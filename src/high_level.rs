@@ -9,10 +9,38 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::cell::{RefCell, Ref, RefMut};
 
+thread_local! {
+    static MAIN_THREAD_STATE: RefCell<MainThreadState> = RefCell::new(MainThreadState {
+            command_by_index: HashMap::new(),
+    });
+
+    static INSTALLED_REAPER: RefCell<Option<Reaper>> = RefCell::new(None);
+}
+
+struct MainThreadState {
+    command_by_index: HashMap<i32, Command>,
+}
+
+// Only for main section
+fn static_hook_command(command_index: i32, flag: i32) -> bool {
+    MAIN_THREAD_STATE.with(|state| {
+        let state = state.borrow();
+        let command = match state.command_by_index.get(&command_index) {
+            None => return false,
+            Some(c) => c
+        };
+        command.operation.borrow_mut().call_mut(());
+        true
+    })
+}
+
+
+pub struct InstalledReaper {
+    pub reaper: Reaper
+}
 
 pub struct Reaper {
-    medium: medium_level::Reaper,
-    command_by_index: HashMap<i32, Command>,
+    pub medium: medium_level::Reaper,
 }
 
 pub enum ActionKind {
@@ -20,87 +48,66 @@ pub enum ActionKind {
     Toggleable(Box<dyn Fn() -> bool + 'static>),
 }
 
-// Right now we go with just a RefCell, not a Mutex because we know that most of the SDK can be
-// used by main thread only. Things like audio hooks which are called by audio threads should then
-// NOT use this global variable!
-//
-// We also don't need to synchronize initialization because we know it happens only in main thread
-// (that's why we don't use the popular lazy_init).
-//
-// TODO UnsafeCell to remove any overhead!?
-//
-// TODO What about thread_local! along with making clone work on medium_level::Reaper?
-//  https://stackoverflow.com/questions/19605132/is-it-possible-to-use-global-variables-in-rust
-//  ... Tried that. It was awkward due to the need of with_instance() everywhere. And not quite
-//  right because we want to access global REAPER variable from main thread only. The best would be
-//  a solution which complains as soon as we try to use it from audio thread! And thread_local!
-//  is told to be not as fast as it could be.
-static mut REAPER: Option<Reaper> = None;
-
 impl Reaper {
-    /// There can be only one instance per module!
-    pub fn setup(medium: medium_level::Reaper) -> &'static mut Reaper {
-        unsafe { assert!(REAPER.is_none(), "setup() has already been called") }
-        medium.plugin_register(c_str!("hookcommand"), Self::static_hook_command as *mut c_void);
-        let reaper = Reaper {
+    pub fn new(medium: medium_level::Reaper) -> Reaper {
+        Reaper {
             medium,
-            command_by_index: HashMap::new(),
-        };
-        unsafe { REAPER = Some(reaper) };
-        Self::instance()
+        }
     }
 
-    /// Only usable after having called setup
-    pub fn instance() -> &'static mut Reaper {
-        unsafe { REAPER.as_mut().unwrap() }
+    // Makes Reaper instance available globally using Reaper::with_installed().
+    // Optional. If you have an appropriate owner mechanism already (e.g. in VST plugin),
+    // you don't need this.
+    pub fn install(reaper: Reaper) {
+        reaper.medium.plugin_register(c_str!("hookcommand"), static_hook_command as *mut c_void);
+        INSTALLED_REAPER.with(|r| {
+           *r.borrow_mut() = Some(reaper);
+        });
     }
 
-    // Only for main section
-    fn static_hook_command(command_index: i32, flag: i32) -> bool {
-        Reaper::instance().hook_command(command_index, flag)
-    }
-
-    pub fn show_console_message(&self, msg: &CStr) {
-        self.medium.show_console_msg(msg);
-    }
-
-    pub fn hook_command(&self, command_index: i32, flag: i32) -> bool {
-        let command = match self.command_by_index.get(&command_index) {
-            None => return false,
-            Some(c) => c
-        };
-        command.operation.borrow_mut().call_mut(());
-        true
+    pub fn with_installed<T>(op: impl FnOnce(&Reaper) -> T) -> T {
+        INSTALLED_REAPER.with(|r| {
+           op(r.borrow().as_ref().unwrap())
+        })
     }
 
     pub fn register_action(
-        &mut self,
+        &self,
         command_id: &CStr,
         description: impl Into<Cow<'static, CStr>>,
         operation: impl FnMut() + 'static,
         kind: ActionKind,
-    ) -> RegisteredAction {
+    )
+//        -> RegisteredAction
+    {
         let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void);
         let mut command = Command::new(command_index, description.into(), RefCell::new(Box::new(operation)), kind);
         self.register_command(command_index, command);
-        RegisteredAction::new(self, command_index)
+//        RegisteredAction::new(self, command_index)
     }
 
-    fn register_command(&mut self, command_index: i32, command: Command) {
-        if let Entry::Vacant(p) = self.command_by_index.entry(command_index) {
-            let command = p.insert(command);
-            let acc = &mut command.accelerator_register;
-            self.medium.plugin_register(c_str!("gaccel"), acc as *mut _ as *mut c_void);
-        }
+    fn register_command(&self, command_index: i32, command: Command) {
+        MAIN_THREAD_STATE.with(|state| {
+            if let Entry::Vacant(p) = state.borrow_mut().command_by_index.entry(command_index) {
+                let command = p.insert(command);
+                let acc = &mut command.accelerator_register;
+                self.medium.plugin_register(c_str!("gaccel"), acc as *mut _ as *mut c_void);
+            }
+        });
     }
 
-    fn unregister_command(&mut self, command_index: i32) {
-        // TODO Use RAII
-        if let Some(command) = self.command_by_index.get_mut(&command_index) {
-            let acc = &mut command.accelerator_register;
-            self.medium.plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
-            self.command_by_index.remove(&command_index);
-        }
+    // TODO
+//    fn unregister_command(&mut self, command_index: i32) {
+//        // TODO Use RAII
+//        if let Some(command) = self.command_by_index.get_mut(&command_index) {
+//            let acc = &mut command.accelerator_register;
+//            self.medium.plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
+//            self.command_by_index.remove(&command_index);
+//        }
+//    }
+
+    pub fn show_console_msg(&self, msg: &CStr) {
+        self.medium.show_console_msg(msg);
     }
 
     pub fn get_current_project(&self) -> Project {
@@ -141,18 +148,18 @@ pub struct RegisteredAction<'a> {
     command_index: i32,
 }
 
-impl<'a> RegisteredAction<'a> {
-    fn new(reaper: &'a mut Reaper, command_index: i32) -> RegisteredAction {
-        RegisteredAction {
-            reaper,
-            command_index,
-        }
-    }
-
-    pub fn unregister(&mut self) {
-        self.reaper.unregister_command(self.command_index);
-    }
-}
+//impl<'a> RegisteredAction<'a> {
+//    fn new(reaper: &'a mut Reaper, command_index: i32) -> RegisteredAction {
+//        RegisteredAction {
+//            reaper,
+//            command_index,
+//        }
+//    }
+//
+//    pub fn unregister(&mut self) {
+//        self.reaper.unregister_command(self.command_index);
+//    }
+//}
 
 
 pub struct Project<'a> {

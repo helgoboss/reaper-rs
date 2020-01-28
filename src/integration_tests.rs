@@ -22,19 +22,21 @@ extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindi
         let low = low_level::Reaper::with_all_functions_loaded(&low_level::create_reaper_plugin_function_provider(GetFunc));
         let medium = medium_level::Reaper::new(low);
         medium.show_console_msg(c_str!("Loaded reaper-rs integration test plugin"));
-        let high = high_level::Reaper::setup(medium);
+        let high = high_level::Reaper::new(medium);
         let mut i = 0;
         high.register_action(
             c_str!("reaperRsIntegrationTests"),
             c_str!("reaper-rs integration tests"),
             move || {
-                let reaper = high_level::Reaper::instance();
                 let owned = format!("Hello from Rust number {}\0", i);
-                reaper.show_console_message(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
+                high_level::Reaper::with_installed(|reaper| {
+                    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
+                });
                 i += 1;
             },
             ActionKind::NotToggleable,
         );
+        high_level::Reaper::install(high);
         1
     } else {
         0
