@@ -1,21 +1,21 @@
 use std::error::Error;
-use reaper_rs::high_level::{Reaper, ActionKind, toggleable};
+use reaper_rs::high_level::{Reaper, ActionKind, toggleable, Project};
 use std::os::raw::{c_int, c_char};
-use reaper_rs::low_level::bindings;
 use reaper_rs::medium_level;
 use reaper_rs::low_level;
 use reaper_rs::high_level;
 use c_str_macro::c_str;
 use std::ffi::{CString, CStr};
 use std::borrow::BorrowMut;
+use rxrust::prelude::*;
 
 #[no_mangle]
-extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindings::reaper_plugin_info_t) -> c_int {
+extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_level::reaper_plugin_info_t) -> c_int {
     if rec.is_null() {
         return 0;
     }
     let rec = unsafe { *rec };
-    if rec.caller_version != bindings::REAPER_PLUGIN_VERSION as c_int {
+    if rec.caller_version != low_level::REAPER_PLUGIN_VERSION as c_int {
         return 0;
     }
     if let Some(GetFunc) = rec.GetFunc {
@@ -78,7 +78,11 @@ fn execute_tests(reaper: &Reaper) {
 fn create_empty_project_in_new_tab(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
     // Given
     let current_project_before = reaper.get_current_project();
-//    let project_count_before = reaper.get_project_count();
+    let project_count_before = reaper.get_project_count();
+    // When
+//    Reaper::instance().project_switched().subscribe(|p: Project| {
+//        println!("Project index {}", p.get_index());
+//    });
     // Then
     Ok(())
 }

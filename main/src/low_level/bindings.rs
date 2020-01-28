@@ -4,227 +4,329 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-pub const REAPER_PLUGIN_VERSION: u32 = 526;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct HWND__ {
-    _unused: [u8; 0],
-}
-pub type HWND = *mut HWND__;
-pub type HINSTANCE = *mut ::std::os::raw::c_void;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ACCEL {
-    pub fVirt: ::std::os::raw::c_uchar,
-    pub key: ::std::os::raw::c_ushort,
-    pub cmd: ::std::os::raw::c_ushort,
-}
-#[test]
-fn bindgen_test_layout_ACCEL() {
-    assert_eq!(
-        ::std::mem::size_of::<ACCEL>(),
-        6usize,
-        concat!("Size of: ", stringify!(ACCEL))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<ACCEL>(),
-        2usize,
-        concat!("Alignment of ", stringify!(ACCEL))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<ACCEL>())).fVirt as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ACCEL),
-            "::",
-            stringify!(fVirt)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<ACCEL>())).key as *const _ as usize },
-        2usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ACCEL),
-            "::",
-            stringify!(key)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<ACCEL>())).cmd as *const _ as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ACCEL),
-            "::",
-            stringify!(cmd)
-        )
-    );
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct reaper_plugin_info_t {
-    pub caller_version: ::std::os::raw::c_int,
-    pub hwnd_main: HWND,
-    pub Register: ::std::option::Option<
-        unsafe extern "C" fn(
-            name: *const ::std::os::raw::c_char,
-            infostruct: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
-    >,
-    pub GetFunc: ::std::option::Option<
-        unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void,
-    >,
-}
-#[test]
-fn bindgen_test_layout_reaper_plugin_info_t() {
-    assert_eq!(
-        ::std::mem::size_of::<reaper_plugin_info_t>(),
-        32usize,
-        concat!("Size of: ", stringify!(reaper_plugin_info_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<reaper_plugin_info_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(reaper_plugin_info_t))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<reaper_plugin_info_t>())).caller_version as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(reaper_plugin_info_t),
-            "::",
-            stringify!(caller_version)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<reaper_plugin_info_t>())).hwnd_main as *const _ as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(reaper_plugin_info_t),
-            "::",
-            stringify!(hwnd_main)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<reaper_plugin_info_t>())).Register as *const _ as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(reaper_plugin_info_t),
-            "::",
-            stringify!(Register)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<reaper_plugin_info_t>())).GetFunc as *const _ as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(reaper_plugin_info_t),
-            "::",
-            stringify!(GetFunc)
-        )
-    );
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct gaccel_register_t {
-    pub accel: ACCEL,
-    pub desc: *const ::std::os::raw::c_char,
-}
-#[test]
-fn bindgen_test_layout_gaccel_register_t() {
-    assert_eq!(
-        ::std::mem::size_of::<gaccel_register_t>(),
-        16usize,
-        concat!("Size of: ", stringify!(gaccel_register_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<gaccel_register_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(gaccel_register_t))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<gaccel_register_t>())).accel as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(gaccel_register_t),
-            "::",
-            stringify!(accel)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<gaccel_register_t>())).desc as *const _ as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(gaccel_register_t),
-            "::",
-            stringify!(desc)
-        )
-    );
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ReaProject {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct MediaTrack {
-    _unused: [u8; 0],
-}
-extern "C" {
-    pub static mut EnumProjects: ::std::option::Option<
-        unsafe extern "C" fn(
-            idx: ::std::os::raw::c_int,
-            projfnOutOptional: *mut ::std::os::raw::c_char,
-            projfnOutOptional_sz: ::std::os::raw::c_int,
-        ) -> *mut ReaProject,
-    >;
-}
-extern "C" {
-    pub static mut GetSetMediaTrackInfo: ::std::option::Option<
-        unsafe extern "C" fn(
-            tr: *mut MediaTrack,
-            parmname: *const ::std::os::raw::c_char,
-            setNewValue: *mut ::std::os::raw::c_void,
-        ) -> *mut ::std::os::raw::c_void,
-    >;
-}
-extern "C" {
-    pub static mut GetTrack: ::std::option::Option<
-        unsafe extern "C" fn(
-            proj: *mut ReaProject,
-            trackidx: ::std::os::raw::c_int,
-        ) -> *mut MediaTrack,
-    >;
-}
-extern "C" {
-    pub static mut plugin_register: ::std::option::Option<
-        unsafe extern "C" fn(
-            name: *const ::std::os::raw::c_char,
-            infostruct: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
-    >;
-}
-extern "C" {
-    pub static mut ShowConsoleMsg:
-        ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
-}
-extern "C" {
-    pub static mut ValidatePtr2: ::std::option::Option<
-        unsafe extern "C" fn(
-            proj: *mut ReaProject,
-            pointer: *mut ::std::os::raw::c_void,
-            ctypename: *const ::std::os::raw::c_char,
-        ) -> bool,
-    >;
+#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals)]
+pub mod root {
+    #[allow(unused_imports)]
+    use self::super::root;
+    pub const REAPER_PLUGIN_VERSION: u32 = 526;
+    pub mod std {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+    }
+    pub mod __gnu_cxx {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct HWND__ {
+        _unused: [u8; 0],
+    }
+    pub type HWND = *mut root::HWND__;
+    pub type HINSTANCE = *mut ::std::os::raw::c_void;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct ACCEL {
+        pub fVirt: ::std::os::raw::c_uchar,
+        pub key: ::std::os::raw::c_ushort,
+        pub cmd: ::std::os::raw::c_ushort,
+    }
+    #[test]
+    fn bindgen_test_layout_ACCEL() {
+        assert_eq!(
+            ::std::mem::size_of::<ACCEL>(),
+            6usize,
+            concat!("Size of: ", stringify!(ACCEL))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<ACCEL>(),
+            2usize,
+            concat!("Alignment of ", stringify!(ACCEL))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<ACCEL>())).fVirt as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(ACCEL),
+                "::",
+                stringify!(fVirt)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<ACCEL>())).key as *const _ as usize },
+            2usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(ACCEL),
+                "::",
+                stringify!(key)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<ACCEL>())).cmd as *const _ as usize },
+            4usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(ACCEL),
+                "::",
+                stringify!(cmd)
+            )
+        );
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct reaper_plugin_info_t {
+        pub caller_version: ::std::os::raw::c_int,
+        pub hwnd_main: root::HWND,
+        pub Register: ::std::option::Option<
+            unsafe extern "C" fn(
+                name: *const ::std::os::raw::c_char,
+                infostruct: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int,
+        >,
+        pub GetFunc: ::std::option::Option<
+            unsafe extern "C" fn(
+                name: *const ::std::os::raw::c_char,
+            ) -> *mut ::std::os::raw::c_void,
+        >,
+    }
+    #[test]
+    fn bindgen_test_layout_reaper_plugin_info_t() {
+        assert_eq!(
+            ::std::mem::size_of::<reaper_plugin_info_t>(),
+            32usize,
+            concat!("Size of: ", stringify!(reaper_plugin_info_t))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<reaper_plugin_info_t>(),
+            8usize,
+            concat!("Alignment of ", stringify!(reaper_plugin_info_t))
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<reaper_plugin_info_t>())).caller_version as *const _ as usize
+            },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(reaper_plugin_info_t),
+                "::",
+                stringify!(caller_version)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<reaper_plugin_info_t>())).hwnd_main as *const _ as usize
+            },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(reaper_plugin_info_t),
+                "::",
+                stringify!(hwnd_main)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<reaper_plugin_info_t>())).Register as *const _ as usize
+            },
+            16usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(reaper_plugin_info_t),
+                "::",
+                stringify!(Register)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<reaper_plugin_info_t>())).GetFunc as *const _ as usize
+            },
+            24usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(reaper_plugin_info_t),
+                "::",
+                stringify!(GetFunc)
+            )
+        );
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct gaccel_register_t {
+        pub accel: root::ACCEL,
+        pub desc: *const ::std::os::raw::c_char,
+    }
+    #[test]
+    fn bindgen_test_layout_gaccel_register_t() {
+        assert_eq!(
+            ::std::mem::size_of::<gaccel_register_t>(),
+            16usize,
+            concat!("Size of: ", stringify!(gaccel_register_t))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<gaccel_register_t>(),
+            8usize,
+            concat!("Alignment of ", stringify!(gaccel_register_t))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<gaccel_register_t>())).accel as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(gaccel_register_t),
+                "::",
+                stringify!(accel)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<gaccel_register_t>())).desc as *const _ as usize },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(gaccel_register_t),
+                "::",
+                stringify!(desc)
+            )
+        );
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct ReaProject {
+        _unused: [u8; 0],
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct MediaTrack {
+        _unused: [u8; 0],
+    }
+    extern "C" {
+        pub static mut EnumProjects: ::std::option::Option<
+            unsafe extern "C" fn(
+                idx: ::std::os::raw::c_int,
+                projfnOutOptional: *mut ::std::os::raw::c_char,
+                projfnOutOptional_sz: ::std::os::raw::c_int,
+            ) -> *mut root::ReaProject,
+        >;
+    }
+    extern "C" {
+        pub static mut GetSetMediaTrackInfo: ::std::option::Option<
+            unsafe extern "C" fn(
+                tr: *mut root::MediaTrack,
+                parmname: *const ::std::os::raw::c_char,
+                setNewValue: *mut ::std::os::raw::c_void,
+            ) -> *mut ::std::os::raw::c_void,
+        >;
+    }
+    extern "C" {
+        pub static mut GetTrack: ::std::option::Option<
+            unsafe extern "C" fn(
+                proj: *mut root::ReaProject,
+                trackidx: ::std::os::raw::c_int,
+            ) -> *mut root::MediaTrack,
+        >;
+    }
+    extern "C" {
+        pub static mut plugin_register: ::std::option::Option<
+            unsafe extern "C" fn(
+                name: *const ::std::os::raw::c_char,
+                infostruct: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut ShowConsoleMsg:
+            ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
+    }
+    extern "C" {
+        pub static mut ValidatePtr2: ::std::option::Option<
+            unsafe extern "C" fn(
+                proj: *mut root::ReaProject,
+                pointer: *mut ::std::os::raw::c_void,
+                ctypename: *const ::std::os::raw::c_char,
+            ) -> bool,
+        >;
+    }
+    pub mod reaper_rs_surface {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub fn get_surface() -> *mut ::std::os::raw::c_void;
+        }
+        extern "C" {
+            pub fn GetTypeString() -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn GetDescString() -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn GetConfigString() -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn CloseNoReset();
+        }
+        extern "C" {
+            pub fn Run();
+        }
+        extern "C" {
+            pub fn SetTrackListChange();
+        }
+        extern "C" {
+            pub fn SetSurfaceVolume(trackid: *mut root::MediaTrack, volume: f64);
+        }
+        extern "C" {
+            pub fn SetSurfacePan(trackid: *mut root::MediaTrack, pan: f64);
+        }
+        extern "C" {
+            pub fn SetSurfaceMute(trackid: *mut root::MediaTrack, mute: bool);
+        }
+        extern "C" {
+            pub fn SetSurfaceSelected(trackid: *mut root::MediaTrack, selected: bool);
+        }
+        extern "C" {
+            pub fn SetSurfaceSolo(trackid: *mut root::MediaTrack, solo: bool);
+        }
+        extern "C" {
+            pub fn SetSurfaceRecArm(trackid: *mut root::MediaTrack, recarm: bool);
+        }
+        extern "C" {
+            pub fn SetPlayState(play: bool, pause: bool, rec: bool);
+        }
+        extern "C" {
+            pub fn SetRepeatState(rep: bool);
+        }
+        extern "C" {
+            pub fn SetTrackTitle(
+                trackid: *mut root::MediaTrack,
+                title: *const ::std::os::raw::c_char,
+            );
+        }
+        extern "C" {
+            pub fn GetTouchState(
+                trackid: *mut root::MediaTrack,
+                isPan: ::std::os::raw::c_int,
+            ) -> bool;
+        }
+        extern "C" {
+            pub fn SetAutoMode(mode: ::std::os::raw::c_int);
+        }
+        extern "C" {
+            pub fn ResetCachedVolPanStates();
+        }
+        extern "C" {
+            pub fn OnTrackSelection(trackid: *mut root::MediaTrack);
+        }
+        extern "C" {
+            pub fn IsKeyDown(key: ::std::os::raw::c_int) -> bool;
+        }
+        extern "C" {
+            pub fn Extended(
+                call: ::std::os::raw::c_int,
+                parm1: *mut ::std::os::raw::c_void,
+                parm2: *mut ::std::os::raw::c_void,
+                parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+    }
 }

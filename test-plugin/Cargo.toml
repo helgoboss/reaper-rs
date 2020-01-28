@@ -8,6 +8,7 @@ edition = "2018"
 [dependencies]
 reaper-rs = { path = "../main" }
 c_str_macro = "1.0.2"
+rxrust = "0.7.1"
 
 [lib]
 name = "reaper_rs_test_plugin"

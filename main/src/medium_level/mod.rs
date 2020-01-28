@@ -7,8 +7,8 @@
 use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
-use crate::low_level::bindings;
 use crate::low_level;
+use crate::low_level::{ReaProject, MediaTrack};
 
 pub struct Reaper {
     low: low_level::Reaper
@@ -30,7 +30,7 @@ impl Reaper {
         Reaper { low }
     }
 
-    pub fn enum_projects(&self, idx: i32, projfn_out_optional_sz: i32) -> (*mut bindings::ReaProject, Option<String>) {
+    pub fn enum_projects(&self, idx: i32, projfn_out_optional_sz: i32) -> (*mut ReaProject, Option<String>) {
         return if projfn_out_optional_sz == 0 {
             let project = self.low.EnumProjects.unwrap()(idx, null_mut(), 0);
             (project, None)
@@ -42,15 +42,18 @@ impl Reaper {
         }
     }
 
-    pub fn get_track(&self, proj: *mut bindings::ReaProject, trackidx: i32) -> *mut bindings::MediaTrack {
+    pub fn get_track(&self,
+                     proj: *mut ReaProject,
+                     trackidx: i32
+    ) -> *mut MediaTrack {
         self.low.GetTrack.unwrap()(proj, trackidx)
     }
 
-    pub fn validate_ptr_2(&self, proj: *mut bindings::ReaProject, pointer: *mut c_void, ctypename: &CStr) -> bool {
+    pub fn validate_ptr_2(&self, proj: *mut ReaProject, pointer: *mut c_void, ctypename: &CStr) -> bool {
         self.low.ValidatePtr2.unwrap()(proj, pointer, ctypename.as_ptr())
     }
 
-    pub fn get_set_media_track_info(&self, tr: *mut bindings::MediaTrack, parmname: &CStr, set_new_value: *mut c_void) -> *mut c_void {
+    pub fn get_set_media_track_info(&self, tr: *mut MediaTrack, parmname: &CStr, set_new_value: *mut c_void) -> *mut c_void {
         self.low.GetSetMediaTrackInfo.unwrap()(tr, parmname.as_ptr(), set_new_value)
     }
 
@@ -106,7 +109,7 @@ impl Reaper {
     }
 
     // TODO Rename
-    pub fn convenient_get_media_track_info_string(&self, tr: *mut bindings::MediaTrack, parmname: &CStr) -> String {
+    pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> String {
         let info = self.get_set_media_track_info(tr, parmname, null_mut());
         let info = info as *const c_char;
         let c_str = unsafe { CStr::from_ptr(info) };

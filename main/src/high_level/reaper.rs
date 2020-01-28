@@ -11,8 +11,9 @@ use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::Project;
-use crate::low_level::bindings::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
+use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
 use crate::medium_level;
+use rxrust::observable::Observable;
 
 // We can't use Once because we need multiple writes (not just for initialization).
 // We use thread_local instead of Mutex to have less overhead because we know this is accessed
@@ -135,6 +136,10 @@ impl Reaper {
 
     pub fn show_console_msg(&self, msg: &CStr) {
         self.medium.show_console_msg(msg);
+    }
+
+    pub fn project_switched<F, Err>(&self) -> Observable<F, Project, Err> {
+        unimplemented!()
     }
 
     pub fn get_current_project(&self) -> Project {

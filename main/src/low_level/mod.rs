@@ -2,10 +2,12 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-pub mod bindings;
+mod bindings;
+
+pub use bindings::root::{ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION, reaper_plugin_info_t};
+
 mod types;
 
-use bindings::{ReaProject, MediaTrack};
 use std::os::raw::{c_char, c_void};
 use std::ffi::CStr;
 use std::convert::AsRef;
@@ -22,7 +24,7 @@ pub fn create_reaper_plugin_function_provider(GetFunc: types::GetFunc) -> impl F
 pub fn create_reaper_vst_plugin_function_provider(host_callback: HostCallbackProc) -> impl Fn(&CStr) -> isize {
     move |name| {
         #[allow(overflowing_literals)]
-        host_callback(null_mut(), 0xdeadbeef, 0xdeadf00d, 0, name.as_ptr() as *mut c_void, 0.0)
+            host_callback(null_mut(), 0xdeadbeef, 0xdeadf00d, 0, name.as_ptr() as *mut c_void, 0.0)
     }
 }
 

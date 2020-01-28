@@ -10,10 +10,10 @@ use std::sync::Once;
 use c_str_macro::c_str;
 
 use crate::high_level::{Reaper, Track};
-use crate::high_level::ActionKind::Toggleable;
-use crate::low_level::bindings::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
+use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
 
+#[derive(Clone, Copy)]
 pub struct Project {
     rea_project: *mut ReaProject,
 }

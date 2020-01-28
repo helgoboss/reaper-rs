@@ -20,6 +20,7 @@ fn generate_bindings() {
         .header("src/low_level/bindgen.h")
         .opaque_type("timex")
         .clang_arg("-xc++")
+        .enable_cxx_namespaces()
         .raw_line("#![allow(non_upper_case_globals)]")
         .raw_line("#![allow(non_camel_case_types)]")
         .raw_line("#![allow(non_snake_case)]")
@@ -33,6 +34,7 @@ fn generate_bindings() {
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")
+        .whitelist_function("reaper_rs_surface::.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed. TODO Do as soon as available
 //        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
