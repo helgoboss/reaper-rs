@@ -10,7 +10,6 @@ use std::convert::AsRef;
 use c_str_macro::c_str;
 
 pub fn create_reaper_plugin_function_provider(GetFunc: types::GetFunc) -> impl Fn(&CStr) -> isize {
-    // TODO See if we can remove that move
     move |name| {
         unsafe { GetFunc(name.as_ptr()) as isize }
     }

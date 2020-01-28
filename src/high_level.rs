@@ -90,7 +90,7 @@ impl Reaper {
     ) -> RegisteredAction
     {
         let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void);
-        let mut command = Command::new(command_index, description.into(), RefCell::new(Box::new(operation)), kind);
+        let command = Command::new(command_index, description.into(), RefCell::new(Box::new(operation)), kind);
         self.register_command(command_index, command);
         RegisteredAction::new(self, command_index)
     }
