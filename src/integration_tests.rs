@@ -24,32 +24,32 @@ extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindi
         );
         let medium = medium_level::Reaper::new(low);
         medium.show_console_msg(c_str!("Loaded reaper-rs integration test plugin"));
-        let high = Reaper::new(medium);
+        Reaper::setup(medium);
         let mut i = 0;
-        let action1 = high.register_action(
+        let reaper = Reaper::instance();
+        let action1 = reaper.register_action(
             c_str!("reaperRsCounter"),
             c_str!("reaper-rs counter"),
             move || {
                 let owned = format!("Hello from Rust number {}\0", i);
-                let reaper = Reaper::installed();
+                let reaper = Reaper::instance();
                 reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
                 i += 1;
             },
             ActionKind::NotToggleable,
         );
-        let action2 = high.register_action(
+        let action2 = reaper.register_action(
             c_str!("reaperRsIntegrationTests"),
             c_str!("reaper-rs integration tests"),
-            || { execute_tests(Reaper::installed()) },
+            || { execute_tests(Reaper::instance()) },
             ActionKind::NotToggleable,
         );
-        let action3 = high.register_action(
+        let action3 = reaper.register_action(
             c_str!("reaperRsExample"),
             c_str!("reaper-rs example"),
-            || { example_code(Reaper::installed()); },
+            || { example_code(Reaper::instance()); },
             ActionKind::NotToggleable,
         );
-        Reaper::install(high);
         1
     } else {
         0

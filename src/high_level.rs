@@ -78,16 +78,10 @@ pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
 }
 
 impl Reaper {
-    pub fn new(medium: medium_level::Reaper) -> Reaper {
-        Reaper {
+    pub fn setup(medium: medium_level::Reaper) {
+        let reaper = Reaper {
             medium,
-        }
-    }
-
-    // Makes Reaper instance available globally using Reaper::installed().
-    // Optional. If you have an appropriate owner mechanism already (e.g. in VST plugin),
-    // you don't need this.
-    pub fn install(reaper: Reaper) {
+        };
         reaper.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
         reaper.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
         unsafe {
@@ -97,7 +91,7 @@ impl Reaper {
         }
     }
 
-    pub fn installed() -> &'static Reaper {
+    pub fn instance() -> &'static Reaper {
         unsafe {
             INSTALLED_REAPER.as_ref().unwrap()
         }
@@ -114,7 +108,7 @@ impl Reaper {
         let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void);
         let command = Command::new(command_index, description.into(), Box::new(operation), kind);
         self.register_command(command_index, command);
-        RegisteredAction::new(self, command_index)
+        RegisteredAction::new(command_index)
     }
 
     fn register_command(&self, command_index: i32, command: Command) {
@@ -145,14 +139,14 @@ impl Reaper {
 
     pub fn get_current_project(&self) -> Project {
         let (rp, _) = self.medium.enum_projects(-1, 0);
-        Project::new(&self, rp)
+        Project::new(rp)
     }
 
-    pub fn get_projects(&self) -> impl Iterator<Item=Project> {
+    pub fn get_projects(&self) -> impl Iterator<Item=Project> + '_ {
         (0..)
             .map(move |i| self.medium.enum_projects(i, 0).0)
             .take_while(|p| !p.is_null())
-            .map(move |p| { Project::new(&self, p) })
+            .map(|p| { Project::new(p) })
     }
 
     pub fn get_project_count(&self) -> i32 {
@@ -187,33 +181,30 @@ impl Command {
     }
 }
 
-pub struct RegisteredAction<'a> {
-    reaper: &'a Reaper,
+pub struct RegisteredAction {
     command_index: i32,
 }
 
-impl<'a> RegisteredAction<'a> {
-    fn new(reaper: &'a Reaper, command_index: i32) -> RegisteredAction {
+impl RegisteredAction {
+    fn new(command_index: i32) -> RegisteredAction {
         RegisteredAction {
-            reaper,
             command_index,
         }
     }
 
     pub fn unregister(&self) {
-        self.reaper.unregister_command(self.command_index);
+        Reaper::instance().unregister_command(self.command_index);
     }
 }
 
 
-pub struct Project<'a> {
-    reaper: &'a Reaper,
+pub struct Project {
     rea_project: *mut ReaProject,
 }
 
-impl<'a> Project<'a> {
-    pub fn new(parent: &Reaper, rea_project: *mut ReaProject) -> Project {
-        Project { reaper: parent, rea_project }
+impl Project {
+    pub fn new(rea_project: *mut ReaProject) -> Project {
+        Project { rea_project }
     }
 
     pub fn get_first_track(&self) -> Option<Track> {
@@ -221,13 +212,13 @@ impl<'a> Project<'a> {
     }
 
     pub fn get_file_path(&self) -> Option<String> {
-        self.reaper.medium.enum_projects(self.get_index(), 5000).1
+        Reaper::instance().medium.enum_projects(self.get_index(), 5000).1
     }
 
     pub fn get_index(&self) -> i32 {
         self.complain_if_not_available();
         let rea_project = self.rea_project;
-        self.reaper.get_projects()
+        Reaper::instance().get_projects()
             .enumerate()
             .find(|(_, rp)| rp.rea_project == rea_project)
             .map(|(i, _)| i)
@@ -240,15 +231,15 @@ impl<'a> Project<'a> {
     /// track (master track is not obtainable via this method).
     pub fn get_track_by_index(&self, idx: u32) -> Option<Track> {
         self.complain_if_not_available();
-        let media_track = self.reaper.medium.get_track(self.rea_project, idx as i32);
+        let media_track = Reaper::instance().medium.get_track(self.rea_project, idx as i32);
         if media_track.is_null() {
             return None;
         }
-        Some(Track::new(self.reaper, media_track, self.rea_project))
+        Some(Track::new(media_track, self.rea_project))
     }
 
     pub fn is_available(&self) -> bool {
-        self.reaper.medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
+        Reaper::instance().medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
     }
 
     fn complain_if_not_available(&self) {
@@ -258,21 +249,20 @@ impl<'a> Project<'a> {
     }
 }
 
-pub struct Track<'a> {
-    reaper: &'a Reaper,
+pub struct Track {
     media_track: *mut MediaTrack,
     rea_project: *mut ReaProject,
 }
 
-impl<'a> Track<'a> {
+impl Track {
     /// mediaTrack must not be null
     /// reaProject can be null but providing it can speed things up quite much for REAPER versions < 5.95
-    pub fn new(reaper: &'a Reaper, media_track: *mut MediaTrack, rea_project: *mut ReaProject) -> Track<'a> {
-        Track { reaper, media_track, rea_project }
+    pub fn new(media_track: *mut MediaTrack, rea_project: *mut ReaProject) -> Track {
+        Track { media_track, rea_project }
     }
 
     pub fn get_name(&self) -> String {
-        self.reaper.medium.convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
+        Reaper::instance().medium.convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
     }
 
     pub fn get_media_track(&self) -> *mut MediaTrack {
