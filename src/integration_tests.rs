@@ -61,5 +61,7 @@ fn create_empty_project_in_new_tab(reaper: &Reaper) -> Result<(), Box<dyn Error>
     // When
     let track_name = track.get_name();
     // Then
+    let owned = format!("Track name is {}\0", track_name);
+    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
     Ok(())
 }
