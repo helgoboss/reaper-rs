@@ -196,13 +196,13 @@ impl<'a> RegisteredAction<'a> {
 
 
 pub struct Project<'a> {
-    parent: &'a Reaper,
+    reaper: &'a Reaper,
     rea_project: *mut ReaProject,
 }
 
 impl<'a> Project<'a> {
     pub fn new(parent: &Reaper, rea_project: *mut ReaProject) -> Project {
-        Project { parent, rea_project }
+        Project { reaper: parent, rea_project }
     }
 
     pub fn get_first_track(&self) -> Option<Track> {
@@ -215,15 +215,15 @@ impl<'a> Project<'a> {
     /// track (master track is not obtainable via this method).
     pub fn get_track_by_index(&self, idx: u32) -> Option<Track> {
         self.complain_if_not_available();
-        let media_track = self.parent.medium.get_track(self.rea_project, idx as i32);
+        let media_track = self.reaper.medium.get_track(self.rea_project, idx as i32);
         if media_track.is_null() {
             return None;
         }
-        Some(Track::new(self, media_track, self.rea_project))
+        Some(Track::new(self.reaper, media_track, self.rea_project))
     }
 
     pub fn is_available(&self) -> bool {
-        self.parent.medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
+        self.reaper.medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
     }
 
     fn complain_if_not_available(&self) {
@@ -234,7 +234,7 @@ impl<'a> Project<'a> {
 }
 
 pub struct Track<'a> {
-    parent: &'a Project<'a>,
+    reaper: &'a Reaper,
     media_track: *mut MediaTrack,
     rea_project: *mut ReaProject,
 }
@@ -242,12 +242,12 @@ pub struct Track<'a> {
 impl<'a> Track<'a> {
     /// mediaTrack must not be null
     /// reaProject can be null but providing it can speed things up quite much for REAPER versions < 5.95
-    pub fn new(parent: &'a Project<'a>, media_track: *mut MediaTrack, rea_project: *mut ReaProject) -> Track<'a> {
-        Track { parent, media_track, rea_project }
+    pub fn new(reaper: &'a Reaper, media_track: *mut MediaTrack, rea_project: *mut ReaProject) -> Track<'a> {
+        Track { reaper, media_track, rea_project }
     }
 
     pub fn get_name(&self) -> String {
-        self.parent.parent.medium.convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
+        self.reaper.medium.convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
     }
 
     pub fn get_media_track(&self) -> *mut MediaTrack {
