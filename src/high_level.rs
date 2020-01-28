@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::cell::{RefCell, Ref, RefMut};
 use std::sync::Once;
+use crate::high_level::ActionKind::Toggleable;
 
 // We can't use Once because we need multiple writes (not just for initialization).
 // We use thread_local instead of Mutex to have less overhead because we know this is accessed
@@ -30,7 +31,7 @@ struct MainThreadState {
 }
 
 // Only for main section
-fn static_hook_command(command_index: i32, flag: i32) -> bool {
+fn hook_command(command_index: i32, flag: i32) -> bool {
     MAIN_THREAD_STATE.with(|state| {
         let state = state.borrow();
         let command = match state.command_by_index.get(&command_index) {
@@ -39,6 +40,22 @@ fn static_hook_command(command_index: i32, flag: i32) -> bool {
         };
         command.operation.borrow_mut().call_mut(());
         true
+    })
+}
+
+
+// Only for main section
+fn toggle_action(command_index: i32) -> i32 {
+    MAIN_THREAD_STATE.with(|state| {
+        let state = state.borrow();
+        let command = match state.command_by_index.get(&command_index) {
+            None => return -1,
+            Some(c) => c
+        };
+        match &command.kind {
+            ActionKind::Toggleable(is_on) => if is_on() { 1 } else { 0 },
+            ActionKind::NotToggleable => -1
+        }
     })
 }
 
@@ -53,7 +70,11 @@ pub struct Reaper {
 
 pub enum ActionKind {
     NotToggleable,
-    Toggleable(Box<dyn Fn() -> bool + 'static>),
+    Toggleable(Box<dyn Fn() -> bool>),
+}
+
+pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
+    Toggleable(Box::new(is_on))
 }
 
 impl Reaper {
@@ -67,7 +88,8 @@ impl Reaper {
     // Optional. If you have an appropriate owner mechanism already (e.g. in VST plugin),
     // you don't need this.
     pub fn install(reaper: Reaper) {
-        reaper.medium.plugin_register(c_str!("hookcommand"), static_hook_command as *mut c_void);
+        reaper.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
+        reaper.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
         unsafe {
             INIT_INSTALLED_REAPER.call_once(|| {
                 INSTALLED_REAPER = Some(reaper);

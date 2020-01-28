@@ -1,5 +1,5 @@
 use std::error::Error;
-use crate::high_level::{Reaper, ActionKind};
+use crate::high_level::{Reaper, ActionKind, toggleable};
 use std::os::raw::{c_int, c_char};
 use crate::{bindings, high_level};
 use crate::medium_level;
@@ -35,7 +35,7 @@ extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindi
                 reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
                 i += 1;
             },
-            ActionKind::NotToggleable,
+            ActionKind::NotToggleable
         );
         let action2 = high.register_action(
             c_str!("reaperRsIntegrationTests"),
