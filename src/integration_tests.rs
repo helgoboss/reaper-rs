@@ -19,34 +19,42 @@ extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindi
         return 0;
     }
     if let Some(GetFunc) = rec.GetFunc {
-        let low = low_level::Reaper::with_all_functions_loaded(&low_level::create_reaper_plugin_function_provider(GetFunc));
+        let low = low_level::Reaper::with_all_functions_loaded(
+            &low_level::create_reaper_plugin_function_provider(GetFunc)
+        );
         let medium = medium_level::Reaper::new(low);
         medium.show_console_msg(c_str!("Loaded reaper-rs integration test plugin"));
-        let high = high_level::Reaper::new(medium);
+        let high = Reaper::new(medium);
         let mut i = 0;
-        let action = high.register_action(
-            c_str!("reaperRsIntegrationTests"),
-            c_str!("reaper-rs integration tests"),
+        let action1 = high.register_action(
+            c_str!("reaperRsCounter"),
+            c_str!("reaper-rs counter"),
             move || {
                 let owned = format!("Hello from Rust number {}\0", i);
-                let reaper = high_level::Reaper::installed();
+                let reaper = Reaper::installed();
                 reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
                 i += 1;
             },
             ActionKind::NotToggleable,
         );
-        high_level::Reaper::install(high);
+        let action2 = high.register_action(
+            c_str!("reaperRsIntegrationTests"),
+            c_str!("reaper-rs integration tests"),
+            || { execute_tests(Reaper::installed()) },
+            ActionKind::NotToggleable,
+        );
+        Reaper::install(high);
         1
     } else {
         0
     }
 }
 
-fn execute_tests() {
-//    create_empty_project_in_new_tab(reaper);
+fn execute_tests(reaper: &Reaper) {
+    create_empty_project_in_new_tab(reaper);
 }
 
-fn create_empty_project_in_new_tab(reaper: &high_level::Reaper) -> Result<(), Box<dyn Error>> {
+fn create_empty_project_in_new_tab(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
     // Given
     let project = reaper.get_current_project();
     let track = project.get_first_track().ok_or("No first track")?;
