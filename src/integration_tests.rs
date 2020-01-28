@@ -24,7 +24,7 @@ extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindi
         medium.show_console_msg(c_str!("Loaded reaper-rs integration test plugin"));
         let high = high_level::Reaper::new(medium);
         let mut i = 0;
-        high.register_action(
+        let action = high.register_action(
             c_str!("reaperRsIntegrationTests"),
             c_str!("reaper-rs integration tests"),
             move || {

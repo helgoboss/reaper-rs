@@ -77,13 +77,12 @@ impl Reaper {
         description: impl Into<Cow<'static, CStr>>,
         operation: impl FnMut() + 'static,
         kind: ActionKind,
-    )
-//        -> RegisteredAction
+    ) -> RegisteredAction
     {
         let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void);
         let mut command = Command::new(command_index, description.into(), RefCell::new(Box::new(operation)), kind);
         self.register_command(command_index, command);
-//        RegisteredAction::new(self, command_index)
+        RegisteredAction::new(self, command_index)
     }
 
     fn register_command(&self, command_index: i32, command: Command) {
@@ -96,15 +95,17 @@ impl Reaper {
         });
     }
 
-    // TODO
-//    fn unregister_command(&mut self, command_index: i32) {
-//        // TODO Use RAII
-//        if let Some(command) = self.command_by_index.get_mut(&command_index) {
-//            let acc = &mut command.accelerator_register;
-//            self.medium.plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
-//            self.command_by_index.remove(&command_index);
-//        }
-//    }
+    fn unregister_command(&self, command_index: i32) {
+        // TODO Use RAII
+        MAIN_THREAD_STATE.with(|state| {
+            let mut state = state.borrow_mut();
+            if let Some(command) = state.command_by_index.get_mut(&command_index) {
+                let acc = &mut command.accelerator_register;
+                self.medium.plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
+                state.command_by_index.remove(&command_index);
+            }
+        });
+    }
 
     pub fn show_console_msg(&self, msg: &CStr) {
         self.medium.show_console_msg(msg);
@@ -144,22 +145,22 @@ impl Command {
 }
 
 pub struct RegisteredAction<'a> {
-    reaper: &'a mut Reaper,
+    reaper: &'a Reaper,
     command_index: i32,
 }
 
-//impl<'a> RegisteredAction<'a> {
-//    fn new(reaper: &'a mut Reaper, command_index: i32) -> RegisteredAction {
-//        RegisteredAction {
-//            reaper,
-//            command_index,
-//        }
-//    }
-//
-//    pub fn unregister(&mut self) {
-//        self.reaper.unregister_command(self.command_index);
-//    }
-//}
+impl<'a> RegisteredAction<'a> {
+    fn new(reaper: &'a Reaper, command_index: i32) -> RegisteredAction {
+        RegisteredAction {
+            reaper,
+            command_index,
+        }
+    }
+
+    pub fn unregister(&self) {
+        self.reaper.unregister_command(self.command_index);
+    }
+}
 
 
 pub struct Project<'a> {
