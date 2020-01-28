@@ -29,9 +29,8 @@ extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindi
             c_str!("reaper-rs integration tests"),
             move || {
                 let owned = format!("Hello from Rust number {}\0", i);
-                high_level::Reaper::with_installed(|reaper| {
-                    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
-                });
+                let reaper = high_level::Reaper::installed();
+                reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
                 i += 1;
             },
             ActionKind::NotToggleable,

@@ -8,14 +8,22 @@ use std::borrow::{Cow, Borrow, BorrowMut};
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::cell::{RefCell, Ref, RefMut};
+use std::sync::Once;
 
+// We can't use Once because we need multiple writes (not just for initialization).
+// We use thread_local instead of Mutex to have less overhead because we know this is accessed
+// from one thread only.
+// However, we still need to use RefCell, otherwise we don't get (interior) mutability with
+// thread_local.
 thread_local! {
     static MAIN_THREAD_STATE: RefCell<MainThreadState> = RefCell::new(MainThreadState {
             command_by_index: HashMap::new(),
     });
-
-    static INSTALLED_REAPER: RefCell<Option<Reaper>> = RefCell::new(None);
 }
+
+// See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
+static mut INSTALLED_REAPER: Option<Reaper> = None;
+static INIT_INSTALLED_REAPER: Once = Once::new();
 
 struct MainThreadState {
     command_by_index: HashMap<i32, Command>,
@@ -55,20 +63,22 @@ impl Reaper {
         }
     }
 
-    // Makes Reaper instance available globally using Reaper::with_installed().
+    // Makes Reaper instance available globally using Reaper::installed().
     // Optional. If you have an appropriate owner mechanism already (e.g. in VST plugin),
     // you don't need this.
     pub fn install(reaper: Reaper) {
         reaper.medium.plugin_register(c_str!("hookcommand"), static_hook_command as *mut c_void);
-        INSTALLED_REAPER.with(|r| {
-           *r.borrow_mut() = Some(reaper);
-        });
+        unsafe {
+            INIT_INSTALLED_REAPER.call_once(|| {
+                INSTALLED_REAPER = Some(reaper);
+            });
+        }
     }
 
-    pub fn with_installed<T>(op: impl FnOnce(&Reaper) -> T) -> T {
-        INSTALLED_REAPER.with(|r| {
-           op(r.borrow().as_ref().unwrap())
-        })
+    pub fn installed() -> &'static Reaper {
+        unsafe {
+            INSTALLED_REAPER.as_ref().unwrap()
+        }
     }
 
     pub fn register_action(
