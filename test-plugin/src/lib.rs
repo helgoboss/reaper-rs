@@ -23,7 +23,7 @@ extern "C" fn ReaperPluginEntry(h_instance: bindings::HINSTANCE, rec: *mut bindi
             &low_level::create_reaper_plugin_function_provider(GetFunc)
         );
         let medium = medium_level::Reaper::new(low);
-        medium.show_console_msg(c_str!("Loaded reaper-rs integration test plugin"));
+        medium.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
         Reaper::setup(medium);
         let mut i = 0;
         let reaper = Reaper::instance();
