@@ -14,6 +14,17 @@ pub struct Reaper {
     low: low_level::Reaper
 }
 
+fn to_string<T>(max_size: usize, fill_buffer: impl FnOnce(*mut c_char, usize) -> T) -> (String, T) {
+    let vec: Vec<u8> = vec![1; max_size as usize];
+    let c_string = unsafe { CString::from_vec_unchecked(vec) };
+    let raw = c_string.into_raw();
+    let result = fill_buffer(raw, max_size);
+    let string = unsafe { CString::from_raw(raw) }
+        .into_string()
+        .expect("Slice must be valid UTF-8 text");
+    (string, result)
+}
+
 impl Reaper {
     pub fn new(low: low_level::Reaper) -> Reaper {
         Reaper { low }
@@ -24,20 +35,11 @@ impl Reaper {
             let project = self.low.EnumProjects.unwrap()(idx, null_mut(), 0);
             (project, None)
         } else {
-            // TODO Factor this out into closure
-            let vec: Vec<u8> = vec![1; projfn_out_optional_sz as usize];
-            let c_string = unsafe { CString::from_vec_unchecked(vec) };
-            let raw = c_string.into_raw();
-            let project = self.low.EnumProjects.unwrap()(idx, raw, projfn_out_optional_sz);
-            if project.is_null() {
-                (null_mut(), None)
-            } else {
-                let filename = unsafe { CString::from_raw(raw) }
-                    .into_string()
-                    .expect("Slice must be valid UTF-8 text");
-                (project, Some(filename))
-            }
-        };
+            let (file_path, project) = to_string(projfn_out_optional_sz as usize, |buffer, max_size| {
+                self.low.EnumProjects.unwrap()(idx, buffer, max_size as i32)
+            });
+            (project, Some(file_path))
+        }
     }
 
     pub fn get_track(&self, proj: *mut bindings::ReaProject, trackidx: i32) -> *mut bindings::MediaTrack {

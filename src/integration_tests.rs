@@ -64,10 +64,10 @@ fn example_code(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
         reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
     });
 
-//    let track = project.get_first_track().ok_or("No first track")?;
-//    let track_name = track.get_name();
-//    let owned = format!("Track name is {}\0", track_name);
-//    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
+    let track = project.get_first_track().ok_or("No first track")?;
+    let track_name = track.get_name();
+    let owned = format!("Track name is {}\0", track_name);
+    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
     Ok(())
 }
 
