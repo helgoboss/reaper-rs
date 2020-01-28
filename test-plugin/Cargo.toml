@@ -1,0 +1,14 @@
+[package]
+name = "reaper-rs-test-plugin"
+version = "0.1.0"
+authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
+edition = "2018"
+
+
+[dependencies]
+reaper-rs = { path = "../main" }
+c_str_macro = "1.0.2"
+
+[lib]
+name = "reaper_rs_test_plugin"
+crate-type = ["cdylib"]

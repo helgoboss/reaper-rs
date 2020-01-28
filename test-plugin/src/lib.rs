@@ -1,13 +1,12 @@
 use std::error::Error;
-use crate::high_level::{Reaper, ActionKind, toggleable};
+use reaper_rs::high_level::{Reaper, ActionKind, toggleable};
 use std::os::raw::{c_int, c_char};
-use crate::low_level::bindings;
-use crate::medium_level;
-use crate::low_level;
-use crate::high_level;
+use reaper_rs::low_level::bindings;
+use reaper_rs::medium_level;
+use reaper_rs::low_level;
+use reaper_rs::high_level;
 use c_str_macro::c_str;
 use std::ffi::{CString, CStr};
-use crate::customize_reaper_with_functions;
 use std::borrow::BorrowMut;
 
 #[no_mangle]

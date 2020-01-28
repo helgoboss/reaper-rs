@@ -17,7 +17,7 @@ fn generate_bindings() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header("src/bindgen.h")
+        .header("src/low_level/bindgen.h")
         .opaque_type("timex")
         .clang_arg("-xc++")
         .raw_line("#![allow(non_upper_case_globals)]")
