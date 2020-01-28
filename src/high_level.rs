@@ -147,6 +147,17 @@ impl Reaper {
         let (rp, _) = self.medium.enum_projects(-1, 0);
         Project::new(&self, rp)
     }
+
+    pub fn get_projects(&self) -> impl Iterator<Item=Project> {
+        (0..)
+            .map(move |i| self.medium.enum_projects(i, 0).0)
+            .take_while(|p| !p.is_null())
+            .map(move |p| { Project::new(&self, p) })
+    }
+
+    pub fn get_project_count(&self) -> i32 {
+        self.get_projects().count() as i32
+    }
 }
 
 struct Command {
@@ -207,6 +218,20 @@ impl<'a> Project<'a> {
 
     pub fn get_first_track(&self) -> Option<Track> {
         self.get_track_by_index(0)
+    }
+
+    pub fn get_file_path(&self) -> Option<String> {
+        self.reaper.medium.enum_projects(self.get_index(), 5000).1
+    }
+
+    pub fn get_index(&self) -> i32 {
+        self.complain_if_not_available();
+        let rea_project = self.rea_project;
+        self.reaper.get_projects()
+            .enumerate()
+            .find(|(_, rp)| rp.rea_project == rea_project)
+            .map(|(i, _)| i)
+            .unwrap() as i32
     }
 
     /// It's correct that this returns an Option because the index isn't a stable identifier of a

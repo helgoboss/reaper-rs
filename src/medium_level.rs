@@ -5,7 +5,7 @@
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available, maybe provide "_available" functions for conditional execution)
 use std::ffi::{CString, CStr};
-use std::ptr::null_mut;
+use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::bindings;
 use crate::low_level;
@@ -25,12 +25,18 @@ impl Reaper {
             (project, None)
         } else {
             // TODO Factor this out into closure
-            let mut buffer: Vec<c_char> = vec![0; projfn_out_optional_sz as usize];
-            let project = self.low.EnumProjects.unwrap()(idx, buffer.as_mut_ptr(), projfn_out_optional_sz);
-            let filename = unsafe { CString::from_raw(buffer.as_mut_ptr()) }
-                .into_string()
-                .expect("Slice must be valid UTF-8 text");
-            (project, Some(filename))
+            let vec: Vec<u8> = vec![1; projfn_out_optional_sz as usize];
+            let c_string = unsafe { CString::from_vec_unchecked(vec) };
+            let raw = c_string.into_raw();
+            let project = self.low.EnumProjects.unwrap()(idx, raw, projfn_out_optional_sz);
+            if project.is_null() {
+                (null_mut(), None)
+            } else {
+                let filename = unsafe { CString::from_raw(raw) }
+                    .into_string()
+                    .expect("Slice must be valid UTF-8 text");
+                (project, Some(filename))
+            }
         };
     }
 
