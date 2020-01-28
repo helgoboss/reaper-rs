@@ -32,13 +32,13 @@ struct MainThreadState {
 
 // Only for main section
 fn hook_command(command_index: i32, flag: i32) -> bool {
-    MAIN_THREAD_STATE.with(|state| {
-        let state = state.borrow();
-        let command = match state.command_by_index.get(&command_index) {
+    MAIN_THREAD_STATE.with(|mut state| {
+        let mut state = state.borrow_mut();
+        let command = match state.command_by_index.get_mut(&command_index) {
             None => return false,
             Some(c) => c
         };
-        command.operation.borrow_mut().call_mut(());
+        command.operation.call_mut(());
         true
     })
 }
@@ -112,7 +112,7 @@ impl Reaper {
     ) -> RegisteredAction
     {
         let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void);
-        let command = Command::new(command_index, description.into(), RefCell::new(Box::new(operation)), kind);
+        let command = Command::new(command_index, description.into(), Box::new(operation), kind);
         self.register_command(command_index, command);
         RegisteredAction::new(self, command_index)
     }
@@ -162,13 +162,13 @@ impl Reaper {
 
 struct Command {
     description: Cow<'static, CStr>,
-    operation: RefCell<Box<dyn FnMut()>>,
+    operation: Box<dyn FnMut()>,
     kind: ActionKind,
     accelerator_register: gaccel_register_t,
 }
 
 impl Command {
-    fn new(command_index: i32, description: Cow<'static, CStr>, operation: RefCell<Box<dyn FnMut()>>, kind: ActionKind) -> Command {
+    fn new(command_index: i32, description: Cow<'static, CStr>, operation: Box<dyn FnMut()>, kind: ActionKind) -> Command {
         let mut c = Command {
             description,
             operation,
