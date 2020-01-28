@@ -7,7 +7,7 @@
 use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
-use crate::bindings;
+use crate::low_level::bindings;
 use crate::low_level;
 
 pub struct Reaper {

@@ -1,16 +1,18 @@
-use crate::medium_level;
-use crate::bindings::{ReaProject, MediaTrack, gaccel_register_t, ACCEL};
-use std::ptr::{null_mut, null};
-use std::os::raw::{c_void, c_ushort};
-use c_str_macro::c_str;
-use std::ffi::{CStr, CString};
-use std::borrow::{Cow, Borrow, BorrowMut};
-use std::collections::HashMap;
+use std::borrow::{Borrow, BorrowMut, Cow};
+use std::cell::{Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
-use std::cell::{RefCell, Ref, RefMut};
+use std::collections::HashMap;
+use std::ffi::{CStr, CString};
+use std::os::raw::{c_ushort, c_void};
+use std::ptr::{null, null_mut};
 use std::sync::Once;
-use crate::high_level::ActionKind::Toggleable;
+
+use c_str_macro::c_str;
+
 use crate::high_level::{Reaper, Track};
+use crate::high_level::ActionKind::Toggleable;
+use crate::low_level::bindings::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
+use crate::medium_level;
 
 pub struct Project {
     rea_project: *mut ReaProject,

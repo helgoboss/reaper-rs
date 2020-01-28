@@ -9,7 +9,7 @@ fn generate_bindings() {
     println!("cargo:rustc-link-lib=bz2");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
-    println!("cargo:rerun-if-changed=src/bindgen.h");
+    println!("cargo:rerun-if-changed=src/low_level/bindgen.h");
 
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
@@ -41,9 +41,9 @@ fn generate_bindings() {
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
 
-    // Write the bindings to the $OUT_DIR/bindings.rs file.
+    // Write the bindings to the bindings.rs file.
     let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
     bindings
-        .write_to_file(out_path.join("src/bindings.rs"))
+        .write_to_file(out_path.join("src/low_level/bindings.rs"))
         .expect("Couldn't write bindings!");
 }

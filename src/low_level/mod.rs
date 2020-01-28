@@ -2,8 +2,10 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::types;
-use crate::bindings::{ReaProject, MediaTrack};
+pub mod bindings;
+mod types;
+
+use bindings::{ReaProject, MediaTrack};
 use std::os::raw::c_char;
 use std::ffi::CStr;
 use std::convert::AsRef;
