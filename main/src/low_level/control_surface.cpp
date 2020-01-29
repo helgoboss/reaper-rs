@@ -1,4 +1,4 @@
-#include "surface.h"
+#include "control_surface.h"
 
 namespace reaper_rs_control_surface {
   // This surface just delegates to the free functions implemented in Rust

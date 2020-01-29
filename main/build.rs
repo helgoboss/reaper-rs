@@ -9,7 +9,7 @@ fn main() {
 fn compile_glue() {
     cc::Build::new()
         .cpp(true)
-        .file("src/low_level/surface.cpp")
+        .file("src/low_level/control_surface.cpp")
         .compile("glue");
 }
 
