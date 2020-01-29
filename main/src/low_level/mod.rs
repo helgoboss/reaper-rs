@@ -4,7 +4,11 @@
 
 mod bindings;
 
-pub use bindings::root::{ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION, reaper_plugin_info_t};
+pub use bindings::root::{
+    ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
+    reaper_plugin_info_t
+};
+pub use bindings::root::reaper_rs_control_surface::create_control_surface;
 
 mod types;
 

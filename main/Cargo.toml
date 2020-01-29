@@ -17,3 +17,4 @@ rxrust = "0.7.1"
 
 [build-dependencies]
 bindgen = "0.52.0"
+cc = "1.0.50"

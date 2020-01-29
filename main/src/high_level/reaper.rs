@@ -12,8 +12,11 @@ use c_str_macro::c_str;
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::Project;
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
+use crate::low_level;
 use crate::medium_level;
 use rxrust::observable::Observable;
+use crate::medium_level::ControlSurface;
+use crate::high_level::helper_control_surface::HelperControlSurface;
 
 // We can't use Once because we need multiple writes (not just for initialization).
 // We use thread_local instead of Mutex to have less overhead because we know this is accessed
@@ -27,8 +30,8 @@ thread_local! {
 }
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
-static mut INSTALLED_REAPER: Option<Reaper> = None;
-static INIT_INSTALLED_REAPER: Once = Once::new();
+static mut REAPER_INSTANCE: Option<Reaper> = None;
+static INIT_REAPER_INSTANCE: Once = Once::new();
 
 struct MainThreadState {
     command_by_index: HashMap<i32, Command>,
@@ -64,9 +67,10 @@ fn toggle_action(command_index: i32) -> i32 {
 }
 
 
-
+#[derive()]
 pub struct Reaper {
     pub medium: medium_level::Reaper,
+    surface: HelperControlSurface,
 }
 
 pub enum ActionKind {
@@ -82,19 +86,25 @@ impl Reaper {
     pub fn setup(medium: medium_level::Reaper) {
         let reaper = Reaper {
             medium,
+            surface: HelperControlSurface {},
         };
-        reaper.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
-        reaper.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
         unsafe {
-            INIT_INSTALLED_REAPER.call_once(|| {
-                INSTALLED_REAPER = Some(reaper);
+            INIT_REAPER_INSTANCE.call_once(|| {
+                REAPER_INSTANCE = Some(reaper);
             });
         }
+        Reaper::instance().init();
+    }
+
+    fn init(&self) {
+        self.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
+        self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
+        self.medium.register_control_surface(&self.surface);
     }
 
     pub fn instance() -> &'static Reaper {
         unsafe {
-            INSTALLED_REAPER.as_ref().unwrap()
+            REAPER_INSTANCE.as_ref().unwrap()
         }
     }
 

@@ -4,11 +4,15 @@
 //! - No C strings
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available, maybe provide "_available" functions for conditional execution)
+mod control_surface;
+
 use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
 use crate::low_level::{ReaProject, MediaTrack};
+pub use control_surface::ControlSurface;
+use c_str_macro::c_str;
 
 pub struct Reaper {
     low: low_level::Reaper
@@ -39,12 +43,12 @@ impl Reaper {
                 self.low.EnumProjects.unwrap()(idx, buffer, max_size as i32)
             });
             (project, Some(file_path))
-        }
+        };
     }
 
     pub fn get_track(&self,
                      proj: *mut ReaProject,
-                     trackidx: i32
+                     trackidx: i32,
     ) -> *mut MediaTrack {
         self.low.GetTrack.unwrap()(proj, trackidx)
     }
@@ -106,6 +110,17 @@ impl Reaper {
 
     pub fn plugin_register(&self, name: &CStr, infostruct: *mut c_void) -> i32 {
         self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
+    }
+
+    pub fn register_control_surface(&self, control_surface: &dyn ControlSurface) {
+        // TODO Ensure that only called if there's not a control surface registered already
+        // "Encode" as thin pointer
+        // (see https://users.rust-lang.org/t/sending-a-boxed-trait-over-ffi/21708/6)
+        let ptr = control_surface as *const dyn ControlSurface;
+        let boxed_ptr = Box::new(ptr);
+        let raw_boxed_ptr = Box::into_raw(boxed_ptr) as *mut c_void;
+        let surface = unsafe { low_level::create_control_surface(raw_boxed_ptr) };
+        self.plugin_register(c_str!("csurf_inst"), surface);
     }
 
     // TODO Rename

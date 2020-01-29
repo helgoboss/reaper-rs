@@ -1,76 +1,81 @@
 #include "surface.h"
 
-namespace reaper_rs_surface {
+namespace reaper_rs_control_surface {
   // This surface just delegates to the free functions implemented in Rust
   class ReaperRsControlSurface : public IReaperControlSurface {
+  private:
+    void* callback_target_;
   public:
+    ReaperRsControlSurface(void* callback_target) : callback_target_(callback_target) {
+    }
+
     virtual const char* GetTypeString() {
-      return ::GetTypeString();
+      return ::reaper_rs_control_surface::GetTypeString(this->callback_target_);
     }
     virtual const char* GetDescString() {
-      return ::GetDescString();
+      return ::reaper_rs_control_surface::GetDescString(this->callback_target_);
     }
     virtual const char* GetConfigString() {
-      return ::GetConfigString();
+      return ::reaper_rs_control_surface::GetConfigString(this->callback_target_);
     }
     virtual void CloseNoReset() {
-      ::CloseNoReset();
+      ::reaper_rs_control_surface::CloseNoReset(this->callback_target_);
     }
     virtual void Run() {
-      ::Run();
+      ::reaper_rs_control_surface::Run(this->callback_target_);
     }
     virtual void SetTrackListChange() {
-      ::SetTrackListChange();
+      ::reaper_rs_control_surface::SetTrackListChange(this->callback_target_);
     }
     virtual void SetSurfaceVolume(MediaTrack* trackid, double volume) {
-      ::SetSurfaceVolume(trackid, volume);
+      ::reaper_rs_control_surface::SetSurfaceVolume(this->callback_target_, trackid, volume);
     }
     virtual void SetSurfacePan(MediaTrack* trackid, double pan) {
-      ::SetSurfacePan(trackid, pan);
+      ::reaper_rs_control_surface::SetSurfacePan(this->callback_target_, trackid, pan);
     }
     virtual void SetSurfaceMute(MediaTrack* trackid, bool mute) {
-      ::SetSurfaceMute(trackid, mute);
+      ::reaper_rs_control_surface::SetSurfaceMute(this->callback_target_, trackid, mute);
     }
     virtual void SetSurfaceSelected(MediaTrack* trackid, bool selected) {
-      ::SetSurfaceSelected(trackid, selected);
+      ::reaper_rs_control_surface::SetSurfaceSelected(this->callback_target_, trackid, selected);
     }
     virtual void SetSurfaceSolo(MediaTrack* trackid, bool solo) {
-      ::SetSurfaceSolo(trackid, solo);
+      ::reaper_rs_control_surface::SetSurfaceSolo(this->callback_target_, trackid, solo);
     }
     virtual void SetSurfaceRecArm(MediaTrack* trackid, bool recarm) {
-      ::SetSurfaceRecArm(trackid, recarm);
+      ::reaper_rs_control_surface::SetSurfaceRecArm(this->callback_target_, trackid, recarm);
     }
     virtual void SetPlayState(bool play, bool pause, bool rec) {
-      ::SetPlayState(play, pause, rec);
+      ::reaper_rs_control_surface::SetPlayState(this->callback_target_, play, pause, rec);
     }
     virtual void SetRepeatState(bool rep) {
-      ::SetRepeatState(rep);
+      ::reaper_rs_control_surface::SetRepeatState(this->callback_target_, rep);
     }
     virtual void SetTrackTitle(MediaTrack* trackid, const char* title) {
-      ::SetTrackTitle(trackid, title);
+      ::reaper_rs_control_surface::SetTrackTitle(this->callback_target_, trackid, title);
     }
     virtual bool GetTouchState(MediaTrack* trackid, int isPan) {
-      return ::GetTouchState(trackid, isPan);
+      return ::reaper_rs_control_surface::GetTouchState(this->callback_target_, trackid, isPan);
     }
     virtual void SetAutoMode(int mode) {
-      ::SetAutoMode(mode);
+      ::reaper_rs_control_surface::SetAutoMode(this->callback_target_, mode);
     }
     virtual void ResetCachedVolPanStates() {
-      ::ResetCachedVolPanStates();
+      ::reaper_rs_control_surface::ResetCachedVolPanStates(this->callback_target_);
     }
     virtual void OnTrackSelection(MediaTrack* trackid) {
-      ::OnTrackSelection(trackid);
+      ::reaper_rs_control_surface::OnTrackSelection(this->callback_target_, trackid);
     }
     virtual bool IsKeyDown(int key) {
-      return ::IsKeyDown(key);
+      return ::reaper_rs_control_surface::IsKeyDown(this->callback_target_, key);
     }
     virtual int Extended(int call, void* parm1, void* parm2, void* parm3) {
-      return ::Extended(call, parm1, parm2, parm3);
+      return ::reaper_rs_control_surface::Extended(this->callback_target_, call, parm1, parm2, parm3);
     }
   };
 
-  void* get_surface() {
-    static ReaperRsControlSurface SURFACE;
-    return (void*) &SURFACE;
+  void* create_control_surface(void* callback_target) {
+    static ReaperRsControlSurface CONTROL_SURFACE(callback_target);
+    return (void*) &CONTROL_SURFACE;
   }
 }

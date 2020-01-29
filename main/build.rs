@@ -1,13 +1,19 @@
+use cc;
+
 fn main() {
     #[cfg(not(windows))]
         generate_bindings();
+    compile_glue();
+}
+
+fn compile_glue() {
+    cc::Build::new()
+        .cpp(true)
+        .file("src/low_level/surface.cpp")
+        .compile("glue");
 }
 
 fn generate_bindings() {
-    // Tell cargo to tell rustc to link the system bzip2
-    // shared library.
-    println!("cargo:rustc-link-lib=bz2");
-
     // Tell cargo to invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed=src/low_level/bindgen.h");
 
@@ -34,7 +40,7 @@ fn generate_bindings() {
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")
-        .whitelist_function("reaper_rs_surface::.*")
+        .whitelist_function("reaper_rs_control_surface::.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed. TODO Do as soon as available
 //        .parse_callbacks(Box::new(bindgen::CargoCallbacks))

@@ -248,80 +248,129 @@ pub mod root {
             ) -> bool,
         >;
     }
-    pub mod reaper_rs_surface {
+    pub mod reaper_rs_control_surface {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
-            pub fn get_surface() -> *mut ::std::os::raw::c_void;
+            pub fn create_control_surface(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *mut ::std::os::raw::c_void;
         }
         extern "C" {
-            pub fn GetTypeString() -> *const ::std::os::raw::c_char;
+            pub fn GetTypeString(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *const ::std::os::raw::c_char;
         }
         extern "C" {
-            pub fn GetDescString() -> *const ::std::os::raw::c_char;
+            pub fn GetDescString(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *const ::std::os::raw::c_char;
         }
         extern "C" {
-            pub fn GetConfigString() -> *const ::std::os::raw::c_char;
+            pub fn GetConfigString(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *const ::std::os::raw::c_char;
         }
         extern "C" {
-            pub fn CloseNoReset();
+            pub fn CloseNoReset(callback_target: *mut ::std::os::raw::c_void);
         }
         extern "C" {
-            pub fn Run();
+            pub fn Run(callback_target: *mut ::std::os::raw::c_void);
         }
         extern "C" {
-            pub fn SetTrackListChange();
+            pub fn SetTrackListChange(callback_target: *mut ::std::os::raw::c_void);
         }
         extern "C" {
-            pub fn SetSurfaceVolume(trackid: *mut root::MediaTrack, volume: f64);
+            pub fn SetSurfaceVolume(
+                callback_target: *mut ::std::os::raw::c_void,
+                trackid: *mut root::MediaTrack,
+                volume: f64,
+            );
         }
         extern "C" {
-            pub fn SetSurfacePan(trackid: *mut root::MediaTrack, pan: f64);
+            pub fn SetSurfacePan(
+                callback_target: *mut ::std::os::raw::c_void,
+                trackid: *mut root::MediaTrack,
+                pan: f64,
+            );
         }
         extern "C" {
-            pub fn SetSurfaceMute(trackid: *mut root::MediaTrack, mute: bool);
+            pub fn SetSurfaceMute(
+                callback_target: *mut ::std::os::raw::c_void,
+                trackid: *mut root::MediaTrack,
+                mute: bool,
+            );
         }
         extern "C" {
-            pub fn SetSurfaceSelected(trackid: *mut root::MediaTrack, selected: bool);
+            pub fn SetSurfaceSelected(
+                callback_target: *mut ::std::os::raw::c_void,
+                trackid: *mut root::MediaTrack,
+                selected: bool,
+            );
         }
         extern "C" {
-            pub fn SetSurfaceSolo(trackid: *mut root::MediaTrack, solo: bool);
+            pub fn SetSurfaceSolo(
+                callback_target: *mut ::std::os::raw::c_void,
+                trackid: *mut root::MediaTrack,
+                solo: bool,
+            );
         }
         extern "C" {
-            pub fn SetSurfaceRecArm(trackid: *mut root::MediaTrack, recarm: bool);
+            pub fn SetSurfaceRecArm(
+                callback_target: *mut ::std::os::raw::c_void,
+                trackid: *mut root::MediaTrack,
+                recarm: bool,
+            );
         }
         extern "C" {
-            pub fn SetPlayState(play: bool, pause: bool, rec: bool);
+            pub fn SetPlayState(
+                callback_target: *mut ::std::os::raw::c_void,
+                play: bool,
+                pause: bool,
+                rec: bool,
+            );
         }
         extern "C" {
-            pub fn SetRepeatState(rep: bool);
+            pub fn SetRepeatState(callback_target: *mut ::std::os::raw::c_void, rep: bool);
         }
         extern "C" {
             pub fn SetTrackTitle(
+                callback_target: *mut ::std::os::raw::c_void,
                 trackid: *mut root::MediaTrack,
                 title: *const ::std::os::raw::c_char,
             );
         }
         extern "C" {
             pub fn GetTouchState(
+                callback_target: *mut ::std::os::raw::c_void,
                 trackid: *mut root::MediaTrack,
                 isPan: ::std::os::raw::c_int,
             ) -> bool;
         }
         extern "C" {
-            pub fn SetAutoMode(mode: ::std::os::raw::c_int);
+            pub fn SetAutoMode(
+                callback_target: *mut ::std::os::raw::c_void,
+                mode: ::std::os::raw::c_int,
+            );
         }
         extern "C" {
-            pub fn ResetCachedVolPanStates();
+            pub fn ResetCachedVolPanStates(callback_target: *mut ::std::os::raw::c_void);
         }
         extern "C" {
-            pub fn OnTrackSelection(trackid: *mut root::MediaTrack);
+            pub fn OnTrackSelection(
+                callback_target: *mut ::std::os::raw::c_void,
+                trackid: *mut root::MediaTrack,
+            );
         }
         extern "C" {
-            pub fn IsKeyDown(key: ::std::os::raw::c_int) -> bool;
+            pub fn IsKeyDown(
+                callback_target: *mut ::std::os::raw::c_void,
+                key: ::std::os::raw::c_int,
+            ) -> bool;
         }
         extern "C" {
             pub fn Extended(
+                callback_target: *mut ::std::os::raw::c_void,
                 call: ::std::os::raw::c_int,
                 parm1: *mut ::std::os::raw::c_void,
                 parm2: *mut ::std::os::raw::c_void,
