@@ -9,7 +9,7 @@ pub use bindings::root::{
     reaper_plugin_info_t
 };
 pub use bindings::root::reaper_rs_control_surface::create_control_surface;
-pub use control_surface::ControlSurface;
+pub use control_surface::IReaperControlSurface;
 
 mod types;
 

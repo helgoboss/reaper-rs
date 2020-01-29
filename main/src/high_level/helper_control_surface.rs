@@ -1,11 +1,11 @@
-use crate::low_level::ControlSurface;
+use crate::low_level::IReaperControlSurface;
 use std::os::raw::c_void;
 use crate::low_level::MediaTrack;
 
 pub struct HelperControlSurface {
 }
 
-impl ControlSurface for HelperControlSurface {
+impl IReaperControlSurface for HelperControlSurface {
     fn GetTypeString(&self) -> *const i8 {
         unimplemented!()
     }

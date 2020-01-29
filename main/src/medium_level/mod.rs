@@ -8,7 +8,7 @@ use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack, ControlSurface};
+use crate::low_level::{ReaProject, MediaTrack, IReaperControlSurface};
 use c_str_macro::c_str;
 
 pub struct Reaper {
@@ -109,11 +109,11 @@ impl Reaper {
         self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
     }
 
-    pub fn register_control_surface(&self, control_surface: &dyn ControlSurface) {
+    pub fn register_control_surface(&self, control_surface: &dyn IReaperControlSurface) {
         // TODO Ensure that only called if there's not a control surface registered already
         // "Encode" as thin pointer
         // (see https://users.rust-lang.org/t/sending-a-boxed-trait-over-ffi/21708/6)
-        let ptr = control_surface as *const dyn ControlSurface;
+        let ptr = control_surface as *const dyn IReaperControlSurface;
         let boxed_ptr = Box::new(ptr);
         let raw_boxed_ptr = Box::into_raw(boxed_ptr) as *mut c_void;
         let surface = unsafe { low_level::create_control_surface(raw_boxed_ptr) };
