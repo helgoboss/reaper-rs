@@ -15,7 +15,7 @@ fn compile_glue() {
 
 fn generate_bindings() {
     // Tell cargo to invalidate the built crate whenever the wrapper changes
-    println!("cargo:rerun-if-changed=src/low_level/bindgen.h");
+    println!("cargo:rerun-if-changed=src/low_level/bindgen.hpp");
 
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
@@ -23,7 +23,7 @@ fn generate_bindings() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header("src/low_level/bindgen.h")
+        .header("src/low_level/bindgen.hpp")
         .opaque_type("timex")
         .clang_arg("-xc++")
         .enable_cxx_namespaces()
