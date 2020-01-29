@@ -8,7 +8,7 @@ pub use bindings::root::{
     ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
     reaper_plugin_info_t,
 };
-use bindings::root::reaper_rs_control_surface::create_control_surface;
+use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use control_surface::ControlSurface;
 
 mod types;
@@ -76,10 +76,8 @@ macro_rules! gen_reaper_struct {
             // plugin_register("csurf_inst", my_rust_trait_implementing_IReaperControlSurface) isn't
             // going to cut it. Rust structs can't implement pure virtual C++ interfaces.
             // This function sets up the given ControlSurface implemented in Rust but doesn't yet register
-            // it. It returns a pointer to a C++ object that will delegate to given Rust ControlSurface.
-            // The pointer needs to be passed to plugin_register("csurf_inst", <here>) for registering or
-            // plugin_register("-csurf_inst", <here>) for unregistering.
-            pub fn setup_control_surface(&self, control_surface: impl ControlSurface + 'static) -> *mut c_void {
+            // it. Can be called only once
+            pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
                 // TODO Ensure that only called if there's not a control surface registered already
                 // Ideally we would have a generic static but as things are now, we need to box it.
                 // However, this is not a big deal because control surfaces are only used in the
@@ -90,12 +88,17 @@ macro_rules! gen_reaper_struct {
                     INIT_CONTROL_SURFACE_INSTANCE.call_once(|| {
                         CONTROL_SURFACE_INSTANCE = Some(Box::new(control_surface));
                     });
-                    // Create and return C++ IReaperControlSurface implementations which calls extern "C"
-                    // functions implemented in RUst
-                    create_control_surface(null_mut())
                 }
             }
 
+            // It returns a pointer to a C++ object that will delegate to given Rust ControlSurface.
+            // The pointer needs to be passed to plugin_register("csurf_inst", <here>) for registering or
+            // plugin_register("-csurf_inst", <here>) for unregistering.
+            pub fn get_cpp_control_surface(&self) -> *mut c_void {
+                // Create and return C++ IReaperControlSurface implementations which calls extern "C"
+                // functions implemented in RUst
+                unsafe { get_control_surface() }
+            }
         }
     }
 }

@@ -96,7 +96,8 @@ impl Reaper {
     fn init(&self) {
         self.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
         self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
-//        self.medium.register_control_surface(&self.surface);
+        self.medium.install_control_surface(HelperControlSurface::new());
+        self.medium.register_control_surface();
     }
 
     pub fn instance() -> &'static Reaper {

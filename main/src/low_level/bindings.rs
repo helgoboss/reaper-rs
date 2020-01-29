@@ -252,9 +252,7 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
-            pub fn create_control_surface(
-                callback_target: *mut ::std::os::raw::c_void,
-            ) -> *mut ::std::os::raw::c_void;
+            pub fn get_control_surface() -> *mut ::std::os::raw::c_void;
         }
         extern "C" {
             pub fn GetTypeString(

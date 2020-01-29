@@ -36,7 +36,7 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
 
         // Medium-level
         let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
-        medium_level_reaper.register_control_surface(MyControlSurface {});
+//        medium_level_reaper.register_control_surface(MyControlSurface {});
 
         // High-level
         high_level::Reaper::setup(medium_level_reaper);

@@ -15,7 +15,7 @@ pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
 
 pub struct Reaper {
-    low: low_level::Reaper
+    pub low: low_level::Reaper
 }
 
 fn to_string<T>(max_size: usize, fill_buffer: impl FnOnce(*mut c_char, usize) -> T) -> (String, T) {
@@ -112,10 +112,17 @@ impl Reaper {
         self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
     }
 
-    pub fn register_control_surface(&self, control_surface: impl ControlSurface + 'static) {
+    pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
         let delegating_control_surface = DelegatingControlSurface::new(control_surface);
-        let cpp_surface = self.low.setup_control_surface(delegating_control_surface);
-        self.plugin_register(c_str!("csurf_inst"), cpp_surface);
+        self.low.install_control_surface(delegating_control_surface);
+    }
+
+    pub fn register_control_surface(&self) {
+        self.plugin_register(c_str!("csurf_inst"), self.low.get_cpp_control_surface());
+    }
+
+    pub fn unregister_control_surface(&self) {
+        self.plugin_register(c_str!("-csurf_inst"), self.low.get_cpp_control_surface());
     }
 
     // TODO Rename

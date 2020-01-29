@@ -74,8 +74,8 @@ namespace reaper_rs_control_surface {
     }
   };
 
-  void* create_control_surface(void* callback_target) {
-    static ReaperRsControlSurface CONTROL_SURFACE(callback_target);
+  void* get_control_surface() {
+    static ReaperRsControlSurface CONTROL_SURFACE(nullptr);
     return (void*) &CONTROL_SURFACE;
   }
 }
