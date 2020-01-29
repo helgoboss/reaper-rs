@@ -9,6 +9,14 @@ use std::ffi::{CString, CStr};
 use std::borrow::BorrowMut;
 use rxrust::prelude::*;
 
+struct MyLowLevelControlSurface {}
+
+impl low_level::ControlSurface for MyLowLevelControlSurface {
+    fn Run(&self) {
+        println!("Hello from low-level ControlSurface")
+    }
+}
+
 #[no_mangle]
 extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_level::reaper_plugin_info_t) -> c_int {
     if rec.is_null() {
@@ -19,41 +27,53 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
         return 0;
     }
     if let Some(GetFunc) = rec.GetFunc {
-        let low = low_level::Reaper::with_all_functions_loaded(
+        // Low-level
+        let low_level_reaper = low_level::Reaper::with_all_functions_loaded(
             &low_level::create_reaper_plugin_function_provider(GetFunc)
         );
-        let medium = medium_level::Reaper::new(low);
-        medium.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
-        Reaper::setup(medium);
-        let mut i = 0;
-        let reaper = Reaper::instance();
-        let action1 = reaper.register_action(
-            c_str!("reaperRsCounter"),
-            c_str!("reaper-rs counter"),
-            move || {
-                let owned = format!("Hello from Rust number {}\0", i);
-                let reaper = Reaper::instance();
-                reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
-                i += 1;
-            },
-            ActionKind::NotToggleable,
-        );
-        let action2 = reaper.register_action(
-            c_str!("reaperRsIntegrationTests"),
-            c_str!("reaper-rs integration tests"),
-            || { execute_tests(Reaper::instance()) },
-            ActionKind::NotToggleable,
-        );
-        let action3 = reaper.register_action(
-            c_str!("reaperRsExample"),
-            c_str!("reaper-rs example"),
-            || { example_code(Reaper::instance()); },
-            ActionKind::NotToggleable,
-        );
+        let cpp_surface = low_level_reaper.setup_control_surface(MyLowLevelControlSurface {});
+        low_level_reaper.plugin_register.unwrap()(c_str!("csurf_inst").as_ptr(), cpp_surface);
+
+        // Medium-level
+        let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
+//        let medium_level_surface = medium_level::ControlSurface::new(high_level_surface);
+
+        // High-level
+        high_level::Reaper::setup(medium_level_reaper);
+//        let high_level_surface = high_level::ControlSurface::new();
         1
     } else {
         0
     }
+}
+
+fn use_high_level() {
+    let high_level_reaper = Reaper::instance();
+    high_level_reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
+    let mut i = 0;
+    let action1 = high_level_reaper.register_action(
+        c_str!("reaperRsCounter"),
+        c_str!("reaper-rs counter"),
+        move || {
+            let owned = format!("Hello from Rust number {}\0", i);
+            let reaper = Reaper::instance();
+            reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
+            i += 1;
+        },
+        ActionKind::NotToggleable,
+    );
+    let action2 = high_level_reaper.register_action(
+        c_str!("reaperRsIntegrationTests"),
+        c_str!("reaper-rs integration tests"),
+        || { execute_tests(Reaper::instance()) },
+        ActionKind::NotToggleable,
+    );
+    let action3 = high_level_reaper.register_action(
+        c_str!("reaperRsExample"),
+        c_str!("reaper-rs example"),
+        || { example_code(Reaper::instance()); },
+        ActionKind::NotToggleable,
+    );
 }
 
 fn example_code(reaper: &Reaper) -> Result<(), Box<dyn Error>> {

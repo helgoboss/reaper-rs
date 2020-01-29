@@ -69,7 +69,6 @@ fn toggle_action(command_index: i32) -> i32 {
 #[derive()]
 pub struct Reaper {
     pub medium: medium_level::Reaper,
-    surface: HelperControlSurface,
 }
 
 pub enum ActionKind {
@@ -85,7 +84,6 @@ impl Reaper {
     pub fn setup(medium: medium_level::Reaper) {
         let reaper = Reaper {
             medium,
-            surface: HelperControlSurface {},
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -98,7 +96,7 @@ impl Reaper {
     fn init(&self) {
         self.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
         self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
-        self.medium.register_control_surface(&self.surface);
+//        self.medium.register_control_surface(&self.surface);
     }
 
     pub fn instance() -> &'static Reaper {

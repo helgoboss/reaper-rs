@@ -4,12 +4,15 @@
 //! - No C strings
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available, maybe provide "_available" functions for conditional execution)
+mod control_surface;
 use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack, IReaperControlSurface};
+use crate::low_level::{ReaProject, MediaTrack};
 use c_str_macro::c_str;
+pub use crate::medium_level::control_surface::ControlSurface;
+use crate::medium_level::control_surface::DelegatingIReaperControlSurface;
 
 pub struct Reaper {
     low: low_level::Reaper
@@ -109,15 +112,23 @@ impl Reaper {
         self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
     }
 
-    pub fn register_control_surface(&self, control_surface: &dyn IReaperControlSurface) {
+    pub fn register_control_surface(&self, control_surface: impl ControlSurface) {
         // TODO Ensure that only called if there's not a control surface registered already
         // "Encode" as thin pointer
         // (see https://users.rust-lang.org/t/sending-a-boxed-trait-over-ffi/21708/6)
-        let ptr = control_surface as *const dyn IReaperControlSurface;
-        let boxed_ptr = Box::new(ptr);
-        let raw_boxed_ptr = Box::into_raw(boxed_ptr) as *mut c_void;
-        let surface = unsafe { low_level::create_control_surface(raw_boxed_ptr) };
-        self.plugin_register(c_str!("csurf_inst"), surface);
+        // TODO Continue This is now exactly the other way around. When we call REAPER,
+        //  high references medium references low calls REAPER. When we are called back by REAPER,
+        //  REAPER calls low references medium references high.
+        //  The following should probably go also to low_level because it's logic that needs
+        //  to be done when using Rust low-level API but doesn't need to be done when using
+        //  original C++ API.
+//        let delegating_control_surface = DelegatingIReaperControlSurface(control_surface);
+//        let ptr = control_surface as *const dyn ControlSurface;
+//        let boxed_ptr = Box::new(ptr);
+//        let raw_boxed_ptr = Box::into_raw(boxed_ptr) as *mut c_void;
+//        let surface = unsafe { low_level::create_control_surface(raw_boxed_ptr) };
+//        // TODO This however should not be part of the low_level API surface stuff anymore.
+//        self.plugin_register(c_str!("csurf_inst"), surface);
     }
 
     // TODO Rename
