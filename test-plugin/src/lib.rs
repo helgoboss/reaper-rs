@@ -31,16 +31,13 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
         let low_level_reaper = low_level::Reaper::with_all_functions_loaded(
             &low_level::create_reaper_plugin_function_provider(GetFunc)
         );
-//        let cpp_surface = low_level_reaper.setup_control_surface(MyControlSurface {});
-//        low_level_reaper.plugin_register.unwrap()(c_str!("csurf_inst").as_ptr(), cpp_surface);
 
         // Medium-level
         let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
-//        medium_level_reaper.register_control_surface(MyControlSurface {});
 
         // High-level
         high_level::Reaper::setup(medium_level_reaper);
-//        let high_level_surface = high_level::ControlSurface::new();
+        use_high_level();
         1
     } else {
         0
@@ -48,10 +45,24 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
 }
 
 fn use_high_level() {
-    let high_level_reaper = Reaper::instance();
-    high_level_reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
+    let reaper = Reaper::instance();
+
+//    let mut s = Subject::local();
+//    s.fork().subscribe(|i| {
+//       Reaper::instance().show_console_msg(c_str!("Project switched"))
+//    });
+//    s.next(5);
+//    let bla: () = s;
+
+    reaper.project_switched4().subscribe(|p| {
+       Reaper::instance().show_console_msg(c_str!("Project switched"))
+    });
+
+    return
+
+    reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
     let mut i = 0;
-    let action1 = high_level_reaper.register_action(
+    let action1 = reaper.register_action(
         c_str!("reaperRsCounter"),
         c_str!("reaper-rs counter"),
         move || {
@@ -62,13 +73,13 @@ fn use_high_level() {
         },
         ActionKind::NotToggleable,
     );
-    let action2 = high_level_reaper.register_action(
+    let action2 = reaper.register_action(
         c_str!("reaperRsIntegrationTests"),
         c_str!("reaper-rs integration tests"),
         || { execute_tests(Reaper::instance()) },
         ActionKind::NotToggleable,
     );
-    let action3 = high_level_reaper.register_action(
+    let action3 = reaper.register_action(
         c_str!("reaperRsExample"),
         c_str!("reaper-rs example"),
         || { example_code(Reaper::instance()); },
