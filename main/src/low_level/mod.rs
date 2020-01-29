@@ -9,9 +9,11 @@ pub use bindings::root::{
     reaper_plugin_info_t
 };
 pub use bindings::root::reaper_rs_control_surface::create_control_surface;
+pub use control_surface::ControlSurface;
 
 mod types;
 
+mod control_surface;
 use std::os::raw::{c_char, c_void};
 use std::ffi::CStr;
 use std::convert::AsRef;

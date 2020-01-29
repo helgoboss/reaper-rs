@@ -1,6 +1,6 @@
 use std::ptr::null_mut;
 
-use crate::low_level::MediaTrack;
+use super::MediaTrack;
 
 // TODO This should probably be moved to low_level API!
 pub trait ControlSurface {

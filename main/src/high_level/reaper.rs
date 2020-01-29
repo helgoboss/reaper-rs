@@ -15,7 +15,6 @@ use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
 use crate::low_level;
 use crate::medium_level;
 use rxrust::observable::Observable;
-use crate::medium_level::ControlSurface;
 use crate::high_level::helper_control_surface::HelperControlSurface;
 
 // We can't use Once because we need multiple writes (not just for initialization).

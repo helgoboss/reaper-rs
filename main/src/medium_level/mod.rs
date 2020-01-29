@@ -4,14 +4,11 @@
 //! - No C strings
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available, maybe provide "_available" functions for conditional execution)
-mod control_surface;
-
 use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack};
-pub use control_surface::ControlSurface;
+use crate::low_level::{ReaProject, MediaTrack, ControlSurface};
 use c_str_macro::c_str;
 
 pub struct Reaper {
