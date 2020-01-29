@@ -54,11 +54,9 @@ fn use_high_level() {
 //    s.next(5);
 //    let bla: () = s;
 
-    reaper.project_switched4().subscribe(|p| {
-       Reaper::instance().show_console_msg(c_str!("Project switched"))
+    reaper.dummy_event_invoked().subscribe(|p| {
+       Reaper::instance().show_console_msg(c_str!("Dummy event invoked"))
     });
-
-    return
 
     reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
     let mut i = 0;
