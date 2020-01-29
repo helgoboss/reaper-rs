@@ -8,15 +8,15 @@ pub struct HelperControlSurface {
 }
 
 impl ControlSurface for HelperControlSurface {
-    fn get_type_string(&self) -> Cow<'static, str> {
+    fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
         unimplemented!()
     }
 
-    fn get_desc_string(&self) -> Cow<'static, str> {
+    fn get_desc_string(&self) -> Option<Cow<'static, CStr>> {
         unimplemented!()
     }
 
-    fn get_config_string(&self) -> Cow<'static, str> {
+    fn get_config_string(&self) -> Option<Cow<'static, CStr>> {
         unimplemented!()
     }
 
@@ -40,7 +40,7 @@ impl ControlSurface for HelperControlSurface {
         unimplemented!()
     }
 
-    fn set_surface_mut(&self, trackid: *mut MediaTrack, mute: bool) {
+    fn set_surface_mute(&self, trackid: *mut MediaTrack, mute: bool) {
         unimplemented!()
     }
 

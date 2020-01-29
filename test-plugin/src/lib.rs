@@ -9,11 +9,11 @@ use std::ffi::{CString, CStr};
 use std::borrow::BorrowMut;
 use rxrust::prelude::*;
 
-struct MyLowLevelControlSurface {}
+struct MyControlSurface {}
 
-impl low_level::ControlSurface for MyLowLevelControlSurface {
-    fn Run(&self) {
-        println!("Hello from low-level ControlSurface")
+impl medium_level::ControlSurface for MyControlSurface {
+    fn run(&self) {
+        println!("Hello from medium-level ControlSurface")
     }
 }
 
@@ -31,12 +31,12 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
         let low_level_reaper = low_level::Reaper::with_all_functions_loaded(
             &low_level::create_reaper_plugin_function_provider(GetFunc)
         );
-        let cpp_surface = low_level_reaper.setup_control_surface(MyLowLevelControlSurface {});
-        low_level_reaper.plugin_register.unwrap()(c_str!("csurf_inst").as_ptr(), cpp_surface);
+//        let cpp_surface = low_level_reaper.setup_control_surface(MyControlSurface {});
+//        low_level_reaper.plugin_register.unwrap()(c_str!("csurf_inst").as_ptr(), cpp_surface);
 
         // Medium-level
         let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
-//        let medium_level_surface = medium_level::ControlSurface::new(high_level_surface);
+        medium_level_reaper.register_control_surface(MyControlSurface {});
 
         // High-level
         high_level::Reaper::setup(medium_level_reaper);

@@ -12,7 +12,7 @@ use crate::low_level;
 use crate::low_level::{ReaProject, MediaTrack};
 use c_str_macro::c_str;
 pub use crate::medium_level::control_surface::ControlSurface;
-use crate::medium_level::control_surface::DelegatingIReaperControlSurface;
+use crate::medium_level::control_surface::DelegatingControlSurface;
 
 pub struct Reaper {
     low: low_level::Reaper
@@ -112,23 +112,10 @@ impl Reaper {
         self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
     }
 
-    pub fn register_control_surface(&self, control_surface: impl ControlSurface) {
-        // TODO Ensure that only called if there's not a control surface registered already
-        // "Encode" as thin pointer
-        // (see https://users.rust-lang.org/t/sending-a-boxed-trait-over-ffi/21708/6)
-        // TODO Continue This is now exactly the other way around. When we call REAPER,
-        //  high references medium references low calls REAPER. When we are called back by REAPER,
-        //  REAPER calls low references medium references high.
-        //  The following should probably go also to low_level because it's logic that needs
-        //  to be done when using Rust low-level API but doesn't need to be done when using
-        //  original C++ API.
-//        let delegating_control_surface = DelegatingIReaperControlSurface(control_surface);
-//        let ptr = control_surface as *const dyn ControlSurface;
-//        let boxed_ptr = Box::new(ptr);
-//        let raw_boxed_ptr = Box::into_raw(boxed_ptr) as *mut c_void;
-//        let surface = unsafe { low_level::create_control_surface(raw_boxed_ptr) };
-//        // TODO This however should not be part of the low_level API surface stuff anymore.
-//        self.plugin_register(c_str!("csurf_inst"), surface);
+    pub fn register_control_surface(&self, control_surface: impl ControlSurface + 'static) {
+        let delegating_control_surface = DelegatingControlSurface::new(control_surface);
+        let cpp_surface = self.low.setup_control_surface(delegating_control_surface);
+        self.plugin_register(c_str!("csurf_inst"), cpp_surface);
     }
 
     // TODO Rename
