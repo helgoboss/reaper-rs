@@ -52,7 +52,22 @@ fn toggle_action(command_index: i32) -> i32 {
 
 pub struct Reaper {
     pub medium: medium_level::Reaper,
+    // We take a mutable reference from this RefCell in order to add/remove commands.
+    // TODO Adding an action in an action would panic because we have an immutable borrow of the map
+    //  to obtain and execute the command, plus a mutable borrow of the map to add the new command.
+    //  (the latter being unavoidable because we somehow need to modify the map!).
+    //  That's not good. Is there a way to avoid this constellation? It's probably hard to avoid the
+    //  immutable borrow because the `operation` is part of the map after all. And we can't just
+    //  copy it before execution, at least not when it captures and mutates state, which might not
+    //  be copyable (which we want to explicitly allow, that's why we accept FnMut!). Or is it
+    //  possible to give up the map borrow after obtaining the command/operation reference???
+    //  Look into that!!!
     command_by_index: RefCell<HashMap<i32, Command>>,
+    // This is a RefCell. So calling next() while another next() is still running will panic.
+    // I guess it's good that way because this is very generic code, panicking or not panicking
+    // depending on the user's code. And getting a panic is good for becoming aware of the problem
+    // instead of running into undefined behavior. The developer can always choose to defer to
+    // the next `ControlSurface::run()` invocation (execute things in next main loop cycle).
     pub(super) dummy_subject: EventStreamSubject<i32>,
     pub(super) project_switched_subject: EventStreamSubject<Project>,
 }
@@ -92,6 +107,16 @@ impl Reaper {
         self.medium.register_control_surface();
     }
 
+    // Allowing global access to native REAPER functions at all times is valid in my opinion.
+    // Because REAPER itself is not written in Rust and therefore cannot take part in Rust's compile
+    // time guarantees anyway. We need to rely on REAPER at that point and also take care not to do
+    // something which is not allowed in Reaper (by reading documentation and learning from
+    // mistakes ... no compiler is going to save us from them). REAPER as a whole is always mutable
+    // from the perspective of extensions.
+    //
+    // We express that in Rust by making `Reaper` class an immutable (in the sense of non-`&mut`)
+    // singleton and allowing all REAPER functions to be called from an immutable context ...
+    // although they can and often will lead to mutations within REAPER!
     pub fn instance() -> &'static Reaper {
         unsafe {
             REAPER_INSTANCE.as_ref().unwrap()

@@ -47,22 +47,11 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
 fn use_high_level() {
     let reaper = Reaper::instance();
 
-//    let mut s = Subject::local();
-//    s.fork().subscribe(|i| {
-//       Reaper::instance().show_console_msg(c_str!("Project switched"))
+//    reaper.project_switched().subscribe(|p: Project| {
+//        // TODO
+//        let text = format!("Project switched to {:?}", p.get_file_path());
+//        Reaper::instance().show_console_msg(CString::new(text).as_ref().unwrap())
 //    });
-//    s.next(5);
-//    let bla: () = s;
-
-//    reaper.dummy_event_invoked().subscribe(|p| {
-//       Reaper::instance().show_console_msg(c_str!("Dummy event invoked"))
-//    });
-
-    reaper.project_switched().subscribe(|p: Project| {
-        // TODO
-        let text = format!("Project switched to {:?}", p.get_file_path());
-        Reaper::instance().show_console_msg(CString::new(text).as_ref().unwrap())
-    });
 
     reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
     let mut i = 0;
@@ -92,6 +81,21 @@ fn use_high_level() {
 }
 
 fn example_code(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
+    example_ref_cell(reaper);
+//   example_iterate_projects(reaper);
+    Ok(())
+}
+
+fn example_ref_cell(reaper: &Reaper) {
+    reaper.register_action(
+        c_str!("blabla"),
+        c_str!("blabla panic"),
+        || { println!("moin" ) },
+        ActionKind::NotToggleable
+    );
+}
+
+fn example_iterate_projects(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
     let project = reaper.get_current_project();
     let projects = reaper.get_projects();
     projects.for_each(|p| {
@@ -115,9 +119,9 @@ fn create_empty_project_in_new_tab(reaper: &Reaper) -> Result<(), Box<dyn Error>
     let current_project_before = reaper.get_current_project();
     let project_count_before = reaper.get_project_count();
     // When
-//    Reaper::instance().project_switched().subscribe(|p: Project| {
-//        println!("Project index {}", p.get_index());
-//    });
+    Reaper::instance().project_switched().subscribe(|p: Project| {
+        println!("Project index {}", p.get_index());
+    });
     // Then
     Ok(())
 }
