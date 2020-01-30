@@ -12,8 +12,10 @@ use c_str_macro::c_str;
 use crate::high_level::{Reaper, Track};
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
+use std::path::PathBuf;
+use std::str::FromStr;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Project {
     rea_project: *mut ReaProject,
 }
@@ -27,8 +29,12 @@ impl Project {
         self.get_track_by_index(0)
     }
 
-    pub fn get_file_path(&self) -> Option<String> {
-        Reaper::instance().medium.enum_projects(self.get_index(), 5000).1
+    // TODO Maybe return file path object ... or CString
+    pub fn get_file_path(&self) -> Option<PathBuf> {
+        Reaper::instance().medium.enum_projects(self.get_index(), 5000).1.map(|path_c_string| {
+            let path_str = path_c_string.to_str().expect("Path contains non-UTF8 characters");
+            PathBuf::from_str(path_str).expect("Malformed path")
+        })
     }
 
     pub fn get_index(&self) -> i32 {

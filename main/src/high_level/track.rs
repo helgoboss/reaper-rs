@@ -14,6 +14,7 @@ use crate::high_level::Reaper;
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
 
+#[derive(Clone, Copy)]
 pub struct Track {
     media_track: *mut MediaTrack,
     rea_project: *mut ReaProject,
@@ -26,7 +27,7 @@ impl Track {
         Track { media_track, rea_project }
     }
 
-    pub fn get_name(&self) -> String {
+    pub fn get_name(&self) -> CString {
         Reaper::instance().medium.convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
     }
 

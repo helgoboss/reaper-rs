@@ -5,6 +5,7 @@
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available, maybe provide "_available" functions for conditional execution)
 mod control_surface;
+
 use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
@@ -18,14 +19,12 @@ pub struct Reaper {
     pub low: low_level::Reaper
 }
 
-fn to_string<T>(max_size: usize, fill_buffer: impl FnOnce(*mut c_char, usize) -> T) -> (String, T) {
+fn with_string_buffer<T>(max_size: usize, fill_buffer: impl FnOnce(*mut c_char, usize) -> T) -> (CString, T) {
     let vec: Vec<u8> = vec![1; max_size as usize];
     let c_string = unsafe { CString::from_vec_unchecked(vec) };
     let raw = c_string.into_raw();
     let result = fill_buffer(raw, max_size);
-    let string = unsafe { CString::from_raw(raw) }
-        .into_string()
-        .expect("Slice must be valid UTF-8 text");
+    let string = unsafe { CString::from_raw(raw) };
     (string, result)
 }
 
@@ -34,15 +33,16 @@ impl Reaper {
         Reaper { low }
     }
 
-    pub fn enum_projects(&self, idx: i32, projfn_out_optional_sz: i32) -> (*mut ReaProject, Option<String>) {
+    pub fn enum_projects(&self, idx: i32, projfn_out_optional_sz: i32) -> (*mut ReaProject, Option<CString>) {
         return if projfn_out_optional_sz == 0 {
             let project = self.low.EnumProjects.unwrap()(idx, null_mut(), 0);
             (project, None)
         } else {
-            let (file_path, project) = to_string(projfn_out_optional_sz as usize, |buffer, max_size| {
+            let (file_path, project) = with_string_buffer(projfn_out_optional_sz as usize, |buffer, max_size| {
                 self.low.EnumProjects.unwrap()(idx, buffer, max_size as i32)
             });
-            (project, Some(file_path))
+
+            (project, if file_path.as_bytes().len() == 0 { None } else { Some(file_path) })
         };
     }
 
@@ -75,7 +75,7 @@ impl Reaper {
     /// reaper.show_console_msg(CStr::from_bytes_with_nul(literal.as_bytes()).unwrap())
     /// ```
     /// - You *must* make sure that the literal is 0-terminated, otherwise it will panic
-    /// - Virtually no runtime overhead
+    /// - Checks for existing 0 bytes
     /// - No copying involved
     ///
     /// ## Passing 0-terminated owned string with borrowing
@@ -84,7 +84,7 @@ impl Reaper {
     /// reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap())
     /// ```
     /// - You *must* make sure that the String is 0-terminated, otherwise it will panic
-    /// - Virtually no runtime overhead
+    /// - Checks for existing 0 bytes
     /// - No copying involved
     ///
     /// ## Passing not 0-terminated owned string with moving
@@ -126,12 +126,10 @@ impl Reaper {
     }
 
     // TODO Rename
-    pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> String {
+    pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {
         let info = self.get_set_media_track_info(tr, parmname, null_mut());
         let info = info as *const c_char;
         let c_str = unsafe { CStr::from_ptr(info) };
-        c_str.to_str()
-            .expect("UTF-8 validation failed")
-            .to_owned()
+        c_str.to_owned()
     }
 }

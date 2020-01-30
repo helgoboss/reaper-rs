@@ -12,7 +12,7 @@ use rxrust::prelude::*;
 struct MyControlSurface {}
 
 impl medium_level::ControlSurface for MyControlSurface {
-    fn run(&self) {
+    fn run(&mut self) {
         println!("Hello from medium-level ControlSurface")
     }
 }
@@ -54,8 +54,14 @@ fn use_high_level() {
 //    s.next(5);
 //    let bla: () = s;
 
-    reaper.dummy_event_invoked().subscribe(|p| {
-       Reaper::instance().show_console_msg(c_str!("Dummy event invoked"))
+//    reaper.dummy_event_invoked().subscribe(|p| {
+//       Reaper::instance().show_console_msg(c_str!("Dummy event invoked"))
+//    });
+
+    reaper.project_switched().subscribe(|p: Project| {
+        // TODO
+        let text = format!("Project switched to {:?}", p.get_file_path());
+        Reaper::instance().show_console_msg(CString::new(text).as_ref().unwrap())
     });
 
     reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
@@ -89,13 +95,13 @@ fn example_code(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
     let project = reaper.get_current_project();
     let projects = reaper.get_projects();
     projects.for_each(|p| {
-        let owned = format!("Project {} at index {}\0", p.get_file_path().unwrap_or("<None>".to_owned()), p.get_index());
+        let owned = format!("Project {:?} at index {}\0", p.get_file_path(), p.get_index());
         reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
     });
 
     let track = project.get_first_track().ok_or("No first track")?;
     let track_name = track.get_name();
-    let owned = format!("Track name is {}\0", track_name);
+    let owned = format!("Track name is {:?}\0", track_name);
     reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
     Ok(())
 }

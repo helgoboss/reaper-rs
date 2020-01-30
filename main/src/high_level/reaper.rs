@@ -53,7 +53,8 @@ fn toggle_action(command_index: i32) -> i32 {
 pub struct Reaper {
     pub medium: medium_level::Reaper,
     command_by_index: RefCell<HashMap<i32, Command>>,
-    pub(super) dummy_subject: EventSubject<i32>,
+    pub(super) dummy_subject: EventStreamSubject<i32>,
+    pub(super) project_switched_subject: EventStreamSubject<Project>,
 }
 
 pub enum ActionKind {
@@ -65,15 +66,16 @@ pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
     Toggleable(Box::new(is_on))
 }
 
-type EventSubject<T> = RefCell<Event<T>>;
-type Event<T> = LocalSubject<'static, SubjectValue<T>, SubjectValue<()>>;
+type EventStreamSubject<T> = RefCell<EventStream<T>>;
+type EventStream<T> = LocalSubject<'static, SubjectValue<T>, SubjectValue<()>>;
 
 impl Reaper {
     pub fn setup(medium: medium_level::Reaper) {
         let reaper = Reaper {
             medium,
             command_by_index: RefCell::new(HashMap::new()),
-            dummy_subject: RefCell::new(Subject::local())
+            dummy_subject: RefCell::new(Subject::local()),
+            project_switched_subject: RefCell::new(Subject::local()),
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -131,8 +133,12 @@ impl Reaper {
         self.medium.show_console_msg(msg);
     }
 
-    pub fn dummy_event_invoked(&self) -> Event<i32> {
+    pub fn dummy_event_invoked(&self) -> EventStream<i32> {
         self.dummy_subject.borrow().fork()
+    }
+
+    pub fn project_switched(&self) -> EventStream<Project> {
+        self.project_switched_subject.borrow().fork()
     }
 
     pub fn get_current_project(&self) -> Project {
