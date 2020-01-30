@@ -21,6 +21,7 @@ use rxrust::subscription::SubscriptionLike;
 use rxrust::observer::Observer;
 use rxrust::prelude::*;
 use rxrust::subject::{LocalSubjectObserver, SubjectValue};
+use std::rc::Rc;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -28,14 +29,13 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 
 // Only for main section
 fn hook_command(command_index: i32, flag: i32) -> bool {
-    if let Some(command) = Reaper::instance().command_by_index.borrow().get(&command_index) {
-        command.operation.borrow_mut().call_mut(());
-        true
-    } else {
-        false
-    }
+    let mut operation = match Reaper::instance().command_by_index.borrow().get(&command_index) {
+        Some(command) => command.operation.clone(),
+        None => return false
+    };
+    (*operation).borrow_mut().call_mut(());
+    true
 }
-
 
 // Only for main section
 fn toggle_action(command_index: i32) -> i32 {
@@ -132,7 +132,7 @@ impl Reaper {
     ) -> RegisteredAction
     {
         let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void);
-        let command = Command::new(command_index, description.into(), RefCell::new(Box::new(operation)), kind);
+        let command = Command::new(command_index, description.into(), Rc::new(RefCell::new(operation)), kind);
         self.register_command(command_index, command);
         RegisteredAction::new(command_index)
     }
@@ -185,13 +185,39 @@ impl Reaper {
 
 struct Command {
     description: Cow<'static, CStr>,
-    operation: RefCell<Box<dyn FnMut()>>,
+    /// Reasoning for that type (from inner to outer):
+    /// - `FnMut`: We don't use just `fn` because we want to support closures. We don't use just
+    ///   `Fn` because we want to support closures that keep mutable references to their captures.
+    /// - `Box`: Of course we want to support very different closures with very different captures.
+    ///   We don't use generic type parameters to achieve that because we need to put Commands into
+    ///   a HashMap as values - so we need each Command to have the same size in memory and the same
+    ///   type. Generics lead to the generation of different types and most likely also different
+    ///   sizes. We don't use references because we want ownership. Yes, Box is (like reference) a
+    ///   so-called trait object and therefore uses dynamic dispatch. It also needs heap allocation
+    ///   (unlike general references). However, this is exactly what we want and need here.
+    /// - `RefCell`: We need this in order to make the FnMut callable in immutable context (for
+    ///   safety reasons we are mostly in immutable context, see ControlSurface documentation). It's
+    ///   good to use `RefCell` in a very fine-grained way like that and not for example on the whole
+    ///   `Command`. That allows for very localized mutation and therefore a lower likelihood that
+    ///   borrowing rules are violated (or if we wouldn't have the runtime borrow checking of
+    ///   `RefCell`, the likeliness to get undefined behavior).
+    /// - `Rc`: We don't want to keep an immutable reference to the surrounding `Command` around
+    ///   just in order to execute this operation! Why? Because we want to support operations which
+    ///   add a REAPER action when executed. And when doing that, we of course have to borrow
+    ///   the command HashMap mutably. However, at that point we already have an immutable borrow
+    ///   to the complete HashMap (via a `RefCell`) ... boom. Panic! With the `Rc` we can release
+    ///   the borrow by cloning the first `Rc` instance and therefore gaining a short-term
+    ///   second ownership of that operation.
+    /// - Wait ... actually there's no `Box` anymore! Turned out that `Rc` makes all things
+    ///   possible that also `Box` makes possible, in particular taking dynamically-sized types.
+    ///   If we wouldn't need `Rc` (for shared references), we would have to take `Box` instead.
+    operation: Rc<RefCell<dyn FnMut()>>,
     kind: ActionKind,
     accelerator_register: gaccel_register_t,
 }
 
 impl Command {
-    fn new(command_index: i32, description: Cow<'static, CStr>, operation: RefCell<Box<dyn FnMut()>>, kind: ActionKind) -> Command {
+    fn new(command_index: i32, description: Cow<'static, CStr>, operation: Rc<RefCell<dyn FnMut()>>, kind: ActionKind) -> Command {
         let mut c = Command {
             description,
             operation,
