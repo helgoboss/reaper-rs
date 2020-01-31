@@ -12,7 +12,7 @@ use rxrust::prelude::*;
 struct MyControlSurface {}
 
 impl medium_level::ControlSurface for MyControlSurface {
-    fn run(&mut self) {
+    fn run(&self) {
         println!("Hello from medium-level ControlSurface")
     }
 }

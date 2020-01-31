@@ -27,66 +27,66 @@ use crate::low_level::get_control_surface_instance;
 // by using `RefCell::try_borrow_mut()`. Or they might find out that they want to avoid this
 // situation by deferring reaction to the next main loop cycle.
 pub trait ControlSurface {
-    fn GetTypeString(&mut self) -> *const ::std::os::raw::c_char {
+    fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
         null()
     }
 
-    fn GetDescString(&mut self) -> *const ::std::os::raw::c_char {
+    fn GetDescString(&self) -> *const ::std::os::raw::c_char {
         null()
     }
 
-    fn GetConfigString(&mut self) -> *const ::std::os::raw::c_char {
+    fn GetConfigString(&self) -> *const ::std::os::raw::c_char {
         null()
     }
 
-    fn CloseNoReset(&mut self) {}
+    fn CloseNoReset(&self) {}
 
-    fn Run(&mut self) {}
+    fn Run(&self) {}
 
-    fn SetTrackListChange(&mut self) {}
+    fn SetTrackListChange(&self) {}
 
-    fn SetSurfaceVolume(&mut self, trackid: *mut MediaTrack, volume: f64) {}
+    fn SetSurfaceVolume(&self, trackid: *mut MediaTrack, volume: f64) {}
 
-    fn SetSurfacePan(&mut self, trackid: *mut MediaTrack, pan: f64) {}
+    fn SetSurfacePan(&self, trackid: *mut MediaTrack, pan: f64) {}
 
-    fn SetSurfaceMute(&mut self, trackid: *mut MediaTrack, mute: bool) {}
+    fn SetSurfaceMute(&self, trackid: *mut MediaTrack, mute: bool) {}
 
-    fn SetSurfaceSelected(&mut self, trackid: *mut MediaTrack, selected: bool) {}
+    fn SetSurfaceSelected(&self, trackid: *mut MediaTrack, selected: bool) {}
 
-    fn SetSurfaceSolo(&mut self, trackid: *mut MediaTrack, solo: bool) {}
+    fn SetSurfaceSolo(&self, trackid: *mut MediaTrack, solo: bool) {}
 
-    fn SetSurfaceRecArm(&mut self, trackid: *mut MediaTrack, recarm: bool) {}
+    fn SetSurfaceRecArm(&self, trackid: *mut MediaTrack, recarm: bool) {}
 
-    fn SetPlayState(&mut self, play: bool, pause: bool, rec: bool) {}
+    fn SetPlayState(&self, play: bool, pause: bool, rec: bool) {}
 
-    fn SetRepeatState(&mut self, rep: bool) {}
+    fn SetRepeatState(&self, rep: bool) {}
 
     fn SetTrackTitle(
-        &mut self,
+        &self,
         trackid: *mut MediaTrack,
         title: *const ::std::os::raw::c_char,
     ) {}
 
     fn GetTouchState(
-        &mut self,
+        &self,
         trackid: *mut MediaTrack,
         isPan: ::std::os::raw::c_int,
     ) -> bool {
         false
     }
 
-    fn SetAutoMode(&mut self, mode: ::std::os::raw::c_int) {}
+    fn SetAutoMode(&self, mode: ::std::os::raw::c_int) {}
 
-    fn ResetCachedVolPanStates(&mut self) {}
+    fn ResetCachedVolPanStates(&self) {}
 
-    fn OnTrackSelection(&mut self, trackid: *mut MediaTrack) {}
+    fn OnTrackSelection(&self, trackid: *mut MediaTrack) {}
 
-    fn IsKeyDown(&mut self, key: ::std::os::raw::c_int) -> bool {
+    fn IsKeyDown(&self, key: ::std::os::raw::c_int) -> bool {
         false
     }
 
     fn Extended(
-        &mut self,
+        &self,
         call: ::std::os::raw::c_int,
         parm1: *mut ::std::os::raw::c_void,
         parm2: *mut ::std::os::raw::c_void,

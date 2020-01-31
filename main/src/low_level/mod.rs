@@ -28,7 +28,7 @@ static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
 static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
 
 
-pub(super) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
+pub(super) fn get_control_surface_instance() -> &'static Box<dyn ControlSurface> {
     // TODO as_mut() ... This doesn't seem okay. Maybe we should use a RefCell around it!
     unsafe {
         CONTROL_SURFACE_INSTANCE.as_mut().unwrap()
