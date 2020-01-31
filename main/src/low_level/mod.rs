@@ -6,7 +6,7 @@ mod bindings;
 
 pub use bindings::root::{
     ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
-    reaper_plugin_info_t,
+    reaper_plugin_info_t, KbdSectionInfo, HWND
 };
 use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use control_surface::ControlSurface;
@@ -110,7 +110,11 @@ gen_reaper_struct![
     ShowConsoleMsg,
     ValidatePtr2,
     GetSetMediaTrackInfo,
-    plugin_register
+    plugin_register,
+    GetMainHwnd,
+    KBD_OnMainActionEx,
+    SectionFromUniqueID,
+    NamedCommandLookup
 ];
 
 #[macro_export]

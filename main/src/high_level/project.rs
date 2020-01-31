@@ -25,6 +25,10 @@ impl Project {
         Project { rea_project }
     }
 
+    pub fn get_rea_project(&self) -> *mut ReaProject {
+        self.rea_project
+    }
+
     pub fn get_first_track(&self) -> Option<Track> {
         self.get_track_by_index(0)
     }

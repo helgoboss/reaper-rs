@@ -1,4 +1,4 @@
-#![feature(unboxed_closures, fn_traits)]
+#![feature(unboxed_closures, fn_traits, clamp)]
 
 pub mod low_level;
 pub mod medium_level;

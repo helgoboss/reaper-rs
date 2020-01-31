@@ -10,7 +10,7 @@ use std::sync::Once;
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::Project;
+use crate::high_level::{Project, Section};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
 use crate::low_level;
 use crate::medium_level;
@@ -68,7 +68,6 @@ pub struct Reaper {
     // depending on the user's code. And getting a panic is good for becoming aware of the problem
     // instead of running into undefined behavior. The developer can always choose to defer to
     // the next `ControlSurface::run()` invocation (execute things in next main loop cycle).
-    pub(super) dummy_subject: EventStreamSubject<i32>,
     pub(super) project_switched_subject: EventStreamSubject<Project>,
 }
 
@@ -89,7 +88,6 @@ impl Reaper {
         let reaper = Reaper {
             medium,
             command_by_index: RefCell::new(HashMap::new()),
-            dummy_subject: RefCell::new(Subject::local()),
             project_switched_subject: RefCell::new(Subject::local()),
         };
         unsafe {
@@ -158,8 +156,13 @@ impl Reaper {
         self.medium.show_console_msg(msg);
     }
 
-    pub fn dummy_event_invoked(&self) -> EventStream<i32> {
-        self.dummy_subject.borrow().fork()
+    pub fn get_main_section(&self) -> Section {
+        Section::new(self.medium.section_from_unique_id(0))
+    }
+
+    pub fn create_empty_project_in_new_tab(&self) -> Project {
+        self.get_main_section().action_by_command_id(41929).invoke_as_trigger(None);
+        self.get_current_project()
     }
 
     pub fn project_switched(&self) -> EventStream<Project> {

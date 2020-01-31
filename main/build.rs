@@ -37,9 +37,14 @@ fn generate_bindings() {
         .whitelist_var("ShowConsoleMsg")
         .whitelist_var("REAPER_PLUGIN_VERSION")
         .whitelist_var("plugin_register")
+        .whitelist_var("SectionFromUniqueID")
+        .whitelist_var("NamedCommandLookup")
+        .whitelist_var("KBD_OnMainActionEx")
+        .whitelist_var("GetMainHwnd")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")
+        .whitelist_type("KbdSectionInfo")
         .whitelist_function("reaper_rs_control_surface::.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed. TODO Do as soon as available

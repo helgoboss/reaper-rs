@@ -10,7 +10,7 @@ use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack};
+use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND};
 use c_str_macro::c_str;
 pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
@@ -123,6 +123,22 @@ impl Reaper {
 
     pub fn unregister_control_surface(&self) {
         self.plugin_register(c_str!("-csurf_inst"), self.low.get_cpp_control_surface());
+    }
+
+    pub fn section_from_unique_id(&self, unique_id: i32) -> *mut KbdSectionInfo {
+        self.low.SectionFromUniqueID.unwrap()(unique_id)
+    }
+
+    pub fn kbd_on_main_action_ex(&self, cmd: i32, val: i32, valhw: i32, relmode: i32, hwnd: HWND, proj: *mut ReaProject) -> i32 {
+        self.low.KBD_OnMainActionEx.unwrap()(cmd, val, valhw, relmode, hwnd, proj)
+    }
+
+    pub fn get_main_hwnd(&self) -> HWND {
+        self.low.GetMainHwnd.unwrap()()
+    }
+
+    pub fn named_command_lookup(&self, command_name: &CStr) -> i32 {
+        self.low.NamedCommandLookup.unwrap()(command_name.as_ptr())
     }
 
     // TODO Rename

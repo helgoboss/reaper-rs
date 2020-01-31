@@ -17,6 +17,7 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
     }
+    pub type DWORD = ::std::os::raw::c_uint;
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
     pub struct HWND__ {
@@ -193,6 +194,234 @@ pub mod root {
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
+    pub struct KbdCmd {
+        pub cmd: root::DWORD,
+        pub text: *const ::std::os::raw::c_char,
+    }
+    #[test]
+    fn bindgen_test_layout_KbdCmd() {
+        assert_eq!(
+            ::std::mem::size_of::<KbdCmd>(),
+            16usize,
+            concat!("Size of: ", stringify!(KbdCmd))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<KbdCmd>(),
+            8usize,
+            concat!("Alignment of ", stringify!(KbdCmd))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdCmd>())).cmd as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdCmd),
+                "::",
+                stringify!(cmd)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdCmd>())).text as *const _ as usize },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdCmd),
+                "::",
+                stringify!(text)
+            )
+        );
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct KbdKeyBindingInfo {
+        pub key: ::std::os::raw::c_int,
+        pub cmd: ::std::os::raw::c_int,
+        pub flags: ::std::os::raw::c_int,
+    }
+    #[test]
+    fn bindgen_test_layout_KbdKeyBindingInfo() {
+        assert_eq!(
+            ::std::mem::size_of::<KbdKeyBindingInfo>(),
+            12usize,
+            concat!("Size of: ", stringify!(KbdKeyBindingInfo))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<KbdKeyBindingInfo>(),
+            4usize,
+            concat!("Alignment of ", stringify!(KbdKeyBindingInfo))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdKeyBindingInfo>())).key as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdKeyBindingInfo),
+                "::",
+                stringify!(key)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdKeyBindingInfo>())).cmd as *const _ as usize },
+            4usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdKeyBindingInfo),
+                "::",
+                stringify!(cmd)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdKeyBindingInfo>())).flags as *const _ as usize },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdKeyBindingInfo),
+                "::",
+                stringify!(flags)
+            )
+        );
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct KbdSectionInfo {
+        pub uniqueID: ::std::os::raw::c_int,
+        pub name: *const ::std::os::raw::c_char,
+        pub action_list: *mut root::KbdCmd,
+        pub action_list_cnt: ::std::os::raw::c_int,
+        pub def_keys: *mut root::KbdKeyBindingInfo,
+        pub def_keys_cnt: ::std::os::raw::c_int,
+        pub onAction: ::std::option::Option<
+            unsafe extern "C" fn(
+                cmd: ::std::os::raw::c_int,
+                val: ::std::os::raw::c_int,
+                valhw: ::std::os::raw::c_int,
+                relmode: ::std::os::raw::c_int,
+                hwnd: root::HWND,
+            ) -> bool,
+        >,
+        pub accels: *mut ::std::os::raw::c_void,
+        pub recent_cmds: *mut ::std::os::raw::c_void,
+        pub extended_data: [*mut ::std::os::raw::c_void; 32usize],
+    }
+    #[test]
+    fn bindgen_test_layout_KbdSectionInfo() {
+        assert_eq!(
+            ::std::mem::size_of::<KbdSectionInfo>(),
+            328usize,
+            concat!("Size of: ", stringify!(KbdSectionInfo))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<KbdSectionInfo>(),
+            8usize,
+            concat!("Alignment of ", stringify!(KbdSectionInfo))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).uniqueID as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(uniqueID)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).name as *const _ as usize },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(name)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).action_list as *const _ as usize },
+            16usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(action_list)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<KbdSectionInfo>())).action_list_cnt as *const _ as usize
+            },
+            24usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(action_list_cnt)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).def_keys as *const _ as usize },
+            32usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(def_keys)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).def_keys_cnt as *const _ as usize },
+            40usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(def_keys_cnt)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).onAction as *const _ as usize },
+            48usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(onAction)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).accels as *const _ as usize },
+            56usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(accels)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<KbdSectionInfo>())).recent_cmds as *const _ as usize },
+            64usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(recent_cmds)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<KbdSectionInfo>())).extended_data as *const _ as usize
+            },
+            72usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(KbdSectionInfo),
+                "::",
+                stringify!(extended_data)
+            )
+        );
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
     pub struct ReaProject {
         _unused: [u8; 0],
     }
@@ -209,6 +438,9 @@ pub mod root {
                 projfnOutOptional_sz: ::std::os::raw::c_int,
             ) -> *mut root::ReaProject,
         >;
+    }
+    extern "C" {
+        pub static mut GetMainHwnd: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
     }
     extern "C" {
         pub static mut GetSetMediaTrackInfo: ::std::option::Option<
@@ -228,11 +460,35 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut KBD_OnMainActionEx: ::std::option::Option<
+            unsafe extern "C" fn(
+                cmd: ::std::os::raw::c_int,
+                val: ::std::os::raw::c_int,
+                valhw: ::std::os::raw::c_int,
+                relmode: ::std::os::raw::c_int,
+                hwnd: root::HWND,
+                proj: *mut root::ReaProject,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut NamedCommandLookup: ::std::option::Option<
+            unsafe extern "C" fn(
+                command_name: *const ::std::os::raw::c_char,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut plugin_register: ::std::option::Option<
             unsafe extern "C" fn(
                 name: *const ::std::os::raw::c_char,
                 infostruct: *mut ::std::os::raw::c_void,
             ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut SectionFromUniqueID: ::std::option::Option<
+            unsafe extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo,
         >;
     }
     extern "C" {

@@ -8,6 +8,9 @@ use c_str_macro::c_str;
 use std::ffi::{CString, CStr};
 use std::borrow::BorrowMut;
 use rxrust::prelude::*;
+use std::rc::Rc;
+use std::cell::RefCell;
+use std::ops::Deref;
 
 struct MyControlSurface {}
 
@@ -90,8 +93,8 @@ fn example_ref_cell(reaper: &Reaper) {
     reaper.register_action(
         c_str!("blabla"),
         c_str!("blabla panic"),
-        || { println!("moin" ) },
-        ActionKind::NotToggleable
+        || { println!("moin") },
+        ActionKind::NotToggleable,
     );
 }
 
@@ -119,9 +122,16 @@ fn create_empty_project_in_new_tab(reaper: &Reaper) -> Result<(), Box<dyn Error>
     let current_project_before = reaper.get_current_project();
     let project_count_before = reaper.get_project_count();
     // When
-    Reaper::instance().project_switched().subscribe(|p: Project| {
-        println!("Project index {}", p.get_index());
+    struct State { count: i32, event_project: Option<Project> }
+    let mut state = Rc::new(RefCell::new(State { count: 0, event_project: None }));
+    let mut mirrored_state = state.clone();
+    reaper.project_switched().subscribe(move |p: Project| {
+        let mut state = state.deref().borrow_mut();
+        state.count += 1;
+        state.event_project = Some(p);
     });
+    reaper.create_empty_project_in_new_tab();
     // Then
+    assert_eq!(mirrored_state.borrow().count, 1);
     Ok(())
 }
