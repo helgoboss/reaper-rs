@@ -11,6 +11,7 @@ use rxrust::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::ops::Deref;
+use reaper_rs_test::ReaperRsIntegrationTest;
 
 struct MyControlSurface {}
 
@@ -40,7 +41,16 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
 
         // High-level
         high_level::Reaper::setup(medium_level_reaper);
-        use_high_level();
+        Reaper::instance().register_action(
+            c_str!("reaperRsIntegrationTests"),
+            c_str!("reaper-rs integration tests"),
+            || {
+                let test = ReaperRsIntegrationTest::new(Reaper::instance());
+                test.execute();
+            },
+            ActionKind::NotToggleable,
+        );
+//        use_high_level();
         1
     } else {
         0
@@ -67,12 +77,6 @@ fn use_high_level() {
             reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
             i += 1;
         },
-        ActionKind::NotToggleable,
-    );
-    let action2 = reaper.register_action(
-        c_str!("reaperRsIntegrationTests"),
-        c_str!("reaper-rs integration tests"),
-        || { execute_tests(Reaper::instance()) },
         ActionKind::NotToggleable,
     );
     let action3 = reaper.register_action(
@@ -110,28 +114,5 @@ fn example_iterate_projects(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
     let track_name = track.get_name();
     let owned = format!("Track name is {:?}\0", track_name);
     reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
-    Ok(())
-}
-
-fn execute_tests(reaper: &Reaper) {
-    create_empty_project_in_new_tab(reaper);
-}
-
-fn create_empty_project_in_new_tab(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
-    // Given
-    let current_project_before = reaper.get_current_project();
-    let project_count_before = reaper.get_project_count();
-    // When
-    struct State { count: i32, event_project: Option<Project> }
-    let mut state = Rc::new(RefCell::new(State { count: 0, event_project: None }));
-    let mut mirrored_state = state.clone();
-    reaper.project_switched().subscribe(move |p: Project| {
-        let mut state = state.deref().borrow_mut();
-        state.count += 1;
-        state.event_project = Some(p);
-    });
-    reaper.create_empty_project_in_new_tab();
-    // Then
-    assert_eq!(mirrored_state.borrow().count, 1);
     Ok(())
 }

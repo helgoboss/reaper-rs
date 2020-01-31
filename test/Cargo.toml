@@ -1,5 +1,5 @@
 [package]
-name = "reaper-rs-test-vst-plugin"
+name = "reaper-rs-test"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
 edition = "2018"
@@ -7,10 +7,5 @@ edition = "2018"
 
 [dependencies]
 reaper-rs = { path = "../main" }
-reaper-rs-test = { path = "../test" }
 c_str_macro = "1.0.2"
-vst = "0.2.0"
-
-[lib]
-name = "reaper_rs_test_vst_plugin"
-crate-type = ["cdylib"]
+rxrust = "0.7.1"
