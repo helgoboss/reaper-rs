@@ -41,6 +41,7 @@ fn generate_bindings() {
         .whitelist_var("NamedCommandLookup")
         .whitelist_var("KBD_OnMainActionEx")
         .whitelist_var("GetMainHwnd")
+        .whitelist_var("ClearConsole")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")

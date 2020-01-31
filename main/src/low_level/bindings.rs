@@ -431,6 +431,9 @@ pub mod root {
         _unused: [u8; 0],
     }
     extern "C" {
+        pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
+    }
+    extern "C" {
         pub static mut EnumProjects: ::std::option::Option<
             unsafe extern "C" fn(
                 idx: ::std::os::raw::c_int,

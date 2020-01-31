@@ -61,49 +61,6 @@ impl Reaper {
         self.low.GetSetMediaTrackInfo.unwrap()(tr, parmname.as_ptr(), set_new_value)
     }
 
-    /// # Examples
-    ///
-    /// ## Passing literal with zero runtime overhead
-    /// ```
-    /// reaper.show_console_msg(c_str!("Hello from Rust!"))
-    /// ```
-    /// - Uses macro `c_str!` to create new 0-terminated static literal embedded in binary
-    ///
-    /// ## Passing 0-terminated literal with borrowing
-    /// ```
-    /// let literal = "Hello from Rust!\0";
-    /// reaper.show_console_msg(CStr::from_bytes_with_nul(literal.as_bytes()).unwrap())
-    /// ```
-    /// - You *must* make sure that the literal is 0-terminated, otherwise it will panic
-    /// - Checks for existing 0 bytes
-    /// - No copying involved
-    ///
-    /// ## Passing 0-terminated owned string with borrowing
-    /// ```
-    /// let owned = String::from("Hello from Rust!\0");
-    /// reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap())
-    /// ```
-    /// - You *must* make sure that the String is 0-terminated, otherwise it will panic
-    /// - Checks for existing 0 bytes
-    /// - No copying involved
-    ///
-    /// ## Passing not 0-terminated owned string with moving
-    /// ```
-    /// let owned = String::from("Hello from Rust!");
-    /// reaper.show_console_msg(&CString::new(owned).unwrap())
-    /// ```
-    /// - Moves owned string for appending 0 byte (maybe increasing String capacity)
-    /// - Checks for existing 0 bytes
-    /// - No copying involved
-    ///
-    /// ## Absolutely zero-overhead variations
-    ///
-    /// If you really need absolutely zero-overhead, you need to resort to unsafe functions. But
-    /// this should be done only in situations when you are very constrained, e.g. in audio thread
-    /// (which is forbidden to call most of the REAPER SDK functions anyway).
-    ///
-    /// Look into [from_vec_unchecked](CString::from_vec_unchecked) or
-    /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.
     pub fn show_console_msg(&self, msg: &CStr) {
         self.low.ShowConsoleMsg.unwrap()(msg.as_ptr())
     }
@@ -139,6 +96,10 @@ impl Reaper {
 
     pub fn named_command_lookup(&self, command_name: &CStr) -> i32 {
         self.low.NamedCommandLookup.unwrap()(command_name.as_ptr())
+    }
+
+    pub fn clear_console(&self) {
+        self.low.ClearConsole.unwrap()();
     }
 
     // TODO Rename

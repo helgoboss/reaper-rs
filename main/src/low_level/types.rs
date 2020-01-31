@@ -55,3 +55,5 @@ pub type SectionFromUniqueID = fn(uniqueID: ::std::os::raw::c_int) -> *mut KbdSe
 pub type NamedCommandLookup = fn(
     command_name: *const ::std::os::raw::c_char,
 ) -> ::std::os::raw::c_int;
+
+pub type ClearConsole = fn();

@@ -114,7 +114,8 @@ gen_reaper_struct![
     GetMainHwnd,
     KBD_OnMainActionEx,
     SectionFromUniqueID,
-    NamedCommandLookup
+    NamedCommandLookup,
+    ClearConsole
 ];
 
 #[macro_export]

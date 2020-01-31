@@ -45,7 +45,7 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
             c_str!("reaperRsIntegrationTests"),
             c_str!("reaper-rs integration tests"),
             || {
-                let test = ReaperRsIntegrationTest::new(Reaper::instance());
+                let mut test = ReaperRsIntegrationTest::new(Reaper::instance());
                 test.execute();
             },
             ActionKind::NotToggleable,

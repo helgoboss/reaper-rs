@@ -152,6 +152,49 @@ impl Reaper {
         }
     }
 
+    /// # Examples
+    ///
+    /// ## Passing literal with zero runtime overhead
+    /// ```
+    /// reaper.show_console_msg(c_str!("Hello from Rust!"))
+    /// ```
+    /// - Uses macro `c_str!` to create new 0-terminated static literal embedded in binary
+    ///
+    /// ## Passing 0-terminated literal with borrowing
+    /// ```
+    /// let literal = "Hello from Rust!\0";
+    /// reaper.show_console_msg(CStr::from_bytes_with_nul(literal.as_bytes()).unwrap())
+    /// ```
+    /// - You *must* make sure that the literal is 0-terminated, otherwise it will panic
+    /// - Checks for existing 0 bytes
+    /// - No copying involved
+    ///
+    /// ## Passing 0-terminated owned string with borrowing
+    /// ```
+    /// let owned = String::from("Hello from Rust!\0");
+    /// reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap())
+    /// ```
+    /// - You *must* make sure that the String is 0-terminated, otherwise it will panic
+    /// - Checks for existing 0 bytes
+    /// - No copying involved
+    ///
+    /// ## Passing not 0-terminated owned string with moving
+    /// ```
+    /// let owned = String::from("Hello from Rust!");
+    /// reaper.show_console_msg(&CString::new(owned).unwrap())
+    /// ```
+    /// - Moves owned string for appending 0 byte (maybe increasing String capacity)
+    /// - Checks for existing 0 bytes
+    /// - No copying involved
+    ///
+    /// ## Absolutely zero-overhead variations
+    ///
+    /// If you really need absolutely zero-overhead, you need to resort to unsafe functions. But
+    /// this should be done only in situations when you are very constrained, e.g. in audio thread
+    /// (which is forbidden to call most of the REAPER SDK functions anyway).
+    ///
+    /// Look into [from_vec_unchecked](CString::from_vec_unchecked) or
+    /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.
     pub fn show_console_msg(&self, msg: &CStr) {
         self.medium.show_console_msg(msg);
     }
@@ -183,6 +226,10 @@ impl Reaper {
 
     pub fn get_project_count(&self) -> i32 {
         self.get_projects().count() as i32
+    }
+
+    pub fn clear_console(&self) {
+        self.medium.clear_console();
     }
 }
 
