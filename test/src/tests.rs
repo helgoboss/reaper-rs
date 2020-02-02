@@ -5,6 +5,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
+use std::ops::{Deref, DerefMut};
 
 fn share<T>(value: T) -> (Rc<RefCell<T>>, Rc<RefCell<T>>) {
     let shareable = Rc::new(RefCell::new(value));
@@ -12,6 +13,11 @@ fn share<T>(value: T) -> (Rc<RefCell<T>>, Rc<RefCell<T>>) {
     (shareable, mirror)
 }
 
+fn with_changes<T>(initial_value: T, op: impl FnOnce(Rc<RefCell<T>>)) -> Rc<RefCell<T>> {
+    let (value, mirrored_value) = share(initial_value);
+    op(value);
+    mirrored_value
+}
 
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
@@ -22,13 +28,14 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let project_count_before = reaper.get_project_count();
             // When
             struct State { count: i32, event_project: Option<Project> }
-            let (mut state, mirrored_state) = share(State { count: 0, event_project: None });
-            reaper.project_switched().subscribe(move |p: Project| {
-                state.replace(State { count: state.borrow().count + 1, event_project: Some(p) });
+            let state = with_changes(State { count: 0, event_project: None }, |state| {
+                reaper.project_switched().subscribe(move |p: Project| {
+                    state.replace(State { count: state.borrow().count + 1, event_project: Some(p) });
+                });
             });
             reaper.create_empty_project_in_new_tab();
             // Then
-            check_eq!(mirrored_state.borrow().count, 1);
+            check_eq!(state.borrow().count, 1);
             Ok(())
         }),
         step("Add track", |reaper| {
