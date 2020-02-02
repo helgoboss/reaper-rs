@@ -20,7 +20,7 @@ pub trait ControlSurface {
 
     fn close_no_reset(&self) {}
 
-    fn run(&self) {}
+    fn run(&mut self) {}
 
     fn set_track_list_change(&self) {}
 
@@ -96,7 +96,7 @@ impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T
         self.delegate.close_no_reset()
     }
 
-    fn Run(&self) {
+    fn Run(&mut self) {
         self.delegate.run()
     }
 

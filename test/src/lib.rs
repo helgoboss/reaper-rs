@@ -12,24 +12,34 @@ use std::panic;
 use std::borrow::Cow;
 use std::borrow::Cow::{Borrowed, Owned};
 use crate::tests::create_test_steps;
+use std::iter::FromIterator;
+use crate::api::TestStep;
 
 pub fn execute_integration_test() {
     let reaper = Reaper::instance();
     reaper.clear_console();
     log("# Testing reaper-rs");
-    let steps = create_test_steps();
-    for s in steps {
-        log_heading(s.name);
-        let result = (s.operation)(reaper);
-        match result {
-            Ok(()) => log("\nSuccessful"),
-            Err(msg) => {
-                log_failure(&msg);
-                return;
-            }
+    let mut steps = VecDeque::from_iter(create_test_steps());
+    execute_next_step(reaper, steps);
+}
+
+fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>) {
+    let step = match steps.pop_front() {
+        Some(step) => step,
+        None => {
+            log("\n\nIntegration test was successful");
+            return;
         }
+    };
+    log_heading(step.name);
+    let result = (step.operation)(reaper);
+    match result {
+        Ok(()) => {
+            log("\nSuccessful");
+            reaper.execute_later_in_main_thread(move || execute_next_step(reaper, steps));
+        },
+        Err(msg) => log_failure(&msg)
     }
-    log("\n\nIntegration test was successful")
 }
 
 fn log_failure(msg: &str) {

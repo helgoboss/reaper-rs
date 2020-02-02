@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_ushort, c_void};
 use std::ptr::{null, null_mut};
-use std::sync::Once;
+use std::sync::{Once, mpsc};
 
 use c_str_macro::c_str;
 
@@ -22,6 +22,7 @@ use rxrust::observer::Observer;
 use rxrust::prelude::*;
 use rxrust::subject::{LocalSubjectObserver, SubjectValue};
 use std::rc::Rc;
+use std::sync::mpsc::{Sender, Receiver};
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -49,6 +50,8 @@ fn toggle_action(command_index: i32) -> i32 {
     }
 }
 
+//pub(super) type Task = Box<dyn FnOnce() + Send + 'static>;
+pub(super) type Task = Box<dyn FnOnce() + 'static>;
 
 pub struct Reaper {
     pub medium: medium_level::Reaper,
@@ -69,6 +72,7 @@ pub struct Reaper {
     // instead of running into undefined behavior. The developer can always choose to defer to
     // the next `ControlSurface::run()` invocation (execute things in next main loop cycle).
     pub(super) project_switched_subject: EventStreamSubject<Project>,
+    task_sender: Sender<Task>,
 }
 
 pub enum ActionKind {
@@ -85,23 +89,25 @@ type EventStream<T> = LocalSubject<'static, SubjectValue<T>, SubjectValue<()>>;
 
 impl Reaper {
     pub fn setup(medium: medium_level::Reaper) {
+        let (task_sender, task_receiver) = mpsc::channel::<Task>();
         let reaper = Reaper {
             medium,
             command_by_index: RefCell::new(HashMap::new()),
             project_switched_subject: RefCell::new(Subject::local()),
+            task_sender,
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
                 REAPER_INSTANCE = Some(reaper);
             });
         }
-        Reaper::instance().init();
+        Reaper::instance().init(task_receiver);
     }
 
-    fn init(&self) {
+    fn init(&self, task_receiver: Receiver<Task>) {
         self.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
         self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
-        self.medium.install_control_surface(HelperControlSurface::new());
+        self.medium.install_control_surface(HelperControlSurface::new(task_receiver));
         self.medium.register_control_surface();
     }
 
@@ -231,6 +237,10 @@ impl Reaper {
     pub fn clear_console(&self) {
         self.medium.clear_console();
     }
+
+    pub fn execute_later_in_main_thread(&self, task: impl FnOnce() + 'static) {
+        self.task_sender.send(Box::new(task));
+    }
 }
 
 struct Command {
@@ -238,6 +248,7 @@ struct Command {
     /// Reasoning for that type (from inner to outer):
     /// - `FnMut`: We don't use just `fn` because we want to support closures. We don't use just
     ///   `Fn` because we want to support closures that keep mutable references to their captures.
+    ///   TODO What about supporting also FnOnce?
     /// - `Box`: Of course we want to support very different closures with very different captures.
     ///   We don't use generic type parameters to achieve that because we need to put Commands into
     ///   a HashMap as values - so we need each Command to have the same size in memory and the same

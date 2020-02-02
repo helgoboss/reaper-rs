@@ -15,7 +15,7 @@ use std::ops::Deref;
 struct MyControlSurface {}
 
 impl medium_level::ControlSurface for MyControlSurface {
-    fn run(&self) {
+    fn run(&mut self) {
         println!("Hello from medium-level ControlSurface")
     }
 }

@@ -3,7 +3,7 @@ use std::ptr::{null_mut, null};
 use super::MediaTrack;
 use crate::low_level::get_control_surface_instance;
 
-// Why do the methods here don't take `&mut self` as parameter? Short answer: Because we follow the
+// Why do most methods here don't take `&mut self` as parameter? Short answer: Because we follow the
 // spirit of Rust here, which is to fail fast and thereby preventing undefined behavior.
 
 // Long answer: Taking `self` as `&mut` in control surface methods would give us a dangerous
@@ -41,7 +41,7 @@ pub trait ControlSurface {
 
     fn CloseNoReset(&self) {}
 
-    fn Run(&self) {}
+    fn Run(&mut self) {}
 
     fn SetTrackListChange(&self) {}
 

@@ -25,6 +25,13 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Then
             check_eq!(mirrored_state.borrow().count, 1);
             Ok(())
+        }),
+        step("Add track", |reaper| {
+            // Given
+            // When
+            // Then
+            check_eq!("2", "5");
+            Ok(())
         })
     )
 }

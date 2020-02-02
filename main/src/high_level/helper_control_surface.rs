@@ -3,26 +3,31 @@ use crate::low_level::MediaTrack;
 use crate::medium_level::ControlSurface;
 use std::ffi::CStr;
 use std::borrow::Cow;
-use crate::high_level::{Reaper, Project};
+use crate::high_level::{Reaper, Project, Task};
 use rxrust::prelude::*;
 use std::cell::RefCell;
+use std::sync::mpsc::Receiver;
 
 pub struct HelperControlSurface {
+    task_receiver: Receiver<Task>,
     last_active_project: RefCell<Project>
 }
 
 impl HelperControlSurface {
-    pub fn new() -> HelperControlSurface {
+    pub fn new(task_receiver: Receiver<Task>) -> HelperControlSurface {
         let reaper = Reaper::instance();
         HelperControlSurface {
+            task_receiver,
             last_active_project: RefCell::new(reaper.get_current_project())
         }
     }
 }
 
 impl ControlSurface for HelperControlSurface {
-    fn run(&self) {
-//        println!("Hello from high-level control surface!")
+    fn run(&mut self) {
+        for task in self.task_receiver.try_iter() {
+            task();
+        }
     }
 
     fn set_track_list_change(&self) {

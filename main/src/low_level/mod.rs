@@ -28,8 +28,10 @@ static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
 static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
 
 
-pub(super) fn get_control_surface_instance() -> &'static Box<dyn ControlSurface> {
-    // TODO as_mut() ... This doesn't seem okay. Maybe we should use a RefCell around it!
+// This returns a mutable reference. In general this mutability should not be used, just in case
+// of control surface methods where it's sure that REAPER never reenters them! See
+// ControlSurface doc.
+pub(super) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
     unsafe {
         CONTROL_SURFACE_INSTANCE.as_mut().unwrap()
     }
