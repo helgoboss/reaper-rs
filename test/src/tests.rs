@@ -31,9 +31,15 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // When
             struct State { count: i32, project: Option<Project> }
             let state = track_changes(State { count: 0, project: None }, |state| {
-                reaper.project_switched().subscribe(move |p: Project| {
-                    state.replace(State { count: state.borrow().count + 1, project: Some(p) });
-                });
+                reaper.project_switched().subscribe_all(
+                    move |p: Project| {
+                        let mut state = state.borrow_mut();
+                        state.count += 1;
+                        state.project = Some(p);
+                    },
+                    |_| {},
+                    || println!("Complete!"),
+                );
             });
             reaper.create_empty_project_in_new_tab();
             // Then

@@ -18,7 +18,6 @@ use rxrust::observable::Observable;
 use rxrust::subscriber::Subscriber;
 use crate::high_level::helper_control_surface::HelperControlSurface;
 use rxrust::subscription::SubscriptionLike;
-use rxrust::observer::Observer;
 use rxrust::prelude::*;
 use rxrust::subject::{LocalSubjectObserver, SubjectValue};
 use std::rc::Rc;
