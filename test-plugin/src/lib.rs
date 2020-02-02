@@ -11,7 +11,6 @@ use rxrust::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::ops::Deref;
-use reaper_rs_test::ReaperRsIntegrationTest;
 
 struct MyControlSurface {}
 
@@ -45,8 +44,7 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
             c_str!("reaperRsIntegrationTests"),
             c_str!("reaper-rs integration tests"),
             || {
-                let mut test = ReaperRsIntegrationTest::new(Reaper::instance());
-                test.execute();
+                reaper_rs_test::execute_integration_test();
             },
             ActionKind::NotToggleable,
         );
