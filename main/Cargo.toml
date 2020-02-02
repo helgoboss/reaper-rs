@@ -6,6 +6,7 @@ edition = "2018"
 build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# TODO Medium and especially high API should be optional features
 
 [dependencies]
 #overloadable = "0.4.1"

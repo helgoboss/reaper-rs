@@ -13,7 +13,9 @@ fn share<T>(value: T) -> (Rc<RefCell<T>>, Rc<RefCell<T>>) {
     (shareable, mirror)
 }
 
-fn with_changes<T>(initial_value: T, op: impl FnOnce(Rc<RefCell<T>>)) -> Rc<RefCell<T>> {
+// Use for tracking changes made to a value within static closures that would move (take ownership)
+// of that value
+fn track_changes<T>(initial_value: T, op: impl FnOnce(Rc<RefCell<T>>)) -> Rc<RefCell<T>> {
     let (value, mirrored_value) = share(initial_value);
     op(value);
     mirrored_value
@@ -27,10 +29,10 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let current_project_before = reaper.get_current_project();
             let project_count_before = reaper.get_project_count();
             // When
-            struct State { count: i32, event_project: Option<Project> }
-            let state = with_changes(State { count: 0, event_project: None }, |state| {
+            struct State { count: i32, project: Option<Project> }
+            let state = track_changes(State { count: 0, project: None }, |state| {
                 reaper.project_switched().subscribe(move |p: Project| {
-                    state.replace(State { count: state.borrow().count + 1, event_project: Some(p) });
+                    state.replace(State { count: state.borrow().count + 1, project: Some(p) });
                 });
             });
             reaper.create_empty_project_in_new_tab();
