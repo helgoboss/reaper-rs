@@ -23,7 +23,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             });
             reaper.create_empty_project_in_new_tab();
             // Then
-            ensure!(mirrored_state.borrow().count == 2);
+            check_eq!(mirrored_state.borrow().count, 1);
             Ok(())
         })
     )

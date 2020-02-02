@@ -24,7 +24,7 @@ pub fn execute_integration_test() {
         match result {
             Ok(()) => log("\nSuccessful"),
             Err(msg) => {
-                log_failure(msg);
+                log_failure(&msg);
                 return;
             }
         }
