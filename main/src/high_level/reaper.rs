@@ -10,7 +10,7 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section};
+use crate::high_level::{Project, Section, Track, LightTrack};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
 use crate::low_level;
 use crate::medium_level;
@@ -71,6 +71,7 @@ pub struct Reaper {
     // instead of running into undefined behavior. The developer can always choose to defer to
     // the next `ControlSurface::run()` invocation (execute things in next main loop cycle).
     pub(super) project_switched_subject: EventStreamSubject<Project>,
+    pub(super) track_added_subject: EventStreamSubject<LightTrack>,
     task_sender: Sender<Task>,
 }
 
@@ -93,6 +94,7 @@ impl Reaper {
             medium,
             command_by_index: RefCell::new(HashMap::new()),
             project_switched_subject: RefCell::new(Subject::local()),
+            track_added_subject: RefCell::new(Subject::local()),
             task_sender,
         };
         unsafe {
@@ -215,6 +217,10 @@ impl Reaper {
 
     pub fn project_switched(&self) -> EventStream<Project> {
         self.project_switched_subject.borrow().fork()
+    }
+
+    pub fn track_added(&self) -> EventStream<LightTrack> {
+        self.track_added_subject.borrow().fork()
     }
 
     pub fn get_current_project(&self) -> Project {

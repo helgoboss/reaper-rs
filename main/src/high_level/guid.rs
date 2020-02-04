@@ -1,6 +1,6 @@
 use crate::low_level::GUID;
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct Guid {
     internal: GUID
 }

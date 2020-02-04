@@ -1,23 +1,59 @@
 use std::borrow::{Borrow, BorrowMut, Cow};
-use std::cell::{Ref, RefCell, RefMut, Cell};
+use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_ushort, c_void};
 use std::ptr::{null, null_mut};
+use std::rc::Rc;
 use std::sync::Once;
 
 use c_str_macro::c_str;
 
+use crate::high_level::{Project, Reaper};
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Reaper, Project};
+use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
-use std::rc::Rc;
-use crate::high_level::guid::Guid;
 
-#[derive(Clone, Debug)]
-// TODO Add Copy again as soon as possible, see https://github.com/rust-lang/rust/issues/20813
+/// The difference to Track is that this implements Copy (not just Clone)
+// TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
+//  this would require rxRust subjects to work with elements that are not copyable (because Rc,
+//  RefCell, Box, Arc and all that stuff are never copyable) but just cloneable
+#[derive(Clone, Copy, Debug)]
+pub struct LightTrack {
+    media_track: *mut MediaTrack,
+    rea_project: *mut ReaProject,
+    guid: Guid,
+}
+
+impl LightTrack {
+    /// mediaTrack must not be null
+    /// reaProject can be null but providing it can speed things up quite much for REAPER versions < 5.95
+    pub fn new(media_track: *mut MediaTrack, rea_project: *mut ReaProject) -> LightTrack {
+        LightTrack {
+            media_track,
+            rea_project: {
+                if rea_project.is_null() {
+                    get_media_track_rea_project(media_track)
+                } else {
+                    rea_project
+                }
+            },
+            // We load the GUID eagerly because we want to make comparability possible even in the following case:
+            // Track A has been initialized with a GUID not been loaded yet, track B has been initialized with a MediaTrack*
+            // (this constructor) but has rendered invalid in the meantime. Now there would not be any way to compare them
+            // because I can neither compare MediaTrack* pointers nor GUIDs. Except I extract the GUID eagerly.
+            guid: get_media_track_guid(media_track),
+        }
+    }
+}
+
+// TODO Think hard about what equality means here!
+#[derive(Clone, Debug, PartialEq, Eq)]
+// TODO Add Copy again and remove LightTrack if possible one day, see https://github.com/rust-lang/rust/issues/20813
+// TODO Reconsider design. Maybe don't do that interior mutability stuff. By moving from lazy to
+//  eager (determining rea_project and media_track at construction time).
 pub struct Track {
     // Only filled if track loaded.
     media_track: Cell<*mut MediaTrack>,
@@ -28,6 +64,16 @@ pub struct Track {
     // b) guid, mediaTrack (guid-based and loaded)
     // TODO This is not super cheap to copy. Do we really need to initialize this eagerly?
     guid: Guid,
+}
+
+impl From<LightTrack> for Track {
+    fn from(light: LightTrack) -> Self {
+        Track {
+            media_track: Cell::new(light.media_track),
+            rea_project: Cell::new(light.rea_project),
+            guid: light.guid
+        }
+    }
 }
 
 impl Track {

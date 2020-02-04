@@ -68,19 +68,19 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let state = track_changes(
                 State::default(),
                 |state| {
-//                    reaper.track_added().take_until(step.finished).subscribe(move |t| {
-//                        let mut state = state.borrow_mut();
-//                        t.count += 1;
-//                        t.track = Some(t);
-//                    });
+                    reaper.track_added().take_until(step.finished).subscribe(move |t| {
+                        let mut state = state.borrow_mut();
+                        state.count += 1;
+                        state.track = Some(t.into());
+                    });
                 },
             );
             let new_track = project.add_track();
             // Then
             check_eq!(project.get_track_count(), 1);
             check_eq!(new_track.get_index(), 0);
-//            assertTrue(count == 1, "Event count wrong");
-//            assertTrue(*eventTrack == newTrack, "Track event wrong");
+            check_eq!(state.borrow().count, 1);
+            check_eq!(state.borrow().track.clone(), Some(new_track));
             Ok(())
         })
     )

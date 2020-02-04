@@ -50,7 +50,7 @@ macro_rules! check_eq {
             } else {
                 let actual_expr = stringify!($actual);
                 let expected_expr = stringify!($expected);
-                Err(format!("[{}] was expected to be [{}] but it turned out to be {:?}", actual_expr, expected_expr, actual))
+                Err(format!("[{}] was expected to be [{}] but is {:?}", actual_expr, expected_expr, actual))
             };
             result?
         }
