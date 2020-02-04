@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use crate::api::{TestStep, step, step_until};
+use crate::api::{TestStep, step};
 use reaper_rs::high_level::{Project, Reaper};
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -26,7 +26,7 @@ fn track_changes<T>(initial_value: T, op: impl FnOnce(Rc<RefCell<T>>)) -> Rc<Ref
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
     vec!(
-        step_until("Create empty project in new tab", |reaper, finished| {
+        step("Create empty project in new tab", |reaper, step| {
             // Given
             let current_project_before = reaper.get_current_project();
             let project_count_before = reaper.get_project_count();
@@ -34,10 +34,9 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             struct State { count: i32, project: Option<Project> }
             let state = track_changes(State { count: 0, project: None }, |state| {
                 reaper.project_switched()
-                    .take_until(finished)
+                    .take_until(step.finished)
                     .subscribe_all(
                         move |p: Project| {
-                            reaper.show_console_msg(c_str!("Switch project"));
                             let mut state = state.borrow_mut();
                             state.count += 1;
                             state.project = Some(p);
@@ -51,7 +50,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(state.borrow().count, 1);
             Ok(())
         }),
-        step("Add track", |reaper| {
+        step("Add track", |reaper, _| {
             // Given
             // When
             // Then

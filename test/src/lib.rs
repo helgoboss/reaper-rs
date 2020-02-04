@@ -13,7 +13,8 @@ use std::borrow::Cow;
 use std::borrow::Cow::{Borrowed, Owned};
 use crate::tests::create_test_steps;
 use std::iter::FromIterator;
-use crate::api::TestStep;
+use crate::api::{TestStep, TestStepContext};
+use rxrust::prelude::*;
 
 pub fn execute_integration_test() {
     let reaper = Reaper::instance();
@@ -32,7 +33,15 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>) {
         }
     };
     log_heading(step.name);
-    let result = (step.operation)(reaper);
+    let result = {
+        let mut finished = Subject::local();
+        let context = TestStepContext {
+            finished: finished.fork()
+        };
+        let result = (step.operation)(reaper, context);
+        finished.complete();
+        result
+    };
     match result {
         Ok(()) => {
             log("\nSuccessful");
