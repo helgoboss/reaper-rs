@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 use reaper_rs::high_level::Reaper;
 use std::error::Error;
+use rxrust::prelude::*;
+use rxrust::subject::SubjectValue;
 
 type TestStepResult = Result<(), Cow<'static, str>>;
 
@@ -9,10 +11,30 @@ pub struct TestStep {
     pub operation: Box<dyn FnOnce(&'static Reaper) -> TestStepResult>,
 }
 
-pub fn step(name: impl Into<Cow<'static, str>>, operation: impl FnOnce(&'static Reaper) -> TestStepResult + 'static) -> TestStep {
+pub fn step<Op>(name: impl Into<Cow<'static, str>>, operation: Op) -> TestStep
+    where
+        Op: FnOnce(&'static Reaper) -> TestStepResult + 'static
+{
     TestStep {
         name: name.into(),
         operation: Box::new(operation),
+    }
+}
+
+type Finished = LocalSubject<'static, SubjectValue<()>, SubjectValue<()>>;
+
+pub fn step_until<Op>(name: impl Into<Cow<'static, str>>, operation: Op) -> TestStep
+    where
+        Op: FnOnce(&'static Reaper, Finished) -> TestStepResult + 'static,
+{
+    TestStep {
+        name: name.into(),
+        operation: Box::new(|reaper| {
+            let mut test_over: Finished = Subject::local();
+            let result = operation(reaper, test_over.fork());
+            test_over.next(());
+            result
+        }),
     }
 }
 

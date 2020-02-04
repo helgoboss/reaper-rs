@@ -1,11 +1,13 @@
 use std::borrow::Cow;
-use crate::api::{TestStep, step};
+use crate::api::{TestStep, step, step_until};
 use reaper_rs::high_level::{Project, Reaper};
 use std::rc::Rc;
 use std::cell::RefCell;
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
+use rxrust::ops::TakeUntil;
 use std::ops::{Deref, DerefMut};
+use c_str_macro::c_str;
 
 fn share<T>(value: T) -> (Rc<RefCell<T>>, Rc<RefCell<T>>) {
     let shareable = Rc::new(RefCell::new(value));
@@ -24,22 +26,25 @@ fn track_changes<T>(initial_value: T, op: impl FnOnce(Rc<RefCell<T>>)) -> Rc<Ref
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
     vec!(
-        step("Create empty project in new tab", |reaper| {
+        step_until("Create empty project in new tab", |reaper, finished| {
             // Given
             let current_project_before = reaper.get_current_project();
             let project_count_before = reaper.get_project_count();
             // When
             struct State { count: i32, project: Option<Project> }
             let state = track_changes(State { count: 0, project: None }, |state| {
-                reaper.project_switched().subscribe_all(
-                    move |p: Project| {
-                        let mut state = state.borrow_mut();
-                        state.count += 1;
-                        state.project = Some(p);
-                    },
-                    |_| {},
-                    || println!("Complete!"),
-                );
+                reaper.project_switched()
+                    .take_until(finished)
+                    .subscribe_all(
+                        move |p: Project| {
+                            reaper.show_console_msg(c_str!("Switch project"));
+                            let mut state = state.borrow_mut();
+                            state.count += 1;
+                            state.project = Some(p);
+                        },
+                        |_| {},
+                        || println!("Complete!"),
+                    );
             });
             reaper.create_empty_project_in_new_tab();
             // Then
