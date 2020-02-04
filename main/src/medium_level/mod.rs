@@ -102,6 +102,18 @@ impl Reaper {
         self.low.ClearConsole.unwrap()();
     }
 
+    pub fn count_tracks(&self, proj: *mut ReaProject) -> i32 {
+        self.low.CountTracks.unwrap()(proj)
+    }
+
+    pub fn insert_track_at_index(&self, idx: i32, want_defaults: bool) {
+        self.low.InsertTrackAtIndex.unwrap()(idx, want_defaults);
+    }
+
+    pub fn track_list_update_all_external_surfaces(&self) {
+        self.low.TrackList_UpdateAllExternalSurfaces.unwrap()();
+    }
+
     // TODO Rename
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {
         let info = self.get_set_media_track_info(tr, parmname, null_mut());

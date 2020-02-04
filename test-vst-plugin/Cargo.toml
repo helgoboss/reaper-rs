@@ -10,6 +10,7 @@ reaper-rs = { path = "../main" }
 reaper-rs-test = { path = "../test" }
 c_str_macro = "1.0.2"
 vst = "0.2.0"
+rxrust = { path = '../lib/rxRust'}
 
 [lib]
 name = "reaper_rs_test_vst_plugin"

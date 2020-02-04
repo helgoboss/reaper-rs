@@ -57,3 +57,9 @@ pub type NamedCommandLookup = fn(
 ) -> ::std::os::raw::c_int;
 
 pub type ClearConsole = fn();
+
+pub type CountTracks = fn(proj: *mut ReaProject) -> ::std::os::raw::c_int;
+
+pub type InsertTrackAtIndex = fn(idx: ::std::os::raw::c_int, wantDefaults: bool);
+
+pub type TrackList_UpdateAllExternalSurfaces = fn();

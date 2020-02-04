@@ -117,7 +117,10 @@ gen_reaper_struct![
     KBD_OnMainActionEx,
     SectionFromUniqueID,
     NamedCommandLookup,
-    ClearConsole
+    ClearConsole,
+    CountTracks,
+    InsertTrackAtIndex,
+    TrackList_UpdateAllExternalSurfaces
 ];
 
 #[macro_export]

@@ -15,7 +15,7 @@ use crate::medium_level;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Project {
     rea_project: *mut ReaProject,
 }
@@ -66,6 +66,29 @@ impl Project {
 
     pub fn is_available(&self) -> bool {
         Reaper::instance().medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
+    }
+
+    pub fn get_track_count(&self) -> i32 {
+        self.complain_if_not_available();
+        Reaper::instance().medium.count_tracks(self.rea_project)
+    }
+
+    // TODO Introduce variant that doesn't notify ControlSurface
+    pub fn add_track(&self) -> Track {
+        self.complain_if_not_available();
+        self.insert_track_at(self.get_track_count())
+    }
+
+    // TODO Introduce variant that doesn't notify ControlSurface
+    pub fn insert_track_at(&self, index: i32) -> Track {
+        self.complain_if_not_available();
+        // TODO reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
+        let reaper = Reaper::instance();
+        reaper.medium.insert_track_at_index(index, false);
+        reaper.medium.track_list_update_all_external_surfaces();
+        // TODO Use u32 where possible
+        let media_track = reaper.medium.get_track(self.rea_project, index);
+        Track::new(media_track, self.rea_project)
     }
 
     fn complain_if_not_available(&self) {

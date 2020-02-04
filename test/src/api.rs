@@ -56,3 +56,20 @@ macro_rules! check_eq {
         }
     }
 }
+
+macro_rules! check_ne {
+    ($actual:expr, $unexpected:expr) => {
+        {
+            let actual = $actual;
+            let unexpected = $unexpected;
+            let result = if (actual == unexpected) {
+                let actual_expr = stringify!($actual);
+                let unexpected_expr = stringify!($unexpected);
+                Err(format!("[{}] was expected to not be [{}] but it is ({:?})", actual_expr, unexpected_expr, actual))
+            } else {
+                Ok(())
+            };
+            result?
+        }
+    }
+}

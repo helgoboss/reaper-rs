@@ -14,7 +14,7 @@ use crate::high_level::Reaper;
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Track {
     media_track: *mut MediaTrack,
     rea_project: *mut ReaProject,

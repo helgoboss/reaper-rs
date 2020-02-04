@@ -8,4 +8,4 @@ edition = "2018"
 [dependencies]
 reaper-rs = { path = "../main" }
 c_str_macro = "1.0.2"
-rxrust = { path = 'C:\Users\benja\Documents\projects\dev\rxRust'}
+rxrust = { path = '../lib/rxRust'}

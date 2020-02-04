@@ -14,7 +14,7 @@ strum = "0.17.1"
 c_str_macro = "1.0.2"
 once_cell = "1.3.1"
 vst = "0.2.0"
-rxrust = { path = 'C:\Users\benja\Documents\projects\dev\rxRust'}
+rxrust = { path = '../lib/rxRust'}
 regex = "1.3.4"
 
 [build-dependencies]

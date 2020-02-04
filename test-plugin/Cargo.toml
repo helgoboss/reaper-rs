@@ -9,7 +9,7 @@ edition = "2018"
 reaper-rs = { path = "../main" }
 reaper-rs-test = { path = "../test" }
 c_str_macro = "1.0.2"
-rxrust = { path = 'C:\Users\benja\Documents\projects\dev\rxRust'}
+rxrust = { path = '../lib/rxRust'}
 
 [lib]
 name = "reaper_rs_test_plugin"

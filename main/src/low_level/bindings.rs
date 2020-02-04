@@ -434,6 +434,11 @@ pub mod root {
         pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
     }
     extern "C" {
+        pub static mut CountTracks: ::std::option::Option<
+            unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut EnumProjects: ::std::option::Option<
             unsafe extern "C" fn(
                 idx: ::std::os::raw::c_int,
@@ -460,6 +465,11 @@ pub mod root {
                 proj: *mut root::ReaProject,
                 trackidx: ::std::os::raw::c_int,
             ) -> *mut root::MediaTrack,
+        >;
+    }
+    extern "C" {
+        pub static mut InsertTrackAtIndex: ::std::option::Option<
+            unsafe extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool),
         >;
     }
     extern "C" {
@@ -497,6 +507,10 @@ pub mod root {
     extern "C" {
         pub static mut ShowConsoleMsg:
             ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
+    }
+    extern "C" {
+        pub static mut TrackList_UpdateAllExternalSurfaces:
+            ::std::option::Option<unsafe extern "C" fn()>;
     }
     extern "C" {
         pub static mut ValidatePtr2: ::std::option::Option<
