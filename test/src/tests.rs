@@ -46,7 +46,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Then
             check_eq!(current_project_before, current_project_before);
             check_eq!(reaper.get_project_count(), project_count_before + 1);
-            check_eq!(reaper.get_projects().count() as i32, project_count_before + 1);
+            check_eq!(reaper.get_projects().count() as u32, project_count_before + 1);
             check_ne!(reaper.get_current_project(), current_project_before);
             check_eq!(reaper.get_current_project(), new_project);
             check_ne!(reaper.get_projects().nth(0), Some(new_project));

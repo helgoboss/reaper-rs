@@ -12,7 +12,7 @@ struct RuntimeData {
     // For built-in actions this ID is globally stable and will always be found. For custom actions, this ID is only
     // stable at runtime and it might be that it can't be found - which means the action is not available.
     command_id: i64,
-    cached_index: Option<i32>,
+    cached_index: Option<u32>,
 }
 
 pub struct Action {
@@ -24,7 +24,7 @@ pub struct Action {
 }
 
 impl Action {
-    pub(super) fn new(section: Section, command_id: i64, index: Option<i32>) -> Action {
+    pub(super) fn new(section: Section, command_id: i64, index: Option<u32>) -> Action {
         Action {
             command_name: None,
             runtime_data: RefCell::new(Some(RuntimeData {

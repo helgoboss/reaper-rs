@@ -35,20 +35,20 @@ impl Project {
 
     // TODO Maybe return file path object ... or CString
     pub fn get_file_path(&self) -> Option<PathBuf> {
-        Reaper::instance().medium.enum_projects(self.get_index(), 5000).1.map(|path_c_string| {
+        Reaper::instance().medium.enum_projects(self.get_index() as i32, 5000).1.map(|path_c_string| {
             let path_str = path_c_string.to_str().expect("Path contains non-UTF8 characters");
             PathBuf::from_str(path_str).expect("Malformed path")
         })
     }
 
-    pub fn get_index(&self) -> i32 {
+    pub fn get_index(&self) -> u32 {
         self.complain_if_not_available();
         let rea_project = self.rea_project;
         Reaper::instance().get_projects()
             .enumerate()
             .find(|(_, rp)| rp.rea_project == rea_project)
             .map(|(i, _)| i)
-            .unwrap() as i32
+            .unwrap() as u32
     }
 
     /// It's correct that this returns an Option because the index isn't a stable identifier of a
@@ -68,9 +68,9 @@ impl Project {
         Reaper::instance().medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
     }
 
-    pub fn get_track_count(&self) -> i32 {
+    pub fn get_track_count(&self) -> u32 {
         self.complain_if_not_available();
-        Reaper::instance().medium.count_tracks(self.rea_project)
+        Reaper::instance().medium.count_tracks(self.rea_project) as u32
     }
 
     // TODO Introduce variant that doesn't notify ControlSurface
@@ -80,14 +80,14 @@ impl Project {
     }
 
     // TODO Introduce variant that doesn't notify ControlSurface
-    pub fn insert_track_at(&self, index: i32) -> Track {
+    pub fn insert_track_at(&self, index: u32) -> Track {
         self.complain_if_not_available();
         // TODO reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
         let reaper = Reaper::instance();
-        reaper.medium.insert_track_at_index(index, false);
+        reaper.medium.insert_track_at_index(index as i32, false);
         reaper.medium.track_list_update_all_external_surfaces();
         // TODO Use u32 where possible
-        let media_track = reaper.medium.get_track(self.rea_project, index);
+        let media_track = reaper.medium.get_track(self.rea_project, index as i32);
         Track::new(media_track, self.rea_project)
     }
 

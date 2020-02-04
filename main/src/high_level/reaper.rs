@@ -29,7 +29,7 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 
 // Only for main section
 fn hook_command(command_index: i32, flag: i32) -> bool {
-    let mut operation = match Reaper::instance().command_by_index.borrow().get(&command_index) {
+    let mut operation = match Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
         Some(command) => command.operation.clone(),
         None => return false
     };
@@ -39,7 +39,7 @@ fn hook_command(command_index: i32, flag: i32) -> bool {
 
 // Only for main section
 fn toggle_action(command_index: i32) -> i32 {
-    if let Some(command) = Reaper::instance().command_by_index.borrow().get(&command_index) {
+    if let Some(command) = Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
         match &command.kind {
             ActionKind::Toggleable(is_on) => if is_on() { 1 } else { 0 },
             ActionKind::NotToggleable => -1
@@ -64,7 +64,7 @@ pub struct Reaper {
     //  be copyable (which we want to explicitly allow, that's why we accept FnMut!). Or is it
     //  possible to give up the map borrow after obtaining the command/operation reference???
     //  Look into that!!!
-    command_by_index: RefCell<HashMap<i32, Command>>,
+    command_by_index: RefCell<HashMap<u32, Command>>,
     // This is a RefCell. So calling next() while another next() is still running will panic.
     // I guess it's good that way because this is very generic code, panicking or not panicking
     // depending on the user's code. And getting a panic is good for becoming aware of the problem
@@ -134,13 +134,13 @@ impl Reaper {
         kind: ActionKind,
     ) -> RegisteredAction
     {
-        let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void);
+        let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void) as u32;
         let command = Command::new(command_index, description.into(), Rc::new(RefCell::new(operation)), kind);
         self.register_command(command_index, command);
         RegisteredAction::new(command_index)
     }
 
-    fn register_command(&self, command_index: i32, command: Command) {
+    fn register_command(&self, command_index: u32, command: Command) {
         if let Entry::Vacant(p) = self.command_by_index.borrow_mut().entry(command_index) {
             let command = p.insert(command);
             let acc = &mut command.accelerator_register;
@@ -148,7 +148,7 @@ impl Reaper {
         }
     }
 
-    fn unregister_command(&self, command_index: i32) {
+    fn unregister_command(&self, command_index: u32) {
         // TODO Use RAII
         if let Some(command) = self.command_by_index.borrow_mut().get_mut(&command_index) {
             let acc = &mut command.accelerator_register;
@@ -229,8 +229,8 @@ impl Reaper {
             .map(|p| { Project::new(p) })
     }
 
-    pub fn get_project_count(&self) -> i32 {
-        self.get_projects().count() as i32
+    pub fn get_project_count(&self) -> u32 {
+        self.get_projects().count() as u32
     }
 
     pub fn clear_console(&self) {
@@ -277,7 +277,7 @@ struct Command {
 }
 
 impl Command {
-    fn new(command_index: i32, description: Cow<'static, CStr>, operation: Rc<RefCell<dyn FnMut()>>, kind: ActionKind) -> Command {
+    fn new(command_index: u32, description: Cow<'static, CStr>, operation: Rc<RefCell<dyn FnMut()>>, kind: ActionKind) -> Command {
         let mut c = Command {
             description,
             operation,
@@ -297,11 +297,11 @@ impl Command {
 }
 
 pub struct RegisteredAction {
-    command_index: i32,
+    command_index: u32,
 }
 
 impl RegisteredAction {
-    fn new(command_index: i32) -> RegisteredAction {
+    fn new(command_index: u32) -> RegisteredAction {
         RegisteredAction {
             command_index,
         }
