@@ -69,15 +69,19 @@ impl Reaper {
         self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
     }
 
+    // Once installed, it stays installed until this module unloaded
     pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
         let delegating_control_surface = DelegatingControlSurface::new(control_surface);
         self.low.install_control_surface(delegating_control_surface);
     }
 
+    // Must be idempotent
+    // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) {
         self.plugin_register(c_str!("csurf_inst"), self.low.get_cpp_control_surface());
     }
 
+    // Must be idempotent
     pub fn unregister_control_surface(&self) {
         self.plugin_register(c_str!("-csurf_inst"), self.low.get_cpp_control_surface());
     }

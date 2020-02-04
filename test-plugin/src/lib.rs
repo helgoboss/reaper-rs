@@ -40,7 +40,9 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
 
         // High-level
         high_level::Reaper::setup(medium_level_reaper);
-        Reaper::instance().register_action(
+        let reaper = Reaper::instance();
+        reaper.activate();
+        reaper.register_action(
             c_str!("reaperRsIntegrationTests"),
             c_str!("reaper-rs integration tests"),
             || {

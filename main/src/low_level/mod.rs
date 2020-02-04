@@ -79,7 +79,11 @@ macro_rules! gen_reaper_struct {
             // plugin_register("csurf_inst", my_rust_trait_implementing_IReaperControlSurface) isn't
             // going to cut it. Rust structs can't implement pure virtual C++ interfaces.
             // This function sets up the given ControlSurface implemented in Rust but doesn't yet register
-            // it. Can be called only once
+            // it. Can be called only once.
+            // Installed control surface is totally independent from this REAPER instance. So
+            // destructor doesn't set the CONTROL_SURFACE_INSTANCE to None. The user needs to take
+            // care of unregistering the control surface if he registered it before.
+            // Once installed, it stays installed until this module unloaded
             pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
                 // TODO Ensure that only called if there's not a control surface registered already
                 // Ideally we would have a generic static but as things are now, we need to box it.

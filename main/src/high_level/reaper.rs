@@ -87,6 +87,12 @@ pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
 type EventStreamSubject<T> = RefCell<EventStream<T>>;
 type EventStream<T> = LocalSubject<'static, SubjectValue<T>, SubjectValue<()>>;
 
+impl Drop for Reaper {
+    fn drop(&mut self) {
+        self.deactivate();
+    }
+}
+
 impl Reaper {
     pub fn setup(medium: medium_level::Reaper) {
         let (task_sender, task_receiver) = mpsc::channel::<Task>();
@@ -106,10 +112,21 @@ impl Reaper {
     }
 
     fn init(&self, task_receiver: Receiver<Task>) {
+        self.medium.install_control_surface(HelperControlSurface::new(task_receiver));
+    }
+
+    // Must be idempotent
+    pub fn activate(&self) {
         self.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
         self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
-        self.medium.install_control_surface(HelperControlSurface::new(task_receiver));
         self.medium.register_control_surface();
+    }
+
+    // Must be idempotent
+    pub fn deactivate(&self) {
+        self.medium.unregister_control_surface();
+        self.medium.plugin_register(c_str!("-toggleaction"), toggle_action as *mut c_void);
+        self.medium.plugin_register(c_str!("-hookcommand"), hook_command as *mut c_void);
     }
 
     // Allowing global access to native REAPER functions at all times is valid in my opinion.
