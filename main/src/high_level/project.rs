@@ -64,6 +64,15 @@ impl Project {
         Some(Track::new(media_track, self.rea_project))
     }
 
+    pub fn get_tracks(&self) -> impl Iterator<Item=Track> + '_ {
+        self.complain_if_not_available();
+        (0..self.get_track_count())
+            .map(move |i| {
+                let media_track = Reaper::instance().medium.get_track(self.rea_project, i as i32);
+                Track::new(media_track, self.rea_project)
+            })
+    }
+
     pub fn is_available(&self) -> bool {
         Reaper::instance().medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
     }
@@ -93,7 +102,7 @@ impl Project {
 
     fn complain_if_not_available(&self) {
         if !self.is_available() {
-            panic!("Project not available")
+            panic!("Project not available");
         }
     }
 }

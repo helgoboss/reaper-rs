@@ -26,7 +26,7 @@ pub mod root {
     pub type HWND = *mut root::HWND__;
     pub type HINSTANCE = *mut ::std::os::raw::c_void;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct ACCEL {
         pub fVirt: ::std::os::raw::c_uchar,
         pub key: ::std::os::raw::c_ushort,
@@ -76,7 +76,69 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    pub struct _GUID {
+        pub Data1: ::std::os::raw::c_uint,
+        pub Data2: ::std::os::raw::c_ushort,
+        pub Data3: ::std::os::raw::c_ushort,
+        pub Data4: [::std::os::raw::c_uchar; 8usize],
+    }
+    #[test]
+    fn bindgen_test_layout__GUID() {
+        assert_eq!(
+            ::std::mem::size_of::<_GUID>(),
+            16usize,
+            concat!("Size of: ", stringify!(_GUID))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<_GUID>(),
+            4usize,
+            concat!("Alignment of ", stringify!(_GUID))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<_GUID>())).Data1 as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(_GUID),
+                "::",
+                stringify!(Data1)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<_GUID>())).Data2 as *const _ as usize },
+            4usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(_GUID),
+                "::",
+                stringify!(Data2)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<_GUID>())).Data3 as *const _ as usize },
+            6usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(_GUID),
+                "::",
+                stringify!(Data3)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<_GUID>())).Data4 as *const _ as usize },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(_GUID),
+                "::",
+                stringify!(Data4)
+            )
+        );
+    }
+    pub type GUID = root::_GUID;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct reaper_plugin_info_t {
         pub caller_version: ::std::os::raw::c_int,
         pub hwnd_main: root::HWND,
@@ -154,7 +216,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct gaccel_register_t {
         pub accel: root::ACCEL,
         pub desc: *const ::std::os::raw::c_char,
@@ -193,7 +255,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct KbdCmd {
         pub cmd: root::DWORD,
         pub text: *const ::std::os::raw::c_char,
@@ -232,7 +294,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct KbdKeyBindingInfo {
         pub key: ::std::os::raw::c_int,
         pub cmd: ::std::os::raw::c_int,
@@ -282,7 +344,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct KbdSectionInfo {
         pub uniqueID: ::std::os::raw::c_int,
         pub name: *const ::std::os::raw::c_char,

@@ -6,7 +6,7 @@ mod bindings;
 
 pub use bindings::root::{
     ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
-    reaper_plugin_info_t, KbdSectionInfo, HWND
+    reaper_plugin_info_t, KbdSectionInfo, HWND, GUID
 };
 use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use control_surface::ControlSurface;

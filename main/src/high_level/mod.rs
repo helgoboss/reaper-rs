@@ -6,6 +6,7 @@ mod track;
 mod helper_control_surface;
 mod section;
 mod action;
+mod guid;
 
 pub use project::*;
 pub use reaper::*;

@@ -10,7 +10,7 @@ use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND};
+use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID};
 use c_str_macro::c_str;
 pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
@@ -115,10 +115,21 @@ impl Reaper {
     }
 
     // TODO Rename
+    // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {
         let info = self.get_set_media_track_info(tr, parmname, null_mut());
         let info = info as *const c_char;
         let c_str = unsafe { CStr::from_ptr(info) };
         c_str.to_owned()
+    }
+
+    // TODO Rename or remove
+    pub fn convenient_get_media_track_info_i32(&self, tr: *mut MediaTrack, parmname: &CStr) -> i32 {
+        self.get_set_media_track_info(tr, parmname, null_mut()) as i32
+    }
+
+    // TODO Rename or remove
+    pub fn convenient_get_media_track_info_guid(&self, tr: *mut MediaTrack, parmname: &CStr) -> *mut GUID {
+        self.get_set_media_track_info(tr, parmname, null_mut()) as *mut GUID
     }
 }

@@ -25,6 +25,8 @@ fn generate_bindings() {
         // bindings for.
         .header("src/low_level/bindgen.hpp")
         .opaque_type("timex")
+        .derive_eq(true)
+        .derive_partialeq(true)
         .clang_arg("-xc++")
         .enable_cxx_namespaces()
         .raw_line("#![allow(non_upper_case_globals)]")
@@ -49,6 +51,7 @@ fn generate_bindings() {
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")
         .whitelist_type("KbdSectionInfo")
+        .whitelist_type("GUID")
         .whitelist_function("reaper_rs_control_surface::.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed. TODO Do as soon as available
