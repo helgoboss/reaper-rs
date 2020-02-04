@@ -492,6 +492,11 @@ pub mod root {
     pub struct MediaTrack {
         _unused: [u8; 0],
     }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct TrackEnvelope {
+        _unused: [u8; 0],
+    }
     extern "C" {
         pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
     }
@@ -510,7 +515,19 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut GetAppVersion:
+            ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
+    }
+    extern "C" {
         pub static mut GetMainHwnd: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
+    }
+    extern "C" {
+        pub static mut GetMediaTrackInfo_Value: ::std::option::Option<
+            unsafe extern "C" fn(
+                tr: *mut root::MediaTrack,
+                parmname: *const ::std::os::raw::c_char,
+            ) -> f64,
+        >;
     }
     extern "C" {
         pub static mut GetSetMediaTrackInfo: ::std::option::Option<
@@ -527,6 +544,14 @@ pub mod root {
                 proj: *mut root::ReaProject,
                 trackidx: ::std::os::raw::c_int,
             ) -> *mut root::MediaTrack,
+        >;
+    }
+    extern "C" {
+        pub static mut GetTrackEnvelopeByName: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                envname: *const ::std::os::raw::c_char,
+            ) -> *mut root::TrackEnvelope,
         >;
     }
     extern "C" {

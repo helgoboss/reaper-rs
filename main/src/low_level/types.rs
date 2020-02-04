@@ -5,7 +5,7 @@
 
 use super::{ReaProject, MediaTrack};
 use crate::low_level::bindings::root::HWND;
-use crate::low_level::KbdSectionInfo;
+use crate::low_level::{KbdSectionInfo, TrackEnvelope};
 
 pub type GetFunc = unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void;
 
@@ -63,3 +63,15 @@ pub type CountTracks = fn(proj: *mut ReaProject) -> ::std::os::raw::c_int;
 pub type InsertTrackAtIndex = fn(idx: ::std::os::raw::c_int, wantDefaults: bool);
 
 pub type TrackList_UpdateAllExternalSurfaces = fn();
+
+pub type GetMediaTrackInfo_Value = fn(
+    tr: *mut MediaTrack,
+    parmname: *const ::std::os::raw::c_char,
+) -> f64;
+
+pub type GetAppVersion = fn() -> *const ::std::os::raw::c_char;
+
+pub type GetTrackEnvelopeByName = fn(
+    track: *mut MediaTrack,
+    envname: *const ::std::os::raw::c_char,
+) -> *mut TrackEnvelope;
