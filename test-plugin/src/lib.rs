@@ -11,6 +11,9 @@ use rxrust::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::ops::Deref;
+use std::panic;
+use reaper_rs::low_level::firewall;
+use slog::o;
 
 struct MyControlSurface {}
 
@@ -20,41 +23,53 @@ impl medium_level::ControlSurface for MyControlSurface {
     }
 }
 
+// TODO Integrate some of this into main
 #[no_mangle]
 extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_level::reaper_plugin_info_t) -> c_int {
-    if rec.is_null() {
-        return 0;
-    }
-    let rec = unsafe { *rec };
-    if rec.caller_version != low_level::REAPER_PLUGIN_VERSION as c_int {
-        return 0;
-    }
-    if let Some(GetFunc) = rec.GetFunc {
-        // Low-level
-        let low_level_reaper = low_level::Reaper::with_all_functions_loaded(
-            &low_level::create_reaper_plugin_function_provider(GetFunc)
-        );
+    firewall(0, || {
+        if rec.is_null() {
+            return 0;
+        }
+        let rec = unsafe { *rec };
+        if rec.caller_version != low_level::REAPER_PLUGIN_VERSION as c_int {
+            return 0;
+        }
+        if let Some(GetFunc) = rec.GetFunc {
+            // Low-level
+            let low_level_reaper = low_level::Reaper::with_all_functions_loaded(
+                &low_level::create_reaper_plugin_function_provider(GetFunc)
+            );
 
-        // Medium-level
-        let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
+            // Medium-level
+            let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
 
-        // High-level
-        high_level::Reaper::setup(medium_level_reaper);
-        let reaper = Reaper::instance();
-        reaper.activate();
-        reaper.register_action(
-            c_str!("reaperRsIntegrationTests"),
-            c_str!("reaper-rs integration tests"),
-            || {
-                reaper_rs_test::execute_integration_test();
-            },
-            ActionKind::NotToggleable,
-        );
+            setup_logging();
+            // High-level
+            high_level::Reaper::setup(medium_level_reaper);
+            let reaper = Reaper::instance();
+            reaper.activate();
+            reaper.register_action(
+                c_str!("reaperRsIntegrationTests"),
+                c_str!("reaper-rs integration tests"),
+                || {
+                    reaper_rs_test::execute_integration_test();
+                },
+                ActionKind::NotToggleable,
+            );
 //        use_high_level();
-        1
-    } else {
-        0
-    }
+            1
+        } else {
+            0
+        }
+    })
+}
+
+fn setup_logging() {
+//    let decorator = slog_term::PlainDecorator::new(std::io::stdout());
+//    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
+//    let drain = slog_async::Async::new(drain).build().fuse();
+//
+//    let log = slog::Logger::root(drain, o!("version" => "0.5"));
 }
 
 fn use_high_level() {

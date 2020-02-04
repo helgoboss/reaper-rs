@@ -3,6 +3,7 @@
 #![allow(non_snake_case)]
 
 mod bindings;
+mod util;
 
 pub use bindings::root::{
     ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
@@ -10,6 +11,7 @@ pub use bindings::root::{
 };
 use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use control_surface::ControlSurface;
+pub use util::firewall;
 
 mod types;
 

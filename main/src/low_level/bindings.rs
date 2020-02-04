@@ -26,7 +26,7 @@ pub mod root {
     pub type HWND = *mut root::HWND__;
     pub type HINSTANCE = *mut ::std::os::raw::c_void;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct ACCEL {
         pub fVirt: ::std::os::raw::c_uchar,
         pub key: ::std::os::raw::c_ushort,
@@ -76,7 +76,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct _GUID {
         pub Data1: ::std::os::raw::c_uint,
         pub Data2: ::std::os::raw::c_ushort,
@@ -138,7 +138,7 @@ pub mod root {
     }
     pub type GUID = root::_GUID;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct reaper_plugin_info_t {
         pub caller_version: ::std::os::raw::c_int,
         pub hwnd_main: root::HWND,
@@ -216,7 +216,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct gaccel_register_t {
         pub accel: root::ACCEL,
         pub desc: *const ::std::os::raw::c_char,
@@ -255,7 +255,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct KbdCmd {
         pub cmd: root::DWORD,
         pub text: *const ::std::os::raw::c_char,
@@ -294,7 +294,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct KbdKeyBindingInfo {
         pub key: ::std::os::raw::c_int,
         pub cmd: ::std::os::raw::c_int,
@@ -344,7 +344,7 @@ pub mod root {
         );
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct KbdSectionInfo {
         pub uniqueID: ::std::os::raw::c_int,
         pub name: *const ::std::os::raw::c_char,

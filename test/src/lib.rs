@@ -18,6 +18,7 @@ use rxrust::prelude::*;
 
 pub fn execute_integration_test() {
     let reaper = Reaper::instance();
+    panic!("OOOOOH NOOOOO!!!");
     reaper.clear_console();
     log("# Testing reaper-rs");
     let mut steps = VecDeque::from_iter(create_test_steps());

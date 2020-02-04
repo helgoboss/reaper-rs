@@ -27,6 +27,7 @@ fn generate_bindings() {
         .opaque_type("timex")
         .derive_eq(true)
         .derive_partialeq(true)
+        .derive_hash(true)
         .clang_arg("-xc++")
         .enable_cxx_namespaces()
         .raw_line("#![allow(non_upper_case_globals)]")

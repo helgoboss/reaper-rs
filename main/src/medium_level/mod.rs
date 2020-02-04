@@ -118,6 +118,11 @@ impl Reaper {
         self.low.TrackList_UpdateAllExternalSurfaces.unwrap()();
     }
 
+    pub fn get_app_version(&self) -> &'static CStr {
+        let ptr = self.low.GetAppVersion.unwrap()();
+        unsafe { CStr::from_ptr(ptr) }
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

@@ -11,7 +11,7 @@ use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::{Project, Section, Track, LightTrack};
-use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject};
+use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall};
 use crate::low_level;
 use crate::medium_level;
 use rxrust::observable::Observable;
@@ -27,26 +27,32 @@ use std::sync::mpsc::{Sender, Receiver};
 static mut REAPER_INSTANCE: Option<Reaper> = None;
 static INIT_REAPER_INSTANCE: Once = Once::new();
 
+// Called by REAPER directly!
 // Only for main section
 fn hook_command(command_index: i32, flag: i32) -> bool {
-    let mut operation = match Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
-        Some(command) => command.operation.clone(),
-        None => return false
-    };
-    (*operation).borrow_mut().call_mut(());
-    true
+    firewall(false, || {
+        let mut operation = match Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
+            Some(command) => command.operation.clone(),
+            None => return false
+        };
+        (*operation).borrow_mut().call_mut(());
+        true
+    })
 }
 
+// Called by REAPER directly!
 // Only for main section
 fn toggle_action(command_index: i32) -> i32 {
-    if let Some(command) = Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
-        match &command.kind {
-            ActionKind::Toggleable(is_on) => if is_on() { 1 } else { 0 },
-            ActionKind::NotToggleable => -1
+    firewall(-1, || {
+        if let Some(command) = Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
+            match &command.kind {
+                ActionKind::Toggleable(is_on) => if is_on() { 1 } else { 0 },
+                ActionKind::NotToggleable => -1
+            }
+        } else {
+            -1
         }
-    } else {
-        -1
-    }
+    })
 }
 
 //pub(super) type Task = Box<dyn FnOnce() + Send + 'static>;
@@ -93,6 +99,22 @@ impl Drop for Reaper {
     }
 }
 
+// TODO Maybe don't rely on static reference (We don't even know for sure if REAPER guarantees that)
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ReaperVersion {
+    internal: &'static CStr,
+}
+
+// TODO Working with C strings is a bit exaggerated in case of versions where, we don't have special
+//  characters which could cause problems
+impl From<&'static CStr> for ReaperVersion {
+    fn from(internal: &'static CStr) -> Self {
+        ReaperVersion {
+            internal
+        }
+    }
+}
+
 impl Reaper {
     pub fn setup(medium: medium_level::Reaper) {
         let (task_sender, task_receiver) = mpsc::channel::<Task>();
@@ -127,6 +149,12 @@ impl Reaper {
         self.medium.unregister_control_surface();
         self.medium.plugin_register(c_str!("-toggleaction"), toggle_action as *mut c_void);
         self.medium.plugin_register(c_str!("-hookcommand"), hook_command as *mut c_void);
+    }
+
+    pub fn get_version(&self) -> ReaperVersion {
+        ReaperVersion {
+            internal: self.medium.get_app_version()
+        }
     }
 
     // Allowing global access to native REAPER functions at all times is valid in my opinion.
