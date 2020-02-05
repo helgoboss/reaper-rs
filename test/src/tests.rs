@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind};
 use std::rc::Rc;
 use std::cell::RefCell;
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -8,6 +8,7 @@ use rxrust::prelude::*;
 use rxrust::ops::TakeUntil;
 use std::ops::{Deref, DerefMut};
 use c_str_macro::c_str;
+use std::ffi::CStr;
 
 fn share<T>(value: T) -> (Rc<RefCell<T>>, Rc<RefCell<T>>) {
     let shareable = Rc::new(RefCell::new(value));
@@ -81,6 +82,23 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(new_track.get_index(), 0);
             check_eq!(state.borrow().count, 1);
             check_eq!(state.borrow().track.clone(), Some(new_track));
+            Ok(())
+        }),
+        // TODO
+        step("FnMut action", |reaper, step| {
+            unimplemented!();
+            let mut i = 0;
+            let action1 = reaper.register_action(
+                c_str!("reaperRsCounter"),
+                c_str!("reaper-rs counter"),
+                move || {
+                    let owned = format!("Hello from Rust number {}\0", i);
+                    let reaper = Reaper::instance();
+                    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
+                    i += 1;
+                },
+                ActionKind::NotToggleable,
+            );
             Ok(())
         })
     )

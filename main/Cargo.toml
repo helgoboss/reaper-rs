@@ -16,6 +16,8 @@ vst = "0.2.0"
 rxrust = { path = '../lib/rxRust'}
 regex = "1.3.4"
 slog = "2.5.2"
+slog-stdlog = "4.0.0"
+slog-term = "2.5.0"
 
 [build-dependencies]
 bindgen = "0.52.0"

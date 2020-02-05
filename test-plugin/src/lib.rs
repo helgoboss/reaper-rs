@@ -1,6 +1,5 @@
-#![feature(backtrace)]
 use std::error::Error;
-use reaper_rs::high_level::{Reaper, ActionKind, toggleable, Project};
+use reaper_rs::high_level::{Reaper, ActionKind, toggleable, Project, create_reaper_panic_hook, create_default_console_msg_formatter, create_reaper_console_logger};
 use std::os::raw::{c_int, c_char};
 use reaper_rs::medium_level;
 use reaper_rs::low_level;
@@ -15,17 +14,8 @@ use std::ops::Deref;
 use std::panic;
 use reaper_rs::low_level::firewall;
 use slog::{o, Drain, OwnedKVList, Record};
-use slog::error;
-use std::backtrace::Backtrace;
 use std::io::LineWriter;
 
-struct MyControlSurface {}
-
-impl medium_level::ControlSurface for MyControlSurface {
-    fn run(&mut self) {
-        println!("Hello from medium-level ControlSurface")
-    }
-}
 
 // TODO Integrate some of this into main
 #[no_mangle]
@@ -43,14 +33,13 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
             let low_level_reaper = low_level::Reaper::with_all_functions_loaded(
                 &low_level::create_reaper_plugin_function_provider(GetFunc)
             );
-
             // Medium-level
             let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
-
-            setup_logging();
             // High-level
             high_level::Reaper::setup(medium_level_reaper);
+            setup_logging();
             let reaper = Reaper::instance();
+            reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
             reaper.activate();
             reaper.register_action(
                 c_str!("reaperRsIntegrationTests"),
@@ -60,7 +49,6 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
                 },
                 ActionKind::NotToggleable,
             );
-//        use_high_level();
             1
         } else {
             0
@@ -69,99 +57,9 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
 }
 
 fn setup_logging() {
-    let logger = create_logger();
-    panic::set_hook(Box::new(move |c| {
-        let backtrace = Backtrace::force_capture();
-        error!(logger, "PANIK!!!"; "backtrace" => format!("{:?}", backtrace));
-    }));
-}
-
-fn create_logger() -> slog::Logger {
-//    let sink = std::io::stdout();
-    let sink = LineWriter::new(ReaperConsoleSink::new());
-    let plain = slog_term::PlainSyncDecorator::new(sink);
-    let drain = slog_term::FullFormat::new(plain).build().fuse();
-    slog::Logger::root(drain, o!())
-}
-
-struct ReaperConsoleSink {
-}
-
-impl ReaperConsoleSink {
-    fn new() -> ReaperConsoleSink {
-        ReaperConsoleSink {
-        }
-    }
-}
-
-impl std::io::Write for ReaperConsoleSink {
-    fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
-        Reaper::instance().show_console_msg(&CString::new(buf)?);
-        Ok(buf.len())
-    }
-
-    fn flush(&mut self) -> Result<(), std::io::Error> {
-        Ok(())
-    }
-}
-
-
-fn use_high_level() {
-    let reaper = Reaper::instance();
-
-//    reaper.project_switched().subscribe(|p: Project| {
-//        // TODO
-//        let text = format!("Project switched to {:?}", p.get_file_path());
-//        Reaper::instance().show_console_msg(CString::new(text).as_ref().unwrap())
-//    });
-
-    reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
-    let mut i = 0;
-    let action1 = reaper.register_action(
-        c_str!("reaperRsCounter"),
-        c_str!("reaper-rs counter"),
-        move || {
-            let owned = format!("Hello from Rust number {}\0", i);
-            let reaper = Reaper::instance();
-            reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
-            i += 1;
-        },
-        ActionKind::NotToggleable,
-    );
-    let action3 = reaper.register_action(
-        c_str!("reaperRsExample"),
-        c_str!("reaper-rs example"),
-        || { example_code(Reaper::instance()); },
-        ActionKind::NotToggleable,
-    );
-}
-
-fn example_code(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
-    example_ref_cell(reaper);
-//   example_iterate_projects(reaper);
-    Ok(())
-}
-
-fn example_ref_cell(reaper: &Reaper) {
-    reaper.register_action(
-        c_str!("blabla"),
-        c_str!("blabla panic"),
-        || { println!("moin") },
-        ActionKind::NotToggleable,
-    );
-}
-
-fn example_iterate_projects(reaper: &Reaper) -> Result<(), Box<dyn Error>> {
-    let project = reaper.get_current_project();
-    let projects = reaper.get_projects();
-    projects.for_each(|p| {
-        let owned = format!("Project {:?} at index {}\0", p.get_file_path(), p.get_index());
-        reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
-    });
-
-    let track = project.get_first_track().ok_or("No first track")?;
-    let track_name = track.get_name();
-    let owned = format!("Track name is {:?}\0", track_name);
-    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
-    Ok(())
+    let logger = create_reaper_console_logger();
+    panic::set_hook(create_reaper_panic_hook(
+        logger,
+        Some(create_default_console_msg_formatter("info@helgoboss.org")),
+    ));
 }

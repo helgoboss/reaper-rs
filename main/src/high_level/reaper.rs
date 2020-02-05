@@ -14,7 +14,6 @@ use crate::high_level::{Project, Section, Track, LightTrack};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall};
 use crate::low_level;
 use crate::medium_level;
-use rxrust::observable::Observable;
 use rxrust::subscriber::Subscriber;
 use crate::high_level::helper_control_surface::HelperControlSurface;
 use rxrust::subscription::SubscriptionLike;
@@ -167,6 +166,7 @@ impl Reaper {
     // We express that in Rust by making `Reaper` class an immutable (in the sense of non-`&mut`)
     // singleton and allowing all REAPER functions to be called from an immutable context ...
     // although they can and often will lead to mutations within REAPER!
+    // TODO Consider naming this get()
     pub fn instance() -> &'static Reaper {
         unsafe {
             REAPER_INSTANCE.as_ref().unwrap()

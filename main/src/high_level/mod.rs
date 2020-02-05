@@ -1,5 +1,6 @@
 #[macro_use]
-mod util;
+mod regex_util;
+mod log_util;
 mod reaper;
 mod project;
 mod track;
@@ -13,3 +14,4 @@ pub use reaper::*;
 pub use track::*;
 pub use section::*;
 pub use action::*;
+pub use log_util::*;

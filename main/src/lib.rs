@@ -1,4 +1,4 @@
-#![feature(fn_traits, clamp)]
+#![feature(fn_traits, clamp, backtrace)]
 
 pub mod low_level;
 pub mod medium_level;
