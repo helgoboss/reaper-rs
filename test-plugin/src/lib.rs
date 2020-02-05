@@ -1,3 +1,4 @@
+#![feature(backtrace)]
 use std::error::Error;
 use reaper_rs::high_level::{Reaper, ActionKind, toggleable, Project};
 use std::os::raw::{c_int, c_char};
@@ -13,7 +14,10 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::panic;
 use reaper_rs::low_level::firewall;
-use slog::o;
+use slog::{o, Drain, OwnedKVList, Record};
+use slog::error;
+use std::backtrace::Backtrace;
+use std::io::LineWriter;
 
 struct MyControlSurface {}
 
@@ -26,7 +30,7 @@ impl medium_level::ControlSurface for MyControlSurface {
 // TODO Integrate some of this into main
 #[no_mangle]
 extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_level::reaper_plugin_info_t) -> c_int {
-    firewall(0, || {
+    firewall(|| {
         if rec.is_null() {
             return 0;
         }
@@ -61,16 +65,46 @@ extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_
         } else {
             0
         }
-    })
+    }).unwrap_or(0)
 }
 
 fn setup_logging() {
-//    let decorator = slog_term::PlainDecorator::new(std::io::stdout());
-//    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
-//    let drain = slog_async::Async::new(drain).build().fuse();
-//
-//    let log = slog::Logger::root(drain, o!("version" => "0.5"));
+    let logger = create_logger();
+    panic::set_hook(Box::new(move |c| {
+        let backtrace = Backtrace::force_capture();
+        error!(logger, "PANIK!!!"; "backtrace" => format!("{:?}", backtrace));
+    }));
 }
+
+fn create_logger() -> slog::Logger {
+//    let sink = std::io::stdout();
+    let sink = LineWriter::new(ReaperConsoleSink::new());
+    let plain = slog_term::PlainSyncDecorator::new(sink);
+    let drain = slog_term::FullFormat::new(plain).build().fuse();
+    slog::Logger::root(drain, o!())
+}
+
+struct ReaperConsoleSink {
+}
+
+impl ReaperConsoleSink {
+    fn new() -> ReaperConsoleSink {
+        ReaperConsoleSink {
+        }
+    }
+}
+
+impl std::io::Write for ReaperConsoleSink {
+    fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
+        Reaper::instance().show_console_msg(&CString::new(buf)?);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> Result<(), std::io::Error> {
+        Ok(())
+    }
+}
+
 
 fn use_high_level() {
     let reaper = Reaper::instance();

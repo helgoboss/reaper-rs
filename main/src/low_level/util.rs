@@ -4,18 +4,9 @@ use std::panic::{UnwindSafe, catch_unwind};
 // TODO Maybe make exact behavior configurable application-wide
 /// Use this in each function called directly by REAPER to establish a fault barrier = not
 /// letting REAPER crash if anything goes wrong within the plugin.
-pub fn firewall<F: FnOnce() -> R + UnwindSafe, R>(default_result: R, f: F) -> R {
-    match catch_unwind(f) {
-        Ok(result) => result,
-        Err(cause) => {
-            let error_msg = match cause.downcast::<&str>() {
-                Ok(cause) => cause.to_string(),
-                Err(cause) => match cause.downcast::<String>() {
-                    Ok(cause) => *cause,
-                    Err(cause) => String::from("Unknown error")
-                }
-            };
-            default_result
-        }
-    }
+/// Right now it's used in control surface callbacks (and in some high-level API command hooks).
+/// Right now this doesn't do anything else than calling catch_unwind. But it might do
+/// more in future.
+pub fn firewall<F: FnOnce() -> R + UnwindSafe, R>(f: F) -> Option<R> {
+    catch_unwind(f).ok()
 }

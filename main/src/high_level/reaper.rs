@@ -30,20 +30,20 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 // Called by REAPER directly!
 // Only for main section
 fn hook_command(command_index: i32, flag: i32) -> bool {
-    firewall(false, || {
+    firewall(|| {
         let mut operation = match Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
             Some(command) => command.operation.clone(),
             None => return false
         };
         (*operation).borrow_mut().call_mut(());
         true
-    })
+    }).unwrap_or(false)
 }
 
 // Called by REAPER directly!
 // Only for main section
 fn toggle_action(command_index: i32) -> i32 {
-    firewall(-1, || {
+    firewall(|| {
         if let Some(command) = Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
             match &command.kind {
                 ActionKind::Toggleable(is_on) => if is_on() { 1 } else { 0 },
@@ -52,7 +52,7 @@ fn toggle_action(command_index: i32) -> i32 {
         } else {
             -1
         }
-    })
+    }).unwrap_or(-1)
 }
 
 //pub(super) type Task = Box<dyn FnOnce() + Send + 'static>;
