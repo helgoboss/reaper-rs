@@ -7,7 +7,7 @@ mod util;
 
 pub use bindings::root::{
     ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
-    reaper_plugin_info_t, KbdSectionInfo, HWND, GUID, TrackEnvelope
+    reaper_plugin_info_t, KbdSectionInfo, HWND, GUID, TrackEnvelope,
 };
 use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use control_surface::ControlSurface;
@@ -39,7 +39,7 @@ pub(super) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurf
     }
 }
 
-pub fn get_reaper_plugin_function_provider(rec: *mut reaper_plugin_info_t) -> Result<impl Fn(&CStr) -> isize, &'static str> {
+pub fn get_reaper_plugin_function_provider(rec: *mut reaper_plugin_info_t) -> Result<FunctionProvider, &'static str> {
     if rec.is_null() {
         return Err("rec not available");
     }
@@ -51,18 +51,48 @@ pub fn get_reaper_plugin_function_provider(rec: *mut reaper_plugin_info_t) -> Re
     Ok(create_reaper_plugin_function_provider(GetFunc))
 }
 
-pub fn create_reaper_plugin_function_provider(GetFunc: types::GetFunc) -> impl Fn(&CStr) -> isize {
-    move |name| {
+pub fn create_reaper_plugin_function_provider(GetFunc: types::GetFunc) -> FunctionProvider {
+    Box::new(move |name| {
         unsafe { GetFunc(name.as_ptr()) as isize }
+    })
+}
+
+pub fn create_reaper_vst_plugin_function_provider(host_callback: HostCallbackProc) -> FunctionProvider {
+    Box::new(move |name| {
+        #[allow(overflowing_literals)]
+            host_callback(null_mut(), 0xdeadbeef, 0xdeadf00d, 0, name.as_ptr() as *mut c_void, 0.0)
+    })
+}
+
+// TODO Log early errors
+#[macro_export]
+macro_rules! reaper_plugin_entry {
+    ($init:ident) => {
+        #[no_mangle]
+        extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_level::reaper_plugin_info_t) -> c_int {
+            $crate::low_level::firewall(|| {
+                let function_provider = match $crate::low_level::get_reaper_plugin_function_provider(rec) {
+                    Err(_) => return 0,
+                    Ok(p) => p
+                };
+                let context = ReaperPluginContext {
+                    function_provider
+                };
+                let result = $init(context);
+                match result {
+                    Ok(_) => 1,
+                    Err(_) => 0
+                }
+            }).unwrap_or(0)
+        }
     }
 }
 
-pub fn create_reaper_vst_plugin_function_provider(host_callback: HostCallbackProc) -> impl Fn(&CStr) -> isize {
-    move |name| {
-        #[allow(overflowing_literals)]
-            host_callback(null_mut(), 0xdeadbeef, 0xdeadf00d, 0, name.as_ptr() as *mut c_void, 0.0)
-    }
+pub struct ReaperPluginContext {
+    pub function_provider: FunctionProvider,
 }
+
+pub type FunctionProvider = Box<dyn Fn(&CStr) -> isize>;
 
 macro_rules! gen_reaper_struct {
     ($($func:ident),+) => {
@@ -78,7 +108,7 @@ macro_rules! gen_reaper_struct {
             // loading mechanism, not the one in reaper_plugin_functions.h (in order to collect all
             // function pointers into struct fields instead of global variables, and in order to
             // still keep the possibility of loading only certain functions)
-            pub fn with_all_functions_loaded(get_func: &impl Fn(&CStr) -> isize) -> Reaper {
+            pub fn with_all_functions_loaded(get_func: FunctionProvider) -> Reaper {
                 unsafe {
                     Reaper {
                         $(
@@ -147,7 +177,7 @@ gen_reaper_struct![
 macro_rules! customize_reaper_with_functions {
     ($($func:ident),+) => {
         impl $crate::low_level::Reaper {
-            pub fn with_custom_functions_loaded(get_func: &impl Fn(&CStr) -> isize) -> $crate::low_level::Reaper {
+            pub fn with_custom_functions_loaded(get_func: FunctionProvider) -> $crate::low_level::Reaper {
                 unsafe {
                     $crate::low_level::Reaper {
                         $(
