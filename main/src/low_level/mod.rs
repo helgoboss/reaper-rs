@@ -17,7 +17,7 @@ mod types;
 
 mod control_surface;
 
-use std::os::raw::{c_char, c_void};
+use std::os::raw::{c_char, c_void, c_int};
 use std::ffi::CStr;
 use std::convert::AsRef;
 use c_str_macro::c_str;
@@ -39,6 +39,17 @@ pub(super) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurf
     }
 }
 
+pub fn get_reaper_plugin_function_provider(rec: *mut reaper_plugin_info_t) -> Result<impl Fn(&CStr) -> isize, &'static str> {
+    if rec.is_null() {
+        return Err("rec not available");
+    }
+    let rec = unsafe { *rec };
+    if rec.caller_version != REAPER_PLUGIN_VERSION as c_int {
+        return Err("Caller version doesn't match");
+    }
+    let GetFunc = rec.GetFunc.ok_or("GetFunc function pointer not set")?;
+    Ok(create_reaper_plugin_function_provider(GetFunc))
+}
 
 pub fn create_reaper_plugin_function_provider(GetFunc: types::GetFunc) -> impl Fn(&CStr) -> isize {
     move |name| {

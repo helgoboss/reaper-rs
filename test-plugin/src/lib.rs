@@ -12,7 +12,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::panic;
-use reaper_rs::low_level::firewall;
+use reaper_rs::low_level::{firewall, reaper_plugin_info_t, REAPER_PLUGIN_VERSION, create_reaper_plugin_function_provider, get_reaper_plugin_function_provider};
 use slog::{o, Drain, OwnedKVList, Record};
 use std::io::LineWriter;
 
@@ -21,38 +21,24 @@ use std::io::LineWriter;
 #[no_mangle]
 extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_level::reaper_plugin_info_t) -> c_int {
     firewall(|| {
-        if rec.is_null() {
-            return 0;
-        }
-        let rec = unsafe { *rec };
-        if rec.caller_version != low_level::REAPER_PLUGIN_VERSION as c_int {
-            return 0;
-        }
-        if let Some(GetFunc) = rec.GetFunc {
-            // Low-level
-            let low_level_reaper = low_level::Reaper::with_all_functions_loaded(
-                &low_level::create_reaper_plugin_function_provider(GetFunc)
-            );
-            // Medium-level
-            let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
-            // High-level
-            high_level::Reaper::setup(medium_level_reaper);
-            setup_logging();
-            let reaper = Reaper::instance();
-            reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
-            reaper.activate();
-            reaper.register_action(
-                c_str!("reaperRsIntegrationTests"),
-                c_str!("reaper-rs integration tests"),
-                || {
-                    reaper_rs_test::execute_integration_test();
-                },
-                ActionKind::NotToggleable,
-            );
-            1
-        } else {
-            0
-        }
+        let provider = match get_reaper_plugin_function_provider(rec) {
+            Err(_) => return 0,
+            Ok(p) => p
+        };
+        let low_level_reaper = low_level::Reaper::with_all_functions_loaded(&provider);
+        let medium_level_reaper = medium_level::Reaper::new(low_level_reaper);
+        high_level::Reaper::setup(medium_level_reaper);
+        setup_logging();
+        let reaper = Reaper::instance();
+        reaper.activate();
+        reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
+        reaper.register_action(
+            c_str!("reaperRsIntegrationTests"),
+            c_str!("reaper-rs integration tests"),
+            || reaper_rs_test::execute_integration_test(),
+            ActionKind::NotToggleable,
+        );
+        1
     }).unwrap_or(0)
 }
 
