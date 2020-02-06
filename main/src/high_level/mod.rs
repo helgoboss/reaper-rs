@@ -4,6 +4,8 @@ mod log_util;
 mod reaper;
 mod project;
 mod track;
+mod track_send;
+mod fx;
 mod helper_control_surface;
 mod section;
 mod action;

@@ -3,13 +3,14 @@ use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level::ControlSurface;
 use std::ffi::CStr;
 use std::borrow::Cow;
-use crate::high_level::{Reaper, Project, Task};
+use crate::high_level::{Reaper, Project, Task, Track};
 use rxrust::prelude::*;
 use std::cell::{RefCell, Cell};
 use std::sync::mpsc::Receiver;
 use crate::high_level::guid::Guid;
 use std::collections::{HashSet, HashMap};
 use c_str_macro::c_str;
+use std::ptr::null_mut;
 
 const BULK_TASK_EXECUTION_COUNT: usize = 100;
 
@@ -24,6 +25,12 @@ pub struct HelperControlSurface {
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
+}
+
+#[derive(PartialEq)]
+enum State {
+    Normal,
+    PropagatingTrackSetChanges,
 }
 
 struct TrackData {
@@ -69,12 +76,42 @@ impl HelperControlSurface {
         surface.set_track_list_change();
         surface
     }
+
+    fn get_state(&self) -> State {
+        if self.num_track_set_changes_left_to_be_propagated.get() == 0 {
+            State::Normal
+        } else {
+            State::PropagatingTrackSetChanges
+        }
+    }
+
+    fn find_track_data_by_track<'a>(&self, track: *mut MediaTrack) -> Option<&'a mut TrackData> {
+        unimplemented!()
+    }
+
+    fn track_parameter_is_automated(&self, track: *mut MediaTrack, parameter_name: &CStr) -> bool {
+        unimplemented!()
+    }
 }
 
 impl ControlSurface for HelperControlSurface {
-
     fn set_surface_pan(&self, trackid: *mut MediaTrack, pan: f64) {
-//        unimplemented!()
+        if self.get_state() == State::PropagatingTrackSetChanges {
+            return;
+        }
+        let td = match self.find_track_data_by_track(trackid) {
+            None => return,
+            Some(td) => td
+        };
+        if td.pan == pan {
+            return;
+        }
+        td.pan = pan;
+        let track = Track::new(trackid, null_mut());
+        // trackPanChangedSubject_.get_subscriber().on_next(track);
+        if !self.track_parameter_is_automated(trackid, c_str!("Pan")) {
+            // trackPanTouchedSubject_.get_subscriber().on_next(track);
+        }
     }
 
 
@@ -89,7 +126,7 @@ impl ControlSurface for HelperControlSurface {
         let new_active_project = reaper.get_current_project();
         if (new_active_project != self.last_active_project.get()) {
             self.last_active_project.replace(new_active_project);
-            reaper.project_switched_subject.borrow_mut().next(new_active_project);
+            reaper.subjects.project_switched.borrow_mut().next(new_active_project);
         }
     }
 }

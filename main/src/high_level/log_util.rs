@@ -16,6 +16,9 @@ pub fn create_reaper_console_logger() -> slog::Logger {
     slog::Logger::root(drain, o!())
 }
 
+// TODO Async logging: https://github.com/gabime/spdlog/wiki/6.-Asynchronous-logging
+// TODO Create per-service loggers https://github.com/gabime/spdlog/issues/630
+// TODO Log to file in user home instead of to console
 pub fn create_terminal_logger() -> slog::Logger {
     let sink = io::stdout();
     let plain = slog_term::PlainSyncDecorator::new(sink);

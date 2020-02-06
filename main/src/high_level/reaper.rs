@@ -24,6 +24,8 @@ use std::sync::mpsc::{Sender, Receiver};
 use slog::Level::Debug;
 use std::thread;
 use std::thread::ThreadId;
+use crate::high_level::track_send::TrackSend;
+use crate::high_level::fx::Fx;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -91,7 +93,7 @@ impl ReaperBuilder {
     pub fn setup(self) {
         Reaper::setup(
             self.medium,
-            self.logger.unwrap_or_else(create_std_logger)
+            self.logger.unwrap_or_else(create_std_logger),
         );
     }
 }
@@ -120,15 +122,94 @@ pub struct Reaper {
     //  possible to give up the map borrow after obtaining the command/operation reference???
     //  Look into that!!!
     command_by_index: RefCell<HashMap<u32, Command>>,
+    pub(super) subjects: EventStreamSubjects,
+    task_sender: Sender<Task>,
+    main_thread_id: ThreadId,
+}
+
+pub(super) struct EventStreamSubjects {
     // This is a RefCell. So calling next() while another next() is still running will panic.
     // I guess it's good that way because this is very generic code, panicking or not panicking
     // depending on the user's code. And getting a panic is good for becoming aware of the problem
     // instead of running into undefined behavior. The developer can always choose to defer to
     // the next `ControlSurface::run()` invocation (execute things in next main loop cycle).
-    pub(super) project_switched_subject: EventStreamSubject<Project>,
-    pub(super) track_added_subject: EventStreamSubject<LightTrack>,
-    task_sender: Sender<Task>,
-    main_thread_id: ThreadId,
+    pub(super) project_switched: EventStreamSubject<Project>,
+    pub(super) track_volume_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_volume_touched: EventStreamSubject<LightTrack>,
+    pub(super) track_pan_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_pan_touched: EventStreamSubject<LightTrack>,
+    pub(super) track_send_volume_changed: EventStreamSubject<TrackSend>,
+    pub(super) track_send_volume_touched: EventStreamSubject<TrackSend>,
+    pub(super) track_send_pan_changed: EventStreamSubject<TrackSend>,
+    pub(super) track_send_pan_touched: EventStreamSubject<TrackSend>,
+    pub(super) track_added: EventStreamSubject<LightTrack>,
+    pub(super) track_removed: EventStreamSubject<LightTrack>,
+    pub(super) tracks_reordered: EventStreamSubject<Project>,
+    pub(super) track_name_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_input_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_input_monitoring_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_arm_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_mute_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_mute_touched: EventStreamSubject<LightTrack>,
+    pub(super) track_solo_changed: EventStreamSubject<LightTrack>,
+    pub(super) track_selected_changed: EventStreamSubject<LightTrack>,
+    pub(super) fx_added: EventStreamSubject<Fx>,
+    pub(super) fx_removed: EventStreamSubject<Fx>,
+    pub(super) fx_enabled_changed: EventStreamSubject<Fx>,
+    pub(super) fx_opened: EventStreamSubject<Fx>,
+    pub(super) fx_closed: EventStreamSubject<Fx>,
+    pub(super) fx_focused: EventStreamSubject<Option<Fx>>,
+    pub(super) fx_reordered: EventStreamSubject<LightTrack>,
+    pub(super) master_tempo_changed: EventStreamSubject<bool>,
+    pub(super) master_tempo_touched: EventStreamSubject<bool>,
+    pub(super) master_playrate_changed: EventStreamSubject<bool>,
+    pub(super) master_playrate_touched: EventStreamSubject<bool>,
+    pub(super) main_thread_idle: EventStreamSubject<bool>,
+    pub(super) project_closed: EventStreamSubject<Project>,
+}
+
+
+impl EventStreamSubjects {
+    fn new() -> EventStreamSubjects {
+        fn default<T>() -> EventStreamSubject<T> {
+            RefCell::new(Subject::local())
+        }
+        EventStreamSubjects {
+            project_switched: default(),
+            track_volume_changed: default(),
+            track_volume_touched: default(),
+            track_pan_changed: default(),
+            track_pan_touched: default(),
+            track_send_volume_changed: default(),
+            track_send_volume_touched: default(),
+            track_send_pan_changed: default(),
+            track_send_pan_touched: default(),
+            track_added: default(),
+            track_removed: default(),
+            tracks_reordered: default(),
+            track_name_changed: default(),
+            track_input_changed: default(),
+            track_input_monitoring_changed: default(),
+            track_arm_changed: default(),
+            track_mute_changed: default(),
+            track_mute_touched: default(),
+            track_solo_changed: default(),
+            track_selected_changed: default(),
+            fx_added: default(),
+            fx_removed: default(),
+            fx_enabled_changed: default(),
+            fx_opened: default(),
+            fx_closed: default(),
+            fx_focused: default(),
+            fx_reordered: default(),
+            master_tempo_changed: default(),
+            master_tempo_touched: default(),
+            master_playrate_changed: default(),
+            master_playrate_touched: default(),
+            main_thread_idle: default(),
+            project_closed: default(),
+        }
+    }
 }
 
 pub enum ActionKind {
@@ -181,10 +262,9 @@ impl Reaper {
             medium,
             logger,
             command_by_index: RefCell::new(HashMap::new()),
-            project_switched_subject: RefCell::new(Subject::local()),
-            track_added_subject: RefCell::new(Subject::local()),
+            subjects: EventStreamSubjects::new(),
             task_sender,
-            main_thread_id: thread::current().id()
+            main_thread_id: thread::current().id(),
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -323,11 +403,11 @@ impl Reaper {
     }
 
     pub fn project_switched(&self) -> EventStream<Project> {
-        self.project_switched_subject.borrow().fork()
+        self.subjects.project_switched.borrow().fork()
     }
 
     pub fn track_added(&self) -> EventStream<LightTrack> {
-        self.track_added_subject.borrow().fork()
+        self.subjects.track_added.borrow().fork()
     }
 
     pub fn get_current_project(&self) -> Project {
