@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "main",
+    "macros",
     "test",
     "test-plugin",
     "test-vst-plugin"
