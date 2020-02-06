@@ -65,27 +65,24 @@ pub fn create_reaper_vst_plugin_function_provider(host_callback: HostCallbackPro
 }
 
 // TODO Log early errors
-#[macro_export]
-macro_rules! reaper_plugin_entry {
-    ($init:ident) => {
-        #[no_mangle]
-        extern "C" fn ReaperPluginEntry(h_instance: low_level::HINSTANCE, rec: *mut low_level::reaper_plugin_info_t) -> c_int {
-            $crate::low_level::firewall(|| {
-                let function_provider = match $crate::low_level::get_reaper_plugin_function_provider(rec) {
-                    Err(_) => return 0,
-                    Ok(p) => p
-                };
-                let context = ReaperPluginContext {
-                    function_provider
-                };
-                let result = $init(context);
-                match result {
-                    Ok(_) => 1,
-                    Err(_) => 0
-                }
-            }).unwrap_or(0)
+pub fn bootstrap_reaper_plugin(
+    h_instance: HINSTANCE,
+    rec: *mut reaper_plugin_info_t,
+    init: fn(ReaperPluginContext) -> Result<(), &'static str>,
+) -> i32 {
+    firewall(|| {
+        let function_provider = match get_reaper_plugin_function_provider(rec) {
+            Err(_) => return 0,
+            Ok(p) => p
+        };
+        let context = ReaperPluginContext {
+            function_provider
+        };
+        match init(context) {
+            Ok(_) => 1,
+            Err(_) => 0
         }
-    }
+    }).unwrap_or(0)
 }
 
 pub struct ReaperPluginContext {

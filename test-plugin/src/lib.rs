@@ -4,7 +4,6 @@ use std::os::raw::{c_int, c_char};
 use reaper_rs::medium_level;
 use reaper_rs::low_level;
 use reaper_rs::high_level;
-use reaper_rs::reaper_plugin_entry;
 use c_str_macro::c_str;
 use std::ffi::{CString, CStr};
 use std::borrow::BorrowMut;
@@ -19,14 +18,7 @@ use std::io::LineWriter;
 use reaper_rs_macros::reaper_plugin;
 
 #[reaper_plugin]
-fn moin() {
-}
-
-// TODO Use attribute macro like #[reaper_plugin_entry]
-reaper_plugin_entry!(init);
-
-fn init(context: ReaperPluginContext) -> Result<(), &'static str> {
-    moin();
+fn main(context: ReaperPluginContext) -> Result<(), &'static str> {
     let logger = create_reaper_console_logger();
     // ---
     // This is the easy way
@@ -43,10 +35,10 @@ fn init(context: ReaperPluginContext) -> Result<(), &'static str> {
 //    Reaper::setup(medium, logger, context.hinstance);
 
     // ---
-    panic::set_hook(create_reaper_panic_hook(
-        logger,
-        Some(create_default_console_msg_formatter("info@helgoboss.org")),
-    ));
+//    panic::set_hook(create_reaper_panic_hook(
+//        logger,
+//        Some(create_default_console_msg_formatter("info@helgoboss.org")),
+//    ));
     let reaper = Reaper::instance();
     reaper.activate();
 
