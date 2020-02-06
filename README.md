@@ -29,7 +29,16 @@ Consists of 3 layers:
 
 #### Scenario 1
 
-- [ ] Provide an extension of this macro which allows to load just some functions  
+The fastest way to get going with the high-level API is to use the `reaper_plugin` macro. It sets up a 
+`high_level::Reaper` instance for you. In particular, it takes care of:
+
+- [x] Loading all available REAPER functions
+- [ ] Setting up file-based logging
+- [x] Installing the default panic hook (which you can still overwrite by calling `std::panic::set_hook()`)
+
+The macro itself doesn't do much more than exposing an `extern "C" ReaperPluginEntry` function which calls
+functions `low_level::bootstrap_reaper_plugin` and `high_level::setup_all_with_defaults()`. So if
+for some reason you don't want to use macros, have a look into the macro implementation. No magic there.
 
 ```rust
 use reaper_rs::{high_level_reaper_plugin};
@@ -45,12 +54,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 ```
 
-- Fastest way to get going
-- Already has set up a `high_level::Reaper` with a sensible default configuration
-    - All available REAPER functions loaded
-    - File logger to home directory
-    - ...
-- Also installs panic hook (which you can still overwrite by calling `std::panic::set_hook()`)
+Future improvements:
+- [ ] Provide an extension of this macro which allows to load just some functions  
 
 #### Scenario 2
 
