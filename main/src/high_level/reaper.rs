@@ -10,8 +10,8 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, LightTrack};
-use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall};
+use crate::high_level::{Project, Section, Track, LightTrack, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter};
+use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext};
 use crate::low_level;
 use crate::medium_level;
 use rxrust::subscriber::Subscriber;
@@ -21,6 +21,7 @@ use rxrust::prelude::*;
 use rxrust::subject::{LocalSubjectObserver, SubjectValue};
 use std::rc::Rc;
 use std::sync::mpsc::{Sender, Receiver};
+use slog::Level::Debug;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -57,8 +58,55 @@ fn toggle_action(command_index: i32) -> i32 {
 //pub(super) type Task = Box<dyn FnOnce() + Send + 'static>;
 pub(super) type Task = Box<dyn FnOnce() + 'static>;
 
+pub struct ReaperBuilder {
+    medium: medium_level::Reaper,
+    logger: Option<slog::Logger>,
+}
+
+impl ReaperBuilder {
+    fn with_all_functions_loaded(context: ReaperPluginContext) -> ReaperBuilder {
+        ReaperBuilder {
+            medium: {
+                let low = low_level::Reaper::with_all_functions_loaded(context.function_provider);
+                medium_level::Reaper::new(low)
+            },
+            logger: Default::default(),
+        }
+    }
+
+    fn with_custom_medium(medium: medium_level::Reaper) -> ReaperBuilder {
+        ReaperBuilder {
+            medium,
+            logger: Default::default(),
+        }
+    }
+
+    pub fn logger(mut self, logger: slog::Logger) -> ReaperBuilder {
+        self.logger = Some(logger);
+        self
+    }
+
+    pub fn setup(self) {
+        Reaper::setup(
+            self.medium,
+            self.logger.unwrap_or_else(create_std_logger)
+        );
+    }
+}
+
+pub fn setup_all_with_defaults(context: ReaperPluginContext, email_address: &'static str) {
+    Reaper::with_all_functions_loaded(context)
+        .logger(create_terminal_logger())
+        .setup();
+    std::panic::set_hook(create_reaper_panic_hook(
+        create_terminal_logger(),
+        Some(create_default_console_msg_formatter(email_address)),
+    ));
+}
+
 pub struct Reaper {
     pub medium: medium_level::Reaper,
+    pub logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO Adding an action in an action would panic because we have an immutable borrow of the map
     //  to obtain and execute the command, plus a mutable borrow of the map to add the new command.
@@ -115,10 +163,20 @@ impl From<&'static CStr> for ReaperVersion {
 }
 
 impl Reaper {
-    pub fn setup(medium: medium_level::Reaper) {
+    pub fn with_all_functions_loaded(context: ReaperPluginContext) -> ReaperBuilder {
+        ReaperBuilder::with_all_functions_loaded(context)
+    }
+
+    // TODO Make pub when the time has come
+    fn with_custom_medium(medium: medium_level::Reaper) -> ReaperBuilder {
+        ReaperBuilder::with_custom_medium(medium)
+    }
+
+    fn setup(medium: medium_level::Reaper, logger: slog::Logger) {
         let (task_sender, task_receiver) = mpsc::channel::<Task>();
         let reaper = Reaper {
             medium,
+            logger,
             command_by_index: RefCell::new(HashMap::new()),
             project_switched_subject: RefCell::new(Subject::local()),
             track_added_subject: RefCell::new(Subject::local()),

@@ -37,7 +37,7 @@ use reaper_rs::high_level::Reaper;
 use std::error::Error;
 use c_str_macro::c_str;
 
-#[high_level_reaper_plugin]
+#[reaper_plugin(email = "info@example.com")]
 fn main() -> Result<(), Box<dyn Error>> {
     let reaper = Reaper::get();
     reaper.show_console_msg(c_str!("Hello world"));
@@ -56,12 +56,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 ```rust
 use reaper_rs::{reaper_plugin};
+use reaper_rs::low_level::ReaperPluginContext;
 use reaper_rs::high_level::Reaper;
 use std::error::Error;
 use c_str_macro::c_str;
 
-#[reaper_plugin]
-fn main(context: PluginContext) -> Result<(), Box<dyn Error>> {
+#[low_level_reaper_plugin]
+fn main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
     Reaper::with_all_functions_loaded(context)
         .setup();
     // TODO
@@ -76,11 +77,12 @@ fn main(context: PluginContext) -> Result<(), Box<dyn Error>> {
 ```rust
 use reaper_rs::{reaper_plugin};
 use reaper_rs::high_level::Reaper;
+use reaper_rs::low_level::ReaperPluginContext;
 use std::error::Error;
 use c_str_macro::c_str;
 
-#[reaper_plugin]
-fn main(context: PluginContext) -> Result<(), Box<dyn Error>> {
+#[low_level_reaper_plugin]
+fn main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
     let low = low_level::Reaper::with_all_functions_loaded(context.function_provider);
     let medium = medium_level::Reaper::new(low);
     Reaper::with_custom_medium(medium)

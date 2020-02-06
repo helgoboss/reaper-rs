@@ -3,14 +3,21 @@ use std::backtrace::Backtrace;
 use crate::high_level::Reaper;
 use slog::{o, error, Drain};
 use std::ffi::CString;
-use std::io::LineWriter;
+use std::io;
 
 pub fn create_std_logger() -> slog::Logger {
     slog::Logger::root(slog_stdlog::StdLog.fuse(), o!())
 }
 
 pub fn create_reaper_console_logger() -> slog::Logger {
-    let sink = LineWriter::new(ReaperConsoleSink::new());
+    let sink = io::LineWriter::new(ReaperConsoleSink::new());
+    let plain = slog_term::PlainSyncDecorator::new(sink);
+    let drain = slog_term::FullFormat::new(plain).build().fuse();
+    slog::Logger::root(drain, o!())
+}
+
+pub fn create_terminal_logger() -> slog::Logger {
+    let sink = io::stdout();
     let plain = slog_term::PlainSyncDecorator::new(sink);
     let drain = slog_term::FullFormat::new(plain).build().fuse();
     slog::Logger::root(drain, o!())
