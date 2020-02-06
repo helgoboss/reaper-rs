@@ -24,6 +24,7 @@ use c_str_macro::c_str;
 use std::ptr::null_mut;
 use vst::api::HostCallbackProc;
 use std::sync::Once;
+use std::error::Error;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
@@ -68,7 +69,7 @@ pub fn create_reaper_vst_plugin_function_provider(host_callback: HostCallbackPro
 pub fn bootstrap_reaper_plugin(
     h_instance: HINSTANCE,
     rec: *mut reaper_plugin_info_t,
-    init: fn(ReaperPluginContext) -> Result<(), &'static str>,
+    init: fn(ReaperPluginContext) -> Result<(), Box<dyn Error>>,
 ) -> i32 {
     firewall(|| {
         let function_provider = match get_reaper_plugin_function_provider(rec) {

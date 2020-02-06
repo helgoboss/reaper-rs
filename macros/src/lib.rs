@@ -34,7 +34,7 @@ pub fn reaper_plugin(attr: TokenStream, input: TokenStream) -> TokenStream {
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[::reaper_rs_macros::low_level_reaper_plugin]
-        fn low_level_main(context: ::reaper_rs::low_level::ReaperPluginContext) -> Result<(), &'static str> {
+        fn low_level_main(context: ::reaper_rs::low_level::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
             ::reaper_rs::high_level::setup_all_with_defaults(context, #email_address);
             #main_function_name()
         }

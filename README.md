@@ -48,7 +48,7 @@ use c_str_macro::c_str;
 
 #[reaper_plugin(email = "info@example.com")]
 fn main() -> Result<(), Box<dyn Error>> {
-    let reaper = Reaper::get();
+    let reaper = Reaper::instance();
     reaper.show_console_msg(c_str!("Hello world"));
     Ok(())
 }
