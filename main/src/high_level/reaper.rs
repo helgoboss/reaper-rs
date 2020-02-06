@@ -22,6 +22,8 @@ use rxrust::subject::{LocalSubjectObserver, SubjectValue};
 use std::rc::Rc;
 use std::sync::mpsc::{Sender, Receiver};
 use slog::Level::Debug;
+use std::thread;
+use std::thread::ThreadId;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -126,6 +128,7 @@ pub struct Reaper {
     pub(super) project_switched_subject: EventStreamSubject<Project>,
     pub(super) track_added_subject: EventStreamSubject<LightTrack>,
     task_sender: Sender<Task>,
+    main_thread_id: ThreadId,
 }
 
 pub enum ActionKind {
@@ -181,6 +184,7 @@ impl Reaper {
             project_switched_subject: RefCell::new(Subject::local()),
             track_added_subject: RefCell::new(Subject::local()),
             task_sender,
+            main_thread_id: thread::current().id()
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -348,6 +352,22 @@ impl Reaper {
 
     pub fn execute_later_in_main_thread(&self, task: impl FnOnce() + 'static) {
         self.task_sender.send(Box::new(task));
+    }
+
+    pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) {
+        if self.current_thread_is_main_thread() {
+            task();
+        } else {
+            self.execute_later_in_main_thread(task);
+        }
+    }
+
+    pub fn current_thread_is_main_thread(&self) -> bool {
+        thread::current().id() == self.main_thread_id
+    }
+
+    pub fn get_main_thread_id(&self) -> ThreadId {
+        self.main_thread_id
     }
 }
 

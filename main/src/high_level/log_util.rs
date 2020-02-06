@@ -36,7 +36,9 @@ pub fn create_reaper_panic_hook(
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
             if let Ok(c_msg) = CString::new(msg) {
-                Reaper::instance().show_console_msg(&c_msg);
+                Reaper::instance().execute_when_in_main_thread(move || {
+                    Reaper::instance().show_console_msg(&c_msg);
+                });
             }
         }
     })
@@ -78,7 +80,10 @@ impl ReaperConsoleSink {
 
 impl std::io::Write for ReaperConsoleSink {
     fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
-        Reaper::instance().show_console_msg(&CString::new(buf)?);
+        let c_string = CString::new(buf)?;
+        Reaper::instance().execute_when_in_main_thread(move || {
+            Reaper::instance().show_console_msg(&c_string)
+        });
         Ok(buf.len())
     }
 
