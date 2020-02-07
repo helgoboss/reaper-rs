@@ -170,7 +170,10 @@ gen_reaper_struct![
     GetAppVersion,
     GetTrackEnvelopeByName,
     GetTrackAutomationMode,
-    GetGlobalAutomationOverride
+    GetGlobalAutomationOverride,
+    TrackFX_GetCount,
+    TrackFX_GetRecCount,
+    TrackFX_GetFXGUID
 ];
 
 #[macro_export]

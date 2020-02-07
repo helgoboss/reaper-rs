@@ -4,6 +4,7 @@ use crate::high_level::Reaper;
 use slog::{o, error, Drain};
 use std::ffi::CString;
 use std::io;
+use std::borrow::Cow;
 
 pub fn create_std_logger() -> slog::Logger {
     slog::Logger::root(slog_stdlog::StdLog.fuse(), o!())
@@ -47,9 +48,21 @@ pub fn create_reaper_panic_hook(
     })
 }
 
+pub fn extract_panic_message(panic_info: &PanicInfo) -> String {
+    let payload = panic_info.payload();
+    match payload.downcast_ref::<&str>() {
+        Some(p) => p.to_string(),
+        None => match payload.downcast_ref::<String>() {
+            Some(p) => p.clone(),
+            None => String::from("Unknown error")
+        }
+    }
+}
+
 pub fn create_default_console_msg_formatter(email_address: &'static str) -> impl Fn(&PanicInfo, &Backtrace) -> String {
     move |panic_info, backtrace| {
-        format!("\
+        format!("
+
 Sorry, an error occurred in a REAPER extension. It seems that a crash has been prevented, but better save your project at this point, just to be sure.
 
 Please report this error:
@@ -60,17 +73,24 @@ Please report this error:
 Thank you for your support!
 
 --- cut ---
+Message: {panic_message}
+
 {backtrace:?}\
 --- cut ---
+
 ",
                 backtrace = backtrace,
-                email_address = email_address
+                email_address = email_address,
+                panic_message = extract_panic_message(panic_info)
         )
     }
 }
 
 pub fn log_panic(logger: &slog::Logger, panic_info: &PanicInfo, backtrace: &Backtrace) {
-    error!(logger, "Plugin panicked"; "backtrace" => format!("{:?}", backtrace));
+    error!(logger, "Plugin panicked";
+        "message" => extract_panic_message(panic_info),
+        "backtrace" => format!("{:?}", backtrace)
+    );
 }
 
 struct ReaperConsoleSink {}

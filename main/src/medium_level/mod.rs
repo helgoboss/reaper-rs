@@ -136,6 +136,22 @@ impl Reaper {
         self.low.GetTrackEnvelopeByName.unwrap()(track, envname.as_ptr())
     }
 
+    pub fn get_media_track_info_value(&self, tr: *mut MediaTrack, parmname: &CStr) -> f64 {
+        self.low.GetMediaTrackInfo_Value.unwrap()(tr, parmname.as_ptr())
+    }
+
+    pub fn track_fx_get_count(&self, track: *mut MediaTrack) -> i32 {
+        self.low.TrackFX_GetCount.unwrap()(track)
+    }
+
+    pub fn track_fx_get_rec_count(&self, track: *mut MediaTrack) -> i32 {
+        self.low.TrackFX_GetRecCount.unwrap()(track)
+    }
+
+    pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: i32) -> *mut GUID {
+        self.low.TrackFX_GetFXGUID.unwrap()(track, fx)
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

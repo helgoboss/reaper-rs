@@ -5,7 +5,7 @@
 
 use super::{ReaProject, MediaTrack};
 use crate::low_level::bindings::root::HWND;
-use crate::low_level::{KbdSectionInfo, TrackEnvelope};
+use crate::low_level::{KbdSectionInfo, TrackEnvelope, GUID};
 
 pub type GetFunc = unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void;
 
@@ -79,3 +79,12 @@ pub type GetTrackEnvelopeByName = fn(
 pub type GetTrackAutomationMode = fn(tr: *mut MediaTrack) -> ::std::os::raw::c_int;
 
 pub type GetGlobalAutomationOverride = fn() -> ::std::os::raw::c_int;
+
+pub type TrackFX_GetRecCount = fn(track: *mut MediaTrack) -> ::std::os::raw::c_int;
+
+pub type TrackFX_GetCount = fn(track: *mut MediaTrack) -> ::std::os::raw::c_int;
+
+pub type TrackFX_GetFXGUID = fn(
+    track: *mut MediaTrack,
+    fx: ::std::os::raw::c_int,
+) -> *mut GUID;

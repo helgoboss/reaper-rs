@@ -11,6 +11,7 @@ mod section;
 mod action;
 mod guid;
 mod automation_mode;
+mod fx_chain;
 
 pub use project::*;
 pub use reaper::*;

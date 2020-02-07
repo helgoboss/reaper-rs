@@ -25,7 +25,7 @@ use slog::Level::Debug;
 use std::thread;
 use std::thread::ThreadId;
 use crate::high_level::track_send::TrackSend;
-use crate::high_level::fx::Fx;
+use crate::high_level::fx::{Fx, LightFx};
 use crate::high_level::automation_mode::AutomationMode;
 use std::convert::TryFrom;
 
@@ -155,12 +155,12 @@ pub(super) struct EventStreamSubjects {
     pub(super) track_mute_touched: EventStreamSubject<LightTrack>,
     pub(super) track_solo_changed: EventStreamSubject<LightTrack>,
     pub(super) track_selected_changed: EventStreamSubject<LightTrack>,
-    pub(super) fx_added: EventStreamSubject<Fx>,
-    pub(super) fx_removed: EventStreamSubject<Fx>,
-    pub(super) fx_enabled_changed: EventStreamSubject<Fx>,
-    pub(super) fx_opened: EventStreamSubject<Fx>,
-    pub(super) fx_closed: EventStreamSubject<Fx>,
-    pub(super) fx_focused: EventStreamSubject<Option<Fx>>,
+    pub(super) fx_added: EventStreamSubject<LightFx>,
+    pub(super) fx_removed: EventStreamSubject<LightFx>,
+    pub(super) fx_enabled_changed: EventStreamSubject<LightFx>,
+    pub(super) fx_opened: EventStreamSubject<LightFx>,
+    pub(super) fx_closed: EventStreamSubject<LightFx>,
+    pub(super) fx_focused: EventStreamSubject<Option<LightFx>>,
     pub(super) fx_reordered: EventStreamSubject<LightTrack>,
     pub(super) master_tempo_changed: EventStreamSubject<bool>,
     pub(super) master_tempo_touched: EventStreamSubject<bool>,

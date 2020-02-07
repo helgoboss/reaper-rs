@@ -605,6 +605,24 @@ pub mod root {
             ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
     }
     extern "C" {
+        pub static mut TrackFX_GetCount: ::std::option::Option<
+            unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_GetFXGUID: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+            ) -> *mut root::GUID,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_GetRecCount: ::std::option::Option<
+            unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut TrackList_UpdateAllExternalSurfaces:
             ::std::option::Option<unsafe extern "C" fn()>;
     }

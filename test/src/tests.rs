@@ -85,21 +85,21 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             Ok(())
         }),
         // TODO
-        step("FnMut action", |reaper, step| {
-            unimplemented!();
-            let mut i = 0;
-            let action1 = reaper.register_action(
-                c_str!("reaperRsCounter"),
-                c_str!("reaper-rs counter"),
-                move || {
-                    let owned = format!("Hello from Rust number {}\0", i);
-                    let reaper = Reaper::instance();
-                    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
-                    i += 1;
-                },
-                ActionKind::NotToggleable,
-            );
-            Ok(())
-        })
+//        step("FnMut action", |reaper, step| {
+//            unimplemented!();
+//            let mut i = 0;
+//            let action1 = reaper.register_action(
+//                c_str!("reaperRsCounter"),
+//                c_str!("reaper-rs counter"),
+//                move || {
+//                    let owned = format!("Hello from Rust number {}\0", i);
+//                    let reaper = Reaper::instance();
+//                    reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
+//                    i += 1;
+//                },
+//                ActionKind::NotToggleable,
+//            );
+//            Ok(())
+//        })
     )
 }

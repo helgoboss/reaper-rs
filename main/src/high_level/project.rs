@@ -14,6 +14,7 @@ use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
 use std::path::PathBuf;
 use std::str::FromStr;
+use crate::high_level::guid::Guid;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Project {
@@ -62,6 +63,13 @@ impl Project {
             return None;
         }
         Some(Track::new(media_track, self.rea_project))
+    }
+
+    // This returns a non-optional in order to support not-yet-loaded tracks. GUID is a perfectly stable
+    // identifier of a track!
+    pub fn get_track_by_guid(&self, guid: &Guid) -> Track {
+        self.complain_if_not_available();
+        Track::from_guid(*self, *guid)
     }
 
     pub fn get_tracks(&self) -> impl Iterator<Item=Track> + '_ {

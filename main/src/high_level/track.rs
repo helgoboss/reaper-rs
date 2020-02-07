@@ -17,6 +17,7 @@ use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
 use crate::high_level::automation_mode::AutomationMode;
+use crate::high_level::fx_chain::FxChain;
 
 /// The difference to Track is that this implements Copy (not just Clone)
 // TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
@@ -107,6 +108,14 @@ impl Track {
             // (this constructor) but has rendered invalid in the meantime. Now there would not be any way to compare them
             // because I can neither compare MediaTrack* pointers nor GUIDs. Except I extract the GUID eagerly.
             guid: get_media_track_guid(media_track),
+        }
+    }
+
+    pub(super) fn from_guid(project: Project, guid: Guid) -> Track {
+        Track {
+            media_track: Cell::new(null_mut()),
+            rea_project: Cell::new(project.get_rea_project()),
+            guid: guid
         }
     }
 
@@ -261,6 +270,14 @@ impl Track {
         } else {
             automation_override
         }
+    }
+
+    pub fn get_normal_fx_chain(&self) -> FxChain {
+        FxChain::new(self.clone(), false)
+    }
+
+    pub fn get_input_fx_chain(&self) -> FxChain {
+        FxChain::new(self.clone(), true)
     }
 }
 
