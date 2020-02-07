@@ -75,3 +75,7 @@ pub type GetTrackEnvelopeByName = fn(
     track: *mut MediaTrack,
     envname: *const ::std::os::raw::c_char,
 ) -> *mut TrackEnvelope;
+
+pub type GetTrackAutomationMode = fn(tr: *mut MediaTrack) -> ::std::os::raw::c_int;
+
+pub type GetGlobalAutomationOverride = fn() -> ::std::os::raw::c_int;

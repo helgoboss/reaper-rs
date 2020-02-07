@@ -519,6 +519,10 @@ pub mod root {
             ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
     }
     extern "C" {
+        pub static mut GetGlobalAutomationOverride:
+            ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
+    }
+    extern "C" {
         pub static mut GetMainHwnd: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
     }
     extern "C" {
@@ -544,6 +548,11 @@ pub mod root {
                 proj: *mut root::ReaProject,
                 trackidx: ::std::os::raw::c_int,
             ) -> *mut root::MediaTrack,
+        >;
+    }
+    extern "C" {
+        pub static mut GetTrackAutomationMode: ::std::option::Option<
+            unsafe extern "C" fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {

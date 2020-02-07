@@ -26,6 +26,8 @@ use std::thread;
 use std::thread::ThreadId;
 use crate::high_level::track_send::TrackSend;
 use crate::high_level::fx::Fx;
+use crate::high_level::automation_mode::AutomationMode;
+use std::convert::TryFrom;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -448,6 +450,11 @@ impl Reaper {
 
     pub fn get_main_thread_id(&self) -> ThreadId {
         self.main_thread_id
+    }
+
+    pub fn get_global_automation_override(&self) -> AutomationMode {
+        let am = self.medium.get_global_automation_override();
+        AutomationMode::try_from(am).expect("Unknown automation mode")
     }
 }
 

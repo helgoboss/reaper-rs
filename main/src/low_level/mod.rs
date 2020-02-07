@@ -168,7 +168,9 @@ gen_reaper_struct![
     TrackList_UpdateAllExternalSurfaces,
     GetMediaTrackInfo_Value,
     GetAppVersion,
-    GetTrackEnvelopeByName
+    GetTrackEnvelopeByName,
+    GetTrackAutomationMode,
+    GetGlobalAutomationOverride
 ];
 
 #[macro_export]

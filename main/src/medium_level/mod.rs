@@ -10,7 +10,7 @@ use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID};
+use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID, TrackEnvelope};
 use c_str_macro::c_str;
 pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
@@ -121,6 +121,19 @@ impl Reaper {
     pub fn get_app_version(&self) -> &'static CStr {
         let ptr = self.low.GetAppVersion.unwrap()();
         unsafe { CStr::from_ptr(ptr) }
+    }
+
+    pub fn get_track_automation_mode(&self, tr: *mut MediaTrack) -> i32 {
+        // TODO Use macro instead of unwrap everywhere in order to panic with good message on non-loaded function
+        self.low.GetTrackAutomationMode.unwrap()(tr)
+    }
+
+    pub fn get_global_automation_override(&self) -> i32 {
+        self.low.GetGlobalAutomationOverride.unwrap()()
+    }
+
+    pub fn get_track_envelope_by_name(&self, track: *mut MediaTrack, envname: &CStr) -> *mut TrackEnvelope {
+        self.low.GetTrackEnvelopeByName.unwrap()(track, envname.as_ptr())
     }
 
     // TODO Rename

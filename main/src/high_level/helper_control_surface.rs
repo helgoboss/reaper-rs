@@ -3,7 +3,7 @@ use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level::ControlSurface;
 use std::ffi::CStr;
 use std::borrow::Cow;
-use crate::high_level::{Reaper, Project, Task, Track, LightTrack};
+use crate::high_level::{Reaper, Project, Task, Track, LightTrack, AutomationMode};
 use rxrust::prelude::*;
 use std::cell::{RefCell, Cell, RefMut, Ref};
 use std::sync::mpsc::Receiver;
@@ -111,8 +111,21 @@ impl HelperControlSurface {
         Some(RefMut::map(track_data_map, |tdm| tdm.get_mut(&track).unwrap()))
     }
 
-    fn track_parameter_is_automated(&self, track: *mut MediaTrack, parameter_name: &CStr) -> bool {
-        unimplemented!()
+    fn track_parameter_is_automated(&self, track: Track, parameter_name: &CStr) -> bool {
+        if !track.is_available() {
+            return false;
+        }
+        let env = Reaper::instance().medium.get_track_envelope_by_name(track.get_media_track(), parameter_name);
+        if env.is_null() {
+            return false;
+        }
+        use AutomationMode::*;
+        match track.get_automation_mode() {
+            // Is not automated
+            Bypass | TrimRead | Write => false,
+            // Is automated
+            _ => true
+        }
     }
 }
 
@@ -144,7 +157,7 @@ impl ControlSurface for HelperControlSurface {
         let track = LightTrack::new(trackid, null_mut());
         let reaper = Reaper::instance();
         reaper.subjects.track_pan_changed.borrow_mut().next(track);
-        if !self.track_parameter_is_automated(trackid, c_str!("Pan")) {
+        if !self.track_parameter_is_automated(track.into(), c_str!("Pan")) {
             reaper.subjects.track_pan_touched.borrow_mut().next(track);
         }
     }
@@ -162,7 +175,7 @@ impl ControlSurface for HelperControlSurface {
         let track = LightTrack::new(trackid, null_mut());
         let reaper = Reaper::instance();
         reaper.subjects.track_volume_changed.borrow_mut().next(track);
-        if !self.track_parameter_is_automated(trackid, c_str!("Volume")) {
+        if !self.track_parameter_is_automated(track.into(), c_str!("Volume")) {
             reaper.subjects.track_volume_touched.borrow_mut().next(track);
         }
     }

@@ -51,6 +51,8 @@ fn generate_bindings() {
         .whitelist_var("GetMediaTrackInfo_Value")
         .whitelist_var("GetAppVersion")
         .whitelist_var("GetTrackEnvelopeByName")
+        .whitelist_var("GetTrackAutomationMode")
+        .whitelist_var("GetGlobalAutomationOverride")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")

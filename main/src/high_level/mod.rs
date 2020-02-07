@@ -10,6 +10,7 @@ mod helper_control_surface;
 mod section;
 mod action;
 mod guid;
+mod automation_mode;
 
 pub use project::*;
 pub use reaper::*;
@@ -17,3 +18,4 @@ pub use track::*;
 pub use section::*;
 pub use action::*;
 pub use log_util::*;
+pub use automation_mode::*;

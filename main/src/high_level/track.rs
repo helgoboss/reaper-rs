@@ -7,6 +7,7 @@ use std::os::raw::{c_ushort, c_void};
 use std::ptr::{null, null_mut};
 use std::rc::Rc;
 use std::sync::Once;
+use std::convert::TryFrom;
 
 use c_str_macro::c_str;
 
@@ -15,6 +16,7 @@ use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
+use crate::high_level::automation_mode::AutomationMode;
 
 /// The difference to Track is that this implements Copy (not just Clone)
 // TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
@@ -72,6 +74,16 @@ impl From<LightTrack> for Track {
             media_track: Cell::new(light.media_track),
             rea_project: Cell::new(light.rea_project),
             guid: light.guid
+        }
+    }
+}
+
+impl From<Track> for LightTrack {
+    fn from(heavy: Track) -> Self {
+        LightTrack {
+            media_track: heavy.media_track.get(),
+            rea_project: heavy.rea_project.get(),
+            guid: heavy.guid
         }
     }
 }
@@ -190,6 +202,16 @@ impl Track {
         }
     }
 
+    pub fn is_available(&self) -> bool {
+        if self.media_track.get().is_null() {
+            // Not yet loaded
+            self.load_by_guid()
+        } else {
+            // Loaded
+            self.is_valid()
+        }
+    }
+
     fn unchecked_project(&self) -> Project {
         self.attempt_to_fill_project_if_necessary();
         Project::new(self.rea_project.get())
@@ -224,6 +246,21 @@ impl Track {
                 )
             );
         other_project.map(|p| p.get_rea_project()).unwrap_or(null_mut())
+    }
+
+    pub fn get_automation_mode(&self) -> AutomationMode {
+        self.load_if_necessary_or_complain();
+        let am = Reaper::instance().medium.get_track_automation_mode(self.media_track.get());
+        AutomationMode::try_from(am).expect("Unknown automation mode")
+    }
+
+    pub fn get_effective_automation_mode(&self) -> AutomationMode {
+        let automation_override = Reaper::instance().get_global_automation_override();
+        if automation_override == AutomationMode::NoOverride {
+            self.get_automation_mode()
+        } else {
+            automation_override
+        }
     }
 }
 
