@@ -1,4 +1,4 @@
-use crate::high_level::{Track, Reaper};
+use crate::high_level::{Track, Reaper, get_media_track_guid};
 use crate::high_level::fx::{Fx, get_fx_guid};
 use crate::high_level::guid::Guid;
 
@@ -41,5 +41,20 @@ impl FxChain {
     // identifier of an FX!
     pub fn get_fx_by_guid(&self, guid: &Guid) -> Fx {
         Fx::from_guid_lazy_index(self.track.clone(), *guid, self.is_input_fx)
+    }
+
+    // It's correct that this returns an optional because the index isn't a stable identifier of an FX.
+    // The FX could move. So this should do a runtime lookup of the FX and return a stable GUID-backed Fx object if
+    // an FX exists at that index.
+    pub fn get_fx_by_index(&self, index: u32) -> Option<Fx> {
+        if index >= self.get_fx_count() {
+            return None
+        }
+        Some(Fx::from_guid_and_index(
+            self.track.clone(),
+            get_fx_guid(&self.track, index, self.is_input_fx).expect("Couldn't determine FX GUID"),
+            index,
+            self.is_input_fx
+        ))
     }
 }

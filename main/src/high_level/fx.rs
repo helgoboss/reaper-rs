@@ -2,6 +2,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Track, Reaper, LightTrack};
 use std::cell::Cell;
 use c_str_macro::c_str;
+use crate::high_level::fx_parameter::FxParameter;
 
 
 /// The difference to Fx is that this implements Copy (not just Clone). See LightTrack for explanation.
@@ -70,6 +71,10 @@ impl Fx {
 
     pub fn get_guid(&self) -> Option<Guid> {
         self.guid
+    }
+
+    pub fn get_parameter_by_index(&self, index: u32) -> FxParameter {
+        FxParameter::new(self.clone(), index)
     }
 }
 

@@ -56,6 +56,7 @@ fn generate_bindings() {
         .whitelist_var("TrackFX_GetRecCount")
         .whitelist_var("TrackFX_GetCount")
         .whitelist_var("TrackFX_GetFXGUID")
+        .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")

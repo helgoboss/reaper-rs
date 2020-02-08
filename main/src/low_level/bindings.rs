@@ -9,6 +9,28 @@ pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
     pub const REAPER_PLUGIN_VERSION: u32 = 526;
+    pub const CSURF_EXT_RESET: u32 = 131071;
+    pub const CSURF_EXT_SETINPUTMONITOR: u32 = 65537;
+    pub const CSURF_EXT_SETMETRONOME: u32 = 65538;
+    pub const CSURF_EXT_SETAUTORECARM: u32 = 65539;
+    pub const CSURF_EXT_SETRECMODE: u32 = 65540;
+    pub const CSURF_EXT_SETSENDVOLUME: u32 = 65541;
+    pub const CSURF_EXT_SETSENDPAN: u32 = 65542;
+    pub const CSURF_EXT_SETFXENABLED: u32 = 65543;
+    pub const CSURF_EXT_SETFXPARAM: u32 = 65544;
+    pub const CSURF_EXT_SETLASTTOUCHEDFX: u32 = 65546;
+    pub const CSURF_EXT_SETFOCUSEDFX: u32 = 65547;
+    pub const CSURF_EXT_SETLASTTOUCHEDTRACK: u32 = 65548;
+    pub const CSURF_EXT_SETMIXERSCROLL: u32 = 65549;
+    pub const CSURF_EXT_SETBPMANDPLAYRATE: u32 = 65545;
+    pub const CSURF_EXT_SETPAN_EX: u32 = 65550;
+    pub const CSURF_EXT_SETRECVVOLUME: u32 = 65552;
+    pub const CSURF_EXT_SETRECVPAN: u32 = 65553;
+    pub const CSURF_EXT_SETFXOPEN: u32 = 65554;
+    pub const CSURF_EXT_SETFXCHANGE: u32 = 65555;
+    pub const CSURF_EXT_SETPROJECTMARKERCHANGE: u32 = 65556;
+    pub const CSURF_EXT_SETFXPARAM_RECFX: u32 = 65560;
+    pub const CSURF_EXT_SUPPORTS_EXTENDED_TOUCH: u32 = 524289;
     pub mod std {
         #[allow(unused_imports)]
         use self::super::super::root;

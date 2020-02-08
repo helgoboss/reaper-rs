@@ -6,6 +6,7 @@ mod project;
 mod track;
 mod track_send;
 mod fx;
+mod fx_parameter;
 mod helper_control_surface;
 mod section;
 mod action;

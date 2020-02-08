@@ -28,6 +28,7 @@ use crate::high_level::track_send::TrackSend;
 use crate::high_level::fx::{Fx, LightFx};
 use crate::high_level::automation_mode::AutomationMode;
 use std::convert::TryFrom;
+use crate::high_level::fx_parameter::{FxParameter, LightFxParameter};
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -162,6 +163,8 @@ pub(super) struct EventStreamSubjects {
     pub(super) fx_closed: EventStreamSubject<LightFx>,
     pub(super) fx_focused: EventStreamSubject<Option<LightFx>>,
     pub(super) fx_reordered: EventStreamSubject<LightTrack>,
+    pub(super) fx_parameter_value_changed: EventStreamSubject<LightFxParameter>,
+    pub(super) fx_parameter_touched: EventStreamSubject<LightFxParameter>,
     pub(super) master_tempo_changed: EventStreamSubject<bool>,
     pub(super) master_tempo_touched: EventStreamSubject<bool>,
     pub(super) master_playrate_changed: EventStreamSubject<bool>,
@@ -204,6 +207,8 @@ impl EventStreamSubjects {
             fx_closed: default(),
             fx_focused: default(),
             fx_reordered: default(),
+            fx_parameter_value_changed: default(),
+            fx_parameter_touched: default(),
             master_tempo_changed: default(),
             master_tempo_touched: default(),
             master_playrate_changed: default(),

@@ -8,6 +8,9 @@ mod util;
 pub use bindings::root::{
     ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
     reaper_plugin_info_t, KbdSectionInfo, HWND, GUID, TrackEnvelope,
+    CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETFXPARAM, CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETFXENABLED,
+    CSURF_EXT_SETSENDVOLUME, CSURF_EXT_SETSENDPAN, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXOPEN,
+    CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETBPMANDPLAYRATE,
 };
 use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use control_surface::ControlSurface;

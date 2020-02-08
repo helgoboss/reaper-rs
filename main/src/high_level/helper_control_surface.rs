@@ -1,5 +1,8 @@
 use std::os::raw::c_void;
-use crate::low_level::{MediaTrack, ReaProject};
+use crate::low_level::{MediaTrack, ReaProject,
+                       CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETFXPARAM, CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETFXENABLED,
+                       CSURF_EXT_SETSENDVOLUME, CSURF_EXT_SETSENDPAN, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXOPEN,
+                       CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETBPMANDPLAYRATE};
 use crate::medium_level::ControlSurface;
 use std::ffi::CStr;
 use std::borrow::Cow;
@@ -164,6 +167,7 @@ impl HelperControlSurface {
                 let reaper = Reaper::instance();
                 let m = &reaper.medium;
                 let td = TrackData {
+                    // TODO Make functions more accessible in medium API (they are called elsewhere here as well)
                     volume: m.get_media_track_info_value(media_track, c_str!("D_VOL")),
                     pan: m.get_media_track_info_value(media_track, c_str!("D_PAN")),
                     selected: m.get_media_track_info_value(media_track, c_str!("I_SELECTED")) != 0.0,
@@ -324,10 +328,110 @@ impl HelperControlSurface {
             reaper.subjects.tracks_reordered.borrow_mut().next(project);
         }
     }
+
+    fn csurf_ext_setinputmonitor(&self, track: *mut MediaTrack, recmonitor: *mut i32) {
+        if (track.is_null() || recmonitor.is_null()) {
+            return;
+        }
+        let mut td = match self.find_track_data_in_normal_state(track) {
+            None => return,
+            Some(td) => td
+        };
+        let recmonitor = unsafe { *recmonitor };
+        let reaper = Reaper::instance();
+        if td.recmonitor != recmonitor {
+            td.recmonitor = recmonitor;
+            reaper.subjects.track_input_monitoring_changed.borrow_mut().next(LightTrack::new(track, null_mut()));
+        }
+        let recinput = reaper.medium.get_media_track_info_value(track, c_str!("I_RECINPUT")) as i32;
+        if td.recinput != recinput {
+            td.recinput = recinput;
+            reaper.subjects.track_input_changed.borrow_mut().next(LightTrack::new(track, null_mut()));
+        }
+    }
+
+    fn csurf_ext_setfxparam(&self, track: *mut MediaTrack, fxidx_and_paramidx: *mut i32, normalized_value: *mut f64) {
+        self.fx_param_set(track, fxidx_and_paramidx, normalized_value, false);
+    }
+
+    fn csurf_ext_setfxparam_recfx(&self, track: *mut MediaTrack, fxidx_and_paramidx: *mut i32, normalized_value: *mut f64) {
+        self.fx_param_set(track, fxidx_and_paramidx, normalized_value, false);
+    }
+
+    fn fx_param_set(&self, track: *mut MediaTrack, fxidx_and_paramidx: *mut i32, normalized_value: *mut f64, is_input_fx_if_supported: bool) {
+        if (track.is_null() || fxidx_and_paramidx.is_null() || normalized_value.is_null()) {
+            return;
+        }
+        let fxidx_and_paramidx = unsafe { *fxidx_and_paramidx };
+        let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
+        let param_index = fxidx_and_paramidx & 0xffff;
+        // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
+        let track = Track::new(track, null_mut());
+        let normalized_value = unsafe { *normalized_value };
+        let is_input_fx = if self.supports_detection_of_input_fx {
+            is_input_fx_if_supported
+        } else {
+            self.is_probably_input_fx(&track, fx_index, param_index, normalized_value)
+        };
+        let fx_chain = if is_input_fx {
+            track.get_input_fx_chain()
+        } else {
+            track.get_normal_fx_chain()
+        };
+        if let Some(fx) = fx_chain.get_fx_by_index(fx_index as u32) {
+            let fx_param = fx.get_parameter_by_index(param_index as u32);
+            let reaper = Reaper::instance();
+            reaper.subjects.fx_parameter_value_changed.borrow_mut().next(fx_param.clone().into());
+            if self.fx_has_been_touched_just_a_moment_ago.get() {
+                self.fx_has_been_touched_just_a_moment_ago.replace(false);
+                reaper.subjects.fx_parameter_touched.borrow_mut().next(fx_param.into());
+            }
+        }
+    }
+
+    fn is_probably_input_fx(&self, track: &Track, fx_index: i32, param_index: i32, normalized_value: f64) -> bool {
+        unimplemented!()
+    }
+
+
+    fn csurf_ext_setfxenabled(&self, track: *mut MediaTrack, fxidx: *mut i32, enabled: bool) {
+        unimplemented!()
+    }
+
+    fn csurf_ext_setsendvolume(&self, track: *mut MediaTrack, sendidx: *mut i32, volume: *mut f64) {
+        unimplemented!()
+    }
+
+    fn csurf_ext_setsendpan(&self, track: *mut MediaTrack, sendidx: *mut i32, pan: *mut f64) {
+        unimplemented!()
+    }
+
+    fn csurf_ext_setfocusedfx(&self, track: *mut MediaTrack, mediaitemidx: *mut i32, fxidx: *mut i32) {
+        unimplemented!()
+    }
+
+    fn csurf_ext_setfxopen(&self, track: *mut MediaTrack, fxidx: *mut i32, ui_open: bool) {
+        unimplemented!()
+    }
+
+    fn csurf_ext_setfxchange(&self, track: *mut MediaTrack) {
+        unimplemented!()
+    }
+
+    fn csurf_ext_setlasttouchedfx(&self, track: *mut MediaTrack, mediaitemidx: *mut i32, fxidx: *mut i32) {
+        unimplemented!()
+    }
+
+    fn csurf_ext_setbpmandplayrate(&self, bpm: *mut f64, playrate: *mut f64) {
+        unimplemented!()
+    }
 }
 
 impl ControlSurface for HelperControlSurface {
     fn run(&mut self) {
+        // Invoke custom idle code
+        Reaper::instance().subjects.main_thread_idle.borrow_mut().next(true);
+        // Process tasks in queue
         for task in self.task_receiver.try_iter().take(BULK_TASK_EXECUTION_COUNT) {
             task();
         }
@@ -378,6 +482,57 @@ impl ControlSurface for HelperControlSurface {
         reaper.subjects.track_volume_changed.borrow_mut().next(track);
         if !self.track_parameter_is_automated(track.into(), c_str!("Volume")) {
             reaper.subjects.track_volume_touched.borrow_mut().next(track);
+        }
+    }
+
+    fn extended(&self, call: i32, parm1: *mut c_void, parm2: *mut c_void, parm3: *mut c_void) -> i32 {
+        match call as u32 {
+            CSURF_EXT_SETINPUTMONITOR => {
+                self.csurf_ext_setinputmonitor(parm1 as *mut MediaTrack, parm2 as *mut i32);
+                // TODO Why do we return 0 in all csurf_ext_ functions? The doc says this should be returned if unsupported.
+                0
+            }
+            CSURF_EXT_SETFXPARAM => {
+                self.csurf_ext_setfxparam(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as *mut f64);
+                0
+            }
+            CSURF_EXT_SETFXPARAM_RECFX => {
+                self.csurf_ext_setfxparam_recfx(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as *mut f64);
+                0
+            }
+            CSURF_EXT_SETFXENABLED => {
+                self.csurf_ext_setfxenabled(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as usize != 0);
+                0
+            }
+            CSURF_EXT_SETSENDVOLUME => {
+                self.csurf_ext_setsendvolume(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as *mut f64);
+                0
+            }
+            CSURF_EXT_SETSENDPAN => {
+                self.csurf_ext_setsendpan(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as *mut f64);
+                0
+            }
+            CSURF_EXT_SETFOCUSEDFX => {
+                self.csurf_ext_setfocusedfx(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as *mut i32);
+                0
+            }
+            CSURF_EXT_SETFXOPEN => {
+                self.csurf_ext_setfxopen(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as usize != 0);
+                0
+            }
+            CSURF_EXT_SETFXCHANGE => {
+                self.csurf_ext_setfxchange(parm1 as *mut MediaTrack);
+                0
+            }
+            CSURF_EXT_SETLASTTOUCHEDFX => {
+                self.csurf_ext_setlasttouchedfx(parm1 as *mut MediaTrack, parm2 as *mut i32, parm3 as *mut i32);
+                0
+            }
+            CSURF_EXT_SETBPMANDPLAYRATE => {
+                self.csurf_ext_setbpmandplayrate(parm1 as *mut f64, parm2 as *mut f64);
+                0
+            }
+            _ => 0
         }
     }
 }
