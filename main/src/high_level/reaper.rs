@@ -24,7 +24,7 @@ use std::sync::mpsc::{Sender, Receiver};
 use slog::Level::Debug;
 use std::thread;
 use std::thread::ThreadId;
-use crate::high_level::track_send::TrackSend;
+use crate::high_level::track_send::{TrackSend, LightTrackSend};
 use crate::high_level::fx::{Fx, LightFx};
 use crate::high_level::automation_mode::AutomationMode;
 use std::convert::TryFrom;
@@ -141,10 +141,10 @@ pub(super) struct EventStreamSubjects {
     pub(super) track_volume_touched: EventStreamSubject<LightTrack>,
     pub(super) track_pan_changed: EventStreamSubject<LightTrack>,
     pub(super) track_pan_touched: EventStreamSubject<LightTrack>,
-    pub(super) track_send_volume_changed: EventStreamSubject<TrackSend>,
-    pub(super) track_send_volume_touched: EventStreamSubject<TrackSend>,
-    pub(super) track_send_pan_changed: EventStreamSubject<TrackSend>,
-    pub(super) track_send_pan_touched: EventStreamSubject<TrackSend>,
+    pub(super) track_send_volume_changed: EventStreamSubject<LightTrackSend>,
+    pub(super) track_send_volume_touched: EventStreamSubject<LightTrackSend>,
+    pub(super) track_send_pan_changed: EventStreamSubject<LightTrackSend>,
+    pub(super) track_send_pan_touched: EventStreamSubject<LightTrackSend>,
     pub(super) track_added: EventStreamSubject<LightTrack>,
     pub(super) track_removed: EventStreamSubject<LightTrack>,
     pub(super) tracks_reordered: EventStreamSubject<Project>,

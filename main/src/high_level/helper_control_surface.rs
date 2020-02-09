@@ -118,7 +118,7 @@ impl HelperControlSurface {
         Some(RefMut::map(track_data_map, |tdm| tdm.get_mut(&track).unwrap()))
     }
 
-    fn track_parameter_is_automated(&self, track: Track, parameter_name: &CStr) -> bool {
+    fn track_parameter_is_automated(&self, track: &Track, parameter_name: &CStr) -> bool {
         if !track.is_available() {
             return false;
         }
@@ -458,10 +458,24 @@ impl HelperControlSurface {
     }
 
     fn csurf_ext_setsendvolume(&self, track: *mut MediaTrack, sendidx: *mut i32, volume: *mut f64) {
-        unimplemented!()
+        if track.is_null() || sendidx.is_null() || volume.is_null() {
+            return;
+        }
+        let sendidx = unsafe { *sendidx };
+        let track = Track::new(track, null_mut());
+        let track_send = track.get_index_based_send_by_index(sendidx as u32);
+        let reaper = Reaper::instance();
+        reaper.subjects.track_send_volume_changed.borrow_mut().next(track_send.clone().into());
+        // Send volume touch event only if not automated
+        if !self.track_parameter_is_automated(&track, c_str!("Send Volume")) {
+            reaper.subjects.track_send_volume_touched.borrow_mut().next(track_send.into());
+        }
     }
 
     fn csurf_ext_setsendpan(&self, track: *mut MediaTrack, sendidx: *mut i32, pan: *mut f64) {
+        if track.is_null() || sendidx.is_null() || pan.is_null() {
+            return;
+        }
         unimplemented!()
     }
 
@@ -521,7 +535,7 @@ impl ControlSurface for HelperControlSurface {
         let track = LightTrack::new(trackid, null_mut());
         let reaper = Reaper::instance();
         reaper.subjects.track_pan_changed.borrow_mut().next(track);
-        if !self.track_parameter_is_automated(track.into(), c_str!("Pan")) {
+        if !self.track_parameter_is_automated(&track.into(), c_str!("Pan")) {
             reaper.subjects.track_pan_touched.borrow_mut().next(track);
         }
     }
@@ -539,7 +553,7 @@ impl ControlSurface for HelperControlSurface {
         let track = LightTrack::new(trackid, null_mut());
         let reaper = Reaper::instance();
         reaper.subjects.track_volume_changed.borrow_mut().next(track);
-        if !self.track_parameter_is_automated(track.into(), c_str!("Volume")) {
+        if !self.track_parameter_is_automated(&track.into(), c_str!("Volume")) {
             reaper.subjects.track_volume_touched.borrow_mut().next(track);
         }
     }

@@ -19,6 +19,7 @@ use crate::medium_level;
 use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx::{Fx, get_index_from_query_index};
+use crate::high_level::track_send::TrackSend;
 
 /// The difference to Track is that this implements Copy (not just Clone)
 // TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
@@ -145,6 +146,14 @@ impl Track {
         }
         // Must be > 0. Make it zero-rooted.
         ip_track_number - 1
+    }
+
+    // Non-Optional. Even the index is not a stable identifier, we need a way to create
+    // sends just by an index, not to target tracks. Think of ReaLearn for example and saving
+    // a preset for a future project which doesn't have the same target track like in the
+    // example project.
+    pub fn get_index_based_send_by_index(&self, index: u32) -> TrackSend {
+        TrackSend::index_based(self.clone(), index)
     }
 
     // It's correct that this returns an optional because the index isn't a stable identifier of an FX.
