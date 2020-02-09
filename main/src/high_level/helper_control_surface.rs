@@ -476,11 +476,32 @@ impl HelperControlSurface {
         if track.is_null() || sendidx.is_null() || pan.is_null() {
             return;
         }
-        unimplemented!()
+        let sendidx = unsafe { *sendidx };
+        let track = Track::new(track, null_mut());
+        let track_send = track.get_index_based_send_by_index(sendidx as u32);
+        let reaper = Reaper::instance();
+        reaper.subjects.track_send_pan_changed.borrow_mut().next(track_send.clone().into());
+        // Send volume touch event only if not automated
+        if !self.track_parameter_is_automated(&track, c_str!("Send Pan")) {
+            reaper.subjects.track_send_pan_touched.borrow_mut().next(track_send.into());
+        }
     }
 
     fn csurf_ext_setfocusedfx(&self, track: *mut MediaTrack, mediaitemidx: *mut i32, fxidx: *mut i32) {
-        unimplemented!()
+        let reaper = Reaper::instance();
+        if track.is_null() || !mediaitemidx.is_null() || fxidx.is_null() {
+            // Clear focused FX
+            reaper.subjects.fx_focused.borrow_mut().next(None);
+            return;
+        }
+        let fxidx = unsafe { *fxidx };
+        // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
+        let track = Track::new(track, null_mut());
+        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
+            // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on chunk manipulations
+            self.detect_fx_changes_on_track(track.clone(), true, !fx.is_input_fx(), fx.is_input_fx());
+            reaper.subjects.fx_focused.borrow_mut().next(Some(fx.into()));
+        }
     }
 
     fn csurf_ext_setfxopen(&self, track: *mut MediaTrack, fxidx: *mut i32, ui_open: bool) {

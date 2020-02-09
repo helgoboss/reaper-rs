@@ -146,6 +146,10 @@ impl Fx {
             self.track.get_normal_fx_chain()
         }
     }
+
+    pub fn is_input_fx(&self) -> bool {
+        self.is_input_fx
+    }
 }
 
 pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid> {
