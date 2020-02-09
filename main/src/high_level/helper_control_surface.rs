@@ -539,11 +539,23 @@ impl HelperControlSurface {
     }
 
     fn csurf_ext_setlasttouchedfx(&self, track: *mut MediaTrack, mediaitemidx: *mut i32, fxidx: *mut i32) {
-        unimplemented!()
+        self.fx_has_been_touched_just_a_moment_ago.replace(true);
     }
 
     fn csurf_ext_setbpmandplayrate(&self, bpm: *mut f64, playrate: *mut f64) {
-        unimplemented!()
+        let reaper = Reaper::instance();
+        if !bpm.is_null() {
+            reaper.subjects.master_tempo_changed.borrow_mut().next(true);
+            // If there's a tempo envelope, there are just tempo notifications when the tempo is actually changed.
+            // So that's okay for "touched".
+            // TODO What about gradual tempo changes?
+            reaper.subjects.master_tempo_touched.borrow_mut().next(true);
+        }
+        if !playrate.is_null() {
+            reaper.subjects.master_playrate_changed.borrow_mut().next(true);
+            // FIXME What about playrate automation?
+            reaper.subjects.master_playrate_touched.borrow_mut().next(true);
+        }
     }
 }
 
