@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid};
 use std::rc::Rc;
 use std::cell::RefCell;
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -101,13 +101,37 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             );
             Ok(())
         }),
-        step("Query master track", |reaper, step| {
+        step("Query master track", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
             // When
             let master_track = project.get_master_track();
             // Then
-            check_eq!(master_track.is_master_track(), true);
+            check!(master_track.is_master_track());
+            Ok(())
+        }),
+        step("Query all tracks", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            project.add_track();
+            // When
+            let tracks = project.get_tracks();
+            // Then
+            check_eq!(tracks.count(), 2);
+            Ok(())
+        }),
+        step("Query track by GUID", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let first_track = project.get_first_track().ok_or("No first track")?;
+            let new_track = project.add_track();
+            // When
+            let found_track = project.get_track_by_guid(new_track.get_guid());
+            // Then
+            check!(found_track.is_available());
+            check_eq!(&found_track, &new_track);
+            check_ne!(&found_track, &first_track);
+            check_eq!(new_track.get_guid(), &get_media_track_guid(new_track.get_media_track()));
             Ok(())
         }),
     )

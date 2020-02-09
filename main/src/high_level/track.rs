@@ -210,7 +210,8 @@ impl Track {
         }
     }
 
-    fn get_guid(&self) -> &Guid {
+    // TODO Maybe return by value instead
+    pub fn get_guid(&self) -> &Guid {
         &self.guid
     }
 
