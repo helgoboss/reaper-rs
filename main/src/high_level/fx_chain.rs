@@ -57,4 +57,8 @@ impl FxChain {
             self.is_input_fx
         ))
     }
+
+    pub fn is_available(&self) -> bool {
+        self.track.is_available()
+    }
 }

@@ -3,6 +3,7 @@ use crate::high_level::{Track, Reaper, LightTrack};
 use std::cell::Cell;
 use c_str_macro::c_str;
 use crate::high_level::fx_parameter::FxParameter;
+use crate::high_level::fx_chain::FxChain;
 
 
 /// The difference to Fx is that this implements Copy (not just Clone). See LightTrack for explanation.
@@ -20,7 +21,7 @@ impl From<LightFx> for Fx {
             track: light.track.into(),
             guid: light.guid,
             index: Cell::new(light.index),
-            is_input_fx: light.is_input_fx
+            is_input_fx: light.is_input_fx,
         }
     }
 }
@@ -31,7 +32,7 @@ impl From<Fx> for LightFx {
             track: heavy.track.into(),
             guid: heavy.guid,
             index: heavy.index.get(),
-            is_input_fx: heavy.is_input_fx
+            is_input_fx: heavy.is_input_fx,
         }
     }
 }
@@ -93,15 +94,57 @@ impl Fx {
     }
 
     fn load_if_necessary_or_complain(&self) {
-        unimplemented!()
+        if !self.is_loaded_and_at_correct_index() && !self.load_by_guid() {
+            panic!("FX not loadable")
+        }
     }
 
     fn is_loaded_and_at_correct_index(&self) -> bool {
-        unimplemented!()
+        let index = match self.index.get() {
+            None => return false, // Not loaded
+            Some(index) => index
+        };
+        if !self.track.is_available() {
+            return false;
+        }
+        match self.guid {
+            None => true, // No GUID tracking
+            Some(guid) => {
+                // Loaded but might be at wrong index
+                self.get_guid_by_index(index) == Some(guid)
+            }
+        }
+    }
+
+    // Returns None if no FX at that index anymore
+    fn get_guid_by_index(&self, index: u32) -> Option<Guid> {
+        get_fx_guid(&self.track, index, self.is_input_fx)
     }
 
     fn load_by_guid(&self) -> bool {
-        unimplemented!()
+        if !self.get_chain().is_available() {
+            return false;
+        }
+        let guid = match self.guid {
+            None => return false, // No GUID tracking
+            Some(guid) => guid
+        };
+        let found_fx = self.get_chain().get_fxs()
+            .find(|fx| fx.get_guid() == Some(guid));
+        if let Some(fx) = found_fx {
+            self.index.replace(Some(fx.get_index()));
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn get_chain(&self) -> FxChain {
+        if self.is_input_fx {
+            self.track.get_input_fx_chain()
+        } else {
+            self.track.get_normal_fx_chain()
+        }
     }
 }
 
