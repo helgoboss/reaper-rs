@@ -16,6 +16,7 @@ use c_str_macro::c_str;
 use std::ptr::null_mut;
 use std::collections::hash_map::Entry;
 use std::collections::hash_map::Entry::Occupied;
+use crate::high_level::fx::Fx;
 
 const BULK_TASK_EXECUTION_COUNT: usize = 100;
 
@@ -371,7 +372,7 @@ impl HelperControlSurface {
         let is_input_fx = if self.supports_detection_of_input_fx {
             is_input_fx_if_supported
         } else {
-            self.is_probably_input_fx(&track, fx_index, param_index, normalized_value)
+            self.is_probably_input_fx(&track, fx_index, Some(param_index), Some(normalized_value))
         };
         let fx_chain = if is_input_fx {
             track.get_input_fx_chain()
@@ -389,7 +390,7 @@ impl HelperControlSurface {
         }
     }
 
-    fn is_probably_input_fx(&self, track: &Track, fx_index: i32, param_index: i32, normalized_value: f64) -> bool {
+    fn is_probably_input_fx(&self, track: &Track, fx_index: i32, param_index: Option<i32>, normalized_value: Option<f64>) -> bool {
         let pairs = self.fx_chain_pair_by_media_track.borrow();
         let pair = match pairs.get(&track.get_media_track()) {
             None => {
@@ -406,16 +407,19 @@ impl HelperControlSurface {
             true
         } else {
             // Could be both
-            if param_index == -1 {
-                // We don't have a parameter number at our disposal so we need to guess - we guess normal FX TODO
-                return false;
-            }
+            let param_index = match param_index {
+                None => {
+                    // We don't have a parameter number at our disposal so we need to guess - we guess normal FX TODO
+                    return false;
+                }
+                Some(i) => i
+            };
             // Compare parameter values (a heuristic but so what, it's just for MIDI learn)
             match track.get_normal_fx_chain().get_fx_by_index(fx_index as u32) {
                 None => true,
                 Some(output_fx) => {
                     let output_fx_param = output_fx.get_parameter_by_index(param_index as u32);
-                    let is_probably_output_fx = output_fx_param.get_reaper_value() == normalized_value;
+                    let is_probably_output_fx = Some(output_fx_param.get_reaper_value()) == normalized_value;
                     !is_probably_output_fx
                 }
             }
@@ -424,7 +428,33 @@ impl HelperControlSurface {
 
 
     fn csurf_ext_setfxenabled(&self, track: *mut MediaTrack, fxidx: *mut i32, enabled: bool) {
-        unimplemented!()
+        if track.is_null() || fxidx.is_null() {
+            return;
+        }
+        let fxidx = unsafe { *fxidx };
+        // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
+        let track = Track::new(track, null_mut());
+        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
+            Reaper::instance().subjects.fx_enabled_changed.borrow_mut().next(fx.into());
+        }
+    }
+
+    // From REAPER > 5.95, parmFxIndex should be interpreted as query index. For earlier versions it's a normal index
+    // - which unfortunately doesn't contain information if the FX is on the normal FX chain or the input FX chain.
+    // In this case a heuristic is applied to determine which chain it is. It gets more accurate when paramIndex
+    // and paramValue are supplied.
+    fn get_fx_from_parm_fx_index(&self, track: &Track, parm_fx_index: i32, param_index: Option<i32>, param_value: Option<f64>) -> Option<Fx> {
+        if self.supports_detection_of_input_fx {
+            track.get_fx_by_query_index(parm_fx_index)
+        } else {
+            let is_input_fx = self.is_probably_input_fx(track, parm_fx_index, param_index, param_value);
+            let fx_chain = if is_input_fx {
+                track.get_input_fx_chain()
+            } else {
+                track.get_normal_fx_chain()
+            };
+            fx_chain.get_fx_by_index(parm_fx_index as u32)
+        }
     }
 
     fn csurf_ext_setsendvolume(&self, track: *mut MediaTrack, sendidx: *mut i32, volume: *mut f64) {

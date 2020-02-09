@@ -158,6 +158,14 @@ pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid>
     }
 }
 
+pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
+    if query_index >= 0x1000000 {
+        ((query_index - 0x1000000) as u32, true)
+    } else {
+        (query_index as u32, false)
+    }
+}
+
 pub fn get_fx_query_index(index: u32, is_input_fx: bool) -> i32 {
     let addend: i32 = if is_input_fx { 0x1000000 } else { 0 };
     addend + (index as i32)

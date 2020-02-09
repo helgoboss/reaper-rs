@@ -18,6 +18,7 @@ use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
 use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx_chain::FxChain;
+use crate::high_level::fx::{Fx, get_index_from_query_index};
 
 /// The difference to Track is that this implements Copy (not just Clone)
 // TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
@@ -74,7 +75,7 @@ impl From<LightTrack> for Track {
         Track {
             media_track: Cell::new(light.media_track),
             rea_project: Cell::new(light.rea_project),
-            guid: light.guid
+            guid: light.guid,
         }
     }
 }
@@ -84,7 +85,7 @@ impl From<Track> for LightTrack {
         LightTrack {
             media_track: heavy.media_track.get(),
             rea_project: heavy.rea_project.get(),
-            guid: heavy.guid
+            guid: heavy.guid,
         }
     }
 }
@@ -115,7 +116,7 @@ impl Track {
         Track {
             media_track: Cell::new(null_mut()),
             rea_project: Cell::new(project.get_rea_project()),
-            guid: guid
+            guid: guid,
         }
     }
 
@@ -144,6 +145,19 @@ impl Track {
         }
         // Must be > 0. Make it zero-rooted.
         ip_track_number - 1
+    }
+
+    // It's correct that this returns an optional because the index isn't a stable identifier of an FX.
+    // The FX could move. So this should do a runtime lookup of the FX and return a stable GUID-backed Fx object if
+    // an FX exists at that query index.
+    pub fn get_fx_by_query_index(&self, query_index: i32) -> Option<Fx> {
+        let (index, is_input_fx) = get_index_from_query_index(query_index);
+        let fx_chain = if is_input_fx {
+            self.get_input_fx_chain()
+        } else {
+            self.get_normal_fx_chain()
+        };
+        fx_chain.get_fx_by_index(index)
     }
 
     fn load_and_check_if_necessary_or_complain(&self) {
