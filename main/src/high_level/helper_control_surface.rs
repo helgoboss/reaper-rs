@@ -557,6 +557,11 @@ impl HelperControlSurface {
             reaper.subjects.master_playrate_touched.borrow_mut().next(true);
         }
     }
+
+    fn decrease_num_track_set_changes_left_to_be_propagated(&self) {
+        let previous_value = self.num_track_set_changes_left_to_be_propagated.get();
+        self.num_track_set_changes_left_to_be_propagated.replace(previous_value - 1);
+    }
 }
 
 impl ControlSurface for HelperControlSurface {
@@ -617,6 +622,59 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
+    fn set_surface_mute(&self, trackid: *mut MediaTrack, mute: bool) {
+        let mut td = match self.find_track_data_in_normal_state(trackid) {
+            None => return,
+            Some(td) => td
+        };
+        if td.mute != mute {
+            td.mute = mute;
+            let track = LightTrack::new(trackid, null_mut());
+            let reaper = Reaper::instance();
+            reaper.subjects.track_mute_changed.borrow_mut().next(track);
+            if !self.track_parameter_is_automated(&track.into(), c_str!("Mute")) {
+                reaper.subjects.track_mute_touched.borrow_mut().next(track);
+            }
+        }
+    }
+
+    fn set_surface_selected(&self, trackid: *mut MediaTrack, selected: bool) {
+        let mut td = match self.find_track_data_in_normal_state(trackid) {
+            None => return,
+            Some(td) => td
+        };
+        if td.selected != selected {
+            td.selected = selected;
+            let track = LightTrack::new(trackid, null_mut());
+            Reaper::instance().subjects.track_selected_changed.borrow_mut().next(track);
+        }
+    }
+
+    fn set_surface_solo(&self, trackid: *mut MediaTrack, solo: bool) {
+        let mut td = match self.find_track_data_in_normal_state(trackid) {
+            None => return,
+            Some(td) => td
+        };
+        if td.solo != solo {
+            td.solo = solo;
+            let track = LightTrack::new(trackid, null_mut());
+            Reaper::instance().subjects.track_solo_changed.borrow_mut().next(track);
+        }
+    }
+
+    fn set_surface_rec_arm(&self, trackid: *mut MediaTrack, recarm: bool) {
+        let mut td = match self.find_track_data_in_normal_state(trackid) {
+            None => return,
+            Some(td) => td
+        };
+        if td.recarm != recarm {
+            td.recarm = recarm;
+            let track = LightTrack::new(trackid, null_mut());
+            Reaper::instance().subjects.track_arm_changed.borrow_mut().next(track);
+        }
+    }
+
+
     fn extended(&self, call: i32, parm1: *mut c_void, parm2: *mut c_void, parm3: *mut c_void) -> i32 {
         match call as u32 {
             CSURF_EXT_SETINPUTMONITOR => {
@@ -666,5 +724,14 @@ impl ControlSurface for HelperControlSurface {
             }
             _ => 0
         }
+    }
+
+    fn set_track_title(&self, trackid: *mut MediaTrack, title: &CStr) {
+        if self.get_state() == State::PropagatingTrackSetChanges {
+            self.decrease_num_track_set_changes_left_to_be_propagated();
+            return;
+        }
+        let track = Track::new(trackid, null_mut());
+        Reaper::instance().subjects.track_name_changed.borrow_mut().next(track.into());
     }
 }
