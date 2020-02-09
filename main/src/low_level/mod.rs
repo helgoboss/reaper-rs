@@ -176,7 +176,8 @@ gen_reaper_struct![
     GetGlobalAutomationOverride,
     TrackFX_GetCount,
     TrackFX_GetRecCount,
-    TrackFX_GetFXGUID
+    TrackFX_GetFXGUID,
+    TrackFX_GetParamNormalized
 ];
 
 #[macro_export]

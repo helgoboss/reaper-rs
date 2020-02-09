@@ -1,4 +1,5 @@
 use crate::high_level::fx::{Fx, LightFx};
+use crate::high_level::Reaper;
 
 
 /// The difference to FxParameter is that this implements Copy (not just Clone). See LightTrack for explanation.
@@ -38,5 +39,13 @@ impl FxParameter {
             fx,
             index,
         }
+    }
+
+    pub fn get_reaper_value(&self) -> f64 {
+        Reaper::instance().medium.track_fx_get_param_normalized(
+            self.fx.get_track().get_media_track(),
+            self.fx.get_query_index(),
+            self.index as i32
+        )
     }
 }

@@ -76,6 +76,33 @@ impl Fx {
     pub fn get_parameter_by_index(&self, index: u32) -> FxParameter {
         FxParameter::new(self.clone(), index)
     }
+
+    pub fn get_track(&self) -> Track {
+        self.track.clone()
+    }
+
+    pub fn get_query_index(&self) -> i32 {
+        get_fx_query_index(self.get_index(), self.is_input_fx)
+    }
+
+    pub fn get_index(&self) -> u32 {
+        if !self.is_loaded_and_at_correct_index() {
+            self.load_by_guid();
+        }
+        self.index.get().expect("FX index could not be determined")
+    }
+
+    fn load_if_necessary_or_complain(&self) {
+        unimplemented!()
+    }
+
+    fn is_loaded_and_at_correct_index(&self) -> bool {
+        unimplemented!()
+    }
+
+    fn load_by_guid(&self) -> bool {
+        unimplemented!()
+    }
 }
 
 pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid> {

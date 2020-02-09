@@ -390,7 +390,36 @@ impl HelperControlSurface {
     }
 
     fn is_probably_input_fx(&self, track: &Track, fx_index: i32, param_index: i32, normalized_value: f64) -> bool {
-        unimplemented!()
+        let pairs = self.fx_chain_pair_by_media_track.borrow();
+        let pair = match pairs.get(&track.get_media_track()) {
+            None => {
+                // Should not happen. In this case, an FX yet unknown to Realearn has sent a parameter change
+                return false;
+            }
+            Some(pair) => pair
+        };
+        let could_be_input_fx = fx_index < pair.input_fx_guids.len() as i32;
+        let could_be_output_fx = fx_index < pair.output_fx_guids.len() as i32;
+        if !could_be_input_fx && !could_be_output_fx {
+            false
+        } else if could_be_input_fx && !could_be_output_fx {
+            true
+        } else {
+            // Could be both
+            if param_index == -1 {
+                // We don't have a parameter number at our disposal so we need to guess - we guess normal FX TODO
+                return false;
+            }
+            // Compare parameter values (a heuristic but so what, it's just for MIDI learn)
+            match track.get_normal_fx_chain().get_fx_by_index(fx_index as u32) {
+                None => true,
+                Some(output_fx) => {
+                    let output_fx_param = output_fx.get_parameter_by_index(param_index as u32);
+                    let is_probably_output_fx = output_fx_param.get_reaper_value() == normalized_value;
+                    !is_probably_output_fx
+                }
+            }
+        }
     }
 
 

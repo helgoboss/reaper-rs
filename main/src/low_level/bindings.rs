@@ -640,6 +640,15 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut TrackFX_GetParamNormalized: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                param: ::std::os::raw::c_int,
+            ) -> f64,
+        >;
+    }
+    extern "C" {
         pub static mut TrackFX_GetRecCount: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;

@@ -88,3 +88,9 @@ pub type TrackFX_GetFXGUID = fn(
     track: *mut MediaTrack,
     fx: ::std::os::raw::c_int,
 ) -> *mut GUID;
+
+pub type TrackFX_GetParamNormalized = fn(
+    track: *mut MediaTrack,
+    fx: ::std::os::raw::c_int,
+    param: ::std::os::raw::c_int,
+) -> f64;
