@@ -524,8 +524,18 @@ impl HelperControlSurface {
         }
     }
 
-    fn csurf_ext_setfxchange(&self, track: *mut MediaTrack) {
-        unimplemented!()
+    fn csurf_ext_setfxchange(&self, track: *mut MediaTrack, flags: i32) {
+        if track.is_null() {
+            return;
+        }
+        let track = Track::new(track, null_mut());
+        if self.supports_detection_of_input_fx_in_set_fx_change {
+            let is_input_fx = (flags & 1) == 1;
+            self.detect_fx_changes_on_track(track, true, !is_input_fx, is_input_fx);
+        } else {
+            // REAPER < 5.95, we don't know if the change happened on input or normal FX chain
+            self.detect_fx_changes_on_track(track, true, true, true);
+        }
     }
 
     fn csurf_ext_setlasttouchedfx(&self, track: *mut MediaTrack, mediaitemidx: *mut i32, fxidx: *mut i32) {
@@ -631,7 +641,7 @@ impl ControlSurface for HelperControlSurface {
                 0
             }
             CSURF_EXT_SETFXCHANGE => {
-                self.csurf_ext_setfxchange(parm1 as *mut MediaTrack);
+                self.csurf_ext_setfxchange(parm1 as *mut MediaTrack, parm2 as usize as i32);
                 0
             }
             CSURF_EXT_SETLASTTOUCHEDFX => {
