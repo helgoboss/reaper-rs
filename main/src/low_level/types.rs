@@ -94,3 +94,5 @@ pub type TrackFX_GetParamNormalized = fn(
     fx: ::std::os::raw::c_int,
     param: ::std::os::raw::c_int,
 ) -> f64;
+
+pub type GetMasterTrack = fn(proj: *mut ReaProject) -> *mut MediaTrack;

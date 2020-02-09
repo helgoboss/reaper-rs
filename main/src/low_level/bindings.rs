@@ -548,6 +548,11 @@ pub mod root {
         pub static mut GetMainHwnd: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
     }
     extern "C" {
+        pub static mut GetMasterTrack: ::std::option::Option<
+            unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::MediaTrack,
+        >;
+    }
+    extern "C" {
         pub static mut GetMediaTrackInfo_Value: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,

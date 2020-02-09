@@ -156,6 +156,10 @@ impl Reaper {
         self.low.TrackFX_GetParamNormalized.unwrap()(track, fx, param)
     }
 
+    pub fn get_master_track(&self, proj: *mut ReaProject) -> *mut MediaTrack {
+        self.low.GetMasterTrack.unwrap()(proj)
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

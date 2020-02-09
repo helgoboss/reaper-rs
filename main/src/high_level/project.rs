@@ -108,6 +108,12 @@ impl Project {
         Track::new(media_track, self.rea_project)
     }
 
+    pub fn get_master_track(&self) -> Track {
+        self.complain_if_not_available();
+        let mt = Reaper::instance().medium.get_master_track(self.rea_project);
+        Track::new(mt, self.rea_project)
+    }
+
     fn complain_if_not_available(&self) {
         if !self.is_available() {
             panic!("Project not available");

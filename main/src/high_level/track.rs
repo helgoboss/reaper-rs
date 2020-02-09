@@ -302,6 +302,10 @@ impl Track {
     pub fn get_input_fx_chain(&self) -> FxChain {
         FxChain::new(self.clone(), true)
     }
+
+    pub fn is_master_track(&self) -> bool {
+        self.get_index() == -1
+    }
 }
 
 pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
