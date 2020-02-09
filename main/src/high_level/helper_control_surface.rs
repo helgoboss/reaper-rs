@@ -499,13 +499,29 @@ impl HelperControlSurface {
         let track = Track::new(track, null_mut());
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on chunk manipulations
-            self.detect_fx_changes_on_track(track.clone(), true, !fx.is_input_fx(), fx.is_input_fx());
+            self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
             reaper.subjects.fx_focused.borrow_mut().next(Some(fx.into()));
         }
     }
 
     fn csurf_ext_setfxopen(&self, track: *mut MediaTrack, fxidx: *mut i32, ui_open: bool) {
-        unimplemented!()
+        if track.is_null() || fxidx.is_null() {
+            return;
+        }
+        let fxidx = unsafe { *fxidx };
+        // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
+        let track = Track::new(track, null_mut());
+        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
+            // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on chunk manipulations
+            self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
+            let reaper = Reaper::instance();
+            let subject = if ui_open {
+                &reaper.subjects.fx_opened
+            } else {
+                &reaper.subjects.fx_closed
+            };
+            subject.borrow_mut().next(fx.into());
+        }
     }
 
     fn csurf_ext_setfxchange(&self, track: *mut MediaTrack) {
