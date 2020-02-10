@@ -122,7 +122,7 @@ impl Track {
     }
 
     pub fn set_name(&self, name: &CStr) {
-        self.load_if_necessary_or_complain();
+        self.load_and_check_if_necessary_or_complain();
         Reaper::instance().medium.get_set_media_track_info(
             self.get_media_track(),
             c_str!("P_NAME"),
@@ -140,26 +140,26 @@ impl Track {
     }
 
     pub fn get_input_monitoring_mode(&self) -> InputMonitoringMode {
-        self.load_if_necessary_or_complain();
+        self.load_and_check_if_necessary_or_complain();
         let irecmon = Reaper::instance().medium.convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECMON"));
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
     pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
-        self.load_if_necessary_or_complain();
+        self.load_and_check_if_necessary_or_complain();
         let irecmon: i32 = mode.into();
         Reaper::instance().medium.csurf_on_input_monitoring_change_ex(self.get_media_track(), irecmon, false);
     }
 
     pub fn get_recording_input(&self) -> RecordingInput {
-        self.load_if_necessary_or_complain();
+        self.load_and_check_if_necessary_or_complain();
         let rec_input_index = Reaper::instance().medium.convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECINPUT"));
         RecordingInput::from_rec_input_index(rec_input_index)
     }
 
     // TODO Support setting other kinds of inputs
     pub fn set_recording_input(&self, input: MidiRecordingInput) {
-        self.load_if_necessary_or_complain();
+        self.load_and_check_if_necessary_or_complain();
         let reaper = Reaper::instance();
         reaper.medium.set_media_track_info_value(self.get_media_track(), c_str!("I_RECINPUT"), input.get_rec_input_index() as f64);
         // Only for triggering notification (as manual setting the rec input would also trigger it)
@@ -180,6 +180,18 @@ impl Track {
         let (volume, _) = Reaper::instance().medium.get_track_ui_vol_pan(self.get_media_track())
             .expect("Couldn't get vol/pan");
         Volume::of_reaper_value(volume)
+    }
+
+    pub fn set_volume(&self, volume: Volume) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper_value = volume.get_reaper_value();
+        let reaper = Reaper::instance();
+        // CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The return value
+        // reflects the cropped value. The precision became much better with REAPER 5.28.
+        reaper.medium.csurf_on_volume_change_ex(self.get_media_track(), reaper_value, false, false);
+        // Setting the volume programmatically doesn't trigger SetSurfaceVolume in HelperControlSurface so we need
+        // to notify manually
+        reaper.medium.csurf_set_surface_volume(self.get_media_track(), reaper_value, null_mut());
     }
 
     // TODO Maybe return u32 and express master track index in other ways
@@ -333,7 +345,7 @@ impl Track {
     }
 
     pub fn get_automation_mode(&self) -> AutomationMode {
-        self.load_if_necessary_or_complain();
+        self.load_and_check_if_necessary_or_complain();
         let am = Reaper::instance().medium.get_track_automation_mode(self.media_track.get());
         AutomationMode::try_from(am).expect("Unknown automation mode")
     }

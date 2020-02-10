@@ -65,6 +65,8 @@ fn generate_bindings() {
         .whitelist_var("DB2SLIDER")
         .whitelist_var("SLIDER2DB")
         .whitelist_var("GetTrackUIVolPan")
+        .whitelist_var("CSurf_OnVolumeChangeEx")
+        .whitelist_var("CSurf_SetSurfaceVolume")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

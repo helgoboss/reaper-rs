@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -272,6 +272,25 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(volume.get_reaper_value(), 1.0);
             check_eq!(volume.get_db(), 0.0);
             check_eq!(volume.get_normalized_value(), 0.71599999999999997);
+            Ok(())
+        }),
+        step("Set track volume", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_volume_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.set_volume(Volume::of_normalized_value(0.25));
+            // Then
+            let volume = track.get_volume();
+            check_eq!(volume.get_reaper_value(), 0.031588093366685013);
+            check_eq!(volume.get_db(), -30.009531739774296);
+            check_eq!(volume.get_normalized_value(), 0.25000000000003497);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
             Ok(())
         }),
     )

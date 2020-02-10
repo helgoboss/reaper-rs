@@ -519,6 +519,26 @@ pub mod root {
     pub struct TrackEnvelope {
         _unused: [u8; 0],
     }
+    #[repr(C)]
+    pub struct IReaperControlSurface__bindgen_vtable(::std::os::raw::c_void);
+    #[repr(C)]
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct IReaperControlSurface {
+        pub vtable_: *const IReaperControlSurface__bindgen_vtable,
+    }
+    #[test]
+    fn bindgen_test_layout_IReaperControlSurface() {
+        assert_eq!(
+            ::std::mem::size_of::<IReaperControlSurface>(),
+            8usize,
+            concat!("Size of: ", stringify!(IReaperControlSurface))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<IReaperControlSurface>(),
+            8usize,
+            concat!("Alignment of ", stringify!(IReaperControlSurface))
+        );
+    }
     extern "C" {
         pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
     }
@@ -534,6 +554,25 @@ pub mod root {
                 monitor: ::std::os::raw::c_int,
                 allowgang: bool,
             ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut CSurf_OnVolumeChangeEx: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                volume: f64,
+                relative: bool,
+                allowGang: bool,
+            ) -> f64,
+        >;
+    }
+    extern "C" {
+        pub static mut CSurf_SetSurfaceVolume: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                volume: f64,
+                ignoresurf: *mut root::IReaperControlSurface,
+            ),
         >;
     }
     extern "C" {

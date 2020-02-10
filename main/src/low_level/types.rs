@@ -4,7 +4,7 @@
 #![allow(non_snake_case)]
 
 use super::{ReaProject, MediaTrack};
-use crate::low_level::bindings::root::HWND;
+use crate::low_level::bindings::root::{HWND, IReaperControlSurface};
 use crate::low_level::{KbdSectionInfo, TrackEnvelope, GUID};
 
 pub type GetFunc = unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void;
@@ -122,3 +122,16 @@ pub type GetTrackUIVolPan = fn(
     volumeOut: *mut f64,
     panOut: *mut f64,
 ) -> bool;
+
+pub type CSurf_OnVolumeChangeEx = fn(
+    trackid: *mut MediaTrack,
+    volume: f64,
+    relative: bool,
+    allowGang: bool,
+) -> f64;
+
+pub type CSurf_SetSurfaceVolume = fn(
+    trackid: *mut MediaTrack,
+    volume: f64,
+    ignoresurf: *mut IReaperControlSurface,
+);

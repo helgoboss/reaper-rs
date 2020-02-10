@@ -10,7 +10,7 @@ use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID, TrackEnvelope};
+use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID, TrackEnvelope, IReaperControlSurface};
 use c_str_macro::c_str;
 pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
@@ -207,6 +207,14 @@ impl Reaper {
         } else {
             None
         }
+    }
+
+    pub fn csurf_set_surface_volume(&self, trackid: *mut MediaTrack, volume: f64, ignoresurf: *mut IReaperControlSurface) {
+        self.low.CSurf_SetSurfaceVolume.unwrap()(trackid, volume, ignoresurf);
+    }
+
+    pub fn csurf_on_volume_change_ex(&self, trackid: *mut MediaTrack, volume: f64, relative: bool, allow_gang: bool) -> f64 {
+        self.low.CSurf_OnVolumeChangeEx.unwrap()(trackid, volume, relative, allow_gang)
     }
 
     // TODO Rename
