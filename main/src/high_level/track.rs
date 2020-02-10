@@ -11,7 +11,7 @@ use std::convert::TryFrom;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput};
+use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput, Volume};
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject, get_control_surface_instance, CSURF_EXT_SETINPUTMONITOR};
@@ -173,6 +173,13 @@ impl Track {
     pub fn get_media_track(&self) -> *mut MediaTrack {
         self.load_if_necessary_or_complain();
         self.media_track.get()
+    }
+
+    pub fn get_volume(&self) -> Volume {
+        // It's important that we don't query D_VOL because that returns the wrong value in case an envelope is written
+        let (volume, _) = Reaper::instance().medium.get_track_ui_vol_pan(self.get_media_track())
+            .expect("Couldn't get vol/pan");
+        Volume::of_reaper_value(volume)
     }
 
     // TODO Maybe return u32 and express master track index in other ways

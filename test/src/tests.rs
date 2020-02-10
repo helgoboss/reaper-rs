@@ -222,11 +222,6 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
-                reaper.track_input_changed().take_until(step.finished).subscribe(move |t| {
-                    mock.invoke(t);
-                });
-            });
             track.set_recording_input(MidiRecordingInput::from_device_and_channel(MidiInputDevice::new(4), 5));
             // Then
             let input = track.get_recording_input();
@@ -236,8 +231,47 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             };
             check_eq!(input_data.get_channel(), Some(5));
             check_eq!(input_data.get_device().ok_or("Expected device")?.get_id(), 4);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Set track recording input MIDI 7/all", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            track.set_recording_input(MidiRecordingInput::from_all_channels_of_device(MidiInputDevice::new(7)));
+            // Then
+            let input = track.get_recording_input();
+            let input_data = match input {
+                RecordingInput::Midi(d) => d,
+                _ => return Err("Expected MIDI input".into())
+            };
+            check_eq!(input_data.get_channel(), None);
+            check_eq!(input_data.get_device(), Some(MidiInputDevice::new(7)));
+            Ok(())
+        }),
+        step("Set track recording input MIDI all/15", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            track.set_recording_input(MidiRecordingInput::from_all_devices_with_channel(15));
+            // Then
+            let input = track.get_recording_input();
+            let input_data = match input {
+                RecordingInput::Midi(d) => d,
+                _ => return Err("Expected MIDI input".into())
+            };
+            check_eq!(input_data.get_channel(), Some(15));
+            check_eq!(input_data.get_device(), None);
+            Ok(())
+        }),
+        step("Query track volume", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let volume = track.get_volume();
+            // Then
+            check_eq!(volume.get_reaper_value(), 1.0);
+            check_eq!(volume.get_db(), 0.0);
+            check_eq!(volume.get_normalized_value(), 0.71599999999999997);
             Ok(())
         }),
     )

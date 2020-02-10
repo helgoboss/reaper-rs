@@ -190,6 +190,25 @@ impl Reaper {
         self.low.SetMediaTrackInfo_Value.unwrap()(tr, parmname.as_ptr(), newvalue)
     }
 
+    pub fn db2slider(&self, x: f64) -> f64 {
+        self.low.DB2SLIDER.unwrap()(x)
+    }
+
+    pub fn slider2db(&self, y: f64) -> f64 {
+        self.low.SLIDER2DB.unwrap()(y)
+    }
+
+    pub fn get_track_ui_vol_pan(&self, track: *mut MediaTrack) -> Option<(f64, f64)> {
+        let mut volume = 0.0;
+        let mut pan = 0.0;
+        let successful = self.low.GetTrackUIVolPan.unwrap()(track, &mut volume as *mut f64, &mut pan as *mut f64);
+        if successful {
+            Some((volume, pan))
+        } else {
+            None
+        }
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

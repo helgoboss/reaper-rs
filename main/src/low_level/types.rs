@@ -112,3 +112,13 @@ pub type SetMediaTrackInfo_Value = fn(
     parmname: *const ::std::os::raw::c_char,
     newvalue: f64,
 ) -> bool;
+
+pub type DB2SLIDER = fn(x: f64) -> f64;
+
+pub type SLIDER2DB = fn(y: f64) -> f64;
+
+pub type GetTrackUIVolPan = fn(
+    track: *mut MediaTrack,
+    volumeOut: *mut f64,
+    panOut: *mut f64,
+) -> bool;

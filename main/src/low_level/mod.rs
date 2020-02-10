@@ -182,7 +182,10 @@ gen_reaper_struct![
     guidToString,
     stringToGuid,
     CSurf_OnInputMonitorChangeEx,
-    SetMediaTrackInfo_Value
+    SetMediaTrackInfo_Value,
+    DB2SLIDER,
+    SLIDER2DB,
+    GetTrackUIVolPan
 ];
 
 #[macro_export]

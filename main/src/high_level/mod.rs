@@ -16,6 +16,7 @@ mod automation_mode;
 mod fx_chain;
 mod input_monitoring_mode;
 mod midi_input_device;
+mod volume;
 
 pub use project::*;
 pub use reaper::*;
@@ -28,3 +29,4 @@ pub use guid::*;
 pub use input_monitoring_mode::*;
 pub use recording_input::*;
 pub use midi_input_device::*;
+pub use volume::*;

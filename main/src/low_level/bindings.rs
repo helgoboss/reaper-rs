@@ -537,6 +537,9 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut DB2SLIDER: ::std::option::Option<unsafe extern "C" fn(x: f64) -> f64>;
+    }
+    extern "C" {
         pub static mut EnumProjects: ::std::option::Option<
             unsafe extern "C" fn(
                 idx: ::std::os::raw::c_int,
@@ -600,6 +603,15 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut GetTrackUIVolPan: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                volumeOut: *mut f64,
+                panOut: *mut f64,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
         pub static mut guidToString: ::std::option::Option<
             unsafe extern "C" fn(g: *const root::GUID, destNeed64: *mut ::std::os::raw::c_char),
         >;
@@ -653,6 +665,9 @@ pub mod root {
     extern "C" {
         pub static mut ShowConsoleMsg:
             ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
+    }
+    extern "C" {
+        pub static mut SLIDER2DB: ::std::option::Option<unsafe extern "C" fn(y: f64) -> f64>;
     }
     extern "C" {
         pub static mut stringToGuid: ::std::option::Option<
