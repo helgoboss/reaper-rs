@@ -187,7 +187,9 @@ gen_reaper_struct![
     SLIDER2DB,
     GetTrackUIVolPan,
     CSurf_OnVolumeChangeEx,
-    CSurf_SetSurfaceVolume
+    CSurf_SetSurfaceVolume,
+    CSurf_OnPanChangeEx,
+    CSurf_SetSurfacePan
 ];
 
 #[macro_export]

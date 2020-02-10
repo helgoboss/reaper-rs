@@ -217,6 +217,14 @@ impl Reaper {
         self.low.CSurf_OnVolumeChangeEx.unwrap()(trackid, volume, relative, allow_gang)
     }
 
+    pub fn csurf_set_surface_pan(&self, trackid: *mut MediaTrack, pan: f64, ignoresurf: *mut IReaperControlSurface) {
+        self.low.CSurf_SetSurfacePan.unwrap()(trackid, pan, ignoresurf);
+    }
+
+    pub fn csurf_on_pan_change_ex(&self, trackid: *mut MediaTrack, pan: f64, relative: bool, allow_gang: bool) -> f64 {
+        self.low.CSurf_OnPanChangeEx.unwrap()(trackid, pan, relative, allow_gang)
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

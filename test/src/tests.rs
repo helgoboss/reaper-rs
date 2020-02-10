@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -289,6 +289,34 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(volume.get_reaper_value(), 0.031588093366685013);
             check_eq!(volume.get_db(), -30.009531739774296);
             check_eq!(volume.get_normalized_value(), 0.25000000000003497);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Query track pan", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let pan = track.get_pan();
+            // Then
+            check_eq!(pan.get_reaper_value(), 0.0);
+            check_eq!(pan.get_normalized_value(), 0.5);
+            Ok(())
+        }),
+        step("Set track pan", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_pan_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.set_pan(Pan::of_normalized_value(0.25));
+            // Then
+            let pan = track.get_pan();
+            check_eq!(pan.get_reaper_value(), -0.5);
+            check_eq!(pan.get_normalized_value(), 0.25);
             check_eq!(mock.invocation_count(), 1);
             check_eq!(mock.last_arg(), track.into());
             Ok(())

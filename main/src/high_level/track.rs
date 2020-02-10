@@ -11,7 +11,7 @@ use std::convert::TryFrom;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput, Volume};
+use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput, Volume, Pan};
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject, get_control_surface_instance, CSURF_EXT_SETINPUTMONITOR};
@@ -173,6 +173,24 @@ impl Track {
     pub fn get_media_track(&self) -> *mut MediaTrack {
         self.load_if_necessary_or_complain();
         self.media_track.get()
+    }
+
+    pub fn get_pan(&self) -> Pan {
+        self.load_and_check_if_necessary_or_complain();
+        // It's important that we don't query D_PAN because that returns the wrong value in case an envelope is written
+        let (_, pan) = Reaper::instance().medium.get_track_ui_vol_pan(self.get_media_track())
+            .expect("Couldn't get vol/pan");
+        Pan::of_reaper_value(pan)
+    }
+
+    pub fn set_pan(&self, pan: Pan) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper_value = pan.get_reaper_value();
+        let reaper = Reaper::instance();
+        reaper.medium.csurf_on_pan_change_ex(self.get_media_track(), reaper_value, false, false);
+        // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so we need
+        // to notify manually
+        reaper.medium.csurf_set_surface_pan(self.get_media_track(), reaper_value, null_mut());
     }
 
     pub fn get_volume(&self) -> Volume {

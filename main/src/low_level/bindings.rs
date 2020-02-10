@@ -557,6 +557,16 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut CSurf_OnPanChangeEx: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                pan: f64,
+                relative: bool,
+                allowGang: bool,
+            ) -> f64,
+        >;
+    }
+    extern "C" {
         pub static mut CSurf_OnVolumeChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -564,6 +574,15 @@ pub mod root {
                 relative: bool,
                 allowGang: bool,
             ) -> f64,
+        >;
+    }
+    extern "C" {
+        pub static mut CSurf_SetSurfacePan: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                pan: f64,
+                ignoresurf: *mut root::IReaperControlSurface,
+            ),
         >;
     }
     extern "C" {

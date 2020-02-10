@@ -1,32 +1,55 @@
 #[macro_use]
 mod regex_util;
-mod log_util;
-mod reaper;
-mod project;
-mod recording_input;
-mod track;
-mod track_send;
-mod fx;
-mod fx_parameter;
-mod helper_control_surface;
-mod section;
-mod action;
-mod guid;
-mod automation_mode;
-mod fx_chain;
-mod input_monitoring_mode;
-mod midi_input_device;
-mod volume;
 
-pub use project::*;
-pub use reaper::*;
-pub use track::*;
-pub use section::*;
-pub use action::*;
+mod log_util;
 pub use log_util::*;
-pub use automation_mode::*;
-pub use guid::*;
-pub use input_monitoring_mode::*;
+
+mod reaper;
+pub use reaper::*;
+
+mod project;
+pub use project::*;
+
+mod recording_input;
 pub use recording_input::*;
+
+mod track;
+pub use track::*;
+
+mod track_send;
+pub use track_send::*;
+
+mod fx;
+pub use fx::*;
+
+mod fx_parameter;
+pub use fx_parameter::*;
+
+mod helper_control_surface;
+
+mod section;
+pub use section::*;
+
+mod action;
+pub use action::*;
+
+mod guid;
+pub use guid::*;
+
+mod automation_mode;
+pub use automation_mode::*;
+
+mod fx_chain;
+pub use fx_chain::*;
+
+mod input_monitoring_mode;
+pub use input_monitoring_mode::*;
+
+mod midi_input_device;
 pub use midi_input_device::*;
+
+mod volume;
 pub use volume::*;
+
+mod pan;
+pub use pan::*;

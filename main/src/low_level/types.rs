@@ -135,3 +135,17 @@ pub type CSurf_SetSurfaceVolume = fn(
     volume: f64,
     ignoresurf: *mut IReaperControlSurface,
 );
+
+pub type CSurf_OnPanChangeEx = fn(
+    trackid: *mut MediaTrack,
+    pan: f64,
+    relative: bool,
+    allowGang: bool,
+) -> f64;
+
+pub type CSurf_SetSurfacePan = fn(
+    trackid: *mut MediaTrack,
+    pan: f64,
+    ignoresurf: *mut IReaperControlSurface,
+);
+
