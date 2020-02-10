@@ -1,6 +1,8 @@
 #[macro_use]
+mod assert;
 mod api;
 mod tests;
+mod mock;
 
 use reaper_rs::high_level::{Reaper, Project};
 use std::error::Error;

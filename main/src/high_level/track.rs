@@ -25,7 +25,7 @@ use crate::high_level::track_send::TrackSend;
 // TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
 //  this would require rxRust subjects to work with elements that are not copyable (because Rc,
 //  RefCell, Box, Arc and all that stuff are never copyable) but just cloneable
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct LightTrack {
     media_track: *mut MediaTrack,
     rea_project: *mut ReaProject,

@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use crate::api::{TestStep, step};
 use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode};
 use std::rc::Rc;
-use std::cell::RefCell;
+use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
 use rxrust::ops::TakeUntil;
@@ -10,21 +10,7 @@ use std::ops::{Deref, DerefMut};
 use c_str_macro::c_str;
 use std::ffi::{CStr, CString};
 use std::convert::TryFrom;
-
-fn share<T>(value: T) -> (Rc<RefCell<T>>, Rc<RefCell<T>>) {
-    let shareable = Rc::new(RefCell::new(value));
-    let mirror = shareable.clone();
-    (shareable, mirror)
-}
-
-// Use for tracking changes made to a value within static closures that would move (take ownership)
-// of that value
-fn track_changes<T>(initial_value: T, op: impl FnOnce(Rc<RefCell<T>>)) -> Rc<RefCell<T>> {
-    let (value, mirrored_value) = share(initial_value);
-    op(value);
-    mirrored_value
-}
-
+use super::mock::observe_invocations;
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
     vec!(
@@ -33,17 +19,11 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let current_project_before = reaper.get_current_project();
             let project_count_before = reaper.get_project_count();
             // When
-            struct State { count: i32, project: Option<Project> }
-            let state = track_changes(
-                State { count: 0, project: None },
-                |state| {
-                    reaper.project_switched().take_until(step.finished).subscribe(move |p| {
-                        let mut state = state.borrow_mut();
-                        state.count += 1;
-                        state.project = Some(p);
-                    });
-                },
-            );
+            let mock = observe_invocations(|mock| {
+                reaper.project_switched().take_until(step.finished).subscribe(move |p| {
+                    mock.invoke(p);
+                });
+            });
             let new_project = reaper.create_empty_project_in_new_tab();
             // Then
             check_eq!(current_project_before, current_project_before);
@@ -57,8 +37,8 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(new_project.get_track_count(), 0);
             check!(new_project.get_index() > 0);
             check_eq!(new_project.get_file_path(), None);
-            check_eq!(state.borrow().count, 1);
-            check_eq!(state.borrow().project, Some(new_project));
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), new_project);
             Ok(())
         }),
         step("Add track", |reaper, step| {
@@ -67,22 +47,17 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // When
             #[derive(Default)]
             struct State { count: i32, track: Option<Track> }
-            let state = track_changes(
-                State::default(),
-                |state| {
-                    reaper.track_added().take_until(step.finished).subscribe(move |t| {
-                        let mut state = state.borrow_mut();
-                        state.count += 1;
-                        state.track = Some(t.into());
-                    });
-                },
-            );
+            let mock = observe_invocations(|mock| {
+                reaper.track_added().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
             let new_track = project.add_track();
             // Then
             check_eq!(project.get_track_count(), 1);
             check_eq!(new_track.get_index(), 0);
-            check_eq!(state.borrow().count, 1);
-            check_eq!(state.borrow().track.clone(), Some(new_track));
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), new_track.into());
             Ok(())
         }),
         step("FnMut action", |reaper, step| {
@@ -127,7 +102,6 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let first_track = get_first_track()?;
             let new_track = project.add_track();
             // When
-
             let found_track = project.get_track_by_guid(new_track.get_guid());
             // Then
             check!(found_track.is_available());
@@ -170,23 +144,16 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let track = get_first_track()?;
             // When
             // TODO Factor this state pattern out
-            #[derive(Default)]
-            struct State { count: i32, track: Option<Track> }
-            let state = track_changes(
-                State::default(),
-                |state| {
-                    reaper.track_name_changed().take_until(step.finished).subscribe(move |t| {
-                        let mut state = state.borrow_mut();
-                        state.count += 1;
-                        state.track = Some(t.into());
-                    });
-                },
-            );
+            let mock = observe_invocations(|mock| {
+                reaper.track_name_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
             track.set_name(c_str!("Foo Bla"));
             // Then
             check_eq!(track.get_name(), c_str!("Foo Bla").to_owned());
-            check_eq!(state.borrow().count, 1);
-            check_eq!(&state.borrow().track, &Some(track));
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
             Ok(())
         }),
         step("Query track input monitoring", |reaper, _| {
@@ -204,21 +171,16 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // When
             #[derive(Default)]
             struct State { count: i32, track: Option<Track> }
-            let state = track_changes(
-                State::default(),
-                |state| {
-                    reaper.track_input_monitoring_changed().take_until(step.finished).subscribe(move |t| {
-                        let mut state = state.borrow_mut();
-                        state.count += 1;
-                        state.track = Some(t.into());
-                    });
-                },
-            );
+            let mock = observe_invocations(|mock| {
+                reaper.track_input_monitoring_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
             track.set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying);
             // Then
             check_eq!(track.get_input_monitoring_mode(), InputMonitoringMode::NotWhenPlaying);
-            check_eq!(state.borrow().count, 1);
-            check_eq!(&state.borrow().track, &Some(track));
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
             Ok(())
         }),
     )
