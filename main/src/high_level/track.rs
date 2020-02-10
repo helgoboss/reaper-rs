@@ -121,9 +121,22 @@ impl Track {
         }
     }
 
+    pub fn set_name(&self, name: &CStr) {
+        self.load_if_necessary_or_complain();
+        Reaper::instance().medium.get_set_media_track_info(
+            self.get_media_track(),
+            c_str!("P_NAME"),
+            name.as_ptr() as *mut c_void
+        );
+    }
+
     pub fn get_name(&self) -> CString {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance().medium.convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
+        if self.is_master_track() {
+            c_str!("<Master track>").to_owned()
+        } else {
+            Reaper::instance().medium.convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
+        }
     }
 
     pub fn get_media_track(&self) -> *mut MediaTrack {
@@ -221,7 +234,7 @@ impl Track {
         }
         // TODO Don't save ReaProject but Project as member
         let guid = self.get_guid();
-        let track = self.unchecked_project().get_tracks()
+        let track = self.get_project_unchecked().get_tracks()
             .find(|t| t.get_guid() == guid);
         match track {
             Some(t) => {
@@ -245,7 +258,7 @@ impl Track {
         }
     }
 
-    fn unchecked_project(&self) -> Project {
+    fn get_project_unchecked(&self) -> Project {
         self.attempt_to_fill_project_if_necessary();
         Project::new(self.rea_project.get())
     }
@@ -306,6 +319,13 @@ impl Track {
 
     pub fn is_master_track(&self) -> bool {
         self.get_index() == -1
+    }
+
+    pub fn get_project(&self) -> Project {
+        if self.rea_project.get().is_null() {
+            self.load_if_necessary_or_complain();
+        }
+        self.get_project_unchecked()
     }
 }
 

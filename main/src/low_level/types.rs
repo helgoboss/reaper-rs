@@ -96,3 +96,7 @@ pub type TrackFX_GetParamNormalized = fn(
 ) -> f64;
 
 pub type GetMasterTrack = fn(proj: *mut ReaProject) -> *mut MediaTrack;
+
+pub type guidToString = fn(g: *const GUID, destNeed64: *mut ::std::os::raw::c_char);
+
+pub type stringToGuid = fn(str: *const ::std::os::raw::c_char, g: *mut GUID);

@@ -591,6 +591,11 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut guidToString: ::std::option::Option<
+            unsafe extern "C" fn(g: *const root::GUID, destNeed64: *mut ::std::os::raw::c_char),
+        >;
+    }
+    extern "C" {
         pub static mut InsertTrackAtIndex: ::std::option::Option<
             unsafe extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool),
         >;
@@ -630,6 +635,11 @@ pub mod root {
     extern "C" {
         pub static mut ShowConsoleMsg:
             ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
+    }
+    extern "C" {
+        pub static mut stringToGuid: ::std::option::Option<
+            unsafe extern "C" fn(str: *const ::std::os::raw::c_char, g: *mut root::GUID),
+        >;
     }
     extern "C" {
         pub static mut TrackFX_GetCount: ::std::option::Option<

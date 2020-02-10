@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid};
 use std::rc::Rc;
 use std::cell::RefCell;
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -8,7 +8,8 @@ use rxrust::prelude::*;
 use rxrust::ops::TakeUntil;
 use std::ops::{Deref, DerefMut};
 use c_str_macro::c_str;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
+use std::convert::TryFrom;
 
 fn share<T>(value: T) -> (Rc<RefCell<T>>, Rc<RefCell<T>>) {
     let shareable = Rc::new(RefCell::new(value));
@@ -126,12 +127,68 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let first_track = project.get_first_track().ok_or("No first track")?;
             let new_track = project.add_track();
             // When
+
             let found_track = project.get_track_by_guid(new_track.get_guid());
             // Then
             check!(found_track.is_available());
             check_eq!(&found_track, &new_track);
             check_ne!(&found_track, &first_track);
             check_eq!(new_track.get_guid(), &get_media_track_guid(new_track.get_media_track()));
+            Ok(())
+        }),
+        step("Query non-existent track by GUID", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            // When
+            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            let found_track = project.get_track_by_guid(&guid);
+            // Then
+            check!(!found_track.is_available());
+            Ok(())
+        }),
+        step("Query track project", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let first_track = project.get_first_track().ok_or("First track not found")?;
+            // When
+            let track_project = first_track.get_project();
+            // Then
+            check_eq!(track_project, project);
+            Ok(())
+        }),
+        step("Query track name", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = project.get_first_track().ok_or("First track not found")?;
+            // When
+            let track_name = track.get_name();
+            // Then
+            check_eq!(track_name.as_bytes().len(), 0);
+            Ok(())
+        }),
+        step("Set track name", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = project.get_first_track().ok_or("First track not found")?;
+            // When
+            // TODO Factor this state pattern out
+            #[derive(Default)]
+            struct State { count: i32, track: Option<Track> }
+            let state = track_changes(
+                State::default(),
+                |state| {
+                    reaper.track_name_changed().take_until(step.finished).subscribe(move |t| {
+                        let mut state = state.borrow_mut();
+                        state.count += 1;
+                        state.track = Some(t.into());
+                    });
+                },
+            );
+            track.set_name(c_str!("Foo Bla"));
+            // Then
+            check_eq!(track.get_name(), c_str!("Foo Bla").to_owned());
+            check_eq!(state.borrow().count, 1);
+            check_eq!(&state.borrow().track, &Some(track));
             Ok(())
         }),
     )

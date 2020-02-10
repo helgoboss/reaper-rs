@@ -19,6 +19,13 @@ pub struct Reaper {
     pub low: low_level::Reaper
 }
 
+const ZERO_GUID: GUID = GUID {
+    Data1: 0,
+    Data2: 0,
+    Data3: 0,
+    Data4: [0; 8]
+};
+
 fn with_string_buffer<T>(max_size: usize, fill_buffer: impl FnOnce(*mut c_char, usize) -> T) -> (CString, T) {
     let vec: Vec<u8> = vec![1; max_size as usize];
     let c_string = unsafe { CString::from_vec_unchecked(vec) };
@@ -158,6 +165,21 @@ impl Reaper {
 
     pub fn get_master_track(&self, proj: *mut ReaProject) -> *mut MediaTrack {
         self.low.GetMasterTrack.unwrap()(proj)
+    }
+
+    pub fn guid_to_string(&self, g: &GUID) -> CString {
+        with_string_buffer(64, |buffer, max_size| {
+            self.low.guidToString.unwrap()(g as *const GUID, buffer)
+        }).0
+    }
+
+    pub fn string_to_guid(&self, str: &CStr) -> Option<GUID> {
+        let mut guid = ZERO_GUID;
+        self.low.stringToGuid.unwrap()(str.as_ptr(), &mut guid as *mut GUID);
+        if guid == ZERO_GUID {
+            return None
+        }
+        Some(guid)
     }
 
     // TODO Rename

@@ -178,7 +178,9 @@ gen_reaper_struct![
     TrackFX_GetRecCount,
     TrackFX_GetFXGUID,
     TrackFX_GetParamNormalized,
-    GetMasterTrack
+    GetMasterTrack,
+    guidToString,
+    stringToGuid
 ];
 
 #[macro_export]
