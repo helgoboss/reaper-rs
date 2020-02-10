@@ -229,6 +229,14 @@ impl Reaper {
         self.low.CountSelectedTracks2.unwrap()(proj, wantmaster)
     }
 
+    pub fn set_track_selected(&self, track: *mut MediaTrack, selected: bool) {
+        self.low.SetTrackSelected.unwrap()(track, selected);
+    }
+
+    pub fn get_selected_track_2(&self, proj: *mut ReaProject, seltrackidx: i32, wantmaster: bool) -> *mut MediaTrack {
+        self.low.GetSelectedTrack2.unwrap()(proj, seltrackidx, wantmaster)
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

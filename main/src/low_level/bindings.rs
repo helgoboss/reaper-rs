@@ -639,6 +639,15 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut GetSelectedTrack2: ::std::option::Option<
+            unsafe extern "C" fn(
+                proj: *mut root::ReaProject,
+                seltrackidx: ::std::os::raw::c_int,
+                wantmaster: bool,
+            ) -> *mut root::MediaTrack,
+        >;
+    }
+    extern "C" {
         pub static mut GetSetMediaTrackInfo: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
@@ -726,6 +735,11 @@ pub mod root {
                 parmname: *const ::std::os::raw::c_char,
                 newvalue: f64,
             ) -> bool,
+        >;
+    }
+    extern "C" {
+        pub static mut SetTrackSelected: ::std::option::Option<
+            unsafe extern "C" fn(track: *mut root::MediaTrack, selected: bool),
         >;
     }
     extern "C" {

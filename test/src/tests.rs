@@ -329,7 +329,32 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let is_selected = track.is_selected();
             // Then
             check!(!is_selected);
-            check_eq!(project.get_selected_tracks_count(false), 0);
+            check_eq!(project.get_selected_track_count(false), 0);
+            Ok(())
+        }),
+        step("Select track", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = get_first_track()?;
+            let track2 = project.get_track_by_index(2).ok_or("No track at index 2")?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.select();
+            track2.select();
+            // Then
+            check!(track.is_selected());
+            check!(track2.is_selected());
+            check_eq!(project.get_selected_track_count(false), 2);
+            let first_selected_track = project.get_first_selected_track(false)
+                .ok_or("Couldn't get first selected track")?;
+            check_eq!(first_selected_track.get_index(), 0);
+            check_eq!(project.get_selected_tracks(false).count(), 2);
+            check_eq!(mock.invocation_count(), 2);
+            check_eq!(mock.last_arg(), track2.into());
             Ok(())
         }),
     )

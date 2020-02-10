@@ -85,8 +85,25 @@ impl Project {
         Reaper::instance().medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
     }
 
-    pub fn get_selected_tracks_count(&self, want_master: bool) -> u32 {
+    pub fn get_selected_track_count(&self, want_master: bool) -> u32 {
         Reaper::instance().medium.count_selected_tracks_2(self.rea_project, want_master) as u32
+    }
+
+    pub fn get_first_selected_track(&self, want_master: bool) -> Option<Track> {
+        let media_track = Reaper::instance().medium.get_selected_track_2(self.rea_project, 0, want_master);
+        if media_track.is_null() {
+            return None;
+        }
+        Some(Track::new(media_track, self.rea_project))
+    }
+
+    pub fn get_selected_tracks(&self, want_master: bool) -> impl Iterator<Item=Track> + '_ {
+        self.complain_if_not_available();
+        (0..self.get_selected_track_count(want_master))
+            .map(move |i| {
+                let media_track = Reaper::instance().medium.get_selected_track_2(self.rea_project, i as i32, want_master);
+                Track::new(media_track, self.rea_project)
+            })
     }
 
     pub fn get_track_count(&self) -> u32 {

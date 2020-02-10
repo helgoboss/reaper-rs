@@ -153,3 +153,11 @@ pub type CountSelectedTracks2 = fn(
     proj: *mut ReaProject,
     wantmaster: bool,
 ) -> ::std::os::raw::c_int;
+
+pub type SetTrackSelected = fn(track: *mut MediaTrack, selected: bool);
+
+pub type GetSelectedTrack2 = fn(
+    proj: *mut ReaProject,
+    seltrackidx: ::std::os::raw::c_int,
+    wantmaster: bool,
+) -> *mut MediaTrack;

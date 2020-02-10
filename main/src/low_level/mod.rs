@@ -190,7 +190,9 @@ gen_reaper_struct![
     CSurf_SetSurfaceVolume,
     CSurf_OnPanChangeEx,
     CSurf_SetSurfacePan,
-    CountSelectedTracks2
+    CountSelectedTracks2,
+    SetTrackSelected,
+    GetSelectedTrack2
 ];
 
 #[macro_export]
