@@ -13,6 +13,7 @@ mod action;
 mod guid;
 mod automation_mode;
 mod fx_chain;
+mod input_monitoring_mode;
 
 pub use project::*;
 pub use reaper::*;
@@ -22,3 +23,4 @@ pub use action::*;
 pub use log_util::*;
 pub use automation_mode::*;
 pub use guid::*;
+pub use input_monitoring_mode::*;

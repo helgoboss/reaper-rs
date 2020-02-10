@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode};
 use std::rc::Rc;
 use std::cell::RefCell;
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -124,7 +124,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Query track by GUID", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
-            let first_track = project.get_first_track().ok_or("No first track")?;
+            let first_track = get_first_track()?;
             let new_track = project.add_track();
             // When
 
@@ -149,17 +149,16 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Query track project", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
-            let first_track = project.get_first_track().ok_or("First track not found")?;
+            let track = get_first_track()?;
             // When
-            let track_project = first_track.get_project();
+            let track_project = track.get_project();
             // Then
             check_eq!(track_project, project);
             Ok(())
         }),
         step("Query track name", |reaper, _| {
             // Given
-            let project = reaper.get_current_project();
-            let track = project.get_first_track().ok_or("First track not found")?;
+            let track = get_first_track()?;
             // When
             let track_name = track.get_name();
             // Then
@@ -168,8 +167,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track name", |reaper, step| {
             // Given
-            let project = reaper.get_current_project();
-            let track = project.get_first_track().ok_or("First track not found")?;
+            let track = get_first_track()?;
             // When
             // TODO Factor this state pattern out
             #[derive(Default)]
@@ -191,5 +189,41 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(&state.borrow().track, &Some(track));
             Ok(())
         }),
+        step("Query track input monitoring", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mode = track.get_input_monitoring_mode();
+            // Then
+            check_eq!(mode, InputMonitoringMode::Off);
+            Ok(())
+        }),
+        step("Set track input monitoring", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            #[derive(Default)]
+            struct State { count: i32, track: Option<Track> }
+            let state = track_changes(
+                State::default(),
+                |state| {
+                    reaper.track_input_monitoring_changed().take_until(step.finished).subscribe(move |t| {
+                        let mut state = state.borrow_mut();
+                        state.count += 1;
+                        state.track = Some(t.into());
+                    });
+                },
+            );
+            track.set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying);
+            // Then
+            check_eq!(track.get_input_monitoring_mode(), InputMonitoringMode::NotWhenPlaying);
+            check_eq!(state.borrow().count, 1);
+            check_eq!(&state.borrow().track, &Some(track));
+            Ok(())
+        }),
     )
+}
+
+fn get_first_track() -> Result<Track, &'static str> {
+    Reaper::instance().get_current_project().get_first_track().ok_or("First track not found")
 }

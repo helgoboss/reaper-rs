@@ -23,7 +23,7 @@ const ZERO_GUID: GUID = GUID {
     Data1: 0,
     Data2: 0,
     Data3: 0,
-    Data4: [0; 8]
+    Data4: [0; 8],
 };
 
 fn with_string_buffer<T>(max_size: usize, fill_buffer: impl FnOnce(*mut c_char, usize) -> T) -> (CString, T) {
@@ -177,9 +177,13 @@ impl Reaper {
         let mut guid = ZERO_GUID;
         self.low.stringToGuid.unwrap()(str.as_ptr(), &mut guid as *mut GUID);
         if guid == ZERO_GUID {
-            return None
+            return None;
         }
         Some(guid)
+    }
+
+    pub fn csurf_on_input_monitoring_change_ex(&self, trackid: *mut MediaTrack, monitor: i32, allowgang: bool) -> i32 {
+        self.low.CSurf_OnInputMonitorChangeEx.unwrap()(trackid, monitor, allowgang)
     }
 
     // TODO Rename
@@ -192,8 +196,14 @@ impl Reaper {
     }
 
     // TODO Rename or remove
-    pub fn convenient_get_media_track_info_i32(&self, tr: *mut MediaTrack, parmname: &CStr) -> i32 {
+    pub fn convenient_get_media_track_info_i32_value(&self, tr: *mut MediaTrack, parmname: &CStr) -> i32 {
         self.get_set_media_track_info(tr, parmname, null_mut()) as i32
+    }
+
+    // TODO Rename or remove
+    pub fn convenient_get_media_track_info_i32_ptr(&self, tr: *mut MediaTrack, parmname: &CStr) -> i32 {
+        let ptr = self.get_set_media_track_info(tr, parmname, null_mut()) as *mut i32;
+        unsafe { *ptr }
     }
 
     // TODO Rename or remove

@@ -11,7 +11,7 @@ use std::convert::TryFrom;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Project, Reaper};
+use crate::high_level::{Project, Reaper, InputMonitoringMode};
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject};
@@ -139,6 +139,18 @@ impl Track {
         }
     }
 
+    pub fn get_input_monitoring_mode(&self) -> InputMonitoringMode {
+        self.load_if_necessary_or_complain();
+        let irecmon = Reaper::instance().medium.convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECMON"));
+        InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
+    }
+
+    pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
+        self.load_if_necessary_or_complain();
+        let irecmon: i32 = mode.into();
+        Reaper::instance().medium.csurf_on_input_monitoring_change_ex(self.get_media_track(), irecmon, false);
+    }
+
     pub fn get_media_track(&self) -> *mut MediaTrack {
         self.load_if_necessary_or_complain();
         self.media_track.get()
@@ -147,7 +159,7 @@ impl Track {
     // TODO Maybe return u32 and express master track index in other ways
     pub fn get_index(&self) -> i32 {
         self.load_and_check_if_necessary_or_complain();
-        let ip_track_number = Reaper::instance().medium.convenient_get_media_track_info_i32(self.get_media_track(), c_str!("IP_TRACKNUMBER"));
+        let ip_track_number = Reaper::instance().medium.convenient_get_media_track_info_i32_value(self.get_media_track(), c_str!("IP_TRACKNUMBER"));
         if ip_track_number == 0 {
             // Usually means that track doesn't exist. But this we already checked. This happens only if we query the
             // number of a track in another project tab. TODO Try to find a working solution. Till then, return 0.

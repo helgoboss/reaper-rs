@@ -180,7 +180,8 @@ gen_reaper_struct![
     TrackFX_GetParamNormalized,
     GetMasterTrack,
     guidToString,
-    stringToGuid
+    stringToGuid,
+    CSurf_OnInputMonitorChangeEx
 ];
 
 #[macro_export]

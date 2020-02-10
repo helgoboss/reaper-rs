@@ -100,3 +100,9 @@ pub type GetMasterTrack = fn(proj: *mut ReaProject) -> *mut MediaTrack;
 pub type guidToString = fn(g: *const GUID, destNeed64: *mut ::std::os::raw::c_char);
 
 pub type stringToGuid = fn(str: *const ::std::os::raw::c_char, g: *mut GUID);
+
+pub type CSurf_OnInputMonitorChangeEx = fn(
+    trackid: *mut MediaTrack,
+    monitor: ::std::os::raw::c_int,
+    allowgang: bool,
+) -> ::std::os::raw::c_int;

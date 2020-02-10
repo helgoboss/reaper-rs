@@ -528,6 +528,15 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut CSurf_OnInputMonitorChangeEx: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                monitor: ::std::os::raw::c_int,
+                allowgang: bool,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut EnumProjects: ::std::option::Option<
             unsafe extern "C" fn(
                 idx: ::std::os::raw::c_int,
