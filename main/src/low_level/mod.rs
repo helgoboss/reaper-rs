@@ -37,7 +37,7 @@ static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
 // This returns a mutable reference. In general this mutability should not be used, just in case
 // of control surface methods where it's sure that REAPER never reenters them! See
 // ControlSurface doc.
-pub(super) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
+pub(crate) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
     unsafe {
         CONTROL_SURFACE_INSTANCE.as_mut().unwrap()
     }
@@ -181,7 +181,8 @@ gen_reaper_struct![
     GetMasterTrack,
     guidToString,
     stringToGuid,
-    CSurf_OnInputMonitorChangeEx
+    CSurf_OnInputMonitorChangeEx,
+    SetMediaTrackInfo_Value
 ];
 
 #[macro_export]

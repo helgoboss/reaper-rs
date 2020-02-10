@@ -642,6 +642,15 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut SetMediaTrackInfo_Value: ::std::option::Option<
+            unsafe extern "C" fn(
+                tr: *mut root::MediaTrack,
+                parmname: *const ::std::os::raw::c_char,
+                newvalue: f64,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
         pub static mut ShowConsoleMsg:
             ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
     }

@@ -8,7 +8,7 @@
             "name": "(Windows) Starten",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "C:\\Program Files\\REAPER (x64)\\reaper.exe",
+            "program": "C:\\REAPER\\reaper.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

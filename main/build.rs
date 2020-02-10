@@ -61,6 +61,7 @@ fn generate_bindings() {
         .whitelist_var("guidToString")
         .whitelist_var("stringToGuid")
         .whitelist_var("CSurf_OnInputMonitorChangeEx")
+        .whitelist_var("SetMediaTrackInfo_Value")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

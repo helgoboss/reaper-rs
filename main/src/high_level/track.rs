@@ -11,10 +11,10 @@ use std::convert::TryFrom;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Project, Reaper, InputMonitoringMode};
+use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput};
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::guid::Guid;
-use crate::low_level::{MediaTrack, ReaProject};
+use crate::low_level::{MediaTrack, ReaProject, get_control_surface_instance, CSURF_EXT_SETINPUTMONITOR};
 use crate::medium_level;
 use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx_chain::FxChain;
@@ -149,6 +149,25 @@ impl Track {
         self.load_if_necessary_or_complain();
         let irecmon: i32 = mode.into();
         Reaper::instance().medium.csurf_on_input_monitoring_change_ex(self.get_media_track(), irecmon, false);
+    }
+
+    pub fn get_recording_input(&self) -> RecordingInput {
+        self.load_if_necessary_or_complain();
+        let rec_input_index = Reaper::instance().medium.convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECINPUT"));
+        RecordingInput::from_rec_input_index(rec_input_index)
+    }
+
+    // TODO Support setting other kinds of inputs
+    pub fn set_recording_input(&self, input: MidiRecordingInput) {
+        self.load_if_necessary_or_complain();
+        let reaper = Reaper::instance();
+        reaper.medium.set_media_track_info_value(self.get_media_track(), c_str!("I_RECINPUT"), input.get_rec_input_index() as f64);
+        // Only for triggering notification (as manual setting the rec input would also trigger it)
+        // This doesn't work for other surfaces but they are also not interested in record input changes.
+        let mut rec_mon = reaper.medium.get_media_track_info_value(self.get_media_track(), c_str!("I_RECMON"));
+        // TODO This is ugly. Solve in other ways.
+        let control_surface = get_control_surface_instance();
+        control_surface.Extended(CSURF_EXT_SETINPUTMONITOR as i32, self.get_media_track() as *mut c_void, &mut rec_mon as *mut f64 as *mut c_void, null_mut());
     }
 
     pub fn get_media_track(&self) -> *mut MediaTrack {

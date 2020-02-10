@@ -106,3 +106,9 @@ pub type CSurf_OnInputMonitorChangeEx = fn(
     monitor: ::std::os::raw::c_int,
     allowgang: bool,
 ) -> ::std::os::raw::c_int;
+
+pub type SetMediaTrackInfo_Value = fn(
+    tr: *mut MediaTrack,
+    parmname: *const ::std::os::raw::c_char,
+    newvalue: f64,
+) -> bool;

@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -162,7 +162,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // When
             let mode = track.get_input_monitoring_mode();
             // Then
-            check_eq!(mode, InputMonitoringMode::Off);
+            check_eq!(mode, InputMonitoringMode::Normal);
             Ok(())
         }),
         step("Set track input monitoring", |reaper, step| {
@@ -179,6 +179,63 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             track.set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying);
             // Then
             check_eq!(track.get_input_monitoring_mode(), InputMonitoringMode::NotWhenPlaying);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Query track recording input", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let input = track.get_recording_input();
+            // Then
+            match input {
+                RecordingInput::Mono => Ok(()),
+                _ => Err("Expected MidiRecordingInput".into())
+            }
+        }),
+        step("Set track recording input MIDI all/all", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_input_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.set_recording_input(MidiRecordingInput::from_all_devices_and_channels());
+            // Then
+            let input = track.get_recording_input();
+            let input_data = match input {
+                RecordingInput::Midi(d) => d,
+                _ => return Err("Expected MIDI input".into())
+            };
+            check_eq!(input_data.get_channel(), None);
+            check_eq!(input_data.get_device(), None);
+            check_eq!(input_data.get_rec_input_index(), 6112);
+            check_eq!(RecordingInput::from_rec_input_index(6112), input);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Set track recording input MIDI 4/5", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_input_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.set_recording_input(MidiRecordingInput::from_device_and_channel(MidiInputDevice::new(4), 5));
+            // Then
+            let input = track.get_recording_input();
+            let input_data = match input {
+                RecordingInput::Midi(d) => d,
+                _ => return Err("Expected MIDI input".into())
+            };
+            check_eq!(input_data.get_channel(), Some(5));
+            check_eq!(input_data.get_device().ok_or("Expected device")?.get_id(), 4);
             check_eq!(mock.invocation_count(), 1);
             check_eq!(mock.last_arg(), track.into());
             Ok(())

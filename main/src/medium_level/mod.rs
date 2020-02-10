@@ -186,6 +186,10 @@ impl Reaper {
         self.low.CSurf_OnInputMonitorChangeEx.unwrap()(trackid, monitor, allowgang)
     }
 
+    pub fn set_media_track_info_value(&self, tr: *mut MediaTrack, parmname: &CStr, newvalue: f64) -> bool {
+        self.low.SetMediaTrackInfo_Value.unwrap()(tr, parmname.as_ptr(), newvalue)
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {
