@@ -85,6 +85,10 @@ impl Project {
         Reaper::instance().medium.validate_ptr_2(null_mut(), self.rea_project as *mut c_void, c_str!("ReaProject*"))
     }
 
+    pub fn get_selected_tracks_count(&self, want_master: bool) -> u32 {
+        Reaper::instance().medium.count_selected_tracks_2(self.rea_project, want_master) as u32
+    }
+
     pub fn get_track_count(&self) -> u32 {
         self.complain_if_not_available();
         Reaper::instance().medium.count_tracks(self.rea_project) as u32

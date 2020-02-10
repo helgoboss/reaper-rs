@@ -69,6 +69,7 @@ fn generate_bindings() {
         .whitelist_var("CSurf_SetSurfaceVolume")
         .whitelist_var("CSurf_OnPanChangeEx")
         .whitelist_var("CSurf_SetSurfacePan")
+        .whitelist_var("CountSelectedTracks2")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

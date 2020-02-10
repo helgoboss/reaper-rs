@@ -149,3 +149,7 @@ pub type CSurf_SetSurfacePan = fn(
     ignoresurf: *mut IReaperControlSurface,
 );
 
+pub type CountSelectedTracks2 = fn(
+    proj: *mut ReaProject,
+    wantmaster: bool,
+) -> ::std::os::raw::c_int;

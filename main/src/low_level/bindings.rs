@@ -543,6 +543,14 @@ pub mod root {
         pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
     }
     extern "C" {
+        pub static mut CountSelectedTracks2: ::std::option::Option<
+            unsafe extern "C" fn(
+                proj: *mut root::ReaProject,
+                wantmaster: bool,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut CountTracks: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
         >;

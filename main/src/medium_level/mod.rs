@@ -225,6 +225,10 @@ impl Reaper {
         self.low.CSurf_OnPanChangeEx.unwrap()(trackid, pan, relative, allow_gang)
     }
 
+    pub fn count_selected_tracks_2(&self, proj: *mut ReaProject, wantmaster: bool) -> i32 {
+        self.low.CountSelectedTracks2.unwrap()(proj, wantmaster)
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

@@ -229,6 +229,11 @@ impl Track {
         ip_track_number - 1
     }
 
+    pub fn is_selected(&self) -> bool {
+        self.load_and_check_if_necessary_or_complain();
+        Reaper::instance().medium.get_media_track_info_value(self.get_media_track(), c_str!("I_SELECTED")) == 1.0
+    }
+
     // Non-Optional. Even the index is not a stable identifier, we need a way to create
     // sends just by an index, not to target tracks. Think of ReaLearn for example and saving
     // a preset for a future project which doesn't have the same target track like in the

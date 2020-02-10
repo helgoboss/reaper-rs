@@ -321,6 +321,17 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(mock.last_arg(), track.into());
             Ok(())
         }),
+        step("Query track selection state", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = get_first_track()?;
+            // When
+            let is_selected = track.is_selected();
+            // Then
+            check!(!is_selected);
+            check_eq!(project.get_selected_tracks_count(false), 0);
+            Ok(())
+        }),
     )
 }
 
