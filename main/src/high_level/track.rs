@@ -20,6 +20,7 @@ use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx::{Fx, get_index_from_query_index};
 use crate::high_level::track_send::TrackSend;
+use slog::debug;
 
 /// The difference to Track is that this implements Copy (not just Clone)
 // TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
@@ -284,6 +285,19 @@ impl Track {
         }
     }
 
+    pub fn disable_auto_arm(&self) {
+        let chunk = {
+            let auto_arm_chunk_line = match self.get_auto_arm_chunk_line() {
+                None => return,
+                Some(l) => l
+            };
+            let mut chunk = auto_arm_chunk_line.get_parent_chunk();
+            chunk.delete_region(&auto_arm_chunk_line);
+            chunk
+        };
+        self.set_chunk(chunk);
+    }
+
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
         get_auto_arm_chunk_line(&self.get_chunk(MAX_CHUNK_SIZE, true))
     }
@@ -310,6 +324,11 @@ impl Track {
     pub fn select(&self) {
         self.load_and_check_if_necessary_or_complain();
         Reaper::instance().medium.set_track_selected(self.get_media_track(), true);
+    }
+
+    pub fn select_exclusively(&self) {
+        self.load_and_check_if_necessary_or_complain();
+        Reaper::instance().medium.set_only_track_selected(self.get_media_track());
     }
 
     pub fn unselect(&self) {

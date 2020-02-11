@@ -3,7 +3,7 @@ use std::cell::{RefCell, Ref};
 use std::ffi::CString;
 
 // Cheap to clone because string is shared
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Chunk {
     content: Rc<RefCell<String>>
 }
@@ -25,7 +25,7 @@ impl From<Chunk> for CString {
 }
 
 // Cheap to clone. Owns chunk for ease of use.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ChunkRegion {
     parent_chunk: Chunk,
     start_pos: usize,
@@ -71,10 +71,15 @@ impl Chunk {
             return false;
         }
         if content[pos..].chars().next() == Some('\n') {
-            return false
+            return false;
         }
         content.insert(pos, '\n');
         true
+    }
+
+    pub fn delete_region(&mut self, region: &ChunkRegion) {
+        self.require_valid_region(region);
+        self.content.borrow_mut().replace_range(region.start_pos..(region.start_pos + region.length), "");
     }
 
     fn require_valid_region(&self, region: &ChunkRegion) {
@@ -91,6 +96,10 @@ impl ChunkRegion {
             start_pos,
             length,
         }
+    }
+
+    pub fn get_parent_chunk(&self) -> Chunk {
+        self.parent_chunk.clone()
     }
 
     pub fn get_first_line(&self) -> ChunkRegion {

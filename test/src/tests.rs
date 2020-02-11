@@ -471,6 +471,145 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(!track.is_armed(false));
             Ok(())
         }),
+        step("Arm track in auto-arm mode", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.arm(true);
+            // Then
+            check!(track.is_armed(true));
+            // TODO Interesting! GetMediaTrackInfo_Value read with I_RECARM seems to support auto-arm already!
+            // So maybe we should remove the chunk check and the parameter supportAutoArm
+            check!(track.is_armed(false));
+            check!(track.has_auto_arm_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Disarm track in auto-arm mode", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.disarm(true);
+            // Then
+            check!(!track.is_armed(true));
+            check!(!track.is_armed(false));
+            check!(track.has_auto_arm_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Disable track auto-arm mode", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            track.disable_auto_arm();
+            // Then
+            check!(!track.has_auto_arm_enabled());
+            check!(!track.is_armed(true));
+            check!(!track.is_armed(false));
+            Ok(())
+        }),
+        step("Switch to normal track mode while armed", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            track.arm(true);
+            check!(track.is_armed(true));
+            // When
+            track.disable_auto_arm();
+            // Then
+            check!(!track.has_auto_arm_enabled());
+            check!(track.is_armed(true));
+            check!(track.is_armed(false));
+            Ok(())
+        }),
+        step("Switch track to auto-arm mode while armed", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            track.unselect();
+            // When
+            track.enable_auto_arm();
+            // Then
+            check!(track.has_auto_arm_enabled());
+            check!(track.is_armed(true));
+            check!(track.is_armed(false));
+            Ok(())
+        }),
+        step("Disarm track in auto-arm mode (ignoring auto-arm)", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.disarm(false);
+            // Then
+            check!(!track.is_armed(true));
+            check!(!track.is_armed(false));
+            check!(!track.has_auto_arm_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Arm track in auto-arm mode (ignoring auto-arm)", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            track.enable_auto_arm();
+            check!(track.has_auto_arm_enabled());
+            check!(!track.is_armed(true));
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.arm(false);
+            // Then
+            check!(track.is_armed(true));
+            check!(track.is_armed(false));
+            check!(!track.has_auto_arm_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Select track exclusively", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
+            let track_2 = project.get_track_by_index(1).ok_or("Missing track 2")?;
+            let track_3 = project.get_track_by_index(2).ok_or("Missing track 3")?;
+            track_1.unselect();
+            track_2.select();
+            track_3.select();
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track_1.select_exclusively();
+            // Then
+            check!(track_1.is_selected());
+            check!(!track_2.is_selected());
+            check!(!track_3.is_selected());
+            check_eq!(project.get_selected_track_count(false), 1);
+            check!(project.get_first_selected_track(false).is_some());
+            check_eq!(project.get_selected_tracks(false).count(), 1);
+            check_eq!(mock.invocation_count(), 3);
+            Ok(())
+        }),
     )
 }
 
