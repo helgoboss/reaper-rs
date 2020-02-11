@@ -247,6 +247,14 @@ impl Reaper {
         self.low.DeleteTrack.unwrap()(tr);
     }
 
+    pub fn get_track_num_sends(&self, tr: *mut MediaTrack, category: i32) -> u32 {
+        self.low.GetTrackNumSends.unwrap()(tr, category) as u32
+    }
+
+    pub fn get_set_track_send_info(&self, tr: *mut MediaTrack, category: i32, sendidx: u32, parmname: &CStr, set_new_value: *mut c_void) -> *mut c_void {
+        self.low.GetSetTrackSendInfo.unwrap()(tr, category, sendidx as i32, parmname.as_ptr(), set_new_value)
+    }
+
     pub fn get_track_state_chunk(&self, track: *mut MediaTrack, str_need_big_sz: u32, isundo_optional: bool) -> Option<CString> {
         let (chunk_content, successful) = with_string_buffer(str_need_big_sz, |buffer, max_size| {
             self.low.GetTrackStateChunk.unwrap()(track, buffer, max_size, isundo_optional)

@@ -670,6 +670,17 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut GetSetTrackSendInfo: ::std::option::Option<
+            unsafe extern "C" fn(
+                tr: *mut root::MediaTrack,
+                category: ::std::os::raw::c_int,
+                sendidx: ::std::os::raw::c_int,
+                parmname: *const ::std::os::raw::c_char,
+                setNewValue: *mut ::std::os::raw::c_void,
+            ) -> *mut ::std::os::raw::c_void,
+        >;
+    }
+    extern "C" {
         pub static mut GetTrack: ::std::option::Option<
             unsafe extern "C" fn(
                 proj: *mut root::ReaProject,
@@ -688,6 +699,14 @@ pub mod root {
                 track: *mut root::MediaTrack,
                 envname: *const ::std::os::raw::c_char,
             ) -> *mut root::TrackEnvelope,
+        >;
+    }
+    extern "C" {
+        pub static mut GetTrackNumSends: ::std::option::Option<
+            unsafe extern "C" fn(
+                tr: *mut root::MediaTrack,
+                category: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {

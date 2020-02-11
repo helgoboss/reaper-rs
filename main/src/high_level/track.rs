@@ -11,7 +11,7 @@ use std::convert::TryFrom;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput, Volume, Pan, ChunkRegion, Chunk};
+use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput, Volume, Pan, ChunkRegion, Chunk, get_target_track};
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject, get_control_surface_instance, CSURF_EXT_SETINPUTMONITOR};
@@ -139,7 +139,7 @@ impl Track {
         Reaper::instance().medium.get_set_media_track_info(
             self.get_media_track(),
             c_str!("P_NAME"),
-            name.as_ptr() as *mut c_void
+            name.as_ptr() as *mut c_void,
         );
     }
 
@@ -344,6 +344,32 @@ impl Track {
     pub fn unselect(&self) {
         self.load_and_check_if_necessary_or_complain();
         Reaper::instance().medium.set_track_selected(self.get_media_track(), false);
+    }
+
+    pub fn get_send_count(&self) -> u32 {
+        self.load_and_check_if_necessary_or_complain();
+        Reaper::instance().medium.get_track_num_sends(self.get_media_track(), 0)
+    }
+
+    // Returns target-track based sends
+    pub fn get_sends(&self) -> impl Iterator<Item=TrackSend> + '_ {
+        self.load_and_check_if_necessary_or_complain();
+        (0..self.get_send_count())
+            .map(move |i| {
+                // Create a stable send (based on target track)
+                TrackSend::target_based(self.clone(), get_target_track(self, i), Some(i))
+            })
+    }
+
+    pub fn get_send_by_index(&self, index: u32) -> Option<TrackSend> {
+        if index >= self.get_send_count() {
+            return None;
+        }
+        Some(TrackSend::target_based(self.clone(), get_target_track(self, index), Some(index)))
+    }
+
+    pub fn get_send_by_target_track(&self, target_track: Track) -> TrackSend {
+        TrackSend::target_based(self.clone(), target_track, None)
     }
 
     // Non-Optional. Even the index is not a stable identifier, we need a way to create

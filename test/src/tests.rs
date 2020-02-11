@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -634,6 +634,32 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(track_2.get_guid(), track_2_guid);
             check_eq!(mock.invocation_count(), 1);
             check_eq!(mock.last_arg(), track_1.into());
+            Ok(())
+        }),
+        step("Query track automation mode", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let automation_mode =track.get_automation_mode();
+            let global_automation_override = reaper.get_global_automation_override();
+            let effective_automation_mode = track.get_effective_automation_mode();
+            // Then
+            check_eq!(automation_mode, AutomationMode::TrimRead);
+            check_eq!(global_automation_override, AutomationMode::NoOverride);
+            check_eq!(effective_automation_mode, AutomationMode::TrimRead);
+            Ok(())
+        }),
+        step("Query track send count", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let send_count = track.get_send_count();
+            // Then
+            check_eq!(send_count, 0);
+            check_eq!(track.get_send_by_index(0), None);
+            check!(!track.get_send_by_target_track(track.clone()).is_available());
+            check!(!track.get_index_based_send_by_index(0).is_available());
+            check_eq!(track.get_sends().count(), 0);
             Ok(())
         }),
     )

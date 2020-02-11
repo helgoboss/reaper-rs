@@ -184,3 +184,16 @@ pub type SetTrackStateChunk = fn(
 ) -> bool;
 
 pub type DeleteTrack = fn(tr: *mut MediaTrack);
+
+pub type GetTrackNumSends = fn(
+    tr: *mut MediaTrack,
+    category: ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int;
+
+pub type GetSetTrackSendInfo = fn(
+    tr: *mut MediaTrack,
+    category: ::std::os::raw::c_int,
+    sendidx: ::std::os::raw::c_int,
+    parmname: *const ::std::os::raw::c_char,
+    setNewValue: *mut ::std::os::raw::c_void,
+) -> *mut ::std::os::raw::c_void;
