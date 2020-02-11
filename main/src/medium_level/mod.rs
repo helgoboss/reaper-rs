@@ -243,6 +243,10 @@ impl Reaper {
         self.low.SetOnlyTrackSelected.unwrap()(track);
     }
 
+    pub fn delete_track(&self, tr: *mut MediaTrack) {
+        self.low.DeleteTrack.unwrap()(tr);
+    }
+
     pub fn get_track_state_chunk(&self, track: *mut MediaTrack, str_need_big_sz: u32, isundo_optional: bool) -> Option<CString> {
         let (chunk_content, successful) = with_string_buffer(str_need_big_sz, |buffer, max_size| {
             self.low.GetTrackStateChunk.unwrap()(track, buffer, max_size, isundo_optional)

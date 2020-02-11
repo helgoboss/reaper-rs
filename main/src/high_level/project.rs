@@ -65,6 +65,15 @@ impl Project {
         Some(Track::new(media_track, self.rea_project))
     }
 
+    // 0 is master track, 1 is first normal track
+    pub fn get_track_by_number(&self, number: u32) -> Option<Track> {
+        if number == 0 {
+            Some(self.get_master_track())
+        } else {
+            self.get_track_by_index(number - 1)
+        }
+    }
+
     // This returns a non-optional in order to support not-yet-loaded tracks. GUID is a perfectly stable
     // identifier of a track!
     pub fn get_track_by_guid(&self, guid: &Guid) -> Track {
@@ -120,6 +129,10 @@ impl Project {
     pub fn add_track(&self) -> Track {
         self.complain_if_not_available();
         self.insert_track_at(self.get_track_count())
+    }
+
+    pub fn remove_track(&self, track: &Track) {
+        Reaper::instance().medium.delete_track(track.get_media_track());
     }
 
     // TODO Introduce variant that doesn't notify ControlSurface

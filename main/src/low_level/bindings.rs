@@ -615,6 +615,10 @@ pub mod root {
         pub static mut DB2SLIDER: ::std::option::Option<unsafe extern "C" fn(x: f64) -> f64>;
     }
     extern "C" {
+        pub static mut DeleteTrack:
+            ::std::option::Option<unsafe extern "C" fn(tr: *mut root::MediaTrack)>;
+    }
+    extern "C" {
         pub static mut EnumProjects: ::std::option::Option<
             unsafe extern "C" fn(
                 idx: ::std::os::raw::c_int,

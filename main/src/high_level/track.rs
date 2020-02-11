@@ -26,7 +26,7 @@ use slog::debug;
 // TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
 //  this would require rxRust subjects to work with elements that are not copyable (because Rc,
 //  RefCell, Box, Arc and all that stuff are never copyable) but just cloneable
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Eq)]
 pub struct LightTrack {
     media_track: *mut MediaTrack,
     rea_project: *mut ReaProject,
@@ -55,10 +55,20 @@ impl LightTrack {
     }
 }
 
+impl PartialEq for LightTrack {
+    fn eq(&self, other: &Self) -> bool {
+        if self.media_track.is_null() || other.media_track.is_null() {
+            self.guid == other.guid
+        } else {
+            self.media_track == other.media_track
+        }
+    }
+}
+
 const MAX_CHUNK_SIZE: u32 = 1_000_000;
 
 // TODO Think hard about what equality means here!
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq)]
 // TODO Add Copy again and remove LightTrack if possible one day, see https://github.com/rust-lang/rust/issues/20813
 // TODO Reconsider design. Maybe don't do that interior mutability stuff. By moving from lazy to
 //  eager (determining rea_project and media_track at construction time).
@@ -501,6 +511,16 @@ impl Track {
             self.load_if_necessary_or_complain();
         }
         self.get_project_unchecked()
+    }
+}
+
+impl PartialEq for Track {
+    fn eq(&self, other: &Self) -> bool {
+        if self.media_track.get().is_null() || other.media_track.get().is_null() {
+            self.get_guid() == other.get_guid()
+        } else {
+            self.media_track == other.media_track
+        }
     }
 }
 

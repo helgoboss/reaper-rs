@@ -610,6 +610,32 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(mock.invocation_count(), 3);
             Ok(())
         }),
+        step("Remove track", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track_count_before = project.get_track_count();
+            let track_1 = project.get_track_by_number(1).ok_or("Missing track 1")?;
+            let track_2 = project.get_track_by_number(2).ok_or("Missing track 2")?;
+            let track_2_guid = track_2.get_guid();
+            check!(track_1.is_available());
+            check_eq!(track_2.get_index(), 1);
+            check!(track_2.is_available());
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_removed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            project.remove_track(&track_1);
+            // Then
+            check_eq!(project.get_track_count(), track_count_before - 1);
+            check!(!track_1.is_available());
+            check_eq!(track_2.get_index(), 0);
+            check_eq!(track_2.get_guid(), track_2_guid);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track_1.into());
+            Ok(())
+        }),
     )
 }
 

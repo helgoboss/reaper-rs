@@ -182,3 +182,5 @@ pub type SetTrackStateChunk = fn(
     str: *const ::std::os::raw::c_char,
     isundoOptional: bool,
 ) -> bool;
+
+pub type DeleteTrack = fn(tr: *mut MediaTrack);

@@ -76,6 +76,7 @@ fn generate_bindings() {
         .whitelist_var("GetTrackStateChunk")
         .whitelist_var("CSurf_OnRecArmChangeEx")
         .whitelist_var("SetTrackStateChunk")
+        .whitelist_var("DeleteTrack")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

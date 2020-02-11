@@ -417,6 +417,10 @@ impl Reaper {
         self.subjects.track_added.borrow().fork()
     }
 
+    pub fn track_removed(&self) -> EventStream<LightTrack> {
+        self.subjects.track_removed.borrow().fork()
+    }
+
     pub fn track_name_changed(&self) -> EventStream<LightTrack> {
         self.subjects.track_name_changed.borrow().fork()
     }
