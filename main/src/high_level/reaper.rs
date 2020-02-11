@@ -449,6 +449,14 @@ impl Reaper {
         self.subjects.track_arm_changed.borrow().fork()
     }
 
+    pub fn track_send_volume_changed(&self) -> EventStream<LightTrackSend> {
+        self.subjects.track_send_volume_changed.borrow().fork()
+    }
+
+    pub fn track_send_pan_changed(&self) -> EventStream<LightTrackSend> {
+        self.subjects.track_send_pan_changed.borrow().fork()
+    }
+
     pub fn get_current_project(&self) -> Project {
         let (rp, _) = self.medium.enum_projects(-1, 0);
         Project::new(rp)

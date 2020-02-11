@@ -57,11 +57,7 @@ impl LightTrack {
 
 impl PartialEq for LightTrack {
     fn eq(&self, other: &Self) -> bool {
-        if self.media_track.is_null() || other.media_track.is_null() {
-            self.guid == other.guid
-        } else {
-            self.media_track == other.media_track
-        }
+        Track::from(self.clone()) == Track::from(other.clone())
     }
 }
 

@@ -5,7 +5,7 @@ use std::ptr::null_mut;
 use c_str_macro::c_str;
 
 /// The difference to TrackSend is that this implements Copy (not just Clone). See LightTrack for explanation.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq)]
 pub struct LightTrackSend {
     source_track: LightTrack,
     target_track: Option<LightTrack>,
@@ -32,13 +32,34 @@ impl From<TrackSend> for LightTrackSend {
     }
 }
 
+impl PartialEq for LightTrackSend {
+    fn eq(&self, other: &Self) -> bool {
+        TrackSend::from(self.clone()) == TrackSend::from(other.clone())
+    }
+}
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq)]
 pub struct TrackSend {
     source_track: Track,
     target_track: Option<Track>,
     index: Cell<Option<u32>>,
 }
+
+impl PartialEq for TrackSend {
+    fn eq(&self, other: &Self) -> bool {
+        if self.source_track != other.source_track {
+            return false;
+        }
+        if self.target_track.is_some() && other.target_track.is_some() {
+            return self.target_track == other.target_track
+        }
+        if self.index.get().is_some() && other.index.get().is_some() {
+            return self.index == other.index
+        }
+        false
+    }
+}
+
 
 impl TrackSend {
     // Use this if you want to create an index-based send.

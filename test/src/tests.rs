@@ -700,6 +700,45 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(send_to_track_3.get_volume().get_db(), 0.0);
             Ok(())
         }),
+        step("Set track send volume", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
+            let track_3 = project.get_track_by_index(2).ok_or("Missing track 3")?;
+            let send = track_1.get_send_by_target_track(track_3);
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_send_volume_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            send.set_volume(Volume::of_normalized_value(0.25));
+            // Then
+            check_eq!(send.get_volume().get_db(), -30.009531739774296);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), send.into());
+            Ok(())
+        }),
+        step("Set track send pan", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
+            let track_3 = project.get_track_by_index(2).ok_or("Missing track 3")?;
+            let send = track_1.get_send_by_target_track(track_3);
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_send_pan_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            send.set_pan(Pan::of_normalized_value(0.25));
+            // Then
+            check_eq!(send.get_pan().get_reaper_value(), -0.5);
+            check_eq!(send.get_pan().get_normalized_value(), 0.25);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), send.into());
+            Ok(())
+        }),
     )
 }
 
