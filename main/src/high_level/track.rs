@@ -236,8 +236,56 @@ impl Track {
         self.get_auto_arm_chunk_line().is_some()
     }
 
+    pub fn is_armed(&self, support_auto_arm: bool) -> bool {
+        if support_auto_arm && self.has_auto_arm_enabled() {
+            self.is_selected()
+        } else {
+            self.load_and_check_if_necessary_or_complain();
+            Reaper::instance().medium.get_media_track_info_value(self.get_media_track(), c_str!("I_RECARM")) == 1.0
+        }
+    }
+
+    // If supportAutoArm is false, auto-arm mode is disabled if it has been enabled before
+    pub fn arm(&self, support_auto_arm: bool) {
+        if support_auto_arm && self.has_auto_arm_enabled() {
+            self.select();
+        } else {
+            let reaper = Reaper::instance();
+            reaper.medium.csurf_on_rec_arm_change_ex(self.get_media_track(), 1, false);
+            // If track was auto-armed before, this would just have switched off the auto-arm but not actually armed
+            // the track. Therefore we check if it's really armed and if not we do it again.
+            if reaper.medium.get_media_track_info_value(self.get_media_track(), c_str!("I_RECARM")) != 1.0 {
+                reaper.medium.csurf_on_rec_arm_change_ex(self.get_media_track(), 1, false);
+            }
+        }
+    }
+
+    // If supportAutoArm is false, auto-arm mode is disabled if it has been enabled before
+    pub fn disarm(&self, support_auto_arm: bool) {
+        if support_auto_arm && self.has_auto_arm_enabled() {
+            self.unselect();
+        } else {
+            Reaper::instance().medium.csurf_on_rec_arm_change_ex(self.get_media_track(), 0, false);
+        }
+    }
+
+    pub fn enable_auto_arm(&self) {
+        let mut chunk = self.get_chunk(MAX_CHUNK_SIZE, false);
+        if get_auto_arm_chunk_line(&chunk).is_some() {
+            return;
+        }
+        let was_armed_before = self.is_armed(true);
+        chunk.insert_after_region_as_block(&chunk.get_region().get_first_line(), "AUTO_RECARM 1");
+        self.set_chunk(chunk);
+        if was_armed_before {
+            self.arm(true);
+        } else {
+            self.disarm(true);
+        }
+    }
+
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
-        get_auto_arm_chunk_line(self.get_chunk(MAX_CHUNK_SIZE, true))
+        get_auto_arm_chunk_line(&self.get_chunk(MAX_CHUNK_SIZE, true))
     }
 
     // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains weird
@@ -246,7 +294,12 @@ impl Track {
         let chunk_content = Reaper::instance().medium
             .get_track_state_chunk(self.get_media_track(), max_chunk_size, undo_is_optional)
             .expect("Couldn't load track chunk");
-        Chunk::new(chunk_content.into_string().expect("Chunk contains illegal characters"))
+        chunk_content.into()
+    }
+
+    pub fn set_chunk(&self, chunk: Chunk) {
+        let c_string: CString = chunk.into();
+        Reaper::instance().medium.set_track_state_chunk(self.get_media_track(), c_string.as_c_str(), true);
     }
 
     pub fn is_selected(&self) -> bool {
@@ -443,6 +496,6 @@ fn get_media_track_rea_project(media_track: *mut MediaTrack) -> *mut ReaProject 
     Reaper::instance().medium.get_set_media_track_info(media_track, c_str!("P_PROJECT"), null_mut()) as *mut ReaProject
 }
 
-fn get_auto_arm_chunk_line(chunk: Chunk) -> Option<ChunkRegion> {
+fn get_auto_arm_chunk_line(chunk: &Chunk) -> Option<ChunkRegion> {
     chunk.get_region().find_line_starting_with("AUTO_RECARM 1")
 }

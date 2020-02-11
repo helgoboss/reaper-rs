@@ -413,6 +413,64 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(!is_in_auto_arm_mode);
             Ok(())
         }),
+        step("Query track arm state", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let is_armed = track.is_armed(true);
+            let is_armed_ignoring_auto_arm = track.is_armed(false);
+            // Then
+            check!(!is_armed);
+            check!(!is_armed_ignoring_auto_arm);
+            Ok(())
+        }),
+        step("Arm track in normal mode", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.arm(true);
+            // Then
+            check!(track.is_armed(true));
+            check!(track.is_armed(false));
+            check!(!track.has_auto_arm_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Disarm track in normal mode", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.disarm(true);
+            // Then
+            check!(!track.is_armed(true));
+            check!(!track.is_armed(false));
+            check!(!track.has_auto_arm_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Enable track auto-arm mode", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            track.enable_auto_arm();
+            // Then
+            check!(track.has_auto_arm_enabled());
+            check!(!track.is_armed(true));
+            check!(!track.is_armed(false));
+            Ok(())
+        }),
     )
 }
 

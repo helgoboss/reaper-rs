@@ -170,3 +170,15 @@ pub type GetTrackStateChunk = fn(
     strNeedBig_sz: ::std::os::raw::c_int,
     isundoOptional: bool,
 ) -> bool;
+
+pub type CSurf_OnRecArmChangeEx = fn(
+    trackid: *mut MediaTrack,
+    recarm: ::std::os::raw::c_int,
+    allowgang: bool,
+) -> bool;
+
+pub type SetTrackStateChunk = fn(
+    track: *mut MediaTrack,
+    str: *const ::std::os::raw::c_char,
+    isundoOptional: bool,
+) -> bool;

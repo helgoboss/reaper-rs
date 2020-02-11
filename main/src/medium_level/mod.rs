@@ -253,6 +253,14 @@ impl Reaper {
         Some(chunk_content)
     }
 
+    pub fn csurf_on_rec_arm_change_ex(&self, trackid: *mut MediaTrack, recarm: i32, allowgang: bool) -> bool {
+        self.low.CSurf_OnRecArmChangeEx.unwrap()(trackid, recarm, allowgang)
+    }
+
+    pub fn set_track_state_chunk(&self, track: *mut MediaTrack, str: &CStr, isundo_optional: bool) -> bool {
+        self.low.SetTrackStateChunk.unwrap()(track, str.as_ptr(), isundo_optional)
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {

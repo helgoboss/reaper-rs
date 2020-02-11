@@ -194,7 +194,9 @@ gen_reaper_struct![
     SetTrackSelected,
     GetSelectedTrack2,
     SetOnlyTrackSelected,
-    GetTrackStateChunk
+    GetTrackStateChunk,
+    CSurf_OnRecArmChangeEx,
+    SetTrackStateChunk
 ];
 
 #[macro_export]

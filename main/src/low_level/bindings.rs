@@ -575,6 +575,15 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut CSurf_OnRecArmChangeEx: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                recarm: ::std::os::raw::c_int,
+                allowgang: bool,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
         pub static mut CSurf_OnVolumeChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -754,6 +763,15 @@ pub mod root {
     extern "C" {
         pub static mut SetTrackSelected: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack, selected: bool),
+        >;
+    }
+    extern "C" {
+        pub static mut SetTrackStateChunk: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                str: *const ::std::os::raw::c_char,
+                isundoOptional: bool,
+            ) -> bool,
         >;
     }
     extern "C" {
