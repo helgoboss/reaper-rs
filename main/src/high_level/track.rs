@@ -351,6 +351,12 @@ impl Track {
         Reaper::instance().medium.get_track_num_sends(self.get_media_track(), 0)
     }
 
+    pub fn add_send_to(&self, target_track: Track) -> TrackSend {
+        // TODO Check how this behaves if send already exists
+        let send_index = Reaper::instance().medium.create_track_send(self.get_media_track(), target_track.get_media_track());
+        TrackSend::target_based(self.clone(), target_track, Some(send_index))
+    }
+
     // Returns target-track based sends
     pub fn get_sends(&self) -> impl Iterator<Item=TrackSend> + '_ {
         self.load_and_check_if_necessary_or_complain();

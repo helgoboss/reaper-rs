@@ -197,3 +197,29 @@ pub type GetSetTrackSendInfo = fn(
     parmname: *const ::std::os::raw::c_char,
     setNewValue: *mut ::std::os::raw::c_void,
 ) -> *mut ::std::os::raw::c_void;
+
+pub type CreateTrackSend = fn(
+    tr: *mut MediaTrack,
+    desttrInOptional: *mut MediaTrack,
+) -> ::std::os::raw::c_int;
+
+pub type CSurf_OnSendVolumeChange = fn(
+    trackid: *mut MediaTrack,
+    send_index: ::std::os::raw::c_int,
+    volume: f64,
+    relative: bool,
+) -> f64;
+
+pub type CSurf_OnSendPanChange = fn(
+    trackid: *mut MediaTrack,
+    send_index: ::std::os::raw::c_int,
+    pan: f64,
+    relative: bool,
+) -> f64;
+
+pub type GetTrackSendUIVolPan = fn(
+    track: *mut MediaTrack,
+    send_index: ::std::os::raw::c_int,
+    volumeOut: *mut f64,
+    panOut: *mut f64,
+) -> bool;

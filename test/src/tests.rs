@@ -640,7 +640,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let automation_mode =track.get_automation_mode();
+            let automation_mode = track.get_automation_mode();
             let global_automation_override = reaper.get_global_automation_override();
             let effective_automation_mode = track.get_effective_automation_mode();
             // Then
@@ -660,6 +660,44 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(!track.get_send_by_target_track(track.clone()).is_available());
             check!(!track.get_index_based_send_by_index(0).is_available());
             check_eq!(track.get_sends().count(), 0);
+            Ok(())
+        }),
+        step("Add track send", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
+            let track_2 = project.get_track_by_index(1).ok_or("Missing track 2")?;
+            // When
+            let send = track_1.add_send_to(track_2.clone());
+            // Then
+            check_eq!(track_1.get_send_count(), 1);
+            check_eq!(track_1.get_send_by_index(0), Some(send));
+            check!(track_1.get_send_by_target_track(track_2.clone()).is_available());
+            check!(!track_2.get_send_by_target_track(track_1.clone()).is_available());
+            check!(track_1.get_index_based_send_by_index(0).is_available());
+            check_eq!(track_1.get_sends().count(), 1);
+            Ok(())
+        }),
+        step("Query track send", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
+            let track_2 = project.get_track_by_index(1).ok_or("Missing track 2")?;
+            let track_3 = project.add_track();
+            // When
+            let send_to_track_2 = track_1.get_send_by_target_track(track_2.clone());
+            let send_to_track_3 = track_1.add_send_to(track_3.clone());
+            // Then
+            check!(send_to_track_2.is_available());
+            check!(send_to_track_3.is_available());
+            check_eq!(send_to_track_2.get_index(), 0);
+            check_eq!(send_to_track_3.get_index(), 1);
+            check_eq!(send_to_track_2.get_source_track(), track_1);
+            check_eq!(send_to_track_3.get_source_track(), track_1);
+            check_eq!(send_to_track_2.get_target_track(), track_2);
+            check_eq!(send_to_track_3.get_target_track(), track_3);
+            check_eq!(send_to_track_2.get_volume().get_db(), 0.0);
+            check_eq!(send_to_track_3.get_volume().get_db(), 0.0);
             Ok(())
         }),
     )

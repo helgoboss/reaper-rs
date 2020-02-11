@@ -14,8 +14,8 @@ macro_rules! check {
 macro_rules! check_eq {
     ($actual:expr, $expected:expr) => {
         {
-            let actual = $actual;
-            let expected = $expected;
+            let actual = &$actual;
+            let expected = &$expected;
             let result = if (actual == expected) {
                 Ok(())
             } else {

@@ -556,6 +556,14 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut CreateTrackSend: ::std::option::Option<
+            unsafe extern "C" fn(
+                tr: *mut root::MediaTrack,
+                desttrInOptional: *mut root::MediaTrack,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut CSurf_OnInputMonitorChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -581,6 +589,26 @@ pub mod root {
                 recarm: ::std::os::raw::c_int,
                 allowgang: bool,
             ) -> bool,
+        >;
+    }
+    extern "C" {
+        pub static mut CSurf_OnSendPanChange: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                send_index: ::std::os::raw::c_int,
+                pan: f64,
+                relative: bool,
+            ) -> f64,
+        >;
+    }
+    extern "C" {
+        pub static mut CSurf_OnSendVolumeChange: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                send_index: ::std::os::raw::c_int,
+                volume: f64,
+                relative: bool,
+            ) -> f64,
         >;
     }
     extern "C" {
@@ -707,6 +735,16 @@ pub mod root {
                 tr: *mut root::MediaTrack,
                 category: ::std::os::raw::c_int,
             ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut GetTrackSendUIVolPan: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                send_index: ::std::os::raw::c_int,
+                volumeOut: *mut f64,
+                panOut: *mut f64,
+            ) -> bool,
         >;
     }
     extern "C" {

@@ -199,7 +199,11 @@ gen_reaper_struct![
     SetTrackStateChunk,
     DeleteTrack,
     GetTrackNumSends,
-    GetSetTrackSendInfo
+    GetSetTrackSendInfo,
+    CreateTrackSend,
+    CSurf_OnSendVolumeChange,
+    CSurf_OnSendPanChange,
+    GetTrackSendUIVolPan
 ];
 
 #[macro_export]

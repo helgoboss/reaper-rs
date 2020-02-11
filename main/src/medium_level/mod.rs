@@ -265,12 +265,37 @@ impl Reaper {
         Some(chunk_content)
     }
 
+    pub fn create_track_send(&self, tr: *mut MediaTrack, desttr_in_optional: *mut MediaTrack) -> u32 {
+        self.low.CreateTrackSend.unwrap()(tr, desttr_in_optional) as u32
+    }
+
     pub fn csurf_on_rec_arm_change_ex(&self, trackid: *mut MediaTrack, recarm: i32, allowgang: bool) -> bool {
         self.low.CSurf_OnRecArmChangeEx.unwrap()(trackid, recarm, allowgang)
     }
 
     pub fn set_track_state_chunk(&self, track: *mut MediaTrack, str: &CStr, isundo_optional: bool) -> bool {
         self.low.SetTrackStateChunk.unwrap()(track, str.as_ptr(), isundo_optional)
+    }
+
+    pub fn csurf_on_send_volume_change(&self, trackid: *mut MediaTrack, send_index: u32, volume: f64, relative: bool) -> f64 {
+        self.low.CSurf_OnSendVolumeChange.unwrap()(trackid, send_index as i32, volume, relative)
+    }
+
+    pub fn csurf_on_send_pan_change(&self, trackid: *mut MediaTrack, send_index: u32, pan: f64, relative: bool) -> f64 {
+        self.low.CSurf_OnSendPanChange.unwrap()(trackid, send_index as i32, pan, relative)
+    }
+
+    // TODO Maybe prefer Result as return data type in such cases
+    pub fn get_track_send_ui_vol_pan(&self, track: *mut MediaTrack, send_index: u32) -> Option<(f64, f64)> {
+        let mut volume = 0.0;
+        let mut pan = 0.0;
+        let successful = self.low.GetTrackSendUIVolPan.unwrap()(
+            track, send_index as i32, &mut volume as *mut f64, &mut pan as *mut f64);
+        if successful {
+            Some((volume, pan))
+        } else {
+            None
+        }
     }
 
     // TODO Rename

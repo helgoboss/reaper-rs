@@ -1,4 +1,4 @@
-use crate::high_level::{Track, LightTrack, Reaper};
+use crate::high_level::{Track, LightTrack, Reaper, Volume, Pan};
 use std::cell::Cell;
 use crate::low_level::MediaTrack;
 use std::ptr::null_mut;
@@ -74,6 +74,10 @@ impl TrackSend {
         }
     }
 
+    pub fn get_source_track(&self) -> Track {
+        self.source_track.clone()
+    }
+
     pub fn get_target_track(&self) -> Track {
         if self.is_index_based() {
             get_target_track(&self.source_track, self.get_index())
@@ -85,6 +89,32 @@ impl TrackSend {
     pub fn get_index(&self) -> u32 {
         self.check_or_load_if_necessary_or_complain();
         self.index.get().expect("Index not set")
+    }
+
+    pub fn get_volume(&self) -> Volume {
+        // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the wrong value if
+        // an envelope is written.
+        let (volume, _) = Reaper::instance().medium
+            .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
+            .expect("Couldn't get send vol/pan");
+        Volume::of_reaper_value(volume)
+    }
+
+    pub fn set_volume(&self, volume: Volume) {
+        Reaper::instance().medium.csurf_on_send_volume_change(
+            self.get_source_track().get_media_track(), self.get_index(), volume.get_reaper_value(), false);
+    }
+
+    pub fn get_pan(&self) -> Pan {
+        let (_, pan) = Reaper::instance().medium
+            .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
+            .expect("Couldn't get send vol/pan");
+        Pan::of_reaper_value(pan)
+    }
+
+    pub fn set_pan(&self, pan: Pan) {
+        Reaper::instance().medium.csurf_on_send_pan_change(
+            self.get_source_track().get_media_track(), self.get_index(), pan.get_reaper_value(), false);
     }
 
     fn load_by_target_track(&self) -> bool {
