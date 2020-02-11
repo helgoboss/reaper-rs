@@ -192,7 +192,9 @@ gen_reaper_struct![
     CSurf_SetSurfacePan,
     CountSelectedTracks2,
     SetTrackSelected,
-    GetSelectedTrack2
+    GetSelectedTrack2,
+    SetOnlyTrackSelected,
+    GetTrackStateChunk
 ];
 
 #[macro_export]

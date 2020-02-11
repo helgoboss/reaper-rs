@@ -72,6 +72,8 @@ fn generate_bindings() {
         .whitelist_var("CountSelectedTracks2")
         .whitelist_var("SetTrackSelected")
         .whitelist_var("GetSelectedTrack2")
+        .whitelist_var("SetOnlyTrackSelected")
+        .whitelist_var("GetTrackStateChunk")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

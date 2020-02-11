@@ -26,11 +26,11 @@ const ZERO_GUID: GUID = GUID {
     Data4: [0; 8],
 };
 
-fn with_string_buffer<T>(max_size: usize, fill_buffer: impl FnOnce(*mut c_char, usize) -> T) -> (CString, T) {
+fn with_string_buffer<T>(max_size: u32, fill_buffer: impl FnOnce(*mut c_char, i32) -> T) -> (CString, T) {
     let vec: Vec<u8> = vec![1; max_size as usize];
     let c_string = unsafe { CString::from_vec_unchecked(vec) };
     let raw = c_string.into_raw();
-    let result = fill_buffer(raw, max_size);
+    let result = fill_buffer(raw, max_size as i32);
     let string = unsafe { CString::from_raw(raw) };
     (string, result)
 }
@@ -40,13 +40,14 @@ impl Reaper {
         Reaper { low }
     }
 
-    pub fn enum_projects(&self, idx: i32, projfn_out_optional_sz: i32) -> (*mut ReaProject, Option<CString>) {
+    // TODO Unifiy u32 vs i32
+    pub fn enum_projects(&self, idx: i32, projfn_out_optional_sz: u32) -> (*mut ReaProject, Option<CString>) {
         return if projfn_out_optional_sz == 0 {
             let project = self.low.EnumProjects.unwrap()(idx, null_mut(), 0);
             (project, None)
         } else {
-            let (file_path, project) = with_string_buffer(projfn_out_optional_sz as usize, |buffer, max_size| {
-                self.low.EnumProjects.unwrap()(idx, buffer, max_size as i32)
+            let (file_path, project) = with_string_buffer(projfn_out_optional_sz, |buffer, max_size| {
+                self.low.EnumProjects.unwrap()(idx, buffer, max_size)
             });
 
             (project, if file_path.as_bytes().len() == 0 { None } else { Some(file_path) })
@@ -168,9 +169,10 @@ impl Reaper {
     }
 
     pub fn guid_to_string(&self, g: &GUID) -> CString {
-        with_string_buffer(64, |buffer, max_size| {
+        let (guid_string, _) = with_string_buffer(64, |buffer, _| {
             self.low.guidToString.unwrap()(g as *const GUID, buffer)
-        }).0
+        });
+        guid_string
     }
 
     pub fn string_to_guid(&self, str: &CStr) -> Option<GUID> {
@@ -235,6 +237,20 @@ impl Reaper {
 
     pub fn get_selected_track_2(&self, proj: *mut ReaProject, seltrackidx: i32, wantmaster: bool) -> *mut MediaTrack {
         self.low.GetSelectedTrack2.unwrap()(proj, seltrackidx, wantmaster)
+    }
+
+    pub fn set_only_track_selected(&self, track: *mut MediaTrack) {
+        self.low.SetOnlyTrackSelected.unwrap()(track);
+    }
+
+    pub fn get_track_state_chunk(&self, track: *mut MediaTrack, str_need_big_sz: u32, isundo_optional: bool) -> Option<CString> {
+        let (chunk_content, successful) = with_string_buffer(str_need_big_sz, |buffer, max_size| {
+            self.low.GetTrackStateChunk.unwrap()(track, buffer, max_size, isundo_optional)
+        });
+        if !successful {
+            return None
+        }
+        Some(chunk_content)
     }
 
     // TODO Rename

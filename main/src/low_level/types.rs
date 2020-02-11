@@ -161,3 +161,12 @@ pub type GetSelectedTrack2 = fn(
     seltrackidx: ::std::os::raw::c_int,
     wantmaster: bool,
 ) -> *mut MediaTrack;
+
+pub type SetOnlyTrackSelected = fn(track: *mut MediaTrack);
+
+pub type GetTrackStateChunk = fn(
+    track: *mut MediaTrack,
+    strNeedBig: *mut ::std::os::raw::c_char,
+    strNeedBig_sz: ::std::os::raw::c_int,
+    isundoOptional: bool,
+) -> bool;

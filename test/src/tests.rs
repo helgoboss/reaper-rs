@@ -357,6 +357,62 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(mock.last_arg(), track2.into());
             Ok(())
         }),
+        step("Unselect track", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.unselect();
+            // Then
+            check!(!track.is_selected());
+            check_eq!(project.get_selected_track_count(false), 1);
+            let first_selected_track = project.get_first_selected_track(false)
+                .ok_or("Couldn't get first selected track")?;
+            check_eq!(first_selected_track.get_index(), 2);
+            check_eq!(project.get_selected_tracks(false).count(), 1);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track.into());
+            Ok(())
+        }),
+        step("Select master track", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let master_track = project.get_master_track();
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            project.unselect_all_tracks();
+            master_track.select();
+            // Then
+            check!(master_track.is_selected());
+            check_eq!(project.get_selected_track_count(true), 1);
+            let first_selected_track = project.get_first_selected_track(true)
+                .ok_or("Couldn't get first selected track")?;
+            check!(first_selected_track.is_master_track());
+            check_eq!(project.get_selected_tracks(true).count(), 1);
+            // TODO REAPER doesn't notify us about master track selection currently
+            check_eq!(mock.invocation_count(), 1);
+            let last_arg: Track = mock.last_arg().into();
+            check_eq!(last_arg.get_index(), 2);
+            Ok(())
+        }),
+        step("Query track auto arm mode", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let is_in_auto_arm_mode = track.has_auto_arm_enabled();
+            // Then
+            check!(!is_in_auto_arm_mode);
+            Ok(())
+        }),
     )
 }
 

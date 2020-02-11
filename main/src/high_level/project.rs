@@ -97,6 +97,11 @@ impl Project {
         Some(Track::new(media_track, self.rea_project))
     }
 
+    pub fn unselect_all_tracks(&self) {
+        // TODO No project context
+        Reaper::instance().medium.set_only_track_selected(null_mut());
+    }
+
     pub fn get_selected_tracks(&self, want_master: bool) -> impl Iterator<Item=Track> + '_ {
         self.complain_if_not_available();
         (0..self.get_selected_track_count(want_master))

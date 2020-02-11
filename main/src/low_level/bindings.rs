@@ -678,6 +678,16 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut GetTrackStateChunk: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                strNeedBig: *mut ::std::os::raw::c_char,
+                strNeedBig_sz: ::std::os::raw::c_int,
+                isundoOptional: bool,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
         pub static mut GetTrackUIVolPan: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -736,6 +746,10 @@ pub mod root {
                 newvalue: f64,
             ) -> bool,
         >;
+    }
+    extern "C" {
+        pub static mut SetOnlyTrackSelected:
+            ::std::option::Option<unsafe extern "C" fn(track: *mut root::MediaTrack)>;
     }
     extern "C" {
         pub static mut SetTrackSelected: ::std::option::Option<

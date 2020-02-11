@@ -53,3 +53,6 @@ pub use volume::*;
 
 mod pan;
 pub use pan::*;
+
+mod chunk;
+pub use chunk::*;

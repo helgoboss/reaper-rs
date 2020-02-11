@@ -11,7 +11,7 @@ use std::convert::TryFrom;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput, Volume, Pan};
+use crate::high_level::{Project, Reaper, InputMonitoringMode, RecordingInput, MidiRecordingInput, Volume, Pan, ChunkRegion, Chunk};
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::guid::Guid;
 use crate::low_level::{MediaTrack, ReaProject, get_control_surface_instance, CSURF_EXT_SETINPUTMONITOR};
@@ -53,6 +53,8 @@ impl LightTrack {
         }
     }
 }
+
+const MAX_CHUNK_SIZE: u32 = 1_000_000;
 
 // TODO Think hard about what equality means here!
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -229,6 +231,24 @@ impl Track {
         ip_track_number - 1
     }
 
+    pub fn has_auto_arm_enabled(&self) -> bool {
+        self.load_and_check_if_necessary_or_complain();
+        self.get_auto_arm_chunk_line().is_some()
+    }
+
+    fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
+        get_auto_arm_chunk_line(self.get_chunk(MAX_CHUNK_SIZE, true))
+    }
+
+    // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains weird
+    // FXID_NEXT (in front of FX tag) instead of FXID (behind FX tag). So FX chunk code should be double checked then.
+    pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: bool) -> Chunk {
+        let chunk_content = Reaper::instance().medium
+            .get_track_state_chunk(self.get_media_track(), max_chunk_size, undo_is_optional)
+            .expect("Couldn't load track chunk");
+        Chunk::new(chunk_content.into_string().expect("Chunk contains illegal characters"))
+    }
+
     pub fn is_selected(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
         Reaper::instance().medium.get_media_track_info_value(self.get_media_track(), c_str!("I_SELECTED")) == 1.0
@@ -237,6 +257,11 @@ impl Track {
     pub fn select(&self) {
         self.load_and_check_if_necessary_or_complain();
         Reaper::instance().medium.set_track_selected(self.get_media_track(), true);
+    }
+
+    pub fn unselect(&self) {
+        self.load_and_check_if_necessary_or_complain();
+        Reaper::instance().medium.set_track_selected(self.get_media_track(), false);
     }
 
     // Non-Optional. Even the index is not a stable identifier, we need a way to create
@@ -416,4 +441,8 @@ pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
 // point.
 fn get_media_track_rea_project(media_track: *mut MediaTrack) -> *mut ReaProject {
     Reaper::instance().medium.get_set_media_track_info(media_track, c_str!("P_PROJECT"), null_mut()) as *mut ReaProject
+}
+
+fn get_auto_arm_chunk_line(chunk: Chunk) -> Option<ChunkRegion> {
+    chunk.get_region().find_line_starting_with("AUTO_RECARM 1")
 }
