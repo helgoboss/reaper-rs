@@ -1,7 +1,7 @@
 use std::ffi::{CString, CStr};
 use crate::high_level::{Section, Project, Reaper};
 use std::borrow::Cow;
-use std::cell::RefCell;
+use std::cell::{RefCell, Ref};
 use c_str_macro::c_str;
 use once_cell::unsync::OnceCell;
 use std::ptr::null_mut;
@@ -33,6 +33,29 @@ impl Action {
                 cached_index: index,
             })),
         }
+    }
+
+    pub fn get_index(&self) -> u32 {
+        self.load_if_necessary_or_complain();
+        let mut opt_runtime_data = self.runtime_data.borrow_mut();
+        let mut runtime_data = opt_runtime_data.as_mut().unwrap();
+        match runtime_data.cached_index {
+            None => {
+                let index = self.find_index(runtime_data).expect("Index couldn't be found");
+                runtime_data.cached_index = Some(index);
+                index
+            }
+            Some(index) => index
+        }
+    }
+
+    fn find_index(&self, runtime_data: &RuntimeData) -> Option<u32> {
+        // TODO Use kbd_enumerateActions
+        runtime_data.section.get_kbd_cmds().enumerate()
+            .find(|(i, kbd_cmd)| {
+                kbd_cmd.cmd as i64 == runtime_data.command_id
+            })
+            .map(|(i, _)| i as u32)
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
@@ -73,6 +96,7 @@ impl Action {
         }
     }
 
+    // TODO Expose runtime data as return value to get rid of the unwraps
     fn load_if_necessary_or_complain(&self) {
         if (self.runtime_data.borrow().is_none() && self.load_by_command_name()) {
             panic!("Action not loadable")

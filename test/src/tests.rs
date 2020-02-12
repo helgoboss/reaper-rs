@@ -739,6 +739,18 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(mock.last_arg(), send.into());
             Ok(())
         }),
+        step("Query action", |reaper, _| {
+            // Given
+            let track = get_first_track()?;
+            track.select_exclusively();
+            check!(!track.is_muted());
+            // When
+            let toggle_action = reaper.get_main_section().get_action_by_command_id(6);
+            let normal_action = reaper.get_main_section().get_action_by_command_id(41075);
+            let normal_action_by_index = reaper.get_main_section().get_action_by_index(normal_action.get_index());
+            // Then
+            Ok(())
+        }),
     )
 }
 

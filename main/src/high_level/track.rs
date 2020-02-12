@@ -304,6 +304,11 @@ impl Track {
         self.set_chunk(chunk);
     }
 
+    pub fn is_muted(&self) -> bool {
+        self.load_and_check_if_necessary_or_complain();
+        Reaper::instance().medium.get_media_track_info_value(self.get_media_track(), c_str!("B_MUTE")) == 1.0
+    }
+
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
         get_auto_arm_chunk_line(&self.get_chunk(MAX_CHUNK_SIZE, true))
     }
