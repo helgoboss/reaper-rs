@@ -49,6 +49,16 @@ fn hook_command(command_index: i32, flag: i32) -> bool {
 
 // Called by REAPER directly!
 // Only for main section
+fn hook_post_command(command_id: i32, flag: i32) {
+    firewall(|| {
+        let reaper = Reaper::instance();
+        let action = reaper.get_main_section().get_action_by_command_id(command_id);
+        reaper.subjects.action_invoked.borrow_mut().next(Rc::new(action));
+    });
+}
+
+// Called by REAPER directly!
+// Only for main section
 fn toggle_action(command_index: i32) -> i32 {
     firewall(|| {
         if let Some(command) = Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
@@ -171,6 +181,7 @@ pub(super) struct EventStreamSubjects {
     pub(super) master_playrate_touched: EventStreamSubject<bool>,
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
+    pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
 }
 
 
@@ -215,6 +226,7 @@ impl EventStreamSubjects {
             master_playrate_touched: default(),
             main_thread_idle: default(),
             project_closed: default(),
+            action_invoked: default(),
         }
     }
 }
@@ -289,12 +301,14 @@ impl Reaper {
     pub fn activate(&self) {
         self.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
         self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
+        self.medium.plugin_register(c_str!("hookpostcommand"), hook_post_command as *mut c_void);
         self.medium.register_control_surface();
     }
 
     // Must be idempotent
     pub fn deactivate(&self) {
         self.medium.unregister_control_surface();
+        self.medium.plugin_register(c_str!("-hookpostcommand"), hook_post_command as *mut c_void);
         self.medium.plugin_register(c_str!("-toggleaction"), toggle_action as *mut c_void);
         self.medium.plugin_register(c_str!("-hookcommand"), hook_command as *mut c_void);
     }
@@ -455,6 +469,10 @@ impl Reaper {
 
     pub fn track_send_pan_changed(&self) -> EventStream<TrackSend> {
         self.subjects.track_send_pan_changed.borrow().fork()
+    }
+
+    pub fn action_invoked(&self) -> EventStream<Rc<Action>> {
+        self.subjects.action_invoked.borrow().fork()
     }
 
     pub fn get_current_project(&self) -> Project {

@@ -772,18 +772,17 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let action = reaper.get_main_section().get_action_by_command_id(6);
             let track = get_first_track()?;
             // When
-            // TODO Make it work once rxRust supports non-copyable items for subjects (#74)
-//            let mock = observe_invocations(|mock| {
-//                reaper.action_invoked().take_until(step.finished).subscribe(move |t| {
-//                    mock.invoke(t);
-//                });
-//            });
+            let mock = observe_invocations(|mock| {
+                reaper.action_invoked().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
             action.invoke_as_trigger(None);
             // Then
             check!(action.is_on());
-//            check!(track.is_muted());
-//            // TODO Actually it would be nice if the actionInvoked event would be raised but it isn't
-//            check_eq!(mock.invocation_count(), 0);
+            check!(track.is_muted());
+            // TODO Actually it would be nice if the actionInvoked event would be raised but it isn't
+            check_eq!(mock.invocation_count(), 0);
             Ok(())
         }),
     )
