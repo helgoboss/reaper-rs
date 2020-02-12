@@ -207,7 +207,10 @@ gen_reaper_struct![
     GetTrackSendUIVolPan,
     kbd_getTextFromCmd,
     GetToggleCommandState2,
-    ReverseNamedCommandLookup
+    ReverseNamedCommandLookup,
+    Main_OnCommandEx,
+    CSurf_SetSurfaceMute,
+    CSurf_SetSurfaceSolo
 ];
 
 #[macro_export]

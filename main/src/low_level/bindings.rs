@@ -622,10 +622,28 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut CSurf_SetSurfaceMute: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                mute: bool,
+                ignoresurf: *mut root::IReaperControlSurface,
+            ),
+        >;
+    }
+    extern "C" {
         pub static mut CSurf_SetSurfacePan: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
                 pan: f64,
+                ignoresurf: *mut root::IReaperControlSurface,
+            ),
+        >;
+    }
+    extern "C" {
+        pub static mut CSurf_SetSurfaceSolo: ::std::option::Option<
+            unsafe extern "C" fn(
+                trackid: *mut root::MediaTrack,
+                solo: bool,
                 ignoresurf: *mut root::IReaperControlSurface,
             ),
         >;
@@ -802,6 +820,15 @@ pub mod root {
                 hwnd: root::HWND,
                 proj: *mut root::ReaProject,
             ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut Main_OnCommandEx: ::std::option::Option<
+            unsafe extern "C" fn(
+                command: ::std::os::raw::c_int,
+                flag: ::std::os::raw::c_int,
+                proj: *mut root::ReaProject,
+            ),
         >;
     }
     extern "C" {

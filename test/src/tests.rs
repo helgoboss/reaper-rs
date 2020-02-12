@@ -13,6 +13,7 @@ use c_str_macro::c_str;
 use std::ffi::{CStr, CString};
 use std::convert::TryFrom;
 use super::mock::observe_invocations;
+use std::ptr::null_mut;
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
     vec!(
@@ -783,6 +784,87 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(track.is_muted());
             // TODO Actually it would be nice if the actionInvoked event would be raised but it isn't
             check_eq!(mock.invocation_count(), 0);
+            Ok(())
+        }),
+        step("Test actionInvoked event", |reaper, step| {
+            // Given
+            let action = reaper.get_main_section().get_action_by_command_id(1582);
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.action_invoked().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            reaper.medium.main_on_command_ex(action.get_command_id() as i32, 0, null_mut());
+            // Then
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(*mock.last_arg(), action);
+            Ok(())
+        }),
+        step("Unmute track", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_mute_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.unmute();
+            // Then
+            check!(!track.is_muted());
+            // For some reason REAPER doesn't call SetSurfaceMute on control surfaces when an action
+            // caused the muting. So HelperControlSurface still thinks the track was unmuted and
+            // therefore will not fire a change event!
+            check_eq!(mock.invocation_count(), 0);
+            Ok(())
+        }),
+        step("Mute track", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_mute_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.mute();
+            // Then
+            check!(track.is_muted());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track);
+            Ok(())
+        }),
+        step("Solo track", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_solo_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.solo();
+            // Then
+            check!(track.is_solo());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track);
+            Ok(())
+        }),
+        step("Unsolo track", |reaper, step| {
+            // Given
+            let track = get_first_track()?;
+            // When
+            let mock = observe_invocations(|mock| {
+                reaper.track_solo_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            track.unsolo();
+            // Then
+            check!(!track.is_solo());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track);
             Ok(())
         }),
     )

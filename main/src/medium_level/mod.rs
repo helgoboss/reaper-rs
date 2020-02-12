@@ -77,6 +77,18 @@ impl Reaper {
         self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
     }
 
+    pub fn main_on_command_ex(&self, command: i32, flag: i32, proj: *mut ReaProject) {
+        self.low.Main_OnCommandEx.unwrap()(command, flag, proj);
+    }
+
+    pub fn csurf_set_surface_mute(&self, trackid: *mut MediaTrack, mute: bool, ignoresurf: *mut IReaperControlSurface) {
+        self.low.CSurf_SetSurfaceMute.unwrap()(trackid, mute, ignoresurf);
+    }
+
+    pub fn csurf_set_surface_solo(&self, trackid: *mut MediaTrack, solo: bool, ignoresurf: *mut IReaperControlSurface) {
+        self.low.CSurf_SetSurfaceSolo.unwrap()(trackid, solo, ignoresurf);
+    }
+
     // Once installed, it stays installed until this module unloaded
     pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
         let delegating_control_surface = DelegatingControlSurface::new(control_surface);

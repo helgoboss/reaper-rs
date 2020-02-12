@@ -250,6 +250,39 @@ impl Track {
         Reaper::instance().medium.get_media_track_info_value(self.get_media_track(), c_str!("B_MUTE")) == 1.0
     }
 
+    pub fn mute(&self) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = Reaper::instance();
+        reaper.medium.set_media_track_info_value(self.get_media_track(), c_str!("B_MUTE"), 1.0);
+        reaper.medium.csurf_set_surface_mute(self.get_media_track(), true, null_mut());
+    }
+
+    pub fn unmute(&self) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = Reaper::instance();
+        reaper.medium.set_media_track_info_value(self.get_media_track(), c_str!("B_MUTE"), 0.0);
+        reaper.medium.csurf_set_surface_mute(self.get_media_track(), false, null_mut());
+    }
+
+    pub fn is_solo(&self) -> bool {
+        self.load_and_check_if_necessary_or_complain();
+        Reaper::instance().medium.get_media_track_info_value(self.get_media_track(), c_str!("I_SOLO")) > 0.0
+    }
+
+    pub fn solo(&self) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = Reaper::instance();
+        reaper.medium.set_media_track_info_value(self.get_media_track(), c_str!("I_SOLO"), 1.0);
+        reaper.medium.csurf_set_surface_solo(self.get_media_track(), true, null_mut());
+    }
+
+    pub fn unsolo(&self) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = Reaper::instance();
+        reaper.medium.set_media_track_info_value(self.get_media_track(), c_str!("I_SOLO"), 0.0);
+        reaper.medium.csurf_set_surface_solo(self.get_media_track(), false, null_mut());
+    }
+
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
         get_auto_arm_chunk_line(&self.get_chunk(MAX_CHUNK_SIZE, true))
     }

@@ -459,6 +459,14 @@ impl Reaper {
         self.subjects.track_selected_changed.borrow().fork()
     }
 
+    pub fn track_mute_changed(&self) -> EventStream<Track> {
+        self.subjects.track_mute_changed.borrow().fork()
+    }
+
+    pub fn track_solo_changed(&self) -> EventStream<Track> {
+        self.subjects.track_solo_changed.borrow().fork()
+    }
+
     pub fn track_arm_changed(&self) -> EventStream<Track> {
         self.subjects.track_arm_changed.borrow().fork()
     }

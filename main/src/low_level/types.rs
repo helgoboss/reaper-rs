@@ -238,3 +238,21 @@ pub type GetToggleCommandState2 = fn(
 pub type ReverseNamedCommandLookup = fn(
     command_id: ::std::os::raw::c_int,
 ) -> *const ::std::os::raw::c_char;
+
+pub type Main_OnCommandEx = fn(
+    command: ::std::os::raw::c_int,
+    flag: ::std::os::raw::c_int,
+    proj: *mut root::ReaProject,
+);
+
+pub type CSurf_SetSurfaceMute = fn(
+    trackid: *mut root::MediaTrack,
+    mute: bool,
+    ignoresurf: *mut root::IReaperControlSurface,
+);
+
+pub type CSurf_SetSurfaceSolo = fn(
+    trackid: *mut root::MediaTrack,
+    solo: bool,
+    ignoresurf: *mut root::IReaperControlSurface,
+);
