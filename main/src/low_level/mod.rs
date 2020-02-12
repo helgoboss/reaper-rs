@@ -204,7 +204,10 @@ gen_reaper_struct![
     CreateTrackSend,
     CSurf_OnSendVolumeChange,
     CSurf_OnSendPanChange,
-    GetTrackSendUIVolPan
+    GetTrackSendUIVolPan,
+    kbd_getTextFromCmd,
+    GetToggleCommandState2,
+    ReverseNamedCommandLookup
 ];
 
 #[macro_export]

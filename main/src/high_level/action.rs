@@ -1,11 +1,12 @@
 use std::ffi::{CString, CStr};
-use crate::high_level::{Section, Project, Reaper};
+use crate::high_level::{Section, Project, Reaper, ActionCharacter, ParameterType};
 use std::borrow::Cow;
 use std::cell::{RefCell, Ref};
 use c_str_macro::c_str;
 use once_cell::unsync::OnceCell;
 use std::ptr::null_mut;
 
+#[derive(Debug, Clone)]
 struct RuntimeData {
     section: Section,
     // Sometimes shortly named cmd in REAPER API. Unique within section. Might be filled lazily.
@@ -15,12 +16,27 @@ struct RuntimeData {
     cached_index: Option<u32>,
 }
 
+// TODO Use separate classes for loaded and not loaded actions
+#[derive(Debug, Clone)]
 pub struct Action {
     runtime_data: RefCell<Option<RuntimeData>>,
     // Used to represent custom actions that are not available (they don't have a commandId) or for which is not yet
     // known if they are available. Globally unique, not within one section.
     // TODO But currently only mainSection supported. How support other sections?
     command_name: Option<CString>,
+}
+
+impl PartialEq for Action {
+    fn eq(&self, other: &Self) -> bool {
+        match (self.runtime_data.borrow().as_ref(), other.runtime_data.borrow().as_ref()) {
+            (Some(self_rd), Some(other_rd)) => {
+                self_rd.section == other_rd.section && self_rd.command_id == other_rd.command_id
+            }
+            _ => {
+                self.command_name == other.command_name
+            }
+        }
+    }
 }
 
 impl Action {
@@ -36,17 +52,22 @@ impl Action {
     }
 
     pub fn get_index(&self) -> u32 {
-        self.load_if_necessary_or_complain();
+        {
+            let rd = self.load_if_necessary_or_complain();
+            if let Some(cached_index) = rd.cached_index {
+                return cached_index;
+            }
+        }
         let mut opt_runtime_data = self.runtime_data.borrow_mut();
         let mut runtime_data = opt_runtime_data.as_mut().unwrap();
-        match runtime_data.cached_index {
-            None => {
-                let index = self.find_index(runtime_data).expect("Index couldn't be found");
-                runtime_data.cached_index = Some(index);
-                index
-            }
-            Some(index) => index
-        }
+        let index = self.find_index(runtime_data).expect("Index couldn't be found");
+        runtime_data.cached_index = Some(index);
+        index
+    }
+
+    pub fn get_section(&self) -> Section {
+        let rd = self.load_if_necessary_or_complain();
+        rd.section
     }
 
     fn find_index(&self, runtime_data: &RuntimeData) -> Option<u32> {
@@ -58,6 +79,59 @@ impl Action {
             .map(|(i, _)| i as u32)
     }
 
+    pub fn is_available(&self) -> bool {
+        match self.runtime_data.borrow().as_ref() {
+            Some(runtime_data) => {
+                // See if we can get a description. If yes, the action actually exists. If not, then not.
+                let text = Reaper::instance().medium
+                    .kbd_get_text_from_cmd(runtime_data.command_id as u32, runtime_data.section.get_raw_section_info());
+                text.filter(|t| t.to_bytes().len() > 0).is_some()
+            }
+            None => {
+                self.load_by_command_name()
+            }
+        }
+    }
+
+    pub fn get_character(&self) -> ActionCharacter {
+        let rd = self.load_if_necessary_or_complain();
+        if Reaper::instance().medium.get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id as i32) == -1 {
+            ActionCharacter::Trigger
+        } else {
+            ActionCharacter::Toggle
+        }
+    }
+
+    pub fn is_on(&self) -> bool {
+        let rd = self.load_if_necessary_or_complain();
+        Reaper::instance().medium.get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id as i32) == 1
+    }
+
+    // TODO "ParameterType" is not a good name for that
+    pub fn get_parameter_type(&self) -> ParameterType {
+        ParameterType::Action
+    }
+
+    pub fn get_command_id(&self) -> i64 {
+        let rd = self.load_if_necessary_or_complain();
+        rd.command_id
+    }
+
+    pub fn get_command_name(&self) -> Option<&CStr> {
+        self.command_name.as_ref().map(|cn| cn.as_c_str()).or_else(|| {
+            let rd = self.load_if_necessary_or_complain();
+            Reaper::instance().medium
+                .reverse_named_command_lookup(rd.command_id as i32)
+        })
+    }
+
+    // Returns None if action disappeared TODO This is not consequent
+    pub fn get_name(&self) -> Option<&CStr> {
+        let rd = self.load_if_necessary_or_complain();
+        Reaper::instance().medium
+            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info())
+    }
+
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
         self.invoke(1.0, false, project)
     }
@@ -66,8 +140,8 @@ impl Action {
         // TODO I have no idea how to launch an action in a specific section. The first function doesn't seem to launch the action :(
         // bool (*kbd_RunCommandThroughHooks)(KbdSectionInfo* section, int* actionCommandID, int* val, int* valhw, int* relmode, HWND hwnd);
         // int (*KBD_OnMainActionEx)(int cmd, int val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
-        self.load_if_necessary_or_complain();
-        let action_command_id = self.runtime_data.borrow().as_ref().unwrap().command_id;
+        let rd = self.load_if_necessary_or_complain();
+        let action_command_id = rd.command_id;
         let reaper = Reaper::instance();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
@@ -96,11 +170,11 @@ impl Action {
         }
     }
 
-    // TODO Expose runtime data as return value to get rid of the unwraps
-    fn load_if_necessary_or_complain(&self) {
+    fn load_if_necessary_or_complain(&self) -> Ref<RuntimeData> {
         if (self.runtime_data.borrow().is_none() && self.load_by_command_name()) {
             panic!("Action not loadable")
         }
+        Ref::map(self.runtime_data.borrow(), |rd| rd.as_ref().unwrap())
     }
 
     fn load_by_command_name(&self) -> bool {

@@ -1,7 +1,7 @@
 use crate::low_level::{KbdSectionInfo, KbdCmd};
 use crate::high_level::Action;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
     section_info: *mut KbdSectionInfo,
 }

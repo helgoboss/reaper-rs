@@ -6,6 +6,7 @@
 use super::{ReaProject, MediaTrack};
 use crate::low_level::bindings::root::{HWND, IReaperControlSurface};
 use crate::low_level::{KbdSectionInfo, TrackEnvelope, GUID};
+use crate::low_level::bindings::root;
 
 pub type GetFunc = unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void;
 
@@ -223,3 +224,17 @@ pub type GetTrackSendUIVolPan = fn(
     volumeOut: *mut f64,
     panOut: *mut f64,
 ) -> bool;
+
+pub type kbd_getTextFromCmd = fn(
+    cmd: root::DWORD,
+    section: *mut root::KbdSectionInfo,
+) -> *const ::std::os::raw::c_char;
+
+pub type GetToggleCommandState2 = fn(
+    section: *mut root::KbdSectionInfo,
+    command_id: ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int;
+
+pub type ReverseNamedCommandLookup = fn(
+    command_id: ::std::os::raw::c_int,
+) -> *const ::std::os::raw::c_char;

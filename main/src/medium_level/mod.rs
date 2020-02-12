@@ -260,7 +260,7 @@ impl Reaper {
             self.low.GetTrackStateChunk.unwrap()(track, buffer, max_size, isundo_optional)
         });
         if !successful {
-            return None
+            return None;
         }
         Some(chunk_content)
     }
@@ -283,6 +283,26 @@ impl Reaper {
 
     pub fn csurf_on_send_pan_change(&self, trackid: *mut MediaTrack, send_index: u32, pan: f64, relative: bool) -> f64 {
         self.low.CSurf_OnSendPanChange.unwrap()(trackid, send_index as i32, pan, relative)
+    }
+
+    pub fn kbd_get_text_from_cmd(&self, cmd: u32, section: *mut KbdSectionInfo) -> Option<&CStr> {
+        let ptr = self.low.kbd_getTextFromCmd.unwrap()(cmd, section);
+        if ptr.is_null() {
+            return None;
+        }
+        Some(unsafe { CStr::from_ptr(ptr) })
+    }
+
+    pub fn get_toggle_command_state_2(&self, section: *mut KbdSectionInfo, command_id: i32) -> i32 {
+        self.low.GetToggleCommandState2.unwrap()(section, command_id)
+    }
+
+    pub fn reverse_named_command_lookup(&self, command_id: i32) -> Option<&CStr> {
+        let ptr = self.low.ReverseNamedCommandLookup.unwrap()(command_id);
+        if ptr.is_null() {
+            return None;
+        }
+        Some(unsafe { CStr::from_ptr(ptr) })
     }
 
     // TODO Maybe prefer Result as return data type in such cases

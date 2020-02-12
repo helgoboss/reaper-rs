@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode};
+use reaper_rs::high_level::{
+    Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode,
+   ActionCharacter, ParameterType};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -749,6 +751,20 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let normal_action = reaper.get_main_section().get_action_by_command_id(41075);
             let normal_action_by_index = reaper.get_main_section().get_action_by_index(normal_action.get_index());
             // Then
+            check!(toggle_action.is_available());
+            check!(normal_action.is_available());
+            check_eq!(toggle_action.get_character(), ActionCharacter::Toggle);
+            check_eq!(normal_action.get_character(), ActionCharacter::Trigger);
+            check!(!toggle_action.is_on());
+            check!(!normal_action.is_on());
+            check_eq!(toggle_action.get_parameter_type(), ParameterType::Action);
+            check_eq!(toggle_action.clone(), toggle_action);
+            check_eq!(toggle_action.get_command_id(), 6);
+            check_eq!(toggle_action.get_command_name(), None);
+            check_eq!(toggle_action.get_name(), Some(c_str!("Track: Toggle mute for selected tracks")));
+            check!(toggle_action.get_index() > 0);
+            check_eq!(toggle_action.get_section(), reaper.get_main_section());
+            check_eq!(normal_action_by_index, normal_action);
             Ok(())
         }),
     )

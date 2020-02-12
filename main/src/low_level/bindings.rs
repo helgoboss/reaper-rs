@@ -709,6 +709,14 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut GetToggleCommandState2: ::std::option::Option<
+            unsafe extern "C" fn(
+                section: *mut root::KbdSectionInfo,
+                command_id: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut GetTrack: ::std::option::Option<
             unsafe extern "C" fn(
                 proj: *mut root::ReaProject,
@@ -777,6 +785,14 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut kbd_getTextFromCmd: ::std::option::Option<
+            unsafe extern "C" fn(
+                cmd: root::DWORD,
+                section: *mut root::KbdSectionInfo,
+            ) -> *const ::std::os::raw::c_char,
+        >;
+    }
+    extern "C" {
         pub static mut KBD_OnMainActionEx: ::std::option::Option<
             unsafe extern "C" fn(
                 cmd: ::std::os::raw::c_int,
@@ -801,6 +817,13 @@ pub mod root {
                 name: *const ::std::os::raw::c_char,
                 infostruct: *mut ::std::os::raw::c_void,
             ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut ReverseNamedCommandLookup: ::std::option::Option<
+            unsafe extern "C" fn(
+                command_id: ::std::os::raw::c_int,
+            ) -> *const ::std::os::raw::c_char,
         >;
     }
     extern "C" {
