@@ -6,7 +6,7 @@ use c_str_macro::c_str;
 use once_cell::unsync::OnceCell;
 use std::ptr::null_mut;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 struct RuntimeData {
     section: Section,
     // Sometimes shortly named cmd in REAPER API. Unique within section. Might be filled lazily.

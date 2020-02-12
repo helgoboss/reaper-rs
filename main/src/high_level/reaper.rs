@@ -10,7 +10,7 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, LightTrack, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter};
+use crate::high_level::{Project, Section, Track, LightTrack, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext};
 use crate::low_level;
 use crate::medium_level;
