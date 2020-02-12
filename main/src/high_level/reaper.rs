@@ -10,7 +10,7 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, LightTrack, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext};
 use crate::low_level;
 use crate::medium_level;
@@ -24,11 +24,11 @@ use std::sync::mpsc::{Sender, Receiver};
 use slog::Level::Debug;
 use std::thread;
 use std::thread::ThreadId;
-use crate::high_level::track_send::{TrackSend, LightTrackSend};
-use crate::high_level::fx::{Fx, LightFx};
+use crate::high_level::track_send::{TrackSend};
+use crate::high_level::fx::{Fx};
 use crate::high_level::automation_mode::AutomationMode;
 use std::convert::TryFrom;
-use crate::high_level::fx_parameter::{FxParameter, LightFxParameter};
+use crate::high_level::fx_parameter::{FxParameter};
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -137,34 +137,34 @@ pub(super) struct EventStreamSubjects {
     // instead of running into undefined behavior. The developer can always choose to defer to
     // the next `ControlSurface::run()` invocation (execute things in next main loop cycle).
     pub(super) project_switched: EventStreamSubject<Project>,
-    pub(super) track_volume_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_volume_touched: EventStreamSubject<LightTrack>,
-    pub(super) track_pan_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_pan_touched: EventStreamSubject<LightTrack>,
-    pub(super) track_send_volume_changed: EventStreamSubject<LightTrackSend>,
-    pub(super) track_send_volume_touched: EventStreamSubject<LightTrackSend>,
-    pub(super) track_send_pan_changed: EventStreamSubject<LightTrackSend>,
-    pub(super) track_send_pan_touched: EventStreamSubject<LightTrackSend>,
-    pub(super) track_added: EventStreamSubject<LightTrack>,
-    pub(super) track_removed: EventStreamSubject<LightTrack>,
+    pub(super) track_volume_changed: EventStreamSubject<Track>,
+    pub(super) track_volume_touched: EventStreamSubject<Track>,
+    pub(super) track_pan_changed: EventStreamSubject<Track>,
+    pub(super) track_pan_touched: EventStreamSubject<Track>,
+    pub(super) track_send_volume_changed: EventStreamSubject<TrackSend>,
+    pub(super) track_send_volume_touched: EventStreamSubject<TrackSend>,
+    pub(super) track_send_pan_changed: EventStreamSubject<TrackSend>,
+    pub(super) track_send_pan_touched: EventStreamSubject<TrackSend>,
+    pub(super) track_added: EventStreamSubject<Track>,
+    pub(super) track_removed: EventStreamSubject<Track>,
     pub(super) tracks_reordered: EventStreamSubject<Project>,
-    pub(super) track_name_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_input_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_input_monitoring_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_arm_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_mute_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_mute_touched: EventStreamSubject<LightTrack>,
-    pub(super) track_solo_changed: EventStreamSubject<LightTrack>,
-    pub(super) track_selected_changed: EventStreamSubject<LightTrack>,
-    pub(super) fx_added: EventStreamSubject<LightFx>,
-    pub(super) fx_removed: EventStreamSubject<LightFx>,
-    pub(super) fx_enabled_changed: EventStreamSubject<LightFx>,
-    pub(super) fx_opened: EventStreamSubject<LightFx>,
-    pub(super) fx_closed: EventStreamSubject<LightFx>,
-    pub(super) fx_focused: EventStreamSubject<Option<LightFx>>,
-    pub(super) fx_reordered: EventStreamSubject<LightTrack>,
-    pub(super) fx_parameter_value_changed: EventStreamSubject<LightFxParameter>,
-    pub(super) fx_parameter_touched: EventStreamSubject<LightFxParameter>,
+    pub(super) track_name_changed: EventStreamSubject<Track>,
+    pub(super) track_input_changed: EventStreamSubject<Track>,
+    pub(super) track_input_monitoring_changed: EventStreamSubject<Track>,
+    pub(super) track_arm_changed: EventStreamSubject<Track>,
+    pub(super) track_mute_changed: EventStreamSubject<Track>,
+    pub(super) track_mute_touched: EventStreamSubject<Track>,
+    pub(super) track_solo_changed: EventStreamSubject<Track>,
+    pub(super) track_selected_changed: EventStreamSubject<Track>,
+    pub(super) fx_added: EventStreamSubject<Fx>,
+    pub(super) fx_removed: EventStreamSubject<Fx>,
+    pub(super) fx_enabled_changed: EventStreamSubject<Fx>,
+    pub(super) fx_opened: EventStreamSubject<Fx>,
+    pub(super) fx_closed: EventStreamSubject<Fx>,
+    pub(super) fx_focused: EventStreamSubject<Option<Fx>>,
+    pub(super) fx_reordered: EventStreamSubject<Track>,
+    pub(super) fx_parameter_value_changed: EventStreamSubject<FxParameter>,
+    pub(super) fx_parameter_touched: EventStreamSubject<FxParameter>,
     pub(super) master_tempo_changed: EventStreamSubject<bool>,
     pub(super) master_tempo_touched: EventStreamSubject<bool>,
     pub(super) master_playrate_changed: EventStreamSubject<bool>,
@@ -413,47 +413,47 @@ impl Reaper {
         self.subjects.project_switched.borrow().fork()
     }
 
-    pub fn track_added(&self) -> EventStream<LightTrack> {
+    pub fn track_added(&self) -> EventStream<Track> {
         self.subjects.track_added.borrow().fork()
     }
 
-    pub fn track_removed(&self) -> EventStream<LightTrack> {
+    pub fn track_removed(&self) -> EventStream<Track> {
         self.subjects.track_removed.borrow().fork()
     }
 
-    pub fn track_name_changed(&self) -> EventStream<LightTrack> {
+    pub fn track_name_changed(&self) -> EventStream<Track> {
         self.subjects.track_name_changed.borrow().fork()
     }
 
-    pub fn track_input_monitoring_changed(&self) -> EventStream<LightTrack> {
+    pub fn track_input_monitoring_changed(&self) -> EventStream<Track> {
         self.subjects.track_input_monitoring_changed.borrow().fork()
     }
 
-    pub fn track_input_changed(&self) -> EventStream<LightTrack> {
+    pub fn track_input_changed(&self) -> EventStream<Track> {
         self.subjects.track_input_changed.borrow().fork()
     }
 
-    pub fn track_volume_changed(&self) -> EventStream<LightTrack> {
+    pub fn track_volume_changed(&self) -> EventStream<Track> {
         self.subjects.track_volume_changed.borrow().fork()
     }
 
-    pub fn track_pan_changed(&self) -> EventStream<LightTrack> {
+    pub fn track_pan_changed(&self) -> EventStream<Track> {
         self.subjects.track_pan_changed.borrow().fork()
     }
 
-    pub fn track_selected_changed(&self) -> EventStream<LightTrack> {
+    pub fn track_selected_changed(&self) -> EventStream<Track> {
         self.subjects.track_selected_changed.borrow().fork()
     }
 
-    pub fn track_arm_changed(&self) -> EventStream<LightTrack> {
+    pub fn track_arm_changed(&self) -> EventStream<Track> {
         self.subjects.track_arm_changed.borrow().fork()
     }
 
-    pub fn track_send_volume_changed(&self) -> EventStream<LightTrackSend> {
+    pub fn track_send_volume_changed(&self) -> EventStream<TrackSend> {
         self.subjects.track_send_volume_changed.borrow().fork()
     }
 
-    pub fn track_send_pan_changed(&self) -> EventStream<LightTrackSend> {
+    pub fn track_send_pan_changed(&self) -> EventStream<TrackSend> {
         self.subjects.track_send_pan_changed.borrow().fork()
     }
 

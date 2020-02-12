@@ -6,7 +6,7 @@ use crate::low_level::{MediaTrack, ReaProject,
 use crate::medium_level::ControlSurface;
 use std::ffi::CStr;
 use std::borrow::Cow;
-use crate::high_level::{Reaper, Project, Task, Track, LightTrack, AutomationMode, get_media_track_guid};
+use crate::high_level::{Reaper, Project, Task, Track, AutomationMode, get_media_track_guid};
 use rxrust::prelude::*;
 use std::cell::{RefCell, Cell, RefMut, Ref};
 use std::sync::mpsc::Receiver;
@@ -180,7 +180,7 @@ impl HelperControlSurface {
                     recinput: m.get_media_track_info_value(media_track, c_str!("I_RECINPUT")) as i32,
                     guid: get_media_track_guid(media_track),
                 };
-                reaper.subjects.track_added.borrow_mut().next(t.clone().into());
+                reaper.subjects.track_added.borrow_mut().next(t.clone());
                 self.detect_fx_changes_on_track(t, false, true, true);
                 td
             });
@@ -342,12 +342,12 @@ impl HelperControlSurface {
         let reaper = Reaper::instance();
         if td.recmonitor != recmonitor {
             td.recmonitor = recmonitor;
-            reaper.subjects.track_input_monitoring_changed.borrow_mut().next(LightTrack::new(track, null_mut()));
+            reaper.subjects.track_input_monitoring_changed.borrow_mut().next(Track::new(track, null_mut()));
         }
         let recinput = reaper.medium.get_media_track_info_value(track, c_str!("I_RECINPUT")) as i32;
         if td.recinput != recinput {
             td.recinput = recinput;
-            reaper.subjects.track_input_changed.borrow_mut().next(LightTrack::new(track, null_mut()));
+            reaper.subjects.track_input_changed.borrow_mut().next(Track::new(track, null_mut()));
         }
     }
 
@@ -382,10 +382,10 @@ impl HelperControlSurface {
         if let Some(fx) = fx_chain.get_fx_by_index(fx_index as u32) {
             let fx_param = fx.get_parameter_by_index(param_index as u32);
             let reaper = Reaper::instance();
-            reaper.subjects.fx_parameter_value_changed.borrow_mut().next(fx_param.clone().into());
+            reaper.subjects.fx_parameter_value_changed.borrow_mut().next(fx_param.clone());
             if self.fx_has_been_touched_just_a_moment_ago.get() {
                 self.fx_has_been_touched_just_a_moment_ago.replace(false);
-                reaper.subjects.fx_parameter_touched.borrow_mut().next(fx_param.into());
+                reaper.subjects.fx_parameter_touched.borrow_mut().next(fx_param);
             }
         }
     }
@@ -435,7 +435,7 @@ impl HelperControlSurface {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, null_mut());
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
-            Reaper::instance().subjects.fx_enabled_changed.borrow_mut().next(fx.into());
+            Reaper::instance().subjects.fx_enabled_changed.borrow_mut().next(fx);
         }
     }
 
@@ -465,10 +465,10 @@ impl HelperControlSurface {
         let track = Track::new(track, null_mut());
         let track_send = track.get_index_based_send_by_index(sendidx as u32);
         let reaper = Reaper::instance();
-        reaper.subjects.track_send_volume_changed.borrow_mut().next(track_send.clone().into());
+        reaper.subjects.track_send_volume_changed.borrow_mut().next(track_send.clone());
         // Send volume touch event only if not automated
         if !self.track_parameter_is_automated(&track, c_str!("Send Volume")) {
-            reaper.subjects.track_send_volume_touched.borrow_mut().next(track_send.into());
+            reaper.subjects.track_send_volume_touched.borrow_mut().next(track_send);
         }
     }
 
@@ -480,10 +480,10 @@ impl HelperControlSurface {
         let track = Track::new(track, null_mut());
         let track_send = track.get_index_based_send_by_index(sendidx as u32);
         let reaper = Reaper::instance();
-        reaper.subjects.track_send_pan_changed.borrow_mut().next(track_send.clone().into());
+        reaper.subjects.track_send_pan_changed.borrow_mut().next(track_send.clone());
         // Send volume touch event only if not automated
         if !self.track_parameter_is_automated(&track, c_str!("Send Pan")) {
-            reaper.subjects.track_send_pan_touched.borrow_mut().next(track_send.into());
+            reaper.subjects.track_send_pan_touched.borrow_mut().next(track_send);
         }
     }
 
@@ -500,7 +500,7 @@ impl HelperControlSurface {
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on chunk manipulations
             self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
-            reaper.subjects.fx_focused.borrow_mut().next(Some(fx.into()));
+            reaper.subjects.fx_focused.borrow_mut().next(Some(fx));
         }
     }
 
@@ -520,7 +520,7 @@ impl HelperControlSurface {
             } else {
                 &reaper.subjects.fx_closed
             };
-            subject.borrow_mut().next(fx.into());
+            subject.borrow_mut().next(fx);
         }
     }
 
@@ -596,10 +596,10 @@ impl ControlSurface for HelperControlSurface {
             return;
         }
         td.pan = pan;
-        let track = LightTrack::new(trackid, null_mut());
+        let track = Track::new(trackid, null_mut());
         let reaper = Reaper::instance();
-        reaper.subjects.track_pan_changed.borrow_mut().next(track);
-        if !self.track_parameter_is_automated(&track.into(), c_str!("Pan")) {
+        reaper.subjects.track_pan_changed.borrow_mut().next(track.clone());
+        if !self.track_parameter_is_automated(&track, c_str!("Pan")) {
             reaper.subjects.track_pan_touched.borrow_mut().next(track);
         }
     }
@@ -614,10 +614,10 @@ impl ControlSurface for HelperControlSurface {
             return;
         }
         td.volume = volume;
-        let track = LightTrack::new(trackid, null_mut());
+        let track = Track::new(trackid, null_mut());
         let reaper = Reaper::instance();
-        reaper.subjects.track_volume_changed.borrow_mut().next(track);
-        if !self.track_parameter_is_automated(&track.into(), c_str!("Volume")) {
+        reaper.subjects.track_volume_changed.borrow_mut().next(track.clone());
+        if !self.track_parameter_is_automated(&track, c_str!("Volume")) {
             reaper.subjects.track_volume_touched.borrow_mut().next(track);
         }
     }
@@ -629,10 +629,10 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.mute != mute {
             td.mute = mute;
-            let track = LightTrack::new(trackid, null_mut());
+            let track = Track::new(trackid, null_mut());
             let reaper = Reaper::instance();
-            reaper.subjects.track_mute_changed.borrow_mut().next(track);
-            if !self.track_parameter_is_automated(&track.into(), c_str!("Mute")) {
+            reaper.subjects.track_mute_changed.borrow_mut().next(track.clone());
+            if !self.track_parameter_is_automated(&track, c_str!("Mute")) {
                 reaper.subjects.track_mute_touched.borrow_mut().next(track);
             }
         }
@@ -645,7 +645,7 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.selected != selected {
             td.selected = selected;
-            let track = LightTrack::new(trackid, null_mut());
+            let track = Track::new(trackid, null_mut());
             Reaper::instance().subjects.track_selected_changed.borrow_mut().next(track);
         }
     }
@@ -657,7 +657,7 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.solo != solo {
             td.solo = solo;
-            let track = LightTrack::new(trackid, null_mut());
+            let track = Track::new(trackid, null_mut());
             Reaper::instance().subjects.track_solo_changed.borrow_mut().next(track);
         }
     }
@@ -669,7 +669,7 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.recarm != recarm {
             td.recarm = recarm;
-            let track = LightTrack::new(trackid, null_mut());
+            let track = Track::new(trackid, null_mut());
             Reaper::instance().subjects.track_arm_changed.borrow_mut().next(track);
         }
     }
@@ -732,6 +732,6 @@ impl ControlSurface for HelperControlSurface {
             return;
         }
         let track = Track::new(trackid, null_mut());
-        Reaper::instance().subjects.track_name_changed.borrow_mut().next(track.into());
+        Reaper::instance().subjects.track_name_changed.borrow_mut().next(track);
     }
 }

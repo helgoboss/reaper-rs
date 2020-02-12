@@ -1,42 +1,8 @@
-use crate::high_level::{Track, LightTrack, Reaper, Volume, Pan};
+use crate::high_level::{Track, Reaper, Volume, Pan};
 use std::cell::Cell;
 use crate::low_level::MediaTrack;
 use std::ptr::null_mut;
 use c_str_macro::c_str;
-
-/// The difference to TrackSend is that this implements Copy (not just Clone). See LightTrack for explanation.
-#[derive(Clone, Copy, Debug, Eq)]
-pub struct LightTrackSend {
-    source_track: LightTrack,
-    target_track: Option<LightTrack>,
-    index: Option<u32>,
-}
-
-impl From<LightTrackSend> for TrackSend {
-    fn from(light: LightTrackSend) -> Self {
-        TrackSend {
-            source_track: light.source_track.into(),
-            target_track: light.target_track.map(|t| t.into()),
-            index: Cell::new(light.index),
-        }
-    }
-}
-
-impl From<TrackSend> for LightTrackSend {
-    fn from(heavy: TrackSend) -> Self {
-        LightTrackSend {
-            source_track: heavy.source_track.into(),
-            target_track: heavy.target_track.map(|t| t.into()),
-            index: heavy.index.get(),
-        }
-    }
-}
-
-impl PartialEq for LightTrackSend {
-    fn eq(&self, other: &Self) -> bool {
-        TrackSend::from(self.clone()) == TrackSend::from(other.clone())
-    }
-}
 
 #[derive(Clone, Debug, Eq)]
 pub struct TrackSend {

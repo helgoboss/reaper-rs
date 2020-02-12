@@ -22,45 +22,6 @@ use crate::high_level::fx::{Fx, get_index_from_query_index};
 use crate::high_level::track_send::TrackSend;
 use slog::debug;
 
-/// The difference to Track is that this implements Copy (not just Clone)
-// TODO Maybe it's more efficient to use a moving or copying pointer for track Observables? Anyway,
-//  this would require rxRust subjects to work with elements that are not copyable (because Rc,
-//  RefCell, Box, Arc and all that stuff are never copyable) but just cloneable
-#[derive(Clone, Copy, Debug, Eq)]
-pub struct LightTrack {
-    media_track: *mut MediaTrack,
-    rea_project: *mut ReaProject,
-    guid: Guid,
-}
-
-impl LightTrack {
-    /// mediaTrack must not be null
-    /// reaProject can be null but providing it can speed things up quite much for REAPER versions < 5.95
-    pub fn new(media_track: *mut MediaTrack, rea_project: *mut ReaProject) -> LightTrack {
-        LightTrack {
-            media_track,
-            rea_project: {
-                if rea_project.is_null() {
-                    get_media_track_rea_project(media_track)
-                } else {
-                    rea_project
-                }
-            },
-            // We load the GUID eagerly because we want to make comparability possible even in the following case:
-            // Track A has been initialized with a GUID not been loaded yet, track B has been initialized with a MediaTrack*
-            // (this constructor) but has rendered invalid in the meantime. Now there would not be any way to compare them
-            // because I can neither compare MediaTrack* pointers nor GUIDs. Except I extract the GUID eagerly.
-            guid: get_media_track_guid(media_track),
-        }
-    }
-}
-
-impl PartialEq for LightTrack {
-    fn eq(&self, other: &Self) -> bool {
-        Track::from(self.clone()) == Track::from(other.clone())
-    }
-}
-
 const MAX_CHUNK_SIZE: u32 = 1_000_000;
 
 // TODO Think hard about what equality means here!
@@ -78,26 +39,6 @@ pub struct Track {
     // b) guid, mediaTrack (guid-based and loaded)
     // TODO This is not super cheap to copy. Do we really need to initialize this eagerly?
     guid: Guid,
-}
-
-impl From<LightTrack> for Track {
-    fn from(light: LightTrack) -> Self {
-        Track {
-            media_track: Cell::new(light.media_track),
-            rea_project: Cell::new(light.rea_project),
-            guid: light.guid,
-        }
-    }
-}
-
-impl From<Track> for LightTrack {
-    fn from(heavy: Track) -> Self {
-        LightTrack {
-            media_track: heavy.media_track.get(),
-            rea_project: heavy.rea_project.get(),
-            guid: heavy.guid,
-        }
-    }
 }
 
 impl Track {

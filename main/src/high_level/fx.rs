@@ -1,41 +1,9 @@
 use crate::high_level::guid::Guid;
-use crate::high_level::{Track, Reaper, LightTrack};
+use crate::high_level::{Track, Reaper};
 use std::cell::Cell;
 use c_str_macro::c_str;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::fx_chain::FxChain;
-
-
-/// The difference to Fx is that this implements Copy (not just Clone). See LightTrack for explanation.
-#[derive(Clone, Copy, Debug)]
-pub struct LightFx {
-    track: LightTrack,
-    guid: Option<Guid>,
-    index: Option<u32>,
-    is_input_fx: bool,
-}
-
-impl From<LightFx> for Fx {
-    fn from(light: LightFx) -> Self {
-        Fx {
-            track: light.track.into(),
-            guid: light.guid,
-            index: Cell::new(light.index),
-            is_input_fx: light.is_input_fx,
-        }
-    }
-}
-
-impl From<Fx> for LightFx {
-    fn from(heavy: Fx) -> Self {
-        LightFx {
-            track: heavy.track.into(),
-            guid: heavy.guid,
-            index: heavy.index.get(),
-            is_input_fx: heavy.is_input_fx,
-        }
-    }
-}
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Fx {
