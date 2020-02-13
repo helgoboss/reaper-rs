@@ -17,19 +17,18 @@ impl RecordingInput {
             i if i < 512 => RecordingInput::Mono,
             i if i < 1024 => RecordingInput::ReaRoute,
             i if i < 4096 => RecordingInput::Stereo,
-            _ => RecordingInput::Midi(MidiRecordingInput::new(rec_input_index)),
+            _ => RecordingInput::Midi(MidiRecordingInput::new(rec_input_index as u32)),
         }
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiRecordingInput {
-    // TODO Make u32?
-    rec_input_index: i32
+    rec_input_index: u32
 }
 
 impl MidiRecordingInput {
-    fn new(rec_input_index: i32) -> Self {
+    fn new(rec_input_index: u32) -> Self {
         MidiRecordingInput {
             rec_input_index
         }
@@ -49,18 +48,18 @@ impl MidiRecordingInput {
     }
 
     pub fn from_device_and_channel(device: MidiInputDevice, channel: u32) -> Self {
-        Self::from_midi_rec_input_index(device.get_id() * 32 + (channel as i32) + 1)
+        Self::from_midi_rec_input_index(device.get_id() * 32 + channel + 1)
     }
 
-    pub fn from_midi_rec_input_index(midi_rec_input_index: i32) -> Self {
+    pub fn from_midi_rec_input_index(midi_rec_input_index: u32) -> Self {
         Self::new(4096 + midi_rec_input_index)
     }
 
-    pub fn get_rec_input_index(&self) -> i32 {
+    pub fn get_rec_input_index(&self) -> u32 {
         self.rec_input_index
     }
 
-    pub fn get_midi_rec_input_index(&self) -> i32 {
+    pub fn get_midi_rec_input_index(&self) -> u32 {
         self.rec_input_index - 4096
     }
 

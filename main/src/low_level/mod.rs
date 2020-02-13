@@ -211,7 +211,11 @@ gen_reaper_struct![
     Main_OnCommandEx,
     CSurf_SetSurfaceMute,
     CSurf_SetSurfaceSolo,
-    genGuid
+    genGuid,
+    GetMaxMidiInputs,
+    GetMIDIInputName,
+    GetMaxMidiOutputs,
+    GetMIDIOutputName
 ];
 
 #[macro_export]

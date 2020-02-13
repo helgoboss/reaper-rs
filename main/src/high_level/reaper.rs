@@ -10,7 +10,7 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext};
 use crate::low_level;
 use crate::medium_level;
@@ -24,11 +24,11 @@ use std::sync::mpsc::{Sender, Receiver};
 use slog::Level::Debug;
 use std::thread;
 use std::thread::ThreadId;
-use crate::high_level::track_send::{TrackSend};
-use crate::high_level::fx::{Fx};
+use crate::high_level::track_send::TrackSend;
+use crate::high_level::fx::Fx;
 use crate::high_level::automation_mode::AutomationMode;
 use std::convert::TryFrom;
-use crate::high_level::fx_parameter::{FxParameter};
+use crate::high_level::fx_parameter::FxParameter;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -370,6 +370,42 @@ impl Reaper {
             self.medium.plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
             command_by_index.remove(&command_index);
         }
+    }
+
+    pub fn get_max_midi_input_devices(&self) -> u32 {
+        self.medium.get_max_midi_inputs()
+    }
+
+    pub fn get_max_midi_output_devices(&self) -> u32 {
+        self.medium.get_max_midi_outputs()
+    }
+
+    // It's correct that this method returns a non-optional. An id is supposed to uniquely identify a device.
+    // A MidiInputDevice#isAvailable method returns if the device is actually existing at runtime. That way we
+    // support (still) unloaded MidiInputDevices.
+    pub fn get_midi_input_device_by_id(&self, id: u32) -> MidiInputDevice {
+        MidiInputDevice::new(id)
+    }
+
+    // It's correct that this method returns a non-optional. An id is supposed to uniquely identify a device.
+    // A MidiOutputDevice#isAvailable method returns if the device is actually existing at runtime. That way we
+    // support (still) unloaded MidiOutputDevices.
+    pub fn get_midi_output_device_by_id(&self, id: u32) -> MidiOutputDevice {
+        MidiOutputDevice::new(id)
+    }
+
+    pub fn get_midi_input_devices(&self) -> impl Iterator<Item=MidiInputDevice> + '_ {
+        (0..self.get_max_midi_input_devices())
+            .map(move |i| self.get_midi_input_device_by_id(i))
+            // TODO I think we should also return unavailable devices. Client can filter easily.
+            .filter(|d| d.is_available())
+    }
+
+    pub fn get_midi_output_devices(&self) -> impl Iterator<Item=MidiOutputDevice> + '_ {
+        (0..self.get_max_midi_output_devices())
+            .map(move |i| self.get_midi_output_device_by_id(i))
+            // TODO I think we should also return unavailable devices. Client can filter easily.
+            .filter(|d| d.is_available())
     }
 
     // It's correct that this method returns a non-optional. A commandName is supposed to uniquely identify the action,

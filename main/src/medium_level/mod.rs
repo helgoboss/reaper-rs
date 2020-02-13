@@ -42,7 +42,7 @@ impl Reaper {
 
     // TODO Unifiy u32 vs i32
     pub fn enum_projects(&self, idx: i32, projfn_out_optional_sz: u32) -> (*mut ReaProject, Option<CString>) {
-        return if projfn_out_optional_sz == 0 {
+        if projfn_out_optional_sz == 0 {
             let project = self.low.EnumProjects.unwrap()(idx, null_mut(), 0);
             (project, None)
         } else {
@@ -51,7 +51,7 @@ impl Reaper {
             });
 
             (project, if file_path.as_bytes().len() == 0 { None } else { Some(file_path) })
-        };
+        }
     }
 
     pub fn get_track(&self,
@@ -138,6 +138,39 @@ impl Reaper {
 
     pub fn insert_track_at_index(&self, idx: i32, want_defaults: bool) {
         self.low.InsertTrackAtIndex.unwrap()(idx, want_defaults);
+    }
+
+    pub fn get_max_midi_inputs(&self) -> u32 {
+        self.low.GetMaxMidiInputs.unwrap()() as u32
+    }
+
+    pub fn get_max_midi_outputs(&self) -> u32 {
+        self.low.GetMaxMidiOutputs.unwrap()() as u32
+    }
+
+    // TODO When not present, does it still return a name? Adjust signature accordingly!
+    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
+        if nameout_sz == 0 {
+            let is_present = self.low.GetMIDIInputName.unwrap()(dev as i32, null_mut(), 0);
+            (is_present, None)
+        } else {
+            let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
+                self.low.GetMIDIInputName.unwrap()(dev as i32, buffer, max_size)
+            });
+            (is_present, if name.as_bytes().len() == 0 { None } else { Some(name) })
+        }
+    }
+
+    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
+        if nameout_sz == 0 {
+            let is_present = self.low.GetMIDIOutputName.unwrap()(dev as i32, null_mut(), 0);
+            (is_present, None)
+        } else {
+            let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
+                self.low.GetMIDIOutputName.unwrap()(dev as i32, buffer, max_size)
+            });
+            (is_present, if name.as_bytes().len() == 0 { None } else { Some(name) })
+        }
     }
 
     pub fn track_list_update_all_external_surfaces(&self) {

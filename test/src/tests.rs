@@ -947,6 +947,39 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(!action.is_available());
             Ok(())
         }),
+        // TODO Insert FX tests HERE!
+        step("Insert track at", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
+            let track_2 = project.get_track_by_index(1).ok_or("Missing track 2")?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.track_added().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            let new_track = project.insert_track_at(1);
+            new_track.set_name(c_str!("Inserted track"));
+            // Then
+            check_eq!(project.get_track_count(), 4);
+            check_eq!(new_track.get_index(), 1);
+            check_eq!(new_track.get_name(), c_str!("Inserted track").into());
+            check_eq!(track_2.get_index(), 2);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), new_track);
+            Ok(())
+        }),
+        step("Insert track at", |reaper, _| {
+            // Given
+            // When
+            let devs = reaper.get_midi_input_devices();
+            let dev_0 = reaper.get_midi_input_device_by_id(0);
+            // Then
+            check_ne!(devs.count(), 0);
+            check!(dev_0.is_available());
+            Ok(())
+        }),
     )
 }
 

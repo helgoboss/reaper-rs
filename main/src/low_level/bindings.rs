@@ -693,11 +693,37 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut GetMaxMidiInputs:
+            ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
+    }
+    extern "C" {
+        pub static mut GetMaxMidiOutputs:
+            ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
+    }
+    extern "C" {
         pub static mut GetMediaTrackInfo_Value: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
                 parmname: *const ::std::os::raw::c_char,
             ) -> f64,
+        >;
+    }
+    extern "C" {
+        pub static mut GetMIDIInputName: ::std::option::Option<
+            unsafe extern "C" fn(
+                dev: ::std::os::raw::c_int,
+                nameout: *mut ::std::os::raw::c_char,
+                nameout_sz: ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
+        pub static mut GetMIDIOutputName: ::std::option::Option<
+            unsafe extern "C" fn(
+                dev: ::std::os::raw::c_int,
+                nameout: *mut ::std::os::raw::c_char,
+                nameout_sz: ::std::os::raw::c_int,
+            ) -> bool,
         >;
     }
     extern "C" {

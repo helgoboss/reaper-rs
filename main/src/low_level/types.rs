@@ -258,3 +258,19 @@ pub type CSurf_SetSurfaceSolo = fn(
 );
 
 pub type genGuid = fn(g: *mut root::GUID);
+
+pub type GetMaxMidiInputs = fn() -> ::std::os::raw::c_int;
+
+pub type GetMIDIInputName = fn(
+    dev: ::std::os::raw::c_int,
+    nameout: *mut ::std::os::raw::c_char,
+    nameout_sz: ::std::os::raw::c_int,
+) -> bool;
+
+pub type GetMaxMidiOutputs = fn() -> ::std::os::raw::c_int;
+
+pub type GetMIDIOutputName = fn(
+    dev: ::std::os::raw::c_int,
+    nameout: *mut ::std::os::raw::c_char,
+    nameout_sz: ::std::os::raw::c_int,
+) -> bool;

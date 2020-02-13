@@ -48,6 +48,9 @@ pub use input_monitoring_mode::*;
 mod midi_input_device;
 pub use midi_input_device::*;
 
+mod midi_output_device;
+pub use midi_output_device::*;
+
 mod volume;
 pub use volume::*;
 
