@@ -836,6 +836,11 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut IsProjectDirty: ::std::option::Option<
+            unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut kbd_getTextFromCmd: ::std::option::Option<
             unsafe extern "C" fn(
                 cmd: root::DWORD,

@@ -1013,6 +1013,50 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(mock.last_arg(), track);
             Ok(())
         }),
+        step("Undo", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = get_first_track()?;
+            // When
+            let successful = project.undo();
+            let label = project.get_label_of_last_redoable_action();
+            // Then
+            check!(successful);
+            check_eq!(track.get_name().as_bytes().len(), 0);
+            check_eq!(label, Some(c_str!("ReaPlus integration test operation")));
+            Ok(())
+        }),
+        step("Redo", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = get_first_track()?;
+            // When
+            let successful = project.redo();
+            let label = project.get_label_of_last_undoable_action();
+            // Then
+            check!(successful);
+            check_eq!(track.get_name(), c_str!("Renamed").into());
+            check_eq!(label, Some(c_str!("ReaPlus integration test operation")));
+            Ok(())
+        }),
+        step("Get REAPER window", |reaper, _| {
+            // Given
+            // When
+            let window = reaper.get_main_window();
+            // Then
+            check!(!window.is_null());
+            Ok(())
+        }),
+        step("Mark project as dirty", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            // When
+            project.mark_as_dirty();
+            // Then
+            // TODO Doesn't say very much because it has been dirty before already. Save before!?
+            check!(project.is_dirty());
+            Ok(())
+        }),
     )
 }
 

@@ -287,3 +287,5 @@ pub type Undo_CanRedo2 = fn(proj: *mut root::ReaProject) -> *const ::std::os::ra
 pub type Undo_DoUndo2 = fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int;
 pub type Undo_DoRedo2 = fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int;
 pub type MarkProjectDirty = fn(proj: *mut root::ReaProject);
+
+pub type IsProjectDirty = fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int;

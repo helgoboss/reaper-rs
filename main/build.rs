@@ -102,6 +102,8 @@ fn generate_bindings() {
         .whitelist_var("Undo_DoUndo2")
         .whitelist_var("Undo_DoRedo2")
         .whitelist_var("MarkProjectDirty")
+        .whitelist_var("IsProjectDirty")
+        .whitelist_var("GetMainHwnd")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

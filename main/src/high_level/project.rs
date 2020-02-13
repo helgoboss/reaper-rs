@@ -179,6 +179,10 @@ impl Project {
         Reaper::instance().medium.mark_project_dirty(self.rea_project);
     }
 
+    pub fn is_dirty(&self) -> bool {
+        Reaper::instance().medium.is_project_dirty(self.rea_project) != 0
+    }
+
     // TODO In such cases it's probably always better to return a reference. If that reference
     //  is going to be used longer, then it should be copied into a string by clients.
     pub fn get_label_of_last_undoable_action(&self) -> Option<&CStr> {

@@ -213,6 +213,10 @@ impl Reaper {
         self.low.MarkProjectDirty.unwrap()(proj);
     }
 
+    pub fn is_project_dirty(&self, proj: *mut ReaProject) -> i32 {
+        self.low.IsProjectDirty.unwrap()(proj)
+    }
+
     pub fn track_list_update_all_external_surfaces(&self) {
         self.low.TrackList_UpdateAllExternalSurfaces.unwrap()();
     }

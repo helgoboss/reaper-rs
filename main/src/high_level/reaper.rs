@@ -11,7 +11,7 @@ use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock};
-use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext};
+use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext, HWND};
 use crate::low_level;
 use crate::medium_level;
 use rxrust::subscriber::Subscriber;
@@ -547,6 +547,10 @@ impl Reaper {
         Project::new(rp)
     }
 
+    pub fn get_main_window(&self) -> HWND {
+        self.medium.get_main_hwnd()
+    }
+
     pub fn get_projects(&self) -> impl Iterator<Item=Project> + '_ {
         (0..)
             .map(move |i| self.medium.enum_projects(i, 0).0)
@@ -591,6 +595,7 @@ impl Reaper {
         self.undo_block_is_active.get()
     }
 
+    // Doesn't start a new block if we already are in an undo block.
     pub(super) fn enter_undo_block_internal<'a>(&self, project: Project, label: &'a CStr) -> Option<UndoBlock<'a>> {
         if self.undo_block_is_active.get() {
             return None;
@@ -600,6 +605,7 @@ impl Reaper {
         Some(UndoBlock::new(project, label))
     }
 
+    // Doesn't attempt to end a block if we are not in an undo block.
     pub(super) fn leave_undo_block_internal(&self, project: &Project, label: &CStr) {
         if !self.undo_block_is_active.get() {
             return;

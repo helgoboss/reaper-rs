@@ -223,7 +223,8 @@ gen_reaper_struct![
     Undo_CanRedo2,
     Undo_DoUndo2,
     Undo_DoRedo2,
-    MarkProjectDirty
+    MarkProjectDirty,
+    IsProjectDirty
 ];
 
 #[macro_export]
