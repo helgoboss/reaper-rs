@@ -583,6 +583,10 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut CSurf_OnPlayRateChange:
+            ::std::option::Option<unsafe extern "C" fn(playrate: f64)>;
+    }
+    extern "C" {
         pub static mut CSurf_OnRecArmChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -874,6 +878,13 @@ pub mod root {
             ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
     }
     extern "C" {
+        pub static mut Master_GetPlayRate:
+            ::std::option::Option<unsafe extern "C" fn(project: *mut root::ReaProject) -> f64>;
+    }
+    extern "C" {
+        pub static mut Master_GetTempo: ::std::option::Option<unsafe extern "C" fn() -> f64>;
+    }
+    extern "C" {
         pub static mut NamedCommandLookup: ::std::option::Option<
             unsafe extern "C" fn(
                 command_name: *const ::std::os::raw::c_char,
@@ -898,6 +909,11 @@ pub mod root {
     extern "C" {
         pub static mut SectionFromUniqueID: ::std::option::Option<
             unsafe extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo,
+        >;
+    }
+    extern "C" {
+        pub static mut SetCurrentBPM: ::std::option::Option<
+            unsafe extern "C" fn(__proj: *mut root::ReaProject, bpm: f64, wantUndo: bool),
         >;
     }
     extern "C" {
@@ -930,6 +946,15 @@ pub mod root {
     extern "C" {
         pub static mut ShowConsoleMsg:
             ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
+    }
+    extern "C" {
+        pub static mut ShowMessageBox: ::std::option::Option<
+            unsafe extern "C" fn(
+                msg: *const ::std::os::raw::c_char,
+                title: *const ::std::os::raw::c_char,
+                type_: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int,
+        >;
     }
     extern "C" {
         pub static mut SLIDER2DB: ::std::option::Option<unsafe extern "C" fn(y: f64) -> f64>;

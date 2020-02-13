@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -1055,6 +1055,41 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Then
             // TODO Doesn't say very much because it has been dirty before already. Save before!?
             check!(project.is_dirty());
+            Ok(())
+        }),
+        step("Get project tempo", |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            // When
+            let tempo = project.get_tempo();
+            // Then
+            check_eq!(tempo.get_bpm(), 120.0);
+            check_eq!(tempo.get_normalized_value(), 119.0 / 959.0);
+            Ok(())
+        }),
+        step("Set project tempo", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.master_tempo_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            project.set_tempo(Tempo::of_bpm(130.0), false);
+            // Then
+            check_eq!(project.get_tempo().get_bpm(), 130.0);
+            // TODO There should be only one event invocation
+            check_eq!(mock.invocation_count(), 2);
+            check_eq!(mock.last_arg(), true);
+            Ok(())
+        }),
+        step("Show message box", |reaper, _| {
+            // Given
+            // When
+            let result = reaper.show_message_box(c_str!("Tests are finished"), c_str!("ReaPlus"), MessageBoxKind::Ok);
+            // Then
+            check_eq!(result, MessageBoxResult::Ok);
             Ok(())
         }),
     )

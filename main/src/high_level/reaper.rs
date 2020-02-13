@@ -10,7 +10,7 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext, HWND};
 use crate::low_level;
 use crate::medium_level;
@@ -27,7 +27,7 @@ use std::thread::ThreadId;
 use crate::high_level::track_send::TrackSend;
 use crate::high_level::fx::Fx;
 use crate::high_level::automation_mode::AutomationMode;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use crate::high_level::fx_parameter::FxParameter;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
@@ -473,6 +473,11 @@ impl Reaper {
         self.medium.show_console_msg(msg);
     }
 
+    // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret 1=OK,2=CANCEL,3=ABORT,4=RETRY,5=IGNORE,6=YES,7=NO
+    pub fn show_message_box(&self, msg: &CStr, title:&CStr, kind: MessageBoxKind) -> MessageBoxResult {
+        self.medium.show_message_box(msg, title, kind.into()).try_into().expect("Unknown message box result")
+    }
+
     pub fn get_main_section(&self) -> Section {
         Section::new(self.medium.section_from_unique_id(0))
     }
@@ -496,6 +501,11 @@ impl Reaper {
 
     pub fn track_name_changed(&self) -> EventStream<Track> {
         self.subjects.track_name_changed.borrow().fork()
+    }
+
+    // TODO bool is not useful here
+    pub fn master_tempo_changed(&self) -> EventStream<bool> {
+        self.subjects.master_tempo_changed.borrow().fork()
     }
 
     pub fn track_input_monitoring_changed(&self) -> EventStream<Track> {

@@ -9,7 +9,7 @@ use std::sync::Once;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Reaper, Track};
+use crate::high_level::{Reaper, Track, Tempo};
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
 use std::path::PathBuf;
@@ -193,6 +193,17 @@ impl Project {
     pub fn get_label_of_last_redoable_action(&self) -> Option<&CStr> {
         self.complain_if_not_available();
         Reaper::instance().medium.undo_can_redo_2(self.rea_project)
+    }
+
+    pub fn get_tempo(&self) -> Tempo {
+        // TODO This is not project-specific ... why?
+        let tempo = Reaper::instance().medium.master_get_tempo();
+        Tempo::of_bpm(tempo)
+    }
+
+    pub fn set_tempo(&self, tempo: Tempo, want_undo: bool) {
+        self.complain_if_not_available();
+        Reaper::instance().medium.set_current_bpm(self.rea_project, tempo.get_bpm(), want_undo);
     }
 
     fn complain_if_not_available(&self) {

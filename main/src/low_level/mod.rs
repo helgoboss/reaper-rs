@@ -11,7 +11,7 @@ pub use bindings::root::{
     CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETFXPARAM, CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETFXENABLED,
     CSURF_EXT_SETSENDVOLUME, CSURF_EXT_SETSENDPAN, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXOPEN,
     CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETBPMANDPLAYRATE, IReaperControlSurface,
-    KbdCmd
+    KbdCmd,
 };
 use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use control_surface::ControlSurface;
@@ -224,7 +224,12 @@ gen_reaper_struct![
     Undo_DoUndo2,
     Undo_DoRedo2,
     MarkProjectDirty,
-    IsProjectDirty
+    IsProjectDirty,
+    Master_GetTempo,
+    SetCurrentBPM,
+    Master_GetPlayRate,
+    CSurf_OnPlayRateChange,
+    ShowMessageBox
 ];
 
 #[macro_export]

@@ -57,6 +57,9 @@ pub use volume::*;
 mod pan;
 pub use pan::*;
 
+mod tempo;
+pub use tempo::*;
+
 mod chunk;
 pub use chunk::*;
 
@@ -68,3 +71,8 @@ pub use parameter_type::*;
 
 mod undo_block;
 pub use undo_block::*;
+
+mod message_box;
+pub use message_box::*;
+
+mod normalized_value;

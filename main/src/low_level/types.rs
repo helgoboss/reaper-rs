@@ -289,3 +289,13 @@ pub type Undo_DoRedo2 = fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int
 pub type MarkProjectDirty = fn(proj: *mut root::ReaProject);
 
 pub type IsProjectDirty = fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int;
+
+pub type Master_GetTempo = fn() -> f64;
+pub type SetCurrentBPM = fn(__proj: *mut root::ReaProject, bpm: f64, wantUndo: bool);
+pub type Master_GetPlayRate = fn(project: *mut root::ReaProject) -> f64;
+pub type CSurf_OnPlayRateChange = fn(playrate: f64);
+pub type ShowMessageBox = fn(
+    msg: *const ::std::os::raw::c_char,
+    title: *const ::std::os::raw::c_char,
+    type_: ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int;

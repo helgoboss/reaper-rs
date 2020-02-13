@@ -270,6 +270,26 @@ impl Reaper {
         guid_string
     }
 
+    pub fn master_get_tempo(&self) -> f64 {
+        self.low.Master_GetTempo.unwrap()()
+    }
+
+    pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: bool) {
+        self.low.SetCurrentBPM.unwrap()(__proj, bpm, want_undo);
+    }
+
+    pub fn master_get_play_rate(&self, project: *mut ReaProject) -> f64 {
+        self.low.Master_GetPlayRate.unwrap()(project)
+    }
+
+    pub fn csurf_on_play_rate_change(&self, playrate: f64) {
+        self.low.CSurf_OnPlayRateChange.unwrap()(playrate);
+    }
+
+    pub fn show_message_box(&self, msg: &CStr, title: &CStr, type_: i32) -> i32 {
+        self.low.ShowMessageBox.unwrap()(msg.as_ptr(), title.as_ptr(), type_)
+    }
+
     pub fn string_to_guid(&self, str: &CStr) -> Option<GUID> {
         let mut guid = ZERO_GUID;
         self.low.stringToGuid.unwrap()(str.as_ptr(), &mut guid as *mut GUID);
