@@ -1,5 +1,5 @@
 use std::borrow::{Borrow, BorrowMut, Cow};
-use std::cell::{Ref, RefCell, RefMut};
+use std::cell::{Ref, RefCell, RefMut, Cell};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
@@ -10,7 +10,7 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext};
 use crate::low_level;
 use crate::medium_level;
@@ -138,6 +138,7 @@ pub struct Reaper {
     pub(super) subjects: EventStreamSubjects,
     task_sender: Sender<Task>,
     main_thread_id: ThreadId,
+    undo_block_is_active: Cell<bool>,
 }
 
 pub(super) struct EventStreamSubjects {
@@ -284,6 +285,7 @@ impl Reaper {
             subjects: EventStreamSubjects::new(),
             task_sender,
             main_thread_id: thread::current().id(),
+            undo_block_is_active: Cell::new(false),
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -406,6 +408,14 @@ impl Reaper {
             .map(move |i| self.get_midi_output_device_by_id(i))
             // TODO I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
+    }
+
+    pub fn get_currently_loading_or_saving_project(&self) -> Option<Project> {
+        let ptr = self.medium.get_current_project_in_load_save();
+        if ptr.is_null() {
+            return None;
+        }
+        Some(Project::new(ptr))
     }
 
     // It's correct that this method returns a non-optional. A commandName is supposed to uniquely identify the action,
@@ -575,6 +585,27 @@ impl Reaper {
     pub fn get_global_automation_override(&self) -> AutomationMode {
         let am = self.medium.get_global_automation_override();
         AutomationMode::try_from(am).expect("Unknown automation mode")
+    }
+
+    pub fn undoable_action_is_running(&self) -> bool {
+        self.undo_block_is_active.get()
+    }
+
+    pub(super) fn enter_undo_block_internal<'a>(&self, project: Project, label: &'a CStr) -> Option<UndoBlock<'a>> {
+        if self.undo_block_is_active.get() {
+            return None;
+        }
+        self.undo_block_is_active.replace(true);
+        self.medium.undo_begin_block_2(project.get_rea_project());
+        Some(UndoBlock::new(project, label))
+    }
+
+    pub(super) fn leave_undo_block_internal(&self, project: &Project, label: &CStr) {
+        if !self.undo_block_is_active.get() {
+            return;
+        }
+        self.medium.undo_end_block_2(project.get_rea_project(), label, -1);
+        self.undo_block_is_active.replace(false);
     }
 }
 

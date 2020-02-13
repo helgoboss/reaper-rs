@@ -970,7 +970,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(mock.last_arg(), new_track);
             Ok(())
         }),
-        step("Insert track at", |reaper, _| {
+        step("Query MIDI input devices", |reaper, _| {
             // Given
             // When
             let devs = reaper.get_midi_input_devices();
@@ -978,6 +978,39 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Then
             check_ne!(devs.count(), 0);
             check!(dev_0.is_available());
+            Ok(())
+        }),
+        step("Query MIDI output devices", |reaper, _| {
+            // Given
+            // When
+            let devs = reaper.get_midi_output_devices();
+            let dev_0 = reaper.get_midi_output_device_by_id(0);
+            // Then
+            check_ne!(devs.count(), 0);
+            check!(dev_0.is_available());
+            Ok(())
+        }),
+        // TODO Insert test "Stuff MIDI messages"
+        step("Use undoable", |reaper, step| {
+            // Given
+            let project = reaper.get_current_project();
+            let track = get_first_track()?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.track_name_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            let track_mirror = track.clone();
+            project.undoable(c_str!("ReaPlus integration test operation"), move || {
+                track_mirror.set_name(c_str!("Renamed"));
+            });
+            let label = project.get_label_of_last_undoable_action();
+            // Then
+            check_eq!(track.get_name(), c_str!("Renamed").into());
+            check_eq!(label, Some(c_str!("ReaPlus integration test operation")));
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), track);
             Ok(())
         }),
     )

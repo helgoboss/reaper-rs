@@ -173,6 +173,46 @@ impl Reaper {
         }
     }
 
+    pub fn get_current_project_in_load_save(&self) -> *mut ReaProject {
+        self.low.GetCurrentProjectInLoadSave.unwrap()()
+    }
+
+    pub fn undo_begin_block_2(&self, proj: *mut ReaProject) {
+        self.low.Undo_BeginBlock2.unwrap()(proj);
+    }
+
+    pub fn undo_end_block_2(&self, proj: *mut ReaProject, descchange: &CStr, extraflags: i32) {
+        self.low.Undo_EndBlock2.unwrap()(proj, descchange.as_ptr(), extraflags);
+    }
+
+    pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
+        let ptr = self.low.Undo_CanUndo2.unwrap()(proj);
+        if ptr.is_null() {
+            return None;
+        }
+        Some(unsafe { CStr::from_ptr(ptr) })
+    }
+
+    pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
+        let ptr = self.low.Undo_CanRedo2.unwrap()(proj);
+        if ptr.is_null() {
+            return None;
+        }
+        Some(unsafe { CStr::from_ptr(ptr) })
+    }
+
+    pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> i32 {
+        self.low.Undo_DoUndo2.unwrap()(proj)
+    }
+
+    pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> i32 {
+        self.low.Undo_DoRedo2.unwrap()(proj)
+    }
+
+    pub fn mark_project_dirty(&self, proj: *mut ReaProject) {
+        self.low.MarkProjectDirty.unwrap()(proj);
+    }
+
     pub fn track_list_update_all_external_surfaces(&self) {
         self.low.TrackList_UpdateAllExternalSurfaces.unwrap()();
     }

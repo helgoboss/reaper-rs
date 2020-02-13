@@ -274,3 +274,16 @@ pub type GetMIDIOutputName = fn(
     nameout: *mut ::std::os::raw::c_char,
     nameout_sz: ::std::os::raw::c_int,
 ) -> bool;
+
+pub type GetCurrentProjectInLoadSave = fn() -> *mut root::ReaProject;
+pub type Undo_BeginBlock2 = fn(proj: *mut root::ReaProject);
+pub type Undo_EndBlock2 = fn(
+    proj: *mut root::ReaProject,
+    descchange: *const ::std::os::raw::c_char,
+    extraflags: ::std::os::raw::c_int,
+);
+pub type Undo_CanUndo2 = fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char;
+pub type Undo_CanRedo2 = fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char;
+pub type Undo_DoUndo2 = fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int;
+pub type Undo_DoRedo2 = fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int;
+pub type MarkProjectDirty = fn(proj: *mut root::ReaProject);

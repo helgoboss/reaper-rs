@@ -681,6 +681,10 @@ pub mod root {
             ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
     }
     extern "C" {
+        pub static mut GetCurrentProjectInLoadSave:
+            ::std::option::Option<unsafe extern "C" fn() -> *mut root::ReaProject>;
+    }
+    extern "C" {
         pub static mut GetGlobalAutomationOverride:
             ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
     }
@@ -861,6 +865,10 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut MarkProjectDirty:
+            ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
+    }
+    extern "C" {
         pub static mut NamedCommandLookup: ::std::option::Option<
             unsafe extern "C" fn(
                 command_name: *const ::std::os::raw::c_char,
@@ -956,6 +964,39 @@ pub mod root {
     extern "C" {
         pub static mut TrackList_UpdateAllExternalSurfaces:
             ::std::option::Option<unsafe extern "C" fn()>;
+    }
+    extern "C" {
+        pub static mut Undo_BeginBlock2:
+            ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
+    }
+    extern "C" {
+        pub static mut Undo_CanRedo2: ::std::option::Option<
+            unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char,
+        >;
+    }
+    extern "C" {
+        pub static mut Undo_CanUndo2: ::std::option::Option<
+            unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char,
+        >;
+    }
+    extern "C" {
+        pub static mut Undo_DoRedo2: ::std::option::Option<
+            unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut Undo_DoUndo2: ::std::option::Option<
+            unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut Undo_EndBlock2: ::std::option::Option<
+            unsafe extern "C" fn(
+                proj: *mut root::ReaProject,
+                descchange: *const ::std::os::raw::c_char,
+                extraflags: ::std::os::raw::c_int,
+            ),
+        >;
     }
     extern "C" {
         pub static mut ValidatePtr2: ::std::option::Option<

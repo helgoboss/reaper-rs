@@ -153,6 +153,44 @@ impl Project {
         Track::new(mt, self.rea_project)
     }
 
+    pub fn undoable<F, R>(&self, label: &CStr, operation: F) -> R
+        where
+            F: FnOnce() -> R
+    {
+        let reaper = Reaper::instance();
+        if reaper.get_currently_loading_or_saving_project().is_some() {
+            operation()
+        } else {
+            let undo_block = reaper.enter_undo_block_internal(*self, label);
+            operation()
+        }
+    }
+
+    pub fn undo(&self) -> bool {
+        self.complain_if_not_available();
+        Reaper::instance().medium.undo_do_undo_2(self.rea_project) != 0
+    }
+
+    pub fn redo(&self) -> bool {
+        Reaper::instance().medium.undo_do_redo_2(self.rea_project) != 0
+    }
+
+    pub fn mark_as_dirty(&self) {
+        Reaper::instance().medium.mark_project_dirty(self.rea_project);
+    }
+
+    // TODO In such cases it's probably always better to return a reference. If that reference
+    //  is going to be used longer, then it should be copied into a string by clients.
+    pub fn get_label_of_last_undoable_action(&self) -> Option<&CStr> {
+        self.complain_if_not_available();
+        Reaper::instance().medium.undo_can_undo_2(self.rea_project)
+    }
+
+    pub fn get_label_of_last_redoable_action(&self) -> Option<&CStr> {
+        self.complain_if_not_available();
+        Reaper::instance().medium.undo_can_redo_2(self.rea_project)
+    }
+
     fn complain_if_not_available(&self) {
         if !self.is_available() {
             panic!("Project not available");

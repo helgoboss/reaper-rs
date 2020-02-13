@@ -215,7 +215,15 @@ gen_reaper_struct![
     GetMaxMidiInputs,
     GetMIDIInputName,
     GetMaxMidiOutputs,
-    GetMIDIOutputName
+    GetMIDIOutputName,
+    GetCurrentProjectInLoadSave,
+    Undo_BeginBlock2,
+    Undo_EndBlock2,
+    Undo_CanUndo2,
+    Undo_CanRedo2,
+    Undo_DoUndo2,
+    Undo_DoRedo2,
+    MarkProjectDirty
 ];
 
 #[macro_export]
