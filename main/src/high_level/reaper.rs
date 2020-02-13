@@ -10,7 +10,7 @@ use std::sync::{Once, mpsc};
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext};
 use crate::low_level;
 use crate::medium_level;
@@ -319,6 +319,10 @@ impl Reaper {
         }
     }
 
+    pub fn generate_guid(&self) -> Guid {
+        Guid::new(Reaper::instance().medium.gen_guid())
+    }
+
     // Allowing global access to native REAPER functions at all times is valid in my opinion.
     // Because REAPER itself is not written in Rust and therefore cannot take part in Rust's compile
     // time guarantees anyway. We need to rely on REAPER at that point and also take care not to do
@@ -360,11 +364,20 @@ impl Reaper {
 
     fn unregister_command(&self, command_index: u32) {
         // TODO Use RAII
-        if let Some(command) = self.command_by_index.borrow_mut().get_mut(&command_index) {
+        let mut command_by_index = self.command_by_index.borrow_mut();
+        if let Some(command) = command_by_index.get_mut(&command_index) {
             let acc = &mut command.accelerator_register;
             self.medium.plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
-            self.command_by_index.borrow_mut().remove(&command_index);
+            command_by_index.remove(&command_index);
         }
+    }
+
+    // It's correct that this method returns a non-optional. A commandName is supposed to uniquely identify the action,
+    // so it could be part of the resulting Action itself. An Action#isAvailable method could return if the action is
+    // actually existing at runtime. That way we would support (still) unloaded Actions.
+    // TODO Don't automatically interpret command name as commandId
+    pub fn get_action_by_command_name(&self, command_name: CString) -> Action {
+        Action::command_name_based(command_name)
     }
 
     /// # Examples

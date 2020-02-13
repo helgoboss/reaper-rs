@@ -33,6 +33,12 @@ impl Section {
         self.section_info
     }
 
+    pub fn get_actions(&self) -> impl Iterator<Item=Action> + '_ {
+        (0..self.get_action_count()).map(move |i| {
+            self.get_action_by_index_unchecked(i)
+        })
+    }
+
     pub(super) fn get_kbd_cmds(&self) -> impl Iterator<Item=&KbdCmd> + '_ {
         (0..self.get_action_count()).map(move |i| {
             self.get_kbd_cmd_by_index(i)

@@ -21,13 +21,12 @@ impl<O: Clone> InvocationMock<O> {
     }
 }
 
-pub fn observe_invocations<O: Clone>(op: impl FnOnce(Rc<InvocationMock<O>>)) -> Rc<InvocationMock<O>> {
+pub fn observe_invocations<O: Clone, R>(op: impl FnOnce(Rc<InvocationMock<O>>) -> R) -> (Rc<InvocationMock<O>>, R) {
     let mock = InvocationMock {
         count: Cell::new(0),
         last_arg: RefCell::new(None),
     };
     let shareable_mock = Rc::new(mock);
     let mirrored_mock = shareable_mock.clone();
-    op(shareable_mock);
-    mirrored_mock
+    (mirrored_mock, op(shareable_mock))
 }

@@ -40,6 +40,13 @@ impl PartialEq for Action {
 }
 
 impl Action {
+    pub(super) fn command_name_based(command_name: CString) -> Action {
+        Action {
+            command_name: Some(command_name),
+            runtime_data: RefCell::new(None),
+        }
+    }
+
     pub(super) fn new(section: Section, command_id: i64, index: Option<u32>) -> Action {
         Action {
             command_name: None,
@@ -52,11 +59,8 @@ impl Action {
     }
 
     pub fn get_index(&self) -> u32 {
-        {
-            let rd = self.load_if_necessary_or_complain();
-            if let Some(cached_index) = rd.cached_index {
-                return cached_index;
-            }
+        if let Some(cached_index) = self.load_if_necessary_or_complain().cached_index {
+            return cached_index;
         }
         let mut opt_runtime_data = self.runtime_data.borrow_mut();
         let mut runtime_data = opt_runtime_data.as_mut().unwrap();
@@ -80,17 +84,13 @@ impl Action {
     }
 
     pub fn is_available(&self) -> bool {
-        match self.runtime_data.borrow().as_ref() {
-            Some(runtime_data) => {
-                // See if we can get a description. If yes, the action actually exists. If not, then not.
-                let text = Reaper::instance().medium
-                    .kbd_get_text_from_cmd(runtime_data.command_id as u32, runtime_data.section.get_raw_section_info());
-                text.filter(|t| t.to_bytes().len() > 0).is_some()
-            }
-            None => {
-                self.load_by_command_name()
-            }
+        if let Some(runtime_data) = self.runtime_data.borrow().as_ref() {
+            // See if we can get a description. If yes, the action actually exists. If not, then not.
+            let text = Reaper::instance().medium
+                .kbd_get_text_from_cmd(runtime_data.command_id as u32, runtime_data.section.get_raw_section_info());
+            return text.filter(|t| t.to_bytes().len() > 0).is_some();
         }
+        self.load_by_command_name()
     }
 
     pub fn get_character(&self) -> ActionCharacter {

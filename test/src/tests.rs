@@ -22,7 +22,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let current_project_before = reaper.get_current_project();
             let project_count_before = reaper.get_project_count();
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.project_switched().take_until(step.finished).subscribe(move |p| {
                     mock.invoke(p);
                 });
@@ -50,7 +50,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // When
             #[derive(Default)]
             struct State { count: i32, track: Option<Track> }
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_added().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -147,7 +147,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let track = get_first_track()?;
             // When
             // TODO Factor this state pattern out
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_name_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -174,7 +174,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // When
             #[derive(Default)]
             struct State { count: i32, track: Option<Track> }
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_input_monitoring_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -201,7 +201,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_input_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -281,7 +281,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_volume_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -310,7 +310,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_pan_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -341,7 +341,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let track = get_first_track()?;
             let track2 = project.get_track_by_index(2).ok_or("No track at index 2")?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -365,7 +365,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let project = reaper.get_current_project();
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -387,7 +387,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let project = reaper.get_current_project();
             let master_track = project.get_master_track();
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -431,7 +431,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -449,7 +449,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -478,7 +478,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -498,7 +498,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -552,7 +552,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -573,7 +573,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(track.has_auto_arm_enabled());
             check!(!track.is_armed(true));
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -597,7 +597,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             track_2.select();
             track_3.select();
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -624,7 +624,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(track_2.get_index(), 1);
             check!(track_2.is_available());
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_removed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -710,7 +710,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let track_3 = project.get_track_by_index(2).ok_or("Missing track 3")?;
             let send = track_1.get_send_by_target_track(track_3);
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_send_volume_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -729,7 +729,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let track_3 = project.get_track_by_index(2).ok_or("Missing track 3")?;
             let send = track_1.get_send_by_target_track(track_3);
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_send_pan_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -773,7 +773,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             let action = reaper.get_main_section().get_action_by_command_id(6);
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.action_invoked().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -790,7 +790,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let action = reaper.get_main_section().get_action_by_command_id(1582);
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.action_invoked().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -805,7 +805,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_mute_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -823,7 +823,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_mute_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -839,7 +839,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_solo_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -855,7 +855,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             // Given
             let track = get_first_track()?;
             // When
-            let mock = observe_invocations(|mock| {
+            let (mock, _) = observe_invocations(|mock| {
                 reaper.track_solo_changed().take_until(step.finished).subscribe(move |t| {
                     mock.invoke(t);
                 });
@@ -865,6 +865,54 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(!track.is_solo());
             check_eq!(mock.invocation_count(), 1);
             check_eq!(mock.last_arg(), track);
+            Ok(())
+        }),
+        step("Generate GUID", |reaper, _| {
+            // Given
+            // When
+            let guid = reaper.generate_guid();
+            // Then
+            check_eq!(guid.to_string_with_braces().len(), 38);
+            Ok(())
+        }),
+        step("Main section functions", |reaper, _| {
+            // Given
+            let section = reaper.get_main_section();
+            // When
+            let actions = section.get_actions();
+            // Then
+            check_eq!(actions.count() as u32, section.get_action_count());
+            Ok(())
+        }),
+        step("Register and unregister action", |reaper, _| {
+            // Given
+            // When
+            // TODO Rename RegisteredAction to ActionRegistration or something like that
+            let (mock, reg) = observe_invocations(|mock| {
+                reaper.register_action(
+                    c_str!("reaperRsTest"),
+                    c_str!("reaper-rs test action"),
+                    move || {
+                        mock.invoke(42);
+                    },
+                    ActionKind::NotToggleable
+                )
+            });
+            let action = reaper.get_action_by_command_name(c_str!("reaperRsTest").into());
+            // Then
+            check!(action.is_available());
+            check_eq!(mock.invocation_count(), 0);
+            action.invoke_as_trigger(None);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), 42);
+            check_eq!(action.get_character(), ActionCharacter::Trigger);
+            check!(action.get_command_id() > 0);
+            check_eq!(action.get_command_name(), Some(c_str!("reaperRsTest")));
+            check!(action.get_index() >= 0);
+            check!(!action.is_on());
+            check_eq!(action.get_name(), Some(c_str!("reaper-rs test action")));
+            reg.unregister();
+            check!(!action.is_available());
             Ok(())
         }),
     )

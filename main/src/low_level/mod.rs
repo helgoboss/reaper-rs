@@ -210,7 +210,8 @@ gen_reaper_struct![
     ReverseNamedCommandLookup,
     Main_OnCommandEx,
     CSurf_SetSurfaceMute,
-    CSurf_SetSurfaceSolo
+    CSurf_SetSurfaceSolo,
+    genGuid
 ];
 
 #[macro_export]

@@ -674,6 +674,9 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut genGuid: ::std::option::Option<unsafe extern "C" fn(g: *mut root::GUID)>;
+    }
+    extern "C" {
         pub static mut GetAppVersion:
             ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
     }

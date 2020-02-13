@@ -256,3 +256,5 @@ pub type CSurf_SetSurfaceSolo = fn(
     solo: bool,
     ignoresurf: *mut root::IReaperControlSurface,
 );
+
+pub type genGuid = fn(g: *mut root::GUID);

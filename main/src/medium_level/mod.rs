@@ -89,6 +89,12 @@ impl Reaper {
         self.low.CSurf_SetSurfaceSolo.unwrap()(trackid, solo, ignoresurf);
     }
 
+    pub fn gen_guid(&self) -> GUID {
+        let mut guid = ZERO_GUID;
+        self.low.genGuid.unwrap()(&mut guid as *mut GUID);
+        guid
+    }
+
     // Once installed, it stays installed until this module unloaded
     pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
         let delegating_control_surface = DelegatingControlSurface::new(control_surface);

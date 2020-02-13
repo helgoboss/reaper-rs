@@ -89,6 +89,7 @@ fn generate_bindings() {
         .whitelist_var("Main_OnCommandEx")
         .whitelist_var("CSurf_SetSurfaceMute")
         .whitelist_var("CSurf_SetSurfaceSolo")
+        .whitelist_var("genGuid")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
