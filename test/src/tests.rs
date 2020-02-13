@@ -1,8 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{
-    Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode,
-   ActionCharacter, ParameterType};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -911,6 +909,40 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(action.get_index() >= 0);
             check!(!action.is_on());
             check_eq!(action.get_name(), Some(c_str!("reaper-rs test action")));
+            reg.unregister();
+            check!(!action.is_available());
+            Ok(())
+        }),
+        step("Register and unregister toggle action", |reaper, _| {
+            // Given
+            // When
+            let (mock, reg) = observe_invocations(|mock| {
+                let cloned_mock = mock.clone();
+                reaper.register_action(
+                    c_str!("reaperRsTest2"),
+                    c_str!("reaper-rs test toggle action"),
+                    move || {
+                        mock.invoke(43);
+                    },
+                    toggleable(move || {
+                        cloned_mock.invocation_count() % 2 == 1
+                    })
+                )
+            });
+            let action = reaper.get_action_by_command_name(c_str!("reaperRsTest2").into());
+            // Then
+            check!(action.is_available());
+            check_eq!(mock.invocation_count(), 0);
+            check!(!action.is_on());
+            action.invoke_as_trigger(None);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), 43);
+            check!(action.is_on());
+            check_eq!(action.get_character(), ActionCharacter::Toggle);
+            check!(action.get_command_id() > 0);
+            check_eq!(action.get_command_name(), Some(c_str!("reaperRsTest2")));
+            check!(action.get_index() >= 0);
+            check_eq!(action.get_name(), Some(c_str!("reaper-rs test toggle action")));
             reg.unregister();
             check!(!action.is_available());
             Ok(())
