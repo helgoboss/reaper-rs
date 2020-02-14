@@ -185,6 +185,16 @@ impl Fx {
         }
     }
 
+    pub fn enable(&self) {
+        Reaper::instance().medium.track_fx_set_enabled(
+            self.track.get_media_track(), self.get_query_index(), true);
+    }
+
+    pub fn disable(&self) {
+        Reaper::instance().medium.track_fx_set_enabled(
+            self.track.get_media_track(), self.get_query_index(), false);
+    }
+
     pub fn is_input_fx(&self) -> bool {
         self.is_input_fx
     }

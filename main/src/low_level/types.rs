@@ -342,3 +342,5 @@ pub type TrackFX_GetFXName = fn(
     buf: *mut ::std::os::raw::c_char,
     buf_sz: ::std::os::raw::c_int,
 ) -> bool;
+
+pub type TrackFX_GetInstrument = fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int;

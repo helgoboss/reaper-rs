@@ -200,6 +200,10 @@ impl Reaper {
         Some(name)
     }
 
+    pub fn track_fx_get_instrument(&self, track: *mut MediaTrack) -> i32 {
+        self.low.TrackFX_GetInstrument.unwrap()(track)
+    }
+
     pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: i32, enabled: bool) {
         self.low.TrackFX_SetEnabled.unwrap()(track, fx, enabled);
     }

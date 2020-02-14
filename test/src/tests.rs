@@ -1216,7 +1216,7 @@ fn create_fx_steps(
             check_eq!(fx_1.get_name().as_c_str(), c_str!("VST: ReaControlMIDI (Cockos)"));
             let chunk = fx_1.get_chunk();
             check!(chunk.starts_with("BYPASS 0 0 0"));
-//            debug!(reaper.logger, "{:?}", chunk.get_parent_chunk());
+            //            debug!(reaper.logger, "{:?}", chunk.get_parent_chunk());
             check!(chunk.ends_with("\nWAK 0 0"));
             let tag_chunk = fx_1.get_tag_chunk();
             check!(tag_chunk.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
@@ -1241,6 +1241,97 @@ fn create_fx_steps(
             check!(fx_1.get_parameter_by_index(15).is_available());
             check!(!fx_1.get_parameter_by_index(17).is_available());
             check!(fx_1.is_enabled());
+            Ok(())
+        }),
+        step("Disable track fx", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx_1 = fx_chain.get_fx_by_index(0).ok_or("Couldn't find first fx")?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_enabled_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            fx_1.disable();
+            // Then
+            check!(!fx_1.is_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), fx_1);
+            Ok(())
+        }),
+        step("Enable track fx", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx_1 = fx_chain.get_fx_by_index(0).ok_or("Couldn't find first fx")?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_enabled_changed().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            fx_1.enable();
+            // Then
+            check!(fx_1.is_enabled());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), fx_1);
+            Ok(())
+        }),
+        step("Check track fx with 2 fx", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let track = fx_chain.get_track();
+            // When
+            let fx_1 = fx_chain.get_fx_by_index(0).ok_or("Couldn't find first fx")?;
+            let fx_2 = fx_chain.add_fx_by_original_name(c_str!("ReaSynth (Cockos)"))
+                .ok_or("Couldn't add ReaSynth")?;
+            // Then
+            check!(fx_1.is_available());
+            check!(fx_2.is_available());
+            check_eq!(fx_1.get_index(), 0);
+            check_eq!(fx_2.get_index(), 1);
+            check_eq!(fx_1.get_query_index(), if fx_chain.is_input_fx() { 0x1000000 } else { 0 });
+            check_eq!(fx_2.get_query_index(), if fx_chain.is_input_fx() { 0x1000001 } else { 1 });
+            check!(fx_1.get_guid().is_some());
+            check!(fx_2.get_guid().is_some());
+            check_eq!(fx_1.get_name().as_c_str(), c_str!("VST: ReaControlMIDI (Cockos)"));
+            check_eq!(fx_2.get_name().as_c_str(), c_str!("VSTi: ReaSynth (Cockos)"));
+            let chunk_1 = fx_1.get_chunk();
+            check!(chunk_1.starts_with("BYPASS 0 0 0"));
+            check!(chunk_1.ends_with("\nWAK 0 0"));
+            let tag_chunk_1 = fx_1.get_tag_chunk();
+            check!(tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
+            check!(tag_chunk_1.ends_with("\n>"));
+            let state_chunk_1 = fx_1.get_state_chunk();
+            check!(!state_chunk_1.contains("<"));
+            check!(!state_chunk_1.contains(">"));
+            let fx_1_info = fx_1.get_info();
+            let fx_2_info = fx_2.get_info();
+            let stem_1 = fx_1_info.file_name.file_stem().ok_or("No stem")?;
+            let stem_2 = fx_2_info.file_name.file_stem().ok_or("No stem")?;
+            check_eq!(stem_1, "reacontrolmidi");
+            check_eq!(stem_2, "reasynth");
+            check_eq!(fx_1.get_track(), track);
+            check_eq!(fx_2.get_track(), track);
+            check_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
+            check_eq!(fx_2.is_input_fx(), fx_chain.is_input_fx());
+            check_eq!(fx_1.get_chain(), fx_chain);
+            check_eq!(fx_2.get_chain(), fx_chain);
+            check_eq!(fx_1.get_parameter_count(), 17);
+            check_eq!(fx_2.get_parameter_count(), 15);
+            check_eq!(fx_1.get_parameters().count(), 17);
+            check_eq!(fx_2.get_parameters().count(), 15);
+            check!(fx_1.get_parameter_by_index(15).is_available());
+            check!(!fx_1.get_parameter_by_index(17).is_available());
+            check!(track.get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000000 } else { 0 }).is_some());
+            check!(track.get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000001 } else { 1 }).is_some());
+            check!(!track.get_fx_by_query_index(if fx_chain.is_input_fx() { 0 } else { 0x1000000 }).is_some());
+            check!(!track.get_fx_by_query_index(if fx_chain.is_input_fx() { 1 } else { 0x1000001 }).is_some());
+            if !fx_chain.is_input_fx() {
+                let first_instrument_fx = fx_chain.get_first_instrument_fx()
+                    .ok_or("Couldn't find instrument FX")?;
+                check_eq!(first_instrument_fx.get_index(), 1);
+            }
             Ok(())
         }),
     );

@@ -567,6 +567,10 @@ impl Reaper {
         self.subjects.fx_added.borrow().fork()
     }
 
+    pub fn fx_enabled_changed(&self) -> EventStream<Fx> {
+        self.subjects.fx_enabled_changed.borrow().fork()
+    }
+
     pub fn track_input_monitoring_changed(&self) -> EventStream<Track> {
         self.subjects.track_input_monitoring_changed.borrow().fork()
     }

@@ -1240,6 +1240,11 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut TrackFX_GetInstrument: ::std::option::Option<
+            unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut TrackFX_GetNumParams: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,

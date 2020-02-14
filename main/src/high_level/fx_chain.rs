@@ -67,6 +67,14 @@ impl FxChain {
         }
     }
 
+    pub fn get_first_instrument_fx(&self) -> Option<Fx> {
+        if self.is_input_fx {
+            return None;
+        }
+        let fx_index = Reaper::instance().medium.track_fx_get_instrument(self.track.get_media_track());
+        self.get_fx_by_index(fx_index as u32)
+    }
+
     pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
         let fx_index = Reaper::instance().medium.track_fx_add_by_name(
             self.track.get_media_track(), original_fx_name, self.is_input_fx, -1);
