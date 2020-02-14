@@ -998,8 +998,23 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             msg.copy_to_slice(bytes.as_mut_slice()).unwrap();
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper.incoming_midi_events().take_until(step.finished).subscribe(move |t| {
-                    mock.invoke(t);
+                reaper.midi_message_received().take_until(step.finished).subscribe(move |evt| {
+                    // CONTINUE
+                    // - Implement very generic read-only (!!!) MIDI message traits as a separate crate, e.g.
+                    //   with trait midi_api::MidiMessage. Should have almost no requirements
+                    //   on implementors and implement most methods itself (by just querying bytes).
+                    // - Create a borrowing cheap-to-copy newtype struct ReaperMidiMessage which just wraps a
+                    //   *const MIDI_event_t (just like CStr). It should implement the traits.
+                    // - Create owning struct helgoboss::MidiMessage (or use wmidi types), just like CString.
+                    //   And implement traits for it.
+                    // - Implement ToOwned for ReaperMidiMessage
+                    // ----------------------------------------------------------------------------
+                    // - Then wrap a reference to ReaperMidiMessage in a Cow and use this as Observable item
+                    //   (we should make sure AT FIRST if SubjectValue can transfer such cows!)
+                    //
+                    // ... the Cow approach is pretty implicit ... maybe we should avoid that first
+                    //   and make this an explicit to_owned() at some point! Yes!
+                    mock.invoke(evt);
                 });
             });
             reaper.stuff_midi_message(

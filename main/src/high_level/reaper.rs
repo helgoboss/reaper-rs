@@ -6,11 +6,12 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_ushort, c_void, c_int};
 use std::ptr::{null, null_mut};
 use std::sync::{Once, mpsc};
+use num_enum::IntoPrimitive;
 
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult, StuffMidiMessageTarget};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext, HWND, audio_hook_register_t, midi_Input_GetReadBuf, MIDI_eventlist_EnumItems, MIDI_event_t};
 use crate::low_level;
 use crate::medium_level;
@@ -29,7 +30,6 @@ use crate::high_level::fx::Fx;
 use crate::high_level::automation_mode::AutomationMode;
 use std::convert::{TryFrom, TryInto};
 use crate::high_level::fx_parameter::FxParameter;
-use wmidi::MidiMessage;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -83,7 +83,7 @@ extern "C" fn process_audio_buffer(is_post: bool, len: i32, srate: f64, reg: *mu
         // TODO Check performance implications for Reaper instance unwrapping
         let reaper = Reaper::instance();
         // TODO Should we use an unsafe cell here for better performance?
-        let mut subject = reaper.subjects.incoming_midi_events.borrow_mut();
+        let mut subject = reaper.subjects.midi_message_received.borrow_mut();
         // TODO IMPORTANT Use early return if nobody is subscribed to incoming MIDI events
         for i in 0..reaper.get_max_midi_input_devices() {
             let dev = reaper.medium.get_midi_input(i);
@@ -222,7 +222,7 @@ pub(super) struct EventStreamSubjects {
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
-    pub(super) incoming_midi_events: EventStreamSubject<*const MIDI_event_t>,
+    pub(super) midi_message_received: EventStreamSubject<*const MIDI_event_t>,
 }
 
 
@@ -268,7 +268,7 @@ impl EventStreamSubjects {
             main_thread_idle: default(),
             project_closed: default(),
             action_invoked: default(),
-            incoming_midi_events: default(),
+            midi_message_received: default(),
         }
     }
 }
@@ -546,8 +546,8 @@ impl Reaper {
         self.subjects.track_added.borrow().fork()
     }
 
-    pub fn incoming_midi_events(&self) -> EventStream<*const MIDI_event_t> {
-        self.subjects.incoming_midi_events.borrow().fork()
+    pub fn midi_message_received(&self) -> EventStream<*const MIDI_event_t> {
+        self.subjects.midi_message_received.borrow().fork()
     }
 
     pub fn track_removed(&self) -> EventStream<Track> {
@@ -755,3 +755,12 @@ impl RegisteredAction {
         Reaper::instance().unregister_command(self.command_index);
     }
 }
+
+#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[repr(i32)]
+pub enum StuffMidiMessageTarget {
+    VirtualMidiKeyboard,
+    MidiAsControlInputQueue,
+    VirtualMidiKeyboardOnCurrentChannel
+}
+

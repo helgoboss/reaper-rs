@@ -1,12 +1,11 @@
 use crate::high_level::MidiInputDevice;
-use wmidi::MidiMessage;
 
-pub struct MidiEvent<'a> {
+pub struct MidiEvent {
     frame_offset: i32,
-    message: MidiMessage<'a>,
+    message: i32,
 }
 
-pub struct IncomingMidiEvent<'a> {
+pub struct IncomingMidiEvent {
     device: MidiInputDevice,
-    event: MidiEvent<'a>,
+    event: MidiEvent,
 }
