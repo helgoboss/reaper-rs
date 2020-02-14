@@ -11,7 +11,7 @@ use num_enum::IntoPrimitive;
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult, BorrowedReaperMidiEvent, MidiEvent};
 use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext, HWND, audio_hook_register_t, midi_Input_GetReadBuf, MIDI_eventlist_EnumItems, MIDI_event_t};
 use crate::low_level;
 use crate::medium_level;
@@ -104,7 +104,7 @@ extern "C" fn process_audio_buffer(is_post: bool, len: i32, srate: f64, reg: *mu
                     // Active sensing, we don't want to forward that TODO maybe yes?
                     break;
                 }
-                subject.next(midi_event);
+                subject.next(BorrowedReaperMidiEvent(midi_event as *const _));
             }
         }
     });
@@ -222,7 +222,7 @@ pub(super) struct EventStreamSubjects {
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
-    pub(super) midi_message_received: EventStreamSubject<*const MIDI_event_t>,
+    pub(super) midi_message_received: EventStreamSubject<BorrowedReaperMidiEvent>,
 }
 
 
@@ -546,7 +546,7 @@ impl Reaper {
         self.subjects.track_added.borrow().fork()
     }
 
-    pub fn midi_message_received(&self) -> EventStream<*const MIDI_event_t> {
+    pub fn midi_message_received(&self) -> EventStream<impl MidiEvent + Clone> {
         self.subjects.midi_message_received.borrow().fork()
     }
 

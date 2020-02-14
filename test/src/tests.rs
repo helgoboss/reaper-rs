@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -12,7 +12,7 @@ use std::ffi::{CStr, CString};
 use std::convert::TryFrom;
 use super::mock::observe_invocations;
 use std::ptr::null_mut;
-use wmidi::{MidiMessage, U7, Channel, Note};
+use wmidi;
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
     vec!(
@@ -894,7 +894,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
                     move || {
                         mock.invoke(42);
                     },
-                    ActionKind::NotToggleable
+                    ActionKind::NotToggleable,
                 )
             });
             let action = reaper.get_action_by_command_name(c_str!("reaperRsTest").into());
@@ -927,7 +927,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
                     },
                     toggleable(move || {
                         cloned_mock.invocation_count() % 2 == 1
-                    })
+                    }),
                 )
             });
             let action = reaper.get_action_by_command_name(c_str!("reaperRsTest2").into());
@@ -993,33 +993,20 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Stuff MIDI messages", |reaper, step| {
             // Given
-            let msg = MidiMessage::NoteOn(Channel::Ch1, Note::A4, U7::try_from(100).unwrap());
+            let msg = wmidi::MidiMessage::NoteOn(wmidi::Channel::Ch1, wmidi::Note::A4, wmidi::U7::try_from(100).unwrap());
             let mut bytes = vec![0u8; msg.bytes_size()];
             msg.copy_to_slice(bytes.as_mut_slice()).unwrap();
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper.midi_message_received().take_until(step.finished).subscribe(move |evt| {
-                    // CONTINUE
-                    // - Implement very generic read-only (!!!) MIDI message traits as a separate crate, e.g.
-                    //   with trait midi_api::MidiMessage. Should have almost no requirements
-                    //   on implementors and implement most methods itself (by just querying bytes).
-                    // - Create a borrowing cheap-to-copy newtype struct ReaperMidiMessage which just wraps a
-                    //   *const MIDI_event_t (just like CStr). It should implement the traits.
-                    // - Create owning struct helgoboss::MidiMessage (or use wmidi types), just like CString.
-                    //   And implement traits for it.
-                    // - Implement ToOwned for ReaperMidiMessage
-                    // ----------------------------------------------------------------------------
-                    // - Then wrap a reference to ReaperMidiMessage in a Cow and use this as Observable item
-                    //   (we should make sure AT FIRST if SubjectValue can transfer such cows!)
-                    //
-                    // ... the Cow approach is pretty implicit ... maybe we should avoid that first
-                    //   and make this an explicit to_owned() at some point! Yes!
-                    mock.invoke(evt);
-                });
+                reaper.midi_message_received()
+                    .take_until(step.finished)
+                    .subscribe(move |evt| {
+                        mock.invoke(evt);
+                    });
             });
             reaper.stuff_midi_message(
                 StuffMidiMessageTarget::VirtualMidiKeyboard,
-                (bytes[0], bytes[1], bytes[2])
+                (bytes[0], bytes[1], bytes[2]),
             );
             // Then
             Ok(())
