@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -12,6 +12,7 @@ use std::ffi::{CStr, CString};
 use std::convert::TryFrom;
 use super::mock::observe_invocations;
 use std::ptr::null_mut;
+use wmidi::{MidiMessage, U7, Channel, Note};
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
     vec!(
@@ -990,7 +991,24 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(dev_0.is_available());
             Ok(())
         }),
-        // TODO Insert test "Stuff MIDI messages"
+        step("Stuff MIDI messages", |reaper, step| {
+            // Given
+            let msg = MidiMessage::NoteOn(Channel::Ch1, Note::A4, U7::try_from(100).unwrap());
+            let mut bytes = vec![0u8; msg.bytes_size()];
+            msg.copy_to_slice(bytes.as_mut_slice()).unwrap();
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.incoming_midi_events().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            reaper.stuff_midi_message(
+                StuffMidiMessageTarget::VirtualMidiKeyboard,
+                (bytes[0], bytes[1], bytes[2])
+            );
+            // Then
+            Ok(())
+        }),
         step("Use undoable", |reaper, step| {
             // Given
             let project = reaper.get_current_project();

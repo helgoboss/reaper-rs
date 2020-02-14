@@ -299,3 +299,19 @@ pub type ShowMessageBox = fn(
     title: *const ::std::os::raw::c_char,
     type_: ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int;
+
+pub type StuffMIDIMessage = fn(
+    mode: ::std::os::raw::c_int,
+    msg1: ::std::os::raw::c_int,
+    msg2: ::std::os::raw::c_int,
+    msg3: ::std::os::raw::c_int,
+);
+
+pub type Audio_RegHardwareHook = fn(
+    isAdd: bool,
+    reg: *const root::audio_hook_register_t,
+) -> ::std::os::raw::c_int;
+
+pub type GetMidiInput = fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input;
+
+pub type GetMidiOutput = fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output;

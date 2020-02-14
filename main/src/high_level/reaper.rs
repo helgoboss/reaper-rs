@@ -3,15 +3,15 @@ use std::cell::{Ref, RefCell, RefMut, Cell};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
-use std::os::raw::{c_ushort, c_void};
+use std::os::raw::{c_ushort, c_void, c_int};
 use std::ptr::{null, null_mut};
 use std::sync::{Once, mpsc};
 
 use c_str_macro::c_str;
 
 use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult};
-use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext, HWND};
+use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult, StuffMidiMessageTarget};
+use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext, HWND, audio_hook_register_t, midi_Input_GetReadBuf, MIDI_eventlist_EnumItems, MIDI_event_t};
 use crate::low_level;
 use crate::medium_level;
 use rxrust::subscriber::Subscriber;
@@ -29,6 +29,7 @@ use crate::high_level::fx::Fx;
 use crate::high_level::automation_mode::AutomationMode;
 use std::convert::{TryFrom, TryInto};
 use crate::high_level::fx_parameter::FxParameter;
+use wmidi::MidiMessage;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -36,7 +37,7 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 
 // Called by REAPER directly!
 // Only for main section
-fn hook_command(command_index: i32, flag: i32) -> bool {
+extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
     firewall(|| {
         let mut operation = match Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
             Some(command) => command.operation.clone(),
@@ -49,7 +50,7 @@ fn hook_command(command_index: i32, flag: i32) -> bool {
 
 // Called by REAPER directly!
 // Only for main section
-fn hook_post_command(command_id: i32, flag: i32) {
+extern "C" fn hook_post_command(command_id: i32, flag: i32) {
     firewall(|| {
         let reaper = Reaper::instance();
         let action = reaper.get_main_section().get_action_by_command_id(command_id);
@@ -59,7 +60,7 @@ fn hook_post_command(command_id: i32, flag: i32) {
 
 // Called by REAPER directly!
 // Only for main section
-fn toggle_action(command_index: i32) -> i32 {
+extern "C" fn toggle_action(command_index: i32) -> i32 {
     firewall(|| {
         if let Some(command) = Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
             match &command.kind {
@@ -70,6 +71,43 @@ fn toggle_action(command_index: i32) -> i32 {
             -1
         }
     }).unwrap_or(-1)
+}
+
+// Called by REAPER directly!
+extern "C" fn process_audio_buffer(is_post: bool, len: i32, srate: f64, reg: *mut audio_hook_register_t) {
+    // TODO Check performance implications for firewall call
+    firewall(|| {
+        if is_post {
+            return;
+        }
+        // TODO Check performance implications for Reaper instance unwrapping
+        let reaper = Reaper::instance();
+        // TODO Should we use an unsafe cell here for better performance?
+        let mut subject = reaper.subjects.incoming_midi_events.borrow_mut();
+        // TODO IMPORTANT Use early return if nobody is subscribed to incoming MIDI events
+        for i in 0..reaper.get_max_midi_input_devices() {
+            let dev = reaper.medium.get_midi_input(i);
+            if dev.is_null() {
+                continue;
+            }
+            let dev = unsafe { &mut *dev };
+            let midi_events = unsafe { midi_Input_GetReadBuf(dev as *mut _) };
+            let mut bpos = 0;
+            loop {
+                let midi_event = unsafe { MIDI_eventlist_EnumItems(midi_events, &mut bpos as *mut c_int) };
+                if midi_event.is_null() {
+                    // No MIDI messages left
+                    break;
+                }
+                let midi_event = unsafe { &*midi_event };
+                if midi_event.midi_message[0] == 254 {
+                    // Active sensing, we don't want to forward that TODO maybe yes?
+                    break;
+                }
+                subject.next(midi_event);
+            }
+        }
+    });
 }
 
 //pub(super) type Task = Box<dyn FnOnce() + Send + 'static>;
@@ -139,6 +177,7 @@ pub struct Reaper {
     task_sender: Sender<Task>,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
+    audio_hook: audio_hook_register_t,
 }
 
 pub(super) struct EventStreamSubjects {
@@ -183,6 +222,7 @@ pub(super) struct EventStreamSubjects {
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
+    pub(super) incoming_midi_events: EventStreamSubject<*const MIDI_event_t>,
 }
 
 
@@ -228,6 +268,7 @@ impl EventStreamSubjects {
             main_thread_idle: default(),
             project_closed: default(),
             action_invoked: default(),
+            incoming_midi_events: default(),
         }
     }
 }
@@ -286,6 +327,14 @@ impl Reaper {
             task_sender,
             main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
+            audio_hook: audio_hook_register_t {
+                OnAudioBuffer: Some(process_audio_buffer),
+                userdata1: null_mut(),
+                userdata2: null_mut(),
+                input_nch: 0,
+                output_nch: 0,
+                GetBuffer: None,
+            },
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -305,10 +354,12 @@ impl Reaper {
         self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
         self.medium.plugin_register(c_str!("hookpostcommand"), hook_post_command as *mut c_void);
         self.medium.register_control_surface();
+        self.medium.audio_reg_hardware_hook(true, &self.audio_hook as *const _);
     }
 
     // Must be idempotent
     pub fn deactivate(&self) {
+        self.medium.audio_reg_hardware_hook(false, &self.audio_hook as *const _);
         self.medium.unregister_control_surface();
         self.medium.plugin_register(c_str!("-hookpostcommand"), hook_post_command as *mut c_void);
         self.medium.plugin_register(c_str!("-toggleaction"), toggle_action as *mut c_void);
@@ -474,7 +525,7 @@ impl Reaper {
     }
 
     // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret 1=OK,2=CANCEL,3=ABORT,4=RETRY,5=IGNORE,6=YES,7=NO
-    pub fn show_message_box(&self, msg: &CStr, title:&CStr, kind: MessageBoxKind) -> MessageBoxResult {
+    pub fn show_message_box(&self, msg: &CStr, title: &CStr, kind: MessageBoxKind) -> MessageBoxResult {
         self.medium.show_message_box(msg, title, kind.into()).try_into().expect("Unknown message box result")
     }
 
@@ -493,6 +544,10 @@ impl Reaper {
 
     pub fn track_added(&self) -> EventStream<Track> {
         self.subjects.track_added.borrow().fork()
+    }
+
+    pub fn incoming_midi_events(&self) -> EventStream<*const MIDI_event_t> {
+        self.subjects.incoming_midi_events.borrow().fork()
     }
 
     pub fn track_removed(&self) -> EventStream<Track> {
@@ -576,16 +631,22 @@ impl Reaper {
         self.medium.clear_console();
     }
 
+    // TODO Require Send?
     pub fn execute_later_in_main_thread(&self, task: impl FnOnce() + 'static) {
         self.task_sender.send(Box::new(task));
     }
 
+    // TODO Require Send?
     pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) {
         if self.current_thread_is_main_thread() {
             task();
         } else {
             self.execute_later_in_main_thread(task);
         }
+    }
+
+    pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: (u8, u8, u8)) {
+        self.medium.stuff_midimessage(target.into(), message.0 as i32, message.1 as i32, message.2 as i32);
     }
 
     pub fn current_thread_is_main_thread(&self) -> bool {

@@ -10,7 +10,7 @@ use std::ffi::{CString, CStr};
 use std::ptr::{null_mut, null};
 use std::os::raw::{c_char, c_void};
 use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID, TrackEnvelope, IReaperControlSurface};
+use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID, TrackEnvelope, IReaperControlSurface, audio_hook_register_t, midi_Input, midi_Output};
 use c_str_macro::c_str;
 pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
@@ -138,6 +138,14 @@ impl Reaper {
 
     pub fn insert_track_at_index(&self, idx: i32, want_defaults: bool) {
         self.low.InsertTrackAtIndex.unwrap()(idx, want_defaults);
+    }
+
+    pub fn get_midi_input(&self, idx: u32) -> *mut midi_Input {
+        self.low.GetMidiInput.unwrap()(idx as i32)
+    }
+
+    pub fn get_midi_output(&self, idx: u32) -> *mut midi_Output {
+        self.low.GetMidiOutput.unwrap()(idx as i32)
     }
 
     pub fn get_max_midi_inputs(&self) -> u32 {
@@ -307,6 +315,10 @@ impl Reaper {
         self.low.SetMediaTrackInfo_Value.unwrap()(tr, parmname.as_ptr(), newvalue)
     }
 
+    pub fn stuff_midimessage(&self, mode: i32, msg1: i32, msg2: i32, msg3: i32) {
+        self.low.StuffMIDIMessage.unwrap()(mode, msg1, msg2, msg3);
+    }
+
     pub fn db2slider(&self, x: f64) -> f64 {
         self.low.DB2SLIDER.unwrap()(x)
     }
@@ -324,6 +336,10 @@ impl Reaper {
         } else {
             None
         }
+    }
+
+    pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> i32 {
+        self.low.Audio_RegHardwareHook.unwrap()(is_add, reg)
     }
 
     pub fn csurf_set_surface_volume(&self, trackid: *mut MediaTrack, volume: f64, ignoresurf: *mut IReaperControlSurface) {

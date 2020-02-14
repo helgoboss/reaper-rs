@@ -11,9 +11,10 @@ pub use bindings::root::{
     CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETFXPARAM, CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETFXENABLED,
     CSURF_EXT_SETSENDVOLUME, CSURF_EXT_SETSENDPAN, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXOPEN,
     CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETBPMANDPLAYRATE, IReaperControlSurface,
-    KbdCmd,
+    KbdCmd, audio_hook_register_t, midi_Input, midi_Output, MIDI_event_t
 };
 use bindings::root::reaper_rs_control_surface::get_control_surface;
+pub use bindings::root::reaper_rs_midi::*;
 pub use control_surface::ControlSurface;
 pub use util::firewall;
 
@@ -229,7 +230,11 @@ gen_reaper_struct![
     SetCurrentBPM,
     Master_GetPlayRate,
     CSurf_OnPlayRateChange,
-    ShowMessageBox
+    ShowMessageBox,
+    StuffMIDIMessage,
+    Audio_RegHardwareHook,
+    GetMidiInput,
+    GetMidiOutput
 ];
 
 #[macro_export]

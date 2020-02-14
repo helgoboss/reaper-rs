@@ -6,7 +6,7 @@ namespace reaper_rs_control_surface {
   // This is implemented in C++ and called from Rust
   extern "C" void* get_control_surface();
 
-  // These is implemented in Rust and called from C++
+  // These are implemented in Rust and called from C++
   extern "C" const char* GetTypeString(void* callback_target);
   extern "C" const char* GetDescString(void* callback_target);
   extern "C" const char* GetConfigString(void* callback_target);

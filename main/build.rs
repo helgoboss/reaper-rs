@@ -10,6 +10,7 @@ fn compile_glue() {
     cc::Build::new()
         .cpp(true)
         .file("src/low_level/control_surface.cpp")
+        .file("src/low_level/midi.cpp")
         .compile("glue");
 }
 
@@ -63,6 +64,8 @@ fn generate_bindings() {
         .whitelist_var("CSurf_OnInputMonitorChangeEx")
         .whitelist_var("SetMediaTrackInfo_Value")
         .whitelist_var("GetMaxMidiInputs")
+        .whitelist_var("GetMidiInput")
+        .whitelist_var("GetMidiOutput")
         .whitelist_var("GetMIDIInputName")
         .whitelist_var("GetMaxMidiOutputs")
         .whitelist_var("GetMIDIOutputName")
@@ -109,13 +112,17 @@ fn generate_bindings() {
         .whitelist_var("CSurf_OnPlayRateChange")
         .whitelist_var("ShowMessageBox")
         .whitelist_var("GetMainHwnd")
+        .whitelist_var("StuffMIDIMessage")
+        .whitelist_var("Audio_RegHardwareHook")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")
         .whitelist_type("gaccel_register_t")
+        .whitelist_type("audio_hook_register_t")
         .whitelist_type("KbdSectionInfo")
         .whitelist_type("GUID")
         .whitelist_function("reaper_rs_control_surface::.*")
+        .whitelist_function("reaper_rs_midi::.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed. TODO Do as soon as available
 //        .parse_callbacks(Box::new(bindgen::CargoCallbacks))

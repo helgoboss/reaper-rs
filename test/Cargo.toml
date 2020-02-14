@@ -9,3 +9,4 @@ edition = "2018"
 reaper-rs = { path = "../main" }
 c_str_macro = "1.0.2"
 rxrust = { path = '../lib/rxRust'}
+wmidi = "3.1.0"

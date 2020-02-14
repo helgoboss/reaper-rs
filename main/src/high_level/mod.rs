@@ -75,4 +75,10 @@ pub use undo_block::*;
 mod message_box;
 pub use message_box::*;
 
+mod midi_message;
+pub use midi_message::*;
+
+mod midi_event;
+pub use midi_event::*;
+
 mod normalized_value;

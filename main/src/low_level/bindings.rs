@@ -31,6 +31,7 @@ pub mod root {
     pub const CSURF_EXT_SETPROJECTMARKERCHANGE: u32 = 65556;
     pub const CSURF_EXT_SETFXPARAM_RECFX: u32 = 65560;
     pub const CSURF_EXT_SUPPORTS_EXTENDED_TOUCH: u32 = 524289;
+    pub type ReaSample = f64;
     pub mod std {
         #[allow(unused_imports)]
         use self::super::super::root;
@@ -237,6 +238,77 @@ pub mod root {
             )
         );
     }
+    #[doc = " MIDI event definition and abstract list"]
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct MIDI_event_t {
+        pub frame_offset: ::std::os::raw::c_int,
+        pub size: ::std::os::raw::c_int,
+        pub midi_message: [::std::os::raw::c_uchar; 4usize],
+    }
+    #[test]
+    fn bindgen_test_layout_MIDI_event_t() {
+        assert_eq!(
+            ::std::mem::size_of::<MIDI_event_t>(),
+            12usize,
+            concat!("Size of: ", stringify!(MIDI_event_t))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<MIDI_event_t>(),
+            4usize,
+            concat!("Alignment of ", stringify!(MIDI_event_t))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<MIDI_event_t>())).frame_offset as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(MIDI_event_t),
+                "::",
+                stringify!(frame_offset)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<MIDI_event_t>())).size as *const _ as usize },
+            4usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(MIDI_event_t),
+                "::",
+                stringify!(size)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<MIDI_event_t>())).midi_message as *const _ as usize },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(MIDI_event_t),
+                "::",
+                stringify!(midi_message)
+            )
+        );
+    }
+    #[repr(C)]
+    pub struct MIDI_eventlist__bindgen_vtable(::std::os::raw::c_void);
+    #[repr(C)]
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct MIDI_eventlist {
+        pub vtable_: *const MIDI_eventlist__bindgen_vtable,
+    }
+    #[test]
+    fn bindgen_test_layout_MIDI_eventlist() {
+        assert_eq!(
+            ::std::mem::size_of::<MIDI_eventlist>(),
+            8usize,
+            concat!("Size of: ", stringify!(MIDI_eventlist))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<MIDI_eventlist>(),
+            8usize,
+            concat!("Alignment of ", stringify!(MIDI_eventlist))
+        );
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct gaccel_register_t {
@@ -273,6 +345,113 @@ pub mod root {
                 stringify!(gaccel_register_t),
                 "::",
                 stringify!(desc)
+            )
+        );
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct audio_hook_register_t {
+        pub OnAudioBuffer: ::std::option::Option<
+            unsafe extern "C" fn(
+                isPost: bool,
+                len: ::std::os::raw::c_int,
+                srate: f64,
+                reg: *mut root::audio_hook_register_t,
+            ),
+        >,
+        pub userdata1: *mut ::std::os::raw::c_void,
+        pub userdata2: *mut ::std::os::raw::c_void,
+        pub input_nch: ::std::os::raw::c_int,
+        pub output_nch: ::std::os::raw::c_int,
+        pub GetBuffer: ::std::option::Option<
+            unsafe extern "C" fn(
+                isOutput: bool,
+                idx: ::std::os::raw::c_int,
+            ) -> *mut root::ReaSample,
+        >,
+    }
+    #[test]
+    fn bindgen_test_layout_audio_hook_register_t() {
+        assert_eq!(
+            ::std::mem::size_of::<audio_hook_register_t>(),
+            40usize,
+            concat!("Size of: ", stringify!(audio_hook_register_t))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<audio_hook_register_t>(),
+            8usize,
+            concat!("Alignment of ", stringify!(audio_hook_register_t))
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<audio_hook_register_t>())).OnAudioBuffer as *const _ as usize
+            },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(audio_hook_register_t),
+                "::",
+                stringify!(OnAudioBuffer)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<audio_hook_register_t>())).userdata1 as *const _ as usize
+            },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(audio_hook_register_t),
+                "::",
+                stringify!(userdata1)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<audio_hook_register_t>())).userdata2 as *const _ as usize
+            },
+            16usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(audio_hook_register_t),
+                "::",
+                stringify!(userdata2)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<audio_hook_register_t>())).input_nch as *const _ as usize
+            },
+            24usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(audio_hook_register_t),
+                "::",
+                stringify!(input_nch)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<audio_hook_register_t>())).output_nch as *const _ as usize
+            },
+            28usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(audio_hook_register_t),
+                "::",
+                stringify!(output_nch)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                &(*(::std::ptr::null::<audio_hook_register_t>())).GetBuffer as *const _ as usize
+            },
+            32usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(audio_hook_register_t),
+                "::",
+                stringify!(GetBuffer)
             )
         );
     }
@@ -505,6 +684,46 @@ pub mod root {
         );
     }
     #[repr(C)]
+    pub struct midi_Output__bindgen_vtable(::std::os::raw::c_void);
+    #[repr(C)]
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct midi_Output {
+        pub vtable_: *const midi_Output__bindgen_vtable,
+    }
+    #[test]
+    fn bindgen_test_layout_midi_Output() {
+        assert_eq!(
+            ::std::mem::size_of::<midi_Output>(),
+            8usize,
+            concat!("Size of: ", stringify!(midi_Output))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<midi_Output>(),
+            8usize,
+            concat!("Alignment of ", stringify!(midi_Output))
+        );
+    }
+    #[repr(C)]
+    pub struct midi_Input__bindgen_vtable(::std::os::raw::c_void);
+    #[repr(C)]
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct midi_Input {
+        pub vtable_: *const midi_Input__bindgen_vtable,
+    }
+    #[test]
+    fn bindgen_test_layout_midi_Input() {
+        assert_eq!(
+            ::std::mem::size_of::<midi_Input>(),
+            8usize,
+            concat!("Size of: ", stringify!(midi_Input))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<midi_Input>(),
+            8usize,
+            concat!("Alignment of ", stringify!(midi_Input))
+        );
+    }
+    #[repr(C)]
     #[derive(Debug, Copy, Clone)]
     pub struct ReaProject {
         _unused: [u8; 0],
@@ -538,6 +757,14 @@ pub mod root {
             8usize,
             concat!("Alignment of ", stringify!(IReaperControlSurface))
         );
+    }
+    extern "C" {
+        pub static mut Audio_RegHardwareHook: ::std::option::Option<
+            unsafe extern "C" fn(
+                isAdd: bool,
+                reg: *mut root::audio_hook_register_t,
+            ) -> ::std::os::raw::c_int,
+        >;
     }
     extern "C" {
         pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
@@ -965,6 +1192,16 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut StuffMIDIMessage: ::std::option::Option<
+            unsafe extern "C" fn(
+                mode: ::std::os::raw::c_int,
+                msg1: ::std::os::raw::c_int,
+                msg2: ::std::os::raw::c_int,
+                msg3: ::std::os::raw::c_int,
+            ),
+        >;
+    }
+    extern "C" {
         pub static mut TrackFX_GetCount: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;
@@ -1035,6 +1272,16 @@ pub mod root {
                 pointer: *mut ::std::os::raw::c_void,
                 ctypename: *const ::std::os::raw::c_char,
             ) -> bool,
+        >;
+    }
+    extern "C" {
+        pub static mut GetMidiInput: ::std::option::Option<
+            unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input,
+        >;
+    }
+    extern "C" {
+        pub static mut GetMidiOutput: ::std::option::Option<
+            unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output,
         >;
     }
     pub mod reaper_rs_control_surface {
@@ -1163,6 +1410,20 @@ pub mod root {
                 parm2: *mut ::std::os::raw::c_void,
                 parm3: *mut ::std::os::raw::c_void,
             ) -> ::std::os::raw::c_int;
+        }
+    }
+    pub mod reaper_rs_midi {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub fn MIDI_eventlist_EnumItems(
+                self_: *mut root::MIDI_eventlist,
+                bpos: *mut ::std::os::raw::c_int,
+            ) -> *mut root::MIDI_event_t;
+        }
+        extern "C" {
+            pub fn midi_Input_GetReadBuf(self_: *mut root::midi_Input)
+                -> *mut root::MIDI_eventlist;
         }
     }
 }
