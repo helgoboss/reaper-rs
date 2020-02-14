@@ -237,7 +237,63 @@ pub struct FxInfo {
 
 impl FxInfo {
     pub fn new(first_line_of_tag_chunk: &str) -> FxInfo {
-        unimplemented!()
+        // TODO try_into() rather than panic
+        // TODO Also handle other plugin types
+        // TODO Don't just assign empty strings in case of JS
+        let vst_line_regex = regex!(r#"<VST "(.+?): (.+?) \((.+?)\).*?" (.+)"#);
+        let vst_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
+        let vst_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
+        let js_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
+        let js_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
+        let first_space_index = first_line_of_tag_chunk.find(' ')
+            .expect("Couldn't find space in VST tag line");
+        let type_expression = &first_line_of_tag_chunk[1..first_space_index];
+        match type_expression {
+            "VST" => {
+                let captures = vst_line_regex.captures(first_line_of_tag_chunk)
+                    .expect("Couldn't parse VST tag line");
+                assert_eq!(captures.len(), 5);
+                FxInfo {
+                    effect_name: captures[2].to_owned(),
+                    type_expression: type_expression.to_owned(),
+                    sub_type_expression: captures[1].to_owned(),
+                    vendor_name: captures[3].to_owned(),
+                    file_name: {
+                        let remainder = &captures[4];
+                        let remainder_regex = if remainder.starts_with('"') {
+                            vst_file_name_with_quotes_regex
+                        } else {
+                            vst_file_name_without_quotes_regex
+                        };
+                        let remainder_captures = remainder_regex.captures(remainder)
+                            .expect("Couldn't parse VST file name");
+                        assert_eq!(remainder_captures.len(), 2);
+                        PathBuf::from(&remainder_captures[1])
+                    }
+                }
+            },
+            "JS" => {
+                FxInfo {
+                    effect_name: "".to_string(),
+                    type_expression: "".to_string(),
+                    sub_type_expression: "".to_string(),
+                    vendor_name: "".to_string(),
+                    file_name: {
+                        let remainder = &first_line_of_tag_chunk[4..];
+                        let remainder_regex = if remainder.starts_with('"') {
+                            js_file_name_with_quotes_regex
+                        } else {
+                            js_file_name_without_quotes_regex
+                        };
+                        let remainder_captures = remainder_regex.captures(remainder)
+                            .expect("Couldn't parse JS file name");
+                        assert_eq!(remainder_captures.len(), 2);
+                        PathBuf::from(&remainder_captures[1])
+                    }
+                }
+            },
+            _ => panic!("Can only handle VST and JS FX types right now")
+        }
     }
 }
 

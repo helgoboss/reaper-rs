@@ -1225,13 +1225,13 @@ fn create_fx_steps(
             check!(!state_chunk.contains("<"));
             check!(!state_chunk.contains(">"));
 
-//            let fx_1_info = fx_1.get_info();
-//            let stem = fx_1_info.file_name.file_stem().ok_or("No stem")?;
-//            check_eq!(stem, "reacontrolmidi");
-//            check_eq!(fx_1_info.type_expression, "VST");
-//            check_eq!(fx_1_info.sub_type_expression, "VST");
-//            check_eq!(fx_1_info.effect_name, "ReaControlMIDI");
-//            check_eq!(fx_1_info.vendor_name, "Cockos");
+            let fx_1_info = fx_1.get_info();
+            let stem = fx_1_info.file_name.file_stem().ok_or("No stem")?;
+            check_eq!(stem, "reacontrolmidi");
+            check_eq!(fx_1_info.type_expression, "VST");
+            check_eq!(fx_1_info.sub_type_expression, "VST");
+            check_eq!(fx_1_info.effect_name, "ReaControlMIDI");
+            check_eq!(fx_1_info.vendor_name, "Cockos");
 
             check_eq!(fx_1.get_track(), track);
             check_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
