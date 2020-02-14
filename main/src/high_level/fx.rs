@@ -118,6 +118,15 @@ impl Fx {
     pub fn is_input_fx(&self) -> bool {
         self.is_input_fx
     }
+
+    pub fn is_available(&self) -> bool {
+        if self.is_loaded_and_at_correct_index() {
+            true
+        } else {
+            // Not yet loaded or at wrong index
+            self.load_by_guid()
+        }
+    }
 }
 
 pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid> {

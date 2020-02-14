@@ -114,6 +114,7 @@ fn generate_bindings() {
         .whitelist_var("GetMainHwnd")
         .whitelist_var("StuffMIDIMessage")
         .whitelist_var("Audio_RegHardwareHook")
+        .whitelist_var("TrackFX_AddByName")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

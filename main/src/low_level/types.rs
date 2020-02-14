@@ -315,3 +315,10 @@ pub type Audio_RegHardwareHook = fn(
 pub type GetMidiInput = fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input;
 
 pub type GetMidiOutput = fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output;
+
+pub type TrackFX_AddByName = fn(
+    track: *mut root::MediaTrack,
+    fxname: *const ::std::os::raw::c_char,
+    recFX: bool,
+    instantiate: ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int;

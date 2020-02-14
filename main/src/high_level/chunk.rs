@@ -1,9 +1,9 @@
 use std::rc::Rc;
 use std::cell::{RefCell, Ref};
-use std::ffi::CString;
+use std::ffi::{CString, CStr};
 
 // Cheap to clone because string is shared
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Chunk {
     content: Rc<RefCell<String>>
 }
@@ -25,7 +25,7 @@ impl From<Chunk> for CString {
 }
 
 // Cheap to clone. Owns chunk for ease of use.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ChunkRegion {
     parent_chunk: Chunk,
     start_pos: usize,
@@ -202,6 +202,84 @@ impl ChunkRegion {
         }
         self.create_region_from_relative_start_pos(0, self.length + count)
     }
+
+    // Returns the tag completely from < to >
+    pub fn find_first_tag_named(&self, relative_search_start_pos: usize, tag_name: &str) -> Option<ChunkRegion> {
+        if !self.is_valid() {
+            return None;
+        }
+        let tag_opener_with_new_line = format!("\n<{}", tag_name);
+        self.find_followed_by_one_of(&tag_opener_with_new_line, " \n", relative_search_start_pos)
+            .and_then(|pos| self.parse_tag_starting_from(pos + 1))
+    }
+
+    // Precondition: isValid
+    fn find_followed_by_one_of(&self, needle: &str, one_of: &str, mut rel_start_pos: usize) -> Option<usize> {
+        let content = self.get_content();
+        while rel_start_pos < content.len() {
+            let needle_pos_relative_to_rel_start_pos =
+                match content[rel_start_pos..].find(needle) {
+                    None => return None, // Needle not found
+                    Some(p) => p
+                };
+            // Needle found
+            let rel_needle_pos = rel_start_pos + needle_pos_relative_to_rel_start_pos;
+            let rel_following_char_pos = rel_needle_pos + needle.len();
+            if rel_following_char_pos < content.len() {
+                // String goes on after needle
+                let following_char = content[rel_following_char_pos..].chars().next().unwrap();
+                if one_of.find(following_char).is_some() {
+                    // Found complete match
+                    return Some(rel_needle_pos);
+                } else {
+                    // No complete match yet. Go on searching.
+                    rel_start_pos = rel_following_char_pos + 1;
+                }
+            } else {
+                // No complete match found
+                return None;
+            }
+        }
+        // No complete match found
+        None
+    }
+
+    // Precondition: isValid
+    fn parse_tag_starting_from(&self, rel_tag_opener_pos: usize) -> Option<ChunkRegion> {
+        let mut rel_start_pos = rel_tag_opener_pos + 1;
+        let mut open_levels_count = 1;
+        let content = self.get_content();
+        while rel_start_pos < content.len() {
+            let rel_tag_opener_or_closer_pos =
+                match self.find_followed_by_one_of("\n", "<>", rel_start_pos) {
+                    None => return None, // No further tag opener or closer found
+                    Some(p) => p
+                };
+            // Further tag opener or closer found
+            let rel_tag_opener_or_closer_without_newline_pos = rel_tag_opener_or_closer_pos + 1;
+            let tag_opener_or_closer_without_newline =
+                content[rel_tag_opener_or_closer_without_newline_pos..].chars().next().unwrap();
+            if tag_opener_or_closer_without_newline == '<' {
+                // Opening tag (nested)
+                open_levels_count += 1;
+                rel_start_pos = rel_tag_opener_or_closer_without_newline_pos + 1;
+            } else {
+                // Closing tag
+                open_levels_count -= 1;
+                if open_levels_count == 0 {
+                    // Found tag closer of searched tag
+                    let length = rel_tag_opener_or_closer_without_newline_pos - rel_tag_opener_pos + 1;
+                    return Some(self.create_region_from_relative_start_pos(rel_tag_opener_pos, length));
+                } else {
+                    // Nested tag was closed
+                    rel_start_pos = rel_tag_opener_or_closer_without_newline_pos + 1;
+                }
+            }
+        }
+        // Tag closer not found
+        None
+    }
+
 
     fn create_invalid_region(&self) -> ChunkRegion {
         ChunkRegion::new(self.parent_chunk.clone(), self.start_pos, usize::max_value())

@@ -234,7 +234,8 @@ gen_reaper_struct![
     StuffMIDIMessage,
     Audio_RegHardwareHook,
     GetMidiInput,
-    GetMidiOutput
+    GetMidiOutput,
+    TrackFX_AddByName
 ];
 
 #[macro_export]

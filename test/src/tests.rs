@@ -13,8 +13,9 @@ use std::convert::TryFrom;
 use super::mock::observe_invocations;
 use std::ptr::null_mut;
 use wmidi;
+use std::iter;
 
-pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
+pub fn create_test_steps() -> impl Iterator<Item=TestStep> {
     let steps_a = vec!(
         step("Create empty project in new tab", |reaper, step| {
             // Given
@@ -948,7 +949,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(!action.is_available());
             Ok(())
         }),
-    );
+    ).into_iter();
     // TODO Insert FX tests HERE!
     let steps_b = vec!(
         step("Insert track at", |reaper, step| {
@@ -1116,38 +1117,55 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(result, MessageBoxResult::Ok);
             Ok(())
         }),
-    );
+    ).into_iter();
     let reaper = Reaper::instance();
     let output_fx_steps = create_fx_steps(
+        "Output FX chain",
         || get_track(0),
         || get_track(0).map(|t| t.get_normal_fx_chain()),
     );
     let input_fx_steps = create_fx_steps(
+        "Input FX chain",
         || get_track(1),
-        || get_track(1).map(|t| t.get_normal_fx_chain()),
+        || get_track(1).map(|t| t.get_input_fx_chain()),
     );
-    vec!(
-        steps_a,
-        output_fx_steps,
-        input_fx_steps,
-        steps_b
-    ).into_iter().flatten()
+    iter::empty()
+        .chain(steps_a)
+        .chain(output_fx_steps)
+        .chain(input_fx_steps)
+        .chain(steps_b)
 }
 
 fn create_fx_steps(
+    prefix: &'static str,
     get_track: impl Fn() -> Result<Track, &'static str> + 'static,
     get_fx_chain: impl Fn() -> Result<FxChain, &'static str> + 'static
-) -> Vec<TestStep> {
-    vec!(
+) -> impl Iterator<Item=TestStep> {
+    let steps = vec!(
         step("Query fx chain", move |reaper, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             // When
             // Then
             check_eq!(fx_chain.get_fx_count(), 0);
+            check_eq!(fx_chain.get_fxs().count(), 0);
+            check_eq!(fx_chain.get_fx_by_index(0), None);
+            check_eq!(fx_chain.get_first_fx(), None);
+            check_eq!(fx_chain.get_last_fx(), None);
+            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            check!(!fx_chain.get_fx_by_guid(&guid).is_available());
+            check!(!fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
+            check_eq!(fx_chain.get_first_fx_by_name(c_str!("bla")), None);
+            check_eq!(fx_chain.get_chunk(), None);
             Ok(())
         })
-    )
+    );
+    steps.into_iter().map(move |s| {
+        TestStep {
+            name: format!("{} - {}", prefix, s.name).into(),
+            ..s
+        }
+    })
 }
 
 fn get_track(index: u32) -> Result<Track, &'static str> {

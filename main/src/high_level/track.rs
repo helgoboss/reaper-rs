@@ -22,7 +22,7 @@ use crate::high_level::fx::{Fx, get_index_from_query_index};
 use crate::high_level::track_send::TrackSend;
 use slog::debug;
 
-const MAX_CHUNK_SIZE: u32 = 1_000_000;
+pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
 // TODO Think hard about what equality means here!
 #[derive(Clone, Debug, Eq)]
@@ -218,7 +218,7 @@ impl Track {
     }
 
     pub fn enable_auto_arm(&self) {
-        let mut chunk = self.get_chunk(MAX_CHUNK_SIZE, false);
+        let mut chunk = self.get_chunk(MAX_TRACK_CHUNK_SIZE, false);
         if get_auto_arm_chunk_line(&chunk).is_some() {
             return;
         }
@@ -284,7 +284,7 @@ impl Track {
     }
 
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
-        get_auto_arm_chunk_line(&self.get_chunk(MAX_CHUNK_SIZE, true))
+        get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, true))
     }
 
     // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains weird

@@ -1202,6 +1202,16 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut TrackFX_AddByName: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fxname: *const ::std::os::raw::c_char,
+                recFX: bool,
+                instantiate: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         pub static mut TrackFX_GetCount: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;

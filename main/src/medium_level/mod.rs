@@ -169,6 +169,10 @@ impl Reaper {
         }
     }
 
+    pub fn track_fx_add_by_name(&self, track: *mut MediaTrack, fxname: &CStr, rec_fx: bool, instantiate: i32) -> i32 {
+        self.low.TrackFX_AddByName.unwrap()(track, fxname.as_ptr(), rec_fx, instantiate)
+    }
+
     pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = self.low.GetMIDIOutputName.unwrap()(dev as i32, null_mut(), 0);
