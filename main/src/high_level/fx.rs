@@ -5,7 +5,7 @@ use c_str_macro::c_str;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::fx_chain::FxChain;
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, Eq, Debug)]
 pub struct Fx {
     // TODO Save chain instead of track
     track: Track,
@@ -15,6 +15,20 @@ pub struct Fx {
     // For just index-based FX instances this is the primary identifier.
     index: Cell<Option<u32>>,
     is_input_fx: bool,
+}
+
+impl PartialEq for Fx {
+    fn eq(&self, other: &Self) -> bool {
+        if self.track != other.track || self.is_input_fx != other.is_input_fx {
+            return false;
+        }
+        if let (Some(self_guid), Some(other_guid)) = (self.guid, other.guid) {
+            // Both FXs are guid-based
+            self_guid == other_guid
+        } else {
+            self.index == other.index
+        }
+    }
 }
 
 impl Fx {

@@ -46,7 +46,7 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>) {
     };
     match result {
         Ok(()) => {
-            log("\nSuccessful");
+            log(" => SUCCESSFUL");
             reaper.execute_later_in_main_thread(move || execute_next_step(reaper, steps));
         },
         Err(msg) => log_failure(&msg)
@@ -54,7 +54,7 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>) {
 }
 
 fn log_failure(msg: &str) {
-    log(format!("\nFailed: {}", msg));
+    log(format!(" => FAILED\n\n{}", msg));
 }
 
 fn log_heading(name: impl Into<Cow<'static, str>>) {

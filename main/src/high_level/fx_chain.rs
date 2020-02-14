@@ -67,6 +67,20 @@ impl FxChain {
         }
     }
 
+    pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
+        let fx_index = Reaper::instance().medium.track_fx_add_by_name(
+            self.track.get_media_track(), original_fx_name, self.is_input_fx, -1);
+        if fx_index == -1 {
+            return None;
+        }
+        Fx::from_guid_and_index(
+            self.track.clone(),
+            get_fx_guid(&self.track, fx_index as u32, self.is_input_fx).expect("Couldn't get GUID"),
+            fx_index as u32,
+            self.is_input_fx
+        ).into()
+    }
+
     pub fn get_first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
         let fx_index = Reaper::instance().medium.track_fx_add_by_name(
             self.track.get_media_track(), name, self.is_input_fx, 0);
@@ -77,7 +91,7 @@ impl FxChain {
             self.track.clone(),
             get_fx_guid(&self.track, fx_index as u32, self.is_input_fx).expect("Couldn't get GUID"),
             fx_index as u32,
-            self.is_input_fx
+            self.is_input_fx,
         ).into()
     }
 

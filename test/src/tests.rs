@@ -1121,12 +1121,10 @@ pub fn create_test_steps() -> impl Iterator<Item=TestStep> {
     let reaper = Reaper::instance();
     let output_fx_steps = create_fx_steps(
         "Output FX chain",
-        || get_track(0),
         || get_track(0).map(|t| t.get_normal_fx_chain()),
     );
     let input_fx_steps = create_fx_steps(
         "Input FX chain",
-        || get_track(1),
         || get_track(1).map(|t| t.get_input_fx_chain()),
     );
     iter::empty()
@@ -1138,8 +1136,7 @@ pub fn create_test_steps() -> impl Iterator<Item=TestStep> {
 
 fn create_fx_steps(
     prefix: &'static str,
-    get_track: impl Fn() -> Result<Track, &'static str> + 'static,
-    get_fx_chain: impl Fn() -> Result<FxChain, &'static str> + 'static
+    get_fx_chain: impl Fn() -> Result<FxChain, &'static str> + 'static + Copy,
 ) -> impl Iterator<Item=TestStep> {
     let steps = vec!(
         step("Query fx chain", move |reaper, _| {
@@ -1152,13 +1149,58 @@ fn create_fx_steps(
             check_eq!(fx_chain.get_fx_by_index(0), None);
             check_eq!(fx_chain.get_first_fx(), None);
             check_eq!(fx_chain.get_last_fx(), None);
-            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
-            check!(!fx_chain.get_fx_by_guid(&guid).is_available());
-            check!(!fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
+            let non_existing_guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            check!(!fx_chain.get_fx_by_guid(&non_existing_guid).is_available());
+            check!(!fx_chain.get_fx_by_guid_and_index(&non_existing_guid, 0).is_available());
             check_eq!(fx_chain.get_first_fx_by_name(c_str!("bla")), None);
             check_eq!(fx_chain.get_chunk(), None);
             Ok(())
-        })
+        }),
+        step("Add track fx by original name", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_added().take_until(step.finished).subscribe(move |t| {
+                    mock.invoke(t);
+                });
+            });
+            let fx = fx_chain.add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"));
+            // Then
+            check!(fx.is_some());
+            check_eq!(fx_chain.get_fx_count(), 1);
+            check_eq!(fx_chain.get_fxs().count(), 1);
+            check_eq!(fx_chain.get_fx_by_index(0), fx);
+            check_eq!(fx_chain.get_first_fx(), fx);
+            check_eq!(fx_chain.get_last_fx(), fx);
+            let fx = fx.unwrap();
+            let guid = fx.get_guid();
+            check!(guid.is_some());
+            let guid = guid.unwrap();
+            let guid_string = guid.to_string_without_braces();
+            check_eq!(guid_string.len(), 36);
+            check_eq!(guid_string.find(|c| c == '{' || c == '}'), None);
+            check!(fx_chain.get_fx_by_guid(&guid).is_available());
+            check_eq!(fx_chain.get_fx_by_guid(&guid), fx);
+            check!(fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
+            // If this doesn't work, then the index hasn't automatically corrected itself
+            check!(fx_chain.get_fx_by_guid_and_index(&guid, 1).is_available());
+            let non_existing_guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            check!(!fx_chain.get_fx_by_guid_and_index(&non_existing_guid, 0).is_available());
+            check_eq!(fx_chain.get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")), Some(fx.clone()));
+            let chain_chunk = fx_chain.get_chunk();
+            check!(chain_chunk.is_some());
+            let chain_chunk = chain_chunk.unwrap();
+            check!(chain_chunk.starts_with("<FXCHAIN"));
+            check!(chain_chunk.ends_with("\n>"));
+            let first_tag = chain_chunk.find_first_tag(0);
+            check!(first_tag.is_some());
+            let first_tag = first_tag.unwrap();
+            check_eq!(*first_tag.get_content(), *chain_chunk.get_content());
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), fx);
+            Ok(())
+        }),
     );
     steps.into_iter().map(move |s| {
         TestStep {

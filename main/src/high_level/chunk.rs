@@ -213,6 +213,47 @@ impl ChunkRegion {
             .and_then(|pos| self.parse_tag_starting_from(pos + 1))
     }
 
+    // Returns the tag completely from < to >
+    // TODO Why don't we return an invalid chunk region instead of none? That would allow easier chaining and would
+    // be more in line with the other methods.
+    pub fn find_first_tag(&self, relative_search_start_pos: usize) -> Option<ChunkRegion> {
+        if !self.is_valid() {
+            return None;
+        }
+        let content = self.get_content();
+        if content[relative_search_start_pos..].starts_with("<") {
+            self.parse_tag_starting_from(relative_search_start_pos)
+        } else {
+            let tag_opener_with_new_line = "\n<";
+            content[relative_search_start_pos..].find(tag_opener_with_new_line)
+                .and_then(|super_relative_tag_opener_with_new_line_pos| {
+                    let rel_tag_opener_with_new_line_pos = relative_search_start_pos + super_relative_tag_opener_with_new_line_pos;
+                    self.parse_tag_starting_from(rel_tag_opener_with_new_line_pos + 1)
+                })
+        }
+    }
+
+    pub fn starts_with(&self, needle: &str) -> bool {
+        if !self.is_valid() {
+            return false;
+        }
+        self.get_content().starts_with(needle)
+    }
+
+    pub fn ends_with(&self, needle: &str) -> bool {
+        if !self.is_valid() {
+            return false;
+        }
+        self.get_content().ends_with(needle)
+    }
+
+    pub fn contains(&self, needle: &str) -> bool {
+        if !self.is_valid() {
+            return false;
+        }
+        self.get_content().contains(needle)
+    }
+
     // Precondition: isValid
     fn find_followed_by_one_of(&self, needle: &str, one_of: &str, mut rel_start_pos: usize) -> Option<usize> {
         let content = self.get_content();
