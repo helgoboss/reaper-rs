@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage, FxChain};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -15,7 +15,7 @@ use std::ptr::null_mut;
 use wmidi;
 
 pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
-    vec!(
+    let steps_a = vec!(
         step("Create empty project in new tab", |reaper, step| {
             // Given
             let current_project_before = reaper.get_current_project();
@@ -101,7 +101,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Query track by GUID", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
-            let first_track = get_first_track()?;
+            let first_track = get_track(0)?;
             let new_track = project.add_track();
             // When
             let found_track = project.get_track_by_guid(new_track.get_guid());
@@ -125,7 +125,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Query track project", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let track_project = track.get_project();
             // Then
@@ -134,7 +134,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track name", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let track_name = track.get_name();
             // Then
@@ -143,7 +143,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track name", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             // TODO Factor this state pattern out
             let (mock, _) = observe_invocations(|mock| {
@@ -160,7 +160,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track input monitoring", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let mode = track.get_input_monitoring_mode();
             // Then
@@ -169,7 +169,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track input monitoring", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             #[derive(Default)]
             struct State { count: i32, track: Option<Track> }
@@ -187,7 +187,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track recording input", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let input = track.get_recording_input();
             // Then
@@ -198,7 +198,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track recording input MIDI all/all", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_input_changed().take_until(step.finished).subscribe(move |t| {
@@ -222,7 +222,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track recording input MIDI 4/5", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             track.set_recording_input(MidiRecordingInput::from_device_and_channel(MidiInputDevice::new(4), 5));
             // Then
@@ -237,7 +237,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track recording input MIDI 7/all", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             track.set_recording_input(MidiRecordingInput::from_all_channels_of_device(MidiInputDevice::new(7)));
             // Then
@@ -252,7 +252,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track recording input MIDI all/15", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             track.set_recording_input(MidiRecordingInput::from_all_devices_with_channel(15));
             // Then
@@ -267,7 +267,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track volume", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let volume = track.get_volume();
             // Then
@@ -278,7 +278,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track volume", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_volume_changed().take_until(step.finished).subscribe(move |t| {
@@ -297,7 +297,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track pan", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let pan = track.get_pan();
             // Then
@@ -307,7 +307,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Set track pan", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_pan_changed().take_until(step.finished).subscribe(move |t| {
@@ -326,7 +326,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Query track selection state", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let is_selected = track.is_selected();
             // Then
@@ -337,7 +337,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Select track", |reaper, step| {
             // Given
             let project = reaper.get_current_project();
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             let track2 = project.get_track_by_index(2).ok_or("No track at index 2")?;
             // When
             let (mock, _) = observe_invocations(|mock| {
@@ -362,7 +362,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Unselect track", |reaper, step| {
             // Given
             let project = reaper.get_current_project();
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_selected_changed().take_until(step.finished).subscribe(move |t| {
@@ -408,7 +408,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track auto arm mode", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let is_in_auto_arm_mode = track.has_auto_arm_enabled();
             // Then
@@ -417,7 +417,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track arm state", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let is_armed = track.is_armed(true);
             let is_armed_ignoring_auto_arm = track.is_armed(false);
@@ -428,7 +428,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Arm track in normal mode", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
@@ -446,7 +446,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Disarm track in normal mode", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
@@ -464,7 +464,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Enable track auto-arm mode", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             track.enable_auto_arm();
             // Then
@@ -475,7 +475,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Arm track in auto-arm mode", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
@@ -495,7 +495,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Disarm track in auto-arm mode", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
@@ -513,7 +513,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Disable track auto-arm mode", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             track.disable_auto_arm();
             // Then
@@ -524,7 +524,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Switch to normal track mode while armed", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             track.arm(true);
             check!(track.is_armed(true));
             // When
@@ -537,7 +537,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Switch track to auto-arm mode while armed", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             track.unselect();
             // When
             track.enable_auto_arm();
@@ -549,7 +549,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Disarm track in auto-arm mode (ignoring auto-arm)", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_arm_changed().take_until(step.finished).subscribe(move |t| {
@@ -567,7 +567,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Arm track in auto-arm mode (ignoring auto-arm)", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             track.enable_auto_arm();
             check!(track.has_auto_arm_enabled());
             check!(!track.is_armed(true));
@@ -640,7 +640,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track automation mode", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let automation_mode = track.get_automation_mode();
             let global_automation_override = reaper.get_global_automation_override();
@@ -653,7 +653,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query track send count", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let send_count = track.get_send_count();
             // Then
@@ -743,7 +743,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Query action", |reaper, _| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             track.select_exclusively();
             check!(!track.is_muted());
             // When
@@ -770,7 +770,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Invoke action", |reaper, step| {
             // Given
             let action = reaper.get_main_section().get_action_by_command_id(6);
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.action_invoked().take_until(step.finished).subscribe(move |t| {
@@ -802,7 +802,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Unmute track", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_mute_changed().take_until(step.finished).subscribe(move |t| {
@@ -820,7 +820,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Mute track", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_mute_changed().take_until(step.finished).subscribe(move |t| {
@@ -836,7 +836,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Solo track", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_solo_changed().take_until(step.finished).subscribe(move |t| {
@@ -852,7 +852,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Unsolo track", |reaper, step| {
             // Given
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_solo_changed().take_until(step.finished).subscribe(move |t| {
@@ -948,7 +948,9 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check!(!action.is_available());
             Ok(())
         }),
-        // TODO Insert FX tests HERE!
+    );
+    // TODO Insert FX tests HERE!
+    let steps_b = vec!(
         step("Insert track at", |reaper, step| {
             // Given
             let project = reaper.get_current_project();
@@ -993,17 +995,19 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         }),
         step("Stuff MIDI messages", |reaper, step| {
             // Given
-            let msg = wmidi::MidiMessage::NoteOn(wmidi::Channel::Ch1, wmidi::Note::A4, wmidi::U7::try_from(100).unwrap());
+            let msg = wmidi::MidiMessage::NoteOn(
+                wmidi::Channel::Ch1, wmidi::Note::A4, wmidi::U7::try_from(100).unwrap());
             let mut bytes = vec![0u8; msg.bytes_size()];
             msg.copy_to_slice(bytes.as_mut_slice()).unwrap();
             // When
-            let (mock, _) = observe_invocations(|mock| {
-                reaper.midi_message_received()
-                    .take_until(step.finished)
-                    .subscribe(move |evt| {
-                        mock.invoke(evt);
-                    });
-            });
+            reaper.midi_message_received()
+                .take_until(step.finished)
+                .subscribe(move |evt| {
+                    // Right now not invoked because MIDI message arrives async.
+                    // TODO As soon as we have an Observable which is not generic on Observer, introduce
+                    //  steps which return an Observable<TestStepResult, ()> in order to test
+                    //  asynchronously that stuffed MIDI messages arrived via midi_message_received().
+                });
             reaper.stuff_midi_message(
                 StuffMidiMessageTarget::VirtualMidiKeyboard,
                 (bytes[0], bytes[1], bytes[2]),
@@ -1014,7 +1018,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Use undoable", |reaper, step| {
             // Given
             let project = reaper.get_current_project();
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper.track_name_changed().take_until(step.finished).subscribe(move |t| {
@@ -1036,7 +1040,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Undo", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let successful = project.undo();
             let label = project.get_label_of_last_redoable_action();
@@ -1049,7 +1053,7 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
         step("Redo", |reaper, _| {
             // Given
             let project = reaper.get_current_project();
-            let track = get_first_track()?;
+            let track = get_track(0)?;
             // When
             let successful = project.redo();
             let label = project.get_label_of_last_undoable_action();
@@ -1112,9 +1116,40 @@ pub fn create_test_steps() -> impl IntoIterator<Item=TestStep> {
             check_eq!(result, MessageBoxResult::Ok);
             Ok(())
         }),
+    );
+    let reaper = Reaper::instance();
+    let output_fx_steps = create_fx_steps(
+        || get_track(0),
+        || get_track(0).map(|t| t.get_normal_fx_chain()),
+    );
+    let input_fx_steps = create_fx_steps(
+        || get_track(1),
+        || get_track(1).map(|t| t.get_normal_fx_chain()),
+    );
+    vec!(
+        steps_a,
+        output_fx_steps,
+        input_fx_steps,
+        steps_b
+    ).into_iter().flatten()
+}
+
+fn create_fx_steps(
+    get_track: impl Fn() -> Result<Track, &'static str> + 'static,
+    get_fx_chain: impl Fn() -> Result<FxChain, &'static str> + 'static
+) -> Vec<TestStep> {
+    vec!(
+        step("Query fx chain", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            // When
+            // Then
+            check_eq!(fx_chain.get_fx_count(), 0);
+            Ok(())
+        })
     )
 }
 
-fn get_first_track() -> Result<Track, &'static str> {
-    Reaper::instance().get_current_project().get_first_track().ok_or("First track not found")
+fn get_track(index: u32) -> Result<Track, &'static str> {
+    Reaper::instance().get_current_project().get_track_by_index(index).ok_or("Track not found")
 }
