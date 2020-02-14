@@ -47,7 +47,6 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, ste
     };
     match result {
         Ok(()) => {
-            log(" → **SUCCESSFUL**");
             reaper.execute_later_in_main_thread(move || execute_next_step(reaper, steps, step_count));
         },
         Err(msg) => log_failure(&msg)

@@ -185,6 +185,29 @@ impl Reaper {
         }
     }
 
+    pub fn track_fx_get_enabled(&self, track: *mut MediaTrack, fx: i32) -> bool {
+        self.low.TrackFX_GetEnabled.unwrap()(track, fx)
+    }
+
+    pub fn track_fx_get_fx_name(&self, track: *mut MediaTrack, fx: i32, buf_sz: u32) -> Option<CString> {
+        assert!(buf_sz > 0);
+        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+            self.low.TrackFX_GetFXName.unwrap()(track, fx, buffer, max_size)
+        });
+        if !successful || name.as_bytes().len() == 0 {
+            return None;
+        }
+        Some(name)
+    }
+
+    pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: i32, enabled: bool) {
+        self.low.TrackFX_SetEnabled.unwrap()(track, fx, enabled);
+    }
+
+    pub fn track_fx_get_num_params(&self, track: *mut MediaTrack, fx: i32) -> i32 {
+        self.low.TrackFX_GetNumParams.unwrap()(track, fx)
+    }
+
     pub fn get_current_project_in_load_save(&self) -> *mut ReaProject {
         self.low.GetCurrentProjectInLoadSave.unwrap()()
     }

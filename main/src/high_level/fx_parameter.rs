@@ -22,4 +22,8 @@ impl FxParameter {
             self.index as i32
         )
     }
+
+    pub fn is_available(&self) -> bool {
+        self.fx.is_available() && self.index < self.fx.get_parameter_count()
+    }
 }

@@ -322,3 +322,23 @@ pub type TrackFX_AddByName = fn(
     recFX: bool,
     instantiate: ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int;
+
+pub type TrackFX_GetEnabled = fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool;
+
+pub type TrackFX_SetEnabled = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    enabled: bool,
+);
+
+pub type TrackFX_GetNumParams = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int;
+
+pub type TrackFX_GetFXName = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    buf: *mut ::std::os::raw::c_char,
+    buf_sz: ::std::os::raw::c_int,
+) -> bool;

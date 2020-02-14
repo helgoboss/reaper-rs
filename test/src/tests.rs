@@ -14,6 +14,7 @@ use super::mock::observe_invocations;
 use std::ptr::null_mut;
 use wmidi;
 use std::iter;
+use slog::debug;
 
 pub fn create_test_steps() -> impl Iterator<Item=TestStep> {
     let steps_a = vec!(
@@ -1215,9 +1216,31 @@ fn create_fx_steps(
             check_eq!(fx_1.get_name().as_c_str(), c_str!("VST: ReaControlMIDI (Cockos)"));
             let chunk = fx_1.get_chunk();
             check!(chunk.starts_with("BYPASS 0 0 0"));
-            check!(chunk.ends_with("\nWAK 0"));
+//            debug!(reaper.logger, "{:?}", chunk.get_parent_chunk());
+            check!(chunk.ends_with("\nWAK 0 0"));
             let tag_chunk = fx_1.get_tag_chunk();
             check!(tag_chunk.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
+            check!(tag_chunk.ends_with("\n>"));
+            let state_chunk = fx_1.get_state_chunk();
+            check!(!state_chunk.contains("<"));
+            check!(!state_chunk.contains(">"));
+
+//            let fx_1_info = fx_1.get_info();
+//            let stem = fx_1_info.file_name.file_stem().ok_or("No stem")?;
+//            check_eq!(stem, "reacontrolmidi");
+//            check_eq!(fx_1_info.type_expression, "VST");
+//            check_eq!(fx_1_info.sub_type_expression, "VST");
+//            check_eq!(fx_1_info.effect_name, "ReaControlMIDI");
+//            check_eq!(fx_1_info.vendor_name, "Cockos");
+
+            check_eq!(fx_1.get_track(), track);
+            check_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
+            check_eq!(fx_1.get_chain(), fx_chain);
+            check_eq!(fx_1.get_parameter_count(), 17);
+            check_eq!(fx_1.get_parameters().count(), 17);
+            check!(fx_1.get_parameter_by_index(15).is_available());
+            check!(!fx_1.get_parameter_by_index(17).is_available());
+            check!(fx_1.is_enabled());
             Ok(())
         }),
     );

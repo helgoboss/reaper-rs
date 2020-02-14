@@ -55,24 +55,57 @@ impl Fx {
     }
 
     pub fn get_name(&self) -> CString {
-        unimplemented!()
+        self.load_if_necessary_or_complain();
+        Reaper::instance().medium.track_fx_get_fx_name(
+            self.track.get_media_track(), self.get_query_index(), 256).expect("Couldn't get track name")
     }
 
     pub fn get_chunk(&self) -> ChunkRegion {
-        unimplemented!()
+        self.load_if_necessary_or_complain();
+        self.get_chain().get_chunk().unwrap()
+            .find_line_starting_with(self.get_fx_id_line().as_str()).unwrap()
+            .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
+            .move_right_cursor_right_to_start_of_line_beginning_with("WAK 0")
+            .move_right_cursor_right_to_end_of_current_line()
+    }
+
+    fn get_fx_id_line(&self) -> String {
+        get_fx_id_line(&self.get_guid().expect("Couldn't get GUID"))
     }
 
     pub fn get_tag_chunk(&self) -> ChunkRegion {
-        unimplemented!()
+        self.load_if_necessary_or_complain();
+        self.get_chain().get_chunk().unwrap()
+            .find_line_starting_with(self.get_fx_id_line().as_str()).unwrap()
+            .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
+            .find_first_tag(0).unwrap()
     }
 
     pub fn get_state_chunk(&self) -> ChunkRegion {
-        unimplemented!()
+        self.get_tag_chunk()
+            .move_left_cursor_right_to_start_of_next_line()
+            .move_right_cursor_left_to_end_of_previous_line()
     }
 
     // Attention: Currently implemented by parsing chunk
     pub fn get_info(&self) -> FxInfo {
-        unimplemented!()
+        FxInfo::new(&self.get_tag_chunk().get_first_line().get_content())
+    }
+
+    pub fn get_parameter_count(&self) -> u32 {
+        self.load_if_necessary_or_complain();
+        Reaper::instance().medium.track_fx_get_num_params(self.track.get_media_track(), self.get_query_index()) as u32
+    }
+
+    pub fn is_enabled(&self) -> bool {
+        Reaper::instance().medium.track_fx_get_enabled(self.track.get_media_track(), self.get_query_index())
+    }
+
+    pub fn get_parameters(&self) -> impl Iterator<Item=FxParameter> + '_ {
+        self.load_if_necessary_or_complain();
+        (0..self.get_parameter_count()).map(move |i| {
+            self.get_parameter_by_index(i)
+        })
     }
 
     pub fn get_guid(&self) -> Option<Guid> {
@@ -200,4 +233,14 @@ pub struct FxInfo {
     pub vendor_name: String,
     /// e.g. reasynth.dll or phaser
     pub file_name: PathBuf,
+}
+
+impl FxInfo {
+    pub fn new(first_line_of_tag_chunk: &str) -> FxInfo {
+        unimplemented!()
+    }
+}
+
+fn get_fx_id_line(guid: &Guid) -> String {
+    format!("FXID {}", guid.to_string_with_braces())
 }

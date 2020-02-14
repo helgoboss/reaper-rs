@@ -158,6 +158,41 @@ impl ChunkRegion {
         self.move_right_cursor_right_to_start_of("\n")
     }
 
+    pub fn move_left_cursor_right_to_start_of_next_line(&self) -> ChunkRegion {
+        self.move_left_cursor_right_to_start_of_line_beginning_with("")
+    }
+
+    pub fn move_left_cursor_right_to_start_of_line_beginning_with(&self, needle: &str) -> ChunkRegion {
+        self.move_left_cursor_right_to_start_of((String::from("\n") + needle).as_str())
+            .move_left_cursor_right_by(1)
+    }
+
+    pub fn move_left_cursor_right_to_start_of(&self, needle: &str) -> ChunkRegion {
+        if !self.is_valid() {
+            return self.clone();
+        }
+        let rel_pos = match self.get_content().find(needle) {
+            None => return self.create_invalid_region(),
+            Some(p) => p
+        };
+        self.move_left_cursor_right_by(rel_pos)
+    }
+
+    pub fn move_right_cursor_left_to_start_of(&self, needle: &str) -> ChunkRegion {
+        if !self.is_valid() {
+            return self.clone();
+        }
+        let rel_start_pos_of_needle = match self.get_content().rfind(needle) {
+            None => return self.create_invalid_region(),
+            Some(p) => p
+        };
+        self.create_region_from_relative_start_pos(0, rel_start_pos_of_needle)
+    }
+
+    pub fn move_right_cursor_left_to_end_of_previous_line(&self) -> ChunkRegion {
+        self.move_right_cursor_left_to_start_of("\n")
+    }
+
     pub fn move_right_cursor_right_to_start_of(&self, needle: &str) -> ChunkRegion {
         if !self.is_valid() {
             return self.clone();
@@ -171,6 +206,53 @@ impl ChunkRegion {
             None => self.create_invalid_region(),
             Some(rel_pos) => self.move_right_cursor_right_by(rel_pos)
         }
+    }
+
+    pub fn move_left_cursor_left_to_start_of_line_beginning_with(&self, needle: &str) -> ChunkRegion {
+        self.move_left_cursor_left_to_start_of((String::from("\n") + needle).as_str())
+            .move_left_cursor_right_by(1)
+    }
+
+    pub fn move_left_cursor_right_by(&self, count: usize) -> ChunkRegion {
+        if !self.is_valid() {
+            return self.clone();
+        }
+        self.move_left_cursor_to(self.start_pos + count)
+    }
+
+    pub fn move_left_cursor_to(&self, start_pos: usize) -> ChunkRegion {
+        if !self.is_valid() {
+            return self.clone();
+        }
+        let new_length = self.length + self.start_pos - start_pos;
+        ChunkRegion::new(self.parent_chunk.clone(), start_pos, new_length)
+    }
+
+    pub fn move_left_cursor_left_to_start_of(&self, needle: &str) -> ChunkRegion {
+        if !self.is_valid() {
+            return self.clone();
+        }
+        let before = self.get_before();
+        if !before.is_valid() {
+            return self.create_invalid_region();
+        }
+        let start_pos_of_needle = match before.get_content().rfind(needle) {
+            None => return self.create_invalid_region(),
+            Some(p) => p
+        };
+        self.move_left_cursor_to(start_pos_of_needle)
+    }
+
+    pub fn move_right_cursor_right_to_start_of_line_beginning_with(&self, needle: &str) -> ChunkRegion {
+        self.move_right_cursor_right_to_start_of((String::from("\n") + needle).as_str())
+            .move_right_cursor_right_by(1)
+    }
+
+    pub fn get_before(&self) -> ChunkRegion {
+        if !self.is_valid() {
+            return self.clone();
+        }
+        ChunkRegion::new(self.parent_chunk.clone(), 0, self.start_pos)
     }
 
     pub fn get_after(&self) -> ChunkRegion {

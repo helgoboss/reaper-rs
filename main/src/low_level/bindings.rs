@@ -1217,11 +1217,34 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut TrackFX_GetEnabled: ::std::option::Option<
+            unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
+        >;
+    }
+    extern "C" {
         pub static mut TrackFX_GetFXGUID: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
                 fx: ::std::os::raw::c_int,
             ) -> *mut root::GUID,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_GetFXName: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                buf: *mut ::std::os::raw::c_char,
+                buf_sz: ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_GetNumParams: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
@@ -1236,6 +1259,15 @@ pub mod root {
     extern "C" {
         pub static mut TrackFX_GetRecCount: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_SetEnabled: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                enabled: bool,
+            ),
         >;
     }
     extern "C" {
