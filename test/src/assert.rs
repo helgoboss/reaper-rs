@@ -13,52 +13,70 @@ macro_rules! check {
 
 macro_rules! check_eq {
     ($actual:expr, $expected:expr) => {
-        {
-            let actual = &$actual;
-            let expected = &$expected;
-            let result = if (actual == expected) {
-                Ok(())
-            } else {
-                let actual_expr = stringify!($actual);
-                let expected_expr = stringify!($expected);
-                Err(
-                    format!("\
-`{actual_expr}`:
+        match (&$actual, &$expected) {
+            (actual_val, expected_val) => {
+                let result = if *actual_val == *expected_val {
+                    Ok(())
+                } else {
+                    let actual_expr = stringify!($actual);
+                    let expected_expr = stringify!($expected);
+                    Err(
+                        format!("\
+Expression `{actual_expr}`
 
-```
-{actual:#?}
+```rust
+{actual_val:#?}
 ```
 
-was expected to be `{expected_expr}`:
+was expected to be equal to expression `{expected_expr}`
 
-```
-{expected:#?}
+```rust
+{expected_val:#?}
 ```",
-                        actual_expr = actual_expr,
-                        expected_expr = expected_expr,
-                        expected = expected,
-                        actual = actual
+                            actual_expr = actual_expr,
+                            expected_expr = expected_expr,
+                            expected_val = &*expected_val,
+                            actual_val = &*actual_val
+                        )
                     )
-                )
-            };
-            result?
+                };
+                result?
+            }
         }
     }
 }
 
 macro_rules! check_ne {
-    ($actual:expr, $unexpected:expr) => {
-        {
-            let actual = $actual;
-            let unexpected = $unexpected;
-            let result = if (actual == unexpected) {
-                let actual_expr = stringify!($actual);
-                let unexpected_expr = stringify!($unexpected);
-                Err(format!("[{}] was expected to not be [{}] but it is ({:?})", actual_expr, unexpected_expr, actual))
-            } else {
-                Ok(())
-            };
-            result?
+    ($actual:expr, $expected:expr) => {
+        match (&$actual, &$expected) {
+            (actual_val, expected_val) => {
+                let result = if *actual_val != *expected_val {
+                    Ok(())
+                } else {
+                    let actual_expr = stringify!($actual);
+                    let expected_expr = stringify!($expected);
+                    Err(
+                        format!("\
+Expression `{actual_expr}`
+
+```rust
+{actual_val:#?}
+```
+
+was expected to not be equal to expression `{expected_expr}`
+
+```rust
+{expected_val:#?}
+```",
+                            actual_expr = actual_expr,
+                            expected_expr = expected_expr,
+                            expected_val = &*expected_val,
+                            actual_val = &*actual_val
+                        )
+                    )
+                };
+                result?
+            }
         }
     }
 }

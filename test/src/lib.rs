@@ -21,20 +21,21 @@ use rxrust::prelude::*;
 pub fn execute_integration_test() {
     let reaper = Reaper::instance();
     reaper.clear_console();
-    log("# Testing reaper-rs");
+    log("# Testing reaper-rs\n");
     let mut steps = VecDeque::from_iter(create_test_steps());
-    execute_next_step(reaper, steps);
+    let step_count = steps.len();
+    execute_next_step(reaper, steps, step_count);
 }
 
-fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>) {
+fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, step_count: usize) {
     let step = match steps.pop_front() {
         Some(step) => step,
         None => {
-            log("\n\nIntegration test was successful");
+            log("\n\n**Integration test was successful**");
             return;
         }
     };
-    log_heading(step.name);
+    log_step(step_count - steps.len() - 1, step.name);
     let result = {
         let mut finished = Subject::local();
         let context = TestStepContext {
@@ -46,20 +47,19 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>) {
     };
     match result {
         Ok(()) => {
-            log(" => SUCCESSFUL");
-            reaper.execute_later_in_main_thread(move || execute_next_step(reaper, steps));
+            log(" → **SUCCESSFUL**");
+            reaper.execute_later_in_main_thread(move || execute_next_step(reaper, steps, step_count));
         },
         Err(msg) => log_failure(&msg)
     }
 }
 
 fn log_failure(msg: &str) {
-    log(format!(" => FAILED\n\n{}", msg));
+    log(format!(" → **FAILED**\n\n{}", msg));
 }
 
-fn log_heading(name: impl Into<Cow<'static, str>>) {
-    log("\n\n## ");
-    log(name);
+fn log_step(step_index: usize, name: impl Into<Cow<'static, str>>) {
+    log(format!("\n{}. {}", step_index + 1, name.into()));
 }
 
 fn log(msg: impl Into<Cow<'static, str>>) {

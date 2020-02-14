@@ -1,9 +1,11 @@
 use crate::high_level::guid::Guid;
-use crate::high_level::{Track, Reaper};
+use crate::high_level::{Track, Reaper, ChunkRegion};
 use std::cell::Cell;
 use c_str_macro::c_str;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::fx_chain::FxChain;
+use std::ffi::CString;
+use std::path::PathBuf;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -50,6 +52,27 @@ impl Fx {
             is_input_fx,
             index: Cell::new(Some(index)),
         }
+    }
+
+    pub fn get_name(&self) -> CString {
+        unimplemented!()
+    }
+
+    pub fn get_chunk(&self) -> ChunkRegion {
+        unimplemented!()
+    }
+
+    pub fn get_tag_chunk(&self) -> ChunkRegion {
+        unimplemented!()
+    }
+
+    pub fn get_state_chunk(&self) -> ChunkRegion {
+        unimplemented!()
+    }
+
+    // Attention: Currently implemented by parsing chunk
+    pub fn get_info(&self) -> FxInfo {
+        unimplemented!()
     }
 
     pub fn get_guid(&self) -> Option<Guid> {
@@ -164,4 +187,17 @@ pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
 pub fn get_fx_query_index(index: u32, is_input_fx: bool) -> i32 {
     let addend: i32 = if is_input_fx { 0x1000000 } else { 0 };
     addend + (index as i32)
+}
+
+pub struct FxInfo {
+    /// e.g. ReaSynth, currently empty if JS
+    pub effect_name: String,
+    /// e.g. VST or JS
+    pub type_expression: String,
+    /// e.g. VSTi, currently empty if JS
+    pub sub_type_expression: String,
+    /// e.g. Cockos, currently empty if JS
+    pub vendor_name: String,
+    /// e.g. reasynth.dll or phaser
+    pub file_name: PathBuf,
 }
