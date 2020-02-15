@@ -216,6 +216,95 @@ impl Reaper {
         self.low.GetCurrentProjectInLoadSave.unwrap()()
     }
 
+    pub fn track_fx_get_param_name(&self, track: *mut MediaTrack, fx: i32, param: i32,
+            buf_sz: u32) -> Option<CString> {
+        assert!(buf_sz > 0);
+        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+            self.low.TrackFX_GetParamName.unwrap()(track, fx, param, buffer, max_size)
+        });
+        if !successful || name.as_bytes().len() == 0 {
+            return None;
+        }
+        Some(name)
+    }
+
+    pub fn track_fx_get_formatted_param_value(&self, track: *mut MediaTrack, fx: i32, param: i32,
+                                              buf_sz: u32) -> Option<CString> {
+        assert!(buf_sz > 0);
+        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+            self.low.TrackFX_GetFormattedParamValue.unwrap()(track, fx, param, buffer, max_size)
+        });
+        if !successful || name.as_bytes().len() == 0 {
+            return None;
+        }
+        Some(name)
+
+    }
+
+    pub fn track_fx_format_param_value_normalized(&self, track: *mut MediaTrack, fx: i32, param: i32,
+            value: f64, buf_sz: u32) -> Option<CString> {
+        assert!(buf_sz > 0);
+        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+            self.low.TrackFX_FormatParamValueNormalized.unwrap()(track, fx, param, value, buffer, max_size)
+        });
+        if !successful || name.as_bytes().len() == 0 {
+            return None;
+        }
+        Some(name)
+    }
+
+    pub fn track_fx_set_param_normalized(&self, track: *mut MediaTrack, fx: i32, param: i32,
+            value: f64) -> bool {
+        self.low.TrackFX_SetParamNormalized.unwrap()(track, fx, param, value)
+    }
+
+    pub fn track_fx_get_parameter_step_sizes(&self, track: *mut MediaTrack, fx: i32,
+                                             param: i32) -> Option<GetParameterStepSizesResult> {
+        let mut step = -1.0;
+        let mut small_step = -1.0;
+        let mut large_step = -1.0;
+        let mut is_toggle = false;
+        let successful = self.low.TrackFX_GetParameterStepSizes.unwrap()(
+            track,
+            fx,
+            param,
+            &mut step as *mut f64,
+            &mut small_step as *mut f64,
+            &mut large_step as *mut f64,
+            &mut is_toggle as *mut bool,
+        );
+        if !successful {
+            return None;
+        }
+        GetParameterStepSizesResult {
+            step: complain_if_minus_one(step),
+            small_step: complain_if_minus_one(small_step),
+            large_step: complain_if_minus_one(large_step),
+            is_toggle
+        }.into()
+    }
+
+    pub fn track_fx_get_param_ex(&self, track: *mut MediaTrack, fx: i32, param: i32) -> GetParamExResult {
+        let mut min_val = -1.0;
+        let mut max_val = -1.0;
+        let mut mid_val = -1.0;
+        let value = self.low.TrackFX_GetParamEx.unwrap()(
+            track,
+            fx,
+            param,
+            &mut min_val as *mut f64,
+            &mut max_val as *mut f64,
+            &mut mid_val as *mut f64,
+        );
+        GetParamExResult {
+            value: complain_if_minus_one(value),
+            min_val: complain_if_minus_one(min_val),
+            mid_val: complain_if_minus_one(mid_val),
+            max_val: complain_if_minus_one(max_val)
+        }.into()
+    }
+
+
     pub fn undo_begin_block_2(&self, proj: *mut ReaProject) {
         self.low.Undo_BeginBlock2.unwrap()(proj);
     }
@@ -362,11 +451,10 @@ impl Reaper {
         let mut volume = 0.0;
         let mut pan = 0.0;
         let successful = self.low.GetTrackUIVolPan.unwrap()(track, &mut volume as *mut f64, &mut pan as *mut f64);
-        if successful {
-            Some((volume, pan))
-        } else {
-            None
+        if !successful {
+            return None;
         }
+        Some((volume, pan))
     }
 
     pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> i32 {
@@ -504,4 +592,28 @@ impl Reaper {
     pub fn convenient_get_media_track_info_guid(&self, tr: *mut MediaTrack, parmname: &CStr) -> *mut GUID {
         self.get_set_media_track_info(tr, parmname, null_mut()) as *mut GUID
     }
+}
+
+// TODO See what's really an option and what not
+pub struct GetParameterStepSizesResult {
+    pub step: f64,
+    pub small_step: f64,
+    pub large_step: f64,
+    pub is_toggle: bool,
+}
+
+// TODO See what's really an option and what not
+pub struct GetParamExResult {
+    pub value: f64,
+    pub min_val: f64,
+    pub mid_val: f64,
+    pub max_val: f64,
+}
+
+// TODO Panic for now, just to detect which situations can actually occur
+fn complain_if_minus_one(value: f64) -> f64 {
+    if value == -1.0 {
+        panic!("Out parameter was not set by REAPER")
+    }
+    value
 }

@@ -344,3 +344,54 @@ pub type TrackFX_GetFXName = fn(
 ) -> bool;
 
 pub type TrackFX_GetInstrument = fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int;
+
+pub type TrackFX_GetParamName = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    param: ::std::os::raw::c_int,
+    buf: *mut ::std::os::raw::c_char,
+    buf_sz: ::std::os::raw::c_int,
+) -> bool;
+
+pub type TrackFX_GetFormattedParamValue = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    param: ::std::os::raw::c_int,
+    buf: *mut ::std::os::raw::c_char,
+    buf_sz: ::std::os::raw::c_int,
+) -> bool;
+
+pub type TrackFX_FormatParamValueNormalized = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    param: ::std::os::raw::c_int,
+    value: f64,
+    buf: *mut ::std::os::raw::c_char,
+    buf_sz: ::std::os::raw::c_int,
+) -> bool;
+
+pub type TrackFX_SetParamNormalized = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    param: ::std::os::raw::c_int,
+    value: f64,
+) -> bool;
+
+pub type TrackFX_GetParameterStepSizes = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    param: ::std::os::raw::c_int,
+    stepOut: *mut f64,
+    smallstepOut: *mut f64,
+    largestepOut: *mut f64,
+    istoggleOut: *mut bool,
+) -> bool;
+
+pub type TrackFX_GetParamEx = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    param: ::std::os::raw::c_int,
+    minvalOut: *mut f64,
+    maxvalOut: *mut f64,
+    midvalOut: *mut f64,
+) -> f64;

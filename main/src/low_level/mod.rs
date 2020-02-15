@@ -240,7 +240,13 @@ gen_reaper_struct![
     TrackFX_SetEnabled,
     TrackFX_GetNumParams,
     TrackFX_GetFXName,
-    TrackFX_GetInstrument
+    TrackFX_GetInstrument,
+    TrackFX_GetParamName,
+    TrackFX_GetFormattedParamValue,
+    TrackFX_FormatParamValueNormalized,
+    TrackFX_SetParamNormalized,
+    TrackFX_GetParameterStepSizes,
+    TrackFX_GetParamEx
 ];
 
 #[macro_export]

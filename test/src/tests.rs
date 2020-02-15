@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage, FxChain};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage, FxChain, FxParameterCharacter};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -1332,6 +1332,27 @@ fn create_fx_steps(
                     .ok_or("Couldn't find instrument FX")?;
                 check_eq!(first_instrument_fx.get_index(), 1);
             }
+            Ok(())
+        }),
+        step("Check fx parameter", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let track = fx_chain.get_track();
+            let fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find first fx")?;
+            // When
+            let p = fx.get_parameter_by_index(5);
+            // Then
+            check!(p.is_available());
+            check_eq!(p.get_name().as_c_str(), c_str!("Pitch Wheel"));
+            check_eq!(p.get_index(), 5);
+            check_eq!(p.get_character(), FxParameterCharacter::Continuous);
+            check_eq!(p.clone(), p);
+            check_eq!(p.get_formatted_value().as_c_str(), c_str!("0"));
+            check_eq!(p.get_normalized_value(), 0.5);
+            check_eq!(p.get_reaper_value(), 0.5);
+            check_eq!(p.format_normalized_value(p.get_normalized_value()).as_c_str(), c_str!("0"));
+            check_eq!(p.get_fx(), fx);
+            check!(p.get_step_size().is_none());
             Ok(())
         }),
     );

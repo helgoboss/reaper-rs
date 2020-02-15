@@ -1212,6 +1212,18 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut TrackFX_FormatParamValueNormalized: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                param: ::std::os::raw::c_int,
+                value: f64,
+                buf: *mut ::std::os::raw::c_char,
+                buf_sz: ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
         pub static mut TrackFX_GetCount: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;
@@ -1219,6 +1231,17 @@ pub mod root {
     extern "C" {
         pub static mut TrackFX_GetEnabled: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_GetFormattedParamValue: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                param: ::std::os::raw::c_int,
+                buf: *mut ::std::os::raw::c_char,
+                buf_sz: ::std::os::raw::c_int,
+            ) -> bool,
         >;
     }
     extern "C" {
@@ -1253,6 +1276,42 @@ pub mod root {
         >;
     }
     extern "C" {
+        pub static mut TrackFX_GetParameterStepSizes: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                param: ::std::os::raw::c_int,
+                stepOut: *mut f64,
+                smallstepOut: *mut f64,
+                largestepOut: *mut f64,
+                istoggleOut: *mut bool,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_GetParamEx: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                param: ::std::os::raw::c_int,
+                minvalOut: *mut f64,
+                maxvalOut: *mut f64,
+                midvalOut: *mut f64,
+            ) -> f64,
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_GetParamName: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                param: ::std::os::raw::c_int,
+                buf: *mut ::std::os::raw::c_char,
+                buf_sz: ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
         pub static mut TrackFX_GetParamNormalized: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1273,6 +1332,16 @@ pub mod root {
                 fx: ::std::os::raw::c_int,
                 enabled: bool,
             ),
+        >;
+    }
+    extern "C" {
+        pub static mut TrackFX_SetParamNormalized: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                param: ::std::os::raw::c_int,
+                value: f64,
+            ) -> bool,
         >;
     }
     extern "C" {
