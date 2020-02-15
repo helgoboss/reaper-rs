@@ -66,9 +66,6 @@ pub use chunk::*;
 mod action_character;
 pub use action_character::*;
 
-mod parameter_type;
-pub use parameter_type::*;
-
 mod undo_block;
 pub use undo_block::*;
 

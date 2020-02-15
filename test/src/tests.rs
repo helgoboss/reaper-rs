@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, ParameterType, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage, FxChain, FxParameterCharacter};
+use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage, FxChain, FxParameterCharacter};
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
@@ -759,7 +759,6 @@ pub fn create_test_steps() -> impl Iterator<Item=TestStep> {
             check_eq!(normal_action.get_character(), ActionCharacter::Trigger);
             check!(!toggle_action.is_on());
             check!(!normal_action.is_on());
-            check_eq!(toggle_action.get_parameter_type(), ParameterType::Action);
             check_eq!(toggle_action.clone(), toggle_action);
             check_eq!(toggle_action.get_command_id(), 6);
             check!(toggle_action.get_command_name().is_none());

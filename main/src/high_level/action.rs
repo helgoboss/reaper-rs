@@ -1,5 +1,5 @@
 use std::ffi::{CString, CStr};
-use crate::high_level::{Section, Project, Reaper, ActionCharacter, ParameterType};
+use crate::high_level::{Section, Project, Reaper, ActionCharacter};
 use std::borrow::Cow;
 use std::cell::{RefCell, Ref};
 use c_str_macro::c_str;
@@ -105,11 +105,6 @@ impl Action {
     pub fn is_on(&self) -> bool {
         let rd = self.load_if_necessary_or_complain();
         Reaper::instance().medium.get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id as i32) == 1
-    }
-
-    // TODO "ParameterType" is not a good name for that
-    pub fn get_parameter_type(&self) -> ParameterType {
-        ParameterType::Action
     }
 
     pub fn get_command_id(&self) -> i64 {
