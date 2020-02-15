@@ -550,6 +550,7 @@ impl Reaper {
         self.subjects.midi_message_received.borrow().fork()
     }
 
+    // Delivers a GUID-based track (to still be able to identify it even it is deleted)
     pub fn track_removed(&self) -> EventStream<Track> {
         self.subjects.track_removed.borrow().fork()
     }
