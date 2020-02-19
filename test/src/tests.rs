@@ -980,8 +980,9 @@ pub fn create_test_steps() -> impl Iterator<Item=TestStep> {
             let devs = reaper.get_midi_input_devices();
             let dev_0 = reaper.get_midi_input_device_by_id(0);
             // Then
-            check_ne!(devs.count(), 0);
-            check!(dev_0.is_available());
+            // TODO There might be no MIDI input devices
+//            check_ne!(devs.count(), 0);
+//            check!(dev_0.is_available());
             Ok(())
         }),
         step("Query MIDI output devices", |reaper, _| {

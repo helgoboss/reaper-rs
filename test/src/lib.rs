@@ -37,9 +37,9 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, ste
     };
     log_step(step_count - steps.len() - 1, step.name);
     let result = {
-        let mut finished = Subject::local();
+        let mut finished = LocalSubject::new();
         let context = TestStepContext {
-            finished: finished.fork()
+            finished: finished.clone()
         };
         let result = (step.operation)(reaper, context);
         finished.complete();

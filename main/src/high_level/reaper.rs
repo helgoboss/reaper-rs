@@ -19,7 +19,6 @@ use rxrust::subscriber::Subscriber;
 use crate::high_level::helper_control_surface::HelperControlSurface;
 use rxrust::subscription::SubscriptionLike;
 use rxrust::prelude::*;
-use rxrust::subject::{LocalSubjectObserver, SubjectValue};
 use std::rc::Rc;
 use std::sync::mpsc::{Sender, Receiver};
 use slog::Level::Debug;
@@ -229,7 +228,7 @@ pub(super) struct EventStreamSubjects {
 impl EventStreamSubjects {
     fn new() -> EventStreamSubjects {
         fn default<T>() -> EventStreamSubject<T> {
-            RefCell::new(Subject::local())
+            RefCell::new(LocalSubject::new())
         }
         EventStreamSubjects {
             project_switched: default(),
@@ -283,7 +282,7 @@ pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
 }
 
 type EventStreamSubject<T> = RefCell<EventStream<T>>;
-type EventStream<T> = LocalSubject<'static, SubjectValue<T>, SubjectValue<()>>;
+type EventStream<T> = LocalSubject<'static, T, ()>;
 
 impl Drop for Reaper {
     fn drop(&mut self) {
@@ -539,81 +538,81 @@ impl Reaper {
     }
 
     pub fn project_switched(&self) -> EventStream<Project> {
-        self.subjects.project_switched.borrow().fork()
+        self.subjects.project_switched.borrow().clone()
     }
 
     pub fn track_added(&self) -> EventStream<Track> {
-        self.subjects.track_added.borrow().fork()
+        self.subjects.track_added.borrow().clone()
     }
 
     pub fn midi_message_received(&self) -> EventStream<impl MidiEvent + Clone> {
-        self.subjects.midi_message_received.borrow().fork()
+        self.subjects.midi_message_received.borrow().clone()
     }
 
     // Delivers a GUID-based track (to still be able to identify it even it is deleted)
     pub fn track_removed(&self) -> EventStream<Track> {
-        self.subjects.track_removed.borrow().fork()
+        self.subjects.track_removed.borrow().clone()
     }
 
     pub fn track_name_changed(&self) -> EventStream<Track> {
-        self.subjects.track_name_changed.borrow().fork()
+        self.subjects.track_name_changed.borrow().clone()
     }
 
     // TODO bool is not useful here
     pub fn master_tempo_changed(&self) -> EventStream<bool> {
-        self.subjects.master_tempo_changed.borrow().fork()
+        self.subjects.master_tempo_changed.borrow().clone()
     }
 
     pub fn fx_added(&self) -> EventStream<Fx> {
-        self.subjects.fx_added.borrow().fork()
+        self.subjects.fx_added.borrow().clone()
     }
 
     pub fn fx_enabled_changed(&self) -> EventStream<Fx> {
-        self.subjects.fx_enabled_changed.borrow().fork()
+        self.subjects.fx_enabled_changed.borrow().clone()
     }
 
     pub fn track_input_monitoring_changed(&self) -> EventStream<Track> {
-        self.subjects.track_input_monitoring_changed.borrow().fork()
+        self.subjects.track_input_monitoring_changed.borrow().clone()
     }
 
     pub fn track_input_changed(&self) -> EventStream<Track> {
-        self.subjects.track_input_changed.borrow().fork()
+        self.subjects.track_input_changed.borrow().clone()
     }
 
     pub fn track_volume_changed(&self) -> EventStream<Track> {
-        self.subjects.track_volume_changed.borrow().fork()
+        self.subjects.track_volume_changed.borrow().clone()
     }
 
     pub fn track_pan_changed(&self) -> EventStream<Track> {
-        self.subjects.track_pan_changed.borrow().fork()
+        self.subjects.track_pan_changed.borrow().clone()
     }
 
     pub fn track_selected_changed(&self) -> EventStream<Track> {
-        self.subjects.track_selected_changed.borrow().fork()
+        self.subjects.track_selected_changed.borrow().clone()
     }
 
     pub fn track_mute_changed(&self) -> EventStream<Track> {
-        self.subjects.track_mute_changed.borrow().fork()
+        self.subjects.track_mute_changed.borrow().clone()
     }
 
     pub fn track_solo_changed(&self) -> EventStream<Track> {
-        self.subjects.track_solo_changed.borrow().fork()
+        self.subjects.track_solo_changed.borrow().clone()
     }
 
     pub fn track_arm_changed(&self) -> EventStream<Track> {
-        self.subjects.track_arm_changed.borrow().fork()
+        self.subjects.track_arm_changed.borrow().clone()
     }
 
     pub fn track_send_volume_changed(&self) -> EventStream<TrackSend> {
-        self.subjects.track_send_volume_changed.borrow().fork()
+        self.subjects.track_send_volume_changed.borrow().clone()
     }
 
     pub fn track_send_pan_changed(&self) -> EventStream<TrackSend> {
-        self.subjects.track_send_pan_changed.borrow().fork()
+        self.subjects.track_send_pan_changed.borrow().clone()
     }
 
     pub fn action_invoked(&self) -> EventStream<Rc<Action>> {
-        self.subjects.action_invoked.borrow().fork()
+        self.subjects.action_invoked.borrow().clone()
     }
 
     pub fn get_current_project(&self) -> Project {

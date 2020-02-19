@@ -1,10 +1,9 @@
 use std::borrow::Cow;
 use reaper_rs::high_level::Reaper;
 use std::error::Error;
-use rxrust::subject::SubjectValue;
 use rxrust::prelude::*;
 
-type TestStepFinished = LocalSubject<'static, SubjectValue<()>, SubjectValue<()>>;
+type TestStepFinished = LocalSubject<'static, (), ()>;
 pub struct TestStepContext {
     pub finished: TestStepFinished
 }
