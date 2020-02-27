@@ -75,7 +75,7 @@ Thank you for your support!
 --- cut ---
 Message: {panic_message}
 
-{backtrace:?}\
+{backtrace}\
 --- cut ---
 
 ",
