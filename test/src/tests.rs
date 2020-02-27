@@ -5,7 +5,6 @@ use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
-use rxrust::ops::TakeUntil;
 use std::ops::{Deref, DerefMut};
 use c_str_macro::c_str;
 use std::ffi::{CStr, CString};

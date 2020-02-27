@@ -536,81 +536,81 @@ impl Reaper {
         self.get_current_project()
     }
 
-    pub fn project_switched(&self) -> impl Observable<'static, Err=(), Item=Project> {
+    pub fn project_switched(&self) -> impl LocalObservable<'static, Err=(), Item=Project> {
         self.subjects.project_switched.borrow().clone()
     }
 
-    pub fn track_added(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_added(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_added.borrow().clone()
     }
 
-    pub fn midi_message_received(&self) -> impl Observable<'static, Err=(), Item=impl MidiEvent + Clone> {
+    pub fn midi_message_received(&self) -> impl LocalObservable<'static, Err=(), Item=impl MidiEvent + Clone> {
         self.subjects.midi_message_received.borrow().clone()
     }
 
     // Delivers a GUID-based track (to still be able to identify it even it is deleted)
-    pub fn track_removed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_removed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_removed.borrow().clone()
     }
 
-    pub fn track_name_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_name_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_name_changed.borrow().clone()
     }
 
     // TODO bool is not useful here
-    pub fn master_tempo_changed(&self) -> impl Observable<'static, Err=(), Item=bool> {
+    pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err=(), Item=bool> {
         self.subjects.master_tempo_changed.borrow().clone()
     }
 
-    pub fn fx_added(&self) -> impl Observable<'static, Err=(), Item=Fx> {
+    pub fn fx_added(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
         self.subjects.fx_added.borrow().clone()
     }
 
-    pub fn fx_enabled_changed(&self) -> impl Observable<'static, Err=(), Item=Fx> {
+    pub fn fx_enabled_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
         self.subjects.fx_enabled_changed.borrow().clone()
     }
 
-    pub fn track_input_monitoring_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_input_monitoring_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_input_monitoring_changed.borrow().clone()
     }
 
-    pub fn track_input_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_input_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_input_changed.borrow().clone()
     }
 
-    pub fn track_volume_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_volume_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_volume_changed.borrow().clone()
     }
 
-    pub fn track_pan_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_pan_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_pan_changed.borrow().clone()
     }
 
-    pub fn track_selected_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_selected_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_selected_changed.borrow().clone()
     }
 
-    pub fn track_mute_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_mute_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_mute_changed.borrow().clone()
     }
 
-    pub fn track_solo_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_solo_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_solo_changed.borrow().clone()
     }
 
-    pub fn track_arm_changed(&self) -> impl Observable<'static, Err=(), Item=Track> {
+    pub fn track_arm_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_arm_changed.borrow().clone()
     }
 
-    pub fn track_send_volume_changed(&self) -> impl Observable<'static, Err=(), Item=TrackSend> {
+    pub fn track_send_volume_changed(&self) -> impl LocalObservable<'static, Err=(), Item=TrackSend> {
         self.subjects.track_send_volume_changed.borrow().clone()
     }
 
-    pub fn track_send_pan_changed(&self) -> impl Observable<'static, Err=(), Item=TrackSend> {
+    pub fn track_send_pan_changed(&self) -> impl LocalObservable<'static, Err=(), Item=TrackSend> {
         self.subjects.track_send_pan_changed.borrow().clone()
     }
 
-    pub fn action_invoked(&self) -> impl Observable<'static, Err=(), Item=Rc<Action>> {
+    pub fn action_invoked(&self) -> impl LocalObservable<'static, Err=(), Item=Rc<Action>> {
         self.subjects.action_invoked.borrow().clone()
     }
 
