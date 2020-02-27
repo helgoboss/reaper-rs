@@ -23,6 +23,11 @@ impl FxParameter {
         self.get_reaper_value()
     }
 
+    pub fn set_normalized_value(&self, normalized_value: f64) {
+        Reaper::instance().medium.track_fx_set_param_normalized(
+            self.get_media_track(), self.fx.get_query_index(), self.index as i32, normalized_value);
+    }
+
     pub fn get_reaper_value(&self) -> f64 {
         Reaper::instance().medium.track_fx_get_param_normalized(
             self.fx.get_track().get_media_track(),

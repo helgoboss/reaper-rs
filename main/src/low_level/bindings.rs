@@ -32,76 +32,13 @@ pub mod root {
     pub const CSURF_EXT_SETFXPARAM_RECFX: u32 = 65560;
     pub const CSURF_EXT_SUPPORTS_EXTENDED_TOUCH: u32 = 524289;
     pub type ReaSample = f64;
-    pub mod std {
-        #[allow(unused_imports)]
-        use self::super::super::root;
-    }
-    pub mod __gnu_cxx {
-        #[allow(unused_imports)]
-        use self::super::super::root;
-    }
-    pub type DWORD = ::std::os::raw::c_uint;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct HWND__ {
-        _unused: [u8; 0],
-    }
-    pub type HWND = *mut root::HWND__;
-    pub type HINSTANCE = *mut ::std::os::raw::c_void;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct ACCEL {
-        pub fVirt: ::std::os::raw::c_uchar,
-        pub key: ::std::os::raw::c_ushort,
-        pub cmd: ::std::os::raw::c_ushort,
-    }
-    #[test]
-    fn bindgen_test_layout_ACCEL() {
-        assert_eq!(
-            ::std::mem::size_of::<ACCEL>(),
-            6usize,
-            concat!("Size of: ", stringify!(ACCEL))
-        );
-        assert_eq!(
-            ::std::mem::align_of::<ACCEL>(),
-            2usize,
-            concat!("Alignment of ", stringify!(ACCEL))
-        );
-        assert_eq!(
-            unsafe { &(*(::std::ptr::null::<ACCEL>())).fVirt as *const _ as usize },
-            0usize,
-            concat!(
-                "Offset of field: ",
-                stringify!(ACCEL),
-                "::",
-                stringify!(fVirt)
-            )
-        );
-        assert_eq!(
-            unsafe { &(*(::std::ptr::null::<ACCEL>())).key as *const _ as usize },
-            2usize,
-            concat!(
-                "Offset of field: ",
-                stringify!(ACCEL),
-                "::",
-                stringify!(key)
-            )
-        );
-        assert_eq!(
-            unsafe { &(*(::std::ptr::null::<ACCEL>())).cmd as *const _ as usize },
-            4usize,
-            concat!(
-                "Offset of field: ",
-                stringify!(ACCEL),
-                "::",
-                stringify!(cmd)
-            )
-        );
-    }
+    pub type DWORD = ::std::os::raw::c_ulong;
+    pub type BYTE = ::std::os::raw::c_uchar;
+    pub type WORD = ::std::os::raw::c_ushort;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct _GUID {
-        pub Data1: ::std::os::raw::c_uint,
+        pub Data1: ::std::os::raw::c_ulong,
         pub Data2: ::std::os::raw::c_ushort,
         pub Data3: ::std::os::raw::c_ushort,
         pub Data4: [::std::os::raw::c_uchar; 8usize],
@@ -160,6 +97,115 @@ pub mod root {
         );
     }
     pub type GUID = root::_GUID;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct HINSTANCE__ {
+        pub unused: ::std::os::raw::c_int,
+    }
+    #[test]
+    fn bindgen_test_layout_HINSTANCE__() {
+        assert_eq!(
+            ::std::mem::size_of::<HINSTANCE__>(),
+            4usize,
+            concat!("Size of: ", stringify!(HINSTANCE__))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<HINSTANCE__>(),
+            4usize,
+            concat!("Alignment of ", stringify!(HINSTANCE__))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<HINSTANCE__>())).unused as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(HINSTANCE__),
+                "::",
+                stringify!(unused)
+            )
+        );
+    }
+    pub type HINSTANCE = *mut root::HINSTANCE__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct HWND__ {
+        pub unused: ::std::os::raw::c_int,
+    }
+    #[test]
+    fn bindgen_test_layout_HWND__() {
+        assert_eq!(
+            ::std::mem::size_of::<HWND__>(),
+            4usize,
+            concat!("Size of: ", stringify!(HWND__))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<HWND__>(),
+            4usize,
+            concat!("Alignment of ", stringify!(HWND__))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<HWND__>())).unused as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(HWND__),
+                "::",
+                stringify!(unused)
+            )
+        );
+    }
+    pub type HWND = *mut root::HWND__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct tagACCEL {
+        pub fVirt: root::BYTE,
+        pub key: root::WORD,
+        pub cmd: root::WORD,
+    }
+    #[test]
+    fn bindgen_test_layout_tagACCEL() {
+        assert_eq!(
+            ::std::mem::size_of::<tagACCEL>(),
+            6usize,
+            concat!("Size of: ", stringify!(tagACCEL))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<tagACCEL>(),
+            2usize,
+            concat!("Alignment of ", stringify!(tagACCEL))
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<tagACCEL>())).fVirt as *const _ as usize },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(tagACCEL),
+                "::",
+                stringify!(fVirt)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<tagACCEL>())).key as *const _ as usize },
+            2usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(tagACCEL),
+                "::",
+                stringify!(key)
+            )
+        );
+        assert_eq!(
+            unsafe { &(*(::std::ptr::null::<tagACCEL>())).cmd as *const _ as usize },
+            4usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(tagACCEL),
+                "::",
+                stringify!(cmd)
+            )
+        );
+    }
+    pub type ACCEL = root::tagACCEL;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct reaper_plugin_info_t {
@@ -759,6 +805,7 @@ pub mod root {
         );
     }
     extern "C" {
+        #[link_name = "\u{1}?Audio_RegHardwareHook@@3P6AH_NPEAUaudio_hook_register_t@@@ZEA"]
         pub static mut Audio_RegHardwareHook: ::std::option::Option<
             unsafe extern "C" fn(
                 isAdd: bool,
@@ -767,9 +814,11 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?ClearConsole@@3P6AXXZEA"]
         pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
     }
     extern "C" {
+        #[link_name = "\u{1}?CountSelectedTracks2@@3P6AHPEAVReaProject@@_N@ZEA"]
         pub static mut CountSelectedTracks2: ::std::option::Option<
             unsafe extern "C" fn(
                 proj: *mut root::ReaProject,
@@ -778,11 +827,13 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CountTracks@@3P6AHPEAVReaProject@@@ZEA"]
         pub static mut CountTracks: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CreateTrackSend@@3P6AHPEAVMediaTrack@@0@ZEA"]
         pub static mut CreateTrackSend: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
@@ -791,6 +842,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_OnInputMonitorChangeEx@@3P6AHPEAVMediaTrack@@H_N@ZEA"]
         pub static mut CSurf_OnInputMonitorChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -800,6 +852,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_OnPanChangeEx@@3P6ANPEAVMediaTrack@@N_N1@ZEA"]
         pub static mut CSurf_OnPanChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -810,10 +863,12 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_OnPlayRateChange@@3P6AXN@ZEA"]
         pub static mut CSurf_OnPlayRateChange:
             ::std::option::Option<unsafe extern "C" fn(playrate: f64)>;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_OnRecArmChangeEx@@3P6A_NPEAVMediaTrack@@H_N@ZEA"]
         pub static mut CSurf_OnRecArmChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -823,6 +878,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_OnSendPanChange@@3P6ANPEAVMediaTrack@@HN_N@ZEA"]
         pub static mut CSurf_OnSendPanChange: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -833,6 +889,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_OnSendVolumeChange@@3P6ANPEAVMediaTrack@@HN_N@ZEA"]
         pub static mut CSurf_OnSendVolumeChange: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -843,6 +900,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_OnVolumeChangeEx@@3P6ANPEAVMediaTrack@@N_N1@ZEA"]
         pub static mut CSurf_OnVolumeChangeEx: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -853,6 +911,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_SetSurfaceMute@@3P6AXPEAVMediaTrack@@_NPEAVIReaperControlSurface@@@ZEA"]
         pub static mut CSurf_SetSurfaceMute: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -862,6 +921,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_SetSurfacePan@@3P6AXPEAVMediaTrack@@NPEAVIReaperControlSurface@@@ZEA"]
         pub static mut CSurf_SetSurfacePan: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -871,6 +931,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_SetSurfaceSolo@@3P6AXPEAVMediaTrack@@_NPEAVIReaperControlSurface@@@ZEA"]
         pub static mut CSurf_SetSurfaceSolo: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -880,6 +941,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?CSurf_SetSurfaceVolume@@3P6AXPEAVMediaTrack@@NPEAVIReaperControlSurface@@@ZEA"]
         pub static mut CSurf_SetSurfaceVolume: ::std::option::Option<
             unsafe extern "C" fn(
                 trackid: *mut root::MediaTrack,
@@ -889,13 +951,16 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?DB2SLIDER@@3P6ANN@ZEA"]
         pub static mut DB2SLIDER: ::std::option::Option<unsafe extern "C" fn(x: f64) -> f64>;
     }
     extern "C" {
+        #[link_name = "\u{1}?DeleteTrack@@3P6AXPEAVMediaTrack@@@ZEA"]
         pub static mut DeleteTrack:
             ::std::option::Option<unsafe extern "C" fn(tr: *mut root::MediaTrack)>;
     }
     extern "C" {
+        #[link_name = "\u{1}?EnumProjects@@3P6APEAVReaProject@@HPEADH@ZEA"]
         pub static mut EnumProjects: ::std::option::Option<
             unsafe extern "C" fn(
                 idx: ::std::os::raw::c_int,
@@ -905,37 +970,56 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?genGuid@@3P6AXPEAU_GUID@@@ZEA"]
         pub static mut genGuid: ::std::option::Option<unsafe extern "C" fn(g: *mut root::GUID)>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetAppVersion@@3P6APEBDXZEA"]
         pub static mut GetAppVersion:
             ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetCurrentProjectInLoadSave@@3P6APEAVReaProject@@XZEA"]
         pub static mut GetCurrentProjectInLoadSave:
             ::std::option::Option<unsafe extern "C" fn() -> *mut root::ReaProject>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetGlobalAutomationOverride@@3P6AHXZEA"]
         pub static mut GetGlobalAutomationOverride:
             ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetLastTouchedFX@@3P6A_NPEAH00@ZEA"]
+        pub static mut GetLastTouchedFX: ::std::option::Option<
+            unsafe extern "C" fn(
+                tracknumberOut: *mut ::std::os::raw::c_int,
+                fxnumberOut: *mut ::std::os::raw::c_int,
+                paramnumberOut: *mut ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?GetMainHwnd@@3P6APEAUHWND__@@XZEA"]
         pub static mut GetMainHwnd: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMasterTrack@@3P6APEAVMediaTrack@@PEAVReaProject@@@ZEA"]
         pub static mut GetMasterTrack: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::MediaTrack,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMaxMidiInputs@@3P6AHXZEA"]
         pub static mut GetMaxMidiInputs:
             ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMaxMidiOutputs@@3P6AHXZEA"]
         pub static mut GetMaxMidiOutputs:
             ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMediaTrackInfo_Value@@3P6ANPEAVMediaTrack@@PEBD@ZEA"]
         pub static mut GetMediaTrackInfo_Value: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
@@ -944,6 +1028,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMIDIInputName@@3P6A_NHPEADH@ZEA"]
         pub static mut GetMIDIInputName: ::std::option::Option<
             unsafe extern "C" fn(
                 dev: ::std::os::raw::c_int,
@@ -953,6 +1038,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMIDIOutputName@@3P6A_NHPEADH@ZEA"]
         pub static mut GetMIDIOutputName: ::std::option::Option<
             unsafe extern "C" fn(
                 dev: ::std::os::raw::c_int,
@@ -962,6 +1048,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetSelectedTrack2@@3P6APEAVMediaTrack@@PEAVReaProject@@H_N@ZEA"]
         pub static mut GetSelectedTrack2: ::std::option::Option<
             unsafe extern "C" fn(
                 proj: *mut root::ReaProject,
@@ -971,6 +1058,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetSetMediaTrackInfo@@3P6APEAXPEAVMediaTrack@@PEBDPEAX@ZEA"]
         pub static mut GetSetMediaTrackInfo: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
@@ -980,6 +1068,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetSetTrackSendInfo@@3P6APEAXPEAVMediaTrack@@HHPEBDPEAX@ZEA"]
         pub static mut GetSetTrackSendInfo: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
@@ -991,6 +1080,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetToggleCommandState2@@3P6AHPEAUKbdSectionInfo@@H@ZEA"]
         pub static mut GetToggleCommandState2: ::std::option::Option<
             unsafe extern "C" fn(
                 section: *mut root::KbdSectionInfo,
@@ -999,6 +1089,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetTrack@@3P6APEAVMediaTrack@@PEAVReaProject@@H@ZEA"]
         pub static mut GetTrack: ::std::option::Option<
             unsafe extern "C" fn(
                 proj: *mut root::ReaProject,
@@ -1007,11 +1098,13 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetTrackAutomationMode@@3P6AHPEAVMediaTrack@@@ZEA"]
         pub static mut GetTrackAutomationMode: ::std::option::Option<
             unsafe extern "C" fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetTrackEnvelopeByName@@3P6APEAVTrackEnvelope@@PEAVMediaTrack@@PEBD@ZEA"]
         pub static mut GetTrackEnvelopeByName: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1020,6 +1113,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetTrackNumSends@@3P6AHPEAVMediaTrack@@H@ZEA"]
         pub static mut GetTrackNumSends: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
@@ -1028,6 +1122,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetTrackSendUIVolPan@@3P6A_NPEAVMediaTrack@@HPEAN1@ZEA"]
         pub static mut GetTrackSendUIVolPan: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1038,6 +1133,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetTrackStateChunk@@3P6A_NPEAVMediaTrack@@PEADH_N@ZEA"]
         pub static mut GetTrackStateChunk: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1048,6 +1144,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetTrackUIVolPan@@3P6A_NPEAVMediaTrack@@PEAN1@ZEA"]
         pub static mut GetTrackUIVolPan: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1057,21 +1154,25 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?guidToString@@3P6AXPEBU_GUID@@PEAD@ZEA"]
         pub static mut guidToString: ::std::option::Option<
             unsafe extern "C" fn(g: *const root::GUID, destNeed64: *mut ::std::os::raw::c_char),
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?InsertTrackAtIndex@@3P6AXH_N@ZEA"]
         pub static mut InsertTrackAtIndex: ::std::option::Option<
             unsafe extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool),
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?IsProjectDirty@@3P6AHPEAVReaProject@@@ZEA"]
         pub static mut IsProjectDirty: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?kbd_getTextFromCmd@@3P6APEBDKPEAUKbdSectionInfo@@@ZEA"]
         pub static mut kbd_getTextFromCmd: ::std::option::Option<
             unsafe extern "C" fn(
                 cmd: root::DWORD,
@@ -1080,6 +1181,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?KBD_OnMainActionEx@@3P6AHHHHHPEAUHWND__@@PEAVReaProject@@@ZEA"]
         pub static mut KBD_OnMainActionEx: ::std::option::Option<
             unsafe extern "C" fn(
                 cmd: ::std::os::raw::c_int,
@@ -1092,6 +1194,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?Main_OnCommandEx@@3P6AXHHPEAVReaProject@@@ZEA"]
         pub static mut Main_OnCommandEx: ::std::option::Option<
             unsafe extern "C" fn(
                 command: ::std::os::raw::c_int,
@@ -1101,17 +1204,21 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?MarkProjectDirty@@3P6AXPEAVReaProject@@@ZEA"]
         pub static mut MarkProjectDirty:
             ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
     }
     extern "C" {
+        #[link_name = "\u{1}?Master_GetPlayRate@@3P6ANPEAVReaProject@@@ZEA"]
         pub static mut Master_GetPlayRate:
             ::std::option::Option<unsafe extern "C" fn(project: *mut root::ReaProject) -> f64>;
     }
     extern "C" {
+        #[link_name = "\u{1}?Master_GetTempo@@3P6ANXZEA"]
         pub static mut Master_GetTempo: ::std::option::Option<unsafe extern "C" fn() -> f64>;
     }
     extern "C" {
+        #[link_name = "\u{1}?NamedCommandLookup@@3P6AHPEBD@ZEA"]
         pub static mut NamedCommandLookup: ::std::option::Option<
             unsafe extern "C" fn(
                 command_name: *const ::std::os::raw::c_char,
@@ -1119,6 +1226,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?plugin_register@@3P6AHPEBDPEAX@ZEA"]
         pub static mut plugin_register: ::std::option::Option<
             unsafe extern "C" fn(
                 name: *const ::std::os::raw::c_char,
@@ -1127,6 +1235,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?ReverseNamedCommandLookup@@3P6APEBDH@ZEA"]
         pub static mut ReverseNamedCommandLookup: ::std::option::Option<
             unsafe extern "C" fn(
                 command_id: ::std::os::raw::c_int,
@@ -1134,16 +1243,19 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?SectionFromUniqueID@@3P6APEAUKbdSectionInfo@@H@ZEA"]
         pub static mut SectionFromUniqueID: ::std::option::Option<
             unsafe extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?SetCurrentBPM@@3P6AXPEAVReaProject@@N_N@ZEA"]
         pub static mut SetCurrentBPM: ::std::option::Option<
             unsafe extern "C" fn(__proj: *mut root::ReaProject, bpm: f64, wantUndo: bool),
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?SetMediaTrackInfo_Value@@3P6A_NPEAVMediaTrack@@PEBDN@ZEA"]
         pub static mut SetMediaTrackInfo_Value: ::std::option::Option<
             unsafe extern "C" fn(
                 tr: *mut root::MediaTrack,
@@ -1153,15 +1265,18 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?SetOnlyTrackSelected@@3P6AXPEAVMediaTrack@@@ZEA"]
         pub static mut SetOnlyTrackSelected:
             ::std::option::Option<unsafe extern "C" fn(track: *mut root::MediaTrack)>;
     }
     extern "C" {
+        #[link_name = "\u{1}?SetTrackSelected@@3P6AXPEAVMediaTrack@@_N@ZEA"]
         pub static mut SetTrackSelected: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack, selected: bool),
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?SetTrackStateChunk@@3P6A_NPEAVMediaTrack@@PEBD_N@ZEA"]
         pub static mut SetTrackStateChunk: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1171,10 +1286,12 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?ShowConsoleMsg@@3P6AXPEBD@ZEA"]
         pub static mut ShowConsoleMsg:
             ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
     }
     extern "C" {
+        #[link_name = "\u{1}?ShowMessageBox@@3P6AHPEBD0H@ZEA"]
         pub static mut ShowMessageBox: ::std::option::Option<
             unsafe extern "C" fn(
                 msg: *const ::std::os::raw::c_char,
@@ -1184,14 +1301,17 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?SLIDER2DB@@3P6ANN@ZEA"]
         pub static mut SLIDER2DB: ::std::option::Option<unsafe extern "C" fn(y: f64) -> f64>;
     }
     extern "C" {
+        #[link_name = "\u{1}?stringToGuid@@3P6AXPEBDPEAU_GUID@@@ZEA"]
         pub static mut stringToGuid: ::std::option::Option<
             unsafe extern "C" fn(str: *const ::std::os::raw::c_char, g: *mut root::GUID),
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?StuffMIDIMessage@@3P6AXHHHH@ZEA"]
         pub static mut StuffMIDIMessage: ::std::option::Option<
             unsafe extern "C" fn(
                 mode: ::std::os::raw::c_int,
@@ -1202,6 +1322,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_AddByName@@3P6AHPEAVMediaTrack@@PEBD_NH@ZEA"]
         pub static mut TrackFX_AddByName: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1212,6 +1333,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_FormatParamValueNormalized@@3P6A_NPEAVMediaTrack@@HHNPEADH@ZEA"]
         pub static mut TrackFX_FormatParamValueNormalized: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1224,16 +1346,19 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetCount@@3P6AHPEAVMediaTrack@@@ZEA"]
         pub static mut TrackFX_GetCount: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetEnabled@@3P6A_NPEAVMediaTrack@@H@ZEA"]
         pub static mut TrackFX_GetEnabled: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetFormattedParamValue@@3P6A_NPEAVMediaTrack@@HHPEADH@ZEA"]
         pub static mut TrackFX_GetFormattedParamValue: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1245,6 +1370,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetFXGUID@@3P6APEAU_GUID@@PEAVMediaTrack@@H@ZEA"]
         pub static mut TrackFX_GetFXGUID: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1253,6 +1379,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetFXName@@3P6A_NPEAVMediaTrack@@HPEADH@ZEA"]
         pub static mut TrackFX_GetFXName: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1263,11 +1390,13 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetInstrument@@3P6AHPEAVMediaTrack@@@ZEA"]
         pub static mut TrackFX_GetInstrument: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetNumParams@@3P6AHPEAVMediaTrack@@H@ZEA"]
         pub static mut TrackFX_GetNumParams: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1276,6 +1405,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetParameterStepSizes@@3P6A_NPEAVMediaTrack@@HHPEAN11PEA_N@ZEA"]
         pub static mut TrackFX_GetParameterStepSizes: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1289,6 +1419,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetParamEx@@3P6ANPEAVMediaTrack@@HHPEAN11@ZEA"]
         pub static mut TrackFX_GetParamEx: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1301,6 +1432,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetParamName@@3P6A_NPEAVMediaTrack@@HHPEADH@ZEA"]
         pub static mut TrackFX_GetParamName: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1312,6 +1444,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetParamNormalized@@3P6ANPEAVMediaTrack@@HH@ZEA"]
         pub static mut TrackFX_GetParamNormalized: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1321,11 +1454,44 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetPreset@@3P6A_NPEAVMediaTrack@@HPEADH@ZEA"]
+        pub static mut TrackFX_GetPreset: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                presetname: *mut ::std::os::raw::c_char,
+                presetname_sz: ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetPresetIndex@@3P6AHPEAVMediaTrack@@HPEAH@ZEA"]
+        pub static mut TrackFX_GetPresetIndex: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                numberOfPresetsOut: *mut ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetRecCount@@3P6AHPEAVMediaTrack@@@ZEA"]
         pub static mut TrackFX_GetRecCount: ::std::option::Option<
             unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_NavigatePresets@@3P6A_NPEAVMediaTrack@@HH@ZEA"]
+        pub static mut TrackFX_NavigatePresets: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                presetmove: ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?TrackFX_SetEnabled@@3P6AXPEAVMediaTrack@@H_N@ZEA"]
         pub static mut TrackFX_SetEnabled: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1335,6 +1501,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_SetParamNormalized@@3P6A_NPEAVMediaTrack@@HHN@ZEA"]
         pub static mut TrackFX_SetParamNormalized: ::std::option::Option<
             unsafe extern "C" fn(
                 track: *mut root::MediaTrack,
@@ -1345,34 +1512,51 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_SetPresetByIndex@@3P6A_NPEAVMediaTrack@@HH@ZEA"]
+        pub static mut TrackFX_SetPresetByIndex: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                fx: ::std::os::raw::c_int,
+                idx: ::std::os::raw::c_int,
+            ) -> bool,
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?TrackList_UpdateAllExternalSurfaces@@3P6AXXZEA"]
         pub static mut TrackList_UpdateAllExternalSurfaces:
             ::std::option::Option<unsafe extern "C" fn()>;
     }
     extern "C" {
+        #[link_name = "\u{1}?Undo_BeginBlock2@@3P6AXPEAVReaProject@@@ZEA"]
         pub static mut Undo_BeginBlock2:
             ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
     }
     extern "C" {
+        #[link_name = "\u{1}?Undo_CanRedo2@@3P6APEBDPEAVReaProject@@@ZEA"]
         pub static mut Undo_CanRedo2: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?Undo_CanUndo2@@3P6APEBDPEAVReaProject@@@ZEA"]
         pub static mut Undo_CanUndo2: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?Undo_DoRedo2@@3P6AHPEAVReaProject@@@ZEA"]
         pub static mut Undo_DoRedo2: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?Undo_DoUndo2@@3P6AHPEAVReaProject@@@ZEA"]
         pub static mut Undo_DoUndo2: ::std::option::Option<
             unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?Undo_EndBlock2@@3P6AXPEAVReaProject@@PEBDH@ZEA"]
         pub static mut Undo_EndBlock2: ::std::option::Option<
             unsafe extern "C" fn(
                 proj: *mut root::ReaProject,
@@ -1382,6 +1566,7 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?ValidatePtr2@@3P6A_NPEAVReaProject@@PEAXPEBD@ZEA"]
         pub static mut ValidatePtr2: ::std::option::Option<
             unsafe extern "C" fn(
                 proj: *mut root::ReaProject,
@@ -1391,11 +1576,13 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMidiInput@@3P6APEAVmidi_Input@@H@ZEA"]
         pub static mut GetMidiInput: ::std::option::Option<
             unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input,
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetMidiOutput@@3P6APEAVmidi_Output@@H@ZEA"]
         pub static mut GetMidiOutput: ::std::option::Option<
             unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output,
         >;

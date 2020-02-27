@@ -356,7 +356,7 @@ impl HelperControlSurface {
     }
 
     fn csurf_ext_setfxparam_recfx(&self, track: *mut MediaTrack, fxidx_and_paramidx: *mut i32, normalized_value: *mut f64) {
-        self.fx_param_set(track, fxidx_and_paramidx, normalized_value, false);
+        self.fx_param_set(track, fxidx_and_paramidx, normalized_value, true);
     }
 
     fn fx_param_set(&self, track: *mut MediaTrack, fxidx_and_paramidx: *mut i32, normalized_value: *mut f64, is_input_fx_if_supported: bool) {

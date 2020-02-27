@@ -395,3 +395,34 @@ pub type TrackFX_GetParamEx = fn(
     maxvalOut: *mut f64,
     midvalOut: *mut f64,
 ) -> f64;
+
+pub type TrackFX_GetPresetIndex = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    numberOfPresetsOut: *mut ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int;
+
+pub type TrackFX_SetPresetByIndex = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    idx: ::std::os::raw::c_int,
+) -> bool;
+
+pub type TrackFX_NavigatePresets = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    presetmove: ::std::os::raw::c_int,
+) -> bool;
+
+pub type TrackFX_GetPreset = fn(
+    track: *mut root::MediaTrack,
+    fx: ::std::os::raw::c_int,
+    presetname: *mut ::std::os::raw::c_char,
+    presetname_sz: ::std::os::raw::c_int,
+) -> bool;
+
+pub type GetLastTouchedFX = fn(
+    tracknumberOut: *mut ::std::os::raw::c_int,
+    fxnumberOut: *mut ::std::os::raw::c_int,
+    paramnumberOut: *mut ::std::os::raw::c_int,
+) -> bool;

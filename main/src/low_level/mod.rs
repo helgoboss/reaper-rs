@@ -246,7 +246,12 @@ gen_reaper_struct![
     TrackFX_FormatParamValueNormalized,
     TrackFX_SetParamNormalized,
     TrackFX_GetParameterStepSizes,
-    TrackFX_GetParamEx
+    TrackFX_GetParamEx,
+    TrackFX_GetPreset,
+    TrackFX_GetPresetIndex,
+    TrackFX_SetPresetByIndex,
+    TrackFX_NavigatePresets,
+    GetLastTouchedFX
 ];
 
 #[macro_export]

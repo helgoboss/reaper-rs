@@ -1,7 +1,7 @@
 use cc;
 
 fn main() {
-    #[cfg(not(windows))]
+    // #[cfg(not(windows))]
         generate_bindings();
     compile_glue();
 }
@@ -126,6 +126,11 @@ fn generate_bindings() {
         .whitelist_var("TrackFX_SetParamNormalized")
         .whitelist_var("TrackFX_GetParameterStepSizes")
         .whitelist_var("TrackFX_GetParamEx")
+        .whitelist_var("TrackFX_GetPreset")
+        .whitelist_var("TrackFX_GetPresetIndex")
+        .whitelist_var("TrackFX_SetPresetByIndex")
+        .whitelist_var("TrackFX_NavigatePresets")
+        .whitelist_var("GetLastTouchedFX")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

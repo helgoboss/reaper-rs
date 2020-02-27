@@ -1,19 +1,23 @@
 use std::borrow::Cow;
-use crate::api::{TestStep, step};
-use reaper_rs::high_level::{Project, Reaper, Track, ActionKind, get_media_track_guid, Guid, InputMonitoringMode, MidiRecordingInput, RecordingInput, MidiInputDevice, Volume, Pan, AutomationMode, ActionCharacter, toggleable, MessageBoxResult, MessageBoxKind, Tempo, StuffMidiMessageTarget, MidiEvent, MidiMessage, FxChain, FxParameterCharacter};
+use std::cell::{Cell, Ref, RefCell};
+use std::convert::TryFrom;
+use std::ffi::{CStr, CString};
+use std::iter;
+use std::ops::{Deref, DerefMut};
+use std::ptr::null_mut;
 use std::rc::Rc;
-use std::cell::{RefCell, Ref, Cell};
+
+use c_str_macro::c_str;
+use slog::debug;
+use wmidi;
+
+use reaper_rs::high_level::{ActionCharacter, ActionKind, AutomationMode, FxChain, FxParameterCharacter, get_media_track_guid, Guid, InputMonitoringMode, MessageBoxKind, MessageBoxResult, MidiEvent, MidiInputDevice, MidiMessage, MidiRecordingInput, Pan, Project, Reaper, RecordingInput, StuffMidiMessageTarget, Tempo, toggleable, Track, Volume, ReaperVersion};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
-use std::ops::{Deref, DerefMut};
-use c_str_macro::c_str;
-use std::ffi::{CStr, CString};
-use std::convert::TryFrom;
+
+use crate::api::{step, TestStep};
+
 use super::mock::observe_invocations;
-use std::ptr::null_mut;
-use wmidi;
-use std::iter;
-use slog::debug;
 
 pub fn create_test_steps() -> impl Iterator<Item=TestStep> {
     let steps_a = vec!(
@@ -1352,6 +1356,45 @@ fn create_fx_steps(
             check_eq!(p.format_normalized_value(p.get_normalized_value()).as_c_str(), c_str!("0"));
             check_eq!(p.get_fx(), fx);
             check!(p.get_step_size().is_none());
+            Ok(())
+        }),
+        step("Check fx presets", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find first fx")?;
+            // When
+            // Then
+            check_eq!(fx.get_preset_count(), 0);
+            check!(fx.get_preset_name().is_none());
+            check!(fx.preset_is_dirty());
+            Ok(())
+        }),
+        step("Set fx parameter value", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find fx")?;
+            let p = fx.get_parameter_by_index(5);
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_parameter_value_changed().take_until(step.finished).subscribe(move |p| {
+                    mock.invoke(p);
+                });
+            });
+            p.set_normalized_value(0.3);
+            // Then
+            let last_touched_fx_param = reaper.get_last_touched_fx_parameter();
+            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95")) {
+                check!(last_touched_fx_param.is_none());
+            } else {
+                check_eq!(last_touched_fx_param, Some(p.clone()));
+            }
+            check_eq!(p.get_formatted_value().as_c_str(), c_str!("-4.44"));
+            check_eq!(p.get_normalized_value(), 0.30000001192092896);
+            check_eq!(p.get_reaper_value(), 0.30000001192092896);
+            check_eq!(p.format_normalized_value(p.get_normalized_value()).as_c_str(), c_str!("-4.44 dB"));
+            // TODO 1 invocation would be better than 2
+            check_eq!(mock.invocation_count(), 2);
+            check_eq!(mock.last_arg(), p);
             Ok(())
         }),
     );

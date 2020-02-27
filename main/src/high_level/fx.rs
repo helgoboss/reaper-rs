@@ -1,11 +1,13 @@
-use crate::high_level::guid::Guid;
-use crate::high_level::{Track, Reaper, ChunkRegion};
 use std::cell::Cell;
-use c_str_macro::c_str;
-use crate::high_level::fx_parameter::FxParameter;
-use crate::high_level::fx_chain::FxChain;
 use std::ffi::CString;
 use std::path::PathBuf;
+
+use c_str_macro::c_str;
+
+use crate::high_level::{ChunkRegion, Reaper, Track};
+use crate::high_level::fx_chain::FxChain;
+use crate::high_level::fx_parameter::FxParameter;
+use crate::high_level::guid::Guid;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -207,6 +209,30 @@ impl Fx {
             self.load_by_guid()
         }
     }
+
+    pub fn get_preset_count(&self) -> u32 {
+        self.load_if_necessary_or_complain();
+        // TODO Use rustfmt everywhere
+        // TODO Integrate into ReaPlus (current preset index?)
+        Reaper::instance().medium.track_fx_get_preset_index(
+            self.track.get_media_track(), self.get_query_index(),
+        ).expect("Couldn't get preset count").1
+    }
+
+    pub fn preset_is_dirty(&self) -> bool {
+        self.load_if_necessary_or_complain();
+        let state_matches_preset = Reaper::instance().medium.track_fx_get_preset(
+            self.track.get_media_track(), self.get_query_index(), 0
+        ).0;
+        !state_matches_preset
+    }
+
+    pub fn get_preset_name(&self) -> Option<CString> {
+        self.load_if_necessary_or_complain();
+        Reaper::instance().medium.track_fx_get_preset(
+            self.track.get_media_track(), self.get_query_index(), 2000,
+        ).1
+    }
 }
 
 pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid> {
@@ -279,9 +305,9 @@ impl FxInfo {
                             .expect("Couldn't parse VST file name");
                         assert_eq!(remainder_captures.len(), 2);
                         PathBuf::from(&remainder_captures[1])
-                    }
+                    },
                 }
-            },
+            }
             "JS" => {
                 FxInfo {
                     effect_name: "".to_string(),
@@ -299,9 +325,9 @@ impl FxInfo {
                             .expect("Couldn't parse JS file name");
                         assert_eq!(remainder_captures.len(), 2);
                         PathBuf::from(&remainder_captures[1])
-                    }
+                    },
                 }
-            },
+            }
             _ => panic!("Can only handle VST and JS FX types right now")
         }
     }

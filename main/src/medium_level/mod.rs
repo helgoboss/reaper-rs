@@ -4,16 +4,18 @@
 //! - No C strings
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available, maybe provide "_available" functions for conditional execution)
-mod control_surface;
-
-use std::ffi::{CString, CStr};
-use std::ptr::{null_mut, null};
+use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
-use crate::low_level;
-use crate::low_level::{ReaProject, MediaTrack, KbdSectionInfo, HWND, GUID, TrackEnvelope, IReaperControlSurface, audio_hook_register_t, midi_Input, midi_Output};
+use std::ptr::{null, null_mut};
+
 use c_str_macro::c_str;
+
+use crate::low_level;
+use crate::low_level::{audio_hook_register_t, GUID, HWND, IReaperControlSurface, KbdSectionInfo, MediaTrack, midi_Input, midi_Output, ReaProject, TrackEnvelope};
 pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
+
+mod control_surface;
 
 pub struct Reaper {
     pub low: low_level::Reaper
@@ -217,7 +219,7 @@ impl Reaper {
     }
 
     pub fn track_fx_get_param_name(&self, track: *mut MediaTrack, fx: i32, param: i32,
-            buf_sz: u32) -> Option<CString> {
+                                   buf_sz: u32) -> Option<CString> {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             self.low.TrackFX_GetParamName.unwrap()(track, fx, param, buffer, max_size)
@@ -238,11 +240,10 @@ impl Reaper {
             return None;
         }
         Some(name)
-
     }
 
     pub fn track_fx_format_param_value_normalized(&self, track: *mut MediaTrack, fx: i32, param: i32,
-            value: f64, buf_sz: u32) -> Option<CString> {
+                                                  value: f64, buf_sz: u32) -> Option<CString> {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             self.low.TrackFX_FormatParamValueNormalized.unwrap()(track, fx, param, value, buffer, max_size)
@@ -254,8 +255,27 @@ impl Reaper {
     }
 
     pub fn track_fx_set_param_normalized(&self, track: *mut MediaTrack, fx: i32, param: i32,
-            value: f64) -> bool {
+                                         value: f64) -> bool {
         self.low.TrackFX_SetParamNormalized.unwrap()(track, fx, param, value)
+    }
+
+    pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult> {
+        let mut tracknumber = -1;
+        let mut fxnumber = -1;
+        let mut paramnumber = -1;
+        let is_valid = self.low.GetLastTouchedFX.unwrap()(
+            &mut tracknumber as *mut i32,
+            &mut fxnumber as *mut i32,
+            &mut paramnumber as *mut i32,
+        );
+        if !is_valid {
+            return None;
+        }
+        Some(GetLastTouchedFxResult {
+            tracknumber,
+            fxnumber,
+            paramnumber,
+        })
     }
 
     pub fn track_fx_get_parameter_step_sizes(&self, track: *mut MediaTrack, fx: i32,
@@ -280,7 +300,7 @@ impl Reaper {
             step: complain_if_minus_one(step),
             small_step: complain_if_minus_one(small_step),
             large_step: complain_if_minus_one(large_step),
-            is_toggle
+            is_toggle,
         }.into()
     }
 
@@ -300,7 +320,7 @@ impl Reaper {
             value: complain_if_minus_one(value),
             min_val: complain_if_minus_one(min_val),
             mid_val: complain_if_minus_one(mid_val),
-            max_val: complain_if_minus_one(max_val)
+            max_val: complain_if_minus_one(max_val),
         }.into()
     }
 
@@ -568,6 +588,40 @@ impl Reaper {
         }
     }
 
+    pub fn track_fx_get_preset_index(&self, track: *mut MediaTrack, fx: i32) -> Result<(i32, u32), ()> {
+        let mut num_presets: i32 = 0;
+        let index = self.low.TrackFX_GetPresetIndex.unwrap()(track, fx, &mut num_presets as *mut i32);
+        if index == -1 {
+            return Err(());
+        }
+        return Ok((index, num_presets as u32));
+    }
+
+    pub fn track_fx_set_preset_by_index(&self, track: *mut MediaTrack, fx: i32, idx: i32) -> bool {
+        self.low.TrackFX_SetPresetByIndex.unwrap()(track, fx, idx)
+    }
+
+    pub fn track_fx_navigate_presets(&self, track: *mut MediaTrack, fx: i32, presetmove: i32) -> bool {
+        self.low.TrackFX_NavigatePresets.unwrap()(track, fx, presetmove)
+    }
+
+    pub fn track_fx_get_preset(&self, track: *mut MediaTrack, fx: i32, presetname_sz: u32) -> (bool, Option<CString>) {
+        if presetname_sz == 0 {
+            let state_matches_preset = self.low.TrackFX_GetPreset.unwrap()(track, fx, null_mut(), 0);
+            (state_matches_preset, None)
+        } else {
+            let (name, state_matches_preset) = with_string_buffer(presetname_sz, |buffer, max_size| {
+                self.low.TrackFX_GetPreset.unwrap()(track, fx, buffer, max_size)
+            });
+            let name = if name.as_bytes().len() == 0 {
+                None
+            } else {
+                Some(name)
+            };
+            (state_matches_preset, name)
+        }
+    }
+
     // TODO Rename
     // TODO Don't turn to owned string immediately
     pub fn convenient_get_media_track_info_string(&self, tr: *mut MediaTrack, parmname: &CStr) -> CString {
@@ -608,6 +662,12 @@ pub struct GetParamExResult {
     pub min_val: f64,
     pub mid_val: f64,
     pub max_val: f64,
+}
+
+pub struct GetLastTouchedFxResult {
+    pub tracknumber: i32,
+    pub fxnumber: i32,
+    pub paramnumber: i32,
 }
 
 // TODO Panic for now, just to detect which situations can actually occur

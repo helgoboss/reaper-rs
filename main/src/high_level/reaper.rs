@@ -1,34 +1,35 @@
 use std::borrow::{Borrow, BorrowMut, Cow};
-use std::cell::{Ref, RefCell, RefMut, Cell};
+use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::convert::{TryFrom, TryInto};
 use std::ffi::{CStr, CString};
-use std::os::raw::{c_ushort, c_void, c_int};
+use std::os::raw::{c_int, c_ushort, c_void};
 use std::ptr::{null, null_mut};
-use std::sync::{Once, mpsc};
-use num_enum::IntoPrimitive;
-
-use c_str_macro::c_str;
-
-use crate::high_level::ActionKind::Toggleable;
-use crate::high_level::{Project, Section, Track, create_std_logger, create_terminal_logger, create_reaper_panic_hook, create_default_console_msg_formatter, Action, Guid, MidiInputDevice, MidiOutputDevice, UndoBlock, MessageBoxKind, MessageBoxResult, BorrowedReaperMidiEvent, MidiEvent};
-use crate::low_level::{ACCEL, gaccel_register_t, MediaTrack, ReaProject, firewall, ReaperPluginContext, HWND, audio_hook_register_t, midi_Input_GetReadBuf, MIDI_eventlist_EnumItems, MIDI_event_t};
-use crate::low_level;
-use crate::medium_level;
-use rxrust::subscriber::Subscriber;
-use crate::high_level::helper_control_surface::HelperControlSurface;
-use rxrust::subscription::SubscriptionLike;
-use rxrust::prelude::*;
 use std::rc::Rc;
-use std::sync::mpsc::{Sender, Receiver};
-use slog::Level::Debug;
+use std::sync::{mpsc, Once};
+use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::thread::ThreadId;
-use crate::high_level::track_send::TrackSend;
-use crate::high_level::fx::Fx;
+
+use c_str_macro::c_str;
+use num_enum::IntoPrimitive;
+use slog::Level::Debug;
+
+use rxrust::prelude::*;
+use rxrust::subscriber::Subscriber;
+use rxrust::subscription::SubscriptionLike;
+
+use crate::high_level::{Action, BorrowedReaperMidiEvent, create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger, create_terminal_logger, Guid, MessageBoxKind, MessageBoxResult, MidiEvent, MidiInputDevice, MidiOutputDevice, Project, Section, Track, UndoBlock};
+use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::automation_mode::AutomationMode;
-use std::convert::{TryFrom, TryInto};
+use crate::high_level::fx::Fx;
 use crate::high_level::fx_parameter::FxParameter;
+use crate::high_level::helper_control_surface::HelperControlSurface;
+use crate::high_level::track_send::TrackSend;
+use crate::low_level::{ACCEL, audio_hook_register_t, firewall, gaccel_register_t, HWND, MediaTrack, MIDI_event_t, MIDI_eventlist_EnumItems, midi_Input_GetReadBuf, ReaperPluginContext, ReaProject};
+use crate::low_level;
+use crate::medium_level;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -370,6 +371,33 @@ impl Reaper {
         }
     }
 
+    pub fn get_last_touched_fx_parameter(&self) -> Option<FxParameter> {
+        // TODO Sucks: We have to assume it was a parameter in the current project
+        //  Maybe we should rather rely on our own technique in ControlSurface here!
+        // fxQueryIndex is only a real query index since REAPER 5.95, before it didn't say if it's
+        // input FX or normal one!
+        let result = match self.medium.get_last_touched_fx() {
+            None => return None,
+            Some(r) => r
+        };
+        let normalized_track_index = result.tracknumber - 1;
+        if normalized_track_index >= self.get_current_project().get_track_count() as i32 {
+            // Must be in another project
+            return None;
+        }
+        // Track exists in this project
+        let track = if normalized_track_index == -1 {
+            self.get_current_project().get_master_track()
+        } else {
+            self.get_current_project().get_track_by_index(normalized_track_index as u32).unwrap()
+        };
+        let fx = match track.get_fx_by_query_index(result.fxnumber) {
+            None => return None,
+            Some(fx) => fx
+        };
+        Some(fx.get_parameter_by_index(result.paramnumber as u32))
+    }
+
     pub fn generate_guid(&self) -> Guid {
         Guid::new(Reaper::instance().medium.gen_guid())
     }
@@ -570,6 +598,10 @@ impl Reaper {
         self.subjects.fx_enabled_changed.borrow().clone()
     }
 
+    pub fn fx_parameter_value_changed(&self) -> impl LocalObservable<'static, Err=(), Item=FxParameter> {
+        self.subjects.fx_parameter_value_changed.borrow().clone()
+    }
+
     pub fn track_input_monitoring_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_input_monitoring_changed.borrow().clone()
     }
@@ -768,6 +800,6 @@ impl RegisteredAction {
 pub enum StuffMidiMessageTarget {
     VirtualMidiKeyboard,
     MidiAsControlInputQueue,
-    VirtualMidiKeyboardOnCurrentChannel
+    VirtualMidiKeyboardOnCurrentChannel,
 }
 
