@@ -131,6 +131,8 @@ fn generate_bindings() {
         .whitelist_var("TrackFX_SetPresetByIndex")
         .whitelist_var("TrackFX_NavigatePresets")
         .whitelist_var("GetLastTouchedFX")
+        .whitelist_var("TrackFX_CopyToTrack")
+        .whitelist_var("TrackFX_Delete")
         .whitelist_var("CSURF_EXT_.*")
         .whitelist_type("HINSTANCE")
         .whitelist_type("reaper_plugin_info_t")

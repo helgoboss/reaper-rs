@@ -1333,6 +1333,24 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_CopyToTrack@@3P6AXPEAVMediaTrack@@H0H_N@ZEA"]
+        pub static mut TrackFX_CopyToTrack: ::std::option::Option<
+            unsafe extern "C" fn(
+                src_track: *mut root::MediaTrack,
+                src_fx: ::std::os::raw::c_int,
+                dest_track: *mut root::MediaTrack,
+                dest_fx: ::std::os::raw::c_int,
+                is_move: bool,
+            ),
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?TrackFX_Delete@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+        pub static mut TrackFX_Delete: ::std::option::Option<
+            unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
+        >;
+    }
+    extern "C" {
         #[link_name = "\u{1}?TrackFX_FormatParamValueNormalized@@3P6A_NPEAVMediaTrack@@HHNPEADH@ZEA"]
         pub static mut TrackFX_FormatParamValueNormalized: ::std::option::Option<
             unsafe extern "C" fn(

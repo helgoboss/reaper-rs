@@ -278,6 +278,21 @@ impl Reaper {
         })
     }
 
+    pub fn track_fx_copy_to_track(
+        &self,
+        src_track: *mut MediaTrack,
+        src_fx: i32,
+        dest_track: *mut MediaTrack,
+        dest_fx: i32,
+        is_move: bool,
+    ) {
+        self.low.TrackFX_CopyToTrack.unwrap()(src_track, src_fx, dest_track, dest_fx, is_move);
+    }
+
+    pub fn track_fx_delete(&self, track: *mut MediaTrack, fx: i32) -> bool {
+        self.low.TrackFX_Delete.unwrap()(track, fx)
+    }
+
     pub fn track_fx_get_parameter_step_sizes(&self, track: *mut MediaTrack, fx: i32,
                                              param: i32) -> Option<GetParameterStepSizesResult> {
         let mut step = -1.0;

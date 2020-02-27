@@ -426,3 +426,13 @@ pub type GetLastTouchedFX = fn(
     fxnumberOut: *mut ::std::os::raw::c_int,
     paramnumberOut: *mut ::std::os::raw::c_int,
 ) -> bool;
+
+pub type TrackFX_CopyToTrack = fn(
+    src_track: *mut root::MediaTrack,
+    src_fx: ::std::os::raw::c_int,
+    dest_track: *mut root::MediaTrack,
+    dest_fx: ::std::os::raw::c_int,
+    is_move: bool,
+);
+
+pub type TrackFX_Delete = fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool;

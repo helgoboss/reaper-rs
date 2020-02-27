@@ -179,6 +179,12 @@ impl Fx {
         }
     }
 
+    // To be called if you become aware that this FX might have been affected by a reordering.
+    // Note that the Fx also corrects the index itself whenever one of its methods is called.
+    pub fn invalidate_index(&self) {
+        self.load_by_guid();
+    }
+
     pub fn get_chain(&self) -> FxChain {
         if self.is_input_fx {
             self.track.get_input_fx_chain()

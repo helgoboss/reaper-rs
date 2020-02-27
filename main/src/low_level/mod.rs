@@ -251,7 +251,9 @@ gen_reaper_struct![
     TrackFX_GetPresetIndex,
     TrackFX_SetPresetByIndex,
     TrackFX_NavigatePresets,
-    GetLastTouchedFX
+    GetLastTouchedFX,
+    TrackFX_CopyToTrack,
+    TrackFX_Delete
 ];
 
 #[macro_export]

@@ -1,4 +1,4 @@
-use crate::high_level::{Track, Reaper, get_media_track_guid, ChunkRegion, MAX_TRACK_CHUNK_SIZE, Chunk};
+use crate::high_level::{Track, Reaper, get_media_track_guid, ChunkRegion, MAX_TRACK_CHUNK_SIZE, Chunk, get_fx_query_index};
 use crate::high_level::fx::{Fx, get_fx_guid};
 use crate::high_level::guid::Guid;
 use std::ffi::CStr;
@@ -25,6 +25,26 @@ impl FxChain {
         } else {
             reaper.medium.track_fx_get_count(self.track.get_media_track()) as u32
         }
+    }
+
+    // Moves within this FX chain
+    pub fn move_fx(&self, fx: &Fx, new_index: u32) {
+        assert_eq!(fx.get_chain(), *self);
+        Reaper::instance().medium.track_fx_copy_to_track(
+            self.track.get_media_track(),
+            fx.get_query_index(),
+            self.track.get_media_track(),
+            get_fx_query_index(new_index, self.is_input_fx),
+            true
+        );
+    }
+
+    pub fn remove_fx(&self, fx: &Fx) {
+        assert_eq!(fx.get_chain(), *self);
+        if !fx.is_available() {
+            return;
+        }
+        Reaper::instance().medium.track_fx_delete(self.track.get_media_track(), fx.get_query_index());
     }
 
     // Returned FX has GUIDs set

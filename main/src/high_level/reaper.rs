@@ -598,6 +598,14 @@ impl Reaper {
         self.subjects.fx_enabled_changed.borrow().clone()
     }
 
+    pub fn fx_reordered(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+        self.subjects.fx_reordered.borrow().clone()
+    }
+
+    pub fn fx_removed(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
+        self.subjects.fx_removed.borrow().clone()
+    }
+
     pub fn fx_parameter_value_changed(&self) -> impl LocalObservable<'static, Err=(), Item=FxParameter> {
         self.subjects.fx_parameter_value_changed.borrow().clone()
     }

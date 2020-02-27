@@ -11,7 +11,7 @@ use c_str_macro::c_str;
 use slog::debug;
 use wmidi;
 
-use reaper_rs::high_level::{ActionCharacter, ActionKind, AutomationMode, FxChain, FxParameterCharacter, get_media_track_guid, Guid, InputMonitoringMode, MessageBoxKind, MessageBoxResult, MidiEvent, MidiInputDevice, MidiMessage, MidiRecordingInput, Pan, Project, Reaper, RecordingInput, StuffMidiMessageTarget, Tempo, toggleable, Track, Volume, ReaperVersion};
+use reaper_rs::high_level::{ActionCharacter, ActionKind, AutomationMode, FxChain, FxParameterCharacter, get_media_track_guid, Guid, InputMonitoringMode, MessageBoxKind, MessageBoxResult, MidiEvent, MidiInputDevice, MidiMessage, MidiRecordingInput, Pan, Project, Reaper, ReaperVersion, RecordingInput, StuffMidiMessageTarget, Tempo, toggleable, Track, Volume};
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
 
@@ -1395,6 +1395,79 @@ fn create_fx_steps(
             // TODO 1 invocation would be better than 2
             check_eq!(mock.invocation_count(), 2);
             check_eq!(mock.last_arg(), p);
+            Ok(())
+        }),
+        step("fxParameterValueChanged with heuristic fail in REAPER < 5.95", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find fx")?;
+            let p = fx.get_parameter_by_index(0);
+            p.set_normalized_value(0.5);
+            let other_fx_chain = if fx_chain.is_input_fx() {
+                fx.get_track().get_normal_fx_chain()
+            } else {
+                fx.get_track().get_input_fx_chain()
+            };
+            let fx_on_other_fx_chain =
+                other_fx_chain.add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"))
+                    .expect("Couldn't find FX on other FX chain");
+            let p_on_other_fx_chain = fx_on_other_fx_chain.get_parameter_by_index(0);
+            // First set parameter on other FX chain to same value (confuses heuristic if fxChain is input FX chain)
+            p_on_other_fx_chain.set_normalized_value(0.5);
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_parameter_value_changed().take_until(step.finished).subscribe(move |p| {
+                    mock.invoke(p);
+                });
+            });
+            p.set_normalized_value(0.5);
+            // Then
+            check_eq!(mock.invocation_count(), 2);
+            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95")) {
+                check_ne!(mock.last_arg(), p);
+            } else {
+                check_eq!(mock.last_arg(), p);
+            }
+            Ok(())
+        }),
+        step("Move FX", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
+            let synth_fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find synth fx")?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_reordered().take_until(step.finished).subscribe(move |p| {
+                    mock.invoke(p);
+                });
+            });
+            fx_chain.move_fx(&synth_fx, 0);
+            // Then
+            check_eq!(midi_fx.get_index(), 1);
+            check_eq!(synth_fx.get_index(), 0);
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), fx_chain.get_track());
+            Ok(())
+        }),
+        step("Remove FX", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let synth_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find synth fx")?;
+            let midi_fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find MIDI fx")?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_removed().take_until(step.finished).subscribe(move |p| {
+                    mock.invoke(p);
+                });
+            });
+            fx_chain.remove_fx(&synth_fx);
+            // Then
+            check!(!synth_fx.is_available());
+            check!(midi_fx.is_available());
+            check_eq!(midi_fx.get_index(), 0);
+            midi_fx.invalidate_index();
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), synth_fx);
             Ok(())
         }),
     );
