@@ -297,6 +297,7 @@ impl Track {
     }
 
     pub fn set_chunk(&self, chunk: Chunk) {
+        debug!(Reaper::instance().logger, "Set track chunk: {}", chunk);
         let c_string: CString = chunk.into();
         Reaper::instance().medium.set_track_state_chunk(self.get_media_track(), c_string.as_c_str(), true);
     }

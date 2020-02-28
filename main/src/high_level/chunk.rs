@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use std::cell::{RefCell, Ref};
 use std::ffi::{CString, CStr};
+use std::fmt::{Display, Formatter, Error};
 
 // Cheap to clone because string is shared
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -11,6 +12,12 @@ pub struct Chunk {
 impl From<CString> for Chunk {
     fn from(value: CString) -> Self {
         Chunk::new(value.into_string().expect("Chunk content contains illegal characters"))
+    }
+}
+
+impl Display for Chunk {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.content.borrow().as_str())
     }
 }
 
@@ -47,9 +54,19 @@ impl Chunk {
         ChunkRegion::new(self.clone(), 0, self.content.borrow().len())
     }
 
+    pub fn insert_before_region(&mut self, region: &ChunkRegion, content: &str) {
+        self.require_valid_region(region);
+        self.content.borrow_mut().insert_str(region.get_start_pos(), content);
+    }
+
     pub fn insert_after_region(&mut self, region: &ChunkRegion, content: &str) {
         self.require_valid_region(region);
         self.content.borrow_mut().insert_str(region.get_end_pos_plus_one(), content);
+    }
+
+    pub fn insert_before_region_as_block(&mut self, region: &ChunkRegion, content: &str) {
+        self.insert_before_region(region, content);
+        self.insert_new_lines_if_necessary_at(region.get_start_pos(), region.get_start_pos() + content.len());
     }
 
     pub fn insert_after_region_as_block(&mut self, region: &ChunkRegion, content: &str) {
@@ -82,6 +99,11 @@ impl Chunk {
         self.content.borrow_mut().replace_range(region.start_pos..(region.start_pos + region.length), "");
     }
 
+    pub fn replace_region(&mut self, region: &ChunkRegion, content: &str) {
+        self.require_valid_region(region);
+        self.content.borrow_mut().replace_range(region.start_pos..(region.start_pos + region.length), content);
+    }
+
     fn require_valid_region(&self, region: &ChunkRegion) {
         if !region.is_valid() {
             panic!("Invalid chunk region")
@@ -108,6 +130,16 @@ impl ChunkRegion {
         }
         self.get_content().find('\n').map(|rel_pos| {
             self.create_region_from_relative_start_pos(0, rel_pos)
+        }).unwrap_or_else(|| self.clone())
+    }
+
+    pub fn get_last_line(&self) -> ChunkRegion {
+        if !self.is_valid() {
+            return self.clone();
+        }
+        self.get_content().rfind('\n').map(|rel_pos_of_newline| {
+            let rel_pos_after_newline = rel_pos_of_newline + 1;
+            self.create_region_from_relative_start_pos(rel_pos_after_newline, self.get_length() - rel_pos_after_newline)
         }).unwrap_or_else(|| self.clone())
     }
 

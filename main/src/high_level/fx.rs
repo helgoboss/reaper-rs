@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{ChunkRegion, Reaper, Track};
+use crate::high_level::{ChunkRegion, Reaper, Track, Chunk};
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
@@ -183,6 +183,25 @@ impl Fx {
     // Note that the Fx also corrects the index itself whenever one of its methods is called.
     pub fn invalidate_index(&self) {
         self.load_by_guid();
+    }
+
+    // TODO How much sense does it make to expect a chunk here?
+    pub fn set_chunk(&self, mut chunk: Chunk) {
+        // First replace GUID in chunk with the one of this FX
+        if let Some(fx_id_line) = chunk.get_region().find_line_starting_with("FXID ") {
+            // TODO Mmh. We assume here that this is a guid-based FX!?
+            let guid = self.get_guid().expect("FX doesn't have GUID");
+            chunk.replace_region(&fx_id_line, get_fx_id_line(&guid).as_str());
+        }
+        // Then set new chunk
+        self.replace_track_chunk_region(self.get_chunk(), chunk.get_content().borrow().as_str());
+    }
+
+    fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {
+        let mut old_chunk = old_chunk_region.get_parent_chunk();
+        old_chunk.replace_region(&old_chunk_region, new_content);
+        std::mem::drop(old_chunk_region);
+        self.track.set_chunk(old_chunk);
     }
 
     pub fn get_chain(&self) -> FxChain {

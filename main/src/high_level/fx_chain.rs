@@ -47,6 +47,33 @@ impl FxChain {
         Reaper::instance().medium.track_fx_delete(self.track.get_media_track(), fx.get_query_index());
     }
 
+    pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
+        let mut track_chunk = self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, false);
+        let chain_tag = self.find_chunk_region(track_chunk.clone());
+        match chain_tag {
+            Some(tag) => {
+                // There's an FX chain already. Add after last FX.
+                track_chunk.insert_before_region_as_block(&tag.get_last_line(), chunk);
+            },
+            None => {
+                // There's no FX chain yet. Insert it with FX.
+                let mut chain_chunk_string = String::from(r#"
+<FXCHAIN
+WNDRECT 0 144 1082 736
+SHOW 0
+LASTSEL 1
+DOCKED 0
+"#);
+                chain_chunk_string.push_str(chunk);
+                chain_chunk_string.push_str("\n>");
+                track_chunk.insert_after_region_as_block(
+                    &track_chunk.get_region().get_first_line(), chain_chunk_string.as_str());
+            }
+        }
+        self.track.set_chunk(track_chunk);
+        return self.get_last_fx();
+    }
+
     // Returned FX has GUIDs set
     pub fn get_fxs(&self) -> impl Iterator<Item=Fx> + '_ {
         (0..self.get_fx_count()).map(move |i| {

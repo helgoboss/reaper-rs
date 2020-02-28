@@ -1470,6 +1470,52 @@ fn create_fx_steps(
             check_eq!(mock.last_arg(), synth_fx);
             Ok(())
         }),
+        step("Add FX by chunk", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx_chunk = r#"BYPASS 0 0 0
+<VST "VSTi: ReaSynth (Cockos)" reasynth.dll 0 "" 1919251321
+eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
+776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
+AAAQAAAA
+>
+FLOATPOS 0 0 0 0
+FXID {5FF5FB09-9102-4CBA-A3FB-3467BA1BFE5D}
+WAK 0
+"#;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_added().take_until(step.finished).subscribe(move |fx| {
+                    mock.invoke(fx);
+                });
+            });
+            let synth_fx = fx_chain.add_fx_from_chunk(fx_chunk);
+            // Then
+            let synth_fx = synth_fx.ok_or("Didn't return FX")?;
+            check_eq!(synth_fx.get_index(), 1);
+            let guid = Guid::try_from(c_str!("{5FF5FB09-9102-4CBA-A3FB-3467BA1BFE5D}"))?;
+            check_eq!(synth_fx.get_guid(), Some(guid));
+            check_eq!(synth_fx.get_parameter_by_index(5).get_formatted_value().as_c_str(), c_str!("-6.00"));
+            // TODO Detect such a programmatic FX add as well (maybe by hooking into HelperControlSurface::updateMediaTrackPositions)
+            check_eq!(mock.invocation_count(), 0);
+            Ok(())
+        }),
+        step("Set fx chunk", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
+            let synth_fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find synth fx")?;
+            let synth_fx_guid_before = synth_fx.get_guid();
+            // When
+            synth_fx.set_chunk(midi_fx.get_chunk().get_parent_chunk());
+            // Then
+            check_eq!(synth_fx.get_guid(), synth_fx_guid_before);
+            check!(synth_fx.is_available());
+            check_eq!(synth_fx.get_name().as_c_str(), c_str!("VST: ReaControlMIDI (Cockos)"));
+            check_eq!(midi_fx.get_index(), 0);
+            check_eq!(synth_fx.get_index(), 1);
+            Ok(())
+        }),
     );
     steps.into_iter().map(move |s| {
         TestStep {
