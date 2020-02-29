@@ -102,6 +102,22 @@ DOCKED 0
         self.find_chunk_region(self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, false))
     }
 
+    pub fn set_chunk(&self, chunk: &str) {
+        let mut track_chunk = self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, false);
+        let chain_tag = self.find_chunk_region(track_chunk.clone());
+        match chain_tag {
+            Some(r) => {
+                // There's an FX chain already. Replace it.
+                track_chunk.replace_region(&r, chunk);
+            },
+            None => {
+                // There's no FX chain yet. Insert it.
+                track_chunk.insert_after_region_as_block(&track_chunk.get_region().get_first_line(), chunk);
+            }
+        }
+        self.track.set_chunk(track_chunk);
+    }
+
     fn find_chunk_region(&self, track_chunk: Chunk) -> Option<ChunkRegion> {
         track_chunk.get_region().find_first_tag_named(0, self.get_chunk_tag_name())
     }

@@ -202,6 +202,14 @@ impl Fx {
         self.replace_track_chunk_region(self.get_chunk(), chunk_region.get_content().deref());
     }
 
+    pub fn set_tag_chunk(&self, chunk: &str) {
+        self.replace_track_chunk_region(self.get_tag_chunk(), chunk);
+    }
+
+    pub fn set_state_chunk(&self, chunk: &str) {
+        self.replace_track_chunk_region(self.get_state_chunk(), chunk);
+    }
+
     fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {
         let mut old_chunk = old_chunk_region.get_parent_chunk();
         old_chunk.replace_region(&old_chunk_region, new_content);

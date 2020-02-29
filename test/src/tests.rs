@@ -1516,6 +1516,90 @@ WAK 0
             check_eq!(synth_fx.get_index(), 1);
             Ok(())
         }),
+        step("Set fx chunk", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let midi_fx_1 = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx 1")?;
+            let midi_fx_2 = fx_chain.get_fx_by_index(1).ok_or("Couldn't find MIDI fx 2")?;
+            let fx_tag_chunk = r#"<VST "VSTi: ReaSynth (Cockos)" reasynth.dll 0 "" 1919251321
+  eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
+  776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
+  AAAQAAAA
+  >"#;
+            // When
+            midi_fx_2.set_tag_chunk(fx_tag_chunk);
+            // Then
+            check_eq!(midi_fx_2.get_index(), 1);
+            check_eq!(midi_fx_2.get_name().as_c_str(), c_str!("VSTi: ReaSynth (Cockos)"));
+            check_eq!(midi_fx_1.get_index(), 0);
+            check_eq!(midi_fx_1.get_name().as_c_str(), c_str!("VST: ReaControlMIDI (Cockos)"));
+            Ok(())
+        }),
+        step("Set fx state chunk", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
+            let synth_fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find synth fx")?;
+            let synth_param_5 = synth_fx.get_parameter_by_index(5);
+            synth_param_5.set_normalized_value(0.0);
+            check_ne!(synth_param_5.get_formatted_value().as_c_str(), c_str!("-6.00"));
+            let fx_state_chunk = r#"eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
+  776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
+  AAAQAAAA"#;
+            // When
+            synth_fx.set_state_chunk(fx_state_chunk);
+            // Then
+            check_eq!(synth_fx.get_index(), 1);
+            check_eq!(synth_fx.get_name().as_c_str(), c_str!("VSTi: ReaSynth (Cockos)"));
+            check_eq!(synth_param_5.get_formatted_value().as_c_str(), c_str!("-6.00"));
+            check_eq!(midi_fx.get_index(), 0);
+            check_eq!(midi_fx.get_name().as_c_str(), c_str!("VST: ReaControlMIDI (Cockos)"));
+            Ok(())
+        }),
+        step("Set fx chain chunk", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let track = fx_chain.get_track();
+            let other_fx_chain = if fx_chain.is_input_fx() {
+                track.get_normal_fx_chain()
+            } else {
+                track.get_input_fx_chain()
+            };
+            let fx_chain_chunk = format!("{}{}",
+                if fx_chain.is_input_fx() { "<FXCHAIN" } else { "<FXCHAIN_REC" },
+                r#"
+SHOW 0
+LASTSEL 0
+DOCKED 0
+BYPASS 0 0 0
+<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi.dll 0 "" 1919118692
+ZG1jcu5e7f4AAAAAAAAAAOYAAAABAAAAAAAQAA==
+/////wAAAAAAAAAAAAAAAAkAAAAMAAAAAQAAAP8/AAAAIAAAACAAAAAAAAA1AAAAQzpcVXNlcnNcYmtsdW1cQXBwRGF0YVxSb2FtaW5nXFJFQVBFUlxEYXRhXEdNLnJlYWJhbmsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAABNYWpvcgANAAAAMTAyMDM0MDUwNjA3AAEAAAAAAAAAAAAAAAAKAAAA
+DQAAAAEAAAAAAAAAAAAAAAAAAAA=
+AAAQAAAA
+>
+FLOATPOS 0 0 0 0
+FXID {80028901-3762-477F-BE48-EA8324C178AA}
+WAK 0
+BYPASS 0 0 0
+<VST "VSTi: ReaSynth (Cockos)" reasynth.dll 0 "" 1919251321
+eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
+776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
+AAAQAAAA
+>
+FLOATPOS 0 0 0 0
+FXID {5FF5FB09-9102-4CBA-A3FB-3467BA1BFEAA}
+WAK 0
+>
+"#
+            );
+            // When
+            other_fx_chain.set_chunk(fx_chain_chunk.as_str());
+            // Then
+            check_eq!(other_fx_chain.get_fx_count(), 2);
+            check_eq!(fx_chain.get_fx_count(), 2);
+            Ok(())
+        }),
     );
     steps.into_iter().map(move |s| {
         TestStep {
