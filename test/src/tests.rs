@@ -1638,6 +1638,65 @@ WAK 0
             check!(reaper.get_focused_fx().is_none()); // Should be Some but doesn't work
             Ok(())
         }),
+        step("Add track JS fx by original name", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper.fx_added().take_until(step.finished.clone()).subscribe(move |fx| {
+                    mock.invoke(fx);
+                });
+            });
+            let fx = fx_chain.add_fx_by_original_name(c_str!("phaser"));
+            // Then
+            let fx = fx.ok_or("No FX added")?;
+            check_eq!(fx_chain.get_fx_count(), 3);
+            check_eq!(fx_chain.get_fx_by_index(2), Some(fx.clone()));
+            check_eq!(fx_chain.get_last_fx(), Some(fx.clone()));
+            let fx_guid = fx.get_guid().ok_or("No GUID")?;
+            check!(fx_chain.get_fx_by_guid(&fx_guid).is_available());
+            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            check!(!fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
+            check!(fx_chain.get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")).is_some());
+            check_eq!(fx_chain.get_first_fx_by_name(c_str!("phaser")), Some(fx.clone()));
+            check_eq!(mock.invocation_count(), 1);
+            check_eq!(mock.last_arg(), fx.clone());
+            Ok(())
+        }),
+        step("Query track JS fx by index", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let track = fx_chain.get_track();
+            // When
+            let fx = fx_chain.get_fx_by_index(2);
+            // Then
+            let fx = fx.ok_or("No FX found")?;
+            check!(fx.is_available());
+            check_eq!(fx.get_index(), 2);
+            check_eq!(fx.get_query_index(), if fx_chain.is_input_fx() { 0x1000002 } else { 2 });
+            check!(fx.get_guid().is_some());
+            check_eq!(fx.get_name().as_c_str(), c_str!("JS: phaser"));
+            let fx_chunk = fx.get_chunk();
+            check!(fx_chunk.starts_with("BYPASS 0 0 0"));
+            check!(fx_chunk.ends_with("\nWAK 0 0"));
+            let tag_chunk = fx.get_tag_chunk();
+            check!(tag_chunk.starts_with(r#"<JS phaser """#));
+            check!(tag_chunk.ends_with("\n>"));
+            let state_chunk = fx.get_state_chunk();
+            check!(!state_chunk.contains("<"));
+            check!(!state_chunk.contains(">"));
+            check_eq!(fx.get_track(), track);
+            check_eq!(fx.is_input_fx(), fx_chain.is_input_fx());
+            check_eq!(fx.get_chain(), fx_chain);
+            check_eq!(fx.get_parameter_count(), 7);
+            check_eq!(fx.get_parameters().count(), 7);
+            check!(fx.get_parameter_by_index(6).is_available());
+            check!(!fx.get_parameter_by_index(7).is_available());
+            let fx_info = fx.get_info();
+            let stem = fx_info.file_name.file_stem().ok_or("No stem")?;
+            check_eq!(stem, "phaser");
+            Ok(())
+        }),
     );
     steps.into_iter().map(move |s| {
         TestStep {
