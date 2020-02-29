@@ -1507,7 +1507,7 @@ WAK 0
             let synth_fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find synth fx")?;
             let synth_fx_guid_before = synth_fx.get_guid();
             // When
-            synth_fx.set_chunk(midi_fx.get_chunk().get_parent_chunk());
+            synth_fx.set_chunk(midi_fx.get_chunk());
             // Then
             check_eq!(synth_fx.get_guid(), synth_fx_guid_before);
             check!(synth_fx.is_available());

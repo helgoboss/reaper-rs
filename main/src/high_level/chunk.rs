@@ -39,6 +39,12 @@ pub struct ChunkRegion {
     length: usize,
 }
 
+impl Display for ChunkRegion {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.get_content())
+    }
+}
+
 impl Chunk {
     pub fn new(content: String) -> Chunk {
         Chunk {
