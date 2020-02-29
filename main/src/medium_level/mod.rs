@@ -259,7 +259,35 @@ impl Reaper {
         self.low.TrackFX_SetParamNormalized.unwrap()(track, fx, param, value)
     }
 
-    pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult> {
+    pub fn get_focused_fx(&self) -> GetFocusedFxResult {
+        let mut tracknumber = -1;
+        let mut itemnumber = -1;
+        let mut fxnumber = -1;
+        let result = self.low.GetFocusedFX.unwrap()(
+            &mut tracknumber as *mut i32,
+            &mut itemnumber as *mut i32,
+            &mut fxnumber as *mut i32,
+        );
+        match result {
+            0 => GetFocusedFxResult::None,
+            1 => GetFocusedFxResult::TrackFx(
+                GetFocusedFxTrackFxResultData {
+                    tracknumber,
+                    fxnumber
+                }
+            ),
+            2 => GetFocusedFxResult::ItemFx(
+                GetFocusedFxItemFxResultData {
+                    tracknumber,
+                    fxnumber,
+                    itemnumber
+                }
+            ),
+            default => panic!("Unknown GetFocusedFX result value")
+        }
+    }
+
+    pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResultData> {
         let mut tracknumber = -1;
         let mut fxnumber = -1;
         let mut paramnumber = -1;
@@ -271,7 +299,7 @@ impl Reaper {
         if !is_valid {
             return None;
         }
-        Some(GetLastTouchedFxResult {
+        Some(GetLastTouchedFxResultData {
             tracknumber,
             fxnumber,
             paramnumber,
@@ -562,6 +590,18 @@ impl Reaper {
         self.low.SetTrackStateChunk.unwrap()(track, str.as_ptr(), isundo_optional)
     }
 
+    pub fn track_fx_show(&self, track: *mut MediaTrack, index: i32, show_flag: i32) {
+        self.low.TrackFX_Show.unwrap()(track, index, show_flag);
+    }
+
+    pub fn track_fx_get_floating_window(&self, track: *mut MediaTrack, index: i32) -> HWND {
+        self.low.TrackFX_GetFloatingWindow.unwrap()(track, index)
+    }
+
+    pub fn track_fx_get_open(&self, track: *mut MediaTrack, fx: i32) -> bool {
+        self.low.TrackFX_GetOpen.unwrap()(track, fx)
+    }
+
     pub fn csurf_on_send_volume_change(&self, trackid: *mut MediaTrack, send_index: u32, volume: f64, relative: bool) -> f64 {
         self.low.CSurf_OnSendVolumeChange.unwrap()(trackid, send_index as i32, volume, relative)
     }
@@ -679,11 +719,30 @@ pub struct GetParamExResult {
     pub max_val: f64,
 }
 
-pub struct GetLastTouchedFxResult {
+pub struct GetLastTouchedFxResultData {
     pub tracknumber: i32,
     pub fxnumber: i32,
     pub paramnumber: i32,
 }
+
+pub enum GetFocusedFxResult {
+    None,
+    TrackFx(GetFocusedFxTrackFxResultData),
+    ItemFx(GetFocusedFxItemFxResultData),
+}
+
+pub struct GetFocusedFxItemFxResultData {
+    pub tracknumber: i32,
+    pub fxnumber: i32,
+    pub itemnumber: i32,
+}
+
+pub struct GetFocusedFxTrackFxResultData {
+    pub tracknumber: i32,
+    pub fxnumber: i32,
+}
+
+
 
 // TODO Panic for now, just to detect which situations can actually occur
 fn complain_if_minus_one(value: f64) -> f64 {

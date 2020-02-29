@@ -9,6 +9,7 @@ use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
 use std::ops::Deref;
+use crate::low_level::HWND;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -208,6 +209,30 @@ impl Fx {
 
     pub fn set_state_chunk(&self, chunk: &str) {
         self.replace_track_chunk_region(self.get_state_chunk(), chunk);
+    }
+
+    pub fn get_floating_window(&self) -> HWND {
+        self.load_if_necessary_or_complain();
+        Reaper::instance().medium.track_fx_get_floating_window(
+            self.track.get_media_track(), self.get_query_index())
+    }
+
+    pub fn window_is_open(&self) -> bool {
+        Reaper::instance().medium.track_fx_get_open(
+            self.track.get_media_track(), self.get_query_index()
+        )
+    }
+
+    pub fn window_has_focus(&self) -> bool {
+        let hwnd = self.get_floating_window();
+        if hwnd.is_null() {
+            // FX is not open in floating window. In this case we consider it as focused if the FX
+            // chain of that track is open and the currently displayed FX in the FX chain is this FX.
+            self.window_is_open()
+        } else {
+            // FX is open in floating window
+            unimplemented!()
+        }
     }
 
     fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {

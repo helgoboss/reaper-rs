@@ -984,6 +984,16 @@ pub mod root {
             ::std::option::Option<unsafe extern "C" fn() -> *mut root::ReaProject>;
     }
     extern "C" {
+        #[link_name = "\u{1}?GetFocusedFX@@3P6AHPEAH00@ZEA"]
+        pub static mut GetFocusedFX: ::std::option::Option<
+            unsafe extern "C" fn(
+                tracknumberOut: *mut ::std::os::raw::c_int,
+                itemnumberOut: *mut ::std::os::raw::c_int,
+                fxnumberOut: *mut ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
         #[link_name = "\u{1}?GetGlobalAutomationOverride@@3P6AHXZEA"]
         pub static mut GetGlobalAutomationOverride:
             ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
@@ -1376,6 +1386,15 @@ pub mod root {
         >;
     }
     extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetFloatingWindow@@3P6APEAUHWND__@@PEAVMediaTrack@@H@ZEA"]
+        pub static mut TrackFX_GetFloatingWindow: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                index: ::std::os::raw::c_int,
+            ) -> root::HWND,
+        >;
+    }
+    extern "C" {
         #[link_name = "\u{1}?TrackFX_GetFormattedParamValue@@3P6A_NPEAVMediaTrack@@HHPEADH@ZEA"]
         pub static mut TrackFX_GetFormattedParamValue: ::std::option::Option<
             unsafe extern "C" fn(
@@ -1420,6 +1439,12 @@ pub mod root {
                 track: *mut root::MediaTrack,
                 fx: ::std::os::raw::c_int,
             ) -> ::std::os::raw::c_int,
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?TrackFX_GetOpen@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+        pub static mut TrackFX_GetOpen: ::std::option::Option<
+            unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
         >;
     }
     extern "C" {
@@ -1537,6 +1562,16 @@ pub mod root {
                 fx: ::std::os::raw::c_int,
                 idx: ::std::os::raw::c_int,
             ) -> bool,
+        >;
+    }
+    extern "C" {
+        #[link_name = "\u{1}?TrackFX_Show@@3P6AXPEAVMediaTrack@@HH@ZEA"]
+        pub static mut TrackFX_Show: ::std::option::Option<
+            unsafe extern "C" fn(
+                track: *mut root::MediaTrack,
+                index: ::std::os::raw::c_int,
+                showFlag: ::std::os::raw::c_int,
+            ),
         >;
     }
     extern "C" {

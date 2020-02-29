@@ -253,7 +253,11 @@ gen_reaper_struct![
     TrackFX_NavigatePresets,
     GetLastTouchedFX,
     TrackFX_CopyToTrack,
-    TrackFX_Delete
+    TrackFX_Delete,
+    TrackFX_GetFloatingWindow,
+    TrackFX_Show,
+    TrackFX_GetOpen,
+    GetFocusedFX
 ];
 
 #[macro_export]

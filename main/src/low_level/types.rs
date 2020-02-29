@@ -436,3 +436,22 @@ pub type TrackFX_CopyToTrack = fn(
 );
 
 pub type TrackFX_Delete = fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool;
+
+pub type TrackFX_Show = fn(
+    track: *mut root::MediaTrack,
+    index: ::std::os::raw::c_int,
+    showFlag: ::std::os::raw::c_int,
+);
+
+pub type TrackFX_GetFloatingWindow = fn(
+    track: *mut root::MediaTrack,
+    index: ::std::os::raw::c_int,
+) -> root::HWND;
+
+pub type TrackFX_GetOpen = fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool;
+
+pub type GetFocusedFX = fn(
+    tracknumberOut: *mut ::std::os::raw::c_int,
+    itemnumberOut: *mut ::std::os::raw::c_int,
+    fxnumberOut: *mut ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int;

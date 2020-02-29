@@ -1600,6 +1600,18 @@ WAK 0
             check_eq!(fx_chain.get_fx_count(), 2);
             Ok(())
         }),
+        step("Query fx floating window", move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find first fx")?;
+            // When
+            // Then
+            check!(fx.get_floating_window().is_null());
+            check!(!fx.window_is_open());
+            check!(!fx.window_has_focus());
+            check!(reaper.get_focused_fx().is_none());
+            Ok(())
+        }),
     );
     steps.into_iter().map(move |s| {
         TestStep {

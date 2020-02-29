@@ -30,6 +30,7 @@ use crate::high_level::track_send::TrackSend;
 use crate::low_level::{ACCEL, audio_hook_register_t, firewall, gaccel_register_t, HWND, MediaTrack, MIDI_event_t, MIDI_eventlist_EnumItems, midi_Input_GetReadBuf, ReaperPluginContext, ReaProject};
 use crate::low_level;
 use crate::medium_level;
+use crate::medium_level::GetFocusedFxResult;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -592,6 +593,26 @@ impl Reaper {
 
     pub fn fx_added(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
         self.subjects.fx_added.borrow().clone()
+    }
+
+
+    // Attention: Returns normal fx only, not input fx!
+    // This is not reliable! After REAPER start no focused Fx can be found!
+    pub fn get_focused_fx(&self) -> Option<Fx> {
+        match self.medium.get_focused_fx() {
+            GetFocusedFxResult::None => None,
+            GetFocusedFxResult::ItemFx(_) => None, // TODO implement
+            GetFocusedFxResult::TrackFx(data) => {
+                // We don't know the project so we must check each project
+                self.get_projects()
+                    .filter_map(|p| {
+                        let track = p.get_track_by_number(data.tracknumber as u32)?;
+                        let fx = track.get_normal_fx_chain().get_fx_by_index(data.fxnumber as u32)?;
+                        if fx.window_has_focus() { Some(fx) } else { None }
+                    })
+                    .next()
+            }
+        }
     }
 
     pub fn fx_enabled_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
