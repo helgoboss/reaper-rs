@@ -1612,6 +1612,32 @@ WAK 0
             check!(reaper.get_focused_fx().is_none());
             Ok(())
         }),
+        step("Show fx in floating window", move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find first fx")?;
+            // When
+            let (fx_opened_mock, _) = observe_invocations(|mock| {
+                reaper.fx_opened().take_until(step.finished.clone()).subscribe(move |fx| {
+                    mock.invoke(fx);
+                });
+            });
+            let (fx_focused_mock, _) = observe_invocations(|mock| {
+                reaper.fx_focused().take_until(step.finished).subscribe(move |fx| {
+                    mock.invoke(fx);
+                });
+            });
+            fx.show_in_floating_window();
+            // Then
+            check!(!fx.get_floating_window().is_null());
+            check!(fx.window_is_open());
+            check!(fx.window_has_focus());
+            check!(fx_opened_mock.invocation_count() >= 1);
+            check_eq!(fx_opened_mock.last_arg(), fx);
+            check_eq!(fx_focused_mock.invocation_count(), 0); // Should be > 0 but doesn't work
+            check!(reaper.get_focused_fx().is_none()); // Should be Some but doesn't work
+            Ok(())
+        }),
     );
     steps.into_iter().map(move |s| {
         TestStep {

@@ -569,6 +569,14 @@ impl Reaper {
         self.subjects.project_switched.borrow().clone()
     }
 
+    pub fn fx_opened(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
+        self.subjects.fx_opened.borrow().clone()
+    }
+
+    pub fn fx_focused(&self) -> impl LocalObservable<'static, Err=(), Item=Option<Fx>> {
+        self.subjects.fx_focused.borrow().clone()
+    }
+
     pub fn track_added(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
         self.subjects.track_added.borrow().clone()
     }

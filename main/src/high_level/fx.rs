@@ -1,15 +1,15 @@
 use std::cell::Cell;
 use std::ffi::CString;
+use std::ops::Deref;
 use std::path::PathBuf;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{ChunkRegion, Reaper, Track, Chunk};
+use crate::high_level::{Chunk, ChunkRegion, Reaper, Track};
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
-use std::ops::Deref;
-use crate::low_level::HWND;
+use crate::low_level::{GetActiveWindow, HWND};
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -219,7 +219,7 @@ impl Fx {
 
     pub fn window_is_open(&self) -> bool {
         Reaper::instance().medium.track_fx_get_open(
-            self.track.get_media_track(), self.get_query_index()
+            self.track.get_media_track(), self.get_query_index(),
         )
     }
 
@@ -231,8 +231,16 @@ impl Fx {
             self.window_is_open()
         } else {
             // FX is open in floating window
-            unimplemented!()
+            let active_window = unsafe { GetActiveWindow() };
+            active_window == hwnd
         }
+    }
+
+    pub fn show_in_floating_window(&self) {
+        self.load_if_necessary_or_complain();
+        Reaper::instance().medium.track_fx_show(
+            self.track.get_media_track(), self.get_query_index(), 3,
+        );
     }
 
     fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {
@@ -285,7 +293,7 @@ impl Fx {
     pub fn preset_is_dirty(&self) -> bool {
         self.load_if_necessary_or_complain();
         let state_matches_preset = Reaper::instance().medium.track_fx_get_preset(
-            self.track.get_media_track(), self.get_query_index(), 0
+            self.track.get_media_track(), self.get_query_index(), 0,
         ).0;
         !state_matches_preset
     }

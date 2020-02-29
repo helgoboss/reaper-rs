@@ -206,6 +206,9 @@ pub mod root {
         );
     }
     pub type ACCEL = root::tagACCEL;
+    extern "C" {
+        pub fn GetActiveWindow() -> root::HWND;
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct reaper_plugin_info_t {

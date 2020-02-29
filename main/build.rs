@@ -21,6 +21,7 @@ fn generate_bindings() {
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
     // the resulting bindings.
+
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
@@ -144,6 +145,7 @@ fn generate_bindings() {
         .whitelist_type("audio_hook_register_t")
         .whitelist_type("KbdSectionInfo")
         .whitelist_type("GUID")
+        .whitelist_function("GetActiveWindow")
         .whitelist_function("reaper_rs_control_surface::.*")
         .whitelist_function("reaper_rs_midi::.*")
         // Tell cargo to invalidate the built crate whenever any of the
@@ -153,7 +155,6 @@ fn generate_bindings() {
         .generate()
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
-
     // Write the bindings to the bindings.rs file.
     let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
     bindings
