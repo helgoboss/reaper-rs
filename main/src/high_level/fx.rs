@@ -14,7 +14,7 @@ use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
-    // TODO Save chain instead of track
+    // TODO-low Save chain instead of track
     track: Track,
     // Primary identifier, but only for tracked, GUID-based FX instances. Otherwise empty.
     guid: Option<Guid>,
@@ -204,7 +204,7 @@ impl Fx {
         self.load_by_guid();
     }
 
-    // TODO How much sense does it make to expect a chunk region here? Why not a &str? Type safety?
+    // TODO-low How much sense does it make to expect a chunk region here? Why not a &str? Type safety?
     //  Probably because a ChunkRegion is a shared owner of what it holds. If we pass just a &str,
     //  we would need to copy to achieve that ownership. We might need to reconsider the ownership
     //  requirement of ChunkRegions as a whole (but then we need to care about lifetimes).
@@ -212,7 +212,7 @@ impl Fx {
         // First replace GUID in chunk with the one of this FX
         let mut parent_chunk = chunk_region.get_parent_chunk();
         if let Some(fx_id_line) = chunk_region.find_line_starting_with("FXID ") {
-            // TODO Mmh. We assume here that this is a guid-based FX!?
+            // TODO-low Mmh. We assume here that this is a guid-based FX!?
             let guid = self.get_guid().expect("FX doesn't have GUID");
             parent_chunk.replace_region(&fx_id_line, get_fx_id_line(&guid).as_str());
         }
@@ -309,8 +309,8 @@ impl Fx {
 
     pub fn get_preset_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
-        // TODO Use rustfmt everywhere
-        // TODO Integrate into ReaPlus (current preset index?)
+        // TODO-high Use rustfmt everywhere
+        // TODO-low Integrate into ReaPlus (current preset index?)
         Reaper::instance()
             .medium
             .track_fx_get_preset_index(self.track.get_media_track(), self.get_query_index())
@@ -376,9 +376,9 @@ pub struct FxInfo {
 
 impl FxInfo {
     pub fn new(first_line_of_tag_chunk: &str) -> FxInfo {
-        // TODO try_into() rather than panic
-        // TODO Also handle other plugin types
-        // TODO Don't just assign empty strings in case of JS
+        // TODO-medium try_into() rather than panic
+        // TODO-low Also handle other plugin types
+        // TODO-low Don't just assign empty strings in case of JS
         let vst_line_regex = regex!(r#"<VST "(.+?): (.+?) \((.+?)\).*?" (.+)"#);
         let vst_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
         let vst_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);

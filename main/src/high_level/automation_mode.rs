@@ -1,6 +1,6 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-// TODO Maybe split into global (global override) and local enum
+// TODO-low Maybe split into global (global override) and local enum
 #[derive(Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
 #[repr(i32)]
 pub enum AutomationMode {
@@ -30,5 +30,4 @@ mod test {
         assert_eq!(AutomationMode::try_from(3), Ok(AutomationMode::Write));
         assert!(AutomationMode::try_from(7).is_err());
     }
-
 }

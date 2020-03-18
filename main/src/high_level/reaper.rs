@@ -112,16 +112,18 @@ extern "C" fn process_audio_buffer(
     srate: f64,
     reg: *mut audio_hook_register_t,
 ) {
-    // TODO Check performance implications for firewall call
+    // TODO-low Check performance implications for firewall call
     firewall(|| {
         if is_post {
             return;
         }
-        // TODO Check performance implications for Reaper instance unwrapping
+        // TODO-low Check performance implications for Reaper instance unwrapping
         let reaper = Reaper::instance();
-        // TODO Should we use an unsafe cell here for better performance?
+        // TODO-low Should we use an unsafe cell here for better performance?
         let mut subject = reaper.subjects.midi_message_received.borrow_mut();
-        // TODO IMPORTANT Use early return if nobody is subscribed to incoming MIDI events
+        if subject.subscribed_size() == 0 {
+            return;
+        }
         for i in 0..reaper.get_max_midi_input_devices() {
             let dev = reaper.medium.get_midi_input(i);
             if dev.is_null() {
@@ -139,7 +141,7 @@ extern "C" fn process_audio_buffer(
                 }
                 let midi_event = unsafe { &*midi_event };
                 if midi_event.midi_message[0] == 254 {
-                    // Active sensing, we don't want to forward that TODO maybe yes?
+                    // Active sensing, we don't want to forward that TODO-low maybe yes?
                     break;
                 }
                 subject.next(BorrowedReaperMidiEvent(midi_event as *const _));
@@ -198,7 +200,7 @@ pub struct Reaper {
     pub medium: medium_level::Reaper,
     pub logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
-    // TODO Adding an action in an action would panic because we have an immutable borrow of the map
+    // TODO-medium Adding an action in an action would panic because we have an immutable borrow of the map
     //  to obtain and execute the command, plus a mutable borrow of the map to add the new command.
     //  (the latter being unavoidable because we somehow need to modify the map!).
     //  That's not good. Is there a way to avoid this constellation? It's probably hard to avoid the
@@ -329,13 +331,13 @@ impl Drop for Reaper {
     }
 }
 
-// TODO Maybe don't rely on static reference (We don't even know for sure if REAPER guarantees that)
+// TODO-medium Maybe don't rely on static reference (We don't even know for sure if REAPER guarantees that)
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ReaperVersion {
     internal: &'static CStr,
 }
 
-// TODO Working with C strings is a bit exaggerated in case of versions where, we don't have special
+// TODO-high Working with C strings is a bit exaggerated in case of versions where, we don't have special
 //  characters which could cause problems
 impl From<&'static CStr> for ReaperVersion {
     fn from(internal: &'static CStr) -> Self {
@@ -348,7 +350,7 @@ impl Reaper {
         ReaperBuilder::with_all_functions_loaded(context)
     }
 
-    // TODO Make pub when the time has come
+    // TODO-low Make pub when the time has come
     fn with_custom_medium(medium: medium_level::Reaper) -> ReaperBuilder {
         ReaperBuilder::with_custom_medium(medium)
     }
@@ -418,7 +420,7 @@ impl Reaper {
     }
 
     pub fn get_last_touched_fx_parameter(&self) -> Option<FxParameter> {
-        // TODO Sucks: We have to assume it was a parameter in the current project
+        // TODO-low Sucks: We have to assume it was a parameter in the current project
         //  Maybe we should rather rely on our own technique in ControlSurface here!
         // fxQueryIndex is only a real query index since REAPER 5.95, before it didn't say if it's
         // input FX or normal one!
@@ -460,7 +462,7 @@ impl Reaper {
     // We express that in Rust by making `Reaper` class an immutable (in the sense of non-`&mut`)
     // singleton and allowing all REAPER functions to be called from an immutable context ...
     // although they can and often will lead to mutations within REAPER!
-    // TODO Consider naming this get()
+    // TODO-high Consider naming this get()
     pub fn instance() -> &'static Reaper {
         unsafe { REAPER_INSTANCE.as_ref().unwrap() }
     }
@@ -496,7 +498,7 @@ impl Reaper {
     }
 
     fn unregister_command(&self, command_index: u32) {
-        // TODO Use RAII
+        // TODO-medium Use RAII
         let mut command_by_index = self.command_by_index.borrow_mut();
         if let Some(command) = command_by_index.get_mut(&command_index) {
             let acc = &mut command.accelerator_register;
@@ -531,14 +533,14 @@ impl Reaper {
     pub fn get_midi_input_devices(&self) -> impl Iterator<Item = MidiInputDevice> + '_ {
         (0..self.get_max_midi_input_devices())
             .map(move |i| self.get_midi_input_device_by_id(i))
-            // TODO I think we should also return unavailable devices. Client can filter easily.
+            // TODO-low I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
     }
 
     pub fn get_midi_output_devices(&self) -> impl Iterator<Item = MidiOutputDevice> + '_ {
         (0..self.get_max_midi_output_devices())
             .map(move |i| self.get_midi_output_device_by_id(i))
-            // TODO I think we should also return unavailable devices. Client can filter easily.
+            // TODO-low I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
     }
 
@@ -553,7 +555,7 @@ impl Reaper {
     // It's correct that this method returns a non-optional. A commandName is supposed to uniquely identify the action,
     // so it could be part of the resulting Action itself. An Action#isAvailable method could return if the action is
     // actually existing at runtime. That way we would support (still) unloaded Actions.
-    // TODO Don't automatically interpret command name as commandId
+    // TODO-low Don't automatically interpret command name as commandId
     pub fn get_action_by_command_name(&self, command_name: CString) -> Action {
         Action::command_name_based(command_name)
     }
@@ -662,7 +664,7 @@ impl Reaper {
         self.subjects.track_name_changed.borrow().clone()
     }
 
-    // TODO bool is not useful here
+    // TODO-high bool is not useful here
     pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = bool> {
         self.subjects.master_tempo_changed.borrow().clone()
     }
@@ -676,7 +678,7 @@ impl Reaper {
     pub fn get_focused_fx(&self) -> Option<Fx> {
         match self.medium.get_focused_fx() {
             GetFocusedFxResult::None => None,
-            GetFocusedFxResult::ItemFx(_) => None, // TODO implement
+            GetFocusedFxResult::ItemFx(_) => None, // TODO-low implement
             GetFocusedFxResult::TrackFx(data) => {
                 // We don't know the project so we must check each project
                 self.get_projects()
@@ -793,12 +795,12 @@ impl Reaper {
         self.medium.clear_console();
     }
 
-    // TODO Require Send?
+    // TODO-medium Require Send?
     pub fn execute_later_in_main_thread(&self, task: impl FnOnce() + 'static) {
         self.task_sender.send(Box::new(task));
     }
 
-    // TODO Require Send?
+    // TODO-medium Require Send?
     pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) {
         if self.current_thread_is_main_thread() {
             task();
@@ -863,7 +865,7 @@ struct Command {
     /// Reasoning for that type (from inner to outer):
     /// - `FnMut`: We don't use just `fn` because we want to support closures. We don't use just
     ///   `Fn` because we want to support closures that keep mutable references to their captures.
-    ///   TODO What about supporting also FnOnce?
+    ///   TODO-high What about supporting also FnOnce?
     /// - `Box`: Of course we want to support very different closures with very different captures.
     ///   We don't use generic type parameters to achieve that because we need to put Commands into
     ///   a HashMap as values - so we need each Command to have the same size in memory and the same

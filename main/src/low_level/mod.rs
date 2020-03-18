@@ -5,16 +5,16 @@
 mod bindings;
 mod util;
 
-pub use bindings::root::{
-    ReaProject, MediaTrack, ACCEL, gaccel_register_t, HINSTANCE, REAPER_PLUGIN_VERSION,
-    reaper_plugin_info_t, KbdSectionInfo, HWND, GUID, TrackEnvelope,
-    CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETFXPARAM, CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETFXENABLED,
-    CSURF_EXT_SETSENDVOLUME, CSURF_EXT_SETSENDPAN, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXOPEN,
-    CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETBPMANDPLAYRATE, IReaperControlSurface,
-    KbdCmd, audio_hook_register_t, midi_Input, midi_Output, MIDI_event_t, GetActiveWindow
-};
 use bindings::root::reaper_rs_control_surface::get_control_surface;
 pub use bindings::root::reaper_rs_midi::*;
+pub use bindings::root::{
+    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, reaper_plugin_info_t,
+    GetActiveWindow, IReaperControlSurface, KbdCmd, KbdSectionInfo, MIDI_event_t, MediaTrack,
+    ReaProject, TrackEnvelope, ACCEL, CSURF_EXT_SETBPMANDPLAYRATE, CSURF_EXT_SETFOCUSEDFX,
+    CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETFXENABLED, CSURF_EXT_SETFXOPEN, CSURF_EXT_SETFXPARAM,
+    CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETLASTTOUCHEDFX,
+    CSURF_EXT_SETSENDPAN, CSURF_EXT_SETSENDVOLUME, GUID, HINSTANCE, HWND, REAPER_PLUGIN_VERSION,
+};
 pub use control_surface::ControlSurface;
 pub use util::firewall;
 
@@ -22,30 +22,29 @@ mod types;
 
 mod control_surface;
 
-use std::os::raw::{c_char, c_void, c_int};
-use std::ffi::CStr;
-use std::convert::AsRef;
 use c_str_macro::c_str;
-use std::ptr::null_mut;
-use vst::api::HostCallbackProc;
-use std::sync::Once;
+use std::convert::AsRef;
 use std::error::Error;
+use std::ffi::CStr;
+use std::os::raw::{c_char, c_int, c_void};
+use std::ptr::null_mut;
+use std::sync::Once;
+use vst::api::HostCallbackProc;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
 static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
 
-
 // This returns a mutable reference. In general this mutability should not be used, just in case
 // of control surface methods where it's sure that REAPER never reenters them! See
 // ControlSurface doc.
 pub(crate) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
-    unsafe {
-        CONTROL_SURFACE_INSTANCE.as_mut().unwrap()
-    }
+    unsafe { CONTROL_SURFACE_INSTANCE.as_mut().unwrap() }
 }
 
-pub fn get_reaper_plugin_function_provider(rec: *mut reaper_plugin_info_t) -> Result<FunctionProvider, &'static str> {
+pub fn get_reaper_plugin_function_provider(
+    rec: *mut reaper_plugin_info_t,
+) -> Result<FunctionProvider, &'static str> {
     if rec.is_null() {
         return Err("rec not available");
     }
@@ -58,19 +57,26 @@ pub fn get_reaper_plugin_function_provider(rec: *mut reaper_plugin_info_t) -> Re
 }
 
 pub fn create_reaper_plugin_function_provider(GetFunc: types::GetFunc) -> FunctionProvider {
-    Box::new(move |name| {
-        unsafe { GetFunc(name.as_ptr()) as isize }
-    })
+    Box::new(move |name| unsafe { GetFunc(name.as_ptr()) as isize })
 }
 
-pub fn create_reaper_vst_plugin_function_provider(host_callback: HostCallbackProc) -> FunctionProvider {
+pub fn create_reaper_vst_plugin_function_provider(
+    host_callback: HostCallbackProc,
+) -> FunctionProvider {
     Box::new(move |name| {
         #[allow(overflowing_literals)]
-            host_callback(null_mut(), 0xdeadbeef, 0xdeadf00d, 0, name.as_ptr() as *mut c_void, 0.0)
+        host_callback(
+            null_mut(),
+            0xdeadbeef,
+            0xdeadf00d,
+            0,
+            name.as_ptr() as *mut c_void,
+            0.0,
+        )
     })
 }
 
-// TODO Log early errors
+// TODO-low Log early errors
 pub fn bootstrap_reaper_plugin(
     h_instance: HINSTANCE,
     rec: *mut reaper_plugin_info_t,
@@ -79,16 +85,15 @@ pub fn bootstrap_reaper_plugin(
     firewall(|| {
         let function_provider = match get_reaper_plugin_function_provider(rec) {
             Err(_) => return 0,
-            Ok(p) => p
+            Ok(p) => p,
         };
-        let context = ReaperPluginContext {
-            function_provider
-        };
+        let context = ReaperPluginContext { function_provider };
         match init(context) {
             Ok(_) => 1,
-            Err(_) => 0
+            Err(_) => 0,
         }
-    }).unwrap_or(0)
+    })
+    .unwrap_or(0)
 }
 
 pub struct ReaperPluginContext {
@@ -131,7 +136,7 @@ macro_rules! gen_reaper_struct {
             // care of unregistering the control surface if he registered it before.
             // Once installed, it stays installed until this module unloaded
             pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
-                // TODO Ensure that only called if there's not a control surface registered already
+                // TODO-low Ensure that only called if there's not a control surface registered already
                 // Ideally we would have a generic static but as things are now, we need to box it.
                 // However, this is not a big deal because control surfaces are only used in the
                 // main thread where these minimal performance differences are not significant.

@@ -18,10 +18,10 @@ pub struct MidiMessageReceivedPayload<Evt> {
 // Represents a borrowed reference to a MIDI event from REAPER. Cheap to copy because it's just a
 // wrapper around MIDI_event_t. Can be converted into an owned MIDI event in case it needs to live
 // longer than REAPER keeps the event around.
-// TODO Don't hold a pointer but a reference. This activates Rust's lifetime checking which would be
+// TODO-low Don't hold a pointer but a reference. This activates Rust's lifetime checking which would be
 //  super helpful in this case. However, we need a good way to use subjects with references in
-//  rxRust before doing that. This is currently undergoing a refactoring:
-//  https://github.com/rxRust/rxRust/issues/73.
+//  rxRust before doing that. Currently as_mut_ref erases lifetime and is unsafe, so it's not better
+//  than the current approach.
 #[derive(Clone, Copy)]
 pub struct BorrowedReaperMidiEvent(pub *const MIDI_event_t);
 

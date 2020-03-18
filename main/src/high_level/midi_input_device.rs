@@ -1,17 +1,15 @@
-use std::ffi::CString;
 use crate::high_level::Reaper;
+use std::ffi::CString;
 
-// TODO Maybe use enum to distinguish between "All" devices and specific device
+// TODO-medium Maybe use enum to distinguish between "All" devices and specific device
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiInputDevice {
-    id: u32
+    id: u32,
 }
 
 impl MidiInputDevice {
     pub fn new(id: u32) -> Self {
-        MidiInputDevice {
-            id
-        }
+        MidiInputDevice { id }
     }
 
     pub fn get_id(&self) -> u32 {
@@ -19,7 +17,11 @@ impl MidiInputDevice {
     }
 
     pub fn get_name(&self) -> CString {
-        Reaper::instance().medium.get_midi_input_name(self.id, 33).1.expect("Couldn't get name")
+        Reaper::instance()
+            .medium
+            .get_midi_input_name(self.id, 33)
+            .1
+            .expect("Couldn't get name")
     }
 
     // For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if the device ever

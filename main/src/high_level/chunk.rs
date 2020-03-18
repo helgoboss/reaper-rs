@@ -1,17 +1,21 @@
+use std::cell::{Ref, RefCell};
+use std::ffi::{CStr, CString};
+use std::fmt::{Display, Error, Formatter};
 use std::rc::Rc;
-use std::cell::{RefCell, Ref};
-use std::ffi::{CString, CStr};
-use std::fmt::{Display, Formatter, Error};
 
 // Cheap to clone because string is shared
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Chunk {
-    content: Rc<RefCell<String>>
+    content: Rc<RefCell<String>>,
 }
 
 impl From<CString> for Chunk {
     fn from(value: CString) -> Self {
-        Chunk::new(value.into_string().expect("Chunk content contains illegal characters"))
+        Chunk::new(
+            value
+                .into_string()
+                .expect("Chunk content contains illegal characters"),
+        )
     }
 }
 
@@ -23,7 +27,7 @@ impl Display for Chunk {
 
 impl From<Chunk> for CString {
     fn from(value: Chunk) -> Self {
-        // TODO Is this too expensive? Check if we can rely on the chunk to be okay and use an
+        // TODO-low Is this too expensive? Check if we can rely on the chunk to be okay and use an
         //  unsafe conversion.
         let freed_prisoner = Rc::try_unwrap(value.content)
             .expect("Can't convert Chunk to CString when there are still other references");
@@ -48,7 +52,7 @@ impl Display for ChunkRegion {
 impl Chunk {
     pub fn new(content: String) -> Chunk {
         Chunk {
-            content: Rc::new(RefCell::new(content))
+            content: Rc::new(RefCell::new(content)),
         }
     }
 
@@ -62,22 +66,32 @@ impl Chunk {
 
     pub fn insert_before_region(&mut self, region: &ChunkRegion, content: &str) {
         self.require_valid_region(region);
-        self.content.borrow_mut().insert_str(region.get_start_pos(), content);
+        self.content
+            .borrow_mut()
+            .insert_str(region.get_start_pos(), content);
     }
 
     pub fn insert_after_region(&mut self, region: &ChunkRegion, content: &str) {
         self.require_valid_region(region);
-        self.content.borrow_mut().insert_str(region.get_end_pos_plus_one(), content);
+        self.content
+            .borrow_mut()
+            .insert_str(region.get_end_pos_plus_one(), content);
     }
 
     pub fn insert_before_region_as_block(&mut self, region: &ChunkRegion, content: &str) {
         self.insert_before_region(region, content);
-        self.insert_new_lines_if_necessary_at(region.get_start_pos(), region.get_start_pos() + content.len());
+        self.insert_new_lines_if_necessary_at(
+            region.get_start_pos(),
+            region.get_start_pos() + content.len(),
+        );
     }
 
     pub fn insert_after_region_as_block(&mut self, region: &ChunkRegion, content: &str) {
         self.insert_after_region(region, content);
-        self.insert_new_lines_if_necessary_at(region.get_end_pos_plus_one(), region.get_end_pos_plus_one() + content.len());
+        self.insert_new_lines_if_necessary_at(
+            region.get_end_pos_plus_one(),
+            region.get_end_pos_plus_one() + content.len(),
+        );
     }
 
     pub fn insert_new_lines_if_necessary_at(&mut self, pos1: usize, pos2: usize) {
@@ -102,12 +116,17 @@ impl Chunk {
 
     pub fn delete_region(&mut self, region: &ChunkRegion) {
         self.require_valid_region(region);
-        self.content.borrow_mut().replace_range(region.start_pos..(region.start_pos + region.length), "");
+        self.content
+            .borrow_mut()
+            .replace_range(region.start_pos..(region.start_pos + region.length), "");
     }
 
     pub fn replace_region(&mut self, region: &ChunkRegion, content: &str) {
         self.require_valid_region(region);
-        self.content.borrow_mut().replace_range(region.start_pos..(region.start_pos + region.length), content);
+        self.content.borrow_mut().replace_range(
+            region.start_pos..(region.start_pos + region.length),
+            content,
+        );
     }
 
     fn require_valid_region(&self, region: &ChunkRegion) {
@@ -134,33 +153,39 @@ impl ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        self.get_content().find('\n').map(|rel_pos| {
-            self.create_region_from_relative_start_pos(0, rel_pos)
-        }).unwrap_or_else(|| self.clone())
+        self.get_content()
+            .find('\n')
+            .map(|rel_pos| self.create_region_from_relative_start_pos(0, rel_pos))
+            .unwrap_or_else(|| self.clone())
     }
 
     pub fn get_last_line(&self) -> ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        self.get_content().rfind('\n').map(|rel_pos_of_newline| {
-            let rel_pos_after_newline = rel_pos_of_newline + 1;
-            self.create_region_from_relative_start_pos(rel_pos_after_newline, self.get_length() - rel_pos_after_newline)
-        }).unwrap_or_else(|| self.clone())
+        self.get_content()
+            .rfind('\n')
+            .map(|rel_pos_of_newline| {
+                let rel_pos_after_newline = rel_pos_of_newline + 1;
+                self.create_region_from_relative_start_pos(
+                    rel_pos_after_newline,
+                    self.get_length() - rel_pos_after_newline,
+                )
+            })
+            .unwrap_or_else(|| self.clone())
     }
 
     pub fn find_line_starting_with(&self, needle: &str) -> Option<ChunkRegion> {
         if !self.is_valid() {
             return None;
         }
-        self.find_first_string_at_line_start(needle).map(|needle_region| {
-            needle_region.move_right_cursor_right_to_end_of_current_line()
-        })
+        self.find_first_string_at_line_start(needle)
+            .map(|needle_region| needle_region.move_right_cursor_right_to_end_of_current_line())
     }
 
     pub fn is_valid(&self) -> bool {
-        self.length != usize::max_value() &&
-            self.start_pos + self.length <= self.parent_chunk.content.borrow().len()
+        self.length != usize::max_value()
+            && self.start_pos + self.length <= self.parent_chunk.content.borrow().len()
     }
 
     pub fn find_first_string_at_line_start(&self, needle: &str) -> Option<ChunkRegion> {
@@ -176,7 +201,11 @@ impl ChunkRegion {
         }
         let pattern = String::from("\n") + needle;
         content.find(&pattern).map(|rel_pos| {
-            ChunkRegion::new(self.parent_chunk.clone(), self.start_pos + rel_pos + 1, needle.len())
+            ChunkRegion::new(
+                self.parent_chunk.clone(),
+                self.start_pos + rel_pos + 1,
+                needle.len(),
+            )
         })
     }
 
@@ -186,9 +215,7 @@ impl ChunkRegion {
                 &r[self.start_pos..(self.start_pos + self.length)]
             })
         } else {
-            Ref::map(self.parent_chunk.content.borrow(), |r| {
-                &r[0..0]
-            })
+            Ref::map(self.parent_chunk.content.borrow(), |r| &r[0..0])
         }
     }
 
@@ -200,7 +227,10 @@ impl ChunkRegion {
         self.move_left_cursor_right_to_start_of_line_beginning_with("")
     }
 
-    pub fn move_left_cursor_right_to_start_of_line_beginning_with(&self, needle: &str) -> ChunkRegion {
+    pub fn move_left_cursor_right_to_start_of_line_beginning_with(
+        &self,
+        needle: &str,
+    ) -> ChunkRegion {
         self.move_left_cursor_right_to_start_of((String::from("\n") + needle).as_str())
             .move_left_cursor_right_by(1)
     }
@@ -211,7 +241,7 @@ impl ChunkRegion {
         }
         let rel_pos = match self.get_content().find(needle) {
             None => return self.create_invalid_region(),
-            Some(p) => p
+            Some(p) => p,
         };
         self.move_left_cursor_right_by(rel_pos)
     }
@@ -222,7 +252,7 @@ impl ChunkRegion {
         }
         let rel_start_pos_of_needle = match self.get_content().rfind(needle) {
             None => return self.create_invalid_region(),
-            Some(p) => p
+            Some(p) => p,
         };
         self.create_region_from_relative_start_pos(0, rel_start_pos_of_needle)
     }
@@ -242,11 +272,14 @@ impl ChunkRegion {
         let after_content = after.get_content();
         match after_content.find(needle) {
             None => self.create_invalid_region(),
-            Some(rel_pos) => self.move_right_cursor_right_by(rel_pos)
+            Some(rel_pos) => self.move_right_cursor_right_by(rel_pos),
         }
     }
 
-    pub fn move_left_cursor_left_to_start_of_line_beginning_with(&self, needle: &str) -> ChunkRegion {
+    pub fn move_left_cursor_left_to_start_of_line_beginning_with(
+        &self,
+        needle: &str,
+    ) -> ChunkRegion {
         self.move_left_cursor_left_to_start_of((String::from("\n") + needle).as_str())
             .move_left_cursor_right_by(1)
     }
@@ -276,12 +309,15 @@ impl ChunkRegion {
         }
         let start_pos_of_needle = match before.get_content().rfind(needle) {
             None => return self.create_invalid_region(),
-            Some(p) => p
+            Some(p) => p,
         };
         self.move_left_cursor_to(start_pos_of_needle)
     }
 
-    pub fn move_right_cursor_right_to_start_of_line_beginning_with(&self, needle: &str) -> ChunkRegion {
+    pub fn move_right_cursor_right_to_start_of_line_beginning_with(
+        &self,
+        needle: &str,
+    ) -> ChunkRegion {
         self.move_right_cursor_right_to_start_of((String::from("\n") + needle).as_str())
             .move_right_cursor_right_by(1)
     }
@@ -324,7 +360,11 @@ impl ChunkRegion {
     }
 
     // Returns the tag completely from < to >
-    pub fn find_first_tag_named(&self, relative_search_start_pos: usize, tag_name: &str) -> Option<ChunkRegion> {
+    pub fn find_first_tag_named(
+        &self,
+        relative_search_start_pos: usize,
+        tag_name: &str,
+    ) -> Option<ChunkRegion> {
         if !self.is_valid() {
             return None;
         }
@@ -334,8 +374,8 @@ impl ChunkRegion {
     }
 
     // Returns the tag completely from < to >
-    // TODO Why don't we return an invalid chunk region instead of none? That would allow easier chaining and would
-    // be more in line with the other methods.
+    // TODO-medium Why don't we return an invalid chunk region instead of none? That would allow easier chaining and would
+    //  be more in line with the other methods.
     pub fn find_first_tag(&self, relative_search_start_pos: usize) -> Option<ChunkRegion> {
         if !self.is_valid() {
             return None;
@@ -345,9 +385,11 @@ impl ChunkRegion {
             self.parse_tag_starting_from(relative_search_start_pos)
         } else {
             let tag_opener_with_new_line = "\n<";
-            content[relative_search_start_pos..].find(tag_opener_with_new_line)
+            content[relative_search_start_pos..]
+                .find(tag_opener_with_new_line)
                 .and_then(|super_relative_tag_opener_with_new_line_pos| {
-                    let rel_tag_opener_with_new_line_pos = relative_search_start_pos + super_relative_tag_opener_with_new_line_pos;
+                    let rel_tag_opener_with_new_line_pos =
+                        relative_search_start_pos + super_relative_tag_opener_with_new_line_pos;
                     self.parse_tag_starting_from(rel_tag_opener_with_new_line_pos + 1)
                 })
         }
@@ -375,14 +417,18 @@ impl ChunkRegion {
     }
 
     // Precondition: isValid
-    fn find_followed_by_one_of(&self, needle: &str, one_of: &str, mut rel_start_pos: usize) -> Option<usize> {
+    fn find_followed_by_one_of(
+        &self,
+        needle: &str,
+        one_of: &str,
+        mut rel_start_pos: usize,
+    ) -> Option<usize> {
         let content = self.get_content();
         while rel_start_pos < content.len() {
-            let needle_pos_relative_to_rel_start_pos =
-                match content[rel_start_pos..].find(needle) {
-                    None => return None, // Needle not found
-                    Some(p) => p
-                };
+            let needle_pos_relative_to_rel_start_pos = match content[rel_start_pos..].find(needle) {
+                None => return None, // Needle not found
+                Some(p) => p,
+            };
             // Needle found
             let rel_needle_pos = rel_start_pos + needle_pos_relative_to_rel_start_pos;
             let rel_following_char_pos = rel_needle_pos + needle.len();
@@ -414,12 +460,15 @@ impl ChunkRegion {
             let rel_tag_opener_or_closer_pos =
                 match self.find_followed_by_one_of("\n", "<>", rel_start_pos) {
                     None => return None, // No further tag opener or closer found
-                    Some(p) => p
+                    Some(p) => p,
                 };
             // Further tag opener or closer found
             let rel_tag_opener_or_closer_without_newline_pos = rel_tag_opener_or_closer_pos + 1;
-            let tag_opener_or_closer_without_newline =
-                content[rel_tag_opener_or_closer_without_newline_pos..].chars().next().unwrap();
+            let tag_opener_or_closer_without_newline = content
+                [rel_tag_opener_or_closer_without_newline_pos..]
+                .chars()
+                .next()
+                .unwrap();
             if tag_opener_or_closer_without_newline == '<' {
                 // Opening tag (nested)
                 open_levels_count += 1;
@@ -429,8 +478,11 @@ impl ChunkRegion {
                 open_levels_count -= 1;
                 if open_levels_count == 0 {
                     // Found tag closer of searched tag
-                    let length = rel_tag_opener_or_closer_without_newline_pos - rel_tag_opener_pos + 1;
-                    return Some(self.create_region_from_relative_start_pos(rel_tag_opener_pos, length));
+                    let length =
+                        rel_tag_opener_or_closer_without_newline_pos - rel_tag_opener_pos + 1;
+                    return Some(
+                        self.create_region_from_relative_start_pos(rel_tag_opener_pos, length),
+                    );
                 } else {
                     // Nested tag was closed
                     rel_start_pos = rel_tag_opener_or_closer_without_newline_pos + 1;
@@ -441,12 +493,23 @@ impl ChunkRegion {
         None
     }
 
-
     fn create_invalid_region(&self) -> ChunkRegion {
-        ChunkRegion::new(self.parent_chunk.clone(), self.start_pos, usize::max_value())
+        ChunkRegion::new(
+            self.parent_chunk.clone(),
+            self.start_pos,
+            usize::max_value(),
+        )
     }
 
-    fn create_region_from_relative_start_pos(&self, rel_start_pos: usize, length: usize) -> ChunkRegion {
-        ChunkRegion::new(self.parent_chunk.clone(), self.start_pos + rel_start_pos, length)
+    fn create_region_from_relative_start_pos(
+        &self,
+        rel_start_pos: usize,
+        length: usize,
+    ) -> ChunkRegion {
+        ChunkRegion::new(
+            self.parent_chunk.clone(),
+            self.start_pos + rel_start_pos,
+            length,
+        )
     }
 }

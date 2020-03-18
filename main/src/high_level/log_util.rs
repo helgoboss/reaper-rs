@@ -1,10 +1,10 @@
-use std::panic::PanicInfo;
-use std::backtrace::Backtrace;
 use crate::high_level::Reaper;
-use slog::{o, error, Drain};
+use slog::{error, o, Drain};
+use std::backtrace::Backtrace;
+use std::borrow::Cow;
 use std::ffi::CString;
 use std::io;
-use std::borrow::Cow;
+use std::panic::PanicInfo;
 
 pub fn create_std_logger() -> slog::Logger {
     slog::Logger::root(slog_stdlog::StdLog.fuse(), o!())
@@ -17,9 +17,8 @@ pub fn create_reaper_console_logger() -> slog::Logger {
     slog::Logger::root(drain, o!())
 }
 
-// TODO Async logging: https://github.com/gabime/spdlog/wiki/6.-Asynchronous-logging
-// TODO Create per-service loggers https://github.com/gabime/spdlog/issues/630
-// TODO Log to file in user home instead of to console
+// TODO-low Async logging: https://github.com/gabime/spdlog/wiki/6.-Asynchronous-logging
+// TODO-low Log to file in user home instead of to console
 pub fn create_terminal_logger() -> slog::Logger {
     let sink = io::stdout();
     let plain = slog_term::PlainSyncDecorator::new(sink);
@@ -32,7 +31,9 @@ pub fn create_terminal_logger() -> slog::Logger {
 /// need further customization. Have a look at the existing implementation and used helper functions.
 pub fn create_reaper_panic_hook(
     logger: slog::Logger,
-    console_msg_formatter: Option<impl Fn(&PanicInfo, &Backtrace) -> String + 'static + Sync + Send>,
+    console_msg_formatter: Option<
+        impl Fn(&PanicInfo, &Backtrace) -> String + 'static + Sync + Send,
+    >,
 ) -> Box<dyn Fn(&PanicInfo<'_>) + 'static + Sync + Send> {
     Box::new(move |panic_info| {
         let backtrace = Backtrace::force_capture();
@@ -54,12 +55,14 @@ pub fn extract_panic_message(panic_info: &PanicInfo) -> String {
         Some(p) => p.to_string(),
         None => match payload.downcast_ref::<String>() {
             Some(p) => p.clone(),
-            None => String::from("Unknown error")
-        }
+            None => String::from("Unknown error"),
+        },
     }
 }
 
-pub fn create_default_console_msg_formatter(email_address: &'static str) -> impl Fn(&PanicInfo, &Backtrace) -> String {
+pub fn create_default_console_msg_formatter(
+    email_address: &'static str,
+) -> impl Fn(&PanicInfo, &Backtrace) -> String {
     move |panic_info, backtrace| {
         format!("
 
@@ -104,9 +107,8 @@ impl ReaperConsoleSink {
 impl std::io::Write for ReaperConsoleSink {
     fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
         let c_string = CString::new(buf)?;
-        Reaper::instance().execute_when_in_main_thread(move || {
-            Reaper::instance().show_console_msg(&c_string)
-        });
+        Reaper::instance()
+            .execute_when_in_main_thread(move || Reaper::instance().show_console_msg(&c_string));
         Ok(buf.len())
     }
 

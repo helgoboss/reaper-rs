@@ -1,7 +1,6 @@
-use std::panic::{UnwindSafe, catch_unwind};
+use std::panic::{catch_unwind, UnwindSafe};
 
-// TODO Have a look at ReaLearn fault barrier (what exactly will be logged)
-// TODO Maybe make exact behavior configurable application-wide
+// TODO-low Have a look at ReaLearn fault barrier (what exactly will be logged)
 /// Use this in each function called directly by REAPER to establish a fault barrier = not
 /// letting REAPER crash if anything goes wrong within the plugin.
 /// Right now it's used in control surface callbacks (and in some high-level API command hooks).

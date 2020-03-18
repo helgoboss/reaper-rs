@@ -1,5 +1,5 @@
-use crate::low_level::{KbdSectionInfo, KbdCmd};
 use crate::high_level::Action;
+use crate::low_level::{KbdCmd, KbdSectionInfo};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
@@ -12,7 +12,7 @@ impl Section {
     }
 
     pub fn get_action_by_command_id(&self, command_id: i32) -> Action {
-        // TODO Why sometimes i32 and sometimes i64 for command_id (also in original ReaPlus)?
+        // TODO-high Why sometimes i32 and sometimes i64 for command_id (also in original ReaPlus)?
         //  Maybe u32/u64?
         Action::new(*self, command_id as i64, None)
     }
@@ -28,21 +28,17 @@ impl Section {
         self.get_section_info().action_list_cnt as u32
     }
 
-    // TODO Rename all pointer-returning methods to get_raw_*()
+    // TODO-high Rename all pointer-returning methods to get_raw_*()
     pub fn get_raw_section_info(&self) -> *mut KbdSectionInfo {
         self.section_info
     }
 
-    pub fn get_actions(&self) -> impl Iterator<Item=Action> + '_ {
-        (0..self.get_action_count()).map(move |i| {
-            self.get_action_by_index_unchecked(i)
-        })
+    pub fn get_actions(&self) -> impl Iterator<Item = Action> + '_ {
+        (0..self.get_action_count()).map(move |i| self.get_action_by_index_unchecked(i))
     }
 
-    pub(super) fn get_kbd_cmds(&self) -> impl Iterator<Item=&KbdCmd> + '_ {
-        (0..self.get_action_count()).map(move |i| {
-            self.get_kbd_cmd_by_index(i)
-        })
+    pub(super) fn get_kbd_cmds(&self) -> impl Iterator<Item = &KbdCmd> + '_ {
+        (0..self.get_action_count()).map(move |i| self.get_kbd_cmd_by_index(i))
     }
 
     fn get_kbd_cmd_by_index(&self, index: u32) -> &KbdCmd {

@@ -19,7 +19,7 @@ impl FxParameter {
 
     // Returns normalized value [0, 1]
     pub fn get_normalized_value(&self) -> f64 {
-        // TODO deal with nullptr MediaTrack (empty string)
+        // TODO-low deal with nullptr MediaTrack (empty string)
         self.get_reaper_value()
     }
 
@@ -73,7 +73,7 @@ impl FxParameter {
         if result.is_toggle {
             return FxParameterCharacter::Toggle;
         }
-        // TODO Use options instead of -1.0 as soon as clear constellations are possible
+        // TODO-medium Use options instead of -1.0 as soon as clear constellations are possible
         if result.small_step != -1.0 || result.step != -1.0 || result.large_step != -1.0 {
             return FxParameterCharacter::Discrete;
         }
@@ -115,7 +115,7 @@ impl FxParameter {
 
     // Returns a normalized value
     // Returns None if no step size (continuous character)
-    // TODO This is a too opinionated function in that it already interprets and processes some of REAPER's return
+    // TODO-low This is a too opinionated function in that it already interprets and processes some of REAPER's return
     //  values.
     pub fn get_step_size(&self) -> Option<f64> {
         let result = Reaper::instance().medium.track_fx_get_parameter_step_sizes(
@@ -133,8 +133,8 @@ impl FxParameter {
             if span == 0.0 {
                 return None;
             }
-            // TODO Use options instead of -1.0 as soon as clear constellations are possible
-            // TODO Use chaining then (coalesce-like)
+            // TODO-medium Use options instead of -1.0 as soon as clear constellations are possible
+            // TODO-medium Use chaining then (coalesce-like)
             let pref_step_size = if r.small_step != -1.0 {
                 r.small_step
             } else if r.step != -1.0 {

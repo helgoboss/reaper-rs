@@ -3,7 +3,7 @@ use crate::high_level::midi_input_device::MidiInputDevice;
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum RecordingInput {
     None,
-    // TODO Audio inputs in detail
+    // TODO-low Audio inputs in detail
     Mono,
     ReaRoute,
     Stereo,
@@ -24,17 +24,15 @@ impl RecordingInput {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiRecordingInput {
-    rec_input_index: u32
+    rec_input_index: u32,
 }
 
 impl MidiRecordingInput {
     fn new(rec_input_index: u32) -> Self {
-        MidiRecordingInput {
-            rec_input_index
-        }
+        MidiRecordingInput { rec_input_index }
     }
 
-    // TODO Maybe use of_ prefix instead
+    // TODO-high Maybe use of_ prefix instead
     pub fn from_all_devices_and_channels() -> Self {
         Self::from_midi_rec_input_index(63 * 32)
     }

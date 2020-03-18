@@ -31,20 +31,18 @@ use crate::medium_level;
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
-// TODO Think hard about what equality means here!
 #[derive(Clone, Debug, Eq)]
-// TODO Add Copy again and remove LightTrack if possible one day, see https://github.com/rust-lang/rust/issues/20813
-// TODO Reconsider design. Maybe don't do that interior mutability stuff. By moving from lazy to
+// TODO-low Reconsider design. Maybe don't do that interior mutability stuff. By moving from lazy to
 //  eager (determining rea_project and media_track at construction time).
 pub struct Track {
     // Only filled if track loaded.
     media_track: Cell<*mut MediaTrack>,
-    // TODO Do we really need this pointer? Makes copying a tiny bit more expensive than just copying a MediaTrack*.
+    // TODO-low Do we really need this pointer? Makes copying a tiny bit more expensive than just copying a MediaTrack*.
     rea_project: Cell<*mut ReaProject>,
     // Possible states:
     // a) guid, project, !mediaTrack (guid-based and not yet loaded)
     // b) guid, mediaTrack (guid-based and loaded)
-    // TODO This is not super cheap to copy. Do we really need to initialize this eagerly?
+    // TODO-low This is not super cheap to copy. Do we really need to initialize this eagerly?
     guid: Guid,
 }
 
@@ -124,7 +122,7 @@ impl Track {
         RecordingInput::from_rec_input_index(rec_input_index)
     }
 
-    // TODO Support setting other kinds of inputs
+    // TODO-low Support setting other kinds of inputs
     pub fn set_recording_input(&self, input: MidiRecordingInput) {
         self.load_and_check_if_necessary_or_complain();
         let reaper = Reaper::instance();
@@ -138,7 +136,7 @@ impl Track {
         let mut rec_mon = reaper
             .medium
             .get_media_track_info_value(self.get_media_track(), c_str!("I_RECMON"));
-        // TODO This is ugly. Solve in other ways.
+        // TODO-low This is ugly. Solve in other ways.
         let control_surface = get_control_surface_instance();
         control_surface.Extended(
             CSURF_EXT_SETINPUTMONITOR as i32,
@@ -202,7 +200,7 @@ impl Track {
             .csurf_set_surface_volume(self.get_media_track(), reaper_value, null_mut());
     }
 
-    // TODO Maybe return u32 and express master track index in other ways
+    // TODO-high Maybe return u32 and express master track index in other ways
     pub fn get_index(&self) -> i32 {
         self.load_and_check_if_necessary_or_complain();
         let ip_track_number = Reaper::instance()
@@ -213,7 +211,7 @@ impl Track {
             );
         if ip_track_number == 0 {
             // Usually means that track doesn't exist. But this we already checked. This happens only if we query the
-            // number of a track in another project tab. TODO Try to find a working solution. Till then, return 0.
+            // number of a track in another project tab. TODO-low Try to find a working solution. Till then, return 0.
             return 0;
         }
         if ip_track_number == -1 {
@@ -423,7 +421,7 @@ impl Track {
     }
 
     pub fn add_send_to(&self, target_track: Track) -> TrackSend {
-        // TODO Check how this behaves if send already exists
+        // TODO-low Check how this behaves if send already exists
         let send_index = Reaper::instance()
             .medium
             .create_track_send(self.get_media_track(), target_track.get_media_track());
@@ -520,7 +518,7 @@ impl Track {
         }
     }
 
-    // TODO Maybe return by value instead
+    // TODO-medium Maybe return by value instead
     pub fn get_guid(&self) -> &Guid {
         &self.guid
     }
@@ -529,7 +527,7 @@ impl Track {
         if self.rea_project.get().is_null() {
             panic!("For loading per GUID, a project must be given");
         }
-        // TODO Don't save ReaProject but Project as member
+        // TODO-low Don't save ReaProject but Project as member
         let guid = self.get_guid();
         let track = self
             .get_project_unchecked()
@@ -570,7 +568,7 @@ impl Track {
         // No ReaProject* available. Try current project first (most likely in everyday REAPER usage).
         let reaper = Reaper::instance();
         let current_project = reaper.get_current_project();
-        // TODO Add convenience functions to medium API for checking various pointer types
+        // TODO-medium Add convenience functions to medium API for checking various pointer types
         let is_valid_in_current_project = reaper.medium.validate_ptr_2(
             current_project.get_rea_project(),
             self.media_track.get() as *mut c_void,

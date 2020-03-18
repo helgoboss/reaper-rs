@@ -85,7 +85,7 @@ impl HelperControlSurface {
         // to call this not at the first change of something (e.g. arm button pressed) but immediately. Because it
         // captures the initial project/track/FX state. If we don't do this immediately, then it happens that change
         // events (e.g. track arm changed) are not reported because the initial state was unknown.
-        // TODO This executes a bunch of REAPER functions right on start. Maybe do more lazily on activate?
+        // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more lazily on activate?
         //  But before activate we can do almost nothing because execute_on_main_thread doesn't work.
         surface.set_track_list_change();
         surface
@@ -189,7 +189,7 @@ impl HelperControlSurface {
                 let reaper = Reaper::instance();
                 let m = &reaper.medium;
                 let td = TrackData {
-                    // TODO Make functions more accessible in medium API (they are called elsewhere here as well)
+                    // TODO-medium Make functions more accessible in medium API (they are called elsewhere here as well)
                     volume: m.get_media_track_info_value(media_track, c_str!("D_VOL")),
                     pan: m.get_media_track_info_value(media_track, c_str!("D_PAN")),
                     selected: m.get_media_track_info_value(media_track, c_str!("I_SELECTED"))
@@ -528,7 +528,7 @@ impl HelperControlSurface {
             // Could be both
             let param_index = match param_index {
                 None => {
-                    // We don't have a parameter number at our disposal so we need to guess - we guess normal FX TODO
+                    // We don't have a parameter number at our disposal so we need to guess - we guess normal FX TODO-low
                     return false;
                 }
                 Some(i) => i,
@@ -708,7 +708,7 @@ impl HelperControlSurface {
             reaper.subjects.master_tempo_changed.borrow_mut().next(true);
             // If there's a tempo envelope, there are just tempo notifications when the tempo is actually changed.
             // So that's okay for "touched".
-            // TODO What about gradual tempo changes?
+            // TODO-low What about gradual tempo changes?
             reaper.subjects.master_tempo_touched.borrow_mut().next(true);
         }
         if !playrate.is_null() {
@@ -752,7 +752,7 @@ impl ControlSurface for HelperControlSurface {
     }
 
     fn set_track_list_change(&self) {
-        // TODO Not multi-project compatible!
+        // TODO-low Not multi-project compatible!
         let reaper = Reaper::instance();
         let new_active_project = reaper.get_current_project();
         if (new_active_project != self.last_active_project.get()) {
@@ -894,7 +894,7 @@ impl ControlSurface for HelperControlSurface {
         match call as u32 {
             CSURF_EXT_SETINPUTMONITOR => {
                 self.csurf_ext_setinputmonitor(parm1 as *mut MediaTrack, parm2 as *mut i32);
-                // TODO Why do we return 0 in all csurf_ext_ functions? The doc says this should be returned if unsupported.
+                // TODO-medium Why do we return 0 in all csurf_ext_ functions? The doc says this should be returned if unsupported.
                 0
             }
             CSURF_EXT_SETFXPARAM => {
