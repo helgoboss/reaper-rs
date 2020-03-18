@@ -912,7 +912,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             });
             reaper
                 .medium
-                .main_on_command_ex(action.get_command_id() as i32, 0, null_mut());
+                .main_on_command_ex(action.get_command_id(), 0, null_mut());
             // Then
             check_eq!(mock.invocation_count(), 1);
             check_eq!(*mock.last_arg(), action);

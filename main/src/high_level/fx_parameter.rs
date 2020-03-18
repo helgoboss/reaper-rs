@@ -27,7 +27,7 @@ impl FxParameter {
         Reaper::instance().medium.track_fx_set_param_normalized(
             self.get_media_track(),
             self.fx.get_query_index(),
-            self.index as i32,
+            self.index,
             normalized_value,
         );
     }
@@ -36,7 +36,7 @@ impl FxParameter {
         Reaper::instance().medium.track_fx_get_param_normalized(
             self.fx.get_track().get_media_track(),
             self.fx.get_query_index(),
-            self.index as i32,
+            self.index,
         )
     }
 
@@ -50,7 +50,7 @@ impl FxParameter {
             .track_fx_get_param_name(
                 self.get_media_track(),
                 self.fx.get_query_index(),
-                self.index as i32,
+                self.index,
                 256,
             )
             .expect("Couldn't get FX parameter name")
@@ -64,7 +64,7 @@ impl FxParameter {
         let result = Reaper::instance().medium.track_fx_get_parameter_step_sizes(
             self.get_media_track(),
             self.fx.get_query_index(),
-            self.index as i32,
+            self.index,
         );
         let result = match result {
             None => return FxParameterCharacter::Continuous,
@@ -86,7 +86,7 @@ impl FxParameter {
             .track_fx_get_formatted_param_value(
                 self.get_media_track(),
                 self.fx.get_query_index(),
-                self.index as i32,
+                self.index,
                 256,
             )
             .expect("Couldn't format FX param value")
@@ -106,7 +106,7 @@ impl FxParameter {
             .track_fx_format_param_value_normalized(
                 self.get_media_track(),
                 self.fx.get_query_index(),
-                self.index as i32,
+                self.index,
                 normalized_value,
                 256,
             )
@@ -121,7 +121,7 @@ impl FxParameter {
         let result = Reaper::instance().medium.track_fx_get_parameter_step_sizes(
             self.get_media_track(),
             self.fx.get_query_index(),
-            self.index as i32,
+            self.index,
         );
         result.and_then(move |r| {
             if r.is_toggle {
@@ -154,7 +154,7 @@ impl FxParameter {
         let result = Reaper::instance().medium.track_fx_get_param_ex(
             self.get_media_track(),
             self.fx.get_query_index(),
-            self.index as i32,
+            self.index,
         );
         FxParameterValueRange {
             min_val: result.min_val,

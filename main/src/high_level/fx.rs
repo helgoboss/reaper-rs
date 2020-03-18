@@ -139,7 +139,7 @@ impl Fx {
         self.track.clone()
     }
 
-    pub fn get_query_index(&self) -> i32 {
+    pub fn get_query_index(&self) -> u32 {
         get_fx_query_index(self.get_index(), self.is_input_fx)
     }
 
@@ -356,9 +356,9 @@ pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
     }
 }
 
-pub fn get_fx_query_index(index: u32, is_input_fx: bool) -> i32 {
-    let addend: i32 = if is_input_fx { 0x1000000 } else { 0 };
-    addend + (index as i32)
+pub fn get_fx_query_index(index: u32, is_input_fx: bool) -> u32 {
+    let addend: u32 = if is_input_fx { 0x1000000 } else { 0 };
+    addend + index
 }
 
 pub struct FxInfo {

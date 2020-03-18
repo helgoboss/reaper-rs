@@ -11,10 +11,8 @@ impl Section {
         Section { section_info }
     }
 
-    pub fn get_action_by_command_id(&self, command_id: i32) -> Action {
-        // TODO-high Why sometimes i32 and sometimes i64 for command_id (also in original ReaPlus)?
-        //  Maybe u32/u64?
-        Action::new(*self, command_id as i64, None)
+    pub fn get_action_by_command_id(&self, command_id: u32) -> Action {
+        Action::new(*self, command_id, None)
     }
 
     pub fn get_action_by_index(&self, index: u32) -> Action {
@@ -47,7 +45,7 @@ impl Section {
 
     fn get_action_by_index_unchecked(&self, index: u32) -> Action {
         let kbd_cmd = self.get_kbd_cmd_by_index(index);
-        Action::new(*self, kbd_cmd.cmd as i64, Some(index))
+        Action::new(*self, kbd_cmd.cmd, Some(index))
     }
 
     fn get_section_info(&self) -> &KbdSectionInfo {

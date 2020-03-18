@@ -48,6 +48,7 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 // Called by REAPER directly!
 // Only for main section
 extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
+    // TODO-low Pass on flag
     firewall(|| {
         let mut operation = match Reaper::instance()
             .command_by_index
@@ -65,7 +66,7 @@ extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
 
 // Called by REAPER directly!
 // Only for main section
-extern "C" fn hook_post_command(command_id: i32, flag: i32) {
+extern "C" fn hook_post_command(command_id: u32, flag: i32) {
     firewall(|| {
         let reaper = Reaper::instance();
         let action = reaper
@@ -810,12 +811,8 @@ impl Reaper {
     }
 
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: (u8, u8, u8)) {
-        self.medium.stuff_midimessage(
-            target.into(),
-            message.0 as i32,
-            message.1 as i32,
-            message.2 as i32,
-        );
+        self.medium
+            .stuff_midimessage(target.into(), message.0, message.1, message.2);
     }
 
     pub fn current_thread_is_main_thread(&self) -> bool {
@@ -934,7 +931,7 @@ impl RegisteredAction {
 }
 
 #[derive(Debug, Eq, PartialEq, IntoPrimitive)]
-#[repr(i32)]
+#[repr(u32)]
 pub enum StuffMidiMessageTarget {
     VirtualMidiKeyboard,
     MidiAsControlInputQueue,

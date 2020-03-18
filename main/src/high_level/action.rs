@@ -12,7 +12,7 @@ struct RuntimeData {
     // Sometimes shortly named cmd in REAPER API. Unique within section. Might be filled lazily.
     // For built-in actions this ID is globally stable and will always be found. For custom actions, this ID is only
     // stable at runtime and it might be that it can't be found - which means the action is not available.
-    command_id: i64,
+    command_id: u32,
     cached_index: Option<u32>,
 }
 
@@ -48,7 +48,7 @@ impl Action {
         }
     }
 
-    pub(super) fn new(section: Section, command_id: i64, index: Option<u32>) -> Action {
+    pub(super) fn new(section: Section, command_id: u32, index: Option<u32>) -> Action {
         Action {
             command_name: None,
             runtime_data: RefCell::new(Some(RuntimeData {
@@ -83,7 +83,7 @@ impl Action {
             .section
             .get_kbd_cmds()
             .enumerate()
-            .find(|(i, kbd_cmd)| kbd_cmd.cmd as i64 == runtime_data.command_id)
+            .find(|(i, kbd_cmd)| kbd_cmd.cmd == runtime_data.command_id)
             .map(|(i, _)| i as u32)
     }
 
@@ -103,7 +103,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         if Reaper::instance()
             .medium
-            .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id as i32)
+            .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
             == -1
         {
             ActionCharacter::Trigger
@@ -116,11 +116,11 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         Reaper::instance()
             .medium
-            .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id as i32)
+            .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
             == 1
     }
 
-    pub fn get_command_id(&self) -> i64 {
+    pub fn get_command_id(&self) -> u32 {
         let rd = self.load_if_necessary_or_complain();
         rd.command_id
     }
@@ -158,10 +158,10 @@ impl Action {
         let reaper = Reaper::instance();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
-            let cropped_relative_value = relative_value.clamp(0, 127);
+            let cropped_relative_value = relative_value.clamp(0, 127) as u32;
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val, &valhw, &relmode, reaper::GetMainHwnd());
             reaper.medium.kbd_on_main_action_ex(
-                action_command_id as i32,
+                action_command_id,
                 cropped_relative_value,
                 0,
                 2,
@@ -171,8 +171,8 @@ impl Action {
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val, &valhw, &relmode, reaper::GetMainHwnd());
             reaper.medium.kbd_on_main_action_ex(
-                action_command_id as i32,
-                (normalized_value * 127 as f64).round() as i32,
+                action_command_id,
+                (normalized_value * 127 as f64).round() as u32,
                 -1,
                 0,
                 reaper.medium.get_main_hwnd(),
@@ -200,7 +200,7 @@ impl Action {
         }
         self.runtime_data.replace(Some(RuntimeData {
             section: reaper.get_main_section(),
-            command_id: command_id as i64,
+            command_id,
             cached_index: None,
         }));
         true

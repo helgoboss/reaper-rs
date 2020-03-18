@@ -64,9 +64,7 @@ impl Project {
     /// track (master track is not obtainable via this method).
     pub fn get_track_by_index(&self, idx: u32) -> Option<Track> {
         self.complain_if_not_available();
-        let media_track = Reaper::instance()
-            .medium
-            .get_track(self.rea_project, idx as i32);
+        let media_track = Reaper::instance().medium.get_track(self.rea_project, idx);
         if media_track.is_null() {
             return None;
         }
@@ -92,9 +90,7 @@ impl Project {
     pub fn get_tracks(&self) -> impl Iterator<Item = Track> + '_ {
         self.complain_if_not_available();
         (0..self.get_track_count()).map(move |i| {
-            let media_track = Reaper::instance()
-                .medium
-                .get_track(self.rea_project, i as i32);
+            let media_track = Reaper::instance().medium.get_track(self.rea_project, i);
             Track::new(media_track, self.rea_project)
         })
     }
@@ -134,11 +130,10 @@ impl Project {
     pub fn get_selected_tracks(&self, want_master: bool) -> impl Iterator<Item = Track> + '_ {
         self.complain_if_not_available();
         (0..self.get_selected_track_count(want_master)).map(move |i| {
-            let media_track = Reaper::instance().medium.get_selected_track_2(
-                self.rea_project,
-                i as i32,
-                want_master,
-            );
+            let media_track =
+                Reaper::instance()
+                    .medium
+                    .get_selected_track_2(self.rea_project, i, want_master);
             Track::new(media_track, self.rea_project)
         })
     }
@@ -165,10 +160,10 @@ impl Project {
         self.complain_if_not_available();
         // TODO-low reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
         let reaper = Reaper::instance();
-        reaper.medium.insert_track_at_index(index as i32, false);
+        reaper.medium.insert_track_at_index(index, false);
         reaper.medium.track_list_update_all_external_surfaces();
         // TODO-high Use u32 where possible
-        let media_track = reaper.medium.get_track(self.rea_project, index as i32);
+        let media_track = reaper.medium.get_track(self.rea_project, index);
         Track::new(media_track, self.rea_project)
     }
 

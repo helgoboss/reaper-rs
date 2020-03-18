@@ -1,7 +1,7 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 #[derive(Debug, Eq, PartialEq, IntoPrimitive)]
-#[repr(i32)]
+#[repr(u32)]
 pub enum MessageBoxKind {
     Ok = 0,
     OkCancel = 1,
@@ -12,7 +12,7 @@ pub enum MessageBoxKind {
 }
 
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
-#[repr(i32)]
+#[repr(u32)]
 pub enum MessageBoxResult {
     Ok = 1,
     Cancel = 2,
