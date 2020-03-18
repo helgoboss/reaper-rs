@@ -1,23 +1,21 @@
-use crate::low_level::GUID;
-use std::fmt;
 use crate::high_level::Reaper;
-use std::str;
-use std::str::FromStr;
-use std::fmt::{Formatter, Error};
-use std::ffi::{CStr, CString};
+use crate::low_level::GUID;
 use std::convert;
 use std::convert::TryFrom;
+use std::ffi::{CStr, CString};
+use std::fmt;
+use std::fmt::{Error, Formatter};
+use std::str;
+use std::str::FromStr;
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Guid {
-    internal: GUID
+    internal: GUID,
 }
 
 impl Guid {
     pub fn new(internal: GUID) -> Guid {
-        Guid {
-            internal
-        }
+        Guid { internal }
     }
 
     pub fn to_string_with_braces(&self) -> String {
@@ -50,7 +48,9 @@ impl convert::TryFrom<&CStr> for Guid {
     type Error = &'static str;
 
     fn try_from(value: &CStr) -> Result<Guid, Self::Error> {
-        Reaper::instance().medium.string_to_guid(value)
+        Reaper::instance()
+            .medium
+            .string_to_guid(value)
             .map(|g| Guid::new(g))
             .ok_or("Invalid GUID")
     }

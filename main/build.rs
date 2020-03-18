@@ -2,7 +2,7 @@ use cc;
 
 fn main() {
     // #[cfg(not(windows))]
-        generate_bindings();
+    generate_bindings();
     compile_glue();
 }
 
@@ -150,7 +150,7 @@ fn generate_bindings() {
         .whitelist_function("reaper_rs_midi::.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed. TODO Do as soon as available
-//        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        //        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         // Finish the builder and generate the bindings.
         .generate()
         // Unwrap the Result and panic on failure.

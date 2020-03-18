@@ -1,6 +1,6 @@
+use crate::high_level::normalized_value::is_normalized_value;
 use std::fmt::{Display, Error, Formatter};
 use std::ops::RangeInclusive;
-use crate::high_level::normalized_value::is_normalized_value;
 
 type Bpm = f64;
 
@@ -10,7 +10,7 @@ const BPM_SPAN: f64 = MAX_BPM - MIN_BPM;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Tempo {
-    bpm: Bpm
+    bpm: Bpm,
 }
 
 pub fn is_bpm_value(value: f64) -> bool {
@@ -26,7 +26,7 @@ impl Tempo {
     pub fn of_normalized_value(normalized_value: f64) -> Tempo {
         assert!(is_normalized_value(normalized_value));
         Tempo {
-            bpm: MIN_BPM + normalized_value * BPM_SPAN
+            bpm: MIN_BPM + normalized_value * BPM_SPAN,
         }
     }
 

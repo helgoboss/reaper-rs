@@ -1,22 +1,22 @@
 #[macro_use]
 mod assert;
 mod api;
-mod tests;
 mod mock;
+mod tests;
 
-use reaper_rs::high_level::{Reaper, Project};
-use std::error::Error;
-use std::cell::RefCell;
-use std::rc::Rc;
-use std::collections::VecDeque;
-use std::ffi::CString;
-use std::panic;
+use crate::api::{TestStep, TestStepContext};
+use crate::tests::create_test_steps;
+use reaper_rs::high_level::{Project, Reaper};
+use rxrust::prelude::*;
 use std::borrow::Cow;
 use std::borrow::Cow::{Borrowed, Owned};
-use crate::tests::create_test_steps;
+use std::cell::RefCell;
+use std::collections::VecDeque;
+use std::error::Error;
+use std::ffi::CString;
 use std::iter::FromIterator;
-use crate::api::{TestStep, TestStepContext};
-use rxrust::prelude::*;
+use std::panic;
+use std::rc::Rc;
 
 pub fn execute_integration_test() {
     let reaper = Reaper::instance();
@@ -39,7 +39,7 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, ste
     let result = {
         let mut finished = LocalSubject::new();
         let context = TestStepContext {
-            finished: finished.clone()
+            finished: finished.clone(),
         };
         let result = (step.operation)(reaper, context);
         finished.complete();
@@ -47,9 +47,10 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, ste
     };
     match result {
         Ok(()) => {
-            reaper.execute_later_in_main_thread(move || execute_next_step(reaper, steps, step_count));
-        },
-        Err(msg) => log_failure(&msg)
+            reaper
+                .execute_later_in_main_thread(move || execute_next_step(reaper, steps, step_count));
+        }
+        Err(msg) => log_failure(&msg),
     }
 }
 

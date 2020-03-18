@@ -3,12 +3,13 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use super::{ReaProject, MediaTrack};
-use crate::low_level::bindings::root::{HWND, IReaperControlSurface};
-use crate::low_level::{KbdSectionInfo, TrackEnvelope, GUID};
+use super::{MediaTrack, ReaProject};
 use crate::low_level::bindings::root;
+use crate::low_level::bindings::root::{IReaperControlSurface, HWND};
+use crate::low_level::{KbdSectionInfo, TrackEnvelope, GUID};
 
-pub type GetFunc = unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void;
+pub type GetFunc =
+    unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void;
 
 pub type EnumProjects = fn(
     idx: ::std::os::raw::c_int,
@@ -16,10 +17,7 @@ pub type EnumProjects = fn(
     projfnOutOptional_sz: ::std::os::raw::c_int,
 ) -> *mut ReaProject;
 
-pub type GetTrack = fn(
-    proj: *mut ReaProject,
-    trackidx: ::std::os::raw::c_int,
-) -> *mut MediaTrack;
+pub type GetTrack = fn(proj: *mut ReaProject, trackidx: ::std::os::raw::c_int) -> *mut MediaTrack;
 
 pub type ValidatePtr2 = fn(
     proj: *mut ReaProject,
@@ -53,9 +51,8 @@ pub type KBD_OnMainActionEx = fn(
 
 pub type SectionFromUniqueID = fn(uniqueID: ::std::os::raw::c_int) -> *mut KbdSectionInfo;
 
-pub type NamedCommandLookup = fn(
-    command_name: *const ::std::os::raw::c_char,
-) -> ::std::os::raw::c_int;
+pub type NamedCommandLookup =
+    fn(command_name: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int;
 
 pub type ClearConsole = fn();
 
@@ -65,17 +62,13 @@ pub type InsertTrackAtIndex = fn(idx: ::std::os::raw::c_int, wantDefaults: bool)
 
 pub type TrackList_UpdateAllExternalSurfaces = fn();
 
-pub type GetMediaTrackInfo_Value = fn(
-    tr: *mut MediaTrack,
-    parmname: *const ::std::os::raw::c_char,
-) -> f64;
+pub type GetMediaTrackInfo_Value =
+    fn(tr: *mut MediaTrack, parmname: *const ::std::os::raw::c_char) -> f64;
 
 pub type GetAppVersion = fn() -> *const ::std::os::raw::c_char;
 
-pub type GetTrackEnvelopeByName = fn(
-    track: *mut MediaTrack,
-    envname: *const ::std::os::raw::c_char,
-) -> *mut TrackEnvelope;
+pub type GetTrackEnvelopeByName =
+    fn(track: *mut MediaTrack, envname: *const ::std::os::raw::c_char) -> *mut TrackEnvelope;
 
 pub type GetTrackAutomationMode = fn(tr: *mut MediaTrack) -> ::std::os::raw::c_int;
 
@@ -85,16 +78,10 @@ pub type TrackFX_GetRecCount = fn(track: *mut MediaTrack) -> ::std::os::raw::c_i
 
 pub type TrackFX_GetCount = fn(track: *mut MediaTrack) -> ::std::os::raw::c_int;
 
-pub type TrackFX_GetFXGUID = fn(
-    track: *mut MediaTrack,
-    fx: ::std::os::raw::c_int,
-) -> *mut GUID;
+pub type TrackFX_GetFXGUID = fn(track: *mut MediaTrack, fx: ::std::os::raw::c_int) -> *mut GUID;
 
-pub type TrackFX_GetParamNormalized = fn(
-    track: *mut MediaTrack,
-    fx: ::std::os::raw::c_int,
-    param: ::std::os::raw::c_int,
-) -> f64;
+pub type TrackFX_GetParamNormalized =
+    fn(track: *mut MediaTrack, fx: ::std::os::raw::c_int, param: ::std::os::raw::c_int) -> f64;
 
 pub type GetMasterTrack = fn(proj: *mut ReaProject) -> *mut MediaTrack;
 
@@ -108,52 +95,30 @@ pub type CSurf_OnInputMonitorChangeEx = fn(
     allowgang: bool,
 ) -> ::std::os::raw::c_int;
 
-pub type SetMediaTrackInfo_Value = fn(
-    tr: *mut MediaTrack,
-    parmname: *const ::std::os::raw::c_char,
-    newvalue: f64,
-) -> bool;
+pub type SetMediaTrackInfo_Value =
+    fn(tr: *mut MediaTrack, parmname: *const ::std::os::raw::c_char, newvalue: f64) -> bool;
 
 pub type DB2SLIDER = fn(x: f64) -> f64;
 
 pub type SLIDER2DB = fn(y: f64) -> f64;
 
-pub type GetTrackUIVolPan = fn(
-    track: *mut MediaTrack,
-    volumeOut: *mut f64,
-    panOut: *mut f64,
-) -> bool;
+pub type GetTrackUIVolPan =
+    fn(track: *mut MediaTrack, volumeOut: *mut f64, panOut: *mut f64) -> bool;
 
-pub type CSurf_OnVolumeChangeEx = fn(
-    trackid: *mut MediaTrack,
-    volume: f64,
-    relative: bool,
-    allowGang: bool,
-) -> f64;
+pub type CSurf_OnVolumeChangeEx =
+    fn(trackid: *mut MediaTrack, volume: f64, relative: bool, allowGang: bool) -> f64;
 
-pub type CSurf_SetSurfaceVolume = fn(
-    trackid: *mut MediaTrack,
-    volume: f64,
-    ignoresurf: *mut IReaperControlSurface,
-);
+pub type CSurf_SetSurfaceVolume =
+    fn(trackid: *mut MediaTrack, volume: f64, ignoresurf: *mut IReaperControlSurface);
 
-pub type CSurf_OnPanChangeEx = fn(
-    trackid: *mut MediaTrack,
-    pan: f64,
-    relative: bool,
-    allowGang: bool,
-) -> f64;
+pub type CSurf_OnPanChangeEx =
+    fn(trackid: *mut MediaTrack, pan: f64, relative: bool, allowGang: bool) -> f64;
 
-pub type CSurf_SetSurfacePan = fn(
-    trackid: *mut MediaTrack,
-    pan: f64,
-    ignoresurf: *mut IReaperControlSurface,
-);
+pub type CSurf_SetSurfacePan =
+    fn(trackid: *mut MediaTrack, pan: f64, ignoresurf: *mut IReaperControlSurface);
 
-pub type CountSelectedTracks2 = fn(
-    proj: *mut ReaProject,
-    wantmaster: bool,
-) -> ::std::os::raw::c_int;
+pub type CountSelectedTracks2 =
+    fn(proj: *mut ReaProject, wantmaster: bool) -> ::std::os::raw::c_int;
 
 pub type SetTrackSelected = fn(track: *mut MediaTrack, selected: bool);
 
@@ -172,24 +137,16 @@ pub type GetTrackStateChunk = fn(
     isundoOptional: bool,
 ) -> bool;
 
-pub type CSurf_OnRecArmChangeEx = fn(
-    trackid: *mut MediaTrack,
-    recarm: ::std::os::raw::c_int,
-    allowgang: bool,
-) -> bool;
+pub type CSurf_OnRecArmChangeEx =
+    fn(trackid: *mut MediaTrack, recarm: ::std::os::raw::c_int, allowgang: bool) -> bool;
 
-pub type SetTrackStateChunk = fn(
-    track: *mut MediaTrack,
-    str: *const ::std::os::raw::c_char,
-    isundoOptional: bool,
-) -> bool;
+pub type SetTrackStateChunk =
+    fn(track: *mut MediaTrack, str: *const ::std::os::raw::c_char, isundoOptional: bool) -> bool;
 
 pub type DeleteTrack = fn(tr: *mut MediaTrack);
 
-pub type GetTrackNumSends = fn(
-    tr: *mut MediaTrack,
-    category: ::std::os::raw::c_int,
-) -> ::std::os::raw::c_int;
+pub type GetTrackNumSends =
+    fn(tr: *mut MediaTrack, category: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
 
 pub type GetSetTrackSendInfo = fn(
     tr: *mut MediaTrack,
@@ -199,10 +156,8 @@ pub type GetSetTrackSendInfo = fn(
     setNewValue: *mut ::std::os::raw::c_void,
 ) -> *mut ::std::os::raw::c_void;
 
-pub type CreateTrackSend = fn(
-    tr: *mut MediaTrack,
-    desttrInOptional: *mut MediaTrack,
-) -> ::std::os::raw::c_int;
+pub type CreateTrackSend =
+    fn(tr: *mut MediaTrack, desttrInOptional: *mut MediaTrack) -> ::std::os::raw::c_int;
 
 pub type CSurf_OnSendVolumeChange = fn(
     trackid: *mut MediaTrack,
@@ -225,37 +180,25 @@ pub type GetTrackSendUIVolPan = fn(
     panOut: *mut f64,
 ) -> bool;
 
-pub type kbd_getTextFromCmd = fn(
-    cmd: root::DWORD,
-    section: *mut root::KbdSectionInfo,
-) -> *const ::std::os::raw::c_char;
+pub type kbd_getTextFromCmd =
+    fn(cmd: root::DWORD, section: *mut root::KbdSectionInfo) -> *const ::std::os::raw::c_char;
 
 pub type GetToggleCommandState2 = fn(
     section: *mut root::KbdSectionInfo,
     command_id: ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int;
 
-pub type ReverseNamedCommandLookup = fn(
-    command_id: ::std::os::raw::c_int,
-) -> *const ::std::os::raw::c_char;
+pub type ReverseNamedCommandLookup =
+    fn(command_id: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
 
-pub type Main_OnCommandEx = fn(
-    command: ::std::os::raw::c_int,
-    flag: ::std::os::raw::c_int,
-    proj: *mut root::ReaProject,
-);
+pub type Main_OnCommandEx =
+    fn(command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int, proj: *mut root::ReaProject);
 
-pub type CSurf_SetSurfaceMute = fn(
-    trackid: *mut root::MediaTrack,
-    mute: bool,
-    ignoresurf: *mut root::IReaperControlSurface,
-);
+pub type CSurf_SetSurfaceMute =
+    fn(trackid: *mut root::MediaTrack, mute: bool, ignoresurf: *mut root::IReaperControlSurface);
 
-pub type CSurf_SetSurfaceSolo = fn(
-    trackid: *mut root::MediaTrack,
-    solo: bool,
-    ignoresurf: *mut root::IReaperControlSurface,
-);
+pub type CSurf_SetSurfaceSolo =
+    fn(trackid: *mut root::MediaTrack, solo: bool, ignoresurf: *mut root::IReaperControlSurface);
 
 pub type genGuid = fn(g: *mut root::GUID);
 
@@ -307,10 +250,8 @@ pub type StuffMIDIMessage = fn(
     msg3: ::std::os::raw::c_int,
 );
 
-pub type Audio_RegHardwareHook = fn(
-    isAdd: bool,
-    reg: *const root::audio_hook_register_t,
-) -> ::std::os::raw::c_int;
+pub type Audio_RegHardwareHook =
+    fn(isAdd: bool, reg: *const root::audio_hook_register_t) -> ::std::os::raw::c_int;
 
 pub type GetMidiInput = fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input;
 
@@ -325,16 +266,11 @@ pub type TrackFX_AddByName = fn(
 
 pub type TrackFX_GetEnabled = fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool;
 
-pub type TrackFX_SetEnabled = fn(
-    track: *mut root::MediaTrack,
-    fx: ::std::os::raw::c_int,
-    enabled: bool,
-);
+pub type TrackFX_SetEnabled =
+    fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int, enabled: bool);
 
-pub type TrackFX_GetNumParams = fn(
-    track: *mut root::MediaTrack,
-    fx: ::std::os::raw::c_int,
-) -> ::std::os::raw::c_int;
+pub type TrackFX_GetNumParams =
+    fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
 
 pub type TrackFX_GetFXName = fn(
     track: *mut root::MediaTrack,
@@ -402,11 +338,8 @@ pub type TrackFX_GetPresetIndex = fn(
     numberOfPresetsOut: *mut ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int;
 
-pub type TrackFX_SetPresetByIndex = fn(
-    track: *mut root::MediaTrack,
-    fx: ::std::os::raw::c_int,
-    idx: ::std::os::raw::c_int,
-) -> bool;
+pub type TrackFX_SetPresetByIndex =
+    fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int, idx: ::std::os::raw::c_int) -> bool;
 
 pub type TrackFX_NavigatePresets = fn(
     track: *mut root::MediaTrack,
@@ -437,16 +370,11 @@ pub type TrackFX_CopyToTrack = fn(
 
 pub type TrackFX_Delete = fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool;
 
-pub type TrackFX_Show = fn(
-    track: *mut root::MediaTrack,
-    index: ::std::os::raw::c_int,
-    showFlag: ::std::os::raw::c_int,
-);
+pub type TrackFX_Show =
+    fn(track: *mut root::MediaTrack, index: ::std::os::raw::c_int, showFlag: ::std::os::raw::c_int);
 
-pub type TrackFX_GetFloatingWindow = fn(
-    track: *mut root::MediaTrack,
-    index: ::std::os::raw::c_int,
-) -> root::HWND;
+pub type TrackFX_GetFloatingWindow =
+    fn(track: *mut root::MediaTrack, index: ::std::os::raw::c_int) -> root::HWND;
 
 pub type TrackFX_GetOpen = fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool;
 

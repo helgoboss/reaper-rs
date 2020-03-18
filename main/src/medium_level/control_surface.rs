@@ -1,9 +1,9 @@
-use crate::low_level::MediaTrack;
 use crate::low_level;
-use std::ffi::CStr;
+use crate::low_level::MediaTrack;
 use std::borrow::Cow;
+use std::ffi::CStr;
 use std::os::raw::c_void;
-use std::ptr::{null_mut, null};
+use std::ptr::{null, null_mut};
 
 pub trait ControlSurface {
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
@@ -68,28 +68,35 @@ pub trait ControlSurface {
 }
 
 pub struct DelegatingControlSurface<T: ControlSurface> {
-    delegate: T
+    delegate: T,
 }
 
 impl<T: ControlSurface> DelegatingControlSurface<T> {
     pub fn new(delegate: T) -> DelegatingControlSurface<T> {
-        DelegatingControlSurface {
-            delegate
-        }
+        DelegatingControlSurface { delegate }
     }
 }
 
 impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T> {
     fn GetTypeString(&self) -> *const i8 {
-        self.delegate.get_type_string().map(|o| o.as_ptr()).unwrap_or(null_mut())
+        self.delegate
+            .get_type_string()
+            .map(|o| o.as_ptr())
+            .unwrap_or(null_mut())
     }
 
     fn GetDescString(&self) -> *const i8 {
-        self.delegate.get_desc_string().map(|o| o.as_ptr()).unwrap_or(null_mut())
+        self.delegate
+            .get_desc_string()
+            .map(|o| o.as_ptr())
+            .unwrap_or(null_mut())
     }
 
     fn GetConfigString(&self) -> *const i8 {
-        self.delegate.get_config_string().map(|o| o.as_ptr()).unwrap_or(null_mut())
+        self.delegate
+            .get_config_string()
+            .map(|o| o.as_ptr())
+            .unwrap_or(null_mut())
     }
 
     fn CloseNoReset(&self) {
@@ -137,7 +144,8 @@ impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T
     }
 
     fn SetTrackTitle(&self, trackid: *mut MediaTrack, title: *const i8) {
-        self.delegate.set_track_title(trackid, unsafe { CStr::from_ptr(title) })
+        self.delegate
+            .set_track_title(trackid, unsafe { CStr::from_ptr(title) })
     }
 
     fn GetTouchState(&self, trackid: *mut MediaTrack, isPan: i32) -> bool {
@@ -160,7 +168,13 @@ impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T
         self.delegate.is_key_down(key)
     }
 
-    fn Extended(&self, call: i32, parm1: *mut c_void, parm2: *mut c_void, parm3: *mut c_void) -> i32 {
+    fn Extended(
+        &self,
+        call: i32,
+        parm1: *mut c_void,
+        parm2: *mut c_void,
+        parm3: *mut c_void,
+    ) -> i32 {
         self.delegate.extended(call, parm1, parm2, parm3)
     }
 }

@@ -309,7 +309,6 @@ impl Fx {
 
     pub fn get_preset_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
-        // TODO-high Use rustfmt everywhere
         // TODO-low Integrate into ReaPlus (current preset index?)
         Reaper::instance()
             .medium

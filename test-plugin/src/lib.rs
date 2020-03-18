@@ -1,6 +1,6 @@
-use reaper_rs_macros::reaper_plugin;
-use reaper_rs::high_level::{Reaper, ActionKind};
 use c_str_macro::c_str;
+use reaper_rs::high_level::{ActionKind, Reaper};
+use reaper_rs_macros::reaper_plugin;
 use std::error::Error;
 
 #[reaper_plugin(email_address = "info@helgoboss.org")]

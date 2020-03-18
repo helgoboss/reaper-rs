@@ -16,11 +16,14 @@ pub trait MidiMessage {
         let high_status_byte_nibble = extract_high_nibble_from_byte(status_byte);
         if high_status_byte_nibble == 0xf {
             // System message. The complete status byte makes up the type.
-            status_byte.try_into().expect("Unknown system message status byte")
+            status_byte
+                .try_into()
+                .expect("Unknown system message status byte")
         } else {
             // Channel message. Just the high nibble of the status byte makes up the type
             // (low nibble encodes channel).
-            build_byte_from_nibbles(high_status_byte_nibble, 0).try_into()
+            build_byte_from_nibbles(high_status_byte_nibble, 0)
+                .try_into()
                 .expect("Unknown channel message nibble")
         }
     }
@@ -61,7 +64,7 @@ pub enum MidiMessageType {
     Continue = 0xfb,
     Stop = 0xfc,
     ActiveSensing = 0xfe,
-    SystemReset = 0xff
+    SystemReset = 0xff,
 }
 
 fn extract_high_nibble_from_byte(byte: Byte) -> Nibble {
@@ -71,5 +74,5 @@ fn extract_high_nibble_from_byte(byte: Byte) -> Nibble {
 fn build_byte_from_nibbles(high_nibble: Nibble, low_nibble: Nibble) -> Byte {
     debug_assert!(high_nibble <= 0xf);
     debug_assert!(low_nibble <= 0xf);
-    (high_nibble << 4) |low_nibble
+    (high_nibble << 4) | low_nibble
 }

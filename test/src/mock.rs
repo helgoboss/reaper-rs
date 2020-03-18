@@ -1,4 +1,4 @@
-use std::cell::{Cell, RefCell, Ref};
+use std::cell::{Cell, Ref, RefCell};
 use std::rc::Rc;
 
 pub struct InvocationMock<O: Clone> {
@@ -17,11 +17,16 @@ impl<O: Clone> InvocationMock<O> {
     }
 
     pub fn last_arg(&self) -> O {
-        self.last_arg.borrow().clone().expect("There were no invocations")
+        self.last_arg
+            .borrow()
+            .clone()
+            .expect("There were no invocations")
     }
 }
 
-pub fn observe_invocations<O: Clone, R>(op: impl FnOnce(Rc<InvocationMock<O>>) -> R) -> (Rc<InvocationMock<O>>, R) {
+pub fn observe_invocations<O: Clone, R>(
+    op: impl FnOnce(Rc<InvocationMock<O>>) -> R,
+) -> (Rc<InvocationMock<O>>, R) {
     let mock = InvocationMock {
         count: Cell::new(0),
         last_arg: RefCell::new(None),

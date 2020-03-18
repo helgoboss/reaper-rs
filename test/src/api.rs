@@ -1,11 +1,11 @@
-use std::borrow::Cow;
 use reaper_rs::high_level::Reaper;
-use std::error::Error;
 use rxrust::prelude::*;
+use std::borrow::Cow;
+use std::error::Error;
 
 type TestStepFinished = LocalSubject<'static, (), ()>;
 pub struct TestStepContext {
-    pub finished: TestStepFinished
+    pub finished: TestStepFinished,
 }
 type TestStepResult = Result<(), Cow<'static, str>>;
 
@@ -15,8 +15,8 @@ pub struct TestStep {
 }
 
 pub fn step<Op>(name: impl Into<Cow<'static, str>>, operation: Op) -> TestStep
-    where
-        Op: FnOnce(&'static Reaper, TestStepContext) -> TestStepResult + 'static,
+where
+    Op: FnOnce(&'static Reaper, TestStepContext) -> TestStepResult + 'static,
 {
     TestStep {
         name: name.into(),

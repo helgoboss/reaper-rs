@@ -1,15 +1,13 @@
 use crate::high_level::Reaper;
 
 pub struct Pan {
-    normalized_value: f64
+    normalized_value: f64,
 }
 
 impl Pan {
     pub fn of_normalized_value(normalized_value: f64) -> Pan {
         assert!(0.0 <= normalized_value && normalized_value <= 1.0);
-        Pan {
-            normalized_value
-        }
+        Pan { normalized_value }
     }
 
     pub fn of_reaper_value(reaper_value: f64) -> Pan {

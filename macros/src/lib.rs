@@ -28,7 +28,9 @@ pub fn reaper_plugin(attr: TokenStream, input: TokenStream) -> TokenStream {
     let main_function = syn::parse_macro_input!(input as syn::ItemFn);
     let args = match ReaperPluginMacroArgs::from_list(&args) {
         Ok(v) => v,
-        Err(e) => { return e.write_errors().into(); }
+        Err(e) => {
+            return e.write_errors().into();
+        }
     };
     let email_address = args.email_address;
     let main_function_name = &main_function.sig.ident;

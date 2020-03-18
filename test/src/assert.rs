@@ -1,14 +1,12 @@
 macro_rules! check {
-    ($condition:expr) => {
-        {
-            let result = if ($condition) {
-                Ok(())
-            } else {
-                Err(stringify!($condition))
-            };
-            result?
-        }
-    }
+    ($condition:expr) => {{
+        let result = if ($condition) {
+            Ok(())
+        } else {
+            Err(stringify!($condition))
+        };
+        result?
+    }};
 }
 
 macro_rules! check_eq {
@@ -20,8 +18,8 @@ macro_rules! check_eq {
                 } else {
                     let actual_expr = stringify!($actual);
                     let expected_expr = stringify!($expected);
-                    Err(
-                        format!("\
+                    Err(format!(
+                        "\
 Expression `{actual_expr}`
 
 ```rust
@@ -33,17 +31,16 @@ was expected to be equal to expression `{expected_expr}`
 ```rust
 {expected_val:#?}
 ```",
-                            actual_expr = actual_expr,
-                            expected_expr = expected_expr,
-                            expected_val = &*expected_val,
-                            actual_val = &*actual_val
-                        )
-                    )
+                        actual_expr = actual_expr,
+                        expected_expr = expected_expr,
+                        expected_val = &*expected_val,
+                        actual_val = &*actual_val
+                    ))
                 };
                 result?
             }
         }
-    }
+    };
 }
 
 macro_rules! check_ne {
@@ -55,8 +52,8 @@ macro_rules! check_ne {
                 } else {
                     let actual_expr = stringify!($actual);
                     let expected_expr = stringify!($expected);
-                    Err(
-                        format!("\
+                    Err(format!(
+                        "\
 Expression `{actual_expr}`
 
 ```rust
@@ -68,15 +65,14 @@ was expected to not be equal to expression `{expected_expr}`
 ```rust
 {expected_val:#?}
 ```",
-                            actual_expr = actual_expr,
-                            expected_expr = expected_expr,
-                            expected_val = &*expected_val,
-                            actual_val = &*actual_val
-                        )
-                    )
+                        actual_expr = actual_expr,
+                        expected_expr = expected_expr,
+                        expected_val = &*expected_val,
+                        actual_val = &*actual_val
+                    ))
                 };
                 result?
             }
         }
-    }
+    };
 }
