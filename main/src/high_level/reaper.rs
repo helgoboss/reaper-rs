@@ -7,8 +7,8 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_int, c_ushort, c_void};
 use std::ptr::{null, null_mut};
 use std::rc::Rc;
-use std::sync::{mpsc, Once};
 use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{mpsc, Once};
 use std::thread;
 use std::thread::ThreadId;
 
@@ -20,17 +20,26 @@ use rxrust::prelude::*;
 use rxrust::subscriber::Subscriber;
 use rxrust::subscription::SubscriptionLike;
 
-use crate::high_level::{Action, BorrowedReaperMidiEvent, create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger, create_terminal_logger, Guid, MessageBoxKind, MessageBoxResult, MidiEvent, MidiInputDevice, MidiOutputDevice, Project, Section, Track, UndoBlock};
-use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx::Fx;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::helper_control_surface::HelperControlSurface;
 use crate::high_level::track_send::TrackSend;
-use crate::low_level::{ACCEL, audio_hook_register_t, firewall, gaccel_register_t, HWND, MediaTrack, MIDI_event_t, MIDI_eventlist_EnumItems, midi_Input_GetReadBuf, ReaperPluginContext, ReaProject};
+use crate::high_level::ActionKind::Toggleable;
+use crate::high_level::{
+    create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
+    create_terminal_logger, Action, BorrowedReaperMidiEvent, Guid, MessageBoxKind,
+    MessageBoxResult, MidiEvent, MidiInputDevice, MidiOutputDevice, Project, Section, Track,
+    UndoBlock,
+};
 use crate::low_level;
+use crate::low_level::{
+    audio_hook_register_t, firewall, gaccel_register_t, midi_Input_GetReadBuf, MIDI_event_t,
+    MIDI_eventlist_EnumItems, MediaTrack, ReaProject, ReaperPluginContext, ACCEL, HWND,
+};
 use crate::medium_level;
 use crate::medium_level::GetFocusedFxResult;
+use std::ops::Deref;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -40,13 +49,18 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 // Only for main section
 extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
     firewall(|| {
-        let mut operation = match Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
+        let mut operation = match Reaper::instance()
+            .command_by_index
+            .borrow()
+            .get(&(command_index as u32))
+        {
             Some(command) => command.operation.clone(),
-            None => return false
+            None => return false,
         };
         (*operation).borrow_mut().call_mut(());
         true
-    }).unwrap_or(false)
+    })
+    .unwrap_or(false)
 }
 
 // Called by REAPER directly!
@@ -54,8 +68,14 @@ extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
 extern "C" fn hook_post_command(command_id: i32, flag: i32) {
     firewall(|| {
         let reaper = Reaper::instance();
-        let action = reaper.get_main_section().get_action_by_command_id(command_id);
-        reaper.subjects.action_invoked.borrow_mut().next(Rc::new(action));
+        let action = reaper
+            .get_main_section()
+            .get_action_by_command_id(command_id);
+        reaper
+            .subjects
+            .action_invoked
+            .borrow_mut()
+            .next(Payload(Rc::new(action)));
     });
 }
 
@@ -63,19 +83,35 @@ extern "C" fn hook_post_command(command_id: i32, flag: i32) {
 // Only for main section
 extern "C" fn toggle_action(command_index: i32) -> i32 {
     firewall(|| {
-        if let Some(command) = Reaper::instance().command_by_index.borrow().get(&(command_index as u32)) {
+        if let Some(command) = Reaper::instance()
+            .command_by_index
+            .borrow()
+            .get(&(command_index as u32))
+        {
             match &command.kind {
-                ActionKind::Toggleable(is_on) => if is_on() { 1 } else { 0 },
-                ActionKind::NotToggleable => -1
+                ActionKind::Toggleable(is_on) => {
+                    if is_on() {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                ActionKind::NotToggleable => -1,
             }
         } else {
             -1
         }
-    }).unwrap_or(-1)
+    })
+    .unwrap_or(-1)
 }
 
 // Called by REAPER directly!
-extern "C" fn process_audio_buffer(is_post: bool, len: i32, srate: f64, reg: *mut audio_hook_register_t) {
+extern "C" fn process_audio_buffer(
+    is_post: bool,
+    len: i32,
+    srate: f64,
+    reg: *mut audio_hook_register_t,
+) {
     // TODO Check performance implications for firewall call
     firewall(|| {
         if is_post {
@@ -95,7 +131,8 @@ extern "C" fn process_audio_buffer(is_post: bool, len: i32, srate: f64, reg: *mu
             let midi_events = unsafe { midi_Input_GetReadBuf(dev as *mut _) };
             let mut bpos = 0;
             loop {
-                let midi_event = unsafe { MIDI_eventlist_EnumItems(midi_events, &mut bpos as *mut c_int) };
+                let midi_event =
+                    unsafe { MIDI_eventlist_EnumItems(midi_events, &mut bpos as *mut c_int) };
                 if midi_event.is_null() {
                     // No MIDI messages left
                     break;
@@ -143,10 +180,7 @@ impl ReaperBuilder {
     }
 
     pub fn setup(self) {
-        Reaper::setup(
-            self.medium,
-            self.logger.unwrap_or_else(create_std_logger),
-        );
+        Reaper::setup(self.medium, self.logger.unwrap_or_else(create_std_logger));
     }
 }
 
@@ -212,7 +246,7 @@ pub(super) struct EventStreamSubjects {
     pub(super) fx_enabled_changed: EventStreamSubject<Fx>,
     pub(super) fx_opened: EventStreamSubject<Fx>,
     pub(super) fx_closed: EventStreamSubject<Fx>,
-    pub(super) fx_focused: EventStreamSubject<Option<Fx>>,
+    pub(super) fx_focused: EventStreamSubject<Payload<Option<Fx>>>,
     pub(super) fx_reordered: EventStreamSubject<Track>,
     pub(super) fx_parameter_value_changed: EventStreamSubject<FxParameter>,
     pub(super) fx_parameter_touched: EventStreamSubject<FxParameter>,
@@ -222,10 +256,14 @@ pub(super) struct EventStreamSubjects {
     pub(super) master_playrate_touched: EventStreamSubject<bool>,
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
-    pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
+    pub(super) action_invoked: EventStreamSubject<Payload<Rc<Action>>>,
     pub(super) midi_message_received: EventStreamSubject<BorrowedReaperMidiEvent>,
 }
 
+#[derive(Clone)]
+pub struct Payload<T>(pub T);
+
+impl<T: Clone> PayloadCopy for Payload<T> {}
 
 impl EventStreamSubjects {
     fn new() -> EventStreamSubjects {
@@ -301,9 +339,7 @@ pub struct ReaperVersion {
 //  characters which could cause problems
 impl From<&'static CStr> for ReaperVersion {
     fn from(internal: &'static CStr) -> Self {
-        ReaperVersion {
-            internal
-        }
+        ReaperVersion { internal }
     }
 }
 
@@ -345,30 +381,39 @@ impl Reaper {
     }
 
     fn init(&self, task_receiver: Receiver<Task>) {
-        self.medium.install_control_surface(HelperControlSurface::new(task_receiver));
+        self.medium
+            .install_control_surface(HelperControlSurface::new(task_receiver));
     }
 
     // Must be idempotent
     pub fn activate(&self) {
-        self.medium.plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
-        self.medium.plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
-        self.medium.plugin_register(c_str!("hookpostcommand"), hook_post_command as *mut c_void);
+        self.medium
+            .plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
+        self.medium
+            .plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
+        self.medium
+            .plugin_register(c_str!("hookpostcommand"), hook_post_command as *mut c_void);
         self.medium.register_control_surface();
-        self.medium.audio_reg_hardware_hook(true, &self.audio_hook as *const _);
+        self.medium
+            .audio_reg_hardware_hook(true, &self.audio_hook as *const _);
     }
 
     // Must be idempotent
     pub fn deactivate(&self) {
-        self.medium.audio_reg_hardware_hook(false, &self.audio_hook as *const _);
+        self.medium
+            .audio_reg_hardware_hook(false, &self.audio_hook as *const _);
         self.medium.unregister_control_surface();
-        self.medium.plugin_register(c_str!("-hookpostcommand"), hook_post_command as *mut c_void);
-        self.medium.plugin_register(c_str!("-toggleaction"), toggle_action as *mut c_void);
-        self.medium.plugin_register(c_str!("-hookcommand"), hook_command as *mut c_void);
+        self.medium
+            .plugin_register(c_str!("-hookpostcommand"), hook_post_command as *mut c_void);
+        self.medium
+            .plugin_register(c_str!("-toggleaction"), toggle_action as *mut c_void);
+        self.medium
+            .plugin_register(c_str!("-hookcommand"), hook_command as *mut c_void);
     }
 
     pub fn get_version(&self) -> ReaperVersion {
         ReaperVersion {
-            internal: self.medium.get_app_version()
+            internal: self.medium.get_app_version(),
         }
     }
 
@@ -379,7 +424,7 @@ impl Reaper {
         // input FX or normal one!
         let result = match self.medium.get_last_touched_fx() {
             None => return None,
-            Some(r) => r
+            Some(r) => r,
         };
         let normalized_track_index = result.tracknumber - 1;
         if normalized_track_index >= self.get_current_project().get_track_count() as i32 {
@@ -390,11 +435,13 @@ impl Reaper {
         let track = if normalized_track_index == -1 {
             self.get_current_project().get_master_track()
         } else {
-            self.get_current_project().get_track_by_index(normalized_track_index as u32).unwrap()
+            self.get_current_project()
+                .get_track_by_index(normalized_track_index as u32)
+                .unwrap()
         };
         let fx = match track.get_fx_by_query_index(result.fxnumber) {
             None => return None,
-            Some(fx) => fx
+            Some(fx) => fx,
         };
         Some(fx.get_parameter_by_index(result.paramnumber as u32))
     }
@@ -415,9 +462,7 @@ impl Reaper {
     // although they can and often will lead to mutations within REAPER!
     // TODO Consider naming this get()
     pub fn instance() -> &'static Reaper {
-        unsafe {
-            REAPER_INSTANCE.as_ref().unwrap()
-        }
+        unsafe { REAPER_INSTANCE.as_ref().unwrap() }
     }
 
     pub fn register_action(
@@ -426,10 +471,17 @@ impl Reaper {
         description: impl Into<Cow<'static, CStr>>,
         operation: impl FnMut() + 'static,
         kind: ActionKind,
-    ) -> RegisteredAction
-    {
-        let command_index = self.medium.plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void) as u32;
-        let command = Command::new(command_index, description.into(), Rc::new(RefCell::new(operation)), kind);
+    ) -> RegisteredAction {
+        let command_index = self
+            .medium
+            .plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void)
+            as u32;
+        let command = Command::new(
+            command_index,
+            description.into(),
+            Rc::new(RefCell::new(operation)),
+            kind,
+        );
         self.register_command(command_index, command);
         RegisteredAction::new(command_index)
     }
@@ -438,7 +490,8 @@ impl Reaper {
         if let Entry::Vacant(p) = self.command_by_index.borrow_mut().entry(command_index) {
             let command = p.insert(command);
             let acc = &mut command.accelerator_register;
-            self.medium.plugin_register(c_str!("gaccel"), acc as *mut _ as *mut c_void);
+            self.medium
+                .plugin_register(c_str!("gaccel"), acc as *mut _ as *mut c_void);
         }
     }
 
@@ -447,7 +500,8 @@ impl Reaper {
         let mut command_by_index = self.command_by_index.borrow_mut();
         if let Some(command) = command_by_index.get_mut(&command_index) {
             let acc = &mut command.accelerator_register;
-            self.medium.plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
+            self.medium
+                .plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
             command_by_index.remove(&command_index);
         }
     }
@@ -474,14 +528,14 @@ impl Reaper {
         MidiOutputDevice::new(id)
     }
 
-    pub fn get_midi_input_devices(&self) -> impl Iterator<Item=MidiInputDevice> + '_ {
+    pub fn get_midi_input_devices(&self) -> impl Iterator<Item = MidiInputDevice> + '_ {
         (0..self.get_max_midi_input_devices())
             .map(move |i| self.get_midi_input_device_by_id(i))
             // TODO I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
     }
 
-    pub fn get_midi_output_devices(&self) -> impl Iterator<Item=MidiOutputDevice> + '_ {
+    pub fn get_midi_output_devices(&self) -> impl Iterator<Item = MidiOutputDevice> + '_ {
         (0..self.get_max_midi_output_devices())
             .map(move |i| self.get_midi_output_device_by_id(i))
             // TODO I think we should also return unavailable devices. Client can filter easily.
@@ -552,8 +606,16 @@ impl Reaper {
     }
 
     // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret 1=OK,2=CANCEL,3=ABORT,4=RETRY,5=IGNORE,6=YES,7=NO
-    pub fn show_message_box(&self, msg: &CStr, title: &CStr, kind: MessageBoxKind) -> MessageBoxResult {
-        self.medium.show_message_box(msg, title, kind.into()).try_into().expect("Unknown message box result")
+    pub fn show_message_box(
+        &self,
+        msg: &CStr,
+        title: &CStr,
+        kind: MessageBoxKind,
+    ) -> MessageBoxResult {
+        self.medium
+            .show_message_box(msg, title, kind.into())
+            .try_into()
+            .expect("Unknown message box result")
     }
 
     pub fn get_main_section(&self) -> Section {
@@ -561,48 +623,53 @@ impl Reaper {
     }
 
     pub fn create_empty_project_in_new_tab(&self) -> Project {
-        self.get_main_section().get_action_by_command_id(41929).invoke_as_trigger(None);
+        self.get_main_section()
+            .get_action_by_command_id(41929)
+            .invoke_as_trigger(None);
         self.get_current_project()
     }
 
-    pub fn project_switched(&self) -> impl LocalObservable<'static, Err=(), Item=Project> {
+    pub fn project_switched(&self) -> impl LocalObservable<'static, Err = (), Item = Project> {
         self.subjects.project_switched.borrow().clone()
     }
 
-    pub fn fx_opened(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
+    pub fn fx_opened(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
         self.subjects.fx_opened.borrow().clone()
     }
 
-    pub fn fx_focused(&self) -> impl LocalObservable<'static, Err=(), Item=Option<Fx>> {
+    pub fn fx_focused(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = Payload<Option<Fx>>> {
         self.subjects.fx_focused.borrow().clone()
     }
 
-    pub fn track_added(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_added(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_added.borrow().clone()
     }
 
-    pub fn midi_message_received(&self) -> impl LocalObservable<'static, Err=(), Item=impl MidiEvent + Clone> {
+    pub fn midi_message_received(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = impl MidiEvent + Clone> {
         self.subjects.midi_message_received.borrow().clone()
     }
 
     // Delivers a GUID-based track (to still be able to identify it even it is deleted)
-    pub fn track_removed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_removed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_removed.borrow().clone()
     }
 
-    pub fn track_name_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_name_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_name_changed.borrow().clone()
     }
 
     // TODO bool is not useful here
-    pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err=(), Item=bool> {
+    pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = bool> {
         self.subjects.master_tempo_changed.borrow().clone()
     }
 
-    pub fn fx_added(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
+    pub fn fx_added(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
         self.subjects.fx_added.borrow().clone()
     }
-
 
     // Attention: Returns normal fx only, not input fx!
     // This is not reliable! After REAPER start no focused Fx can be found!
@@ -615,71 +682,90 @@ impl Reaper {
                 self.get_projects()
                     .filter_map(|p| {
                         let track = p.get_track_by_number(data.tracknumber as u32)?;
-                        let fx = track.get_normal_fx_chain().get_fx_by_index(data.fxnumber as u32)?;
-                        if fx.window_has_focus() { Some(fx) } else { None }
+                        let fx = track
+                            .get_normal_fx_chain()
+                            .get_fx_by_index(data.fxnumber as u32)?;
+                        if fx.window_has_focus() {
+                            Some(fx)
+                        } else {
+                            None
+                        }
                     })
                     .next()
             }
         }
     }
 
-    pub fn fx_enabled_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
+    pub fn fx_enabled_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
         self.subjects.fx_enabled_changed.borrow().clone()
     }
 
-    pub fn fx_reordered(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn fx_reordered(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.fx_reordered.borrow().clone()
     }
 
-    pub fn fx_removed(&self) -> impl LocalObservable<'static, Err=(), Item=Fx> {
+    pub fn fx_removed(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
         self.subjects.fx_removed.borrow().clone()
     }
 
-    pub fn fx_parameter_value_changed(&self) -> impl LocalObservable<'static, Err=(), Item=FxParameter> {
+    pub fn fx_parameter_value_changed(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = FxParameter> {
         self.subjects.fx_parameter_value_changed.borrow().clone()
     }
 
-    pub fn track_input_monitoring_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
-        self.subjects.track_input_monitoring_changed.borrow().clone()
+    pub fn track_input_monitoring_changed(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.subjects
+            .track_input_monitoring_changed
+            .borrow()
+            .clone()
     }
 
-    pub fn track_input_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_input_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_input_changed.borrow().clone()
     }
 
-    pub fn track_volume_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_volume_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_volume_changed.borrow().clone()
     }
 
-    pub fn track_pan_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_pan_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_pan_changed.borrow().clone()
     }
 
-    pub fn track_selected_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_selected_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_selected_changed.borrow().clone()
     }
 
-    pub fn track_mute_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_mute_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_mute_changed.borrow().clone()
     }
 
-    pub fn track_solo_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_solo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_solo_changed.borrow().clone()
     }
 
-    pub fn track_arm_changed(&self) -> impl LocalObservable<'static, Err=(), Item=Track> {
+    pub fn track_arm_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_arm_changed.borrow().clone()
     }
 
-    pub fn track_send_volume_changed(&self) -> impl LocalObservable<'static, Err=(), Item=TrackSend> {
+    pub fn track_send_volume_changed(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = TrackSend> {
         self.subjects.track_send_volume_changed.borrow().clone()
     }
 
-    pub fn track_send_pan_changed(&self) -> impl LocalObservable<'static, Err=(), Item=TrackSend> {
+    pub fn track_send_pan_changed(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = TrackSend> {
         self.subjects.track_send_pan_changed.borrow().clone()
     }
 
-    pub fn action_invoked(&self) -> impl LocalObservable<'static, Err=(), Item=Rc<Action>> {
+    pub fn action_invoked(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = Payload<Rc<Action>>> {
         self.subjects.action_invoked.borrow().clone()
     }
 
@@ -692,11 +778,11 @@ impl Reaper {
         self.medium.get_main_hwnd()
     }
 
-    pub fn get_projects(&self) -> impl Iterator<Item=Project> + '_ {
+    pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
             .map(move |i| self.medium.enum_projects(i, 0).0)
             .take_while(|p| !p.is_null())
-            .map(|p| { Project::new(p) })
+            .map(|p| Project::new(p))
     }
 
     pub fn get_project_count(&self) -> u32 {
@@ -722,7 +808,12 @@ impl Reaper {
     }
 
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: (u8, u8, u8)) {
-        self.medium.stuff_midimessage(target.into(), message.0 as i32, message.1 as i32, message.2 as i32);
+        self.medium.stuff_midimessage(
+            target.into(),
+            message.0 as i32,
+            message.1 as i32,
+            message.2 as i32,
+        );
     }
 
     pub fn current_thread_is_main_thread(&self) -> bool {
@@ -743,7 +834,11 @@ impl Reaper {
     }
 
     // Doesn't start a new block if we already are in an undo block.
-    pub(super) fn enter_undo_block_internal<'a>(&self, project: Project, label: &'a CStr) -> Option<UndoBlock<'a>> {
+    pub(super) fn enter_undo_block_internal<'a>(
+        &self,
+        project: Project,
+        label: &'a CStr,
+    ) -> Option<UndoBlock<'a>> {
         if self.undo_block_is_active.get() {
             return None;
         }
@@ -757,7 +852,8 @@ impl Reaper {
         if !self.undo_block_is_active.get() {
             return;
         }
-        self.medium.undo_end_block_2(project.get_rea_project(), label, -1);
+        self.medium
+            .undo_end_block_2(project.get_rea_project(), label, -1);
         self.undo_block_is_active.replace(false);
     }
 }
@@ -797,7 +893,12 @@ struct Command {
 }
 
 impl Command {
-    fn new(command_index: u32, description: Cow<'static, CStr>, operation: Rc<RefCell<dyn FnMut()>>, kind: ActionKind) -> Command {
+    fn new(
+        command_index: u32,
+        description: Cow<'static, CStr>,
+        operation: Rc<RefCell<dyn FnMut()>>,
+        kind: ActionKind,
+    ) -> Command {
         let mut c = Command {
             description,
             operation,
@@ -822,9 +923,7 @@ pub struct RegisteredAction {
 
 impl RegisteredAction {
     fn new(command_index: u32) -> RegisteredAction {
-        RegisteredAction {
-            command_index,
-        }
+        RegisteredAction { command_index }
     }
 
     pub fn unregister(&self) {
@@ -839,4 +938,3 @@ pub enum StuffMidiMessageTarget {
     MidiAsControlInputQueue,
     VirtualMidiKeyboardOnCurrentChannel,
 }
-

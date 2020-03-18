@@ -5,11 +5,12 @@ use std::path::PathBuf;
 
 use c_str_macro::c_str;
 
-use crate::high_level::{Chunk, ChunkRegion, Reaper, Track};
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
+use crate::high_level::{Chunk, ChunkRegion, Reaper, Track};
 use crate::low_level::{GetActiveWindow, HWND};
+use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -22,6 +23,8 @@ pub struct Fx {
     index: Cell<Option<u32>>,
     is_input_fx: bool,
 }
+
+impl PayloadCopy for Fx {}
 
 impl PartialEq for Fx {
     fn eq(&self, other: &Self) -> bool {
@@ -60,14 +63,19 @@ impl Fx {
 
     pub fn get_name(&self) -> CString {
         self.load_if_necessary_or_complain();
-        Reaper::instance().medium.track_fx_get_fx_name(
-            self.track.get_media_track(), self.get_query_index(), 256).expect("Couldn't get track name")
+        Reaper::instance()
+            .medium
+            .track_fx_get_fx_name(self.track.get_media_track(), self.get_query_index(), 256)
+            .expect("Couldn't get track name")
     }
 
     pub fn get_chunk(&self) -> ChunkRegion {
         self.load_if_necessary_or_complain();
-        self.get_chain().get_chunk().unwrap()
-            .find_line_starting_with(self.get_fx_id_line().as_str()).unwrap()
+        self.get_chain()
+            .get_chunk()
+            .unwrap()
+            .find_line_starting_with(self.get_fx_id_line().as_str())
+            .unwrap()
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
             .move_right_cursor_right_to_start_of_line_beginning_with("WAK 0")
             .move_right_cursor_right_to_end_of_current_line()
@@ -79,10 +87,14 @@ impl Fx {
 
     pub fn get_tag_chunk(&self) -> ChunkRegion {
         self.load_if_necessary_or_complain();
-        self.get_chain().get_chunk().unwrap()
-            .find_line_starting_with(self.get_fx_id_line().as_str()).unwrap()
+        self.get_chain()
+            .get_chunk()
+            .unwrap()
+            .find_line_starting_with(self.get_fx_id_line().as_str())
+            .unwrap()
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
-            .find_first_tag(0).unwrap()
+            .find_first_tag(0)
+            .unwrap()
     }
 
     pub fn get_state_chunk(&self) -> ChunkRegion {
@@ -98,18 +110,21 @@ impl Fx {
 
     pub fn get_parameter_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
-        Reaper::instance().medium.track_fx_get_num_params(self.track.get_media_track(), self.get_query_index()) as u32
+        Reaper::instance()
+            .medium
+            .track_fx_get_num_params(self.track.get_media_track(), self.get_query_index())
+            as u32
     }
 
     pub fn is_enabled(&self) -> bool {
-        Reaper::instance().medium.track_fx_get_enabled(self.track.get_media_track(), self.get_query_index())
+        Reaper::instance()
+            .medium
+            .track_fx_get_enabled(self.track.get_media_track(), self.get_query_index())
     }
 
-    pub fn get_parameters(&self) -> impl Iterator<Item=FxParameter> + '_ {
+    pub fn get_parameters(&self) -> impl Iterator<Item = FxParameter> + '_ {
         self.load_if_necessary_or_complain();
-        (0..self.get_parameter_count()).map(move |i| {
-            self.get_parameter_by_index(i)
-        })
+        (0..self.get_parameter_count()).map(move |i| self.get_parameter_by_index(i))
     }
 
     pub fn get_guid(&self) -> Option<Guid> {
@@ -144,7 +159,7 @@ impl Fx {
     fn is_loaded_and_at_correct_index(&self) -> bool {
         let index = match self.index.get() {
             None => return false, // Not loaded
-            Some(index) => index
+            Some(index) => index,
         };
         if !self.track.is_available() {
             return false;
@@ -169,9 +184,11 @@ impl Fx {
         }
         let guid = match self.guid {
             None => return false, // No GUID tracking
-            Some(guid) => guid
+            Some(guid) => guid,
         };
-        let found_fx = self.get_chain().get_fxs()
+        let found_fx = self
+            .get_chain()
+            .get_fxs()
             .find(|fx| fx.get_guid() == Some(guid));
         if let Some(fx) = found_fx {
             self.index.replace(Some(fx.get_index()));
@@ -213,14 +230,15 @@ impl Fx {
 
     pub fn get_floating_window(&self) -> HWND {
         self.load_if_necessary_or_complain();
-        Reaper::instance().medium.track_fx_get_floating_window(
-            self.track.get_media_track(), self.get_query_index())
+        Reaper::instance()
+            .medium
+            .track_fx_get_floating_window(self.track.get_media_track(), self.get_query_index())
     }
 
     pub fn window_is_open(&self) -> bool {
-        Reaper::instance().medium.track_fx_get_open(
-            self.track.get_media_track(), self.get_query_index(),
-        )
+        Reaper::instance()
+            .medium
+            .track_fx_get_open(self.track.get_media_track(), self.get_query_index())
     }
 
     pub fn window_has_focus(&self) -> bool {
@@ -239,7 +257,9 @@ impl Fx {
     pub fn show_in_floating_window(&self) {
         self.load_if_necessary_or_complain();
         Reaper::instance().medium.track_fx_show(
-            self.track.get_media_track(), self.get_query_index(), 3,
+            self.track.get_media_track(),
+            self.get_query_index(),
+            3,
         );
     }
 
@@ -260,12 +280,18 @@ impl Fx {
 
     pub fn enable(&self) {
         Reaper::instance().medium.track_fx_set_enabled(
-            self.track.get_media_track(), self.get_query_index(), true);
+            self.track.get_media_track(),
+            self.get_query_index(),
+            true,
+        );
     }
 
     pub fn disable(&self) {
         Reaper::instance().medium.track_fx_set_enabled(
-            self.track.get_media_track(), self.get_query_index(), false);
+            self.track.get_media_track(),
+            self.get_query_index(),
+            false,
+        );
     }
 
     pub fn is_input_fx(&self) -> bool {
@@ -285,30 +311,36 @@ impl Fx {
         self.load_if_necessary_or_complain();
         // TODO Use rustfmt everywhere
         // TODO Integrate into ReaPlus (current preset index?)
-        Reaper::instance().medium.track_fx_get_preset_index(
-            self.track.get_media_track(), self.get_query_index(),
-        ).expect("Couldn't get preset count").1
+        Reaper::instance()
+            .medium
+            .track_fx_get_preset_index(self.track.get_media_track(), self.get_query_index())
+            .expect("Couldn't get preset count")
+            .1
     }
 
     pub fn preset_is_dirty(&self) -> bool {
         self.load_if_necessary_or_complain();
-        let state_matches_preset = Reaper::instance().medium.track_fx_get_preset(
-            self.track.get_media_track(), self.get_query_index(), 0,
-        ).0;
+        let state_matches_preset = Reaper::instance()
+            .medium
+            .track_fx_get_preset(self.track.get_media_track(), self.get_query_index(), 0)
+            .0;
         !state_matches_preset
     }
 
     pub fn get_preset_name(&self) -> Option<CString> {
         self.load_if_necessary_or_complain();
-        Reaper::instance().medium.track_fx_get_preset(
-            self.track.get_media_track(), self.get_query_index(), 2000,
-        ).1
+        Reaper::instance()
+            .medium
+            .track_fx_get_preset(self.track.get_media_track(), self.get_query_index(), 2000)
+            .1
     }
 }
 
 pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid> {
     let query_index = get_fx_query_index(index, is_input_fx);
-    let internal = Reaper::instance().medium.track_fx_get_fx_guid(track.get_media_track(), query_index);
+    let internal = Reaper::instance()
+        .medium
+        .track_fx_get_fx_guid(track.get_media_track(), query_index);
     if internal.is_null() {
         None
     } else {
@@ -352,12 +384,14 @@ impl FxInfo {
         let vst_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
         let js_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
         let js_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
-        let first_space_index = first_line_of_tag_chunk.find(' ')
+        let first_space_index = first_line_of_tag_chunk
+            .find(' ')
             .expect("Couldn't find space in VST tag line");
         let type_expression = &first_line_of_tag_chunk[1..first_space_index];
         match type_expression {
             "VST" => {
-                let captures = vst_line_regex.captures(first_line_of_tag_chunk)
+                let captures = vst_line_regex
+                    .captures(first_line_of_tag_chunk)
                     .expect("Couldn't parse VST tag line");
                 assert_eq!(captures.len(), 5);
                 FxInfo {
@@ -372,34 +406,34 @@ impl FxInfo {
                         } else {
                             vst_file_name_without_quotes_regex
                         };
-                        let remainder_captures = remainder_regex.captures(remainder)
+                        let remainder_captures = remainder_regex
+                            .captures(remainder)
                             .expect("Couldn't parse VST file name");
                         assert_eq!(remainder_captures.len(), 2);
                         PathBuf::from(&remainder_captures[1])
                     },
                 }
             }
-            "JS" => {
-                FxInfo {
-                    effect_name: "".to_string(),
-                    type_expression: "".to_string(),
-                    sub_type_expression: "".to_string(),
-                    vendor_name: "".to_string(),
-                    file_name: {
-                        let remainder = &first_line_of_tag_chunk[4..];
-                        let remainder_regex = if remainder.starts_with('"') {
-                            js_file_name_with_quotes_regex
-                        } else {
-                            js_file_name_without_quotes_regex
-                        };
-                        let remainder_captures = remainder_regex.captures(remainder)
-                            .expect("Couldn't parse JS file name");
-                        assert_eq!(remainder_captures.len(), 2);
-                        PathBuf::from(&remainder_captures[1])
-                    },
-                }
-            }
-            _ => panic!("Can only handle VST and JS FX types right now")
+            "JS" => FxInfo {
+                effect_name: "".to_string(),
+                type_expression: "".to_string(),
+                sub_type_expression: "".to_string(),
+                vendor_name: "".to_string(),
+                file_name: {
+                    let remainder = &first_line_of_tag_chunk[4..];
+                    let remainder_regex = if remainder.starts_with('"') {
+                        js_file_name_with_quotes_regex
+                    } else {
+                        js_file_name_without_quotes_regex
+                    };
+                    let remainder_captures = remainder_regex
+                        .captures(remainder)
+                        .expect("Couldn't parse JS file name");
+                    assert_eq!(remainder_captures.len(), 2);
+                    PathBuf::from(&remainder_captures[1])
+                },
+            },
+            _ => panic!("Can only handle VST and JS FX types right now"),
         }
     }
 }

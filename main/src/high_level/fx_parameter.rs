@@ -1,7 +1,8 @@
 use crate::high_level::fx::Fx;
 use crate::high_level::{Reaper, Track};
-use std::ffi::CString;
 use crate::low_level::MediaTrack;
+use rxrust::prelude::PayloadCopy;
+use std::ffi::CString;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FxParameter {
@@ -9,12 +10,11 @@ pub struct FxParameter {
     index: u32,
 }
 
+impl PayloadCopy for FxParameter {}
+
 impl FxParameter {
     pub(super) fn new(fx: Fx, index: u32) -> FxParameter {
-        FxParameter {
-            fx,
-            index,
-        }
+        FxParameter { fx, index }
     }
 
     // Returns normalized value [0, 1]
@@ -25,7 +25,11 @@ impl FxParameter {
 
     pub fn set_normalized_value(&self, normalized_value: f64) {
         Reaper::instance().medium.track_fx_set_param_normalized(
-            self.get_media_track(), self.fx.get_query_index(), self.index as i32, normalized_value);
+            self.get_media_track(),
+            self.fx.get_query_index(),
+            self.index as i32,
+            normalized_value,
+        );
     }
 
     pub fn get_reaper_value(&self) -> f64 {
@@ -41,9 +45,14 @@ impl FxParameter {
     }
 
     pub fn get_name(&self) -> CString {
-        Reaper::instance().medium
+        Reaper::instance()
+            .medium
             .track_fx_get_param_name(
-                self.get_media_track(), self.fx.get_query_index(), self.index as i32, 256)
+                self.get_media_track(),
+                self.fx.get_query_index(),
+                self.index as i32,
+                256,
+            )
             .expect("Couldn't get FX parameter name")
     }
 
@@ -52,12 +61,14 @@ impl FxParameter {
     }
 
     pub fn get_character(&self) -> FxParameterCharacter {
-        let result = Reaper::instance().medium
-            .track_fx_get_parameter_step_sizes(
-                self.get_media_track(), self.fx.get_query_index(), self.index as i32);
+        let result = Reaper::instance().medium.track_fx_get_parameter_step_sizes(
+            self.get_media_track(),
+            self.fx.get_query_index(),
+            self.index as i32,
+        );
         let result = match result {
             None => return FxParameterCharacter::Continuous,
-            Some(r) => r
+            Some(r) => r,
         };
         if result.is_toggle {
             return FxParameterCharacter::Toggle;
@@ -70,9 +81,14 @@ impl FxParameter {
     }
 
     pub fn get_formatted_value(&self) -> CString {
-        Reaper::instance().medium
+        Reaper::instance()
+            .medium
             .track_fx_get_formatted_param_value(
-                self.get_media_track(), self.fx.get_query_index(), self.index as i32, 256)
+                self.get_media_track(),
+                self.fx.get_query_index(),
+                self.index as i32,
+                256,
+            )
             .expect("Couldn't format FX param value")
     }
 
@@ -85,9 +101,15 @@ impl FxParameter {
     }
 
     pub fn format_normalized_value(&self, normalized_value: f64) -> CString {
-        Reaper::instance().medium
+        Reaper::instance()
+            .medium
             .track_fx_format_param_value_normalized(
-                self.get_media_track(), self.fx.get_query_index(), self.index as i32, normalized_value, 256)
+                self.get_media_track(),
+                self.fx.get_query_index(),
+                self.index as i32,
+                normalized_value,
+                256,
+            )
             .expect("Couldn't format normalized value")
     }
 
@@ -97,7 +119,10 @@ impl FxParameter {
     //  values.
     pub fn get_step_size(&self) -> Option<f64> {
         let result = Reaper::instance().medium.track_fx_get_parameter_step_sizes(
-            self.get_media_track(), self.fx.get_query_index(), self.index as i32);
+            self.get_media_track(),
+            self.fx.get_query_index(),
+            self.index as i32,
+        );
         result.and_then(move |r| {
             if r.is_toggle {
                 return Some(1.0);
@@ -127,7 +152,10 @@ impl FxParameter {
     // Doesn't necessarily return normalized values
     pub fn get_value_range(&self) -> FxParameterValueRange {
         let result = Reaper::instance().medium.track_fx_get_param_ex(
-            self.get_media_track(), self.fx.get_query_index(), self.index as i32);
+            self.get_media_track(),
+            self.fx.get_query_index(),
+            self.index as i32,
+        );
         FxParameterValueRange {
             min_val: result.min_val,
             mid_val: result.mid_val,

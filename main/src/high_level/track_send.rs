@@ -1,8 +1,9 @@
-use crate::high_level::{Track, Reaper, Volume, Pan};
-use std::cell::Cell;
+use crate::high_level::{Pan, Reaper, Track, Volume};
 use crate::low_level::MediaTrack;
-use std::ptr::null_mut;
 use c_str_macro::c_str;
+use rxrust::prelude::PayloadCopy;
+use std::cell::Cell;
+use std::ptr::null_mut;
 
 #[derive(Clone, Debug, Eq)]
 pub struct TrackSend {
@@ -11,21 +12,22 @@ pub struct TrackSend {
     index: Cell<Option<u32>>,
 }
 
+impl PayloadCopy for TrackSend {}
+
 impl PartialEq for TrackSend {
     fn eq(&self, other: &Self) -> bool {
         if self.source_track != other.source_track {
             return false;
         }
         if self.target_track.is_some() && other.target_track.is_some() {
-            return self.target_track == other.target_track
+            return self.target_track == other.target_track;
         }
         if self.index.get().is_some() && other.index.get().is_some() {
-            return self.index == other.index
+            return self.index == other.index;
         }
         false
     }
 }
-
 
 impl TrackSend {
     // Use this if you want to create an index-based send.
@@ -81,7 +83,8 @@ impl TrackSend {
     pub fn get_volume(&self) -> Volume {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the wrong value if
         // an envelope is written.
-        let (volume, _) = Reaper::instance().medium
+        let (volume, _) = Reaper::instance()
+            .medium
             .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
             .expect("Couldn't get send vol/pan");
         Volume::of_reaper_value(volume)
@@ -89,11 +92,16 @@ impl TrackSend {
 
     pub fn set_volume(&self, volume: Volume) {
         Reaper::instance().medium.csurf_on_send_volume_change(
-            self.get_source_track().get_media_track(), self.get_index(), volume.get_reaper_value(), false);
+            self.get_source_track().get_media_track(),
+            self.get_index(),
+            volume.get_reaper_value(),
+            false,
+        );
     }
 
     pub fn get_pan(&self) -> Pan {
-        let (_, pan) = Reaper::instance().medium
+        let (_, pan) = Reaper::instance()
+            .medium
             .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
             .expect("Couldn't get send vol/pan");
         Pan::of_reaper_value(pan)
@@ -101,19 +109,26 @@ impl TrackSend {
 
     pub fn set_pan(&self, pan: Pan) {
         Reaper::instance().medium.csurf_on_send_pan_change(
-            self.get_source_track().get_media_track(), self.get_index(), pan.get_reaper_value(), false);
+            self.get_source_track().get_media_track(),
+            self.get_index(),
+            pan.get_reaper_value(),
+            false,
+        );
     }
 
     fn load_by_target_track(&self) -> bool {
         let target_track = match &self.target_track {
             None => return false,
-            Some(t) => t
+            Some(t) => t,
         };
         if !self.source_track.is_available() {
             return false;
         }
-        match self.source_track.get_sends()
-            .find(|s| s.get_target_track() == *target_track) {
+        match self
+            .source_track
+            .get_sends()
+            .find(|s| s.get_target_track() == *target_track)
+        {
             None => false,
             Some(found_track_send) => {
                 self.index.replace(Some(found_track_send.get_index()));
@@ -139,11 +154,15 @@ impl TrackSend {
 
     // Precondition: index set
     fn get_target_track_by_index(&self) -> Option<Track> {
-        let target_media_track = get_target_media_track(&self.source_track, self.index.get().expect("Index not set"));
+        let target_media_track =
+            get_target_media_track(&self.source_track, self.index.get().expect("Index not set"));
         if target_media_track.is_null() {
             return None;
         }
-        Some(Track::new(target_media_track, self.source_track.get_project().get_rea_project()))
+        Some(Track::new(
+            target_media_track,
+            self.source_track.get_project().get_rea_project(),
+        ))
     }
 
     fn is_index_based(&self) -> bool {
@@ -170,7 +189,10 @@ impl TrackSend {
 }
 
 pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
-    Track::new(get_target_media_track(source_track, send_index), source_track.get_project().get_rea_project())
+    Track::new(
+        get_target_media_track(source_track, send_index),
+        source_track.get_project().get_rea_project(),
+    )
 }
 
 fn get_target_media_track(source_track: &Track, send_index: u32) -> *mut MediaTrack {
