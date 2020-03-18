@@ -44,6 +44,18 @@ fn with_string_buffer<T>(
     (string, result)
 }
 
+macro_rules! require {
+    ($low:expr, $func:ident) => {{
+        match $low.$func {
+            None => panic!(format!(
+                "Couldn't load REAPER function {}",
+                stringify!($func)
+            )),
+            Some(f) => f,
+        }
+    }};
+}
+
 impl Reaper {
     pub fn new(low: low_level::Reaper) -> Reaper {
         Reaper { low }
@@ -55,12 +67,12 @@ impl Reaper {
         projfn_out_optional_sz: u32,
     ) -> (*mut ReaProject, Option<CString>) {
         if projfn_out_optional_sz == 0 {
-            let project = self.low.EnumProjects.unwrap()(idx, null_mut(), 0);
+            let project = require!(self.low, EnumProjects)(idx, null_mut(), 0);
             (project, None)
         } else {
             let (file_path, project) =
                 with_string_buffer(projfn_out_optional_sz, |buffer, max_size| {
-                    self.low.EnumProjects.unwrap()(idx, buffer, max_size)
+                    require!(self.low, EnumProjects)(idx, buffer, max_size)
                 });
 
             (
@@ -75,7 +87,7 @@ impl Reaper {
     }
 
     pub fn get_track(&self, proj: *mut ReaProject, trackidx: u32) -> *mut MediaTrack {
-        self.low.GetTrack.unwrap()(proj, trackidx as i32)
+        require!(self.low, GetTrack)(proj, trackidx as i32)
     }
 
     pub fn validate_ptr_2(
@@ -84,7 +96,7 @@ impl Reaper {
         pointer: *mut c_void,
         ctypename: &CStr,
     ) -> bool {
-        self.low.ValidatePtr2.unwrap()(proj, pointer, ctypename.as_ptr())
+        require!(self.low, ValidatePtr2)(proj, pointer, ctypename.as_ptr())
     }
 
     pub fn get_set_media_track_info(
@@ -93,19 +105,19 @@ impl Reaper {
         parmname: &CStr,
         set_new_value: *mut c_void,
     ) -> *mut c_void {
-        self.low.GetSetMediaTrackInfo.unwrap()(tr, parmname.as_ptr(), set_new_value)
+        require!(self.low, GetSetMediaTrackInfo)(tr, parmname.as_ptr(), set_new_value)
     }
 
     pub fn show_console_msg(&self, msg: &CStr) {
-        self.low.ShowConsoleMsg.unwrap()(msg.as_ptr())
+        require!(self.low, ShowConsoleMsg)(msg.as_ptr())
     }
 
     pub fn plugin_register(&self, name: &CStr, infostruct: *mut c_void) -> i32 {
-        self.low.plugin_register.unwrap()(name.as_ptr(), infostruct)
+        require!(self.low, plugin_register)(name.as_ptr(), infostruct)
     }
 
     pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: *mut ReaProject) {
-        self.low.Main_OnCommandEx.unwrap()(command as i32, flag, proj);
+        require!(self.low, Main_OnCommandEx)(command as i32, flag, proj);
     }
 
     pub fn csurf_set_surface_mute(
@@ -114,7 +126,7 @@ impl Reaper {
         mute: bool,
         ignoresurf: *mut IReaperControlSurface,
     ) {
-        self.low.CSurf_SetSurfaceMute.unwrap()(trackid, mute, ignoresurf);
+        require!(self.low, CSurf_SetSurfaceMute)(trackid, mute, ignoresurf);
     }
 
     pub fn csurf_set_surface_solo(
@@ -123,12 +135,12 @@ impl Reaper {
         solo: bool,
         ignoresurf: *mut IReaperControlSurface,
     ) {
-        self.low.CSurf_SetSurfaceSolo.unwrap()(trackid, solo, ignoresurf);
+        require!(self.low, CSurf_SetSurfaceSolo)(trackid, solo, ignoresurf);
     }
 
     pub fn gen_guid(&self) -> GUID {
         let mut guid = ZERO_GUID;
-        self.low.genGuid.unwrap()(&mut guid as *mut GUID);
+        require!(self.low, genGuid)(&mut guid as *mut GUID);
         guid
     }
 
@@ -150,7 +162,7 @@ impl Reaper {
     }
 
     pub fn section_from_unique_id(&self, unique_id: u32) -> *mut KbdSectionInfo {
-        self.low.SectionFromUniqueID.unwrap()(unique_id as i32)
+        require!(self.low, SectionFromUniqueID)(unique_id as i32)
     }
 
     pub fn kbd_on_main_action_ex(
@@ -162,7 +174,7 @@ impl Reaper {
         hwnd: HWND,
         proj: *mut ReaProject,
     ) -> i32 {
-        self.low.KBD_OnMainActionEx.unwrap()(
+        require!(self.low, KBD_OnMainActionEx)(
             cmd as i32,
             val as i32,
             valhw,
@@ -173,48 +185,48 @@ impl Reaper {
     }
 
     pub fn get_main_hwnd(&self) -> HWND {
-        self.low.GetMainHwnd.unwrap()()
+        require!(self.low, GetMainHwnd)()
     }
 
     pub fn named_command_lookup(&self, command_name: &CStr) -> u32 {
-        self.low.NamedCommandLookup.unwrap()(command_name.as_ptr()) as u32
+        require!(self.low, NamedCommandLookup)(command_name.as_ptr()) as u32
     }
 
     pub fn clear_console(&self) {
-        self.low.ClearConsole.unwrap()();
+        require!(self.low, ClearConsole)();
     }
 
     pub fn count_tracks(&self, proj: *mut ReaProject) -> u32 {
-        self.low.CountTracks.unwrap()(proj) as u32
+        require!(self.low, CountTracks)(proj) as u32
     }
 
     pub fn insert_track_at_index(&self, idx: u32, want_defaults: bool) {
-        self.low.InsertTrackAtIndex.unwrap()(idx as i32, want_defaults);
+        require!(self.low, InsertTrackAtIndex)(idx as i32, want_defaults);
     }
 
     pub fn get_midi_input(&self, idx: u32) -> *mut midi_Input {
-        self.low.GetMidiInput.unwrap()(idx as i32)
+        require!(self.low, GetMidiInput)(idx as i32)
     }
 
     pub fn get_midi_output(&self, idx: u32) -> *mut midi_Output {
-        self.low.GetMidiOutput.unwrap()(idx as i32)
+        require!(self.low, GetMidiOutput)(idx as i32)
     }
 
     pub fn get_max_midi_inputs(&self) -> u32 {
-        self.low.GetMaxMidiInputs.unwrap()() as u32
+        require!(self.low, GetMaxMidiInputs)() as u32
     }
 
     pub fn get_max_midi_outputs(&self) -> u32 {
-        self.low.GetMaxMidiOutputs.unwrap()() as u32
+        require!(self.low, GetMaxMidiOutputs)() as u32
     }
 
     pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
-            let is_present = self.low.GetMIDIInputName.unwrap()(dev as i32, null_mut(), 0);
+            let is_present = require!(self.low, GetMIDIInputName)(dev as i32, null_mut(), 0);
             (is_present, None)
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
-                self.low.GetMIDIInputName.unwrap()(dev as i32, buffer, max_size)
+                require!(self.low, GetMIDIInputName)(dev as i32, buffer, max_size)
             });
             (
                 is_present,
@@ -234,16 +246,16 @@ impl Reaper {
         rec_fx: bool,
         instantiate: i32,
     ) -> i32 {
-        self.low.TrackFX_AddByName.unwrap()(track, fxname.as_ptr(), rec_fx, instantiate)
+        require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate)
     }
 
     pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
-            let is_present = self.low.GetMIDIOutputName.unwrap()(dev as i32, null_mut(), 0);
+            let is_present = require!(self.low, GetMIDIOutputName)(dev as i32, null_mut(), 0);
             (is_present, None)
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
-                self.low.GetMIDIOutputName.unwrap()(dev as i32, buffer, max_size)
+                require!(self.low, GetMIDIOutputName)(dev as i32, buffer, max_size)
             });
             (
                 is_present,
@@ -257,7 +269,7 @@ impl Reaper {
     }
 
     pub fn track_fx_get_enabled(&self, track: *mut MediaTrack, fx: u32) -> bool {
-        self.low.TrackFX_GetEnabled.unwrap()(track, fx as i32)
+        require!(self.low, TrackFX_GetEnabled)(track, fx as i32)
     }
 
     pub fn track_fx_get_fx_name(
@@ -268,7 +280,7 @@ impl Reaper {
     ) -> Option<CString> {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
-            self.low.TrackFX_GetFXName.unwrap()(track, fx as i32, buffer, max_size)
+            require!(self.low, TrackFX_GetFXName)(track, fx as i32, buffer, max_size)
         });
         if !successful || name.as_bytes().len() == 0 {
             return None;
@@ -278,19 +290,19 @@ impl Reaper {
 
     // TODO-high Return None if result is -1
     pub fn track_fx_get_instrument(&self, track: *mut MediaTrack) -> i32 {
-        self.low.TrackFX_GetInstrument.unwrap()(track)
+        require!(self.low, TrackFX_GetInstrument)(track)
     }
 
     pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: u32, enabled: bool) {
-        self.low.TrackFX_SetEnabled.unwrap()(track, fx as i32, enabled);
+        require!(self.low, TrackFX_SetEnabled)(track, fx as i32, enabled);
     }
 
     pub fn track_fx_get_num_params(&self, track: *mut MediaTrack, fx: u32) -> u32 {
-        self.low.TrackFX_GetNumParams.unwrap()(track, fx as i32) as u32
+        require!(self.low, TrackFX_GetNumParams)(track, fx as i32) as u32
     }
 
     pub fn get_current_project_in_load_save(&self) -> *mut ReaProject {
-        self.low.GetCurrentProjectInLoadSave.unwrap()()
+        require!(self.low, GetCurrentProjectInLoadSave)()
     }
 
     pub fn track_fx_get_param_name(
@@ -302,7 +314,13 @@ impl Reaper {
     ) -> Option<CString> {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
-            self.low.TrackFX_GetParamName.unwrap()(track, fx as i32, param as i32, buffer, max_size)
+            require!(self.low, TrackFX_GetParamName)(
+                track,
+                fx as i32,
+                param as i32,
+                buffer,
+                max_size,
+            )
         });
         if !successful || name.as_bytes().len() == 0 {
             return None;
@@ -319,7 +337,7 @@ impl Reaper {
     ) -> Option<CString> {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
-            self.low.TrackFX_GetFormattedParamValue.unwrap()(
+            require!(self.low, TrackFX_GetFormattedParamValue)(
                 track,
                 fx as i32,
                 param as i32,
@@ -343,7 +361,7 @@ impl Reaper {
     ) -> Option<CString> {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
-            self.low.TrackFX_FormatParamValueNormalized.unwrap()(
+            require!(self.low, TrackFX_FormatParamValueNormalized)(
                 track,
                 fx as i32,
                 param as i32,
@@ -365,14 +383,14 @@ impl Reaper {
         param: u32,
         value: f64,
     ) -> bool {
-        self.low.TrackFX_SetParamNormalized.unwrap()(track, fx as i32, param as i32, value)
+        require!(self.low, TrackFX_SetParamNormalized)(track, fx as i32, param as i32, value)
     }
 
     pub fn get_focused_fx(&self) -> GetFocusedFxResult {
         let mut tracknumber = -1;
         let mut itemnumber = -1;
         let mut fxnumber = -1;
-        let result = self.low.GetFocusedFX.unwrap()(
+        let result = require!(self.low, GetFocusedFX)(
             &mut tracknumber as *mut i32,
             &mut itemnumber as *mut i32,
             &mut fxnumber as *mut i32,
@@ -396,7 +414,7 @@ impl Reaper {
         let mut tracknumber = -1;
         let mut fxnumber = -1;
         let mut paramnumber = -1;
-        let is_valid = self.low.GetLastTouchedFX.unwrap()(
+        let is_valid = require!(self.low, GetLastTouchedFX)(
             &mut tracknumber as *mut i32,
             &mut fxnumber as *mut i32,
             &mut paramnumber as *mut i32,
@@ -419,7 +437,7 @@ impl Reaper {
         dest_fx: u32,
         is_move: bool,
     ) {
-        self.low.TrackFX_CopyToTrack.unwrap()(
+        require!(self.low, TrackFX_CopyToTrack)(
             src_track,
             src_fx as i32,
             dest_track,
@@ -429,7 +447,7 @@ impl Reaper {
     }
 
     pub fn track_fx_delete(&self, track: *mut MediaTrack, fx: u32) -> bool {
-        self.low.TrackFX_Delete.unwrap()(track, fx as i32)
+        require!(self.low, TrackFX_Delete)(track, fx as i32)
     }
 
     pub fn track_fx_get_parameter_step_sizes(
@@ -442,7 +460,7 @@ impl Reaper {
         let mut small_step = -1.0;
         let mut large_step = -1.0;
         let mut is_toggle = false;
-        let successful = self.low.TrackFX_GetParameterStepSizes.unwrap()(
+        let successful = require!(self.low, TrackFX_GetParameterStepSizes)(
             track,
             fx as i32,
             param as i32,
@@ -472,7 +490,7 @@ impl Reaper {
         let mut min_val = -1.0;
         let mut max_val = -1.0;
         let mut mid_val = -1.0;
-        let value = self.low.TrackFX_GetParamEx.unwrap()(
+        let value = require!(self.low, TrackFX_GetParamEx)(
             track,
             fx as i32,
             param as i32,
@@ -490,15 +508,15 @@ impl Reaper {
     }
 
     pub fn undo_begin_block_2(&self, proj: *mut ReaProject) {
-        self.low.Undo_BeginBlock2.unwrap()(proj);
+        require!(self.low, Undo_BeginBlock2)(proj);
     }
 
     pub fn undo_end_block_2(&self, proj: *mut ReaProject, descchange: &CStr, extraflags: u32) {
-        self.low.Undo_EndBlock2.unwrap()(proj, descchange.as_ptr(), extraflags as i32);
+        require!(self.low, Undo_EndBlock2)(proj, descchange.as_ptr(), extraflags as i32);
     }
 
     pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
-        let ptr = self.low.Undo_CanUndo2.unwrap()(proj);
+        let ptr = require!(self.low, Undo_CanUndo2)(proj);
         if ptr.is_null() {
             return None;
         }
@@ -506,7 +524,7 @@ impl Reaper {
     }
 
     pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
-        let ptr = self.low.Undo_CanRedo2.unwrap()(proj);
+        let ptr = require!(self.low, Undo_CanRedo2)(proj);
         if ptr.is_null() {
             return None;
         }
@@ -515,38 +533,38 @@ impl Reaper {
 
     // TODO-medium Should the return value be boolean?
     pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> i32 {
-        self.low.Undo_DoUndo2.unwrap()(proj)
+        require!(self.low, Undo_DoUndo2)(proj)
     }
 
     // TODO-medium Should the return value be boolean?
     pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> i32 {
-        self.low.Undo_DoRedo2.unwrap()(proj)
+        require!(self.low, Undo_DoRedo2)(proj)
     }
 
     pub fn mark_project_dirty(&self, proj: *mut ReaProject) {
-        self.low.MarkProjectDirty.unwrap()(proj);
+        require!(self.low, MarkProjectDirty)(proj);
     }
 
     pub fn is_project_dirty(&self, proj: *mut ReaProject) -> i32 {
-        self.low.IsProjectDirty.unwrap()(proj)
+        require!(self.low, IsProjectDirty)(proj)
     }
 
     pub fn track_list_update_all_external_surfaces(&self) {
-        self.low.TrackList_UpdateAllExternalSurfaces.unwrap()();
+        require!(self.low, TrackList_UpdateAllExternalSurfaces)();
     }
 
     pub fn get_app_version(&self) -> &'static CStr {
-        let ptr = self.low.GetAppVersion.unwrap()();
+        let ptr = require!(self.low, GetAppVersion)();
         unsafe { CStr::from_ptr(ptr) }
     }
 
     pub fn get_track_automation_mode(&self, tr: *mut MediaTrack) -> i32 {
         // TODO-high Use macro instead of unwrap everywhere in order to panic with good message on non-loaded function
-        self.low.GetTrackAutomationMode.unwrap()(tr)
+        require!(self.low, GetTrackAutomationMode)(tr)
     }
 
     pub fn get_global_automation_override(&self) -> i32 {
-        self.low.GetGlobalAutomationOverride.unwrap()()
+        require!(self.low, GetGlobalAutomationOverride)()
     }
 
     pub fn get_track_envelope_by_name(
@@ -554,23 +572,23 @@ impl Reaper {
         track: *mut MediaTrack,
         envname: &CStr,
     ) -> *mut TrackEnvelope {
-        self.low.GetTrackEnvelopeByName.unwrap()(track, envname.as_ptr())
+        require!(self.low, GetTrackEnvelopeByName)(track, envname.as_ptr())
     }
 
     pub fn get_media_track_info_value(&self, tr: *mut MediaTrack, parmname: &CStr) -> f64 {
-        self.low.GetMediaTrackInfo_Value.unwrap()(tr, parmname.as_ptr())
+        require!(self.low, GetMediaTrackInfo_Value)(tr, parmname.as_ptr())
     }
 
     pub fn track_fx_get_count(&self, track: *mut MediaTrack) -> u32 {
-        self.low.TrackFX_GetCount.unwrap()(track) as u32
+        require!(self.low, TrackFX_GetCount)(track) as u32
     }
 
     pub fn track_fx_get_rec_count(&self, track: *mut MediaTrack) -> u32 {
-        self.low.TrackFX_GetRecCount.unwrap()(track) as u32
+        require!(self.low, TrackFX_GetRecCount)(track) as u32
     }
 
     pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: u32) -> *mut GUID {
-        self.low.TrackFX_GetFXGUID.unwrap()(track, fx as i32)
+        require!(self.low, TrackFX_GetFXGUID)(track, fx as i32)
     }
 
     pub fn track_fx_get_param_normalized(
@@ -579,43 +597,43 @@ impl Reaper {
         fx: u32,
         param: u32,
     ) -> f64 {
-        self.low.TrackFX_GetParamNormalized.unwrap()(track, fx as i32, param as i32)
+        require!(self.low, TrackFX_GetParamNormalized)(track, fx as i32, param as i32)
     }
 
     pub fn get_master_track(&self, proj: *mut ReaProject) -> *mut MediaTrack {
-        self.low.GetMasterTrack.unwrap()(proj)
+        require!(self.low, GetMasterTrack)(proj)
     }
 
     pub fn guid_to_string(&self, g: &GUID) -> CString {
         let (guid_string, _) = with_string_buffer(64, |buffer, _| {
-            self.low.guidToString.unwrap()(g as *const GUID, buffer)
+            require!(self.low, guidToString)(g as *const GUID, buffer)
         });
         guid_string
     }
 
     pub fn master_get_tempo(&self) -> f64 {
-        self.low.Master_GetTempo.unwrap()()
+        require!(self.low, Master_GetTempo)()
     }
 
     pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: bool) {
-        self.low.SetCurrentBPM.unwrap()(__proj, bpm, want_undo);
+        require!(self.low, SetCurrentBPM)(__proj, bpm, want_undo);
     }
 
     pub fn master_get_play_rate(&self, project: *mut ReaProject) -> f64 {
-        self.low.Master_GetPlayRate.unwrap()(project)
+        require!(self.low, Master_GetPlayRate)(project)
     }
 
     pub fn csurf_on_play_rate_change(&self, playrate: f64) {
-        self.low.CSurf_OnPlayRateChange.unwrap()(playrate);
+        require!(self.low, CSurf_OnPlayRateChange)(playrate);
     }
 
     pub fn show_message_box(&self, msg: &CStr, title: &CStr, type_: u32) -> u32 {
-        self.low.ShowMessageBox.unwrap()(msg.as_ptr(), title.as_ptr(), type_ as i32) as u32
+        require!(self.low, ShowMessageBox)(msg.as_ptr(), title.as_ptr(), type_ as i32) as u32
     }
 
     pub fn string_to_guid(&self, str: &CStr) -> Option<GUID> {
         let mut guid = ZERO_GUID;
-        self.low.stringToGuid.unwrap()(str.as_ptr(), &mut guid as *mut GUID);
+        require!(self.low, stringToGuid)(str.as_ptr(), &mut guid as *mut GUID);
         if guid == ZERO_GUID {
             return None;
         }
@@ -628,7 +646,7 @@ impl Reaper {
         monitor: u32,
         allowgang: bool,
     ) -> i32 {
-        self.low.CSurf_OnInputMonitorChangeEx.unwrap()(trackid, monitor as i32, allowgang)
+        require!(self.low, CSurf_OnInputMonitorChangeEx)(trackid, monitor as i32, allowgang)
     }
 
     pub fn set_media_track_info_value(
@@ -637,25 +655,25 @@ impl Reaper {
         parmname: &CStr,
         newvalue: f64,
     ) -> bool {
-        self.low.SetMediaTrackInfo_Value.unwrap()(tr, parmname.as_ptr(), newvalue)
+        require!(self.low, SetMediaTrackInfo_Value)(tr, parmname.as_ptr(), newvalue)
     }
 
     pub fn stuff_midimessage(&self, mode: u32, msg1: u8, msg2: u8, msg3: u8) {
-        self.low.StuffMIDIMessage.unwrap()(mode as i32, msg1 as i32, msg2 as i32, msg3 as i32);
+        require!(self.low, StuffMIDIMessage)(mode as i32, msg1 as i32, msg2 as i32, msg3 as i32);
     }
 
     pub fn db2slider(&self, x: f64) -> f64 {
-        self.low.DB2SLIDER.unwrap()(x)
+        require!(self.low, DB2SLIDER)(x)
     }
 
     pub fn slider2db(&self, y: f64) -> f64 {
-        self.low.SLIDER2DB.unwrap()(y)
+        require!(self.low, SLIDER2DB)(y)
     }
 
     pub fn get_track_ui_vol_pan(&self, track: *mut MediaTrack) -> Option<(f64, f64)> {
         let mut volume = 0.0;
         let mut pan = 0.0;
-        let successful = self.low.GetTrackUIVolPan.unwrap()(
+        let successful = require!(self.low, GetTrackUIVolPan)(
             track,
             &mut volume as *mut f64,
             &mut pan as *mut f64,
@@ -668,7 +686,7 @@ impl Reaper {
 
     // TODO-medium return boolean/Result?
     pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> i32 {
-        self.low.Audio_RegHardwareHook.unwrap()(is_add, reg)
+        require!(self.low, Audio_RegHardwareHook)(is_add, reg)
     }
 
     pub fn csurf_set_surface_volume(
@@ -677,7 +695,7 @@ impl Reaper {
         volume: f64,
         ignoresurf: *mut IReaperControlSurface,
     ) {
-        self.low.CSurf_SetSurfaceVolume.unwrap()(trackid, volume, ignoresurf);
+        require!(self.low, CSurf_SetSurfaceVolume)(trackid, volume, ignoresurf);
     }
 
     pub fn csurf_on_volume_change_ex(
@@ -687,7 +705,7 @@ impl Reaper {
         relative: bool,
         allow_gang: bool,
     ) -> f64 {
-        self.low.CSurf_OnVolumeChangeEx.unwrap()(trackid, volume, relative, allow_gang)
+        require!(self.low, CSurf_OnVolumeChangeEx)(trackid, volume, relative, allow_gang)
     }
 
     pub fn csurf_set_surface_pan(
@@ -696,7 +714,7 @@ impl Reaper {
         pan: f64,
         ignoresurf: *mut IReaperControlSurface,
     ) {
-        self.low.CSurf_SetSurfacePan.unwrap()(trackid, pan, ignoresurf);
+        require!(self.low, CSurf_SetSurfacePan)(trackid, pan, ignoresurf);
     }
 
     pub fn csurf_on_pan_change_ex(
@@ -706,15 +724,15 @@ impl Reaper {
         relative: bool,
         allow_gang: bool,
     ) -> f64 {
-        self.low.CSurf_OnPanChangeEx.unwrap()(trackid, pan, relative, allow_gang)
+        require!(self.low, CSurf_OnPanChangeEx)(trackid, pan, relative, allow_gang)
     }
 
     pub fn count_selected_tracks_2(&self, proj: *mut ReaProject, wantmaster: bool) -> u32 {
-        self.low.CountSelectedTracks2.unwrap()(proj, wantmaster) as u32
+        require!(self.low, CountSelectedTracks2)(proj, wantmaster) as u32
     }
 
     pub fn set_track_selected(&self, track: *mut MediaTrack, selected: bool) {
-        self.low.SetTrackSelected.unwrap()(track, selected);
+        require!(self.low, SetTrackSelected)(track, selected);
     }
 
     pub fn get_selected_track_2(
@@ -723,19 +741,19 @@ impl Reaper {
         seltrackidx: u32,
         wantmaster: bool,
     ) -> *mut MediaTrack {
-        self.low.GetSelectedTrack2.unwrap()(proj, seltrackidx as i32, wantmaster)
+        require!(self.low, GetSelectedTrack2)(proj, seltrackidx as i32, wantmaster)
     }
 
     pub fn set_only_track_selected(&self, track: *mut MediaTrack) {
-        self.low.SetOnlyTrackSelected.unwrap()(track);
+        require!(self.low, SetOnlyTrackSelected)(track);
     }
 
     pub fn delete_track(&self, tr: *mut MediaTrack) {
-        self.low.DeleteTrack.unwrap()(tr);
+        require!(self.low, DeleteTrack)(tr);
     }
 
     pub fn get_track_num_sends(&self, tr: *mut MediaTrack, category: i32) -> u32 {
-        self.low.GetTrackNumSends.unwrap()(tr, category) as u32
+        require!(self.low, GetTrackNumSends)(tr, category) as u32
     }
 
     pub fn get_set_track_send_info(
@@ -746,7 +764,7 @@ impl Reaper {
         parmname: &CStr,
         set_new_value: *mut c_void,
     ) -> *mut c_void {
-        self.low.GetSetTrackSendInfo.unwrap()(
+        require!(self.low, GetSetTrackSendInfo)(
             tr,
             category,
             sendidx as i32,
@@ -763,7 +781,7 @@ impl Reaper {
     ) -> Option<CString> {
         let (chunk_content, successful) =
             with_string_buffer(str_need_big_sz, |buffer, max_size| {
-                self.low.GetTrackStateChunk.unwrap()(track, buffer, max_size, isundo_optional)
+                require!(self.low, GetTrackStateChunk)(track, buffer, max_size, isundo_optional)
             });
         if !successful {
             return None;
@@ -776,7 +794,7 @@ impl Reaper {
         tr: *mut MediaTrack,
         desttr_in_optional: *mut MediaTrack,
     ) -> u32 {
-        self.low.CreateTrackSend.unwrap()(tr, desttr_in_optional) as u32
+        require!(self.low, CreateTrackSend)(tr, desttr_in_optional) as u32
     }
 
     pub fn csurf_on_rec_arm_change_ex(
@@ -785,7 +803,7 @@ impl Reaper {
         recarm: u32, // TODO-medium boolean!?
         allowgang: bool,
     ) -> bool {
-        self.low.CSurf_OnRecArmChangeEx.unwrap()(trackid, recarm as i32, allowgang)
+        require!(self.low, CSurf_OnRecArmChangeEx)(trackid, recarm as i32, allowgang)
     }
 
     pub fn set_track_state_chunk(
@@ -794,19 +812,19 @@ impl Reaper {
         str: &CStr,
         isundo_optional: bool,
     ) -> bool {
-        self.low.SetTrackStateChunk.unwrap()(track, str.as_ptr(), isundo_optional)
+        require!(self.low, SetTrackStateChunk)(track, str.as_ptr(), isundo_optional)
     }
 
     pub fn track_fx_show(&self, track: *mut MediaTrack, index: u32, show_flag: u32) {
-        self.low.TrackFX_Show.unwrap()(track, index as i32, show_flag as i32);
+        require!(self.low, TrackFX_Show)(track, index as i32, show_flag as i32);
     }
 
     pub fn track_fx_get_floating_window(&self, track: *mut MediaTrack, index: u32) -> HWND {
-        self.low.TrackFX_GetFloatingWindow.unwrap()(track, index as i32)
+        require!(self.low, TrackFX_GetFloatingWindow)(track, index as i32)
     }
 
     pub fn track_fx_get_open(&self, track: *mut MediaTrack, fx: u32) -> bool {
-        self.low.TrackFX_GetOpen.unwrap()(track, fx as i32)
+        require!(self.low, TrackFX_GetOpen)(track, fx as i32)
     }
 
     pub fn csurf_on_send_volume_change(
@@ -816,7 +834,7 @@ impl Reaper {
         volume: f64,
         relative: bool,
     ) -> f64 {
-        self.low.CSurf_OnSendVolumeChange.unwrap()(trackid, send_index as i32, volume, relative)
+        require!(self.low, CSurf_OnSendVolumeChange)(trackid, send_index as i32, volume, relative)
     }
 
     pub fn csurf_on_send_pan_change(
@@ -826,11 +844,11 @@ impl Reaper {
         pan: f64,
         relative: bool,
     ) -> f64 {
-        self.low.CSurf_OnSendPanChange.unwrap()(trackid, send_index as i32, pan, relative)
+        require!(self.low, CSurf_OnSendPanChange)(trackid, send_index as i32, pan, relative)
     }
 
     pub fn kbd_get_text_from_cmd(&self, cmd: u32, section: *mut KbdSectionInfo) -> Option<&CStr> {
-        let ptr = self.low.kbd_getTextFromCmd.unwrap()(cmd, section);
+        let ptr = require!(self.low, kbd_getTextFromCmd)(cmd, section);
         if ptr.is_null() {
             return None;
         }
@@ -839,11 +857,11 @@ impl Reaper {
 
     // TODO-medium Maybe return Err if result is -1
     pub fn get_toggle_command_state_2(&self, section: *mut KbdSectionInfo, command_id: u32) -> i32 {
-        self.low.GetToggleCommandState2.unwrap()(section, command_id as i32)
+        require!(self.low, GetToggleCommandState2)(section, command_id as i32)
     }
 
     pub fn reverse_named_command_lookup(&self, command_id: i32) -> Option<&CStr> {
-        let ptr = self.low.ReverseNamedCommandLookup.unwrap()(command_id);
+        let ptr = require!(self.low, ReverseNamedCommandLookup)(command_id);
         if ptr.is_null() {
             return None;
         }
@@ -858,7 +876,7 @@ impl Reaper {
     ) -> Option<(f64, f64)> {
         let mut volume = 0.0;
         let mut pan = 0.0;
-        let successful = self.low.GetTrackSendUIVolPan.unwrap()(
+        let successful = require!(self.low, GetTrackSendUIVolPan)(
             track,
             send_index as i32,
             &mut volume as *mut f64,
@@ -877,7 +895,7 @@ impl Reaper {
         fx: u32,
     ) -> Result<(u32, u32), ()> {
         let mut num_presets: i32 = 0;
-        let index = self.low.TrackFX_GetPresetIndex.unwrap()(
+        let index = require!(self.low, TrackFX_GetPresetIndex)(
             track,
             fx as i32,
             &mut num_presets as *mut i32,
@@ -889,7 +907,7 @@ impl Reaper {
     }
 
     pub fn track_fx_set_preset_by_index(&self, track: *mut MediaTrack, fx: u32, idx: i32) -> bool {
-        self.low.TrackFX_SetPresetByIndex.unwrap()(track, fx as i32, idx)
+        require!(self.low, TrackFX_SetPresetByIndex)(track, fx as i32, idx)
     }
 
     pub fn track_fx_navigate_presets(
@@ -898,7 +916,7 @@ impl Reaper {
         fx: u32,
         presetmove: i32,
     ) -> bool {
-        self.low.TrackFX_NavigatePresets.unwrap()(track, fx as i32, presetmove)
+        require!(self.low, TrackFX_NavigatePresets)(track, fx as i32, presetmove)
     }
 
     pub fn track_fx_get_preset(
@@ -909,12 +927,12 @@ impl Reaper {
     ) -> (bool, Option<CString>) {
         if presetname_sz == 0 {
             let state_matches_preset =
-                self.low.TrackFX_GetPreset.unwrap()(track, fx as i32, null_mut(), 0);
+                require!(self.low, TrackFX_GetPreset)(track, fx as i32, null_mut(), 0);
             (state_matches_preset, None)
         } else {
             let (name, state_matches_preset) =
                 with_string_buffer(presetname_sz, |buffer, max_size| {
-                    self.low.TrackFX_GetPreset.unwrap()(track, fx as i32, buffer, max_size)
+                    require!(self.low, TrackFX_GetPreset)(track, fx as i32, buffer, max_size)
                 });
             let name = if name.as_bytes().len() == 0 {
                 None
