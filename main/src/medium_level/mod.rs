@@ -49,7 +49,6 @@ impl Reaper {
         Reaper { low }
     }
 
-    // TODO-high Unifiy u32 vs i32
     pub fn enum_projects(
         &self,
         idx: i32,
@@ -178,7 +177,6 @@ impl Reaper {
     }
 
     pub fn named_command_lookup(&self, command_name: &CStr) -> u32 {
-        // TODO-high Return Option if result -1
         self.low.NamedCommandLookup.unwrap()(command_name.as_ptr()) as u32
     }
 
@@ -210,7 +208,6 @@ impl Reaper {
         self.low.GetMaxMidiOutputs.unwrap()() as u32
     }
 
-    // TODO-high When not present, does it still return a name? Adjust signature accordingly!
     pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = self.low.GetMIDIInputName.unwrap()(dev as i32, null_mut(), 0);
@@ -496,9 +493,8 @@ impl Reaper {
         self.low.Undo_BeginBlock2.unwrap()(proj);
     }
 
-    // TODO-medium extraflags as u32?
-    pub fn undo_end_block_2(&self, proj: *mut ReaProject, descchange: &CStr, extraflags: i32) {
-        self.low.Undo_EndBlock2.unwrap()(proj, descchange.as_ptr(), extraflags);
+    pub fn undo_end_block_2(&self, proj: *mut ReaProject, descchange: &CStr, extraflags: u32) {
+        self.low.Undo_EndBlock2.unwrap()(proj, descchange.as_ptr(), extraflags as i32);
     }
 
     pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
@@ -629,10 +625,10 @@ impl Reaper {
     pub fn csurf_on_input_monitoring_change_ex(
         &self,
         trackid: *mut MediaTrack,
-        monitor: i32, // TODO-medium u32?
+        monitor: u32,
         allowgang: bool,
     ) -> i32 {
-        self.low.CSurf_OnInputMonitorChangeEx.unwrap()(trackid, monitor, allowgang)
+        self.low.CSurf_OnInputMonitorChangeEx.unwrap()(trackid, monitor as i32, allowgang)
     }
 
     pub fn set_media_track_info_value(

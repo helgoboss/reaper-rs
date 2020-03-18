@@ -102,13 +102,14 @@ impl Track {
         self.load_and_check_if_necessary_or_complain();
         let irecmon = Reaper::instance()
             .medium
-            .convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECMON"));
+            .convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECMON"))
+            as u32;
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
     pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
         self.load_and_check_if_necessary_or_complain();
-        let irecmon: i32 = mode.into();
+        let irecmon: u32 = mode.into();
         Reaper::instance()
             .medium
             .csurf_on_input_monitoring_change_ex(self.get_media_track(), irecmon, false);
