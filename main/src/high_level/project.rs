@@ -35,10 +35,11 @@ impl Project {
     }
 
     pub fn get_file_path(&self) -> Option<PathBuf> {
-        Reaper::instance()
+        let (_, path_c_string) = Reaper::instance()
             .medium
-            .enum_projects(self.get_index() as i32, 5000)
-            .1
+            .enum_projects(self.get_index() as i32, 5000);
+        Some(path_c_string)
+            .filter(|path_c_string| path_c_string.to_bytes().len() > 0)
             .map(|path_c_string| {
                 let path_str = path_c_string
                     .to_str()

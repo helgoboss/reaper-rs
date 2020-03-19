@@ -1,10 +1,15 @@
-//! Provides all functions from `reaper_plugin_functions.h` with the following improvements:
+//! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! - Snake-case function and parameter names
 //! - Return values instead of output parameters
-//! - No C strings
+//! - When there are string output parameters which can be passed a null pointer, trigger this null
+//!   pointer case by passing a buffer size of 0, also use Cow in this case in order to have a cheap
+//!   empty string in null-pointer case
+//! - When there are both return values and output parameters, return a tuple if there's just one
+//!   output parameter and a struct if there are many output parameters
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
-//!   functions are available, maybe provide "_available" functions for conditional execution)
-//! - Use u32 instead of i32 when applicable
+//!   functions are available)
+//! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
+//!   of i32)
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null, null_mut};
@@ -18,6 +23,7 @@ use crate::low_level::{
 };
 pub use crate::medium_level::control_surface::ControlSurface;
 use crate::medium_level::control_surface::DelegatingControlSurface;
+use std::borrow::Cow;
 
 mod control_surface;
 
@@ -65,24 +71,16 @@ impl Reaper {
         &self,
         idx: i32,
         projfn_out_optional_sz: u32,
-    ) -> (*mut ReaProject, Option<CString>) {
+    ) -> (*mut ReaProject, Cow<'static, CStr>) {
         if projfn_out_optional_sz == 0 {
             let project = require!(self.low, EnumProjects)(idx, null_mut(), 0);
-            (project, None)
+            (project, create_cheap_empty_string())
         } else {
             let (file_path, project) =
                 with_string_buffer(projfn_out_optional_sz, |buffer, max_size| {
                     require!(self.low, EnumProjects)(idx, buffer, max_size)
                 });
-
-            (
-                project,
-                if file_path.as_bytes().len() == 0 {
-                    None
-                } else {
-                    Some(file_path)
-                },
-            )
+            (project, Cow::Owned(file_path))
         }
     }
 
@@ -220,25 +218,19 @@ impl Reaper {
         require!(self.low, GetMaxMidiOutputs)() as u32
     }
 
-    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
+    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Cow<'static, CStr>) {
         if nameout_sz == 0 {
             let is_present = require!(self.low, GetMIDIInputName)(dev as i32, null_mut(), 0);
-            (is_present, None)
+            (is_present, create_cheap_empty_string())
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
                 require!(self.low, GetMIDIInputName)(dev as i32, buffer, max_size)
             });
-            (
-                is_present,
-                if name.as_bytes().len() == 0 {
-                    None
-                } else {
-                    Some(name)
-                },
-            )
+            (is_present, Cow::Owned(name))
         }
     }
 
+    // CONTINUE
     pub fn track_fx_add_by_name(
         &self,
         track: *mut MediaTrack,
@@ -249,22 +241,15 @@ impl Reaper {
         require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate)
     }
 
-    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
+    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Cow<'static, CStr>) {
         if nameout_sz == 0 {
             let is_present = require!(self.low, GetMIDIOutputName)(dev as i32, null_mut(), 0);
-            (is_present, None)
+            (is_present, create_cheap_empty_string())
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
                 require!(self.low, GetMIDIOutputName)(dev as i32, buffer, max_size)
             });
-            (
-                is_present,
-                if name.as_bytes().len() == 0 {
-                    None
-                } else {
-                    Some(name)
-                },
-            )
+            (is_present, Cow::Owned(name))
         }
     }
 
@@ -282,7 +267,7 @@ impl Reaper {
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             require!(self.low, TrackFX_GetFXName)(track, fx as i32, buffer, max_size)
         });
-        if !successful || name.as_bytes().len() == 0 {
+        if !successful {
             return None;
         }
         Some(name)
@@ -322,7 +307,7 @@ impl Reaper {
                 max_size,
             )
         });
-        if !successful || name.as_bytes().len() == 0 {
+        if !successful {
             return None;
         }
         Some(name)
@@ -345,7 +330,7 @@ impl Reaper {
                 max_size,
             )
         });
-        if !successful || name.as_bytes().len() == 0 {
+        if !successful {
             return None;
         }
         Some(name)
@@ -370,7 +355,7 @@ impl Reaper {
                 max_size,
             )
         });
-        if !successful || name.as_bytes().len() == 0 {
+        if !successful {
             return None;
         }
         Some(name)
@@ -515,6 +500,7 @@ impl Reaper {
         require!(self.low, Undo_EndBlock2)(proj, descchange.as_ptr(), extraflags as i32);
     }
 
+    // TODO-medium Reference or owned? Reference lifetime?
     pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
         let ptr = require!(self.low, Undo_CanUndo2)(proj);
         if ptr.is_null() {
@@ -523,6 +509,7 @@ impl Reaper {
         Some(unsafe { CStr::from_ptr(ptr) })
     }
 
+    // TODO-medium Reference or owned? Reference lifetime?
     pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
         let ptr = require!(self.low, Undo_CanRedo2)(proj);
         if ptr.is_null() {
@@ -631,6 +618,7 @@ impl Reaper {
         require!(self.low, ShowMessageBox)(msg.as_ptr(), title.as_ptr(), type_ as i32) as u32
     }
 
+    // TODO-medium Result instead of Option?
     pub fn string_to_guid(&self, str: &CStr) -> Option<GUID> {
         let mut guid = ZERO_GUID;
         require!(self.low, stringToGuid)(str.as_ptr(), &mut guid as *mut GUID);
@@ -924,22 +912,17 @@ impl Reaper {
         track: *mut MediaTrack,
         fx: u32,
         presetname_sz: u32,
-    ) -> (bool, Option<CString>) {
+    ) -> (bool, Cow<'static, CStr>) {
         if presetname_sz == 0 {
             let state_matches_preset =
                 require!(self.low, TrackFX_GetPreset)(track, fx as i32, null_mut(), 0);
-            (state_matches_preset, None)
+            (state_matches_preset, create_cheap_empty_string())
         } else {
             let (name, state_matches_preset) =
                 with_string_buffer(presetname_sz, |buffer, max_size| {
                     require!(self.low, TrackFX_GetPreset)(track, fx as i32, buffer, max_size)
                 });
-            let name = if name.as_bytes().len() == 0 {
-                None
-            } else {
-                Some(name)
-            };
-            (state_matches_preset, name)
+            (state_matches_preset, Cow::Owned(name))
         }
     }
 
@@ -1030,4 +1013,8 @@ fn complain_if_minus_one(value: f64) -> f64 {
         panic!("Out parameter was not set by REAPER")
     }
     value
+}
+
+fn create_cheap_empty_string() -> Cow<'static, CStr> {
+    Cow::Borrowed(Default::default())
 }
