@@ -133,7 +133,7 @@ impl Action {
                 let rd = self.load_if_necessary_or_complain();
                 Reaper::instance()
                     .medium
-                    .reverse_named_command_lookup(rd.command_id as i32)
+                    .reverse_named_command_lookup(rd.command_id)
             })
     }
 
