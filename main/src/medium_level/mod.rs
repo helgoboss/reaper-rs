@@ -1,6 +1,7 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! - Snake-case function and parameter names
 //! - Use bool instead of i32 as return value type for "yes or no" functions
+//!   TODO-low Debatable. Maybe other int values reserved for future use.
 //! - Use Option<&CStr> return value type instead of c_char pointers at some places
 //!   TODO-low Debatable because non-string pointers we also don't transform to None if they are null
 //!   TODO-low Lifetime not correct ... maybe it should be marked unsafe or just be left a pointer
@@ -11,11 +12,15 @@
 //! - When there are both return values and output parameters, return a tuple if there's just one
 //!   output parameter and a struct if there are many output parameters
 //! - In all REAPER functions which can fail (indicated by returning false or -1), return Result
+//!   TODO-low Debatable. Sometimes it's not documented what return values there can be. Sometimes
+//!    the meaning of returning false or -1 can vary depending on the given parameters.
 //! - In all REAPER functions which return things that might not be present, return Option
+//!   TODO-low Debatable for the same reason that Result is debatable.
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available)
 //! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
-//!   of i32)
+//!   of i32). In the unlikely case that the value range has to be extended in future, it's just
+//!   a matter of removing safe casts on user-side code.
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
