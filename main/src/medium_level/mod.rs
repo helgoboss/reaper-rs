@@ -1,13 +1,16 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! - Snake-case function and parameter names
-//! - Use Option<&CStr> instead of c_char pointers at some places
+//! - Use bool instead of i32 as return value type for "yes or no" functions
+//! - Use Option<&CStr> return value type instead of c_char pointers at some places
+//!   TODO-low Debatable because non-string pointers we also don't transform to None if they are null
+//!   TODO-low Lifetime not correct ... maybe it should be marked unsafe or just be left a pointer
 //! - Use return values instead of output parameters
 //! - When there are string output parameters which can be passed a null pointer, trigger this null
 //!   pointer case when a buffer size of 0 is passed, also use Cow in this case in order to have a
 //!   cheap empty string in null-pointer case
 //! - When there are both return values and output parameters, return a tuple if there's just one
 //!   output parameter and a struct if there are many output parameters
-//! - In all REAPER functions which can fail (indicated by returning false), return Result
+//! - In all REAPER functions which can fail (indicated by returning false or -1), return Result
 //! - In all REAPER functions which return things that might not be present, return Option
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available)
@@ -119,6 +122,8 @@ impl Reaper {
     }
 
     // DONE
+    // Kept return value type i32 because meaning of return value depends very much on the actual
+    // thing which is registered and probably is not safe to generalize.
     pub fn plugin_register(&self, name: &CStr, infostruct: *mut c_void) -> i32 {
         require!(self.low, plugin_register)(name.as_ptr(), infostruct)
     }
@@ -181,6 +186,7 @@ impl Reaper {
     }
 
     // DONE
+    // Kept return value type i32 because I have no idea what the return value is about.
     pub fn kbd_on_main_action_ex(
         &self,
         cmd: u32,
@@ -259,14 +265,23 @@ impl Reaper {
     }
 
     // DONE
+    // instantiate == -1 => Returns None if FX couldn't be added because not available
+    // instantiate == 0  => Returns None if FX not in chain
+    // instantiate > 0   => Returns None if FX not in chain and couldn't be added because not available
+    // TODO-low Return type Option debatable because if instantiate != 0, it's rather an Err
     pub fn track_fx_add_by_name(
         &self,
         track: *mut MediaTrack,
         fxname: &CStr,
         rec_fx: bool,
         instantiate: i32,
-    ) -> i32 {
-        require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate)
+    ) -> Option<u32> {
+        let index =
+            require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate);
+        if index == -1 {
+            return None;
+        }
+        Some(index as u32)
     }
 
     // DONE
@@ -305,9 +320,13 @@ impl Reaper {
         Ok(name)
     }
 
-    // TODO-high Maybe return None if result is -1
-    pub fn track_fx_get_instrument(&self, track: *mut MediaTrack) -> i32 {
-        require!(self.low, TrackFX_GetInstrument)(track)
+    // DONE
+    pub fn track_fx_get_instrument(&self, track: *mut MediaTrack) -> Option<u32> {
+        let index = require!(self.low, TrackFX_GetInstrument)(track);
+        if index == -1 {
+            return None;
+        }
+        Some(index as u32)
     }
 
     // DONE
@@ -569,7 +588,7 @@ impl Reaper {
         require!(self.low, Undo_EndBlock2)(proj, descchange.as_ptr(), extraflags as i32);
     }
 
-    // TODO-medium Reference or owned? Reference lifetime?
+    // DONE
     pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
         let ptr = require!(self.low, Undo_CanUndo2)(proj);
         if ptr.is_null() {
@@ -578,7 +597,7 @@ impl Reaper {
         Some(unsafe { CStr::from_ptr(ptr) })
     }
 
-    // TODO-medium Reference or owned? Reference lifetime?
+    // DONE
     pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
         let ptr = require!(self.low, Undo_CanRedo2)(proj);
         if ptr.is_null() {
@@ -587,14 +606,16 @@ impl Reaper {
         Some(unsafe { CStr::from_ptr(ptr) })
     }
 
-    // TODO-medium Shouldn't the return value be boolean/Result?
-    pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> i32 {
-        require!(self.low, Undo_DoUndo2)(proj)
+    // DONE
+    // Returns true if there was something to be undone, false if not
+    pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> bool {
+        require!(self.low, Undo_DoUndo2)(proj) != 0
     }
 
-    // TODO-medium Shouldn't the return value be boolean/Result?
-    pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> i32 {
-        require!(self.low, Undo_DoRedo2)(proj)
+    // DONE
+    // Returns true if there was something to be redone, false if not
+    pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> bool {
+        require!(self.low, Undo_DoRedo2)(proj) != 0
     }
 
     // DONE
@@ -602,9 +623,10 @@ impl Reaper {
         require!(self.low, MarkProjectDirty)(proj);
     }
 
-    // TODO-medium Shouldn't the return value be boolean?
-    pub fn is_project_dirty(&self, proj: *mut ReaProject) -> i32 {
-        require!(self.low, IsProjectDirty)(proj)
+    // DONE
+    // Returns true if project dirty, false if not
+    pub fn is_project_dirty(&self, proj: *mut ReaProject) -> bool {
+        require!(self.low, IsProjectDirty)(proj) != 0
     }
 
     // DONE
@@ -619,8 +641,8 @@ impl Reaper {
     }
 
     // DONE
-    pub fn get_track_automation_mode(&self, tr: *mut MediaTrack) -> i32 {
-        require!(self.low, GetTrackAutomationMode)(tr)
+    pub fn get_track_automation_mode(&self, tr: *mut MediaTrack) -> u32 {
+        require!(self.low, GetTrackAutomationMode)(tr) as u32
     }
 
     // DONE
@@ -773,9 +795,9 @@ impl Reaper {
         Ok((volume, pan))
     }
 
-    // TODO-medium return boolean/Result?
-    pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> i32 {
-        require!(self.low, Audio_RegHardwareHook)(is_add, reg)
+    // DONE
+    pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> bool {
+        require!(self.low, Audio_RegHardwareHook)(is_add, reg) > 0
     }
 
     // DONE
@@ -964,21 +986,36 @@ impl Reaper {
         require!(self.low, CSurf_OnSendPanChange)(trackid, send_index as i32, pan, relative)
     }
 
-    // TODO-medium Result or Option? Lifetime?
-    pub fn kbd_get_text_from_cmd(&self, cmd: u32, section: *mut KbdSectionInfo) -> Option<&CStr> {
+    // Returns Err if section or command not existing (can't think of any other case)
+    // DONE
+    pub fn kbd_get_text_from_cmd(
+        &self,
+        cmd: u32,
+        section: *mut KbdSectionInfo,
+    ) -> Result<&CStr, ()> {
         let ptr = require!(self.low, kbd_getTextFromCmd)(cmd, section);
         if ptr.is_null() {
+            return Err(());
+        }
+        Ok(unsafe { CStr::from_ptr(ptr) })
+    }
+
+    // DONE
+    // Returns None if action doesn't support on/off states (or if action not existing)
+    pub fn get_toggle_command_state_2(
+        &self,
+        section: *mut KbdSectionInfo,
+        command_id: u32,
+    ) -> Option<bool> {
+        let result = require!(self.low, GetToggleCommandState2)(section, command_id as i32);
+        if result == -1 {
             return None;
         }
-        Some(unsafe { CStr::from_ptr(ptr) })
+        return Some(result != 0);
     }
 
-    // TODO-medium Maybe return Err if result is -1
-    pub fn get_toggle_command_state_2(&self, section: *mut KbdSectionInfo, command_id: u32) -> i32 {
-        require!(self.low, GetToggleCommandState2)(section, command_id as i32)
-    }
-
-    // TODO-medium Result or Option? Lifetime?
+    // DONE
+    // Returns None if lookup was not successful, that is, the command couldn't be found
     pub fn reverse_named_command_lookup(&self, command_id: u32) -> Option<&CStr> {
         let ptr = require!(self.low, ReverseNamedCommandLookup)(command_id as i32);
         if ptr.is_null() {
@@ -1010,7 +1047,6 @@ impl Reaper {
 
     // DONE
     // Returns Err e.g. if FX doesn't exist
-    // TODO-medium Take this as inspiration how to handle other -1 returning functions
     pub fn track_fx_get_preset_index(
         &self,
         track: *mut MediaTrack,
@@ -1158,7 +1194,7 @@ pub struct GetFocusedFxTrackFxResultData {
     pub fxnumber: u32,
 }
 
-// TODO-high Panic for now, just to detect which situations can actually occur
+// TODO-low Panic for now, just to detect which situations can actually occur
 fn complain_if_minus_one(value: f64) -> f64 {
     if value == -1.0 {
         panic!("Out parameter was not set by REAPER")

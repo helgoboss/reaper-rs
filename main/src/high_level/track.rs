@@ -600,7 +600,7 @@ impl Track {
         let am = Reaper::instance()
             .medium
             .get_track_automation_mode(self.media_track.get());
-        AutomationMode::try_from(am).expect("Unknown automation mode")
+        AutomationMode::try_from(am as i32).expect("Unknown automation mode")
     }
 
     pub fn get_effective_automation_mode(&self) -> AutomationMode {

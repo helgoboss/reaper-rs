@@ -189,11 +189,11 @@ impl Project {
 
     pub fn undo(&self) -> bool {
         self.complain_if_not_available();
-        Reaper::instance().medium.undo_do_undo_2(self.rea_project) != 0
+        Reaper::instance().medium.undo_do_undo_2(self.rea_project)
     }
 
     pub fn redo(&self) -> bool {
-        Reaper::instance().medium.undo_do_redo_2(self.rea_project) != 0
+        Reaper::instance().medium.undo_do_redo_2(self.rea_project)
     }
 
     pub fn mark_as_dirty(&self) {
@@ -203,7 +203,7 @@ impl Project {
     }
 
     pub fn is_dirty(&self) -> bool {
-        Reaper::instance().medium.is_project_dirty(self.rea_project) != 0
+        Reaper::instance().medium.is_project_dirty(self.rea_project)
     }
 
     // TODO-high In such cases it's probably always better to return a reference. If that reference

@@ -94,21 +94,19 @@ impl Action {
                 runtime_data.command_id as u32,
                 runtime_data.section.get_raw_section_info(),
             );
-            return text.filter(|t| t.to_bytes().len() > 0).is_some();
+            return text.ok().filter(|t| t.to_bytes().len() > 0).is_some();
         }
         self.load_by_command_name()
     }
 
     pub fn get_character(&self) -> ActionCharacter {
         let rd = self.load_if_necessary_or_complain();
-        if Reaper::instance()
+        match Reaper::instance()
             .medium
             .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
-            == -1
         {
-            ActionCharacter::Trigger
-        } else {
-            ActionCharacter::Toggle
+            Some(_) => ActionCharacter::Toggle,
+            None => ActionCharacter::Trigger,
         }
     }
 
@@ -117,7 +115,7 @@ impl Action {
         Reaper::instance()
             .medium
             .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
-            == 1
+            == Some(true)
     }
 
     pub fn get_command_id(&self) -> u32 {
@@ -143,6 +141,7 @@ impl Action {
         Reaper::instance()
             .medium
             .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info())
+            .ok()
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
