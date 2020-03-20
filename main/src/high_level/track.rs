@@ -25,9 +25,10 @@ use crate::high_level::{
     Reaper, RecordingInput, Volume,
 };
 use crate::low_level::{
-    get_control_surface_instance, MediaTrack, ReaProject, CSURF_EXT_SETINPUTMONITOR,
+    get_control_surface_instance, MediaTrack, ReaProject, CSURF_EXT_SETINPUTMONITOR, GUID,
 };
 use crate::medium_level;
+use crate::medium_level::{get_ptr_content_as_c_str, get_ptr_content_as_copy};
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
@@ -87,23 +88,29 @@ impl Track {
         );
     }
 
+    // TODO-medium Maybe return borrowed string instead!
     pub fn get_name(&self) -> CString {
         self.load_and_check_if_necessary_or_complain();
         if self.is_master_track() {
             c_str!("<Master track>").to_owned()
         } else {
-            Reaper::instance()
-                .medium
-                .convenient_get_media_track_info_string(self.get_media_track(), c_str!("P_NAME"))
+            let ptr = Reaper::instance().medium.get_set_media_track_info(
+                self.get_media_track(),
+                c_str!("P_NAME"),
+                null_mut(),
+            );
+            unsafe { get_ptr_content_as_c_str(ptr) }.unwrap().to_owned()
         }
     }
 
     pub fn get_input_monitoring_mode(&self) -> InputMonitoringMode {
         self.load_and_check_if_necessary_or_complain();
-        let irecmon = Reaper::instance()
-            .medium
-            .convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECMON"))
-            as u32;
+        let ptr = Reaper::instance().medium.get_set_media_track_info(
+            self.get_media_track(),
+            c_str!("I_RECMON"),
+            null_mut(),
+        );
+        let irecmon = unsafe { get_ptr_content_as_copy::<i32>(ptr) }.unwrap() as u32;
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
@@ -117,9 +124,12 @@ impl Track {
 
     pub fn get_recording_input(&self) -> RecordingInput {
         self.load_and_check_if_necessary_or_complain();
-        let rec_input_index = Reaper::instance()
-            .medium
-            .convenient_get_media_track_info_i32_ptr(self.get_media_track(), c_str!("I_RECINPUT"));
+        let ptr = Reaper::instance().medium.get_set_media_track_info(
+            self.get_media_track(),
+            c_str!("I_RECINPUT"),
+            null_mut(),
+        );
+        let rec_input_index = unsafe { get_ptr_content_as_copy::<i32>(ptr) }.unwrap();
         RecordingInput::from_rec_input_index(rec_input_index)
     }
 
@@ -204,12 +214,11 @@ impl Track {
     // TODO-high Maybe return u32 and express master track index in other ways
     pub fn get_index(&self) -> i32 {
         self.load_and_check_if_necessary_or_complain();
-        let ip_track_number = Reaper::instance()
-            .medium
-            .convenient_get_media_track_info_i32_value(
-                self.get_media_track(),
-                c_str!("IP_TRACKNUMBER"),
-            );
+        let ip_track_number = Reaper::instance().medium.get_set_media_track_info(
+            self.get_media_track(),
+            c_str!("IP_TRACKNUMBER"),
+            null_mut(),
+        ) as i32;
         if ip_track_number == 0 {
             // Usually means that track doesn't exist. But this we already checked. This happens only if we query the
             // number of a track in another project tab. TODO-low Try to find a working solution. Till then, return 0.
@@ -643,9 +652,10 @@ impl PartialEq for Track {
 }
 
 pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
-    let internal = Reaper::instance()
-        .medium
-        .convenient_get_media_track_info_guid(media_track, c_str!("GUID"));
+    let internal =
+        Reaper::instance()
+            .medium
+            .get_set_media_track_info(media_track, c_str!("GUID"), null_mut()) as *mut GUID;
     Guid::new(unsafe { *internal })
 }
 

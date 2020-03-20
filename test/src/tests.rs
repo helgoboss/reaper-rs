@@ -24,8 +24,13 @@ use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
 
+// TODO-high Remove all compile-time warnings
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     let steps_a = vec![
+        step("Basics", |reaper, _| {
+            check!(Guid::try_from(c_str!("{hey}")).is_err());
+            Ok(())
+        }),
         step("Create empty project in new tab", |reaper, step| {
             // Given
             let current_project_before = reaper.get_current_project();

@@ -22,7 +22,7 @@
 //!   of i32). In the unlikely case that the value range has to be extended in future, it's just
 //!   a matter of removing safe casts on user-side code.
 use std::borrow::Cow;
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr, CString, OsString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null, null_mut};
 
@@ -34,7 +34,11 @@ use crate::low_level::{
     MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
 };
 pub use crate::medium_level::control_surface::ControlSurface;
+mod util;
 use crate::medium_level::control_surface::DelegatingControlSurface;
+// TODO-low Maybe expose under util mod. Maybe put those utils in low-level API.
+use std::mem::MaybeUninit;
+pub use util::*;
 
 mod control_surface;
 
@@ -160,9 +164,9 @@ impl Reaper {
 
     // DONE
     pub fn gen_guid(&self) -> GUID {
-        let mut guid = ZERO_GUID;
-        require!(self.low, genGuid)(&mut guid as *mut GUID);
-        guid
+        let mut guid = MaybeUninit::uninit();
+        require!(self.low, genGuid)(guid.as_mut_ptr());
+        unsafe { guid.assume_init() }
     }
 
     // DONE
@@ -446,26 +450,27 @@ impl Reaper {
 
     // DONE
     pub fn get_focused_fx(&self) -> GetFocusedFxResult {
-        let mut tracknumber: i32 = -1;
-        let mut itemnumber: i32 = -1;
-        let mut fxnumber: i32 = -1;
+        // TODO-high Use MaybeUninit (see https://medium.com/dwelo-r-d/wrapping-unsafe-c-libraries-in-rust-d75aeb283c65)
+        let mut tracknumber = MaybeUninit::uninit();
+        let mut itemnumber = MaybeUninit::uninit();
+        let mut fxnumber = MaybeUninit::uninit();
         let result = require!(self.low, GetFocusedFX)(
-            &mut tracknumber as *mut i32,
-            &mut itemnumber as *mut i32,
-            &mut fxnumber as *mut i32,
+            tracknumber.as_mut_ptr(),
+            itemnumber.as_mut_ptr(),
+            fxnumber.as_mut_ptr(),
         );
         match result {
             0 => GetFocusedFxResult::None,
             1 => GetFocusedFxResult::TrackFx(GetFocusedFxTrackFxResultData {
-                tracknumber: tracknumber as u32,
-                fxnumber: fxnumber as u32,
+                tracknumber: unsafe { tracknumber.assume_init() } as u32,
+                fxnumber: unsafe { fxnumber.assume_init() } as u32,
             }),
             2 => {
                 // TODO-low Add test
-                let fxnumber = fxnumber as u32;
+                let fxnumber = unsafe { fxnumber.assume_init() } as u32;
                 GetFocusedFxResult::ItemFx(GetFocusedFxItemFxResultData {
-                    tracknumber: tracknumber as u32,
-                    itemnumber: itemnumber as u32,
+                    tracknumber: unsafe { tracknumber.assume_init() } as u32,
+                    itemnumber: unsafe { itemnumber.assume_init() } as u32,
                     takeindex: (fxnumber >> 16) & 0xFFFF,
                     fxindex: fxnumber & 0xFFFF,
                 })
@@ -474,24 +479,24 @@ impl Reaper {
         }
     }
 
-    // DONE
+    // TODO-high Support item FX, see GetLastTouchedFX doc!!!
     // Returns None if no FX has been touched yet or if the last-touched FX doesn't exist anymore
     pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResultData> {
-        let mut tracknumber = -1;
-        let mut fxnumber = -1;
-        let mut paramnumber = -1;
+        let mut tracknumber = MaybeUninit::uninit();
+        let mut fxnumber = MaybeUninit::uninit();
+        let mut paramnumber = MaybeUninit::uninit();
         let is_valid = require!(self.low, GetLastTouchedFX)(
-            &mut tracknumber as *mut i32,
-            &mut fxnumber as *mut i32,
-            &mut paramnumber as *mut i32,
+            tracknumber.as_mut_ptr(),
+            fxnumber.as_mut_ptr(),
+            paramnumber.as_mut_ptr(),
         );
         if !is_valid {
             return None;
         }
         Some(GetLastTouchedFxResultData {
-            tracknumber,
-            fxnumber,
-            paramnumber,
+            tracknumber: unsafe { tracknumber.assume_init() },
+            fxnumber: unsafe { fxnumber.assume_init() },
+            paramnumber: unsafe { paramnumber.assume_init() },
         })
     }
 
@@ -532,27 +537,27 @@ impl Reaper {
         fx: u32,
         param: u32,
     ) -> Option<GetParameterStepSizesResult> {
-        let mut step = -1.0;
-        let mut small_step = -1.0;
-        let mut large_step = -1.0;
-        let mut is_toggle = false;
+        let mut step = MaybeUninit::uninit();
+        let mut small_step = MaybeUninit::uninit();
+        let mut large_step = MaybeUninit::uninit();
+        let mut is_toggle = MaybeUninit::uninit();
         let successful = require!(self.low, TrackFX_GetParameterStepSizes)(
             track,
             fx as i32,
             param as i32,
-            &mut step as *mut f64,
-            &mut small_step as *mut f64,
-            &mut large_step as *mut f64,
-            &mut is_toggle as *mut bool,
+            step.as_mut_ptr(),
+            small_step.as_mut_ptr(),
+            large_step.as_mut_ptr(),
+            is_toggle.as_mut_ptr(),
         );
         if !successful {
             return None;
         }
         Some(GetParameterStepSizesResult {
-            step: complain_if_minus_one(step),
-            small_step: complain_if_minus_one(small_step),
-            large_step: complain_if_minus_one(large_step),
-            is_toggle,
+            step: unsafe { step.assume_init() },
+            small_step: unsafe { small_step.assume_init() },
+            large_step: unsafe { large_step.assume_init() },
+            is_toggle: unsafe { is_toggle.assume_init() },
         })
     }
 
@@ -563,22 +568,22 @@ impl Reaper {
         fx: u32,
         param: u32,
     ) -> GetParamExResult {
-        let mut min_val = -1.0;
-        let mut max_val = -1.0;
-        let mut mid_val = -1.0;
+        let mut min_val = MaybeUninit::uninit();
+        let mut max_val = MaybeUninit::uninit();
+        let mut mid_val = MaybeUninit::uninit();
         let value = require!(self.low, TrackFX_GetParamEx)(
             track,
             fx as i32,
             param as i32,
-            &mut min_val as *mut f64,
-            &mut max_val as *mut f64,
-            &mut mid_val as *mut f64,
+            min_val.as_mut_ptr(),
+            max_val.as_mut_ptr(),
+            mid_val.as_mut_ptr(),
         );
         GetParamExResult {
-            value: complain_if_minus_one(value),
-            min_val: complain_if_minus_one(min_val),
-            mid_val: complain_if_minus_one(mid_val),
-            max_val: complain_if_minus_one(max_val),
+            value: value,
+            min_val: unsafe { min_val.assume_init() },
+            mid_val: unsafe { mid_val.assume_init() },
+            max_val: unsafe { max_val.assume_init() },
         }
         .into()
     }
@@ -735,8 +740,9 @@ impl Reaper {
     // DONE
     // Returns Err if given string is not a valid GUID string
     pub fn string_to_guid(&self, str: &CStr) -> Result<GUID, ()> {
-        let mut guid = ZERO_GUID;
-        require!(self.low, stringToGuid)(str.as_ptr(), &mut guid as *mut GUID);
+        let mut guid = MaybeUninit::uninit();
+        require!(self.low, stringToGuid)(str.as_ptr(), guid.as_mut_ptr());
+        let guid = unsafe { guid.assume_init() };
         if guid == ZERO_GUID {
             return Err(());
         }
@@ -787,17 +793,16 @@ impl Reaper {
     // DONE
     // I guess it returns Err if the track doesn't exist
     pub fn get_track_ui_vol_pan(&self, track: *mut MediaTrack) -> Result<(f64, f64), ()> {
-        let mut volume = 0.0;
-        let mut pan = 0.0;
-        let successful = require!(self.low, GetTrackUIVolPan)(
-            track,
-            &mut volume as *mut f64,
-            &mut pan as *mut f64,
-        );
+        let mut volume = MaybeUninit::uninit();
+        let mut pan = MaybeUninit::uninit();
+        let successful =
+            require!(self.low, GetTrackUIVolPan)(track, volume.as_mut_ptr(), pan.as_mut_ptr());
         if !successful {
             return Err(());
         }
-        Ok((volume, pan))
+        Ok((unsafe { volume.assume_init() }, unsafe {
+            pan.assume_init()
+        }))
     }
 
     // DONE
@@ -932,7 +937,7 @@ impl Reaper {
     pub fn csurf_on_rec_arm_change_ex(
         &self,
         trackid: *mut MediaTrack,
-        recarm: u32, // TODO-medium boolean!?
+        recarm: u32, // TODO-low Why not boolean!?
         allowgang: bool,
     ) -> bool {
         require!(self.low, CSurf_OnRecArmChangeEx)(trackid, recarm as i32, allowgang)
@@ -1036,18 +1041,20 @@ impl Reaper {
         track: *mut MediaTrack,
         send_index: u32,
     ) -> Result<(f64, f64), ()> {
-        let mut volume = 0.0;
-        let mut pan = 0.0;
+        let mut volume = MaybeUninit::uninit();
+        let mut pan = MaybeUninit::uninit();
         let successful = require!(self.low, GetTrackSendUIVolPan)(
             track,
             send_index as i32,
-            &mut volume as *mut f64,
-            &mut pan as *mut f64,
+            volume.as_mut_ptr(),
+            pan.as_mut_ptr(),
         );
         if !successful {
             return Err(());
         }
-        Ok((volume, pan))
+        Ok((unsafe { volume.assume_init() }, unsafe {
+            pan.assume_init()
+        }))
     }
 
     // DONE
@@ -1057,16 +1064,13 @@ impl Reaper {
         track: *mut MediaTrack,
         fx: u32,
     ) -> Result<(u32, u32), ()> {
-        let mut num_presets: i32 = 0;
-        let index = require!(self.low, TrackFX_GetPresetIndex)(
-            track,
-            fx as i32,
-            &mut num_presets as *mut i32,
-        );
+        let mut num_presets = MaybeUninit::uninit();
+        let index =
+            require!(self.low, TrackFX_GetPresetIndex)(track, fx as i32, num_presets.as_mut_ptr());
         if index == -1 {
             return Err(());
         }
-        return Ok((index as u32, num_presets as u32));
+        return Ok((index as u32, unsafe { num_presets.assume_init() } as u32));
     }
 
     // DONE
@@ -1118,47 +1122,6 @@ impl Reaper {
             (state_matches_preset, Cow::Owned(name))
         }
     }
-
-    // TODO-high Rename
-    // TODO-high Don't turn to owned string immediately
-    pub fn convenient_get_media_track_info_string(
-        &self,
-        tr: *mut MediaTrack,
-        parmname: &CStr,
-    ) -> CString {
-        let info = self.get_set_media_track_info(tr, parmname, null_mut());
-        let info = info as *const c_char;
-        let c_str = unsafe { CStr::from_ptr(info) };
-        c_str.to_owned()
-    }
-
-    // TODO-high Rename or remove
-    pub fn convenient_get_media_track_info_i32_value(
-        &self,
-        tr: *mut MediaTrack,
-        parmname: &CStr,
-    ) -> i32 {
-        self.get_set_media_track_info(tr, parmname, null_mut()) as i32
-    }
-
-    // TODO-high Rename or remove
-    pub fn convenient_get_media_track_info_i32_ptr(
-        &self,
-        tr: *mut MediaTrack,
-        parmname: &CStr,
-    ) -> i32 {
-        let ptr = self.get_set_media_track_info(tr, parmname, null_mut()) as *mut i32;
-        unsafe { *ptr }
-    }
-
-    // TODO-high Rename or remove
-    pub fn convenient_get_media_track_info_guid(
-        &self,
-        tr: *mut MediaTrack,
-        parmname: &CStr,
-    ) -> *mut GUID {
-        self.get_set_media_track_info(tr, parmname, null_mut()) as *mut GUID
-    }
 }
 
 pub struct GetParameterStepSizesResult {
@@ -1197,14 +1160,6 @@ pub struct GetFocusedFxItemFxResultData {
 pub struct GetFocusedFxTrackFxResultData {
     pub tracknumber: u32,
     pub fxnumber: u32,
-}
-
-// TODO-low Panic for now, just to detect which situations can actually occur
-fn complain_if_minus_one(value: f64) -> f64 {
-    if value == -1.0 {
-        panic!("Out parameter was not set by REAPER")
-    }
-    value
 }
 
 fn create_cheap_empty_string() -> Cow<'static, CStr> {
