@@ -39,6 +39,7 @@ mod util;
 use crate::medium_level::control_surface::DelegatingControlSurface;
 // TODO-low Maybe expose under util mod. Maybe put those utils in low-level API.
 use std::mem::MaybeUninit;
+use std::ops::Deref;
 pub use util::*;
 
 mod control_surface;
@@ -616,22 +617,14 @@ impl Reaper {
         require!(self.low, Undo_EndBlock2)(proj, descchange.as_ptr(), extraflags as i32);
     }
 
-    // TODO-medium &CStr in return value debatable
-    pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
-        let ptr = require!(self.low, Undo_CanUndo2)(proj);
-        if ptr.is_null() {
-            return None;
-        }
-        Some(unsafe { CStr::from_ptr(ptr) })
+    // DONE
+    pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> ReaperStringPtr {
+        ReaperStringPtr(require!(self.low, Undo_CanUndo2)(proj))
     }
 
-    // TODO-medium &CStr in return value debatable
-    pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
-        let ptr = require!(self.low, Undo_CanRedo2)(proj);
-        if ptr.is_null() {
-            return None;
-        }
-        Some(unsafe { CStr::from_ptr(ptr) })
+    // DONE
+    pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> ReaperStringPtr {
+        ReaperStringPtr(require!(self.low, Undo_CanRedo2)(proj))
     }
 
     // TODO-medium bool return value debatable, wait for askjf reply
@@ -1015,18 +1008,10 @@ impl Reaper {
         require!(self.low, CSurf_OnSendPanChange)(trackid, send_index as i32, pan, relative)
     }
 
-    // TODO-medium &CStr in return value debatable
+    // DONE
     // Returns Err if section or command not existing (can't think of any other case)
-    pub fn kbd_get_text_from_cmd(
-        &self,
-        cmd: u32,
-        section: *mut KbdSectionInfo,
-    ) -> Result<&CStr, ()> {
-        let ptr = require!(self.low, kbd_getTextFromCmd)(cmd, section);
-        if ptr.is_null() {
-            return Err(());
-        }
-        Ok(unsafe { CStr::from_ptr(ptr) })
+    pub fn kbd_get_text_from_cmd(&self, cmd: u32, section: *mut KbdSectionInfo) -> ReaperStringPtr {
+        ReaperStringPtr(require!(self.low, kbd_getTextFromCmd)(cmd, section))
     }
 
     // TODO-medium Return type Option debatable. Could also be Err.
@@ -1043,14 +1028,12 @@ impl Reaper {
         return Some(result != 0);
     }
 
-    // TODO-medium &CStr in return value debatable
+    // DONE
     // Returns None if lookup was not successful, that is, the command couldn't be found
-    pub fn reverse_named_command_lookup(&self, command_id: u32) -> Option<&CStr> {
-        let ptr = require!(self.low, ReverseNamedCommandLookup)(command_id as i32);
-        if ptr.is_null() {
-            return None;
-        }
-        Some(unsafe { CStr::from_ptr(ptr) })
+    pub fn reverse_named_command_lookup(&self, command_id: u32) -> ReaperStringPtr {
+        ReaperStringPtr(require!(self.low, ReverseNamedCommandLookup)(
+            command_id as i32,
+        ))
     }
 
     // DONE
@@ -1191,6 +1174,18 @@ pub struct GetFocusedFxItemFxResultData {
 pub struct GetFocusedFxTrackFxResultData {
     pub tracknumber: u32,
     pub fxnumber: i32,
+}
+
+pub struct ReaperStringPtr(pub *const c_char);
+
+impl ReaperStringPtr {
+    // Unsafe because lifetime of returned string reference is unbounded
+    pub unsafe fn into_c_str<'a>(self) -> Option<&'a CStr> {
+        if self.0.is_null() {
+            return None;
+        }
+        Some(CStr::from_ptr(self.0))
+    }
 }
 
 fn create_cheap_empty_string() -> Cow<'static, CStr> {

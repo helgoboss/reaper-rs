@@ -211,12 +211,14 @@ impl Project {
     //  we choose the lifetime?
     pub fn get_label_of_last_undoable_action(&self) -> Option<&CStr> {
         self.complain_if_not_available();
-        Reaper::instance().medium.undo_can_undo_2(self.rea_project)
+        let ptr = Reaper::instance().medium.undo_can_undo_2(self.rea_project);
+        unsafe { ptr.into_c_str() }
     }
 
     pub fn get_label_of_last_redoable_action(&self) -> Option<&CStr> {
         self.complain_if_not_available();
-        Reaper::instance().medium.undo_can_redo_2(self.rea_project)
+        let ptr = Reaper::instance().medium.undo_can_redo_2(self.rea_project);
+        unsafe { ptr.into_c_str() }
     }
 
     pub fn get_tempo(&self) -> Tempo {

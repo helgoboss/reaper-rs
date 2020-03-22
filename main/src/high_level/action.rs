@@ -90,11 +90,13 @@ impl Action {
     pub fn is_available(&self) -> bool {
         if let Some(runtime_data) = self.runtime_data.borrow().as_ref() {
             // See if we can get a description. If yes, the action actually exists. If not, then not.
-            let text = Reaper::instance().medium.kbd_get_text_from_cmd(
+            let ptr = Reaper::instance().medium.kbd_get_text_from_cmd(
                 runtime_data.command_id as u32,
                 runtime_data.section.get_raw_section_info(),
             );
-            return text.ok().filter(|t| t.to_bytes().len() > 0).is_some();
+            return unsafe { ptr.into_c_str() }
+                .filter(|t| t.to_bytes().len() > 0)
+                .is_some();
         }
         self.load_by_command_name()
     }
@@ -123,25 +125,28 @@ impl Action {
         rd.command_id
     }
 
+    // TODO-high unsafe
     pub fn get_command_name(&self) -> Option<&CStr> {
         self.command_name
             .as_ref()
             .map(|cn| cn.as_c_str())
             .or_else(|| {
                 let rd = self.load_if_necessary_or_complain();
-                Reaper::instance()
+                let ptr = Reaper::instance()
                     .medium
-                    .reverse_named_command_lookup(rd.command_id)
+                    .reverse_named_command_lookup(rd.command_id);
+                unsafe { ptr.into_c_str() }
             })
     }
 
     // Returns None if action disappeared TODO-medium This is not consequent
+    // TODO-medium unsafe lifetime
     pub fn get_name(&self) -> Option<&CStr> {
         let rd = self.load_if_necessary_or_complain();
-        Reaper::instance()
+        let ptr = Reaper::instance()
             .medium
-            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info())
-            .ok()
+            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info());
+        unsafe { ptr.into_c_str() }
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {

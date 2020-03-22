@@ -837,6 +837,7 @@ impl Reaper {
     }
 
     // Doesn't start a new block if we already are in an undo block.
+    #[must_use]
     pub(super) fn enter_undo_block_internal<'a>(
         &self,
         project: Project,
