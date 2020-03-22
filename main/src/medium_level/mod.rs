@@ -1,21 +1,22 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! - Snake-case function and parameter names
 //! - Use bool instead of i32 as return value type for "yes or no" functions
-//!   TODO-low Debatable. Maybe other int values reserved for future use.
-//! - Use Option<&CStr> return value type instead of c_char pointers at some places
-//!   TODO-low Debatable because non-string pointers we also don't transform to None if they are null
-//!   TODO-low Lifetime not correct ... maybe it should be marked unsafe or just be left a pointer
+//!   TODO-medium Debatable. Maybe other int values reserved for future use. Wait for askjf reply.
+//! - Use &CStr in return value type instead of c_char pointers at some places
+//!   TODO-medium Debatable because non-string pointers we also don't transform to None if they are null
+//!   TODO-medium Lifetime not correct ... maybe it should be marked unsafe or just be left a pointer
+//!    Maybe use util functions in order to fix both issues!
 //! - Use return values instead of output parameters
 //! - When there are string output parameters which can be passed a null pointer, trigger this null
 //!   pointer case when a buffer size of 0 is passed, also use Cow in this case in order to have a
 //!   cheap empty string in null-pointer case
 //! - When there are both return values and output parameters, return a tuple if there's just one
 //!   output parameter and a struct if there are many output parameters
-//! - In all REAPER functions which can fail (indicated by returning false or -1), return Result
-//!   TODO-low Debatable. Sometimes it's not documented what return values there can be. Sometimes
-//!    the meaning of returning false or -1 can vary depending on the given parameters.
+//! - In all REAPER functions which can fail (mostly indicated by returning false or -1), return Result
 //! - In all REAPER functions which return things that might not be present, return Option
-//!   TODO-low Debatable for the same reason that Result is debatable.
+//!   TODO-medium Debatable. Sometimes it's not documented what return values there can be. Sometimes
+//!    the meaning of returning false or -1 can vary depending on the given parameters.
+//!    Check each function and mark if it's really debatable!
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available)
 //! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
@@ -277,7 +278,7 @@ impl Reaper {
     // instantiate == -1 => Returns None if FX couldn't be added because not available
     // instantiate == 0  => Returns None if FX not in chain
     // instantiate > 0   => Returns None if FX not in chain and couldn't be added because not available
-    // TODO-low Return type Option debatable because if instantiate != 0, it's rather an Err
+    // TODO-low Return type Option really debatable because if instantiate != 0, it's rather an Err
     pub fn track_fx_add_by_name(
         &self,
         track: *mut MediaTrack,
@@ -449,8 +450,7 @@ impl Reaper {
     }
 
     // DONE
-    pub fn get_focused_fx(&self) -> GetFocusedFxResult {
-        // TODO-high Use MaybeUninit (see https://medium.com/dwelo-r-d/wrapping-unsafe-c-libraries-in-rust-d75aeb283c65)
+    pub fn get_focused_fx(&self) -> Option<GetFocusedFxResult> {
         let mut tracknumber = MaybeUninit::uninit();
         let mut itemnumber = MaybeUninit::uninit();
         let mut fxnumber = MaybeUninit::uninit();
@@ -460,28 +460,27 @@ impl Reaper {
             fxnumber.as_mut_ptr(),
         );
         match result {
-            0 => GetFocusedFxResult::None,
-            1 => GetFocusedFxResult::TrackFx(GetFocusedFxTrackFxResultData {
+            0 => None,
+            1 => Some(GetFocusedFxResult::TrackFx(GetFocusedFxTrackFxResultData {
                 tracknumber: unsafe { tracknumber.assume_init() } as u32,
-                fxnumber: unsafe { fxnumber.assume_init() } as u32,
-            }),
+                fxnumber: unsafe { fxnumber.assume_init() },
+            })),
             2 => {
                 // TODO-low Add test
                 let fxnumber = unsafe { fxnumber.assume_init() } as u32;
-                GetFocusedFxResult::ItemFx(GetFocusedFxItemFxResultData {
+                Some(GetFocusedFxResult::ItemFx(GetFocusedFxItemFxResultData {
                     tracknumber: unsafe { tracknumber.assume_init() } as u32,
                     itemnumber: unsafe { itemnumber.assume_init() } as u32,
                     takeindex: (fxnumber >> 16) & 0xFFFF,
                     fxindex: fxnumber & 0xFFFF,
-                })
+                }))
             }
             default => panic!("Unknown GetFocusedFX result value"),
         }
     }
 
-    // TODO-high Support item FX, see GetLastTouchedFX doc!!!
     // Returns None if no FX has been touched yet or if the last-touched FX doesn't exist anymore
-    pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResultData> {
+    pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult> {
         let mut tracknumber = MaybeUninit::uninit();
         let mut fxnumber = MaybeUninit::uninit();
         let mut paramnumber = MaybeUninit::uninit();
@@ -493,11 +492,29 @@ impl Reaper {
         if !is_valid {
             return None;
         }
-        Some(GetLastTouchedFxResultData {
-            tracknumber: unsafe { tracknumber.assume_init() },
-            fxnumber: unsafe { fxnumber.assume_init() },
-            paramnumber: unsafe { paramnumber.assume_init() },
-        })
+        let tracknumber = unsafe { tracknumber.assume_init() } as u32;
+        let tracknumber_high_word = (tracknumber >> 16) & 0xFFFF;
+        if tracknumber_high_word == 0 {
+            Some(GetLastTouchedFxResult::TrackFx(
+                GetLastTouchedFxTrackFxResultData {
+                    tracknumber,
+                    fxnumber: unsafe { fxnumber.assume_init() },
+                    paramnumber: unsafe { paramnumber.assume_init() } as u32,
+                },
+            ))
+        } else {
+            // TODO-low Add test
+            let fxnumber = unsafe { fxnumber.assume_init() } as u32;
+            Some(GetLastTouchedFxResult::ItemFx(
+                GetLastTouchedFxItemFxResultData {
+                    tracknumber: tracknumber & 0xFFFF,
+                    itemnumber: tracknumber_high_word,
+                    takeindex: (fxnumber >> 16) & 0xFFFF,
+                    fxindex: fxnumber & 0xFFFF,
+                    paramnumber: unsafe { paramnumber.assume_init() } as u32,
+                },
+            ))
+        }
     }
 
     // DONE
@@ -528,9 +545,10 @@ impl Reaper {
         Ok(())
     }
 
-    // DONE
     // Returns None if the FX parameter doesn't report step sizes (or if the FX or parameter doesn't
     // exist, but that can be checked before)
+    // TODO-medium Return type Option debatable. One could also see it as Err (parameter doesn't support step sizes)
+    //  However, latter would assume that a function exists which can check the support
     pub fn track_fx_get_parameter_step_sizes(
         &self,
         track: *mut MediaTrack,
@@ -598,7 +616,7 @@ impl Reaper {
         require!(self.low, Undo_EndBlock2)(proj, descchange.as_ptr(), extraflags as i32);
     }
 
-    // DONE
+    // TODO-medium &CStr in return value debatable
     pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
         let ptr = require!(self.low, Undo_CanUndo2)(proj);
         if ptr.is_null() {
@@ -607,7 +625,7 @@ impl Reaper {
         Some(unsafe { CStr::from_ptr(ptr) })
     }
 
-    // DONE
+    // TODO-medium &CStr in return value debatable
     pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> Option<&CStr> {
         let ptr = require!(self.low, Undo_CanRedo2)(proj);
         if ptr.is_null() {
@@ -616,13 +634,13 @@ impl Reaper {
         Some(unsafe { CStr::from_ptr(ptr) })
     }
 
-    // DONE
+    // TODO-medium bool return value debatable, wait for askjf reply
     // Returns true if there was something to be undone, false if not
     pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, Undo_DoUndo2)(proj) != 0
     }
 
-    // DONE
+    // TODO-medium bool return value debatable, wait for askjf reply
     // Returns true if there was something to be redone, false if not
     pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, Undo_DoRedo2)(proj) != 0
@@ -633,7 +651,7 @@ impl Reaper {
         require!(self.low, MarkProjectDirty)(proj);
     }
 
-    // DONE
+    // TODO-medium bool return value debatable, wait for askjf reply
     // Returns true if project dirty, false if not
     pub fn is_project_dirty(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, IsProjectDirty)(proj) != 0
@@ -805,7 +823,8 @@ impl Reaper {
         }))
     }
 
-    // DONE
+    // TODO-medium bool return value debatable, wait for askjf reply
+    // Returns true on success
     pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> bool {
         require!(self.low, Audio_RegHardwareHook)(is_add, reg) > 0
     }
@@ -996,8 +1015,8 @@ impl Reaper {
         require!(self.low, CSurf_OnSendPanChange)(trackid, send_index as i32, pan, relative)
     }
 
+    // TODO-medium &CStr in return value debatable
     // Returns Err if section or command not existing (can't think of any other case)
-    // DONE
     pub fn kbd_get_text_from_cmd(
         &self,
         cmd: u32,
@@ -1010,7 +1029,7 @@ impl Reaper {
         Ok(unsafe { CStr::from_ptr(ptr) })
     }
 
-    // DONE
+    // TODO-medium Return type Option debatable. Could also be Err.
     // Returns None if action doesn't support on/off states (or if action not existing)
     pub fn get_toggle_command_state_2(
         &self,
@@ -1024,7 +1043,7 @@ impl Reaper {
         return Some(result != 0);
     }
 
-    // DONE
+    // TODO-medium &CStr in return value debatable
     // Returns None if lookup was not successful, that is, the command couldn't be found
     pub fn reverse_named_command_lookup(&self, command_id: u32) -> Option<&CStr> {
         let ptr = require!(self.low, ReverseNamedCommandLookup)(command_id as i32);
@@ -1138,14 +1157,26 @@ pub struct GetParamExResult {
     pub max_val: f64,
 }
 
-pub struct GetLastTouchedFxResultData {
-    pub tracknumber: i32,
+pub enum GetLastTouchedFxResult {
+    TrackFx(GetLastTouchedFxTrackFxResultData),
+    ItemFx(GetLastTouchedFxItemFxResultData),
+}
+
+pub struct GetLastTouchedFxTrackFxResultData {
+    pub tracknumber: u32,
     pub fxnumber: i32,
-    pub paramnumber: i32,
+    pub paramnumber: u32,
+}
+
+pub struct GetLastTouchedFxItemFxResultData {
+    pub tracknumber: u32,
+    pub itemnumber: u32,
+    pub takeindex: u32,
+    pub fxindex: u32,
+    pub paramnumber: u32,
 }
 
 pub enum GetFocusedFxResult {
-    None,
     TrackFx(GetFocusedFxTrackFxResultData),
     ItemFx(GetFocusedFxItemFxResultData),
 }
@@ -1159,7 +1190,7 @@ pub struct GetFocusedFxItemFxResultData {
 
 pub struct GetFocusedFxTrackFxResultData {
     pub tracknumber: u32,
-    pub fxnumber: u32,
+    pub fxnumber: i32,
 }
 
 fn create_cheap_empty_string() -> Cow<'static, CStr> {
