@@ -197,11 +197,9 @@ impl HelperControlSurface {
                     mute: m.get_media_track_info_value(media_track, c_str!("B_MUTE")) != 0.0,
                     solo: m.get_media_track_info_value(media_track, c_str!("I_SOLO")) != 0.0,
                     recarm: m.get_media_track_info_value(media_track, c_str!("I_RECARM")) != 0.0,
-                    number: m.get_set_media_track_info(
-                        media_track,
-                        c_str!("IP_TRACKNUMBER"),
-                        null_mut(),
-                    ) as i32,
+                    number: m
+                        .get_set_media_track_info(media_track, c_str!("IP_TRACKNUMBER"), null_mut())
+                        .0 as i32,
                     recmonitor: m.get_media_track_info_value(media_track, c_str!("I_RECMON"))
                         as i32,
                     recinput: m.get_media_track_info_value(media_track, c_str!("I_RECINPUT"))
@@ -397,11 +395,10 @@ impl HelperControlSurface {
             ) {
                 continue;
             }
-            let new_number = reaper.medium.get_set_media_track_info(
-                *media_track,
-                c_str!("IP_TRACKNUMBER"),
-                null_mut(),
-            ) as i32;
+            let new_number = reaper
+                .medium
+                .get_set_media_track_info(*media_track, c_str!("IP_TRACKNUMBER"), null_mut())
+                .0 as i32;
             if (new_number != track_data.number) {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;

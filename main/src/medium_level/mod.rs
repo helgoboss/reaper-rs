@@ -3,9 +3,6 @@
 //! - Use bool instead of i32 as return value type for "yes or no" functions
 //!   TODO-medium Debatable. Maybe other int values reserved for future use. Wait for askjf reply.
 //! - Use &CStr in return value type instead of c_char pointers at some places
-//!   TODO-medium Debatable because non-string pointers we also don't transform to None if they are null
-//!   TODO-medium Lifetime not correct ... maybe it should be marked unsafe or just be left a pointer
-//!    Maybe use util functions in order to fix both issues!
 //! - Use return values instead of output parameters
 //! - When there are string output parameters which can be passed a null pointer, trigger this null
 //!   pointer case when a buffer size of 0 is passed, also use Cow in this case in order to have a
@@ -35,12 +32,9 @@ use crate::low_level::{
     MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
 };
 pub use crate::medium_level::control_surface::ControlSurface;
-mod util;
 use crate::medium_level::control_surface::DelegatingControlSurface;
-// TODO-low Maybe expose under util mod. Maybe put those utils in low-level API.
 use std::mem::MaybeUninit;
 use std::ops::Deref;
-pub use util::*;
 
 mod control_surface;
 
@@ -123,8 +117,12 @@ impl Reaper {
         tr: *mut MediaTrack,
         parmname: &CStr,
         set_new_value: *mut c_void,
-    ) -> *mut c_void {
-        require!(self.low, GetSetMediaTrackInfo)(tr, parmname.as_ptr(), set_new_value)
+    ) -> ReaperVoidPtr {
+        ReaperVoidPtr(require!(self.low, GetSetMediaTrackInfo)(
+            tr,
+            parmname.as_ptr(),
+            set_new_value,
+        ))
     }
 
     // DONE
@@ -907,14 +905,14 @@ impl Reaper {
         sendidx: u32,
         parmname: &CStr,
         set_new_value: *mut c_void,
-    ) -> *mut c_void {
-        require!(self.low, GetSetTrackSendInfo)(
+    ) -> ReaperVoidPtr {
+        ReaperVoidPtr(require!(self.low, GetSetTrackSendInfo)(
             tr,
             category,
             sendidx as i32,
             parmname.as_ptr(),
             set_new_value,
-        )
+        ))
     }
 
     // DONE
@@ -1176,6 +1174,7 @@ pub struct GetFocusedFxTrackFxResultData {
     pub fxnumber: i32,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct ReaperStringPtr(pub *const c_char);
 
 impl ReaperStringPtr {
@@ -1185,6 +1184,30 @@ impl ReaperStringPtr {
             return None;
         }
         Some(CStr::from_ptr(self.0))
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct ReaperVoidPtr(pub *mut c_void);
+
+impl ReaperVoidPtr {
+    // Unsafe because lifetime of returned string reference is unbounded and because it's not sure if
+    // the given pointer points to a C string.
+    pub unsafe fn into_c_str<'a>(self) -> Option<&'a CStr> {
+        if self.0.is_null() {
+            return None;
+        }
+        let ptr = self.0 as *const c_char;
+        Some(CStr::from_ptr(ptr))
+    }
+
+    // Unsafe because it's not sure if the given pointer points to a value of type T.
+    pub unsafe fn to<T: Copy>(&self) -> Option<T> {
+        if self.0.is_null() {
+            return None;
+        }
+        let ptr = self.0 as *mut T;
+        Some(*ptr)
     }
 }
 

@@ -196,11 +196,14 @@ pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
 }
 
 fn get_target_media_track(source_track: &Track, send_index: u32) -> *mut MediaTrack {
-    Reaper::instance().medium.get_set_track_send_info(
-        source_track.get_media_track(),
-        0,
-        send_index,
-        c_str!("P_DESTTRACK"),
-        null_mut(),
-    ) as *mut MediaTrack
+    Reaper::instance()
+        .medium
+        .get_set_track_send_info(
+            source_track.get_media_track(),
+            0,
+            send_index,
+            c_str!("P_DESTTRACK"),
+            null_mut(),
+        )
+        .0 as *mut MediaTrack
 }
