@@ -1,7 +1,6 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! - Snake-case function and parameter names
-//! - Use bool instead of i32 as return value type for "yes or no" functions
-//!   TODO-medium Debatable. Maybe other int values reserved for future use. Wait for askjf reply.
+//! - Use bool instead of i32 as return value type for functions with obvious "yes or no" result
 //! - Use &CStr in return value type instead of c_char pointers at some places
 //! - Use return values instead of output parameters
 //! - When there are string output parameters which can be passed a null pointer, trigger this null
@@ -11,9 +10,6 @@
 //!   output parameter and a struct if there are many output parameters
 //! - In all REAPER functions which can fail (mostly indicated by returning false or -1), return Result
 //! - In all REAPER functions which return things that might not be present, return Option
-//!   TODO-medium Debatable. Sometimes it's not documented what return values there can be. Sometimes
-//!    the meaning of returning false or -1 can vary depending on the given parameters.
-//!    Check each function and mark if it's really debatable!
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available)
 //! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
@@ -625,13 +621,13 @@ impl Reaper {
         ReaperStringPtr(require!(self.low, Undo_CanRedo2)(proj))
     }
 
-    // TODO-medium bool return value debatable, wait for askjf reply
+    // DONE
     // Returns true if there was something to be undone, false if not
     pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, Undo_DoUndo2)(proj) != 0
     }
 
-    // TODO-medium bool return value debatable, wait for askjf reply
+    // DONE
     // Returns true if there was something to be redone, false if not
     pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, Undo_DoRedo2)(proj) != 0
@@ -642,7 +638,7 @@ impl Reaper {
         require!(self.low, MarkProjectDirty)(proj);
     }
 
-    // TODO-medium bool return value debatable, wait for askjf reply
+    // DONE
     // Returns true if project dirty, false if not
     pub fn is_project_dirty(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, IsProjectDirty)(proj) != 0
@@ -814,7 +810,7 @@ impl Reaper {
         }))
     }
 
-    // TODO-medium bool return value debatable, wait for askjf reply
+    // DONE
     // Returns true on success
     pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> bool {
         require!(self.low, Audio_RegHardwareHook)(is_add, reg) > 0
