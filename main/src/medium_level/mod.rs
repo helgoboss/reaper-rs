@@ -563,9 +563,9 @@ impl Reaper {
             return None;
         }
         Some(GetParameterStepSizesResult {
-            step: unsafe { step.assume_init() },
-            small_step: unsafe { small_step.assume_init() },
-            large_step: unsafe { large_step.assume_init() },
+            step: make_some_if_greater_than_zero(unsafe { step.assume_init() }),
+            small_step: make_some_if_greater_than_zero(unsafe { small_step.assume_init() }),
+            large_step: make_some_if_greater_than_zero(unsafe { large_step.assume_init() }),
             is_toggle: unsafe { is_toggle.assume_init() },
         })
     }
@@ -1118,13 +1118,17 @@ impl Reaper {
     }
 }
 
+// Each of the decimal numbers are > 0
 pub struct GetParameterStepSizesResult {
-    pub step: f64,
-    pub small_step: f64,
-    pub large_step: f64,
+    // TODO-low Not sure if this can ever be 0 when TrackFX_GetParameterStepSizes returns true
+    //  So the Option might be obsolete here
+    pub step: Option<f64>,
+    pub small_step: Option<f64>,
+    pub large_step: Option<f64>,
     pub is_toggle: bool,
 }
 
+// Each of the attributes can be negative! These are not normalized values (0..1).
 pub struct GetParamExResult {
     pub value: f64,
     pub min_val: f64,
@@ -1211,6 +1215,13 @@ impl ReaperVoidPtr {
         let ptr = self.0 as *mut T;
         Some(*ptr)
     }
+}
+
+fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
+    if value <= 0.0 || value.is_nan() {
+        return None;
+    }
+    Some(value)
 }
 
 fn create_cheap_empty_string() -> Cow<'static, CStr> {

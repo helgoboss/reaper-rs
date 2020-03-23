@@ -1183,14 +1183,14 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                     });
             });
             let track_mirror = track.clone();
-            project.undoable(c_str!("ReaPlus integration test operation"), move || {
+            project.undoable(c_str!("reaper-rs integration test operation"), move || {
                 track_mirror.set_name(c_str!("Renamed"));
             });
             let ptr = project.get_label_of_last_undoable_action();
             let label = unsafe { ptr.into_c_str() };
             // Then
             check_eq!(track.get_name().as_c_str(), c_str!("Renamed"));
-            check_eq!(label, Some(c_str!("ReaPlus integration test operation")));
+            check_eq!(label, Some(c_str!("reaper-rs integration test operation")));
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), track);
             Ok(())
@@ -1205,7 +1205,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check!(successful);
             check_eq!(track.get_name().as_bytes().len(), 0);
-            check_eq!(label, Some(c_str!("ReaPlus integration test operation")));
+            check_eq!(label, Some(c_str!("reaper-rs integration test operation")));
             Ok(())
         }),
         step("Redo", |reaper, _| {
@@ -1219,7 +1219,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check!(successful);
             check_eq!(track.get_name().as_c_str(), c_str!("Renamed"));
-            check_eq!(label, Some(c_str!("ReaPlus integration test operation")));
+            check_eq!(label, Some(c_str!("reaper-rs integration test operation")));
             Ok(())
         }),
         step("Get REAPER window", |reaper, _| {
@@ -1275,7 +1275,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // When
             let result = reaper.show_message_box(
                 c_str!("Tests are finished"),
-                c_str!("ReaPlus"),
+                c_str!("reaper-rs"),
                 MessageBoxKind::Ok,
             );
             // Then
@@ -1557,7 +1557,6 @@ fn create_fx_steps(
         step("Check fx parameter", move |reaper, _| {
             // Given
             let fx_chain = get_fx_chain()?;
-            let track = fx_chain.get_track();
             let fx = fx_chain
                 .get_fx_by_index(0)
                 .ok_or("Couldn't find first fx")?;
@@ -1579,6 +1578,8 @@ fn create_fx_steps(
             );
             check_eq!(p.get_fx(), fx);
             check!(p.get_step_size().is_none());
+            // BREAK
+            let value_range = p.get_value_range();
             Ok(())
         }),
         step("Check fx presets", move |reaper, _| {
@@ -2005,6 +2006,11 @@ WAK 0
             check_eq!(fx.get_chain(), fx_chain);
             check_eq!(fx.get_parameter_count(), 7);
             check_eq!(fx.get_parameters().count(), 7);
+            let param1 = fx.get_parameter_by_index(0);
+            check!(param1.is_available());
+            // BREAK
+            let step_size = param1.get_step_size();
+            let value_range = param1.get_value_range();
             check!(fx.get_parameter_by_index(6).is_available());
             check!(!fx.get_parameter_by_index(7).is_available());
             let fx_info = fx.get_info();

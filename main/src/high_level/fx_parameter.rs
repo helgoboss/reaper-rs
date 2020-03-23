@@ -73,8 +73,7 @@ impl FxParameter {
         if result.is_toggle {
             return FxParameterCharacter::Toggle;
         }
-        // TODO-medium Use options instead of -1.0 as soon as clear constellations are possible
-        if result.small_step != -1.0 || result.step != -1.0 || result.large_step != -1.0 {
+        if result.small_step.is_some() || result.step.is_some() || result.large_step.is_some() {
             return FxParameterCharacter::Discrete;
         }
         FxParameterCharacter::Continuous
@@ -133,19 +132,10 @@ impl FxParameter {
             if span == 0.0 {
                 return None;
             }
-            // TODO-medium Use options instead of -1.0 as soon as clear constellations are possible
-            // TODO-medium Use chaining then (coalesce-like)
-            let pref_step_size = if r.small_step != -1.0 {
-                r.small_step
-            } else if r.step != -1.0 {
-                r.step
-            } else {
-                r.large_step
-            };
-            if pref_step_size == 1.0 {
-                return None;
-            }
-            Some(pref_step_size / span)
+            r.small_step
+                .or(r.step)
+                .or(r.large_step)
+                .map(|pref_step_size| pref_step_size / span)
         })
     }
 
