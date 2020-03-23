@@ -9,10 +9,10 @@ use crate::low_level::{
     CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETLASTTOUCHEDFX,
     CSURF_EXT_SETSENDPAN, CSURF_EXT_SETSENDVOLUME,
 };
-use crate::medium_level::ControlSurface;
 use crate::medium_level::MediaTrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
+use crate::medium_level::{ControlSurface, ReaperPointerType};
 use c_str_macro::c_str;
 use rxrust::prelude::*;
 use std::borrow::Cow;
@@ -156,7 +156,7 @@ impl HelperControlSurface {
             if Reaper::get().medium.validate_ptr_2(
                 null_mut(),
                 *rea_project as *mut c_void,
-                c_str!("ReaProject*"),
+                ReaperPointerType::ReaProject,
             ) {
                 true
             } else {
@@ -361,7 +361,7 @@ impl HelperControlSurface {
             if reaper.medium.validate_ptr_2(
                 project.get_raw(),
                 *media_track as *mut c_void,
-                c_str!("MediaTrack*"),
+                ReaperPointerType::MediaTrack,
             ) {
                 true
             } else {
@@ -386,7 +386,7 @@ impl HelperControlSurface {
             if !reaper.medium.validate_ptr_2(
                 project.get_raw(),
                 *media_track as *mut c_void,
-                c_str!("MediaTrack*"),
+                ReaperPointerType::MediaTrack,
             ) {
                 continue;
             }

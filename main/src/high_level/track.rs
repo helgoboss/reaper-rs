@@ -28,10 +28,10 @@ use crate::low_level::{
     get_control_surface_instance, MediaTrack, ReaProject, CSURF_EXT_SETINPUTMONITOR, GUID,
 };
 use crate::medium_level;
-use crate::medium_level::MediaTrackInfoKey;
 use crate::medium_level::MediaTrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
+use crate::medium_level::{MediaTrackInfoKey, ReaperPointerType};
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
@@ -505,7 +505,7 @@ impl Track {
                 Reaper::get().medium.validate_ptr_2(
                     self.rea_project.get(),
                     self.media_track.get() as *mut c_void,
-                    c_str!("MediaTrack*"),
+                    ReaperPointerType::MediaTrack,
                 )
             } else {
                 false
@@ -520,7 +520,6 @@ impl Track {
         }
     }
 
-    // TODO-medium Maybe return by value instead
     pub fn get_guid(&self) -> &Guid {
         &self.guid
     }
@@ -570,11 +569,10 @@ impl Track {
         // No ReaProject* available. Try current project first (most likely in everyday REAPER usage).
         let reaper = Reaper::get();
         let current_project = reaper.get_current_project();
-        // TODO-medium Add convenience functions to medium API for checking various pointer types
         let is_valid_in_current_project = reaper.medium.validate_ptr_2(
             current_project.get_raw(),
             self.media_track.get() as *mut c_void,
-            c_str!("MediaTrack*"),
+            ReaperPointerType::MediaTrack,
         );
         if is_valid_in_current_project {
             return current_project.get_raw();
@@ -588,7 +586,7 @@ impl Track {
                 reaper.medium.validate_ptr_2(
                     p.get_raw(),
                     self.media_track.get() as *mut c_void,
-                    c_str!("MediaTrack*"),
+                    ReaperPointerType::MediaTrack,
                 )
             });
         other_project.map(|p| p.get_raw()).unwrap_or(null_mut())

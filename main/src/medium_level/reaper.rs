@@ -11,7 +11,7 @@ use crate::low_level::{
     MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
 };
 use crate::medium_level::constants::MediaTrackInfoKey;
-use crate::medium_level::{ControlSurface, DelegatingControlSurface};
+use crate::medium_level::{ControlSurface, DelegatingControlSurface, ReaperPointerType};
 use std::mem::MaybeUninit;
 use std::ops::Deref;
 
@@ -83,9 +83,9 @@ impl Reaper {
         &self,
         proj: *mut ReaProject,
         pointer: *mut c_void,
-        ctypename: &CStr,
+        ctypename: ReaperPointerType,
     ) -> bool {
-        require!(self.low, ValidatePtr2)(proj, pointer, ctypename.as_ptr())
+        require!(self.low, ValidatePtr2)(proj, pointer, Cow::from(ctypename).as_ptr())
     }
 
     // DONE

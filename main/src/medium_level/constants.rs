@@ -3,6 +3,23 @@ use c_str_macro::c_str;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 
+pub enum ReaperPointerType {
+    MediaTrack,
+    ReaProject,
+    Custom(&'static CStr),
+}
+
+impl From<ReaperPointerType> for Cow<'static, CStr> {
+    fn from(value: ReaperPointerType) -> Self {
+        use ReaperPointerType::*;
+        match value {
+            MediaTrack => c_str!("MediaTrack*").into(),
+            ReaProject => c_str!("ReaProject*").into(),
+            Custom(name) => concat_c_strs(name, c_str!("*")).into(),
+        }
+    }
+}
+
 // TODO-low Maybe don't use ENV suffix or even use PascalCase
 // TODO-low Add more values
 // TODO-low Rename

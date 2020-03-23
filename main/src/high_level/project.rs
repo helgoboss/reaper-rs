@@ -13,7 +13,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
-use crate::medium_level::ReaperStringPtr;
+use crate::medium_level::{ReaperPointerType, ReaperStringPtr};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -101,7 +101,7 @@ impl Project {
         Reaper::get().medium.validate_ptr_2(
             null_mut(),
             self.rea_project as *mut c_void,
-            c_str!("ReaProject*"),
+            ReaperPointerType::ReaProject,
         )
     }
 
