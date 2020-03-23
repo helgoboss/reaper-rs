@@ -887,8 +887,7 @@ impl ControlSurface for HelperControlSurface {
         match call as u32 {
             CSURF_EXT_SETINPUTMONITOR => {
                 self.csurf_ext_setinputmonitor(parm1 as *mut MediaTrack, parm2 as *mut i32);
-                // TODO-medium Why do we return 0 in all csurf_ext_ functions? The doc says this should be returned if unsupported.
-                0
+                1
             }
             CSURF_EXT_SETFXPARAM => {
                 self.csurf_ext_setfxparam(
@@ -896,7 +895,7 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as *mut f64,
                 );
-                0
+                1
             }
             CSURF_EXT_SETFXPARAM_RECFX => {
                 self.csurf_ext_setfxparam_recfx(
@@ -904,7 +903,7 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as *mut f64,
                 );
-                0
+                1
             }
             CSURF_EXT_SETFXENABLED => {
                 self.csurf_ext_setfxenabled(
@@ -912,7 +911,7 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as usize != 0,
                 );
-                0
+                1
             }
             CSURF_EXT_SETSENDVOLUME => {
                 self.csurf_ext_setsendvolume(
@@ -920,7 +919,7 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as *mut f64,
                 );
-                0
+                1
             }
             CSURF_EXT_SETSENDPAN => {
                 self.csurf_ext_setsendpan(
@@ -928,7 +927,7 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as *mut f64,
                 );
-                0
+                1
             }
             CSURF_EXT_SETFOCUSEDFX => {
                 self.csurf_ext_setfocusedfx(
@@ -936,7 +935,7 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as *mut i32,
                 );
-                0
+                1
             }
             CSURF_EXT_SETFXOPEN => {
                 self.csurf_ext_setfxopen(
@@ -944,11 +943,11 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as usize != 0,
                 );
-                0
+                1
             }
             CSURF_EXT_SETFXCHANGE => {
                 self.csurf_ext_setfxchange(parm1 as *mut MediaTrack, parm2 as usize as i32);
-                0
+                1
             }
             CSURF_EXT_SETLASTTOUCHEDFX => {
                 self.csurf_ext_setlasttouchedfx(
@@ -956,11 +955,11 @@ impl ControlSurface for HelperControlSurface {
                     parm2 as *mut i32,
                     parm3 as *mut i32,
                 );
-                0
+                1
             }
             CSURF_EXT_SETBPMANDPLAYRATE => {
                 self.csurf_ext_setbpmandplayrate(parm1 as *mut f64, parm2 as *mut f64);
-                0
+                1
             }
             _ => 0,
         }
