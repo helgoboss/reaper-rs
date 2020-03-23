@@ -23,10 +23,10 @@ use crate::low_level::{
     get_control_surface_instance, MediaTrack, ReaProject, CSURF_EXT_SETINPUTMONITOR, GUID,
 };
 
-use crate::medium_level::MediaTrackInfoKey::{
+use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
-use crate::medium_level::{MediaTrackInfoKey, ReaperPointerType};
+use crate::medium_level::{ReaperPointerType, TrackInfoKey};
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
@@ -644,7 +644,7 @@ impl PartialEq for Track {
 pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
     let internal = Reaper::get()
         .medium
-        .get_set_media_track_info(media_track, MediaTrackInfoKey::GUID, null_mut())
+        .get_set_media_track_info(media_track, TrackInfoKey::GUID, null_mut())
         .0 as *mut GUID;
     Guid::new(unsafe { *internal })
 }

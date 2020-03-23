@@ -40,9 +40,8 @@ impl From<EnvChunkName> for Cow<'static, CStr> {
     }
 }
 
-// TODO-low Rename
 // TODO-low Maybe use PascalCase
-pub enum MediaTrackInfoKey {
+pub enum TrackInfoKey {
     B_FREEMODE,
     B_HEIGHTLOCK,
     B_MAINSEND,
@@ -99,9 +98,9 @@ pub enum MediaTrackInfoKey {
     Custom(&'static CStr),
 }
 
-impl From<MediaTrackInfoKey> for Cow<'static, CStr> {
-    fn from(value: MediaTrackInfoKey) -> Self {
-        use MediaTrackInfoKey::*;
+impl From<TrackInfoKey> for Cow<'static, CStr> {
+    fn from(value: TrackInfoKey) -> Self {
+        use TrackInfoKey::*;
         match value {
             B_FREEMODE => c_str!("B_FREEMODE").into(),
             B_HEIGHTLOCK => c_str!("B_HEIGHTLOCK").into(),
@@ -166,6 +165,55 @@ impl From<MediaTrackInfoKey> for Cow<'static, CStr> {
     }
 }
 
+// TODO-low Maybe use PascalCase
+pub enum TrackSendInfoKey {
+    B_MONO,
+    B_MUTE,
+    B_PHASE,
+    D_PAN,
+    D_PANLAW,
+    D_VOL,
+    I_AUTOMODE,
+    I_DSTCHAN,
+    I_MIDIFLAGS,
+    I_SENDMODE,
+    I_SRCCHAN,
+    P_DESTTRACK,
+    P_SRCTRACK,
+    P_ENV(EnvChunkName),
+    P_EXT(&'static CStr),
+    Custom(&'static CStr),
+}
+
+impl From<TrackSendInfoKey> for Cow<'static, CStr> {
+    fn from(value: TrackSendInfoKey) -> Self {
+        use TrackSendInfoKey::*;
+        match value {
+            B_MONO => c_str!("B_MONO").into(),
+            B_MUTE => c_str!("B_MUTE").into(),
+            B_PHASE => c_str!("B_PHASE").into(),
+            D_PAN => c_str!("D_PAN").into(),
+            D_PANLAW => c_str!("D_PANLAW").into(),
+            D_VOL => c_str!("D_VOL").into(),
+            I_AUTOMODE => c_str!("I_AUTOMODE").into(),
+            I_DSTCHAN => c_str!("I_DSTCHAN").into(),
+            I_MIDIFLAGS => c_str!("I_MIDIFLAGS").into(),
+            I_SENDMODE => c_str!("I_SENDMODE").into(),
+            I_SRCCHAN => c_str!("I_SRCCHAN").into(),
+            P_DESTTRACK => c_str!("P_DESTTRACK").into(),
+            P_SRCTRACK => c_str!("P_SRCTRACK").into(),
+            P_ENV(env_chunk_name) => {
+                let cow: Cow<CStr> = env_chunk_name.into();
+                concat_c_strs(c_str!("P_ENV:<"), cow.as_ref()).into()
+            }
+            P_EXT(extension_specific_key) => {
+                concat_c_strs(c_str!("P_EXT:"), extension_specific_key).into()
+            }
+            Custom(key) => key.into(),
+        }
+    }
+}
+
 fn concat_c_strs(first: &CStr, second: &CStr) -> CString {
     CString::new([first.to_bytes(), second.to_bytes()].concat()).unwrap()
 }
@@ -175,8 +223,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn serialize() {
-        use MediaTrackInfoKey::*;
+    fn serialize_track_info_key() {
+        use TrackInfoKey::*;
         assert_eq!(Cow::from(B_MUTE).as_ref(), c_str!("B_MUTE"));
         assert_eq!(
             Cow::from(P_ENV(EnvChunkName::VOLENV)).as_ref(),

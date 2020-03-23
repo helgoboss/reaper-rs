@@ -10,8 +10,10 @@ use crate::low_level::{
     audio_hook_register_t, midi_Input, midi_Output, IReaperControlSurface, KbdSectionInfo,
     MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
 };
-use crate::medium_level::constants::MediaTrackInfoKey;
-use crate::medium_level::{ControlSurface, DelegatingControlSurface, ReaperPointerType};
+use crate::medium_level::constants::TrackInfoKey;
+use crate::medium_level::{
+    ControlSurface, DelegatingControlSurface, ReaperPointerType, TrackSendInfoKey,
+};
 use std::mem::MaybeUninit;
 
 pub struct Reaper {
@@ -91,7 +93,7 @@ impl Reaper {
     pub fn get_set_media_track_info(
         &self,
         tr: *mut MediaTrack,
-        parmname: MediaTrackInfoKey,
+        parmname: TrackInfoKey,
         set_new_value: *mut c_void,
     ) -> ReaperVoidPtr {
         ReaperVoidPtr(require!(self.low, GetSetMediaTrackInfo)(
@@ -648,11 +650,7 @@ impl Reaper {
     }
 
     // DONE
-    pub fn get_media_track_info_value(
-        &self,
-        tr: *mut MediaTrack,
-        parmname: MediaTrackInfoKey,
-    ) -> f64 {
+    pub fn get_media_track_info_value(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> f64 {
         require!(self.low, GetMediaTrackInfo_Value)(tr, Cow::from(parmname).as_ptr())
     }
 
@@ -746,7 +744,7 @@ impl Reaper {
     pub fn set_media_track_info_value(
         &self,
         tr: *mut MediaTrack,
-        parmname: MediaTrackInfoKey,
+        parmname: TrackInfoKey,
         newvalue: f64,
     ) -> Result<(), ()> {
         let successful =
@@ -876,14 +874,14 @@ impl Reaper {
         tr: *mut MediaTrack,
         category: i32,
         sendidx: u32,
-        parmname: &CStr, // TODO-medium enum
+        parmname: TrackSendInfoKey,
         set_new_value: *mut c_void,
     ) -> ReaperVoidPtr {
         ReaperVoidPtr(require!(self.low, GetSetTrackSendInfo)(
             tr,
             category,
             sendidx as i32,
-            parmname.as_ptr(),
+            Cow::from(parmname).as_ptr(),
             set_new_value,
         ))
     }

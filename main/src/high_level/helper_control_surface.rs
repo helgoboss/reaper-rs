@@ -9,7 +9,7 @@ use crate::low_level::{
     CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETLASTTOUCHEDFX,
     CSURF_EXT_SETSENDPAN, CSURF_EXT_SETSENDVOLUME,
 };
-use crate::medium_level::MediaTrackInfoKey::{
+use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
 use crate::medium_level::{ControlSurface, ReaperPointerType};
