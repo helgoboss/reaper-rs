@@ -84,7 +84,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             let new_track = project.add_track();
             // Then
             check_eq!(project.get_track_count(), 1);
-            check_eq!(new_track.get_index(), 0);
+            check_eq!(new_track.get_index(), Some(0));
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), new_track);
             Ok(())
@@ -416,7 +416,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             let first_selected_track = project
                 .get_first_selected_track(false)
                 .ok_or("Couldn't get first selected track")?;
-            check_eq!(first_selected_track.get_index(), 0);
+            check_eq!(first_selected_track.get_index(), Some(0));
             check_eq!(project.get_selected_tracks(false).count(), 2);
             check_eq!(mock.get_invocation_count(), 2);
             check_eq!(mock.get_last_arg(), track2);
@@ -442,7 +442,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             let first_selected_track = project
                 .get_first_selected_track(false)
                 .ok_or("Couldn't get first selected track")?;
-            check_eq!(first_selected_track.get_index(), 2);
+            check_eq!(first_selected_track.get_index(), Some(2));
             check_eq!(project.get_selected_tracks(false).count(), 1);
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), track);
@@ -474,7 +474,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // TODO REAPER doesn't notify us about master track selection currently
             check_eq!(mock.get_invocation_count(), 1);
             let last_arg: Track = mock.get_last_arg().into();
-            check_eq!(last_arg.get_index(), 2);
+            check_eq!(last_arg.get_index(), Some(2));
             Ok(())
         }),
         step("Query track auto arm mode", |reaper, _| {
@@ -718,7 +718,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             let track_2 = project.get_track_by_number(2).ok_or("Missing track 2")?;
             let track_2_guid = track_2.get_guid();
             check!(track_1.is_available());
-            check_eq!(track_2.get_index(), 1);
+            check_eq!(track_2.get_index(), Some(1));
             check!(track_2.is_available());
             // When
             let (mock, _) = observe_invocations(|mock| {
@@ -733,7 +733,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check_eq!(project.get_track_count(), track_count_before - 1);
             check!(!track_1.is_available());
-            check_eq!(track_2.get_index(), 0);
+            check_eq!(track_2.get_index(), Some(0));
             check_eq!(track_2.get_guid(), track_2_guid);
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), track_1);
@@ -1115,9 +1115,9 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             new_track.set_name(c_str!("Inserted track"));
             // Then
             check_eq!(project.get_track_count(), 4);
-            check_eq!(new_track.get_index(), 1);
+            check_eq!(new_track.get_index(), Some(1));
             check_eq!(new_track.get_name().as_c_str(), c_str!("Inserted track"));
-            check_eq!(track_2.get_index(), 2);
+            check_eq!(track_2.get_index(), Some(2));
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), new_track);
             Ok(())

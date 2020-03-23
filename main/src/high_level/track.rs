@@ -91,7 +91,7 @@ impl Track {
         );
     }
 
-    // TODO-medium Maybe return borrowed string instead!
+    // TODO-low Maybe return borrowed string instead!
     pub fn get_name(&self) -> CString {
         self.load_and_check_if_necessary_or_complain();
         if self.is_master_track() {
@@ -211,8 +211,7 @@ impl Track {
             .csurf_set_surface_volume(self.get_raw(), reaper_value, null_mut());
     }
 
-    // TODO-medium Maybe return u32 and express master track index in other ways
-    pub fn get_index(&self) -> i32 {
+    pub fn get_index(&self) -> Option<u32> {
         self.load_and_check_if_necessary_or_complain();
         let ip_track_number = Reaper::get()
             .medium
@@ -221,14 +220,14 @@ impl Track {
         if ip_track_number == 0 {
             // Usually means that track doesn't exist. But this we already checked. This happens only if we query the
             // number of a track in another project tab. TODO-low Try to find a working solution. Till then, return 0.
-            return 0;
+            return None;
         }
         if ip_track_number == -1 {
             // Master track indicator
-            return -1;
+            return None;
         }
         // Must be > 0. Make it zero-rooted.
-        ip_track_number - 1
+        Some(ip_track_number as u32 - 1)
     }
 
     pub fn has_auto_arm_enabled(&self) -> bool {
@@ -621,7 +620,12 @@ impl Track {
     }
 
     pub fn is_master_track(&self) -> bool {
-        self.get_index() == -1
+        self.load_and_check_if_necessary_or_complain();
+        let ip_track_number = Reaper::get()
+            .medium
+            .get_set_media_track_info(self.get_raw(), IP_TRACKNUMBER, null_mut())
+            .0 as i32;
+        ip_track_number == -1
     }
 
     pub fn get_project(&self) -> Project {

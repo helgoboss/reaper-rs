@@ -201,7 +201,7 @@ pub struct Reaper {
     pub medium: medium_level::Reaper,
     pub logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
-    // TODO-medium Adding an action in an action would panic because we have an immutable borrow of the map
+    // TODO-low Adding an action in an action would panic because we have an immutable borrow of the map
     //  to obtain and execute the command, plus a mutable borrow of the map to add the new command.
     //  (the latter being unavoidable because we somehow need to modify the map!).
     //  That's not good. Is there a way to avoid this constellation? It's probably hard to avoid the
@@ -498,7 +498,10 @@ impl Reaper {
     }
 
     fn unregister_command(&self, command_index: u32) {
-        // TODO-medium Use RAII
+        // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
+        // this is the wrong point in time. The right point in time for unregistering is when it's
+        // removed from the command hash map. Because even if the command still exists in memory,
+        // if it's not in the map anymore, REAPER won't be able to find it.
         let mut command_by_index = self.command_by_index.borrow_mut();
         if let Some(command) = command_by_index.get_mut(&command_index) {
             let acc = &mut command.accelerator_register;
@@ -795,12 +798,10 @@ impl Reaper {
         self.medium.clear_console();
     }
 
-    // TODO-medium Require Send?
     pub fn execute_later_in_main_thread(&self, task: impl FnOnce() + 'static) {
         self.task_sender.send(Box::new(task));
     }
 
-    // TODO-medium Require Send?
     pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) {
         if self.current_thread_is_main_thread() {
             task();
@@ -832,7 +833,7 @@ impl Reaper {
     }
 
     // Doesn't start a new block if we already are in an undo block.
-    #[must_use]
+    #[must_use = "Return value determines the scope of the undo block (RAII)"]
     pub(super) fn enter_undo_block_internal<'a>(
         &self,
         project: Project,
