@@ -10,6 +10,9 @@ use crate::low_level::{
     CSURF_EXT_SETSENDPAN, CSURF_EXT_SETSENDVOLUME,
 };
 use crate::medium_level::ControlSurface;
+use crate::medium_level::MediaTrackInfoKey::{
+    B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
+};
 use c_str_macro::c_str;
 use rxrust::prelude::*;
 use std::borrow::Cow;
@@ -189,21 +192,17 @@ impl HelperControlSurface {
                 let reaper = Reaper::get();
                 let m = &reaper.medium;
                 let td = TrackData {
-                    // TODO-medium Make functions more accessible in medium API (they are called elsewhere here as well)
-                    volume: m.get_media_track_info_value(media_track, c_str!("D_VOL")),
-                    pan: m.get_media_track_info_value(media_track, c_str!("D_PAN")),
-                    selected: m.get_media_track_info_value(media_track, c_str!("I_SELECTED"))
-                        != 0.0,
-                    mute: m.get_media_track_info_value(media_track, c_str!("B_MUTE")) != 0.0,
-                    solo: m.get_media_track_info_value(media_track, c_str!("I_SOLO")) != 0.0,
-                    recarm: m.get_media_track_info_value(media_track, c_str!("I_RECARM")) != 0.0,
+                    volume: m.get_media_track_info_value(media_track, D_VOL),
+                    pan: m.get_media_track_info_value(media_track, D_PAN),
+                    selected: m.get_media_track_info_value(media_track, I_SELECTED) != 0.0,
+                    mute: m.get_media_track_info_value(media_track, B_MUTE) != 0.0,
+                    solo: m.get_media_track_info_value(media_track, I_SOLO) != 0.0,
+                    recarm: m.get_media_track_info_value(media_track, I_RECARM) != 0.0,
                     number: m
-                        .get_set_media_track_info(media_track, c_str!("IP_TRACKNUMBER"), null_mut())
+                        .get_set_media_track_info(media_track, IP_TRACKNUMBER, null_mut())
                         .0 as i32,
-                    recmonitor: m.get_media_track_info_value(media_track, c_str!("I_RECMON"))
-                        as i32,
-                    recinput: m.get_media_track_info_value(media_track, c_str!("I_RECINPUT"))
-                        as i32,
+                    recmonitor: m.get_media_track_info_value(media_track, I_RECMON) as i32,
+                    recinput: m.get_media_track_info_value(media_track, I_RECINPUT) as i32,
                     guid: get_media_track_guid(media_track),
                 };
                 reaper.subjects.track_added.borrow_mut().next(t.clone());
@@ -393,7 +392,7 @@ impl HelperControlSurface {
             }
             let new_number = reaper
                 .medium
-                .get_set_media_track_info(*media_track, c_str!("IP_TRACKNUMBER"), null_mut())
+                .get_set_media_track_info(*media_track, IP_TRACKNUMBER, null_mut())
                 .0 as i32;
             if (new_number != track_data.number) {
                 tracks_have_been_reordered = true;
@@ -423,9 +422,7 @@ impl HelperControlSurface {
                 .borrow_mut()
                 .next(Track::new(track, null_mut()));
         }
-        let recinput = reaper
-            .medium
-            .get_media_track_info_value(track, c_str!("I_RECINPUT")) as i32;
+        let recinput = reaper.medium.get_media_track_info_value(track, I_RECINPUT) as i32;
         if td.recinput != recinput {
             td.recinput = recinput;
             reaper
