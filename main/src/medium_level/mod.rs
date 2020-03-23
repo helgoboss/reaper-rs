@@ -1,7 +1,10 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! - Snake-case function and parameter names
 //! - Use bool instead of i32 as return value type for functions with obvious "yes or no" result
-//! - Use &CStr in return value type instead of c_char pointers at some places
+//! - Use ReaperStringPtr instead of raw c_char pointers as return value type (offers convenience
+//!   functions)
+//! - Use ReaperVoidPtr instead of raw c_void pointers as return value type (offers convenience
+//!   functions)
 //! - Use return values instead of output parameters
 //! - When there are string output parameters which can be passed a null pointer, trigger this null
 //!   pointer case when a buffer size of 0 is passed, also use Cow in this case in order to have a
@@ -270,23 +273,16 @@ impl Reaper {
     }
 
     // DONE
-    // instantiate == -1 => Returns None if FX couldn't be added because not available
-    // instantiate == 0  => Returns None if FX not in chain
-    // instantiate > 0   => Returns None if FX not in chain and couldn't be added because not available
-    // TODO-low Return type Option really debatable because if instantiate != 0, it's rather an Err
+    // Return type Option or Result can't be easily chosen here because if instantiate is 0, it
+    // should be Option, if it's -1 or > 0, it should be Result. So we just keep the i32.
     pub fn track_fx_add_by_name(
         &self,
         track: *mut MediaTrack,
         fxname: &CStr,
         rec_fx: bool,
         instantiate: i32,
-    ) -> Option<u32> {
-        let index =
-            require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate);
-        if index == -1 {
-            return None;
-        }
-        Some(index as u32)
+    ) -> i32 {
+        require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate)
     }
 
     // DONE
@@ -541,9 +537,9 @@ impl Reaper {
     }
 
     // Returns None if the FX parameter doesn't report step sizes (or if the FX or parameter doesn't
-    // exist, but that can be checked before)
-    // TODO-medium Return type Option debatable. One could also see it as Err (parameter doesn't support step sizes)
-    //  However, latter would assume that a function exists which can check the support
+    // exist, but that can be checked before). Option makes more sense than Result here because
+    // this function is at the same time the correct function to be used to determine *if* a
+    // parameter reports step sizes. So "parameter doesn't report step sizes" is a valid result.
     pub fn track_fx_get_parameter_step_sizes(
         &self,
         track: *mut MediaTrack,
@@ -1008,8 +1004,10 @@ impl Reaper {
         ReaperStringPtr(require!(self.low, kbd_getTextFromCmd)(cmd, section))
     }
 
-    // TODO-medium Return type Option debatable. Could also be Err.
-    // Returns None if action doesn't support on/off states (or if action not existing)
+    // Returns None if action doesn't report on/off states (or if action not existing).
+    // Option makes more sense than Result here because this function is at the same time the
+    // correct function to be used to determine *if* an action reports on/off states. So
+    // "action doesn't report on/off states" is a valid result.
     pub fn get_toggle_command_state_2(
         &self,
         section: *mut KbdSectionInfo,

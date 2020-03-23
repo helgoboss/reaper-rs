@@ -157,23 +157,21 @@ DOCKED 0
     }
 
     pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
-        Reaper::instance()
-            .medium
-            .track_fx_add_by_name(
-                self.track.get_media_track(),
-                original_fx_name,
-                self.is_input_fx,
-                -1,
-            )
-            .map(|fx_index| {
-                Fx::from_guid_and_index(
-                    self.track.clone(),
-                    get_fx_guid(&self.track, fx_index as u32, self.is_input_fx)
-                        .expect("Couldn't get GUID"),
-                    fx_index as u32,
-                    self.is_input_fx,
-                )
-            })
+        let fx_index = Reaper::instance().medium.track_fx_add_by_name(
+            self.track.get_media_track(),
+            original_fx_name,
+            self.is_input_fx,
+            -1,
+        );
+        if fx_index == -1 {
+            return None;
+        }
+        Some(Fx::from_guid_and_index(
+            self.track.clone(),
+            get_fx_guid(&self.track, fx_index as u32, self.is_input_fx).expect("Couldn't get GUID"),
+            fx_index as u32,
+            self.is_input_fx,
+        ))
     }
 
     pub fn get_track(&self) -> Track {
@@ -185,18 +183,21 @@ DOCKED 0
     }
 
     pub fn get_first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
-        Reaper::instance()
-            .medium
-            .track_fx_add_by_name(self.track.get_media_track(), name, self.is_input_fx, 0)
-            .map(|fx_index| {
-                Fx::from_guid_and_index(
-                    self.track.clone(),
-                    get_fx_guid(&self.track, fx_index as u32, self.is_input_fx)
-                        .expect("Couldn't get GUID"),
-                    fx_index as u32,
-                    self.is_input_fx,
-                )
-            })
+        let fx_index = Reaper::instance().medium.track_fx_add_by_name(
+            self.track.get_media_track(),
+            name,
+            self.is_input_fx,
+            0,
+        );
+        if fx_index == -1 {
+            return None;
+        }
+        Some(Fx::from_guid_and_index(
+            self.track.clone(),
+            get_fx_guid(&self.track, fx_index as u32, self.is_input_fx).expect("Couldn't get GUID"),
+            fx_index as u32,
+            self.is_input_fx,
+        ))
     }
 
     // It's correct that this returns an optional because the index isn't a stable identifier of an FX.
