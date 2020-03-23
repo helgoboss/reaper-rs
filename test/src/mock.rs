@@ -12,11 +12,11 @@ impl<O: Clone> InvocationMock<O> {
         self.last_arg.replace(Some(arg));
     }
 
-    pub fn invocation_count(&self) -> u32 {
+    pub fn get_invocation_count(&self) -> u32 {
         self.count.get()
     }
 
-    pub fn last_arg(&self) -> O {
+    pub fn get_last_arg(&self) -> O {
         self.last_arg
             .borrow()
             .clone()

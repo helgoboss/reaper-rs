@@ -332,14 +332,11 @@ impl Drop for Reaper {
     }
 }
 
-// TODO-medium Maybe don't rely on static reference (We don't even know for sure if REAPER guarantees that)
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ReaperVersion {
     internal: &'static CStr,
 }
 
-// TODO-high Working with C strings is a bit exaggerated in case of versions where, we don't have special
-//  characters which could cause problems
 impl From<&'static CStr> for ReaperVersion {
     fn from(internal: &'static CStr) -> Self {
         ReaperVersion { internal }

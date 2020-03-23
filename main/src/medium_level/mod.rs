@@ -1168,16 +1168,24 @@ pub struct GetFocusedFxTrackFxResultData {
     pub fxnumber: i32,
 }
 
+// TODO-low Should not be constructable by users but only by reaper-rs crate
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct ReaperStringPtr(pub *const c_char);
 
 impl ReaperStringPtr {
-    // Unsafe because lifetime of returned string reference is unbounded
+    // Unsafe *only* because lifetime of returned string reference is unbounded.
+    // If we got this string from REAPER, then we can assume that all the other possible unsafety
+    // reasons of CStr::from_ptr don't apply.
     pub unsafe fn into_c_str<'a>(self) -> Option<&'a CStr> {
         if self.0.is_null() {
             return None;
         }
         Some(CStr::from_ptr(self.0))
+    }
+
+    // Not unsafe because returns owned string. No lifetime questions anymore.
+    pub fn into_c_string(self) -> Option<CString> {
+        unsafe { self.into_c_str().map(|c_str| c_str.to_owned()) }
     }
 }
 

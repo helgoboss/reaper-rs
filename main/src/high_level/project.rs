@@ -13,6 +13,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::{MediaTrack, ReaProject};
 use crate::medium_level;
+use crate::medium_level::ReaperStringPtr;
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -163,7 +164,6 @@ impl Project {
         let reaper = Reaper::instance();
         reaper.medium.insert_track_at_index(index, false);
         reaper.medium.track_list_update_all_external_surfaces();
-        // TODO-high Use u32 where possible
         let media_track = reaper.medium.get_track(self.rea_project, index);
         Track::new(media_track, self.rea_project)
     }
@@ -206,13 +206,9 @@ impl Project {
         Reaper::instance().medium.is_project_dirty(self.rea_project)
     }
 
-    // TODO-high In such cases it's probably always better to return a reference. If that reference
-    //  is going to be used longer, then it should be copied into a string by clients. How should
-    //  we choose the lifetime?
-    pub fn get_label_of_last_undoable_action(&self) -> Option<&CStr> {
+    pub fn get_label_of_last_undoable_action(&self) -> ReaperStringPtr {
         self.complain_if_not_available();
-        let ptr = Reaper::instance().medium.undo_can_undo_2(self.rea_project);
-        unsafe { ptr.into_c_str() }
+        Reaper::instance().medium.undo_can_undo_2(self.rea_project)
     }
 
     pub fn get_label_of_last_redoable_action(&self) -> Option<&CStr> {

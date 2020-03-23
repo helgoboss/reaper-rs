@@ -60,8 +60,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(new_project.get_track_count(), 0);
             check!(new_project.get_index() > 0);
             check!(new_project.get_file_path().is_none());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), new_project);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), new_project);
             Ok(())
         }),
         step("Add track", |reaper, step| {
@@ -85,8 +85,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check_eq!(project.get_track_count(), 1);
             check_eq!(new_track.get_index(), 0);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), new_track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), new_track);
             Ok(())
         }),
         step("FnMut action", |reaper, step| {
@@ -187,8 +187,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             track.set_name(c_str!("Foo Bla"));
             // Then
             check_eq!(track.get_name(), c_str!("Foo Bla").to_owned());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Query track input monitoring", |reaper, _| {
@@ -223,8 +223,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 track.get_input_monitoring_mode(),
                 InputMonitoringMode::NotWhenPlaying
             );
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Query track recording input", |reaper, _| {
@@ -261,8 +261,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(input_data.get_device().is_none());
             check_eq!(input_data.get_rec_input_index(), 6112);
             check_eq!(RecordingInput::from_rec_input_index(6112), input);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Set track recording input MIDI 4/5", |reaper, step| {
@@ -347,8 +347,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(volume.get_reaper_value(), 0.031588093366685013);
             check_eq!(volume.get_db(), -30.009531739774296);
             check_eq!(volume.get_normalized_value(), 0.25000000000003497);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Query track pan", |reaper, _| {
@@ -378,8 +378,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             let pan = track.get_pan();
             check_eq!(pan.get_reaper_value(), -0.5);
             check_eq!(pan.get_normalized_value(), 0.25);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Query track selection state", |reaper, _| {
@@ -418,8 +418,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 .ok_or("Couldn't get first selected track")?;
             check_eq!(first_selected_track.get_index(), 0);
             check_eq!(project.get_selected_tracks(false).count(), 2);
-            check_eq!(mock.invocation_count(), 2);
-            check_eq!(mock.last_arg(), track2);
+            check_eq!(mock.get_invocation_count(), 2);
+            check_eq!(mock.get_last_arg(), track2);
             Ok(())
         }),
         step("Unselect track", |reaper, step| {
@@ -444,8 +444,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 .ok_or("Couldn't get first selected track")?;
             check_eq!(first_selected_track.get_index(), 2);
             check_eq!(project.get_selected_tracks(false).count(), 1);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Select master track", |reaper, step| {
@@ -472,8 +472,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(first_selected_track.is_master_track());
             check_eq!(project.get_selected_tracks(true).count(), 1);
             // TODO REAPER doesn't notify us about master track selection currently
-            check_eq!(mock.invocation_count(), 1);
-            let last_arg: Track = mock.last_arg().into();
+            check_eq!(mock.get_invocation_count(), 1);
+            let last_arg: Track = mock.get_last_arg().into();
             check_eq!(last_arg.get_index(), 2);
             Ok(())
         }),
@@ -514,8 +514,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(track.is_armed(true));
             check!(track.is_armed(false));
             check!(!track.has_auto_arm_enabled());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Disarm track in normal mode", |reaper, step| {
@@ -535,8 +535,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(!track.is_armed(true));
             check!(!track.is_armed(false));
             check!(!track.has_auto_arm_enabled());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Enable track auto-arm mode", |reaper, _| {
@@ -569,8 +569,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // So maybe we should remove the chunk check and the parameter supportAutoArm
             check!(track.is_armed(false));
             check!(track.has_auto_arm_enabled());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Disarm track in auto-arm mode", |reaper, step| {
@@ -590,8 +590,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(!track.is_armed(true));
             check!(!track.is_armed(false));
             check!(track.has_auto_arm_enabled());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Disable track auto-arm mode", |reaper, _| {
@@ -649,8 +649,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 check!(!track.is_armed(true));
                 check!(!track.is_armed(false));
                 check!(!track.has_auto_arm_enabled());
-                check_eq!(mock.invocation_count(), 1);
-                check_eq!(mock.last_arg(), track);
+                check_eq!(mock.get_invocation_count(), 1);
+                check_eq!(mock.get_last_arg(), track);
                 Ok(())
             },
         ),
@@ -676,8 +676,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 check!(track.is_armed(true));
                 check!(track.is_armed(false));
                 check!(!track.has_auto_arm_enabled());
-                check_eq!(mock.invocation_count(), 1);
-                check_eq!(mock.last_arg(), track);
+                check_eq!(mock.get_invocation_count(), 1);
+                check_eq!(mock.get_last_arg(), track);
                 Ok(())
             },
         ),
@@ -707,7 +707,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(project.get_selected_track_count(false), 1);
             check!(project.get_first_selected_track(false).is_some());
             check_eq!(project.get_selected_tracks(false).count(), 1);
-            check_eq!(mock.invocation_count(), 3);
+            check_eq!(mock.get_invocation_count(), 3);
             Ok(())
         }),
         step("Remove track", |reaper, step| {
@@ -735,8 +735,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(!track_1.is_available());
             check_eq!(track_2.get_index(), 0);
             check_eq!(track_2.get_guid(), track_2_guid);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track_1);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track_1);
             Ok(())
         }),
         step("Query track automation mode", |reaper, _| {
@@ -825,8 +825,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             send.set_volume(Volume::of_normalized_value(0.25));
             // Then
             check_eq!(send.get_volume().get_db(), -30.009531739774296);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), send);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), send);
             Ok(())
         }),
         step("Set track send pan", |reaper, step| {
@@ -848,8 +848,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check_eq!(send.get_pan().get_reaper_value(), -0.5);
             check_eq!(send.get_pan().get_normalized_value(), 0.25);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), send);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), send);
             Ok(())
         }),
         step("Query action", |reaper, _| {
@@ -874,7 +874,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(toggle_action.get_command_id(), 6);
             check!(toggle_action.get_command_name().is_none());
             check_eq!(
-                toggle_action.get_name(),
+                unsafe { toggle_action.get_name().into_c_str() },
                 Some(c_str!("Track: Toggle mute for selected tracks"))
             );
             check!(toggle_action.get_index() > 0);
@@ -900,7 +900,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(action.is_on());
             check!(track.is_muted());
             // TODO Actually it would be nice if the actionInvoked event would be raised but it isn't
-            check_eq!(mock.invocation_count(), 0);
+            check_eq!(mock.get_invocation_count(), 0);
             Ok(())
         }),
         step("Test actionInvoked event", |reaper, step| {
@@ -919,8 +919,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 .medium
                 .main_on_command_ex(action.get_command_id(), 0, null_mut());
             // Then
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(*mock.last_arg(), action);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(*mock.get_last_arg(), action);
             Ok(())
         }),
         step("Unmute track", |reaper, step| {
@@ -941,7 +941,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // For some reason REAPER doesn't call SetSurfaceMute on control surfaces when an action
             // caused the muting. So HelperControlSurface still thinks the track was unmuted and
             // therefore will not fire a change event!
-            check_eq!(mock.invocation_count(), 0);
+            check_eq!(mock.get_invocation_count(), 0);
             Ok(())
         }),
         step("Mute track", |reaper, step| {
@@ -959,8 +959,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             track.mute();
             // Then
             check!(track.is_muted());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Solo track", |reaper, step| {
@@ -978,8 +978,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             track.solo();
             // Then
             check!(track.is_solo());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Unsolo track", |reaper, step| {
@@ -997,8 +997,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             track.unsolo();
             // Then
             check!(!track.is_solo());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Generate GUID", |reaper, _| {
@@ -1035,16 +1035,22 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             let action = reaper.get_action_by_command_name(c_str!("reaperRsTest").into());
             // Then
             check!(action.is_available());
-            check_eq!(mock.invocation_count(), 0);
+            check_eq!(mock.get_invocation_count(), 0);
             action.invoke_as_trigger(None);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), 42);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), 42);
             check_eq!(action.get_character(), ActionCharacter::Trigger);
             check!(action.get_command_id() > 0);
-            check_eq!(action.get_command_name(), Some(c_str!("reaperRsTest")));
+            check_eq!(
+                action.get_command_name(),
+                Some(c_str!("reaperRsTest").to_owned())
+            );
             check!(action.get_index() >= 0);
             check!(!action.is_on());
-            check_eq!(action.get_name(), Some(c_str!("reaper-rs test action")));
+            check_eq!(
+                unsafe { action.get_name().into_c_str() },
+                Some(c_str!("reaper-rs test action"))
+            );
             reg.unregister();
             check!(!action.is_available());
             Ok(())
@@ -1060,24 +1066,27 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                     move || {
                         mock.invoke(43);
                     },
-                    toggleable(move || cloned_mock.invocation_count() % 2 == 1),
+                    toggleable(move || cloned_mock.get_invocation_count() % 2 == 1),
                 )
             });
             let action = reaper.get_action_by_command_name(c_str!("reaperRsTest2").into());
             // Then
             check!(action.is_available());
-            check_eq!(mock.invocation_count(), 0);
+            check_eq!(mock.get_invocation_count(), 0);
             check!(!action.is_on());
             action.invoke_as_trigger(None);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), 43);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), 43);
             check!(action.is_on());
             check_eq!(action.get_character(), ActionCharacter::Toggle);
             check!(action.get_command_id() > 0);
-            check_eq!(action.get_command_name(), Some(c_str!("reaperRsTest2")));
+            check_eq!(
+                action.get_command_name(),
+                Some(c_str!("reaperRsTest2").to_owned())
+            );
             check!(action.get_index() >= 0);
             check_eq!(
-                action.get_name(),
+                unsafe { action.get_name().into_c_str() },
                 Some(c_str!("reaper-rs test toggle action"))
             );
             reg.unregister();
@@ -1109,8 +1118,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(new_track.get_index(), 1);
             check_eq!(new_track.get_name().as_c_str(), c_str!("Inserted track"));
             check_eq!(track_2.get_index(), 2);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), new_track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), new_track);
             Ok(())
         }),
         step("Query MIDI input devices", |reaper, _| {
@@ -1177,12 +1186,13 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             project.undoable(c_str!("ReaPlus integration test operation"), move || {
                 track_mirror.set_name(c_str!("Renamed"));
             });
-            let label = project.get_label_of_last_undoable_action();
+            let ptr = project.get_label_of_last_undoable_action();
+            let label = unsafe { ptr.into_c_str() };
             // Then
             check_eq!(track.get_name().as_c_str(), c_str!("Renamed"));
             check_eq!(label, Some(c_str!("ReaPlus integration test operation")));
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), track);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
         step("Undo", |reaper, _| {
@@ -1204,7 +1214,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             let track = get_track(0)?;
             // When
             let successful = project.redo();
-            let label = project.get_label_of_last_undoable_action();
+            let ptr = project.get_label_of_last_undoable_action();
+            let label = unsafe { ptr.into_c_str() };
             // Then
             check!(successful);
             check_eq!(track.get_name().as_c_str(), c_str!("Renamed"));
@@ -1255,8 +1266,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check_eq!(project.get_tempo().get_bpm(), 130.0);
             // TODO There should be only one event invocation
-            check_eq!(mock.invocation_count(), 2);
-            check_eq!(mock.last_arg(), true);
+            check_eq!(mock.get_invocation_count(), 2);
+            check_eq!(mock.get_last_arg(), true);
             Ok(())
         }),
         step("Show message box", |reaper, _| {
@@ -1365,8 +1376,8 @@ fn create_fx_steps(
                 first_tag.get_content().deref(),
                 chain_chunk.get_content().deref()
             );
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), fx);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx);
             Ok(())
         }),
         step("Check track fx with 1 fx", move |reaper, _| {
@@ -1436,8 +1447,8 @@ fn create_fx_steps(
             fx_1.disable();
             // Then
             check!(!fx_1.is_enabled());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), fx_1);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx_1);
             Ok(())
         }),
         step("Enable track fx", move |reaper, step| {
@@ -1458,8 +1469,8 @@ fn create_fx_steps(
             fx_1.enable();
             // Then
             check!(fx_1.is_enabled());
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), fx_1);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx_1);
             Ok(())
         }),
         step("Check track fx with 2 fx", move |reaper, _| {
@@ -1615,8 +1626,8 @@ fn create_fx_steps(
                 c_str!("-4.44 dB")
             );
             // TODO 1 invocation would be better than 2
-            check_eq!(mock.invocation_count(), 2);
-            check_eq!(mock.last_arg(), p);
+            check_eq!(mock.get_invocation_count(), 2);
+            check_eq!(mock.get_last_arg(), p);
             Ok(())
         }),
         step(
@@ -1649,13 +1660,13 @@ fn create_fx_steps(
                 });
                 p.set_normalized_value(0.5);
                 // Then
-                check_eq!(mock.invocation_count(), 2);
+                check_eq!(mock.get_invocation_count(), 2);
                 if fx_chain.is_input_fx()
                     && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
                 {
-                    check_ne!(mock.last_arg(), p);
+                    check_ne!(mock.get_last_arg(), p);
                 } else {
-                    check_eq!(mock.last_arg(), p);
+                    check_eq!(mock.get_last_arg(), p);
                 }
                 Ok(())
             },
@@ -1680,8 +1691,8 @@ fn create_fx_steps(
             // Then
             check_eq!(midi_fx.get_index(), 1);
             check_eq!(synth_fx.get_index(), 0);
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), fx_chain.get_track());
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx_chain.get_track());
             Ok(())
         }),
         step("Remove FX", move |reaper, step| {
@@ -1706,8 +1717,8 @@ fn create_fx_steps(
             check!(midi_fx.is_available());
             check_eq!(midi_fx.get_index(), 0);
             midi_fx.invalidate_index();
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), synth_fx);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), synth_fx);
             Ok(())
         }),
         step("Add FX by chunk", move |reaper, step| {
@@ -1746,7 +1757,7 @@ WAK 0
                 c_str!("-6.00")
             );
             // TODO Detect such a programmatic FX add as well (maybe by hooking into HelperControlSurface::updateMediaTrackPositions)
-            check_eq!(mock.invocation_count(), 0);
+            check_eq!(mock.get_invocation_count(), 0);
             Ok(())
         }),
         step("Set fx chunk", move |reaper, _| {
@@ -1925,9 +1936,9 @@ WAK 0
             check!(!fx.get_floating_window().is_null());
             check!(fx.window_is_open());
             check!(fx.window_has_focus());
-            check!(fx_opened_mock.invocation_count() >= 1);
-            check_eq!(fx_opened_mock.last_arg(), fx);
-            check_eq!(fx_focused_mock.invocation_count(), 0); // Should be > 0 but doesn't work
+            check!(fx_opened_mock.get_invocation_count() >= 1);
+            check_eq!(fx_opened_mock.get_last_arg(), fx);
+            check_eq!(fx_focused_mock.get_invocation_count(), 0); // Should be > 0 but doesn't work
             check!(reaper.get_focused_fx().is_none()); // Should be Some but doesn't work
             Ok(())
         }),
@@ -1960,8 +1971,8 @@ WAK 0
                 fx_chain.get_first_fx_by_name(c_str!("phaser")),
                 Some(fx.clone())
             );
-            check_eq!(mock.invocation_count(), 1);
-            check_eq!(mock.last_arg(), fx.clone());
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx.clone());
             Ok(())
         }),
         step("Query track JS fx by index", move |reaper, _| {

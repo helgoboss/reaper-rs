@@ -1,4 +1,5 @@
 use crate::high_level::{ActionCharacter, Project, Reaper, Section};
+use crate::medium_level::ReaperStringPtr;
 use c_str_macro::c_str;
 use once_cell::unsync::OnceCell;
 use std::borrow::Cow;
@@ -20,8 +21,8 @@ struct RuntimeData {
 #[derive(Debug, Clone)]
 pub struct Action {
     runtime_data: RefCell<Option<RuntimeData>>,
-    // Used to represent custom actions that are not available (they don't have a commandId) or for which is not yet
-    // known if they are available. Globally unique, not within one section.
+    // Used to represent custom actions that are not available (they don't have a commandId) or for
+    // which is not yet known if they are available. Globally unique, not within one section.
     // TODO-low But currently only mainSection supported. How support other sections?
     command_name: Option<CString>,
 }
@@ -125,28 +126,27 @@ impl Action {
         rd.command_id
     }
 
-    // TODO-high unsafe
-    pub fn get_command_name(&self) -> Option<&CStr> {
+    // TODO-low Don't copy into string. Split into command-based action and command-id based action
+    //  and then return Option<&CStr> for the first (with same lifetime like self) and
+    //  ReaperStringPtr for the second
+    pub fn get_command_name(&self) -> Option<CString> {
         self.command_name
             .as_ref()
-            .map(|cn| cn.as_c_str())
+            .map(|cn| cn.as_c_str().to_owned())
             .or_else(|| {
-                let rd = self.load_if_necessary_or_complain();
-                let ptr = Reaper::instance()
+                let rd = self.runtime_data.borrow();
+                Reaper::instance()
                     .medium
-                    .reverse_named_command_lookup(rd.command_id);
-                unsafe { ptr.into_c_str() }
+                    .reverse_named_command_lookup(rd.as_ref().unwrap().command_id)
+                    .into_c_string()
             })
     }
 
-    // Returns None if action disappeared TODO-medium This is not consequent
-    // TODO-medium unsafe lifetime
-    pub fn get_name(&self) -> Option<&CStr> {
+    pub fn get_name(&self) -> ReaperStringPtr {
         let rd = self.load_if_necessary_or_complain();
-        let ptr = Reaper::instance()
+        Reaper::instance()
             .medium
-            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info());
-        unsafe { ptr.into_c_str() }
+            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info())
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
