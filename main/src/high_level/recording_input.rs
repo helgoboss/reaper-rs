@@ -27,13 +27,15 @@ pub struct MidiRecordingInput {
     rec_input_index: u32,
 }
 
+const ALL_MIDI_DEVICES_ID: u32 = 63;
+
 impl MidiRecordingInput {
     fn new(rec_input_index: u32) -> Self {
         MidiRecordingInput { rec_input_index }
     }
 
     pub fn from_all_devices_and_channels() -> Self {
-        Self::from_midi_rec_input_index(63 * 32)
+        Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32)
     }
 
     pub fn from_all_channels_of_device(device: MidiInputDevice) -> Self {
@@ -41,7 +43,7 @@ impl MidiRecordingInput {
     }
 
     pub fn from_all_devices_with_channel(channel: u32) -> Self {
-        Self::from_device_and_channel(MidiInputDevice::new(63), channel)
+        Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32 + channel + 1)
     }
 
     pub fn from_device_and_channel(device: MidiInputDevice, channel: u32) -> Self {
@@ -60,7 +62,7 @@ impl MidiRecordingInput {
         self.rec_input_index - 4096
     }
 
-    // TODO-medium In Rust get_ prefix is not idiomatic. On the other hand, the convention talks
+    // TODO-low In Rust get_ prefix is not idiomatic. On the other hand, the convention talks
     //  about exposing members only. Channel is not a member. However I also don't want to
     //  expose the information if it's a member or not. get_ has an advantage in IDEs and also
     //  prevents ambiguities if the noun can sound like a verb.
@@ -75,7 +77,7 @@ impl MidiRecordingInput {
 
     pub fn get_device(&self) -> Option<MidiInputDevice> {
         let raw_device_id = self.get_midi_rec_input_index() / 32;
-        if raw_device_id == 63 {
+        if raw_device_id == ALL_MIDI_DEVICES_ID {
             None
         } else {
             Some(MidiInputDevice::new(raw_device_id))

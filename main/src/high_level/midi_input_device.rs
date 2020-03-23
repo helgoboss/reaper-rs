@@ -1,7 +1,6 @@
 use crate::high_level::Reaper;
 use std::ffi::CString;
 
-// TODO-medium Maybe use enum to distinguish between "All" devices and specific device
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiInputDevice {
     id: u32,
@@ -9,6 +8,10 @@ pub struct MidiInputDevice {
 
 impl MidiInputDevice {
     pub fn new(id: u32) -> Self {
+        assert_ne!(
+            id, 63,
+            "rec_input_index 63 represents all MIDI input devices"
+        );
         MidiInputDevice { id }
     }
 
