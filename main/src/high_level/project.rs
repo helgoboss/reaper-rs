@@ -27,7 +27,7 @@ impl Project {
         Project { rea_project }
     }
 
-    pub fn get_rea_project(&self) -> *mut ReaProject {
+    pub fn get_raw(&self) -> *mut ReaProject {
         self.rea_project
     }
 
@@ -150,7 +150,7 @@ impl Project {
     }
 
     pub fn remove_track(&self, track: &Track) {
-        Reaper::get().medium.delete_track(track.get_media_track());
+        Reaper::get().medium.delete_track(track.get_raw());
     }
 
     // TODO-low Introduce variant that doesn't notify ControlSurface

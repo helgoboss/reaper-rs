@@ -110,7 +110,7 @@ impl HelperControlSurface {
     }
 
     fn find_track_data_map(&self) -> Option<RefMut<TrackDataMap>> {
-        let rea_project = Reaper::get().get_current_project().get_rea_project();
+        let rea_project = Reaper::get().get_current_project().get_raw();
         if (!self.project_datas.borrow().contains_key(&rea_project)) {
             return None;
         }
@@ -135,7 +135,7 @@ impl HelperControlSurface {
         }
         let env = Reaper::get()
             .medium
-            .get_track_envelope_by_name(track.get_media_track(), parameter_name);
+            .get_track_envelope_by_name(track.get_raw(), parameter_name);
         if env.is_null() {
             return false;
         }
@@ -170,7 +170,7 @@ impl HelperControlSurface {
     fn detect_track_set_changes(&self) {
         let project = Reaper::get().get_current_project();
         let mut project_datas = self.project_datas.borrow_mut();
-        let mut track_datas = project_datas.entry(project.get_rea_project()).or_default();
+        let mut track_datas = project_datas.entry(project.get_raw()).or_default();
         let old_track_count = track_datas.len() as u32;
         let new_track_count = project.get_track_count();
         if new_track_count < old_track_count {
@@ -184,7 +184,7 @@ impl HelperControlSurface {
 
     fn add_missing_media_tracks(&self, project: Project, track_datas: &mut TrackDataMap) {
         for t in project.get_tracks() {
-            let media_track = t.get_media_track();
+            let media_track = t.get_raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let reaper = Reaper::get();
                 let m = &reaper.medium;
@@ -224,7 +224,7 @@ impl HelperControlSurface {
             return;
         }
         let mut fx_chain_pairs = self.fx_chain_pair_by_media_track.borrow_mut();
-        let mut fx_chain_pair = fx_chain_pairs.entry(track.get_media_track()).or_default();
+        let mut fx_chain_pair = fx_chain_pairs.entry(track.get_raw()).or_default();
         let added_or_removed_output_fx = if check_normal_fx_chain {
             self.detect_fx_changes_on_track_internal(
                 &track,
@@ -360,7 +360,7 @@ impl HelperControlSurface {
         track_datas.retain(|media_track, data| {
             let reaper = Reaper::get();
             if reaper.medium.validate_ptr_2(
-                project.get_rea_project(),
+                project.get_raw(),
                 *media_track as *mut c_void,
                 c_str!("MediaTrack*"),
             ) {
@@ -385,7 +385,7 @@ impl HelperControlSurface {
         let reaper = Reaper::get();
         for (media_track, track_data) in track_datas.iter_mut() {
             if !reaper.medium.validate_ptr_2(
-                project.get_rea_project(),
+                project.get_raw(),
                 *media_track as *mut c_void,
                 c_str!("MediaTrack*"),
             ) {
@@ -507,7 +507,7 @@ impl HelperControlSurface {
         normalized_value: Option<f64>,
     ) -> bool {
         let pairs = self.fx_chain_pair_by_media_track.borrow();
-        let pair = match pairs.get(&track.get_media_track()) {
+        let pair = match pairs.get(&track.get_raw()) {
             None => {
                 // Should not happen. In this case, an FX yet unknown to Realearn has sent a parameter change
                 return false;

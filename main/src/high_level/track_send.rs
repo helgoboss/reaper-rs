@@ -85,14 +85,14 @@ impl TrackSend {
         // an envelope is written.
         let (volume, _) = Reaper::get()
             .medium
-            .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
+            .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
             .expect("Couldn't get send vol/pan");
         Volume::from_reaper_value(volume)
     }
 
     pub fn set_volume(&self, volume: Volume) {
         Reaper::get().medium.csurf_on_send_volume_change(
-            self.get_source_track().get_media_track(),
+            self.get_source_track().get_raw(),
             self.get_index(),
             volume.get_reaper_value(),
             false,
@@ -102,14 +102,14 @@ impl TrackSend {
     pub fn get_pan(&self) -> Pan {
         let (_, pan) = Reaper::get()
             .medium
-            .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
+            .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
             .expect("Couldn't get send vol/pan");
         Pan::from_reaper_value(pan)
     }
 
     pub fn set_pan(&self, pan: Pan) {
         Reaper::get().medium.csurf_on_send_pan_change(
-            self.get_source_track().get_media_track(),
+            self.get_source_track().get_raw(),
             self.get_index(),
             pan.get_reaper_value(),
             false,
@@ -155,13 +155,13 @@ impl TrackSend {
     // Precondition: index set
     fn get_target_track_by_index(&self) -> Option<Track> {
         let target_media_track =
-            get_target_media_track(&self.source_track, self.index.get().expect("Index not set"));
+            get_target_track_raw(&self.source_track, self.index.get().expect("Index not set"));
         if target_media_track.is_null() {
             return None;
         }
         Some(Track::new(
             target_media_track,
-            self.source_track.get_project().get_rea_project(),
+            self.source_track.get_project().get_raw(),
         ))
     }
 
@@ -190,16 +190,16 @@ impl TrackSend {
 
 pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
     Track::new(
-        get_target_media_track(source_track, send_index),
-        source_track.get_project().get_rea_project(),
+        get_target_track_raw(source_track, send_index),
+        source_track.get_project().get_raw(),
     )
 }
 
-fn get_target_media_track(source_track: &Track, send_index: u32) -> *mut MediaTrack {
+fn get_target_track_raw(source_track: &Track, send_index: u32) -> *mut MediaTrack {
     Reaper::get()
         .medium
         .get_set_track_send_info(
-            source_track.get_media_track(),
+            source_track.get_raw(),
             0,
             send_index,
             c_str!("P_DESTTRACK"),

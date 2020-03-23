@@ -26,8 +26,7 @@ impl Section {
         self.get_section_info().action_list_cnt as u32
     }
 
-    // TODO-high Rename all pointer-returning methods to get_raw_*()
-    pub fn get_raw_section_info(&self) -> *mut KbdSectionInfo {
+    pub fn get_raw(&self) -> *mut KbdSectionInfo {
         self.section_info
     }
 

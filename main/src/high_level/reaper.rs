@@ -842,7 +842,7 @@ impl Reaper {
             return None;
         }
         self.undo_block_is_active.replace(true);
-        self.medium.undo_begin_block_2(project.get_rea_project());
+        self.medium.undo_begin_block_2(project.get_raw());
         Some(UndoBlock::new(project, label))
     }
 
@@ -852,7 +852,7 @@ impl Reaper {
             return;
         }
         self.medium
-            .undo_end_block_2(project.get_rea_project(), label, 0xFFFFFFFF);
+            .undo_end_block_2(project.get_raw(), label, 0xFFFFFFFF);
         self.undo_block_is_active.replace(false);
     }
 }

@@ -138,7 +138,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_ne!(&found_track, &first_track);
             check_eq!(
                 new_track.get_guid(),
-                &get_media_track_guid(new_track.get_media_track())
+                &get_media_track_guid(new_track.get_raw())
             );
             Ok(())
         }),

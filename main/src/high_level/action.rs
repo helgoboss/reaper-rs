@@ -93,7 +93,7 @@ impl Action {
             // See if we can get a description. If yes, the action actually exists. If not, then not.
             let ptr = Reaper::get().medium.kbd_get_text_from_cmd(
                 runtime_data.command_id as u32,
-                runtime_data.section.get_raw_section_info(),
+                runtime_data.section.get_raw(),
             );
             return unsafe { ptr.into_c_str() }
                 .filter(|t| t.to_bytes().len() > 0)
@@ -106,7 +106,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         match Reaper::get()
             .medium
-            .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
+            .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
         {
             Some(_) => ActionCharacter::Toggle,
             None => ActionCharacter::Trigger,
@@ -117,7 +117,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         Reaper::get()
             .medium
-            .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
+            .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
             == Some(true)
     }
 
@@ -146,7 +146,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         Reaper::get()
             .medium
-            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info())
+            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw())
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
@@ -170,7 +170,7 @@ impl Action {
                 0,
                 2,
                 reaper.medium.get_main_hwnd(),
-                project.map(|p| p.get_rea_project()).unwrap_or(null_mut()),
+                project.map(|p| p.get_raw()).unwrap_or(null_mut()),
             );
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val, &valhw, &relmode, reaper::GetMainHwnd());
@@ -180,7 +180,7 @@ impl Action {
                 -1,
                 0,
                 reaper.medium.get_main_hwnd(),
-                project.map(|p| p.get_rea_project()).unwrap_or(null_mut()),
+                project.map(|p| p.get_raw()).unwrap_or(null_mut()),
             );
             // Main_OnCommandEx would trigger the actionInvoked event but it has not enough parameters for passing values etc.
             //          reaper::Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
