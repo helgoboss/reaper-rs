@@ -1,7 +1,7 @@
 use crate::high_level::Reaper;
 use slog::{error, o, Drain};
 use std::backtrace::Backtrace;
-use std::borrow::Cow;
+
 use std::ffi::CString;
 use std::io;
 use std::panic::PanicInfo;

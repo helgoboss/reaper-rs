@@ -46,44 +46,44 @@ pub trait ControlSurface {
 
     fn SetTrackListChange(&self) {}
 
-    fn SetSurfaceVolume(&self, trackid: *mut MediaTrack, volume: f64) {}
+    fn SetSurfaceVolume(&self, _trackid: *mut MediaTrack, _volume: f64) {}
 
-    fn SetSurfacePan(&self, trackid: *mut MediaTrack, pan: f64) {}
+    fn SetSurfacePan(&self, _trackid: *mut MediaTrack, _pan: f64) {}
 
-    fn SetSurfaceMute(&self, trackid: *mut MediaTrack, mute: bool) {}
+    fn SetSurfaceMute(&self, _trackid: *mut MediaTrack, _mute: bool) {}
 
-    fn SetSurfaceSelected(&self, trackid: *mut MediaTrack, selected: bool) {}
+    fn SetSurfaceSelected(&self, _trackid: *mut MediaTrack, _selected: bool) {}
 
-    fn SetSurfaceSolo(&self, trackid: *mut MediaTrack, solo: bool) {}
+    fn SetSurfaceSolo(&self, _trackid: *mut MediaTrack, _solo: bool) {}
 
-    fn SetSurfaceRecArm(&self, trackid: *mut MediaTrack, recarm: bool) {}
+    fn SetSurfaceRecArm(&self, _trackid: *mut MediaTrack, _recarm: bool) {}
 
-    fn SetPlayState(&self, play: bool, pause: bool, rec: bool) {}
+    fn SetPlayState(&self, _play: bool, _pause: bool, _rec: bool) {}
 
-    fn SetRepeatState(&self, rep: bool) {}
+    fn SetRepeatState(&self, _rep: bool) {}
 
-    fn SetTrackTitle(&self, trackid: *mut MediaTrack, title: *const ::std::os::raw::c_char) {}
+    fn SetTrackTitle(&self, _trackid: *mut MediaTrack, _title: *const ::std::os::raw::c_char) {}
 
-    fn GetTouchState(&self, trackid: *mut MediaTrack, isPan: ::std::os::raw::c_int) -> bool {
+    fn GetTouchState(&self, _trackid: *mut MediaTrack, _isPan: ::std::os::raw::c_int) -> bool {
         false
     }
 
-    fn SetAutoMode(&self, mode: ::std::os::raw::c_int) {}
+    fn SetAutoMode(&self, _mode: ::std::os::raw::c_int) {}
 
     fn ResetCachedVolPanStates(&self) {}
 
-    fn OnTrackSelection(&self, trackid: *mut MediaTrack) {}
+    fn OnTrackSelection(&self, _trackid: *mut MediaTrack) {}
 
-    fn IsKeyDown(&self, key: ::std::os::raw::c_int) -> bool {
+    fn IsKeyDown(&self, _key: ::std::os::raw::c_int) -> bool {
         false
     }
 
     fn Extended(
         &self,
-        call: ::std::os::raw::c_int,
-        parm1: *mut ::std::os::raw::c_void,
-        parm2: *mut ::std::os::raw::c_void,
-        parm3: *mut ::std::os::raw::c_void,
+        _call: ::std::os::raw::c_int,
+        _parm1: *mut ::std::os::raw::c_void,
+        _parm2: *mut ::std::os::raw::c_void,
+        _parm3: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
         0
     }
@@ -91,32 +91,32 @@ pub trait ControlSurface {
 
 #[no_mangle]
 extern "C" fn GetTypeString(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| get_control_surface_instance().GetTypeString()).unwrap_or(null_mut())
 }
 
 #[no_mangle]
 extern "C" fn GetDescString(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| get_control_surface_instance().GetDescString()).unwrap_or(null_mut())
 }
 
 #[no_mangle]
 extern "C" fn GetConfigString(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| get_control_surface_instance().GetConfigString()).unwrap_or(null_mut())
 }
 
 #[no_mangle]
-extern "C" fn CloseNoReset(callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn CloseNoReset(_callback_target: *mut Box<dyn ControlSurface>) {
     firewall(|| get_control_surface_instance().CloseNoReset());
 }
 
 #[no_mangle]
-extern "C" fn Run(callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn Run(_callback_target: *mut Box<dyn ControlSurface>) {
     // "Decoding" the thin pointer is not necessary right now because we have a static variable.
     // However, we leave it. Might come in handy one day to support multiple control surfaces
     // (see https://users.rust-lang.org/t/sending-a-boxed-trait-over-ffi/21708/6)
@@ -124,13 +124,13 @@ extern "C" fn Run(callback_target: *mut Box<dyn ControlSurface>) {
 }
 
 #[no_mangle]
-extern "C" fn SetTrackListChange(callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn SetTrackListChange(_callback_target: *mut Box<dyn ControlSurface>) {
     firewall(|| get_control_surface_instance().SetTrackListChange());
 }
 
 #[no_mangle]
 extern "C" fn SetSurfaceVolume(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     volume: f64,
 ) {
@@ -139,7 +139,7 @@ extern "C" fn SetSurfaceVolume(
 
 #[no_mangle]
 extern "C" fn SetSurfacePan(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     pan: f64,
 ) {
@@ -148,7 +148,7 @@ extern "C" fn SetSurfacePan(
 
 #[no_mangle]
 extern "C" fn SetSurfaceMute(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     mute: bool,
 ) {
@@ -157,7 +157,7 @@ extern "C" fn SetSurfaceMute(
 
 #[no_mangle]
 extern "C" fn SetSurfaceSelected(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     selected: bool,
 ) {
@@ -166,7 +166,7 @@ extern "C" fn SetSurfaceSelected(
 
 #[no_mangle]
 extern "C" fn SetSurfaceSolo(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     solo: bool,
 ) {
@@ -175,7 +175,7 @@ extern "C" fn SetSurfaceSolo(
 
 #[no_mangle]
 extern "C" fn SetSurfaceRecArm(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     recarm: bool,
 ) {
@@ -184,7 +184,7 @@ extern "C" fn SetSurfaceRecArm(
 
 #[no_mangle]
 extern "C" fn SetPlayState(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     play: bool,
     pause: bool,
     rec: bool,
@@ -193,13 +193,13 @@ extern "C" fn SetPlayState(
 }
 
 #[no_mangle]
-extern "C" fn SetRepeatState(callback_target: *mut Box<dyn ControlSurface>, rep: bool) {
+extern "C" fn SetRepeatState(_callback_target: *mut Box<dyn ControlSurface>, rep: bool) {
     firewall(|| get_control_surface_instance().SetRepeatState(rep));
 }
 
 #[no_mangle]
 extern "C" fn SetTrackTitle(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     title: *const ::std::os::raw::c_char,
 ) {
@@ -208,7 +208,7 @@ extern "C" fn SetTrackTitle(
 
 #[no_mangle]
 extern "C" fn GetTouchState(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
     isPan: ::std::os::raw::c_int,
 ) -> bool {
@@ -217,20 +217,20 @@ extern "C" fn GetTouchState(
 
 #[no_mangle]
 extern "C" fn SetAutoMode(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     mode: ::std::os::raw::c_int,
 ) {
     firewall(|| get_control_surface_instance().SetAutoMode(mode));
 }
 
 #[no_mangle]
-extern "C" fn ResetCachedVolPanStates(callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn ResetCachedVolPanStates(_callback_target: *mut Box<dyn ControlSurface>) {
     firewall(|| get_control_surface_instance().ResetCachedVolPanStates());
 }
 
 #[no_mangle]
 extern "C" fn OnTrackSelection(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     trackid: *mut MediaTrack,
 ) {
     firewall(|| get_control_surface_instance().OnTrackSelection(trackid));
@@ -238,7 +238,7 @@ extern "C" fn OnTrackSelection(
 
 #[no_mangle]
 extern "C" fn IsKeyDown(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     key: ::std::os::raw::c_int,
 ) -> bool {
     firewall(|| get_control_surface_instance().IsKeyDown(key)).unwrap_or(false)
@@ -246,7 +246,7 @@ extern "C" fn IsKeyDown(
 
 #[no_mangle]
 extern "C" fn Extended(
-    callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn ControlSurface>,
     call: ::std::os::raw::c_int,
     parm1: *mut ::std::os::raw::c_void,
     parm2: *mut ::std::os::raw::c_void,

@@ -1,10 +1,10 @@
 use crate::high_level::fx::{get_fx_guid, Fx};
 use crate::high_level::guid::Guid;
 use crate::high_level::{
-    get_fx_query_index, get_media_track_guid, Chunk, ChunkRegion, Reaper, Track,
+    get_fx_query_index, Chunk, ChunkRegion, Reaper, Track,
     MAX_TRACK_CHUNK_SIZE,
 };
-use c_str_macro::c_str;
+
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]

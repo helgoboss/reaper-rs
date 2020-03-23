@@ -14,11 +14,8 @@ use std::thread::ThreadId;
 
 use c_str_macro::c_str;
 use num_enum::IntoPrimitive;
-use slog::Level::Debug;
 
 use rxrust::prelude::*;
-use rxrust::subscriber::Subscriber;
-use rxrust::subscription::SubscriptionLike;
 
 use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx::Fx;
@@ -39,7 +36,6 @@ use crate::low_level::{
 };
 use crate::medium_level;
 use crate::medium_level::{GetFocusedFxResult, GetLastTouchedFxResult};
-use std::ops::Deref;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -47,10 +43,10 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 
 // Called by REAPER directly!
 // Only for main section
-extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
+extern "C" fn hook_command(command_index: i32, _flag: i32) -> bool {
     // TODO-low Pass on flag
     firewall(|| {
-        let mut operation = match Reaper::get()
+        let operation = match Reaper::get()
             .command_by_index
             .borrow()
             .get(&(command_index as u32))
@@ -66,7 +62,7 @@ extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
 
 // Called by REAPER directly!
 // Only for main section
-extern "C" fn hook_post_command(command_id: u32, flag: i32) {
+extern "C" fn hook_post_command(command_id: u32, _flag: i32) {
     firewall(|| {
         let reaper = Reaper::get();
         let action = reaper
@@ -109,9 +105,9 @@ extern "C" fn toggle_action(command_index: i32) -> i32 {
 // Called by REAPER directly!
 extern "C" fn process_audio_buffer(
     is_post: bool,
-    len: i32,
-    srate: f64,
-    reg: *mut audio_hook_register_t,
+    _len: i32,
+    _srate: f64,
+    _reg: *mut audio_hook_register_t,
 ) {
     // TODO-low Check performance implications for firewall call
     firewall(|| {
@@ -444,7 +440,7 @@ impl Reaper {
                     };
                     Some(fx.get_parameter_by_index(data.paramnumber as u32))
                 }
-                GetLastTouchedFxResult::ItemFx(data) => None, // TODO-low Implement,
+                GetLastTouchedFxResult::ItemFx(_) => None, // TODO-low Implement,
             }
         })
     }

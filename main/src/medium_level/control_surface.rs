@@ -3,7 +3,7 @@ use crate::low_level::MediaTrack;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_void;
-use std::ptr::{null, null_mut};
+use std::ptr::{null_mut};
 
 pub trait ControlSurface {
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
@@ -24,44 +24,44 @@ pub trait ControlSurface {
 
     fn set_track_list_change(&self) {}
 
-    fn set_surface_volume(&self, trackid: *mut MediaTrack, volume: f64) {}
+    fn set_surface_volume(&self, _trackid: *mut MediaTrack, _volume: f64) {}
 
-    fn set_surface_pan(&self, trackid: *mut MediaTrack, pan: f64) {}
+    fn set_surface_pan(&self, _trackid: *mut MediaTrack, _pan: f64) {}
 
-    fn set_surface_mute(&self, trackid: *mut MediaTrack, mute: bool) {}
+    fn set_surface_mute(&self, _trackid: *mut MediaTrack, _mute: bool) {}
 
-    fn set_surface_selected(&self, trackid: *mut MediaTrack, selected: bool) {}
+    fn set_surface_selected(&self, _trackid: *mut MediaTrack, _selected: bool) {}
 
-    fn set_surface_solo(&self, trackid: *mut MediaTrack, solo: bool) {}
+    fn set_surface_solo(&self, _trackid: *mut MediaTrack, _solo: bool) {}
 
-    fn set_surface_rec_arm(&self, trackid: *mut MediaTrack, recarm: bool) {}
+    fn set_surface_rec_arm(&self, _trackid: *mut MediaTrack, _recarm: bool) {}
 
-    fn set_play_state(&self, play: bool, pause: bool, rec: bool) {}
+    fn set_play_state(&self, _play: bool, _pause: bool, _rec: bool) {}
 
-    fn set_repeat_state(&self, rep: bool) {}
+    fn set_repeat_state(&self, _rep: bool) {}
 
-    fn set_track_title(&self, trackid: *mut MediaTrack, title: &CStr) {}
+    fn set_track_title(&self, _trackid: *mut MediaTrack, _title: &CStr) {}
 
-    fn get_touch_state(&self, trackid: *mut MediaTrack, is_pan: i32) -> bool {
+    fn get_touch_state(&self, _trackid: *mut MediaTrack, _is_pan: i32) -> bool {
         false
     }
 
-    fn set_auto_mode(&self, mode: i32) {}
+    fn set_auto_mode(&self, _mode: i32) {}
 
     fn reset_cached_vol_pan_states(&self) {}
 
-    fn on_track_selection(&self, trackid: *mut MediaTrack) {}
+    fn on_track_selection(&self, _trackid: *mut MediaTrack) {}
 
-    fn is_key_down(&self, key: i32) -> bool {
+    fn is_key_down(&self, _key: i32) -> bool {
         false
     }
 
     fn extended(
         &self,
-        call: i32,
-        parm1: *mut c_void,
-        parm2: *mut c_void,
-        parm3: *mut c_void,
+        _call: i32,
+        _parm1: *mut c_void,
+        _parm2: *mut c_void,
+        _parm3: *mut c_void,
     ) -> i32 {
         0
     }

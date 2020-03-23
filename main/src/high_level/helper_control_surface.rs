@@ -15,10 +15,10 @@ use crate::medium_level::MediaTrackInfoKey::{
 use crate::medium_level::{ControlSurface, ReaperPointerType};
 use c_str_macro::c_str;
 use rxrust::prelude::*;
-use std::borrow::Cow;
-use std::cell::{Cell, Ref, RefCell, RefMut};
-use std::collections::hash_map::Entry;
-use std::collections::hash_map::Entry::Occupied;
+
+use std::cell::{Cell, RefCell, RefMut};
+
+
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 use std::os::raw::c_void;
@@ -114,7 +114,7 @@ impl HelperControlSurface {
 
     fn find_track_data_map(&self) -> Option<RefMut<TrackDataMap>> {
         let rea_project = Reaper::get().get_current_project().get_raw();
-        if (!self.project_datas.borrow().contains_key(&rea_project)) {
+        if !self.project_datas.borrow().contains_key(&rea_project) {
             return None;
         }
         Some(RefMut::map(self.project_datas.borrow_mut(), |tds| {
@@ -124,7 +124,7 @@ impl HelperControlSurface {
 
     fn find_track_data<'a>(&self, track: *mut MediaTrack) -> Option<RefMut<TrackData>> {
         let track_data_map = self.find_track_data_map()?;
-        if (!track_data_map.contains_key(&track)) {
+        if !track_data_map.contains_key(&track) {
             return None;
         }
         Some(RefMut::map(track_data_map, |tdm| {
@@ -173,7 +173,7 @@ impl HelperControlSurface {
     fn detect_track_set_changes(&self) {
         let project = Reaper::get().get_current_project();
         let mut project_datas = self.project_datas.borrow_mut();
-        let mut track_datas = project_datas.entry(project.get_raw()).or_default();
+        let track_datas = project_datas.entry(project.get_raw()).or_default();
         let old_track_count = track_datas.len() as u32;
         let new_track_count = project.get_track_count();
         if new_track_count < old_track_count {
@@ -223,7 +223,7 @@ impl HelperControlSurface {
             return;
         }
         let mut fx_chain_pairs = self.fx_chain_pair_by_media_track.borrow_mut();
-        let mut fx_chain_pair = fx_chain_pairs.entry(track.get_raw()).or_default();
+        let fx_chain_pair = fx_chain_pairs.entry(track.get_raw()).or_default();
         let added_or_removed_output_fx = if check_normal_fx_chain {
             self.detect_fx_changes_on_track_internal(
                 &track,
@@ -394,7 +394,7 @@ impl HelperControlSurface {
                 .medium
                 .get_set_media_track_info(*media_track, IP_TRACKNUMBER, null_mut())
                 .0 as i32;
-            if (new_number != track_data.number) {
+            if new_number != track_data.number {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;
             }
@@ -405,7 +405,7 @@ impl HelperControlSurface {
     }
 
     fn csurf_ext_setinputmonitor(&self, track: *mut MediaTrack, recmonitor: *mut i32) {
-        if (track.is_null() || recmonitor.is_null()) {
+        if track.is_null() || recmonitor.is_null() {
             return;
         }
         let mut td = match self.find_track_data_in_normal_state(track) {
@@ -458,7 +458,7 @@ impl HelperControlSurface {
         normalized_value: *mut f64,
         is_input_fx_if_supported: bool,
     ) {
-        if (track.is_null() || fxidx_and_paramidx.is_null() || normalized_value.is_null()) {
+        if track.is_null() || fxidx_and_paramidx.is_null() || normalized_value.is_null() {
             return;
         }
         let fxidx_and_paramidx = unsafe { *fxidx_and_paramidx };
@@ -539,7 +539,7 @@ impl HelperControlSurface {
         }
     }
 
-    fn csurf_ext_setfxenabled(&self, track: *mut MediaTrack, fxidx: *mut i32, enabled: bool) {
+    fn csurf_ext_setfxenabled(&self, track: *mut MediaTrack, fxidx: *mut i32, _enabled: bool) {
         if track.is_null() || fxidx.is_null() {
             return;
         }
@@ -688,9 +688,9 @@ impl HelperControlSurface {
 
     fn csurf_ext_setlasttouchedfx(
         &self,
-        track: *mut MediaTrack,
-        mediaitemidx: *mut i32,
-        fxidx: *mut i32,
+        _track: *mut MediaTrack,
+        _mediaitemidx: *mut i32,
+        _fxidx: *mut i32,
     ) {
         self.fx_has_been_touched_just_a_moment_ago.replace(true);
     }
@@ -748,7 +748,7 @@ impl ControlSurface for HelperControlSurface {
         // TODO-low Not multi-project compatible!
         let reaper = Reaper::get();
         let new_active_project = reaper.get_current_project();
-        if (new_active_project != self.last_active_project.get()) {
+        if new_active_project != self.last_active_project.get() {
             self.last_active_project.replace(new_active_project);
             reaper
                 .subjects
@@ -965,7 +965,7 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
-    fn set_track_title(&self, trackid: *mut MediaTrack, title: &CStr) {
+    fn set_track_title(&self, trackid: *mut MediaTrack, _title: &CStr) {
         if self.get_state() == State::PropagatingTrackSetChanges {
             self.decrease_num_track_set_changes_left_to_be_propagated();
             return;

@@ -1,7 +1,7 @@
 use std::borrow::Cow;
-use std::ffi::{CStr, CString, OsString};
+use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
-use std::ptr::{null, null_mut};
+use std::ptr::null_mut;
 
 use c_str_macro::c_str;
 
@@ -13,7 +13,6 @@ use crate::low_level::{
 use crate::medium_level::constants::MediaTrackInfoKey;
 use crate::medium_level::{ControlSurface, DelegatingControlSurface, ReaperPointerType};
 use std::mem::MaybeUninit;
-use std::ops::Deref;
 
 pub struct Reaper {
     pub low: low_level::Reaper,

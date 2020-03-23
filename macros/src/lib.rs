@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 
 #[proc_macro_attribute]
-pub fn low_level_reaper_plugin(attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn low_level_reaper_plugin(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let main_function = syn::parse_macro_input!(input as syn::ItemFn);
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {

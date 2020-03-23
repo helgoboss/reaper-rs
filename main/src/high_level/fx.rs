@@ -3,12 +3,12 @@ use std::ffi::CString;
 use std::ops::Deref;
 use std::path::PathBuf;
 
-use c_str_macro::c_str;
+
 
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
-use crate::high_level::{Chunk, ChunkRegion, Reaper, Track};
+use crate::high_level::{ChunkRegion, Reaper, Track};
 use crate::low_level::{GetActiveWindow, HWND};
 use rxrust::prelude::PayloadCopy;
 

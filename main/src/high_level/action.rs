@@ -1,7 +1,7 @@
 use crate::high_level::{ActionCharacter, Project, Reaper, Section};
 use crate::medium_level::ReaperStringPtr;
 use c_str_macro::c_str;
-use once_cell::unsync::OnceCell;
+
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 use std::ffi::{CStr, CString};
@@ -84,7 +84,7 @@ impl Action {
             .section
             .get_kbd_cmds()
             .enumerate()
-            .find(|(i, kbd_cmd)| kbd_cmd.cmd == runtime_data.command_id)
+            .find(|(_, kbd_cmd)| kbd_cmd.cmd == runtime_data.command_id)
             .map(|(i, _)| i as u32)
     }
 
@@ -188,7 +188,7 @@ impl Action {
     }
 
     fn load_if_necessary_or_complain(&self) -> Ref<RuntimeData> {
-        if (self.runtime_data.borrow().is_none() && self.load_by_command_name()) {
+        if self.runtime_data.borrow().is_none() && self.load_by_command_name() {
             panic!("Action not loadable")
         }
         Ref::map(self.runtime_data.borrow(), |rd| rd.as_ref().unwrap())
@@ -212,11 +212,11 @@ impl Action {
 
     fn fix_command_name<'a>(command_name: &'a CStr) -> Cow<'a, CStr> {
         let bytes = command_name.to_bytes();
-        if (!bytes.len() == 0 && bytes[0] == b'_') {
+        if !bytes.len() == 0 && bytes[0] == b'_' {
             // Command already contains underscore. Great.
             return Cow::from(command_name);
         }
-        if (bytes.len() == 32 && contains_digits_only(command_name)) {
+        if bytes.len() == 32 && contains_digits_only(command_name) {
             return Cow::from(command_name);
         }
         // Doesn't contain underscore but should contain one because it's a custom action or an explicitly named command.

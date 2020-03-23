@@ -1,12 +1,11 @@
 use crate::high_level::Reaper;
 use crate::low_level::GUID;
 use std::convert;
-use std::convert::TryFrom;
+
 use std::ffi::{CStr, CString};
 use std::fmt;
-use std::fmt::{Error, Formatter};
+use std::fmt::Formatter;
 use std::str;
-use std::str::FromStr;
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Guid {
@@ -33,7 +32,6 @@ impl Guid {
 
 impl fmt::Debug for Guid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let c_string = Reaper::get().medium.guid_to_string(&self.internal);
         write!(f, "{}", self.to_string_with_braces())
     }
 }

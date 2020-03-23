@@ -23,10 +23,10 @@ mod types;
 mod control_surface;
 
 use c_str_macro::c_str;
-use std::convert::AsRef;
+
 use std::error::Error;
 use std::ffi::CStr;
-use std::os::raw::{c_char, c_int, c_void};
+use std::os::raw::{c_int, c_void};
 use std::ptr::null_mut;
 use std::sync::Once;
 use vst::api::HostCallbackProc;
@@ -78,7 +78,7 @@ pub fn create_reaper_vst_plugin_function_provider(
 
 // TODO-low Log early errors
 pub fn bootstrap_reaper_plugin(
-    h_instance: HINSTANCE,
+    _h_instance: HINSTANCE,
     rec: *mut reaper_plugin_info_t,
     init: fn(ReaperPluginContext) -> Result<(), Box<dyn Error>>,
 ) -> i32 {

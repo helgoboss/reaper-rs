@@ -1,6 +1,6 @@
 use std::cell::{Ref, RefCell};
-use std::ffi::{CStr, CString};
-use std::fmt::{Display, Error, Formatter};
+use std::ffi::{CString};
+use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
 // Cheap to clone because string is shared

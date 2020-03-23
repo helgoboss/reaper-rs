@@ -1,18 +1,18 @@
-use std::borrow::{Borrow, BorrowMut, Cow};
-use std::cell::{Ref, RefCell, RefMut};
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-use std::ffi::{CStr, CString};
-use std::os::raw::{c_ushort, c_void};
-use std::ptr::{null, null_mut};
-use std::sync::Once;
 
-use c_str_macro::c_str;
+
+
+
+use std::ffi::{CStr};
+use std::os::raw::{c_void};
+use std::ptr::{null_mut};
+
+
+
 
 use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
-use crate::low_level::{MediaTrack, ReaProject};
-use crate::medium_level;
+use crate::low_level::{ReaProject};
+
 use crate::medium_level::{ReaperPointerType, ReaperStringPtr};
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -178,7 +178,7 @@ impl Project {
         if reaper.get_currently_loading_or_saving_project().is_some() {
             operation()
         } else {
-            let undo_block = reaper.enter_undo_block_internal(*self, label);
+            let _undo_block = reaper.enter_undo_block_internal(*self, label);
             operation()
         }
     }

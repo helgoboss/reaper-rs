@@ -1,6 +1,6 @@
 use crate::high_level::{MidiInputDevice, MidiMessage};
 use crate::low_level::MIDI_event_t;
-use std::borrow::Borrow;
+
 
 pub trait MidiEvent {
     type Msg: MidiMessage;
