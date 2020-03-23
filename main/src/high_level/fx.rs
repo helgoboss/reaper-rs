@@ -105,7 +105,8 @@ impl Fx {
 
     // Attention: Currently implemented by parsing chunk
     pub fn get_info(&self) -> FxInfo {
-        FxInfo::new(&self.get_tag_chunk().get_first_line().get_content())
+        FxInfo::from_first_line_of_tag_chunk(&self.get_tag_chunk().get_first_line().get_content())
+            .unwrap()
     }
 
     pub fn get_parameter_count(&self) -> u32 {
@@ -375,8 +376,7 @@ pub struct FxInfo {
 }
 
 impl FxInfo {
-    pub fn new(first_line_of_tag_chunk: &str) -> FxInfo {
-        // TODO-medium try_into() rather than panic
+    pub(super) fn from_first_line_of_tag_chunk(line: &str) -> Result<FxInfo, &'static str> {
         // TODO-low Also handle other plugin types
         // TODO-low Don't just assign empty strings in case of JS
         let vst_line_regex = regex!(r#"<VST "(.+?): (.+?) \((.+?)\).*?" (.+)"#);
@@ -384,17 +384,17 @@ impl FxInfo {
         let vst_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
         let js_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
         let js_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
-        let first_space_index = first_line_of_tag_chunk
+        let first_space_index = line
             .find(' ')
-            .expect("Couldn't find space in VST tag line");
-        let type_expression = &first_line_of_tag_chunk[1..first_space_index];
+            .ok_or("Couldn't find space in VST tag line")?;
+        let type_expression = &line[1..first_space_index];
         match type_expression {
             "VST" => {
                 let captures = vst_line_regex
-                    .captures(first_line_of_tag_chunk)
-                    .expect("Couldn't parse VST tag line");
+                    .captures(line)
+                    .ok_or("Couldn't parse VST tag line")?;
                 assert_eq!(captures.len(), 5);
-                FxInfo {
+                Ok(FxInfo {
                     effect_name: captures[2].to_owned(),
                     type_expression: type_expression.to_owned(),
                     sub_type_expression: captures[1].to_owned(),
@@ -408,19 +408,19 @@ impl FxInfo {
                         };
                         let remainder_captures = remainder_regex
                             .captures(remainder)
-                            .expect("Couldn't parse VST file name");
+                            .ok_or("Couldn't parse VST file name")?;
                         assert_eq!(remainder_captures.len(), 2);
                         PathBuf::from(&remainder_captures[1])
                     },
-                }
+                })
             }
-            "JS" => FxInfo {
+            "JS" => Ok(FxInfo {
                 effect_name: "".to_string(),
                 type_expression: "".to_string(),
                 sub_type_expression: "".to_string(),
                 vendor_name: "".to_string(),
                 file_name: {
-                    let remainder = &first_line_of_tag_chunk[4..];
+                    let remainder = &line[4..];
                     let remainder_regex = if remainder.starts_with('"') {
                         js_file_name_with_quotes_regex
                     } else {
@@ -428,12 +428,12 @@ impl FxInfo {
                     };
                     let remainder_captures = remainder_regex
                         .captures(remainder)
-                        .expect("Couldn't parse JS file name");
+                        .ok_or("Couldn't parse JS file name")?;
                     assert_eq!(remainder_captures.len(), 2);
                     PathBuf::from(&remainder_captures[1])
                 },
-            },
-            _ => panic!("Can only handle VST and JS FX types right now"),
+            }),
+            _ => Err("Can only handle VST and JS FX types right now"),
         }
     }
 }

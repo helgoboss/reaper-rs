@@ -374,7 +374,7 @@ impl ChunkRegion {
     }
 
     // Returns the tag completely from < to >
-    // TODO-medium Why don't we return an invalid chunk region instead of none? That would allow easier chaining and would
+    // TODO-low Why don't we return an invalid chunk region instead of none? That would allow easier chaining and would
     //  be more in line with the other methods.
     pub fn find_first_tag(&self, relative_search_start_pos: usize) -> Option<ChunkRegion> {
         if !self.is_valid() {
