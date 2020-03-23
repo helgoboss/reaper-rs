@@ -1,5 +1,5 @@
-use std::borrow::{Borrow, BorrowMut, Cow};
-use std::cell::{Cell, Ref, RefCell, RefMut};
+use std::borrow::Cow;
+use std::cell::{Cell, RefCell};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
@@ -22,17 +22,17 @@ use crate::high_level::fx::Fx;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::helper_control_surface::HelperControlSurface;
 use crate::high_level::track_send::TrackSend;
+use crate::high_level::undo_block::UndoBlock;
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
     create_terminal_logger, Action, BorrowedReaperMidiEvent, Guid, MessageBoxKind,
     MessageBoxResult, MidiEvent, MidiInputDevice, MidiOutputDevice, Project, Section, Track,
-    UndoBlock,
 };
 use crate::low_level;
 use crate::low_level::{
-    audio_hook_register_t, firewall, gaccel_register_t, midi_Input_GetReadBuf, MIDI_event_t,
-    MIDI_eventlist_EnumItems, MediaTrack, ReaProject, ReaperPluginContext, ACCEL, HWND,
+    audio_hook_register_t, firewall, gaccel_register_t, midi_Input_GetReadBuf,
+    MIDI_eventlist_EnumItems, ReaperPluginContext, ACCEL, HWND,
 };
 use crate::medium_level;
 use crate::medium_level::{GetFocusedFxResult, GetLastTouchedFxResult};
@@ -345,6 +345,7 @@ impl Reaper {
     }
 
     // TODO-low Make pub when the time has come
+    #[allow(dead_code)]
     fn with_custom_medium(medium: medium_level::Reaper) -> ReaperBuilder {
         ReaperBuilder::with_custom_medium(medium)
     }
@@ -795,7 +796,7 @@ impl Reaper {
     }
 
     pub fn execute_later_in_main_thread(&self, task: impl FnOnce() + 'static) {
-        self.task_sender.send(Box::new(task));
+        self.task_sender.send(Box::new(task)).unwrap();
     }
 
     pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) {

@@ -67,7 +67,6 @@ mod action_character;
 pub use action_character::*;
 
 mod undo_block;
-pub use undo_block::*;
 
 mod message_box;
 pub use message_box::*;

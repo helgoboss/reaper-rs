@@ -18,7 +18,6 @@ use rxrust::prelude::*;
 
 use std::cell::{Cell, RefCell, RefMut};
 
-
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 use std::os::raw::c_void;
@@ -757,8 +756,7 @@ impl ControlSurface for HelperControlSurface {
                 .next(new_active_project);
         }
         self.num_track_set_changes_left_to_be_propagated
-            .replace(new_active_project.get_track_count())
-            + 1;
+            .replace(new_active_project.get_track_count() + 1);
         self.remove_invalid_rea_projects();
         self.detect_track_set_changes();
     }

@@ -1,11 +1,8 @@
-
-
 use std::convert::TryFrom;
-use std::ffi::{CStr};
+use std::ffi::CStr;
 use std::iter;
-use std::ops::{Deref};
+use std::ops::Deref;
 use std::ptr::null_mut;
-
 
 use c_str_macro::c_str;
 
@@ -14,8 +11,8 @@ use wmidi;
 use reaper_rs::high_level::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, AutomationMode, FxChain,
     FxParameterCharacter, FxParameterValueRange, Guid, InputMonitoringMode, MessageBoxKind,
-    MessageBoxResult, MidiEvent, MidiInputDevice, MidiMessage, MidiRecordingInput, Pan, Project,
-    Reaper, ReaperVersion, RecordingInput, StuffMidiMessageTarget, Tempo, Track, Volume,
+    MessageBoxResult, MidiInputDevice, MidiRecordingInput, Pan, Reaper, ReaperVersion,
+    RecordingInput, StuffMidiMessageTarget, Tempo, Track, Volume,
 };
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
@@ -24,7 +21,6 @@ use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
 
-// TODO-high Remove all compile-time warnings
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     let steps_a = vec![
         step("Basics", |_, _| {

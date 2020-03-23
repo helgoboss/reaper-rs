@@ -3,7 +3,7 @@ use crate::low_level::MediaTrack;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_void;
-use std::ptr::{null_mut};
+use std::ptr::null_mut;
 
 pub trait ControlSurface {
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
@@ -77,6 +77,7 @@ impl<T: ControlSurface> DelegatingControlSurface<T> {
     }
 }
 
+#[allow(non_snake_case)]
 impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T> {
     fn GetTypeString(&self) -> *const i8 {
         self.delegate

@@ -1,7 +1,6 @@
 use crate::high_level::{MidiInputDevice, MidiMessage};
 use crate::low_level::MIDI_event_t;
 
-
 pub trait MidiEvent {
     type Msg: MidiMessage;
 
@@ -10,6 +9,8 @@ pub trait MidiEvent {
     fn get_message(&self) -> &Self::Msg;
 }
 
+// TODO-low Continue
+#[allow(dead_code)]
 pub struct MidiMessageReceivedPayload<Evt> {
     device: MidiInputDevice,
     event: Evt,
@@ -69,6 +70,8 @@ impl MidiMessage for BorrowedReaperMidiEvent {
 //    }
 //}
 
+// TODO-low Continue
+#[allow(dead_code)]
 pub struct OwnedReaperMidiEvent {
     inner: MIDI_event_t,
     borrowed: BorrowedReaperMidiEvent,

@@ -1,16 +1,11 @@
-
-use std::cell::{Cell};
-
+use std::cell::Cell;
 
 use std::convert::TryFrom;
 use std::ffi::{CStr, CString};
-use std::os::raw::{c_void};
-use std::ptr::{null_mut};
-
-
+use std::os::raw::c_void;
+use std::ptr::null_mut;
 
 use c_str_macro::c_str;
-
 
 use rxrust::prelude::PayloadCopy;
 
@@ -137,9 +132,9 @@ impl Track {
     pub fn set_recording_input(&self, input: MidiRecordingInput) {
         self.load_and_check_if_necessary_or_complain();
         let reaper = Reaper::get();
-        reaper.medium.set_media_track_info_value(
+        let _ = reaper.medium.set_media_track_info_value(
             self.get_raw(),
-            c_str!("I_RECINPUT"),
+            I_RECINPUT,
             input.get_rec_input_index() as f64,
         );
         // Only for triggering notification (as manual setting the rec input would also trigger it)
@@ -320,9 +315,9 @@ impl Track {
     pub fn mute(&self) {
         self.load_and_check_if_necessary_or_complain();
         let reaper = Reaper::get();
-        reaper
+        let _ = reaper
             .medium
-            .set_media_track_info_value(self.get_raw(), c_str!("B_MUTE"), 1.0);
+            .set_media_track_info_value(self.get_raw(), B_MUTE, 1.0);
         reaper
             .medium
             .csurf_set_surface_mute(self.get_raw(), true, null_mut());
@@ -331,9 +326,9 @@ impl Track {
     pub fn unmute(&self) {
         self.load_and_check_if_necessary_or_complain();
         let reaper = Reaper::get();
-        reaper
+        let _ = reaper
             .medium
-            .set_media_track_info_value(self.get_raw(), c_str!("B_MUTE"), 0.0);
+            .set_media_track_info_value(self.get_raw(), B_MUTE, 0.0);
         reaper
             .medium
             .csurf_set_surface_mute(self.get_raw(), false, null_mut());
@@ -350,9 +345,9 @@ impl Track {
     pub fn solo(&self) {
         self.load_and_check_if_necessary_or_complain();
         let reaper = Reaper::get();
-        reaper
+        let _ = reaper
             .medium
-            .set_media_track_info_value(self.get_raw(), c_str!("I_SOLO"), 1.0);
+            .set_media_track_info_value(self.get_raw(), I_SOLO, 1.0);
         reaper
             .medium
             .csurf_set_surface_solo(self.get_raw(), true, null_mut());
@@ -361,9 +356,9 @@ impl Track {
     pub fn unsolo(&self) {
         self.load_and_check_if_necessary_or_complain();
         let reaper = Reaper::get();
-        reaper
+        let _ = reaper
             .medium
-            .set_media_track_info_value(self.get_raw(), c_str!("I_SOLO"), 0.0);
+            .set_media_track_info_value(self.get_raw(), I_SOLO, 0.0);
         reaper
             .medium
             .csurf_set_surface_solo(self.get_raw(), false, null_mut());
@@ -383,11 +378,13 @@ impl Track {
         chunk_content.into()
     }
 
+    // TODO-low Report possible error
     pub fn set_chunk(&self, chunk: Chunk) {
         let c_string: CString = chunk.into();
-        Reaper::get()
-            .medium
-            .set_track_state_chunk(self.get_raw(), c_string.as_c_str(), true);
+        let _ =
+            Reaper::get()
+                .medium
+                .set_track_state_chunk(self.get_raw(), c_string.as_c_str(), true);
     }
 
     pub fn is_selected(&self) -> bool {

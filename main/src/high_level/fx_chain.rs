@@ -1,8 +1,7 @@
 use crate::high_level::fx::{get_fx_guid, Fx};
 use crate::high_level::guid::Guid;
 use crate::high_level::{
-    get_fx_query_index, Chunk, ChunkRegion, Reaper, Track,
-    MAX_TRACK_CHUNK_SIZE,
+    get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE,
 };
 
 use std::ffi::CStr;
@@ -44,7 +43,7 @@ impl FxChain {
         if !fx.is_available() {
             return;
         }
-        Reaper::get()
+        let _ = Reaper::get()
             .medium
             .track_fx_delete(self.track.get_raw(), fx.get_query_index());
     }

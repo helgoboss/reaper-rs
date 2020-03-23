@@ -746,11 +746,11 @@ impl Reaper {
     pub fn set_media_track_info_value(
         &self,
         tr: *mut MediaTrack,
-        parmname: &CStr,
+        parmname: MediaTrackInfoKey,
         newvalue: f64,
     ) -> Result<(), ()> {
         let successful =
-            require!(self.low, SetMediaTrackInfo_Value)(tr, parmname.as_ptr(), newvalue);
+            require!(self.low, SetMediaTrackInfo_Value)(tr, Cow::from(parmname).as_ptr(), newvalue);
         if !successful {
             return Err(());
         }
@@ -876,7 +876,7 @@ impl Reaper {
         tr: *mut MediaTrack,
         category: i32,
         sendidx: u32,
-        parmname: &CStr,
+        parmname: &CStr, // TODO-medium enum
         set_new_value: *mut c_void,
     ) -> ReaperVoidPtr {
         ReaperVoidPtr(require!(self.low, GetSetTrackSendInfo)(

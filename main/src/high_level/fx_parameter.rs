@@ -24,7 +24,7 @@ impl FxParameter {
     }
 
     pub fn set_normalized_value(&self, normalized_value: f64) {
-        Reaper::get().medium.track_fx_set_param_normalized(
+        let _ = Reaper::get().medium.track_fx_set_param_normalized(
             self.get_track_raw(),
             self.fx.get_query_index(),
             self.index,

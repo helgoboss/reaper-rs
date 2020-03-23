@@ -35,6 +35,7 @@ fn generate_bindings() {
         .raw_line("#![allow(non_upper_case_globals)]")
         .raw_line("#![allow(non_camel_case_types)]")
         .raw_line("#![allow(non_snake_case)]")
+        .raw_line("#![allow(dead_code)]")
         .whitelist_var("EnumProjects")
         .whitelist_var("GetTrack")
         .whitelist_var("ValidatePtr2")
@@ -149,8 +150,8 @@ fn generate_bindings() {
         .whitelist_function("reaper_rs_control_surface::.*")
         .whitelist_function("reaper_rs_midi::.*")
         // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed. TODO Do as soon as available
-        //        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        // included header files changed.
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         // Finish the builder and generate the bindings.
         .generate()
         // Unwrap the Result and panic on failure.
