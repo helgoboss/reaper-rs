@@ -443,7 +443,7 @@ impl Reaper {
                     fxindex: fxnumber & 0xFFFF,
                 }))
             }
-            default => panic!("Unknown GetFocusedFX result value"),
+            _ => panic!("Unknown GetFocusedFX result value"),
         }
     }
 
