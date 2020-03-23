@@ -19,7 +19,7 @@ impl FxChain {
     }
 
     pub fn get_fx_count(&self) -> u32 {
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         if self.is_input_fx {
             reaper
                 .medium
@@ -34,7 +34,7 @@ impl FxChain {
     // Moves within this FX chain
     pub fn move_fx(&self, fx: &Fx, new_index: u32) {
         assert_eq!(fx.get_chain(), *self);
-        Reaper::instance().medium.track_fx_copy_to_track(
+        Reaper::get().medium.track_fx_copy_to_track(
             self.track.get_media_track(),
             fx.get_query_index(),
             self.track.get_media_track(),
@@ -48,7 +48,7 @@ impl FxChain {
         if !fx.is_available() {
             return;
         }
-        Reaper::instance()
+        Reaper::get()
             .medium
             .track_fx_delete(self.track.get_media_track(), fx.get_query_index());
     }
@@ -150,14 +150,14 @@ DOCKED 0
         if self.is_input_fx {
             return None;
         }
-        Reaper::instance()
+        Reaper::get()
             .medium
             .track_fx_get_instrument(self.track.get_media_track())
             .and_then(|fx_index| self.get_fx_by_index(fx_index))
     }
 
     pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
-        let fx_index = Reaper::instance().medium.track_fx_add_by_name(
+        let fx_index = Reaper::get().medium.track_fx_add_by_name(
             self.track.get_media_track(),
             original_fx_name,
             self.is_input_fx,
@@ -183,7 +183,7 @@ DOCKED 0
     }
 
     pub fn get_first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
-        let fx_index = Reaper::instance().medium.track_fx_add_by_name(
+        let fx_index = Reaper::get().medium.track_fx_add_by_name(
             self.track.get_media_track(),
             name,
             self.is_input_fx,

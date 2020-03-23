@@ -15,6 +15,6 @@ impl UndoBlock<'_> {
 
 impl Drop for UndoBlock<'_> {
     fn drop(&mut self) {
-        Reaper::instance().leave_undo_block_internal(&self.project, self.label);
+        Reaper::get().leave_undo_block_internal(&self.project, self.label);
     }
 }

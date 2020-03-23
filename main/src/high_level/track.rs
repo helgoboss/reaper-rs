@@ -80,7 +80,7 @@ impl Track {
 
     pub fn set_name(&self, name: &CStr) {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance().medium.get_set_media_track_info(
+        Reaper::get().medium.get_set_media_track_info(
             self.get_media_track(),
             c_str!("P_NAME"),
             name.as_ptr() as *mut c_void,
@@ -93,7 +93,7 @@ impl Track {
         if self.is_master_track() {
             c_str!("<Master track>").to_owned()
         } else {
-            let ptr = Reaper::instance().medium.get_set_media_track_info(
+            let ptr = Reaper::get().medium.get_set_media_track_info(
                 self.get_media_track(),
                 c_str!("P_NAME"),
                 null_mut(),
@@ -104,7 +104,7 @@ impl Track {
 
     pub fn get_input_monitoring_mode(&self) -> InputMonitoringMode {
         self.load_and_check_if_necessary_or_complain();
-        let ptr = Reaper::instance().medium.get_set_media_track_info(
+        let ptr = Reaper::get().medium.get_set_media_track_info(
             self.get_media_track(),
             c_str!("I_RECMON"),
             null_mut(),
@@ -116,14 +116,16 @@ impl Track {
     pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
         self.load_and_check_if_necessary_or_complain();
         let irecmon: u32 = mode.into();
-        Reaper::instance()
-            .medium
-            .csurf_on_input_monitoring_change_ex(self.get_media_track(), irecmon, false);
+        Reaper::get().medium.csurf_on_input_monitoring_change_ex(
+            self.get_media_track(),
+            irecmon,
+            false,
+        );
     }
 
     pub fn get_recording_input(&self) -> RecordingInput {
         self.load_and_check_if_necessary_or_complain();
-        let ptr = Reaper::instance().medium.get_set_media_track_info(
+        let ptr = Reaper::get().medium.get_set_media_track_info(
             self.get_media_track(),
             c_str!("I_RECINPUT"),
             null_mut(),
@@ -135,7 +137,7 @@ impl Track {
     // TODO-low Support setting other kinds of inputs
     pub fn set_recording_input(&self, input: MidiRecordingInput) {
         self.load_and_check_if_necessary_or_complain();
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper.medium.set_media_track_info_value(
             self.get_media_track(),
             c_str!("I_RECINPUT"),
@@ -164,7 +166,7 @@ impl Track {
     pub fn get_pan(&self) -> Pan {
         self.load_and_check_if_necessary_or_complain();
         // It's important that we don't query D_PAN because that returns the wrong value in case an envelope is written
-        let (_, pan) = Reaper::instance()
+        let (_, pan) = Reaper::get()
             .medium
             .get_track_ui_vol_pan(self.get_media_track())
             .expect("Couldn't get vol/pan");
@@ -174,7 +176,7 @@ impl Track {
     pub fn set_pan(&self, pan: Pan) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = pan.get_reaper_value();
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .medium
             .csurf_on_pan_change_ex(self.get_media_track(), reaper_value, false, false);
@@ -187,7 +189,7 @@ impl Track {
 
     pub fn get_volume(&self) -> Volume {
         // It's important that we don't query D_VOL because that returns the wrong value in case an envelope is written
-        let (volume, _) = Reaper::instance()
+        let (volume, _) = Reaper::get()
             .medium
             .get_track_ui_vol_pan(self.get_media_track())
             .expect("Couldn't get vol/pan");
@@ -197,7 +199,7 @@ impl Track {
     pub fn set_volume(&self, volume: Volume) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = volume.get_reaper_value();
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         // CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The return value
         // reflects the cropped value. The precision became much better with REAPER 5.28.
         reaper
@@ -213,7 +215,7 @@ impl Track {
     // TODO-high Maybe return u32 and express master track index in other ways
     pub fn get_index(&self) -> i32 {
         self.load_and_check_if_necessary_or_complain();
-        let ip_track_number = Reaper::instance()
+        let ip_track_number = Reaper::get()
             .medium
             .get_set_media_track_info(self.get_media_track(), c_str!("IP_TRACKNUMBER"), null_mut())
             .0 as i32;
@@ -240,7 +242,7 @@ impl Track {
             self.is_selected()
         } else {
             self.load_and_check_if_necessary_or_complain();
-            Reaper::instance()
+            Reaper::get()
                 .medium
                 .get_media_track_info_value(self.get_media_track(), c_str!("I_RECARM"))
                 == 1.0
@@ -252,7 +254,7 @@ impl Track {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.select();
         } else {
-            let reaper = Reaper::instance();
+            let reaper = Reaper::get();
             reaper
                 .medium
                 .csurf_on_rec_arm_change_ex(self.get_media_track(), 1, false);
@@ -275,7 +277,7 @@ impl Track {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.unselect();
         } else {
-            Reaper::instance()
+            Reaper::get()
                 .medium
                 .csurf_on_rec_arm_change_ex(self.get_media_track(), 0, false);
         }
@@ -311,7 +313,7 @@ impl Track {
 
     pub fn is_muted(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .get_media_track_info_value(self.get_media_track(), c_str!("B_MUTE"))
             == 1.0
@@ -319,7 +321,7 @@ impl Track {
 
     pub fn mute(&self) {
         self.load_and_check_if_necessary_or_complain();
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .medium
             .set_media_track_info_value(self.get_media_track(), c_str!("B_MUTE"), 1.0);
@@ -330,7 +332,7 @@ impl Track {
 
     pub fn unmute(&self) {
         self.load_and_check_if_necessary_or_complain();
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .medium
             .set_media_track_info_value(self.get_media_track(), c_str!("B_MUTE"), 0.0);
@@ -341,7 +343,7 @@ impl Track {
 
     pub fn is_solo(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .get_media_track_info_value(self.get_media_track(), c_str!("I_SOLO"))
             > 0.0
@@ -349,7 +351,7 @@ impl Track {
 
     pub fn solo(&self) {
         self.load_and_check_if_necessary_or_complain();
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .medium
             .set_media_track_info_value(self.get_media_track(), c_str!("I_SOLO"), 1.0);
@@ -360,7 +362,7 @@ impl Track {
 
     pub fn unsolo(&self) {
         self.load_and_check_if_necessary_or_complain();
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .medium
             .set_media_track_info_value(self.get_media_track(), c_str!("I_SOLO"), 0.0);
@@ -376,7 +378,7 @@ impl Track {
     // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains weird
     // FXID_NEXT (in front of FX tag) instead of FXID (behind FX tag). So FX chunk code should be double checked then.
     pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: bool) -> Chunk {
-        let chunk_content = Reaper::instance()
+        let chunk_content = Reaper::get()
             .medium
             .get_track_state_chunk(self.get_media_track(), max_chunk_size, undo_is_optional)
             .expect("Couldn't load track chunk");
@@ -385,7 +387,7 @@ impl Track {
 
     pub fn set_chunk(&self, chunk: Chunk) {
         let c_string: CString = chunk.into();
-        Reaper::instance().medium.set_track_state_chunk(
+        Reaper::get().medium.set_track_state_chunk(
             self.get_media_track(),
             c_string.as_c_str(),
             true,
@@ -394,7 +396,7 @@ impl Track {
 
     pub fn is_selected(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .get_media_track_info_value(self.get_media_track(), c_str!("I_SELECTED"))
             == 1.0
@@ -402,35 +404,35 @@ impl Track {
 
     pub fn select(&self) {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .set_track_selected(self.get_media_track(), true);
     }
 
     pub fn select_exclusively(&self) {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .set_only_track_selected(self.get_media_track());
     }
 
     pub fn unselect(&self) {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .set_track_selected(self.get_media_track(), false);
     }
 
     pub fn get_send_count(&self) -> u32 {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .get_track_num_sends(self.get_media_track(), 0)
     }
 
     pub fn add_send_to(&self, target_track: Track) -> TrackSend {
         // TODO-low Check how this behaves if send already exists
-        let send_index = Reaper::instance()
+        let send_index = Reaper::get()
             .medium
             .create_track_send(self.get_media_track(), target_track.get_media_track());
         TrackSend::target_based(self.clone(), target_track, Some(send_index))
@@ -508,7 +510,7 @@ impl Track {
             false
         } else {
             if Project::new(self.rea_project.get()).is_available() {
-                Reaper::instance().medium.validate_ptr_2(
+                Reaper::get().medium.validate_ptr_2(
                     self.rea_project.get(),
                     self.media_track.get() as *mut c_void,
                     c_str!("MediaTrack*"),
@@ -574,7 +576,7 @@ impl Track {
             panic!("Containing project cannot be found if mediaTrack not available");
         }
         // No ReaProject* available. Try current project first (most likely in everyday REAPER usage).
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         let current_project = reaper.get_current_project();
         // TODO-medium Add convenience functions to medium API for checking various pointer types
         let is_valid_in_current_project = reaper.medium.validate_ptr_2(
@@ -604,14 +606,14 @@ impl Track {
 
     pub fn get_automation_mode(&self) -> AutomationMode {
         self.load_and_check_if_necessary_or_complain();
-        let am = Reaper::instance()
+        let am = Reaper::get()
             .medium
             .get_track_automation_mode(self.media_track.get());
         AutomationMode::try_from(am as i32).expect("Unknown automation mode")
     }
 
     pub fn get_effective_automation_mode(&self) -> AutomationMode {
-        let automation_override = Reaper::instance().get_global_automation_override();
+        let automation_override = Reaper::get().get_global_automation_override();
         if automation_override == AutomationMode::NoOverride {
             self.get_automation_mode()
         } else {
@@ -650,7 +652,7 @@ impl PartialEq for Track {
 }
 
 pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
-    let internal = Reaper::instance()
+    let internal = Reaper::get()
         .medium
         .get_set_media_track_info(media_track, c_str!("GUID"), null_mut())
         .0 as *mut GUID;
@@ -660,7 +662,7 @@ pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
 // In REAPER < 5.95 this returns nullptr. That means we might need to use findContainingProject logic at a later
 // point.
 fn get_media_track_rea_project(media_track: *mut MediaTrack) -> *mut ReaProject {
-    Reaper::instance()
+    Reaper::get()
         .medium
         .get_set_media_track_info(media_track, c_str!("P_PROJECT"), null_mut())
         .0 as *mut ReaProject

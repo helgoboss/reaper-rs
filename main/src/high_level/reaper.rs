@@ -50,7 +50,7 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
     // TODO-low Pass on flag
     firewall(|| {
-        let mut operation = match Reaper::instance()
+        let mut operation = match Reaper::get()
             .command_by_index
             .borrow()
             .get(&(command_index as u32))
@@ -68,7 +68,7 @@ extern "C" fn hook_command(command_index: i32, flag: i32) -> bool {
 // Only for main section
 extern "C" fn hook_post_command(command_id: u32, flag: i32) {
     firewall(|| {
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         let action = reaper
             .get_main_section()
             .get_action_by_command_id(command_id);
@@ -84,7 +84,7 @@ extern "C" fn hook_post_command(command_id: u32, flag: i32) {
 // Only for main section
 extern "C" fn toggle_action(command_index: i32) -> i32 {
     firewall(|| {
-        if let Some(command) = Reaper::instance()
+        if let Some(command) = Reaper::get()
             .command_by_index
             .borrow()
             .get(&(command_index as u32))
@@ -119,7 +119,7 @@ extern "C" fn process_audio_buffer(
             return;
         }
         // TODO-low Check performance implications for Reaper instance unwrapping
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         // TODO-low Should we use an unsafe cell here for better performance?
         let mut subject = reaper.subjects.midi_message_received.borrow_mut();
         if subject.subscribed_size() == 0 {
@@ -377,7 +377,7 @@ impl Reaper {
                 REAPER_INSTANCE = Some(reaper);
             });
         }
-        Reaper::instance().init(task_receiver);
+        Reaper::get().init(task_receiver);
     }
 
     fn init(&self, task_receiver: Receiver<Task>) {
@@ -450,7 +450,7 @@ impl Reaper {
     }
 
     pub fn generate_guid(&self) -> Guid {
-        Guid::new(Reaper::instance().medium.gen_guid())
+        Guid::new(Reaper::get().medium.gen_guid())
     }
 
     // Allowing global access to native REAPER functions at all times is valid in my opinion.
@@ -463,8 +463,7 @@ impl Reaper {
     // We express that in Rust by making `Reaper` class an immutable (in the sense of non-`&mut`)
     // singleton and allowing all REAPER functions to be called from an immutable context ...
     // although they can and often will lead to mutations within REAPER!
-    // TODO-high Consider naming this get()
-    pub fn instance() -> &'static Reaper {
+    pub fn get() -> &'static Reaper {
         unsafe { REAPER_INSTANCE.as_ref().unwrap() }
     }
 
@@ -928,7 +927,7 @@ impl RegisteredAction {
     }
 
     pub fn unregister(&self) {
-        Reaper::instance().unregister_command(self.command_index);
+        Reaper::get().unregister_command(self.command_index);
     }
 }
 

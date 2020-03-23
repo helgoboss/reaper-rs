@@ -98,7 +98,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 c_str!("reaper-rs counter"),
                 move || {
                     let owned = format!("Hello from Rust number {}\0", i);
-                    let reaper = Reaper::instance();
+                    let reaper = Reaper::get();
                     reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
                     i += 1;
                 },
@@ -1284,7 +1284,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         }),
     ]
     .into_iter();
-    let reaper = Reaper::instance();
+    let reaper = Reaper::get();
     let output_fx_steps = create_fx_steps("Output FX chain", || {
         get_track(0).map(|t| t.get_normal_fx_chain())
     });
@@ -2020,7 +2020,7 @@ WAK 0
 }
 
 fn get_track(index: u32) -> Result<Track, &'static str> {
-    Reaper::instance()
+    Reaper::get()
         .get_current_project()
         .get_track_by_index(index)
         .ok_or("Track not found")

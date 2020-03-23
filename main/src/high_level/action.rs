@@ -91,7 +91,7 @@ impl Action {
     pub fn is_available(&self) -> bool {
         if let Some(runtime_data) = self.runtime_data.borrow().as_ref() {
             // See if we can get a description. If yes, the action actually exists. If not, then not.
-            let ptr = Reaper::instance().medium.kbd_get_text_from_cmd(
+            let ptr = Reaper::get().medium.kbd_get_text_from_cmd(
                 runtime_data.command_id as u32,
                 runtime_data.section.get_raw_section_info(),
             );
@@ -104,7 +104,7 @@ impl Action {
 
     pub fn get_character(&self) -> ActionCharacter {
         let rd = self.load_if_necessary_or_complain();
-        match Reaper::instance()
+        match Reaper::get()
             .medium
             .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
         {
@@ -115,7 +115,7 @@ impl Action {
 
     pub fn is_on(&self) -> bool {
         let rd = self.load_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .get_toggle_command_state_2(rd.section.get_raw_section_info(), rd.command_id)
             == Some(true)
@@ -135,7 +135,7 @@ impl Action {
             .map(|cn| cn.as_c_str().to_owned())
             .or_else(|| {
                 let rd = self.runtime_data.borrow();
-                Reaper::instance()
+                Reaper::get()
                     .medium
                     .reverse_named_command_lookup(rd.as_ref().unwrap().command_id)
                     .into_c_string()
@@ -144,7 +144,7 @@ impl Action {
 
     pub fn get_name(&self) -> ReaperStringPtr {
         let rd = self.load_if_necessary_or_complain();
-        Reaper::instance()
+        Reaper::get()
             .medium
             .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw_section_info())
     }
@@ -159,7 +159,7 @@ impl Action {
         // int (*KBD_OnMainActionEx)(int cmd, int val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
         let rd = self.load_if_necessary_or_complain();
         let action_command_id = rd.command_id;
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
             let cropped_relative_value = relative_value.clamp(0, 127) as u32;
@@ -197,7 +197,7 @@ impl Action {
     fn load_by_command_name(&self) -> bool {
         let fixed_command_name =
             Self::fix_command_name(self.command_name.as_ref().expect("Command name not set"));
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         let command_id = reaper.medium.named_command_lookup(&fixed_command_name);
         if command_id == 0 {
             return false;

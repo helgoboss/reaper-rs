@@ -83,7 +83,7 @@ impl TrackSend {
     pub fn get_volume(&self) -> Volume {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the wrong value if
         // an envelope is written.
-        let (volume, _) = Reaper::instance()
+        let (volume, _) = Reaper::get()
             .medium
             .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
             .expect("Couldn't get send vol/pan");
@@ -91,7 +91,7 @@ impl TrackSend {
     }
 
     pub fn set_volume(&self, volume: Volume) {
-        Reaper::instance().medium.csurf_on_send_volume_change(
+        Reaper::get().medium.csurf_on_send_volume_change(
             self.get_source_track().get_media_track(),
             self.get_index(),
             volume.get_reaper_value(),
@@ -100,7 +100,7 @@ impl TrackSend {
     }
 
     pub fn get_pan(&self) -> Pan {
-        let (_, pan) = Reaper::instance()
+        let (_, pan) = Reaper::get()
             .medium
             .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
             .expect("Couldn't get send vol/pan");
@@ -108,7 +108,7 @@ impl TrackSend {
     }
 
     pub fn set_pan(&self, pan: Pan) {
-        Reaper::instance().medium.csurf_on_send_pan_change(
+        Reaper::get().medium.csurf_on_send_pan_change(
             self.get_source_track().get_media_track(),
             self.get_index(),
             pan.get_reaper_value(),
@@ -196,7 +196,7 @@ pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
 }
 
 fn get_target_media_track(source_track: &Track, send_index: u32) -> *mut MediaTrack {
-    Reaper::instance()
+    Reaper::get()
         .medium
         .get_set_track_send_info(
             source_track.get_media_track(),

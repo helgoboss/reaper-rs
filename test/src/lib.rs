@@ -19,7 +19,7 @@ use std::panic;
 use std::rc::Rc;
 
 pub fn execute_integration_test() {
-    let reaper = Reaper::instance();
+    let reaper = Reaper::get();
     reaper.clear_console();
     log("# Testing reaper-rs\n");
     let mut steps = VecDeque::from_iter(create_test_steps());
@@ -69,5 +69,5 @@ fn log(msg: impl Into<Cow<'static, str>>) {
         // We can move the string and append the 0 byte
         Owned(o) => CString::new(o),
     };
-    Reaper::instance().show_console_msg(&msg.unwrap())
+    Reaper::get().show_console_msg(&msg.unwrap())
 }

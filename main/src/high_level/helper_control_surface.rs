@@ -67,7 +67,7 @@ type TrackDataMap = HashMap<*mut MediaTrack, TrackData>;
 
 impl HelperControlSurface {
     pub fn new(task_receiver: Receiver<Task>) -> HelperControlSurface {
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         let version = reaper.get_version();
         let surface = HelperControlSurface {
             task_receiver,
@@ -110,7 +110,7 @@ impl HelperControlSurface {
     }
 
     fn find_track_data_map(&self) -> Option<RefMut<TrackDataMap>> {
-        let rea_project = Reaper::instance().get_current_project().get_rea_project();
+        let rea_project = Reaper::get().get_current_project().get_rea_project();
         if (!self.project_datas.borrow().contains_key(&rea_project)) {
             return None;
         }
@@ -133,7 +133,7 @@ impl HelperControlSurface {
         if !track.is_available() {
             return false;
         }
-        let env = Reaper::instance()
+        let env = Reaper::get()
             .medium
             .get_track_envelope_by_name(track.get_media_track(), parameter_name);
         if env.is_null() {
@@ -150,14 +150,14 @@ impl HelperControlSurface {
 
     fn remove_invalid_rea_projects(&self) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
-            if Reaper::instance().medium.validate_ptr_2(
+            if Reaper::get().medium.validate_ptr_2(
                 null_mut(),
                 *rea_project as *mut c_void,
                 c_str!("ReaProject*"),
             ) {
                 true
             } else {
-                Reaper::instance()
+                Reaper::get()
                     .subjects
                     .project_closed
                     .borrow_mut()
@@ -168,7 +168,7 @@ impl HelperControlSurface {
     }
 
     fn detect_track_set_changes(&self) {
-        let project = Reaper::instance().get_current_project();
+        let project = Reaper::get().get_current_project();
         let mut project_datas = self.project_datas.borrow_mut();
         let mut track_datas = project_datas.entry(project.get_rea_project()).or_default();
         let old_track_count = track_datas.len() as u32;
@@ -186,7 +186,7 @@ impl HelperControlSurface {
         for t in project.get_tracks() {
             let media_track = t.get_media_track();
             track_datas.entry(media_track).or_insert_with(|| {
-                let reaper = Reaper::instance();
+                let reaper = Reaper::get();
                 let m = &reaper.medium;
                 let td = TrackData {
                     // TODO-medium Make functions more accessible in medium API (they are called elsewhere here as well)
@@ -249,7 +249,7 @@ impl HelperControlSurface {
             && !added_or_removed_input_fx
             && !added_or_removed_output_fx
         {
-            Reaper::instance()
+            Reaper::get()
                 .subjects
                 .fx_reordered
                 .borrow_mut()
@@ -313,7 +313,7 @@ impl HelperControlSurface {
                         track.get_normal_fx_chain()
                     };
                     let removed_fx = fx_chain.get_fx_by_guid(old_fx_guid);
-                    Reaper::instance()
+                    Reaper::get()
                         .subjects
                         .fx_removed
                         .borrow_mut()
@@ -339,11 +339,7 @@ impl HelperControlSurface {
         for fx in fx_chain.get_fxs() {
             let was_inserted = fx_guids.insert(fx.get_guid().expect("No FX GUID set"));
             if was_inserted && notify_listeners_about_changes {
-                Reaper::instance()
-                    .subjects
-                    .fx_added
-                    .borrow_mut()
-                    .next(fx.into());
+                Reaper::get().subjects.fx_added.borrow_mut().next(fx.into());
             }
         }
     }
@@ -362,7 +358,7 @@ impl HelperControlSurface {
 
     fn remove_invalid_media_tracks(&self, project: Project, track_datas: &mut TrackDataMap) {
         track_datas.retain(|media_track, data| {
-            let reaper = Reaper::instance();
+            let reaper = Reaper::get();
             if reaper.medium.validate_ptr_2(
                 project.get_rea_project(),
                 *media_track as *mut c_void,
@@ -386,7 +382,7 @@ impl HelperControlSurface {
 
     fn update_media_track_positions(&self, project: Project, track_datas: &mut TrackDataMap) {
         let mut tracks_have_been_reordered = false;
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         for (media_track, track_data) in track_datas.iter_mut() {
             if !reaper.medium.validate_ptr_2(
                 project.get_rea_project(),
@@ -418,7 +414,7 @@ impl HelperControlSurface {
             Some(td) => td,
         };
         let recmonitor = unsafe { *recmonitor };
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         if td.recmonitor != recmonitor {
             td.recmonitor = recmonitor;
             reaper
@@ -486,7 +482,7 @@ impl HelperControlSurface {
         };
         if let Some(fx) = fx_chain.get_fx_by_index(fx_index as u32) {
             let fx_param = fx.get_parameter_by_index(param_index as u32);
-            let reaper = Reaper::instance();
+            let reaper = Reaper::get();
             reaper
                 .subjects
                 .fx_parameter_value_changed
@@ -554,7 +550,7 @@ impl HelperControlSurface {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, null_mut());
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
-            Reaper::instance()
+            Reaper::get()
                 .subjects
                 .fx_enabled_changed
                 .borrow_mut()
@@ -594,7 +590,7 @@ impl HelperControlSurface {
         let sendidx = unsafe { *sendidx };
         let track = Track::new(track, null_mut());
         let track_send = track.get_index_based_send_by_index(sendidx as u32);
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .subjects
             .track_send_volume_changed
@@ -617,7 +613,7 @@ impl HelperControlSurface {
         let sendidx = unsafe { *sendidx };
         let track = Track::new(track, null_mut());
         let track_send = track.get_index_based_send_by_index(sendidx as u32);
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .subjects
             .track_send_pan_changed
@@ -639,7 +635,7 @@ impl HelperControlSurface {
         mediaitemidx: *mut i32,
         fxidx: *mut i32,
     ) {
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         if track.is_null() || !mediaitemidx.is_null() || fxidx.is_null() {
             // Clear focused FX
             reaper.subjects.fx_focused.borrow_mut().next(Payload(None));
@@ -669,7 +665,7 @@ impl HelperControlSurface {
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on chunk manipulations
             self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
-            let reaper = Reaper::instance();
+            let reaper = Reaper::get();
             let subject = if ui_open {
                 &reaper.subjects.fx_opened
             } else {
@@ -703,7 +699,7 @@ impl HelperControlSurface {
     }
 
     fn csurf_ext_setbpmandplayrate(&self, bpm: *mut f64, playrate: *mut f64) {
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         if !bpm.is_null() {
             reaper.subjects.master_tempo_changed.borrow_mut().next(true);
             // If there's a tempo envelope, there are just tempo notifications when the tempo is actually changed.
@@ -736,7 +732,7 @@ impl HelperControlSurface {
 impl ControlSurface for HelperControlSurface {
     fn run(&mut self) {
         // Invoke custom idle code
-        Reaper::instance()
+        Reaper::get()
             .subjects
             .main_thread_idle
             .borrow_mut()
@@ -753,7 +749,7 @@ impl ControlSurface for HelperControlSurface {
 
     fn set_track_list_change(&self) {
         // TODO-low Not multi-project compatible!
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         let new_active_project = reaper.get_current_project();
         if (new_active_project != self.last_active_project.get()) {
             self.last_active_project.replace(new_active_project);
@@ -780,7 +776,7 @@ impl ControlSurface for HelperControlSurface {
         }
         td.pan = pan;
         let track = Track::new(trackid, null_mut());
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .subjects
             .track_pan_changed
@@ -801,7 +797,7 @@ impl ControlSurface for HelperControlSurface {
         }
         td.volume = volume;
         let track = Track::new(trackid, null_mut());
-        let reaper = Reaper::instance();
+        let reaper = Reaper::get();
         reaper
             .subjects
             .track_volume_changed
@@ -824,7 +820,7 @@ impl ControlSurface for HelperControlSurface {
         if td.mute != mute {
             td.mute = mute;
             let track = Track::new(trackid, null_mut());
-            let reaper = Reaper::instance();
+            let reaper = Reaper::get();
             reaper
                 .subjects
                 .track_mute_changed
@@ -844,7 +840,7 @@ impl ControlSurface for HelperControlSurface {
         if td.selected != selected {
             td.selected = selected;
             let track = Track::new(trackid, null_mut());
-            Reaper::instance()
+            Reaper::get()
                 .subjects
                 .track_selected_changed
                 .borrow_mut()
@@ -860,7 +856,7 @@ impl ControlSurface for HelperControlSurface {
         if td.solo != solo {
             td.solo = solo;
             let track = Track::new(trackid, null_mut());
-            Reaper::instance()
+            Reaper::get()
                 .subjects
                 .track_solo_changed
                 .borrow_mut()
@@ -876,7 +872,7 @@ impl ControlSurface for HelperControlSurface {
         if td.recarm != recarm {
             td.recarm = recarm;
             let track = Track::new(trackid, null_mut());
-            Reaper::instance()
+            Reaper::get()
                 .subjects
                 .track_arm_changed
                 .borrow_mut()
@@ -979,7 +975,7 @@ impl ControlSurface for HelperControlSurface {
             return;
         }
         let track = Track::new(trackid, null_mut());
-        Reaper::instance()
+        Reaper::get()
             .subjects
             .track_name_changed
             .borrow_mut()
