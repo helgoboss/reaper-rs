@@ -87,7 +87,7 @@ impl TrackSend {
             .medium
             .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
             .expect("Couldn't get send vol/pan");
-        Volume::of_reaper_value(volume)
+        Volume::from_reaper_value(volume)
     }
 
     pub fn set_volume(&self, volume: Volume) {
@@ -104,7 +104,7 @@ impl TrackSend {
             .medium
             .get_track_send_ui_vol_pan(self.get_source_track().get_media_track(), self.get_index())
             .expect("Couldn't get send vol/pan");
-        Pan::of_reaper_value(pan)
+        Pan::from_reaper_value(pan)
     }
 
     pub fn set_pan(&self, pan: Pan) {

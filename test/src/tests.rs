@@ -341,7 +341,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                         mock.invoke(t);
                     });
             });
-            track.set_volume(Volume::of_normalized_value(0.25));
+            track.set_volume(Volume::from_normalized_value(0.25));
             // Then
             let volume = track.get_volume();
             check_eq!(volume.get_reaper_value(), 0.031588093366685013);
@@ -373,7 +373,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                         mock.invoke(t);
                     });
             });
-            track.set_pan(Pan::of_normalized_value(0.25));
+            track.set_pan(Pan::from_normalized_value(0.25));
             // Then
             let pan = track.get_pan();
             check_eq!(pan.get_reaper_value(), -0.5);
@@ -822,7 +822,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                         mock.invoke(t);
                     });
             });
-            send.set_volume(Volume::of_normalized_value(0.25));
+            send.set_volume(Volume::from_normalized_value(0.25));
             // Then
             check_eq!(send.get_volume().get_db(), -30.009531739774296);
             check_eq!(mock.get_invocation_count(), 1);
@@ -844,7 +844,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                         mock.invoke(t);
                     });
             });
-            send.set_pan(Pan::of_normalized_value(0.25));
+            send.set_pan(Pan::from_normalized_value(0.25));
             // Then
             check_eq!(send.get_pan().get_reaper_value(), -0.5);
             check_eq!(send.get_pan().get_normalized_value(), 0.25);
@@ -1262,12 +1262,12 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                         mock.invoke(t);
                     });
             });
-            project.set_tempo(Tempo::of_bpm(130.0), false);
+            project.set_tempo(Tempo::from_bpm(130.0), false);
             // Then
             check_eq!(project.get_tempo().get_bpm(), 130.0);
             // TODO There should be only one event invocation
             check_eq!(mock.get_invocation_count(), 2);
-            check_eq!(mock.get_last_arg(), true);
+            check_eq!(mock.get_last_arg(), ());
             Ok(())
         }),
         step("Show message box", |reaper, _| {

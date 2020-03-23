@@ -5,14 +5,14 @@ pub struct Pan {
 }
 
 impl Pan {
-    pub fn of_normalized_value(normalized_value: f64) -> Pan {
+    pub fn from_normalized_value(normalized_value: f64) -> Pan {
         assert!(0.0 <= normalized_value && normalized_value <= 1.0);
         Pan { normalized_value }
     }
 
-    pub fn of_reaper_value(reaper_value: f64) -> Pan {
+    pub fn from_reaper_value(reaper_value: f64) -> Pan {
         assert!(-1.0 <= reaper_value && reaper_value <= 1.0);
-        Pan::of_normalized_value((reaper_value + 1.0) / 2.0)
+        Pan::from_normalized_value((reaper_value + 1.0) / 2.0)
     }
 
     pub fn get_normalized_value(&self) -> f64 {

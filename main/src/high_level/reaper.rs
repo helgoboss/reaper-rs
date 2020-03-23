@@ -253,8 +253,8 @@ pub(super) struct EventStreamSubjects {
     pub(super) fx_reordered: EventStreamSubject<Track>,
     pub(super) fx_parameter_value_changed: EventStreamSubject<FxParameter>,
     pub(super) fx_parameter_touched: EventStreamSubject<FxParameter>,
-    pub(super) master_tempo_changed: EventStreamSubject<bool>,
-    pub(super) master_tempo_touched: EventStreamSubject<bool>,
+    pub(super) master_tempo_changed: EventStreamSubject<()>,
+    pub(super) master_tempo_touched: EventStreamSubject<()>,
     pub(super) master_playrate_changed: EventStreamSubject<bool>,
     pub(super) master_playrate_touched: EventStreamSubject<bool>,
     pub(super) main_thread_idle: EventStreamSubject<bool>,
@@ -664,8 +664,7 @@ impl Reaper {
         self.subjects.track_name_changed.borrow().clone()
     }
 
-    // TODO-high bool is not useful here
-    pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = bool> {
+    pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = ()> {
         self.subjects.master_tempo_changed.borrow().clone()
     }
 
@@ -863,7 +862,9 @@ struct Command {
     /// Reasoning for that type (from inner to outer):
     /// - `FnMut`: We don't use just `fn` because we want to support closures. We don't use just
     ///   `Fn` because we want to support closures that keep mutable references to their captures.
-    ///   TODO-high What about supporting also FnOnce?
+    ///   We can't accept `FnOnce` because that would mean that the closure value itself is consumed
+    ///   when it's called. That means we would have to remove the action from the action list just
+    ///   to call it and we couldn't again it again.
     /// - `Box`: Of course we want to support very different closures with very different captures.
     ///   We don't use generic type parameters to achieve that because we need to put Commands into
     ///   a HashMap as values - so we need each Command to have the same size in memory and the same

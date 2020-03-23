@@ -18,12 +18,12 @@ pub fn is_bpm_value(value: f64) -> bool {
 }
 
 impl Tempo {
-    pub fn of_bpm(bpm: Bpm) -> Tempo {
+    pub fn from_bpm(bpm: Bpm) -> Tempo {
         assert!(is_bpm_value(bpm));
         Tempo { bpm }
     }
 
-    pub fn of_normalized_value(normalized_value: f64) -> Tempo {
+    pub fn from_normalized_value(normalized_value: f64) -> Tempo {
         assert!(is_normalized_value(normalized_value));
         Tempo {
             bpm: MIN_BPM + normalized_value * BPM_SPAN,
@@ -44,9 +44,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn of_bpm() {
+    fn from_bpm() {
         // Given
-        let tempo = Tempo::of_bpm(120.0);
+        let tempo = Tempo::from_bpm(120.0);
         // Then
         assert_eq!(tempo.get_bpm(), 120.0);
         let normalized_value = tempo.get_normalized_value();
@@ -54,9 +54,9 @@ mod tests {
     }
 
     #[test]
-    fn of_normalized_value() {
+    fn from_normalized_value() {
         // Given
-        let tempo = Tempo::of_normalized_value(0.5);
+        let tempo = Tempo::from_normalized_value(0.5);
         // Then
         assert_eq!(tempo.get_bpm(), 480.5);
     }

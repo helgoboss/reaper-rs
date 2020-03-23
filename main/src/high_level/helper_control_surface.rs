@@ -701,11 +701,11 @@ impl HelperControlSurface {
     fn csurf_ext_setbpmandplayrate(&self, bpm: *mut f64, playrate: *mut f64) {
         let reaper = Reaper::get();
         if !bpm.is_null() {
-            reaper.subjects.master_tempo_changed.borrow_mut().next(true);
+            reaper.subjects.master_tempo_changed.borrow_mut().next(());
             // If there's a tempo envelope, there are just tempo notifications when the tempo is actually changed.
             // So that's okay for "touched".
             // TODO-low What about gradual tempo changes?
-            reaper.subjects.master_tempo_touched.borrow_mut().next(true);
+            reaper.subjects.master_tempo_touched.borrow_mut().next(());
         }
         if !playrate.is_null() {
             reaper

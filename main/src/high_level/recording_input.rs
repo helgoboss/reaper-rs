@@ -32,7 +32,6 @@ impl MidiRecordingInput {
         MidiRecordingInput { rec_input_index }
     }
 
-    // TODO-high Maybe use of_ prefix instead
     pub fn from_all_devices_and_channels() -> Self {
         Self::from_midi_rec_input_index(63 * 32)
     }
@@ -61,6 +60,10 @@ impl MidiRecordingInput {
         self.rec_input_index - 4096
     }
 
+    // TODO-medium In Rust get_ prefix is not idiomatic. On the other hand, the convention talks
+    //  about exposing members only. Channel is not a member. However I also don't want to
+    //  expose the information if it's a member or not. get_ has an advantage in IDEs and also
+    //  prevents ambiguities if the noun can sound like a verb.
     pub fn get_channel(&self) -> Option<u32> {
         let channel_id = self.get_midi_rec_input_index() % 32;
         if channel_id == 0 {

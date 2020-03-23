@@ -170,7 +170,7 @@ impl Track {
             .medium
             .get_track_ui_vol_pan(self.get_media_track())
             .expect("Couldn't get vol/pan");
-        Pan::of_reaper_value(pan)
+        Pan::from_reaper_value(pan)
     }
 
     pub fn set_pan(&self, pan: Pan) {
@@ -193,7 +193,7 @@ impl Track {
             .medium
             .get_track_ui_vol_pan(self.get_media_track())
             .expect("Couldn't get vol/pan");
-        Volume::of_reaper_value(volume)
+        Volume::from_reaper_value(volume)
     }
 
     pub fn set_volume(&self, volume: Volume) {
