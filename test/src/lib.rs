@@ -6,16 +6,16 @@ mod tests;
 
 use crate::api::{TestStep, TestStepContext};
 use crate::tests::create_test_steps;
-use reaper_rs::high_level::{Project, Reaper};
+use reaper_rs::high_level::{Reaper};
 use rxrust::prelude::*;
 use std::borrow::Cow;
 use std::borrow::Cow::{Borrowed, Owned};
-use std::cell::RefCell;
+
 use std::collections::VecDeque;
-use std::error::Error;
+
 use std::ffi::CString;
 use std::iter::FromIterator;
-use std::panic;
+
 
 pub fn execute_integration_test() {
     let reaper = Reaper::get();

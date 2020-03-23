@@ -1,7 +1,7 @@
 use reaper_rs::high_level::Reaper;
 use rxrust::prelude::*;
 use std::borrow::Cow;
-use std::error::Error;
+
 
 type TestStepFinished = LocalSubject<'static, (), ()>;
 pub struct TestStepContext {
