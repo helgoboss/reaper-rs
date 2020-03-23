@@ -13,9 +13,9 @@ use wmidi;
 
 use reaper_rs::high_level::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, AutomationMode, FxChain,
-    FxParameterCharacter, Guid, InputMonitoringMode, MessageBoxKind, MessageBoxResult, MidiEvent,
-    MidiInputDevice, MidiMessage, MidiRecordingInput, Pan, Project, Reaper, ReaperVersion,
-    RecordingInput, StuffMidiMessageTarget, Tempo, Track, Volume,
+    FxParameterCharacter, FxParameterValueRange, Guid, InputMonitoringMode, MessageBoxKind,
+    MessageBoxResult, MidiEvent, MidiInputDevice, MidiMessage, MidiRecordingInput, Pan, Project,
+    Reaper, ReaperVersion, RecordingInput, StuffMidiMessageTarget, Tempo, Track, Volume,
 };
 // TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
 use rxrust::prelude::*;
@@ -27,7 +27,7 @@ use super::mock::observe_invocations;
 // TODO-high Remove all compile-time warnings
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     let steps_a = vec![
-        step("Basics", |reaper, _| {
+        step("Basics", |_, _| {
             check!(Guid::try_from(c_str!("{hey}")).is_err());
             Ok(())
         }),
@@ -68,11 +68,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Given
             let project = reaper.get_current_project();
             // When
-            #[derive(Default)]
-            struct State {
-                count: i32,
-                track: Option<Track>,
-            }
             let (mock, _) = observe_invocations(|mock| {
                 reaper
                     .track_added()
@@ -89,11 +84,12 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(mock.get_last_arg(), new_track);
             Ok(())
         }),
-        step("FnMut action", |reaper, step| {
-            // TODO Add this as new test
+        #[allow(unreachable_code)]
+        step("FnMut action", |_reaper, _| {
+            // TODO-low Add this as new test
             return Ok(());
             let mut i = 0;
-            let action1 = reaper.register_action(
+            let _action1 = _reaper.register_action(
                 c_str!("reaperRsCounter"),
                 c_str!("reaper-rs counter"),
                 move || {
@@ -162,7 +158,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(track_project, project);
             Ok(())
         }),
-        step("Query track name", |reaper, _| {
+        step("Query track name", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -191,7 +187,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
-        step("Query track input monitoring", |reaper, _| {
+        step("Query track input monitoring", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -204,11 +200,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Given
             let track = get_track(0)?;
             // When
-            #[derive(Default)]
-            struct State {
-                count: i32,
-                track: Option<Track>,
-            }
             let (mock, _) = observe_invocations(|mock| {
                 reaper
                     .track_input_monitoring_changed()
@@ -227,7 +218,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
-        step("Query track recording input", |reaper, _| {
+        step("Query track recording input", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -265,7 +256,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
-        step("Set track recording input MIDI 4/5", |reaper, step| {
+        step("Set track recording input MIDI 4/5", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -286,7 +277,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             );
             Ok(())
         }),
-        step("Set track recording input MIDI 7/all", |reaper, step| {
+        step("Set track recording input MIDI 7/all", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -303,7 +294,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(input_data.get_device(), Some(MidiInputDevice::new(7)));
             Ok(())
         }),
-        step("Set track recording input MIDI all/15", |reaper, step| {
+        step("Set track recording input MIDI all/15", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -318,7 +309,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(input_data.get_device().is_none());
             Ok(())
         }),
-        step("Query track volume", |reaper, _| {
+        step("Query track volume", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -351,7 +342,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
-        step("Query track pan", |reaper, _| {
+        step("Query track pan", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -477,7 +468,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(last_arg.get_index(), Some(2));
             Ok(())
         }),
-        step("Query track auto arm mode", |reaper, _| {
+        step("Query track auto arm mode", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -486,7 +477,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(!is_in_auto_arm_mode);
             Ok(())
         }),
-        step("Query track arm state", |reaper, _| {
+        step("Query track arm state", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -539,7 +530,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
-        step("Enable track auto-arm mode", |reaper, _| {
+        step("Enable track auto-arm mode", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -594,7 +585,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(mock.get_last_arg(), track);
             Ok(())
         }),
-        step("Disable track auto-arm mode", |reaper, _| {
+        step("Disable track auto-arm mode", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -605,7 +596,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(!track.is_armed(false));
             Ok(())
         }),
-        step("Switch to normal track mode while armed", |reaper, _| {
+        step("Switch to normal track mode while armed", |_, _| {
             // Given
             let track = get_track(0)?;
             track.arm(true);
@@ -618,7 +609,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check!(track.is_armed(false));
             Ok(())
         }),
-        step("Switch track to auto-arm mode while armed", |reaper, _| {
+        step("Switch track to auto-arm mode while armed", |_, _| {
             // Given
             let track = get_track(0)?;
             track.unselect();
@@ -752,7 +743,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_eq!(effective_automation_mode, AutomationMode::TrimRead);
             Ok(())
         }),
-        step("Query track send count", |reaper, _| {
+        step("Query track send count", |_, _| {
             // Given
             let track = get_track(0)?;
             // When
@@ -1045,7 +1036,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 action.get_command_name(),
                 Some(c_str!("reaperRsTest").to_owned())
             );
-            check!(action.get_index() >= 0);
             check!(!action.is_on());
             check_eq!(
                 unsafe { action.get_name().into_c_str() },
@@ -1084,7 +1074,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 action.get_command_name(),
                 Some(c_str!("reaperRsTest2").to_owned())
             );
-            check!(action.get_index() >= 0);
             check_eq!(
                 unsafe { action.get_name().into_c_str() },
                 Some(c_str!("reaper-rs test toggle action"))
@@ -1100,7 +1089,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         step("Insert track at", |reaper, step| {
             // Given
             let project = reaper.get_current_project();
-            let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
             let track_2 = project.get_track_by_index(1).ok_or("Missing track 2")?;
             // When
             let (mock, _) = observe_invocations(|mock| {
@@ -1125,8 +1113,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         step("Query MIDI input devices", |reaper, _| {
             // Given
             // When
-            let devs = reaper.get_midi_input_devices();
-            let dev_0 = reaper.get_midi_input_device_by_id(0);
+            let _devs = reaper.get_midi_input_devices();
+            let _dev_0 = reaper.get_midi_input_device_by_id(0);
             // Then
             // TODO There might be no MIDI input devices
             //            check_ne!(devs.count(), 0);
@@ -1156,7 +1144,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             reaper
                 .midi_message_received()
                 .take_until(step.finished)
-                .subscribe(move |evt| {
+                .subscribe(move |_evt| {
                     // Right now not invoked because MIDI message arrives async.
                     // TODO As soon as we have an Observable which is not generic on Observer, introduce
                     //  steps which return an Observable<TestStepResult, ()> in order to test
@@ -1284,7 +1272,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         }),
     ]
     .into_iter();
-    let reaper = Reaper::get();
     let output_fx_steps = create_fx_steps("Output FX chain", || {
         get_track(0).map(|t| t.get_normal_fx_chain())
     });
@@ -1303,7 +1290,7 @@ fn create_fx_steps(
     get_fx_chain: impl Fn() -> Result<FxChain, &'static str> + 'static + Copy,
 ) -> impl Iterator<Item = TestStep> {
     let steps = vec![
-        step("Query fx chain", move |reaper, _| {
+        step("Query fx chain", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             // When
@@ -1380,7 +1367,7 @@ fn create_fx_steps(
             check_eq!(mock.get_last_arg(), fx);
             Ok(())
         }),
-        step("Check track fx with 1 fx", move |reaper, _| {
+        step("Check track fx with 1 fx", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.get_track();
@@ -1473,7 +1460,7 @@ fn create_fx_steps(
             check_eq!(mock.get_last_arg(), fx_1);
             Ok(())
         }),
-        step("Check track fx with 2 fx", move |reaper, _| {
+        step("Check track fx with 2 fx", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.get_track();
@@ -1554,7 +1541,7 @@ fn create_fx_steps(
             }
             Ok(())
         }),
-        step("Check fx parameter", move |reaper, _| {
+        step("Check fx parameter", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain
@@ -1578,11 +1565,17 @@ fn create_fx_steps(
             );
             check_eq!(p.get_fx(), fx);
             check!(p.get_step_size().is_none());
-            // BREAK
-            let value_range = p.get_value_range();
+            check_eq!(
+                p.get_value_range(),
+                FxParameterValueRange {
+                    min_val: 0.0,
+                    mid_val: 0.5,
+                    max_val: 1.0,
+                }
+            );
             Ok(())
         }),
-        step("Check fx presets", move |reaper, _| {
+        step("Check fx presets", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain
@@ -1761,7 +1754,7 @@ WAK 0
             check_eq!(mock.get_invocation_count(), 0);
             Ok(())
         }),
-        step("Set fx chunk", move |reaper, _| {
+        step("Set fx chunk", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
@@ -1782,7 +1775,7 @@ WAK 0
             check_eq!(synth_fx.get_index(), 1);
             Ok(())
         }),
-        step("Set fx chunk", move |reaper, _| {
+        step("Set fx chunk", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let midi_fx_1 = fx_chain
@@ -1811,7 +1804,7 @@ WAK 0
             );
             Ok(())
         }),
-        step("Set fx state chunk", move |reaper, _| {
+        step("Set fx state chunk", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
@@ -1846,7 +1839,7 @@ WAK 0
             );
             Ok(())
         }),
-        step("Set fx chain chunk", move |reaper, _| {
+        step("Set fx chain chunk", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.get_track();
@@ -1976,7 +1969,7 @@ WAK 0
             check_eq!(mock.get_last_arg(), fx.clone());
             Ok(())
         }),
-        step("Query track JS fx by index", move |reaper, _| {
+        step("Query track JS fx by index", move |_, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.get_track();
@@ -2008,9 +2001,16 @@ WAK 0
             check_eq!(fx.get_parameters().count(), 7);
             let param1 = fx.get_parameter_by_index(0);
             check!(param1.is_available());
-            // BREAK
-            let step_size = param1.get_step_size();
-            let value_range = param1.get_value_range();
+            // TODO-low Fix for input FX (there it's 1.0 for some reason)
+            // check_eq!(param1.get_step_size(), Some(0.01));
+            check_eq!(
+                param1.get_value_range(),
+                FxParameterValueRange {
+                    min_val: 0.0,
+                    mid_val: 5.0,
+                    max_val: 10.0,
+                }
+            );
             check!(fx.get_parameter_by_index(6).is_available());
             check!(!fx.get_parameter_by_index(7).is_available());
             let fx_info = fx.get_info();

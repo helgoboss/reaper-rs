@@ -1,5 +1,5 @@
 use crate::high_level::fx::Fx;
-use crate::high_level::{Reaper};
+use crate::high_level::Reaper;
 use crate::low_level::MediaTrack;
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
@@ -161,6 +161,7 @@ pub enum FxParameterCharacter {
     Continuous,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct FxParameterValueRange {
     pub min_val: f64,
     pub mid_val: f64,

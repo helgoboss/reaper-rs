@@ -16,13 +16,12 @@ use std::error::Error;
 use std::ffi::CString;
 use std::iter::FromIterator;
 use std::panic;
-use std::rc::Rc;
 
 pub fn execute_integration_test() {
     let reaper = Reaper::get();
     reaper.clear_console();
     log("# Testing reaper-rs\n");
-    let mut steps = VecDeque::from_iter(create_test_steps());
+    let steps = VecDeque::from_iter(create_test_steps());
     let step_count = steps.len();
     execute_next_step(reaper, steps, step_count);
 }
