@@ -30,6 +30,7 @@ use std::os::raw::{c_int, c_void};
 use std::ptr::null_mut;
 use std::sync::Once;
 use vst::api::HostCallbackProc;
+use vst::plugin::HostCallback;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
@@ -83,11 +84,10 @@ pub fn bootstrap_reaper_plugin(
     init: fn(ReaperPluginContext) -> Result<(), Box<dyn Error>>,
 ) -> i32 {
     firewall(|| {
-        let function_provider = match get_reaper_plugin_function_provider(rec) {
+        let context = match ReaperPluginContext::from_reaper_plugin(rec) {
             Err(_) => return 0,
-            Ok(p) => p,
+            Ok(c) => c,
         };
-        let context = ReaperPluginContext { function_provider };
         match init(context) {
             Ok(_) => 1,
             Err(_) => 0,
@@ -98,6 +98,21 @@ pub fn bootstrap_reaper_plugin(
 
 pub struct ReaperPluginContext {
     pub function_provider: FunctionProvider,
+}
+
+impl ReaperPluginContext {
+    pub fn from_reaper_plugin(
+        rec: *mut reaper_plugin_info_t,
+    ) -> Result<ReaperPluginContext, &'static str> {
+        let function_provider = get_reaper_plugin_function_provider(rec)?;
+        Ok(ReaperPluginContext { function_provider })
+    }
+
+    pub fn from_reaper_vst_plugin(host: HostCallback) -> Result<ReaperPluginContext, &'static str> {
+        let host_callback = host.raw_callback().ok_or("Host callback not available")?;
+        let function_provider = create_reaper_vst_plugin_function_provider(host_callback);
+        Ok(ReaperPluginContext { function_provider })
+    }
 }
 
 pub type FunctionProvider = Box<dyn Fn(&CStr) -> isize>;

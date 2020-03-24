@@ -1,7 +1,7 @@
 use c_str_macro::c_str;
 
-use reaper_rs::low_level;
-use reaper_rs::medium_level;
+use reaper_rs::high_level::{setup_all_with_defaults, Reaper};
+use reaper_rs::low_level::ReaperPluginContext;
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
 
@@ -24,12 +24,10 @@ impl Plugin for TestVstPlugin {
     }
 
     fn init(&mut self) {
-        let host_callback = self.host.raw_callback().unwrap();
-        let low = low_level::Reaper::with_all_functions_loaded(
-            low_level::create_reaper_vst_plugin_function_provider(host_callback),
-        );
-        let medium = medium_level::Reaper::new(low);
-        medium.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
+        let context = ReaperPluginContext::from_reaper_vst_plugin(self.host).unwrap();
+        setup_all_with_defaults(context, "info@helgoboss.org");
+        let reaper = Reaper::get();
+        reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
     }
 }
 

@@ -27,7 +27,7 @@ Consists of 3 layers:
 
 ### REAPER plug-in
 
-#### Scenario 1
+#### Scenario 1: You want the fastest way (recommended)
 
 The fastest way to get going with the high-level API is to use the `reaper_plugin` macro. It sets up a 
 `high_level::Reaper` instance for you. In particular, it takes care of:
@@ -48,7 +48,7 @@ use c_str_macro::c_str;
 
 #[reaper_plugin(email = "info@example.com")]
 fn main() -> Result<(), Box<dyn Error>> {
-    let reaper = Reaper::instance();
+    let reaper = Reaper::get();
     reaper.show_console_msg(c_str!("Hello world"));
     Ok(())
 }
@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 Future improvements:
 - [ ] Provide an extension of this macro which allows to load just some functions  
 
-#### Scenario 2
+#### Scenario 2: You want custom configuration (e.g. for logging)
 
 ```rust
 use reaper_rs::{reaper_plugin};
@@ -75,7 +75,7 @@ fn main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
 }
 ```
 
-#### Scenario 3
+#### Scenario 3: You want to use just low-level or medium-level API
 
 - [ ] Add an example for loading just some functions
 
@@ -97,6 +97,14 @@ fn main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
 }
 ```
 
+#### Scenario 4: You have an existing REAPER plugin written in Rust
+    
+TODO
+
+
+### REAPER VST plug-in
+
+TODO
     
 ## Develop
 
