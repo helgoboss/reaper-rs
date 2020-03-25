@@ -1,7 +1,6 @@
 use cc;
 
 fn main() {
-    // #[cfg(not(windows))]
     generate_bindings();
     compile_glue();
 }
