@@ -12,6 +12,7 @@ c_str_macro = "1.0.2"
 once_cell = "1.3.1"
 vst = "0.2.0"
 rxrust = { path = '../lib/rxRust'}
+helgoboss-midi = { path = '../../helgoboss-midi-rs'}
 regex = "1.3.4"
 slog = "2.5.2"
 slog-stdlog = "4.0.0"
