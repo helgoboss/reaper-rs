@@ -36,7 +36,8 @@ pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 pub struct Track {
     // Only filled if track loaded.
     media_track: Cell<*mut MediaTrack>,
-    // TODO-low Do we really need this pointer? Makes copying a tiny bit more expensive than just copying a MediaTrack*.
+    // TODO-low Do we really need this pointer? Makes copying a tiny bit more expensive than just
+    // copying a MediaTrack*.
     rea_project: Cell<*mut ReaProject>,
     // Possible states:
     // a) guid, project, !mediaTrack (guid-based and not yet loaded)
@@ -49,7 +50,8 @@ impl PayloadCopy for Track {}
 
 impl Track {
     /// mediaTrack must not be null
-    /// reaProject can be null but providing it can speed things up quite much for REAPER versions < 5.95
+    /// reaProject can be null but providing it can speed things up quite much for REAPER versions <
+    /// 5.95
     pub fn new(media_track: *mut MediaTrack, rea_project: *mut ReaProject) -> Track {
         Track {
             media_track: Cell::new(media_track),
@@ -61,10 +63,12 @@ impl Track {
                 };
                 Cell::new(actual)
             },
-            // We load the GUID eagerly because we want to make comparability possible even in the following case:
-            // Track A has been initialized with a GUID not been loaded yet, track B has been initialized with a MediaTrack*
-            // (this constructor) but has rendered invalid in the meantime. Now there would not be any way to compare them
-            // because I can neither compare MediaTrack* pointers nor GUIDs. Except I extract the GUID eagerly.
+            // We load the GUID eagerly because we want to make comparability possible even in the
+            // following case: Track A has been initialized with a GUID not been loaded
+            // yet, track B has been initialized with a MediaTrack* (this constructor)
+            // but has rendered invalid in the meantime. Now there would not be any way to compare
+            // them because I can neither compare MediaTrack* pointers nor GUIDs. Except
+            // I extract the GUID eagerly.
             guid: get_media_track_guid(media_track),
         }
     }
@@ -138,7 +142,8 @@ impl Track {
             input.get_rec_input_index() as f64,
         );
         // Only for triggering notification (as manual setting the rec input would also trigger it)
-        // This doesn't work for other surfaces but they are also not interested in record input changes.
+        // This doesn't work for other surfaces but they are also not interested in record input
+        // changes.
         let mut rec_mon = reaper
             .medium
             .get_media_track_info_value(self.get_raw(), I_RECMON);
@@ -159,7 +164,8 @@ impl Track {
 
     pub fn get_pan(&self) -> Pan {
         self.load_and_check_if_necessary_or_complain();
-        // It's important that we don't query D_PAN because that returns the wrong value in case an envelope is written
+        // It's important that we don't query D_PAN because that returns the wrong value in case an
+        // envelope is written
         let (_, pan) = Reaper::get()
             .medium
             .get_track_ui_vol_pan(self.get_raw())
@@ -174,15 +180,16 @@ impl Track {
         reaper
             .medium
             .csurf_on_pan_change_ex(self.get_raw(), reaper_value, false, false);
-        // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so we need
-        // to notify manually
+        // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so
+        // we need to notify manually
         reaper
             .medium
             .csurf_set_surface_pan(self.get_raw(), reaper_value, null_mut());
     }
 
     pub fn get_volume(&self) -> Volume {
-        // It's important that we don't query D_VOL because that returns the wrong value in case an envelope is written
+        // It's important that we don't query D_VOL because that returns the wrong value in case an
+        // envelope is written
         let (volume, _) = Reaper::get()
             .medium
             .get_track_ui_vol_pan(self.get_raw())
@@ -194,13 +201,14 @@ impl Track {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = volume.get_reaper_value();
         let reaper = Reaper::get();
-        // CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The return value
-        // reflects the cropped value. The precision became much better with REAPER 5.28.
+        // CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The
+        // return value reflects the cropped value. The precision became much better with
+        // REAPER 5.28.
         reaper
             .medium
             .csurf_on_volume_change_ex(self.get_raw(), reaper_value, false, false);
-        // Setting the volume programmatically doesn't trigger SetSurfaceVolume in HelperControlSurface so we need
-        // to notify manually
+        // Setting the volume programmatically doesn't trigger SetSurfaceVolume in
+        // HelperControlSurface so we need to notify manually
         reaper
             .medium
             .csurf_set_surface_volume(self.get_raw(), reaper_value, null_mut());
@@ -213,8 +221,9 @@ impl Track {
             .get_set_media_track_info(self.get_raw(), IP_TRACKNUMBER, null_mut())
             .0 as i32;
         if ip_track_number == 0 {
-            // Usually means that track doesn't exist. But this we already checked. This happens only if we query the
-            // number of a track in another project tab. TODO-low Try to find a working solution. Till then, return 0.
+            // Usually means that track doesn't exist. But this we already checked. This happens
+            // only if we query the number of a track in another project tab. TODO-low
+            // Try to find a working solution. Till then, return 0.
             return None;
         }
         if ip_track_number == -1 {
@@ -251,8 +260,9 @@ impl Track {
             reaper
                 .medium
                 .csurf_on_rec_arm_change_ex(self.get_raw(), 1, false);
-            // If track was auto-armed before, this would just have switched off the auto-arm but not actually armed
-            // the track. Therefore we check if it's really armed and if not we do it again.
+            // If track was auto-armed before, this would just have switched off the auto-arm but
+            // not actually armed the track. Therefore we check if it's really armed and
+            // if not we do it again.
             if reaper
                 .medium
                 .get_media_track_info_value(self.get_raw(), I_RECARM)
@@ -368,8 +378,9 @@ impl Track {
         get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, true))
     }
 
-    // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains weird
-    // FXID_NEXT (in front of FX tag) instead of FXID (behind FX tag). So FX chunk code should be double checked then.
+    // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains
+    // weird FXID_NEXT (in front of FX tag) instead of FXID (behind FX tag). So FX chunk code
+    // should be double checked then.
     pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: bool) -> Chunk {
         let chunk_content = Reaper::get()
             .medium
@@ -459,9 +470,9 @@ impl Track {
         TrackSend::index_based(self.clone(), index)
     }
 
-    // It's correct that this returns an optional because the index isn't a stable identifier of an FX.
-    // The FX could move. So this should do a runtime lookup of the FX and return a stable GUID-backed Fx object if
-    // an FX exists at that query index.
+    // It's correct that this returns an optional because the index isn't a stable identifier of an
+    // FX. The FX could move. So this should do a runtime lookup of the FX and return a stable
+    // GUID-backed Fx object if an FX exists at that query index.
     pub fn get_fx_by_query_index(&self, query_index: i32) -> Option<Fx> {
         let (index, is_input_fx) = get_index_from_query_index(query_index);
         let fx_chain = if is_input_fx {
@@ -563,7 +574,8 @@ impl Track {
         if self.media_track.get().is_null() {
             panic!("Containing project cannot be found if mediaTrack not available");
         }
-        // No ReaProject* available. Try current project first (most likely in everyday REAPER usage).
+        // No ReaProject* available. Try current project first (most likely in everyday REAPER
+        // usage).
         let reaper = Reaper::get();
         let current_project = reaper.get_current_project();
         let is_valid_in_current_project = reaper.medium.validate_ptr_2(
@@ -649,8 +661,8 @@ pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
     Guid::new(unsafe { *internal })
 }
 
-// In REAPER < 5.95 this returns nullptr. That means we might need to use findContainingProject logic at a later
-// point.
+// In REAPER < 5.95 this returns nullptr. That means we might need to use findContainingProject
+// logic at a later point.
 fn get_track_project_raw(media_track: *mut MediaTrack) -> *mut ReaProject {
     Reaper::get()
         .medium

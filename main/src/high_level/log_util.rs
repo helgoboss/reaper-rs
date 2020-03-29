@@ -28,7 +28,8 @@ pub fn create_terminal_logger() -> slog::Logger {
 
 /// Creates a panic hook which logs the error both to the logging system and optionally to REAPER
 /// console. This is just a convenience function. You can easily write your own panic hook if you
-/// need further customization. Have a look at the existing implementation and used helper functions.
+/// need further customization. Have a look at the existing implementation and used helper
+/// functions.
 pub fn create_reaper_panic_hook(
     logger: slog::Logger,
     console_msg_formatter: Option<

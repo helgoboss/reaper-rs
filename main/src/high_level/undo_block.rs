@@ -1,7 +1,8 @@
 use crate::high_level::{Project, Reaper};
 use std::ffi::CStr;
 
-// Constructor takes care of starting the undo block. Destructor takes care of ending the undo block (RAII).
+// Constructor takes care of starting the undo block. Destructor takes care of ending the undo block
+// (RAII).
 pub(super) struct UndoBlock<'a> {
     label: &'a CStr,
     project: Project,

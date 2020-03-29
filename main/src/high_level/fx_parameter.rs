@@ -114,8 +114,8 @@ impl FxParameter {
 
     // Returns a normalized value
     // Returns None if no step size (continuous character)
-    // TODO-low This is a too opinionated function in that it already interprets and processes some of REAPER's return
-    //  values.
+    // TODO-low This is a too opinionated function in that it already interprets and processes some
+    // of REAPER's return  values.
     pub fn get_step_size(&self) -> Option<f64> {
         let result = Reaper::get().medium.track_fx_get_parameter_step_sizes(
             self.get_track_raw(),
@@ -127,7 +127,8 @@ impl FxParameter {
                 return Some(1.0);
             }
             let range = self.get_value_range();
-            // We are primarily interested in the smallest step size that makes sense. We can always create multiples of it.
+            // We are primarily interested in the smallest step size that makes sense. We can always
+            // create multiples of it.
             let span = (range.max_val - range.min_val).abs();
             if span == 0.0 {
                 return None;

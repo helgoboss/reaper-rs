@@ -14,7 +14,8 @@ use reaper_rs::high_level::{
     MessageBoxResult, MidiInputDevice, MidiRecordingInput, Pan, Reaper, ReaperVersion,
     RecordingInput, StuffMidiMessageTarget, Tempo, Track, Volume,
 };
-// TODO Change rxRust so we don't always have to import this ... see existing trait refactoring issue
+// TODO Change rxRust so we don't always have to import this ... see existing trait refactoring
+// issue
 use rxrust::prelude::*;
 
 use crate::api::{step, TestStep};
@@ -51,8 +52,11 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_ne!(reaper.get_current_project(), current_project_before);
             check_eq!(reaper.get_current_project(), new_project);
             check_ne!(reaper.get_projects().nth(0), Some(new_project));
-            //            assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() == newProject);
-            //            assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() == projectCountBefore + 1);
+            //            
+            // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() ==
+            // newProject);            
+            // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
+            // projectCountBefore + 1);
             check_eq!(new_project.get_track_count(), 0);
             check!(new_project.get_index() > 0);
             check!(new_project.get_file_path().is_none());
@@ -552,8 +556,9 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             track.arm(true);
             // Then
             check!(track.is_armed(true));
-            // TODO Interesting! GetMediaTrackInfo_Value read with I_RECARM seems to support auto-arm already!
-            // So maybe we should remove the chunk check and the parameter supportAutoArm
+            // TODO Interesting! GetMediaTrackInfo_Value read with I_RECARM seems to support
+            // auto-arm already! So maybe we should remove the chunk check and the
+            // parameter supportAutoArm
             check!(track.is_armed(false));
             check!(track.has_auto_arm_enabled());
             check_eq!(mock.get_invocation_count(), 1);
@@ -762,12 +767,16 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check_eq!(track_1.get_send_count(), 1);
             check_eq!(track_1.get_send_by_index(0), Some(send));
-            check!(track_1
-                .get_send_by_target_track(track_2.clone())
-                .is_available());
-            check!(!track_2
-                .get_send_by_target_track(track_1.clone())
-                .is_available());
+            check!(
+                track_1
+                    .get_send_by_target_track(track_2.clone())
+                    .is_available()
+            );
+            check!(
+                !track_2
+                    .get_send_by_target_track(track_1.clone())
+                    .is_available()
+            );
             check!(track_1.get_index_based_send_by_index(0).is_available());
             check_eq!(track_1.get_sends().count(), 1);
             Ok(())
@@ -886,7 +895,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             // Then
             check!(action.is_on());
             check!(track.is_muted());
-            // TODO Actually it would be nice if the actionInvoked event would be raised but it isn't
+            // TODO Actually it would be nice if the actionInvoked event would be raised but it
+            // isn't
             check_eq!(mock.get_invocation_count(), 0);
             Ok(())
         }),
@@ -1142,9 +1152,11 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
                 .take_until(step.finished)
                 .subscribe(move |_evt| {
                     // Right now not invoked because MIDI message arrives async.
-                    // TODO As soon as we have an Observable which is not generic on Observer, introduce
-                    //  steps which return an Observable<TestStepResult, ()> in order to test
-                    //  asynchronously that stuffed MIDI messages arrived via midi_message_received().
+                    // TODO As soon as we have an Observable which is not generic on Observer,
+                    // introduce  steps which return an
+                    // Observable<TestStepResult, ()> in order to test
+                    //  asynchronously that stuffed MIDI messages arrived via
+                    // midi_message_received().
                 });
             reaper.stuff_midi_message(
                 StuffMidiMessageTarget::VirtualMidiKeyboard,
@@ -1299,9 +1311,11 @@ fn create_fx_steps(
             let non_existing_guid =
                 Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
             check!(!fx_chain.get_fx_by_guid(&non_existing_guid).is_available());
-            check!(!fx_chain
-                .get_fx_by_guid_and_index(&non_existing_guid, 0)
-                .is_available());
+            check!(
+                !fx_chain
+                    .get_fx_by_guid_and_index(&non_existing_guid, 0)
+                    .is_available()
+            );
             check!(fx_chain.get_first_fx_by_name(c_str!("bla")).is_none());
             check!(fx_chain.get_chunk().is_none());
             Ok(())
@@ -1340,9 +1354,11 @@ fn create_fx_steps(
             check!(fx_chain.get_fx_by_guid_and_index(&guid, 1).is_available());
             let non_existing_guid =
                 Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
-            check!(!fx_chain
-                .get_fx_by_guid_and_index(&non_existing_guid, 0)
-                .is_available());
+            check!(
+                !fx_chain
+                    .get_fx_by_guid_and_index(&non_existing_guid, 0)
+                    .is_available()
+            );
             check_eq!(
                 fx_chain.get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")),
                 Some(fx.clone())
@@ -1494,7 +1510,9 @@ fn create_fx_steps(
             check!(chunk_1.starts_with("BYPASS 0 0 0"));
             check!(chunk_1.ends_with("\nWAK 0 0"));
             let tag_chunk_1 = fx_1.get_tag_chunk();
-            check!(tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
+            check!(
+                tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#)
+            );
             check!(tag_chunk_1.ends_with("\n>"));
             let state_chunk_1 = fx_1.get_state_chunk();
             check!(!state_chunk_1.contains("<"));
@@ -1517,18 +1535,26 @@ fn create_fx_steps(
             check_eq!(fx_2.get_parameters().count(), 15);
             check!(fx_1.get_parameter_by_index(15).is_available());
             check!(!fx_1.get_parameter_by_index(17).is_available());
-            check!(track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000000 } else { 0 })
-                .is_some());
-            check!(track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000001 } else { 1 })
-                .is_some());
-            check!(!track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0 } else { 0x1000000 })
-                .is_some());
-            check!(!track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 1 } else { 0x1000001 })
-                .is_some());
+            check!(
+                track
+                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000000 } else { 0 })
+                    .is_some()
+            );
+            check!(
+                track
+                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000001 } else { 1 })
+                    .is_some()
+            );
+            check!(
+                !track
+                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 0 } else { 0x1000000 })
+                    .is_some()
+            );
+            check!(
+                !track
+                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 1 } else { 0x1000001 })
+                    .is_some()
+            );
             if !fx_chain.is_input_fx() {
                 let first_instrument_fx = fx_chain
                     .get_first_instrument_fx()
@@ -1637,7 +1663,8 @@ fn create_fx_steps(
                     .add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"))
                     .expect("Couldn't find FX on other FX chain");
                 let p_on_other_fx_chain = fx_on_other_fx_chain.get_parameter_by_index(0);
-                // First set parameter on other FX chain to same value (confuses heuristic if fxChain is input FX chain)
+                // First set parameter on other FX chain to same value (confuses heuristic if
+                // fxChain is input FX chain)
                 p_on_other_fx_chain.set_normalized_value(0.5);
                 // When
                 let (mock, _) = observe_invocations(|mock| {
@@ -1746,7 +1773,8 @@ WAK 0
                     .as_c_str(),
                 c_str!("-6.00")
             );
-            // TODO Detect such a programmatic FX add as well (maybe by hooking into HelperControlSurface::updateMediaTrackPositions)
+            // TODO Detect such a programmatic FX add as well (maybe by hooking into
+            // HelperControlSurface::updateMediaTrackPositions)
             check_eq!(mock.get_invocation_count(), 0);
             Ok(())
         }),
@@ -1954,9 +1982,11 @@ WAK 0
             check!(fx_chain.get_fx_by_guid(&fx_guid).is_available());
             let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
             check!(!fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
-            check!(fx_chain
-                .get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)"))
-                .is_some());
+            check!(
+                fx_chain
+                    .get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)"))
+                    .is_some()
+            );
             check_eq!(
                 fx_chain.get_first_fx_by_name(c_str!("phaser")),
                 Some(fx.clone())

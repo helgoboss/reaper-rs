@@ -11,8 +11,9 @@ use std::ptr::null_mut;
 struct RuntimeData {
     section: Section,
     // Sometimes shortly named cmd in REAPER API. Unique within section. Might be filled lazily.
-    // For built-in actions this ID is globally stable and will always be found. For custom actions, this ID is only
-    // stable at runtime and it might be that it can't be found - which means the action is not available.
+    // For built-in actions this ID is globally stable and will always be found. For custom
+    // actions, this ID is only stable at runtime and it might be that it can't be found -
+    // which means the action is not available.
     command_id: u32,
     cached_index: Option<u32>,
 }
@@ -90,7 +91,8 @@ impl Action {
 
     pub fn is_available(&self) -> bool {
         if let Some(runtime_data) = self.runtime_data.borrow().as_ref() {
-            // See if we can get a description. If yes, the action actually exists. If not, then not.
+            // See if we can get a description. If yes, the action actually exists. If not, then
+            // not.
             let ptr = Reaper::get().medium.kbd_get_text_from_cmd(
                 runtime_data.command_id as u32,
                 runtime_data.section.get_raw(),
@@ -154,16 +156,19 @@ impl Action {
     }
 
     pub fn invoke(&self, normalized_value: f64, is_step_count: bool, project: Option<Project>) {
-        // TODO-low I have no idea how to launch an action in a specific section. The first function doesn't seem to launch the action :(
-        // bool (*kbd_RunCommandThroughHooks)(KbdSectionInfo* section, int* actionCommandID, int* val, int* valhw, int* relmode, HWND hwnd);
-        // int (*KBD_OnMainActionEx)(int cmd, int val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
+        // TODO-low I have no idea how to launch an action in a specific section. The first function
+        // doesn't seem to launch the action :(
+        // bool (*kbd_RunCommandThroughHooks)(KbdSectionInfo* section, int* actionCommandID, int*
+        // val, int* valhw, int* relmode, HWND hwnd); int (*KBD_OnMainActionEx)(int cmd, int
+        // val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
         let rd = self.load_if_necessary_or_complain();
         let action_command_id = rd.command_id;
         let reaper = Reaper::get();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
             let cropped_relative_value = relative_value.clamp(0, 127) as u32;
-            // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val, &valhw, &relmode, reaper::GetMainHwnd());
+            // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
+            // &valhw, &relmode, reaper::GetMainHwnd());
             reaper.medium.kbd_on_main_action_ex(
                 action_command_id,
                 cropped_relative_value,
@@ -173,7 +178,8 @@ impl Action {
                 project.map(|p| p.get_raw()).unwrap_or(null_mut()),
             );
         } else {
-            // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val, &valhw, &relmode, reaper::GetMainHwnd());
+            // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
+            // &valhw, &relmode, reaper::GetMainHwnd());
             reaper.medium.kbd_on_main_action_ex(
                 action_command_id,
                 (normalized_value * 127 as f64).round() as u32,
@@ -182,8 +188,9 @@ impl Action {
                 reaper.medium.get_main_hwnd(),
                 project.map(|p| p.get_raw()).unwrap_or(null_mut()),
             );
-            // Main_OnCommandEx would trigger the actionInvoked event but it has not enough parameters for passing values etc.
-            //          reaper::Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
+            // Main_OnCommandEx would trigger the actionInvoked event but it has not enough
+            // parameters for passing values etc.          reaper::
+            // Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
         }
     }
 
@@ -219,7 +226,8 @@ impl Action {
         if bytes.len() == 32 && contains_digits_only(command_name) {
             return Cow::from(command_name);
         }
-        // Doesn't contain underscore but should contain one because it's a custom action or an explicitly named command.
+        // Doesn't contain underscore but should contain one because it's a custom action or an
+        // explicitly named command.
         let with_underscore = CString::new([c_str!("_").to_bytes(), bytes].concat()).unwrap();
         return Cow::from(with_underscore);
     }

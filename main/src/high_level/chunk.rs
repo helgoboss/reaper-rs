@@ -1,5 +1,5 @@
 use std::cell::{Ref, RefCell};
-use std::ffi::{CString};
+use std::ffi::CString;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
@@ -374,8 +374,8 @@ impl ChunkRegion {
     }
 
     // Returns the tag completely from < to >
-    // TODO-low Why don't we return an invalid chunk region instead of none? That would allow easier chaining and would
-    //  be more in line with the other methods.
+    // TODO-low Why don't we return an invalid chunk region instead of none? That would allow easier
+    // chaining and would  be more in line with the other methods.
     pub fn find_first_tag(&self, relative_search_start_pos: usize) -> Option<ChunkRegion> {
         if !self.is_valid() {
             return None;

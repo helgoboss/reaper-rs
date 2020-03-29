@@ -2,7 +2,6 @@ use reaper_rs::high_level::Reaper;
 use rxrust::prelude::*;
 use std::borrow::Cow;
 
-
 type TestStepFinished = LocalSubject<'static, (), ()>;
 pub struct TestStepContext {
     pub finished: TestStepFinished,

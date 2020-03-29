@@ -19,8 +19,8 @@ use crate::low_level::util::firewall;
 // By not having a `&mut self` reference, developers are forced to explicitly think about this
 // scenario. One can use a `RefCell` along with `borrow_mut()` to still mutate some ControlSurface
 // state and failing fast whenever reentrancy happens - at runtime, by getting a panic. This is not
-// as good as failing fast at compile time but still much better than to run into undefined behavior,
-// which could cause hard-to-find bugs and crash REAPER - that's the last thing we want!
+// as good as failing fast at compile time but still much better than to run into undefined
+// behavior, which could cause hard-to-find bugs and crash REAPER - that's the last thing we want!
 // Panicking is not so bad. We can catch it before it reaches REAPER and therefore let REAPER
 // continue running. Ideally it's observed by the developer when he tests his plugin and then he can
 // think about how to solve that issue. They might find out that it's okay and therefore use some

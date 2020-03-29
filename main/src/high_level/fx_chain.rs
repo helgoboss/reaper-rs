@@ -195,9 +195,9 @@ DOCKED 0
         ))
     }
 
-    // It's correct that this returns an optional because the index isn't a stable identifier of an FX.
-    // The FX could move. So this should do a runtime lookup of the FX and return a stable GUID-backed Fx object if
-    // an FX exists at that index.
+    // It's correct that this returns an optional because the index isn't a stable identifier of an
+    // FX. The FX could move. So this should do a runtime lookup of the FX and return a stable
+    // GUID-backed Fx object if an FX exists at that index.
     pub fn get_fx_by_index(&self, index: u32) -> Option<Fx> {
         if index >= self.get_fx_count() {
             return None;

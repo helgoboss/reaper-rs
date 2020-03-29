@@ -1,5 +1,3 @@
-
-
 pub struct Pan {
     normalized_value: f64,
 }

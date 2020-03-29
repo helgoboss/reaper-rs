@@ -197,15 +197,15 @@ pub struct Reaper {
     pub medium: medium_level::Reaper,
     pub logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
-    // TODO-low Adding an action in an action would panic because we have an immutable borrow of the map
-    //  to obtain and execute the command, plus a mutable borrow of the map to add the new command.
-    //  (the latter being unavoidable because we somehow need to modify the map!).
-    //  That's not good. Is there a way to avoid this constellation? It's probably hard to avoid the
-    //  immutable borrow because the `operation` is part of the map after all. And we can't just
-    //  copy it before execution, at least not when it captures and mutates state, which might not
-    //  be copyable (which we want to explicitly allow, that's why we accept FnMut!). Or is it
-    //  possible to give up the map borrow after obtaining the command/operation reference???
-    //  Look into that!!!
+    // TODO-low Adding an action in an action would panic because we have an immutable borrow of
+    // the map  to obtain and execute the command, plus a mutable borrow of the map to add the
+    // new command.  (the latter being unavoidable because we somehow need to modify the map!).
+    //  That's not good. Is there a way to avoid this constellation? It's probably hard to avoid
+    // the  immutable borrow because the `operation` is part of the map after all. And we can't
+    // just  copy it before execution, at least not when it captures and mutates state, which
+    // might not  be copyable (which we want to explicitly allow, that's why we accept FnMut!).
+    // Or is it  possible to give up the map borrow after obtaining the command/operation
+    // reference???  Look into that!!!
     command_by_index: RefCell<HashMap<u32, Command>>,
     pub(super) subjects: EventStreamSubjects,
     task_sender: Sender<Task>,
@@ -516,16 +516,16 @@ impl Reaper {
         self.medium.get_max_midi_outputs()
     }
 
-    // It's correct that this method returns a non-optional. An id is supposed to uniquely identify a device.
-    // A MidiInputDevice#isAvailable method returns if the device is actually existing at runtime. That way we
-    // support (still) unloaded MidiInputDevices.
+    // It's correct that this method returns a non-optional. An id is supposed to uniquely identify
+    // a device. A MidiInputDevice#isAvailable method returns if the device is actually existing
+    // at runtime. That way we support (still) unloaded MidiInputDevices.
     pub fn get_midi_input_device_by_id(&self, id: u32) -> MidiInputDevice {
         MidiInputDevice::new(id)
     }
 
-    // It's correct that this method returns a non-optional. An id is supposed to uniquely identify a device.
-    // A MidiOutputDevice#isAvailable method returns if the device is actually existing at runtime. That way we
-    // support (still) unloaded MidiOutputDevices.
+    // It's correct that this method returns a non-optional. An id is supposed to uniquely identify
+    // a device. A MidiOutputDevice#isAvailable method returns if the device is actually
+    // existing at runtime. That way we support (still) unloaded MidiOutputDevices.
     pub fn get_midi_output_device_by_id(&self, id: u32) -> MidiOutputDevice {
         MidiOutputDevice::new(id)
     }
@@ -552,10 +552,11 @@ impl Reaper {
         Some(Project::new(ptr))
     }
 
-    // It's correct that this method returns a non-optional. A commandName is supposed to uniquely identify the action,
-    // so it could be part of the resulting Action itself. An Action#isAvailable method could return if the action is
-    // actually existing at runtime. That way we would support (still) unloaded Actions.
-    // TODO-low Don't automatically interpret command name as commandId
+    // It's correct that this method returns a non-optional. A commandName is supposed to uniquely
+    // identify the action, so it could be part of the resulting Action itself. An
+    // Action#isAvailable method could return if the action is actually existing at runtime.
+    // That way we would support (still) unloaded Actions. TODO-low Don't automatically
+    // interpret command name as commandId
     pub fn get_action_by_command_name(&self, command_name: CString) -> Action {
         Action::command_name_based(command_name)
     }
@@ -607,7 +608,8 @@ impl Reaper {
         self.medium.show_console_msg(msg);
     }
 
-    // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret 1=OK,2=CANCEL,3=ABORT,4=RETRY,5=IGNORE,6=YES,7=NO
+    // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret
+    // 1=OK,2=CANCEL,3=ABORT,4=RETRY,5=IGNORE,6=YES,7=NO
     pub fn show_message_box(
         &self,
         msg: &CStr,
@@ -860,32 +862,33 @@ struct Command {
     /// Reasoning for that type (from inner to outer):
     /// - `FnMut`: We don't use just `fn` because we want to support closures. We don't use just
     ///   `Fn` because we want to support closures that keep mutable references to their captures.
-    ///   We can't accept `FnOnce` because that would mean that the closure value itself is consumed
-    ///   when it's called. That means we would have to remove the action from the action list just
-    ///   to call it and we couldn't again it again.
+    ///   We can't accept `FnOnce` because that would mean that the closure value itself is
+    ///   consumed when it's called. That means we would have to remove the action from the action
+    ///   list just to call it and we couldn't again it again.
     /// - `Box`: Of course we want to support very different closures with very different captures.
     ///   We don't use generic type parameters to achieve that because we need to put Commands into
-    ///   a HashMap as values - so we need each Command to have the same size in memory and the same
-    ///   type. Generics lead to the generation of different types and most likely also different
-    ///   sizes. We don't use references because we want ownership. Yes, Box is (like reference) a
-    ///   so-called trait object and therefore uses dynamic dispatch. It also needs heap allocation
-    ///   (unlike general references). However, this is exactly what we want and need here.
+    ///   a HashMap as values - so we need each Command to have the same size in memory and the
+    ///   same type. Generics lead to the generation of different types and most likely also
+    ///   different sizes. We don't use references because we want ownership. Yes, Box is (like
+    ///   reference) a so-called trait object and therefore uses dynamic dispatch. It also needs
+    ///   heap allocation (unlike general references). However, this is exactly what we want and
+    ///   need here.
     /// - `RefCell`: We need this in order to make the FnMut callable in immutable context (for
-    ///   safety reasons we are mostly in immutable context, see ControlSurface documentation). It's
-    ///   good to use `RefCell` in a very fine-grained way like that and not for example on the whole
-    ///   `Command`. That allows for very localized mutation and therefore a lower likelihood that
-    ///   borrowing rules are violated (or if we wouldn't have the runtime borrow checking of
-    ///   `RefCell`, the likeliness to get undefined behavior).
+    ///   safety reasons we are mostly in immutable context, see ControlSurface documentation).
+    ///   It's good to use `RefCell` in a very fine-grained way like that and not for example on
+    ///   the whole `Command`. That allows for very localized mutation and therefore a lower
+    ///   likelihood that borrowing rules are violated (or if we wouldn't have the runtime borrow
+    ///   checking of `RefCell`, the likeliness to get undefined behavior).
     /// - `Rc`: We don't want to keep an immutable reference to the surrounding `Command` around
     ///   just in order to execute this operation! Why? Because we want to support operations which
-    ///   add a REAPER action when executed. And when doing that, we of course have to borrow
-    ///   the command HashMap mutably. However, at that point we already have an immutable borrow
-    ///   to the complete HashMap (via a `RefCell`) ... boom. Panic! With the `Rc` we can release
-    ///   the borrow by cloning the first `Rc` instance and therefore gaining a short-term
-    ///   second ownership of that operation.
+    ///   add a REAPER action when executed. And when doing that, we of course have to borrow the
+    ///   command HashMap mutably. However, at that point we already have an immutable borrow to
+    ///   the complete HashMap (via a `RefCell`) ... boom. Panic! With the `Rc` we can release the
+    ///   borrow by cloning the first `Rc` instance and therefore gaining a short-term second
+    ///   ownership of that operation.
     /// - Wait ... actually there's no `Box` anymore! Turned out that `Rc` makes all things
-    ///   possible that also `Box` makes possible, in particular taking dynamically-sized types.
-    ///   If we wouldn't need `Rc` (for shared references), we would have to take `Box` instead.
+    ///   possible that also `Box` makes possible, in particular taking dynamically-sized types. If
+    ///   we wouldn't need `Rc` (for shared references), we would have to take `Box` instead.
     operation: Rc<RefCell<dyn FnMut()>>,
     kind: ActionKind,
     accelerator_register: gaccel_register_t,

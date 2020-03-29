@@ -11,13 +11,14 @@
 //!   cheap empty string in null-pointer case
 //! - When there are both return values and output parameters, return a tuple if there's just one
 //!   output parameter and a struct if there are many output parameters
-//! - In all REAPER functions which can fail (mostly indicated by returning false or -1), return Result
+//! - In all REAPER functions which can fail (mostly indicated by returning false or -1), return
+//!   Result
 //! - In all REAPER functions which return things that might not be present, return Option
 //! - Panics if function not available (we should make sure on plug-in load that all necessary
 //!   functions are available)
 //! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
-//!   of i32). In the unlikely case that the value range has to be extended in future, it's just
-//!   a matter of removing safe casts on user-side code.
+//!   of i32). In the unlikely case that the value range has to be extended in future, it's just a
+//!   matter of removing safe casts on user-side code.
 
 mod constants;
 mod control_surface;

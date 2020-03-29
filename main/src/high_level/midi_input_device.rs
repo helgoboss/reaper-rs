@@ -27,8 +27,8 @@ impl MidiInputDevice {
             .into()
     }
 
-    // For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if the device ever
-    // existed, even if it's disconnected now.
+    // For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if
+    // the device ever existed, even if it's disconnected now.
     pub fn is_available(&self) -> bool {
         let (is_present, name) = Reaper::get().medium.get_midi_input_name(self.id, 2);
         is_present || name.to_bytes().len() > 0

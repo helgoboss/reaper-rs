@@ -1176,8 +1176,8 @@ impl ReaperStringPtr {
 pub struct ReaperVoidPtr(pub *mut c_void);
 
 impl ReaperVoidPtr {
-    // Unsafe because lifetime of returned string reference is unbounded and because it's not sure if
-    // the given pointer points to a C string.
+    // Unsafe because lifetime of returned string reference is unbounded and because it's not sure
+    // if the given pointer points to a C string.
     pub unsafe fn into_c_str<'a>(self) -> Option<&'a CStr> {
         if self.0.is_null() {
             return None;

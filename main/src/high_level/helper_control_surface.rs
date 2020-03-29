@@ -83,12 +83,14 @@ impl HelperControlSurface {
             // since pre2 to be accurate but so what
             supports_detection_of_input_fx_in_set_fx_change: version >= c_str!("5.95").into(),
         };
-        // REAPER doesn't seem to call this automatically when the surface is registered. In our case it's important
-        // to call this not at the first change of something (e.g. arm button pressed) but immediately. Because it
-        // captures the initial project/track/FX state. If we don't do this immediately, then it happens that change
-        // events (e.g. track arm changed) are not reported because the initial state was unknown.
-        // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more lazily on activate?
-        //  But before activate we can do almost nothing because execute_on_main_thread doesn't work.
+        // REAPER doesn't seem to call this automatically when the surface is registered. In our
+        // case it's important to call this not at the first change of something (e.g. arm
+        // button pressed) but immediately. Because it captures the initial project/track/FX
+        // state. If we don't do this immediately, then it happens that change events (e.g.
+        // track arm changed) are not reported because the initial state was unknown.
+        // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more lazily
+        // on activate?  But before activate we can do almost nothing because
+        // execute_on_main_thread doesn't work.
         surface.set_track_list_change();
         surface
     }
@@ -505,7 +507,8 @@ impl HelperControlSurface {
         let pairs = self.fx_chain_pair_by_media_track.borrow();
         let pair = match pairs.get(&track.get_raw()) {
             None => {
-                // Should not happen. In this case, an FX yet unknown to Realearn has sent a parameter change
+                // Should not happen. In this case, an FX yet unknown to Realearn has sent a
+                // parameter change
                 return false;
             }
             Some(pair) => pair,
@@ -520,7 +523,8 @@ impl HelperControlSurface {
             // Could be both
             let param_index = match param_index {
                 None => {
-                    // We don't have a parameter number at our disposal so we need to guess - we guess normal FX TODO-low
+                    // We don't have a parameter number at our disposal so we need to guess - we
+                    // guess normal FX TODO-low
                     return false;
                 }
                 Some(i) => i,
@@ -554,10 +558,12 @@ impl HelperControlSurface {
         }
     }
 
-    // From REAPER > 5.95, parmFxIndex should be interpreted as query index. For earlier versions it's a normal index
-    // - which unfortunately doesn't contain information if the FX is on the normal FX chain or the input FX chain.
-    // In this case a heuristic is applied to determine which chain it is. It gets more accurate when paramIndex
-    // and paramValue are supplied.
+    // From REAPER > 5.95, parmFxIndex should be interpreted as query index. For earlier versions
+    // it's a normal index
+    // - which unfortunately doesn't contain information if the FX is on the normal FX chain or the
+    //   input FX chain.
+    // In this case a heuristic is applied to determine which chain it is. It gets more accurate
+    // when paramIndex and paramValue are supplied.
     fn get_fx_from_parm_fx_index(
         &self,
         track: &Track,
@@ -641,7 +647,8 @@ impl HelperControlSurface {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, null_mut());
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
-            // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on chunk manipulations
+            // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
+            // chunk manipulations
             self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
             reaper
                 .subjects
@@ -659,7 +666,8 @@ impl HelperControlSurface {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, null_mut());
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
-            // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on chunk manipulations
+            // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
+            // chunk manipulations
             self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
             let reaper = Reaper::get();
             let subject = if ui_open {
@@ -698,8 +706,8 @@ impl HelperControlSurface {
         let reaper = Reaper::get();
         if !bpm.is_null() {
             reaper.subjects.master_tempo_changed.borrow_mut().next(());
-            // If there's a tempo envelope, there are just tempo notifications when the tempo is actually changed.
-            // So that's okay for "touched".
+            // If there's a tempo envelope, there are just tempo notifications when the tempo is
+            // actually changed. So that's okay for "touched".
             // TODO-low What about gradual tempo changes?
             reaper.subjects.master_tempo_touched.borrow_mut().next(());
         }

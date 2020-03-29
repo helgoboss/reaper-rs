@@ -1,7 +1,5 @@
 use crate::high_level::normalized_value::is_normalized_value;
 
-
-
 type Bpm = f64;
 
 pub const MAX_BPM: f64 = 960.0;

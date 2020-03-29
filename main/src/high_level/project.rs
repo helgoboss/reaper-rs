@@ -1,17 +1,10 @@
-
-
-
-
-use std::ffi::{CStr};
-use std::os::raw::{c_void};
-use std::ptr::{null_mut};
-
-
-
+use std::ffi::CStr;
+use std::os::raw::c_void;
+use std::ptr::null_mut;
 
 use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
-use crate::low_level::{ReaProject};
+use crate::low_level::ReaProject;
 
 use crate::medium_level::{ReaperPointerType, ReaperStringPtr};
 use std::path::PathBuf;
@@ -82,8 +75,8 @@ impl Project {
         }
     }
 
-    // This returns a non-optional in order to support not-yet-loaded tracks. GUID is a perfectly stable
-    // identifier of a track!
+    // This returns a non-optional in order to support not-yet-loaded tracks. GUID is a perfectly
+    // stable identifier of a track!
     pub fn get_track_by_guid(&self, guid: &Guid) -> Track {
         self.complain_if_not_available();
         Track::from_guid(*self, *guid)

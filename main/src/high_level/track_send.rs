@@ -39,8 +39,8 @@ impl TrackSend {
         }
     }
 
-    // Use this if you want to create a target-track based send (more stable but sometimes not desired -
-    // just think of presets that should work in other projects as well).
+    // Use this if you want to create a target-track based send (more stable but sometimes not
+    // desired - just think of presets that should work in other projects as well).
     // If you know the index, provide it as well!
     pub fn target_based(source_track: Track, target_track: Track, index: Option<u32>) -> TrackSend {
         TrackSend {
@@ -81,8 +81,8 @@ impl TrackSend {
     }
 
     pub fn get_volume(&self) -> Volume {
-        // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the wrong value if
-        // an envelope is written.
+        // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the
+        // wrong value if an envelope is written.
         let (volume, _) = Reaper::get()
             .medium
             .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())

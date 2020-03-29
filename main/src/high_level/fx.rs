@@ -3,8 +3,6 @@ use std::ffi::CString;
 use std::ops::Deref;
 use std::path::PathBuf;
 
-
-
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
@@ -18,8 +16,8 @@ pub struct Fx {
     track: Track,
     // Primary identifier, but only for tracked, GUID-based FX instances. Otherwise empty.
     guid: Option<Guid>,
-    // For GUID-based FX instances this is the secondary identifier, can become invalid on FX reorderings.
-    // For just index-based FX instances this is the primary identifier.
+    // For GUID-based FX instances this is the secondary identifier, can become invalid on FX
+    // reorderings. For just index-based FX instances this is the primary identifier.
     index: Cell<Option<u32>>,
     is_input_fx: bool,
 }
@@ -204,10 +202,11 @@ impl Fx {
         self.load_by_guid();
     }
 
-    // TODO-low How much sense does it make to expect a chunk region here? Why not a &str? Type safety?
-    //  Probably because a ChunkRegion is a shared owner of what it holds. If we pass just a &str,
-    //  we would need to copy to achieve that ownership. We might need to reconsider the ownership
-    //  requirement of ChunkRegions as a whole (but then we need to care about lifetimes).
+    // TODO-low How much sense does it make to expect a chunk region here? Why not a &str? Type
+    // safety?  Probably because a ChunkRegion is a shared owner of what it holds. If we pass
+    // just a &str,  we would need to copy to achieve that ownership. We might need to
+    // reconsider the ownership  requirement of ChunkRegions as a whole (but then we need to
+    // care about lifetimes).
     pub fn set_chunk(&self, chunk_region: ChunkRegion) {
         // First replace GUID in chunk with the one of this FX
         let mut parent_chunk = chunk_region.get_parent_chunk();
@@ -245,7 +244,8 @@ impl Fx {
         let hwnd = self.get_floating_window();
         if hwnd.is_null() {
             // FX is not open in floating window. In this case we consider it as focused if the FX
-            // chain of that track is open and the currently displayed FX in the FX chain is this FX.
+            // chain of that track is open and the currently displayed FX in the FX chain is this
+            // FX.
             self.window_is_open()
         } else {
             // FX is open in floating window
