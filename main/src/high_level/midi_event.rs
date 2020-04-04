@@ -1,6 +1,6 @@
 use crate::high_level::MidiInputDevice;
 use crate::low_level::MIDI_event_t;
-use helgoboss_midi::MidiMessage;
+use helgoboss_midi::{MidiMessage, U7};
 
 pub trait MidiEvent {
     type Msg: MidiMessage;
@@ -50,12 +50,12 @@ impl MidiMessage for BorrowedReaperMidiEvent {
         self.inner().midi_message[0]
     }
 
-    fn get_data_byte_1(&self) -> u8 {
-        self.inner().midi_message[1]
+    fn get_data_byte_1(&self) -> U7 {
+        unsafe { U7::new_unchecked(self.inner().midi_message[1]) }
     }
 
-    fn get_data_byte_2(&self) -> u8 {
-        self.inner().midi_message[2]
+    fn get_data_byte_2(&self) -> U7 {
+        unsafe { U7::new_unchecked(self.inner().midi_message[2]) }
     }
 }
 
@@ -95,12 +95,12 @@ impl MidiMessage for OwnedReaperMidiEvent {
         self.inner.midi_message[0]
     }
 
-    fn get_data_byte_1(&self) -> u8 {
-        self.inner.midi_message[1]
+    fn get_data_byte_1(&self) -> U7 {
+        unsafe { U7::new_unchecked(self.inner.midi_message[1]) }
     }
 
-    fn get_data_byte_2(&self) -> u8 {
-        self.inner.midi_message[2]
+    fn get_data_byte_2(&self) -> U7 {
+        unsafe { U7::new_unchecked(self.inner.midi_message[2]) }
     }
 }
 
