@@ -1,15 +1,16 @@
 #![feature(fn_traits, clamp, backtrace)]
 //!
 //! Currently required nightly features:
-//! - fn_traits: In high-level API for calling hook commands. I think there must be an easy workaround.
+//! - fn_traits: In high-level API for calling hook commands. I think there must be an easy
+//!   workaround.
 //! - clamp: In high-level API. Could be easily replaced with clamp from num crate.
 //! - backtrace: In high-level API for logging. Could be replaced with crate.
 //!
 //! For now leave things as they are. It's impossible anyway to make the high-level API work on
 //! stable channel as long as rxRust still relies on nightly features. Moreover I don't consider it
-//! as a showstopper that it doesn't work on stable channel yet. reaper-rs will most likely not be used by
-//! other universal Rust libraries, but only in final plugins. So its nightly-nature is not very
-//! contaminating.
+//! as a showstopper that it doesn't work on stable channel yet. reaper-rs will most likely not be
+//! used by other universal Rust libraries, but only in final plugins. So its nightly-nature is not
+//! very contaminating.
 //! TODO Make low_level and medium_level different crates so we can use it on stable!
 //! TODO Wise rustfmt settings
 pub mod high_level;

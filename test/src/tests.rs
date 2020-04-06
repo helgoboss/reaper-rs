@@ -52,9 +52,9 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
             check_ne!(reaper.get_current_project(), current_project_before);
             check_eq!(reaper.get_current_project(), new_project);
             check_ne!(reaper.get_projects().nth(0), Some(new_project));
-            //            
+            //
             // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() ==
-            // newProject);            
+            // newProject);
             // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
             // projectCountBefore + 1);
             check_eq!(new_project.get_track_count(), 0);

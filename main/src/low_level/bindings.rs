@@ -1783,7 +1783,7 @@ pub mod root {
         }
         extern "C" {
             pub fn midi_Input_GetReadBuf(self_: *mut root::midi_Input)
-                -> *mut root::MIDI_eventlist;
+            -> *mut root::MIDI_eventlist;
         }
     }
 }
