@@ -1,4 +1,4 @@
-#![feature(fn_traits, clamp, backtrace)]
+#![cfg_attr(feature = "high-level", feature(fn_traits, clamp, backtrace))]
 //!
 //! Currently required nightly features:
 //! - fn_traits: In high-level API for calling hook commands. I think there must be an easy
@@ -11,8 +11,9 @@
 //! as a showstopper that it doesn't work on stable channel yet. reaper-rs will most likely not be
 //! used by other universal Rust libraries, but only in final plugins. So its nightly-nature is not
 //! very contaminating.
-//! TODO Make low_level and medium_level different crates so we can use it on stable!
 //! TODO Wise rustfmt settings
+#[cfg(feature = "high-level")]
 pub mod high_level;
-pub mod low_level;
+#[cfg(feature = "medium-level")]
 pub mod medium_level;
+pub mod low_level;
