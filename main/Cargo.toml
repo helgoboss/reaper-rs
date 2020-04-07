@@ -6,9 +6,14 @@ edition = "2018"
 build = "build.rs"
 
 [features]
+# By default, only the low-level API is enabled
 default = []
-high-level = ["medium-level", "once_cell", "rxrust", "helgoboss-midi", "regex", "slog", "slog-stdlog", "slog-term", "num_enum"]
+# Enables the medium-level API (which depends on the low-level API)
 medium-level = []
+# Enables the high-level API (which depends on the medium-level and low-level APIs)
+high-level = ["medium-level", "once_cell", "rxrust", "helgoboss-midi", "regex", "slog", "slog-stdlog", "slog-term", "num_enum"]
+# Regenerates `bindings.rs` from C++ header files
+generate-bindings = ["bindgen"]
 
 [dependencies]
 c_str_macro = "1.0.2"
@@ -26,5 +31,5 @@ slog-term = { version = "2.5.0", optional = true }
 num_enum = { version = "0.4.2", optional = true }
 
 [build-dependencies]
-bindgen = "0.52.0"
 cc = "1.0.50"
+bindgen = { version = "0.52.0", optional = true }
