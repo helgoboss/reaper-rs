@@ -2,14 +2,14 @@
 
 [REAPER](https://www.reaper.fm/) bindings for the [Rust](https://www.rust-lang.org/) programming language
 
-**Attention: reaper-rs is in alpha stage so its API is not stable yet!**
+**Attention: reaper-rs is in alpha stage so its API is not stable yet (especially not the high-level AP)!**
 
 ---
 
 ## Introduction
 
-reaper-rs allows programmers to write extensions for the awesome [REAPER](https://www.reaper.fm/) DAW 
-(**D**igital **A**udio **W**orkstation) by using the  [Rust](https://www.rust-lang.org/) programming 
+reaper-rs allows programmers to write extensions for the [REAPER](https://www.reaper.fm/) DAW 
+(**D**igital **A**udio **W**orkstation) using the  [Rust](https://www.rust-lang.org/) programming 
 language. It does so by providing both raw Rust bindings to the 
 [REAPER C++ SDK](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
 

@@ -771,10 +771,6 @@ fn remove_track() -> TestStep {
         check_eq!(track_2.get_guid(), track_2_guid);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track_1);
-        // CONTINUE
-        // let media_track = track_1.get_raw();
-        // reaper.medium.get_media_track_info_value(media_track, TrackInfoKey::P_NAME, )
-        // let track_name = track.get_name();
         Ok(())
     })
 }

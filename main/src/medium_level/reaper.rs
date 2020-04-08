@@ -1166,6 +1166,12 @@ impl ReaperStringPtr {
         Some(CStr::from_ptr(self.0))
     }
 
+    // TODO Unfortunately in general this is unsafe as well :( Because we don't know when this will
+    //  be called. We must find some mechanism which *forces* us to do something with the pointer
+    //  immediately in order to do something safe with it. This forcing could be represented as a
+    //  type which we cannot be kept around and also not copied/cloned.
+    // TODO In the high-level API we could make this safe by using dynamic lifetime checking in the
+    //  background via ValidatePtr methods.
     // Not unsafe because returns owned string. No lifetime questions anymore.
     pub fn into_c_string(self) -> Option<CString> {
         unsafe { self.into_c_str().map(|c_str| c_str.to_owned()) }
