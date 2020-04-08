@@ -1,4 +1,5 @@
 [package]
+# TODO Call this "-extension" instead
 name = "reaper-rs-test-plugin"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
