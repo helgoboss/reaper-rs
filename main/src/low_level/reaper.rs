@@ -1,11 +1,10 @@
-# ! [ allow ( non_upper_case_globals ) ] # ! [ allow ( non_camel_case_types ) ] # ! [ allow ( non_snake_case ) ]use super::{bindings::root, ReaperPluginContext};
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+use super::{bindings::root, ReaperPluginContext};
 use c_str_macro::c_str;
 #[doc = r" This is the low-level access point to all REAPER functions. In order to use it, you first"]
-#[doc = r" must obtain an instance of this struct by using `Reaper::load()`."]
-#[doc = r""]
-#[doc = r#" "Low-level" means that it exposes the original C++ REAPER functions 1:1, nothing"#]
-#[doc = r" more and nothing less. If you want additional convenience, use the medium-level"]
-#[doc = r" or high-level API."]
+#[doc = r" must obtain an instance of this struct by invoking [`load`](struct.Reaper.html#method.load)."]
 #[doc = r""]
 #[doc = r" Please note that it's possible that functions are *not available*. This can be the case if"]
 #[doc = r" the user runs your plug-in in an older version of REAPER which doesn't have that function yet."]

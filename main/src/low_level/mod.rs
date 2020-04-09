@@ -1,7 +1,14 @@
-//! Low-level test doc TODO
+//! This module contains the low-level API of *reaper-rs*, meaning that it exposes the raw C++
+//! REAPER functions one to one, nothing more and nothing less. If you want "Rust feeling" or
+//! additional convenience, use the [medium-level](../medium_level/index.html) or
+//! [high-level](../high_level/index.html) API.
+//!
+//! Most parts of the low-level API are auto-generated from `reaper_plugin_functions.h`.
+//! For a list of all exposed functions, have a look at the [Reaper](struct.Reaper.html) type.
 mod bindings;
 
 pub mod raw {
+    //! Exposes a few important raw types, functions and constants from the C++ REAPER SDK.
     pub use super::bindings::root::{
         audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, reaper_plugin_info_t,
         reaper_rs_midi::*, GetActiveWindow, IReaperControlSurface, KbdCmd, KbdSectionInfo,

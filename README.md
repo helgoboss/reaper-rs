@@ -8,8 +8,8 @@
 
 ## Introduction
 
-reaper-rs allows programmers to write extensions for the [REAPER](https://www.reaper.fm/) DAW 
-(**D**igital **A**udio **W**orkstation) using the  [Rust](https://www.rust-lang.org/) programming 
+*reaper-rs* allows programmers to write extensions for the [REAPER](https://www.reaper.fm/) DAW 
+(digital audio workstation) using the  [Rust](https://www.rust-lang.org/) programming 
 language. It does so by providing both raw Rust bindings to the 
 [REAPER C++ SDK](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
 

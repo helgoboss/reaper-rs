@@ -98,11 +98,7 @@ mod codegen {
                 use c_str_macro::c_str;
 
                 /// This is the low-level access point to all REAPER functions. In order to use it, you first
-                /// must obtain an instance of this struct by using `Reaper::load()`.
-                ///
-                /// "Low-level" means that it exposes the original C++ REAPER functions 1:1, nothing
-                /// more and nothing less. If you want additional convenience, use the medium-level
-                /// or high-level API.
+                /// must obtain an instance of this struct by invoking [`load`](struct.Reaper.html#method.load).
                 ///
                 /// Please note that it's possible that functions are *not available*. This can be the case if
                 /// the user runs your plug-in in an older version of REAPER which doesn't have that function yet.

@@ -7,15 +7,17 @@ use vst::plugin::HostCallback;
 type FunctionProvider = Box<dyn Fn(&std::ffi::CStr) -> isize>;
 
 /// This represents the context which is needed to access REAPER functions from plug-ins. Once
-/// obtained, it is supposed to be passed to `Reaper::load()`.
+/// obtained, it is supposed to be passed to [`load`](struct.Reaper.html#method.load).
 pub struct ReaperPluginContext {
     /// Function which obtains a function pointer for a given REAPER function name.
     pub function_provider: FunctionProvider,
 }
 
 impl ReaperPluginContext {
-    /// Creates a plug-in context from the `reaper_plugin_info_t` struct that REAPER provides when
-    /// calling the `ReaperPluginEntry` function (the main entry point for any extension plug-in).
+    /// Creates a plug-in context from the
+    /// [`reaper_plugin_info_t`](raw/struct.reaper_plugin_info_t.html) struct that REAPER
+    /// provides when calling the `ReaperPluginEntry` function (the main entry point for any
+    /// extension plug-in).
     pub fn from_extension_plugin(
         rec: *mut reaper_plugin_info_t,
     ) -> Result<ReaperPluginContext, &'static str> {
@@ -24,7 +26,7 @@ impl ReaperPluginContext {
     }
 
     /// Creates a plug-in context by invoking the given VST host callback that `vst-rs` passes to
-    /// the `Plugin::new()` function.
+    /// the plugin's [`new`](../../vst/plugin/trait.Plugin.html#method.new) function.
     pub fn from_vst_plugin(host: HostCallback) -> Result<ReaperPluginContext, &'static str> {
         let host_callback = host.raw_callback().ok_or("Host callback not available")?;
         let function_provider = create_vst_plugin_function_provider(host_callback);

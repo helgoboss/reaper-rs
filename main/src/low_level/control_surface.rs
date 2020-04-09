@@ -8,9 +8,9 @@ use std::os::raw::c_void;
 use std::ptr::{null, null_mut};
 use std::sync::Once;
 
-/// This is the Rust analog to the C++ `IReaperControlSurface`. An implementation of this trait
-/// can be passed to `Reaper::install_control_surface()`. As a consequence, REAPER will invoke
-/// the respective callback methods.
+/// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`. An implementation
+/// of this trait can be passed to [`install_control_surface`](fn.install_control_surface.html).
+/// As a consequence, REAPER will invoke the respective callback methods.
 ///
 /// # Design
 ///
@@ -29,14 +29,14 @@ use std::sync::Once;
 /// compiler wouldn't allow us to do that. But Rust won't save us here because the call comes from
 /// "outside". By not having a `&mut self` reference, developers are forced to explicitly think
 /// about this scenario. One can use a `RefCell` along with `borrow_mut()` to still mutate some
-/// ControlSurface state and failing fast whenever reentrancy happens - at runtime, by getting a
+/// control surface state and failing fast whenever reentrancy happens - at runtime, by getting a
 /// panic. This is not as good as failing fast at compile time but still much better than to run
 /// into undefined behavior, which could cause hard-to-find bugs and crash REAPER - that's the last
 /// thing we want! Panicking is not so bad. We can catch it before it reaches REAPER and therefore
 /// let REAPER continue running. Ideally it's observed by the developer when he tests his plugin.
 /// Then he can think about how to solve that issue. They might find out that it's okay and
 /// therefore use some unsafe code to prevent the panic. They might find out that they want to check
-/// for reentrancy by using `RefCell::try_borrow_mut()`. Or they might find out that they want to
+/// for reentrancy by using `try_borrow_mut()`. Or they might find out that they want to
 /// avoid this situation by just deferring the event handling to the next main loop cycle.
 pub trait ControlSurface {
     fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
@@ -105,26 +105,26 @@ static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
 static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
 
 /// This returns a mutable reference. In general this mutability should not be used, just in case
-/// of control surface methods where it's sure that REAPER never reenters them! See `ControlSurface`
-/// documentation.
+/// of control surface methods where it's sure that REAPER never reenters them! See
+/// [`ControlSurface`](trait.ControlSurface.html) documentation.
 pub(crate) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
     unsafe { CONTROL_SURFACE_INSTANCE.as_mut().unwrap() }
 }
 
 /// This function for installing a REAPER control surface is provided because
-/// `plugin_register("csurf_inst", my_rust_trait_implementing_IReaperControlSurface)` isn't
-/// going to work. Rust structs can't implement pure virtual C++ interfaces.
+/// `plugin_register("csurf_inst", my_rust_struct)` isn't going to work. Rust structs can't
+/// implement C++ virtual base classes.
 ///
-/// This function sets up the given `ControlSurface` implemented in Rust but **doesn't yet
+/// This function sets up the given control surface implemented in Rust but **doesn't yet
 /// register it**! Because you are not using the high-level API, the usual REAPER C++ way to
-/// register a control surface still applies. See `get_cpp_control_surface()`. If you register a
-/// control surface, you also must take care of unregistering it at the end. This is especially
-/// important for VST plug-ins because they live shorter than a REAPER session! **If you don't
-/// unregister the control surface before the VST plug-in is destroyed, REAPER will crash** because
-/// it will attempt to invoke functions which are not loaded anymore. This kind of responsibility is
-/// gone when using the high-level API.
-///     
-/// Currently `reaper-rs` supports only one control surface per plug-in. This is not a restriction
+/// register a control surface still applies. See
+/// [`get_cpp_control_surface`](fn.get_cpp_control_surface.html). If you register a control surface,
+/// you also must take care of unregistering it at the end. This is especially important for VST
+/// plug-ins because they live shorter than a REAPER session! **If you don't unregister the control
+/// surface before the VST plug-in is destroyed, REAPER will crash** because it will attempt to
+/// invoke functions which are not loaded anymore. This kind of responsibility is gone when using
+/// the high-level API.     
+/// Currently *reaper-rs* supports only one control surface per plug-in. This is not a restriction
 /// dictated by Rust, it's just a bit easier to implement and I don't see many use cases where one
 /// would want multiple control surfaces.
 pub fn install_control_surface(control_surface: impl ControlSurface + 'static) {
@@ -142,9 +142,11 @@ pub fn install_control_surface(control_surface: impl ControlSurface + 'static) {
 }
 
 /// This returns a pointer to a `IReaperControlSurface`-implementing C++ object which will delegate
-/// to the Rust `ControlSurface` which you did install by invoking `install_control_surface`.
-/// The pointer needs to be passed to `Reaper::plugin_register("csurf_inst", <here>)` for
-/// registering and to `Reaper::plugin_register("-csurf_inst", <here>)` for unregistering.
+/// to the Rust [`ControlSurface`](trait.ControlSurface.html) which you installed by invoking
+/// [`install_control_surface`](fn.install_control_surface.html). The pointer needs to be passed to
+/// [`plugin_register`](struct.Reaper.html#structfield.plugin_register) as in
+/// `plugin_register("csurf_inst", ptr)` for registering and as in
+/// `plugin_register("-csurf_inst", ptr)` for unregistering.
 pub fn get_cpp_control_surface() -> *mut c_void {
     unsafe { get_control_surface() }
 }

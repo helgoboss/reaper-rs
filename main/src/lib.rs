@@ -1,4 +1,9 @@
 #![cfg_attr(feature = "high-level", feature(fn_traits, clamp, backtrace))]
+//! *reaper-rs* allows programmers to write extensions for the [REAPER](https://www.reaper.fm/) DAW
+//! (digital audio workstation) using the  [Rust](https://www.rust-lang.org/) programming
+//! language. It does so by providing both raw Rust bindings to the
+//! [REAPER C++ SDK](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of
+//! that.
 
 // The high-level API currently requires nightly features:
 // - fn_traits: For calling hook commands. I think this can be avoided somehow.
