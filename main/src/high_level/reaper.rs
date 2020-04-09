@@ -159,7 +159,7 @@ impl ReaperBuilder {
     fn with_all_functions_loaded(context: ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder {
             medium: {
-                let low = low_level::Reaper::with_all_functions_loaded(context.function_provider);
+                let low = low_level::Reaper::load(context.function_provider);
                 medium_level::Reaper::new(low)
             },
             logger: Default::default(),
@@ -392,13 +392,13 @@ impl Reaper {
             .plugin_register(c_str!("hookpostcommand"), hook_post_command as *mut c_void);
         self.medium.register_control_surface();
         self.medium
-            .audio_reg_hardware_hook(true, &self.audio_hook as *const _);
+            .audio_reg_hardware_hook(true, &self.audio_hook as *const _ as *mut _);
     }
 
     // Must be idempotent
     pub fn deactivate(&self) {
         self.medium
-            .audio_reg_hardware_hook(false, &self.audio_hook as *const _);
+            .audio_reg_hardware_hook(false, &self.audio_hook as *const _ as *mut _);
         self.medium.unregister_control_surface();
         self.medium
             .plugin_register(c_str!("-hookpostcommand"), hook_post_command as *mut c_void);

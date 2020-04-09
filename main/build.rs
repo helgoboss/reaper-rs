@@ -193,12 +193,29 @@ mod codegen {
             let fn_types: Vec<TypeBareFn> = fn_ptrs.iter().map(|p| p.fn_type.clone()).collect();
             let result = quote::quote! {
                 use super::bindings::root;
+                use c_str_macro::c_str;
+
+                pub type FunctionProvider = Box<dyn Fn(&std::ffi::CStr) -> isize>;
 
                #[derive(Default)]
                 pub struct Reaper {
                     #(
                         pub #idents: Option<#fn_types>,
                     )*
+                }
+
+                impl Reaper {
+                    /// Loads all available REAPER functions from the given function provider and
+                    /// returns a Reaper instance which allows you to call these functions.
+                    pub fn load(get_func: FunctionProvider) -> Reaper {
+                        unsafe {
+                            Reaper {
+                                #(
+                                    #idents: std::mem::transmute(get_func(c_str!(stringify!(#idents)))),
+                                )*
+                            }
+                        }
+                    }
                 }
             };
             std::fs::write("src/low_level/reaper.rs", result.to_string())

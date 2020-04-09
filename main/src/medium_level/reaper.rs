@@ -787,7 +787,7 @@ impl Reaper {
 
     // DONE
     // Returns true on success
-    pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *const audio_hook_register_t) -> bool {
+    pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *mut audio_hook_register_t) -> bool {
         require!(self.low, Audio_RegHardwareHook)(is_add, reg) > 0
     }
 
