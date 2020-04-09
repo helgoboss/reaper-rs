@@ -20,6 +20,3 @@ pub use reaper_plugin_context::*;
 
 mod reaper;
 pub use reaper::*;
-
-// TODO Generate ALL REAPER functions without the necessity to whitelist them in build.rs
-// TODO Maybe don't generate root mod in bindings.rs
