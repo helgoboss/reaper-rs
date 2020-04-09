@@ -1,7 +1,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
-use super::{bindings::root::reaper_rs_control_surface::get_control_surface, firewall, MediaTrack};
+use super::{
+    bindings::root::reaper_rs_control_surface::get_control_surface, firewall, raw::MediaTrack,
+};
 use std::os::raw::c_void;
 use std::ptr::{null, null_mut};
 use std::sync::Once;

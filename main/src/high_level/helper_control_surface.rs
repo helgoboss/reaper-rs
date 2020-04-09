@@ -3,7 +3,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{
     get_media_track_guid, AutomationMode, Payload, Project, Reaper, Task, Track,
 };
-use crate::low_level::{
+use crate::low_level::raw::{
     MediaTrack, ReaProject, CSURF_EXT_SETBPMANDPLAYRATE, CSURF_EXT_SETFOCUSEDFX,
     CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETFXENABLED, CSURF_EXT_SETFXOPEN, CSURF_EXT_SETFXPARAM,
     CSURF_EXT_SETFXPARAM_RECFX, CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETLASTTOUCHEDFX,

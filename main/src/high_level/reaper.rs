@@ -30,12 +30,13 @@ use crate::high_level::{
     MessageBoxResult, MidiEvent, MidiInputDevice, MidiOutputDevice, Project, Section, Track,
 };
 use crate::low_level;
-use crate::low_level::{
-    audio_hook_register_t, firewall, gaccel_register_t, midi_Input_GetReadBuf,
-    MIDI_eventlist_EnumItems, ReaperPluginContext, ACCEL, HWND,
+use crate::low_level::raw::{
+    audio_hook_register_t, gaccel_register_t, midi_Input_GetReadBuf, MIDI_eventlist_EnumItems,
+    ACCEL, HWND,
 };
+use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
-use crate::medium_level::{GetFocusedFxResult, GetLastTouchedFxResult};
+use crate::medium_level::{install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult};
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -378,8 +379,7 @@ impl Reaper {
     }
 
     fn init(&self, task_receiver: Receiver<Task>) {
-        self.medium
-            .install_control_surface(HelperControlSurface::new(task_receiver));
+        install_control_surface(HelperControlSurface::new(task_receiver));
     }
 
     // Must be idempotent

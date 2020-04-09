@@ -1,4 +1,4 @@
-use super::{reaper_plugin_info_t, REAPER_PLUGIN_VERSION};
+use super::raw::{reaper_plugin_info_t, REAPER_PLUGIN_VERSION};
 use std::os::raw::{c_int, c_void};
 use std::ptr::null_mut;
 use vst::api::HostCallbackProc;

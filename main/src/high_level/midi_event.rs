@@ -1,5 +1,5 @@
 use crate::high_level::MidiInputDevice;
-use crate::low_level::MIDI_event_t;
+use crate::low_level::raw::MIDI_event_t;
 use helgoboss_midi::{MidiMessage, U7};
 
 pub trait MidiEvent {

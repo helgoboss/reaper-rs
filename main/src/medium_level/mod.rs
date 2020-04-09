@@ -23,6 +23,8 @@
 mod constants;
 mod control_surface;
 mod reaper;
+mod util;
+pub use util::*;
 
 pub use constants::*;
 pub use control_surface::{ControlSurface, DelegatingControlSurface};

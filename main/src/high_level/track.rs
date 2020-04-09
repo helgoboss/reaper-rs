@@ -19,9 +19,8 @@ use crate::high_level::{
     get_target_track, Chunk, ChunkRegion, InputMonitoringMode, MidiRecordingInput, Pan, Project,
     Reaper, RecordingInput, Volume,
 };
-use crate::low_level::{
-    get_control_surface_instance, MediaTrack, ReaProject, CSURF_EXT_SETINPUTMONITOR, GUID,
-};
+use crate::low_level::get_control_surface_instance;
+use crate::low_level::raw::{MediaTrack, ReaProject, CSURF_EXT_SETINPUTMONITOR, GUID};
 
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,

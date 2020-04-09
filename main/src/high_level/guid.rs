@@ -1,5 +1,5 @@
 use crate::high_level::Reaper;
-use crate::low_level::GUID;
+use crate::low_level::raw::GUID;
 use std::convert;
 
 use std::ffi::{CStr, CString};

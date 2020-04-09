@@ -1,4 +1,5 @@
-use crate::low_level::{reaper_plugin_info_t, ReaperPluginContext, HINSTANCE};
+use super::raw::{reaper_plugin_info_t, HINSTANCE};
+use super::ReaperPluginContext;
 use std::error::Error;
 use std::panic::{catch_unwind, UnwindSafe};
 

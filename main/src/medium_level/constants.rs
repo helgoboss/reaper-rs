@@ -3,9 +3,18 @@ use c_str_macro::c_str;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 
+/// Possible REAPER pointer types which can be passed to `Reaper::validate_ptr_2()`.
+///
+/// Except for the trailing asterisk, the variants are named exactly like the strings which will be
+/// passed to the low-level REAPER function because the medium-level API is designed to still be
+/// close to the raw REAPER API.
+///
+/// Please raise a reaper-rs issue if you find that an enum variant is missing!
 pub enum ReaperPointerType {
     MediaTrack,
     ReaProject,
+    /// If a variant is missing in this enum, you can use this custom one as a last resort. Don't
+    /// include the trailing asterisk (`*`)! It will be added to the call automatically.
     Custom(&'static CStr),
 }
 
@@ -20,27 +29,10 @@ impl From<ReaperPointerType> for Cow<'static, CStr> {
     }
 }
 
-// TODO-low Maybe don't use ENV suffix or even use PascalCase
-// TODO-low Add more values
-// TODO-low Rename
-pub enum EnvChunkName {
-    VOLENV,
-    PANENV,
-    Custom(&'static CStr),
-}
-
-impl From<EnvChunkName> for Cow<'static, CStr> {
-    fn from(value: EnvChunkName) -> Self {
-        use EnvChunkName::*;
-        match value {
-            VOLENV => c_str!("VOLENV").into(),
-            PANENV => c_str!("PANENV").into(),
-            Custom(name) => name.into(),
-        }
-    }
-}
-
-// TODO-low Maybe use PascalCase
+/// All the possible track info keys which you can pass to `Reaper::get_set_media_track_info()`.
+/// Please raise a reaper-rs issue if you find that an enum variant is missing!
+/// The variants are named exactly like the strings which will be passed to the low-level REAPER
+/// function because the medium-level API is designed to still be close to the raw REAPER API.  
 pub enum TrackInfoKey {
     B_FREEMODE,
     B_HEIGHTLOCK,
@@ -95,6 +87,7 @@ pub enum TrackInfoKey {
     P_PARTRACK,
     P_PROJECT,
     P_TCP_LAYOUT,
+    /// If a variant is missing in this enum, you can use this custom one as a last resort.
     Custom(&'static CStr),
 }
 
@@ -165,7 +158,12 @@ impl From<TrackInfoKey> for Cow<'static, CStr> {
     }
 }
 
-// TODO-low Maybe use PascalCase
+/// All the possible track send info keys which you can pass to `Reaper::get_set_track_send_info()`.
+///
+/// The variants are named exactly like the strings which will be passed to the low-level REAPER
+/// function because the medium-level API is designed to still be close to the raw REAPER API.  
+///
+/// Please raise a reaper-rs issue if you find that an enum variant is missing!
 pub enum TrackSendInfoKey {
     B_MONO,
     B_MUTE,
@@ -182,6 +180,7 @@ pub enum TrackSendInfoKey {
     P_SRCTRACK,
     P_ENV(EnvChunkName),
     P_EXT(&'static CStr),
+    /// If a variant is missing in this enum, you can use this custom one as a last resort.
     Custom(&'static CStr),
 }
 
@@ -210,6 +209,30 @@ impl From<TrackSendInfoKey> for Cow<'static, CStr> {
                 concat_c_strs(c_str!("P_EXT:"), extension_specific_key).into()
             }
             Custom(key) => key.into(),
+        }
+    }
+}
+
+/// Common envelope chunk names which you can pass to `TrackInfoKey::P_ENV()`.
+///
+/// The variants are named exactly like the strings which will be passed to the low-level REAPER
+/// function because the medium-level API is designed to still be close to the raw REAPER API.  
+///
+/// Please raise a reaper-rs issue if you find that an enum variant is missing!
+pub enum EnvChunkName {
+    VOLENV,
+    PANENV,
+    /// Use this for all non-common envelope names.
+    Custom(&'static CStr),
+}
+
+impl From<EnvChunkName> for Cow<'static, CStr> {
+    fn from(value: EnvChunkName) -> Self {
+        use EnvChunkName::*;
+        match value {
+            VOLENV => c_str!("VOLENV").into(),
+            PANENV => c_str!("PANENV").into(),
+            Custom(name) => name.into(),
         }
     }
 }

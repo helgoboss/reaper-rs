@@ -6,11 +6,11 @@ use std::ptr::null_mut;
 use c_str_macro::c_str;
 
 use crate::low_level;
-use crate::low_level::{
-    audio_hook_register_t, get_cpp_control_surface, install_control_surface, midi_Input,
-    midi_Output, IReaperControlSurface, KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope,
-    GUID, HWND,
+use crate::low_level::raw::{
+    audio_hook_register_t, midi_Input, midi_Output, IReaperControlSurface, KbdSectionInfo,
+    MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
 };
+use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
     ControlSurface, DelegatingControlSurface, ReaperPointerType, TrackSendInfoKey,
@@ -146,13 +146,6 @@ impl Reaper {
         let mut guid = MaybeUninit::uninit();
         require!(self.low, genGuid)(guid.as_mut_ptr());
         unsafe { guid.assume_init() }
-    }
-
-    // DONE
-    // Once installed, it stays installed until this module unloaded
-    pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
-        let delegating_control_surface = DelegatingControlSurface::new(control_surface);
-        install_control_surface(delegating_control_surface);
     }
 
     // DONE

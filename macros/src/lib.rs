@@ -8,7 +8,7 @@ pub fn low_level_reaper_extension_plugin(_attr: TokenStream, input: TokenStream)
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[no_mangle]
-        extern "C" fn ReaperPluginEntry(h_instance: ::reaper_rs::low_level::HINSTANCE, rec: *mut ::reaper_rs::low_level::reaper_plugin_info_t) -> ::std::os::raw::c_int {
+        extern "C" fn ReaperPluginEntry(h_instance: ::reaper_rs::low_level::raw::HINSTANCE, rec: *mut ::reaper_rs::low_level::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
             ::reaper_rs::low_level::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
         }
 

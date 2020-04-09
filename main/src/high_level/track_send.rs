@@ -1,5 +1,5 @@
 use crate::high_level::{Pan, Reaper, Track, Volume};
-use crate::low_level::MediaTrack;
+use crate::low_level::raw::MediaTrack;
 use crate::medium_level::TrackSendInfoKey::P_DESTTRACK;
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;

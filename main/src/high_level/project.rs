@@ -4,7 +4,7 @@ use std::ptr::null_mut;
 
 use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
-use crate::low_level::ReaProject;
+use crate::low_level::raw::ReaProject;
 
 use crate::medium_level::{ReaperPointerType, ReaperStringPtr};
 use std::path::PathBuf;

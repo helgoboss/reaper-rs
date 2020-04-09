@@ -1,6 +1,6 @@
 use crate::high_level::fx::Fx;
 use crate::high_level::Reaper;
-use crate::low_level::MediaTrack;
+use crate::low_level::raw::MediaTrack;
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
 

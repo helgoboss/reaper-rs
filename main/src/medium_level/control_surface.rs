@@ -1,10 +1,13 @@
 use crate::low_level;
-use crate::low_level::MediaTrack;
+use crate::low_level::raw::MediaTrack;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 
+/// This is the medium-level version of
+/// [`low_level::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation of
+/// this trait can be passed to `medium_level::install_control_surface()`. TODO
 pub trait ControlSurface {
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
         None

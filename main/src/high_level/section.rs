@@ -1,5 +1,5 @@
 use crate::high_level::Action;
-use crate::low_level::{KbdCmd, KbdSectionInfo};
+use crate::low_level::raw::{KbdCmd, KbdSectionInfo};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
