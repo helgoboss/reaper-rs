@@ -1,9 +1,9 @@
 use c_str_macro::c_str;
 use reaper_rs::high_level::{ActionKind, Reaper};
-use reaper_rs_macros::reaper_plugin;
+use reaper_rs_macros::reaper_extension_plugin;
 use std::error::Error;
 
-#[reaper_plugin(email_address = "info@helgoboss.org")]
+#[reaper_extension_plugin(email_address = "info@helgoboss.org")]
 fn main() -> Result<(), Box<dyn Error>> {
     let reaper = Reaper::get();
     reaper.activate();

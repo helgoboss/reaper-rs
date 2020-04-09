@@ -1,9 +1,11 @@
 #include "control_surface.hpp"
 
 namespace reaper_rs_control_surface {
-  // This surface just delegates to the free functions implemented in Rust
+  // This surface just delegates to the free functions implemented in Rust. See header file for an explanation.
   class ReaperRsControlSurface : public IReaperControlSurface {
   private:
+    // This pointer is not used right now. It might be used in future if someone wants to provide multiple control
+    // surfaces from just one plug-in.
     void* callback_target_;
   public:
     ReaperRsControlSurface(void* callback_target) : callback_target_(callback_target) {

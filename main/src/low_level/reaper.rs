@@ -1,8 +1,18 @@
-use super::bindings::root;
+# ! [ allow ( non_upper_case_globals ) ] # ! [ allow ( non_camel_case_types ) ] # ! [ allow ( non_snake_case ) ]use super::{bindings::root, ReaperPluginContext};
 use c_str_macro::c_str;
-
-pub type FunctionProvider = Box<dyn Fn(&std::ffi::CStr) -> isize>;
-
+#[doc = r" This is the low-level access point to all REAPER functions. In order to use it, you first"]
+#[doc = r" must obtain an instance of this struct by using `Reaper::load()`."]
+#[doc = r""]
+#[doc = r#" "Low-level" means that it exposes the original C++ REAPER functions 1:1, nothing"#]
+#[doc = r" more and nothing less. If you want additional convenience, use the medium-level"]
+#[doc = r" or high-level API."]
+#[doc = r""]
+#[doc = r" Please note that it's possible that functions are *not available*. This can be the case if"]
+#[doc = r" the user runs your plug-in in an older version of REAPER which doesn't have that function yet."]
+#[doc = r" Therefore each function in this struct is actually a function pointer wrapped"]
+#[doc = r" in an `Option`. If you are sure your function will be there, you can just unwrap the option."]
+#[doc = r" The medium-level API doesn't have this distinction anymore. It just unwraps the options"]
+#[doc = r" automatically for the sake of convenience."]
 #[derive(Default)]
 pub struct Reaper {
     pub Audio_RegHardwareHook:
@@ -419,11 +429,11 @@ pub struct Reaper {
     pub GetMidiInput: Option<fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
     pub GetMidiOutput: Option<fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
 }
-
 impl Reaper {
-    #[doc = r" Loads all available REAPER functions from the given function provider and"]
-    #[doc = r" returns a Reaper instance which allows you to call these functions."]
-    pub fn load(get_func: FunctionProvider) -> Reaper {
+    #[doc = r" Loads all available REAPER functions plug-in context and returns a `Reaper` instance"]
+    #[doc = r" which allows you to call these functions."]
+    pub fn load(context: &ReaperPluginContext) -> Reaper {
+        let get_func = &context.function_provider;
         unsafe {
             Reaper {
                 Audio_RegHardwareHook: std::mem::transmute(get_func(c_str!(stringify!(

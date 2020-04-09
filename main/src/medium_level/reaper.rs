@@ -7,8 +7,9 @@ use c_str_macro::c_str;
 
 use crate::low_level;
 use crate::low_level::{
-    audio_hook_register_t, midi_Input, midi_Output, IReaperControlSurface, KbdSectionInfo,
-    MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
+    audio_hook_register_t, get_cpp_control_surface, install_control_surface, midi_Input,
+    midi_Output, IReaperControlSurface, KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope,
+    GUID, HWND,
 };
 use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
@@ -151,20 +152,20 @@ impl Reaper {
     // Once installed, it stays installed until this module unloaded
     pub fn install_control_surface(&self, control_surface: impl ControlSurface + 'static) {
         let delegating_control_surface = DelegatingControlSurface::new(control_surface);
-        self.low.install_control_surface(delegating_control_surface);
+        install_control_surface(delegating_control_surface);
     }
 
     // DONE
     // TODO-low Check if this is really idempotent
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) {
-        self.plugin_register(c_str!("csurf_inst"), self.low.get_cpp_control_surface());
+        self.plugin_register(c_str!("csurf_inst"), get_cpp_control_surface());
     }
 
     // DONE
     // TODO-low Check if this is really idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_register(c_str!("-csurf_inst"), self.low.get_cpp_control_surface());
+        self.plugin_register(c_str!("-csurf_inst"), get_cpp_control_surface());
     }
 
     // DONE

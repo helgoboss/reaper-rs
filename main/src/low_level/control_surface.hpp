@@ -2,11 +2,14 @@
 
 #include "../../lib/reaper/reaper_plugin.h"
 
+// Most functions in this namespace are called from C++ and implemented in Rust. They are callbacks invoked by REAPER.
+// This glue code is necessary because Rust can't implement pure virtual functions directly.
 namespace reaper_rs_control_surface {
-  // This is implemented in C++ and called from Rust
+  // This is the only function which is called from Rust and implemented in C++. It returns a reference to the one and
+  // only static `IReaperControlSurface`instance of this plug-in that Rust code can pass to `plugin_register()`.
   extern "C" void* get_control_surface();
 
-  // These are implemented in Rust and called from C++
+  // All of the following functions are called from C++ and implemented in Rust.
   extern "C" const char* GetTypeString(void* callback_target);
   extern "C" const char* GetDescString(void* callback_target);
   extern "C" const char* GetConfigString(void* callback_target);

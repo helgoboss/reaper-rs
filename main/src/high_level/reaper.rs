@@ -156,10 +156,10 @@ pub struct ReaperBuilder {
 }
 
 impl ReaperBuilder {
-    fn with_all_functions_loaded(context: ReaperPluginContext) -> ReaperBuilder {
+    fn with_all_functions_loaded(context: &ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder {
             medium: {
-                let low = low_level::Reaper::load(context.function_provider);
+                let low = low_level::Reaper::load(context);
                 medium_level::Reaper::new(low)
             },
             logger: Default::default(),
@@ -183,8 +183,8 @@ impl ReaperBuilder {
     }
 }
 
-pub fn setup_all_with_defaults(context: ReaperPluginContext, email_address: &'static str) {
-    Reaper::with_all_functions_loaded(context)
+pub fn setup_all_with_defaults(context: &ReaperPluginContext, email_address: &'static str) {
+    Reaper::load(context)
         .logger(create_terminal_logger())
         .setup();
     std::panic::set_hook(create_reaper_panic_hook(
@@ -340,7 +340,7 @@ impl From<&'static CStr> for ReaperVersion {
 }
 
 impl Reaper {
-    pub fn with_all_functions_loaded(context: ReaperPluginContext) -> ReaperBuilder {
+    pub fn load(context: &ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder::with_all_functions_loaded(context)
     }
 

@@ -8,21 +8,16 @@ build = "build.rs"
 [features]
 # By default, only the low-level API is enabled
 default = []
-
 # Enables the medium-level API (which depends on the low-level API)
 medium-level = []
-
 # Enables the high-level API (which depends on the medium-level and low-level APIs)
 high-level = ["medium-level", "once_cell", "rxrust", "helgoboss-midi", "regex", "slog", "slog-stdlog", "slog-term", "num_enum"]
-
-# Regenerates low-level `bindings.rs` from C++ header files and after that low-level `reaper.rs` from `bindings.rs`
-generate-from-headers = ["bindgen", "quote", "syn"]
-
+# Regenerates `bindings.rs` from C++ header files and right after that low-level `reaper.rs` from `bindings.rs`
+generate-low-level-reaper = ["bindgen", "quote", "syn"]
 
 [dependencies]
 c_str_macro = "1.0.2"
 vst = "0.2.0"
-
 once_cell = {version = "1.3.1", optional = true}
 # TODO Use crates.io version
 rxrust = { path = '../lib/rxRust', optional = true}

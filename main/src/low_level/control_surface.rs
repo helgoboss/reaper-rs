@@ -1,32 +1,41 @@
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+use super::{bindings::root::reaper_rs_control_surface::get_control_surface, firewall, MediaTrack};
+use std::os::raw::c_void;
 use std::ptr::{null, null_mut};
+use std::sync::Once;
 
-use super::MediaTrack;
-use crate::low_level::get_control_surface_instance;
-use crate::low_level::util::firewall;
-
-// Why do most methods here don't take `&mut self` as parameter? Short answer: Because we follow the
-// spirit of Rust here, which is to fail fast and thereby preventing undefined behavior.
-
-// Long answer: Taking `self` as `&mut` in control surface methods would give us a dangerous
-// illusion of safety (safety as defined by Rust). It would tell Rust developers "I'm safe to mutate
-// my ControlSurface struct's state here". But in reality it's not safe. Not because of
-// multi-threading (ControlSurfaces methods are invoked by REAPER's main thread only) but because
-// of reentrancy. It can happen quite easily, just think of this scenario: A track is changed,
-// REAPER notifies us about it by calling a ControlSurface method, thereby causing another change in
-// REAPER which in turn synchronously notifies our ControlSurface while our first method is still
-// running ... and there you go: 2 mutable borrows of self. In a pure Rust world, Rust's compiler
-// wouldn't allow us to do that. But Rust won't save us here because the call comes from "outside".
-// By not having a `&mut self` reference, developers are forced to explicitly think about this
-// scenario. One can use a `RefCell` along with `borrow_mut()` to still mutate some ControlSurface
-// state and failing fast whenever reentrancy happens - at runtime, by getting a panic. This is not
-// as good as failing fast at compile time but still much better than to run into undefined
-// behavior, which could cause hard-to-find bugs and crash REAPER - that's the last thing we want!
-// Panicking is not so bad. We can catch it before it reaches REAPER and therefore let REAPER
-// continue running. Ideally it's observed by the developer when he tests his plugin and then he can
-// think about how to solve that issue. They might find out that it's okay and therefore use some
-// unsafe code to prevent the panic. They might find out that they want to check for reentrancy
-// by using `RefCell::try_borrow_mut()`. Or they might find out that they want to avoid this
-// situation by deferring reaction to the next main loop cycle.
+/// This is the Rust analog to the C++ `IReaperControlSurface`. An implementation of this trait
+/// can be passed to `Reaper::install_control_surface()`. As a consequence, REAPER will invoke
+/// the respective callback methods.
+///
+/// # Design
+///
+/// ## Why do most methods here don't take `&mut self` as parameter?
+/// **Short answer:** Because we follow the spirit of Rust here, which is to fail fast and thereby
+/// preventing undefined behavior.
+///
+/// **Long answer:** Taking `self` as `&mut` in control surface methods would give us a dangerous
+/// illusion of safety (safety as defined by Rust). It would tell Rust developers "It's safe here to
+/// mutate the state of my control surface struct". But in reality it's not safe. Not because of
+/// multi-threading (ControlSurfaces methods are invoked by REAPER's main thread only) but because
+/// of reentrancy. That can happen quite easily, just think of this scenario: A track is changed,
+/// REAPER notifies us about it by calling a ControlSurface method, thereby causing another change
+/// in REAPER which in turn synchronously notifies our ControlSurface again while our first method
+/// is still running ... and there you go: 2 mutable borrows of `self`. In a Rust-only world, Rust's
+/// compiler wouldn't allow us to do that. But Rust won't save us here because the call comes from
+/// "outside". By not having a `&mut self` reference, developers are forced to explicitly think
+/// about this scenario. One can use a `RefCell` along with `borrow_mut()` to still mutate some
+/// ControlSurface state and failing fast whenever reentrancy happens - at runtime, by getting a
+/// panic. This is not as good as failing fast at compile time but still much better than to run
+/// into undefined behavior, which could cause hard-to-find bugs and crash REAPER - that's the last
+/// thing we want! Panicking is not so bad. We can catch it before it reaches REAPER and therefore
+/// let REAPER continue running. Ideally it's observed by the developer when he tests his plugin.
+/// Then he can think about how to solve that issue. They might find out that it's okay and
+/// therefore use some unsafe code to prevent the panic. They might find out that they want to check
+/// for reentrancy by using `RefCell::try_borrow_mut()`. Or they might find out that they want to
+/// avoid this situation by just deferring the event handling to the next main loop cycle.
 pub trait ControlSurface {
     fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
         null()
@@ -87,6 +96,55 @@ pub trait ControlSurface {
     ) -> ::std::os::raw::c_int {
         0
     }
+}
+
+// See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
+static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
+static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
+
+/// This returns a mutable reference. In general this mutability should not be used, just in case
+/// of control surface methods where it's sure that REAPER never reenters them! See `ControlSurface`
+/// documentation.
+pub(crate) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
+    unsafe { CONTROL_SURFACE_INSTANCE.as_mut().unwrap() }
+}
+
+/// This function for installing a REAPER control surface is provided because
+/// `plugin_register("csurf_inst", my_rust_trait_implementing_IReaperControlSurface)` isn't
+/// going to work. Rust structs can't implement pure virtual C++ interfaces.
+///
+/// This function sets up the given `ControlSurface` implemented in Rust but **doesn't yet
+/// register it**! Because you are not using the high-level API, the usual REAPER C++ way to
+/// register a control surface still applies. See `get_cpp_control_surface()`. If you register a
+/// control surface, you also must take care of unregistering it at the end. This is especially
+/// important for VST plug-ins because they live shorter than a REAPER session! **If you don't
+/// unregister the control surface before the VST plug-in is destroyed, REAPER will crash** because
+/// it will attempt to invoke functions which are not loaded anymore. This kind of responsibility is
+/// gone when using the high-level API.
+///     
+/// Currently `reaper-rs` supports only one control surface per plug-in. This is not a restriction
+/// dictated by Rust, it's just a bit easier to implement and I don't see many use cases where one
+/// would want multiple control surfaces.
+pub fn install_control_surface(control_surface: impl ControlSurface + 'static) {
+    // TODO-low Ensure that only called if there's not a control surface registered already
+    // Ideally we would have a generic static but as things are now, we need to box it.
+    // However, this is not a big deal because control surfaces are only used in the
+    // main thread where these minimal performance differences are not significant.
+    unsafe {
+        // Save boxed control surface to static variable so that extern "C" functions
+        // implemented in Rust have something to delegate to.
+        INIT_CONTROL_SURFACE_INSTANCE.call_once(|| {
+            CONTROL_SURFACE_INSTANCE = Some(Box::new(control_surface));
+        });
+    }
+}
+
+/// This returns a pointer to a `IReaperControlSurface`-implementing C++ object which will delegate
+/// to the Rust `ControlSurface` which you did install by invoking `install_control_surface`.
+/// The pointer needs to be passed to `Reaper::plugin_register("csurf_inst", <here>)` for
+/// registering and to `Reaper::plugin_register("-csurf_inst", <here>)` for unregistering.
+pub fn get_cpp_control_surface() -> *mut c_void {
+    unsafe { get_control_surface() }
 }
 
 #[no_mangle]

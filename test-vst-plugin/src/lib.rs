@@ -24,8 +24,8 @@ impl Plugin for TestVstPlugin {
     }
 
     fn init(&mut self) {
-        let context = ReaperPluginContext::from_reaper_vst_plugin(self.host).unwrap();
-        setup_all_with_defaults(context, "info@helgoboss.org");
+        let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
+        setup_all_with_defaults(&context, "info@helgoboss.org");
         let reaper = Reaper::get();
         reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
     }
