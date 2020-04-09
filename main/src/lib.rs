@@ -14,6 +14,6 @@
 //! TODO Wise rustfmt settings
 #[cfg(feature = "high-level")]
 pub mod high_level;
+pub mod low_level;
 #[cfg(feature = "medium-level")]
 pub mod medium_level;
-pub mod low_level;

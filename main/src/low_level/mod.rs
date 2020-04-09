@@ -27,7 +27,7 @@ use c_str_macro::c_str;
 
 use std::error::Error;
 use std::ffi::CStr;
-use std::os::raw::{c_int, c_void, c_char};
+use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::null_mut;
 use vst::api::HostCallbackProc;
 use vst::plugin::HostCallback;
@@ -46,7 +46,9 @@ pub fn get_reaper_plugin_function_provider(
     Ok(create_reaper_plugin_function_provider(GetFunc))
 }
 
-pub fn create_reaper_plugin_function_provider(GetFunc: unsafe extern "C" fn(name: *const c_char) -> *mut c_void) -> FunctionProvider {
+pub fn create_reaper_plugin_function_provider(
+    GetFunc: unsafe extern "C" fn(name: *const c_char) -> *mut c_void,
+) -> FunctionProvider {
     Box::new(move |name| unsafe { GetFunc(name.as_ptr()) as isize })
 }
 

@@ -362,13 +362,13 @@ fn register_and_unregister_toggle_action() -> TestStep {
         check_eq!(action.get_character(), ActionCharacter::Toggle);
         check!(action.get_command_id() > 0);
         check_eq!(
-                action.get_command_name(),
-                Some(c_str!("reaperRsTest2").to_owned())
-            );
+            action.get_command_name(),
+            Some(c_str!("reaperRsTest2").to_owned())
+        );
         check_eq!(
-                unsafe { action.get_name().into_c_str() },
-                Some(c_str!("reaper-rs test toggle action"))
-            );
+            unsafe { action.get_name().into_c_str() },
+            Some(c_str!("reaper-rs test toggle action"))
+        );
         reg.unregister();
         check!(!action.is_available());
         Ok(())
@@ -400,14 +400,14 @@ fn register_and_unregister_action() -> TestStep {
         check_eq!(action.get_character(), ActionCharacter::Trigger);
         check!(action.get_command_id() > 0);
         check_eq!(
-                action.get_command_name(),
-                Some(c_str!("reaperRsTest").to_owned())
-            );
+            action.get_command_name(),
+            Some(c_str!("reaperRsTest").to_owned())
+        );
         check!(!action.is_on());
         check_eq!(
-                unsafe { action.get_name().into_c_str() },
-                Some(c_str!("reaper-rs test action"))
-            );
+            unsafe { action.get_name().into_c_str() },
+            Some(c_str!("reaper-rs test action"))
+        );
         reg.unregister();
         check!(!action.is_available());
         Ok(())
@@ -598,9 +598,9 @@ fn query_action() -> TestStep {
         check_eq!(toggle_action.get_command_id(), 6);
         check!(toggle_action.get_command_name().is_none());
         check_eq!(
-                unsafe { toggle_action.get_name().into_c_str() },
-                Some(c_str!("Track: Toggle mute for selected tracks"))
-            );
+            unsafe { toggle_action.get_name().into_c_str() },
+            Some(c_str!("Track: Toggle mute for selected tracks"))
+        );
         check!(toggle_action.get_index() > 0);
         check_eq!(toggle_action.get_section(), reaper.get_main_section());
         check_eq!(normal_action_by_index, normal_action);
@@ -696,15 +696,15 @@ fn add_track_send() -> TestStep {
         check_eq!(track_1.get_send_count(), 1);
         check_eq!(track_1.get_send_by_index(0), Some(send));
         check!(
-                track_1
-                    .get_send_by_target_track(track_2.clone())
-                    .is_available()
-            );
+            track_1
+                .get_send_by_target_track(track_2.clone())
+                .is_available()
+        );
         check!(
-                !track_2
-                    .get_send_by_target_track(track_1.clone())
-                    .is_available()
-            );
+            !track_2
+                .get_send_by_target_track(track_1.clone())
+                .is_available()
+        );
         check!(track_1.get_index_based_send_by_index(0).is_available());
         check_eq!(track_1.get_sends().count(), 1);
         Ok(())
@@ -1286,9 +1286,9 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
         };
         check_eq!(input_data.get_channel(), Some(5));
         check_eq!(
-                input_data.get_device().ok_or("Expected device")?.get_id(),
-                4
-            );
+            input_data.get_device().ok_or("Expected device")?.get_id(),
+            4
+        );
         Ok(())
     })
 }
@@ -1353,9 +1353,9 @@ fn set_track_input_monitoring() -> TestStep {
         track.set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying);
         // Then
         check_eq!(
-                track.get_input_monitoring_mode(),
-                InputMonitoringMode::NotWhenPlaying
-            );
+            track.get_input_monitoring_mode(),
+            InputMonitoringMode::NotWhenPlaying
+        );
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
         Ok(())
@@ -1448,9 +1448,9 @@ fn query_track_by_guid() -> TestStep {
         check_eq!(&found_track, &new_track);
         check_ne!(&found_track, &first_track);
         check_eq!(
-                new_track.get_guid(),
-                &get_media_track_guid(new_track.get_raw())
-            );
+            new_track.get_guid(),
+            &get_media_track_guid(new_track.get_raw())
+        );
         Ok(())
     })
 }
@@ -1482,7 +1482,7 @@ fn query_master_track() -> TestStep {
 
 fn fn_mut_action() -> TestStep {
     #[allow(unreachable_code)]
-        step("FnMut action", |_reaper, _| {
+    step("FnMut action", |_reaper, _| {
         // TODO-low Add this as new test
         return Ok(());
         let mut i = 0;
@@ -1543,9 +1543,9 @@ fn create_empty_project_in_new_tab() -> TestStep {
         check_eq!(current_project_before, current_project_before);
         check_eq!(reaper.get_project_count(), project_count_before + 1);
         check_eq!(
-                reaper.get_projects().count() as u32,
-                project_count_before + 1
-            );
+            reaper.get_projects().count() as u32,
+            project_count_before + 1
+        );
         check_ne!(reaper.get_current_project(), current_project_before);
         check_eq!(reaper.get_current_project(), new_project);
         check_ne!(reaper.get_projects().nth(0), Some(new_project));
@@ -1570,7 +1570,7 @@ fn basics() -> TestStep {
     })
 }
 
-type GetFxChain = Rc::<dyn Fn() -> Result<FxChain, &'static str>>;
+type GetFxChain = Rc<dyn Fn() -> Result<FxChain, &'static str>>;
 
 fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
     step("Query fx chain", move |_, _| {
@@ -1583,14 +1583,13 @@ fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx_chain.get_fx_by_index(0).is_none());
         check!(fx_chain.get_first_fx().is_none());
         check!(fx_chain.get_last_fx().is_none());
-        let non_existing_guid =
-            Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+        let non_existing_guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
         check!(!fx_chain.get_fx_by_guid(&non_existing_guid).is_available());
         check!(
-                !fx_chain
-                    .get_fx_by_guid_and_index(&non_existing_guid, 0)
-                    .is_available()
-            );
+            !fx_chain
+                .get_fx_by_guid_and_index(&non_existing_guid, 0)
+                .is_available()
+        );
         check!(fx_chain.get_first_fx_by_name(c_str!("bla")).is_none());
         check!(fx_chain.get_chunk().is_none());
         Ok(())
@@ -1642,9 +1641,9 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx.is_available());
         check_eq!(fx.get_index(), 2);
         check_eq!(
-                fx.get_query_index(),
-                if fx_chain.is_input_fx() { 0x1000002 } else { 2 }
-            );
+            fx.get_query_index(),
+            if fx_chain.is_input_fx() { 0x1000002 } else { 2 }
+        );
         check!(fx.get_guid().is_some());
         check_eq!(fx.get_name().as_c_str(), c_str!("JS: phaser"));
         let fx_chunk = fx.get_chunk();
@@ -1666,13 +1665,13 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
         // TODO-low Fix for input FX (there it's 1.0 for some reason)
         // check_eq!(param1.get_step_size(), Some(0.01));
         check_eq!(
-                param1.get_value_range(),
-                FxParameterValueRange {
-                    min_val: 0.0,
-                    mid_val: 5.0,
-                    max_val: 10.0,
-                }
-            );
+            param1.get_value_range(),
+            FxParameterValueRange {
+                min_val: 0.0,
+                mid_val: 5.0,
+                max_val: 10.0,
+            }
+        );
         check!(fx.get_parameter_by_index(6).is_available());
         check!(!fx.get_parameter_by_index(7).is_available());
         let fx_info = fx.get_info();
@@ -1706,14 +1705,14 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
         let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
         check!(!fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
         check!(
-                fx_chain
-                    .get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)"))
-                    .is_some()
-            );
+            fx_chain
+                .get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)"))
+                .is_some()
+        );
         check_eq!(
-                fx_chain.get_first_fx_by_name(c_str!("phaser")),
-                Some(fx.clone())
-            );
+            fx_chain.get_first_fx_by_name(c_str!("phaser")),
+            Some(fx.clone())
+        );
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), fx.clone());
         Ok(())
@@ -1838,9 +1837,9 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
         let synth_param_5 = synth_fx.get_parameter_by_index(5);
         synth_param_5.set_normalized_value(0.0);
         check_ne!(
-                synth_param_5.get_formatted_value().as_c_str(),
-                c_str!("-6.00")
-            );
+            synth_param_5.get_formatted_value().as_c_str(),
+            c_str!("-6.00")
+        );
         let fx_state_chunk = r#"eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
   776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
   AAAQAAAA"#;
@@ -1849,18 +1848,18 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
         // Then
         check_eq!(synth_fx.get_index(), 1);
         check_eq!(
-                synth_fx.get_name().as_c_str(),
-                c_str!("VSTi: ReaSynth (Cockos)")
-            );
+            synth_fx.get_name().as_c_str(),
+            c_str!("VSTi: ReaSynth (Cockos)")
+        );
         check_eq!(
-                synth_param_5.get_formatted_value().as_c_str(),
-                c_str!("-6.00")
-            );
+            synth_param_5.get_formatted_value().as_c_str(),
+            c_str!("-6.00")
+        );
         check_eq!(midi_fx.get_index(), 0);
         check_eq!(
-                midi_fx.get_name().as_c_str(),
-                c_str!("VST: ReaControlMIDI (Cockos)")
-            );
+            midi_fx.get_name().as_c_str(),
+            c_str!("VST: ReaControlMIDI (Cockos)")
+        );
         Ok(())
     })
 }
@@ -1885,14 +1884,14 @@ fn set_fx_tag_chunk(get_fx_chain: GetFxChain) -> TestStep {
         // Then
         check_eq!(midi_fx_2.get_index(), 1);
         check_eq!(
-                midi_fx_2.get_name().as_c_str(),
-                c_str!("VSTi: ReaSynth (Cockos)")
-            );
+            midi_fx_2.get_name().as_c_str(),
+            c_str!("VSTi: ReaSynth (Cockos)")
+        );
         check_eq!(midi_fx_1.get_index(), 0);
         check_eq!(
-                midi_fx_1.get_name().as_c_str(),
-                c_str!("VST: ReaControlMIDI (Cockos)")
-            );
+            midi_fx_1.get_name().as_c_str(),
+            c_str!("VST: ReaControlMIDI (Cockos)")
+        );
         Ok(())
     })
 }
@@ -1912,9 +1911,9 @@ fn set_fx_chunk(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(synth_fx.get_guid(), synth_fx_guid_before);
         check!(synth_fx.is_available());
         check_eq!(
-                synth_fx.get_name().as_c_str(),
-                c_str!("VST: ReaControlMIDI (Cockos)")
-            );
+            synth_fx.get_name().as_c_str(),
+            c_str!("VST: ReaControlMIDI (Cockos)")
+        );
         check_eq!(midi_fx.get_index(), 0);
         check_eq!(synth_fx.get_index(), 1);
         Ok(())
@@ -1951,12 +1950,12 @@ WAK 0
         let guid = Guid::try_from(c_str!("{5FF5FB09-9102-4CBA-A3FB-3467BA1BFE5D}"))?;
         check_eq!(synth_fx.get_guid(), Some(guid));
         check_eq!(
-                synth_fx
-                    .get_parameter_by_index(5)
-                    .get_formatted_value()
-                    .as_c_str(),
-                c_str!("-6.00")
-            );
+            synth_fx
+                .get_parameter_by_index(5)
+                .get_formatted_value()
+                .as_c_str(),
+            c_str!("-6.00")
+        );
         // TODO Detect such a programmatic FX add as well (maybe by hooking into
         // HelperControlSurface::updateMediaTrackPositions)
         check_eq!(mock.get_invocation_count(), 0);
@@ -2053,8 +2052,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             p.set_normalized_value(0.5);
             // Then
             check_eq!(mock.get_invocation_count(), 2);
-            if fx_chain.is_input_fx()
-                && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
+            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
             {
                 check_ne!(mock.get_last_arg(), p);
             } else {
@@ -2083,8 +2081,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
         p.set_normalized_value(0.3);
         // Then
         let last_touched_fx_param = reaper.get_last_touched_fx_parameter();
-        if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
-        {
+        if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95")) {
             check!(last_touched_fx_param.is_none());
         } else {
             check_eq!(last_touched_fx_param, Some(p.clone()));
@@ -2093,10 +2090,10 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(p.get_normalized_value(), 0.30000001192092896);
         check_eq!(p.get_reaper_value(), 0.30000001192092896);
         check_eq!(
-                p.format_normalized_value(p.get_normalized_value())
-                    .as_c_str(),
-                c_str!("-4.44 dB")
-            );
+            p.format_normalized_value(p.get_normalized_value())
+                .as_c_str(),
+            c_str!("-4.44 dB")
+        );
         // TODO 1 invocation would be better than 2
         check_eq!(mock.get_invocation_count(), 2);
         check_eq!(mock.get_last_arg(), p);
@@ -2139,20 +2136,20 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(p.get_normalized_value(), 0.5);
         check_eq!(p.get_reaper_value(), 0.5);
         check_eq!(
-                p.format_normalized_value(p.get_normalized_value())
-                    .as_c_str(),
-                c_str!("0")
-            );
+            p.format_normalized_value(p.get_normalized_value())
+                .as_c_str(),
+            c_str!("0")
+        );
         check_eq!(p.get_fx(), fx);
         check!(p.get_step_size().is_none());
         check_eq!(
-                p.get_value_range(),
-                FxParameterValueRange {
-                    min_val: 0.0,
-                    mid_val: 0.5,
-                    max_val: 1.0,
-                }
-            );
+            p.get_value_range(),
+            FxParameterValueRange {
+                min_val: 0.0,
+                mid_val: 0.5,
+                max_val: 1.0,
+            }
+        );
         Ok(())
     })
 }
@@ -2175,30 +2172,28 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(fx_1.get_index(), 0);
         check_eq!(fx_2.get_index(), 1);
         check_eq!(
-                fx_1.get_query_index(),
-                if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
-            );
+            fx_1.get_query_index(),
+            if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
+        );
         check_eq!(
-                fx_2.get_query_index(),
-                if fx_chain.is_input_fx() { 0x1000001 } else { 1 }
-            );
+            fx_2.get_query_index(),
+            if fx_chain.is_input_fx() { 0x1000001 } else { 1 }
+        );
         check!(fx_1.get_guid().is_some());
         check!(fx_2.get_guid().is_some());
         check_eq!(
-                fx_1.get_name().as_c_str(),
-                c_str!("VST: ReaControlMIDI (Cockos)")
-            );
+            fx_1.get_name().as_c_str(),
+            c_str!("VST: ReaControlMIDI (Cockos)")
+        );
         check_eq!(
-                fx_2.get_name().as_c_str(),
-                c_str!("VSTi: ReaSynth (Cockos)")
-            );
+            fx_2.get_name().as_c_str(),
+            c_str!("VSTi: ReaSynth (Cockos)")
+        );
         let chunk_1 = fx_1.get_chunk();
         check!(chunk_1.starts_with("BYPASS 0 0 0"));
         check!(chunk_1.ends_with("\nWAK 0 0"));
         let tag_chunk_1 = fx_1.get_tag_chunk();
-        check!(
-                tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#)
-            );
+        check!(tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
         check!(tag_chunk_1.ends_with("\n>"));
         let state_chunk_1 = fx_1.get_state_chunk();
         check!(!state_chunk_1.contains("<"));
@@ -2222,25 +2217,25 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx_1.get_parameter_by_index(15).is_available());
         check!(!fx_1.get_parameter_by_index(17).is_available());
         check!(
-                track
-                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000000 } else { 0 })
-                    .is_some()
-            );
+            track
+                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000000 } else { 0 })
+                .is_some()
+        );
         check!(
-                track
-                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000001 } else { 1 })
-                    .is_some()
-            );
+            track
+                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000001 } else { 1 })
+                .is_some()
+        );
         check!(
-                !track
-                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 0 } else { 0x1000000 })
-                    .is_some()
-            );
+            !track
+                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0 } else { 0x1000000 })
+                .is_some()
+        );
         check!(
-                !track
-                    .get_fx_by_query_index(if fx_chain.is_input_fx() { 1 } else { 0x1000001 })
-                    .is_some()
-            );
+            !track
+                .get_fx_by_query_index(if fx_chain.is_input_fx() { 1 } else { 0x1000001 })
+                .is_some()
+        );
         if !fx_chain.is_input_fx() {
             let first_instrument_fx = fx_chain
                 .get_first_instrument_fx()
@@ -2314,14 +2309,14 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx_1.is_available());
         check_eq!(fx_1.get_index(), 0);
         check_eq!(
-                fx_1.get_query_index(),
-                if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
-            );
+            fx_1.get_query_index(),
+            if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
+        );
         check!(fx_1.get_guid().is_some());
         check_eq!(
-                fx_1.get_name().as_c_str(),
-                c_str!("VST: ReaControlMIDI (Cockos)")
-            );
+            fx_1.get_name().as_c_str(),
+            c_str!("VST: ReaControlMIDI (Cockos)")
+        );
         let chunk = fx_1.get_chunk();
         check!(chunk.starts_with("BYPASS 0 0 0"));
         //            debug!(reaper.logger, "{:?}", chunk.get_parent_chunk());
@@ -2386,17 +2381,16 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
         // If this doesn't work, then the index hasn't automatically corrected itself
         check!(fx_chain.get_fx_by_guid_and_index(&guid, 1).is_available());
-        let non_existing_guid =
-            Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+        let non_existing_guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
         check!(
-                !fx_chain
-                    .get_fx_by_guid_and_index(&non_existing_guid, 0)
-                    .is_available()
-            );
+            !fx_chain
+                .get_fx_by_guid_and_index(&non_existing_guid, 0)
+                .is_available()
+        );
         check_eq!(
-                fx_chain.get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")),
-                Some(fx.clone())
-            );
+            fx_chain.get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")),
+            Some(fx.clone())
+        );
         let chain_chunk = fx_chain.get_chunk();
         check!(chain_chunk.is_some());
         let chain_chunk = chain_chunk.unwrap();
@@ -2406,9 +2400,9 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
         check!(first_tag.is_some());
         let first_tag = first_tag.unwrap();
         check_eq!(
-                first_tag.get_content().deref(),
-                chain_chunk.get_content().deref()
-            );
+            first_tag.get_content().deref(),
+            chain_chunk.get_content().deref()
+        );
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), fx);
         Ok(())
