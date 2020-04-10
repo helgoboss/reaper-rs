@@ -13,6 +13,7 @@ use std::borrow::Cow::{Borrowed, Owned};
 
 use std::collections::VecDeque;
 
+use reaper_rs::medium_level::ReaperStringArg;
 use std::ffi::CString;
 use std::iter::FromIterator;
 
@@ -60,12 +61,6 @@ fn log_step(step_index: usize, name: impl Into<Cow<'static, str>>) {
     log(format!("\n{}. {}", step_index + 1, name.into()));
 }
 
-fn log(msg: impl Into<Cow<'static, str>>) {
-    let msg = match msg.into() {
-        // We need to copy the string and append the 0 byte
-        Borrowed(b) => CString::new(b),
-        // We can move the string and append the 0 byte
-        Owned(o) => CString::new(o),
-    };
-    Reaper::get().show_console_msg(&msg.unwrap())
+fn log<'a>(msg: impl Into<ReaperStringArg<'a>>) {
+    Reaper::get().show_console_msg(msg)
 }

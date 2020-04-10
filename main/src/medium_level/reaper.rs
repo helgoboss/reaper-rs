@@ -13,11 +13,21 @@ use crate::low_level::raw::{
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
-    ControlSurface, DelegatingControlSurface, ReaperPointerType, TrackSendInfoKey,
+    ControlSurface, DelegatingControlSurface, ProjectRef, ReaperPointerType, ReaperStringArg,
+    TrackSendInfoKey,
 };
 use std::mem::MaybeUninit;
 
+/// This is the medium-level API access point to all REAPER functions. In order to use it, you first
+/// must obtain an instance of this struct by invoking [`new`](struct.Reaper.html#method.new).
+///
+/// It's always possible that a function from the low-level API is missing in the medium-level one.
+/// That's because unlike the low-level API, the medium-level API is hand-written and a perpetual
+/// work in progress. If you can't find the function that you need, you can always resort to the
+/// low-level API by navigating to [`low`](struct.Reaper.html#structfield.low). Of course you are
+/// welcome to contribute to bring the medium-level API on par with the low-level one.  
 pub struct Reaper {
+    /// Returns the low-level REAPER instance
     pub low: low_level::Reaper,
 }
 
@@ -44,7 +54,7 @@ macro_rules! require {
     ($low:expr, $func:ident) => {{
         match $low.$func {
             None => panic!(format!(
-                "Couldn't load REAPER function {}",
+                "Attempt to use a REAPER function that has not been loaded: {}",
                 stringify!($func)
             )),
             Some(f) => f,
@@ -53,16 +63,27 @@ macro_rules! require {
 }
 
 impl Reaper {
+    /// Creates a new instance by getting hold of a
+    /// [`low_level::Reaper`](../../low_level/struct.Reaper.html) instance.
     pub fn new(low: low_level::Reaper) -> Reaper {
         Reaper { low }
     }
 
-    // DONE
+    /// Returns the requested project and optionally its file name.
+    ///
+    /// With `projfn_out_optional_sz` you can tell REAPER how many characters of the file name you
+    /// want. If you are not interested in the file name at all, pass 0.
     pub fn enum_projects(
         &self,
-        idx: i32,
+        proj_ref: ProjectRef,
         projfn_out_optional_sz: u32,
     ) -> (*mut ReaProject, Cow<'static, CStr>) {
+        use ProjectRef::*;
+        let idx = match proj_ref {
+            Current => -1,
+            CurrentlyRendering => 0x40000000,
+            TabIndex(i) => i as i32,
+        };
         if projfn_out_optional_sz == 0 {
             let project = require!(self.low, EnumProjects)(idx, null_mut(), 0);
             (project, create_cheap_empty_string())
@@ -75,12 +96,14 @@ impl Reaper {
         }
     }
 
-    // DONE
+    /// Returns the track at the given index. Set `proj` to `null_mut()` in order to look for tracks
+    /// in the current project.
     pub fn get_track(&self, proj: *mut ReaProject, trackidx: u32) -> *mut MediaTrack {
         require!(self.low, GetTrack)(proj, trackidx as i32)
     }
 
-    // DONE
+    /// Returns `true` if the given pointer is a valid object of the right type in project `proj`
+    /// (`proj` is ignored if pointer is itself a project).
     pub fn validate_ptr_2(
         &self,
         proj: *mut ReaProject,
@@ -88,6 +111,12 @@ impl Reaper {
         ctypename: ReaperPointerType,
     ) -> bool {
         require!(self.low, ValidatePtr2)(proj, pointer, Cow::from(ctypename).as_ptr())
+    }
+
+    /// Shows a message to the user (also useful for debugging). Send "\n" for newline and "" to
+    /// clear the console.
+    pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
+        require!(self.low, ShowConsoleMsg)(msg.into().as_ptr())
     }
 
     // DONE
@@ -102,11 +131,6 @@ impl Reaper {
             Cow::from(parmname).as_ptr(),
             set_new_value,
         ))
-    }
-
-    // DONE
-    pub fn show_console_msg(&self, msg: &CStr) {
-        require!(self.low, ShowConsoleMsg)(msg.as_ptr())
     }
 
     // DONE

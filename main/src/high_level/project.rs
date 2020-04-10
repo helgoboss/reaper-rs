@@ -6,7 +6,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::raw::ReaProject;
 
-use crate::medium_level::{ReaperPointerType, ReaperStringPtr};
+use crate::medium_level::{ProjectRef, ReaperPointerType, ReaperStringPtr};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -31,7 +31,7 @@ impl Project {
     pub fn get_file_path(&self) -> Option<PathBuf> {
         let (_, path_c_string) = Reaper::get()
             .medium
-            .enum_projects(self.get_index() as i32, 5000);
+            .enum_projects(ProjectRef::TabIndex(self.get_index()), 5000);
         Some(path_c_string)
             .filter(|path_c_string| path_c_string.to_bytes().len() > 0)
             .map(|path_c_string| {

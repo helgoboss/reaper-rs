@@ -97,7 +97,7 @@ mod codegen {
                 use super::{bindings::root, ReaperPluginContext};
                 use c_str_macro::c_str;
 
-                /// This is the low-level access point to all REAPER functions. In order to use it, you first
+                /// This is the low-level API access point to all REAPER functions. In order to use it, you first
                 /// must obtain an instance of this struct by invoking [`load`](struct.Reaper.html#method.load).
                 ///
                 /// Please note that it's possible that functions are *not available*. This can be the case if

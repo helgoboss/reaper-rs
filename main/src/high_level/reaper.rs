@@ -36,7 +36,10 @@ use crate::low_level::raw::{
 };
 use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
-use crate::medium_level::{install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult};
+use crate::medium_level::{
+    install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, ProjectRef,
+    ReaperStringArg,
+};
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -604,7 +607,7 @@ impl Reaper {
     ///
     /// Look into [from_vec_unchecked](CString::from_vec_unchecked) or
     /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.
-    pub fn show_console_msg(&self, msg: &CStr) {
+    pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
         self.medium.show_console_msg(msg);
     }
 
@@ -774,7 +777,7 @@ impl Reaper {
     }
 
     pub fn get_current_project(&self) -> Project {
-        let (rp, _) = self.medium.enum_projects(-1, 0);
+        let (rp, _) = self.medium.enum_projects(ProjectRef::Current, 0);
         Project::new(rp)
     }
 
@@ -784,7 +787,7 @@ impl Reaper {
 
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
-            .map(move |i| self.medium.enum_projects(i, 0).0)
+            .map(move |i| self.medium.enum_projects(ProjectRef::TabIndex(i), 0).0)
             .take_while(|p| !p.is_null())
             .map(|p| Project::new(p))
     }

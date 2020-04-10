@@ -3,6 +3,12 @@ use c_str_macro::c_str;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 
+pub enum ProjectRef {
+    Current,
+    CurrentlyRendering,
+    TabIndex(u32),
+}
+
 /// Possible REAPER pointer types which can be passed to `Reaper::validate_ptr_2()`.
 ///
 /// Except for the trailing asterisk, the variants are named exactly like the strings which will be
@@ -13,6 +19,10 @@ use std::ffi::{CStr, CString};
 pub enum ReaperPointerType {
     MediaTrack,
     ReaProject,
+    MediaItem,
+    MediaItem_Take,
+    TrackEnvelope,
+    PCM_source,
     /// If a variant is missing in this enum, you can use this custom one as a last resort. Don't
     /// include the trailing asterisk (`*`)! It will be added to the call automatically.
     Custom(&'static CStr),
@@ -24,6 +34,10 @@ impl From<ReaperPointerType> for Cow<'static, CStr> {
         match value {
             MediaTrack => c_str!("MediaTrack*").into(),
             ReaProject => c_str!("ReaProject*").into(),
+            MediaItem => c_str!("MediaItem*").into(),
+            MediaItem_Take => c_str!("MediaItem_Take*").into(),
+            TrackEnvelope => c_str!("TrackEnvelope*").into(),
+            PCM_source => c_str!("PCM_source*").into(),
             Custom(name) => concat_c_strs(name, c_str!("*")).into(),
         }
     }

@@ -16,7 +16,7 @@ use std::sync::Once;
 ///
 /// ## Why do most methods here don't take `&mut self` as parameter?
 /// **Short answer:** Because we follow the spirit of Rust here, which is to fail fast and thereby
-/// preventing undefined behavior.
+/// prevent undefined behavior.
 ///
 /// **Long answer:** Taking `self` as `&mut` in control surface methods would give us a dangerous
 /// illusion of safety (safety as defined by Rust). It would tell Rust developers "It's safe here to

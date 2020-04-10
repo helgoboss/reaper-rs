@@ -1,4 +1,15 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
+//! TODO
+//! The medium-level API offers much more type safety and convenience. Still stays close to
+//! original REAPER API and the ultimate goal is to expose every function with every possible
+//! calling style of the low-level API, just
+//! in a bit nicer and type-safe manner - so that at the end you don't have to resort to the
+//! low-level API anymore and this gets a complete replacement. Some low-level functions can't be
+//! rewritten in a type-safe way. In this case, new convenience functions are introduced.
+//!
+//! - Note about strings (both return and parameter)!
+//! - When I say "index", I always mean zero-based
+//!
 //! - Snake-case function and parameter names
 //! - Use bool instead of i32 as return value type for functions with obvious "yes or no" result
 //! - Use ReaperStringPtr instead of raw c_char pointers as return value type (offers convenience
@@ -21,11 +32,16 @@
 //!   matter of removing safe casts on user-side code.
 
 mod constants;
+pub use constants::*;
+
 mod control_surface;
+pub use control_surface::*;
+
 mod reaper;
+pub use reaper::*;
+
 mod util;
 pub use util::*;
 
-pub use constants::*;
-pub use control_surface::{ControlSurface, DelegatingControlSurface};
-pub use reaper::*;
+mod string_types;
+pub use string_types::*;

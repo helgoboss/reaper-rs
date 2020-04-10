@@ -5,9 +5,10 @@ use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 
-/// This is the medium-level version of
+/// This is the medium-level variant of
 /// [`low_level::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation of
-/// this trait can be passed to `medium_level::install_control_surface()`. TODO
+/// this trait can be passed to
+/// [`medium_level::install_control_surface()`](../fn.install_control_surface.html).
 pub trait ControlSurface {
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
         None

@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::iter;
 use std::ops::Deref;
 use std::ptr::null_mut;
@@ -1564,8 +1564,13 @@ fn create_empty_project_in_new_tab() -> TestStep {
 }
 
 fn basics() -> TestStep {
-    step("Basics", |_, _| {
+    step("Basics", |reaper, _| {
         check!(Guid::try_from(c_str!("{hey}")).is_err());
+        reaper.show_console_msg(c_str!("Test string types and encoding:\n"));
+        reaper.show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
+        reaper.show_console_msg(CString::new("- CString: 范例文字äöüß\n").unwrap());
+        reaper.show_console_msg("- &str: 范例文字äöüß\n");
+        reaper.show_console_msg(String::from("- String: 范例文字äöüß\n"));
         Ok(())
     })
 }
