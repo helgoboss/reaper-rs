@@ -13,10 +13,12 @@ use crate::low_level::raw::{
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
-    ControlSurface, DelegatingControlSurface, ProjectRef, ReaperPointerType, ReaperStringArg,
-    TrackSendInfoKey,
+    ControlSurface, DelegatingControlSurface, InputMonitoringMode, ProjectRef, ReaperPointerType,
+    ReaperStringArg, ReaperStringVal, RecordingInput, TrackNumberResult, TrackSendInfoKey,
 };
+use std::convert::TryFrom;
 use std::mem::MaybeUninit;
+use std::path::{Path, PathBuf};
 
 /// This is the medium-level API access point to all REAPER functions. In order to use it, you first
 /// must obtain an instance of this struct by invoking [`new`](struct.Reaper.html#method.new).
@@ -77,7 +79,7 @@ impl Reaper {
         &self,
         proj_ref: ProjectRef,
         projfn_out_optional_sz: u32,
-    ) -> (*mut ReaProject, Cow<'static, CStr>) {
+    ) -> (*mut ReaProject, Option<PathBuf>) {
         use ProjectRef::*;
         let idx = match proj_ref {
             Current => -1,
@@ -86,13 +88,19 @@ impl Reaper {
         };
         if projfn_out_optional_sz == 0 {
             let project = require!(self.low, EnumProjects)(idx, null_mut(), 0);
-            (project, create_cheap_empty_string())
+            (project, None)
         } else {
-            let (file_path, project) =
+            let (owned_c_string, project) =
                 with_string_buffer(projfn_out_optional_sz, |buffer, max_size| {
                     require!(self.low, EnumProjects)(idx, buffer, max_size)
                 });
-            (project, Cow::Owned(file_path))
+            if owned_c_string.to_bytes().len() == 0 {
+                return (project, None);
+            }
+            let owned_string = owned_c_string
+                .into_string()
+                .expect("Path contains non-UTF8 characters");
+            (project, Some(PathBuf::from(owned_string)))
         }
     }
 
@@ -119,18 +127,72 @@ impl Reaper {
         require!(self.low, ShowConsoleMsg)(msg.into().as_ptr())
     }
 
-    // DONE
+    /// Gets or sets track attributes. This just delegates to the low-level function. Using this
+    /// function is not fun and requires you to use unsafe code. Consider using one of type-safe
+    /// convenience functions instead. They start with `get_media_track_info_` or
+    /// `set_media_track_info_`.
     pub fn get_set_media_track_info(
         &self,
         tr: *mut MediaTrack,
         parmname: TrackInfoKey,
         set_new_value: *mut c_void,
-    ) -> ReaperVoidPtr {
-        ReaperVoidPtr(require!(self.low, GetSetMediaTrackInfo)(
-            tr,
-            Cow::from(parmname).as_ptr(),
-            set_new_value,
-        ))
+    ) -> *mut c_void {
+        require!(self.low, GetSetMediaTrackInfo)(tr, Cow::from(parmname).as_ptr(), set_new_value)
+    }
+
+    fn get_media_track_info(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> *mut c_void {
+        self.get_set_media_track_info(tr, parmname, null_mut())
+    }
+
+    /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
+    pub fn get_media_track_info_partrack(&self, tr: *mut MediaTrack) -> *mut MediaTrack {
+        self.get_media_track_info(tr, TrackInfoKey::P_PARTRACK) as *mut MediaTrack
+    }
+
+    /// Convenience function which returns the given track's parent project (`P_PROJECT`).
+    pub fn get_media_track_info_project(&self, tr: *mut MediaTrack) -> *mut ReaProject {
+        self.get_media_track_info(tr, TrackInfoKey::P_PROJECT) as *mut ReaProject
+    }
+
+    /// Convenience function which let's you use the given track's name (`P_NAME`).
+    pub fn get_media_track_info_name<R>(
+        &self,
+        tr: *mut MediaTrack,
+        f: impl Fn(ReaperStringVal) -> R,
+    ) -> Option<R> {
+        let ptr = self.get_media_track_info(tr, TrackInfoKey::P_NAME);
+        unsafe { interpret_ptr_as_string(ptr) }.map(f)
+    }
+
+    /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
+    pub fn get_media_track_info_recmon(&self, tr: *mut MediaTrack) -> InputMonitoringMode {
+        let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECMON);
+        let irecmon = unsafe { deref_ptr_as::<i32>(ptr) }.unwrap() as u32;
+        InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
+    }
+
+    /// Convenience function which returns the given track's recording input (I_RECINPUT).
+    pub fn get_media_track_info_recinput(&self, tr: *mut MediaTrack) -> RecordingInput {
+        let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECINPUT);
+        let rec_input_index = unsafe { deref_ptr_as::<i32>(ptr) }.unwrap();
+        RecordingInput::from_rec_input_index(rec_input_index)
+    }
+
+    /// Convenience function which returns the given track's number (IP_TRACKNUMBER).
+    pub fn get_media_track_info_tracknumber(&self, tr: *mut MediaTrack) -> TrackNumberResult {
+        use TrackNumberResult::*;
+        match self.get_media_track_info(tr, TrackInfoKey::IP_TRACKNUMBER) as i32 {
+            -1 => MasterTrack,
+            0 => NotFound,
+            n if n > 0 => TrackNumber(n as u32),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Convenience function which returns the given track's GUID (GUID).
+    pub fn get_media_track_info_guid(&self, tr: *mut MediaTrack) -> GUID {
+        let ptr = self.get_media_track_info(tr, TrackInfoKey::GUID);
+        unsafe { deref_ptr_as::<GUID>(ptr) }.unwrap()
     }
 
     // DONE
@@ -1229,4 +1291,20 @@ fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
 
 fn create_cheap_empty_string() -> Cow<'static, CStr> {
     Cow::Borrowed(Default::default())
+}
+
+unsafe fn interpret_ptr_as_string<'a>(ptr: *mut c_void) -> Option<ReaperStringVal<'a>> {
+    if ptr.is_null() {
+        return None;
+    }
+    let ptr = ptr as *const c_char;
+    Some(ReaperStringVal(CStr::from_ptr(ptr)))
+}
+
+unsafe fn deref_ptr_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
+    if ptr.is_null() {
+        return None;
+    }
+    let ptr = ptr as *mut T;
+    Some(*ptr)
 }

@@ -6,6 +6,10 @@
 //! in a bit nicer and type-safe manner - so that at the end you don't have to resort to the
 //! low-level API anymore and this gets a complete replacement. Some low-level functions can't be
 //! rewritten in a type-safe way. In this case, new convenience functions are introduced.
+//! Quite likely that someone who uses Rust (instead of e.g. Lua) does it also because of
+//! performance reasons. medium-level API can be considered the first API. The low-level one is not
+//! really supposed to be used directly. It's important that the "first" API still is sensitive
+//! about performance and doesn't do too much extra.
 //!
 //! - Note about strings (both return and parameter)!
 //! - When I say "index", I always mean zero-based
@@ -45,3 +49,6 @@ pub use util::*;
 
 mod string_types;
 pub use string_types::*;
+
+mod recording_input;
+pub use recording_input::*;

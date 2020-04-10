@@ -10,16 +10,17 @@ use wmidi;
 
 use reaper_rs::high_level::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, AutomationMode, FxChain,
-    FxParameterCharacter, FxParameterValueRange, Guid, InputMonitoringMode, MessageBoxKind,
-    MessageBoxResult, MidiInputDevice, MidiRecordingInput, Pan, Reaper, ReaperVersion,
-    RecordingInput, StuffMidiMessageTarget, Tempo, Track, Volume,
+    FxParameterCharacter, FxParameterValueRange, Guid, MessageBoxKind, MessageBoxResult,
+    MidiInputDevice, Pan, Reaper, ReaperVersion, StuffMidiMessageTarget, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
 use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
-use reaper_rs::medium_level::TrackInfoKey;
+use reaper_rs::medium_level::{
+    InputMonitoringMode, MidiRecordingInput, RecordingInput, TrackInfoKey,
+};
 use std::rc::Rc;
 
 /// Creates all integration test steps to be executed. The order matters!
@@ -1244,7 +1245,7 @@ fn set_track_recording_input_midi_all_15() -> TestStep {
             _ => return Err("Expected MIDI input".into()),
         };
         check_eq!(input_data.get_channel(), Some(15));
-        check!(input_data.get_device().is_none());
+        check!(input_data.get_device_id().is_none());
         Ok(())
     })
 }
@@ -1254,9 +1255,7 @@ fn set_track_recording_input_midi_7_all() -> TestStep {
         // Given
         let track = get_track(0)?;
         // When
-        track.set_recording_input(MidiRecordingInput::from_all_channels_of_device(
-            MidiInputDevice::new(7),
-        ));
+        track.set_recording_input(MidiRecordingInput::from_all_channels_of_device(7));
         // Then
         let input = track.get_recording_input();
         let input_data = match input {
@@ -1264,7 +1263,7 @@ fn set_track_recording_input_midi_7_all() -> TestStep {
             _ => return Err("Expected MIDI input".into()),
         };
         check!(input_data.get_channel().is_none());
-        check_eq!(input_data.get_device(), Some(MidiInputDevice::new(7)));
+        check_eq!(input_data.get_device_id(), Some(7));
         Ok(())
     })
 }
@@ -1274,10 +1273,7 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
         // Given
         let track = get_track(0)?;
         // When
-        track.set_recording_input(MidiRecordingInput::from_device_and_channel(
-            MidiInputDevice::new(4),
-            5,
-        ));
+        track.set_recording_input(MidiRecordingInput::from_device_and_channel(4, 5));
         // Then
         let input = track.get_recording_input();
         let input_data = match input {
@@ -1285,10 +1281,7 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
             _ => return Err("Expected MIDI input".into()),
         };
         check_eq!(input_data.get_channel(), Some(5));
-        check_eq!(
-            input_data.get_device().ok_or("Expected device")?.get_id(),
-            4
-        );
+        check_eq!(input_data.get_device_id().ok_or("Expected device")?, 4);
         Ok(())
     })
 }
@@ -1314,7 +1307,7 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
             _ => return Err("Expected MIDI input".into()),
         };
         check!(input_data.get_channel().is_none());
-        check!(input_data.get_device().is_none());
+        check!(input_data.get_device_id().is_none());
         check_eq!(input_data.get_rec_input_index(), 6112);
         check_eq!(RecordingInput::from_rec_input_index(6112), input);
         check_eq!(mock.get_invocation_count(), 1);

@@ -10,9 +10,6 @@ pub use reaper::*;
 mod project;
 pub use project::*;
 
-mod recording_input;
-pub use recording_input::*;
-
 mod track;
 pub use track::*;
 
@@ -41,9 +38,6 @@ pub use automation_mode::*;
 
 mod fx_chain;
 pub use fx_chain::*;
-
-mod input_monitoring_mode;
-pub use input_monitoring_mode::*;
 
 mod midi_input_device;
 pub use midi_input_device::*;

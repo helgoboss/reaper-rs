@@ -1,7 +1,25 @@
 #![allow(non_camel_case_types)]
 use c_str_macro::c_str;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum TrackNumberResult {
+    MasterTrack,
+    NotFound,
+    // TODO Maybe use non-zero (because it's one-rooted)
+    TrackNumber(u32),
+}
+
+#[derive(Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[repr(u32)]
+pub enum InputMonitoringMode {
+    Off = 0,
+    Normal = 1,
+    /// Tape style
+    NotWhenPlaying = 2,
+}
 
 pub enum ProjectRef {
     Current,

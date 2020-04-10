@@ -1,9 +1,10 @@
-use crate::high_level::midi_input_device::MidiInputDevice;
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum RecordingInput {
     None,
     // TODO-low Audio inputs in detail
+    //  record input, <0=no input, 0..n=mono hardware input, 512+n=rearoute input, &1024=stereo
+    // input pair. &4096=MIDI input, if set then low 5 bits represent channel (0=all, 1-16=only
+    // chan), next 6 bits represent physical input (63=all, 62=VKB)
     Mono,
     ReaRoute,
     Stereo,
@@ -38,16 +39,16 @@ impl MidiRecordingInput {
         Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32)
     }
 
-    pub fn from_all_channels_of_device(device: MidiInputDevice) -> Self {
-        Self::from_midi_rec_input_index(device.get_id() * 32)
+    pub fn from_all_channels_of_device(device_id: u32) -> Self {
+        Self::from_midi_rec_input_index(device_id * 32)
     }
 
     pub fn from_all_devices_with_channel(channel: u32) -> Self {
         Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32 + channel + 1)
     }
 
-    pub fn from_device_and_channel(device: MidiInputDevice, channel: u32) -> Self {
-        Self::from_midi_rec_input_index(device.get_id() * 32 + channel + 1)
+    pub fn from_device_and_channel(device_id: u32, channel: u32) -> Self {
+        Self::from_midi_rec_input_index(device_id * 32 + channel + 1)
     }
 
     pub fn from_midi_rec_input_index(midi_rec_input_index: u32) -> Self {
@@ -75,12 +76,13 @@ impl MidiRecordingInput {
         }
     }
 
-    pub fn get_device(&self) -> Option<MidiInputDevice> {
+    // TODO Should we introduce a newtype!? I think makes only sense if we also introduce one for
+    //  Channel. I guess we will pull down helgoboss-midi dependency to medium-level API anyway.
+    pub fn get_device_id(&self) -> Option<u32> {
         let raw_device_id = self.get_midi_rec_input_index() / 32;
         if raw_device_id == ALL_MIDI_DEVICES_ID {
-            None
-        } else {
-            Some(MidiInputDevice::new(raw_device_id))
+            return None;
         }
+        Some(raw_device_id)
     }
 }

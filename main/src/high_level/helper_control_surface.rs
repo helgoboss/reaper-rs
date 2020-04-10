@@ -12,7 +12,7 @@ use crate::low_level::raw::{
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
-use crate::medium_level::{ControlSurface, ReaperPointerType};
+use crate::medium_level::{ControlSurface, ReaperPointerType, TrackNumberResult};
 use c_str_macro::c_str;
 use rxrust::prelude::*;
 
@@ -52,7 +52,7 @@ struct TrackData {
     mute: bool,
     solo: bool,
     recarm: bool,
-    number: i32,
+    number: TrackNumberResult,
     recmonitor: i32,
     recinput: i32,
     guid: Guid,
@@ -199,9 +199,7 @@ impl HelperControlSurface {
                     mute: m.get_media_track_info_value(media_track, B_MUTE) != 0.0,
                     solo: m.get_media_track_info_value(media_track, I_SOLO) != 0.0,
                     recarm: m.get_media_track_info_value(media_track, I_RECARM) != 0.0,
-                    number: m
-                        .get_set_media_track_info(media_track, IP_TRACKNUMBER, null_mut())
-                        .0 as i32,
+                    number: m.get_media_track_info_tracknumber(media_track),
                     recmonitor: m.get_media_track_info_value(media_track, I_RECMON) as i32,
                     recinput: m.get_media_track_info_value(media_track, I_RECINPUT) as i32,
                     guid: get_media_track_guid(media_track),
@@ -391,10 +389,7 @@ impl HelperControlSurface {
             ) {
                 continue;
             }
-            let new_number = reaper
-                .medium
-                .get_set_media_track_info(*media_track, IP_TRACKNUMBER, null_mut())
-                .0 as i32;
+            let new_number = reaper.medium.get_media_track_info_tracknumber(*media_track);
             if new_number != track_data.number {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;

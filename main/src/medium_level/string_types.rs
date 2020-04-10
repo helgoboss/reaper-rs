@@ -82,3 +82,19 @@ impl<'a> From<Cow<'a, str>> for ReaperStringArg<'a> {
         }
     }
 }
+
+/// This string type is used in the medium-level API to expose strings which are owned by REAPER
+/// itself.
+pub struct ReaperStringVal<'a>(pub(super) &'a CStr);
+
+impl<'a> From<ReaperStringVal<'a>> for &'a CStr {
+    fn from(v: ReaperStringVal<'a>) -> Self {
+        v.0
+    }
+}
+
+impl<'a> From<ReaperStringVal<'a>> for CString {
+    fn from(v: ReaperStringVal<'a>) -> Self {
+        v.0.to_owned()
+    }
+}

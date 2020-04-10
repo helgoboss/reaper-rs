@@ -15,17 +15,17 @@ use crate::high_level::fx_chain::FxChain;
 use crate::high_level::guid::Guid;
 use crate::high_level::track_send::TrackSend;
 
-use crate::high_level::{
-    get_target_track, Chunk, ChunkRegion, InputMonitoringMode, MidiRecordingInput, Pan, Project,
-    Reaper, RecordingInput, Volume,
-};
+use crate::high_level::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
 use crate::low_level::get_control_surface_instance;
 use crate::low_level::raw::{MediaTrack, ReaProject, CSURF_EXT_SETINPUTMONITOR, GUID};
 
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
-use crate::medium_level::{ReaperPointerType, TrackInfoKey};
+use crate::medium_level::{
+    InputMonitoringMode, MidiRecordingInput, ReaperPointerType, RecordingInput, TrackInfoKey,
+    TrackNumberResult,
+};
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
@@ -92,25 +92,17 @@ impl Track {
     // TODO-low Maybe return borrowed string instead!
     pub fn get_name(&self) -> CString {
         self.load_and_check_if_necessary_or_complain();
-        if self.is_master_track() {
-            c_str!("<Master track>").to_owned()
-        } else {
-            let ptr =
-                Reaper::get()
-                    .medium
-                    .get_set_media_track_info(self.get_raw(), P_NAME, null_mut());
-            unsafe { ptr.into_c_str() }.unwrap().to_owned()
-        }
+        Reaper::get()
+            .medium
+            .get_media_track_info_name(self.get_raw(), |n| n.into())
+            .unwrap_or_else(|| c_str!("<Master track>").to_owned())
     }
 
     pub fn get_input_monitoring_mode(&self) -> InputMonitoringMode {
         self.load_and_check_if_necessary_or_complain();
-        let ptr =
-            Reaper::get()
-                .medium
-                .get_set_media_track_info(self.get_raw(), I_RECMON, null_mut());
-        let irecmon = unsafe { ptr.to::<i32>() }.unwrap() as u32;
-        InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
+        Reaper::get()
+            .medium
+            .get_media_track_info_recmon(self.get_raw())
     }
 
     pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
@@ -123,12 +115,9 @@ impl Track {
 
     pub fn get_recording_input(&self) -> RecordingInput {
         self.load_and_check_if_necessary_or_complain();
-        let ptr =
-            Reaper::get()
-                .medium
-                .get_set_media_track_info(self.get_raw(), I_RECINPUT, null_mut());
-        let rec_input_index = unsafe { ptr.to::<i32>() }.unwrap();
-        RecordingInput::from_rec_input_index(rec_input_index)
+        Reaper::get()
+            .medium
+            .get_media_track_info_recinput(self.get_raw())
     }
 
     // TODO-low Support setting other kinds of inputs
@@ -215,22 +204,26 @@ impl Track {
 
     pub fn get_index(&self) -> Option<u32> {
         self.load_and_check_if_necessary_or_complain();
-        let ip_track_number = Reaper::get()
+        let result = Reaper::get()
             .medium
-            .get_set_media_track_info(self.get_raw(), IP_TRACKNUMBER, null_mut())
-            .0 as i32;
-        if ip_track_number == 0 {
-            // Usually means that track doesn't exist. But this we already checked. This happens
-            // only if we query the number of a track in another project tab. TODO-low
-            // Try to find a working solution. Till then, return 0.
-            return None;
+            .get_media_track_info_tracknumber(self.get_raw());
+        use TrackNumberResult::*;
+        match result {
+            NotFound => {
+                // Usually means that track doesn't exist. But this we already checked. This happens
+                // only if we query the number of a track in another project tab. TODO-low
+                // Try to find a working solution. Till then, return None.
+                None
+            }
+            MasterTrack => {
+                // Master track indicator
+                None
+            }
+            TrackNumber(n) => {
+                // Must be > 0. Make it zero-rooted.
+                Some(n - 1)
+            }
         }
-        if ip_track_number == -1 {
-            // Master track indicator
-            return None;
-        }
-        // Must be > 0. Make it zero-rooted.
-        Some(ip_track_number as u32 - 1)
     }
 
     pub fn has_auto_arm_enabled(&self) -> bool {
@@ -627,11 +620,10 @@ impl Track {
 
     pub fn is_master_track(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
-        let ip_track_number = Reaper::get()
+        Reaper::get()
             .medium
-            .get_set_media_track_info(self.get_raw(), IP_TRACKNUMBER, null_mut())
-            .0 as i32;
-        ip_track_number == -1
+            .get_media_track_info_tracknumber(self.get_raw())
+            == TrackNumberResult::MasterTrack
     }
 
     pub fn get_project(&self) -> Project {
@@ -653,11 +645,8 @@ impl PartialEq for Track {
 }
 
 pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
-    let internal = Reaper::get()
-        .medium
-        .get_set_media_track_info(media_track, TrackInfoKey::GUID, null_mut())
-        .0 as *mut GUID;
-    Guid::new(unsafe { *internal })
+    let internal = Reaper::get().medium.get_media_track_info_guid(media_track);
+    Guid::new(internal)
 }
 
 // In REAPER < 5.95 this returns nullptr. That means we might need to use findContainingProject
@@ -665,8 +654,7 @@ pub fn get_media_track_guid(media_track: *mut MediaTrack) -> Guid {
 fn get_track_project_raw(media_track: *mut MediaTrack) -> *mut ReaProject {
     Reaper::get()
         .medium
-        .get_set_media_track_info(media_track, P_PROJECT, null_mut())
-        .0 as *mut ReaProject
+        .get_media_track_info_project(media_track)
 }
 
 fn get_auto_arm_chunk_line(chunk: &Chunk) -> Option<ChunkRegion> {
