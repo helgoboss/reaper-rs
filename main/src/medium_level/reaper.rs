@@ -127,9 +127,9 @@ impl Reaper {
         require!(self.low, ShowConsoleMsg)(msg.into().as_ptr())
     }
 
-    /// Gets or sets track attributes. This just delegates to the low-level function. Using this
-    /// function is not fun and requires you to use unsafe code. Consider using one of type-safe
-    /// convenience functions instead. They start with `get_media_track_info_` or
+    /// Gets or sets track arbitrary attributes. This just delegates to the low-level analog. Using
+    /// this function is not fun and requires you to use unsafe code. Consider using one of
+    /// type-safe convenience functions instead. They start with `get_media_track_info_` or
     /// `set_media_track_info_`.
     pub fn get_set_media_track_info(
         &self,
@@ -195,19 +195,22 @@ impl Reaper {
         unsafe { deref_ptr_as::<GUID>(ptr) }.unwrap()
     }
 
-    // DONE
+    // TODO Introduce enum for "name" parameter
+    // TODO Introduce convenience variants with better signatures
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
     pub fn plugin_register(&self, name: &CStr, infostruct: *mut c_void) -> i32 {
         require!(self.low, plugin_register)(name.as_ptr(), infostruct)
     }
 
-    // DONE
+    /// Performs an action belonging to the main action section. To perform non-native actions
+    /// (ReaScripts, custom or extension plugins' actions) safely, see
+    /// [`named_command_lookup`](struct.Reaper.html#method.named_command_lookup).
     pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: *mut ReaProject) {
         require!(self.low, Main_OnCommandEx)(command as i32, flag, proj);
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_set_surface_mute(
         &self,
         trackid: *mut MediaTrack,
@@ -217,7 +220,7 @@ impl Reaper {
         require!(self.low, CSurf_SetSurfaceMute)(trackid, mute, ignoresurf);
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_set_surface_solo(
         &self,
         trackid: *mut MediaTrack,
@@ -227,32 +230,35 @@ impl Reaper {
         require!(self.low, CSurf_SetSurfaceSolo)(trackid, solo, ignoresurf);
     }
 
-    // DONE
+    /// Generates a random GUID.
     pub fn gen_guid(&self) -> GUID {
         let mut guid = MaybeUninit::uninit();
         require!(self.low, genGuid)(guid.as_mut_ptr());
         unsafe { guid.assume_init() }
     }
 
-    // DONE
     // TODO-low Check if this is really idempotent
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) {
         self.plugin_register(c_str!("csurf_inst"), get_cpp_control_surface());
     }
 
-    // DONE
     // TODO-low Check if this is really idempotent
     pub fn unregister_control_surface(&self) {
         self.plugin_register(c_str!("-csurf_inst"), get_cpp_control_surface());
     }
 
-    // DONE
+    // TODO Doc
     pub fn section_from_unique_id(&self, unique_id: u32) -> *mut KbdSectionInfo {
         require!(self.low, SectionFromUniqueID)(unique_id as i32)
     }
 
-    // DONE
+    // TODO Introduce enums
+    // KBD_OnMainActionEx
+    // val/valhw are used for midi stuff.
+    // val=[0..127] and valhw=-1 (midi CC),
+    // valhw >=0 (midi pitch (valhw | val<<7)),
+    // relmode absolute (0) or 1/2/3 for relative adjust modes
     // Kept return value type i32 because I have no idea what the return value is about.
     pub fn kbd_on_main_action_ex(
         &self,
@@ -273,52 +279,55 @@ impl Reaper {
         )
     }
 
-    // DONE
+    /// Returns the REAPER main window handle.
     pub fn get_main_hwnd(&self) -> HWND {
         require!(self.low, GetMainHwnd)()
     }
 
-    // DONE
+    // TODO Use ReaperStringArg
     pub fn named_command_lookup(&self, command_name: &CStr) -> u32 {
         require!(self.low, NamedCommandLookup)(command_name.as_ptr()) as u32
     }
 
-    // DONE
+    /// Clears the ReaScript console.
     pub fn clear_console(&self) {
         require!(self.low, ClearConsole)();
     }
 
-    // DONE
+    /// Returns the number of tracks in the given project (pass `null_mut()` for current project)
+    // TODO Consider fixing all non-justified *mut to *const (so we can pass null() in many places)
     pub fn count_tracks(&self, proj: *mut ReaProject) -> u32 {
         require!(self.low, CountTracks)(proj) as u32
     }
 
-    // DONE
+    // TODO Doc
     pub fn insert_track_at_index(&self, idx: u32, want_defaults: bool) {
         require!(self.low, InsertTrackAtIndex)(idx as i32, want_defaults);
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_midi_input(&self, idx: u32) -> *mut midi_Input {
         require!(self.low, GetMidiInput)(idx as i32)
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_midi_output(&self, idx: u32) -> *mut midi_Output {
         require!(self.low, GetMidiOutput)(idx as i32)
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_max_midi_inputs(&self) -> u32 {
         require!(self.low, GetMaxMidiInputs)() as u32
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_max_midi_outputs(&self) -> u32 {
         require!(self.low, GetMaxMidiOutputs)() as u32
     }
 
-    // DONE
+    // TODO Use Option<CString> because a MIDI device *must* have a name.
+    // TODO Use Explain that returning CString instead of String is because we also expect CStrings
+    //  as arguments (for good reasons). It would not be symmetric to return Strings then.
     pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Cow<'static, CStr>) {
         if nameout_sz == 0 {
             let is_present = require!(self.low, GetMIDIInputName)(dev as i32, null_mut(), 0);
@@ -331,7 +340,9 @@ impl Reaper {
         }
     }
 
-    // DONE
+    // TODO Add enum for instantiate
+    // TODO Add convenience variants (with different result types)
+    // TODO Expect ReaperStringArg
     // Return type Option or Result can't be easily chosen here because if instantiate is 0, it
     // should be Option, if it's -1 or > 0, it should be Result. So we just keep the i32.
     pub fn track_fx_add_by_name(
@@ -344,7 +355,7 @@ impl Reaper {
         require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate)
     }
 
-    // DONE
+    // TODO Use Option<CString> because a MIDI device *must* have a name.
     pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Cow<'static, CStr>) {
         if nameout_sz == 0 {
             let is_present = require!(self.low, GetMIDIOutputName)(dev as i32, null_mut(), 0);
@@ -357,12 +368,12 @@ impl Reaper {
         }
     }
 
-    // DONE
+    // TODO Consider introducing an Fx enum (Input/Output Fx) and using it in FX parameters
     pub fn track_fx_get_enabled(&self, track: *mut MediaTrack, fx: u32) -> bool {
         require!(self.low, TrackFX_GetEnabled)(track, fx as i32)
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if FX doesn't exist
     pub fn track_fx_get_fx_name(
         &self,
@@ -380,7 +391,7 @@ impl Reaper {
         Ok(name)
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_instrument(&self, track: *mut MediaTrack) -> Option<u32> {
         let index = require!(self.low, TrackFX_GetInstrument)(track);
         if index == -1 {
@@ -389,22 +400,22 @@ impl Reaper {
         Some(index as u32)
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: u32, enabled: bool) {
         require!(self.low, TrackFX_SetEnabled)(track, fx as i32, enabled);
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_num_params(&self, track: *mut MediaTrack, fx: u32) -> u32 {
         require!(self.low, TrackFX_GetNumParams)(track, fx as i32) as u32
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_current_project_in_load_save(&self) -> *mut ReaProject {
         require!(self.low, GetCurrentProjectInLoadSave)()
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if FX or parameter doesn't exist
     pub fn track_fx_get_param_name(
         &self,
@@ -429,7 +440,7 @@ impl Reaper {
         Ok(name)
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if FX or parameter doesn't exist
     pub fn track_fx_get_formatted_param_value(
         &self,
@@ -454,7 +465,7 @@ impl Reaper {
         Ok(name)
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if FX or parameter doesn't exist or if FX doesn't support formatting arbitrary
     // parameter values and the given value is not equal to the current one.
     pub fn track_fx_format_param_value_normalized(
@@ -482,7 +493,7 @@ impl Reaper {
         Ok(name)
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if FX or parameter doesn't exist
     pub fn track_fx_set_param_normalized(
         &self,
@@ -499,7 +510,8 @@ impl Reaper {
         Ok(())
     }
 
-    // DONE
+    // TODO Doc
+    // TODO Introduce enums for result attributes that have special numbers
     pub fn get_focused_fx(&self) -> Option<GetFocusedFxResult> {
         let mut tracknumber = MaybeUninit::uninit();
         let mut itemnumber = MaybeUninit::uninit();
@@ -529,6 +541,8 @@ impl Reaper {
         }
     }
 
+    // TODO Doc
+    // TODO Introduce enums for result attributes that have special numbers
     // Returns None if no FX has been touched yet or if the last-touched FX doesn't exist anymore
     pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult> {
         let mut tracknumber = MaybeUninit::uninit();
@@ -567,7 +581,7 @@ impl Reaper {
         }
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_copy_to_track(
         &self,
         src_track: *mut MediaTrack,
@@ -585,7 +599,7 @@ impl Reaper {
         );
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if FX doesn't exist (maybe also in other cases?)
     pub fn track_fx_delete(&self, track: *mut MediaTrack, fx: u32) -> Result<(), ()> {
         let succesful = require!(self.low, TrackFX_Delete)(track, fx as i32);
@@ -595,6 +609,7 @@ impl Reaper {
         Ok(())
     }
 
+    // TODO Doc
     // Returns None if the FX parameter doesn't report step sizes (or if the FX or parameter doesn't
     // exist, but that can be checked before). Option makes more sense than Result here because
     // this function is at the same time the correct function to be used to determine *if* a
@@ -629,7 +644,7 @@ impl Reaper {
         })
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_param_ex(
         &self,
         track: *mut MediaTrack,
@@ -656,71 +671,73 @@ impl Reaper {
         .into()
     }
 
-    // DONE
+    // TODO Doc
     pub fn undo_begin_block_2(&self, proj: *mut ReaProject) {
         require!(self.low, Undo_BeginBlock2)(proj);
     }
 
-    // DONE
+    // TODO Introduce enum for extraflags
+    // TODO Use ReaperStringArg
     pub fn undo_end_block_2(&self, proj: *mut ReaProject, descchange: &CStr, extraflags: u32) {
         require!(self.low, Undo_EndBlock2)(proj, descchange.as_ptr(), extraflags as i32);
     }
 
-    // DONE
+    // TODO Use closure with ReaperStringVal
     pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> ReaperStringPtr {
         ReaperStringPtr(require!(self.low, Undo_CanUndo2)(proj))
     }
 
-    // DONE
+    // TODO Use closure with ReaperStringVal
     pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> ReaperStringPtr {
         ReaperStringPtr(require!(self.low, Undo_CanRedo2)(proj))
     }
 
-    // DONE
+    // TODO Doc
     // Returns true if there was something to be undone, false if not
     pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, Undo_DoUndo2)(proj) != 0
     }
 
-    // DONE
+    // TODO Doc
     // Returns true if there was something to be redone, false if not
     pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, Undo_DoRedo2)(proj) != 0
     }
 
-    // DONE
+    // TODO Doc
     pub fn mark_project_dirty(&self, proj: *mut ReaProject) {
         require!(self.low, MarkProjectDirty)(proj);
     }
 
-    // DONE
+    // TODO Doc
     // Returns true if project dirty, false if not
     pub fn is_project_dirty(&self, proj: *mut ReaProject) -> bool {
         require!(self.low, IsProjectDirty)(proj) != 0
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_list_update_all_external_surfaces(&self) {
         require!(self.low, TrackList_UpdateAllExternalSurfaces)();
     }
 
-    // DONE
+    // TODO Pull ReaperVersion down
     pub fn get_app_version(&self) -> &'static CStr {
         let ptr = require!(self.low, GetAppVersion)();
         unsafe { CStr::from_ptr(ptr) }
     }
 
-    // DONE
+    // TODO Pull down enum for result
     pub fn get_track_automation_mode(&self, tr: *mut MediaTrack) -> u32 {
         require!(self.low, GetTrackAutomationMode)(tr) as u32
     }
 
-    // DONE
+    // TODO Pull down enum for result, use option
     pub fn get_global_automation_override(&self) -> i32 {
         require!(self.low, GetGlobalAutomationOverride)()
     }
 
-    // DONE
+    // TODO Maybe use existing enum for envelope names
+    // TODO Make it possible for Custom enum to pass any REAPER string. Must be documented.
     pub fn get_track_envelope_by_name(
         &self,
         track: *mut MediaTrack,
@@ -729,27 +746,27 @@ impl Reaper {
         require!(self.low, GetTrackEnvelopeByName)(track, envname.as_ptr())
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_media_track_info_value(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> f64 {
         require!(self.low, GetMediaTrackInfo_Value)(tr, Cow::from(parmname).as_ptr())
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_count(&self, track: *mut MediaTrack) -> u32 {
         require!(self.low, TrackFX_GetCount)(track) as u32
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_rec_count(&self, track: *mut MediaTrack) -> u32 {
         require!(self.low, TrackFX_GetRecCount)(track) as u32
     }
 
-    // DONE
+    // TODO Return owned GUID
     pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: u32) -> *mut GUID {
         require!(self.low, TrackFX_GetFXGUID)(track, fx as i32)
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_param_normalized(
         &self,
         track: *mut MediaTrack,
@@ -759,12 +776,12 @@ impl Reaper {
         require!(self.low, TrackFX_GetParamNormalized)(track, fx as i32, param as i32)
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_master_track(&self, proj: *mut ReaProject) -> *mut MediaTrack {
         require!(self.low, GetMasterTrack)(proj)
     }
 
-    // DONE
+    // TODO Doc
     pub fn guid_to_string(&self, g: &GUID) -> CString {
         let (guid_string, _) = with_string_buffer(64, |buffer, _| {
             require!(self.low, guidToString)(g as *const GUID, buffer)
@@ -772,32 +789,33 @@ impl Reaper {
         guid_string
     }
 
-    // DONE
+    // TODO Doc
     pub fn master_get_tempo(&self) -> f64 {
         require!(self.low, Master_GetTempo)()
     }
 
-    // DONE
+    // TODO Doc
     pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: bool) {
         require!(self.low, SetCurrentBPM)(__proj, bpm, want_undo);
     }
 
-    // DONE
+    // TODO Doc
     pub fn master_get_play_rate(&self, project: *mut ReaProject) -> f64 {
         require!(self.low, Master_GetPlayRate)(project)
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_on_play_rate_change(&self, playrate: f64) {
         require!(self.low, CSurf_OnPlayRateChange)(playrate);
     }
 
-    // DONE
+    // TODO Introduce enums
+    // TODO Expect ReaperStringArg
     pub fn show_message_box(&self, msg: &CStr, title: &CStr, type_: u32) -> u32 {
         require!(self.low, ShowMessageBox)(msg.as_ptr(), title.as_ptr(), type_ as i32) as u32
     }
 
-    // DONE
+    // TODO Expect ReaperStringArg
     // Returns Err if given string is not a valid GUID string
     pub fn string_to_guid(&self, str: &CStr) -> Result<GUID, ()> {
         let mut guid = MaybeUninit::uninit();
@@ -809,7 +827,8 @@ impl Reaper {
         Ok(guid)
     }
 
-    // DONE
+    // TODO Use enum for monitor (there's one already)
+    // TODO Askjf what all the csurf_ return ints mean
     pub fn csurf_on_input_monitoring_change_ex(
         &self,
         trackid: *mut MediaTrack,
@@ -819,7 +838,7 @@ impl Reaper {
         require!(self.low, CSurf_OnInputMonitorChangeEx)(trackid, monitor as i32, allowgang)
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if invalid parameter name given (maybe also in other situations)
     pub fn set_media_track_info_value(
         &self,
@@ -835,22 +854,22 @@ impl Reaper {
         Ok(())
     }
 
-    // DONE
+    // TODO Introduce enum for mode
     pub fn stuff_midimessage(&self, mode: u32, msg1: u8, msg2: u8, msg3: u8) {
         require!(self.low, StuffMIDIMessage)(mode as i32, msg1 as i32, msg2 as i32, msg3 as i32);
     }
 
-    // DONE
+    // TODO Doc
     pub fn db2slider(&self, x: f64) -> f64 {
         require!(self.low, DB2SLIDER)(x)
     }
 
-    // DONE
+    // TODO Doc
     pub fn slider2db(&self, y: f64) -> f64 {
         require!(self.low, SLIDER2DB)(y)
     }
 
-    // DONE
+    // TODO Doc
     // I guess it returns Err if the track doesn't exist
     pub fn get_track_ui_vol_pan(&self, track: *mut MediaTrack) -> Result<(f64, f64), ()> {
         let mut volume = MaybeUninit::uninit();
@@ -865,13 +884,13 @@ impl Reaper {
         }))
     }
 
-    // DONE
+    // TODO Doc
     // Returns true on success
     pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *mut audio_hook_register_t) -> bool {
         require!(self.low, Audio_RegHardwareHook)(is_add, reg) > 0
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_set_surface_volume(
         &self,
         trackid: *mut MediaTrack,
@@ -881,7 +900,7 @@ impl Reaper {
         require!(self.low, CSurf_SetSurfaceVolume)(trackid, volume, ignoresurf);
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_on_volume_change_ex(
         &self,
         trackid: *mut MediaTrack,
@@ -892,7 +911,7 @@ impl Reaper {
         require!(self.low, CSurf_OnVolumeChangeEx)(trackid, volume, relative, allow_gang)
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_set_surface_pan(
         &self,
         trackid: *mut MediaTrack,
@@ -902,7 +921,7 @@ impl Reaper {
         require!(self.low, CSurf_SetSurfacePan)(trackid, pan, ignoresurf);
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_on_pan_change_ex(
         &self,
         trackid: *mut MediaTrack,
@@ -913,17 +932,17 @@ impl Reaper {
         require!(self.low, CSurf_OnPanChangeEx)(trackid, pan, relative, allow_gang)
     }
 
-    // DONE
+    // TODO Doc
     pub fn count_selected_tracks_2(&self, proj: *mut ReaProject, wantmaster: bool) -> u32 {
         require!(self.low, CountSelectedTracks2)(proj, wantmaster) as u32
     }
 
-    // DONE
+    // TODO Doc
     pub fn set_track_selected(&self, track: *mut MediaTrack, selected: bool) {
         require!(self.low, SetTrackSelected)(track, selected);
     }
 
-    // DONE
+    // TODO Doc
     pub fn get_selected_track_2(
         &self,
         proj: *mut ReaProject,
@@ -933,22 +952,24 @@ impl Reaper {
         require!(self.low, GetSelectedTrack2)(proj, seltrackidx as i32, wantmaster)
     }
 
-    // DONE
+    // TODO Doc
     pub fn set_only_track_selected(&self, track: *mut MediaTrack) {
         require!(self.low, SetOnlyTrackSelected)(track);
     }
 
-    // DONE
+    // TODO Doc
     pub fn delete_track(&self, tr: *mut MediaTrack) {
         require!(self.low, DeleteTrack)(tr);
     }
 
-    // DONE
+    // TODO Introduce enum for category
     pub fn get_track_num_sends(&self, tr: *mut MediaTrack, category: i32) -> u32 {
         require!(self.low, GetTrackNumSends)(tr, category) as u32
     }
 
-    // DONE
+    // TODO Use enum for category
+    // TODO Make it like get_set_track_info
+    // TODO Introduce convenience functions
     pub fn get_set_track_send_info(
         &self,
         tr: *mut MediaTrack,
@@ -966,7 +987,7 @@ impl Reaper {
         ))
     }
 
-    // DONE
+    // TODO Doc
     // I guess it returns Err if the track doesn't exist
     pub fn get_track_state_chunk(
         &self,
@@ -984,7 +1005,7 @@ impl Reaper {
         Ok(chunk_content)
     }
 
-    // DONE
+    // TODO Doc
     pub fn create_track_send(
         &self,
         tr: *mut MediaTrack,
@@ -993,7 +1014,7 @@ impl Reaper {
         require!(self.low, CreateTrackSend)(tr, desttr_in_optional) as u32
     }
 
-    // DONE
+    // TODO Maybe make recarm bool
     // Seems to return true if was armed and false if not
     pub fn csurf_on_rec_arm_change_ex(
         &self,
@@ -1004,7 +1025,7 @@ impl Reaper {
         require!(self.low, CSurf_OnRecArmChangeEx)(trackid, recarm as i32, allowgang)
     }
 
-    // DONE
+    // TODO Expect ReaperStringArg
     // Returns Err for example if given chunk is invalid
     pub fn set_track_state_chunk(
         &self,
@@ -1020,22 +1041,22 @@ impl Reaper {
         Ok(())
     }
 
-    // DONE
+    // TODO Introduce enum for show_flag
     pub fn track_fx_show(&self, track: *mut MediaTrack, index: u32, show_flag: u32) {
         require!(self.low, TrackFX_Show)(track, index as i32, show_flag as i32);
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_floating_window(&self, track: *mut MediaTrack, index: u32) -> HWND {
         require!(self.low, TrackFX_GetFloatingWindow)(track, index as i32)
     }
 
-    // DONE
+    // TODO Doc
     pub fn track_fx_get_open(&self, track: *mut MediaTrack, fx: u32) -> bool {
         require!(self.low, TrackFX_GetOpen)(track, fx as i32)
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_on_send_volume_change(
         &self,
         trackid: *mut MediaTrack,
@@ -1046,7 +1067,7 @@ impl Reaper {
         require!(self.low, CSurf_OnSendVolumeChange)(trackid, send_index as i32, volume, relative)
     }
 
-    // DONE
+    // TODO Doc
     pub fn csurf_on_send_pan_change(
         &self,
         trackid: *mut MediaTrack,
@@ -1057,12 +1078,13 @@ impl Reaper {
         require!(self.low, CSurf_OnSendPanChange)(trackid, send_index as i32, pan, relative)
     }
 
-    // DONE
+    // TODO Use closure with ReaperStringVal
     // Returns Err if section or command not existing (can't think of any other case)
     pub fn kbd_get_text_from_cmd(&self, cmd: u32, section: *mut KbdSectionInfo) -> ReaperStringPtr {
         ReaperStringPtr(require!(self.low, kbd_getTextFromCmd)(cmd, section))
     }
 
+    // TODO Doc
     // Returns None if action doesn't report on/off states (or if action not existing).
     // Option makes more sense than Result here because this function is at the same time the
     // correct function to be used to determine *if* an action reports on/off states. So
@@ -1079,7 +1101,7 @@ impl Reaper {
         return Some(result != 0);
     }
 
-    // DONE
+    // TODO Use closure with ReaperStringVal
     // Returns None if lookup was not successful, that is, the command couldn't be found
     pub fn reverse_named_command_lookup(&self, command_id: u32) -> ReaperStringPtr {
         ReaperStringPtr(require!(self.low, ReverseNamedCommandLookup)(
@@ -1087,7 +1109,7 @@ impl Reaper {
         ))
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err if send not existing
     pub fn get_track_send_ui_vol_pan(
         &self,
@@ -1110,7 +1132,7 @@ impl Reaper {
         }))
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err e.g. if FX doesn't exist
     pub fn track_fx_get_preset_index(
         &self,
@@ -1126,7 +1148,7 @@ impl Reaper {
         return Ok((index as u32, unsafe { num_presets.assume_init() } as u32));
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err e.g. if FX doesn't exist
     pub fn track_fx_set_preset_by_index(
         &self,
@@ -1141,7 +1163,7 @@ impl Reaper {
         Ok(())
     }
 
-    // DONE
+    // TODO Doc
     // Returns Err e.g. if FX doesn't exist
     pub fn track_fx_navigate_presets(
         &self,
@@ -1156,7 +1178,7 @@ impl Reaper {
         Ok(())
     }
 
-    // DONE
+    // TODO Check when this returns null presetname and if empty preset names are possible
     pub fn track_fx_get_preset(
         &self,
         track: *mut MediaTrack,
