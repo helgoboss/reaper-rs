@@ -140,8 +140,7 @@ impl Action {
                 let rd = self.runtime_data.borrow();
                 Reaper::get()
                     .medium
-                    .reverse_named_command_lookup(rd.as_ref().unwrap().command_id)
-                    .into_c_string()
+                    .reverse_named_command_lookup(rd.as_ref().unwrap().command_id, |s| s.into())
             })
     }
 

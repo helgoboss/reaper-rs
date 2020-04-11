@@ -428,7 +428,7 @@ impl Reaper {
     }
 
     // TODO Doc: Explain that returning CString instead of String is because we also expect CStrings
-    //  as arguments (for good reasons). It would not be symmetric to return Strings then.
+    //  as ideal arguments (for good reasons). It would not be symmetric to return Strings then.
     pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = require!(self.low, GetMIDIInputName)(dev as i32, null_mut(), 0);
@@ -911,14 +911,13 @@ impl Reaper {
         }
     }
 
-    // TODO Maybe use existing enum for envelope names
-    // TODO Make it possible for Custom enum to pass any REAPER string. Must be documented.
-    pub fn get_track_envelope_by_name(
+    // TODO Doc
+    pub fn get_track_envelope_by_name<'a>(
         &self,
         track: *mut MediaTrack,
-        envname: &CStr,
+        envname: impl Into<ReaperStringArg<'a>>,
     ) -> *mut TrackEnvelope {
-        require!(self.low, GetTrackEnvelopeByName)(track, envname.as_ptr())
+        require!(self.low, GetTrackEnvelopeByName)(track, envname.into().as_ptr())
     }
 
     // TODO Doc
@@ -1323,12 +1322,15 @@ impl Reaper {
         return Some(result != 0);
     }
 
-    // TODO Use closure with ReaperStringVal
+    // TODO Doc
     // Returns None if lookup was not successful, that is, the command couldn't be found
-    pub fn reverse_named_command_lookup(&self, command_id: u32) -> ReaperStringPtr {
-        ReaperStringPtr(require!(self.low, ReverseNamedCommandLookup)(
-            command_id as i32,
-        ))
+    pub fn reverse_named_command_lookup<R>(
+        &self,
+        command_id: u32,
+        f: impl Fn(&CStr) -> R,
+    ) -> Option<R> {
+        let ptr = require!(self.low, ReverseNamedCommandLookup)(command_id as i32);
+        unsafe { create_passing_c_str(ptr) }.map(f)
     }
 
     // TODO Doc

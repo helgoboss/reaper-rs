@@ -140,6 +140,7 @@ impl From<RegInstr> for Cow<'static, CStr> {
     }
 }
 
+// TODO Make it possible for all Custom enum variants to pass any REAPER string. Must be documented.
 pub enum ExtensionType {
     Api(&'static CStr),
     ApiDef(&'static CStr),
@@ -427,6 +428,9 @@ impl From<TrackSendInfoKey> for Cow<'static, CStr> {
 pub enum EnvChunkName {
     VOLENV,
     PANENV,
+    // TODO Figure out all common env chunk names
+    // TODO Check if there are any *common* envelopes which don't have an own chunk. In this case
+    //  we should provide a similar enum for get_track_envelope_by_name() envname as well.
     /// Use this for all non-common envelope names.
     Custom(&'static CStr),
 }
