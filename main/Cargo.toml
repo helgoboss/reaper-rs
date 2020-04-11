@@ -6,6 +6,11 @@ edition = "2018"
 build = "build.rs"
 
 [features]
+# The different APIs are modeled as different features. They are not in separate crates for the following reasons:
+# - Usage is more straight-forward (there's only *one* reaper-rs crate)
+# - The developer effort of maintaining several separate versions is gone
+# - If one day features are used to model which REAPER functions are loaded, these features can be used by all APIs
+
 # By default, only the low-level API is enabled
 default = []
 # Enables the medium-level API (which depends on the low-level API)

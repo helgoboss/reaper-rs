@@ -387,12 +387,10 @@ impl Reaper {
 
     // Must be idempotent
     pub fn activate(&self) {
+        self.medium.plugin_register_hookcommand(hook_command);
+        self.medium.plugin_register_toggleaction(toggle_action);
         self.medium
-            .plugin_register(c_str!("hookcommand"), hook_command as *mut c_void);
-        self.medium
-            .plugin_register(c_str!("toggleaction"), toggle_action as *mut c_void);
-        self.medium
-            .plugin_register(c_str!("hookpostcommand"), hook_post_command as *mut c_void);
+            .plugin_register_hookpostcommand(hook_post_command);
         self.medium.register_control_surface();
         self.medium
             .audio_reg_hardware_hook(true, &self.audio_hook as *const _ as *mut _);
@@ -404,11 +402,9 @@ impl Reaper {
             .audio_reg_hardware_hook(false, &self.audio_hook as *const _ as *mut _);
         self.medium.unregister_control_surface();
         self.medium
-            .plugin_register(c_str!("-hookpostcommand"), hook_post_command as *mut c_void);
-        self.medium
-            .plugin_register(c_str!("-toggleaction"), toggle_action as *mut c_void);
-        self.medium
-            .plugin_register(c_str!("-hookcommand"), hook_command as *mut c_void);
+            .plugin_unregister_hookpostcommand(hook_post_command);
+        self.medium.plugin_unregister_toggleaction(toggle_action);
+        self.medium.plugin_unregister_hookcommand(hook_command);
     }
 
     pub fn get_version(&self) -> ReaperVersion {
@@ -474,10 +470,7 @@ impl Reaper {
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
-        let command_index = self
-            .medium
-            .plugin_register(c_str!("command_id"), command_id.as_ptr() as *mut c_void)
-            as u32;
+        let command_index = self.medium.plugin_register_command_id(command_id) as u32;
         let command = Command::new(
             command_index,
             description.into(),
@@ -492,8 +485,7 @@ impl Reaper {
         if let Entry::Vacant(p) = self.command_by_index.borrow_mut().entry(command_index) {
             let command = p.insert(command);
             let acc = &mut command.accelerator_register;
-            self.medium
-                .plugin_register(c_str!("gaccel"), acc as *mut _ as *mut c_void);
+            self.medium.plugin_register_gaccel(acc);
         }
     }
 
@@ -505,8 +497,7 @@ impl Reaper {
         let mut command_by_index = self.command_by_index.borrow_mut();
         if let Some(command) = command_by_index.get_mut(&command_index) {
             let acc = &mut command.accelerator_register;
-            self.medium
-                .plugin_register(c_str!("-gaccel"), acc as *mut _ as *mut c_void);
+            self.medium.plugin_unregister_gaccel(acc);
             command_by_index.remove(&command_index);
         }
     }

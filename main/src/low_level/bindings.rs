@@ -9263,7 +9263,7 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
-            pub fn get_control_surface() -> *mut ::std::os::raw::c_void;
+            pub fn get_control_surface() -> *mut root::IReaperControlSurface;
         }
         extern "C" {
             pub fn GetTypeString(

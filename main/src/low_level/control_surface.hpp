@@ -7,7 +7,7 @@
 namespace reaper_rs_control_surface {
   // This is the only function which is called from Rust and implemented in C++. It returns a reference to the one and
   // only static `IReaperControlSurface`instance of this plug-in that Rust code can pass to `plugin_register()`.
-  extern "C" void* get_control_surface();
+  extern "C" IReaperControlSurface* get_control_surface();
 
   // All of the following functions are called from C++ and implemented in Rust.
   extern "C" const char* GetTypeString(void* callback_target);

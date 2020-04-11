@@ -4,6 +4,60 @@ use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 
+pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
+pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
+pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
+
+pub enum RegInstr {
+    Register(ExtensionType),
+    Unregister(ExtensionType),
+}
+
+impl From<RegInstr> for Cow<'static, CStr> {
+    fn from(value: RegInstr) -> Self {
+        use RegInstr::*;
+        match value {
+            Register(et) => et.into(),
+            Unregister(et) => concat_c_strs(c_str!("-"), Cow::from(et).as_ref()).into(),
+        }
+    }
+}
+
+pub enum ExtensionType {
+    Api(&'static CStr),
+    ApiDef(&'static CStr),
+    HookCommand,
+    HookPostCommand,
+    HookCommand2,
+    ToggleAction,
+    ActionHelp,
+    CommandId,
+    CommandIdLookup,
+    GAccel,
+    CSurfInst,
+    Custom(&'static CStr),
+}
+
+impl From<ExtensionType> for Cow<'static, CStr> {
+    fn from(value: ExtensionType) -> Self {
+        use ExtensionType::*;
+        match value {
+            GAccel => c_str!("gaccel").into(),
+            CSurfInst => c_str!("csurf_inst").into(),
+            Api(func_name) => concat_c_strs(c_str!("API_"), func_name).into(),
+            ApiDef(func_def) => concat_c_strs(c_str!("APIdef_"), func_def).into(),
+            HookCommand => c_str!("hookcommand").into(),
+            HookPostCommand => c_str!("hookpostcommand").into(),
+            HookCommand2 => c_str!("hookcommand2").into(),
+            ToggleAction => c_str!("toggleaction").into(),
+            ActionHelp => c_str!("action_help").into(),
+            CommandId => c_str!("command_id").into(),
+            CommandIdLookup => c_str!("command_id_lookup").into(),
+            Custom(k) => k.into(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum TrackNumberResult {
     MasterTrack,

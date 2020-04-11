@@ -4,6 +4,7 @@
 use super::{
     bindings::root::reaper_rs_control_surface::get_control_surface, firewall, raw::MediaTrack,
 };
+use crate::low_level::raw::IReaperControlSurface;
 use std::os::raw::c_void;
 use std::ptr::{null, null_mut};
 use std::sync::Once;
@@ -141,14 +142,14 @@ pub fn install_control_surface(control_surface: impl ControlSurface + 'static) {
     }
 }
 
-/// This returns a pointer to a `IReaperControlSurface`-implementing C++ object which will delegate
-/// to the Rust [`ControlSurface`](trait.ControlSurface.html) which you installed by invoking
-/// [`install_control_surface`](fn.install_control_surface.html). The pointer needs to be passed to
-/// [`plugin_register`](struct.Reaper.html#structfield.plugin_register) as in
-/// `plugin_register("csurf_inst", ptr)` for registering and as in
-/// `plugin_register("-csurf_inst", ptr)` for unregistering.
-pub fn get_cpp_control_surface() -> *mut c_void {
-    unsafe { get_control_surface() }
+/// This returns a reference of a `IReaperControlSurface`-implementing C++ object which will
+/// delegate to the Rust [`ControlSurface`](trait.ControlSurface.html) which you installed by
+/// invoking [`install_control_surface`](fn.install_control_surface.html). It needs to be
+/// passed to [`plugin_register`](struct.Reaper.html#structfield.plugin_register) as a pointer as in
+/// `plugin_register("csurf_inst", ptr as *mut _ as *mut c_void)` for registering and as in
+/// `plugin_register("-csurf_inst", ptr as *mut _ as *mut c_void)` for unregistering.
+pub fn get_cpp_control_surface() -> &'static mut IReaperControlSurface {
+    unsafe { &mut *get_control_surface() }
 }
 
 #[no_mangle]

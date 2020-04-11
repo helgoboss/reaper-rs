@@ -7,14 +7,15 @@ use c_str_macro::c_str;
 
 use crate::low_level;
 use crate::low_level::raw::{
-    audio_hook_register_t, midi_Input, midi_Output, IReaperControlSurface, KbdSectionInfo,
-    MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
+    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, IReaperControlSurface,
+    KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
-    ControlSurface, DelegatingControlSurface, InputMonitoringMode, ProjectRef, ReaperPointerType,
-    ReaperStringArg, ReaperStringVal, RecordingInput, TrackNumberResult, TrackSendInfoKey,
+    ControlSurface, DelegatingControlSurface, ExtensionType, HookCommand, HookPostCommand,
+    InputMonitoringMode, ProjectRef, ReaperPointerType, ReaperStringArg, ReaperStringVal,
+    RecordingInput, RegInstr, ToggleAction, TrackNumberResult, TrackSendInfoKey,
 };
 use std::convert::TryFrom;
 use std::mem::MaybeUninit;
@@ -195,12 +196,116 @@ impl Reaper {
         unsafe { deref_ptr_as::<GUID>(ptr) }.unwrap()
     }
 
-    // TODO Introduce enum for "name" parameter
     // TODO Introduce convenience variants with better signatures
+    // TODO Doc
+    // TODO Maybe mark unsafe, also the other c_void functions like GetSetTrack...
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
-    pub fn plugin_register(&self, name: &CStr, infostruct: *mut c_void) -> i32 {
-        require!(self.low, plugin_register)(name.as_ptr(), infostruct)
+    pub fn plugin_register(&self, name: RegInstr, infostruct: *mut c_void) -> i32 {
+        require!(self.low, plugin_register)(Cow::from(name).as_ptr(), infostruct)
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_register_hookcommand(&self, hookcommand: HookCommand) -> i32 {
+        self.plugin_register(
+            RegInstr::Register(ExtensionType::HookCommand),
+            hookcommand as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_unregister_hookcommand(&self, hookcommand: HookCommand) -> i32 {
+        self.plugin_register(
+            RegInstr::Unregister(ExtensionType::HookCommand),
+            hookcommand as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_register_toggleaction(&self, toggleaction: ToggleAction) -> i32 {
+        self.plugin_register(
+            RegInstr::Register(ExtensionType::ToggleAction),
+            toggleaction as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_unregister_toggleaction(&self, toggleaction: ToggleAction) -> i32 {
+        self.plugin_register(
+            RegInstr::Unregister(ExtensionType::ToggleAction),
+            toggleaction as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_register_hookpostcommand(&self, hookpostcommand: HookPostCommand) -> i32 {
+        self.plugin_register(
+            RegInstr::Register(ExtensionType::HookPostCommand),
+            hookpostcommand as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_unregister_hookpostcommand(&self, hookpostcommand: HookPostCommand) -> i32 {
+        self.plugin_register(
+            RegInstr::Unregister(ExtensionType::HookPostCommand),
+            hookpostcommand as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values (Can it return negative value if not successful?)
+    // TODO Doc
+    // TODO Do they have to be unregistered!? How?
+    pub fn plugin_register_command_id<'a>(
+        &self,
+        command_id: impl Into<ReaperStringArg<'a>>,
+    ) -> i32 {
+        self.plugin_register(
+            RegInstr::Register(ExtensionType::CommandId),
+            command_id.into().as_ptr() as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> i32 {
+        self.plugin_register(
+            RegInstr::Register(ExtensionType::GAccel),
+            gaccel as *mut _ as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_unregister_gaccel(&self, gaccel: &mut gaccel_register_t) -> i32 {
+        self.plugin_register(
+            RegInstr::Unregister(ExtensionType::GAccel),
+            gaccel as *mut _ as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_register_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) -> i32 {
+        self.plugin_register(
+            RegInstr::Register(ExtensionType::CSurfInst),
+            csurf_inst as *mut _ as *mut c_void,
+        )
+    }
+
+    // TODO Check possible return values
+    // TODO Doc
+    pub fn plugin_unregister_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) -> i32 {
+        self.plugin_register(
+            RegInstr::Unregister(ExtensionType::CSurfInst),
+            csurf_inst as *mut _ as *mut c_void,
+        )
     }
 
     /// Performs an action belonging to the main action section. To perform non-native actions
@@ -240,12 +345,12 @@ impl Reaper {
     // TODO-low Check if this is really idempotent
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) {
-        self.plugin_register(c_str!("csurf_inst"), get_cpp_control_surface());
+        self.plugin_register_csurf_inst(get_cpp_control_surface());
     }
 
     // TODO-low Check if this is really idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_register(c_str!("-csurf_inst"), get_cpp_control_surface());
+        self.plugin_register_csurf_inst(get_cpp_control_surface());
     }
 
     // TODO Doc
