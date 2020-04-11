@@ -8,6 +8,14 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
+pub enum KbdActionValue {
+    AbsoluteLowRes(u8),   // TODO Maybe use U7 type
+    AbsoluteHighRes(u16), // TODO Maybe use U14 type
+    Relative1(u8),
+    Relative2(u8),
+    Relative3(u8),
+}
+
 pub enum RegInstr {
     Register(ExtensionType),
     Unregister(ExtensionType),

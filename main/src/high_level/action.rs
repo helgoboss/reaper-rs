@@ -1,5 +1,5 @@
 use crate::high_level::{ActionCharacter, Project, Reaper, Section};
-use crate::medium_level::ReaperStringPtr;
+use crate::medium_level::{KbdActionValue, ReaperStringPtr};
 use c_str_macro::c_str;
 
 use std::borrow::Cow;
@@ -166,14 +166,12 @@ impl Action {
         let reaper = Reaper::get();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
-            let cropped_relative_value = relative_value.clamp(0, 127) as u32;
+            let cropped_relative_value = relative_value.clamp(0, 127) as u8;
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
             reaper.medium.kbd_on_main_action_ex(
                 action_command_id,
-                cropped_relative_value,
-                0,
-                2,
+                KbdActionValue::Relative2(cropped_relative_value),
                 reaper.medium.get_main_hwnd(),
                 project.map(|p| p.get_raw()).unwrap_or(null_mut()),
             );
@@ -182,9 +180,7 @@ impl Action {
             // &valhw, &relmode, reaper::GetMainHwnd());
             reaper.medium.kbd_on_main_action_ex(
                 action_command_id,
-                (normalized_value * 127 as f64).round() as u32,
-                -1,
-                0,
+                KbdActionValue::AbsoluteLowRes((normalized_value * 127 as f64).round() as u8),
                 reaper.medium.get_main_hwnd(),
                 project.map(|p| p.get_raw()).unwrap_or(null_mut()),
             );

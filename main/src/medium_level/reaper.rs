@@ -14,8 +14,8 @@ use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
     ControlSurface, DelegatingControlSurface, ExtensionType, HookCommand, HookPostCommand,
-    InputMonitoringMode, ProjectRef, ReaperPointerType, ReaperStringArg, ReaperStringVal,
-    RecordingInput, RegInstr, ToggleAction, TrackNumberResult, TrackSendInfoKey,
+    InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType, ReaperStringArg,
+    ReaperStringVal, RecordingInput, RegInstr, ToggleAction, TrackNumberResult, TrackSendInfoKey,
 };
 use std::convert::TryFrom;
 use std::mem::MaybeUninit;
@@ -196,7 +196,6 @@ impl Reaper {
         unsafe { deref_ptr_as::<GUID>(ptr) }.unwrap()
     }
 
-    // TODO Introduce convenience variants with better signatures
     // TODO Doc
     // TODO Maybe mark unsafe, also the other c_void functions like GetSetTrack...
     // Kept return value type i32 because meaning of return value depends very much on the actual
@@ -358,30 +357,24 @@ impl Reaper {
         require!(self.low, SectionFromUniqueID)(unique_id as i32)
     }
 
-    // TODO Introduce enums
-    // KBD_OnMainActionEx
-    // val/valhw are used for midi stuff.
-    // val=[0..127] and valhw=-1 (midi CC),
-    // valhw >=0 (midi pitch (valhw | val<<7)),
-    // relmode absolute (0) or 1/2/3 for relative adjust modes
+    // TODO Doc
     // Kept return value type i32 because I have no idea what the return value is about.
     pub fn kbd_on_main_action_ex(
         &self,
         cmd: u32,
-        val: u32,
-        valhw: i32,
-        relmode: u32,
+        value: KbdActionValue,
         hwnd: HWND,
         proj: *mut ReaProject,
     ) -> i32 {
-        require!(self.low, KBD_OnMainActionEx)(
-            cmd as i32,
-            val as i32,
-            valhw,
-            relmode as i32,
-            hwnd,
-            proj,
-        )
+        use KbdActionValue::*;
+        let (val, valhw, relmode) = match value {
+            AbsoluteLowRes(v) => (v as i32, -1, 0),
+            AbsoluteHighRes(v) => (((v >> 7) & 0x7f) as i32, (v & 0x7f) as i32, 0),
+            Relative1(v) => (v as i32, -1, 1),
+            Relative2(v) => (v as i32, -1, 2),
+            Relative3(v) => (v as i32, -1, 3),
+        };
+        require!(self.low, KBD_OnMainActionEx)(cmd as i32, val, valhw, relmode, hwnd, proj)
     }
 
     /// Returns the REAPER main window handle.
