@@ -59,9 +59,6 @@ pub use action_character::*;
 
 mod undo_block;
 
-mod message_box;
-pub use message_box::*;
-
 mod midi_event;
 pub use midi_event::*;
 

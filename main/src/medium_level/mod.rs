@@ -63,3 +63,6 @@ pub use recording_input::*;
 
 mod automation_mode;
 pub use automation_mode::*;
+
+mod message_box;
+pub use message_box::*;

@@ -1,7 +1,8 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
+// TODO Maybe rename all "Kind" types back to "Type"
 #[derive(Debug, Eq, PartialEq, IntoPrimitive)]
-#[repr(u32)]
+#[repr(i32)]
 pub enum MessageBoxKind {
     Ok = 0,
     OkCancel = 1,
@@ -12,7 +13,7 @@ pub enum MessageBoxKind {
 }
 
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
-#[repr(u32)]
+#[repr(i32)]
 pub enum MessageBoxResult {
     Ok = 1,
     Cancel = 2,

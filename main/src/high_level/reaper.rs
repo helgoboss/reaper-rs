@@ -25,8 +25,8 @@ use crate::high_level::undo_block::UndoBlock;
 use crate::high_level::ActionKind::Toggleable;
 use crate::high_level::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, BorrowedReaperMidiEvent, Guid, MessageBoxKind,
-    MessageBoxResult, MidiEvent, MidiInputDevice, MidiOutputDevice, Project, Section, Track,
+    create_terminal_logger, Action, BorrowedReaperMidiEvent, Guid, MidiEvent, MidiInputDevice,
+    MidiOutputDevice, Project, Section, Track,
 };
 use crate::low_level;
 use crate::low_level::raw::{
@@ -37,7 +37,7 @@ use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    ProjectRef, ReaperStringArg, ReaperVersion, TrackRef,
+    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperStringArg, ReaperVersion, TrackRef,
 };
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
@@ -602,10 +602,7 @@ impl Reaper {
         title: &CStr,
         kind: MessageBoxKind,
     ) -> MessageBoxResult {
-        self.medium
-            .show_message_box(msg, title, kind.into())
-            .try_into()
-            .expect("Unknown message box result")
+        self.medium.show_message_box(msg, title, kind)
     }
 
     pub fn get_main_section(&self) -> Section {

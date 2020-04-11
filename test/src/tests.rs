@@ -10,8 +10,8 @@ use wmidi;
 
 use reaper_rs::high_level::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, MessageBoxKind, MessageBoxResult, MidiInputDevice, Pan, Reaper,
-    StuffMidiMessageTarget, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, MidiInputDevice, Pan, Reaper, StuffMidiMessageTarget, Tempo,
+    Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -19,8 +19,8 @@ use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
 use reaper_rs::medium_level::{
-    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MidiRecordingInput,
-    ReaperVersion, RecordingInput, TrackInfoKey, TrackRef,
+    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxKind,
+    MessageBoxResult, MidiRecordingInput, ReaperVersion, RecordingInput, TrackInfoKey, TrackRef,
 };
 use std::rc::Rc;
 

@@ -14,12 +14,12 @@ use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
     AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex,
     GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode, KbdActionValue,
-    ProjectRef, ReaperPointerType, ReaperStringArg, ReaperStringVal, ReaperVersion, RecordingInput,
-    RegInstr, ToggleAction, TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey,
-    UndoFlag,
+    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperPointerType, ReaperStringArg,
+    ReaperStringVal, ReaperVersion, RecordingInput, RegInstr, ToggleAction,
+    TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey, UndoFlag,
 };
 use enumflags2::BitFlags;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::mem::MaybeUninit;
 use std::path::{Path, PathBuf};
 
@@ -170,14 +170,14 @@ impl Reaper {
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
     pub fn get_media_track_info_recmon(&self, tr: *mut MediaTrack) -> InputMonitoringMode {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECMON);
-        let irecmon = unsafe { deref_ptr_as::<i32>(ptr) }.unwrap() as u32;
+        let irecmon = unsafe { copy_void_ptr_target::<i32>(ptr) }.unwrap() as u32;
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
     pub fn get_media_track_info_recinput(&self, tr: *mut MediaTrack) -> RecordingInput {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECINPUT);
-        let rec_input_index = unsafe { deref_ptr_as::<i32>(ptr) }.unwrap();
+        let rec_input_index = unsafe { copy_void_ptr_target::<i32>(ptr) }.unwrap();
         RecordingInput::from_rec_input_index(rec_input_index)
     }
 
@@ -195,7 +195,7 @@ impl Reaper {
     /// Convenience function which returns the given track's GUID (GUID).
     pub fn get_media_track_info_guid(&self, tr: *mut MediaTrack) -> GUID {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::GUID);
-        unsafe { deref_ptr_as::<GUID>(ptr) }.unwrap()
+        unsafe { copy_void_ptr_target::<GUID>(ptr) }.unwrap()
     }
 
     // TODO Doc
@@ -943,9 +943,10 @@ impl Reaper {
         require!(self.low, TrackFX_GetRecCount)(track) as u32
     }
 
-    // TODO Return owned GUID
-    pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> *mut GUID {
-        require!(self.low, TrackFX_GetFXGUID)(track, fx.into())
+    // TODO Doc
+    pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> Option<GUID> {
+        let ptr = require!(self.low, TrackFX_GetFXGUID)(track, fx.into());
+        unsafe { copy_ptr_target(ptr) }
     }
 
     // TODO Doc
@@ -991,10 +992,19 @@ impl Reaper {
         require!(self.low, CSurf_OnPlayRateChange)(playrate);
     }
 
-    // TODO Introduce enums
-    // TODO Expect ReaperStringArg
-    pub fn show_message_box(&self, msg: &CStr, title: &CStr, type_: u32) -> u32 {
-        require!(self.low, ShowMessageBox)(msg.as_ptr(), title.as_ptr(), type_ as i32) as u32
+    // TODO Doc
+    pub fn show_message_box<'a>(
+        &self,
+        msg: impl Into<ReaperStringArg<'a>>,
+        title: impl Into<ReaperStringArg<'a>>,
+        r#type: MessageBoxKind,
+    ) -> MessageBoxResult {
+        let result = require!(self.low, ShowMessageBox)(
+            msg.into().as_ptr(),
+            title.into().as_ptr(),
+            r#type.into(),
+        );
+        result.try_into().expect("Unknown message box result")
     }
 
     // TODO Expect ReaperStringArg
@@ -1495,12 +1505,15 @@ fn create_cheap_empty_string() -> Cow<'static, CStr> {
     Cow::Borrowed(Default::default())
 }
 
-unsafe fn deref_ptr_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
+unsafe fn copy_ptr_target<T: Copy>(ptr: *const T) -> Option<T> {
     if ptr.is_null() {
         return None;
     }
-    let ptr = ptr as *mut T;
     Some(*ptr)
+}
+
+unsafe fn copy_void_ptr_target<T: Copy>(ptr: *mut c_void) -> Option<T> {
+    copy_ptr_target(ptr as *const T)
 }
 
 fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {

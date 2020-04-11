@@ -343,11 +343,7 @@ pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid>
     let internal = Reaper::get()
         .medium
         .track_fx_get_fx_guid(track.get_raw(), query_index);
-    if internal.is_null() {
-        None
-    } else {
-        Some(Guid::new(unsafe { *internal }))
-    }
+    internal.map(|g| Guid::new(g))
 }
 
 pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
