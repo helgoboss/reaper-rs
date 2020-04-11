@@ -38,7 +38,7 @@ use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, ProjectRef,
-    ReaperStringArg,
+    ReaperStringArg, TrackRef,
 };
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
@@ -419,28 +419,34 @@ impl Reaper {
         // fxQueryIndex is only a real query index since REAPER 5.95, before it didn't say if it's
         // input FX or normal one!
         self.medium.get_last_touched_fx().and_then(|result| {
+            use GetLastTouchedFxResult::*;
             match result {
-                GetLastTouchedFxResult::TrackFx(data) => {
+                TrackFx {
+                    track_ref,
+                    fx_query_index,
+                    param_index,
+                } => {
                     // Track exists in this project
-                    let track = if data.tracknumber == 0 {
-                        self.get_current_project().get_master_track()
-                    } else {
-                        let normalized_track_index = data.tracknumber - 1;
-                        if normalized_track_index >= self.get_current_project().get_track_count() {
-                            // Must be in another project
-                            return None;
+                    use TrackRef::*;
+                    let track = match track_ref {
+                        MasterTrack => self.get_current_project().get_master_track(),
+                        TrackIndex(idx) => {
+                            if idx >= self.get_current_project().get_track_count() {
+                                // Must be in another project
+                                return None;
+                            }
+                            self.get_current_project().get_track_by_index(idx).unwrap()
                         }
-                        self.get_current_project()
-                            .get_track_by_index(normalized_track_index)
-                            .unwrap()
                     };
-                    let fx = match track.get_fx_by_query_index(data.fxnumber) {
+                    // TODO We should rethink the query index methods now that we have an FxRef
+                    //  enum in medium-level API
+                    let fx = match track.get_fx_by_query_index(fx_query_index.into()) {
                         None => return None,
                         Some(fx) => fx,
                     };
-                    Some(fx.get_parameter_by_index(data.paramnumber as u32))
+                    Some(fx.get_parameter_by_index(param_index))
                 }
-                GetLastTouchedFxResult::ItemFx(_) => None, // TODO-low Implement,
+                ItemFx { .. } => None, // TODO-low Implement,
             }
         })
     }
@@ -672,16 +678,18 @@ impl Reaper {
     // This is not reliable! After REAPER start no focused Fx can be found!
     pub fn get_focused_fx(&self) -> Option<Fx> {
         self.medium.get_focused_fx().and_then(|res| {
+            use GetFocusedFxResult::*;
             match res {
-                GetFocusedFxResult::ItemFx(_) => None, // TODO-low implement
-                GetFocusedFxResult::TrackFx(data) => {
+                ItemFx { .. } => None, // TODO-low implement
+                TrackFx {
+                    track_ref,
+                    fx_query_index,
+                } => {
                     // We don't know the project so we must check each project
                     self.get_projects()
                         .filter_map(|p| {
-                            let track = p.get_track_by_number(data.tracknumber as u32)?;
-                            let fx = track
-                                .get_normal_fx_chain()
-                                .get_fx_by_index(data.fxnumber as u32)?;
+                            let track = p.get_track_by_ref(track_ref)?;
+                            let fx = track.get_fx_by_query_index(fx_query_index.into())?;
                             if fx.window_has_focus() {
                                 Some(fx)
                             } else {

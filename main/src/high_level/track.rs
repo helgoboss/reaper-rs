@@ -24,7 +24,7 @@ use crate::medium_level::TrackInfoKey::{
 };
 use crate::medium_level::{
     InputMonitoringMode, MidiRecordingInput, ReaperPointerType, RecordingInput, TrackInfoKey,
-    TrackNumberResult,
+    TrackRef,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -204,25 +204,15 @@ impl Track {
 
     pub fn get_index(&self) -> Option<u32> {
         self.load_and_check_if_necessary_or_complain();
+        // TODO-low The following returns None if we query the number of a track in another project
+        //  Try to find a working solution!
         let result = Reaper::get()
             .medium
-            .get_media_track_info_tracknumber(self.get_raw());
-        use TrackNumberResult::*;
+            .get_media_track_info_tracknumber(self.get_raw())?;
+        use TrackRef::*;
         match result {
-            NotFound => {
-                // Usually means that track doesn't exist. But this we already checked. This happens
-                // only if we query the number of a track in another project tab. TODO-low
-                // Try to find a working solution. Till then, return None.
-                None
-            }
-            MasterTrack => {
-                // Master track indicator
-                None
-            }
-            TrackNumber(n) => {
-                // Must be > 0. Make it zero-rooted.
-                Some(n - 1)
-            }
+            MasterTrack => None,
+            TrackIndex(idx) => Some(idx),
         }
     }
 
@@ -623,7 +613,7 @@ impl Track {
         Reaper::get()
             .medium
             .get_media_track_info_tracknumber(self.get_raw())
-            == TrackNumberResult::MasterTrack
+            == Some(TrackRef::MasterTrack)
     }
 
     pub fn get_project(&self) -> Project {

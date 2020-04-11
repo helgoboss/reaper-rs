@@ -8,12 +8,15 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
+// TODO Maybe call it TrackFxRef (in line with TrackRef and ProjectRef)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum FxQueryIndex {
     InputFx(u32),
     OutputFx(u32),
 }
 
+// TODO Maybe make this explicit and private because it exposes low-level logic.
+// Converts directly to the i32 value that is expected by low-level track-FX related functions
 impl From<FxQueryIndex> for i32 {
     fn from(v: FxQueryIndex) -> Self {
         use FxQueryIndex::*;
@@ -22,6 +25,19 @@ impl From<FxQueryIndex> for i32 {
             OutputFx(idx) => idx,
         };
         positive as i32
+    }
+}
+
+// TODO Maybe make this explicit and private because it exposes low-level logic.
+// Converts from a value returned by low-level track-FX related functions turned into u32.
+impl From<u32> for FxQueryIndex {
+    fn from(v: u32) -> Self {
+        use FxQueryIndex::*;
+        if v >= 0x1000000 {
+            InputFx(v - 0x1000000)
+        } else {
+            OutputFx(v)
+        }
     }
 }
 
@@ -46,6 +62,7 @@ pub enum RegInstr {
     Unregister(ExtensionType),
 }
 
+// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl From<RegInstr> for Cow<'static, CStr> {
     fn from(value: RegInstr) -> Self {
         use RegInstr::*;
@@ -71,6 +88,7 @@ pub enum ExtensionType {
     Custom(&'static CStr),
 }
 
+// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl From<ExtensionType> for Cow<'static, CStr> {
     fn from(value: ExtensionType) -> Self {
         use ExtensionType::*;
@@ -92,11 +110,9 @@ impl From<ExtensionType> for Cow<'static, CStr> {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum TrackNumberResult {
+pub enum TrackRef {
     MasterTrack,
-    NotFound,
-    // TODO Maybe use non-zero (because it's one-rooted)
-    TrackNumber(u32),
+    TrackIndex(u32),
 }
 
 #[derive(Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
@@ -133,6 +149,7 @@ pub enum ReaperPointerType {
     Custom(&'static CStr),
 }
 
+// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl From<ReaperPointerType> for Cow<'static, CStr> {
     fn from(value: ReaperPointerType) -> Self {
         use ReaperPointerType::*;
@@ -210,6 +227,7 @@ pub enum TrackInfoKey {
     Custom(&'static CStr),
 }
 
+// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl From<TrackInfoKey> for Cow<'static, CStr> {
     fn from(value: TrackInfoKey) -> Self {
         use TrackInfoKey::*;
@@ -303,6 +321,7 @@ pub enum TrackSendInfoKey {
     Custom(&'static CStr),
 }
 
+// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl From<TrackSendInfoKey> for Cow<'static, CStr> {
     fn from(value: TrackSendInfoKey) -> Self {
         use TrackSendInfoKey::*;
@@ -345,6 +364,7 @@ pub enum EnvChunkName {
     Custom(&'static CStr),
 }
 
+// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl From<EnvChunkName> for Cow<'static, CStr> {
     fn from(value: EnvChunkName) -> Self {
         use EnvChunkName::*;

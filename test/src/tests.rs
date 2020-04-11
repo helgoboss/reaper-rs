@@ -19,7 +19,7 @@ use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
 use reaper_rs::medium_level::{
-    InputMonitoringMode, MidiRecordingInput, RecordingInput, TrackInfoKey,
+    InputMonitoringMode, MidiRecordingInput, RecordingInput, TrackInfoKey, TrackRef,
 };
 use std::rc::Rc;
 
@@ -749,8 +749,12 @@ fn remove_track() -> TestStep {
         // Given
         let project = reaper.get_current_project();
         let track_count_before = project.get_track_count();
-        let track_1 = project.get_track_by_number(1).ok_or("Missing track 1")?;
-        let track_2 = project.get_track_by_number(2).ok_or("Missing track 2")?;
+        let track_1 = project
+            .get_track_by_ref(TrackRef::TrackIndex(0))
+            .ok_or("Missing track 1")?;
+        let track_2 = project
+            .get_track_by_ref(TrackRef::TrackIndex(1))
+            .ok_or("Missing track 2")?;
         let track_2_guid = track_2.get_guid();
         check!(track_1.is_available());
         check_eq!(track_2.get_index(), Some(1));

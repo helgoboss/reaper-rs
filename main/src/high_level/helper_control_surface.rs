@@ -12,7 +12,7 @@ use crate::low_level::raw::{
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
-use crate::medium_level::{ControlSurface, ReaperPointerType, TrackNumberResult};
+use crate::medium_level::{ControlSurface, ReaperPointerType, TrackRef};
 use c_str_macro::c_str;
 use rxrust::prelude::*;
 
@@ -52,7 +52,7 @@ struct TrackData {
     mute: bool,
     solo: bool,
     recarm: bool,
-    number: TrackNumberResult,
+    number: Option<TrackRef>,
     recmonitor: i32,
     recinput: i32,
     guid: Guid,

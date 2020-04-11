@@ -16,7 +16,7 @@ use crate::medium_level::{
     ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex, HookCommand,
     HookPostCommand, InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType,
     ReaperStringArg, ReaperStringVal, RecordingInput, RegInstr, ToggleAction,
-    TrackFxAddByNameVariant, TrackNumberResult, TrackSendInfoKey,
+    TrackFxAddByNameVariant, TrackRef, TrackSendInfoKey,
 };
 use std::convert::TryFrom;
 use std::mem::MaybeUninit;
@@ -181,12 +181,12 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's number (IP_TRACKNUMBER).
-    pub fn get_media_track_info_tracknumber(&self, tr: *mut MediaTrack) -> TrackNumberResult {
-        use TrackNumberResult::*;
+    pub fn get_media_track_info_tracknumber(&self, tr: *mut MediaTrack) -> Option<TrackRef> {
+        use TrackRef::*;
         match self.get_media_track_info(tr, TrackInfoKey::IP_TRACKNUMBER) as i32 {
-            -1 => MasterTrack,
-            0 => NotFound,
-            n if n > 0 => TrackNumber(n as u32),
+            -1 => Some(MasterTrack),
+            0 => None,
+            n if n > 0 => Some(TrackIndex(n as u32 - 1)),
             _ => unreachable!(),
         }
     }
@@ -658,7 +658,6 @@ impl Reaper {
     }
 
     // TODO Doc
-    // TODO Introduce enums for result attributes that have special numbers
     pub fn get_focused_fx(&self) -> Option<GetFocusedFxResult> {
         let mut tracknumber = MaybeUninit::uninit();
         let mut itemnumber = MaybeUninit::uninit();
@@ -668,28 +667,32 @@ impl Reaper {
             itemnumber.as_mut_ptr(),
             fxnumber.as_mut_ptr(),
         );
+        let tracknumber = unsafe { tracknumber.assume_init() } as u32;
+        let fxnumber = unsafe { fxnumber.assume_init() } as u32;
+        use GetFocusedFxResult::*;
         match result {
             0 => None,
-            1 => Some(GetFocusedFxResult::TrackFx(GetFocusedFxTrackFxResultData {
-                tracknumber: unsafe { tracknumber.assume_init() } as u32,
-                fxnumber: unsafe { fxnumber.assume_init() },
-            })),
+            1 => Some(TrackFx {
+                track_ref: convert_tracknumber_to_track_ref(tracknumber),
+                fx_query_index: fxnumber.into(),
+            }),
             2 => {
                 // TODO-low Add test
-                let fxnumber = unsafe { fxnumber.assume_init() } as u32;
-                Some(GetFocusedFxResult::ItemFx(GetFocusedFxItemFxResultData {
-                    tracknumber: unsafe { tracknumber.assume_init() } as u32,
-                    itemnumber: unsafe { itemnumber.assume_init() } as u32,
-                    takeindex: (fxnumber >> 16) & 0xFFFF,
-                    fxindex: fxnumber & 0xFFFF,
-                }))
+                Some(ItemFx {
+                    // Master track can't contain items
+                    track_index: tracknumber - 1,
+                    // Although the parameter is called itemnumber, it's zero-based (mentioned in
+                    // official doc and checked)
+                    item_index: unsafe { itemnumber.assume_init() } as u32,
+                    take_index: (fxnumber >> 16) & 0xFFFF,
+                    fx_index: fxnumber & 0xFFFF,
+                })
             }
             _ => panic!("Unknown GetFocusedFX result value"),
         }
     }
 
     // TODO Doc
-    // TODO Introduce enums for result attributes that have special numbers
     // Returns None if no FX has been touched yet or if the last-touched FX doesn't exist anymore
     pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult> {
         let mut tracknumber = MaybeUninit::uninit();
@@ -705,26 +708,27 @@ impl Reaper {
         }
         let tracknumber = unsafe { tracknumber.assume_init() } as u32;
         let tracknumber_high_word = (tracknumber >> 16) & 0xFFFF;
+        let fxnumber = unsafe { fxnumber.assume_init() } as u32;
+        let paramnumber = unsafe { paramnumber.assume_init() } as u32;
+        use GetLastTouchedFxResult::*;
         if tracknumber_high_word == 0 {
-            Some(GetLastTouchedFxResult::TrackFx(
-                GetLastTouchedFxTrackFxResultData {
-                    tracknumber,
-                    fxnumber: unsafe { fxnumber.assume_init() },
-                    paramnumber: unsafe { paramnumber.assume_init() } as u32,
-                },
-            ))
+            Some(TrackFx {
+                track_ref: convert_tracknumber_to_track_ref(tracknumber),
+                fx_query_index: fxnumber.into(),
+                // Although the parameter is called paramnumber, it's zero-based (checked)
+                param_index: paramnumber,
+            })
         } else {
             // TODO-low Add test
-            let fxnumber = unsafe { fxnumber.assume_init() } as u32;
-            Some(GetLastTouchedFxResult::ItemFx(
-                GetLastTouchedFxItemFxResultData {
-                    tracknumber: tracknumber & 0xFFFF,
-                    itemnumber: tracknumber_high_word,
-                    takeindex: (fxnumber >> 16) & 0xFFFF,
-                    fxindex: fxnumber & 0xFFFF,
-                    paramnumber: unsafe { paramnumber.assume_init() } as u32,
-                },
-            ))
+            Some(ItemFx {
+                // Master track can't contain items
+                track_index: (tracknumber & 0xFFFF) - 1,
+                item_index: tracknumber_high_word - 1,
+                take_index: (fxnumber >> 16) & 0xFFFF,
+                fx_index: fxnumber & 0xFFFF,
+                // Although the parameter is called paramnumber, it's zero-based (checked)
+                param_index: paramnumber,
+            })
         }
     }
 
@@ -1369,39 +1373,33 @@ pub struct GetParamExResult {
 }
 
 pub enum GetLastTouchedFxResult {
-    TrackFx(GetLastTouchedFxTrackFxResultData),
-    ItemFx(GetLastTouchedFxItemFxResultData),
-}
-
-pub struct GetLastTouchedFxTrackFxResultData {
-    pub tracknumber: u32,
-    pub fxnumber: i32,
-    pub paramnumber: u32,
-}
-
-pub struct GetLastTouchedFxItemFxResultData {
-    pub tracknumber: u32,
-    pub itemnumber: u32,
-    pub takeindex: u32,
-    pub fxindex: u32,
-    pub paramnumber: u32,
+    TrackFx {
+        track_ref: TrackRef,
+        fx_query_index: FxQueryIndex,
+        param_index: u32,
+    },
+    ItemFx {
+        track_index: u32,
+        /// **Attention:** It's an index so it's zero-based (the one-based result from the
+        /// low-level function is transformed).
+        item_index: u32,
+        take_index: u32,
+        fx_index: u32,
+        param_index: u32,
+    },
 }
 
 pub enum GetFocusedFxResult {
-    TrackFx(GetFocusedFxTrackFxResultData),
-    ItemFx(GetFocusedFxItemFxResultData),
-}
-
-pub struct GetFocusedFxItemFxResultData {
-    pub tracknumber: u32,
-    pub itemnumber: u32,
-    pub takeindex: u32,
-    pub fxindex: u32,
-}
-
-pub struct GetFocusedFxTrackFxResultData {
-    pub tracknumber: u32,
-    pub fxnumber: i32,
+    TrackFx {
+        track_ref: TrackRef,
+        fx_query_index: FxQueryIndex,
+    },
+    ItemFx {
+        track_index: u32,
+        item_index: u32,
+        take_index: u32,
+        fx_index: u32,
+    },
 }
 
 // TODO-low Should not be constructable by users but only by reaper-rs crate
@@ -1480,4 +1478,12 @@ unsafe fn deref_ptr_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
     }
     let ptr = ptr as *mut T;
     Some(*ptr)
+}
+
+fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
+    if tracknumber == 0 {
+        TrackRef::MasterTrack
+    } else {
+        TrackRef::TrackIndex(tracknumber - 1)
+    }
 }

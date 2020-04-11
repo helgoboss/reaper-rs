@@ -6,7 +6,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::raw::ReaProject;
 
-use crate::medium_level::{ProjectRef, ReaperPointerType, ReaperStringPtr};
+use crate::medium_level::{ProjectRef, ReaperPointerType, ReaperStringPtr, TrackRef};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -59,12 +59,12 @@ impl Project {
         Some(Track::new(media_track, self.rea_project))
     }
 
-    // 0 is master track, 1 is first normal track
-    pub fn get_track_by_number(&self, number: u32) -> Option<Track> {
-        if number == 0 {
-            Some(self.get_master_track())
-        } else {
-            self.get_track_by_index(number - 1)
+    // TODO Probably an unnecessary method
+    pub fn get_track_by_ref(&self, track_ref: TrackRef) -> Option<Track> {
+        use TrackRef::*;
+        match track_ref {
+            MasterTrack => Some(self.get_master_track()),
+            TrackIndex(idx) => self.get_track_by_index(idx),
         }
     }
 
