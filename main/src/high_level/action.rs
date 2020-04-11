@@ -201,7 +201,9 @@ impl Action {
         let fixed_command_name =
             Self::fix_command_name(self.command_name.as_ref().expect("Command name not set"));
         let reaper = Reaper::get();
-        let command_id = reaper.medium.named_command_lookup(&fixed_command_name);
+        let command_id = reaper
+            .medium
+            .named_command_lookup(fixed_command_name.as_ref());
         if command_id == 0 {
             return false;
         }

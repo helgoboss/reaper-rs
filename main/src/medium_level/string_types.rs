@@ -39,27 +39,18 @@ impl<'a> ReaperStringArg<'a> {
     }
 }
 
+// This is the most important conversion because it's the ideal case (zero-cost). For now we don't
+// offer a conversion from `CString` (owned) because it could confuse consumers. They might start to
+// think that string arguments are always consumed, which is not the case. If there's much demand,
+// we can still add that later.
 impl<'a> From<&'a CStr> for ReaperStringArg<'a> {
     fn from(s: &'a CStr) -> Self {
         ReaperStringArg(s.into())
     }
 }
 
-impl<'a> From<CString> for ReaperStringArg<'a> {
-    fn from(s: CString) -> Self {
-        ReaperStringArg(s.into())
-    }
-}
-
-impl<'a> From<Cow<'a, CStr>> for ReaperStringArg<'a> {
-    fn from(s: Cow<'a, CStr>) -> Self {
-        match s.into() {
-            Cow::Borrowed(b) => b.into(),
-            Cow::Owned(o) => o.into(),
-        }
-    }
-}
-
+// This is the second most important conversion because we want consumers to be able to just pass a
+// normal string literal.
 impl<'a> From<&'a str> for ReaperStringArg<'a> {
     fn from(s: &'a str) -> Self {
         // Requires copying
@@ -67,19 +58,14 @@ impl<'a> From<&'a str> for ReaperStringArg<'a> {
     }
 }
 
+// This conversion might appear somewhat unusual because it takes something *owned*. But that has a
+// good reason: If there's a `String` which the consumer is okay to give away (move), this is
+// good for performance because no copy needs to be made in order to convert this into a C string.
+// By introducing this conversion, we want to encourage this scenario.
 impl<'a> From<String> for ReaperStringArg<'a> {
     fn from(s: String) -> Self {
         // Doesn't require copying because we own the string now
         ReaperStringArg(CString::new(s).unwrap().into())
-    }
-}
-
-impl<'a> From<Cow<'a, str>> for ReaperStringArg<'a> {
-    fn from(s: Cow<'a, str>) -> Self {
-        match s.into() {
-            Cow::Borrowed(b) => b.into(),
-            Cow::Owned(o) => o.into(),
-        }
     }
 }
 

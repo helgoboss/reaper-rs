@@ -382,9 +382,9 @@ impl Reaper {
         require!(self.low, GetMainHwnd)()
     }
 
-    // TODO Use ReaperStringArg
-    pub fn named_command_lookup(&self, command_name: &CStr) -> u32 {
-        require!(self.low, NamedCommandLookup)(command_name.as_ptr()) as u32
+    // TODO Doc
+    pub fn named_command_lookup<'a>(&self, command_name: impl Into<ReaperStringArg<'a>>) -> u32 {
+        require!(self.low, NamedCommandLookup)(command_name.into().as_ptr()) as u32
     }
 
     /// Clears the ReaScript console.
@@ -393,7 +393,8 @@ impl Reaper {
     }
 
     /// Returns the number of tracks in the given project (pass `null_mut()` for current project)
-    // TODO Consider fixing all non-justified *mut to *const (so we can pass null() in many places)
+    // TODO-low Consider fixing all non-justified *mut to *const (so we can pass null() in many
+    // places)
     pub fn count_tracks(&self, proj: *mut ReaProject) -> u32 {
         require!(self.low, CountTracks)(proj) as u32
     }

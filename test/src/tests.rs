@@ -1561,9 +1561,8 @@ fn basics() -> TestStep {
         check!(Guid::try_from(c_str!("{hey}")).is_err());
         reaper.show_console_msg(c_str!("Test string types and encoding:\n"));
         reaper.show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
-        reaper.show_console_msg(CString::new("- CString: 范例文字äöüß\n").unwrap());
         reaper.show_console_msg("- &str: 范例文字äöüß\n");
-        reaper.show_console_msg(String::from("- String: 范例文字äöüß\n"));
+        reaper.show_console_msg(String::from("- String: 范例文字äöüß"));
         Ok(())
     })
 }
