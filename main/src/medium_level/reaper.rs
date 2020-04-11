@@ -8,15 +8,16 @@ use c_str_macro::c_str;
 use crate::low_level;
 use crate::low_level::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, IReaperControlSurface,
-    KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
+    KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
     ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex, HookCommand,
     HookPostCommand, InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType,
     ReaperStringArg, ReaperStringVal, RecordingInput, RegInstr, ToggleAction,
-    TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey, UndoFlags,
+    TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey, UndoFlag,
 };
+use enumflags2::BitFlags;
 use std::convert::TryFrom;
 use std::mem::MaybeUninit;
 use std::path::{Path, PathBuf};
@@ -831,12 +832,15 @@ impl Reaper {
         &self,
         proj: *mut ReaProject,
         descchange: impl Into<ReaperStringArg<'a>>,
-        extraflags: UndoFlags,
+        extraflags: Option<BitFlags<UndoFlag>>,
     ) {
         require!(self.low, Undo_EndBlock2)(
             proj,
             descchange.into().as_ptr(),
-            extraflags.bits() as i32,
+            match extraflags {
+                Some(flags) => flags.bits(),
+                None => UNDO_STATE_ALL,
+            } as i32,
         );
     }
 
