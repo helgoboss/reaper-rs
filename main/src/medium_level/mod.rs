@@ -1,5 +1,13 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! TODO
+//! Should be similar to Lua API, not too far away because there are lots of tutorials already.
+//! At first I didn't have the enums in place and was closer to the low-level API. At the point when
+//! I changed to enums I could watch how my high-level API code gets cleaner, more understandable
+//! and often also less. In some cases I also discovered API usage bugs because of that. So I think
+//! enums are a good choice here. Again, you can always resort to low-level API.
+//! I think that with the right abstractions in place, you can build sophisticated extensions much
+//! easier, faster and with less bugs because there's no need to take care of the same low-level
+//! stuff again and again.
 //! The medium-level API offers much more type safety and convenience. Still stays close to
 //! original REAPER API and the ultimate goal is to expose every function with every possible
 //! calling style of the low-level API, just

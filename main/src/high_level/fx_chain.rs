@@ -152,19 +152,19 @@ DOCKED 0
     }
 
     pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
-        let fx_index = Reaper::get().medium.track_fx_add_by_name(
-            self.track.get_raw(),
-            original_fx_name,
-            self.is_input_fx,
-            -1,
-        );
-        if fx_index == -1 {
-            return None;
-        }
+        let fx_index = Reaper::get()
+            .medium
+            .track_fx_add_by_name_add(
+                self.track.get_raw(),
+                original_fx_name,
+                self.is_input_fx,
+                true,
+            )
+            .ok()?;
         Some(Fx::from_guid_and_index(
             self.track.clone(),
-            get_fx_guid(&self.track, fx_index as u32, self.is_input_fx).expect("Couldn't get GUID"),
-            fx_index as u32,
+            get_fx_guid(&self.track, fx_index, self.is_input_fx).expect("Couldn't get GUID"),
+            fx_index,
             self.is_input_fx,
         ))
     }
@@ -178,19 +178,15 @@ DOCKED 0
     }
 
     pub fn get_first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
-        let fx_index = Reaper::get().medium.track_fx_add_by_name(
+        let fx_index = Reaper::get().medium.track_fx_add_by_name_query(
             self.track.get_raw(),
             name,
             self.is_input_fx,
-            0,
-        );
-        if fx_index == -1 {
-            return None;
-        }
+        )?;
         Some(Fx::from_guid_and_index(
             self.track.clone(),
-            get_fx_guid(&self.track, fx_index as u32, self.is_input_fx).expect("Couldn't get GUID"),
-            fx_index as u32,
+            get_fx_guid(&self.track, fx_index, self.is_input_fx).expect("Couldn't get GUID"),
+            fx_index,
             self.is_input_fx,
         ))
     }

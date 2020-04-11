@@ -15,7 +15,8 @@ use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
     ControlSurface, DelegatingControlSurface, ExtensionType, HookCommand, HookPostCommand,
     InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType, ReaperStringArg,
-    ReaperStringVal, RecordingInput, RegInstr, ToggleAction, TrackNumberResult, TrackSendInfoKey,
+    ReaperStringVal, RecordingInput, RegInstr, ToggleAction, TrackFxAddByNameVariant,
+    TrackNumberResult, TrackSendInfoKey,
 };
 use std::convert::TryFrom;
 use std::mem::MaybeUninit;
@@ -424,46 +425,93 @@ impl Reaper {
         require!(self.low, GetMaxMidiOutputs)() as u32
     }
 
-    // TODO Use Option<CString> because a MIDI device *must* have a name.
-    // TODO Use Explain that returning CString instead of String is because we also expect CStrings
+    // TODO Doc: Explain that returning CString instead of String is because we also expect CStrings
     //  as arguments (for good reasons). It would not be symmetric to return Strings then.
-    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Cow<'static, CStr>) {
+    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = require!(self.low, GetMIDIInputName)(dev as i32, null_mut(), 0);
-            (is_present, create_cheap_empty_string())
+            (is_present, None)
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
                 require!(self.low, GetMIDIInputName)(dev as i32, buffer, max_size)
             });
-            (is_present, Cow::Owned(name))
+            if name.to_bytes().len() == 0 {
+                return (is_present, None);
+            }
+            (is_present, Some(name))
         }
     }
 
-    // TODO Add enum for instantiate
-    // TODO Add convenience variants (with different result types)
-    // TODO Expect ReaperStringArg
+    // TODO Doc
+    // TODO Check if instantiate also denotes the desired position
     // Return type Option or Result can't be easily chosen here because if instantiate is 0, it
     // should be Option, if it's -1 or > 0, it should be Result. So we just keep the i32.
-    pub fn track_fx_add_by_name(
+    pub fn track_fx_add_by_name<'a>(
         &self,
         track: *mut MediaTrack,
-        fxname: &CStr,
+        fxname: impl Into<ReaperStringArg<'a>>,
         rec_fx: bool,
-        instantiate: i32,
+        instantiate: TrackFxAddByNameVariant,
     ) -> i32 {
-        require!(self.low, TrackFX_AddByName)(track, fxname.as_ptr(), rec_fx, instantiate)
+        require!(self.low, TrackFX_AddByName)(
+            track,
+            fxname.into().as_ptr(),
+            rec_fx,
+            instantiate.into(),
+        )
     }
 
-    // TODO Use Option<CString> because a MIDI device *must* have a name.
-    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Cow<'static, CStr>) {
+    // TODO Doc
+    pub fn track_fx_add_by_name_query<'a>(
+        &self,
+        track: *mut MediaTrack,
+        fxname: impl Into<ReaperStringArg<'a>>,
+        rec_fx: bool,
+    ) -> Option<u32> {
+        match self.track_fx_add_by_name(track, fxname, rec_fx, TrackFxAddByNameVariant::Query) {
+            -1 => None,
+            idx if idx >= 0 => Some(idx as u32),
+            _ => unreachable!(),
+        }
+    }
+
+    // TODO Doc
+    pub fn track_fx_add_by_name_add<'a>(
+        &self,
+        track: *mut MediaTrack,
+        fxname: impl Into<ReaperStringArg<'a>>,
+        rec_fx: bool,
+        force_add: bool,
+    ) -> Result<u32, ()> {
+        match self.track_fx_add_by_name(
+            track,
+            fxname,
+            rec_fx,
+            if force_add {
+                TrackFxAddByNameVariant::Add
+            } else {
+                TrackFxAddByNameVariant::AddIfNotFound
+            },
+        ) {
+            -1 => Err(()),
+            idx if idx >= 0 => Ok(idx as u32),
+            _ => unreachable!(),
+        }
+    }
+
+    // TODO Doc
+    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = require!(self.low, GetMIDIOutputName)(dev as i32, null_mut(), 0);
-            (is_present, create_cheap_empty_string())
+            (is_present, None)
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| {
                 require!(self.low, GetMIDIOutputName)(dev as i32, buffer, max_size)
             });
-            (is_present, Cow::Owned(name))
+            if name.to_bytes().len() == 0 {
+                return (is_present, None);
+            }
+            (is_present, Some(name))
         }
     }
 
