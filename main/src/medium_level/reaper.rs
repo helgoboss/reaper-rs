@@ -13,10 +13,11 @@ use crate::low_level::raw::{
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
     AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex,
-    GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode, KbdActionValue,
-    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperPointerType, ReaperStringArg,
-    ReaperStringVal, ReaperVersion, RecordingInput, RegInstr, ToggleAction,
-    TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey, UndoFlag,
+    FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode,
+    KbdActionValue, MessageBoxKind, MessageBoxResult, ProjectRef, ReaperPointerType,
+    ReaperStringArg, ReaperVersion, RecordingInput, RegInstr, SendOrReceive,
+    StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendInfoKey, UndoFlag,
 };
 use enumflags2::BitFlags;
 use std::convert::{TryFrom, TryInto};
@@ -161,16 +162,16 @@ impl Reaper {
     pub fn get_media_track_info_name<R>(
         &self,
         tr: *mut MediaTrack,
-        f: impl Fn(ReaperStringVal) -> R,
+        f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::P_NAME);
-        unsafe { ReaperStringVal::new(ptr as *const c_char) }.map(f)
+        unsafe { create_passing_c_str(ptr as *const c_char) }.map(f)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
     pub fn get_media_track_info_recmon(&self, tr: *mut MediaTrack) -> InputMonitoringMode {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECMON);
-        let irecmon = unsafe { copy_void_ptr_target::<i32>(ptr) }.unwrap() as u32;
+        let irecmon = unsafe { copy_void_ptr_target::<i32>(ptr) }.unwrap();
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
@@ -846,23 +847,15 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn undo_can_undo_2<R>(
-        &self,
-        proj: *mut ReaProject,
-        f: impl Fn(ReaperStringVal) -> R,
-    ) -> Option<R> {
+    pub fn undo_can_undo_2<R>(&self, proj: *mut ReaProject, f: impl Fn(&CStr) -> R) -> Option<R> {
         let ptr = require!(self.low, Undo_CanUndo2)(proj);
-        unsafe { ReaperStringVal::new(ptr) }.map(f)
+        unsafe { create_passing_c_str(ptr) }.map(f)
     }
 
     // TODO Doc
-    pub fn undo_can_redo_2<R>(
-        &self,
-        proj: *mut ReaProject,
-        f: impl Fn(ReaperStringVal) -> R,
-    ) -> Option<R> {
+    pub fn undo_can_redo_2<R>(&self, proj: *mut ReaProject, f: impl Fn(&CStr) -> R) -> Option<R> {
         let ptr = require!(self.low, Undo_CanRedo2)(proj);
-        unsafe { ReaperStringVal::new(ptr) }.map(f)
+        unsafe { create_passing_c_str(ptr) }.map(f)
     }
 
     // TODO Doc
@@ -1007,11 +1000,11 @@ impl Reaper {
         result.try_into().expect("Unknown message box result")
     }
 
-    // TODO Expect ReaperStringArg
+    // TODO Doc
     // Returns Err if given string is not a valid GUID string
-    pub fn string_to_guid(&self, str: &CStr) -> Result<GUID, ()> {
+    pub fn string_to_guid<'a>(&self, str: impl Into<ReaperStringArg<'a>>) -> Result<GUID, ()> {
         let mut guid = MaybeUninit::uninit();
-        require!(self.low, stringToGuid)(str.as_ptr(), guid.as_mut_ptr());
+        require!(self.low, stringToGuid)(str.into().as_ptr(), guid.as_mut_ptr());
         let guid = unsafe { guid.assume_init() };
         if guid == ZERO_GUID {
             return Err(());
@@ -1019,15 +1012,14 @@ impl Reaper {
         Ok(guid)
     }
 
-    // TODO Use enum for monitor (there's one already)
-    // TODO Askjf what all the csurf_ return ints mean
+    // TODO Doc
     pub fn csurf_on_input_monitoring_change_ex(
         &self,
         trackid: *mut MediaTrack,
-        monitor: u32,
+        monitor: InputMonitoringMode,
         allowgang: bool,
     ) -> i32 {
-        require!(self.low, CSurf_OnInputMonitorChangeEx)(trackid, monitor as i32, allowgang)
+        require!(self.low, CSurf_OnInputMonitorChangeEx)(trackid, monitor.into(), allowgang)
     }
 
     // TODO Doc
@@ -1046,9 +1038,9 @@ impl Reaper {
         Ok(())
     }
 
-    // TODO Introduce enum for mode
-    pub fn stuff_midimessage(&self, mode: u32, msg1: u8, msg2: u8, msg3: u8) {
-        require!(self.low, StuffMIDIMessage)(mode as i32, msg1 as i32, msg2 as i32, msg3 as i32);
+    // TODO Doc
+    pub fn stuff_midimessage(&self, mode: StuffMidiMessageTarget, msg1: u8, msg2: u8, msg3: u8) {
+        require!(self.low, StuffMIDIMessage)(mode.into(), msg1 as i32, msg2 as i32, msg3 as i32);
     }
 
     // TODO Doc
@@ -1154,29 +1146,48 @@ impl Reaper {
         require!(self.low, DeleteTrack)(tr);
     }
 
-    // TODO Introduce enum for category
-    pub fn get_track_num_sends(&self, tr: *mut MediaTrack, category: i32) -> u32 {
-        require!(self.low, GetTrackNumSends)(tr, category) as u32
+    // TODO Doc
+    pub fn get_track_num_sends(&self, tr: *mut MediaTrack, category: TrackSendCategory) -> u32 {
+        require!(self.low, GetTrackNumSends)(tr, category.into()) as u32
     }
 
-    // TODO Use enum for category
-    // TODO Make it like get_set_track_info
-    // TODO Introduce convenience functions
+    // TODO Doc
     pub fn get_set_track_send_info(
         &self,
         tr: *mut MediaTrack,
-        category: i32,
+        category: TrackSendCategory,
         sendidx: u32,
         parmname: TrackSendInfoKey,
         set_new_value: *mut c_void,
-    ) -> ReaperVoidPtr {
-        ReaperVoidPtr(require!(self.low, GetSetTrackSendInfo)(
+    ) -> *mut c_void {
+        require!(self.low, GetSetTrackSendInfo)(
             tr,
-            category,
+            category.into(),
             sendidx as i32,
             Cow::from(parmname).as_ptr(),
             set_new_value,
-        ))
+        )
+    }
+
+    fn get_track_send_info(
+        &self,
+        tr: *mut MediaTrack,
+        category: TrackSendCategory,
+        sendidx: u32,
+        parmname: TrackSendInfoKey,
+    ) -> *mut c_void {
+        self.get_set_track_send_info(tr, category, sendidx, parmname, null_mut())
+    }
+
+    // TODO Doc
+    pub fn get_track_send_info_desttrack(
+        &self,
+        tr: *mut MediaTrack,
+        category: SendOrReceive,
+        sendidx: u32,
+    ) -> *mut MediaTrack {
+        self.get_track_send_info(tr, category.into(), sendidx, TrackSendInfoKey::P_DESTTRACK)
+            as *mut MediaTrack
     }
 
     // TODO Doc
@@ -1206,36 +1217,42 @@ impl Reaper {
         require!(self.low, CreateTrackSend)(tr, desttr_in_optional) as u32
     }
 
-    // TODO Maybe make recarm bool
+    // TODO Doc
+    // TODO Two booleans ... maybe expect a struct?
     // Seems to return true if was armed and false if not
     pub fn csurf_on_rec_arm_change_ex(
         &self,
         trackid: *mut MediaTrack,
-        recarm: u32, // TODO-low Why not boolean!?
+        recarm: bool,
         allowgang: bool,
     ) -> bool {
         require!(self.low, CSurf_OnRecArmChangeEx)(trackid, recarm as i32, allowgang)
     }
 
-    // TODO Expect ReaperStringArg
+    // TODO Doc
     // Returns Err for example if given chunk is invalid
-    pub fn set_track_state_chunk(
+    pub fn set_track_state_chunk<'a>(
         &self,
         track: *mut MediaTrack,
-        str: &CStr,
+        str: impl Into<ReaperStringArg<'a>>,
         isundo_optional: bool,
     ) -> Result<(), ()> {
         let successful =
-            require!(self.low, SetTrackStateChunk)(track, str.as_ptr(), isundo_optional);
+            require!(self.low, SetTrackStateChunk)(track, str.into().as_ptr(), isundo_optional);
         if !successful {
             return Err(());
         }
         Ok(())
     }
 
-    // TODO Introduce enum for show_flag
-    pub fn track_fx_show(&self, track: *mut MediaTrack, index: FxQueryIndex, show_flag: u32) {
-        require!(self.low, TrackFX_Show)(track, index.into(), show_flag as i32);
+    // TODO Doc
+    pub fn track_fx_show(
+        &self,
+        track: *mut MediaTrack,
+        index: FxQueryIndex,
+        show_flag: FxShowFlag,
+    ) {
+        require!(self.low, TrackFX_Show)(track, index.into(), show_flag.into());
     }
 
     // TODO Doc
@@ -1274,10 +1291,19 @@ impl Reaper {
         require!(self.low, CSurf_OnSendPanChange)(trackid, send_index as i32, pan, relative)
     }
 
-    // TODO Use closure with ReaperStringVal
-    // Returns Err if section or command not existing (can't think of any other case)
-    pub fn kbd_get_text_from_cmd(&self, cmd: u32, section: *mut KbdSectionInfo) -> ReaperStringPtr {
-        ReaperStringPtr(require!(self.low, kbd_getTextFromCmd)(cmd, section))
+    // TODO Doc
+    // Returns None if section or command not existing (can't think of any other case)
+    pub fn kbd_get_text_from_cmd<R>(
+        &self,
+        cmd: u32,
+        section: *mut KbdSectionInfo,
+        f: impl Fn(&CStr) -> R,
+    ) -> Option<R> {
+        let ptr = require!(self.low, kbd_getTextFromCmd)(cmd, section);
+        unsafe { create_passing_c_str(ptr) }
+            // Removed action returns empty string for some reason. We want None in this case!
+            .filter(|s| s.to_bytes().len() > 0)
+            .map(f)
     }
 
     // TODO Doc
@@ -1514,6 +1540,13 @@ unsafe fn copy_ptr_target<T: Copy>(ptr: *const T) -> Option<T> {
 
 unsafe fn copy_void_ptr_target<T: Copy>(ptr: *mut c_void) -> Option<T> {
     copy_ptr_target(ptr as *const T)
+}
+
+unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a CStr> {
+    if ptr.is_null() {
+        return None;
+    }
+    Some(CStr::from_ptr(ptr))
 }
 
 fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {

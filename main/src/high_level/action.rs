@@ -93,12 +93,13 @@ impl Action {
         if let Some(runtime_data) = self.runtime_data.borrow().as_ref() {
             // See if we can get a description. If yes, the action actually exists. If not, then
             // not.
-            let ptr = Reaper::get().medium.kbd_get_text_from_cmd(
-                runtime_data.command_id as u32,
-                runtime_data.section.get_raw(),
-            );
-            return unsafe { ptr.into_c_str() }
-                .filter(|t| t.to_bytes().len() > 0)
+            return Reaper::get()
+                .medium
+                .kbd_get_text_from_cmd(
+                    runtime_data.command_id as u32,
+                    runtime_data.section.get_raw(),
+                    |_| (),
+                )
                 .is_some();
         }
         self.load_by_command_name()
@@ -144,11 +145,13 @@ impl Action {
             })
     }
 
-    pub fn get_name(&self) -> ReaperStringPtr {
+    pub fn get_name(&self) -> Option<CString> {
         let rd = self.load_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .kbd_get_text_from_cmd(rd.command_id as u32, rd.section.get_raw())
+        Reaper::get().medium.kbd_get_text_from_cmd(
+            rd.command_id as u32,
+            rd.section.get_raw(),
+            |s| s.into(),
+        )
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {

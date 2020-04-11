@@ -23,7 +23,7 @@ use crate::medium_level::TrackInfoKey::{
 };
 use crate::medium_level::{
     AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MidiRecordingInput,
-    ReaperPointerType, RecordingInput, TrackInfoKey, TrackRef,
+    ReaperPointerType, RecordingInput, TrackInfoKey, TrackRef, TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -106,10 +106,9 @@ impl Track {
 
     pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
         self.load_and_check_if_necessary_or_complain();
-        let irecmon: u32 = mode.into();
         Reaper::get()
             .medium
-            .csurf_on_input_monitoring_change_ex(self.get_raw(), irecmon, false);
+            .csurf_on_input_monitoring_change_ex(self.get_raw(), mode, false);
     }
 
     pub fn get_recording_input(&self) -> RecordingInput {
@@ -240,7 +239,7 @@ impl Track {
             let reaper = Reaper::get();
             reaper
                 .medium
-                .csurf_on_rec_arm_change_ex(self.get_raw(), 1, false);
+                .csurf_on_rec_arm_change_ex(self.get_raw(), true, false);
             // If track was auto-armed before, this would just have switched off the auto-arm but
             // not actually armed the track. Therefore we check if it's really armed and
             // if not we do it again.
@@ -251,7 +250,7 @@ impl Track {
             {
                 reaper
                     .medium
-                    .csurf_on_rec_arm_change_ex(self.get_raw(), 1, false);
+                    .csurf_on_rec_arm_change_ex(self.get_raw(), true, false);
             }
         }
     }
@@ -263,7 +262,7 @@ impl Track {
         } else {
             Reaper::get()
                 .medium
-                .csurf_on_rec_arm_change_ex(self.get_raw(), 0, false);
+                .csurf_on_rec_arm_change_ex(self.get_raw(), false, false);
         }
     }
 
@@ -408,7 +407,9 @@ impl Track {
 
     pub fn get_send_count(&self) -> u32 {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::get().medium.get_track_num_sends(self.get_raw(), 0)
+        Reaper::get()
+            .medium
+            .get_track_num_sends(self.get_raw(), TrackSendCategory::Send)
     }
 
     pub fn add_send_to(&self, target_track: Track) -> TrackSend {

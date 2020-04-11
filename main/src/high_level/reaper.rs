@@ -37,7 +37,8 @@ use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperStringArg, ReaperVersion, TrackRef,
+    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperStringArg, ReaperVersion,
+    StuffMidiMessageTarget, TrackRef,
 };
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
@@ -796,7 +797,7 @@ impl Reaper {
 
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: (u8, u8, u8)) {
         self.medium
-            .stuff_midimessage(target.into(), message.0, message.1, message.2);
+            .stuff_midimessage(target, message.0, message.1, message.2);
     }
 
     pub fn current_thread_is_main_thread(&self) -> bool {
@@ -914,12 +915,4 @@ impl RegisteredAction {
     pub fn unregister(&self) {
         Reaper::get().unregister_command(self.command_index);
     }
-}
-
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
-#[repr(u32)]
-pub enum StuffMidiMessageTarget {
-    VirtualMidiKeyboard,
-    MidiAsControlInputQueue,
-    VirtualMidiKeyboardOnCurrentChannel,
 }

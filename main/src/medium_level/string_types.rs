@@ -68,28 +68,3 @@ impl<'a> From<String> for ReaperStringArg<'a> {
         ReaperStringArg(CString::new(s).unwrap().into())
     }
 }
-
-/// This string type is used in the medium-level API to expose strings which are owned by REAPER
-/// itself. TODO Maybe call EphemeralString or PassingString or VolatileString
-pub struct ReaperStringVal<'a>(pub(super) &'a CStr);
-
-impl<'a> ReaperStringVal<'a> {
-    pub unsafe fn new(ptr: *const c_char) -> Option<Self> {
-        if ptr.is_null() {
-            return None;
-        }
-        Some(ReaperStringVal(CStr::from_ptr(ptr)))
-    }
-}
-
-impl<'a> From<ReaperStringVal<'a>> for &'a CStr {
-    fn from(v: ReaperStringVal<'a>) -> Self {
-        v.0
-    }
-}
-
-impl<'a> From<ReaperStringVal<'a>> for CString {
-    fn from(v: ReaperStringVal<'a>) -> Self {
-        v.0.to_owned()
-    }
-}

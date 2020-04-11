@@ -8,7 +8,7 @@ use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
 use crate::high_level::{ChunkRegion, Reaper, Track};
 use crate::low_level::raw::{GetActiveWindow, HWND};
-use crate::medium_level::FxQueryIndex;
+use crate::medium_level::{FxQueryIndex, FxShowFlag};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
@@ -257,9 +257,11 @@ impl Fx {
 
     pub fn show_in_floating_window(&self) {
         self.load_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .track_fx_show(self.track.get_raw(), self.get_query_index(), 3);
+        Reaper::get().medium.track_fx_show(
+            self.track.get_raw(),
+            self.get_query_index(),
+            FxShowFlag::ShowFloatingWindow,
+        );
     }
 
     fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {

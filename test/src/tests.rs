@@ -10,8 +10,7 @@ use wmidi;
 
 use reaper_rs::high_level::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, MidiInputDevice, Pan, Reaper, StuffMidiMessageTarget, Tempo,
-    Track, Volume,
+    FxParameterValueRange, Guid, MidiInputDevice, Pan, Reaper, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -20,7 +19,8 @@ use crate::api::{step, TestStep};
 use super::mock::observe_invocations;
 use reaper_rs::medium_level::{
     AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxKind,
-    MessageBoxResult, MidiRecordingInput, ReaperVersion, RecordingInput, TrackInfoKey, TrackRef,
+    MessageBoxResult, MidiRecordingInput, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
+    TrackInfoKey, TrackRef,
 };
 use std::rc::Rc;
 
@@ -375,8 +375,8 @@ fn register_and_unregister_toggle_action() -> TestStep {
             Some(c_str!("reaperRsTest2").to_owned())
         );
         check_eq!(
-            unsafe { action.get_name().into_c_str() },
-            Some(c_str!("reaper-rs test toggle action"))
+            unsafe { action.get_name() },
+            Some(c_str!("reaper-rs test toggle action").to_owned())
         );
         reg.unregister();
         check!(!action.is_available());
@@ -414,8 +414,8 @@ fn register_and_unregister_action() -> TestStep {
         );
         check!(!action.is_on());
         check_eq!(
-            unsafe { action.get_name().into_c_str() },
-            Some(c_str!("reaper-rs test action"))
+            unsafe { action.get_name() },
+            Some(c_str!("reaper-rs test action").to_owned())
         );
         reg.unregister();
         check!(!action.is_available());
@@ -607,8 +607,8 @@ fn query_action() -> TestStep {
         check_eq!(toggle_action.get_command_id(), 6);
         check!(toggle_action.get_command_name().is_none());
         check_eq!(
-            unsafe { toggle_action.get_name().into_c_str() },
-            Some(c_str!("Track: Toggle mute for selected tracks"))
+            unsafe { toggle_action.get_name() },
+            Some(c_str!("Track: Toggle mute for selected tracks").to_owned())
         );
         check!(toggle_action.get_index() > 0);
         check_eq!(toggle_action.get_section(), reaper.get_main_section());

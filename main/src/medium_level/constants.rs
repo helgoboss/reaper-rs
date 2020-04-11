@@ -12,6 +12,48 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
+#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[repr(i32)]
+pub enum FxShowFlag {
+    HideChain = 0,
+    ShowChain = 1,
+    HideFloatingWindow = 2,
+    ShowFloatingWindow = 3,
+}
+
+#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[repr(i32)]
+pub enum TrackSendCategory {
+    Receive = -1,
+    Send = 0,
+    HardwareOutput = 1,
+}
+
+impl From<SendOrReceive> for TrackSendCategory {
+    fn from(v: SendOrReceive) -> Self {
+        use SendOrReceive::*;
+        match v {
+            Receive => TrackSendCategory::Receive,
+            Send => TrackSendCategory::Send,
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[repr(i32)]
+pub enum SendOrReceive {
+    Receive = -1,
+    Send = 0,
+}
+
+#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[repr(i32)]
+pub enum StuffMidiMessageTarget {
+    VirtualMidiKeyboard = 0,
+    MidiAsControlInputQueue = 1,
+    VirtualMidiKeyboardOnCurrentChannel = 2,
+}
+
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ReaperVersion {
     internal: &'static CStr,
@@ -141,7 +183,7 @@ pub enum TrackRef {
 }
 
 #[derive(Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
-#[repr(u32)]
+#[repr(i32)]
 pub enum InputMonitoringMode {
     Off = 0,
     Normal = 1,

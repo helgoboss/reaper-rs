@@ -1,5 +1,6 @@
 use crate::high_level::{Pan, Reaper, Track, Volume};
 use crate::low_level::raw::MediaTrack;
+use crate::medium_level::SendOrReceive;
 use crate::medium_level::TrackSendInfoKey::P_DESTTRACK;
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
@@ -196,14 +197,9 @@ pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
 }
 
 fn get_target_track_raw(source_track: &Track, send_index: u32) -> *mut MediaTrack {
-    Reaper::get()
-        .medium
-        .get_set_track_send_info(
-            source_track.get_raw(),
-            0,
-            send_index,
-            P_DESTTRACK,
-            null_mut(),
-        )
-        .0 as *mut MediaTrack
+    Reaper::get().medium.get_track_send_info_desttrack(
+        source_track.get_raw(),
+        SendOrReceive::Send,
+        send_index,
+    )
 }
