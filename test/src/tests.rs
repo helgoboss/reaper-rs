@@ -9,9 +9,9 @@ use c_str_macro::c_str;
 use wmidi;
 
 use reaper_rs::high_level::{
-    get_media_track_guid, toggleable, ActionCharacter, ActionKind, AutomationMode, FxChain,
-    FxParameterCharacter, FxParameterValueRange, Guid, MessageBoxKind, MessageBoxResult,
-    MidiInputDevice, Pan, Reaper, StuffMidiMessageTarget, Tempo, Track, Volume,
+    get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
+    FxParameterValueRange, Guid, MessageBoxKind, MessageBoxResult, MidiInputDevice, Pan, Reaper,
+    StuffMidiMessageTarget, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -19,7 +19,8 @@ use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
 use reaper_rs::medium_level::{
-    InputMonitoringMode, MidiRecordingInput, ReaperVersion, RecordingInput, TrackInfoKey, TrackRef,
+    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MidiRecordingInput,
+    ReaperVersion, RecordingInput, TrackInfoKey, TrackRef,
 };
 use std::rc::Rc;
 
@@ -745,8 +746,8 @@ fn query_track_automation_mode() -> TestStep {
         let effective_automation_mode = track.get_effective_automation_mode();
         // Then
         check_eq!(automation_mode, AutomationMode::TrimRead);
-        check_eq!(global_automation_override, AutomationMode::NoOverride);
-        check_eq!(effective_automation_mode, AutomationMode::TrimRead);
+        check_eq!(global_automation_override, None);
+        check_eq!(effective_automation_mode, Some(AutomationMode::TrimRead));
         Ok(())
     })
 }
@@ -783,6 +784,8 @@ fn remove_track() -> TestStep {
         check_eq!(track_2.get_guid(), track_2_guid);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track_1);
+        // TODO-high Check all kinds of track functions here on deleted track (medium API), e.g.
+        //  get_track_automation_mode(). Maybe we should use Result return type in some places.
         Ok(())
     })
 }

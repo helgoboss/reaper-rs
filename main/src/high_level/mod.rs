@@ -33,9 +33,6 @@ pub use action::*;
 mod guid;
 pub use guid::*;
 
-mod automation_mode;
-pub use automation_mode::*;
-
 mod fx_chain;
 pub use fx_chain::*;
 

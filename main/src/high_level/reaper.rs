@@ -17,7 +17,6 @@ use num_enum::IntoPrimitive;
 
 use rxrust::prelude::*;
 
-use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx::Fx;
 use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::helper_control_surface::HelperControlSurface;
@@ -37,8 +36,8 @@ use crate::low_level::raw::{
 use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
-    install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, ProjectRef,
-    ReaperStringArg, ReaperVersion, TrackRef,
+    install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
+    ProjectRef, ReaperStringArg, ReaperVersion, TrackRef,
 };
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
@@ -811,9 +810,8 @@ impl Reaper {
         self.main_thread_id
     }
 
-    pub fn get_global_automation_override(&self) -> AutomationMode {
-        let am = self.medium.get_global_automation_override();
-        AutomationMode::try_from(am).expect("Unknown automation mode")
+    pub fn get_global_automation_override(&self) -> Option<GlobalAutomationOverride> {
+        self.medium.get_global_automation_override()
     }
 
     pub fn undoable_action_is_running(&self) -> bool {

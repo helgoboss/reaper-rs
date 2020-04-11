@@ -9,7 +9,6 @@ use c_str_macro::c_str;
 
 use rxrust::prelude::PayloadCopy;
 
-use crate::high_level::automation_mode::AutomationMode;
 use crate::high_level::fx::{get_index_from_query_index, Fx};
 use crate::high_level::fx_chain::FxChain;
 use crate::high_level::guid::Guid;
@@ -23,8 +22,8 @@ use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
 use crate::medium_level::{
-    InputMonitoringMode, MidiRecordingInput, ReaperPointerType, RecordingInput, TrackInfoKey,
-    TrackRef,
+    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MidiRecordingInput,
+    ReaperPointerType, RecordingInput, TrackInfoKey, TrackRef,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -585,18 +584,18 @@ impl Track {
 
     pub fn get_automation_mode(&self) -> AutomationMode {
         self.load_and_check_if_necessary_or_complain();
-        let am = Reaper::get()
+        Reaper::get()
             .medium
-            .get_track_automation_mode(self.media_track.get());
-        AutomationMode::try_from(am as i32).expect("Unknown automation mode")
+            .get_track_automation_mode(self.media_track.get())
     }
 
-    pub fn get_effective_automation_mode(&self) -> AutomationMode {
-        let automation_override = Reaper::get().get_global_automation_override();
-        if automation_override == AutomationMode::NoOverride {
-            self.get_automation_mode()
-        } else {
-            automation_override
+    // None means Bypass
+    pub fn get_effective_automation_mode(&self) -> Option<AutomationMode> {
+        use GlobalAutomationOverride::*;
+        match Reaper::get().get_global_automation_override() {
+            None => Some(self.get_automation_mode()),
+            Some(Bypass) => None,
+            Some(Mode(am)) => Some(am),
         }
     }
 

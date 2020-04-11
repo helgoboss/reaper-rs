@@ -1,8 +1,6 @@
 use crate::high_level::fx::Fx;
 use crate::high_level::guid::Guid;
-use crate::high_level::{
-    get_media_track_guid, AutomationMode, Payload, Project, Reaper, Task, Track,
-};
+use crate::high_level::{get_media_track_guid, Payload, Project, Reaper, Task, Track};
 use crate::low_level::raw::{
     MediaTrack, ReaProject, CSURF_EXT_SETBPMANDPLAYRATE, CSURF_EXT_SETFOCUSEDFX,
     CSURF_EXT_SETFXCHANGE, CSURF_EXT_SETFXENABLED, CSURF_EXT_SETFXOPEN, CSURF_EXT_SETFXPARAM,
@@ -12,7 +10,7 @@ use crate::low_level::raw::{
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
-use crate::medium_level::{ControlSurface, ReaperPointerType, TrackRef};
+use crate::medium_level::{AutomationMode, ControlSurface, ReaperPointerType, TrackRef};
 use c_str_macro::c_str;
 use rxrust::prelude::*;
 
@@ -144,9 +142,9 @@ impl HelperControlSurface {
             return false;
         }
         use AutomationMode::*;
-        match track.get_automation_mode() {
+        match track.get_effective_automation_mode() {
             // Is not automated
-            Bypass | TrimRead | Write => false,
+            None | Some(TrimRead) | Some(Write) => false,
             // Is automated
             _ => true,
         }

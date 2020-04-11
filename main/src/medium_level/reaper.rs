@@ -12,10 +12,11 @@ use crate::low_level::raw::{
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
-    ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex, HookCommand,
-    HookPostCommand, InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType,
-    ReaperStringArg, ReaperStringVal, ReaperVersion, RecordingInput, RegInstr, ToggleAction,
-    TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey, UndoFlag,
+    AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex,
+    GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode, KbdActionValue,
+    ProjectRef, ReaperPointerType, ReaperStringArg, ReaperStringVal, ReaperVersion, RecordingInput,
+    RegInstr, ToggleAction, TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey,
+    UndoFlag,
 };
 use enumflags2::BitFlags;
 use std::convert::TryFrom;
@@ -899,14 +900,22 @@ impl Reaper {
         version_str.into()
     }
 
-    // TODO Pull down enum for result
-    pub fn get_track_automation_mode(&self, tr: *mut MediaTrack) -> u32 {
-        require!(self.low, GetTrackAutomationMode)(tr) as u32
+    // TODO Doc
+    pub fn get_track_automation_mode(&self, tr: *mut MediaTrack) -> AutomationMode {
+        let result = require!(self.low, GetTrackAutomationMode)(tr) as u32;
+        AutomationMode::try_from(result).expect("Unknown automation mode")
     }
 
-    // TODO Pull down enum for result, use option
-    pub fn get_global_automation_override(&self) -> i32 {
-        require!(self.low, GetGlobalAutomationOverride)()
+    // TODO Doc
+    pub fn get_global_automation_override(&self) -> Option<GlobalAutomationOverride> {
+        use GlobalAutomationOverride::*;
+        match require!(self.low, GetGlobalAutomationOverride)() {
+            -1 => None,
+            6 => Some(Bypass),
+            x => Some(Mode(
+                AutomationMode::try_from(x as u32).expect("Unknown automation mode"),
+            )),
+        }
     }
 
     // TODO Maybe use existing enum for envelope names

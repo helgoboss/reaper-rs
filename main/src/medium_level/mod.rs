@@ -60,3 +60,6 @@ pub use string_types::*;
 
 mod recording_input;
 pub use recording_input::*;
+
+mod automation_mode;
+pub use automation_mode::*;
