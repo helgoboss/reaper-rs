@@ -163,7 +163,7 @@ impl Reaper {
         f: impl Fn(ReaperStringVal) -> R,
     ) -> Option<R> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::P_NAME);
-        unsafe { interpret_ptr_as_string(ptr) }.map(f)
+        unsafe { ReaperStringVal::new(ptr as *const c_char) }.map(f)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
@@ -844,14 +844,24 @@ impl Reaper {
         );
     }
 
-    // TODO Use closure with ReaperStringVal
-    pub fn undo_can_undo_2(&self, proj: *mut ReaProject) -> ReaperStringPtr {
-        ReaperStringPtr(require!(self.low, Undo_CanUndo2)(proj))
+    // TODO Doc
+    pub fn undo_can_undo_2<R>(
+        &self,
+        proj: *mut ReaProject,
+        f: impl Fn(ReaperStringVal) -> R,
+    ) -> Option<R> {
+        let ptr = require!(self.low, Undo_CanUndo2)(proj);
+        unsafe { ReaperStringVal::new(ptr) }.map(f)
     }
 
-    // TODO Use closure with ReaperStringVal
-    pub fn undo_can_redo_2(&self, proj: *mut ReaProject) -> ReaperStringPtr {
-        ReaperStringPtr(require!(self.low, Undo_CanRedo2)(proj))
+    // TODO Doc
+    pub fn undo_can_redo_2<R>(
+        &self,
+        proj: *mut ReaProject,
+        f: impl Fn(ReaperStringVal) -> R,
+    ) -> Option<R> {
+        let ptr = require!(self.low, Undo_CanRedo2)(proj);
+        unsafe { ReaperStringVal::new(ptr) }.map(f)
     }
 
     // TODO Doc
@@ -1473,14 +1483,6 @@ fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
 
 fn create_cheap_empty_string() -> Cow<'static, CStr> {
     Cow::Borrowed(Default::default())
-}
-
-unsafe fn interpret_ptr_as_string<'a>(ptr: *mut c_void) -> Option<ReaperStringVal<'a>> {
-    if ptr.is_null() {
-        return None;
-    }
-    let ptr = ptr as *const c_char;
-    Some(ReaperStringVal(CStr::from_ptr(ptr)))
 }
 
 unsafe fn deref_ptr_as<T: Copy>(ptr: *mut c_void) -> Option<T> {

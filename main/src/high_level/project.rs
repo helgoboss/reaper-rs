@@ -1,4 +1,4 @@
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 
@@ -186,15 +186,18 @@ impl Project {
         Reaper::get().medium.is_project_dirty(self.rea_project)
     }
 
-    pub fn get_label_of_last_undoable_action(&self) -> ReaperStringPtr {
+    pub fn get_label_of_last_undoable_action(&self) -> Option<CString> {
         self.complain_if_not_available();
-        Reaper::get().medium.undo_can_undo_2(self.rea_project)
+        Reaper::get()
+            .medium
+            .undo_can_undo_2(self.rea_project, |s| s.into())
     }
 
-    pub fn get_label_of_last_redoable_action(&self) -> Option<&CStr> {
+    pub fn get_label_of_last_redoable_action(&self) -> Option<CString> {
         self.complain_if_not_available();
-        let ptr = Reaper::get().medium.undo_can_redo_2(self.rea_project);
-        unsafe { ptr.into_c_str() }
+        Reaper::get()
+            .medium
+            .undo_can_redo_2(self.rea_project, |s| s.into())
     }
 
     pub fn get_tempo(&self) -> Tempo {

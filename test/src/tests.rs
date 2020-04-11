@@ -196,12 +196,14 @@ fn redo() -> TestStep {
         let track = get_track(0)?;
         // When
         let successful = project.redo();
-        let ptr = project.get_label_of_last_undoable_action();
-        let label = unsafe { ptr.into_c_str() };
+        let label = project.get_label_of_last_undoable_action();
         // Then
         check!(successful);
         check_eq!(track.get_name().as_c_str(), c_str!("Renamed"));
-        check_eq!(label, Some(c_str!("reaper-rs integration test operation")));
+        check_eq!(
+            label,
+            Some(c_str!("reaper-rs integration test operation").to_owned())
+        );
         Ok(())
     })
 }
@@ -217,7 +219,10 @@ fn undo() -> TestStep {
         // Then
         check!(successful);
         check_eq!(track.get_name().as_bytes().len(), 0);
-        check_eq!(label, Some(c_str!("reaper-rs integration test operation")));
+        check_eq!(
+            label,
+            Some(c_str!("reaper-rs integration test operation").to_owned())
+        );
         Ok(())
     })
 }
@@ -240,11 +245,13 @@ fn use_undoable() -> TestStep {
         project.undoable(c_str!("reaper-rs integration test operation"), move || {
             track_mirror.set_name(c_str!("Renamed"));
         });
-        let ptr = project.get_label_of_last_undoable_action();
-        let label = unsafe { ptr.into_c_str() };
+        let label = project.get_label_of_last_undoable_action();
         // Then
         check_eq!(track.get_name().as_c_str(), c_str!("Renamed"));
-        check_eq!(label, Some(c_str!("reaper-rs integration test operation")));
+        check_eq!(
+            label,
+            Some(c_str!("reaper-rs integration test operation").to_owned())
+        );
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
         Ok(())
