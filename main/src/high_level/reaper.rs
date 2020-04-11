@@ -38,7 +38,7 @@ use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, ProjectRef,
-    ReaperStringArg, TrackRef,
+    ReaperStringArg, ReaperVersion, TrackRef,
 };
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
@@ -332,17 +332,6 @@ impl Drop for Reaper {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ReaperVersion {
-    internal: &'static CStr,
-}
-
-impl From<&'static CStr> for ReaperVersion {
-    fn from(internal: &'static CStr) -> Self {
-        ReaperVersion { internal }
-    }
-}
-
 impl Reaper {
     pub fn load(context: &ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder::with_all_functions_loaded(context)
@@ -408,9 +397,7 @@ impl Reaper {
     }
 
     pub fn get_version(&self) -> ReaperVersion {
-        ReaperVersion {
-            internal: self.medium.get_app_version(),
-        }
+        self.medium.get_app_version()
     }
 
     pub fn get_last_touched_fx_parameter(&self) -> Option<FxParameter> {

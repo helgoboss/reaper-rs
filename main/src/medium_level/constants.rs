@@ -12,6 +12,17 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ReaperVersion {
+    internal: &'static CStr,
+}
+
+impl From<&'static CStr> for ReaperVersion {
+    fn from(internal: &'static CStr) -> Self {
+        ReaperVersion { internal }
+    }
+}
+
 #[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
 #[repr(u32)]
 pub enum UndoFlag {

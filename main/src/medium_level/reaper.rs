@@ -14,7 +14,7 @@ use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
     ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex, HookCommand,
     HookPostCommand, InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType,
-    ReaperStringArg, ReaperStringVal, RecordingInput, RegInstr, ToggleAction,
+    ReaperStringArg, ReaperStringVal, ReaperVersion, RecordingInput, RegInstr, ToggleAction,
     TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey, UndoFlag,
 };
 use enumflags2::BitFlags;
@@ -892,10 +892,11 @@ impl Reaper {
         require!(self.low, TrackList_UpdateAllExternalSurfaces)();
     }
 
-    // TODO Pull ReaperVersion down
-    pub fn get_app_version(&self) -> &'static CStr {
+    // TODO Doc
+    pub fn get_app_version(&self) -> ReaperVersion {
         let ptr = require!(self.low, GetAppVersion)();
-        unsafe { CStr::from_ptr(ptr) }
+        let version_str = unsafe { CStr::from_ptr(ptr) };
+        version_str.into()
     }
 
     // TODO Pull down enum for result
