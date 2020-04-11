@@ -853,8 +853,9 @@ impl Reaper {
         if !self.undo_block_is_active.get() {
             return;
         }
+        use crate::medium_level::UndoFlags;
         self.medium
-            .undo_end_block_2(project.get_raw(), label, 0xFFFFFFFF);
+            .undo_end_block_2(project.get_raw(), label, UndoFlags::ALL);
         self.undo_block_is_active.replace(false);
     }
 }

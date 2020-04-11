@@ -11,12 +11,11 @@ use crate::low_level::raw::{
     KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope, GUID, HWND,
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
-use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
     ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex, HookCommand,
     HookPostCommand, InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType,
     ReaperStringArg, ReaperStringVal, RecordingInput, RegInstr, ToggleAction,
-    TrackFxAddByNameVariant, TrackRef, TrackSendInfoKey,
+    TrackFxAddByNameVariant, TrackInfoKey, TrackRef, TrackSendInfoKey, UndoFlags,
 };
 use std::convert::TryFrom;
 use std::mem::MaybeUninit;
@@ -827,10 +826,18 @@ impl Reaper {
         require!(self.low, Undo_BeginBlock2)(proj);
     }
 
-    // TODO Introduce enum for extraflags
-    // TODO Use ReaperStringArg
-    pub fn undo_end_block_2(&self, proj: *mut ReaProject, descchange: &CStr, extraflags: u32) {
-        require!(self.low, Undo_EndBlock2)(proj, descchange.as_ptr(), extraflags as i32);
+    // TODO Doc
+    pub fn undo_end_block_2<'a>(
+        &self,
+        proj: *mut ReaProject,
+        descchange: impl Into<ReaperStringArg<'a>>,
+        extraflags: UndoFlags,
+    ) {
+        require!(self.low, Undo_EndBlock2)(
+            proj,
+            descchange.into().as_ptr(),
+            extraflags.bits() as i32,
+        );
     }
 
     // TODO Use closure with ReaperStringVal

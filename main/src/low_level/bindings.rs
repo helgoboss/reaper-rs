@@ -32,6 +32,12 @@ pub mod root {
     pub const CSURF_EXT_SETPROJECTMARKERCHANGE: u32 = 65556;
     pub const CSURF_EXT_SETFXPARAM_RECFX: u32 = 65560;
     pub const CSURF_EXT_SUPPORTS_EXTENDED_TOUCH: u32 = 524289;
+    pub const UNDO_STATE_ALL: u32 = 4294967295;
+    pub const UNDO_STATE_TRACKCFG: u32 = 1;
+    pub const UNDO_STATE_FX: u32 = 2;
+    pub const UNDO_STATE_ITEMS: u32 = 4;
+    pub const UNDO_STATE_MISCCFG: u32 = 8;
+    pub const UNDO_STATE_FREEZE: u32 = 16;
     pub type ReaSample = f64;
     pub type DWORD = ::std::os::raw::c_ulong;
     pub type BYTE = ::std::os::raw::c_uchar;

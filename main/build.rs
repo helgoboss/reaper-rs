@@ -41,6 +41,7 @@ mod codegen {
             .whitelist_var("reaper_functions::.*")
             .whitelist_var("CSURF_EXT_.*")
             .whitelist_var("REAPER_PLUGIN_VERSION")
+            .whitelist_var("UNDO_STATE_.*")
             .whitelist_type("HINSTANCE")
             .whitelist_type("reaper_plugin_info_t")
             .whitelist_type("gaccel_register_t")

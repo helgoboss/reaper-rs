@@ -1,4 +1,9 @@
 #![allow(non_camel_case_types)]
+use crate::low_level::raw::{
+    UNDO_STATE_ALL, UNDO_STATE_FREEZE, UNDO_STATE_FX, UNDO_STATE_ITEMS, UNDO_STATE_MISCCFG,
+    UNDO_STATE_TRACKCFG,
+};
+use bitflags::*;
 use c_str_macro::c_str;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
@@ -7,6 +12,17 @@ use std::ffi::{CStr, CString};
 pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
+
+bitflags! {
+    pub struct UndoFlags: u32 {
+        const ALL = UNDO_STATE_ALL;
+        const FREEZE = UNDO_STATE_FREEZE;
+        const FX = UNDO_STATE_FX;
+        const ITEMS = UNDO_STATE_ITEMS;
+        const MISCCFG = UNDO_STATE_MISCCFG;
+        const TRACKCFG = UNDO_STATE_TRACKCFG;
+    }
+}
 
 // TODO Maybe call it TrackFxRef (in line with TrackRef and ProjectRef)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
