@@ -8,6 +8,23 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FxQueryIndex {
+    InputFx(u32),
+    OutputFx(u32),
+}
+
+impl From<FxQueryIndex> for i32 {
+    fn from(v: FxQueryIndex) -> Self {
+        use FxQueryIndex::*;
+        let positive = match v {
+            InputFx(idx) => 0x1000000 + idx,
+            OutputFx(idx) => idx,
+        };
+        positive as i32
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum TrackFxAddByNameVariant {

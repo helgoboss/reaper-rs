@@ -13,10 +13,10 @@ use crate::low_level::raw::{
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::constants::TrackInfoKey;
 use crate::medium_level::{
-    ControlSurface, DelegatingControlSurface, ExtensionType, HookCommand, HookPostCommand,
-    InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType, ReaperStringArg,
-    ReaperStringVal, RecordingInput, RegInstr, ToggleAction, TrackFxAddByNameVariant,
-    TrackNumberResult, TrackSendInfoKey,
+    ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex, HookCommand,
+    HookPostCommand, InputMonitoringMode, KbdActionValue, ProjectRef, ReaperPointerType,
+    ReaperStringArg, ReaperStringVal, RecordingInput, RegInstr, ToggleAction,
+    TrackFxAddByNameVariant, TrackNumberResult, TrackSendInfoKey,
 };
 use std::convert::TryFrom;
 use std::mem::MaybeUninit;
@@ -515,9 +515,9 @@ impl Reaper {
         }
     }
 
-    // TODO Consider introducing an Fx enum (Input/Output Fx) and using it in FX parameters
-    pub fn track_fx_get_enabled(&self, track: *mut MediaTrack, fx: u32) -> bool {
-        require!(self.low, TrackFX_GetEnabled)(track, fx as i32)
+    // TODO Doc
+    pub fn track_fx_get_enabled(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> bool {
+        require!(self.low, TrackFX_GetEnabled)(track, fx.into())
     }
 
     // TODO Doc
@@ -525,12 +525,12 @@ impl Reaper {
     pub fn track_fx_get_fx_name(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         buf_sz: u32,
     ) -> Result<CString, ()> {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
-            require!(self.low, TrackFX_GetFXName)(track, fx as i32, buffer, max_size)
+            require!(self.low, TrackFX_GetFXName)(track, fx.into(), buffer, max_size)
         });
         if !successful {
             return Err(());
@@ -548,13 +548,13 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: u32, enabled: bool) {
-        require!(self.low, TrackFX_SetEnabled)(track, fx as i32, enabled);
+    pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: FxQueryIndex, enabled: bool) {
+        require!(self.low, TrackFX_SetEnabled)(track, fx.into(), enabled);
     }
 
     // TODO Doc
-    pub fn track_fx_get_num_params(&self, track: *mut MediaTrack, fx: u32) -> u32 {
-        require!(self.low, TrackFX_GetNumParams)(track, fx as i32) as u32
+    pub fn track_fx_get_num_params(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> u32 {
+        require!(self.low, TrackFX_GetNumParams)(track, fx.into()) as u32
     }
 
     // TODO Doc
@@ -567,7 +567,7 @@ impl Reaper {
     pub fn track_fx_get_param_name(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         param: u32,
         buf_sz: u32,
     ) -> Result<CString, ()> {
@@ -575,7 +575,7 @@ impl Reaper {
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             require!(self.low, TrackFX_GetParamName)(
                 track,
-                fx as i32,
+                fx.into(),
                 param as i32,
                 buffer,
                 max_size,
@@ -592,7 +592,7 @@ impl Reaper {
     pub fn track_fx_get_formatted_param_value(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         param: u32,
         buf_sz: u32,
     ) -> Result<CString, ()> {
@@ -600,7 +600,7 @@ impl Reaper {
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             require!(self.low, TrackFX_GetFormattedParamValue)(
                 track,
-                fx as i32,
+                fx.into(),
                 param as i32,
                 buffer,
                 max_size,
@@ -618,7 +618,7 @@ impl Reaper {
     pub fn track_fx_format_param_value_normalized(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         param: u32,
         value: f64,
         buf_sz: u32,
@@ -627,7 +627,7 @@ impl Reaper {
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             require!(self.low, TrackFX_FormatParamValueNormalized)(
                 track,
-                fx as i32,
+                fx.into(),
                 param as i32,
                 value,
                 buffer,
@@ -645,12 +645,12 @@ impl Reaper {
     pub fn track_fx_set_param_normalized(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         param: u32,
         value: f64,
     ) -> Result<(), ()> {
         let successful =
-            require!(self.low, TrackFX_SetParamNormalized)(track, fx as i32, param as i32, value);
+            require!(self.low, TrackFX_SetParamNormalized)(track, fx.into(), param as i32, value);
         if !successful {
             return Err(());
         }
@@ -732,24 +732,24 @@ impl Reaper {
     pub fn track_fx_copy_to_track(
         &self,
         src_track: *mut MediaTrack,
-        src_fx: u32,
+        src_fx: FxQueryIndex,
         dest_track: *mut MediaTrack,
-        dest_fx: u32,
+        dest_fx: FxQueryIndex,
         is_move: bool,
     ) {
         require!(self.low, TrackFX_CopyToTrack)(
             src_track,
-            src_fx as i32,
+            src_fx.into(),
             dest_track,
-            dest_fx as i32,
+            dest_fx.into(),
             is_move,
         );
     }
 
     // TODO Doc
     // Returns Err if FX doesn't exist (maybe also in other cases?)
-    pub fn track_fx_delete(&self, track: *mut MediaTrack, fx: u32) -> Result<(), ()> {
-        let succesful = require!(self.low, TrackFX_Delete)(track, fx as i32);
+    pub fn track_fx_delete(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> Result<(), ()> {
+        let succesful = require!(self.low, TrackFX_Delete)(track, fx.into());
         if !succesful {
             return Err(());
         }
@@ -764,7 +764,7 @@ impl Reaper {
     pub fn track_fx_get_parameter_step_sizes(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         param: u32,
     ) -> Option<GetParameterStepSizesResult> {
         let mut step = MaybeUninit::uninit();
@@ -773,7 +773,7 @@ impl Reaper {
         let mut is_toggle = MaybeUninit::uninit();
         let successful = require!(self.low, TrackFX_GetParameterStepSizes)(
             track,
-            fx as i32,
+            fx.into(),
             param as i32,
             step.as_mut_ptr(),
             small_step.as_mut_ptr(),
@@ -795,7 +795,7 @@ impl Reaper {
     pub fn track_fx_get_param_ex(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         param: u32,
     ) -> GetParamExResult {
         let mut min_val = MaybeUninit::uninit();
@@ -803,7 +803,7 @@ impl Reaper {
         let mut mid_val = MaybeUninit::uninit();
         let value = require!(self.low, TrackFX_GetParamEx)(
             track,
-            fx as i32,
+            fx.into(),
             param as i32,
             min_val.as_mut_ptr(),
             max_val.as_mut_ptr(),
@@ -909,18 +909,18 @@ impl Reaper {
     }
 
     // TODO Return owned GUID
-    pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: u32) -> *mut GUID {
-        require!(self.low, TrackFX_GetFXGUID)(track, fx as i32)
+    pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> *mut GUID {
+        require!(self.low, TrackFX_GetFXGUID)(track, fx.into())
     }
 
     // TODO Doc
     pub fn track_fx_get_param_normalized(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         param: u32,
     ) -> f64 {
-        require!(self.low, TrackFX_GetParamNormalized)(track, fx as i32, param as i32)
+        require!(self.low, TrackFX_GetParamNormalized)(track, fx.into(), param as i32)
     }
 
     // TODO Doc
@@ -1189,18 +1189,22 @@ impl Reaper {
     }
 
     // TODO Introduce enum for show_flag
-    pub fn track_fx_show(&self, track: *mut MediaTrack, index: u32, show_flag: u32) {
-        require!(self.low, TrackFX_Show)(track, index as i32, show_flag as i32);
+    pub fn track_fx_show(&self, track: *mut MediaTrack, index: FxQueryIndex, show_flag: u32) {
+        require!(self.low, TrackFX_Show)(track, index.into(), show_flag as i32);
     }
 
     // TODO Doc
-    pub fn track_fx_get_floating_window(&self, track: *mut MediaTrack, index: u32) -> HWND {
-        require!(self.low, TrackFX_GetFloatingWindow)(track, index as i32)
+    pub fn track_fx_get_floating_window(
+        &self,
+        track: *mut MediaTrack,
+        index: FxQueryIndex,
+    ) -> HWND {
+        require!(self.low, TrackFX_GetFloatingWindow)(track, index.into())
     }
 
     // TODO Doc
-    pub fn track_fx_get_open(&self, track: *mut MediaTrack, fx: u32) -> bool {
-        require!(self.low, TrackFX_GetOpen)(track, fx as i32)
+    pub fn track_fx_get_open(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> bool {
+        require!(self.low, TrackFX_GetOpen)(track, fx.into())
     }
 
     // TODO Doc
@@ -1284,11 +1288,11 @@ impl Reaper {
     pub fn track_fx_get_preset_index(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
     ) -> Result<(u32, u32), ()> {
         let mut num_presets = MaybeUninit::uninit();
         let index =
-            require!(self.low, TrackFX_GetPresetIndex)(track, fx as i32, num_presets.as_mut_ptr());
+            require!(self.low, TrackFX_GetPresetIndex)(track, fx.into(), num_presets.as_mut_ptr());
         if index == -1 {
             return Err(());
         }
@@ -1300,10 +1304,10 @@ impl Reaper {
     pub fn track_fx_set_preset_by_index(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         idx: i32,
     ) -> Result<(), ()> {
-        let successful = require!(self.low, TrackFX_SetPresetByIndex)(track, fx as i32, idx);
+        let successful = require!(self.low, TrackFX_SetPresetByIndex)(track, fx.into(), idx);
         if !successful {
             return Err(());
         }
@@ -1315,10 +1319,10 @@ impl Reaper {
     pub fn track_fx_navigate_presets(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         presetmove: i32,
     ) -> Result<(), ()> {
-        let successful = require!(self.low, TrackFX_NavigatePresets)(track, fx as i32, presetmove);
+        let successful = require!(self.low, TrackFX_NavigatePresets)(track, fx.into(), presetmove);
         if !successful {
             return Err(());
         }
@@ -1329,17 +1333,17 @@ impl Reaper {
     pub fn track_fx_get_preset(
         &self,
         track: *mut MediaTrack,
-        fx: u32,
+        fx: FxQueryIndex,
         presetname_sz: u32,
     ) -> (bool, Cow<'static, CStr>) {
         if presetname_sz == 0 {
             let state_matches_preset =
-                require!(self.low, TrackFX_GetPreset)(track, fx as i32, null_mut(), 0);
+                require!(self.low, TrackFX_GetPreset)(track, fx.into(), null_mut(), 0);
             (state_matches_preset, create_cheap_empty_string())
         } else {
             let (name, state_matches_preset) =
                 with_string_buffer(presetname_sz, |buffer, max_size| {
-                    require!(self.low, TrackFX_GetPreset)(track, fx as i32, buffer, max_size)
+                    require!(self.low, TrackFX_GetPreset)(track, fx.into(), buffer, max_size)
                 });
             (state_matches_preset, Cow::Owned(name))
         }

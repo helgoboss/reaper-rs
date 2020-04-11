@@ -1638,7 +1638,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx.is_available());
         check_eq!(fx.get_index(), 2);
         check_eq!(
-            fx.get_query_index(),
+            i32::from(fx.get_query_index()),
             if fx_chain.is_input_fx() { 0x1000002 } else { 2 }
         );
         check!(fx.get_guid().is_some());
@@ -2169,11 +2169,11 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(fx_1.get_index(), 0);
         check_eq!(fx_2.get_index(), 1);
         check_eq!(
-            fx_1.get_query_index(),
+            i32::from(fx_1.get_query_index()),
             if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
         );
         check_eq!(
-            fx_2.get_query_index(),
+            i32::from(fx_2.get_query_index()),
             if fx_chain.is_input_fx() { 0x1000001 } else { 1 }
         );
         check!(fx_1.get_guid().is_some());
@@ -2306,7 +2306,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx_1.is_available());
         check_eq!(fx_1.get_index(), 0);
         check_eq!(
-            fx_1.get_query_index(),
+            i32::from(fx_1.get_query_index()),
             if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
         );
         check!(fx_1.get_guid().is_some());
