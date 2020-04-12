@@ -138,7 +138,6 @@ impl<'a> From<RegInstr<'a>> for Cow<'a, CStr> {
     }
 }
 
-// TODO Make it possible for all Custom enum variants to pass any REAPER string. Must be documented.
 pub enum ExtensionType<'a> {
     Api(Cow<'a, CStr>),
     ApiDef(Cow<'a, CStr>),
@@ -152,6 +151,20 @@ pub enum ExtensionType<'a> {
     GAccel,
     CSurfInst,
     Custom(Cow<'a, CStr>),
+}
+
+impl<'a> ExtensionType<'a> {
+    pub fn api(func_name: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Api(func_name.into().into_cow())
+    }
+
+    pub fn api_def(func_def: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::ApiDef(func_def.into().into_cow())
+    }
+
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(key.into().into_cow())
+    }
 }
 
 impl<'a> From<ExtensionType<'a>> for Cow<'a, CStr> {
@@ -212,6 +225,12 @@ pub enum ReaperPointerType<'a> {
     /// If a variant is missing in this enum, you can use this custom one as a last resort. Don't
     /// include the trailing asterisk (`*`)! It will be added to the call automatically.
     Custom(Cow<'a, CStr>),
+}
+
+impl<'a> ReaperPointerType<'a> {
+    pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(name.into().into_cow())
+    }
 }
 
 impl<'a> From<ReaperPointerType<'a>> for Cow<'a, CStr> {
@@ -292,12 +311,12 @@ pub enum TrackInfoKey<'a> {
 }
 
 impl<'a> TrackInfoKey<'a> {
-    pub fn p_ext(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
-        TrackInfoKey::P_EXT(key.into().into_cow())
+    pub fn p_ext(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::P_EXT(key.into().into_cow())
     }
 
-    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
-        TrackInfoKey::Custom(key.into().into_cow())
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(key.into().into_cow())
     }
 }
 
@@ -394,6 +413,16 @@ pub enum TrackSendInfoKey<'a> {
     Custom(Cow<'a, CStr>),
 }
 
+impl<'a> TrackSendInfoKey<'a> {
+    pub fn p_ext(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::P_EXT(key.into().into_cow())
+    }
+
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(key.into().into_cow())
+    }
+}
+
 impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
     fn from(value: TrackSendInfoKey<'a>) -> Self {
         use TrackSendInfoKey::*;
@@ -415,9 +444,7 @@ impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
                 let cow: Cow<CStr> = env_chunk_name.into();
                 concat_c_strs(c_str!("P_ENV:<"), cow.as_ref()).into()
             }
-            P_EXT(extension_specific_key) => {
-                concat_c_strs(c_str!("P_EXT:"), extension_specific_key.as_ref()).into()
-            }
+            P_EXT(key) => concat_c_strs(c_str!("P_EXT:"), key.as_ref()).into(),
             Custom(key) => key.into(),
         }
     }
@@ -437,6 +464,12 @@ pub enum EnvChunkName<'a> {
     //  we should provide a similar enum for get_track_envelope_by_name() envname as well.
     /// Use this for all non-common envelope names.
     Custom(Cow<'a, CStr>),
+}
+
+impl<'a> EnvChunkName<'a> {
+    pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(name.into().into_cow())
+    }
 }
 
 impl<'a> From<EnvChunkName<'a>> for Cow<'a, CStr> {
