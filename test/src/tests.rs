@@ -18,8 +18,8 @@ use super::mock::observe_invocations;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
 use reaper_rs::medium_level::{
-    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxKind,
-    MessageBoxResult, MidiRecordingInput, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
+    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
+    MessageBoxType, MidiRecordingInput, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
     TrackInfoKey, TrackRef,
 };
 use std::rc::Rc;
@@ -122,7 +122,7 @@ fn show_message_box() -> TestStep {
         let result = reaper.show_message_box(
             c_str!("Tests are finished"),
             c_str!("reaper-rs"),
-            MessageBoxKind::Ok,
+            MessageBoxType::Ok,
         );
         // Then
         check_eq!(result, MessageBoxResult::Ok);

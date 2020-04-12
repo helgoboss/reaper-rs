@@ -37,7 +37,7 @@ use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperStringArg, ReaperVersion,
+    MessageBoxResult, MessageBoxType, ProjectRef, ReaperStringArg, ReaperVersion,
     StuffMidiMessageTarget, TrackRef,
 };
 use helgoboss_midi::MidiMessage;
@@ -602,7 +602,7 @@ impl Reaper {
         &self,
         msg: &CStr,
         title: &CStr,
-        kind: MessageBoxKind,
+        kind: MessageBoxType,
     ) -> MessageBoxResult {
         self.medium.show_message_box(msg, title, kind)
     }

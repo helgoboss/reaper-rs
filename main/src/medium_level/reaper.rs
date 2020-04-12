@@ -14,7 +14,7 @@ use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
     AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxShowFlag,
     GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode, KbdActionValue,
-    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperPointerType, ReaperStringArg,
+    MessageBoxResult, MessageBoxType, ProjectRef, ReaperPointerType, ReaperStringArg,
     ReaperVersion, RecordingInput, RegInstr, SendOrReceive, StuffMidiMessageTarget, ToggleAction,
     TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
     TrackSendInfoKey, UndoFlag,
@@ -994,7 +994,7 @@ impl Reaper {
         &self,
         msg: impl Into<ReaperStringArg<'a>>,
         title: impl Into<ReaperStringArg<'a>>,
-        r#type: MessageBoxKind,
+        r#type: MessageBoxType,
     ) -> MessageBoxResult {
         let result = require!(self.low, ShowMessageBox)(
             msg.into().as_ptr(),
