@@ -2,6 +2,7 @@
 use crate::low_level::raw::{
     UNDO_STATE_FREEZE, UNDO_STATE_FX, UNDO_STATE_ITEMS, UNDO_STATE_MISCCFG, UNDO_STATE_TRACKCFG,
 };
+use crate::medium_level::ReaperStringArg;
 use c_str_macro::c_str;
 use enumflags2::BitFlags;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
@@ -205,7 +206,7 @@ pub enum ProjectRef {
 /// close to the raw REAPER API.
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
-pub enum ReaperPointerType {
+pub enum ReaperPointerType<'a> {
     MediaTrack,
     ReaProject,
     MediaItem,
@@ -214,11 +215,11 @@ pub enum ReaperPointerType {
     PCM_source,
     /// If a variant is missing in this enum, you can use this custom one as a last resort. Don't
     /// include the trailing asterisk (`*`)! It will be added to the call automatically.
-    Custom(&'static CStr),
+    Custom(Cow<'a, CStr>),
 }
 
 // TODO Maybe make this explicit and private because it exposes low-level logic.
-impl From<ReaperPointerType> for Cow<'static, CStr> {
+impl<'a> From<ReaperPointerType<'a>> for Cow<'a, CStr> {
     fn from(value: ReaperPointerType) -> Self {
         use ReaperPointerType::*;
         match value {
@@ -228,7 +229,7 @@ impl From<ReaperPointerType> for Cow<'static, CStr> {
             MediaItem_Take => c_str!("MediaItem_Take*").into(),
             TrackEnvelope => c_str!("TrackEnvelope*").into(),
             PCM_source => c_str!("PCM_source*").into(),
-            Custom(name) => concat_c_strs(name, c_str!("*")).into(),
+            Custom(name) => concat_c_strs(name.as_ref(), c_str!("*")).into(),
         }
     }
 }
@@ -237,7 +238,7 @@ impl From<ReaperPointerType> for Cow<'static, CStr> {
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
 /// The variants are named exactly like the strings which will be passed to the low-level REAPER
 /// function because the medium-level API is designed to still be close to the raw REAPER API.  
-pub enum TrackInfoKey {
+pub enum TrackInfoKey<'a> {
     B_FREEMODE,
     B_HEIGHTLOCK,
     B_MAINSEND,
@@ -284,7 +285,7 @@ pub enum TrackInfoKey {
     I_WNDH,
     IP_TRACKNUMBER,
     P_ENV(EnvChunkName),
-    P_EXT(&'static CStr),
+    P_EXT(Cow<'a, CStr>),
     P_ICON,
     P_MCP_LAYOUT,
     P_NAME,
@@ -292,12 +293,22 @@ pub enum TrackInfoKey {
     P_PROJECT,
     P_TCP_LAYOUT,
     /// If a variant is missing in this enum, you can use this custom one as a last resort.
-    Custom(&'static CStr),
+    Custom(Cow<'a, CStr>),
+}
+
+impl<'a> TrackInfoKey<'a> {
+    pub fn p_ext(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
+        TrackInfoKey::P_EXT(key.into().into_cow())
+    }
+
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
+        TrackInfoKey::Custom(key.into().into_cow())
+    }
 }
 
 // TODO Maybe make this explicit and private because it exposes low-level logic.
-impl From<TrackInfoKey> for Cow<'static, CStr> {
-    fn from(value: TrackInfoKey) -> Self {
+impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
+    fn from(value: TrackInfoKey<'a>) -> Self {
         use TrackInfoKey::*;
         match value {
             B_FREEMODE => c_str!("B_FREEMODE").into(),
@@ -350,7 +361,7 @@ impl From<TrackInfoKey> for Cow<'static, CStr> {
                 concat_c_strs(c_str!("P_ENV:<"), cow.as_ref()).into()
             }
             P_EXT(extension_specific_key) => {
-                concat_c_strs(c_str!("P_EXT:"), extension_specific_key).into()
+                concat_c_strs(c_str!("P_EXT:"), extension_specific_key.as_ref()).into()
             }
             P_ICON => c_str!("P_ICON").into(),
             P_MCP_LAYOUT => c_str!("P_MCP_LAYOUT").into(),
@@ -358,7 +369,7 @@ impl From<TrackInfoKey> for Cow<'static, CStr> {
             P_PARTRACK => c_str!("P_PARTRACK").into(),
             P_PROJECT => c_str!("P_PROJECT").into(),
             P_TCP_LAYOUT => c_str!("P_TCP_LAYOUT").into(),
-            Custom(key) => key.into(),
+            Custom(key) => key,
         }
     }
 }
@@ -452,7 +463,7 @@ fn concat_c_strs(first: &CStr, second: &CStr) -> CString {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
@@ -468,9 +479,12 @@ mod test {
             c_str!("P_ENV:<MYENV")
         );
         assert_eq!(
-            Cow::from(P_EXT(c_str!("SWS_FOO"))).as_ref(),
+            Cow::from(TrackInfoKey::p_ext("SWS_FOO")).as_ref(),
             c_str!("P_EXT:SWS_FOO")
         );
-        assert_eq!(Cow::from(Custom(c_str!("BLA"))).as_ref(), c_str!("BLA"));
+        assert_eq!(
+            Cow::from(TrackInfoKey::custom(c_str!("BLA"))).as_ref(),
+            c_str!("BLA")
+        );
     }
 }

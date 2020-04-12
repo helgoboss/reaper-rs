@@ -34,8 +34,14 @@ use std::os::raw::c_char;
 pub struct ReaperStringArg<'a>(Cow<'a, CStr>);
 
 impl<'a> ReaperStringArg<'a> {
+    /// Returns a raw pointer to the string. Used by code in this crate only.
     pub(super) fn as_ptr(&self) -> *const c_char {
         self.0.as_ptr()
+    }
+
+    /// Consumes this string and spits out the contained cow. Used by code in this crate only.
+    pub(super) fn into_cow(self) -> Cow<'a, CStr> {
+        self.0
     }
 }
 
