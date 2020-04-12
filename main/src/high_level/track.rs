@@ -22,8 +22,8 @@ use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
 use crate::medium_level::{
-    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MidiRecordingInput,
-    ReaperPointerType, RecordingInput, TrackInfoKey, TrackRef, TrackSendCategory,
+    AutomationMode, Gang, GlobalAutomationOverride, InputMonitoringMode, MidiRecordingInput,
+    ReaperPointerType, RecArmState, RecordingInput, TrackInfoKey, TrackRef, TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -237,9 +237,11 @@ impl Track {
             self.select();
         } else {
             let reaper = Reaper::get();
-            reaper
-                .medium
-                .csurf_on_rec_arm_change_ex(self.get_raw(), true, false);
+            reaper.medium.csurf_on_rec_arm_change_ex(
+                self.get_raw(),
+                RecArmState::Armed,
+                Gang::Forbid,
+            );
             // If track was auto-armed before, this would just have switched off the auto-arm but
             // not actually armed the track. Therefore we check if it's really armed and
             // if not we do it again.
@@ -248,9 +250,11 @@ impl Track {
                 .get_media_track_info_value(self.get_raw(), I_RECARM)
                 != 1.0
             {
-                reaper
-                    .medium
-                    .csurf_on_rec_arm_change_ex(self.get_raw(), true, false);
+                reaper.medium.csurf_on_rec_arm_change_ex(
+                    self.get_raw(),
+                    RecArmState::Armed,
+                    Gang::Forbid,
+                );
             }
         }
     }
@@ -260,9 +264,11 @@ impl Track {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.unselect();
         } else {
-            Reaper::get()
-                .medium
-                .csurf_on_rec_arm_change_ex(self.get_raw(), false, false);
+            Reaper::get().medium.csurf_on_rec_arm_change_ex(
+                self.get_raw(),
+                RecArmState::Unarmed,
+                Gang::Forbid,
+            );
         }
     }
 

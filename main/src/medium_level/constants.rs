@@ -14,6 +14,20 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
+// TODO Revise names of all enums and their variants
+#[derive(Debug, Eq, PartialEq)]
+pub enum Gang {
+    Forbid,
+    Allow,
+}
+
+#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[repr(i32)]
+pub enum RecArmState {
+    Unarmed = 0,
+    Armed = 1,
+}
+
 #[derive(Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum FxShowFlag {

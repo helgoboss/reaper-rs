@@ -12,11 +12,11 @@ use crate::low_level::raw::{
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
-    AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxShowFlag,
+    AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxShowFlag, Gang,
     GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode, KbdActionValue,
     MessageBoxResult, MessageBoxType, ProjectRef, ReaperPointerType, ReaperStringArg,
-    ReaperVersion, RecordingInput, RegInstr, SendOrReceive, StuffMidiMessageTarget, ToggleAction,
-    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    ReaperVersion, RecArmState, RecordingInput, RegInstr, SendOrReceive, StuffMidiMessageTarget,
+    ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
     TrackSendInfoKey, UndoFlag,
 };
 use enumflags2::BitFlags;
@@ -1227,15 +1227,15 @@ impl Reaper {
     }
 
     // TODO Doc
-    // TODO Two booleans ... maybe expect a struct?
+    // TODO Check other bools in this API and consider using an enum
     // Seems to return true if was armed and false if not
     pub fn csurf_on_rec_arm_change_ex(
         &self,
         trackid: *mut MediaTrack,
-        recarm: bool,
-        allowgang: bool,
+        recarm: RecArmState,
+        allowgang: Gang,
     ) -> bool {
-        require!(self.low, CSurf_OnRecArmChangeEx)(trackid, recarm as i32, allowgang)
+        require!(self.low, CSurf_OnRecArmChangeEx)(trackid, recarm.into(), allowgang == Gang::Allow)
     }
 
     // TODO Doc
