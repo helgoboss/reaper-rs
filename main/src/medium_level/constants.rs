@@ -57,12 +57,12 @@ pub enum StuffMidiMessageTarget {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ReaperVersion {
-    internal: &'static CStr,
+    version_str: &'static CStr,
 }
 
 impl From<&'static CStr> for ReaperVersion {
-    fn from(internal: &'static CStr) -> Self {
-        ReaperVersion { internal }
+    fn from(version_str: &'static CStr) -> Self {
+        ReaperVersion { version_str }
     }
 }
 
@@ -125,14 +125,14 @@ pub enum KbdActionValue {
     Relative3(u8),
 }
 
-pub enum RegInstr {
-    Register(ExtensionType),
-    Unregister(ExtensionType),
+pub enum RegInstr<'a> {
+    Register(ExtensionType<'a>),
+    Unregister(ExtensionType<'a>),
 }
 
 // TODO Maybe make this explicit and private because it exposes low-level logic.
-impl From<RegInstr> for Cow<'static, CStr> {
-    fn from(value: RegInstr) -> Self {
+impl<'a> From<RegInstr<'a>> for Cow<'a, CStr> {
+    fn from(value: RegInstr<'a>) -> Self {
         use RegInstr::*;
         match value {
             Register(et) => et.into(),
@@ -142,9 +142,9 @@ impl From<RegInstr> for Cow<'static, CStr> {
 }
 
 // TODO Make it possible for all Custom enum variants to pass any REAPER string. Must be documented.
-pub enum ExtensionType {
-    Api(&'static CStr),
-    ApiDef(&'static CStr),
+pub enum ExtensionType<'a> {
+    Api(Cow<'a, CStr>),
+    ApiDef(Cow<'a, CStr>),
     HookCommand,
     HookPostCommand,
     HookCommand2,
@@ -154,18 +154,18 @@ pub enum ExtensionType {
     CommandIdLookup,
     GAccel,
     CSurfInst,
-    Custom(&'static CStr),
+    Custom(Cow<'a, CStr>),
 }
 
 // TODO Maybe make this explicit and private because it exposes low-level logic.
-impl From<ExtensionType> for Cow<'static, CStr> {
-    fn from(value: ExtensionType) -> Self {
+impl<'a> From<ExtensionType<'a>> for Cow<'a, CStr> {
+    fn from(value: ExtensionType<'a>) -> Self {
         use ExtensionType::*;
         match value {
             GAccel => c_str!("gaccel").into(),
             CSurfInst => c_str!("csurf_inst").into(),
-            Api(func_name) => concat_c_strs(c_str!("API_"), func_name).into(),
-            ApiDef(func_def) => concat_c_strs(c_str!("APIdef_"), func_def).into(),
+            Api(func_name) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
+            ApiDef(func_def) => concat_c_strs(c_str!("APIdef_"), func_def.as_ref()).into(),
             HookCommand => c_str!("hookcommand").into(),
             HookPostCommand => c_str!("hookpostcommand").into(),
             HookCommand2 => c_str!("hookcommand2").into(),
@@ -173,7 +173,7 @@ impl From<ExtensionType> for Cow<'static, CStr> {
             ActionHelp => c_str!("action_help").into(),
             CommandId => c_str!("command_id").into(),
             CommandIdLookup => c_str!("command_id_lookup").into(),
-            Custom(k) => k.into(),
+            Custom(k) => k,
         }
     }
 }
@@ -220,7 +220,7 @@ pub enum ReaperPointerType<'a> {
 
 // TODO Maybe make this explicit and private because it exposes low-level logic.
 impl<'a> From<ReaperPointerType<'a>> for Cow<'a, CStr> {
-    fn from(value: ReaperPointerType) -> Self {
+    fn from(value: ReaperPointerType<'a>) -> Self {
         use ReaperPointerType::*;
         match value {
             MediaTrack => c_str!("MediaTrack*").into(),
@@ -284,7 +284,7 @@ pub enum TrackInfoKey<'a> {
     I_TCPY,
     I_WNDH,
     IP_TRACKNUMBER,
-    P_ENV(EnvChunkName),
+    P_ENV(EnvChunkName<'a>),
     P_EXT(Cow<'a, CStr>),
     P_ICON,
     P_MCP_LAYOUT,
@@ -380,7 +380,7 @@ impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
 /// function because the medium-level API is designed to still be close to the raw REAPER API.  
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
-pub enum TrackSendInfoKey {
+pub enum TrackSendInfoKey<'a> {
     B_MONO,
     B_MUTE,
     B_PHASE,
@@ -394,15 +394,15 @@ pub enum TrackSendInfoKey {
     I_SRCCHAN,
     P_DESTTRACK,
     P_SRCTRACK,
-    P_ENV(EnvChunkName),
-    P_EXT(&'static CStr),
+    P_ENV(EnvChunkName<'a>),
+    P_EXT(Cow<'a, CStr>),
     /// If a variant is missing in this enum, you can use this custom one as a last resort.
-    Custom(&'static CStr),
+    Custom(Cow<'a, CStr>),
 }
 
 // TODO Maybe make this explicit and private because it exposes low-level logic.
-impl From<TrackSendInfoKey> for Cow<'static, CStr> {
-    fn from(value: TrackSendInfoKey) -> Self {
+impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
+    fn from(value: TrackSendInfoKey<'a>) -> Self {
         use TrackSendInfoKey::*;
         match value {
             B_MONO => c_str!("B_MONO").into(),
@@ -423,7 +423,7 @@ impl From<TrackSendInfoKey> for Cow<'static, CStr> {
                 concat_c_strs(c_str!("P_ENV:<"), cow.as_ref()).into()
             }
             P_EXT(extension_specific_key) => {
-                concat_c_strs(c_str!("P_EXT:"), extension_specific_key).into()
+                concat_c_strs(c_str!("P_EXT:"), extension_specific_key.as_ref()).into()
             }
             Custom(key) => key.into(),
         }
@@ -436,24 +436,24 @@ impl From<TrackSendInfoKey> for Cow<'static, CStr> {
 /// function because the medium-level API is designed to still be close to the raw REAPER API.  
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
-pub enum EnvChunkName {
+pub enum EnvChunkName<'a> {
     VOLENV,
     PANENV,
     // TODO Figure out all common env chunk names
     // TODO Check if there are any *common* envelopes which don't have an own chunk. In this case
     //  we should provide a similar enum for get_track_envelope_by_name() envname as well.
     /// Use this for all non-common envelope names.
-    Custom(&'static CStr),
+    Custom(Cow<'a, CStr>),
 }
 
 // TODO Maybe make this explicit and private because it exposes low-level logic.
-impl From<EnvChunkName> for Cow<'static, CStr> {
-    fn from(value: EnvChunkName) -> Self {
+impl<'a> From<EnvChunkName<'a>> for Cow<'a, CStr> {
+    fn from(value: EnvChunkName<'a>) -> Self {
         use EnvChunkName::*;
         match value {
             VOLENV => c_str!("VOLENV").into(),
             PANENV => c_str!("PANENV").into(),
-            Custom(name) => name.into(),
+            Custom(name) => name,
         }
     }
 }
@@ -475,7 +475,7 @@ mod tests {
             c_str!("P_ENV:<VOLENV")
         );
         assert_eq!(
-            Cow::from(P_ENV(EnvChunkName::Custom(c_str!("MYENV")))).as_ref(),
+            Cow::from(P_ENV(EnvChunkName::Custom(c_str!("MYENV").into()))).as_ref(),
             c_str!("P_ENV:<MYENV")
         );
         assert_eq!(
