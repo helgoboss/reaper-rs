@@ -19,8 +19,8 @@ use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
 use reaper_rs::medium_level::{
     AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
-    MessageBoxType, MidiRecordingInput, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
-    TrackInfoKey, TrackRef,
+    MessageBoxType, MidiDeviceId, MidiRecordingInput, ReaperVersion, RecordingInput,
+    StuffMidiMessageTarget, TrackInfoKey, TrackRef,
 };
 use std::rc::Rc;
 
@@ -1260,7 +1260,9 @@ fn set_track_recording_input_midi_7_all() -> TestStep {
         // Given
         let track = get_track(0)?;
         // When
-        track.set_recording_input(MidiRecordingInput::from_all_channels_of_device(7));
+        track.set_recording_input(MidiRecordingInput::from_all_channels_of_device(
+            MidiDeviceId::new(7),
+        ));
         // Then
         let input = track.get_recording_input();
         let input_data = match input {
@@ -1268,7 +1270,7 @@ fn set_track_recording_input_midi_7_all() -> TestStep {
             _ => return Err("Expected MIDI input".into()),
         };
         check!(input_data.get_channel().is_none());
-        check_eq!(input_data.get_device_id(), Some(7));
+        check_eq!(input_data.get_device_id(), Some(MidiDeviceId::new(7)));
         Ok(())
     })
 }
@@ -1278,7 +1280,10 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
         // Given
         let track = get_track(0)?;
         // When
-        track.set_recording_input(MidiRecordingInput::from_device_and_channel(4, 5));
+        track.set_recording_input(MidiRecordingInput::from_device_and_channel(
+            MidiDeviceId::new(4),
+            5,
+        ));
         // Then
         let input = track.get_recording_input();
         let input_data = match input {
@@ -1286,7 +1291,10 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
             _ => return Err("Expected MIDI input".into()),
         };
         check_eq!(input_data.get_channel(), Some(channel(5)));
-        check_eq!(input_data.get_device_id().ok_or("Expected device")?, 4);
+        check_eq!(
+            input_data.get_device_id().ok_or("Expected device")?,
+            MidiDeviceId::new(4)
+        );
         Ok(())
     })
 }

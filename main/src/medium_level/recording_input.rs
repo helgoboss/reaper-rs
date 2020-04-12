@@ -1,6 +1,30 @@
 use helgoboss_midi::Channel;
 use std::convert::TryInto;
 
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
+pub struct MidiDeviceId(pub(super) u8);
+
+// TODO Consider creating all newtypes with macros for more consistency and less code:
+//  - https://gitlab.com/williamyaoh/shrinkwraprs
+//  - https://github.com/JelteF/derive_more
+//  - https://github.com/DanielKeep/rust-custom-derive
+impl MidiDeviceId {
+    /// Creates the MIDI device ID. Panics if the given number is not a valid ID.
+    pub fn new(number: u8) -> MidiDeviceId {
+        assert!(
+            number != 63,
+            "ID 63 is not a valid device ID because it represents all devices"
+        );
+        MidiDeviceId(number)
+    }
+}
+
+impl From<MidiDeviceId> for u8 {
+    fn from(id: MidiDeviceId) -> Self {
+        id.0
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum RecordingInput {
     None,
@@ -11,6 +35,7 @@ pub enum RecordingInput {
     Mono,
     ReaRoute,
     Stereo,
+    // TODO Don't make MidiRecordingInput an own type
     Midi(MidiRecordingInput),
 }
 
@@ -42,16 +67,16 @@ impl MidiRecordingInput {
         Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32)
     }
 
-    pub fn from_all_channels_of_device(device_id: u32) -> Self {
-        Self::from_midi_rec_input_index(device_id * 32)
+    pub fn from_all_channels_of_device(device_id: MidiDeviceId) -> Self {
+        Self::from_midi_rec_input_index(u8::from(device_id) as u32 * 32)
     }
 
     pub fn from_all_devices_with_channel(channel: u32) -> Self {
         Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32 + channel + 1)
     }
 
-    pub fn from_device_and_channel(device_id: u32, channel: u32) -> Self {
-        Self::from_midi_rec_input_index(device_id * 32 + channel + 1)
+    pub fn from_device_and_channel(device_id: MidiDeviceId, channel: u32) -> Self {
+        Self::from_midi_rec_input_index(u8::from(device_id) as u32 * 32 + channel + 1)
     }
 
     pub fn from_midi_rec_input_index(midi_rec_input_index: u32) -> Self {
@@ -79,13 +104,11 @@ impl MidiRecordingInput {
         ch.try_into().ok()
     }
 
-    // TODO Should we introduce a newtype!? I think makes only sense if we also introduce one for
-    //  Channel. I guess we will pull down helgoboss-midi dependency to medium-level API anyway.
-    pub fn get_device_id(&self) -> Option<u32> {
+    pub fn get_device_id(&self) -> Option<MidiDeviceId> {
         let raw_device_id = self.get_midi_rec_input_index() / 32;
         if raw_device_id == ALL_MIDI_DEVICES_ID {
             return None;
         }
-        Some(raw_device_id)
+        Some(MidiDeviceId::new(raw_device_id as u8))
     }
 }
