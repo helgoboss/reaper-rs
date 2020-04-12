@@ -40,6 +40,7 @@ use crate::medium_level::{
     MessageBoxKind, MessageBoxResult, ProjectRef, ReaperStringArg, ReaperVersion,
     StuffMidiMessageTarget, TrackRef,
 };
+use helgoboss_midi::MidiMessage;
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -410,7 +411,7 @@ impl Reaper {
             match result {
                 TrackFx {
                     track_ref,
-                    fx_query_index,
+                    fx_ref,
                     param_index,
                 } => {
                     // Track exists in this project
@@ -427,7 +428,7 @@ impl Reaper {
                     };
                     // TODO We should rethink the query index methods now that we have an FxRef
                     //  enum in medium-level API
-                    let fx = match track.get_fx_by_query_index(fx_query_index.into()) {
+                    let fx = match track.get_fx_by_query_index(fx_ref.into()) {
                         None => return None,
                         Some(fx) => fx,
                     };
@@ -665,15 +666,12 @@ impl Reaper {
             use GetFocusedFxResult::*;
             match res {
                 ItemFx { .. } => None, // TODO-low implement
-                TrackFx {
-                    track_ref,
-                    fx_query_index,
-                } => {
+                TrackFx { track_ref, fx_ref } => {
                     // We don't know the project so we must check each project
                     self.get_projects()
                         .filter_map(|p| {
                             let track = p.get_track_by_ref(track_ref)?;
-                            let fx = track.get_fx_by_query_index(fx_query_index.into())?;
+                            let fx = track.get_fx_by_query_index(fx_ref.into())?;
                             if fx.window_has_focus() {
                                 Some(fx)
                             } else {
@@ -795,9 +793,8 @@ impl Reaper {
         }
     }
 
-    pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: (u8, u8, u8)) {
-        self.medium
-            .stuff_midimessage(target, message.0, message.1, message.2);
+    pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl MidiMessage) {
+        self.medium.stuff_midimessage(target, message);
     }
 
     pub fn current_thread_is_main_thread(&self) -> bool {

@@ -9,5 +9,5 @@ edition = "2018"
 reaper-rs = { path = "../main", features = ["high-level"] }
 c_str_macro = "1.0.2"
 rxrust = { path = '../lib/rxRust'}
-wmidi = "3.1.0"
 slog = "2.5.2"
+helgoboss-midi = { path = '../../helgoboss-midi-rs' }

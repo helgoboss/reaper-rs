@@ -8,7 +8,7 @@ use crate::high_level::fx_parameter::FxParameter;
 use crate::high_level::guid::Guid;
 use crate::high_level::{ChunkRegion, Reaper, Track};
 use crate::low_level::raw::{GetActiveWindow, HWND};
-use crate::medium_level::{FxQueryIndex, FxShowFlag};
+use crate::medium_level::{FxShowFlag, TrackFxRef};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
@@ -138,7 +138,7 @@ impl Fx {
         self.track.clone()
     }
 
-    pub fn get_query_index(&self) -> FxQueryIndex {
+    pub fn get_query_index(&self) -> TrackFxRef {
         get_fx_query_index(self.get_index(), self.is_input_fx)
     }
 
@@ -356,8 +356,8 @@ pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
     }
 }
 
-pub fn get_fx_query_index(index: u32, is_input_fx: bool) -> FxQueryIndex {
-    use FxQueryIndex::*;
+pub fn get_fx_query_index(index: u32, is_input_fx: bool) -> TrackFxRef {
+    use TrackFxRef::*;
     if is_input_fx {
         InputFx(index)
     } else {

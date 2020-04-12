@@ -6,8 +6,6 @@ use std::ptr::null_mut;
 
 use c_str_macro::c_str;
 
-use wmidi;
-
 use reaper_rs::high_level::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
     FxParameterValueRange, Guid, MidiInputDevice, Pan, Reaper, Tempo, Track, Volume,
@@ -17,6 +15,8 @@ use rxrust::prelude::*;
 use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
+use helgoboss_midi::test_util::{channel, key_number, u7};
+use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
 use reaper_rs::medium_level::{
     AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxKind,
     MessageBoxResult, MidiRecordingInput, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
@@ -262,13 +262,7 @@ fn use_undoable() -> TestStep {
 fn stuff_midi_devices() -> TestStep {
     step("Stuff MIDI messages", |reaper, step| {
         // Given
-        let msg = wmidi::MidiMessage::NoteOn(
-            wmidi::Channel::Ch1,
-            wmidi::Note::A4,
-            wmidi::U7::try_from(100).unwrap(),
-        );
-        let mut bytes = vec![0u8; msg.bytes_size()];
-        msg.copy_to_slice(bytes.as_mut_slice()).unwrap();
+        let msg = RawMidiMessage::note_on(channel(0), key_number(64), u7(100));
         // When
         reaper
             .midi_message_received()
@@ -281,10 +275,7 @@ fn stuff_midi_devices() -> TestStep {
                 //  asynchronously that stuffed MIDI messages arrived via
                 // midi_message_received().
             });
-        reaper.stuff_midi_message(
-            StuffMidiMessageTarget::VirtualMidiKeyboard,
-            (bytes[0], bytes[1], bytes[2]),
-        );
+        reaper.stuff_midi_message(StuffMidiMessageTarget::VirtualMidiKeyboard, msg);
         // Then
         Ok(())
     })
@@ -1258,7 +1249,7 @@ fn set_track_recording_input_midi_all_15() -> TestStep {
             RecordingInput::Midi(d) => d,
             _ => return Err("Expected MIDI input".into()),
         };
-        check_eq!(input_data.get_channel(), Some(15));
+        check_eq!(input_data.get_channel(), Some(channel(15)));
         check!(input_data.get_device_id().is_none());
         Ok(())
     })
@@ -1294,7 +1285,7 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
             RecordingInput::Midi(d) => d,
             _ => return Err("Expected MIDI input".into()),
         };
-        check_eq!(input_data.get_channel(), Some(5));
+        check_eq!(input_data.get_channel(), Some(channel(5)));
         check_eq!(input_data.get_device_id().ok_or("Expected device")?, 4);
         Ok(())
     })

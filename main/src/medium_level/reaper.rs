@@ -12,14 +12,15 @@ use crate::low_level::raw::{
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
-    AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxQueryIndex,
-    FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode,
-    KbdActionValue, MessageBoxKind, MessageBoxResult, ProjectRef, ReaperPointerType,
-    ReaperStringArg, ReaperVersion, RecordingInput, RegInstr, SendOrReceive,
-    StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendInfoKey, UndoFlag,
+    AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxShowFlag,
+    GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode, KbdActionValue,
+    MessageBoxKind, MessageBoxResult, ProjectRef, ReaperPointerType, ReaperStringArg,
+    ReaperVersion, RecordingInput, RegInstr, SendOrReceive, StuffMidiMessageTarget, ToggleAction,
+    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendInfoKey, UndoFlag,
 };
 use enumflags2::BitFlags;
+use helgoboss_midi::MidiMessage;
 use std::convert::{TryFrom, TryInto};
 use std::mem::MaybeUninit;
 use std::path::{Path, PathBuf};
@@ -371,11 +372,15 @@ impl Reaper {
     ) -> i32 {
         use KbdActionValue::*;
         let (val, valhw, relmode) = match value {
-            AbsoluteLowRes(v) => (v as i32, -1, 0),
-            AbsoluteHighRes(v) => (((v >> 7) & 0x7f) as i32, (v & 0x7f) as i32, 0),
-            Relative1(v) => (v as i32, -1, 1),
-            Relative2(v) => (v as i32, -1, 2),
-            Relative3(v) => (v as i32, -1, 3),
+            AbsoluteLowRes(v) => (i32::from(v), -1, 0),
+            AbsoluteHighRes(v) => (
+                ((u32::from(v) >> 7) & 0x7f) as i32,
+                (u32::from(v) & 0x7f) as i32,
+                0,
+            ),
+            Relative1(v) => (i32::from(v), -1, 1),
+            Relative2(v) => (i32::from(v), -1, 2),
+            Relative3(v) => (i32::from(v), -1, 3),
         };
         require!(self.low, KBD_OnMainActionEx)(cmd as i32, val, valhw, relmode, hwnd, proj)
     }
@@ -518,7 +523,7 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn track_fx_get_enabled(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> bool {
+    pub fn track_fx_get_enabled(&self, track: *mut MediaTrack, fx: TrackFxRef) -> bool {
         require!(self.low, TrackFX_GetEnabled)(track, fx.into())
     }
 
@@ -527,7 +532,7 @@ impl Reaper {
     pub fn track_fx_get_fx_name(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         buf_sz: u32,
     ) -> Result<CString, ()> {
         assert!(buf_sz > 0);
@@ -550,12 +555,12 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: FxQueryIndex, enabled: bool) {
+    pub fn track_fx_set_enabled(&self, track: *mut MediaTrack, fx: TrackFxRef, enabled: bool) {
         require!(self.low, TrackFX_SetEnabled)(track, fx.into(), enabled);
     }
 
     // TODO Doc
-    pub fn track_fx_get_num_params(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> u32 {
+    pub fn track_fx_get_num_params(&self, track: *mut MediaTrack, fx: TrackFxRef) -> u32 {
         require!(self.low, TrackFX_GetNumParams)(track, fx.into()) as u32
     }
 
@@ -569,7 +574,7 @@ impl Reaper {
     pub fn track_fx_get_param_name(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         param: u32,
         buf_sz: u32,
     ) -> Result<CString, ()> {
@@ -594,7 +599,7 @@ impl Reaper {
     pub fn track_fx_get_formatted_param_value(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         param: u32,
         buf_sz: u32,
     ) -> Result<CString, ()> {
@@ -620,7 +625,7 @@ impl Reaper {
     pub fn track_fx_format_param_value_normalized(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         param: u32,
         value: f64,
         buf_sz: u32,
@@ -647,7 +652,7 @@ impl Reaper {
     pub fn track_fx_set_param_normalized(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         param: u32,
         value: f64,
     ) -> Result<(), ()> {
@@ -676,7 +681,7 @@ impl Reaper {
             0 => None,
             1 => Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_query_index: fxnumber.into(),
+                fx_ref: fxnumber.into(),
             }),
             2 => {
                 // TODO-low Add test
@@ -716,7 +721,7 @@ impl Reaper {
         if tracknumber_high_word == 0 {
             Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_query_index: fxnumber.into(),
+                fx_ref: fxnumber.into(),
                 // Although the parameter is called paramnumber, it's zero-based (checked)
                 param_index: paramnumber,
             })
@@ -738,9 +743,9 @@ impl Reaper {
     pub fn track_fx_copy_to_track(
         &self,
         src_track: *mut MediaTrack,
-        src_fx: FxQueryIndex,
+        src_fx: TrackFxRef,
         dest_track: *mut MediaTrack,
-        dest_fx: FxQueryIndex,
+        dest_fx: TrackFxRef,
         is_move: bool,
     ) {
         require!(self.low, TrackFX_CopyToTrack)(
@@ -754,7 +759,7 @@ impl Reaper {
 
     // TODO Doc
     // Returns Err if FX doesn't exist (maybe also in other cases?)
-    pub fn track_fx_delete(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> Result<(), ()> {
+    pub fn track_fx_delete(&self, track: *mut MediaTrack, fx: TrackFxRef) -> Result<(), ()> {
         let succesful = require!(self.low, TrackFX_Delete)(track, fx.into());
         if !succesful {
             return Err(());
@@ -770,7 +775,7 @@ impl Reaper {
     pub fn track_fx_get_parameter_step_sizes(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         param: u32,
     ) -> Option<GetParameterStepSizesResult> {
         let mut step = MaybeUninit::uninit();
@@ -801,7 +806,7 @@ impl Reaper {
     pub fn track_fx_get_param_ex(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         param: u32,
     ) -> GetParamExResult {
         let mut min_val = MaybeUninit::uninit();
@@ -936,7 +941,7 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> Option<GUID> {
+    pub fn track_fx_get_fx_guid(&self, track: *mut MediaTrack, fx: TrackFxRef) -> Option<GUID> {
         let ptr = require!(self.low, TrackFX_GetFXGUID)(track, fx.into());
         unsafe { copy_ptr_target(ptr) }
     }
@@ -945,7 +950,7 @@ impl Reaper {
     pub fn track_fx_get_param_normalized(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         param: u32,
     ) -> f64 {
         require!(self.low, TrackFX_GetParamNormalized)(track, fx.into(), param as i32)
@@ -1038,8 +1043,13 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn stuff_midimessage(&self, mode: StuffMidiMessageTarget, msg1: u8, msg2: u8, msg3: u8) {
-        require!(self.low, StuffMIDIMessage)(mode.into(), msg1 as i32, msg2 as i32, msg3 as i32);
+    pub fn stuff_midimessage(&self, mode: StuffMidiMessageTarget, msg: impl MidiMessage) {
+        require!(self.low, StuffMIDIMessage)(
+            mode.into(),
+            msg.get_status_byte().into(),
+            msg.get_data_byte_1().into(),
+            msg.get_data_byte_2().into(),
+        );
     }
 
     // TODO Doc
@@ -1245,26 +1255,17 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn track_fx_show(
-        &self,
-        track: *mut MediaTrack,
-        index: FxQueryIndex,
-        show_flag: FxShowFlag,
-    ) {
+    pub fn track_fx_show(&self, track: *mut MediaTrack, index: TrackFxRef, show_flag: FxShowFlag) {
         require!(self.low, TrackFX_Show)(track, index.into(), show_flag.into());
     }
 
     // TODO Doc
-    pub fn track_fx_get_floating_window(
-        &self,
-        track: *mut MediaTrack,
-        index: FxQueryIndex,
-    ) -> HWND {
+    pub fn track_fx_get_floating_window(&self, track: *mut MediaTrack, index: TrackFxRef) -> HWND {
         require!(self.low, TrackFX_GetFloatingWindow)(track, index.into())
     }
 
     // TODO Doc
-    pub fn track_fx_get_open(&self, track: *mut MediaTrack, fx: FxQueryIndex) -> bool {
+    pub fn track_fx_get_open(&self, track: *mut MediaTrack, fx: TrackFxRef) -> bool {
         require!(self.low, TrackFX_GetOpen)(track, fx.into())
     }
 
@@ -1361,7 +1362,7 @@ impl Reaper {
     pub fn track_fx_get_preset_index(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
     ) -> Result<(u32, u32), ()> {
         let mut num_presets = MaybeUninit::uninit();
         let index =
@@ -1377,7 +1378,7 @@ impl Reaper {
     pub fn track_fx_set_preset_by_index(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         idx: i32,
     ) -> Result<(), ()> {
         let successful = require!(self.low, TrackFX_SetPresetByIndex)(track, fx.into(), idx);
@@ -1392,7 +1393,7 @@ impl Reaper {
     pub fn track_fx_navigate_presets(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         presetmove: i32,
     ) -> Result<(), ()> {
         let successful = require!(self.low, TrackFX_NavigatePresets)(track, fx.into(), presetmove);
@@ -1406,7 +1407,7 @@ impl Reaper {
     pub fn track_fx_get_preset(
         &self,
         track: *mut MediaTrack,
-        fx: FxQueryIndex,
+        fx: TrackFxRef,
         presetname_sz: u32,
     ) -> (bool, Cow<'static, CStr>) {
         if presetname_sz == 0 {
@@ -1444,7 +1445,7 @@ pub struct GetParamExResult {
 pub enum GetLastTouchedFxResult {
     TrackFx {
         track_ref: TrackRef,
-        fx_query_index: FxQueryIndex,
+        fx_ref: TrackFxRef,
         param_index: u32,
     },
     ItemFx {
@@ -1461,7 +1462,7 @@ pub enum GetLastTouchedFxResult {
 pub enum GetFocusedFxResult {
     TrackFx {
         track_ref: TrackRef,
-        fx_query_index: FxQueryIndex,
+        fx_ref: TrackFxRef,
     },
     ItemFx {
         track_index: u32,
@@ -1469,57 +1470,6 @@ pub enum GetFocusedFxResult {
         take_index: u32,
         fx_index: u32,
     },
-}
-
-// TODO-low Should not be constructable by users but only by reaper-rs crate
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct ReaperStringPtr(pub *const c_char);
-
-impl ReaperStringPtr {
-    // Unsafe *only* because lifetime of returned string reference is unbounded.
-    // If we got this string from REAPER, then we can assume that all the other possible unsafety
-    // reasons of CStr::from_ptr don't apply.
-    pub unsafe fn into_c_str<'a>(self) -> Option<&'a CStr> {
-        if self.0.is_null() {
-            return None;
-        }
-        Some(CStr::from_ptr(self.0))
-    }
-
-    // TODO Unfortunately in general this is unsafe as well :( Because we don't know when this will
-    //  be called. We must find some mechanism which *forces* us to do something with the pointer
-    //  immediately in order to do something safe with it. This forcing could be represented as a
-    //  type which we cannot be kept around and also not copied/cloned.
-    // TODO In the high-level API we could make this safe by using dynamic lifetime checking in the
-    //  background via ValidatePtr methods.
-    // Not unsafe because returns owned string. No lifetime questions anymore.
-    pub fn into_c_string(self) -> Option<CString> {
-        unsafe { self.into_c_str().map(|c_str| c_str.to_owned()) }
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct ReaperVoidPtr(pub *mut c_void);
-
-impl ReaperVoidPtr {
-    // Unsafe because lifetime of returned string reference is unbounded and because it's not sure
-    // if the given pointer points to a C string.
-    pub unsafe fn into_c_str<'a>(self) -> Option<&'a CStr> {
-        if self.0.is_null() {
-            return None;
-        }
-        let ptr = self.0 as *const c_char;
-        Some(CStr::from_ptr(ptr))
-    }
-
-    // Unsafe because it's not sure if the given pointer points to a value of type T.
-    pub unsafe fn to<T: Copy>(&self) -> Option<T> {
-        if self.0.is_null() {
-            return None;
-        }
-        let ptr = self.0 as *mut T;
-        Some(*ptr)
-    }
 }
 
 fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {

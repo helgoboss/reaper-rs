@@ -5,6 +5,7 @@ use crate::low_level::raw::{
 use crate::medium_level::ReaperStringArg;
 use c_str_macro::c_str;
 use enumflags2::BitFlags;
+use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
@@ -76,18 +77,16 @@ pub enum UndoFlag {
     TrackCfg = UNDO_STATE_TRACKCFG,
 }
 
-// TODO Maybe call it TrackFxRef (in line with TrackRef and ProjectRef)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum FxQueryIndex {
+pub enum TrackFxRef {
     InputFx(u32),
     OutputFx(u32),
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 // Converts directly to the i32 value that is expected by low-level track-FX related functions
-impl From<FxQueryIndex> for i32 {
-    fn from(v: FxQueryIndex) -> Self {
-        use FxQueryIndex::*;
+impl From<TrackFxRef> for i32 {
+    fn from(v: TrackFxRef) -> Self {
+        use TrackFxRef::*;
         let positive = match v {
             InputFx(idx) => 0x1000000 + idx,
             OutputFx(idx) => idx,
@@ -96,11 +95,10 @@ impl From<FxQueryIndex> for i32 {
     }
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 // Converts from a value returned by low-level track-FX related functions turned into u32.
-impl From<u32> for FxQueryIndex {
+impl From<u32> for TrackFxRef {
     fn from(v: u32) -> Self {
-        use FxQueryIndex::*;
+        use TrackFxRef::*;
         if v >= 0x1000000 {
             InputFx(v - 0x1000000)
         } else {
@@ -118,11 +116,11 @@ pub enum TrackFxAddByNameVariant {
 }
 
 pub enum KbdActionValue {
-    AbsoluteLowRes(u8),   // TODO Maybe use U7 type
-    AbsoluteHighRes(u16), // TODO Maybe use U14 type
-    Relative1(u8),
-    Relative2(u8),
-    Relative3(u8),
+    AbsoluteLowRes(U7),
+    AbsoluteHighRes(U14),
+    Relative1(U7),
+    Relative2(U7),
+    Relative3(U7),
 }
 
 pub enum RegInstr<'a> {
@@ -130,7 +128,6 @@ pub enum RegInstr<'a> {
     Unregister(ExtensionType<'a>),
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl<'a> From<RegInstr<'a>> for Cow<'a, CStr> {
     fn from(value: RegInstr<'a>) -> Self {
         use RegInstr::*;
@@ -157,7 +154,6 @@ pub enum ExtensionType<'a> {
     Custom(Cow<'a, CStr>),
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl<'a> From<ExtensionType<'a>> for Cow<'a, CStr> {
     fn from(value: ExtensionType<'a>) -> Self {
         use ExtensionType::*;
@@ -218,7 +214,6 @@ pub enum ReaperPointerType<'a> {
     Custom(Cow<'a, CStr>),
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl<'a> From<ReaperPointerType<'a>> for Cow<'a, CStr> {
     fn from(value: ReaperPointerType<'a>) -> Self {
         use ReaperPointerType::*;
@@ -306,7 +301,6 @@ impl<'a> TrackInfoKey<'a> {
     }
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
     fn from(value: TrackInfoKey<'a>) -> Self {
         use TrackInfoKey::*;
@@ -400,7 +394,6 @@ pub enum TrackSendInfoKey<'a> {
     Custom(Cow<'a, CStr>),
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
     fn from(value: TrackSendInfoKey<'a>) -> Self {
         use TrackSendInfoKey::*;
@@ -446,7 +439,6 @@ pub enum EnvChunkName<'a> {
     Custom(Cow<'a, CStr>),
 }
 
-// TODO Maybe make this explicit and private because it exposes low-level logic.
 impl<'a> From<EnvChunkName<'a>> for Cow<'a, CStr> {
     fn from(value: EnvChunkName<'a>) -> Self {
         use EnvChunkName::*;

@@ -1,3 +1,6 @@
+use helgoboss_midi::Channel;
+use std::convert::TryInto;
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum RecordingInput {
     None,
@@ -67,13 +70,13 @@ impl MidiRecordingInput {
     //  about exposing members only. Channel is not a member. However I also don't want to
     //  expose the information if it's a member or not. get_ has an advantage in IDEs and also
     //  prevents ambiguities if the noun can sound like a verb.
-    pub fn get_channel(&self) -> Option<u32> {
+    pub fn get_channel(&self) -> Option<Channel> {
         let channel_id = self.get_midi_rec_input_index() % 32;
         if channel_id == 0 {
-            None
-        } else {
-            Some(channel_id as u32 - 1)
+            return None;
         }
+        let ch = channel_id - 1;
+        ch.try_into().ok()
     }
 
     // TODO Should we introduce a newtype!? I think makes only sense if we also introduce one for

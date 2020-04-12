@@ -1,9 +1,11 @@
 use crate::high_level::{ActionCharacter, Project, Reaper, Section};
-use crate::medium_level::{KbdActionValue, ReaperStringPtr};
+use crate::medium_level::KbdActionValue;
 use c_str_macro::c_str;
 
+use helgoboss_midi::U7;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
+use std::convert::TryInto;
 use std::ffi::{CStr, CString};
 use std::ptr::null_mut;
 
@@ -131,7 +133,7 @@ impl Action {
 
     // TODO-low Don't copy into string. Split into command-based action and command-id based action
     //  and then return Option<&CStr> for the first (with same lifetime like self) and
-    //  ReaperStringPtr for the second
+    //  ReaperStringPtr alternative for the second
     pub fn get_command_name(&self) -> Option<CString> {
         self.command_name
             .as_ref()
@@ -168,7 +170,8 @@ impl Action {
         let reaper = Reaper::get();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
-            let cropped_relative_value = relative_value.clamp(0, 127) as u8;
+            let cropped_relative_value =
+                unsafe { U7::new_unchecked(relative_value.clamp(0, 127) as u8) };
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
             reaper.medium.kbd_on_main_action_ex(
@@ -180,9 +183,11 @@ impl Action {
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
+            let discrete_value =
+                unsafe { U7::new_unchecked((normalized_value * 127 as f64).round() as u8) };
             reaper.medium.kbd_on_main_action_ex(
                 action_command_id,
-                KbdActionValue::AbsoluteLowRes((normalized_value * 127 as f64).round() as u8),
+                KbdActionValue::AbsoluteLowRes(discrete_value),
                 reaper.medium.get_main_hwnd(),
                 project.map(|p| p.get_raw()).unwrap_or(null_mut()),
             );

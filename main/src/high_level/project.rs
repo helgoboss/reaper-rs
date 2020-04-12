@@ -6,7 +6,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::raw::ReaProject;
 
-use crate::medium_level::{ProjectRef, ReaperPointerType, ReaperStringPtr, TrackRef};
+use crate::medium_level::{ProjectRef, ReaperPointerType, TrackRef};
 use std::path::PathBuf;
 use std::str::FromStr;
 

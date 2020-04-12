@@ -14,9 +14,9 @@ build = "build.rs"
 # By default, only the low-level API is enabled
 default = []
 # Enables the medium-level API (which depends on the low-level API)
-medium-level = ["num_enum", "enumflags2"]
+medium-level = ["num_enum", "enumflags2", "helgoboss-midi"]
 # Enables the high-level API (which depends on the medium-level and low-level APIs)
-high-level = ["medium-level", "once_cell", "rxrust", "helgoboss-midi", "regex", "slog", "slog-stdlog", "slog-term"]
+high-level = ["medium-level", "once_cell", "rxrust", "regex", "slog", "slog-stdlog", "slog-term"]
 # Regenerates `bindings.rs` from C++ header files and right after that low-level `reaper.rs` from `bindings.rs`
 generate-low-level-reaper = ["bindgen", "quote", "syn"]
 
