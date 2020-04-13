@@ -81,11 +81,13 @@ impl Track {
 
     pub fn set_name(&self, name: &CStr) {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::get().medium.get_set_media_track_info(
-            self.get_raw(),
-            P_NAME,
-            name.as_ptr() as *mut c_void,
-        );
+        unsafe {
+            Reaper::get().medium.get_set_media_track_info(
+                self.get_raw(),
+                P_NAME,
+                name.as_ptr() as *mut c_void,
+            );
+        }
     }
 
     // TODO-low Maybe return borrowed string instead!

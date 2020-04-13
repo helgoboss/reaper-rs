@@ -103,6 +103,9 @@ impl Reaper {
         unsafe { self.low.GetTrack(proj, trackidx as i32) }
     }
 
+    // TODO If we take pointers in medium-level methods, even they should be marked unsafe. Because
+    //  we can do anything with pointers, e.g. pretend we are passing MediaTrack when we actually
+    //  pass a ReaProject. Maybe we should introduce newtypes.
     /// Returns `true` if the given pointer is a valid object of the right type in project `proj`
     /// (`proj` is ignored if pointer is itself a project).
     pub fn validate_ptr_2(
@@ -127,20 +130,18 @@ impl Reaper {
     /// this function is not fun and requires you to use unsafe code. Consider using one of
     /// type-safe convenience functions instead. They start with `get_media_track_info_` or
     /// `set_media_track_info_`.
-    pub fn get_set_media_track_info(
+    pub unsafe fn get_set_media_track_info(
         &self,
         tr: *mut MediaTrack,
         parmname: TrackInfoKey,
         set_new_value: *mut c_void,
     ) -> *mut c_void {
-        unsafe {
-            self.low
-                .GetSetMediaTrackInfo(tr, Cow::from(parmname).as_ptr(), set_new_value)
-        }
+        self.low
+            .GetSetMediaTrackInfo(tr, Cow::from(parmname).as_ptr(), set_new_value)
     }
 
     fn get_media_track_info(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> *mut c_void {
-        self.get_set_media_track_info(tr, parmname, null_mut())
+        unsafe { self.get_set_media_track_info(tr, parmname, null_mut()) }
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
@@ -195,68 +196,77 @@ impl Reaper {
     }
 
     // TODO Doc
-    // TODO Maybe mark unsafe, also the other c_void functions like GetSetTrack...
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
-    pub fn plugin_register(&self, name: RegInstr, infostruct: *mut c_void) -> i32 {
-        unsafe {
-            self.low
-                .plugin_register(Cow::from(name).as_ptr(), infostruct)
-        }
+    pub unsafe fn plugin_register(&self, name: RegInstr, infostruct: *mut c_void) -> i32 {
+        self.low
+            .plugin_register(Cow::from(name).as_ptr(), infostruct)
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_register_hookcommand(&self, hookcommand: HookCommand) -> i32 {
-        self.plugin_register(
-            RegInstr::Register(ExtensionType::HookCommand),
-            hookcommand as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Register(ExtensionType::HookCommand),
+                hookcommand as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_unregister_hookcommand(&self, hookcommand: HookCommand) -> i32 {
-        self.plugin_register(
-            RegInstr::Unregister(ExtensionType::HookCommand),
-            hookcommand as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Unregister(ExtensionType::HookCommand),
+                hookcommand as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_register_toggleaction(&self, toggleaction: ToggleAction) -> i32 {
-        self.plugin_register(
-            RegInstr::Register(ExtensionType::ToggleAction),
-            toggleaction as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Register(ExtensionType::ToggleAction),
+                toggleaction as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_unregister_toggleaction(&self, toggleaction: ToggleAction) -> i32 {
-        self.plugin_register(
-            RegInstr::Unregister(ExtensionType::ToggleAction),
-            toggleaction as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Unregister(ExtensionType::ToggleAction),
+                toggleaction as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_register_hookpostcommand(&self, hookpostcommand: HookPostCommand) -> i32 {
-        self.plugin_register(
-            RegInstr::Register(ExtensionType::HookPostCommand),
-            hookpostcommand as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Register(ExtensionType::HookPostCommand),
+                hookpostcommand as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_unregister_hookpostcommand(&self, hookpostcommand: HookPostCommand) -> i32 {
-        self.plugin_register(
-            RegInstr::Unregister(ExtensionType::HookPostCommand),
-            hookpostcommand as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Unregister(ExtensionType::HookPostCommand),
+                hookpostcommand as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values (Can it return negative value if not successful?)
@@ -266,46 +276,56 @@ impl Reaper {
         &self,
         command_id: impl Into<ReaperStringArg<'a>>,
     ) -> i32 {
-        self.plugin_register(
-            RegInstr::Register(ExtensionType::CommandId),
-            command_id.into().as_ptr() as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Register(ExtensionType::CommandId),
+                command_id.into().as_ptr() as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> i32 {
-        self.plugin_register(
-            RegInstr::Register(ExtensionType::GAccel),
-            gaccel as *mut _ as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Register(ExtensionType::GAccel),
+                gaccel as *mut _ as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_unregister_gaccel(&self, gaccel: &mut gaccel_register_t) -> i32 {
-        self.plugin_register(
-            RegInstr::Unregister(ExtensionType::GAccel),
-            gaccel as *mut _ as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Unregister(ExtensionType::GAccel),
+                gaccel as *mut _ as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_register_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) -> i32 {
-        self.plugin_register(
-            RegInstr::Register(ExtensionType::CSurfInst),
-            csurf_inst as *mut _ as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Register(ExtensionType::CSurfInst),
+                csurf_inst as *mut _ as *mut c_void,
+            )
+        }
     }
 
     // TODO Check possible return values
     // TODO Doc
     pub fn plugin_unregister_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) -> i32 {
-        self.plugin_register(
-            RegInstr::Unregister(ExtensionType::CSurfInst),
-            csurf_inst as *mut _ as *mut c_void,
-        )
+        unsafe {
+            self.plugin_register(
+                RegInstr::Unregister(ExtensionType::CSurfInst),
+                csurf_inst as *mut _ as *mut c_void,
+            )
+        }
     }
 
     /// Performs an action belonging to the main action section. To perform non-native actions
@@ -1232,7 +1252,7 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn get_set_track_send_info(
+    pub unsafe fn get_set_track_send_info(
         &self,
         tr: *mut MediaTrack,
         category: TrackSendCategory,
@@ -1240,15 +1260,13 @@ impl Reaper {
         parmname: TrackSendInfoKey,
         set_new_value: *mut c_void,
     ) -> *mut c_void {
-        unsafe {
-            self.low.GetSetTrackSendInfo(
-                tr,
-                category.into(),
-                sendidx as i32,
-                Cow::from(parmname).as_ptr(),
-                set_new_value,
-            )
-        }
+        self.low.GetSetTrackSendInfo(
+            tr,
+            category.into(),
+            sendidx as i32,
+            Cow::from(parmname).as_ptr(),
+            set_new_value,
+        )
     }
 
     fn get_track_send_info(
@@ -1258,7 +1276,7 @@ impl Reaper {
         sendidx: u32,
         parmname: TrackSendInfoKey,
     ) -> *mut c_void {
-        self.get_set_track_send_info(tr, category, sendidx, parmname, null_mut())
+        unsafe { self.get_set_track_send_info(tr, category, sendidx, parmname, null_mut()) }
     }
 
     // TODO Doc

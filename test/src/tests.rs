@@ -598,7 +598,7 @@ fn query_action() -> TestStep {
         check_eq!(toggle_action.get_command_id(), 6);
         check!(toggle_action.get_command_name().is_none());
         check_eq!(
-            unsafe { toggle_action.get_name() },
+            toggle_action.get_name(),
             Some(c_str!("Track: Toggle mute for selected tracks").to_owned())
         );
         check!(toggle_action.get_index() > 0);
