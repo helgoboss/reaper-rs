@@ -23,16 +23,3 @@ pub mod high_level;
 pub mod medium_level;
 
 pub mod low_level;
-
-pub mod experiment;
-
-mod test {
-    use crate::experiment::Reaper;
-
-    fn test_reaper(reaper: Reaper) {
-        if reaper.pointers.PluginWantsAlwaysRunFx.is_none() {
-            panic!("Sorry");
-        }
-        unsafe { reaper.PluginWantsAlwaysRunFx(5) };
-    }
-}
