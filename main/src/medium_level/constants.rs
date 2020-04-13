@@ -1,7 +1,5 @@
 #![allow(non_camel_case_types)]
-use crate::low_level::raw::{
-    UNDO_STATE_FREEZE, UNDO_STATE_FX, UNDO_STATE_ITEMS, UNDO_STATE_MISCCFG, UNDO_STATE_TRACKCFG,
-};
+use crate::low_level::raw;
 use crate::medium_level::ReaperStringArg;
 use c_str_macro::c_str;
 use enumflags2::BitFlags;
@@ -186,11 +184,11 @@ impl From<&'static CStr> for ReaperVersion {
 #[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
 #[repr(u32)]
 pub enum UndoFlag {
-    Freeze = UNDO_STATE_FREEZE,
-    Fx = UNDO_STATE_FX,
-    Items = UNDO_STATE_ITEMS,
-    MiscCfg = UNDO_STATE_MISCCFG,
-    TrackCfg = UNDO_STATE_TRACKCFG,
+    Freeze = raw::UNDO_STATE_FREEZE,
+    Fx = raw::UNDO_STATE_FX,
+    Items = raw::UNDO_STATE_ITEMS,
+    MiscCfg = raw::UNDO_STATE_MISCCFG,
+    TrackCfg = raw::UNDO_STATE_TRACKCFG,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

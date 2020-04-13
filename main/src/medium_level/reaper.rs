@@ -1365,7 +1365,6 @@ impl Reaper {
 
     // TODO Doc
     // Seems to return true if was armed and false if not
-    // TODO Replace bool (result)
     pub fn csurf_on_rec_arm_change_ex(
         &self,
         trackid: *mut MediaTrack,
