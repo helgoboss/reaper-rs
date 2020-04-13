@@ -14,7 +14,6 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
-// TODO Derive Copy for each trivial enum
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WantMaster {
     No,
@@ -39,7 +38,7 @@ impl From<IsUndoOptional> for bool {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Relative {
     No,
     Yes,
@@ -51,7 +50,7 @@ impl From<Relative> for bool {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum IsAdd {
     No,
     Yes,
@@ -63,7 +62,7 @@ impl From<IsAdd> for bool {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WantUndo {
     No,
     Yes,
@@ -75,7 +74,7 @@ impl From<WantUndo> for bool {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum IsMove {
     No,
     Yes,
@@ -87,7 +86,7 @@ impl From<IsMove> for bool {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RecFx {
     No,
     Yes,
@@ -99,7 +98,7 @@ impl From<RecFx> for bool {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Presence {
     NotPresent,
     Present,
@@ -112,7 +111,7 @@ impl From<bool> for Presence {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WantDefaults {
     No,
     Yes,
@@ -125,7 +124,7 @@ impl From<WantDefaults> for bool {
 }
 
 // TODO Revise names of all enums and their variants
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AllowGang {
     No,
     Yes,
@@ -137,14 +136,14 @@ impl From<AllowGang> for bool {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum RecArmState {
     Unarmed = 0,
     Armed = 1,
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum FxShowFlag {
     HideChain = 0,
@@ -153,7 +152,7 @@ pub enum FxShowFlag {
     ShowFloatingWindow = 3,
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum TrackSendCategory {
     Receive = -1,
@@ -171,14 +170,14 @@ impl From<SendOrReceive> for TrackSendCategory {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum SendOrReceive {
     Receive = -1,
     Send = 0,
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum StuffMidiMessageTarget {
     VirtualMidiKeyboard = 0,
@@ -186,7 +185,7 @@ pub enum StuffMidiMessageTarget {
     VirtualMidiKeyboardOnCurrentChannel = 2,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ReaperVersion {
     version_str: &'static CStr,
 }
@@ -237,7 +236,7 @@ impl From<u32> for TrackFxRef {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum TrackFxAddByNameVariant {
     Add = -1,
@@ -245,6 +244,7 @@ pub enum TrackFxAddByNameVariant {
     AddIfNotFound = 1,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum KbdActionValue {
     AbsoluteLowRes(U7),
     AbsoluteHighRes(U14),
@@ -253,6 +253,7 @@ pub enum KbdActionValue {
     Relative3(U7),
 }
 
+#[derive(Clone, Debug)]
 pub enum RegInstr<'a> {
     Register(ExtensionType<'a>),
     Unregister(ExtensionType<'a>),
@@ -268,6 +269,7 @@ impl<'a> From<RegInstr<'a>> for Cow<'a, CStr> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum ExtensionType<'a> {
     Api(Cow<'a, CStr>),
     ApiDef(Cow<'a, CStr>),
@@ -317,13 +319,13 @@ impl<'a> From<ExtensionType<'a>> for Cow<'a, CStr> {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TrackRef {
     MasterTrack,
     TrackIndex(u32),
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
 #[repr(i32)]
 pub enum InputMonitoringMode {
     Off = 0,
@@ -332,6 +334,7 @@ pub enum InputMonitoringMode {
     NotWhenPlaying = 2,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ProjectRef {
     Current,
     CurrentlyRendering,
@@ -345,6 +348,7 @@ pub enum ProjectRef {
 /// close to the raw REAPER API.
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
+#[derive(Clone, Debug)]
 pub enum ReaperPointerType<'a> {
     MediaTrack,
     ReaProject,
@@ -382,6 +386,7 @@ impl<'a> From<ReaperPointerType<'a>> for Cow<'a, CStr> {
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
 /// The variants are named exactly like the strings which will be passed to the low-level REAPER
 /// function because the medium-level API is designed to still be close to the raw REAPER API.  
+#[derive(Clone, Debug)]
 pub enum TrackInfoKey<'a> {
     B_FREEMODE,
     B_HEIGHTLOCK,
@@ -523,6 +528,7 @@ impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
 /// function because the medium-level API is designed to still be close to the raw REAPER API.  
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
+#[derive(Clone, Debug)]
 pub enum TrackSendInfoKey<'a> {
     B_MONO,
     B_MUTE,
@@ -586,6 +592,7 @@ impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
 /// function because the medium-level API is designed to still be close to the raw REAPER API.  
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
+#[derive(Clone, Debug)]
 pub enum EnvChunkName<'a> {
     /// Volume (Pre-FX)
     VOLENV,
