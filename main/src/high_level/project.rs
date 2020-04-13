@@ -31,10 +31,10 @@ impl Project {
     }
 
     pub fn get_file_path(&self) -> Option<PathBuf> {
-        let (_, path_buf) = Reaper::get()
+        Reaper::get()
             .medium
-            .enum_projects(ProjectRef::TabIndex(self.get_index()), 5000);
-        path_buf
+            .enum_projects(ProjectRef::TabIndex(self.get_index()), 5000)
+            .file_path
     }
 
     pub fn get_index(&self) -> u32 {

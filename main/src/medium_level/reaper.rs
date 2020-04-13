@@ -13,9 +13,9 @@ use crate::medium_level::{
     AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
     ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
     InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, MessageBoxResult,
-    MessageBoxType, Presence, ProjectRef, ReaperPointerType, ReaperStringArg, ReaperVersion,
-    RecArmState, RecFx, RecordingInput, RegInstr, Relative, SendOrReceive, StuffMidiMessageTarget,
-    ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    MessageBoxType, ProjectRef, ReaperPointerType, ReaperStringArg, ReaperVersion, RecArmState,
+    RecFx, RecordingInput, RegInstr, Relative, SendOrReceive, StuffMidiMessageTarget, ToggleAction,
+    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
     TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
 };
 use enumflags2::BitFlags;
@@ -71,7 +71,7 @@ impl Reaper {
         &self,
         proj_ref: ProjectRef,
         projfn_out_optional_sz: u32,
-    ) -> (*mut ReaProject, Option<PathBuf>) {
+    ) -> EnumProjectsResult {
         use ProjectRef::*;
         let idx = match proj_ref {
             Current => -1,
@@ -80,19 +80,28 @@ impl Reaper {
         };
         if projfn_out_optional_sz == 0 {
             let project = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
-            (project, None)
+            EnumProjectsResult {
+                project,
+                file_path: None,
+            }
         } else {
             let (owned_c_string, project) =
                 with_string_buffer(projfn_out_optional_sz, |buffer, max_size| unsafe {
                     self.low.EnumProjects(idx, buffer, max_size)
                 });
             if owned_c_string.to_bytes().len() == 0 {
-                return (project, None);
+                return EnumProjectsResult {
+                    project,
+                    file_path: None,
+                };
             }
             let owned_string = owned_c_string
                 .into_string()
                 .expect("Path contains non-UTF8 characters");
-            (project, Some(PathBuf::from(owned_string)))
+            EnumProjectsResult {
+                project,
+                file_path: Some(PathBuf::from(owned_string)),
+            }
         }
     }
 
@@ -468,18 +477,27 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (Presence, Option<CString>) {
+    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> GetMidiDevNameResult {
         if nameout_sz == 0 {
             let is_present = unsafe { self.low.GetMIDIInputName(dev as i32, null_mut(), 0) };
-            (is_present.into(), None)
+            GetMidiDevNameResult {
+                is_present,
+                name: None,
+            }
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
                 self.low.GetMIDIInputName(dev as i32, buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
-                return (is_present.into(), None);
+                return GetMidiDevNameResult {
+                    is_present,
+                    name: None,
+                };
             }
-            (is_present.into(), Some(name))
+            GetMidiDevNameResult {
+                is_present,
+                name: Some(name),
+            }
         }
     }
 
@@ -542,20 +560,27 @@ impl Reaper {
     }
 
     // TODO Doc
-    // TODO Make only low-level functions expecting pointers unsafe
-    // TODO Maybe use struct instead of tuple!
-    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (Presence, Option<CString>) {
+    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> GetMidiDevNameResult {
         if nameout_sz == 0 {
             let is_present = unsafe { self.low.GetMIDIOutputName(dev as i32, null_mut(), 0) };
-            (is_present.into(), None)
+            GetMidiDevNameResult {
+                is_present,
+                name: None,
+            }
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
                 self.low.GetMIDIOutputName(dev as i32, buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
-                return (is_present.into(), None);
+                return GetMidiDevNameResult {
+                    is_present,
+                    name: None,
+                };
             }
-            (is_present.into(), Some(name))
+            GetMidiDevNameResult {
+                is_present,
+                name: Some(name),
+            }
         }
     }
 
@@ -1533,17 +1558,19 @@ impl Reaper {
     }
 
     // TODO Doc
-    // TODO Replace bool (result)
     pub fn track_fx_get_preset(
         &self,
         track: *mut MediaTrack,
         fx: TrackFxRef,
         presetname_sz: u32,
-    ) -> (bool, Option<CString>) {
+    ) -> TrackFxGetPresetResult {
         if presetname_sz == 0 {
             let state_matches_preset =
                 unsafe { self.low.TrackFX_GetPreset(track, fx.into(), null_mut(), 0) };
-            (state_matches_preset, None)
+            TrackFxGetPresetResult {
+                state_matches_preset,
+                name: None,
+            }
         } else {
             let (name, state_matches_preset) =
                 with_string_buffer(presetname_sz, |buffer, max_size| unsafe {
@@ -1551,9 +1578,15 @@ impl Reaper {
                         .TrackFX_GetPreset(track, fx.into(), buffer, max_size)
                 });
             if name.to_bytes().len() == 0 {
-                return (state_matches_preset, None);
+                return TrackFxGetPresetResult {
+                    state_matches_preset,
+                    name: None,
+                };
             }
-            (state_matches_preset, Some(name))
+            TrackFxGetPresetResult {
+                state_matches_preset,
+                name: Some(name),
+            }
         }
     }
 }
@@ -1575,6 +1608,21 @@ pub struct GetParamExResult {
     pub min_val: f64,
     pub mid_val: f64,
     pub max_val: f64,
+}
+
+pub struct EnumProjectsResult {
+    pub project: *mut ReaProject,
+    pub file_path: Option<PathBuf>,
+}
+
+pub struct GetMidiDevNameResult {
+    pub is_present: bool,
+    pub name: Option<CString>,
+}
+
+pub struct TrackFxGetPresetResult {
+    pub state_matches_preset: bool,
+    pub name: Option<CString>,
 }
 
 pub enum GetLastTouchedFxResult {

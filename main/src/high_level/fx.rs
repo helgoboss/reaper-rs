@@ -320,21 +320,18 @@ impl Fx {
 
     pub fn preset_is_dirty(&self) -> bool {
         self.load_if_necessary_or_complain();
-        let state_matches_preset = Reaper::get()
+        !Reaper::get()
             .medium
             .track_fx_get_preset(self.track.get_raw(), self.get_query_index(), 0)
-            .0;
-        !state_matches_preset
+            .state_matches_preset
     }
 
     pub fn get_preset_name(&self) -> Option<CString> {
         self.load_if_necessary_or_complain();
-        let (_, name) = Reaper::get().medium.track_fx_get_preset(
-            self.track.get_raw(),
-            self.get_query_index(),
-            2000,
-        );
-        name
+        Reaper::get()
+            .medium
+            .track_fx_get_preset(self.track.get_raw(), self.get_query_index(), 2000)
+            .name
     }
 }
 

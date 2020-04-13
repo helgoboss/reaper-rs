@@ -99,19 +99,6 @@ impl From<RecFx> for bool {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Presence {
-    NotPresent,
-    Present,
-}
-
-impl From<bool> for Presence {
-    fn from(v: bool) -> Self {
-        use Presence::*;
-        if v { Present } else { NotPresent }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WantDefaults {
     No,
     Yes,

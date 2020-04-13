@@ -758,8 +758,7 @@ impl Reaper {
     }
 
     pub fn get_current_project(&self) -> Project {
-        let (rp, _) = self.medium.enum_projects(ProjectRef::Current, 0);
-        Project::new(rp)
+        Project::new(self.medium.enum_projects(ProjectRef::Current, 0).project)
     }
 
     pub fn get_main_window(&self) -> HWND {
@@ -768,7 +767,11 @@ impl Reaper {
 
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
-            .map(move |i| self.medium.enum_projects(ProjectRef::TabIndex(i), 0).0)
+            .map(move |i| {
+                self.medium
+                    .enum_projects(ProjectRef::TabIndex(i), 0)
+                    .project
+            })
             .take_while(|p| !p.is_null())
             .map(|p| Project::new(p))
     }
