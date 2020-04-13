@@ -7,7 +7,7 @@ use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::raw::ReaProject;
 
 use crate::medium_level::{
-    DefaultOption, ProjectRef, ReaperPointerType, TrackRef, UndoHint, WantMaster,
+    ProjectRef, ReaperPointerType, TrackRef, WantDefaults, WantMaster, WantUndo,
 };
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -146,9 +146,7 @@ impl Project {
         self.complain_if_not_available();
         // TODO-low reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
         let reaper = Reaper::get();
-        reaper
-            .medium
-            .insert_track_at_index(index, DefaultOption::NoDefaults);
+        reaper.medium.insert_track_at_index(index, WantDefaults::No);
         reaper.medium.track_list_update_all_external_surfaces();
         let media_track = reaper.medium.get_track(self.rea_project, index);
         Track::new(media_track, self.rea_project)
@@ -210,7 +208,7 @@ impl Project {
         Tempo::from_bpm(tempo)
     }
 
-    pub fn set_tempo(&self, tempo: Tempo, undo_hint: UndoHint) {
+    pub fn set_tempo(&self, tempo: Tempo, undo_hint: WantUndo) {
         self.complain_if_not_available();
         Reaper::get()
             .medium

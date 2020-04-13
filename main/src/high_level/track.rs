@@ -22,8 +22,8 @@ use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
 use crate::medium_level::{
-    AutomationMode, Gang, GlobalAutomationOverride, InputMonitoringMode, IsUndoOptional,
-    MidiRecordingInput, ReaperPointerType, RecArmState, RecordingInput, RelativeType, TrackInfoKey,
+    AllowGang, AutomationMode, GlobalAutomationOverride, InputMonitoringMode, IsUndoOptional,
+    MidiRecordingInput, ReaperPointerType, RecArmState, RecordingInput, Relative, TrackInfoKey,
     TrackRef, TrackSendCategory,
 };
 
@@ -112,7 +112,7 @@ impl Track {
         Reaper::get().medium.csurf_on_input_monitoring_change_ex(
             self.get_raw(),
             mode,
-            Gang::Forbid,
+            AllowGang::No,
         );
     }
 
@@ -171,8 +171,8 @@ impl Track {
         reaper.medium.csurf_on_pan_change_ex(
             self.get_raw(),
             reaper_value,
-            RelativeType::Absolute,
-            Gang::Forbid,
+            Relative::No,
+            AllowGang::No,
         );
         // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so
         // we need to notify manually
@@ -201,8 +201,8 @@ impl Track {
         reaper.medium.csurf_on_volume_change_ex(
             self.get_raw(),
             reaper_value,
-            RelativeType::Absolute,
-            Gang::Forbid,
+            Relative::No,
+            AllowGang::No,
         );
         // Setting the volume programmatically doesn't trigger SetSurfaceVolume in
         // HelperControlSurface so we need to notify manually
@@ -251,7 +251,7 @@ impl Track {
             reaper.medium.csurf_on_rec_arm_change_ex(
                 self.get_raw(),
                 RecArmState::Armed,
-                Gang::Forbid,
+                AllowGang::No,
             );
             // If track was auto-armed before, this would just have switched off the auto-arm but
             // not actually armed the track. Therefore we check if it's really armed and
@@ -264,7 +264,7 @@ impl Track {
                 reaper.medium.csurf_on_rec_arm_change_ex(
                     self.get_raw(),
                     RecArmState::Armed,
-                    Gang::Forbid,
+                    AllowGang::No,
                 );
             }
         }
@@ -278,7 +278,7 @@ impl Track {
             Reaper::get().medium.csurf_on_rec_arm_change_ex(
                 self.get_raw(),
                 RecArmState::Unarmed,
-                Gang::Forbid,
+                AllowGang::No,
             );
         }
     }

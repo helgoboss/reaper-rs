@@ -10,13 +10,11 @@ use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 
-
 pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
 // TODO Derive Copy for each trivial enum
-// TODO Consider using the same principle for enums (enum name = param name, values = no or yes)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WantMaster {
     No,
@@ -42,63 +40,62 @@ impl From<IsUndoOptional> for bool {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum RelativeType {
-    Absolute,
-    Relative,
+pub enum Relative {
+    No,
+    Yes,
 }
 
-impl From<RelativeType> for bool {
-    fn from(t: RelativeType) -> Self {
-        t == RelativeType::Relative
-    }
-}
-
-// TODO This looks very similar to RegInstr
-#[derive(Debug, Eq, PartialEq)]
-pub enum AddType {
-    Add,
-    Remove,
-}
-
-impl From<AddType> for bool {
-    fn from(t: AddType) -> Self {
-        t == AddType::Add
+impl From<Relative> for bool {
+    fn from(t: Relative) -> Self {
+        t == Relative::Yes
     }
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum UndoHint {
-    NoUndo,
-    WantUndo,
+pub enum IsAdd {
+    No,
+    Yes,
 }
 
-impl From<UndoHint> for bool {
-    fn from(h: UndoHint) -> Self {
-        h == UndoHint::WantUndo
+impl From<IsAdd> for bool {
+    fn from(t: IsAdd) -> Self {
+        t == IsAdd::Yes
     }
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum CopyType {
-    Copy,
-    Move,
+pub enum WantUndo {
+    No,
+    Yes,
 }
 
-impl From<CopyType> for bool {
-    fn from(t: CopyType) -> Self {
-        t == CopyType::Move
+impl From<WantUndo> for bool {
+    fn from(h: WantUndo) -> Self {
+        h == WantUndo::Yes
     }
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum FxChainType {
-    OutputFx,
-    InputFx,
+pub enum IsMove {
+    No,
+    Yes,
 }
 
-impl From<FxChainType> for bool {
-    fn from(t: FxChainType) -> Self {
-        t == FxChainType::InputFx
+impl From<IsMove> for bool {
+    fn from(t: IsMove) -> Self {
+        t == IsMove::Yes
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum RecFx {
+    No,
+    Yes,
+}
+
+impl From<RecFx> for bool {
+    fn from(t: RecFx) -> Self {
+        t == RecFx::Yes
     }
 }
 
@@ -116,27 +113,27 @@ impl From<bool> for Presence {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum DefaultOption {
-    NoDefaults,
-    WantDefaults,
+pub enum WantDefaults {
+    No,
+    Yes,
 }
 
-impl From<DefaultOption> for bool {
-    fn from(v: DefaultOption) -> Self {
-        v == DefaultOption::WantDefaults
+impl From<WantDefaults> for bool {
+    fn from(v: WantDefaults) -> Self {
+        v == WantDefaults::Yes
     }
 }
 
 // TODO Revise names of all enums and their variants
 #[derive(Debug, Eq, PartialEq)]
-pub enum Gang {
-    Forbid,
-    Allow,
+pub enum AllowGang {
+    No,
+    Yes,
 }
 
-impl From<Gang> for bool {
-    fn from(v: Gang) -> Self {
-        v == Gang::Allow
+impl From<AllowGang> for bool {
+    fn from(v: AllowGang) -> Self {
+        v == AllowGang::Yes
     }
 }
 

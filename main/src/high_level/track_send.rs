@@ -1,7 +1,7 @@
 use crate::high_level::{Pan, Reaper, Track, Volume};
 use crate::low_level::raw::MediaTrack;
 use crate::medium_level::TrackSendInfoKey::P_DESTTRACK;
-use crate::medium_level::{RelativeType, SendOrReceive};
+use crate::medium_level::{Relative, SendOrReceive};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
 use std::ptr::null_mut;
@@ -96,7 +96,7 @@ impl TrackSend {
             self.get_source_track().get_raw(),
             self.get_index(),
             volume.get_reaper_value(),
-            RelativeType::Absolute,
+            Relative::No,
         );
     }
 
@@ -113,7 +113,7 @@ impl TrackSend {
             self.get_source_track().get_raw(),
             self.get_index(),
             pan.get_reaper_value(),
-            RelativeType::Absolute,
+            Relative::No,
         );
     }
 

@@ -4,7 +4,7 @@ use crate::high_level::{
     get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE,
 };
 
-use crate::medium_level::{CopyType, FxChainType, IsUndoOptional};
+use crate::medium_level::{IsMove, IsUndoOptional, RecFx};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -35,7 +35,7 @@ impl FxChain {
             fx.get_query_index(),
             self.track.get_raw(),
             get_fx_query_index(new_index, self.is_input_fx),
-            CopyType::Move,
+            IsMove::Yes,
         );
     }
 
@@ -166,9 +166,9 @@ DOCKED 0
                 self.track.get_raw(),
                 original_fx_name,
                 if self.is_input_fx {
-                    FxChainType::InputFx
+                    RecFx::Yes
                 } else {
-                    FxChainType::OutputFx
+                    RecFx::No
                 },
                 true,
             )
@@ -194,9 +194,9 @@ DOCKED 0
             self.track.get_raw(),
             name,
             if self.is_input_fx {
-                FxChainType::InputFx
+                RecFx::Yes
             } else {
-                FxChainType::OutputFx
+                RecFx::No
             },
         )?;
         Some(Fx::from_guid_and_index(

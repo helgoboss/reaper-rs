@@ -36,9 +36,9 @@ use crate::low_level::raw::{
 use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
-    install_control_surface, AddType, GetFocusedFxResult, GetLastTouchedFxResult,
-    GlobalAutomationOverride, MessageBoxResult, MessageBoxType, ProjectRef, ReaperStringArg,
-    ReaperVersion, StuffMidiMessageTarget, TrackRef,
+    install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
+    IsAdd, MessageBoxResult, MessageBoxType, ProjectRef, ReaperStringArg, ReaperVersion,
+    StuffMidiMessageTarget, TrackRef,
 };
 use helgoboss_midi::MidiMessage;
 
@@ -383,13 +383,13 @@ impl Reaper {
             .plugin_register_hookpostcommand(hook_post_command);
         self.medium.register_control_surface();
         self.medium
-            .audio_reg_hardware_hook(AddType::Add, &self.audio_hook as *const _ as *mut _);
+            .audio_reg_hardware_hook(IsAdd::Yes, &self.audio_hook as *const _ as *mut _);
     }
 
     // Must be idempotent
     pub fn deactivate(&self) {
         self.medium
-            .audio_reg_hardware_hook(AddType::Remove, &self.audio_hook as *const _ as *mut _);
+            .audio_reg_hardware_hook(IsAdd::No, &self.audio_hook as *const _ as *mut _);
         self.medium.unregister_control_surface();
         self.medium
             .plugin_unregister_hookpostcommand(hook_post_command);

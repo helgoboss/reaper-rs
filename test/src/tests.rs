@@ -20,7 +20,7 @@ use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
 use reaper_rs::medium_level::{
     AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
     MessageBoxType, MidiDeviceId, MidiRecordingInput, ReaperVersion, RecordingInput,
-    StuffMidiMessageTarget, TrackInfoKey, TrackRef, UndoHint, WantMaster,
+    StuffMidiMessageTarget, TrackInfoKey, TrackRef, WantMaster, WantUndo,
 };
 use std::rc::Rc;
 
@@ -143,7 +143,7 @@ fn set_project_tempo() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        project.set_tempo(Tempo::from_bpm(130.0), UndoHint::NoUndo);
+        project.set_tempo(Tempo::from_bpm(130.0), WantUndo::No);
         // Then
         check_eq!(project.get_tempo().get_bpm(), 130.0);
         // TODO There should be only one event invocation

@@ -10,13 +10,13 @@ use crate::low_level::raw::{
     KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
 };
 use crate::medium_level::{
-    AddType, AutomationMode, ControlSurface, CopyType, DefaultOption, DelegatingControlSurface,
-    EnvChunkName, ExtensionType, FxChainType, FxShowFlag, Gang, GlobalAutomationOverride,
-    HookCommand, HookPostCommand, InputMonitoringMode, IsUndoOptional, KbdActionValue,
-    MessageBoxResult, MessageBoxType, Presence, ProjectRef, ReaperPointerType, ReaperStringArg,
-    ReaperVersion, RecArmState, RecordingInput, RegInstr, RelativeType, SendOrReceive,
-    StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag, UndoHint, WantMaster,
+    AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
+    ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
+    InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, MessageBoxResult,
+    MessageBoxType, Presence, ProjectRef, ReaperPointerType, ReaperStringArg, ReaperVersion,
+    RecArmState, RecFx, RecordingInput, RegInstr, Relative, SendOrReceive, StuffMidiMessageTarget,
+    ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
@@ -442,7 +442,7 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn insert_track_at_index(&self, idx: u32, want_defaults: DefaultOption) {
+    pub fn insert_track_at_index(&self, idx: u32, want_defaults: WantDefaults) {
         self.low
             .InsertTrackAtIndex(idx as i32, want_defaults.into());
     }
@@ -490,7 +490,7 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: FxChainType,
+        rec_fx: RecFx,
         instantiate: TrackFxAddByNameVariant,
     ) -> i32 {
         unsafe {
@@ -508,7 +508,7 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: FxChainType,
+        rec_fx: RecFx,
     ) -> Option<u32> {
         match self.track_fx_add_by_name(track, fxname, rec_fx, TrackFxAddByNameVariant::Query) {
             -1 => None,
@@ -522,7 +522,7 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: FxChainType,
+        rec_fx: RecFx,
         force_add: bool,
     ) -> Result<u32, ()> {
         match self.track_fx_add_by_name(
@@ -787,7 +787,7 @@ impl Reaper {
         src_fx: TrackFxRef,
         dest_track: *mut MediaTrack,
         dest_fx: TrackFxRef,
-        is_move: CopyType,
+        is_move: IsMove,
     ) {
         unsafe {
             self.low.TrackFX_CopyToTrack(
@@ -1052,7 +1052,7 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: UndoHint) {
+    pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: WantUndo) {
         unsafe {
             self.low.SetCurrentBPM(__proj, bpm, want_undo.into());
         }
@@ -1102,7 +1102,7 @@ impl Reaper {
         &self,
         trackid: *mut MediaTrack,
         monitor: InputMonitoringMode,
-        allowgang: Gang,
+        allowgang: AllowGang,
     ) -> i32 {
         unsafe {
             self.low
@@ -1168,11 +1168,7 @@ impl Reaper {
     // TODO Doc
     // Returns true on success
     // TODO Add variants
-    pub fn audio_reg_hardware_hook(
-        &self,
-        is_add: AddType,
-        reg: *mut audio_hook_register_t,
-    ) -> bool {
+    pub fn audio_reg_hardware_hook(&self, is_add: IsAdd, reg: *mut audio_hook_register_t) -> bool {
         unsafe { self.low.Audio_RegHardwareHook(is_add.into(), reg) > 0 }
     }
 
@@ -1193,8 +1189,8 @@ impl Reaper {
         &self,
         trackid: *mut MediaTrack,
         volume: f64,
-        relative: RelativeType,
-        allow_gang: Gang,
+        relative: Relative,
+        allow_gang: AllowGang,
     ) -> f64 {
         unsafe {
             self.low
@@ -1219,8 +1215,8 @@ impl Reaper {
         &self,
         trackid: *mut MediaTrack,
         pan: f64,
-        relative: RelativeType,
-        allow_gang: Gang,
+        relative: Relative,
+        allow_gang: AllowGang,
     ) -> f64 {
         unsafe {
             self.low
@@ -1346,7 +1342,7 @@ impl Reaper {
         &self,
         trackid: *mut MediaTrack,
         recarm: RecArmState,
-        allowgang: Gang,
+        allowgang: AllowGang,
     ) -> bool {
         unsafe {
             self.low
@@ -1395,7 +1391,7 @@ impl Reaper {
         trackid: *mut MediaTrack,
         send_index: u32,
         volume: f64,
-        relative: RelativeType,
+        relative: Relative,
     ) -> f64 {
         unsafe {
             self.low
@@ -1409,7 +1405,7 @@ impl Reaper {
         trackid: *mut MediaTrack,
         send_index: u32,
         pan: f64,
-        relative: RelativeType,
+        relative: Relative,
     ) -> f64 {
         unsafe {
             self.low
