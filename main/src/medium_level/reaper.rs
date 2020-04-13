@@ -3,14 +3,12 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::null_mut;
 
-use c_str_macro::c_str;
-
 use crate::low_level;
+use crate::low_level::get_cpp_control_surface;
 use crate::low_level::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, IReaperControlSurface,
     KbdSectionInfo, MediaTrack, ReaProject, TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
 };
-use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
     AddType, AutomationMode, ControlSurface, CopyType, DefaultOption, DelegatingControlSurface,
     EnvChunkName, ExtensionType, FxChainType, FxShowFlag, Gang, GlobalAutomationOverride,
@@ -24,7 +22,7 @@ use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
 use std::convert::{TryFrom, TryInto};
 use std::mem::MaybeUninit;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 /// This is the medium-level API access point to all REAPER functions. In order to use it, you first
 /// must obtain an instance of this struct by invoking [`new`](struct.Reaper.html#method.new).
@@ -393,7 +391,7 @@ impl Reaper {
 
     // TODO Doc
     pub fn section_from_unique_id(&self, unique_id: u32) -> *mut KbdSectionInfo {
-        unsafe { self.low.SectionFromUniqueID(unique_id as i32) }
+        self.low.SectionFromUniqueID(unique_id as i32)
     }
 
     // TODO Doc
@@ -425,7 +423,7 @@ impl Reaper {
 
     /// Returns the REAPER main window handle.
     pub fn get_main_hwnd(&self) -> HWND {
-        unsafe { self.low.GetMainHwnd() }
+        self.low.GetMainHwnd()
     }
 
     // TODO Doc
@@ -435,9 +433,7 @@ impl Reaper {
 
     /// Clears the ReaScript console.
     pub fn clear_console(&self) {
-        unsafe {
-            self.low.ClearConsole();
-        }
+        self.low.ClearConsole();
     }
 
     /// Returns the number of tracks in the given project (pass `null_mut()` for current project)
@@ -447,30 +443,28 @@ impl Reaper {
 
     // TODO Doc
     pub fn insert_track_at_index(&self, idx: u32, want_defaults: DefaultOption) {
-        unsafe {
-            self.low
-                .InsertTrackAtIndex(idx as i32, want_defaults.into());
-        }
+        self.low
+            .InsertTrackAtIndex(idx as i32, want_defaults.into());
     }
 
     // TODO Doc
     pub fn get_midi_input(&self, idx: u32) -> *mut midi_Input {
-        unsafe { self.low.GetMidiInput(idx as i32) }
+        self.low.GetMidiInput(idx as i32)
     }
 
     // TODO Doc
     pub fn get_midi_output(&self, idx: u32) -> *mut midi_Output {
-        unsafe { self.low.GetMidiOutput(idx as i32) }
+        self.low.GetMidiOutput(idx as i32)
     }
 
     // TODO Doc
     pub fn get_max_midi_inputs(&self) -> u32 {
-        unsafe { self.low.GetMaxMidiInputs() as u32 }
+        self.low.GetMaxMidiInputs() as u32
     }
 
     // TODO Doc
     pub fn get_max_midi_outputs(&self) -> u32 {
-        unsafe { self.low.GetMaxMidiOutputs() as u32 }
+        self.low.GetMaxMidiOutputs() as u32
     }
 
     // TODO Doc
@@ -612,7 +606,7 @@ impl Reaper {
 
     // TODO Doc
     pub fn get_current_project_in_load_save(&self) -> *mut ReaProject {
-        unsafe { self.low.GetCurrentProjectInLoadSave() }
+        self.low.GetCurrentProjectInLoadSave()
     }
 
     // TODO Doc
@@ -947,14 +941,12 @@ impl Reaper {
 
     // TODO Doc
     pub fn track_list_update_all_external_surfaces(&self) {
-        unsafe {
-            self.low.TrackList_UpdateAllExternalSurfaces();
-        }
+        self.low.TrackList_UpdateAllExternalSurfaces();
     }
 
     // TODO Doc
     pub fn get_app_version(&self) -> ReaperVersion {
-        let ptr = unsafe { self.low.GetAppVersion() };
+        let ptr = self.low.GetAppVersion();
         let version_str = unsafe { CStr::from_ptr(ptr) };
         version_str.into()
     }
@@ -968,7 +960,7 @@ impl Reaper {
     // TODO Doc
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationOverride> {
         use GlobalAutomationOverride::*;
-        match unsafe { self.low.GetGlobalAutomationOverride() } {
+        match self.low.GetGlobalAutomationOverride() {
             -1 => None,
             6 => Some(Bypass),
             x => Some(Mode(
@@ -1056,7 +1048,7 @@ impl Reaper {
 
     // TODO Doc
     pub fn master_get_tempo(&self) -> f64 {
-        unsafe { self.low.Master_GetTempo() }
+        self.low.Master_GetTempo()
     }
 
     // TODO Doc
@@ -1073,9 +1065,7 @@ impl Reaper {
 
     // TODO Doc
     pub fn csurf_on_play_rate_change(&self, playrate: f64) {
-        unsafe {
-            self.low.CSurf_OnPlayRateChange(playrate);
-        }
+        self.low.CSurf_OnPlayRateChange(playrate);
     }
 
     // TODO Doc
@@ -1140,24 +1130,22 @@ impl Reaper {
 
     // TODO Doc
     pub fn stuff_midimessage(&self, mode: StuffMidiMessageTarget, msg: impl MidiMessage) {
-        unsafe {
-            self.low.StuffMIDIMessage(
-                mode.into(),
-                msg.get_status_byte().into(),
-                msg.get_data_byte_1().into(),
-                msg.get_data_byte_2().into(),
-            );
-        }
+        self.low.StuffMIDIMessage(
+            mode.into(),
+            msg.get_status_byte().into(),
+            msg.get_data_byte_1().into(),
+            msg.get_data_byte_2().into(),
+        );
     }
 
     // TODO Doc
     pub fn db2slider(&self, x: f64) -> f64 {
-        unsafe { self.low.DB2SLIDER(x) }
+        self.low.DB2SLIDER(x)
     }
 
     // TODO Doc
     pub fn slider2db(&self, y: f64) -> f64 {
-        unsafe { self.low.SLIDER2DB(y) }
+        self.low.SLIDER2DB(y)
     }
 
     // TODO Doc
@@ -1468,7 +1456,7 @@ impl Reaper {
         command_id: u32,
         f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = unsafe { self.low.ReverseNamedCommandLookup(command_id as i32) };
+        let ptr = self.low.ReverseNamedCommandLookup(command_id as i32);
         unsafe { create_passing_c_str(ptr) }.map(f)
     }
 

@@ -5,7 +5,7 @@ use super::{
     bindings::root::reaper_rs_control_surface::get_control_surface, firewall, raw::MediaTrack,
 };
 use crate::low_level::raw::IReaperControlSurface;
-use std::os::raw::c_void;
+
 use std::ptr::{null, null_mut};
 use std::sync::Once;
 

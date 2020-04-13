@@ -366,7 +366,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
             Some(c_str!("reaperRsTest2").to_owned())
         );
         check_eq!(
-            unsafe { action.get_name() },
+            action.get_name(),
             Some(c_str!("reaper-rs test toggle action").to_owned())
         );
         reg.unregister();
@@ -405,7 +405,7 @@ fn register_and_unregister_action() -> TestStep {
         );
         check!(!action.is_on());
         check_eq!(
-            unsafe { action.get_name() },
+            action.get_name(),
             Some(c_str!("reaper-rs test action").to_owned())
         );
         reg.unregister();

@@ -9,7 +9,7 @@ use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
-use std::os::raw::c_char;
+
 
 pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
