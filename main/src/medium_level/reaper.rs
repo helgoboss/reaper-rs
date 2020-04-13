@@ -278,7 +278,6 @@ impl Reaper {
     // we can't do that using this signature. If a very large string is passed, it works. If a
     // number of a built-in command is passed, it works.
     // TODO Doc
-    // TODO Do they have to be unregistered!? How?
     pub fn plugin_register_command_id<'a>(
         &self,
         command_id: impl Into<ReaperStringArg<'a>>,
@@ -441,8 +440,6 @@ impl Reaper {
     }
 
     /// Returns the number of tracks in the given project (pass `null_mut()` for current project)
-    // TODO-low Consider fixing all non-justified *mut to *const (so we can pass null() in many
-    // places)
     pub fn count_tracks(&self, proj: *mut ReaProject) -> u32 {
         unsafe { self.low.CountTracks(proj) as u32 }
     }
@@ -474,8 +471,7 @@ impl Reaper {
         unsafe { self.low.GetMaxMidiOutputs() as u32 }
     }
 
-    // TODO Doc: Explain that returning CString instead of String is because we also expect CStrings
-    //  as ideal arguments (for good reasons). It would not be symmetric to return Strings then.
+    // TODO Doc
     pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = unsafe { self.low.GetMIDIInputName(dev as i32, null_mut(), 0) };
@@ -492,7 +488,6 @@ impl Reaper {
     }
 
     // TODO Doc
-    // TODO Check if instantiate also denotes the desired position
     // Return type Option or Result can't be easily chosen here because if instantiate is 0, it
     // should be Option, if it's -1 or > 0, it should be Result. So we just keep the i32.
     pub fn track_fx_add_by_name<'a>(
@@ -1525,24 +1520,27 @@ impl Reaper {
         Ok(())
     }
 
-    // TODO Check when this returns null presetname and if empty preset names are possible
+    // TODO Doc
     pub fn track_fx_get_preset(
         &self,
         track: *mut MediaTrack,
         fx: TrackFxRef,
         presetname_sz: u32,
-    ) -> (bool, Cow<'static, CStr>) {
+    ) -> (bool, Option<CString>) {
         if presetname_sz == 0 {
             let state_matches_preset =
                 unsafe { self.low.TrackFX_GetPreset(track, fx.into(), null_mut(), 0) };
-            (state_matches_preset, create_cheap_empty_string())
+            (state_matches_preset, None)
         } else {
             let (name, state_matches_preset) =
                 with_string_buffer(presetname_sz, |buffer, max_size| unsafe {
                     self.low
                         .TrackFX_GetPreset(track, fx.into(), buffer, max_size)
                 });
-            (state_matches_preset, Cow::Owned(name))
+            if name.to_bytes().len() == 0 {
+                return (state_matches_preset, None);
+            }
+            (state_matches_preset, Some(name))
         }
     }
 }
@@ -1600,10 +1598,6 @@ fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
         return None;
     }
     Some(value)
-}
-
-fn create_cheap_empty_string() -> Cow<'static, CStr> {
-    Cow::Borrowed(Default::default())
 }
 
 unsafe fn copy_ptr_target<T: Copy>(ptr: *const T) -> Option<T> {

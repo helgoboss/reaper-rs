@@ -329,14 +329,12 @@ impl Fx {
 
     pub fn get_preset_name(&self) -> Option<CString> {
         self.load_if_necessary_or_complain();
-        let (_, c_string) = Reaper::get().medium.track_fx_get_preset(
+        let (_, name) = Reaper::get().medium.track_fx_get_preset(
             self.track.get_raw(),
             self.get_query_index(),
             2000,
         );
-        Some(c_string)
-            .filter(|c_string| c_string.to_bytes().len() > 0)
-            .map(|c_string| c_string.into())
+        name
     }
 }
 

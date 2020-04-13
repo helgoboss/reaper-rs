@@ -1,5 +1,7 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
 //! TODO
+//! Doc: Explain that returning CString instead of String is because we also expect CStrings
+//! as ideal arguments (for good reasons). It would not be symmetric to return Strings then.
 //! Should be similar to Lua API, not too far away because there are lots of tutorials already.
 //! At first I didn't have the enums in place and was closer to the low-level API. At the point when
 //! I changed to enums I could watch how my high-level API code gets cleaner, more understandable
