@@ -6,7 +6,9 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::raw::ReaProject;
 
-use crate::medium_level::{ProjectRef, ReaperPointerType, TrackRef};
+use crate::medium_level::{
+    DefaultOption, ProjectRef, ReaperPointerType, TrackRef, UndoHint, WantMaster,
+};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -91,13 +93,13 @@ impl Project {
         )
     }
 
-    pub fn get_selected_track_count(&self, want_master: bool) -> u32 {
+    pub fn get_selected_track_count(&self, want_master: WantMaster) -> u32 {
         Reaper::get()
             .medium
             .count_selected_tracks_2(self.rea_project, want_master) as u32
     }
 
-    pub fn get_first_selected_track(&self, want_master: bool) -> Option<Track> {
+    pub fn get_first_selected_track(&self, want_master: WantMaster) -> Option<Track> {
         let media_track =
             Reaper::get()
                 .medium
@@ -113,7 +115,7 @@ impl Project {
         Reaper::get().medium.set_only_track_selected(null_mut());
     }
 
-    pub fn get_selected_tracks(&self, want_master: bool) -> impl Iterator<Item = Track> + '_ {
+    pub fn get_selected_tracks(&self, want_master: WantMaster) -> impl Iterator<Item = Track> + '_ {
         self.complain_if_not_available();
         (0..self.get_selected_track_count(want_master)).map(move |i| {
             let media_track =
@@ -144,7 +146,9 @@ impl Project {
         self.complain_if_not_available();
         // TODO-low reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
         let reaper = Reaper::get();
-        reaper.medium.insert_track_at_index(index, false);
+        reaper
+            .medium
+            .insert_track_at_index(index, DefaultOption::NoDefaults);
         reaper.medium.track_list_update_all_external_surfaces();
         let media_track = reaper.medium.get_track(self.rea_project, index);
         Track::new(media_track, self.rea_project)
@@ -206,11 +210,11 @@ impl Project {
         Tempo::from_bpm(tempo)
     }
 
-    pub fn set_tempo(&self, tempo: Tempo, want_undo: bool) {
+    pub fn set_tempo(&self, tempo: Tempo, undo_hint: UndoHint) {
         self.complain_if_not_available();
         Reaper::get()
             .medium
-            .set_current_bpm(self.rea_project, tempo.get_bpm(), want_undo);
+            .set_current_bpm(self.rea_project, tempo.get_bpm(), undo_hint);
     }
 
     fn complain_if_not_available(&self) {

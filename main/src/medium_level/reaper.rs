@@ -12,12 +12,13 @@ use crate::low_level::raw::{
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
-    AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName, ExtensionType,
-    FxShowFlag, Gang, GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode,
-    KbdActionValue, MessageBoxResult, MessageBoxType, ProjectRef, ReaperPointerType,
-    ReaperStringArg, ReaperVersion, RecArmState, RecordingInput, RegInstr, SendOrReceive,
+    AddType, AutomationMode, ControlSurface, CopyType, DefaultOption, DelegatingControlSurface,
+    EnvChunkName, ExtensionType, FxChainType, FxShowFlag, Gang, GlobalAutomationOverride,
+    HookCommand, HookPostCommand, InputMonitoringMode, IsUndoOptional, KbdActionValue,
+    MessageBoxResult, MessageBoxType, Presence, ProjectRef, ReaperPointerType, ReaperStringArg,
+    ReaperVersion, RecArmState, RecordingInput, RegInstr, RelativeType, SendOrReceive,
     StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag,
+    TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag, UndoHint, WantMaster,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
@@ -441,9 +442,10 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn insert_track_at_index(&self, idx: u32, want_defaults: bool) {
+    pub fn insert_track_at_index(&self, idx: u32, want_defaults: DefaultOption) {
         unsafe {
-            self.low.InsertTrackAtIndex(idx as i32, want_defaults);
+            self.low
+                .InsertTrackAtIndex(idx as i32, want_defaults.into());
         }
     }
 
@@ -468,18 +470,18 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
+    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> (Presence, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = unsafe { self.low.GetMIDIInputName(dev as i32, null_mut(), 0) };
-            (is_present, None)
+            (is_present.into(), None)
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
                 self.low.GetMIDIInputName(dev as i32, buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
-                return (is_present, None);
+                return (is_present.into(), None);
             }
-            (is_present, Some(name))
+            (is_present.into(), Some(name))
         }
     }
 
@@ -490,12 +492,16 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: bool,
+        rec_fx: FxChainType,
         instantiate: TrackFxAddByNameVariant,
     ) -> i32 {
         unsafe {
-            self.low
-                .TrackFX_AddByName(track, fxname.into().as_ptr(), rec_fx, instantiate.into())
+            self.low.TrackFX_AddByName(
+                track,
+                fxname.into().as_ptr(),
+                rec_fx.into(),
+                instantiate.into(),
+            )
         }
     }
 
@@ -504,7 +510,7 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: bool,
+        rec_fx: FxChainType,
     ) -> Option<u32> {
         match self.track_fx_add_by_name(track, fxname, rec_fx, TrackFxAddByNameVariant::Query) {
             -1 => None,
@@ -518,7 +524,7 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: bool,
+        rec_fx: FxChainType,
         force_add: bool,
     ) -> Result<u32, ()> {
         match self.track_fx_add_by_name(
@@ -538,18 +544,20 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (bool, Option<CString>) {
+    // TODO Make only low-level functions expecting pointers unsafe
+    // TODO Maybe use struct instead of tuple!
+    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> (Presence, Option<CString>) {
         if nameout_sz == 0 {
             let is_present = unsafe { self.low.GetMIDIOutputName(dev as i32, null_mut(), 0) };
-            (is_present, None)
+            (is_present.into(), None)
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
                 self.low.GetMIDIOutputName(dev as i32, buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
-                return (is_present, None);
+                return (is_present.into(), None);
             }
-            (is_present, Some(name))
+            (is_present.into(), Some(name))
         }
     }
 
@@ -781,7 +789,7 @@ impl Reaper {
         src_fx: TrackFxRef,
         dest_track: *mut MediaTrack,
         dest_fx: TrackFxRef,
-        is_move: bool,
+        is_move: CopyType,
     ) {
         unsafe {
             self.low.TrackFX_CopyToTrack(
@@ -789,7 +797,7 @@ impl Reaper {
                 src_fx.into(),
                 dest_track,
                 dest_fx.into(),
-                is_move,
+                is_move.into(),
             );
         }
     }
@@ -1045,9 +1053,9 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: bool) {
+    pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: UndoHint) {
         unsafe {
-            self.low.SetCurrentBPM(__proj, bpm, want_undo);
+            self.low.SetCurrentBPM(__proj, bpm, want_undo.into());
         }
     }
 
@@ -1097,11 +1105,11 @@ impl Reaper {
         &self,
         trackid: *mut MediaTrack,
         monitor: InputMonitoringMode,
-        allowgang: bool,
+        allowgang: Gang,
     ) -> i32 {
         unsafe {
             self.low
-                .CSurf_OnInputMonitorChangeEx(trackid, monitor.into(), allowgang)
+                .CSurf_OnInputMonitorChangeEx(trackid, monitor.into(), allowgang.into())
         }
     }
 
@@ -1164,8 +1172,13 @@ impl Reaper {
 
     // TODO Doc
     // Returns true on success
-    pub fn audio_reg_hardware_hook(&self, is_add: bool, reg: *mut audio_hook_register_t) -> bool {
-        unsafe { self.low.Audio_RegHardwareHook(is_add, reg) > 0 }
+    // TODO Add variants
+    pub fn audio_reg_hardware_hook(
+        &self,
+        is_add: AddType,
+        reg: *mut audio_hook_register_t,
+    ) -> bool {
+        unsafe { self.low.Audio_RegHardwareHook(is_add.into(), reg) > 0 }
     }
 
     // TODO Doc
@@ -1185,12 +1198,12 @@ impl Reaper {
         &self,
         trackid: *mut MediaTrack,
         volume: f64,
-        relative: bool,
-        allow_gang: bool,
+        relative: RelativeType,
+        allow_gang: Gang,
     ) -> f64 {
         unsafe {
             self.low
-                .CSurf_OnVolumeChangeEx(trackid, volume, relative, allow_gang)
+                .CSurf_OnVolumeChangeEx(trackid, volume, relative.into(), allow_gang.into())
         }
     }
 
@@ -1211,18 +1224,18 @@ impl Reaper {
         &self,
         trackid: *mut MediaTrack,
         pan: f64,
-        relative: bool,
-        allow_gang: bool,
+        relative: RelativeType,
+        allow_gang: Gang,
     ) -> f64 {
         unsafe {
             self.low
-                .CSurf_OnPanChangeEx(trackid, pan, relative, allow_gang)
+                .CSurf_OnPanChangeEx(trackid, pan, relative.into(), allow_gang.into())
         }
     }
 
     // TODO Doc
-    pub fn count_selected_tracks_2(&self, proj: *mut ReaProject, wantmaster: bool) -> u32 {
-        unsafe { self.low.CountSelectedTracks2(proj, wantmaster) as u32 }
+    pub fn count_selected_tracks_2(&self, proj: *mut ReaProject, wantmaster: WantMaster) -> u32 {
+        unsafe { self.low.CountSelectedTracks2(proj, wantmaster.into()) as u32 }
     }
 
     // TODO Doc
@@ -1237,11 +1250,11 @@ impl Reaper {
         &self,
         proj: *mut ReaProject,
         seltrackidx: u32,
-        wantmaster: bool,
+        wantmaster: WantMaster,
     ) -> *mut MediaTrack {
         unsafe {
             self.low
-                .GetSelectedTrack2(proj, seltrackidx as i32, wantmaster)
+                .GetSelectedTrack2(proj, seltrackidx as i32, wantmaster.into())
         }
     }
 
@@ -1309,12 +1322,12 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         str_need_big_sz: u32,
-        isundo_optional: bool,
+        isundo_optional: IsUndoOptional,
     ) -> Result<CString, ()> {
         let (chunk_content, successful) =
             with_string_buffer(str_need_big_sz, |buffer, max_size| unsafe {
                 self.low
-                    .GetTrackStateChunk(track, buffer, max_size, isundo_optional)
+                    .GetTrackStateChunk(track, buffer, max_size, isundo_optional.into())
             });
         if !successful {
             return Err(());
@@ -1332,8 +1345,8 @@ impl Reaper {
     }
 
     // TODO Doc
-    // TODO Check other bools in this API and consider using an enum
     // Seems to return true if was armed and false if not
+    // TODO Replace bool (result)
     pub fn csurf_on_rec_arm_change_ex(
         &self,
         trackid: *mut MediaTrack,
@@ -1342,7 +1355,7 @@ impl Reaper {
     ) -> bool {
         unsafe {
             self.low
-                .CSurf_OnRecArmChangeEx(trackid, recarm.into(), allowgang == Gang::Allow)
+                .CSurf_OnRecArmChangeEx(trackid, recarm.into(), allowgang.into())
         }
     }
 
@@ -1352,11 +1365,11 @@ impl Reaper {
         &self,
         track: *mut MediaTrack,
         str: impl Into<ReaperStringArg<'a>>,
-        isundo_optional: bool,
+        isundo_optional: IsUndoOptional,
     ) -> Result<(), ()> {
         let successful = unsafe {
             self.low
-                .SetTrackStateChunk(track, str.into().as_ptr(), isundo_optional)
+                .SetTrackStateChunk(track, str.into().as_ptr(), isundo_optional.into())
         };
         if !successful {
             return Err(());
@@ -1387,11 +1400,11 @@ impl Reaper {
         trackid: *mut MediaTrack,
         send_index: u32,
         volume: f64,
-        relative: bool,
+        relative: RelativeType,
     ) -> f64 {
         unsafe {
             self.low
-                .CSurf_OnSendVolumeChange(trackid, send_index as i32, volume, relative)
+                .CSurf_OnSendVolumeChange(trackid, send_index as i32, volume, relative.into())
         }
     }
 
@@ -1401,11 +1414,11 @@ impl Reaper {
         trackid: *mut MediaTrack,
         send_index: u32,
         pan: f64,
-        relative: bool,
+        relative: RelativeType,
     ) -> f64 {
         unsafe {
             self.low
-                .CSurf_OnSendPanChange(trackid, send_index as i32, pan, relative)
+                .CSurf_OnSendPanChange(trackid, send_index as i32, pan, relative.into())
         }
     }
 
@@ -1529,6 +1542,7 @@ impl Reaper {
     }
 
     // TODO Doc
+    // TODO Replace bool (result)
     pub fn track_fx_get_preset(
         &self,
         track: *mut MediaTrack,
@@ -1554,6 +1568,7 @@ impl Reaper {
 }
 
 // Each of the decimal numbers are > 0
+// TODO If is_toggle is true, the other things don't matter ... maybe an enum would be better!
 pub struct GetParameterStepSizesResult {
     // TODO-low Not sure if this can ever be 0 when TrackFX_GetParameterStepSizes returns true
     //  So the Option might be obsolete here

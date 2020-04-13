@@ -22,8 +22,9 @@ use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
 use crate::medium_level::{
-    AutomationMode, Gang, GlobalAutomationOverride, InputMonitoringMode, MidiRecordingInput,
-    ReaperPointerType, RecArmState, RecordingInput, TrackInfoKey, TrackRef, TrackSendCategory,
+    AutomationMode, Gang, GlobalAutomationOverride, InputMonitoringMode, IsUndoOptional,
+    MidiRecordingInput, ReaperPointerType, RecArmState, RecordingInput, RelativeType, TrackInfoKey,
+    TrackRef, TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -108,9 +109,11 @@ impl Track {
 
     pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
         self.load_and_check_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .csurf_on_input_monitoring_change_ex(self.get_raw(), mode, false);
+        Reaper::get().medium.csurf_on_input_monitoring_change_ex(
+            self.get_raw(),
+            mode,
+            Gang::Forbid,
+        );
     }
 
     pub fn get_recording_input(&self) -> RecordingInput {
@@ -165,9 +168,12 @@ impl Track {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = pan.get_reaper_value();
         let reaper = Reaper::get();
-        reaper
-            .medium
-            .csurf_on_pan_change_ex(self.get_raw(), reaper_value, false, false);
+        reaper.medium.csurf_on_pan_change_ex(
+            self.get_raw(),
+            reaper_value,
+            RelativeType::Absolute,
+            Gang::Forbid,
+        );
         // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so
         // we need to notify manually
         reaper
@@ -192,9 +198,12 @@ impl Track {
         // CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The
         // return value reflects the cropped value. The precision became much better with
         // REAPER 5.28.
-        reaper
-            .medium
-            .csurf_on_volume_change_ex(self.get_raw(), reaper_value, false, false);
+        reaper.medium.csurf_on_volume_change_ex(
+            self.get_raw(),
+            reaper_value,
+            RelativeType::Absolute,
+            Gang::Forbid,
+        );
         // Setting the volume programmatically doesn't trigger SetSurfaceVolume in
         // HelperControlSurface so we need to notify manually
         reaper
@@ -275,7 +284,7 @@ impl Track {
     }
 
     pub fn enable_auto_arm(&self) {
-        let mut chunk = self.get_chunk(MAX_TRACK_CHUNK_SIZE, false);
+        let mut chunk = self.get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::No);
         if get_auto_arm_chunk_line(&chunk).is_some() {
             return;
         }
@@ -363,13 +372,13 @@ impl Track {
     }
 
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
-        get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, true))
+        get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::Yes))
     }
 
     // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains
     // weird FXID_NEXT (in front of FX tag) instead of FXID (behind FX tag). So FX chunk code
     // should be double checked then.
-    pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: bool) -> Chunk {
+    pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: IsUndoOptional) -> Chunk {
         let chunk_content = Reaper::get()
             .medium
             .get_track_state_chunk(self.get_raw(), max_chunk_size, undo_is_optional)
@@ -380,10 +389,11 @@ impl Track {
     // TODO-low Report possible error
     pub fn set_chunk(&self, chunk: Chunk) {
         let c_string: CString = chunk.into();
-        let _ =
-            Reaper::get()
-                .medium
-                .set_track_state_chunk(self.get_raw(), c_string.as_c_str(), true);
+        let _ = Reaper::get().medium.set_track_state_chunk(
+            self.get_raw(),
+            c_string.as_c_str(),
+            IsUndoOptional::Yes,
+        );
     }
 
     pub fn is_selected(&self) -> bool {

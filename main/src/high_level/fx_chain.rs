@@ -4,6 +4,7 @@ use crate::high_level::{
     get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE,
 };
 
+use crate::medium_level::{CopyType, FxChainType, IsUndoOptional};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -34,7 +35,7 @@ impl FxChain {
             fx.get_query_index(),
             self.track.get_raw(),
             get_fx_query_index(new_index, self.is_input_fx),
-            true,
+            CopyType::Move,
         );
     }
 
@@ -49,7 +50,9 @@ impl FxChain {
     }
 
     pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
-        let mut track_chunk = self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, false);
+        let mut track_chunk = self
+            .track
+            .get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::No);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(tag) => {
@@ -105,11 +108,16 @@ DOCKED 0
     // In Track this returns Chunk, here it returns ChunkRegion. Because REAPER always returns
     // the chunk of the complete track, not just of the FX chain.
     pub fn get_chunk(&self) -> Option<ChunkRegion> {
-        self.find_chunk_region(self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, false))
+        self.find_chunk_region(
+            self.track
+                .get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::No),
+        )
     }
 
     pub fn set_chunk(&self, chunk: &str) {
-        let mut track_chunk = self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, false);
+        let mut track_chunk = self
+            .track
+            .get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::No);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(r) => {
@@ -157,7 +165,11 @@ DOCKED 0
             .track_fx_add_by_name_add(
                 self.track.get_raw(),
                 original_fx_name,
-                self.is_input_fx,
+                if self.is_input_fx {
+                    FxChainType::InputFx
+                } else {
+                    FxChainType::OutputFx
+                },
                 true,
             )
             .ok()?;
@@ -181,7 +193,11 @@ DOCKED 0
         let fx_index = Reaper::get().medium.track_fx_add_by_name_query(
             self.track.get_raw(),
             name,
-            self.is_input_fx,
+            if self.is_input_fx {
+                FxChainType::InputFx
+            } else {
+                FxChainType::OutputFx
+            },
         )?;
         Some(Fx::from_guid_and_index(
             self.track.clone(),

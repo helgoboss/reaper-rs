@@ -15,11 +15,129 @@ pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
 pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
 
+// TODO Derive Copy for each trivial enum
+// TODO Consider using the same principle for enums (enum name = param name, values = no or yes)
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum WantMaster {
+    No,
+    Yes,
+}
+
+impl From<WantMaster> for bool {
+    fn from(v: WantMaster) -> Self {
+        v == WantMaster::Yes
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum IsUndoOptional {
+    No,
+    Yes,
+}
+
+impl From<IsUndoOptional> for bool {
+    fn from(v: IsUndoOptional) -> Self {
+        v == IsUndoOptional::Yes
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum RelativeType {
+    Absolute,
+    Relative,
+}
+
+impl From<RelativeType> for bool {
+    fn from(t: RelativeType) -> Self {
+        t == RelativeType::Relative
+    }
+}
+
+// TODO This looks very similar to RegInstr
+#[derive(Debug, Eq, PartialEq)]
+pub enum AddType {
+    Add,
+    Remove,
+}
+
+impl From<AddType> for bool {
+    fn from(t: AddType) -> Self {
+        t == AddType::Add
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum UndoHint {
+    NoUndo,
+    WantUndo,
+}
+
+impl From<UndoHint> for bool {
+    fn from(h: UndoHint) -> Self {
+        h == UndoHint::WantUndo
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum CopyType {
+    Copy,
+    Move,
+}
+
+impl From<CopyType> for bool {
+    fn from(t: CopyType) -> Self {
+        t == CopyType::Move
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum FxChainType {
+    OutputFx,
+    InputFx,
+}
+
+impl From<FxChainType> for bool {
+    fn from(t: FxChainType) -> Self {
+        t == FxChainType::InputFx
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum Presence {
+    NotPresent,
+    Present,
+}
+
+impl From<bool> for Presence {
+    fn from(v: bool) -> Self {
+        use Presence::*;
+        if v { Present } else { NotPresent }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum DefaultOption {
+    NoDefaults,
+    WantDefaults,
+}
+
+impl From<DefaultOption> for bool {
+    fn from(v: DefaultOption) -> Self {
+        v == DefaultOption::WantDefaults
+    }
+}
+
 // TODO Revise names of all enums and their variants
 #[derive(Debug, Eq, PartialEq)]
 pub enum Gang {
     Forbid,
     Allow,
+}
+
+impl From<Gang> for bool {
+    fn from(v: Gang) -> Self {
+        v == Gang::Allow
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, IntoPrimitive)]

@@ -20,7 +20,7 @@ use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
 use reaper_rs::medium_level::{
     AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
     MessageBoxType, MidiDeviceId, MidiRecordingInput, ReaperVersion, RecordingInput,
-    StuffMidiMessageTarget, TrackInfoKey, TrackRef,
+    StuffMidiMessageTarget, TrackInfoKey, TrackRef, UndoHint, WantMaster,
 };
 use std::rc::Rc;
 
@@ -143,7 +143,7 @@ fn set_project_tempo() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        project.set_tempo(Tempo::from_bpm(130.0), false);
+        project.set_tempo(Tempo::from_bpm(130.0), UndoHint::NoUndo);
         // Then
         check_eq!(project.get_tempo().get_bpm(), 130.0);
         // TODO There should be only one event invocation
@@ -805,9 +805,9 @@ fn select_track_exclusively() -> TestStep {
         check!(track_1.is_selected());
         check!(!track_2.is_selected());
         check!(!track_3.is_selected());
-        check_eq!(project.get_selected_track_count(false), 1);
-        check!(project.get_first_selected_track(false).is_some());
-        check_eq!(project.get_selected_tracks(false).count(), 1);
+        check_eq!(project.get_selected_track_count(WantMaster::No), 1);
+        check!(project.get_first_selected_track(WantMaster::No).is_some());
+        check_eq!(project.get_selected_tracks(WantMaster::No).count(), 1);
         check_eq!(mock.get_invocation_count(), 3);
         Ok(())
     })
@@ -1072,12 +1072,12 @@ fn select_master_track() -> TestStep {
         master_track.select();
         // Then
         check!(master_track.is_selected());
-        check_eq!(project.get_selected_track_count(true), 1);
+        check_eq!(project.get_selected_track_count(WantMaster::Yes), 1);
         let first_selected_track = project
-            .get_first_selected_track(true)
+            .get_first_selected_track(WantMaster::Yes)
             .ok_or("Couldn't get first selected track")?;
         check!(first_selected_track.is_master_track());
-        check_eq!(project.get_selected_tracks(true).count(), 1);
+        check_eq!(project.get_selected_tracks(WantMaster::Yes).count(), 1);
         // TODO REAPER doesn't notify us about master track selection currently
         check_eq!(mock.get_invocation_count(), 1);
         let last_arg: Track = mock.get_last_arg().into();
@@ -1103,12 +1103,12 @@ fn unselect_track() -> TestStep {
         track.unselect();
         // Then
         check!(!track.is_selected());
-        check_eq!(project.get_selected_track_count(false), 1);
+        check_eq!(project.get_selected_track_count(WantMaster::No), 1);
         let first_selected_track = project
-            .get_first_selected_track(false)
+            .get_first_selected_track(WantMaster::No)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(2));
-        check_eq!(project.get_selected_tracks(false).count(), 1);
+        check_eq!(project.get_selected_tracks(WantMaster::No).count(), 1);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
         Ok(())
@@ -1135,12 +1135,12 @@ fn select_track() -> TestStep {
         // Then
         check!(track.is_selected());
         check!(track2.is_selected());
-        check_eq!(project.get_selected_track_count(false), 2);
+        check_eq!(project.get_selected_track_count(WantMaster::No), 2);
         let first_selected_track = project
-            .get_first_selected_track(false)
+            .get_first_selected_track(WantMaster::No)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(0));
-        check_eq!(project.get_selected_tracks(false).count(), 2);
+        check_eq!(project.get_selected_tracks(WantMaster::No).count(), 2);
         check_eq!(mock.get_invocation_count(), 2);
         check_eq!(mock.get_last_arg(), track2);
         Ok(())
@@ -1156,7 +1156,7 @@ fn query_track_selection_state() -> TestStep {
         let is_selected = track.is_selected();
         // Then
         check!(!is_selected);
-        check_eq!(project.get_selected_track_count(false), 0);
+        check_eq!(project.get_selected_track_count(WantMaster::No), 0);
         Ok(())
     })
 }
