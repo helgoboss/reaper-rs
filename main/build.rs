@@ -84,16 +84,26 @@ mod codegen {
         /// Orchestrates the complete generation process
         fn generate() {
             let fn_ptrs = parse_reaper_fn_ptrs();
-            let result = generate_reaper_rs_token_stream(fn_ptrs);
+            let result = generate_reaper_rs_token_stream(&fn_ptrs);
             std::fs::write("src/low_level/reaper.rs", result.to_string())
                 .expect("Unable to write file");
         }
 
         /// Generates the token stream. All of this could also be done in a procedural macro but
         /// I prefer the code generation approach for now.
-        fn generate_reaper_rs_token_stream(fn_ptrs: Vec<ReaperFnPtr>) -> proc_macro2::TokenStream {
+        fn generate_reaper_rs_token_stream(fn_ptrs: &Vec<ReaperFnPtr>) -> proc_macro2::TokenStream {
             let names: Vec<_> = fn_ptrs.iter().map(|p| p.name.clone()).collect();
-            let signatures: Vec<_> = fn_ptrs.iter().map(|p| p.signature.clone()).collect();
+            let fn_ptr_signatures: Vec<_> = fn_ptrs
+                .iter()
+                .map(|p| TypeBareFn {
+                    unsafety: if p.has_pointer_args() {
+                        p.signature.unsafety.clone()
+                    } else {
+                        None
+                    },
+                    ..p.signature.clone()
+                })
+                .collect();
             let methods: Vec<_> = fn_ptrs
                 .iter()
                 .map(|p| generate_reaper_method(p.clone()))
@@ -147,7 +157,7 @@ mod codegen {
                 #[derive(Default)]
                 pub struct ReaperFunctionPointers {
                     #(
-                        pub #names: Option<#signatures>,
+                        pub #names: Option<#fn_ptr_signatures>,
                     )*
                 }
             }
@@ -181,9 +191,13 @@ mod codegen {
                 sig: Signature {
                     constness: None,
                     asyncness: None,
-                    unsafety: Some(Unsafe {
-                        span: Span::call_site(),
-                    }),
+                    unsafety: if ptr.has_pointer_args() {
+                        Some(Unsafe {
+                            span: Span::call_site(),
+                        })
+                    } else {
+                        None
+                    },
                     abi: None,
                     fn_token: Fn {
                         span: Span::call_site(),
@@ -228,13 +242,13 @@ mod codegen {
                     variadic: None,
                     output: ptr.signature.output.clone(),
                 },
-                block: generate_reaper_method_body(ptr),
+                block: generate_reaper_method_body(&ptr),
             })
         }
 
         /// Generates the body of a method in `impl Reaper`
-        fn generate_reaper_method_body(ptr: ReaperFnPtr) -> Block {
-            let name = ptr.name;
+        fn generate_reaper_method_body(ptr: &ReaperFnPtr) -> Block {
+            let name = &ptr.name;
             let fn_ptr_call = generate_fn_ptr_call(&ptr.signature);
             syn::parse_quote! {
                 {
@@ -364,6 +378,15 @@ mod codegen {
         struct ReaperFnPtr {
             name: Ident,
             signature: TypeBareFn,
+        }
+
+        impl ReaperFnPtr {
+            fn has_pointer_args(&self) -> bool {
+                self.signature.inputs.iter().any(|a| match a.ty {
+                    Type::Ptr(_) => true,
+                    _ => false,
+                })
+            }
         }
     }
 }

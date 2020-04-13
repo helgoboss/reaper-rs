@@ -1962,7 +1962,7 @@ impl Reaper {
             Some(f) => f(menuidstr, menuname, kbdsecname, addtomainmenu),
         }
     }
-    pub unsafe fn AddExtensionsMainMenu(&self) -> bool {
+    pub fn AddExtensionsMainMenu(&self) -> bool {
         match self.pointers.AddExtensionsMainMenu {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2066,7 +2066,7 @@ impl Reaper {
             ),
         }
     }
-    pub unsafe fn adjustZoom(
+    pub fn adjustZoom(
         &self,
         amt: f64,
         forceset: ::std::os::raw::c_int,
@@ -2099,7 +2099,7 @@ impl Reaper {
             Some(f) => f(function_name),
         }
     }
-    pub unsafe fn APITest(&self) {
+    pub fn APITest(&self) {
         match self.pointers.APITest {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2141,7 +2141,7 @@ impl Reaper {
             Some(f) => f(cmd, sectionname),
         }
     }
-    pub unsafe fn Audio_Init(&self) {
+    pub fn Audio_Init(&self) {
         match self.pointers.Audio_Init {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2150,7 +2150,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn Audio_IsPreBuffer(&self) -> ::std::os::raw::c_int {
+    pub fn Audio_IsPreBuffer(&self) -> ::std::os::raw::c_int {
         match self.pointers.Audio_IsPreBuffer {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2159,7 +2159,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn Audio_IsRunning(&self) -> ::std::os::raw::c_int {
+    pub fn Audio_IsRunning(&self) -> ::std::os::raw::c_int {
         match self.pointers.Audio_IsRunning {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2168,7 +2168,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn Audio_Quit(&self) {
+    pub fn Audio_Quit(&self) {
         match self.pointers.Audio_Quit {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2223,7 +2223,7 @@ impl Reaper {
             Some(f) => f(accessor),
         }
     }
-    pub unsafe fn BypassFxAllTracks(&self, bypass: ::std::os::raw::c_int) {
+    pub fn BypassFxAllTracks(&self, bypass: ::std::os::raw::c_int) {
         match self.pointers.BypassFxAllTracks {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2258,7 +2258,7 @@ impl Reaper {
             Some(f) => f(srcBlock, pksBlock),
         }
     }
-    pub unsafe fn ClearAllRecArmed(&self) {
+    pub fn ClearAllRecArmed(&self) {
         match self.pointers.ClearAllRecArmed {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2267,7 +2267,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn ClearConsole(&self) {
+    pub fn ClearConsole(&self) {
         match self.pointers.ClearConsole {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2276,7 +2276,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn ClearPeakCache(&self) {
+    pub fn ClearPeakCache(&self) {
         match self.pointers.ClearPeakCache {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2300,7 +2300,7 @@ impl Reaper {
             Some(f) => f(col, rOut, gOut, bOut),
         }
     }
-    pub unsafe fn ColorToNative(
+    pub fn ColorToNative(
         &self,
         r: ::std::os::raw::c_int,
         g: ::std::os::raw::c_int,
@@ -2513,7 +2513,7 @@ impl Reaper {
             Some(f) => f(obj, callback),
         }
     }
-    pub unsafe fn CreateMIDIInput(&self, dev: ::std::os::raw::c_int) -> *mut root::midi_Input {
+    pub fn CreateMIDIInput(&self, dev: ::std::os::raw::c_int) -> *mut root::midi_Input {
         match self.pointers.CreateMIDIInput {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2588,7 +2588,7 @@ impl Reaper {
             Some(f) => f(tr, desttrInOptional),
         }
     }
-    pub unsafe fn CSurf_FlushUndo(&self, force: bool) {
+    pub fn CSurf_FlushUndo(&self, force: bool) {
         match self.pointers.CSurf_FlushUndo {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2610,7 +2610,7 @@ impl Reaper {
             Some(f) => f(trackid, isPan),
         }
     }
-    pub unsafe fn CSurf_GoEnd(&self) {
+    pub fn CSurf_GoEnd(&self) {
         match self.pointers.CSurf_GoEnd {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2619,7 +2619,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn CSurf_GoStart(&self) {
+    pub fn CSurf_GoStart(&self) {
         match self.pointers.CSurf_GoStart {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2628,7 +2628,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn CSurf_NumTracks(&self, mcpView: bool) -> ::std::os::raw::c_int {
+    pub fn CSurf_NumTracks(&self, mcpView: bool) -> ::std::os::raw::c_int {
         match self.pointers.CSurf_NumTracks {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2637,7 +2637,7 @@ impl Reaper {
             Some(f) => f(mcpView),
         }
     }
-    pub unsafe fn CSurf_OnArrow(&self, whichdir: ::std::os::raw::c_int, wantzoom: bool) {
+    pub fn CSurf_OnArrow(&self, whichdir: ::std::os::raw::c_int, wantzoom: bool) {
         match self.pointers.CSurf_OnArrow {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2646,7 +2646,7 @@ impl Reaper {
             Some(f) => f(whichdir, wantzoom),
         }
     }
-    pub unsafe fn CSurf_OnFwd(&self, seekplay: ::std::os::raw::c_int) {
+    pub fn CSurf_OnFwd(&self, seekplay: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnFwd {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2764,7 +2764,7 @@ impl Reaper {
             Some(f) => f(trackid, pan, relative, allowGang),
         }
     }
-    pub unsafe fn CSurf_OnPause(&self) {
+    pub fn CSurf_OnPause(&self) {
         match self.pointers.CSurf_OnPause {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2773,7 +2773,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn CSurf_OnPlay(&self) {
+    pub fn CSurf_OnPlay(&self) {
         match self.pointers.CSurf_OnPlay {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2782,7 +2782,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn CSurf_OnPlayRateChange(&self, playrate: f64) {
+    pub fn CSurf_OnPlayRateChange(&self, playrate: f64) {
         match self.pointers.CSurf_OnPlayRateChange {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2818,7 +2818,7 @@ impl Reaper {
             Some(f) => f(trackid, recarm, allowgang),
         }
     }
-    pub unsafe fn CSurf_OnRecord(&self) {
+    pub fn CSurf_OnRecord(&self) {
         match self.pointers.CSurf_OnRecord {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2857,7 +2857,7 @@ impl Reaper {
             Some(f) => f(trackid, recv_index, volume, relative),
         }
     }
-    pub unsafe fn CSurf_OnRew(&self, seekplay: ::std::os::raw::c_int) {
+    pub fn CSurf_OnRew(&self, seekplay: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnRew {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2866,11 +2866,7 @@ impl Reaper {
             Some(f) => f(seekplay),
         }
     }
-    pub unsafe fn CSurf_OnRewFwd(
-        &self,
-        seekplay: ::std::os::raw::c_int,
-        dir: ::std::os::raw::c_int,
-    ) {
+    pub fn CSurf_OnRewFwd(&self, seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnRewFwd {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2879,7 +2875,7 @@ impl Reaper {
             Some(f) => f(seekplay, dir),
         }
     }
-    pub unsafe fn CSurf_OnScroll(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
+    pub fn CSurf_OnScroll(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnScroll {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2958,7 +2954,7 @@ impl Reaper {
             Some(f) => f(trackid, solo, allowgang),
         }
     }
-    pub unsafe fn CSurf_OnStop(&self) {
+    pub fn CSurf_OnStop(&self) {
         match self.pointers.CSurf_OnStop {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -2967,7 +2963,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn CSurf_OnTempoChange(&self, bpm: f64) {
+    pub fn CSurf_OnTempoChange(&self, bpm: f64) {
         match self.pointers.CSurf_OnTempoChange {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3043,7 +3039,7 @@ impl Reaper {
             Some(f) => f(trackid, width, relative, allowGang),
         }
     }
-    pub unsafe fn CSurf_OnZoom(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
+    pub fn CSurf_OnZoom(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnZoom {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3052,7 +3048,7 @@ impl Reaper {
             Some(f) => f(xdir, ydir),
         }
     }
-    pub unsafe fn CSurf_ResetAllCachedVolPanStates(&self) {
+    pub fn CSurf_ResetAllCachedVolPanStates(&self) {
         match self.pointers.CSurf_ResetAllCachedVolPanStates {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3061,7 +3057,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn CSurf_ScrubAmt(&self, amt: f64) {
+    pub fn CSurf_ScrubAmt(&self, amt: f64) {
         match self.pointers.CSurf_ScrubAmt {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3195,7 +3191,7 @@ impl Reaper {
             Some(f) => f(trackid, volume, ignoresurf),
         }
     }
-    pub unsafe fn CSurf_SetTrackListChange(&self) {
+    pub fn CSurf_SetTrackListChange(&self) {
         match self.pointers.CSurf_SetTrackListChange {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3204,7 +3200,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn CSurf_TrackFromID(
+    pub fn CSurf_TrackFromID(
         &self,
         idx: ::std::os::raw::c_int,
         mcpView: bool,
@@ -3230,7 +3226,7 @@ impl Reaper {
             Some(f) => f(track, mcpView),
         }
     }
-    pub unsafe fn DB2SLIDER(&self, x: f64) -> f64 {
+    pub fn DB2SLIDER(&self, x: f64) -> f64 {
         match self.pointers.DB2SLIDER {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3435,10 +3431,7 @@ impl Reaper {
             Some(f) => f(ident_str, whichDock),
         }
     }
-    pub unsafe fn DockGetPosition(
-        &self,
-        whichDock: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int {
+    pub fn DockGetPosition(&self, whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.DockGetPosition {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3460,7 +3453,7 @@ impl Reaper {
             Some(f) => f(hwnd, isFloatingDockerOut),
         }
     }
-    pub unsafe fn DockWindowActivate(&self, hwnd: root::HWND) {
+    pub fn DockWindowActivate(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowActivate {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3499,7 +3492,7 @@ impl Reaper {
             Some(f) => f(hwnd, name, identstr, allowShow),
         }
     }
-    pub unsafe fn DockWindowRefresh(&self) {
+    pub fn DockWindowRefresh(&self) {
         match self.pointers.DockWindowRefresh {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3508,7 +3501,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn DockWindowRefreshForHWND(&self, hwnd: root::HWND) {
+    pub fn DockWindowRefreshForHWND(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowRefreshForHWND {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3517,7 +3510,7 @@ impl Reaper {
             Some(f) => f(hwnd),
         }
     }
-    pub unsafe fn DockWindowRemove(&self, hwnd: root::HWND) {
+    pub fn DockWindowRemove(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowRemove {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -3600,7 +3593,7 @@ impl Reaper {
             Some(f) => f(mode, strOut),
         }
     }
-    pub unsafe fn EnumPitchShiftSubModes(
+    pub fn EnumPitchShiftSubModes(
         &self,
         mode: ::std::os::raw::c_int,
         submode: ::std::os::raw::c_int,
@@ -3994,7 +3987,7 @@ impl Reaper {
             Some(f) => f(name, bufOut, bufOut_sz),
         }
     }
-    pub unsafe fn get_ini_file(&self) -> *const ::std::os::raw::c_char {
+    pub fn get_ini_file(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.get_ini_file {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4053,7 +4046,7 @@ impl Reaper {
             Some(f) => f(ignoreProject),
         }
     }
-    pub unsafe fn GetAppVersion(&self) -> *const ::std::os::raw::c_char {
+    pub fn GetAppVersion(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetAppVersion {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4150,7 +4143,7 @@ impl Reaper {
             Some(f) => f(attribute, desc, desc_sz),
         }
     }
-    pub unsafe fn GetColorTheme(
+    pub fn GetColorTheme(
         &self,
         idx: ::std::os::raw::c_int,
         defval: ::std::os::raw::c_int,
@@ -4187,7 +4180,7 @@ impl Reaper {
             Some(f) => f(ident_str),
         }
     }
-    pub unsafe fn GetContextMenu(&self, idx: ::std::os::raw::c_int) -> root::HMENU {
+    pub fn GetContextMenu(&self, idx: ::std::os::raw::c_int) -> root::HMENU {
         match self.pointers.GetContextMenu {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4196,7 +4189,7 @@ impl Reaper {
             Some(f) => f(idx),
         }
     }
-    pub unsafe fn GetCurrentProjectInLoadSave(&self) -> *mut root::ReaProject {
+    pub fn GetCurrentProjectInLoadSave(&self) -> *mut root::ReaProject {
         match self.pointers.GetCurrentProjectInLoadSave {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4205,7 +4198,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetCursorContext(&self) -> ::std::os::raw::c_int {
+    pub fn GetCursorContext(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetCursorContext {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4214,7 +4207,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetCursorContext2(&self, want_last_valid: bool) -> ::std::os::raw::c_int {
+    pub fn GetCursorContext2(&self, want_last_valid: bool) -> ::std::os::raw::c_int {
         match self.pointers.GetCursorContext2 {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4223,7 +4216,7 @@ impl Reaper {
             Some(f) => f(want_last_valid),
         }
     }
-    pub unsafe fn GetCursorPosition(&self) -> f64 {
+    pub fn GetCursorPosition(&self) -> f64 {
         match self.pointers.GetCursorPosition {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4401,7 +4394,7 @@ impl Reaper {
             Some(f) => f(env, strNeedBig, strNeedBig_sz, isundoOptional),
         }
     }
-    pub unsafe fn GetExePath(&self) -> *const ::std::os::raw::c_char {
+    pub fn GetExePath(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetExePath {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4465,7 +4458,7 @@ impl Reaper {
             Some(f) => f(track, fxindex, parameterindex, create),
         }
     }
-    pub unsafe fn GetGlobalAutomationOverride(&self) -> ::std::os::raw::c_int {
+    pub fn GetGlobalAutomationOverride(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetGlobalAutomationOverride {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4474,7 +4467,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetHZoomLevel(&self) -> f64 {
+    pub fn GetHZoomLevel(&self) -> f64 {
         match self.pointers.GetHZoomLevel {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4520,7 +4513,7 @@ impl Reaper {
             Some(f) => f(szOut),
         }
     }
-    pub unsafe fn GetInputChannelName(
+    pub fn GetInputChannelName(
         &self,
         channelIndex: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
@@ -4600,7 +4593,7 @@ impl Reaper {
             Some(f) => f(item, strNeedBig, strNeedBig_sz, isundoOptional),
         }
     }
-    pub unsafe fn GetLastColorThemeFile(&self) -> *const ::std::os::raw::c_char {
+    pub fn GetLastColorThemeFile(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetLastColorThemeFile {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4638,7 +4631,7 @@ impl Reaper {
             Some(f) => f(tracknumberOut, fxnumberOut, paramnumberOut),
         }
     }
-    pub unsafe fn GetLastTouchedTrack(&self) -> *mut root::MediaTrack {
+    pub fn GetLastTouchedTrack(&self) -> *mut root::MediaTrack {
         match self.pointers.GetLastTouchedTrack {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4647,7 +4640,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetMainHwnd(&self) -> root::HWND {
+    pub fn GetMainHwnd(&self) -> root::HWND {
         match self.pointers.GetMainHwnd {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4656,7 +4649,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetMasterMuteSoloFlags(&self) -> ::std::os::raw::c_int {
+    pub fn GetMasterMuteSoloFlags(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMasterMuteSoloFlags {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4674,7 +4667,7 @@ impl Reaper {
             Some(f) => f(proj),
         }
     }
-    pub unsafe fn GetMasterTrackVisibility(&self) -> ::std::os::raw::c_int {
+    pub fn GetMasterTrackVisibility(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMasterTrackVisibility {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4683,7 +4676,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetMaxMidiInputs(&self) -> ::std::os::raw::c_int {
+    pub fn GetMaxMidiInputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMaxMidiInputs {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4692,7 +4685,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetMaxMidiOutputs(&self) -> ::std::os::raw::c_int {
+    pub fn GetMaxMidiOutputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMaxMidiOutputs {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -4970,7 +4963,7 @@ impl Reaper {
             Some(f) => f(dev, nameout, nameout_sz),
         }
     }
-    pub unsafe fn GetMixerScroll(&self) -> *mut root::MediaTrack {
+    pub fn GetMixerScroll(&self) -> *mut root::MediaTrack {
         match self.pointers.GetMixerScroll {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5007,7 +5000,7 @@ impl Reaper {
             Some(f) => f(xOut, yOut),
         }
     }
-    pub unsafe fn GetNumAudioInputs(&self) -> ::std::os::raw::c_int {
+    pub fn GetNumAudioInputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumAudioInputs {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5016,7 +5009,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetNumAudioOutputs(&self) -> ::std::os::raw::c_int {
+    pub fn GetNumAudioOutputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumAudioOutputs {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5025,7 +5018,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetNumMIDIInputs(&self) -> ::std::os::raw::c_int {
+    pub fn GetNumMIDIInputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumMIDIInputs {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5034,7 +5027,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetNumMIDIOutputs(&self) -> ::std::os::raw::c_int {
+    pub fn GetNumMIDIOutputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumMIDIOutputs {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5043,7 +5036,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetNumTracks(&self) -> ::std::os::raw::c_int {
+    pub fn GetNumTracks(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumTracks {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5052,7 +5045,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetOS(&self) -> *const ::std::os::raw::c_char {
+    pub fn GetOS(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetOS {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5061,7 +5054,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetOutputChannelName(
+    pub fn GetOutputChannelName(
         &self,
         channelIndex: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
@@ -5073,7 +5066,7 @@ impl Reaper {
             Some(f) => f(channelIndex),
         }
     }
-    pub unsafe fn GetOutputLatency(&self) -> f64 {
+    pub fn GetOutputLatency(&self) -> f64 {
         match self.pointers.GetOutputLatency {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5152,7 +5145,7 @@ impl Reaper {
             Some(f) => f(pks, maxamp, w, h, bmp),
         }
     }
-    pub unsafe fn GetPlayPosition(&self) -> f64 {
+    pub fn GetPlayPosition(&self) -> f64 {
         match self.pointers.GetPlayPosition {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5161,7 +5154,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn GetPlayPosition2(&self) -> f64 {
+    pub fn GetPlayPosition2(&self) -> f64 {
         match self.pointers.GetPlayPosition2 {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5188,7 +5181,7 @@ impl Reaper {
             Some(f) => f(proj),
         }
     }
-    pub unsafe fn GetPlayState(&self) -> ::std::os::raw::c_int {
+    pub fn GetPlayState(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetPlayState {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5358,7 +5351,7 @@ impl Reaper {
             Some(f) => f(proj, extname, key, valOutNeedBig, valOutNeedBig_sz),
         }
     }
-    pub unsafe fn GetResourcePath(&self) -> *const ::std::os::raw::c_char {
+    pub fn GetResourcePath(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetResourcePath {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -5789,7 +5782,7 @@ impl Reaper {
             Some(f) => f(proj, set, notesNeedBig, notesNeedBig_sz),
         }
     }
-    pub unsafe fn GetSetRepeat(&self, val: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
+    pub fn GetSetRepeat(&self, val: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSetRepeat {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -6084,7 +6077,7 @@ impl Reaper {
             ),
         }
     }
-    pub unsafe fn GetToggleCommandState(
+    pub fn GetToggleCommandState(
         &self,
         command_id: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
@@ -6109,7 +6102,7 @@ impl Reaper {
             Some(f) => f(section, command_id),
         }
     }
-    pub unsafe fn GetToggleCommandStateEx(
+    pub fn GetToggleCommandStateEx(
         &self,
         section_id: ::std::os::raw::c_int,
         command_id: ::std::os::raw::c_int,
@@ -6135,7 +6128,7 @@ impl Reaper {
             Some(f) => f(section, command_id),
         }
     }
-    pub unsafe fn GetTooltipWindow(&self) -> root::HWND {
+    pub fn GetTooltipWindow(&self) -> root::HWND {
         match self.pointers.GetTooltipWindow {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -6290,7 +6283,7 @@ impl Reaper {
             Some(f) => f(track, flag, bufWantNeedBig, bufWantNeedBig_sz),
         }
     }
-    pub unsafe fn GetTrackMIDINoteName(
+    pub fn GetTrackMIDINoteName(
         &self,
         track: ::std::os::raw::c_int,
         pitch: ::std::os::raw::c_int,
@@ -6628,7 +6621,7 @@ impl Reaper {
             Some(f) => f(hwnd, colorOut),
         }
     }
-    pub unsafe fn GSC_mainwnd(&self, t: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
+    pub fn GSC_mainwnd(&self, t: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GSC_mainwnd {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -6663,7 +6656,7 @@ impl Reaper {
             Some(f) => f(section, key),
         }
     }
-    pub unsafe fn HasTrackMIDIPrograms(
+    pub fn HasTrackMIDIPrograms(
         &self,
         track: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
@@ -6826,7 +6819,7 @@ impl Reaper {
             Some(f) => f(file, mode, startpct, endpct, pitchshift),
         }
     }
-    pub unsafe fn InsertTrackAtIndex(&self, idx: ::std::os::raw::c_int, wantDefaults: bool) {
+    pub fn InsertTrackAtIndex(&self, idx: ::std::os::raw::c_int, wantDefaults: bool) {
         match self.pointers.InsertTrackAtIndex {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -6835,7 +6828,7 @@ impl Reaper {
             Some(f) => f(idx, wantDefaults),
         }
     }
-    pub unsafe fn IsInRealTimeAudio(&self) -> ::std::os::raw::c_int {
+    pub fn IsInRealTimeAudio(&self) -> ::std::os::raw::c_int {
         match self.pointers.IsInRealTimeAudio {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -6888,7 +6881,7 @@ impl Reaper {
             Some(f) => f(proj),
         }
     }
-    pub unsafe fn IsREAPER(&self) -> bool {
+    pub fn IsREAPER(&self) -> bool {
         match self.pointers.IsREAPER {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -7518,7 +7511,7 @@ impl Reaper {
             Some(f) => f(dest, src),
         }
     }
-    pub unsafe fn LICE_CreateBitmap(
+    pub fn LICE_CreateBitmap(
         &self,
         mode: ::std::os::raw::c_int,
         w: ::std::os::raw::c_int,
@@ -7532,7 +7525,7 @@ impl Reaper {
             Some(f) => f(mode, w, h),
         }
     }
-    pub unsafe fn LICE_CreateFont(&self) -> *mut root::reaper_functions::LICE_IFont {
+    pub fn LICE_CreateFont(&self) -> *mut root::reaper_functions::LICE_IFont {
         match self.pointers.LICE_CreateFont {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8059,11 +8052,7 @@ impl Reaper {
             Some(f) => f(project, direction),
         }
     }
-    pub unsafe fn Main_OnCommand(
-        &self,
-        command: ::std::os::raw::c_int,
-        flag: ::std::os::raw::c_int,
-    ) {
+    pub fn Main_OnCommand(&self, command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int) {
         match self.pointers.Main_OnCommand {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8108,7 +8097,7 @@ impl Reaper {
             Some(f) => f(proj, forceSaveAsInOptional),
         }
     }
-    pub unsafe fn Main_UpdateLoopInfo(&self, ignoremask: ::std::os::raw::c_int) {
+    pub fn Main_UpdateLoopInfo(&self, ignoremask: ::std::os::raw::c_int) {
         match self.pointers.Main_UpdateLoopInfo {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8157,7 +8146,7 @@ impl Reaper {
             Some(f) => f(time_s, proj),
         }
     }
-    pub unsafe fn Master_GetTempo(&self) -> f64 {
+    pub fn Master_GetTempo(&self) -> f64 {
         match self.pointers.Master_GetTempo {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8166,7 +8155,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn Master_NormalizePlayRate(&self, playrate: f64, isnormalized: bool) -> f64 {
+    pub fn Master_NormalizePlayRate(&self, playrate: f64, isnormalized: bool) -> f64 {
         match self.pointers.Master_NormalizePlayRate {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8175,7 +8164,7 @@ impl Reaper {
             Some(f) => f(playrate, isnormalized),
         }
     }
-    pub unsafe fn Master_NormalizeTempo(&self, bpm: f64, isnormalized: bool) -> f64 {
+    pub fn Master_NormalizeTempo(&self, bpm: f64, isnormalized: bool) -> f64 {
         match self.pointers.Master_NormalizeTempo {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8339,7 +8328,7 @@ impl Reaper {
             Some(f) => f(take, textsyxidx),
         }
     }
-    pub unsafe fn MIDI_eventlist_Create(&self) -> *mut root::MIDI_eventlist {
+    pub fn MIDI_eventlist_Create(&self) -> *mut root::MIDI_eventlist {
         match self.pointers.MIDI_eventlist_Create {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8714,7 +8703,7 @@ impl Reaper {
             Some(f) => f(take, selected, muted, ppqpos, type_, bytestr, bytestr_sz),
         }
     }
-    pub unsafe fn midi_reinit(&self) {
+    pub fn midi_reinit(&self) {
         match self.pointers.midi_reinit {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8907,7 +8896,7 @@ impl Reaper {
             Some(f) => f(take),
         }
     }
-    pub unsafe fn MIDIEditor_GetActive(&self) -> root::HWND {
+    pub fn MIDIEditor_GetActive(&self) -> root::HWND {
         match self.pointers.MIDIEditor_GetActive {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8916,7 +8905,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn MIDIEditor_GetMode(&self, midieditor: root::HWND) -> ::std::os::raw::c_int {
+    pub fn MIDIEditor_GetMode(&self, midieditor: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.MIDIEditor_GetMode {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8953,7 +8942,7 @@ impl Reaper {
             Some(f) => f(midieditor, setting_desc, buf, buf_sz),
         }
     }
-    pub unsafe fn MIDIEditor_GetTake(&self, midieditor: root::HWND) -> *mut root::MediaItem_Take {
+    pub fn MIDIEditor_GetTake(&self, midieditor: root::HWND) -> *mut root::MediaItem_Take {
         match self.pointers.MIDIEditor_GetTake {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -8962,7 +8951,7 @@ impl Reaper {
             Some(f) => f(midieditor),
         }
     }
-    pub unsafe fn MIDIEditor_LastFocused_OnCommand(
+    pub fn MIDIEditor_LastFocused_OnCommand(
         &self,
         command_id: ::std::os::raw::c_int,
         islistviewcommand: bool,
@@ -8975,7 +8964,7 @@ impl Reaper {
             Some(f) => f(command_id, islistviewcommand),
         }
     }
-    pub unsafe fn MIDIEditor_OnCommand(
+    pub fn MIDIEditor_OnCommand(
         &self,
         midieditor: root::HWND,
         command_id: ::std::os::raw::c_int,
@@ -9029,7 +9018,7 @@ impl Reaper {
             Some(f) => f(strNeed64, vol),
         }
     }
-    pub unsafe fn MoveEditCursor(&self, adjamt: f64, dosel: bool) {
+    pub fn MoveEditCursor(&self, adjamt: f64, dosel: bool) {
         match self.pointers.MoveEditCursor {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9051,7 +9040,7 @@ impl Reaper {
             Some(f) => f(item, desttr),
         }
     }
-    pub unsafe fn MuteAllTracks(&self, mute: bool) {
+    pub fn MuteAllTracks(&self, mute: bool) {
         match self.pointers.MuteAllTracks {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9086,7 +9075,7 @@ impl Reaper {
             Some(f) => f(command_name),
         }
     }
-    pub unsafe fn OnPauseButton(&self) {
+    pub fn OnPauseButton(&self) {
         match self.pointers.OnPauseButton {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9104,7 +9093,7 @@ impl Reaper {
             Some(f) => f(proj),
         }
     }
-    pub unsafe fn OnPlayButton(&self) {
+    pub fn OnPlayButton(&self) {
         match self.pointers.OnPlayButton {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9122,7 +9111,7 @@ impl Reaper {
             Some(f) => f(proj),
         }
     }
-    pub unsafe fn OnStopButton(&self) {
+    pub fn OnStopButton(&self) {
         match self.pointers.OnStopButton {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9473,7 +9462,7 @@ impl Reaper {
             Some(f) => f(fn_, srate, nch),
         }
     }
-    pub unsafe fn PitchShiftSubModeMenu(
+    pub fn PitchShiftSubModeMenu(
         &self,
         hwnd: root::HWND,
         x: ::std::os::raw::c_int,
@@ -9567,7 +9556,7 @@ impl Reaper {
             Some(f) => f(name),
         }
     }
-    pub unsafe fn plugin_getFilterList(&self) -> *const ::std::os::raw::c_char {
+    pub fn plugin_getFilterList(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.plugin_getFilterList {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9576,7 +9565,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn plugin_getImportableProjectFilterList(&self) -> *const ::std::os::raw::c_char {
+    pub fn plugin_getImportableProjectFilterList(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.plugin_getImportableProjectFilterList {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9598,7 +9587,7 @@ impl Reaper {
             Some(f) => f(name, infostruct),
         }
     }
-    pub unsafe fn PluginWantsAlwaysRunFx(&self, amt: ::std::os::raw::c_int) {
+    pub fn PluginWantsAlwaysRunFx(&self, amt: ::std::os::raw::c_int) {
         match self.pointers.PluginWantsAlwaysRunFx {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9607,7 +9596,7 @@ impl Reaper {
             Some(f) => f(amt),
         }
     }
-    pub unsafe fn PreventUIRefresh(&self, prevent_count: ::std::os::raw::c_int) {
+    pub fn PreventUIRefresh(&self, prevent_count: ::std::os::raw::c_int) {
         match self.pointers.PreventUIRefresh {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9656,7 +9645,7 @@ impl Reaper {
             Some(f) => f(ptr, ptr_size, new_size),
         }
     }
-    pub unsafe fn ReaperGetPitchShiftAPI(
+    pub fn ReaperGetPitchShiftAPI(
         &self,
         version: ::std::os::raw::c_int,
     ) -> *mut root::IReaperPitchShift {
@@ -9690,7 +9679,7 @@ impl Reaper {
             Some(f) => f(path, ignored),
         }
     }
-    pub unsafe fn reduce_open_files(&self, flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
+    pub fn reduce_open_files(&self, flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.reduce_open_files {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9699,7 +9688,7 @@ impl Reaper {
             Some(f) => f(flags),
         }
     }
-    pub unsafe fn RefreshToolbar(&self, command_id: ::std::os::raw::c_int) {
+    pub fn RefreshToolbar(&self, command_id: ::std::os::raw::c_int) {
         match self.pointers.RefreshToolbar {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9708,7 +9697,7 @@ impl Reaper {
             Some(f) => f(command_id),
         }
     }
-    pub unsafe fn RefreshToolbar2(
+    pub fn RefreshToolbar2(
         &self,
         section_id: ::std::os::raw::c_int,
         command_id: ::std::os::raw::c_int,
@@ -9771,7 +9760,7 @@ impl Reaper {
             ),
         }
     }
-    pub unsafe fn ReorderSelectedTracks(
+    pub fn ReorderSelectedTracks(
         &self,
         beforeTrackIdx: ::std::os::raw::c_int,
         makePrevFolder: ::std::os::raw::c_int,
@@ -9784,10 +9773,7 @@ impl Reaper {
             Some(f) => f(beforeTrackIdx, makePrevFolder),
         }
     }
-    pub unsafe fn Resample_EnumModes(
-        &self,
-        mode: ::std::os::raw::c_int,
-    ) -> *const ::std::os::raw::c_char {
+    pub fn Resample_EnumModes(&self, mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char {
         match self.pointers.Resample_EnumModes {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9796,7 +9782,7 @@ impl Reaper {
             Some(f) => f(mode),
         }
     }
-    pub unsafe fn Resampler_Create(&self) -> *mut root::REAPER_Resample_Interface {
+    pub fn Resampler_Create(&self) -> *mut root::REAPER_Resample_Interface {
         match self.pointers.Resampler_Create {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9834,7 +9820,7 @@ impl Reaper {
             Some(f) => f(in_, out, out_sz, checkSubDirOptional),
         }
     }
-    pub unsafe fn ReverseNamedCommandLookup(
+    pub fn ReverseNamedCommandLookup(
         &self,
         command_id: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
@@ -9846,11 +9832,7 @@ impl Reaper {
             Some(f) => f(command_id),
         }
     }
-    pub unsafe fn ScaleFromEnvelopeMode(
-        &self,
-        scaling_mode: ::std::os::raw::c_int,
-        val: f64,
-    ) -> f64 {
+    pub fn ScaleFromEnvelopeMode(&self, scaling_mode: ::std::os::raw::c_int, val: f64) -> f64 {
         match self.pointers.ScaleFromEnvelopeMode {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9859,7 +9841,7 @@ impl Reaper {
             Some(f) => f(scaling_mode, val),
         }
     }
-    pub unsafe fn ScaleToEnvelopeMode(&self, scaling_mode: ::std::os::raw::c_int, val: f64) -> f64 {
+    pub fn ScaleToEnvelopeMode(&self, scaling_mode: ::std::os::raw::c_int, val: f64) -> f64 {
         match self.pointers.ScaleToEnvelopeMode {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9914,7 +9896,7 @@ impl Reaper {
             Some(f) => f(param),
         }
     }
-    pub unsafe fn screenset_updateLastFocus(&self, prevWin: root::HWND) {
+    pub fn screenset_updateLastFocus(&self, prevWin: root::HWND) {
         match self.pointers.screenset_updateLastFocus {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -9923,7 +9905,7 @@ impl Reaper {
             Some(f) => f(prevWin),
         }
     }
-    pub unsafe fn SectionFromUniqueID(
+    pub fn SectionFromUniqueID(
         &self,
         uniqueID: ::std::os::raw::c_int,
     ) -> *mut root::KbdSectionInfo {
@@ -9976,7 +9958,7 @@ impl Reaper {
             Some(f) => f(take),
         }
     }
-    pub unsafe fn SetAutomationMode(&self, mode: ::std::os::raw::c_int, onlySel: bool) {
+    pub fn SetAutomationMode(&self, mode: ::std::os::raw::c_int, onlySel: bool) {
         match self.pointers.SetAutomationMode {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -10007,7 +9989,7 @@ impl Reaper {
             Some(f) => f(mode, envInOptional),
         }
     }
-    pub unsafe fn SetEditCurPos(&self, time: f64, moveview: bool, seekplay: bool) {
+    pub fn SetEditCurPos(&self, time: f64, moveview: bool, seekplay: bool) {
         match self.pointers.SetEditCurPos {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -10118,7 +10100,7 @@ impl Reaper {
             Some(f) => f(section, key, value, persist),
         }
     }
-    pub unsafe fn SetGlobalAutomationOverride(&self, mode: ::std::os::raw::c_int) {
+    pub fn SetGlobalAutomationOverride(&self, mode: ::std::os::raw::c_int) {
         match self.pointers.SetGlobalAutomationOverride {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -10141,10 +10123,7 @@ impl Reaper {
             Some(f) => f(item, str, isundoOptional),
         }
     }
-    pub unsafe fn SetMasterTrackVisibility(
-        &self,
-        flag: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int {
+    pub fn SetMasterTrackVisibility(&self, flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.SetMasterTrackVisibility {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -10516,7 +10495,7 @@ impl Reaper {
             ),
         }
     }
-    pub unsafe fn SetToggleCommandState(
+    pub fn SetToggleCommandState(
         &self,
         section_id: ::std::os::raw::c_int,
         command_id: ::std::os::raw::c_int,
@@ -10724,7 +10703,7 @@ impl Reaper {
             ),
         }
     }
-    pub unsafe fn SLIDER2DB(&self, y: f64) -> f64 {
+    pub fn SLIDER2DB(&self, y: f64) -> f64 {
         match self.pointers.SLIDER2DB {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -10742,7 +10721,7 @@ impl Reaper {
             Some(f) => f(project, time_pos),
         }
     }
-    pub unsafe fn SoloAllTracks(&self, solo: ::std::os::raw::c_int) {
+    pub fn SoloAllTracks(&self, solo: ::std::os::raw::c_int) {
         match self.pointers.SoloAllTracks {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -10751,7 +10730,7 @@ impl Reaper {
             Some(f) => f(solo),
         }
     }
-    pub unsafe fn Splash_GetWnd(&self) -> root::HWND {
+    pub fn Splash_GetWnd(&self) -> root::HWND {
         match self.pointers.Splash_GetWnd {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -10819,7 +10798,7 @@ impl Reaper {
             Some(f) => f(str, g),
         }
     }
-    pub unsafe fn StuffMIDIMessage(
+    pub fn StuffMIDIMessage(
         &self,
         mode: ::std::os::raw::c_int,
         msg1: ::std::os::raw::c_int,
@@ -11474,7 +11453,7 @@ impl Reaper {
             ),
         }
     }
-    pub unsafe fn ThemeLayout_RefreshAll(&self) {
+    pub fn ThemeLayout_RefreshAll(&self) {
         match self.pointers.ThemeLayout_RefreshAll {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -11496,7 +11475,7 @@ impl Reaper {
             Some(f) => f(section, layout),
         }
     }
-    pub unsafe fn ThemeLayout_SetParameter(
+    pub fn ThemeLayout_SetParameter(
         &self,
         wp: ::std::os::raw::c_int,
         value: ::std::os::raw::c_int,
@@ -11510,7 +11489,7 @@ impl Reaper {
             Some(f) => f(wp, value, persist),
         }
     }
-    pub unsafe fn time_precise(&self) -> f64 {
+    pub fn time_precise(&self) -> f64 {
         match self.pointers.time_precise {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -11610,7 +11589,7 @@ impl Reaper {
             Some(f) => f(proj, dropFrameOutOptional),
         }
     }
-    pub unsafe fn TimeMap_GetDividedBpmAtTime(&self, time: f64) -> f64 {
+    pub fn TimeMap_GetDividedBpmAtTime(&self, time: f64) -> f64 {
         match self.pointers.TimeMap_GetDividedBpmAtTime {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -11691,7 +11670,7 @@ impl Reaper {
             Some(f) => f(proj, qn, qnMeasureStartOutOptional, qnMeasureEndOutOptional),
         }
     }
-    pub unsafe fn TimeMap_QNToTime(&self, qn: f64) -> f64 {
+    pub fn TimeMap_QNToTime(&self, qn: f64) -> f64 {
         match self.pointers.TimeMap_QNToTime {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -11709,7 +11688,7 @@ impl Reaper {
             Some(f) => f(proj, qn),
         }
     }
-    pub unsafe fn TimeMap_timeToQN(&self, tpos: f64) -> f64 {
+    pub fn TimeMap_timeToQN(&self, tpos: f64) -> f64 {
         match self.pointers.TimeMap_timeToQN {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12498,7 +12477,7 @@ impl Reaper {
             Some(f) => f(track, index, showFlag),
         }
     }
-    pub unsafe fn TrackList_AdjustWindows(&self, isMinor: bool) {
+    pub fn TrackList_AdjustWindows(&self, isMinor: bool) {
         match self.pointers.TrackList_AdjustWindows {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12507,7 +12486,7 @@ impl Reaper {
             Some(f) => f(isMinor),
         }
     }
-    pub unsafe fn TrackList_UpdateAllExternalSurfaces(&self) {
+    pub fn TrackList_UpdateAllExternalSurfaces(&self) {
         match self.pointers.TrackList_UpdateAllExternalSurfaces {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12516,7 +12495,7 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub unsafe fn Undo_BeginBlock(&self) {
+    pub fn Undo_BeginBlock(&self) {
         match self.pointers.Undo_BeginBlock {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12668,7 +12647,7 @@ impl Reaper {
             Some(f) => f(proj, descchange, whichStates, trackparm),
         }
     }
-    pub unsafe fn update_disk_counters(
+    pub fn update_disk_counters(
         &self,
         readamt: ::std::os::raw::c_int,
         writeamt: ::std::os::raw::c_int,
@@ -12681,7 +12660,7 @@ impl Reaper {
             Some(f) => f(readamt, writeamt),
         }
     }
-    pub unsafe fn UpdateArrange(&self) {
+    pub fn UpdateArrange(&self) {
         match self.pointers.UpdateArrange {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12699,7 +12678,7 @@ impl Reaper {
             Some(f) => f(item),
         }
     }
-    pub unsafe fn UpdateTimeline(&self) {
+    pub fn UpdateTimeline(&self) {
         match self.pointers.UpdateTimeline {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12773,7 +12752,7 @@ impl Reaper {
             ),
         }
     }
-    pub unsafe fn GetMidiInput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Input {
+    pub fn GetMidiInput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Input {
         match self.pointers.GetMidiInput {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12782,7 +12761,7 @@ impl Reaper {
             Some(f) => f(idx),
         }
     }
-    pub unsafe fn GetMidiOutput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Output {
+    pub fn GetMidiOutput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Output {
         match self.pointers.GetMidiOutput {
             None => panic!(format!(
                 "Attempt to use a REAPER function that has not been loaded: {}",
@@ -12817,7 +12796,7 @@ pub struct ReaperFunctionPointers {
             addtomainmenu: bool,
         ) -> bool,
     >,
-    pub AddExtensionsMainMenu: Option<unsafe extern "C" fn() -> bool>,
+    pub AddExtensionsMainMenu: Option<extern "C" fn() -> bool>,
     pub AddMediaItemToTrack:
         Option<unsafe extern "C" fn(tr: *mut root::MediaTrack) -> *mut root::MediaItem>,
     pub AddProjectMarker: Option<
@@ -12862,7 +12841,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub adjustZoom: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             amt: f64,
             forceset: ::std::os::raw::c_int,
             doupd: bool,
@@ -12872,7 +12851,7 @@ pub struct ReaperFunctionPointers {
     pub AnyTrackSolo: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> bool>,
     pub APIExists:
         Option<unsafe extern "C" fn(function_name: *const ::std::os::raw::c_char) -> bool>,
-    pub APITest: Option<unsafe extern "C" fn()>,
+    pub APITest: Option<extern "C" fn()>,
     pub ApplyNudge: Option<
         unsafe extern "C" fn(
             project: *mut root::ReaProject,
@@ -12890,10 +12869,10 @@ pub struct ReaperFunctionPointers {
             sectionname: *const ::std::os::raw::c_char,
         ),
     >,
-    pub Audio_Init: Option<unsafe extern "C" fn()>,
-    pub Audio_IsPreBuffer: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub Audio_IsRunning: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub Audio_Quit: Option<unsafe extern "C" fn()>,
+    pub Audio_Init: Option<extern "C" fn()>,
+    pub Audio_IsPreBuffer: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub Audio_IsRunning: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub Audio_Quit: Option<extern "C" fn()>,
     pub Audio_RegHardwareHook: Option<
         unsafe extern "C" fn(
             isAdd: bool,
@@ -12906,7 +12885,7 @@ pub struct ReaperFunctionPointers {
         Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor)>,
     pub AudioAccessorValidateState:
         Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool>,
-    pub BypassFxAllTracks: Option<unsafe extern "C" fn(bypass: ::std::os::raw::c_int)>,
+    pub BypassFxAllTracks: Option<extern "C" fn(bypass: ::std::os::raw::c_int)>,
     pub CalculatePeaks: Option<
         unsafe extern "C" fn(
             srcBlock: *mut root::PCM_source_transfer_t,
@@ -12919,9 +12898,9 @@ pub struct ReaperFunctionPointers {
             pksBlock: *mut root::PCM_source_peaktransfer_t,
         ) -> ::std::os::raw::c_int,
     >,
-    pub ClearAllRecArmed: Option<unsafe extern "C" fn()>,
-    pub ClearConsole: Option<unsafe extern "C" fn()>,
-    pub ClearPeakCache: Option<unsafe extern "C" fn()>,
+    pub ClearAllRecArmed: Option<extern "C" fn()>,
+    pub ClearConsole: Option<extern "C" fn()>,
+    pub ClearPeakCache: Option<extern "C" fn()>,
     pub ColorFromNative: Option<
         unsafe extern "C" fn(
             col: ::std::os::raw::c_int,
@@ -12931,7 +12910,7 @@ pub struct ReaperFunctionPointers {
         ),
     >,
     pub ColorToNative: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             r: ::std::os::raw::c_int,
             g: ::std::os::raw::c_int,
             b: ::std::os::raw::c_int,
@@ -12996,8 +12975,7 @@ pub struct ReaperFunctionPointers {
             callback: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    pub CreateMIDIInput:
-        Option<unsafe extern "C" fn(dev: ::std::os::raw::c_int) -> *mut root::midi_Input>,
+    pub CreateMIDIInput: Option<extern "C" fn(dev: ::std::os::raw::c_int) -> *mut root::midi_Input>,
     pub CreateMIDIOutput: Option<
         unsafe extern "C" fn(
             dev: ::std::os::raw::c_int,
@@ -13029,16 +13007,15 @@ pub struct ReaperFunctionPointers {
             desttrInOptional: *mut root::MediaTrack,
         ) -> ::std::os::raw::c_int,
     >,
-    pub CSurf_FlushUndo: Option<unsafe extern "C" fn(force: bool)>,
+    pub CSurf_FlushUndo: Option<extern "C" fn(force: bool)>,
     pub CSurf_GetTouchState: Option<
         unsafe extern "C" fn(trackid: *mut root::MediaTrack, isPan: ::std::os::raw::c_int) -> bool,
     >,
-    pub CSurf_GoEnd: Option<unsafe extern "C" fn()>,
-    pub CSurf_GoStart: Option<unsafe extern "C" fn()>,
-    pub CSurf_NumTracks: Option<unsafe extern "C" fn(mcpView: bool) -> ::std::os::raw::c_int>,
-    pub CSurf_OnArrow:
-        Option<unsafe extern "C" fn(whichdir: ::std::os::raw::c_int, wantzoom: bool)>,
-    pub CSurf_OnFwd: Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int)>,
+    pub CSurf_GoEnd: Option<extern "C" fn()>,
+    pub CSurf_GoStart: Option<extern "C" fn()>,
+    pub CSurf_NumTracks: Option<extern "C" fn(mcpView: bool) -> ::std::os::raw::c_int>,
+    pub CSurf_OnArrow: Option<extern "C" fn(whichdir: ::std::os::raw::c_int, wantzoom: bool)>,
+    pub CSurf_OnFwd: Option<extern "C" fn(seekplay: ::std::os::raw::c_int)>,
     pub CSurf_OnFXChange: Option<
         unsafe extern "C" fn(trackid: *mut root::MediaTrack, en: ::std::os::raw::c_int) -> bool,
     >,
@@ -13078,9 +13055,9 @@ pub struct ReaperFunctionPointers {
             allowGang: bool,
         ) -> f64,
     >,
-    pub CSurf_OnPause: Option<unsafe extern "C" fn()>,
-    pub CSurf_OnPlay: Option<unsafe extern "C" fn()>,
-    pub CSurf_OnPlayRateChange: Option<unsafe extern "C" fn(playrate: f64)>,
+    pub CSurf_OnPause: Option<extern "C" fn()>,
+    pub CSurf_OnPlay: Option<extern "C" fn()>,
+    pub CSurf_OnPlayRateChange: Option<extern "C" fn(playrate: f64)>,
     pub CSurf_OnRecArmChange: Option<
         unsafe extern "C" fn(trackid: *mut root::MediaTrack, recarm: ::std::os::raw::c_int) -> bool,
     >,
@@ -13091,7 +13068,7 @@ pub struct ReaperFunctionPointers {
             allowgang: bool,
         ) -> bool,
     >,
-    pub CSurf_OnRecord: Option<unsafe extern "C" fn()>,
+    pub CSurf_OnRecord: Option<extern "C" fn()>,
     pub CSurf_OnRecvPanChange: Option<
         unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
@@ -13108,11 +13085,11 @@ pub struct ReaperFunctionPointers {
             relative: bool,
         ) -> f64,
     >,
-    pub CSurf_OnRew: Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int)>,
+    pub CSurf_OnRew: Option<extern "C" fn(seekplay: ::std::os::raw::c_int)>,
     pub CSurf_OnRewFwd:
-        Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int)>,
+        Option<extern "C" fn(seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int)>,
     pub CSurf_OnScroll:
-        Option<unsafe extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
+        Option<extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
     pub CSurf_OnSelectedChange: Option<
         unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
@@ -13145,8 +13122,8 @@ pub struct ReaperFunctionPointers {
             allowgang: bool,
         ) -> bool,
     >,
-    pub CSurf_OnStop: Option<unsafe extern "C" fn()>,
-    pub CSurf_OnTempoChange: Option<unsafe extern "C" fn(bpm: f64)>,
+    pub CSurf_OnStop: Option<extern "C" fn()>,
+    pub CSurf_OnTempoChange: Option<extern "C" fn(bpm: f64)>,
     pub CSurf_OnTrackSelection: Option<unsafe extern "C" fn(trackid: *mut root::MediaTrack)>,
     pub CSurf_OnVolumeChange: Option<
         unsafe extern "C" fn(trackid: *mut root::MediaTrack, volume: f64, relative: bool) -> f64,
@@ -13171,9 +13148,9 @@ pub struct ReaperFunctionPointers {
         ) -> f64,
     >,
     pub CSurf_OnZoom:
-        Option<unsafe extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
-    pub CSurf_ResetAllCachedVolPanStates: Option<unsafe extern "C" fn()>,
-    pub CSurf_ScrubAmt: Option<unsafe extern "C" fn(amt: f64)>,
+        Option<extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
+    pub CSurf_ResetAllCachedVolPanStates: Option<extern "C" fn()>,
+    pub CSurf_ScrubAmt: Option<extern "C" fn(amt: f64)>,
     pub CSurf_SetAutoMode: Option<
         unsafe extern "C" fn(
             mode: ::std::os::raw::c_int,
@@ -13232,14 +13209,13 @@ pub struct ReaperFunctionPointers {
             ignoresurf: *mut root::IReaperControlSurface,
         ),
     >,
-    pub CSurf_SetTrackListChange: Option<unsafe extern "C" fn()>,
-    pub CSurf_TrackFromID: Option<
-        unsafe extern "C" fn(idx: ::std::os::raw::c_int, mcpView: bool) -> *mut root::MediaTrack,
-    >,
+    pub CSurf_SetTrackListChange: Option<extern "C" fn()>,
+    pub CSurf_TrackFromID:
+        Option<extern "C" fn(idx: ::std::os::raw::c_int, mcpView: bool) -> *mut root::MediaTrack>,
     pub CSurf_TrackToID: Option<
         unsafe extern "C" fn(track: *mut root::MediaTrack, mcpView: bool) -> ::std::os::raw::c_int,
     >,
-    pub DB2SLIDER: Option<unsafe extern "C" fn(x: f64) -> f64>,
+    pub DB2SLIDER: Option<extern "C" fn(x: f64) -> f64>,
     pub DeleteActionShortcut: Option<
         unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
@@ -13324,14 +13300,14 @@ pub struct ReaperFunctionPointers {
         ),
     >,
     pub DockGetPosition:
-        Option<unsafe extern "C" fn(whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+        Option<extern "C" fn(whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub DockIsChildOfDock: Option<
         unsafe extern "C" fn(
             hwnd: root::HWND,
             isFloatingDockerOut: *mut bool,
         ) -> ::std::os::raw::c_int,
     >,
-    pub DockWindowActivate: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
+    pub DockWindowActivate: Option<extern "C" fn(hwnd: root::HWND)>,
     pub DockWindowAdd: Option<
         unsafe extern "C" fn(
             hwnd: root::HWND,
@@ -13348,9 +13324,9 @@ pub struct ReaperFunctionPointers {
             allowShow: bool,
         ),
     >,
-    pub DockWindowRefresh: Option<unsafe extern "C" fn()>,
-    pub DockWindowRefreshForHWND: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
-    pub DockWindowRemove: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
+    pub DockWindowRefresh: Option<extern "C" fn()>,
+    pub DockWindowRefreshForHWND: Option<extern "C" fn(hwnd: root::HWND)>,
+    pub DockWindowRemove: Option<extern "C" fn(hwnd: root::HWND)>,
     pub DuplicateCustomizableMenu: Option<
         unsafe extern "C" fn(
             srcmenu: *mut ::std::os::raw::c_void,
@@ -13383,7 +13359,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub EnumPitchShiftSubModes: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             mode: ::std::os::raw::c_int,
             submode: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
@@ -13554,7 +13530,7 @@ pub struct ReaperFunctionPointers {
             bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub get_ini_file: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub get_ini_file: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub get_midi_config_var: Option<
         unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
@@ -13574,7 +13550,7 @@ pub struct ReaperFunctionPointers {
         Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaItem_Take>,
     pub GetAllProjectPlayStates:
         Option<unsafe extern "C" fn(ignoreProject: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub GetAppVersion: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub GetAppVersion: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetArmedCommand: Option<
         unsafe extern "C" fn(
             secOut: *mut ::std::os::raw::c_char,
@@ -13609,10 +13585,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub GetColorTheme: Option<
-        unsafe extern "C" fn(
-            idx: ::std::os::raw::c_int,
-            defval: ::std::os::raw::c_int,
-        ) -> root::INT_PTR,
+        extern "C" fn(idx: ::std::os::raw::c_int, defval: ::std::os::raw::c_int) -> root::INT_PTR,
     >,
     pub GetColorThemeStruct: Option<
         unsafe extern "C" fn(szOut: *mut ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void,
@@ -13620,12 +13593,11 @@ pub struct ReaperFunctionPointers {
     pub GetConfigWantsDock: Option<
         unsafe extern "C" fn(ident_str: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int,
     >,
-    pub GetContextMenu: Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> root::HMENU>,
-    pub GetCurrentProjectInLoadSave: Option<unsafe extern "C" fn() -> *mut root::ReaProject>,
-    pub GetCursorContext: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetCursorContext2:
-        Option<unsafe extern "C" fn(want_last_valid: bool) -> ::std::os::raw::c_int>,
-    pub GetCursorPosition: Option<unsafe extern "C" fn() -> f64>,
+    pub GetContextMenu: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> root::HMENU>,
+    pub GetCurrentProjectInLoadSave: Option<extern "C" fn() -> *mut root::ReaProject>,
+    pub GetCursorContext: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetCursorContext2: Option<extern "C" fn(want_last_valid: bool) -> ::std::os::raw::c_int>,
+    pub GetCursorPosition: Option<extern "C" fn() -> f64>,
     pub GetCursorPositionEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>,
     pub GetDisplayedMediaItemColor:
         Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int>,
@@ -13694,7 +13666,7 @@ pub struct ReaperFunctionPointers {
             isundoOptional: bool,
         ) -> bool,
     >,
-    pub GetExePath: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub GetExePath: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetExtState: Option<
         unsafe extern "C" fn(
             section: *const ::std::os::raw::c_char,
@@ -13722,8 +13694,8 @@ pub struct ReaperFunctionPointers {
             create: bool,
         ) -> *mut root::TrackEnvelope,
     >,
-    pub GetGlobalAutomationOverride: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetHZoomLevel: Option<unsafe extern "C" fn() -> f64>,
+    pub GetGlobalAutomationOverride: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetHZoomLevel: Option<extern "C" fn() -> f64>,
     pub GetIconThemePointer: Option<
         unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void,
     >,
@@ -13736,9 +13708,8 @@ pub struct ReaperFunctionPointers {
     pub GetIconThemeStruct: Option<
         unsafe extern "C" fn(szOut: *mut ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void,
     >,
-    pub GetInputChannelName: Option<
-        unsafe extern "C" fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
-    >,
+    pub GetInputChannelName:
+        Option<extern "C" fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
     pub GetInputOutputLatency: Option<
         unsafe extern "C" fn(
             inputlatencyOut: *mut ::std::os::raw::c_int,
@@ -13769,7 +13740,7 @@ pub struct ReaperFunctionPointers {
             isundoOptional: bool,
         ) -> bool,
     >,
-    pub GetLastColorThemeFile: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub GetLastColorThemeFile: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetLastMarkerAndCurRegion: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -13785,14 +13756,14 @@ pub struct ReaperFunctionPointers {
             paramnumberOut: *mut ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetLastTouchedTrack: Option<unsafe extern "C" fn() -> *mut root::MediaTrack>,
-    pub GetMainHwnd: Option<unsafe extern "C" fn() -> root::HWND>,
-    pub GetMasterMuteSoloFlags: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetLastTouchedTrack: Option<extern "C" fn() -> *mut root::MediaTrack>,
+    pub GetMainHwnd: Option<extern "C" fn() -> root::HWND>,
+    pub GetMasterMuteSoloFlags: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetMasterTrack:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::MediaTrack>,
-    pub GetMasterTrackVisibility: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetMaxMidiInputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetMaxMidiOutputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetMasterTrackVisibility: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetMaxMidiInputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetMaxMidiOutputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetMediaItem: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -13889,7 +13860,7 @@ pub struct ReaperFunctionPointers {
             nameout_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetMixerScroll: Option<unsafe extern "C" fn() -> *mut root::MediaTrack>,
+    pub GetMixerScroll: Option<extern "C" fn() -> *mut root::MediaTrack>,
     pub GetMouseModifier: Option<
         unsafe extern "C" fn(
             context: *const ::std::os::raw::c_char,
@@ -13901,16 +13872,15 @@ pub struct ReaperFunctionPointers {
     pub GetMousePosition: Option<
         unsafe extern "C" fn(xOut: *mut ::std::os::raw::c_int, yOut: *mut ::std::os::raw::c_int),
     >,
-    pub GetNumAudioInputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetNumAudioOutputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetNumMIDIInputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetNumMIDIOutputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetNumTracks: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
-    pub GetOS: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
-    pub GetOutputChannelName: Option<
-        unsafe extern "C" fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
-    >,
-    pub GetOutputLatency: Option<unsafe extern "C" fn() -> f64>,
+    pub GetNumAudioInputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumAudioOutputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumMIDIInputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumMIDIOutputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumTracks: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetOS: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub GetOutputChannelName:
+        Option<extern "C" fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
+    pub GetOutputLatency: Option<extern "C" fn() -> f64>,
     pub GetParentTrack:
         Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> *mut root::MediaTrack>,
     pub GetPeakFileName: Option<
@@ -13946,11 +13916,11 @@ pub struct ReaperFunctionPointers {
             bmp: *mut root::reaper_functions::LICE_IBitmap,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    pub GetPlayPosition: Option<unsafe extern "C" fn() -> f64>,
-    pub GetPlayPosition2: Option<unsafe extern "C" fn() -> f64>,
+    pub GetPlayPosition: Option<extern "C" fn() -> f64>,
+    pub GetPlayPosition2: Option<extern "C" fn() -> f64>,
     pub GetPlayPosition2Ex: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>,
     pub GetPlayPositionEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>,
-    pub GetPlayState: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetPlayState: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetPlayStateEx:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
     pub GetPreferredDiskReadMode: Option<
@@ -14009,7 +13979,7 @@ pub struct ReaperFunctionPointers {
             valOutNeedBig_sz: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub GetResourcePath: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub GetResourcePath: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetSelectedEnvelope:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::TrackEnvelope>,
     pub GetSelectedMediaItem: Option<
@@ -14217,8 +14187,7 @@ pub struct ReaperFunctionPointers {
             notesNeedBig_sz: ::std::os::raw::c_int,
         ),
     >,
-    pub GetSetRepeat:
-        Option<unsafe extern "C" fn(val: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub GetSetRepeat: Option<extern "C" fn(val: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub GetSetRepeatEx: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -14352,7 +14321,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub GetToggleCommandState:
-        Option<unsafe extern "C" fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+        Option<extern "C" fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub GetToggleCommandState2: Option<
         unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
@@ -14360,7 +14329,7 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub GetToggleCommandStateEx: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             section_id: ::std::os::raw::c_int,
             command_id: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
@@ -14371,7 +14340,7 @@ pub struct ReaperFunctionPointers {
             command_id: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub GetTooltipWindow: Option<unsafe extern "C" fn() -> root::HWND>,
+    pub GetTooltipWindow: Option<extern "C" fn() -> root::HWND>,
     pub GetTrack: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -14431,7 +14400,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub GetTrackMIDINoteName: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             track: ::std::os::raw::c_int,
             pitch: ::std::os::raw::c_int,
             chan: ::std::os::raw::c_int,
@@ -14596,8 +14565,7 @@ pub struct ReaperFunctionPointers {
             colorOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub GSC_mainwnd:
-        Option<unsafe extern "C" fn(t: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub GSC_mainwnd: Option<extern "C" fn(t: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub guidToString:
         Option<unsafe extern "C" fn(g: *const root::GUID, destNeed64: *mut ::std::os::raw::c_char)>,
     pub HasExtState: Option<
@@ -14607,7 +14575,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub HasTrackMIDIPrograms:
-        Option<unsafe extern "C" fn(track: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
+        Option<extern "C" fn(track: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
     pub HasTrackMIDIProgramsEx: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -14676,9 +14644,8 @@ pub struct ReaperFunctionPointers {
             pitchshift: f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub InsertTrackAtIndex:
-        Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool)>,
-    pub IsInRealTimeAudio: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub InsertTrackAtIndex: Option<extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool)>,
+    pub IsInRealTimeAudio: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub IsItemTakeActiveForPlayback: Option<
         unsafe extern "C" fn(item: *mut root::MediaItem, take: *mut root::MediaItem_Take) -> bool,
     >,
@@ -14687,7 +14654,7 @@ pub struct ReaperFunctionPointers {
     pub IsMediaItemSelected: Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> bool>,
     pub IsProjectDirty:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub IsREAPER: Option<unsafe extern "C" fn() -> bool>,
+    pub IsREAPER: Option<extern "C" fn() -> bool>,
     pub IsTrackSelected: Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> bool>,
     pub IsTrackVisible:
         Option<unsafe extern "C" fn(track: *mut root::MediaTrack, mixer: bool) -> bool>,
@@ -14973,13 +14940,13 @@ pub struct ReaperFunctionPointers {
         ),
     >,
     pub LICE_CreateBitmap: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             mode: ::std::os::raw::c_int,
             w: ::std::os::raw::c_int,
             h: ::std::os::raw::c_int,
         ) -> *mut root::reaper_functions::LICE_IBitmap,
     >,
-    pub LICE_CreateFont: Option<unsafe extern "C" fn() -> *mut root::reaper_functions::LICE_IFont>,
+    pub LICE_CreateFont: Option<extern "C" fn() -> *mut root::reaper_functions::LICE_IFont>,
     pub LICE_DrawCBezier: Option<
         unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -15296,7 +15263,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub Main_OnCommand:
-        Option<unsafe extern "C" fn(command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int)>,
+        Option<extern "C" fn(command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int)>,
     pub Main_OnCommandEx: Option<
         unsafe extern "C" fn(
             command: ::std::os::raw::c_int,
@@ -15307,17 +15274,16 @@ pub struct ReaperFunctionPointers {
     pub Main_openProject: Option<unsafe extern "C" fn(name: *const ::std::os::raw::c_char)>,
     pub Main_SaveProject:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject, forceSaveAsInOptional: bool)>,
-    pub Main_UpdateLoopInfo: Option<unsafe extern "C" fn(ignoremask: ::std::os::raw::c_int)>,
+    pub Main_UpdateLoopInfo: Option<extern "C" fn(ignoremask: ::std::os::raw::c_int)>,
     pub MarkProjectDirty: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
     pub MarkTrackItemsDirty:
         Option<unsafe extern "C" fn(track: *mut root::MediaTrack, item: *mut root::MediaItem)>,
     pub Master_GetPlayRate: Option<unsafe extern "C" fn(project: *mut root::ReaProject) -> f64>,
     pub Master_GetPlayRateAtTime:
         Option<unsafe extern "C" fn(time_s: f64, proj: *mut root::ReaProject) -> f64>,
-    pub Master_GetTempo: Option<unsafe extern "C" fn() -> f64>,
-    pub Master_NormalizePlayRate:
-        Option<unsafe extern "C" fn(playrate: f64, isnormalized: bool) -> f64>,
-    pub Master_NormalizeTempo: Option<unsafe extern "C" fn(bpm: f64, isnormalized: bool) -> f64>,
+    pub Master_GetTempo: Option<extern "C" fn() -> f64>,
+    pub Master_NormalizePlayRate: Option<extern "C" fn(playrate: f64, isnormalized: bool) -> f64>,
+    pub Master_NormalizeTempo: Option<extern "C" fn(bpm: f64, isnormalized: bool) -> f64>,
     pub MB: Option<
         unsafe extern "C" fn(
             msg: *const ::std::os::raw::c_char,
@@ -15385,7 +15351,7 @@ pub struct ReaperFunctionPointers {
             textsyxidx: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub MIDI_eventlist_Create: Option<unsafe extern "C" fn() -> *mut root::MIDI_eventlist>,
+    pub MIDI_eventlist_Create: Option<extern "C" fn() -> *mut root::MIDI_eventlist>,
     pub MIDI_eventlist_Destroy: Option<unsafe extern "C" fn(evtlist: *mut root::MIDI_eventlist)>,
     pub MIDI_GetAllEvts: Option<
         unsafe extern "C" fn(
@@ -15541,7 +15507,7 @@ pub struct ReaperFunctionPointers {
             bytestr_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub midi_reinit: Option<unsafe extern "C" fn()>,
+    pub midi_reinit: Option<extern "C" fn()>,
     pub MIDI_SelectAll: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, select: bool)>,
     pub MIDI_SetAllEvts: Option<
         unsafe extern "C" fn(
@@ -15615,9 +15581,8 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub MIDI_Sort: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
-    pub MIDIEditor_GetActive: Option<unsafe extern "C" fn() -> root::HWND>,
-    pub MIDIEditor_GetMode:
-        Option<unsafe extern "C" fn(midieditor: root::HWND) -> ::std::os::raw::c_int>,
+    pub MIDIEditor_GetActive: Option<extern "C" fn() -> root::HWND>,
+    pub MIDIEditor_GetMode: Option<extern "C" fn(midieditor: root::HWND) -> ::std::os::raw::c_int>,
     pub MIDIEditor_GetSetting_int: Option<
         unsafe extern "C" fn(
             midieditor: root::HWND,
@@ -15633,13 +15598,11 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub MIDIEditor_GetTake:
-        Option<unsafe extern "C" fn(midieditor: root::HWND) -> *mut root::MediaItem_Take>,
-    pub MIDIEditor_LastFocused_OnCommand: Option<
-        unsafe extern "C" fn(command_id: ::std::os::raw::c_int, islistviewcommand: bool) -> bool,
-    >,
-    pub MIDIEditor_OnCommand: Option<
-        unsafe extern "C" fn(midieditor: root::HWND, command_id: ::std::os::raw::c_int) -> bool,
-    >,
+        Option<extern "C" fn(midieditor: root::HWND) -> *mut root::MediaItem_Take>,
+    pub MIDIEditor_LastFocused_OnCommand:
+        Option<extern "C" fn(command_id: ::std::os::raw::c_int, islistviewcommand: bool) -> bool>,
+    pub MIDIEditor_OnCommand:
+        Option<extern "C" fn(midieditor: root::HWND, command_id: ::std::os::raw::c_int) -> bool>,
     pub MIDIEditor_SetSetting_int: Option<
         unsafe extern "C" fn(
             midieditor: root::HWND,
@@ -15651,21 +15614,21 @@ pub struct ReaperFunctionPointers {
     pub mkvolpanstr:
         Option<unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64, pan: f64)>,
     pub mkvolstr: Option<unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64)>,
-    pub MoveEditCursor: Option<unsafe extern "C" fn(adjamt: f64, dosel: bool)>,
+    pub MoveEditCursor: Option<extern "C" fn(adjamt: f64, dosel: bool)>,
     pub MoveMediaItemToTrack: Option<
         unsafe extern "C" fn(item: *mut root::MediaItem, desttr: *mut root::MediaTrack) -> bool,
     >,
-    pub MuteAllTracks: Option<unsafe extern "C" fn(mute: bool)>,
+    pub MuteAllTracks: Option<extern "C" fn(mute: bool)>,
     pub my_getViewport:
         Option<unsafe extern "C" fn(r: *mut root::RECT, sr: *const root::RECT, wantWorkArea: bool)>,
     pub NamedCommandLookup: Option<
         unsafe extern "C" fn(command_name: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int,
     >,
-    pub OnPauseButton: Option<unsafe extern "C" fn()>,
+    pub OnPauseButton: Option<extern "C" fn()>,
     pub OnPauseButtonEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
-    pub OnPlayButton: Option<unsafe extern "C" fn()>,
+    pub OnPlayButton: Option<extern "C" fn()>,
     pub OnPlayButtonEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
-    pub OnStopButton: Option<unsafe extern "C" fn()>,
+    pub OnStopButton: Option<extern "C" fn()>,
     pub OnStopButtonEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
     pub OpenColorThemeFile:
         Option<unsafe extern "C" fn(fn_: *const ::std::os::raw::c_char) -> bool>,
@@ -15812,7 +15775,7 @@ pub struct ReaperFunctionPointers {
         ) -> *mut root::REAPER_PeakGet_Interface,
     >,
     pub PitchShiftSubModeMenu: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             hwnd: root::HWND,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -15850,17 +15813,17 @@ pub struct ReaperFunctionPointers {
     pub plugin_getapi: Option<
         unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void,
     >,
-    pub plugin_getFilterList: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub plugin_getFilterList: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub plugin_getImportableProjectFilterList:
-        Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+        Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub plugin_register: Option<
         unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             infostruct: *mut ::std::os::raw::c_void,
         ) -> ::std::os::raw::c_int,
     >,
-    pub PluginWantsAlwaysRunFx: Option<unsafe extern "C" fn(amt: ::std::os::raw::c_int)>,
-    pub PreventUIRefresh: Option<unsafe extern "C" fn(prevent_count: ::std::os::raw::c_int)>,
+    pub PluginWantsAlwaysRunFx: Option<extern "C" fn(amt: ::std::os::raw::c_int)>,
+    pub PreventUIRefresh: Option<extern "C" fn(prevent_count: ::std::os::raw::c_int)>,
     pub projectconfig_var_addr: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -15880,9 +15843,8 @@ pub struct ReaperFunctionPointers {
             new_size: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub ReaperGetPitchShiftAPI: Option<
-        unsafe extern "C" fn(version: ::std::os::raw::c_int) -> *mut root::IReaperPitchShift,
-    >,
+    pub ReaperGetPitchShiftAPI:
+        Option<extern "C" fn(version: ::std::os::raw::c_int) -> *mut root::IReaperPitchShift>,
     pub ReaScriptError: Option<unsafe extern "C" fn(errmsg: *const ::std::os::raw::c_char)>,
     pub RecursiveCreateDirectory: Option<
         unsafe extern "C" fn(
@@ -15891,11 +15853,10 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub reduce_open_files:
-        Option<unsafe extern "C" fn(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
-    pub RefreshToolbar: Option<unsafe extern "C" fn(command_id: ::std::os::raw::c_int)>,
-    pub RefreshToolbar2: Option<
-        unsafe extern "C" fn(section_id: ::std::os::raw::c_int, command_id: ::std::os::raw::c_int),
-    >,
+        Option<extern "C" fn(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub RefreshToolbar: Option<extern "C" fn(command_id: ::std::os::raw::c_int)>,
+    pub RefreshToolbar2:
+        Option<extern "C" fn(section_id: ::std::os::raw::c_int, command_id: ::std::os::raw::c_int)>,
     pub relative_fn: Option<
         unsafe extern "C" fn(
             in_: *const ::std::os::raw::c_char,
@@ -15920,14 +15881,14 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub ReorderSelectedTracks: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             beforeTrackIdx: ::std::os::raw::c_int,
             makePrevFolder: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub Resample_EnumModes:
-        Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
-    pub Resampler_Create: Option<unsafe extern "C" fn() -> *mut root::REAPER_Resample_Interface>,
+        Option<extern "C" fn(mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
+    pub Resampler_Create: Option<extern "C" fn() -> *mut root::REAPER_Resample_Interface>,
     pub resolve_fn: Option<
         unsafe extern "C" fn(
             in_: *const ::std::os::raw::c_char,
@@ -15943,13 +15904,12 @@ pub struct ReaperFunctionPointers {
             checkSubDirOptional: *const ::std::os::raw::c_char,
         ),
     >,
-    pub ReverseNamedCommandLookup: Option<
-        unsafe extern "C" fn(command_id: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
-    >,
+    pub ReverseNamedCommandLookup:
+        Option<extern "C" fn(command_id: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
     pub ScaleFromEnvelopeMode:
-        Option<unsafe extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
+        Option<extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
     pub ScaleToEnvelopeMode:
-        Option<unsafe extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
+        Option<extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
     pub screenset_register: Option<
         unsafe extern "C" fn(
             id: *mut ::std::os::raw::c_char,
@@ -15967,9 +15927,9 @@ pub struct ReaperFunctionPointers {
     pub screenset_unregister: Option<unsafe extern "C" fn(id: *mut ::std::os::raw::c_char)>,
     pub screenset_unregisterByParam:
         Option<unsafe extern "C" fn(param: *mut ::std::os::raw::c_void)>,
-    pub screenset_updateLastFocus: Option<unsafe extern "C" fn(prevWin: root::HWND)>,
+    pub screenset_updateLastFocus: Option<extern "C" fn(prevWin: root::HWND)>,
     pub SectionFromUniqueID:
-        Option<unsafe extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo>,
+        Option<extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo>,
     pub SelectAllMediaItems:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject, selected: bool)>,
     pub SelectProjectInstance: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
@@ -15981,13 +15941,13 @@ pub struct ReaperFunctionPointers {
         ),
     >,
     pub SetActiveTake: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
-    pub SetAutomationMode: Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int, onlySel: bool)>,
+    pub SetAutomationMode: Option<extern "C" fn(mode: ::std::os::raw::c_int, onlySel: bool)>,
     pub SetCurrentBPM:
         Option<unsafe extern "C" fn(__proj: *mut root::ReaProject, bpm: f64, wantUndo: bool)>,
     pub SetCursorContext: Option<
         unsafe extern "C" fn(mode: ::std::os::raw::c_int, envInOptional: *mut root::TrackEnvelope),
     >,
-    pub SetEditCurPos: Option<unsafe extern "C" fn(time: f64, moveview: bool, seekplay: bool)>,
+    pub SetEditCurPos: Option<extern "C" fn(time: f64, moveview: bool, seekplay: bool)>,
     pub SetEditCurPos2: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -16036,7 +15996,7 @@ pub struct ReaperFunctionPointers {
             persist: bool,
         ),
     >,
-    pub SetGlobalAutomationOverride: Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int)>,
+    pub SetGlobalAutomationOverride: Option<extern "C" fn(mode: ::std::os::raw::c_int)>,
     pub SetItemStateChunk: Option<
         unsafe extern "C" fn(
             item: *mut root::MediaItem,
@@ -16045,7 +16005,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub SetMasterTrackVisibility:
-        Option<unsafe extern "C" fn(flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+        Option<extern "C" fn(flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub SetMediaItemInfo_Value: Option<
         unsafe extern "C" fn(
             item: *mut root::MediaItem,
@@ -16207,7 +16167,7 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub SetToggleCommandState: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             section_id: ::std::os::raw::c_int,
             command_id: ::std::os::raw::c_int,
             state: ::std::os::raw::c_int,
@@ -16296,11 +16256,11 @@ pub struct ReaperFunctionPointers {
             ctx3Optional: ::std::os::raw::c_int,
         ),
     >,
-    pub SLIDER2DB: Option<unsafe extern "C" fn(y: f64) -> f64>,
+    pub SLIDER2DB: Option<extern "C" fn(y: f64) -> f64>,
     pub SnapToGrid:
         Option<unsafe extern "C" fn(project: *mut root::ReaProject, time_pos: f64) -> f64>,
-    pub SoloAllTracks: Option<unsafe extern "C" fn(solo: ::std::os::raw::c_int)>,
-    pub Splash_GetWnd: Option<unsafe extern "C" fn() -> root::HWND>,
+    pub SoloAllTracks: Option<extern "C" fn(solo: ::std::os::raw::c_int)>,
+    pub Splash_GetWnd: Option<extern "C" fn() -> root::HWND>,
     pub SplitMediaItem: Option<
         unsafe extern "C" fn(item: *mut root::MediaItem, position: f64) -> *mut root::MediaItem,
     >,
@@ -16319,7 +16279,7 @@ pub struct ReaperFunctionPointers {
     pub stringToGuid:
         Option<unsafe extern "C" fn(str: *const ::std::os::raw::c_char, g: *mut root::GUID)>,
     pub StuffMIDIMessage: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             mode: ::std::os::raw::c_int,
             msg1: ::std::os::raw::c_int,
             msg2: ::std::os::raw::c_int,
@@ -16634,7 +16594,7 @@ pub struct ReaperFunctionPointers {
             maxValueOutOptional: *mut ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
-    pub ThemeLayout_RefreshAll: Option<unsafe extern "C" fn()>,
+    pub ThemeLayout_RefreshAll: Option<extern "C" fn()>,
     pub ThemeLayout_SetLayout: Option<
         unsafe extern "C" fn(
             section: *const ::std::os::raw::c_char,
@@ -16642,13 +16602,13 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub ThemeLayout_SetParameter: Option<
-        unsafe extern "C" fn(
+        extern "C" fn(
             wp: ::std::os::raw::c_int,
             value: ::std::os::raw::c_int,
             persist: bool,
         ) -> bool,
     >,
-    pub time_precise: Option<unsafe extern "C" fn() -> f64>,
+    pub time_precise: Option<extern "C" fn() -> f64>,
     pub TimeMap2_beatsToTime: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -16677,7 +16637,7 @@ pub struct ReaperFunctionPointers {
     pub TimeMap_curFrameRate: Option<
         unsafe extern "C" fn(proj: *mut root::ReaProject, dropFrameOutOptional: *mut bool) -> f64,
     >,
-    pub TimeMap_GetDividedBpmAtTime: Option<unsafe extern "C" fn(time: f64) -> f64>,
+    pub TimeMap_GetDividedBpmAtTime: Option<extern "C" fn(time: f64) -> f64>,
     pub TimeMap_GetMeasureInfo: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -16714,10 +16674,10 @@ pub struct ReaperFunctionPointers {
             qnMeasureEndOutOptional: *mut f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub TimeMap_QNToTime: Option<unsafe extern "C" fn(qn: f64) -> f64>,
+    pub TimeMap_QNToTime: Option<extern "C" fn(qn: f64) -> f64>,
     pub TimeMap_QNToTime_abs:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject, qn: f64) -> f64>,
-    pub TimeMap_timeToQN: Option<unsafe extern "C" fn(tpos: f64) -> f64>,
+    pub TimeMap_timeToQN: Option<extern "C" fn(tpos: f64) -> f64>,
     pub TimeMap_timeToQN_abs:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject, tpos: f64) -> f64>,
     pub ToggleTrackSendUIMute: Option<
@@ -17077,9 +17037,9 @@ pub struct ReaperFunctionPointers {
             showFlag: ::std::os::raw::c_int,
         ),
     >,
-    pub TrackList_AdjustWindows: Option<unsafe extern "C" fn(isMinor: bool)>,
-    pub TrackList_UpdateAllExternalSurfaces: Option<unsafe extern "C" fn()>,
-    pub Undo_BeginBlock: Option<unsafe extern "C" fn()>,
+    pub TrackList_AdjustWindows: Option<extern "C" fn(isMinor: bool)>,
+    pub TrackList_UpdateAllExternalSurfaces: Option<extern "C" fn()>,
+    pub Undo_BeginBlock: Option<extern "C" fn()>,
     pub Undo_BeginBlock2: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
     pub Undo_CanRedo2:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char>,
@@ -17131,12 +17091,11 @@ pub struct ReaperFunctionPointers {
             trackparm: ::std::os::raw::c_int,
         ),
     >,
-    pub update_disk_counters: Option<
-        unsafe extern "C" fn(readamt: ::std::os::raw::c_int, writeamt: ::std::os::raw::c_int),
-    >,
-    pub UpdateArrange: Option<unsafe extern "C" fn()>,
+    pub update_disk_counters:
+        Option<extern "C" fn(readamt: ::std::os::raw::c_int, writeamt: ::std::os::raw::c_int)>,
+    pub UpdateArrange: Option<extern "C" fn()>,
     pub UpdateItemInProject: Option<unsafe extern "C" fn(item: *mut root::MediaItem)>,
-    pub UpdateTimeline: Option<unsafe extern "C" fn()>,
+    pub UpdateTimeline: Option<extern "C" fn()>,
     pub ValidatePtr: Option<
         unsafe extern "C" fn(
             pointer: *mut ::std::os::raw::c_void,
@@ -17172,8 +17131,6 @@ pub struct ReaperFunctionPointers {
             mode: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetMidiInput:
-        Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
-    pub GetMidiOutput:
-        Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
+    pub GetMidiInput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
+    pub GetMidiOutput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
 }
