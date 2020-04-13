@@ -7,6 +7,42 @@ use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
+use std::ptr::null_mut;
+
+// Only medium-level API can create such objects. This is the most important point why we don't need
+// `unsafe` for medium-level API methods that take such objects instead of pointers. Because only
+// if we don't let anyone create such objects, we can safely assume that this is really a pointer of
+// that type and has not been messed with (by pointer casting - which can be made even with unsafe
+// code!). The contained pointer is non-null.
+pub struct MediaTrack(*mut raw::MediaTrack);
+
+impl MediaTrack {
+    pub(super) fn required(ptr: *mut raw::MediaTrack) -> Result<MediaTrack, ()> {
+        if ptr.is_null() {
+            Err(())
+        } else {
+            Ok(MediaTrack(ptr))
+        }
+    }
+
+    pub(super) fn optional(ptr: *mut raw::MediaTrack) -> Option<MediaTrack> {
+        if ptr.is_null() {
+            None
+        } else {
+            Some(MediaTrack(ptr))
+        }
+    }
+}
+
+// This is for easy extraction of the raw pointer. First and foremost for the medium-level API
+// implementation code (because it needs to call the low-level API). But also for consumers who
+// need to resort to the low-level API. However, once one starts using the low-level API and gets
+// a pointer from it, they can't use that pointer in safe medium-level methods. That's by design.
+impl From<MediaTrack> for *mut raw::MediaTrack {
+    fn from(v: MediaTrack) -> Self {
+        v.0
+    }
+}
 
 pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
