@@ -118,7 +118,10 @@ impl Reaper {
         pointer: *mut c_void,
         ctypename: ReaperPointerType,
     ) -> bool {
-        unsafe { self.low.ValidatePtr2(proj, pointer, ctypename.into()) }
+        unsafe {
+            self.low
+                .ValidatePtr2(proj, pointer, Cow::from(ctypename).as_ptr())
+        }
     }
 
     /// Shows a message to the user (also useful for debugging). Send "\n" for newline and "" to
@@ -138,7 +141,7 @@ impl Reaper {
         set_new_value: *mut c_void,
     ) -> *mut c_void {
         self.low
-            .GetSetMediaTrackInfo(tr, parmname.into(), set_new_value)
+            .GetSetMediaTrackInfo(tr, Cow::from(parmname).as_ptr(), set_new_value)
     }
 
     fn get_media_track_info(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> *mut c_void {
@@ -200,7 +203,8 @@ impl Reaper {
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
     pub unsafe fn plugin_register(&self, name: RegInstr, infostruct: *mut c_void) -> i32 {
-        self.low.plugin_register(name.into(), infostruct)
+        self.low
+            .plugin_register(Cow::from(name).as_ptr(), infostruct)
     }
 
     // TODO Doc
@@ -982,7 +986,7 @@ impl Reaper {
     ) -> *mut TrackEnvelope {
         unsafe {
             self.low
-                .GetTrackEnvelopeByChunkName(track, cfgchunkname.into())
+                .GetTrackEnvelopeByChunkName(track, Cow::from(cfgchunkname).as_ptr())
         }
     }
 
@@ -1002,7 +1006,10 @@ impl Reaper {
 
     // TODO Doc
     pub fn get_media_track_info_value(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> f64 {
-        unsafe { self.low.GetMediaTrackInfo_Value(tr, parmname.into()) }
+        unsafe {
+            self.low
+                .GetMediaTrackInfo_Value(tr, Cow::from(parmname).as_ptr())
+        }
     }
 
     // TODO Doc
@@ -1123,7 +1130,7 @@ impl Reaper {
     ) -> Result<(), ()> {
         let successful = unsafe {
             self.low
-                .SetMediaTrackInfo_Value(tr, parmname.into(), newvalue)
+                .SetMediaTrackInfo_Value(tr, Cow::from(parmname).as_ptr(), newvalue)
         };
         if !successful {
             return Err(());
@@ -1290,7 +1297,7 @@ impl Reaper {
             tr,
             category.into(),
             sendidx as i32,
-            parmname.into(),
+            Cow::from(parmname).as_ptr(),
             set_new_value,
         )
     }
