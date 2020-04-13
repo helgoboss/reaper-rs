@@ -12,7 +12,7 @@ use c_str_macro::c_str;
 #[derive(Default)]
 pub struct Reaper {
     pub __mergesort: Option<
-        fn(
+        unsafe extern "C" fn(
             base: *mut ::std::os::raw::c_void,
             nmemb: usize,
             size: usize,
@@ -26,17 +26,18 @@ pub struct Reaper {
         ),
     >,
     pub AddCustomizableMenu: Option<
-        fn(
+        unsafe extern "C" fn(
             menuidstr: *const ::std::os::raw::c_char,
             menuname: *const ::std::os::raw::c_char,
             kbdsecname: *const ::std::os::raw::c_char,
             addtomainmenu: bool,
         ) -> bool,
     >,
-    pub AddExtensionsMainMenu: Option<fn() -> bool>,
-    pub AddMediaItemToTrack: Option<fn(tr: *mut root::MediaTrack) -> *mut root::MediaItem>,
+    pub AddExtensionsMainMenu: Option<unsafe extern "C" fn() -> bool>,
+    pub AddMediaItemToTrack:
+        Option<unsafe extern "C" fn(tr: *mut root::MediaTrack) -> *mut root::MediaItem>,
     pub AddProjectMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             isrgn: bool,
             pos: f64,
@@ -46,7 +47,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub AddProjectMarker2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             isrgn: bool,
             pos: f64,
@@ -57,16 +58,17 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub AddRemoveReaScript: Option<
-        fn(
+        unsafe extern "C" fn(
             add: bool,
             sectionID: ::std::os::raw::c_int,
             scriptfn: *const ::std::os::raw::c_char,
             commit: bool,
         ) -> ::std::os::raw::c_int,
     >,
-    pub AddTakeToMediaItem: Option<fn(item: *mut root::MediaItem) -> *mut root::MediaItem_Take>,
+    pub AddTakeToMediaItem:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaItem_Take>,
     pub AddTempoTimeSigMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             timepos: f64,
             bpm: f64,
@@ -76,18 +78,19 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub adjustZoom: Option<
-        fn(
+        unsafe extern "C" fn(
             amt: f64,
             forceset: ::std::os::raw::c_int,
             doupd: bool,
             centermode: ::std::os::raw::c_int,
         ),
     >,
-    pub AnyTrackSolo: Option<fn(proj: *mut root::ReaProject) -> bool>,
-    pub APIExists: Option<fn(function_name: *const ::std::os::raw::c_char) -> bool>,
-    pub APITest: Option<fn()>,
+    pub AnyTrackSolo: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> bool>,
+    pub APIExists:
+        Option<unsafe extern "C" fn(function_name: *const ::std::os::raw::c_char) -> bool>,
+    pub APITest: Option<unsafe extern "C" fn()>,
     pub ApplyNudge: Option<
-        fn(
+        unsafe extern "C" fn(
             project: *mut root::ReaProject,
             nudgeflag: ::std::os::raw::c_int,
             nudgewhat: ::std::os::raw::c_int,
@@ -97,37 +100,46 @@ pub struct Reaper {
             copies: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub ArmCommand:
-        Option<fn(cmd: ::std::os::raw::c_int, sectionname: *const ::std::os::raw::c_char)>,
-    pub Audio_Init: Option<fn()>,
-    pub Audio_IsPreBuffer: Option<fn() -> ::std::os::raw::c_int>,
-    pub Audio_IsRunning: Option<fn() -> ::std::os::raw::c_int>,
-    pub Audio_Quit: Option<fn()>,
-    pub Audio_RegHardwareHook:
-        Option<fn(isAdd: bool, reg: *mut root::audio_hook_register_t) -> ::std::os::raw::c_int>,
+    pub ArmCommand: Option<
+        unsafe extern "C" fn(
+            cmd: ::std::os::raw::c_int,
+            sectionname: *const ::std::os::raw::c_char,
+        ),
+    >,
+    pub Audio_Init: Option<unsafe extern "C" fn()>,
+    pub Audio_IsPreBuffer: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub Audio_IsRunning: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub Audio_Quit: Option<unsafe extern "C" fn()>,
+    pub Audio_RegHardwareHook: Option<
+        unsafe extern "C" fn(
+            isAdd: bool,
+            reg: *mut root::audio_hook_register_t,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub AudioAccessorStateChanged:
-        Option<fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool>,
-    pub AudioAccessorUpdate: Option<fn(accessor: *mut root::reaper_functions::AudioAccessor)>,
+        Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool>,
+    pub AudioAccessorUpdate:
+        Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor)>,
     pub AudioAccessorValidateState:
-        Option<fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool>,
-    pub BypassFxAllTracks: Option<fn(bypass: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool>,
+    pub BypassFxAllTracks: Option<unsafe extern "C" fn(bypass: ::std::os::raw::c_int)>,
     pub CalculatePeaks: Option<
-        fn(
+        unsafe extern "C" fn(
             srcBlock: *mut root::PCM_source_transfer_t,
             pksBlock: *mut root::PCM_source_peaktransfer_t,
         ) -> ::std::os::raw::c_int,
     >,
     pub CalculatePeaksFloatSrcPtr: Option<
-        fn(
+        unsafe extern "C" fn(
             srcBlock: *mut root::PCM_source_transfer_t,
             pksBlock: *mut root::PCM_source_peaktransfer_t,
         ) -> ::std::os::raw::c_int,
     >,
-    pub ClearAllRecArmed: Option<fn()>,
-    pub ClearConsole: Option<fn()>,
-    pub ClearPeakCache: Option<fn()>,
+    pub ClearAllRecArmed: Option<unsafe extern "C" fn()>,
+    pub ClearConsole: Option<unsafe extern "C" fn()>,
+    pub ClearPeakCache: Option<unsafe extern "C" fn()>,
     pub ColorFromNative: Option<
-        fn(
+        unsafe extern "C" fn(
             col: ::std::os::raw::c_int,
             rOut: *mut ::std::os::raw::c_int,
             gOut: *mut ::std::os::raw::c_int,
@@ -135,122 +147,169 @@ pub struct Reaper {
         ),
     >,
     pub ColorToNative: Option<
-        fn(
+        unsafe extern "C" fn(
             r: ::std::os::raw::c_int,
             g: ::std::os::raw::c_int,
             b: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub CountActionShortcuts: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
             cmdID: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub CountAutomationItems: Option<fn(env: *mut root::TrackEnvelope) -> ::std::os::raw::c_int>,
+    pub CountAutomationItems:
+        Option<unsafe extern "C" fn(env: *mut root::TrackEnvelope) -> ::std::os::raw::c_int>,
     pub CountEnvelopePoints:
-        Option<fn(envelope: *mut root::TrackEnvelope) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(envelope: *mut root::TrackEnvelope) -> ::std::os::raw::c_int>,
     pub CountEnvelopePointsEx: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub CountMediaItems: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub CountMediaItems:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
     pub CountProjectMarkers: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             num_markersOut: *mut ::std::os::raw::c_int,
             num_regionsOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub CountSelectedMediaItems: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub CountSelectedTracks: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub CountSelectedTracks2:
-        Option<fn(proj: *mut root::ReaProject, wantmaster: bool) -> ::std::os::raw::c_int>,
-    pub CountTakeEnvelopes: Option<fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
-    pub CountTakes: Option<fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int>,
-    pub CountTCPFXParms: Option<
-        fn(project: *mut root::ReaProject, track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
+    pub CountSelectedMediaItems:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub CountSelectedTracks:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub CountSelectedTracks2: Option<
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            wantmaster: bool,
+        ) -> ::std::os::raw::c_int,
     >,
-    pub CountTempoTimeSigMarkers: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub CountTrackEnvelopes: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
-    pub CountTrackMediaItems: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
-    pub CountTracks: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub CountTakeEnvelopes:
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
+    pub CountTakes:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int>,
+    pub CountTCPFXParms: Option<
+        unsafe extern "C" fn(
+            project: *mut root::ReaProject,
+            track: *mut root::MediaTrack,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub CountTempoTimeSigMarkers:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub CountTrackEnvelopes:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub CountTrackMediaItems:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub CountTracks:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
     pub CreateLocalOscHandler: Option<
-        fn(
+        unsafe extern "C" fn(
             obj: *mut ::std::os::raw::c_void,
             callback: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    pub CreateMIDIInput: Option<fn(dev: ::std::os::raw::c_int) -> *mut root::midi_Input>,
+    pub CreateMIDIInput:
+        Option<unsafe extern "C" fn(dev: ::std::os::raw::c_int) -> *mut root::midi_Input>,
     pub CreateMIDIOutput: Option<
-        fn(
+        unsafe extern "C" fn(
             dev: ::std::os::raw::c_int,
             streamMode: bool,
             msoffset100: *mut ::std::os::raw::c_int,
         ) -> *mut root::midi_Output,
     >,
     pub CreateNewMIDIItemInProj: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             starttime: f64,
             endtime: f64,
             qnInOptional: *const bool,
         ) -> *mut root::MediaItem,
     >,
-    pub CreateTakeAudioAccessor:
-        Option<fn(take: *mut root::MediaItem_Take) -> *mut root::reaper_functions::AudioAccessor>,
-    pub CreateTrackAudioAccessor:
-        Option<fn(track: *mut root::MediaTrack) -> *mut root::reaper_functions::AudioAccessor>,
+    pub CreateTakeAudioAccessor: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+        ) -> *mut root::reaper_functions::AudioAccessor,
+    >,
+    pub CreateTrackAudioAccessor: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+        ) -> *mut root::reaper_functions::AudioAccessor,
+    >,
     pub CreateTrackSend: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             desttrInOptional: *mut root::MediaTrack,
         ) -> ::std::os::raw::c_int,
     >,
-    pub CSurf_FlushUndo: Option<fn(force: bool)>,
-    pub CSurf_GetTouchState:
-        Option<fn(trackid: *mut root::MediaTrack, isPan: ::std::os::raw::c_int) -> bool>,
-    pub CSurf_GoEnd: Option<fn()>,
-    pub CSurf_GoStart: Option<fn()>,
-    pub CSurf_NumTracks: Option<fn(mcpView: bool) -> ::std::os::raw::c_int>,
-    pub CSurf_OnArrow: Option<fn(whichdir: ::std::os::raw::c_int, wantzoom: bool)>,
-    pub CSurf_OnFwd: Option<fn(seekplay: ::std::os::raw::c_int)>,
-    pub CSurf_OnFXChange:
-        Option<fn(trackid: *mut root::MediaTrack, en: ::std::os::raw::c_int) -> bool>,
+    pub CSurf_FlushUndo: Option<unsafe extern "C" fn(force: bool)>,
+    pub CSurf_GetTouchState: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, isPan: ::std::os::raw::c_int) -> bool,
+    >,
+    pub CSurf_GoEnd: Option<unsafe extern "C" fn()>,
+    pub CSurf_GoStart: Option<unsafe extern "C" fn()>,
+    pub CSurf_NumTracks: Option<unsafe extern "C" fn(mcpView: bool) -> ::std::os::raw::c_int>,
+    pub CSurf_OnArrow:
+        Option<unsafe extern "C" fn(whichdir: ::std::os::raw::c_int, wantzoom: bool)>,
+    pub CSurf_OnFwd: Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int)>,
+    pub CSurf_OnFXChange: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, en: ::std::os::raw::c_int) -> bool,
+    >,
     pub CSurf_OnInputMonitorChange: Option<
-        fn(trackid: *mut root::MediaTrack, monitor: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            monitor: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub CSurf_OnInputMonitorChangeEx: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             monitor: ::std::os::raw::c_int,
             allowgang: bool,
         ) -> ::std::os::raw::c_int,
     >,
-    pub CSurf_OnMuteChange:
-        Option<fn(trackid: *mut root::MediaTrack, mute: ::std::os::raw::c_int) -> bool>,
+    pub CSurf_OnMuteChange: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, mute: ::std::os::raw::c_int) -> bool,
+    >,
     pub CSurf_OnMuteChangeEx: Option<
-        fn(trackid: *mut root::MediaTrack, mute: ::std::os::raw::c_int, allowgang: bool) -> bool,
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            mute: ::std::os::raw::c_int,
+            allowgang: bool,
+        ) -> bool,
     >,
-    pub CSurf_OnOscControlMessage: Option<fn(msg: *const ::std::os::raw::c_char, arg: *const f32)>,
-    pub CSurf_OnPanChange:
-        Option<fn(trackid: *mut root::MediaTrack, pan: f64, relative: bool) -> f64>,
+    pub CSurf_OnOscControlMessage:
+        Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char, arg: *const f32)>,
+    pub CSurf_OnPanChange: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, pan: f64, relative: bool) -> f64,
+    >,
     pub CSurf_OnPanChangeEx: Option<
-        fn(trackid: *mut root::MediaTrack, pan: f64, relative: bool, allowGang: bool) -> f64,
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            pan: f64,
+            relative: bool,
+            allowGang: bool,
+        ) -> f64,
     >,
-    pub CSurf_OnPause: Option<fn()>,
-    pub CSurf_OnPlay: Option<fn()>,
-    pub CSurf_OnPlayRateChange: Option<fn(playrate: f64)>,
-    pub CSurf_OnRecArmChange:
-        Option<fn(trackid: *mut root::MediaTrack, recarm: ::std::os::raw::c_int) -> bool>,
+    pub CSurf_OnPause: Option<unsafe extern "C" fn()>,
+    pub CSurf_OnPlay: Option<unsafe extern "C" fn()>,
+    pub CSurf_OnPlayRateChange: Option<unsafe extern "C" fn(playrate: f64)>,
+    pub CSurf_OnRecArmChange: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, recarm: ::std::os::raw::c_int) -> bool,
+    >,
     pub CSurf_OnRecArmChangeEx: Option<
-        fn(trackid: *mut root::MediaTrack, recarm: ::std::os::raw::c_int, allowgang: bool) -> bool,
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            recarm: ::std::os::raw::c_int,
+            allowgang: bool,
+        ) -> bool,
     >,
-    pub CSurf_OnRecord: Option<fn()>,
+    pub CSurf_OnRecord: Option<unsafe extern "C" fn()>,
     pub CSurf_OnRecvPanChange: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             recv_index: ::std::os::raw::c_int,
             pan: f64,
@@ -258,20 +317,26 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub CSurf_OnRecvVolumeChange: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             recv_index: ::std::os::raw::c_int,
             volume: f64,
             relative: bool,
         ) -> f64,
     >,
-    pub CSurf_OnRew: Option<fn(seekplay: ::std::os::raw::c_int)>,
-    pub CSurf_OnRewFwd: Option<fn(seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int)>,
-    pub CSurf_OnScroll: Option<fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
-    pub CSurf_OnSelectedChange:
-        Option<fn(trackid: *mut root::MediaTrack, selected: ::std::os::raw::c_int) -> bool>,
+    pub CSurf_OnRew: Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int)>,
+    pub CSurf_OnRewFwd:
+        Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int)>,
+    pub CSurf_OnScroll:
+        Option<unsafe extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
+    pub CSurf_OnSelectedChange: Option<
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            selected: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
     pub CSurf_OnSendPanChange: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             send_index: ::std::os::raw::c_int,
             pan: f64,
@@ -279,102 +344,141 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub CSurf_OnSendVolumeChange: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             send_index: ::std::os::raw::c_int,
             volume: f64,
             relative: bool,
         ) -> f64,
     >,
-    pub CSurf_OnSoloChange:
-        Option<fn(trackid: *mut root::MediaTrack, solo: ::std::os::raw::c_int) -> bool>,
+    pub CSurf_OnSoloChange: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, solo: ::std::os::raw::c_int) -> bool,
+    >,
     pub CSurf_OnSoloChangeEx: Option<
-        fn(trackid: *mut root::MediaTrack, solo: ::std::os::raw::c_int, allowgang: bool) -> bool,
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            solo: ::std::os::raw::c_int,
+            allowgang: bool,
+        ) -> bool,
     >,
-    pub CSurf_OnStop: Option<fn()>,
-    pub CSurf_OnTempoChange: Option<fn(bpm: f64)>,
-    pub CSurf_OnTrackSelection: Option<fn(trackid: *mut root::MediaTrack)>,
-    pub CSurf_OnVolumeChange:
-        Option<fn(trackid: *mut root::MediaTrack, volume: f64, relative: bool) -> f64>,
+    pub CSurf_OnStop: Option<unsafe extern "C" fn()>,
+    pub CSurf_OnTempoChange: Option<unsafe extern "C" fn(bpm: f64)>,
+    pub CSurf_OnTrackSelection: Option<unsafe extern "C" fn(trackid: *mut root::MediaTrack)>,
+    pub CSurf_OnVolumeChange: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, volume: f64, relative: bool) -> f64,
+    >,
     pub CSurf_OnVolumeChangeEx: Option<
-        fn(trackid: *mut root::MediaTrack, volume: f64, relative: bool, allowGang: bool) -> f64,
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            volume: f64,
+            relative: bool,
+            allowGang: bool,
+        ) -> f64,
     >,
-    pub CSurf_OnWidthChange:
-        Option<fn(trackid: *mut root::MediaTrack, width: f64, relative: bool) -> f64>,
+    pub CSurf_OnWidthChange: Option<
+        unsafe extern "C" fn(trackid: *mut root::MediaTrack, width: f64, relative: bool) -> f64,
+    >,
     pub CSurf_OnWidthChangeEx: Option<
-        fn(trackid: *mut root::MediaTrack, width: f64, relative: bool, allowGang: bool) -> f64,
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            width: f64,
+            relative: bool,
+            allowGang: bool,
+        ) -> f64,
     >,
-    pub CSurf_OnZoom: Option<fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
-    pub CSurf_ResetAllCachedVolPanStates: Option<fn()>,
-    pub CSurf_ScrubAmt: Option<fn(amt: f64)>,
-    pub CSurf_SetAutoMode:
-        Option<fn(mode: ::std::os::raw::c_int, ignoresurf: *mut root::IReaperControlSurface)>,
+    pub CSurf_OnZoom:
+        Option<unsafe extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int)>,
+    pub CSurf_ResetAllCachedVolPanStates: Option<unsafe extern "C" fn()>,
+    pub CSurf_ScrubAmt: Option<unsafe extern "C" fn(amt: f64)>,
+    pub CSurf_SetAutoMode: Option<
+        unsafe extern "C" fn(
+            mode: ::std::os::raw::c_int,
+            ignoresurf: *mut root::IReaperControlSurface,
+        ),
+    >,
     pub CSurf_SetPlayState: Option<
-        fn(play: bool, pause: bool, rec: bool, ignoresurf: *mut root::IReaperControlSurface),
+        unsafe extern "C" fn(
+            play: bool,
+            pause: bool,
+            rec: bool,
+            ignoresurf: *mut root::IReaperControlSurface,
+        ),
     >,
-    pub CSurf_SetRepeatState: Option<fn(rep: bool, ignoresurf: *mut root::IReaperControlSurface)>,
+    pub CSurf_SetRepeatState:
+        Option<unsafe extern "C" fn(rep: bool, ignoresurf: *mut root::IReaperControlSurface)>,
     pub CSurf_SetSurfaceMute: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             mute: bool,
             ignoresurf: *mut root::IReaperControlSurface,
         ),
     >,
     pub CSurf_SetSurfacePan: Option<
-        fn(trackid: *mut root::MediaTrack, pan: f64, ignoresurf: *mut root::IReaperControlSurface),
+        unsafe extern "C" fn(
+            trackid: *mut root::MediaTrack,
+            pan: f64,
+            ignoresurf: *mut root::IReaperControlSurface,
+        ),
     >,
     pub CSurf_SetSurfaceRecArm: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             recarm: bool,
             ignoresurf: *mut root::IReaperControlSurface,
         ),
     >,
     pub CSurf_SetSurfaceSelected: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             selected: bool,
             ignoresurf: *mut root::IReaperControlSurface,
         ),
     >,
     pub CSurf_SetSurfaceSolo: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             solo: bool,
             ignoresurf: *mut root::IReaperControlSurface,
         ),
     >,
     pub CSurf_SetSurfaceVolume: Option<
-        fn(
+        unsafe extern "C" fn(
             trackid: *mut root::MediaTrack,
             volume: f64,
             ignoresurf: *mut root::IReaperControlSurface,
         ),
     >,
-    pub CSurf_SetTrackListChange: Option<fn()>,
-    pub CSurf_TrackFromID:
-        Option<fn(idx: ::std::os::raw::c_int, mcpView: bool) -> *mut root::MediaTrack>,
-    pub CSurf_TrackToID:
-        Option<fn(track: *mut root::MediaTrack, mcpView: bool) -> ::std::os::raw::c_int>,
-    pub DB2SLIDER: Option<fn(x: f64) -> f64>,
+    pub CSurf_SetTrackListChange: Option<unsafe extern "C" fn()>,
+    pub CSurf_TrackFromID: Option<
+        unsafe extern "C" fn(idx: ::std::os::raw::c_int, mcpView: bool) -> *mut root::MediaTrack,
+    >,
+    pub CSurf_TrackToID: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, mcpView: bool) -> ::std::os::raw::c_int,
+    >,
+    pub DB2SLIDER: Option<unsafe extern "C" fn(x: f64) -> f64>,
     pub DeleteActionShortcut: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
             cmdID: ::std::os::raw::c_int,
             shortcutidx: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub DeleteEnvelopePointEx: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             ptidx: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub DeleteEnvelopePointRange:
-        Option<fn(envelope: *mut root::TrackEnvelope, time_start: f64, time_end: f64) -> bool>,
+    pub DeleteEnvelopePointRange: Option<
+        unsafe extern "C" fn(
+            envelope: *mut root::TrackEnvelope,
+            time_start: f64,
+            time_end: f64,
+        ) -> bool,
+    >,
     pub DeleteEnvelopePointRangeEx: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             time_start: f64,
@@ -382,51 +486,70 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub DeleteExtState: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *const ::std::os::raw::c_char,
             key: *const ::std::os::raw::c_char,
             persist: bool,
         ),
     >,
     pub DeleteProjectMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             markrgnindexnumber: ::std::os::raw::c_int,
             isrgn: bool,
         ) -> bool,
     >,
-    pub DeleteProjectMarkerByIndex:
-        Option<fn(proj: *mut root::ReaProject, markrgnidx: ::std::os::raw::c_int) -> bool>,
+    pub DeleteProjectMarkerByIndex: Option<
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            markrgnidx: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
     pub DeleteTakeStretchMarkers: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             idx: ::std::os::raw::c_int,
             countInOptional: *const ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub DeleteTempoTimeSigMarker:
-        Option<fn(project: *mut root::ReaProject, markerindex: ::std::os::raw::c_int) -> bool>,
-    pub DeleteTrack: Option<fn(tr: *mut root::MediaTrack)>,
+    pub DeleteTempoTimeSigMarker: Option<
+        unsafe extern "C" fn(
+            project: *mut root::ReaProject,
+            markerindex: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub DeleteTrack: Option<unsafe extern "C" fn(tr: *mut root::MediaTrack)>,
     pub DeleteTrackMediaItem:
-        Option<fn(tr: *mut root::MediaTrack, it: *mut root::MediaItem) -> bool>,
-    pub DestroyAudioAccessor: Option<fn(accessor: *mut root::reaper_functions::AudioAccessor)>,
-    pub DestroyLocalOscHandler: Option<fn(local_osc_handler: *mut ::std::os::raw::c_void)>,
+        Option<unsafe extern "C" fn(tr: *mut root::MediaTrack, it: *mut root::MediaItem) -> bool>,
+    pub DestroyAudioAccessor:
+        Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor)>,
+    pub DestroyLocalOscHandler:
+        Option<unsafe extern "C" fn(local_osc_handler: *mut ::std::os::raw::c_void)>,
     pub DoActionShortcutDialog: Option<
-        fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             section: *mut root::KbdSectionInfo,
             cmdID: ::std::os::raw::c_int,
             shortcutidx: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub Dock_UpdateDockID:
-        Option<fn(ident_str: *const ::std::os::raw::c_char, whichDock: ::std::os::raw::c_int)>,
-    pub DockGetPosition: Option<fn(whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
-    pub DockIsChildOfDock:
-        Option<fn(hwnd: root::HWND, isFloatingDockerOut: *mut bool) -> ::std::os::raw::c_int>,
-    pub DockWindowActivate: Option<fn(hwnd: root::HWND)>,
+    pub Dock_UpdateDockID: Option<
+        unsafe extern "C" fn(
+            ident_str: *const ::std::os::raw::c_char,
+            whichDock: ::std::os::raw::c_int,
+        ),
+    >,
+    pub DockGetPosition:
+        Option<unsafe extern "C" fn(whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub DockIsChildOfDock: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            isFloatingDockerOut: *mut bool,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub DockWindowActivate: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub DockWindowAdd: Option<
-        fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             name: *const ::std::os::raw::c_char,
             pos: ::std::os::raw::c_int,
@@ -434,44 +557,55 @@ pub struct Reaper {
         ),
     >,
     pub DockWindowAddEx: Option<
-        fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             name: *const ::std::os::raw::c_char,
             identstr: *const ::std::os::raw::c_char,
             allowShow: bool,
         ),
     >,
-    pub DockWindowRefresh: Option<fn()>,
-    pub DockWindowRefreshForHWND: Option<fn(hwnd: root::HWND)>,
-    pub DockWindowRemove: Option<fn(hwnd: root::HWND)>,
+    pub DockWindowRefresh: Option<unsafe extern "C" fn()>,
+    pub DockWindowRefreshForHWND: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
+    pub DockWindowRemove: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub DuplicateCustomizableMenu: Option<
-        fn(srcmenu: *mut ::std::os::raw::c_void, destmenu: *mut ::std::os::raw::c_void) -> bool,
+        unsafe extern "C" fn(
+            srcmenu: *mut ::std::os::raw::c_void,
+            destmenu: *mut ::std::os::raw::c_void,
+        ) -> bool,
     >,
-    pub EditTempoTimeSigMarker:
-        Option<fn(project: *mut root::ReaProject, markerindex: ::std::os::raw::c_int) -> bool>,
-    pub EnsureNotCompletelyOffscreen: Option<fn(rInOut: *mut root::RECT)>,
+    pub EditTempoTimeSigMarker: Option<
+        unsafe extern "C" fn(
+            project: *mut root::ReaProject,
+            markerindex: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub EnsureNotCompletelyOffscreen: Option<unsafe extern "C" fn(rInOut: *mut root::RECT)>,
     pub EnumerateFiles: Option<
-        fn(
+        unsafe extern "C" fn(
             path: *const ::std::os::raw::c_char,
             fileindex: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub EnumerateSubdirectories: Option<
-        fn(
+        unsafe extern "C" fn(
             path: *const ::std::os::raw::c_char,
             subdirindex: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
-    pub EnumPitchShiftModes:
-        Option<fn(mode: ::std::os::raw::c_int, strOut: *mut *const ::std::os::raw::c_char) -> bool>,
+    pub EnumPitchShiftModes: Option<
+        unsafe extern "C" fn(
+            mode: ::std::os::raw::c_int,
+            strOut: *mut *const ::std::os::raw::c_char,
+        ) -> bool,
+    >,
     pub EnumPitchShiftSubModes: Option<
-        fn(
+        unsafe extern "C" fn(
             mode: ::std::os::raw::c_int,
             submode: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub EnumProjectMarkers: Option<
-        fn(
+        unsafe extern "C" fn(
             idx: ::std::os::raw::c_int,
             isrgnOut: *mut bool,
             posOut: *mut f64,
@@ -481,7 +615,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub EnumProjectMarkers2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             idx: ::std::os::raw::c_int,
             isrgnOut: *mut bool,
@@ -492,7 +626,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub EnumProjectMarkers3: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             idx: ::std::os::raw::c_int,
             isrgnOut: *mut bool,
@@ -504,14 +638,14 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub EnumProjects: Option<
-        fn(
+        unsafe extern "C" fn(
             idx: ::std::os::raw::c_int,
             projfnOutOptional: *mut ::std::os::raw::c_char,
             projfnOutOptional_sz: ::std::os::raw::c_int,
         ) -> *mut root::ReaProject,
     >,
     pub EnumProjExtState: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             extname: *const ::std::os::raw::c_char,
             idx: ::std::os::raw::c_int,
@@ -522,14 +656,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub EnumRegionRenderMatrix: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             regionindex: ::std::os::raw::c_int,
             rendertrack: ::std::os::raw::c_int,
         ) -> *mut root::MediaTrack,
     >,
     pub EnumTrackMIDIProgramNames: Option<
-        fn(
+        unsafe extern "C" fn(
             track: ::std::os::raw::c_int,
             programNumber: ::std::os::raw::c_int,
             programName: *mut ::std::os::raw::c_char,
@@ -537,7 +671,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub EnumTrackMIDIProgramNamesEx: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             track: *mut root::MediaTrack,
             programNumber: ::std::os::raw::c_int,
@@ -546,7 +680,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub Envelope_Evaluate: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             time: f64,
             samplerate: f64,
@@ -558,7 +692,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub Envelope_FormatValue: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             value: f64,
             bufOut: *mut ::std::os::raw::c_char,
@@ -566,35 +700,46 @@ pub struct Reaper {
         ),
     >,
     pub Envelope_GetParentTake: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             indexOutOptional: *mut ::std::os::raw::c_int,
             index2OutOptional: *mut ::std::os::raw::c_int,
         ) -> *mut root::MediaItem_Take,
     >,
     pub Envelope_GetParentTrack: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             indexOutOptional: *mut ::std::os::raw::c_int,
             index2OutOptional: *mut ::std::os::raw::c_int,
         ) -> *mut root::MediaTrack,
     >,
-    pub Envelope_SortPoints: Option<fn(envelope: *mut root::TrackEnvelope) -> bool>,
-    pub Envelope_SortPointsEx:
-        Option<fn(envelope: *mut root::TrackEnvelope, autoitem_idx: ::std::os::raw::c_int) -> bool>,
+    pub Envelope_SortPoints:
+        Option<unsafe extern "C" fn(envelope: *mut root::TrackEnvelope) -> bool>,
+    pub Envelope_SortPointsEx: Option<
+        unsafe extern "C" fn(
+            envelope: *mut root::TrackEnvelope,
+            autoitem_idx: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
     pub ExecProcess: Option<
-        fn(
+        unsafe extern "C" fn(
             cmdline: *const ::std::os::raw::c_char,
             timeoutmsec: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
-    pub file_exists: Option<fn(path: *const ::std::os::raw::c_char) -> bool>,
-    pub FindTempoTimeSigMarker:
-        Option<fn(project: *mut root::ReaProject, time: f64) -> ::std::os::raw::c_int>,
-    pub format_timestr:
-        Option<fn(tpos: f64, buf: *mut ::std::os::raw::c_char, buf_sz: ::std::os::raw::c_int)>,
+    pub file_exists: Option<unsafe extern "C" fn(path: *const ::std::os::raw::c_char) -> bool>,
+    pub FindTempoTimeSigMarker: Option<
+        unsafe extern "C" fn(project: *mut root::ReaProject, time: f64) -> ::std::os::raw::c_int,
+    >,
+    pub format_timestr: Option<
+        unsafe extern "C" fn(
+            tpos: f64,
+            buf: *mut ::std::os::raw::c_char,
+            buf_sz: ::std::os::raw::c_int,
+        ),
+    >,
     pub format_timestr_len: Option<
-        fn(
+        unsafe extern "C" fn(
             tpos: f64,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
@@ -603,37 +748,37 @@ pub struct Reaper {
         ),
     >,
     pub format_timestr_pos: Option<
-        fn(
+        unsafe extern "C" fn(
             tpos: f64,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
             modeoverride: ::std::os::raw::c_int,
         ),
     >,
-    pub FreeHeapPtr: Option<fn(ptr: *mut ::std::os::raw::c_void)>,
-    pub genGuid: Option<fn(g: *mut root::GUID)>,
+    pub FreeHeapPtr: Option<unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void)>,
+    pub genGuid: Option<unsafe extern "C" fn(g: *mut root::GUID)>,
     pub get_config_var: Option<
-        fn(
+        unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             szOut: *mut ::std::os::raw::c_int,
         ) -> *mut ::std::os::raw::c_void,
     >,
     pub get_config_var_string: Option<
-        fn(
+        unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             bufOut: *mut ::std::os::raw::c_char,
             bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub get_ini_file: Option<fn() -> *const ::std::os::raw::c_char>,
+    pub get_ini_file: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub get_midi_config_var: Option<
-        fn(
+        unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             szOut: *mut ::std::os::raw::c_int,
         ) -> *mut ::std::os::raw::c_void,
     >,
     pub GetActionShortcutDesc: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
             cmdID: ::std::os::raw::c_int,
             shortcutidx: ::std::os::raw::c_int,
@@ -641,26 +786,27 @@ pub struct Reaper {
             desclen: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetActiveTake: Option<fn(item: *mut root::MediaItem) -> *mut root::MediaItem_Take>,
+    pub GetActiveTake:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaItem_Take>,
     pub GetAllProjectPlayStates:
-        Option<fn(ignoreProject: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub GetAppVersion: Option<fn() -> *const ::std::os::raw::c_char>,
+        Option<unsafe extern "C" fn(ignoreProject: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub GetAppVersion: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetArmedCommand: Option<
-        fn(
+        unsafe extern "C" fn(
             secOut: *mut ::std::os::raw::c_char,
             secOut_sz: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub GetAudioAccessorEndTime:
-        Option<fn(accessor: *mut root::reaper_functions::AudioAccessor) -> f64>,
+        Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> f64>,
     pub GetAudioAccessorHash: Option<
-        fn(
+        unsafe extern "C" fn(
             accessor: *mut root::reaper_functions::AudioAccessor,
             hashNeed128: *mut ::std::os::raw::c_char,
         ),
     >,
     pub GetAudioAccessorSamples: Option<
-        fn(
+        unsafe extern "C" fn(
             accessor: *mut root::reaper_functions::AudioAccessor,
             samplerate: ::std::os::raw::c_int,
             numchannels: ::std::os::raw::c_int,
@@ -670,41 +816,56 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub GetAudioAccessorStartTime:
-        Option<fn(accessor: *mut root::reaper_functions::AudioAccessor) -> f64>,
+        Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> f64>,
     pub GetAudioDeviceInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             attribute: *const ::std::os::raw::c_char,
             desc: *mut ::std::os::raw::c_char,
             desc_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetColorTheme:
-        Option<fn(idx: ::std::os::raw::c_int, defval: ::std::os::raw::c_int) -> root::INT_PTR>,
-    pub GetColorThemeStruct:
-        Option<fn(szOut: *mut ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void>,
-    pub GetConfigWantsDock:
-        Option<fn(ident_str: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int>,
-    pub GetContextMenu: Option<fn(idx: ::std::os::raw::c_int) -> root::HMENU>,
-    pub GetCurrentProjectInLoadSave: Option<fn() -> *mut root::ReaProject>,
-    pub GetCursorContext: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetCursorContext2: Option<fn(want_last_valid: bool) -> ::std::os::raw::c_int>,
-    pub GetCursorPosition: Option<fn() -> f64>,
-    pub GetCursorPositionEx: Option<fn(proj: *mut root::ReaProject) -> f64>,
-    pub GetDisplayedMediaItemColor: Option<fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int>,
-    pub GetDisplayedMediaItemColor2: Option<
-        fn(item: *mut root::MediaItem, take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int,
+    pub GetColorTheme: Option<
+        unsafe extern "C" fn(
+            idx: ::std::os::raw::c_int,
+            defval: ::std::os::raw::c_int,
+        ) -> root::INT_PTR,
     >,
-    pub GetEnvelopeInfo_Value:
-        Option<fn(tr: *mut root::TrackEnvelope, parmname: *const ::std::os::raw::c_char) -> f64>,
+    pub GetColorThemeStruct: Option<
+        unsafe extern "C" fn(szOut: *mut ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void,
+    >,
+    pub GetConfigWantsDock: Option<
+        unsafe extern "C" fn(ident_str: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int,
+    >,
+    pub GetContextMenu: Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> root::HMENU>,
+    pub GetCurrentProjectInLoadSave: Option<unsafe extern "C" fn() -> *mut root::ReaProject>,
+    pub GetCursorContext: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetCursorContext2:
+        Option<unsafe extern "C" fn(want_last_valid: bool) -> ::std::os::raw::c_int>,
+    pub GetCursorPosition: Option<unsafe extern "C" fn() -> f64>,
+    pub GetCursorPositionEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>,
+    pub GetDisplayedMediaItemColor:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int>,
+    pub GetDisplayedMediaItemColor2: Option<
+        unsafe extern "C" fn(
+            item: *mut root::MediaItem,
+            take: *mut root::MediaItem_Take,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub GetEnvelopeInfo_Value: Option<
+        unsafe extern "C" fn(
+            tr: *mut root::TrackEnvelope,
+            parmname: *const ::std::os::raw::c_char,
+        ) -> f64,
+    >,
     pub GetEnvelopeName: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             bufOut: *mut ::std::os::raw::c_char,
             bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetEnvelopePoint: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             ptidx: ::std::os::raw::c_int,
             timeOutOptional: *mut f64,
@@ -714,17 +875,21 @@ pub struct Reaper {
             selectedOutOptional: *mut bool,
         ) -> bool,
     >,
-    pub GetEnvelopePointByTime:
-        Option<fn(envelope: *mut root::TrackEnvelope, time: f64) -> ::std::os::raw::c_int>,
+    pub GetEnvelopePointByTime: Option<
+        unsafe extern "C" fn(
+            envelope: *mut root::TrackEnvelope,
+            time: f64,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub GetEnvelopePointByTimeEx: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             time: f64,
         ) -> ::std::os::raw::c_int,
     >,
     pub GetEnvelopePointEx: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             ptidx: ::std::os::raw::c_int,
@@ -735,83 +900,94 @@ pub struct Reaper {
             selectedOutOptional: *mut bool,
         ) -> bool,
     >,
-    pub GetEnvelopeScalingMode: Option<fn(env: *mut root::TrackEnvelope) -> ::std::os::raw::c_int>,
+    pub GetEnvelopeScalingMode:
+        Option<unsafe extern "C" fn(env: *mut root::TrackEnvelope) -> ::std::os::raw::c_int>,
     pub GetEnvelopeStateChunk: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             strNeedBig: *mut ::std::os::raw::c_char,
             strNeedBig_sz: ::std::os::raw::c_int,
             isundoOptional: bool,
         ) -> bool,
     >,
-    pub GetExePath: Option<fn() -> *const ::std::os::raw::c_char>,
+    pub GetExePath: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetExtState: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *const ::std::os::raw::c_char,
             key: *const ::std::os::raw::c_char,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub GetFocusedFX: Option<
-        fn(
+        unsafe extern "C" fn(
             tracknumberOut: *mut ::std::os::raw::c_int,
             itemnumberOut: *mut ::std::os::raw::c_int,
             fxnumberOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub GetFreeDiskSpaceForRecordPath: Option<
-        fn(proj: *mut root::ReaProject, pathidx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            pathidx: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub GetFXEnvelope: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fxindex: ::std::os::raw::c_int,
             parameterindex: ::std::os::raw::c_int,
             create: bool,
         ) -> *mut root::TrackEnvelope,
     >,
-    pub GetGlobalAutomationOverride: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetHZoomLevel: Option<fn() -> f64>,
-    pub GetIconThemePointer:
-        Option<fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void>,
+    pub GetGlobalAutomationOverride: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetHZoomLevel: Option<unsafe extern "C" fn() -> f64>,
+    pub GetIconThemePointer: Option<
+        unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void,
+    >,
     pub GetIconThemePointerForDPI: Option<
-        fn(
+        unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             dpisc: ::std::os::raw::c_int,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    pub GetIconThemeStruct:
-        Option<fn(szOut: *mut ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void>,
-    pub GetInputChannelName:
-        Option<fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
+    pub GetIconThemeStruct: Option<
+        unsafe extern "C" fn(szOut: *mut ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void,
+    >,
+    pub GetInputChannelName: Option<
+        unsafe extern "C" fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
+    >,
     pub GetInputOutputLatency: Option<
-        fn(
+        unsafe extern "C" fn(
             inputlatencyOut: *mut ::std::os::raw::c_int,
             outputLatencyOut: *mut ::std::os::raw::c_int,
         ),
     >,
     pub GetItemEditingTime2: Option<
-        fn(which_itemOut: *mut *mut root::PCM_source, flagsOut: *mut ::std::os::raw::c_int) -> f64,
+        unsafe extern "C" fn(
+            which_itemOut: *mut *mut root::PCM_source,
+            flagsOut: *mut ::std::os::raw::c_int,
+        ) -> f64,
     >,
     pub GetItemFromPoint: Option<
-        fn(
+        unsafe extern "C" fn(
             screen_x: ::std::os::raw::c_int,
             screen_y: ::std::os::raw::c_int,
             allow_locked: bool,
             takeOutOptional: *mut *mut root::MediaItem_Take,
         ) -> *mut root::MediaItem,
     >,
-    pub GetItemProjectContext: Option<fn(item: *mut root::MediaItem) -> *mut root::ReaProject>,
+    pub GetItemProjectContext:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::ReaProject>,
     pub GetItemStateChunk: Option<
-        fn(
+        unsafe extern "C" fn(
             item: *mut root::MediaItem,
             strNeedBig: *mut ::std::os::raw::c_char,
             strNeedBig_sz: ::std::os::raw::c_int,
             isundoOptional: bool,
         ) -> bool,
     >,
-    pub GetLastColorThemeFile: Option<fn() -> *const ::std::os::raw::c_char>,
+    pub GetLastColorThemeFile: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetLastMarkerAndCurRegion: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             time: f64,
             markeridxOut: *mut ::std::os::raw::c_int,
@@ -819,32 +995,46 @@ pub struct Reaper {
         ),
     >,
     pub GetLastTouchedFX: Option<
-        fn(
+        unsafe extern "C" fn(
             tracknumberOut: *mut ::std::os::raw::c_int,
             fxnumberOut: *mut ::std::os::raw::c_int,
             paramnumberOut: *mut ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetLastTouchedTrack: Option<fn() -> *mut root::MediaTrack>,
-    pub GetMainHwnd: Option<fn() -> root::HWND>,
-    pub GetMasterMuteSoloFlags: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetMasterTrack: Option<fn(proj: *mut root::ReaProject) -> *mut root::MediaTrack>,
-    pub GetMasterTrackVisibility: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetMaxMidiInputs: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetMaxMidiOutputs: Option<fn() -> ::std::os::raw::c_int>,
+    pub GetLastTouchedTrack: Option<unsafe extern "C" fn() -> *mut root::MediaTrack>,
+    pub GetMainHwnd: Option<unsafe extern "C" fn() -> root::HWND>,
+    pub GetMasterMuteSoloFlags: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetMasterTrack:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::MediaTrack>,
+    pub GetMasterTrackVisibility: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetMaxMidiInputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetMaxMidiOutputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetMediaItem: Option<
-        fn(proj: *mut root::ReaProject, itemidx: ::std::os::raw::c_int) -> *mut root::MediaItem,
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            itemidx: ::std::os::raw::c_int,
+        ) -> *mut root::MediaItem,
     >,
-    pub GetMediaItem_Track: Option<fn(item: *mut root::MediaItem) -> *mut root::MediaTrack>,
-    pub GetMediaItemInfo_Value:
-        Option<fn(item: *mut root::MediaItem, parmname: *const ::std::os::raw::c_char) -> f64>,
-    pub GetMediaItemNumTakes: Option<fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int>,
+    pub GetMediaItem_Track:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaTrack>,
+    pub GetMediaItemInfo_Value: Option<
+        unsafe extern "C" fn(
+            item: *mut root::MediaItem,
+            parmname: *const ::std::os::raw::c_char,
+        ) -> f64,
+    >,
+    pub GetMediaItemNumTakes:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int>,
     pub GetMediaItemTake: Option<
-        fn(item: *mut root::MediaItem, tk: ::std::os::raw::c_int) -> *mut root::MediaItem_Take,
+        unsafe extern "C" fn(
+            item: *mut root::MediaItem,
+            tk: ::std::os::raw::c_int,
+        ) -> *mut root::MediaItem_Take,
     >,
-    pub GetMediaItemTake_Item: Option<fn(take: *mut root::MediaItem_Take) -> *mut root::MediaItem>,
+    pub GetMediaItemTake_Item:
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *mut root::MediaItem>,
     pub GetMediaItemTake_Peaks: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             peakrate: f64,
             starttime: f64,
@@ -855,82 +1045,99 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub GetMediaItemTake_Source:
-        Option<fn(take: *mut root::MediaItem_Take) -> *mut root::PCM_source>,
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *mut root::PCM_source>,
     pub GetMediaItemTake_Track:
-        Option<fn(take: *mut root::MediaItem_Take) -> *mut root::MediaTrack>,
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *mut root::MediaTrack>,
     pub GetMediaItemTakeByGUID: Option<
-        fn(project: *mut root::ReaProject, guid: *const root::GUID) -> *mut root::MediaItem_Take,
+        unsafe extern "C" fn(
+            project: *mut root::ReaProject,
+            guid: *const root::GUID,
+        ) -> *mut root::MediaItem_Take,
     >,
-    pub GetMediaItemTakeInfo_Value:
-        Option<fn(take: *mut root::MediaItem_Take, parmname: *const ::std::os::raw::c_char) -> f64>,
-    pub GetMediaItemTrack: Option<fn(item: *mut root::MediaItem) -> *mut root::MediaTrack>,
+    pub GetMediaItemTakeInfo_Value: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            parmname: *const ::std::os::raw::c_char,
+        ) -> f64,
+    >,
+    pub GetMediaItemTrack:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaTrack>,
     pub GetMediaSourceFileName: Option<
-        fn(
+        unsafe extern "C" fn(
             source: *mut root::PCM_source,
             filenamebuf: *mut ::std::os::raw::c_char,
             filenamebuf_sz: ::std::os::raw::c_int,
         ),
     >,
-    pub GetMediaSourceLength:
-        Option<fn(source: *mut root::PCM_source, lengthIsQNOut: *mut bool) -> f64>,
+    pub GetMediaSourceLength: Option<
+        unsafe extern "C" fn(source: *mut root::PCM_source, lengthIsQNOut: *mut bool) -> f64,
+    >,
     pub GetMediaSourceNumChannels:
-        Option<fn(source: *mut root::PCM_source) -> ::std::os::raw::c_int>,
-    pub GetMediaSourceParent: Option<fn(src: *mut root::PCM_source) -> *mut root::PCM_source>,
+        Option<unsafe extern "C" fn(source: *mut root::PCM_source) -> ::std::os::raw::c_int>,
+    pub GetMediaSourceParent:
+        Option<unsafe extern "C" fn(src: *mut root::PCM_source) -> *mut root::PCM_source>,
     pub GetMediaSourceSampleRate:
-        Option<fn(source: *mut root::PCM_source) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(source: *mut root::PCM_source) -> ::std::os::raw::c_int>,
     pub GetMediaSourceType: Option<
-        fn(
+        unsafe extern "C" fn(
             source: *mut root::PCM_source,
             typebuf: *mut ::std::os::raw::c_char,
             typebuf_sz: ::std::os::raw::c_int,
         ),
     >,
-    pub GetMediaTrackInfo_Value:
-        Option<fn(tr: *mut root::MediaTrack, parmname: *const ::std::os::raw::c_char) -> f64>,
+    pub GetMediaTrackInfo_Value: Option<
+        unsafe extern "C" fn(
+            tr: *mut root::MediaTrack,
+            parmname: *const ::std::os::raw::c_char,
+        ) -> f64,
+    >,
     pub GetMIDIInputName: Option<
-        fn(
+        unsafe extern "C" fn(
             dev: ::std::os::raw::c_int,
             nameout: *mut ::std::os::raw::c_char,
             nameout_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetMIDIOutputName: Option<
-        fn(
+        unsafe extern "C" fn(
             dev: ::std::os::raw::c_int,
             nameout: *mut ::std::os::raw::c_char,
             nameout_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetMixerScroll: Option<fn() -> *mut root::MediaTrack>,
+    pub GetMixerScroll: Option<unsafe extern "C" fn() -> *mut root::MediaTrack>,
     pub GetMouseModifier: Option<
-        fn(
+        unsafe extern "C" fn(
             context: *const ::std::os::raw::c_char,
             modifier_flag: ::std::os::raw::c_int,
             action: *mut ::std::os::raw::c_char,
             action_sz: ::std::os::raw::c_int,
         ),
     >,
-    pub GetMousePosition:
-        Option<fn(xOut: *mut ::std::os::raw::c_int, yOut: *mut ::std::os::raw::c_int)>,
-    pub GetNumAudioInputs: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetNumAudioOutputs: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetNumMIDIInputs: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetNumMIDIOutputs: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetNumTracks: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetOS: Option<fn() -> *const ::std::os::raw::c_char>,
-    pub GetOutputChannelName:
-        Option<fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
-    pub GetOutputLatency: Option<fn() -> f64>,
-    pub GetParentTrack: Option<fn(track: *mut root::MediaTrack) -> *mut root::MediaTrack>,
+    pub GetMousePosition: Option<
+        unsafe extern "C" fn(xOut: *mut ::std::os::raw::c_int, yOut: *mut ::std::os::raw::c_int),
+    >,
+    pub GetNumAudioInputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumAudioOutputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumMIDIInputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumMIDIOutputs: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumTracks: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetOS: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub GetOutputChannelName: Option<
+        unsafe extern "C" fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
+    >,
+    pub GetOutputLatency: Option<unsafe extern "C" fn() -> f64>,
+    pub GetParentTrack:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> *mut root::MediaTrack>,
     pub GetPeakFileName: Option<
-        fn(
+        unsafe extern "C" fn(
             fn_: *const ::std::os::raw::c_char,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetPeakFileNameEx: Option<
-        fn(
+        unsafe extern "C" fn(
             fn_: *const ::std::os::raw::c_char,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
@@ -938,7 +1145,7 @@ pub struct Reaper {
         ),
     >,
     pub GetPeakFileNameEx2: Option<
-        fn(
+        unsafe extern "C" fn(
             fn_: *const ::std::os::raw::c_char,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
@@ -947,7 +1154,7 @@ pub struct Reaper {
         ),
     >,
     pub GetPeaksBitmap: Option<
-        fn(
+        unsafe extern "C" fn(
             pks: *mut root::PCM_source_peaktransfer_t,
             maxamp: f64,
             w: ::std::os::raw::c_int,
@@ -955,57 +1162,62 @@ pub struct Reaper {
             bmp: *mut root::reaper_functions::LICE_IBitmap,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    pub GetPlayPosition: Option<fn() -> f64>,
-    pub GetPlayPosition2: Option<fn() -> f64>,
-    pub GetPlayPosition2Ex: Option<fn(proj: *mut root::ReaProject) -> f64>,
-    pub GetPlayPositionEx: Option<fn(proj: *mut root::ReaProject) -> f64>,
-    pub GetPlayState: Option<fn() -> ::std::os::raw::c_int>,
-    pub GetPlayStateEx: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub GetPlayPosition: Option<unsafe extern "C" fn() -> f64>,
+    pub GetPlayPosition2: Option<unsafe extern "C" fn() -> f64>,
+    pub GetPlayPosition2Ex: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>,
+    pub GetPlayPositionEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>,
+    pub GetPlayState: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetPlayStateEx:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
     pub GetPreferredDiskReadMode: Option<
-        fn(
+        unsafe extern "C" fn(
             mode: *mut ::std::os::raw::c_int,
             nb: *mut ::std::os::raw::c_int,
             bs: *mut ::std::os::raw::c_int,
         ),
     >,
     pub GetPreferredDiskReadModePeak: Option<
-        fn(
+        unsafe extern "C" fn(
             mode: *mut ::std::os::raw::c_int,
             nb: *mut ::std::os::raw::c_int,
             bs: *mut ::std::os::raw::c_int,
         ),
     >,
     pub GetPreferredDiskWriteMode: Option<
-        fn(
+        unsafe extern "C" fn(
             mode: *mut ::std::os::raw::c_int,
             nb: *mut ::std::os::raw::c_int,
             bs: *mut ::std::os::raw::c_int,
         ),
     >,
-    pub GetProjectLength: Option<fn(proj: *mut root::ReaProject) -> f64>,
+    pub GetProjectLength: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>,
     pub GetProjectName: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
         ),
     >,
-    pub GetProjectPath: Option<fn(buf: *mut ::std::os::raw::c_char, buf_sz: ::std::os::raw::c_int)>,
+    pub GetProjectPath: Option<
+        unsafe extern "C" fn(buf: *mut ::std::os::raw::c_char, buf_sz: ::std::os::raw::c_int),
+    >,
     pub GetProjectPathEx: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetProjectStateChangeCount:
-        Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub GetProjectTimeOffset: Option<fn(proj: *mut root::ReaProject, rndframe: bool) -> f64>,
-    pub GetProjectTimeSignature: Option<fn(bpmOut: *mut f64, bpiOut: *mut f64)>,
-    pub GetProjectTimeSignature2:
-        Option<fn(proj: *mut root::ReaProject, bpmOut: *mut f64, bpiOut: *mut f64)>,
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub GetProjectTimeOffset:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, rndframe: bool) -> f64>,
+    pub GetProjectTimeSignature: Option<unsafe extern "C" fn(bpmOut: *mut f64, bpiOut: *mut f64)>,
+    pub GetProjectTimeSignature2: Option<
+        unsafe extern "C" fn(proj: *mut root::ReaProject, bpmOut: *mut f64, bpiOut: *mut f64),
+    >,
     pub GetProjExtState: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             extname: *const ::std::os::raw::c_char,
             key: *const ::std::os::raw::c_char,
@@ -1013,28 +1225,32 @@ pub struct Reaper {
             valOutNeedBig_sz: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub GetResourcePath: Option<fn() -> *const ::std::os::raw::c_char>,
-    pub GetSelectedEnvelope: Option<fn(proj: *mut root::ReaProject) -> *mut root::TrackEnvelope>,
+    pub GetResourcePath: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub GetSelectedEnvelope:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::TrackEnvelope>,
     pub GetSelectedMediaItem: Option<
-        fn(proj: *mut root::ReaProject, selitem: ::std::os::raw::c_int) -> *mut root::MediaItem,
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            selitem: ::std::os::raw::c_int,
+        ) -> *mut root::MediaItem,
     >,
     pub GetSelectedTrack: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             seltrackidx: ::std::os::raw::c_int,
         ) -> *mut root::MediaTrack,
     >,
     pub GetSelectedTrack2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             seltrackidx: ::std::os::raw::c_int,
             wantmaster: bool,
         ) -> *mut root::MediaTrack,
     >,
     pub GetSelectedTrackEnvelope:
-        Option<fn(proj: *mut root::ReaProject) -> *mut root::TrackEnvelope>,
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::TrackEnvelope>,
     pub GetSet_ArrangeView2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             isSet: bool,
             screen_x_start: ::std::os::raw::c_int,
@@ -1044,10 +1260,16 @@ pub struct Reaper {
         ),
     >,
     pub GetSet_LoopTimeRange: Option<
-        fn(isSet: bool, isLoop: bool, startOut: *mut f64, endOut: *mut f64, allowautoseek: bool),
+        unsafe extern "C" fn(
+            isSet: bool,
+            isLoop: bool,
+            startOut: *mut f64,
+            endOut: *mut f64,
+            allowautoseek: bool,
+        ),
     >,
     pub GetSet_LoopTimeRange2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             isSet: bool,
             isLoop: bool,
@@ -1057,7 +1279,7 @@ pub struct Reaper {
         ),
     >,
     pub GetSetAutomationItemInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             desc: *const ::std::os::raw::c_char,
@@ -1066,7 +1288,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub GetSetAutomationItemInfo_String: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             desc: *const ::std::os::raw::c_char,
@@ -1075,7 +1297,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetEnvelopeInfo_String: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             parmname: *const ::std::os::raw::c_char,
             stringNeedBig: *mut ::std::os::raw::c_char,
@@ -1083,14 +1305,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetEnvelopeState: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             str: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetSetEnvelopeState2: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             str: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
@@ -1098,14 +1320,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetItemState: Option<
-        fn(
+        unsafe extern "C" fn(
             item: *mut root::MediaItem,
             str: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetSetItemState2: Option<
-        fn(
+        unsafe extern "C" fn(
             item: *mut root::MediaItem,
             str: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
@@ -1113,14 +1335,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetMediaItemInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             item: *mut root::MediaItem,
             parmname: *const ::std::os::raw::c_char,
             setNewValue: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
     pub GetSetMediaItemInfo_String: Option<
-        fn(
+        unsafe extern "C" fn(
             item: *mut root::MediaItem,
             parmname: *const ::std::os::raw::c_char,
             stringNeedBig: *mut ::std::os::raw::c_char,
@@ -1128,14 +1350,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetMediaItemTakeInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             tk: *mut root::MediaItem_Take,
             parmname: *const ::std::os::raw::c_char,
             setNewValue: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
     pub GetSetMediaItemTakeInfo_String: Option<
-        fn(
+        unsafe extern "C" fn(
             tk: *mut root::MediaItem_Take,
             parmname: *const ::std::os::raw::c_char,
             stringNeedBig: *mut ::std::os::raw::c_char,
@@ -1143,14 +1365,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetMediaTrackInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             parmname: *const ::std::os::raw::c_char,
             setNewValue: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
     pub GetSetMediaTrackInfo_String: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             parmname: *const ::std::os::raw::c_char,
             stringNeedBig: *mut ::std::os::raw::c_char,
@@ -1158,20 +1380,20 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetObjectState: Option<
-        fn(
+        unsafe extern "C" fn(
             obj: *mut ::std::os::raw::c_void,
             str: *const ::std::os::raw::c_char,
         ) -> *mut ::std::os::raw::c_char,
     >,
     pub GetSetObjectState2: Option<
-        fn(
+        unsafe extern "C" fn(
             obj: *mut ::std::os::raw::c_void,
             str: *const ::std::os::raw::c_char,
             isundo: bool,
         ) -> *mut ::std::os::raw::c_char,
     >,
     pub GetSetProjectAuthor: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             set: bool,
             author: *mut ::std::os::raw::c_char,
@@ -1179,7 +1401,7 @@ pub struct Reaper {
         ),
     >,
     pub GetSetProjectGrid: Option<
-        fn(
+        unsafe extern "C" fn(
             project: *mut root::ReaProject,
             set: bool,
             divisionInOutOptional: *mut f64,
@@ -1188,7 +1410,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub GetSetProjectInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             project: *mut root::ReaProject,
             desc: *const ::std::os::raw::c_char,
             value: f64,
@@ -1196,7 +1418,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub GetSetProjectInfo_String: Option<
-        fn(
+        unsafe extern "C" fn(
             project: *mut root::ReaProject,
             desc: *const ::std::os::raw::c_char,
             valuestrNeedBig: *mut ::std::os::raw::c_char,
@@ -1204,19 +1426,23 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetProjectNotes: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             set: bool,
             notesNeedBig: *mut ::std::os::raw::c_char,
             notesNeedBig_sz: ::std::os::raw::c_int,
         ),
     >,
-    pub GetSetRepeat: Option<fn(val: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub GetSetRepeat:
+        Option<unsafe extern "C" fn(val: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub GetSetRepeatEx: Option<
-        fn(proj: *mut root::ReaProject, val: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            val: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub GetSetTrackGroupMembership: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             groupname: *const ::std::os::raw::c_char,
             setmask: ::std::os::raw::c_uint,
@@ -1224,7 +1450,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_uint,
     >,
     pub GetSetTrackGroupMembershipHigh: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             groupname: *const ::std::os::raw::c_char,
             setmask: ::std::os::raw::c_uint,
@@ -1232,7 +1458,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_uint,
     >,
     pub GetSetTrackMIDISupportFile: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             track: *mut root::MediaTrack,
             which: ::std::os::raw::c_int,
@@ -1240,7 +1466,7 @@ pub struct Reaper {
         ) -> *const ::std::os::raw::c_char,
     >,
     pub GetSetTrackSendInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             category: ::std::os::raw::c_int,
             sendidx: ::std::os::raw::c_int,
@@ -1249,7 +1475,7 @@ pub struct Reaper {
         ) -> *mut ::std::os::raw::c_void,
     >,
     pub GetSetTrackSendInfo_String: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             category: ::std::os::raw::c_int,
             sendidx: ::std::os::raw::c_int,
@@ -1259,51 +1485,58 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetSetTrackState: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             str: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetSetTrackState2: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             str: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
             isundo: bool,
         ) -> bool,
     >,
-    pub GetSubProjectFromSource: Option<fn(src: *mut root::PCM_source) -> *mut root::ReaProject>,
+    pub GetSubProjectFromSource:
+        Option<unsafe extern "C" fn(src: *mut root::PCM_source) -> *mut root::ReaProject>,
     pub GetTake: Option<
-        fn(item: *mut root::MediaItem, takeidx: ::std::os::raw::c_int) -> *mut root::MediaItem_Take,
+        unsafe extern "C" fn(
+            item: *mut root::MediaItem,
+            takeidx: ::std::os::raw::c_int,
+        ) -> *mut root::MediaItem_Take,
     >,
     pub GetTakeEnvelope: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             envidx: ::std::os::raw::c_int,
         ) -> *mut root::TrackEnvelope,
     >,
     pub GetTakeEnvelopeByName: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             envname: *const ::std::os::raw::c_char,
         ) -> *mut root::TrackEnvelope,
     >,
-    pub GetTakeName: Option<fn(take: *mut root::MediaItem_Take) -> *const ::std::os::raw::c_char>,
+    pub GetTakeName: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *const ::std::os::raw::c_char,
+    >,
     pub GetTakeNumStretchMarkers:
-        Option<fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
     pub GetTakeStretchMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             idx: ::std::os::raw::c_int,
             posOut: *mut f64,
             srcposOutOptional: *mut f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub GetTakeStretchMarkerSlope:
-        Option<fn(take: *mut root::MediaItem_Take, idx: ::std::os::raw::c_int) -> f64>,
+    pub GetTakeStretchMarkerSlope: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take, idx: ::std::os::raw::c_int) -> f64,
+    >,
     pub GetTCPFXParm: Option<
-        fn(
+        unsafe extern "C" fn(
             project: *mut root::ReaProject,
             track: *mut root::MediaTrack,
             index: ::std::os::raw::c_int,
@@ -1312,7 +1545,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetTempoMatchPlayRate: Option<
-        fn(
+        unsafe extern "C" fn(
             source: *mut root::PCM_source,
             srcscale: f64,
             position: f64,
@@ -1322,7 +1555,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetTempoTimeSigMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             ptidx: ::std::os::raw::c_int,
             timeposOut: *mut f64,
@@ -1335,66 +1568,78 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetToggleCommandState:
-        Option<fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub GetToggleCommandState2: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
             command_id: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub GetToggleCommandStateEx: Option<
-        fn(
+        unsafe extern "C" fn(
             section_id: ::std::os::raw::c_int,
             command_id: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub GetToggleCommandStateThroughHooks: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
             command_id: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub GetTooltipWindow: Option<fn() -> root::HWND>,
+    pub GetTooltipWindow: Option<unsafe extern "C" fn() -> root::HWND>,
     pub GetTrack: Option<
-        fn(proj: *mut root::ReaProject, trackidx: ::std::os::raw::c_int) -> *mut root::MediaTrack,
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            trackidx: ::std::os::raw::c_int,
+        ) -> *mut root::MediaTrack,
     >,
-    pub GetTrackAutomationMode: Option<fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
-    pub GetTrackColor: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
-    pub GetTrackDepth: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub GetTrackAutomationMode:
+        Option<unsafe extern "C" fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub GetTrackColor:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub GetTrackDepth:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
     pub GetTrackEnvelope: Option<
-        fn(track: *mut root::MediaTrack, envidx: ::std::os::raw::c_int) -> *mut root::TrackEnvelope,
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            envidx: ::std::os::raw::c_int,
+        ) -> *mut root::TrackEnvelope,
     >,
     pub GetTrackEnvelopeByChunkName: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             cfgchunkname: *const ::std::os::raw::c_char,
         ) -> *mut root::TrackEnvelope,
     >,
     pub GetTrackEnvelopeByName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             envname: *const ::std::os::raw::c_char,
         ) -> *mut root::TrackEnvelope,
     >,
     pub GetTrackFromPoint: Option<
-        fn(
+        unsafe extern "C" fn(
             screen_x: ::std::os::raw::c_int,
             screen_y: ::std::os::raw::c_int,
             infoOutOptional: *mut ::std::os::raw::c_int,
         ) -> *mut root::MediaTrack,
     >,
-    pub GetTrackGUID: Option<fn(tr: *mut root::MediaTrack) -> *mut root::GUID>,
+    pub GetTrackGUID: Option<unsafe extern "C" fn(tr: *mut root::MediaTrack) -> *mut root::GUID>,
     pub GetTrackInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             track: root::INT_PTR,
             flags: *mut ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub GetTrackMediaItem: Option<
-        fn(tr: *mut root::MediaTrack, itemidx: ::std::os::raw::c_int) -> *mut root::MediaItem,
+        unsafe extern "C" fn(
+            tr: *mut root::MediaTrack,
+            itemidx: ::std::os::raw::c_int,
+        ) -> *mut root::MediaItem,
     >,
     pub GetTrackMIDILyrics: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             flag: ::std::os::raw::c_int,
             bufWantNeedBig: *mut ::std::os::raw::c_char,
@@ -1402,14 +1647,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetTrackMIDINoteName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: ::std::os::raw::c_int,
             pitch: ::std::os::raw::c_int,
             chan: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub GetTrackMIDINoteNameEx: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             track: *mut root::MediaTrack,
             pitch: ::std::os::raw::c_int,
@@ -1417,7 +1662,7 @@ pub struct Reaper {
         ) -> *const ::std::os::raw::c_char,
     >,
     pub GetTrackMIDINoteRange: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             track: *mut root::MediaTrack,
             note_loOut: *mut ::std::os::raw::c_int,
@@ -1425,18 +1670,22 @@ pub struct Reaper {
         ),
     >,
     pub GetTrackName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             bufOut: *mut ::std::os::raw::c_char,
             bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetTrackNumMediaItems: Option<fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub GetTrackNumMediaItems:
+        Option<unsafe extern "C" fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
     pub GetTrackNumSends: Option<
-        fn(tr: *mut root::MediaTrack, category: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            tr: *mut root::MediaTrack,
+            category: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub GetTrackReceiveName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             recv_index: ::std::os::raw::c_int,
             buf: *mut ::std::os::raw::c_char,
@@ -1444,14 +1693,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetTrackReceiveUIMute: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             recv_index: ::std::os::raw::c_int,
             muteOut: *mut bool,
         ) -> bool,
     >,
     pub GetTrackReceiveUIVolPan: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             recv_index: ::std::os::raw::c_int,
             volumeOut: *mut f64,
@@ -1459,7 +1708,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetTrackSendInfo_Value: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             category: ::std::os::raw::c_int,
             sendidx: ::std::os::raw::c_int,
@@ -1467,7 +1716,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub GetTrackSendName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             send_index: ::std::os::raw::c_int,
             buf: *mut ::std::os::raw::c_char,
@@ -1475,14 +1724,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetTrackSendUIMute: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             send_index: ::std::os::raw::c_int,
             muteOut: *mut bool,
         ) -> bool,
     >,
     pub GetTrackSendUIVolPan: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             send_index: ::std::os::raw::c_int,
             volumeOut: *mut f64,
@@ -1490,46 +1739,52 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GetTrackState: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             flagsOut: *mut ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub GetTrackStateChunk: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             strNeedBig: *mut ::std::os::raw::c_char,
             strNeedBig_sz: ::std::os::raw::c_int,
             isundoOptional: bool,
         ) -> bool,
     >,
-    pub GetTrackUIMute: Option<fn(track: *mut root::MediaTrack, muteOut: *mut bool) -> bool>,
+    pub GetTrackUIMute:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack, muteOut: *mut bool) -> bool>,
     pub GetTrackUIPan: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             pan1Out: *mut f64,
             pan2Out: *mut f64,
             panmodeOut: *mut ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetTrackUIVolPan:
-        Option<fn(track: *mut root::MediaTrack, volumeOut: *mut f64, panOut: *mut f64) -> bool>,
+    pub GetTrackUIVolPan: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            volumeOut: *mut f64,
+            panOut: *mut f64,
+        ) -> bool,
+    >,
     pub GetUnderrunTime: Option<
-        fn(
+        unsafe extern "C" fn(
             audio_xrunOutOptional: *mut ::std::os::raw::c_uint,
             media_xrunOutOptional: *mut ::std::os::raw::c_uint,
             curtimeOutOptional: *mut ::std::os::raw::c_uint,
         ),
     >,
     pub GetUserFileNameForRead: Option<
-        fn(
+        unsafe extern "C" fn(
             filenameNeed4096: *mut ::std::os::raw::c_char,
             title: *const ::std::os::raw::c_char,
             defext: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
     pub GetUserInputs: Option<
-        fn(
+        unsafe extern "C" fn(
             title: *const ::std::os::raw::c_char,
             num_inputs: ::std::os::raw::c_int,
             captions_csv: *const ::std::os::raw::c_char,
@@ -1538,46 +1793,61 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub GoToMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             marker_index: ::std::os::raw::c_int,
             use_timeline_order: bool,
         ),
     >,
     pub GoToRegion: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             region_index: ::std::os::raw::c_int,
             use_timeline_order: bool,
         ),
     >,
-    pub GR_SelectColor:
-        Option<fn(hwnd: root::HWND, colorOut: *mut ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
-    pub GSC_mainwnd: Option<fn(t: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
-    pub guidToString: Option<fn(g: *const root::GUID, destNeed64: *mut ::std::os::raw::c_char)>,
+    pub GR_SelectColor: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            colorOut: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub GSC_mainwnd:
+        Option<unsafe extern "C" fn(t: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub guidToString:
+        Option<unsafe extern "C" fn(g: *const root::GUID, destNeed64: *mut ::std::os::raw::c_char)>,
     pub HasExtState: Option<
-        fn(section: *const ::std::os::raw::c_char, key: *const ::std::os::raw::c_char) -> bool,
+        unsafe extern "C" fn(
+            section: *const ::std::os::raw::c_char,
+            key: *const ::std::os::raw::c_char,
+        ) -> bool,
     >,
     pub HasTrackMIDIPrograms:
-        Option<fn(track: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
+        Option<unsafe extern "C" fn(track: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
     pub HasTrackMIDIProgramsEx: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             track: *mut root::MediaTrack,
         ) -> *const ::std::os::raw::c_char,
     >,
-    pub Help_Set: Option<fn(helpstring: *const ::std::os::raw::c_char, is_temporary_help: bool)>,
-    pub HiresPeaksFromSource:
-        Option<fn(src: *mut root::PCM_source, block: *mut root::PCM_source_peaktransfer_t)>,
+    pub Help_Set: Option<
+        unsafe extern "C" fn(helpstring: *const ::std::os::raw::c_char, is_temporary_help: bool),
+    >,
+    pub HiresPeaksFromSource: Option<
+        unsafe extern "C" fn(
+            src: *mut root::PCM_source,
+            block: *mut root::PCM_source_peaktransfer_t,
+        ),
+    >,
     pub image_resolve_fn: Option<
-        fn(
+        unsafe extern "C" fn(
             in_: *const ::std::os::raw::c_char,
             out: *mut ::std::os::raw::c_char,
             out_sz: ::std::os::raw::c_int,
         ),
     >,
     pub InsertAutomationItem: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             pool_id: ::std::os::raw::c_int,
             position: f64,
@@ -1585,7 +1855,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub InsertEnvelopePoint: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             time: f64,
             value: f64,
@@ -1596,7 +1866,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub InsertEnvelopePointEx: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             time: f64,
@@ -1608,13 +1878,13 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub InsertMedia: Option<
-        fn(
+        unsafe extern "C" fn(
             file: *const ::std::os::raw::c_char,
             mode: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub InsertMediaSection: Option<
-        fn(
+        unsafe extern "C" fn(
             file: *const ::std::os::raw::c_char,
             mode: ::std::os::raw::c_int,
             startpct: f64,
@@ -1622,61 +1892,84 @@ pub struct Reaper {
             pitchshift: f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub InsertTrackAtIndex: Option<fn(idx: ::std::os::raw::c_int, wantDefaults: bool)>,
-    pub IsInRealTimeAudio: Option<fn() -> ::std::os::raw::c_int>,
-    pub IsItemTakeActiveForPlayback:
-        Option<fn(item: *mut root::MediaItem, take: *mut root::MediaItem_Take) -> bool>,
-    pub IsMediaExtension: Option<fn(ext: *const ::std::os::raw::c_char, wantOthers: bool) -> bool>,
-    pub IsMediaItemSelected: Option<fn(item: *mut root::MediaItem) -> bool>,
-    pub IsProjectDirty: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub IsREAPER: Option<fn() -> bool>,
-    pub IsTrackSelected: Option<fn(track: *mut root::MediaTrack) -> bool>,
-    pub IsTrackVisible: Option<fn(track: *mut root::MediaTrack, mixer: bool) -> bool>,
-    pub joystick_create:
-        Option<fn(guid: *const root::GUID) -> *mut root::reaper_functions::joystick_device>,
-    pub joystick_destroy: Option<fn(device: *mut root::reaper_functions::joystick_device)>,
+    pub InsertTrackAtIndex:
+        Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool)>,
+    pub IsInRealTimeAudio: Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>,
+    pub IsItemTakeActiveForPlayback: Option<
+        unsafe extern "C" fn(item: *mut root::MediaItem, take: *mut root::MediaItem_Take) -> bool,
+    >,
+    pub IsMediaExtension:
+        Option<unsafe extern "C" fn(ext: *const ::std::os::raw::c_char, wantOthers: bool) -> bool>,
+    pub IsMediaItemSelected: Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> bool>,
+    pub IsProjectDirty:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub IsREAPER: Option<unsafe extern "C" fn() -> bool>,
+    pub IsTrackSelected: Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> bool>,
+    pub IsTrackVisible:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack, mixer: bool) -> bool>,
+    pub joystick_create: Option<
+        unsafe extern "C" fn(
+            guid: *const root::GUID,
+        ) -> *mut root::reaper_functions::joystick_device,
+    >,
+    pub joystick_destroy:
+        Option<unsafe extern "C" fn(device: *mut root::reaper_functions::joystick_device)>,
     pub joystick_enum: Option<
-        fn(
+        unsafe extern "C" fn(
             index: ::std::os::raw::c_int,
             namestrOutOptional: *mut *const ::std::os::raw::c_char,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub joystick_getaxis: Option<
-        fn(dev: *mut root::reaper_functions::joystick_device, axis: ::std::os::raw::c_int) -> f64,
+        unsafe extern "C" fn(
+            dev: *mut root::reaper_functions::joystick_device,
+            axis: ::std::os::raw::c_int,
+        ) -> f64,
     >,
-    pub joystick_getbuttonmask:
-        Option<fn(dev: *mut root::reaper_functions::joystick_device) -> ::std::os::raw::c_uint>,
+    pub joystick_getbuttonmask: Option<
+        unsafe extern "C" fn(
+            dev: *mut root::reaper_functions::joystick_device,
+        ) -> ::std::os::raw::c_uint,
+    >,
     pub joystick_getinfo: Option<
-        fn(
+        unsafe extern "C" fn(
             dev: *mut root::reaper_functions::joystick_device,
             axesOutOptional: *mut ::std::os::raw::c_int,
             povsOutOptional: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub joystick_getpov: Option<
-        fn(dev: *mut root::reaper_functions::joystick_device, pov: ::std::os::raw::c_int) -> f64,
+        unsafe extern "C" fn(
+            dev: *mut root::reaper_functions::joystick_device,
+            pov: ::std::os::raw::c_int,
+        ) -> f64,
     >,
-    pub joystick_update: Option<fn(dev: *mut root::reaper_functions::joystick_device) -> bool>,
+    pub joystick_update:
+        Option<unsafe extern "C" fn(dev: *mut root::reaper_functions::joystick_device) -> bool>,
     pub kbd_enumerateActions: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
             idx: ::std::os::raw::c_int,
             nameOut: *mut *const ::std::os::raw::c_char,
         ) -> ::std::os::raw::c_int,
     >,
-    pub kbd_formatKeyName: Option<fn(ac: *mut root::ACCEL, s: *mut ::std::os::raw::c_char)>,
+    pub kbd_formatKeyName:
+        Option<unsafe extern "C" fn(ac: *mut root::ACCEL, s: *mut ::std::os::raw::c_char)>,
     pub kbd_getCommandName: Option<
-        fn(
+        unsafe extern "C" fn(
             cmd: ::std::os::raw::c_int,
             s: *mut ::std::os::raw::c_char,
             section: *mut root::KbdSectionInfo,
         ),
     >,
     pub kbd_getTextFromCmd: Option<
-        fn(cmd: root::DWORD, section: *mut root::KbdSectionInfo) -> *const ::std::os::raw::c_char,
+        unsafe extern "C" fn(
+            cmd: root::DWORD,
+            section: *mut root::KbdSectionInfo,
+        ) -> *const ::std::os::raw::c_char,
     >,
     pub KBD_OnMainActionEx: Option<
-        fn(
+        unsafe extern "C" fn(
             cmd: ::std::os::raw::c_int,
             val: ::std::os::raw::c_int,
             valhw: ::std::os::raw::c_int,
@@ -1685,20 +1978,25 @@ pub struct Reaper {
             proj: *mut root::ReaProject,
         ) -> ::std::os::raw::c_int,
     >,
-    pub kbd_OnMidiEvent: Option<fn(evt: *mut root::MIDI_event_t, dev_index: ::std::os::raw::c_int)>,
-    pub kbd_OnMidiList:
-        Option<fn(list: *mut root::MIDI_eventlist, dev_index: ::std::os::raw::c_int)>,
-    pub kbd_ProcessActionsMenu: Option<fn(menu: root::HMENU, section: *mut root::KbdSectionInfo)>,
+    pub kbd_OnMidiEvent: Option<
+        unsafe extern "C" fn(evt: *mut root::MIDI_event_t, dev_index: ::std::os::raw::c_int),
+    >,
+    pub kbd_OnMidiList: Option<
+        unsafe extern "C" fn(list: *mut root::MIDI_eventlist, dev_index: ::std::os::raw::c_int),
+    >,
+    pub kbd_ProcessActionsMenu:
+        Option<unsafe extern "C" fn(menu: root::HMENU, section: *mut root::KbdSectionInfo)>,
     pub kbd_processMidiEventActionEx: Option<
-        fn(
+        unsafe extern "C" fn(
             evt: *mut root::MIDI_event_t,
             section: *mut root::KbdSectionInfo,
             hwndCtx: root::HWND,
         ) -> bool,
     >,
-    pub kbd_reprocessMenu: Option<fn(menu: root::HMENU, section: *mut root::KbdSectionInfo)>,
+    pub kbd_reprocessMenu:
+        Option<unsafe extern "C" fn(menu: root::HMENU, section: *mut root::KbdSectionInfo)>,
     pub kbd_RunCommandThroughHooks: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
             actionCommandID: *mut ::std::os::raw::c_int,
             val: *mut ::std::os::raw::c_int,
@@ -1708,19 +2006,23 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub kbd_translateAccelerator: Option<
-        fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             msg: *mut root::MSG,
             section: *mut root::KbdSectionInfo,
         ) -> ::std::os::raw::c_int,
     >,
     pub kbd_translateMouse: Option<
-        fn(winmsg: *mut ::std::os::raw::c_void, midimsg: *mut ::std::os::raw::c_uchar) -> bool,
+        unsafe extern "C" fn(
+            winmsg: *mut ::std::os::raw::c_void,
+            midimsg: *mut ::std::os::raw::c_uchar,
+        ) -> bool,
     >,
-    pub LICE__Destroy: Option<fn(bm: *mut root::reaper_functions::LICE_IBitmap)>,
-    pub LICE__DestroyFont: Option<fn(font: *mut root::reaper_functions::LICE_IFont)>,
+    pub LICE__Destroy: Option<unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap)>,
+    pub LICE__DestroyFont:
+        Option<unsafe extern "C" fn(font: *mut root::reaper_functions::LICE_IFont)>,
     pub LICE__DrawText: Option<
-        fn(
+        unsafe extern "C" fn(
             font: *mut root::reaper_functions::LICE_IFont,
             bm: *mut root::reaper_functions::LICE_IBitmap,
             str: *const ::std::os::raw::c_char,
@@ -1729,47 +2031,65 @@ pub struct Reaper {
             dtFlags: root::UINT,
         ) -> ::std::os::raw::c_int,
     >,
-    pub LICE__GetBits:
-        Option<fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> *mut ::std::os::raw::c_void>,
-    pub LICE__GetDC: Option<fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> root::HDC>,
-    pub LICE__GetHeight:
-        Option<fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> ::std::os::raw::c_int>,
-    pub LICE__GetRowSpan:
-        Option<fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> ::std::os::raw::c_int>,
-    pub LICE__GetWidth:
-        Option<fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> ::std::os::raw::c_int>,
-    pub LICE__IsFlipped: Option<fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> bool>,
+    pub LICE__GetBits: Option<
+        unsafe extern "C" fn(
+            bm: *mut root::reaper_functions::LICE_IBitmap,
+        ) -> *mut ::std::os::raw::c_void,
+    >,
+    pub LICE__GetDC:
+        Option<unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> root::HDC>,
+    pub LICE__GetHeight: Option<
+        unsafe extern "C" fn(
+            bm: *mut root::reaper_functions::LICE_IBitmap,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub LICE__GetRowSpan: Option<
+        unsafe extern "C" fn(
+            bm: *mut root::reaper_functions::LICE_IBitmap,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub LICE__GetWidth: Option<
+        unsafe extern "C" fn(
+            bm: *mut root::reaper_functions::LICE_IBitmap,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub LICE__IsFlipped:
+        Option<unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> bool>,
     pub LICE__resize: Option<
-        fn(
+        unsafe extern "C" fn(
             bm: *mut root::reaper_functions::LICE_IBitmap,
             w: ::std::os::raw::c_int,
             h: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub LICE__SetBkColor: Option<
-        fn(
+        unsafe extern "C" fn(
             font: *mut root::reaper_functions::LICE_IFont,
             color: root::reaper_functions::LICE_pixel,
         ) -> root::reaper_functions::LICE_pixel,
     >,
     pub LICE__SetFromHFont: Option<
-        fn(
+        unsafe extern "C" fn(
             font: *mut root::reaper_functions::LICE_IFont,
             hfont: root::HFONT,
             flags: ::std::os::raw::c_int,
         ),
     >,
     pub LICE__SetTextColor: Option<
-        fn(
+        unsafe extern "C" fn(
             font: *mut root::reaper_functions::LICE_IFont,
             color: root::reaper_functions::LICE_pixel,
         ) -> root::reaper_functions::LICE_pixel,
     >,
     pub LICE__SetTextCombineMode: Option<
-        fn(ifont: *mut root::reaper_functions::LICE_IFont, mode: ::std::os::raw::c_int, alpha: f32),
+        unsafe extern "C" fn(
+            ifont: *mut root::reaper_functions::LICE_IFont,
+            mode: ::std::os::raw::c_int,
+            alpha: f32,
+        ),
     >,
     pub LICE_Arc: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             cx: f32,
             cy: f32,
@@ -1783,7 +2103,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_Blit: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             src: *mut root::reaper_functions::LICE_IBitmap,
             dstx: ::std::os::raw::c_int,
@@ -1797,7 +2117,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_Blur: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             src: *mut root::reaper_functions::LICE_IBitmap,
             dstx: ::std::os::raw::c_int,
@@ -1809,7 +2129,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_BorderedRect: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -1822,7 +2142,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_Circle: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             cx: f32,
             cy: f32,
@@ -1834,13 +2154,13 @@ pub struct Reaper {
         ),
     >,
     pub LICE_Clear: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             color: root::reaper_functions::LICE_pixel,
         ),
     >,
     pub LICE_ClearRect: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -1851,7 +2171,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_ClipLine: Option<
-        fn(
+        unsafe extern "C" fn(
             pX1Out: *mut ::std::os::raw::c_int,
             pY1Out: *mut ::std::os::raw::c_int,
             pX2Out: *mut ::std::os::raw::c_int,
@@ -1863,21 +2183,21 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub LICE_Copy: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             src: *mut root::reaper_functions::LICE_IBitmap,
         ),
     >,
     pub LICE_CreateBitmap: Option<
-        fn(
+        unsafe extern "C" fn(
             mode: ::std::os::raw::c_int,
             w: ::std::os::raw::c_int,
             h: ::std::os::raw::c_int,
         ) -> *mut root::reaper_functions::LICE_IBitmap,
     >,
-    pub LICE_CreateFont: Option<fn() -> *mut root::reaper_functions::LICE_IFont>,
+    pub LICE_CreateFont: Option<unsafe extern "C" fn() -> *mut root::reaper_functions::LICE_IFont>,
     pub LICE_DrawCBezier: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             xstart: f64,
             ystart: f64,
@@ -1895,7 +2215,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_DrawChar: Option<
-        fn(
+        unsafe extern "C" fn(
             bm: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -1906,7 +2226,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_DrawGlyph: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -1919,7 +2239,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_DrawRect: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -1931,7 +2251,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_DrawText: Option<
-        fn(
+        unsafe extern "C" fn(
             bm: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -1942,7 +2262,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_FillCBezier: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             xstart: f64,
             ystart: f64,
@@ -1961,7 +2281,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_FillCircle: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             cx: f32,
             cy: f32,
@@ -1973,7 +2293,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_FillConvexPolygon: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: *mut ::std::os::raw::c_int,
             y: *mut ::std::os::raw::c_int,
@@ -1984,7 +2304,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_FillRect: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -1996,7 +2316,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_FillTrapezoid: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x1a: ::std::os::raw::c_int,
             x1b: ::std::os::raw::c_int,
@@ -2010,7 +2330,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_FillTriangle: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x1: ::std::os::raw::c_int,
             y1: ::std::os::raw::c_int,
@@ -2024,14 +2344,14 @@ pub struct Reaper {
         ),
     >,
     pub LICE_GetPixel: Option<
-        fn(
+        unsafe extern "C" fn(
             bm: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
         ) -> root::reaper_functions::LICE_pixel,
     >,
     pub LICE_GradRect: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             dstx: ::std::os::raw::c_int,
             dsty: ::std::os::raw::c_int,
@@ -2053,7 +2373,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_Line: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x1: f32,
             y1: f32,
@@ -2066,7 +2386,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_LineInt: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x1: ::std::os::raw::c_int,
             y1: ::std::os::raw::c_int,
@@ -2079,27 +2399,27 @@ pub struct Reaper {
         ),
     >,
     pub LICE_LoadPNG: Option<
-        fn(
+        unsafe extern "C" fn(
             filename: *const ::std::os::raw::c_char,
             bmp: *mut root::reaper_functions::LICE_IBitmap,
         ) -> *mut root::reaper_functions::LICE_IBitmap,
     >,
     pub LICE_LoadPNGFromResource: Option<
-        fn(
+        unsafe extern "C" fn(
             hInst: root::HINSTANCE,
             resid: *const ::std::os::raw::c_char,
             bmp: *mut root::reaper_functions::LICE_IBitmap,
         ) -> *mut root::reaper_functions::LICE_IBitmap,
     >,
     pub LICE_MeasureText: Option<
-        fn(
+        unsafe extern "C" fn(
             string: *const ::std::os::raw::c_char,
             w: *mut ::std::os::raw::c_int,
             h: *mut ::std::os::raw::c_int,
         ),
     >,
     pub LICE_MultiplyAddRect: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -2116,7 +2436,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_PutPixel: Option<
-        fn(
+        unsafe extern "C" fn(
             bm: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -2126,7 +2446,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_RotatedBlit: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             src: *mut root::reaper_functions::LICE_IBitmap,
             dstx: ::std::os::raw::c_int,
@@ -2146,7 +2466,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_RoundRect: Option<
-        fn(
+        unsafe extern "C" fn(
             drawbm: *mut root::reaper_functions::LICE_IBitmap,
             xpos: f32,
             ypos: f32,
@@ -2160,7 +2480,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_ScaledBlit: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             src: *mut root::reaper_functions::LICE_IBitmap,
             dstx: ::std::os::raw::c_int,
@@ -2176,7 +2496,7 @@ pub struct Reaper {
         ),
     >,
     pub LICE_SimpleFill: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -2185,82 +2505,113 @@ pub struct Reaper {
             keepmask: root::reaper_functions::LICE_pixel,
         ),
     >,
-    pub Loop_OnArrow:
-        Option<fn(project: *mut root::ReaProject, direction: ::std::os::raw::c_int) -> bool>,
-    pub Main_OnCommand: Option<fn(command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int)>,
+    pub Loop_OnArrow: Option<
+        unsafe extern "C" fn(
+            project: *mut root::ReaProject,
+            direction: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub Main_OnCommand:
+        Option<unsafe extern "C" fn(command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int)>,
     pub Main_OnCommandEx: Option<
-        fn(
+        unsafe extern "C" fn(
             command: ::std::os::raw::c_int,
             flag: ::std::os::raw::c_int,
             proj: *mut root::ReaProject,
         ),
     >,
-    pub Main_openProject: Option<fn(name: *const ::std::os::raw::c_char)>,
-    pub Main_SaveProject: Option<fn(proj: *mut root::ReaProject, forceSaveAsInOptional: bool)>,
-    pub Main_UpdateLoopInfo: Option<fn(ignoremask: ::std::os::raw::c_int)>,
-    pub MarkProjectDirty: Option<fn(proj: *mut root::ReaProject)>,
-    pub MarkTrackItemsDirty: Option<fn(track: *mut root::MediaTrack, item: *mut root::MediaItem)>,
-    pub Master_GetPlayRate: Option<fn(project: *mut root::ReaProject) -> f64>,
-    pub Master_GetPlayRateAtTime: Option<fn(time_s: f64, proj: *mut root::ReaProject) -> f64>,
-    pub Master_GetTempo: Option<fn() -> f64>,
-    pub Master_NormalizePlayRate: Option<fn(playrate: f64, isnormalized: bool) -> f64>,
-    pub Master_NormalizeTempo: Option<fn(bpm: f64, isnormalized: bool) -> f64>,
+    pub Main_openProject: Option<unsafe extern "C" fn(name: *const ::std::os::raw::c_char)>,
+    pub Main_SaveProject:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, forceSaveAsInOptional: bool)>,
+    pub Main_UpdateLoopInfo: Option<unsafe extern "C" fn(ignoremask: ::std::os::raw::c_int)>,
+    pub MarkProjectDirty: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
+    pub MarkTrackItemsDirty:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack, item: *mut root::MediaItem)>,
+    pub Master_GetPlayRate: Option<unsafe extern "C" fn(project: *mut root::ReaProject) -> f64>,
+    pub Master_GetPlayRateAtTime:
+        Option<unsafe extern "C" fn(time_s: f64, proj: *mut root::ReaProject) -> f64>,
+    pub Master_GetTempo: Option<unsafe extern "C" fn() -> f64>,
+    pub Master_NormalizePlayRate:
+        Option<unsafe extern "C" fn(playrate: f64, isnormalized: bool) -> f64>,
+    pub Master_NormalizeTempo: Option<unsafe extern "C" fn(bpm: f64, isnormalized: bool) -> f64>,
     pub MB: Option<
-        fn(
+        unsafe extern "C" fn(
             msg: *const ::std::os::raw::c_char,
             title: *const ::std::os::raw::c_char,
             type_: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub MediaItemDescendsFromTrack: Option<
-        fn(item: *mut root::MediaItem, track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            item: *mut root::MediaItem,
+            track: *mut root::MediaTrack,
+        ) -> ::std::os::raw::c_int,
     >,
     pub MIDI_CountEvts: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             notecntOut: *mut ::std::os::raw::c_int,
             ccevtcntOut: *mut ::std::os::raw::c_int,
             textsyxevtcntOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub MIDI_DeleteCC:
-        Option<fn(take: *mut root::MediaItem_Take, ccidx: ::std::os::raw::c_int) -> bool>,
-    pub MIDI_DeleteEvt:
-        Option<fn(take: *mut root::MediaItem_Take, evtidx: ::std::os::raw::c_int) -> bool>,
-    pub MIDI_DeleteNote:
-        Option<fn(take: *mut root::MediaItem_Take, noteidx: ::std::os::raw::c_int) -> bool>,
-    pub MIDI_DeleteTextSysexEvt:
-        Option<fn(take: *mut root::MediaItem_Take, textsyxevtidx: ::std::os::raw::c_int) -> bool>,
-    pub MIDI_DisableSort: Option<fn(take: *mut root::MediaItem_Take)>,
+    pub MIDI_DeleteCC: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take, ccidx: ::std::os::raw::c_int) -> bool,
+    >,
+    pub MIDI_DeleteEvt: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            evtidx: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub MIDI_DeleteNote: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            noteidx: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub MIDI_DeleteTextSysexEvt: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            textsyxevtidx: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub MIDI_DisableSort: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
     pub MIDI_EnumSelCC: Option<
-        fn(take: *mut root::MediaItem_Take, ccidx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            ccidx: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub MIDI_EnumSelEvts: Option<
-        fn(take: *mut root::MediaItem_Take, evtidx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            evtidx: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub MIDI_EnumSelNotes: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             noteidx: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub MIDI_EnumSelTextSysexEvts: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             textsyxidx: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub MIDI_eventlist_Create: Option<fn() -> *mut root::MIDI_eventlist>,
-    pub MIDI_eventlist_Destroy: Option<fn(evtlist: *mut root::MIDI_eventlist)>,
+    pub MIDI_eventlist_Create: Option<unsafe extern "C" fn() -> *mut root::MIDI_eventlist>,
+    pub MIDI_eventlist_Destroy: Option<unsafe extern "C" fn(evtlist: *mut root::MIDI_eventlist)>,
     pub MIDI_GetAllEvts: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             bufNeedBig: *mut ::std::os::raw::c_char,
             bufNeedBig_sz: *mut ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDI_GetCC: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             ccidx: ::std::os::raw::c_int,
             selectedOut: *mut bool,
@@ -2273,7 +2624,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_GetCCShape: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             ccidx: ::std::os::raw::c_int,
             shapeOut: *mut ::std::os::raw::c_int,
@@ -2281,7 +2632,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_GetEvt: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             evtidx: ::std::os::raw::c_int,
             selectedOut: *mut bool,
@@ -2292,14 +2643,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_GetGrid: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             swingOutOptional: *mut f64,
             noteLenOutOptional: *mut f64,
         ) -> f64,
     >,
     pub MIDI_GetHash: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             notesonly: bool,
             hash: *mut ::std::os::raw::c_char,
@@ -2307,7 +2658,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_GetNote: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             noteidx: ::std::os::raw::c_int,
             selectedOut: *mut bool,
@@ -2320,16 +2671,19 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_GetPPQPos_EndOfMeasure:
-        Option<fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
     pub MIDI_GetPPQPos_StartOfMeasure:
-        Option<fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
-    pub MIDI_GetPPQPosFromProjQN: Option<fn(take: *mut root::MediaItem_Take, projqn: f64) -> f64>,
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
+    pub MIDI_GetPPQPosFromProjQN:
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, projqn: f64) -> f64>,
     pub MIDI_GetPPQPosFromProjTime:
-        Option<fn(take: *mut root::MediaItem_Take, projtime: f64) -> f64>,
-    pub MIDI_GetProjQNFromPPQPos: Option<fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
-    pub MIDI_GetProjTimeFromPPQPos: Option<fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, projtime: f64) -> f64>,
+    pub MIDI_GetProjQNFromPPQPos:
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
+    pub MIDI_GetProjTimeFromPPQPos:
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
     pub MIDI_GetScale: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             rootOut: *mut ::std::os::raw::c_int,
             scaleOut: *mut ::std::os::raw::c_int,
@@ -2338,7 +2692,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_GetTextSysexEvt: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             textsyxevtidx: ::std::os::raw::c_int,
             selectedOutOptional: *mut bool,
@@ -2350,7 +2704,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_GetTrackHash: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             notesonly: bool,
             hash: *mut ::std::os::raw::c_char,
@@ -2358,7 +2712,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_InsertCC: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             selected: bool,
             muted: bool,
@@ -2370,7 +2724,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_InsertEvt: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             selected: bool,
             muted: bool,
@@ -2380,7 +2734,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_InsertNote: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             selected: bool,
             muted: bool,
@@ -2393,7 +2747,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_InsertTextSysexEvt: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             selected: bool,
             muted: bool,
@@ -2403,17 +2757,17 @@ pub struct Reaper {
             bytestr_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub midi_reinit: Option<fn()>,
-    pub MIDI_SelectAll: Option<fn(take: *mut root::MediaItem_Take, select: bool)>,
+    pub midi_reinit: Option<unsafe extern "C" fn()>,
+    pub MIDI_SelectAll: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, select: bool)>,
     pub MIDI_SetAllEvts: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             buf: *const ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDI_SetCC: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             ccidx: ::std::os::raw::c_int,
             selectedInOptional: *const bool,
@@ -2427,7 +2781,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_SetCCShape: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             ccidx: ::std::os::raw::c_int,
             shape: ::std::os::raw::c_int,
@@ -2436,7 +2790,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_SetEvt: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             evtidx: ::std::os::raw::c_int,
             selectedInOptional: *const bool,
@@ -2448,9 +2802,9 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_SetItemExtents:
-        Option<fn(item: *mut root::MediaItem, startQN: f64, endQN: f64) -> bool>,
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem, startQN: f64, endQN: f64) -> bool>,
     pub MIDI_SetNote: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             noteidx: ::std::os::raw::c_int,
             selectedInOptional: *const bool,
@@ -2464,7 +2818,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub MIDI_SetTextSysexEvt: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             textsyxevtidx: ::std::os::raw::c_int,
             selectedInOptional: *const bool,
@@ -2476,69 +2830,84 @@ pub struct Reaper {
             noSortInOptional: *const bool,
         ) -> bool,
     >,
-    pub MIDI_Sort: Option<fn(take: *mut root::MediaItem_Take)>,
-    pub MIDIEditor_GetActive: Option<fn() -> root::HWND>,
-    pub MIDIEditor_GetMode: Option<fn(midieditor: root::HWND) -> ::std::os::raw::c_int>,
+    pub MIDI_Sort: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
+    pub MIDIEditor_GetActive: Option<unsafe extern "C" fn() -> root::HWND>,
+    pub MIDIEditor_GetMode:
+        Option<unsafe extern "C" fn(midieditor: root::HWND) -> ::std::os::raw::c_int>,
     pub MIDIEditor_GetSetting_int: Option<
-        fn(
+        unsafe extern "C" fn(
             midieditor: root::HWND,
             setting_desc: *const ::std::os::raw::c_char,
         ) -> ::std::os::raw::c_int,
     >,
     pub MIDIEditor_GetSetting_str: Option<
-        fn(
+        unsafe extern "C" fn(
             midieditor: root::HWND,
             setting_desc: *const ::std::os::raw::c_char,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub MIDIEditor_GetTake: Option<fn(midieditor: root::HWND) -> *mut root::MediaItem_Take>,
-    pub MIDIEditor_LastFocused_OnCommand:
-        Option<fn(command_id: ::std::os::raw::c_int, islistviewcommand: bool) -> bool>,
-    pub MIDIEditor_OnCommand:
-        Option<fn(midieditor: root::HWND, command_id: ::std::os::raw::c_int) -> bool>,
+    pub MIDIEditor_GetTake:
+        Option<unsafe extern "C" fn(midieditor: root::HWND) -> *mut root::MediaItem_Take>,
+    pub MIDIEditor_LastFocused_OnCommand: Option<
+        unsafe extern "C" fn(command_id: ::std::os::raw::c_int, islistviewcommand: bool) -> bool,
+    >,
+    pub MIDIEditor_OnCommand: Option<
+        unsafe extern "C" fn(midieditor: root::HWND, command_id: ::std::os::raw::c_int) -> bool,
+    >,
     pub MIDIEditor_SetSetting_int: Option<
-        fn(
+        unsafe extern "C" fn(
             midieditor: root::HWND,
             setting_desc: *const ::std::os::raw::c_char,
             setting: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub mkpanstr: Option<fn(strNeed64: *mut ::std::os::raw::c_char, pan: f64)>,
-    pub mkvolpanstr: Option<fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64, pan: f64)>,
-    pub mkvolstr: Option<fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64)>,
-    pub MoveEditCursor: Option<fn(adjamt: f64, dosel: bool)>,
-    pub MoveMediaItemToTrack:
-        Option<fn(item: *mut root::MediaItem, desttr: *mut root::MediaTrack) -> bool>,
-    pub MuteAllTracks: Option<fn(mute: bool)>,
-    pub my_getViewport: Option<fn(r: *mut root::RECT, sr: *const root::RECT, wantWorkArea: bool)>,
-    pub NamedCommandLookup:
-        Option<fn(command_name: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int>,
-    pub OnPauseButton: Option<fn()>,
-    pub OnPauseButtonEx: Option<fn(proj: *mut root::ReaProject)>,
-    pub OnPlayButton: Option<fn()>,
-    pub OnPlayButtonEx: Option<fn(proj: *mut root::ReaProject)>,
-    pub OnStopButton: Option<fn()>,
-    pub OnStopButtonEx: Option<fn(proj: *mut root::ReaProject)>,
-    pub OpenColorThemeFile: Option<fn(fn_: *const ::std::os::raw::c_char) -> bool>,
-    pub OpenMediaExplorer:
-        Option<fn(mediafn: *const ::std::os::raw::c_char, play: bool) -> root::HWND>,
-    pub OscLocalMessageToHost:
-        Option<fn(message: *const ::std::os::raw::c_char, valueInOptional: *const f64)>,
-    pub parse_timestr: Option<fn(buf: *const ::std::os::raw::c_char) -> f64>,
+    pub mkpanstr: Option<unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, pan: f64)>,
+    pub mkvolpanstr:
+        Option<unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64, pan: f64)>,
+    pub mkvolstr: Option<unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64)>,
+    pub MoveEditCursor: Option<unsafe extern "C" fn(adjamt: f64, dosel: bool)>,
+    pub MoveMediaItemToTrack: Option<
+        unsafe extern "C" fn(item: *mut root::MediaItem, desttr: *mut root::MediaTrack) -> bool,
+    >,
+    pub MuteAllTracks: Option<unsafe extern "C" fn(mute: bool)>,
+    pub my_getViewport:
+        Option<unsafe extern "C" fn(r: *mut root::RECT, sr: *const root::RECT, wantWorkArea: bool)>,
+    pub NamedCommandLookup: Option<
+        unsafe extern "C" fn(command_name: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int,
+    >,
+    pub OnPauseButton: Option<unsafe extern "C" fn()>,
+    pub OnPauseButtonEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
+    pub OnPlayButton: Option<unsafe extern "C" fn()>,
+    pub OnPlayButtonEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
+    pub OnStopButton: Option<unsafe extern "C" fn()>,
+    pub OnStopButtonEx: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
+    pub OpenColorThemeFile:
+        Option<unsafe extern "C" fn(fn_: *const ::std::os::raw::c_char) -> bool>,
+    pub OpenMediaExplorer: Option<
+        unsafe extern "C" fn(mediafn: *const ::std::os::raw::c_char, play: bool) -> root::HWND,
+    >,
+    pub OscLocalMessageToHost: Option<
+        unsafe extern "C" fn(message: *const ::std::os::raw::c_char, valueInOptional: *const f64),
+    >,
+    pub parse_timestr: Option<unsafe extern "C" fn(buf: *const ::std::os::raw::c_char) -> f64>,
     pub parse_timestr_len: Option<
-        fn(
+        unsafe extern "C" fn(
             buf: *const ::std::os::raw::c_char,
             offset: f64,
             modeoverride: ::std::os::raw::c_int,
         ) -> f64,
     >,
-    pub parse_timestr_pos:
-        Option<fn(buf: *const ::std::os::raw::c_char, modeoverride: ::std::os::raw::c_int) -> f64>,
-    pub parsepanstr: Option<fn(str: *const ::std::os::raw::c_char) -> f64>,
+    pub parse_timestr_pos: Option<
+        unsafe extern "C" fn(
+            buf: *const ::std::os::raw::c_char,
+            modeoverride: ::std::os::raw::c_int,
+        ) -> f64,
+    >,
+    pub parsepanstr: Option<unsafe extern "C" fn(str: *const ::std::os::raw::c_char) -> f64>,
     pub PCM_Sink_Create: Option<
-        fn(
+        unsafe extern "C" fn(
             filename: *const ::std::os::raw::c_char,
             cfg: *const ::std::os::raw::c_char,
             cfg_sz: ::std::os::raw::c_int,
@@ -2548,7 +2917,7 @@ pub struct Reaper {
         ) -> *mut root::PCM_sink,
     >,
     pub PCM_Sink_CreateEx: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             filename: *const ::std::os::raw::c_char,
             cfg: *const ::std::os::raw::c_char,
@@ -2559,7 +2928,7 @@ pub struct Reaper {
         ) -> *mut root::PCM_sink,
     >,
     pub PCM_Sink_CreateMIDIFile: Option<
-        fn(
+        unsafe extern "C" fn(
             filename: *const ::std::os::raw::c_char,
             cfg: *const ::std::os::raw::c_char,
             cfg_sz: ::std::os::raw::c_int,
@@ -2568,7 +2937,7 @@ pub struct Reaper {
         ) -> *mut root::PCM_sink,
     >,
     pub PCM_Sink_CreateMIDIFileEx: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             filename: *const ::std::os::raw::c_char,
             cfg: *const ::std::os::raw::c_char,
@@ -2578,40 +2947,45 @@ pub struct Reaper {
         ) -> *mut root::PCM_sink,
     >,
     pub PCM_Sink_Enum: Option<
-        fn(
+        unsafe extern "C" fn(
             idx: ::std::os::raw::c_int,
             descstrOut: *mut *const ::std::os::raw::c_char,
         ) -> ::std::os::raw::c_uint,
     >,
     pub PCM_Sink_GetExtension: Option<
-        fn(
+        unsafe extern "C" fn(
             data: *const ::std::os::raw::c_char,
             data_sz: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
     pub PCM_Sink_ShowConfig: Option<
-        fn(
+        unsafe extern "C" fn(
             cfg: *const ::std::os::raw::c_char,
             cfg_sz: ::std::os::raw::c_int,
             hwndParent: root::HWND,
         ) -> root::HWND,
     >,
-    pub PCM_Source_CreateFromFile:
-        Option<fn(filename: *const ::std::os::raw::c_char) -> *mut root::PCM_source>,
+    pub PCM_Source_CreateFromFile: Option<
+        unsafe extern "C" fn(filename: *const ::std::os::raw::c_char) -> *mut root::PCM_source,
+    >,
     pub PCM_Source_CreateFromFileEx: Option<
-        fn(filename: *const ::std::os::raw::c_char, forcenoMidiImp: bool) -> *mut root::PCM_source,
+        unsafe extern "C" fn(
+            filename: *const ::std::os::raw::c_char,
+            forcenoMidiImp: bool,
+        ) -> *mut root::PCM_source,
     >,
     pub PCM_Source_CreateFromSimple: Option<
-        fn(
+        unsafe extern "C" fn(
             dec: *mut root::ISimpleMediaDecoder,
             fn_: *const ::std::os::raw::c_char,
         ) -> *mut root::PCM_source,
     >,
-    pub PCM_Source_CreateFromType:
-        Option<fn(sourcetype: *const ::std::os::raw::c_char) -> *mut root::PCM_source>,
-    pub PCM_Source_Destroy: Option<fn(src: *mut root::PCM_source)>,
+    pub PCM_Source_CreateFromType: Option<
+        unsafe extern "C" fn(sourcetype: *const ::std::os::raw::c_char) -> *mut root::PCM_source,
+    >,
+    pub PCM_Source_Destroy: Option<unsafe extern "C" fn(src: *mut root::PCM_source)>,
     pub PCM_Source_GetPeaks: Option<
-        fn(
+        unsafe extern "C" fn(
             src: *mut root::PCM_source,
             peakrate: f64,
             starttime: f64,
@@ -2622,7 +2996,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub PCM_Source_GetSectionInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             src: *mut root::PCM_source,
             offsOut: *mut f64,
             lenOut: *mut f64,
@@ -2630,7 +3004,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub PeakBuild_Create: Option<
-        fn(
+        unsafe extern "C" fn(
             src: *mut root::PCM_source,
             fn_: *const ::std::os::raw::c_char,
             srate: ::std::os::raw::c_int,
@@ -2638,7 +3012,7 @@ pub struct Reaper {
         ) -> *mut root::REAPER_PeakBuild_Interface,
     >,
     pub PeakBuild_CreateEx: Option<
-        fn(
+        unsafe extern "C" fn(
             src: *mut root::PCM_source,
             fn_: *const ::std::os::raw::c_char,
             srate: ::std::os::raw::c_int,
@@ -2647,14 +3021,14 @@ pub struct Reaper {
         ) -> *mut root::REAPER_PeakBuild_Interface,
     >,
     pub PeakGet_Create: Option<
-        fn(
+        unsafe extern "C" fn(
             fn_: *const ::std::os::raw::c_char,
             srate: ::std::os::raw::c_int,
             nch: ::std::os::raw::c_int,
         ) -> *mut root::REAPER_PeakGet_Interface,
     >,
     pub PitchShiftSubModeMenu: Option<
-        fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -2662,83 +3036,98 @@ pub struct Reaper {
             submode_sel: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub PlayPreview: Option<fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int>,
+    pub PlayPreview: Option<
+        unsafe extern "C" fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int,
+    >,
     pub PlayPreviewEx: Option<
-        fn(
+        unsafe extern "C" fn(
             preview: *mut root::preview_register_t,
             bufflags: ::std::os::raw::c_int,
             MSI: f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub PlayTrackPreview:
-        Option<fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int>,
+    pub PlayTrackPreview: Option<
+        unsafe extern "C" fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int,
+    >,
     pub PlayTrackPreview2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             preview: *mut root::preview_register_t,
         ) -> ::std::os::raw::c_int,
     >,
     pub PlayTrackPreview2Ex: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             preview: *mut root::preview_register_t,
             flags: ::std::os::raw::c_int,
             msi: f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub plugin_getapi:
-        Option<fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void>,
-    pub plugin_getFilterList: Option<fn() -> *const ::std::os::raw::c_char>,
-    pub plugin_getImportableProjectFilterList: Option<fn() -> *const ::std::os::raw::c_char>,
+    pub plugin_getapi: Option<
+        unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void,
+    >,
+    pub plugin_getFilterList: Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
+    pub plugin_getImportableProjectFilterList:
+        Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub plugin_register: Option<
-        fn(
+        unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             infostruct: *mut ::std::os::raw::c_void,
         ) -> ::std::os::raw::c_int,
     >,
-    pub PluginWantsAlwaysRunFx: Option<fn(amt: ::std::os::raw::c_int)>,
-    pub PreventUIRefresh: Option<fn(prevent_count: ::std::os::raw::c_int)>,
+    pub PluginWantsAlwaysRunFx: Option<unsafe extern "C" fn(amt: ::std::os::raw::c_int)>,
+    pub PreventUIRefresh: Option<unsafe extern "C" fn(prevent_count: ::std::os::raw::c_int)>,
     pub projectconfig_var_addr: Option<
-        fn(proj: *mut root::ReaProject, idx: ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void,
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            idx: ::std::os::raw::c_int,
+        ) -> *mut ::std::os::raw::c_void,
     >,
     pub projectconfig_var_getoffs: Option<
-        fn(
+        unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             szOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub realloc_cmd_ptr: Option<
-        fn(
+        unsafe extern "C" fn(
             ptr: *mut *mut ::std::os::raw::c_char,
             ptr_size: *mut ::std::os::raw::c_int,
             new_size: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub ReaperGetPitchShiftAPI:
-        Option<fn(version: ::std::os::raw::c_int) -> *mut root::IReaperPitchShift>,
-    pub ReaScriptError: Option<fn(errmsg: *const ::std::os::raw::c_char)>,
-    pub RecursiveCreateDirectory:
-        Option<fn(path: *const ::std::os::raw::c_char, ignored: usize) -> ::std::os::raw::c_int>,
-    pub reduce_open_files: Option<fn(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
-    pub RefreshToolbar: Option<fn(command_id: ::std::os::raw::c_int)>,
-    pub RefreshToolbar2:
-        Option<fn(section_id: ::std::os::raw::c_int, command_id: ::std::os::raw::c_int)>,
+    pub ReaperGetPitchShiftAPI: Option<
+        unsafe extern "C" fn(version: ::std::os::raw::c_int) -> *mut root::IReaperPitchShift,
+    >,
+    pub ReaScriptError: Option<unsafe extern "C" fn(errmsg: *const ::std::os::raw::c_char)>,
+    pub RecursiveCreateDirectory: Option<
+        unsafe extern "C" fn(
+            path: *const ::std::os::raw::c_char,
+            ignored: usize,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub reduce_open_files:
+        Option<unsafe extern "C" fn(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub RefreshToolbar: Option<unsafe extern "C" fn(command_id: ::std::os::raw::c_int)>,
+    pub RefreshToolbar2: Option<
+        unsafe extern "C" fn(section_id: ::std::os::raw::c_int, command_id: ::std::os::raw::c_int),
+    >,
     pub relative_fn: Option<
-        fn(
+        unsafe extern "C" fn(
             in_: *const ::std::os::raw::c_char,
             out: *mut ::std::os::raw::c_char,
             out_sz: ::std::os::raw::c_int,
         ),
     >,
     pub RemoveTrackSend: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             category: ::std::os::raw::c_int,
             sendidx: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub RenderFileSection: Option<
-        fn(
+        unsafe extern "C" fn(
             source_filename: *const ::std::os::raw::c_char,
             target_filename: *const ::std::os::raw::c_char,
             start_percent: f64,
@@ -2747,68 +3136,84 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub ReorderSelectedTracks: Option<
-        fn(beforeTrackIdx: ::std::os::raw::c_int, makePrevFolder: ::std::os::raw::c_int) -> bool,
+        unsafe extern "C" fn(
+            beforeTrackIdx: ::std::os::raw::c_int,
+            makePrevFolder: ::std::os::raw::c_int,
+        ) -> bool,
     >,
     pub Resample_EnumModes:
-        Option<fn(mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
-    pub Resampler_Create: Option<fn() -> *mut root::REAPER_Resample_Interface>,
+        Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
+    pub Resampler_Create: Option<unsafe extern "C" fn() -> *mut root::REAPER_Resample_Interface>,
     pub resolve_fn: Option<
-        fn(
+        unsafe extern "C" fn(
             in_: *const ::std::os::raw::c_char,
             out: *mut ::std::os::raw::c_char,
             out_sz: ::std::os::raw::c_int,
         ),
     >,
     pub resolve_fn2: Option<
-        fn(
+        unsafe extern "C" fn(
             in_: *const ::std::os::raw::c_char,
             out: *mut ::std::os::raw::c_char,
             out_sz: ::std::os::raw::c_int,
             checkSubDirOptional: *const ::std::os::raw::c_char,
         ),
     >,
-    pub ReverseNamedCommandLookup:
-        Option<fn(command_id: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
-    pub ScaleFromEnvelopeMode: Option<fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
-    pub ScaleToEnvelopeMode: Option<fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
+    pub ReverseNamedCommandLookup: Option<
+        unsafe extern "C" fn(command_id: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
+    >,
+    pub ScaleFromEnvelopeMode:
+        Option<unsafe extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
+    pub ScaleToEnvelopeMode:
+        Option<unsafe extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64>,
     pub screenset_register: Option<
-        fn(
+        unsafe extern "C" fn(
             id: *mut ::std::os::raw::c_char,
             callbackFunc: *mut ::std::os::raw::c_void,
             param: *mut ::std::os::raw::c_void,
         ),
     >,
     pub screenset_registerNew: Option<
-        fn(
+        unsafe extern "C" fn(
             id: *mut ::std::os::raw::c_char,
             callbackFunc: root::screensetNewCallbackFunc,
             param: *mut ::std::os::raw::c_void,
         ),
     >,
-    pub screenset_unregister: Option<fn(id: *mut ::std::os::raw::c_char)>,
-    pub screenset_unregisterByParam: Option<fn(param: *mut ::std::os::raw::c_void)>,
-    pub screenset_updateLastFocus: Option<fn(prevWin: root::HWND)>,
+    pub screenset_unregister: Option<unsafe extern "C" fn(id: *mut ::std::os::raw::c_char)>,
+    pub screenset_unregisterByParam:
+        Option<unsafe extern "C" fn(param: *mut ::std::os::raw::c_void)>,
+    pub screenset_updateLastFocus: Option<unsafe extern "C" fn(prevWin: root::HWND)>,
     pub SectionFromUniqueID:
-        Option<fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo>,
-    pub SelectAllMediaItems: Option<fn(proj: *mut root::ReaProject, selected: bool)>,
-    pub SelectProjectInstance: Option<fn(proj: *mut root::ReaProject)>,
+        Option<unsafe extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo>,
+    pub SelectAllMediaItems:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, selected: bool)>,
+    pub SelectProjectInstance: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
     pub SendLocalOscMessage: Option<
-        fn(
+        unsafe extern "C" fn(
             local_osc_handler: *mut ::std::os::raw::c_void,
             msg: *const ::std::os::raw::c_char,
             msglen: ::std::os::raw::c_int,
         ),
     >,
-    pub SetActiveTake: Option<fn(take: *mut root::MediaItem_Take)>,
-    pub SetAutomationMode: Option<fn(mode: ::std::os::raw::c_int, onlySel: bool)>,
-    pub SetCurrentBPM: Option<fn(__proj: *mut root::ReaProject, bpm: f64, wantUndo: bool)>,
-    pub SetCursorContext:
-        Option<fn(mode: ::std::os::raw::c_int, envInOptional: *mut root::TrackEnvelope)>,
-    pub SetEditCurPos: Option<fn(time: f64, moveview: bool, seekplay: bool)>,
-    pub SetEditCurPos2:
-        Option<fn(proj: *mut root::ReaProject, time: f64, moveview: bool, seekplay: bool)>,
+    pub SetActiveTake: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
+    pub SetAutomationMode: Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int, onlySel: bool)>,
+    pub SetCurrentBPM:
+        Option<unsafe extern "C" fn(__proj: *mut root::ReaProject, bpm: f64, wantUndo: bool)>,
+    pub SetCursorContext: Option<
+        unsafe extern "C" fn(mode: ::std::os::raw::c_int, envInOptional: *mut root::TrackEnvelope),
+    >,
+    pub SetEditCurPos: Option<unsafe extern "C" fn(time: f64, moveview: bool, seekplay: bool)>,
+    pub SetEditCurPos2: Option<
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            time: f64,
+            moveview: bool,
+            seekplay: bool,
+        ),
+    >,
     pub SetEnvelopePoint: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             ptidx: ::std::os::raw::c_int,
             timeInOptional: *mut f64,
@@ -2820,7 +3225,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetEnvelopePointEx: Option<
-        fn(
+        unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             ptidx: ::std::os::raw::c_int,
@@ -2833,70 +3238,80 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetEnvelopeStateChunk: Option<
-        fn(
+        unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
             str: *const ::std::os::raw::c_char,
             isundoOptional: bool,
         ) -> bool,
     >,
     pub SetExtState: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *const ::std::os::raw::c_char,
             key: *const ::std::os::raw::c_char,
             value: *const ::std::os::raw::c_char,
             persist: bool,
         ),
     >,
-    pub SetGlobalAutomationOverride: Option<fn(mode: ::std::os::raw::c_int)>,
+    pub SetGlobalAutomationOverride: Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int)>,
     pub SetItemStateChunk: Option<
-        fn(
+        unsafe extern "C" fn(
             item: *mut root::MediaItem,
             str: *const ::std::os::raw::c_char,
             isundoOptional: bool,
         ) -> bool,
     >,
-    pub SetMasterTrackVisibility: Option<fn(flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub SetMasterTrackVisibility:
+        Option<unsafe extern "C" fn(flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub SetMediaItemInfo_Value: Option<
-        fn(
+        unsafe extern "C" fn(
             item: *mut root::MediaItem,
             parmname: *const ::std::os::raw::c_char,
             newvalue: f64,
         ) -> bool,
     >,
-    pub SetMediaItemLength:
-        Option<fn(item: *mut root::MediaItem, length: f64, refreshUI: bool) -> bool>,
-    pub SetMediaItemPosition:
-        Option<fn(item: *mut root::MediaItem, position: f64, refreshUI: bool) -> bool>,
-    pub SetMediaItemSelected: Option<fn(item: *mut root::MediaItem, selected: bool)>,
-    pub SetMediaItemTake_Source:
-        Option<fn(take: *mut root::MediaItem_Take, source: *mut root::PCM_source) -> bool>,
+    pub SetMediaItemLength: Option<
+        unsafe extern "C" fn(item: *mut root::MediaItem, length: f64, refreshUI: bool) -> bool,
+    >,
+    pub SetMediaItemPosition: Option<
+        unsafe extern "C" fn(item: *mut root::MediaItem, position: f64, refreshUI: bool) -> bool,
+    >,
+    pub SetMediaItemSelected:
+        Option<unsafe extern "C" fn(item: *mut root::MediaItem, selected: bool)>,
+    pub SetMediaItemTake_Source: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            source: *mut root::PCM_source,
+        ) -> bool,
+    >,
     pub SetMediaItemTakeInfo_Value: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             parmname: *const ::std::os::raw::c_char,
             newvalue: f64,
         ) -> bool,
     >,
     pub SetMediaTrackInfo_Value: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             parmname: *const ::std::os::raw::c_char,
             newvalue: f64,
         ) -> bool,
     >,
-    pub SetMIDIEditorGrid: Option<fn(project: *mut root::ReaProject, division: f64)>,
-    pub SetMixerScroll: Option<fn(leftmosttrack: *mut root::MediaTrack) -> *mut root::MediaTrack>,
+    pub SetMIDIEditorGrid:
+        Option<unsafe extern "C" fn(project: *mut root::ReaProject, division: f64)>,
+    pub SetMixerScroll:
+        Option<unsafe extern "C" fn(leftmosttrack: *mut root::MediaTrack) -> *mut root::MediaTrack>,
     pub SetMouseModifier: Option<
-        fn(
+        unsafe extern "C" fn(
             context: *const ::std::os::raw::c_char,
             modifier_flag: ::std::os::raw::c_int,
             action: *const ::std::os::raw::c_char,
         ),
     >,
-    pub SetOnlyTrackSelected: Option<fn(track: *mut root::MediaTrack)>,
-    pub SetProjectGrid: Option<fn(project: *mut root::ReaProject, division: f64)>,
+    pub SetOnlyTrackSelected: Option<unsafe extern "C" fn(track: *mut root::MediaTrack)>,
+    pub SetProjectGrid: Option<unsafe extern "C" fn(project: *mut root::ReaProject, division: f64)>,
     pub SetProjectMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             markrgnindexnumber: ::std::os::raw::c_int,
             isrgn: bool,
             pos: f64,
@@ -2905,7 +3320,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetProjectMarker2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             markrgnindexnumber: ::std::os::raw::c_int,
             isrgn: bool,
@@ -2915,7 +3330,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetProjectMarker3: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             markrgnindexnumber: ::std::os::raw::c_int,
             isrgn: bool,
@@ -2926,7 +3341,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetProjectMarker4: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             markrgnindexnumber: ::std::os::raw::c_int,
             isrgn: bool,
@@ -2938,7 +3353,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetProjectMarkerByIndex: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             markrgnidx: ::std::os::raw::c_int,
             isrgn: bool,
@@ -2950,7 +3365,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetProjectMarkerByIndex2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             markrgnidx: ::std::os::raw::c_int,
             isrgn: bool,
@@ -2963,7 +3378,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetProjExtState: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             extname: *const ::std::os::raw::c_char,
             key: *const ::std::os::raw::c_char,
@@ -2971,26 +3386,31 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub SetRegionRenderMatrix: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             regionindex: ::std::os::raw::c_int,
             track: *mut root::MediaTrack,
             addorremove: ::std::os::raw::c_int,
         ),
     >,
-    pub SetRenderLastError: Option<fn(errorstr: *const ::std::os::raw::c_char)>,
+    pub SetRenderLastError: Option<unsafe extern "C" fn(errorstr: *const ::std::os::raw::c_char)>,
     pub SetTakeStretchMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             idx: ::std::os::raw::c_int,
             pos: f64,
             srcposInOptional: *const f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub SetTakeStretchMarkerSlope:
-        Option<fn(take: *mut root::MediaItem_Take, idx: ::std::os::raw::c_int, slope: f64) -> bool>,
+    pub SetTakeStretchMarkerSlope: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            idx: ::std::os::raw::c_int,
+            slope: f64,
+        ) -> bool,
+    >,
     pub SetTempoTimeSigMarker: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             ptidx: ::std::os::raw::c_int,
             timepos: f64,
@@ -3003,23 +3423,25 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetToggleCommandState: Option<
-        fn(
+        unsafe extern "C" fn(
             section_id: ::std::os::raw::c_int,
             command_id: ::std::os::raw::c_int,
             state: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub SetTrackAutomationMode: Option<fn(tr: *mut root::MediaTrack, mode: ::std::os::raw::c_int)>,
-    pub SetTrackColor: Option<fn(track: *mut root::MediaTrack, color: ::std::os::raw::c_int)>,
+    pub SetTrackAutomationMode:
+        Option<unsafe extern "C" fn(tr: *mut root::MediaTrack, mode: ::std::os::raw::c_int)>,
+    pub SetTrackColor:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack, color: ::std::os::raw::c_int)>,
     pub SetTrackMIDILyrics: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             flag: ::std::os::raw::c_int,
             str: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
     pub SetTrackMIDINoteName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: ::std::os::raw::c_int,
             pitch: ::std::os::raw::c_int,
             chan: ::std::os::raw::c_int,
@@ -3027,7 +3449,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetTrackMIDINoteNameEx: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             track: *mut root::MediaTrack,
             pitch: ::std::os::raw::c_int,
@@ -3035,9 +3457,10 @@ pub struct Reaper {
             name: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
-    pub SetTrackSelected: Option<fn(track: *mut root::MediaTrack, selected: bool)>,
+    pub SetTrackSelected:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack, selected: bool)>,
     pub SetTrackSendInfo_Value: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             category: ::std::os::raw::c_int,
             sendidx: ::std::os::raw::c_int,
@@ -3046,7 +3469,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetTrackSendUIPan: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             send_idx: ::std::os::raw::c_int,
             pan: f64,
@@ -3054,7 +3477,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetTrackSendUIVol: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             send_idx: ::std::os::raw::c_int,
             vol: f64,
@@ -3062,23 +3485,24 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub SetTrackStateChunk: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             str: *const ::std::os::raw::c_char,
             isundoOptional: bool,
         ) -> bool,
     >,
-    pub ShowActionList: Option<fn(caller: *mut root::KbdSectionInfo, callerWnd: root::HWND)>,
-    pub ShowConsoleMsg: Option<fn(msg: *const ::std::os::raw::c_char)>,
+    pub ShowActionList:
+        Option<unsafe extern "C" fn(caller: *mut root::KbdSectionInfo, callerWnd: root::HWND)>,
+    pub ShowConsoleMsg: Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>,
     pub ShowMessageBox: Option<
-        fn(
+        unsafe extern "C" fn(
             msg: *const ::std::os::raw::c_char,
             title: *const ::std::os::raw::c_char,
             type_: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub ShowPopupMenu: Option<
-        fn(
+        unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -3088,24 +3512,30 @@ pub struct Reaper {
             ctx3Optional: ::std::os::raw::c_int,
         ),
     >,
-    pub SLIDER2DB: Option<fn(y: f64) -> f64>,
-    pub SnapToGrid: Option<fn(project: *mut root::ReaProject, time_pos: f64) -> f64>,
-    pub SoloAllTracks: Option<fn(solo: ::std::os::raw::c_int)>,
-    pub Splash_GetWnd: Option<fn() -> root::HWND>,
-    pub SplitMediaItem:
-        Option<fn(item: *mut root::MediaItem, position: f64) -> *mut root::MediaItem>,
-    pub StopPreview: Option<fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int>,
-    pub StopTrackPreview:
-        Option<fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int>,
+    pub SLIDER2DB: Option<unsafe extern "C" fn(y: f64) -> f64>,
+    pub SnapToGrid:
+        Option<unsafe extern "C" fn(project: *mut root::ReaProject, time_pos: f64) -> f64>,
+    pub SoloAllTracks: Option<unsafe extern "C" fn(solo: ::std::os::raw::c_int)>,
+    pub Splash_GetWnd: Option<unsafe extern "C" fn() -> root::HWND>,
+    pub SplitMediaItem: Option<
+        unsafe extern "C" fn(item: *mut root::MediaItem, position: f64) -> *mut root::MediaItem,
+    >,
+    pub StopPreview: Option<
+        unsafe extern "C" fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int,
+    >,
+    pub StopTrackPreview: Option<
+        unsafe extern "C" fn(preview: *mut root::preview_register_t) -> ::std::os::raw::c_int,
+    >,
     pub StopTrackPreview2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut ::std::os::raw::c_void,
             preview: *mut root::preview_register_t,
         ) -> ::std::os::raw::c_int,
     >,
-    pub stringToGuid: Option<fn(str: *const ::std::os::raw::c_char, g: *mut root::GUID)>,
+    pub stringToGuid:
+        Option<unsafe extern "C" fn(str: *const ::std::os::raw::c_char, g: *mut root::GUID)>,
     pub StuffMIDIMessage: Option<
-        fn(
+        unsafe extern "C" fn(
             mode: ::std::os::raw::c_int,
             msg1: ::std::os::raw::c_int,
             msg2: ::std::os::raw::c_int,
@@ -3113,14 +3543,14 @@ pub struct Reaper {
         ),
     >,
     pub TakeFX_AddByName: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fxname: *const ::std::os::raw::c_char,
             instantiate: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub TakeFX_CopyToTake: Option<
-        fn(
+        unsafe extern "C" fn(
             src_take: *mut root::MediaItem_Take,
             src_fx: ::std::os::raw::c_int,
             dest_take: *mut root::MediaItem_Take,
@@ -3129,7 +3559,7 @@ pub struct Reaper {
         ),
     >,
     pub TakeFX_CopyToTrack: Option<
-        fn(
+        unsafe extern "C" fn(
             src_take: *mut root::MediaItem_Take,
             src_fx: ::std::os::raw::c_int,
             dest_track: *mut root::MediaTrack,
@@ -3137,17 +3567,18 @@ pub struct Reaper {
             is_move: bool,
         ),
     >,
-    pub TakeFX_Delete:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool>,
+    pub TakeFX_Delete: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool,
+    >,
     pub TakeFX_EndParamEdit: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_FormatParamValue: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3157,7 +3588,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_FormatParamValueNormalized: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3167,22 +3598,28 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_GetChainVisible:
-        Option<fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
-    pub TakeFX_GetCount: Option<fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
-    pub TakeFX_GetEnabled:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool>,
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
+    pub TakeFX_GetCount:
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
+    pub TakeFX_GetEnabled: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool,
+    >,
     pub TakeFX_GetEnvelope: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fxindex: ::std::os::raw::c_int,
             parameterindex: ::std::os::raw::c_int,
             create: bool,
         ) -> *mut root::TrackEnvelope,
     >,
-    pub TakeFX_GetFloatingWindow:
-        Option<fn(take: *mut root::MediaItem_Take, index: ::std::os::raw::c_int) -> root::HWND>,
+    pub TakeFX_GetFloatingWindow: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            index: ::std::os::raw::c_int,
+        ) -> root::HWND,
+    >,
     pub TakeFX_GetFormattedParamValue: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3190,10 +3627,14 @@ pub struct Reaper {
             buf_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub TakeFX_GetFXGUID:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> *mut root::GUID>,
+    pub TakeFX_GetFXGUID: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            fx: ::std::os::raw::c_int,
+        ) -> *mut root::GUID,
+    >,
     pub TakeFX_GetFXName: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             buf: *mut ::std::os::raw::c_char,
@@ -3201,7 +3642,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_GetIOSize: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             inputPinsOutOptional: *mut ::std::os::raw::c_int,
@@ -3209,7 +3650,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub TakeFX_GetNamedConfigParm: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             parmname: *const ::std::os::raw::c_char,
@@ -3218,14 +3659,19 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_GetNumParams: Option<
-        fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            fx: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
-    pub TakeFX_GetOffline:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool>,
-    pub TakeFX_GetOpen:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool>,
+    pub TakeFX_GetOffline: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool,
+    >,
+    pub TakeFX_GetOpen: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int) -> bool,
+    >,
     pub TakeFX_GetParam: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3234,7 +3680,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub TakeFX_GetParameterStepSizes: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3245,7 +3691,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_GetParamEx: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3255,7 +3701,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub TakeFX_GetParamName: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3264,14 +3710,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_GetParamNormalized: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
         ) -> f64,
     >,
     pub TakeFX_GetPinMappings: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             isoutput: ::std::os::raw::c_int,
@@ -3280,7 +3726,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub TakeFX_GetPreset: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             presetname: *mut ::std::os::raw::c_char,
@@ -3288,14 +3734,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_GetPresetIndex: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             numberOfPresetsOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub TakeFX_GetUserPresetFilename: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             fn_: *mut ::std::os::raw::c_char,
@@ -3303,28 +3749,43 @@ pub struct Reaper {
         ),
     >,
     pub TakeFX_NavigatePresets: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             presetmove: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub TakeFX_SetEnabled:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int, enabled: bool)>,
+    pub TakeFX_SetEnabled: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            fx: ::std::os::raw::c_int,
+            enabled: bool,
+        ),
+    >,
     pub TakeFX_SetNamedConfigParm: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             parmname: *const ::std::os::raw::c_char,
             value: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
-    pub TakeFX_SetOffline:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int, offline: bool)>,
-    pub TakeFX_SetOpen:
-        Option<fn(take: *mut root::MediaItem_Take, fx: ::std::os::raw::c_int, open: bool)>,
+    pub TakeFX_SetOffline: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            fx: ::std::os::raw::c_int,
+            offline: bool,
+        ),
+    >,
+    pub TakeFX_SetOpen: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            fx: ::std::os::raw::c_int,
+            open: bool,
+        ),
+    >,
     pub TakeFX_SetParam: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3332,7 +3793,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_SetParamNormalized: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3340,7 +3801,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_SetPinMappings: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             isoutput: ::std::os::raw::c_int,
@@ -3350,29 +3811,29 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TakeFX_SetPreset: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             presetname: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
     pub TakeFX_SetPresetByIndex: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             idx: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_Show: Option<
-        fn(
+        unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             index: ::std::os::raw::c_int,
             showFlag: ::std::os::raw::c_int,
         ),
     >,
-    pub TakeIsMIDI: Option<fn(take: *mut root::MediaItem_Take) -> bool>,
+    pub TakeIsMIDI: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> bool>,
     pub ThemeLayout_GetLayout: Option<
-        fn(
+        unsafe extern "C" fn(
             section: *const ::std::os::raw::c_char,
             idx: ::std::os::raw::c_int,
             nameOut: *mut ::std::os::raw::c_char,
@@ -3380,7 +3841,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub ThemeLayout_GetParameter: Option<
-        fn(
+        unsafe extern "C" fn(
             wp: ::std::os::raw::c_int,
             descOutOptional: *mut *const ::std::os::raw::c_char,
             valueOutOptional: *mut ::std::os::raw::c_int,
@@ -3389,25 +3850,36 @@ pub struct Reaper {
             maxValueOutOptional: *mut ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
-    pub ThemeLayout_RefreshAll: Option<fn()>,
+    pub ThemeLayout_RefreshAll: Option<unsafe extern "C" fn()>,
     pub ThemeLayout_SetLayout: Option<
-        fn(section: *const ::std::os::raw::c_char, layout: *const ::std::os::raw::c_char) -> bool,
+        unsafe extern "C" fn(
+            section: *const ::std::os::raw::c_char,
+            layout: *const ::std::os::raw::c_char,
+        ) -> bool,
     >,
-    pub ThemeLayout_SetParameter:
-        Option<fn(wp: ::std::os::raw::c_int, value: ::std::os::raw::c_int, persist: bool) -> bool>,
-    pub time_precise: Option<fn() -> f64>,
+    pub ThemeLayout_SetParameter: Option<
+        unsafe extern "C" fn(
+            wp: ::std::os::raw::c_int,
+            value: ::std::os::raw::c_int,
+            persist: bool,
+        ) -> bool,
+    >,
+    pub time_precise: Option<unsafe extern "C" fn() -> f64>,
     pub TimeMap2_beatsToTime: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             tpos: f64,
             measuresInOptional: *const ::std::os::raw::c_int,
         ) -> f64,
     >,
-    pub TimeMap2_GetDividedBpmAtTime: Option<fn(proj: *mut root::ReaProject, time: f64) -> f64>,
-    pub TimeMap2_GetNextChangeTime: Option<fn(proj: *mut root::ReaProject, time: f64) -> f64>,
-    pub TimeMap2_QNToTime: Option<fn(proj: *mut root::ReaProject, qn: f64) -> f64>,
+    pub TimeMap2_GetDividedBpmAtTime:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, time: f64) -> f64>,
+    pub TimeMap2_GetNextChangeTime:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, time: f64) -> f64>,
+    pub TimeMap2_QNToTime:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, qn: f64) -> f64>,
     pub TimeMap2_timeToBeats: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             tpos: f64,
             measuresOutOptional: *mut ::std::os::raw::c_int,
@@ -3416,12 +3888,14 @@ pub struct Reaper {
             cdenomOutOptional: *mut ::std::os::raw::c_int,
         ) -> f64,
     >,
-    pub TimeMap2_timeToQN: Option<fn(proj: *mut root::ReaProject, tpos: f64) -> f64>,
-    pub TimeMap_curFrameRate:
-        Option<fn(proj: *mut root::ReaProject, dropFrameOutOptional: *mut bool) -> f64>,
-    pub TimeMap_GetDividedBpmAtTime: Option<fn(time: f64) -> f64>,
+    pub TimeMap2_timeToQN:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, tpos: f64) -> f64>,
+    pub TimeMap_curFrameRate: Option<
+        unsafe extern "C" fn(proj: *mut root::ReaProject, dropFrameOutOptional: *mut bool) -> f64,
+    >,
+    pub TimeMap_GetDividedBpmAtTime: Option<unsafe extern "C" fn(time: f64) -> f64>,
     pub TimeMap_GetMeasureInfo: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             measure: ::std::os::raw::c_int,
             qn_startOut: *mut f64,
@@ -3432,7 +3906,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub TimeMap_GetMetronomePattern: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             time: f64,
             pattern: *mut ::std::os::raw::c_char,
@@ -3440,7 +3914,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub TimeMap_GetTimeSigAtTime: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             time: f64,
             timesig_numOut: *mut ::std::os::raw::c_int,
@@ -3449,26 +3923,34 @@ pub struct Reaper {
         ),
     >,
     pub TimeMap_QNToMeasures: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             qn: f64,
             qnMeasureStartOutOptional: *mut f64,
             qnMeasureEndOutOptional: *mut f64,
         ) -> ::std::os::raw::c_int,
     >,
-    pub TimeMap_QNToTime: Option<fn(qn: f64) -> f64>,
-    pub TimeMap_QNToTime_abs: Option<fn(proj: *mut root::ReaProject, qn: f64) -> f64>,
-    pub TimeMap_timeToQN: Option<fn(tpos: f64) -> f64>,
-    pub TimeMap_timeToQN_abs: Option<fn(proj: *mut root::ReaProject, tpos: f64) -> f64>,
-    pub ToggleTrackSendUIMute:
-        Option<fn(track: *mut root::MediaTrack, send_idx: ::std::os::raw::c_int) -> bool>,
-    pub Track_GetPeakHoldDB: Option<
-        fn(track: *mut root::MediaTrack, channel: ::std::os::raw::c_int, clear: bool) -> f64,
+    pub TimeMap_QNToTime: Option<unsafe extern "C" fn(qn: f64) -> f64>,
+    pub TimeMap_QNToTime_abs:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, qn: f64) -> f64>,
+    pub TimeMap_timeToQN: Option<unsafe extern "C" fn(tpos: f64) -> f64>,
+    pub TimeMap_timeToQN_abs:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, tpos: f64) -> f64>,
+    pub ToggleTrackSendUIMute: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, send_idx: ::std::os::raw::c_int) -> bool,
     >,
-    pub Track_GetPeakInfo:
-        Option<fn(track: *mut root::MediaTrack, channel: ::std::os::raw::c_int) -> f64>,
+    pub Track_GetPeakHoldDB: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            channel: ::std::os::raw::c_int,
+            clear: bool,
+        ) -> f64,
+    >,
+    pub Track_GetPeakInfo: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, channel: ::std::os::raw::c_int) -> f64,
+    >,
     pub TrackCtl_SetToolTip: Option<
-        fn(
+        unsafe extern "C" fn(
             fmt: *const ::std::os::raw::c_char,
             xpos: ::std::os::raw::c_int,
             ypos: ::std::os::raw::c_int,
@@ -3476,7 +3958,7 @@ pub struct Reaper {
         ),
     >,
     pub TrackFX_AddByName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fxname: *const ::std::os::raw::c_char,
             recFX: bool,
@@ -3484,7 +3966,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub TrackFX_CopyToTake: Option<
-        fn(
+        unsafe extern "C" fn(
             src_track: *mut root::MediaTrack,
             src_fx: ::std::os::raw::c_int,
             dest_take: *mut root::MediaItem_Take,
@@ -3493,7 +3975,7 @@ pub struct Reaper {
         ),
     >,
     pub TrackFX_CopyToTrack: Option<
-        fn(
+        unsafe extern "C" fn(
             src_track: *mut root::MediaTrack,
             src_fx: ::std::os::raw::c_int,
             dest_track: *mut root::MediaTrack,
@@ -3501,16 +3983,18 @@ pub struct Reaper {
             is_move: bool,
         ),
     >,
-    pub TrackFX_Delete: Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool>,
+    pub TrackFX_Delete: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
+    >,
     pub TrackFX_EndParamEdit: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_FormatParamValue: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3520,7 +4004,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_FormatParamValueNormalized: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3530,20 +4014,27 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_GetByName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fxname: *const ::std::os::raw::c_char,
             instantiate: bool,
         ) -> ::std::os::raw::c_int,
     >,
-    pub TrackFX_GetChainVisible: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
-    pub TrackFX_GetCount: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
-    pub TrackFX_GetEnabled:
-        Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool>,
-    pub TrackFX_GetEQ:
-        Option<fn(track: *mut root::MediaTrack, instantiate: bool) -> ::std::os::raw::c_int>,
+    pub TrackFX_GetChainVisible:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub TrackFX_GetCount:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub TrackFX_GetEnabled: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
+    >,
+    pub TrackFX_GetEQ: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            instantiate: bool,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub TrackFX_GetEQBandEnabled: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fxidx: ::std::os::raw::c_int,
             bandtype: ::std::os::raw::c_int,
@@ -3551,7 +4042,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_GetEQParam: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fxidx: ::std::os::raw::c_int,
             paramidx: ::std::os::raw::c_int,
@@ -3561,10 +4052,14 @@ pub struct Reaper {
             normvalOut: *mut f64,
         ) -> bool,
     >,
-    pub TrackFX_GetFloatingWindow:
-        Option<fn(track: *mut root::MediaTrack, index: ::std::os::raw::c_int) -> root::HWND>,
+    pub TrackFX_GetFloatingWindow: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            index: ::std::os::raw::c_int,
+        ) -> root::HWND,
+    >,
     pub TrackFX_GetFormattedParamValue: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3572,19 +4067,24 @@ pub struct Reaper {
             buf_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub TrackFX_GetFXGUID:
-        Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> *mut root::GUID>,
+    pub TrackFX_GetFXGUID: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            fx: ::std::os::raw::c_int,
+        ) -> *mut root::GUID,
+    >,
     pub TrackFX_GetFXName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             buf: *mut ::std::os::raw::c_char,
             buf_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub TrackFX_GetInstrument: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub TrackFX_GetInstrument:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
     pub TrackFX_GetIOSize: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             inputPinsOutOptional: *mut ::std::os::raw::c_int,
@@ -3592,7 +4092,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub TrackFX_GetNamedConfigParm: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             parmname: *const ::std::os::raw::c_char,
@@ -3601,14 +4101,19 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_GetNumParams: Option<
-        fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            fx: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
-    pub TrackFX_GetOffline:
-        Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool>,
-    pub TrackFX_GetOpen:
-        Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool>,
+    pub TrackFX_GetOffline: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
+    >,
+    pub TrackFX_GetOpen: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int) -> bool,
+    >,
     pub TrackFX_GetParam: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3617,7 +4122,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub TrackFX_GetParameterStepSizes: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3628,7 +4133,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_GetParamEx: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3638,7 +4143,7 @@ pub struct Reaper {
         ) -> f64,
     >,
     pub TrackFX_GetParamName: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3647,14 +4152,14 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_GetParamNormalized: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
         ) -> f64,
     >,
     pub TrackFX_GetPinMappings: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             isoutput: ::std::os::raw::c_int,
@@ -3663,7 +4168,7 @@ pub struct Reaper {
         ) -> ::std::os::raw::c_int,
     >,
     pub TrackFX_GetPreset: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             presetname: *mut ::std::os::raw::c_char,
@@ -3671,17 +4176,18 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_GetPresetIndex: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             numberOfPresetsOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub TrackFX_GetRecChainVisible:
-        Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
-    pub TrackFX_GetRecCount: Option<fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
+    pub TrackFX_GetRecCount:
+        Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
     pub TrackFX_GetUserPresetFilename: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             fn_: *mut ::std::os::raw::c_char,
@@ -3689,16 +4195,21 @@ pub struct Reaper {
         ),
     >,
     pub TrackFX_NavigatePresets: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             presetmove: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub TrackFX_SetEnabled:
-        Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int, enabled: bool)>,
+    pub TrackFX_SetEnabled: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            fx: ::std::os::raw::c_int,
+            enabled: bool,
+        ),
+    >,
     pub TrackFX_SetEQBandEnabled: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fxidx: ::std::os::raw::c_int,
             bandtype: ::std::os::raw::c_int,
@@ -3707,7 +4218,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_SetEQParam: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fxidx: ::std::os::raw::c_int,
             bandtype: ::std::os::raw::c_int,
@@ -3718,19 +4229,25 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_SetNamedConfigParm: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             parmname: *const ::std::os::raw::c_char,
             value: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
-    pub TrackFX_SetOffline:
-        Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int, offline: bool)>,
-    pub TrackFX_SetOpen:
-        Option<fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int, open: bool)>,
+    pub TrackFX_SetOffline: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            fx: ::std::os::raw::c_int,
+            offline: bool,
+        ),
+    >,
+    pub TrackFX_SetOpen: Option<
+        unsafe extern "C" fn(track: *mut root::MediaTrack, fx: ::std::os::raw::c_int, open: bool),
+    >,
     pub TrackFX_SetParam: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3738,7 +4255,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_SetParamNormalized: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
@@ -3746,7 +4263,7 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_SetPinMappings: Option<
-        fn(
+        unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             isoutput: ::std::os::raw::c_int,
@@ -3756,87 +4273,107 @@ pub struct Reaper {
         ) -> bool,
     >,
     pub TrackFX_SetPreset: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             presetname: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
     pub TrackFX_SetPresetByIndex: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             idx: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_Show: Option<
-        fn(
+        unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             index: ::std::os::raw::c_int,
             showFlag: ::std::os::raw::c_int,
         ),
     >,
-    pub TrackList_AdjustWindows: Option<fn(isMinor: bool)>,
-    pub TrackList_UpdateAllExternalSurfaces: Option<fn()>,
-    pub Undo_BeginBlock: Option<fn()>,
-    pub Undo_BeginBlock2: Option<fn(proj: *mut root::ReaProject)>,
-    pub Undo_CanRedo2: Option<fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char>,
-    pub Undo_CanUndo2: Option<fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char>,
-    pub Undo_DoRedo2: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub Undo_DoUndo2: Option<fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
-    pub Undo_EndBlock:
-        Option<fn(descchange: *const ::std::os::raw::c_char, extraflags: ::std::os::raw::c_int)>,
+    pub TrackList_AdjustWindows: Option<unsafe extern "C" fn(isMinor: bool)>,
+    pub TrackList_UpdateAllExternalSurfaces: Option<unsafe extern "C" fn()>,
+    pub Undo_BeginBlock: Option<unsafe extern "C" fn()>,
+    pub Undo_BeginBlock2: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
+    pub Undo_CanRedo2:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char>,
+    pub Undo_CanUndo2:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char>,
+    pub Undo_DoRedo2:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub Undo_DoUndo2:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+    pub Undo_EndBlock: Option<
+        unsafe extern "C" fn(
+            descchange: *const ::std::os::raw::c_char,
+            extraflags: ::std::os::raw::c_int,
+        ),
+    >,
     pub Undo_EndBlock2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             descchange: *const ::std::os::raw::c_char,
             extraflags: ::std::os::raw::c_int,
         ),
     >,
-    pub Undo_OnStateChange: Option<fn(descchange: *const ::std::os::raw::c_char)>,
-    pub Undo_OnStateChange2:
-        Option<fn(proj: *mut root::ReaProject, descchange: *const ::std::os::raw::c_char)>,
+    pub Undo_OnStateChange: Option<unsafe extern "C" fn(descchange: *const ::std::os::raw::c_char)>,
+    pub Undo_OnStateChange2: Option<
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            descchange: *const ::std::os::raw::c_char,
+        ),
+    >,
     pub Undo_OnStateChange_Item: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             name: *const ::std::os::raw::c_char,
             item: *mut root::MediaItem,
         ),
     >,
     pub Undo_OnStateChangeEx: Option<
-        fn(
+        unsafe extern "C" fn(
             descchange: *const ::std::os::raw::c_char,
             whichStates: ::std::os::raw::c_int,
             trackparm: ::std::os::raw::c_int,
         ),
     >,
     pub Undo_OnStateChangeEx2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             descchange: *const ::std::os::raw::c_char,
             whichStates: ::std::os::raw::c_int,
             trackparm: ::std::os::raw::c_int,
         ),
     >,
-    pub update_disk_counters:
-        Option<fn(readamt: ::std::os::raw::c_int, writeamt: ::std::os::raw::c_int)>,
-    pub UpdateArrange: Option<fn()>,
-    pub UpdateItemInProject: Option<fn(item: *mut root::MediaItem)>,
-    pub UpdateTimeline: Option<fn()>,
+    pub update_disk_counters: Option<
+        unsafe extern "C" fn(readamt: ::std::os::raw::c_int, writeamt: ::std::os::raw::c_int),
+    >,
+    pub UpdateArrange: Option<unsafe extern "C" fn()>,
+    pub UpdateItemInProject: Option<unsafe extern "C" fn(item: *mut root::MediaItem)>,
+    pub UpdateTimeline: Option<unsafe extern "C" fn()>,
     pub ValidatePtr: Option<
-        fn(pointer: *mut ::std::os::raw::c_void, ctypename: *const ::std::os::raw::c_char) -> bool,
+        unsafe extern "C" fn(
+            pointer: *mut ::std::os::raw::c_void,
+            ctypename: *const ::std::os::raw::c_char,
+        ) -> bool,
     >,
     pub ValidatePtr2: Option<
-        fn(
+        unsafe extern "C" fn(
             proj: *mut root::ReaProject,
             pointer: *mut ::std::os::raw::c_void,
             ctypename: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
-    pub ViewPrefs:
-        Option<fn(page: ::std::os::raw::c_int, pageByName: *const ::std::os::raw::c_char)>,
+    pub ViewPrefs: Option<
+        unsafe extern "C" fn(
+            page: ::std::os::raw::c_int,
+            pageByName: *const ::std::os::raw::c_char,
+        ),
+    >,
     pub WDL_VirtualWnd_ScaledBlitBG: Option<
-        fn(
+        unsafe extern "C" fn(
             dest: *mut root::reaper_functions::LICE_IBitmap,
             src: *mut root::reaper_functions::WDL_VirtualWnd_BGCfg,
             destx: ::std::os::raw::c_int,
@@ -3851,8 +4388,10 @@ pub struct Reaper {
             mode: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub GetMidiInput: Option<fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
-    pub GetMidiOutput: Option<fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
+    pub GetMidiInput:
+        Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
+    pub GetMidiOutput:
+        Option<unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
 }
 impl Reaper {
     #[doc = r" Loads all available REAPER functions plug-in context and returns a `Reaper` instance"]

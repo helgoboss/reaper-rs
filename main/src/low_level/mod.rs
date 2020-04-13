@@ -32,3 +32,5 @@ pub use reaper_plugin_context::*;
 
 mod reaper;
 pub use reaper::*;
+
+mod experiment;

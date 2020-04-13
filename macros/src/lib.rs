@@ -45,3 +45,19 @@ pub fn reaper_extension_plugin(attr: TokenStream, input: TokenStream) -> TokenSt
     };
     tokens.into()
 }
+
+#[test]
+fn main() {
+    use std::env;
+    use std::fs::File;
+    use std::io::Read;
+    use std::process;
+
+    let mut file = File::open("../main/src/experiment.rs").expect("Unable to open experiment.rs");
+
+    let mut src = String::new();
+    file.read_to_string(&mut src).expect("Unable to read file");
+
+    let syntax = syn::parse_file(&src).expect("Unable to parse file");
+    println!("{:#?}", syntax);
+}

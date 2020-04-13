@@ -68,10 +68,141 @@ mod codegen {
         use std::path::Path;
         use syn::{
             AngleBracketedGenericArguments, ForeignItem, ForeignItemStatic, GenericArgument, Ident,
-            Item, ItemForeignMod, ItemMod, PathArguments, PathSegment, Type, TypeBareFn,
+            Item, ItemForeignMod, ItemMod, Pat, PatIdent, PathArguments, PathSegment, Type,
+            TypeBareFn,
         };
 
         generate();
+
+        fn experiment(ptr: ReaperFnPtr) {
+            use proc_macro2::Span;
+            use syn::punctuated::Punctuated;
+            use syn::token::{And, Brace, Colon, Colon2, Comma, Fn, Paren, Pub, SelfValue, Unsafe};
+            use syn::{
+                Block, Expr, ExprCall, ExprPath, FnArg, ImplItem, ImplItemMethod, PatType, Path,
+                PathSegment, Receiver, ReturnType, Signature, VisPublic, Visibility,
+            };
+            let ReaperFnPtr { ident, fn_type } = ptr;
+            let actual_call = Expr::Call(ExprCall {
+                attrs: vec![],
+                func: Box::new(Expr::Path(ExprPath {
+                    attrs: vec![],
+                    qself: None,
+                    path: Path {
+                        leading_colon: None,
+                        segments: {
+                            let mut p = Punctuated::new();
+                            let ps = PathSegment {
+                                ident: Ident::new("f", Span::call_site()),
+                                arguments: Default::default(),
+                            };
+                            p.push(ps);
+                            p
+                        },
+                    },
+                })),
+                paren_token: Paren {
+                    span: Span::call_site(),
+                },
+                args: fn_type
+                    .inputs
+                    .iter()
+                    .map(|a| {
+                        Expr::Path(ExprPath {
+                            attrs: vec![],
+                            qself: None,
+                            path: Path {
+                                leading_colon: None,
+                                segments: {
+                                    let mut p = Punctuated::new();
+                                    let ps = PathSegment {
+                                        ident: a.name.clone().unwrap().0,
+                                        arguments: Default::default(),
+                                    };
+                                    p.push(ps);
+                                    p
+                                },
+                            },
+                        })
+                    })
+                    .collect(),
+            });
+            let tree = ImplItem::Method(ImplItemMethod {
+                attrs: vec![],
+                vis: Visibility::Public(VisPublic {
+                    pub_token: Pub {
+                        span: Span::call_site(),
+                    },
+                }),
+                defaultness: None,
+                sig: Signature {
+                    constness: None,
+                    asyncness: None,
+                    unsafety: Some(Unsafe {
+                        span: Span::call_site(),
+                    }),
+                    abi: None,
+                    fn_token: Fn {
+                        span: Span::call_site(),
+                    },
+                    ident: ident.clone(),
+                    generics: Default::default(),
+                    paren_token: Paren {
+                        span: Span::call_site(),
+                    },
+                    inputs: {
+                        let receiver = FnArg::Receiver(Receiver {
+                            attrs: vec![],
+                            reference: Some((
+                                And {
+                                    spans: [Span::call_site()],
+                                },
+                                None,
+                            )),
+                            mutability: None,
+                            self_token: SelfValue {
+                                span: Span::call_site(),
+                            },
+                        });
+                        let actual_args = fn_type.inputs.iter().map(|a| {
+                            FnArg::Typed(PatType {
+                                attrs: vec![],
+                                pat: Box::new(Pat::Ident(PatIdent {
+                                    attrs: vec![],
+                                    by_ref: None,
+                                    mutability: None,
+                                    ident: a.name.clone().unwrap().0,
+                                    subpat: None,
+                                })),
+                                colon_token: Colon {
+                                    spans: [Span::call_site()],
+                                },
+                                ty: Box::new(a.ty.clone()),
+                            })
+                        });
+                        std::iter::once(receiver).chain(actual_args).collect()
+                    },
+                    variadic: None,
+                    output: fn_type.output,
+                },
+                block: syn::parse_quote! {
+                    {
+                        match self.pointers.#ident {
+                            None => panic!(format!(
+                                "Attempt to use a REAPER function that has not been loaded: {}",
+                                stringify!(#ident)
+                            )),
+                            Some(f) => #actual_call,
+                        }
+                    }
+                },
+            });
+            let result = quote::quote! {
+                #tree
+            };
+            std::fs::write("src/low_level/experiment.rs", result.to_string())
+                .expect("Unable to write file");
+        }
 
         fn generate() {
             use std::env;
@@ -87,6 +218,7 @@ mod codegen {
                 .into_iter()
                 .map(map_to_reaper_fn_ptr)
                 .collect();
+            experiment(fn_ptrs.get(1).unwrap().clone());
             let idents: Vec<_> = fn_ptrs.iter().map(|p| p.ident.clone()).collect();
             let fn_types: Vec<TypeBareFn> = fn_ptrs.iter().map(|p| p.fn_type.clone()).collect();
             let result = quote::quote! {
@@ -187,14 +319,11 @@ mod codegen {
             };
             ReaperFnPtr {
                 ident: item.ident.clone(),
-                fn_type: TypeBareFn {
-                    abi: None,
-                    unsafety: None,
-                    ..bare_fn.clone()
-                },
+                fn_type: bare_fn.clone(),
             }
         }
 
+        #[derive(Clone)]
         struct ReaperFnPtr {
             ident: Ident,
             fn_type: TypeBareFn,
