@@ -105,7 +105,10 @@ impl Reaper {
 
     // TODO If we take pointers in medium-level methods, even they should be marked unsafe. Because
     //  we can do anything with pointers, e.g. pretend we are passing MediaTrack when we actually
-    //  pass a ReaProject. Maybe we should introduce newtypes.
+    //  pass a ReaProject. Maybe we should introduce newtypes. Definitely! I checked with
+    //  plugin_register(). If you pretend a toggle action to be a hook command, then things
+    //  stop working! Completely. This is undefined behavior and this is supposed to be marked as
+    //  unsafe.
     /// Returns `true` if the given pointer is a valid object of the right type in project `proj`
     /// (`proj` is ignored if pointer is itself a project).
     pub fn validate_ptr_2(
@@ -203,128 +206,133 @@ impl Reaper {
             .plugin_register(Cow::from(name).as_ptr(), infostruct)
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_register_hookcommand(&self, hookcommand: HookCommand) -> i32 {
-        unsafe {
+    pub fn plugin_register_hookcommand(&self, hookcommand: HookCommand) -> Result<(), ()> {
+        let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::HookCommand),
                 hookcommand as *mut c_void,
             )
-        }
+        };
+        ok_if_one(result)
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_unregister_hookcommand(&self, hookcommand: HookCommand) -> i32 {
+    pub fn plugin_unregister_hookcommand(&self, hookcommand: HookCommand) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::HookCommand),
                 hookcommand as *mut c_void,
-            )
+            );
         }
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_register_toggleaction(&self, toggleaction: ToggleAction) -> i32 {
-        unsafe {
+    pub fn plugin_register_toggleaction(&self, toggleaction: ToggleAction) -> Result<(), ()> {
+        let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::ToggleAction),
                 toggleaction as *mut c_void,
             )
-        }
+        };
+        ok_if_one(result)
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_unregister_toggleaction(&self, toggleaction: ToggleAction) -> i32 {
+    pub fn plugin_unregister_toggleaction(&self, toggleaction: ToggleAction) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::ToggleAction),
                 toggleaction as *mut c_void,
-            )
+            );
         }
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_register_hookpostcommand(&self, hookpostcommand: HookPostCommand) -> i32 {
-        unsafe {
+    pub fn plugin_register_hookpostcommand(
+        &self,
+        hookpostcommand: HookPostCommand,
+    ) -> Result<(), ()> {
+        let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::HookPostCommand),
                 hookpostcommand as *mut c_void,
             )
-        }
+        };
+        ok_if_one(result)
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_unregister_hookpostcommand(&self, hookpostcommand: HookPostCommand) -> i32 {
+    pub fn plugin_unregister_hookpostcommand(&self, hookpostcommand: HookPostCommand) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::HookPostCommand),
                 hookpostcommand as *mut c_void,
-            )
+            );
         }
     }
 
-    // TODO Check possible return values (Can it return negative value if not successful?)
+    // Returns the assigned command index.
+    // If the command ID is already used, it just returns the index which has been assigned before.
+    // Passing an empty string actually works (!). If a null pointer is passed, 0 is returned, but
+    // we can't do that using this signature. If a very large string is passed, it works. If a
+    // number of a built-in command is passed, it works.
     // TODO Doc
     // TODO Do they have to be unregistered!? How?
     pub fn plugin_register_command_id<'a>(
         &self,
         command_id: impl Into<ReaperStringArg<'a>>,
-    ) -> i32 {
+    ) -> u32 {
         unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::CommandId),
                 command_id.into().as_ptr() as *mut c_void,
-            )
+            ) as u32
         }
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> i32 {
-        unsafe {
+    pub fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> Result<(), ()> {
+        let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::GAccel),
                 gaccel as *mut _ as *mut c_void,
             )
-        }
+        };
+        ok_if_one(result)
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_unregister_gaccel(&self, gaccel: &mut gaccel_register_t) -> i32 {
+    pub fn plugin_unregister_gaccel(&self, gaccel: &mut gaccel_register_t) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::GAccel),
                 gaccel as *mut _ as *mut c_void,
-            )
+            );
         }
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_register_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) -> i32 {
-        unsafe {
+    pub fn plugin_register_csurf_inst(
+        &self,
+        csurf_inst: &mut IReaperControlSurface,
+    ) -> Result<(), ()> {
+        let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::CSurfInst),
                 csurf_inst as *mut _ as *mut c_void,
             )
-        }
+        };
+        ok_if_one(result)
     }
 
-    // TODO Check possible return values
     // TODO Doc
-    pub fn plugin_unregister_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) -> i32 {
+    pub fn plugin_unregister_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::CSurfInst),
                 csurf_inst as *mut _ as *mut c_void,
-            )
+            );
         }
     }
 
@@ -370,15 +378,17 @@ impl Reaper {
         unsafe { guid.assume_init() }
     }
 
-    // TODO-low Check if this is really idempotent
+    // TODO Doc
+    // This method is not idempotent. If you call it two times, you will have every callback TWICE.
     // Please take care of unregistering once you are done!
-    pub fn register_control_surface(&self) {
-        self.plugin_register_csurf_inst(get_cpp_control_surface());
+    pub fn register_control_surface(&self) -> Result<(), ()> {
+        self.plugin_register_csurf_inst(get_cpp_control_surface())
     }
 
-    // TODO-low Check if this is really idempotent
+    // TODO Doc
+    // This method is idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_register_csurf_inst(get_cpp_control_surface());
+        self.plugin_unregister_csurf_inst(get_cpp_control_surface());
     }
 
     // TODO Doc
@@ -1620,4 +1630,8 @@ fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
     } else {
         TrackRef::TrackIndex(tracknumber - 1)
     }
+}
+
+fn ok_if_one(result: i32) -> Result<(), ()> {
+    if result == 1 { Ok(()) } else { Err(()) }
 }
