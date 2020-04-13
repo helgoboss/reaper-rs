@@ -864,12 +864,16 @@ impl Reaper {
         if !successful {
             return None;
         }
-        Some(GetParameterStepSizesResult {
-            step: make_some_if_greater_than_zero(unsafe { step.assume_init() }),
-            small_step: make_some_if_greater_than_zero(unsafe { small_step.assume_init() }),
-            large_step: make_some_if_greater_than_zero(unsafe { large_step.assume_init() }),
-            is_toggle: unsafe { is_toggle.assume_init() },
-        })
+        let is_toggle = unsafe { is_toggle.assume_init() };
+        if is_toggle {
+            Some(GetParameterStepSizesResult::Toggle)
+        } else {
+            Some(GetParameterStepSizesResult::Normal {
+                step: unsafe { step.assume_init() },
+                small_step: make_some_if_greater_than_zero(unsafe { small_step.assume_init() }),
+                large_step: make_some_if_greater_than_zero(unsafe { large_step.assume_init() }),
+            })
+        }
     }
 
     // TODO Doc
@@ -1192,7 +1196,6 @@ impl Reaper {
 
     // TODO Doc
     // Returns true on success
-    // TODO Add variants
     pub fn audio_reg_hardware_hook(&self, is_add: IsAdd, reg: *mut audio_hook_register_t) -> bool {
         unsafe { self.low.Audio_RegHardwareHook(is_add.into(), reg) > 0 }
     }
@@ -1591,15 +1594,14 @@ impl Reaper {
     }
 }
 
-// Each of the decimal numbers are > 0
-// TODO If is_toggle is true, the other things don't matter ... maybe an enum would be better!
-pub struct GetParameterStepSizesResult {
-    // TODO-low Not sure if this can ever be 0 when TrackFX_GetParameterStepSizes returns true
-    //  So the Option might be obsolete here
-    pub step: Option<f64>,
-    pub small_step: Option<f64>,
-    pub large_step: Option<f64>,
-    pub is_toggle: bool,
+pub enum GetParameterStepSizesResult {
+    // Each of the decimal numbers are > 0
+    Normal {
+        step: f64,
+        small_step: Option<f64>,
+        large_step: Option<f64>,
+    },
+    Toggle,
 }
 
 // Each of the attributes can be negative! These are not normalized values (0..1).

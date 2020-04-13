@@ -1,6 +1,7 @@
 use crate::high_level::fx::Fx;
 use crate::high_level::Reaper;
 use crate::low_level::raw::MediaTrack;
+use crate::medium_level::GetParameterStepSizesResult;
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
 
@@ -66,17 +67,12 @@ impl FxParameter {
             self.fx.get_query_index(),
             self.index,
         );
-        let result = match result {
+        use GetParameterStepSizesResult::*;
+        match result {
             None => return FxParameterCharacter::Continuous,
-            Some(r) => r,
-        };
-        if result.is_toggle {
-            return FxParameterCharacter::Toggle;
+            Some(Toggle) => FxParameterCharacter::Toggle,
+            Some(Normal { .. }) => FxParameterCharacter::Discrete,
         }
-        if result.small_step.is_some() || result.step.is_some() || result.large_step.is_some() {
-            return FxParameterCharacter::Discrete;
-        }
-        FxParameterCharacter::Continuous
     }
 
     pub fn get_formatted_value(&self) -> CString {
@@ -121,23 +117,24 @@ impl FxParameter {
             self.get_track_raw(),
             self.fx.get_query_index(),
             self.index,
-        );
-        result.and_then(move |r| {
-            if r.is_toggle {
-                return Some(1.0);
+        )?;
+        use GetParameterStepSizesResult::*;
+        match result {
+            Normal {
+                step, small_step, ..
+            } => {
+                let range = self.get_value_range();
+                // We are primarily interested in the smallest step size that makes sense. We can
+                // always create multiples of it.
+                let span = (range.max_val - range.min_val).abs();
+                if span == 0.0 {
+                    return None;
+                }
+                let pref_step_size = small_step.unwrap_or(step);
+                Some(pref_step_size / span)
             }
-            let range = self.get_value_range();
-            // We are primarily interested in the smallest step size that makes sense. We can always
-            // create multiples of it.
-            let span = (range.max_val - range.min_val).abs();
-            if span == 0.0 {
-                return None;
-            }
-            r.small_step
-                .or(r.step)
-                .or(r.large_step)
-                .map(|pref_step_size| pref_step_size / span)
-        })
+            Toggle => Some(1.0),
+        }
     }
 
     // Doesn't necessarily return normalized values
