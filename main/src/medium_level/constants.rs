@@ -9,6 +9,7 @@ use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
 
 pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
@@ -152,6 +153,12 @@ impl<'a> From<RegInstr<'a>> for Cow<'a, CStr> {
     }
 }
 
+impl<'a> From<RegInstr<'a>> for *const c_char {
+    fn from(name: RegInstr<'a>) -> Self {
+        Cow::from(name).as_ptr()
+    }
+}
+
 pub enum ExtensionType<'a> {
     Api(Cow<'a, CStr>),
     ApiDef(Cow<'a, CStr>),
@@ -259,6 +266,12 @@ impl<'a> From<ReaperPointerType<'a>> for Cow<'a, CStr> {
             PCM_source => c_str!("PCM_source*").into(),
             Custom(name) => concat_c_strs(name.as_ref(), c_str!("*")).into(),
         }
+    }
+}
+
+impl<'a> From<ReaperPointerType<'a>> for *const c_char {
+    fn from(name: ReaperPointerType<'a>) -> Self {
+        Cow::from(name).as_ptr()
     }
 }
 
@@ -401,6 +414,12 @@ impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
     }
 }
 
+impl<'a> From<TrackInfoKey<'a>> for *const c_char {
+    fn from(name: TrackInfoKey<'a>) -> Self {
+        Cow::from(name).as_ptr()
+    }
+}
+
 /// All the possible track send info keys which you can pass to `Reaper::get_set_track_send_info()`.
 ///
 /// The variants are named exactly like the strings which will be passed to the low-level REAPER
@@ -464,6 +483,12 @@ impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
     }
 }
 
+impl<'a> From<TrackSendInfoKey<'a>> for *const c_char {
+    fn from(name: TrackSendInfoKey<'a>) -> Self {
+        Cow::from(name).as_ptr()
+    }
+}
+
 /// Common envelope chunk names which you can pass to `TrackInfoKey::P_ENV()`.
 ///
 /// The variants are named exactly like the strings which will be passed to the low-level REAPER
@@ -471,11 +496,22 @@ impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
 pub enum EnvChunkName<'a> {
+    /// Volume (Pre-FX)
     VOLENV,
+    /// Pan (Pre-FX)
     PANENV,
-    // TODO Figure out all common env chunk names
-    // TODO Check if there are any *common* envelopes which don't have an own chunk. In this case
-    //  we should provide a similar enum for get_track_envelope_by_name() envname as well.
+    /// Volume
+    VOLENV2,
+    /// Pan
+    PANENV2,
+    /// Width (Pre-FX)
+    WIDTHENV,
+    /// Width
+    WIDTHENV2,
+    /// Trim Volume
+    VOLENV3,
+    /// Mute
+    MUTEENV,
     /// Use this for all non-common envelope names.
     Custom(Cow<'a, CStr>),
 }
@@ -492,8 +528,20 @@ impl<'a> From<EnvChunkName<'a>> for Cow<'a, CStr> {
         match value {
             VOLENV => c_str!("VOLENV").into(),
             PANENV => c_str!("PANENV").into(),
+            VOLENV2 => c_str!("VOLENV2").into(),
+            PANENV2 => c_str!("PANENV2").into(),
+            WIDTHENV => c_str!("WIDTHENV").into(),
+            WIDTHENV2 => c_str!("WIDTHENV2").into(),
+            VOLENV3 => c_str!("VOLENV3").into(),
+            MUTEENV => c_str!("MUTEENV").into(),
             Custom(name) => name,
         }
+    }
+}
+
+impl<'a> From<EnvChunkName<'a>> for *const c_char {
+    fn from(name: EnvChunkName<'a>) -> Self {
+        Cow::from(name).as_ptr()
     }
 }
 

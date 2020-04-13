@@ -12,12 +12,12 @@ use crate::low_level::raw::{
 };
 use crate::low_level::{get_cpp_control_surface, install_control_surface};
 use crate::medium_level::{
-    AutomationMode, ControlSurface, DelegatingControlSurface, ExtensionType, FxShowFlag, Gang,
-    GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode, KbdActionValue,
-    MessageBoxResult, MessageBoxType, ProjectRef, ReaperPointerType, ReaperStringArg,
-    ReaperVersion, RecArmState, RecordingInput, RegInstr, SendOrReceive, StuffMidiMessageTarget,
-    ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
-    TrackSendInfoKey, UndoFlag,
+    AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName, ExtensionType,
+    FxShowFlag, Gang, GlobalAutomationOverride, HookCommand, HookPostCommand, InputMonitoringMode,
+    KbdActionValue, MessageBoxResult, MessageBoxType, ProjectRef, ReaperPointerType,
+    ReaperStringArg, ReaperVersion, RecArmState, RecordingInput, RegInstr, SendOrReceive,
+    StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey,
+    TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
@@ -117,10 +117,7 @@ impl Reaper {
         pointer: *mut c_void,
         ctypename: ReaperPointerType,
     ) -> bool {
-        unsafe {
-            self.low
-                .ValidatePtr2(proj, pointer, Cow::from(ctypename).as_ptr())
-        }
+        unsafe { self.low.ValidatePtr2(proj, pointer, ctypename.into()) }
     }
 
     /// Shows a message to the user (also useful for debugging). Send "\n" for newline and "" to
@@ -140,7 +137,7 @@ impl Reaper {
         set_new_value: *mut c_void,
     ) -> *mut c_void {
         self.low
-            .GetSetMediaTrackInfo(tr, Cow::from(parmname).as_ptr(), set_new_value)
+            .GetSetMediaTrackInfo(tr, parmname.into(), set_new_value)
     }
 
     fn get_media_track_info(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> *mut c_void {
@@ -202,8 +199,7 @@ impl Reaper {
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
     pub unsafe fn plugin_register(&self, name: RegInstr, infostruct: *mut c_void) -> i32 {
-        self.low
-            .plugin_register(Cow::from(name).as_ptr(), infostruct)
+        self.low.plugin_register(name.into(), infostruct)
     }
 
     // TODO Doc
@@ -970,6 +966,21 @@ impl Reaper {
     }
 
     // TODO Doc
+    // TODO-low Test
+    pub fn get_track_envelope_by_chunk_name(
+        &self,
+        track: *mut MediaTrack,
+        cfgchunkname: EnvChunkName,
+    ) -> *mut TrackEnvelope {
+        unsafe {
+            self.low
+                .GetTrackEnvelopeByChunkName(track, cfgchunkname.into())
+        }
+    }
+
+    // TODO Doc
+    // For getting common envelopes (like volume or pan) I recommend using
+    // get_track_envelope_by_chunk_name
     pub fn get_track_envelope_by_name<'a>(
         &self,
         track: *mut MediaTrack,
@@ -983,10 +994,7 @@ impl Reaper {
 
     // TODO Doc
     pub fn get_media_track_info_value(&self, tr: *mut MediaTrack, parmname: TrackInfoKey) -> f64 {
-        unsafe {
-            self.low
-                .GetMediaTrackInfo_Value(tr, Cow::from(parmname).as_ptr())
-        }
+        unsafe { self.low.GetMediaTrackInfo_Value(tr, parmname.into()) }
     }
 
     // TODO Doc
@@ -1107,7 +1115,7 @@ impl Reaper {
     ) -> Result<(), ()> {
         let successful = unsafe {
             self.low
-                .SetMediaTrackInfo_Value(tr, Cow::from(parmname).as_ptr(), newvalue)
+                .SetMediaTrackInfo_Value(tr, parmname.into(), newvalue)
         };
         if !successful {
             return Err(());
@@ -1269,7 +1277,7 @@ impl Reaper {
             tr,
             category.into(),
             sendidx as i32,
-            Cow::from(parmname).as_ptr(),
+            parmname.into(),
             set_new_value,
         )
     }
