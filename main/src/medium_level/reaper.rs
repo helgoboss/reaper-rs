@@ -9,13 +9,13 @@ use crate::low_level;
 use crate::low_level::get_cpp_control_surface;
 use crate::low_level::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, IReaperControlSurface,
-    KbdSectionInfo, ReaProject, TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
+    KbdSectionInfo, TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
 };
 use crate::medium_level::{
     AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
     ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
     InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, MediaTrack,
-    MessageBoxResult, MessageBoxType, ProjectRef, ReaperPointerType, ReaperStringArg,
+    MessageBoxResult, MessageBoxType, ProjectRef, ReaProject, ReaperPointerType, ReaperStringArg,
     ReaperVersion, RecArmState, RecFx, RecordingInput, RegInstr, Relative, SendOrReceive,
     StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey,
     TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
@@ -73,7 +73,7 @@ impl Reaper {
         &self,
         proj_ref: ProjectRef,
         projfn_out_optional_sz: u32,
-    ) -> EnumProjectsResult {
+    ) -> Option<EnumProjectsResult> {
         use ProjectRef::*;
         let idx = match proj_ref {
             Current => -1,
@@ -81,36 +81,38 @@ impl Reaper {
             TabIndex(i) => i as i32,
         };
         if projfn_out_optional_sz == 0 {
-            let project = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
-            EnumProjectsResult {
+            let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
+            let project = ReaProject::optional(ptr)?;
+            Some(EnumProjectsResult {
                 project,
                 file_path: None,
-            }
+            })
         } else {
-            let (owned_c_string, project) =
+            let (owned_c_string, ptr) =
                 with_string_buffer(projfn_out_optional_sz, |buffer, max_size| unsafe {
                     self.low.EnumProjects(idx, buffer, max_size)
                 });
+            let project = ReaProject::optional(ptr)?;
             if owned_c_string.to_bytes().len() == 0 {
-                return EnumProjectsResult {
+                return Some(EnumProjectsResult {
                     project,
                     file_path: None,
-                };
+                });
             }
             let owned_string = owned_c_string
                 .into_string()
                 .expect("Path contains non-UTF8 characters");
-            EnumProjectsResult {
+            Some(EnumProjectsResult {
                 project,
                 file_path: Some(PathBuf::from(owned_string)),
-            }
+            })
         }
     }
 
     /// Returns the track at the given index. Set `proj` to `null_mut()` in order to look for tracks
     /// in the current project.
-    pub fn get_track(&self, proj: *mut ReaProject, trackidx: u32) -> Option<MediaTrack> {
-        let ptr = unsafe { self.low.GetTrack(proj, trackidx as i32) };
+    pub fn get_track(&self, proj: Option<ReaProject>, trackidx: u32) -> Option<MediaTrack> {
+        let ptr = unsafe { self.low.GetTrack(option_into(proj), trackidx as i32) };
         MediaTrack::optional(ptr)
     }
 
@@ -128,13 +130,13 @@ impl Reaper {
     /// (`proj` is ignored if pointer is itself a project).
     pub fn validate_ptr_2(
         &self,
-        proj: *mut ReaProject,
+        proj: Option<ReaProject>,
         pointer: *mut c_void,
         ctypename: ReaperPointerType,
     ) -> bool {
         unsafe {
             self.low
-                .ValidatePtr2(proj, pointer, Cow::from(ctypename).as_ptr())
+                .ValidatePtr2(option_into(proj), pointer, Cow::from(ctypename).as_ptr())
         }
     }
 
@@ -169,8 +171,9 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
-    pub fn get_media_track_info_project(&self, tr: MediaTrack) -> *mut ReaProject {
-        self.get_media_track_info(tr, TrackInfoKey::P_PROJECT) as *mut ReaProject
+    pub fn get_media_track_info_project(&self, tr: MediaTrack) -> ReaProject {
+        let ptr = self.get_media_track_info(tr, TrackInfoKey::P_PROJECT) as *mut raw::ReaProject;
+        ReaProject::required_panic(ptr)
     }
 
     /// Convenience function which let's you use the given track's name (`P_NAME`).
@@ -354,9 +357,10 @@ impl Reaper {
     /// Performs an action belonging to the main action section. To perform non-native actions
     /// (ReaScripts, custom or extension plugins' actions) safely, see
     /// [`named_command_lookup`](struct.Reaper.html#method.named_command_lookup).
-    pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: *mut ReaProject) {
+    pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: Option<ReaProject>) {
         unsafe {
-            self.low.Main_OnCommandEx(command as i32, flag, proj);
+            self.low
+                .Main_OnCommandEx(command as i32, flag, option_into(proj));
         }
     }
 
@@ -420,7 +424,7 @@ impl Reaper {
         cmd: u32,
         value: KbdActionValue,
         hwnd: HWND,
-        proj: *mut ReaProject,
+        proj: Option<ReaProject>,
     ) -> i32 {
         use KbdActionValue::*;
         let (val, valhw, relmode) = match value {
@@ -436,7 +440,7 @@ impl Reaper {
         };
         unsafe {
             self.low
-                .KBD_OnMainActionEx(cmd as i32, val, valhw, relmode, hwnd, proj)
+                .KBD_OnMainActionEx(cmd as i32, val, valhw, relmode, hwnd, option_into(proj))
         }
     }
 
@@ -456,8 +460,8 @@ impl Reaper {
     }
 
     /// Returns the number of tracks in the given project (pass `null_mut()` for current project)
-    pub fn count_tracks(&self, proj: *mut ReaProject) -> u32 {
-        unsafe { self.low.CountTracks(proj) as u32 }
+    pub fn count_tracks(&self, proj: Option<ReaProject>) -> u32 {
+        unsafe { self.low.CountTracks(option_into(proj)) as u32 }
     }
 
     // TODO Doc
@@ -641,8 +645,9 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn get_current_project_in_load_save(&self) -> *mut ReaProject {
-        self.low.GetCurrentProjectInLoadSave()
+    pub fn get_current_project_in_load_save(&self) -> Option<ReaProject> {
+        let ptr = self.low.GetCurrentProjectInLoadSave();
+        ReaProject::optional(ptr)
     }
 
     // TODO Doc
@@ -908,7 +913,7 @@ impl Reaper {
             )
         };
         GetParamExResult {
-            value: value,
+            value,
             min_val: unsafe { min_val.assume_init() },
             mid_val: unsafe { mid_val.assume_init() },
             max_val: unsafe { max_val.assume_init() },
@@ -917,22 +922,22 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn undo_begin_block_2(&self, proj: *mut ReaProject) {
+    pub fn undo_begin_block_2(&self, proj: Option<ReaProject>) {
         unsafe {
-            self.low.Undo_BeginBlock2(proj);
+            self.low.Undo_BeginBlock2(option_into(proj));
         }
     }
 
     // TODO Doc
     pub fn undo_end_block_2<'a>(
         &self,
-        proj: *mut ReaProject,
+        proj: Option<ReaProject>,
         descchange: impl Into<ReaperStringArg<'a>>,
         extraflags: Option<BitFlags<UndoFlag>>,
     ) {
         unsafe {
             self.low.Undo_EndBlock2(
-                proj,
+                option_into(proj),
                 descchange.into().as_ptr(),
                 match extraflags {
                     Some(flags) => flags.bits(),
@@ -943,40 +948,48 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn undo_can_undo_2<R>(&self, proj: *mut ReaProject, f: impl Fn(&CStr) -> R) -> Option<R> {
-        let ptr = unsafe { self.low.Undo_CanUndo2(proj) };
+    pub fn undo_can_undo_2<R>(
+        &self,
+        proj: Option<ReaProject>,
+        f: impl Fn(&CStr) -> R,
+    ) -> Option<R> {
+        let ptr = unsafe { self.low.Undo_CanUndo2(option_into(proj)) };
         unsafe { create_passing_c_str(ptr) }.map(f)
     }
 
     // TODO Doc
-    pub fn undo_can_redo_2<R>(&self, proj: *mut ReaProject, f: impl Fn(&CStr) -> R) -> Option<R> {
-        let ptr = unsafe { self.low.Undo_CanRedo2(proj) };
+    pub fn undo_can_redo_2<R>(
+        &self,
+        proj: Option<ReaProject>,
+        f: impl Fn(&CStr) -> R,
+    ) -> Option<R> {
+        let ptr = unsafe { self.low.Undo_CanRedo2(option_into(proj)) };
         unsafe { create_passing_c_str(ptr) }.map(f)
     }
 
     // TODO Doc
     // Returns true if there was something to be undone, false if not
-    pub fn undo_do_undo_2(&self, proj: *mut ReaProject) -> bool {
-        unsafe { self.low.Undo_DoUndo2(proj) != 0 }
+    pub fn undo_do_undo_2(&self, proj: Option<ReaProject>) -> bool {
+        unsafe { self.low.Undo_DoUndo2(option_into(proj)) != 0 }
     }
 
     // TODO Doc
     // Returns true if there was something to be redone, false if not
-    pub fn undo_do_redo_2(&self, proj: *mut ReaProject) -> bool {
-        unsafe { self.low.Undo_DoRedo2(proj) != 0 }
+    pub fn undo_do_redo_2(&self, proj: Option<ReaProject>) -> bool {
+        unsafe { self.low.Undo_DoRedo2(option_into(proj)) != 0 }
     }
 
     // TODO Doc
-    pub fn mark_project_dirty(&self, proj: *mut ReaProject) {
+    pub fn mark_project_dirty(&self, proj: Option<ReaProject>) {
         unsafe {
-            self.low.MarkProjectDirty(proj);
+            self.low.MarkProjectDirty(option_into(proj));
         }
     }
 
     // TODO Doc
     // Returns true if project dirty, false if not
-    pub fn is_project_dirty(&self, proj: *mut ReaProject) -> bool {
-        unsafe { self.low.IsProjectDirty(proj) != 0 }
+    pub fn is_project_dirty(&self, proj: Option<ReaProject>) -> bool {
+        unsafe { self.low.IsProjectDirty(option_into(proj)) != 0 }
     }
 
     // TODO Doc
@@ -1074,11 +1087,11 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn get_master_track(&self, proj: *mut ReaProject) -> MediaTrack {
-        let ptr = unsafe { self.low.GetMasterTrack(proj) };
+    pub fn get_master_track(&self, proj: Option<ReaProject>) -> MediaTrack {
+        let ptr = unsafe { self.low.GetMasterTrack(option_into(proj)) };
         // TODO General question: Should we panic if the project is invalid or similar situations?
         //  Or should we make basically all return types where this might happen a Result?
-        MediaTrack::required(ptr).expect("Project must always have a master track")
+        MediaTrack::required_panic(ptr)
     }
 
     // TODO Doc
@@ -1095,15 +1108,16 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn set_current_bpm(&self, __proj: *mut ReaProject, bpm: f64, want_undo: WantUndo) {
+    pub fn set_current_bpm(&self, proj: Option<ReaProject>, bpm: f64, want_undo: WantUndo) {
         unsafe {
-            self.low.SetCurrentBPM(__proj, bpm, want_undo.into());
+            self.low
+                .SetCurrentBPM(option_into(proj), bpm, want_undo.into());
         }
     }
 
     // TODO Doc
-    pub fn master_get_play_rate(&self, project: *mut ReaProject) -> f64 {
-        unsafe { self.low.Master_GetPlayRate(project) }
+    pub fn master_get_play_rate(&self, project: Option<ReaProject>) -> f64 {
+        unsafe { self.low.Master_GetPlayRate(option_into(project)) }
     }
 
     // TODO Doc
@@ -1273,8 +1287,11 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn count_selected_tracks_2(&self, proj: *mut ReaProject, wantmaster: WantMaster) -> u32 {
-        unsafe { self.low.CountSelectedTracks2(proj, wantmaster.into()) as u32 }
+    pub fn count_selected_tracks_2(&self, proj: Option<ReaProject>, wantmaster: WantMaster) -> u32 {
+        unsafe {
+            self.low
+                .CountSelectedTracks2(option_into(proj), wantmaster.into()) as u32
+        }
     }
 
     // TODO Doc
@@ -1287,13 +1304,13 @@ impl Reaper {
     // TODO Doc
     pub fn get_selected_track_2(
         &self,
-        proj: *mut ReaProject,
+        proj: Option<ReaProject>,
         seltrackidx: u32,
         wantmaster: WantMaster,
     ) -> Option<MediaTrack> {
         let ptr = unsafe {
             self.low
-                .GetSelectedTrack2(proj, seltrackidx as i32, wantmaster.into())
+                .GetSelectedTrack2(option_into(proj), seltrackidx as i32, wantmaster.into())
         };
         MediaTrack::optional(ptr)
     }
@@ -1647,7 +1664,7 @@ pub struct GetParamExResult {
 }
 
 pub struct EnumProjectsResult {
-    pub project: *mut ReaProject,
+    pub project: ReaProject,
     pub file_path: Option<PathBuf>,
 }
 
