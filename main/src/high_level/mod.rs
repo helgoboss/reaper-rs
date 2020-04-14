@@ -59,7 +59,4 @@ pub use action_character::*;
 
 mod undo_block;
 
-mod midi_event;
-pub use midi_event::*;
-
 mod normalized_value;
