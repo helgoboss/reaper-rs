@@ -3,23 +3,22 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::null_mut;
 
-use crate::low_level::raw;
+use crate::low_level::{midi_Input, midi_Output, raw};
 
 use crate::low_level;
 use crate::low_level::get_cpp_control_surface;
 use crate::low_level::raw::{
-    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, KbdSectionInfo, GUID, HWND,
-    UNDO_STATE_ALL,
+    audio_hook_register_t, gaccel_register_t, KbdSectionInfo, GUID, HWND, UNDO_STATE_ALL,
 };
 use crate::medium_level::{
     AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
     ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
     IReaperControlSurface, InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue,
-    MediaTrack, MessageBoxResult, MessageBoxType, ProjectRef, ReaProject, ReaperPointerType,
-    ReaperStringArg, ReaperVersion, RecArmState, RecFx, RecordingInput, RegInstr, Relative,
-    SendOrReceive, StuffMidiMessageTarget, ToggleAction, TrackEnvelope, TrackFxAddByNameVariant,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag,
-    WantDefaults, WantMaster, WantUndo,
+    MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
+    ReaperPointerType, ReaperStringArg, ReaperVersion, RecArmState, RecFx, RecordingInput,
+    RegInstr, Relative, SendOrReceive, StuffMidiMessageTarget, ToggleAction, TrackEnvelope,
+    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
@@ -474,13 +473,23 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn get_midi_input(&self, idx: u32) -> *mut midi_Input {
-        self.low.GetMidiInput(idx as i32)
+    pub fn get_midi_input(&self, idx: u32) -> Option<MidiInput> {
+        let ptr = self.low.GetMidiInput(idx as i32);
+        if ptr.is_null() {
+            return None;
+        }
+        let raw_midi_input = unsafe { midi_Input::new(ptr) };
+        Some(MidiInput::new(raw_midi_input))
     }
 
     // TODO Doc
-    pub fn get_midi_output(&self, idx: u32) -> *mut midi_Output {
-        self.low.GetMidiOutput(idx as i32)
+    pub fn get_midi_output(&self, idx: u32) -> Option<MidiOutput> {
+        let ptr = self.low.GetMidiOutput(idx as i32);
+        if ptr.is_null() {
+            return None;
+        }
+        let raw_midi_output = unsafe { midi_Output::new(ptr) };
+        Some(MidiOutput::new(raw_midi_output))
     }
 
     // TODO Doc

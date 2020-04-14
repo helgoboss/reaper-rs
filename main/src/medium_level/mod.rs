@@ -51,6 +51,9 @@ pub use constants::*;
 mod control_surface;
 pub use control_surface::*;
 
+mod midi;
+pub use midi::*;
+
 mod reaper;
 pub use reaper::*;
 

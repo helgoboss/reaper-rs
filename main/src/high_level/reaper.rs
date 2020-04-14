@@ -29,10 +29,7 @@ use crate::high_level::{
     MidiOutputDevice, Project, Section, Track,
 };
 use crate::low_level;
-use crate::low_level::raw::{
-    audio_hook_register_t, gaccel_register_t, midi_Input_GetReadBuf, MIDI_eventlist_EnumItems,
-    ACCEL, HWND,
-};
+use crate::low_level::raw::{audio_hook_register_t, gaccel_register_t, ACCEL, HWND};
 use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
@@ -127,27 +124,19 @@ extern "C" fn process_audio_buffer(
             return;
         }
         for i in 0..reaper.get_max_midi_input_devices() {
-            let dev = reaper.medium.get_midi_input(i);
-            if dev.is_null() {
-                continue;
-            }
-            let dev = unsafe { &mut *dev };
-            let midi_events = unsafe { midi_Input_GetReadBuf(dev as *mut _) };
-            let mut bpos = 0;
-            loop {
-                let midi_event =
-                    unsafe { MIDI_eventlist_EnumItems(midi_events, &mut bpos as *mut c_int) };
-                if midi_event.is_null() {
-                    // No MIDI messages left
-                    break;
+            let input = match reaper.medium.get_midi_input(i) {
+                None => continue,
+                Some(i) => i,
+            };
+            input.get_read_buf(|evt_list| {
+                for evt in evt_list.enum_items(0) {
+                    // if midi_event.midi_message[0] == 254 {
+                    //     // Active sensing, we don't want to forward that TODO-low maybe yes?
+                    //     break;
+                    // }
+                    // subject.next(BorrowedReaperMidiEvent(midi_event as *const _));
                 }
-                let midi_event = unsafe { &*midi_event };
-                if midi_event.midi_message[0] == 254 {
-                    // Active sensing, we don't want to forward that TODO-low maybe yes?
-                    break;
-                }
-                subject.next(BorrowedReaperMidiEvent(midi_event as *const _));
-            }
+            });
         }
     });
 }

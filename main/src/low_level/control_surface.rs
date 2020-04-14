@@ -9,6 +9,7 @@ use crate::low_level::raw::IReaperControlSurface;
 use std::ptr::{null, null_mut};
 use std::sync::Once;
 
+// TODO Rename to IReaperControlSurface because it's a 1:1 analog
 /// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`. An implementation
 /// of this trait can be passed to [`install_control_surface`](fn.install_control_surface.html).
 /// As a consequence, REAPER will invoke the respective callback methods.
