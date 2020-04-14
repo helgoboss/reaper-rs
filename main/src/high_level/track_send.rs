@@ -159,7 +159,7 @@ impl TrackSend {
             get_target_track_raw(&self.source_track, self.index.get().expect("Index not set"))?;
         Some(Track::new(
             target_media_track,
-            self.source_track.get_project().get_raw(),
+            Some(self.source_track.get_project().get_raw()),
         ))
     }
 
@@ -189,7 +189,7 @@ impl TrackSend {
 pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
     Track::new(
         get_target_track_raw(source_track, send_index).unwrap(),
-        source_track.get_project().get_raw(),
+        Some(source_track.get_project().get_raw()),
     )
 }
 

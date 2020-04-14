@@ -178,7 +178,7 @@ impl Action {
                 action_command_id,
                 KbdActionValue::Relative2(cropped_relative_value),
                 reaper.medium.get_main_hwnd(),
-                project.map(|p| p.get_raw()).unwrap_or(null_mut()),
+                project.map(|p| p.get_raw()),
             );
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
@@ -189,7 +189,7 @@ impl Action {
                 action_command_id,
                 KbdActionValue::AbsoluteLowRes(discrete_value),
                 reaper.medium.get_main_hwnd(),
-                project.map(|p| p.get_raw()).unwrap_or(null_mut()),
+                project.map(|p| p.get_raw()),
             );
             // Main_OnCommandEx would trigger the actionInvoked event but it has not enough
             // parameters for passing values etc.          reaper::

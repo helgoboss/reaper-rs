@@ -2,12 +2,11 @@ use crate::high_level::fx::Fx;
 use crate::high_level::guid::Guid;
 use crate::high_level::{get_media_track_guid, Payload, Project, Reaper, Task, Track};
 use crate::low_level::raw;
-use crate::low_level::raw::ReaProject;
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
 use crate::medium_level::{
-    AutomationMode, ControlSurface, MediaTrack, ReaperPointerType, TrackRef,
+    AutomationMode, ControlSurface, MediaTrack, ReaProject, ReaperPointerType, TrackRef,
 };
 use c_str_macro::c_str;
 use rxrust::prelude::*;
@@ -60,7 +59,7 @@ struct FxChainPair {
     output_fx_guids: HashSet<Guid>,
 }
 
-type ProjectDataMap = HashMap<*mut ReaProject, TrackDataMap>;
+type ProjectDataMap = HashMap<ReaProject, TrackDataMap>;
 type TrackDataMap = HashMap<MediaTrack, TrackData>;
 
 impl HelperControlSurface {
@@ -147,9 +146,10 @@ impl HelperControlSurface {
 
     fn remove_invalid_rea_projects(&self) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
+            let raw_rea_project: *mut raw::ReaProject = (*rea_project).into();
             if Reaper::get().medium.validate_ptr_2(
-                null_mut(),
-                *rea_project as *mut c_void,
+                None,
+                raw_rea_project as *mut c_void,
                 ReaperPointerType::ReaProject,
             ) {
                 true
@@ -352,7 +352,7 @@ impl HelperControlSurface {
             let reaper = Reaper::get();
             let raw_media_track: *mut raw::MediaTrack = (*media_track).into();
             if reaper.medium.validate_ptr_2(
-                project.get_raw(),
+                Some(project.get_raw()),
                 raw_media_track as *mut c_void,
                 ReaperPointerType::MediaTrack,
             ) {
@@ -378,7 +378,7 @@ impl HelperControlSurface {
         for (media_track, track_data) in track_datas.iter_mut() {
             let raw_media_track: *mut raw::MediaTrack = (*media_track).into();
             if !reaper.medium.validate_ptr_2(
-                project.get_raw(),
+                Some(project.get_raw()),
                 raw_media_track as *mut c_void,
                 ReaperPointerType::MediaTrack,
             ) {
@@ -409,7 +409,7 @@ impl HelperControlSurface {
         let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
         let param_index = fxidx_and_paramidx & 0xffff;
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
-        let track = Track::new(track, null_mut());
+        let track = Track::new(track, None);
         let normalized_value = unsafe { *normalized_value };
         let is_input_fx = if self.supports_detection_of_input_fx {
             is_input_fx_if_supported
@@ -564,7 +564,7 @@ impl ControlSurface for HelperControlSurface {
             return;
         }
         td.pan = pan;
-        let track = Track::new(trackid, null_mut());
+        let track = Track::new(trackid, None);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -585,7 +585,7 @@ impl ControlSurface for HelperControlSurface {
             return;
         }
         td.volume = volume;
-        let track = Track::new(trackid, null_mut());
+        let track = Track::new(trackid, None);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -608,7 +608,7 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.mute != mute {
             td.mute = mute;
-            let track = Track::new(trackid, null_mut());
+            let track = Track::new(trackid, None);
             let reaper = Reaper::get();
             reaper
                 .subjects
@@ -628,7 +628,7 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.selected != selected {
             td.selected = selected;
-            let track = Track::new(trackid, null_mut());
+            let track = Track::new(trackid, None);
             Reaper::get()
                 .subjects
                 .track_selected_changed
@@ -644,7 +644,7 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.solo != solo {
             td.solo = solo;
-            let track = Track::new(trackid, null_mut());
+            let track = Track::new(trackid, None);
             Reaper::get()
                 .subjects
                 .track_solo_changed
@@ -660,7 +660,7 @@ impl ControlSurface for HelperControlSurface {
         };
         if td.recarm != recarm {
             td.recarm = recarm;
-            let track = Track::new(trackid, null_mut());
+            let track = Track::new(trackid, None);
             Reaper::get()
                 .subjects
                 .track_arm_changed
@@ -674,7 +674,7 @@ impl ControlSurface for HelperControlSurface {
             self.decrease_num_track_set_changes_left_to_be_propagated();
             return;
         }
-        let track = Track::new(trackid, null_mut());
+        let track = Track::new(trackid, None);
         Reaper::get()
             .subjects
             .track_name_changed
@@ -698,7 +698,7 @@ impl ControlSurface for HelperControlSurface {
                 .subjects
                 .track_input_monitoring_changed
                 .borrow_mut()
-                .next(Track::new(track, null_mut()));
+                .next(Track::new(track, None));
         }
         let recinput = reaper.medium.get_media_track_info_value(track, I_RECINPUT) as i32;
         if td.recinput != recinput {
@@ -707,7 +707,7 @@ impl ControlSurface for HelperControlSurface {
                 .subjects
                 .track_input_changed
                 .borrow_mut()
-                .next(Track::new(track, null_mut()));
+                .next(Track::new(track, None));
         }
         1
     }
@@ -738,7 +738,7 @@ impl ControlSurface for HelperControlSurface {
         }
         let fxidx = unsafe { *fxidx };
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
-        let track = Track::new(track, null_mut());
+        let track = Track::new(track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
             Reaper::get()
                 .subjects
@@ -754,7 +754,7 @@ impl ControlSurface for HelperControlSurface {
             return 0;
         }
         let sendidx = unsafe { *sendidx };
-        let track = Track::new(track, null_mut());
+        let track = Track::new(track, None);
         let track_send = track.get_index_based_send_by_index(sendidx as u32);
         let reaper = Reaper::get();
         reaper
@@ -778,7 +778,7 @@ impl ControlSurface for HelperControlSurface {
             return 0;
         }
         let sendidx = unsafe { *sendidx };
-        let track = Track::new(track, null_mut());
+        let track = Track::new(track, None);
         let track_send = track.get_index_based_send_by_index(sendidx as u32);
         let reaper = Reaper::get();
         reaper
@@ -814,7 +814,7 @@ impl ControlSurface for HelperControlSurface {
         };
         let fxidx = unsafe { *fxidx };
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
-        let track = Track::new(track, null_mut());
+        let track = Track::new(track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
             // chunk manipulations
@@ -834,7 +834,7 @@ impl ControlSurface for HelperControlSurface {
         }
         let fxidx = unsafe { *fxidx };
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
-        let track = Track::new(track, null_mut());
+        let track = Track::new(track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
             // chunk manipulations
@@ -851,7 +851,7 @@ impl ControlSurface for HelperControlSurface {
     }
 
     fn ext_setfxchange(&self, track: MediaTrack, flags: i32) -> i32 {
-        let track = Track::new(track, null_mut());
+        let track = Track::new(track, None);
         if self.supports_detection_of_input_fx_in_set_fx_change {
             let is_input_fx = (flags & 1) == 1;
             self.detect_fx_changes_on_track(track, true, !is_input_fx, is_input_fx);

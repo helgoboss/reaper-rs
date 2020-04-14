@@ -533,10 +533,7 @@ impl Reaper {
     }
 
     pub fn get_currently_loading_or_saving_project(&self) -> Option<Project> {
-        let ptr = self.medium.get_current_project_in_load_save();
-        if ptr.is_null() {
-            return None;
-        }
+        let ptr = self.medium.get_current_project_in_load_save()?;
         Some(Project::new(ptr))
     }
 
@@ -758,7 +755,12 @@ impl Reaper {
     }
 
     pub fn get_current_project(&self) -> Project {
-        Project::new(self.medium.enum_projects(ProjectRef::Current, 0).project)
+        Project::new(
+            self.medium
+                .enum_projects(ProjectRef::Current, 0)
+                .unwrap()
+                .project,
+        )
     }
 
     pub fn get_main_window(&self) -> HWND {
@@ -767,13 +769,9 @@ impl Reaper {
 
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
-            .map(move |i| {
-                self.medium
-                    .enum_projects(ProjectRef::TabIndex(i), 0)
-                    .project
-            })
-            .take_while(|p| !p.is_null())
-            .map(|p| Project::new(p))
+            .map(move |i| self.medium.enum_projects(ProjectRef::TabIndex(i), 0))
+            .take_while(|r| !r.is_none())
+            .map(|r| Project::new(r.unwrap().project))
     }
 
     pub fn get_project_count(&self) -> u32 {
@@ -827,7 +825,7 @@ impl Reaper {
             return None;
         }
         self.undo_block_is_active.replace(true);
-        self.medium.undo_begin_block_2(project.get_raw());
+        self.medium.undo_begin_block_2(Some(project.get_raw()));
         Some(UndoBlock::new(project, label))
     }
 
@@ -836,7 +834,8 @@ impl Reaper {
         if !self.undo_block_is_active.get() {
             return;
         }
-        self.medium.undo_end_block_2(project.get_raw(), label, None);
+        self.medium
+            .undo_end_block_2(Some(project.get_raw()), label, None);
         self.undo_block_is_active.replace(false);
     }
 }

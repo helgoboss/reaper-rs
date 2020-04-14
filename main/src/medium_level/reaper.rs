@@ -171,9 +171,10 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
-    pub fn get_media_track_info_project(&self, tr: MediaTrack) -> ReaProject {
+    // In REAPER < 5.95 this returns nullptr
+    pub fn get_media_track_info_project(&self, tr: MediaTrack) -> Option<ReaProject> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::P_PROJECT) as *mut raw::ReaProject;
-        ReaProject::required_panic(ptr)
+        ReaProject::optional(ptr)
     }
 
     /// Convenience function which let's you use the given track's name (`P_NAME`).

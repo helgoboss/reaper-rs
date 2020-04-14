@@ -17,15 +17,15 @@ use crate::high_level::track_send::TrackSend;
 use crate::high_level::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
 use crate::low_level::get_control_surface_instance;
 use crate::low_level::raw;
-use crate::low_level::raw::{ReaProject, CSURF_EXT_SETINPUTMONITOR, GUID};
+use crate::low_level::raw::{CSURF_EXT_SETINPUTMONITOR, GUID};
 
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
 };
 use crate::medium_level::{
     AllowGang, AutomationMode, GlobalAutomationOverride, InputMonitoringMode, IsUndoOptional,
-    MediaTrack, MidiRecordingInput, ReaperPointerType, RecArmState, RecordingInput, Relative,
-    TrackInfoKey, TrackRef, TrackSendCategory,
+    MediaTrack, MidiRecordingInput, ReaProject, ReaperPointerType, RecArmState, RecordingInput,
+    Relative, TrackInfoKey, TrackRef, TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -38,7 +38,7 @@ pub struct Track {
     media_track: Cell<Option<MediaTrack>>,
     // TODO-low Do we really need this pointer? Makes copying a tiny bit more expensive than just
     // copying a MediaTrack*.
-    rea_project: Cell<*mut ReaProject>,
+    rea_project: Cell<Option<ReaProject>>,
     // Possible states:
     // a) guid, project, !mediaTrack (guid-based and not yet loaded)
     // b) guid, mediaTrack (guid-based and loaded)
@@ -52,15 +52,11 @@ impl Track {
     /// mediaTrack must not be null
     /// reaProject can be null but providing it can speed things up quite much for REAPER versions <
     /// 5.95
-    pub fn new(media_track: MediaTrack, rea_project: *mut ReaProject) -> Track {
+    pub fn new(media_track: MediaTrack, rea_project: Option<ReaProject>) -> Track {
         Track {
             media_track: Cell::new(Some(media_track)),
             rea_project: {
-                let actual = if rea_project.is_null() {
-                    get_track_project_raw(media_track)
-                } else {
-                    rea_project
-                };
+                let actual = rea_project.or_else(|| get_track_project_raw(media_track));
                 Cell::new(actual)
             },
             // We load the GUID eagerly because we want to make comparability possible even in the
@@ -76,7 +72,7 @@ impl Track {
     pub(super) fn from_guid(project: Project, guid: Guid) -> Track {
         Track {
             media_track: Cell::new(None),
-            rea_project: Cell::new(project.get_raw()),
+            rea_project: Cell::new(Some(project.get_raw())),
             guid: guid,
         }
     }
@@ -511,25 +507,26 @@ impl Track {
             Some(t) => t,
         };
         self.attempt_to_fill_project_if_necessary();
-        if self.rea_project.get().is_null() {
-            false
-        } else {
-            if Project::new(self.rea_project.get()).is_available() {
-                let raw: *mut raw::MediaTrack = media_track.into();
-                Reaper::get().medium.validate_ptr_2(
-                    self.rea_project.get(),
-                    raw as *mut c_void,
-                    ReaperPointerType::MediaTrack,
-                )
-            } else {
-                false
+        match self.rea_project.get() {
+            None => false,
+            Some(rea_project) => {
+                if Project::new(rea_project).is_available() {
+                    let raw: *mut raw::MediaTrack = media_track.into();
+                    Reaper::get().medium.validate_ptr_2(
+                        Some(rea_project),
+                        raw as *mut c_void,
+                        ReaperPointerType::MediaTrack,
+                    )
+                } else {
+                    false
+                }
             }
         }
     }
 
     // Precondition: mediaTrack_ must be filled!
     fn attempt_to_fill_project_if_necessary(&self) {
-        if self.rea_project.get().is_null() {
+        if self.rea_project.get().is_none() {
             self.rea_project.replace(self.find_containing_project_raw());
         }
     }
@@ -539,7 +536,7 @@ impl Track {
     }
 
     fn load_by_guid(&self) -> bool {
-        if self.rea_project.get().is_null() {
+        if self.rea_project.get().is_none() {
             panic!("For loading per GUID, a project must be given");
         }
         // TODO-low Don't save ReaProject but Project as member
@@ -572,11 +569,11 @@ impl Track {
 
     fn get_project_unchecked(&self) -> Project {
         self.attempt_to_fill_project_if_necessary();
-        Project::new(self.rea_project.get())
+        Project::new(self.rea_project.get().unwrap())
     }
 
     // Precondition: mediaTrack_ must be filled!
-    fn find_containing_project_raw(&self) -> *mut ReaProject {
+    fn find_containing_project_raw(&self) -> Option<ReaProject> {
         let media_track = match self.media_track.get() {
             None => panic!("Containing project cannot be found if mediaTrack not available"),
             Some(t) => t,
@@ -587,12 +584,12 @@ impl Track {
         let current_project = reaper.get_current_project();
         let raw_media_track: *mut raw::MediaTrack = media_track.into();
         let is_valid_in_current_project = reaper.medium.validate_ptr_2(
-            current_project.get_raw(),
+            Some(current_project.get_raw()),
             raw_media_track as *mut c_void,
             ReaperPointerType::MediaTrack,
         );
         if is_valid_in_current_project {
-            return current_project.get_raw();
+            return Some(current_project.get_raw());
         }
         // Worst case. It could still be valid in another project. We have to check each project.
         let other_project = reaper
@@ -601,12 +598,12 @@ impl Track {
             .filter(|p| p != &current_project)
             .find(|p| {
                 reaper.medium.validate_ptr_2(
-                    p.get_raw(),
+                    Some(p.get_raw()),
                     raw_media_track as *mut c_void,
                     ReaperPointerType::MediaTrack,
                 )
             });
-        other_project.map(|p| p.get_raw()).unwrap_or(null_mut())
+        other_project.map(|p| p.get_raw())
     }
 
     pub fn get_automation_mode(&self) -> AutomationMode {
@@ -643,7 +640,7 @@ impl Track {
     }
 
     pub fn get_project(&self) -> Project {
-        if self.rea_project.get().is_null() {
+        if self.rea_project.get().is_none() {
             self.load_if_necessary_or_complain();
         }
         self.get_project_unchecked()
@@ -668,7 +665,7 @@ pub fn get_media_track_guid(media_track: MediaTrack) -> Guid {
 
 // In REAPER < 5.95 this returns nullptr. That means we might need to use findContainingProject
 // logic at a later point.
-fn get_track_project_raw(media_track: MediaTrack) -> *mut ReaProject {
+fn get_track_project_raw(media_track: MediaTrack) -> Option<ReaProject> {
     Reaper::get()
         .medium
         .get_media_track_info_project(media_track)

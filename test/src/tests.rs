@@ -542,7 +542,7 @@ fn test_action_invoked_event() -> TestStep {
         });
         reaper
             .medium
-            .main_on_command_ex(action.get_command_id(), 0, null_mut());
+            .main_on_command_ex(action.get_command_id(), 0, None);
         // Then
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(*mock.get_last_arg(), action);
