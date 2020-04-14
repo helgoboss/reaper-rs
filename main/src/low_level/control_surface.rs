@@ -146,8 +146,8 @@ pub fn install_control_surface(control_surface: impl ControlSurface + 'static) {
 /// delegate to the Rust [`ControlSurface`](trait.ControlSurface.html) which you installed by
 /// invoking [`install_control_surface`](fn.install_control_surface.html). It needs to be
 /// passed to [`plugin_register`](struct.Reaper.html#structfield.plugin_register) as a pointer as in
-/// `plugin_register("csurf_inst", ptr as *mut _ as *mut c_void)` for registering and as in
-/// `plugin_register("-csurf_inst", ptr as *mut _ as *mut c_void)` for unregistering.
+/// `plugin_register("csurf_inst", cs as *mut _ as *mut c_void)` for registering and as in
+/// `plugin_register("-csurf_inst", cs as *mut _ as *mut c_void)` for unregistering.
 pub fn get_cpp_control_surface() -> &'static mut IReaperControlSurface {
     unsafe { &mut *get_control_surface() }
 }

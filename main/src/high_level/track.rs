@@ -176,7 +176,7 @@ impl Track {
         // we need to notify manually
         reaper
             .medium
-            .csurf_set_surface_pan(self.get_raw(), reaper_value, null_mut());
+            .csurf_set_surface_pan(self.get_raw(), reaper_value, None);
     }
 
     pub fn get_volume(&self) -> Volume {
@@ -206,7 +206,7 @@ impl Track {
         // HelperControlSurface so we need to notify manually
         reaper
             .medium
-            .csurf_set_surface_volume(self.get_raw(), reaper_value, null_mut());
+            .csurf_set_surface_volume(self.get_raw(), reaper_value, None);
     }
 
     pub fn get_index(&self) -> Option<u32> {
@@ -325,7 +325,7 @@ impl Track {
             .set_media_track_info_value(self.get_raw(), B_MUTE, 1.0);
         reaper
             .medium
-            .csurf_set_surface_mute(self.get_raw(), true, null_mut());
+            .csurf_set_surface_mute(self.get_raw(), true, None);
     }
 
     pub fn unmute(&self) {
@@ -336,7 +336,7 @@ impl Track {
             .set_media_track_info_value(self.get_raw(), B_MUTE, 0.0);
         reaper
             .medium
-            .csurf_set_surface_mute(self.get_raw(), false, null_mut());
+            .csurf_set_surface_mute(self.get_raw(), false, None);
     }
 
     pub fn is_solo(&self) -> bool {
@@ -355,7 +355,7 @@ impl Track {
             .set_media_track_info_value(self.get_raw(), I_SOLO, 1.0);
         reaper
             .medium
-            .csurf_set_surface_solo(self.get_raw(), true, null_mut());
+            .csurf_set_surface_solo(self.get_raw(), true, None);
     }
 
     pub fn unsolo(&self) {
@@ -366,7 +366,7 @@ impl Track {
             .set_media_track_info_value(self.get_raw(), I_SOLO, 0.0);
         reaper
             .medium
-            .csurf_set_surface_solo(self.get_raw(), false, null_mut());
+            .csurf_set_surface_solo(self.get_raw(), false, None);
     }
 
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {

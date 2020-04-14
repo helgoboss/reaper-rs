@@ -45,8 +45,16 @@ macro_rules! define_ptr_wrapper {
                 v.0
             }
         }
+
+        // This is for easy extraction of the raw pointer as c_void.
+        impl From<$name> for *mut std::ffi::c_void {
+            fn from(v: $name) -> Self {
+                v.0 as *mut std::ffi::c_void
+            }
+        }
     };
 }
 
 define_ptr_wrapper!(MediaTrack, raw::MediaTrack);
 define_ptr_wrapper!(ReaProject, raw::ReaProject);
+define_ptr_wrapper!(IReaperControlSurface, raw::IReaperControlSurface);

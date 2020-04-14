@@ -8,17 +8,18 @@ use crate::low_level::raw;
 use crate::low_level;
 use crate::low_level::get_cpp_control_surface;
 use crate::low_level::raw::{
-    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, IReaperControlSurface,
-    KbdSectionInfo, TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
+    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, KbdSectionInfo,
+    TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
 };
 use crate::medium_level::{
     AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
     ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
-    InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, MediaTrack,
-    MessageBoxResult, MessageBoxType, ProjectRef, ReaProject, ReaperPointerType, ReaperStringArg,
-    ReaperVersion, RecArmState, RecFx, RecordingInput, RegInstr, Relative, SendOrReceive,
-    StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
+    IReaperControlSurface, InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue,
+    MediaTrack, MessageBoxResult, MessageBoxType, ProjectRef, ReaProject, ReaperPointerType,
+    ReaperStringArg, ReaperVersion, RecArmState, RecFx, RecordingInput, RegInstr, Relative,
+    SendOrReceive, StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackFxRef,
+    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag, WantDefaults,
+    WantMaster, WantUndo,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
@@ -147,7 +148,7 @@ impl Reaper {
     }
 
     /// Gets or sets track arbitrary attributes. This just delegates to the low-level analog. Using
-    /// this function is not fun and requires you to use unsafe code. Consider using one of
+    /// this function is not fun and requires you to use unsafe code. Consider using one of the
     /// type-safe convenience functions instead. They start with `get_media_track_info_` or
     /// `set_media_track_info_`.
     pub unsafe fn get_set_media_track_info(
@@ -332,25 +333,22 @@ impl Reaper {
     }
 
     // TODO Doc
-    pub fn plugin_register_csurf_inst(
-        &self,
-        csurf_inst: &mut IReaperControlSurface,
-    ) -> Result<(), ()> {
+    pub fn plugin_register_csurf_inst(&self, csurf_inst: IReaperControlSurface) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::CSurfInst),
-                csurf_inst as *mut _ as *mut c_void,
+                csurf_inst.into(),
             )
         };
         ok_if_one(result)
     }
 
     // TODO Doc
-    pub fn plugin_unregister_csurf_inst(&self, csurf_inst: &mut IReaperControlSurface) {
+    pub fn plugin_unregister_csurf_inst(&self, csurf_inst: IReaperControlSurface) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::CSurfInst),
-                csurf_inst as *mut _ as *mut c_void,
+                csurf_inst.into(),
             );
         }
     }
@@ -370,11 +368,11 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         mute: bool,
-        ignoresurf: *mut IReaperControlSurface,
+        ignoresurf: Option<IReaperControlSurface>,
     ) {
         unsafe {
             self.low
-                .CSurf_SetSurfaceMute(trackid.into(), mute, ignoresurf);
+                .CSurf_SetSurfaceMute(trackid.into(), mute, option_into(ignoresurf));
         }
     }
 
@@ -383,11 +381,11 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         solo: bool,
-        ignoresurf: *mut IReaperControlSurface,
+        ignoresurf: Option<IReaperControlSurface>,
     ) {
         unsafe {
             self.low
-                .CSurf_SetSurfaceSolo(trackid.into(), solo, ignoresurf);
+                .CSurf_SetSurfaceSolo(trackid.into(), solo, option_into(ignoresurf));
         }
     }
 
@@ -404,13 +402,17 @@ impl Reaper {
     // This method is not idempotent. If you call it two times, you will have every callback TWICE.
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) -> Result<(), ()> {
-        self.plugin_register_csurf_inst(get_cpp_control_surface())
+        self.plugin_register_csurf_inst(IReaperControlSurface::required_panic(
+            get_cpp_control_surface() as *mut _,
+        ))
     }
 
     // TODO Doc
     // This method is idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_unregister_csurf_inst(get_cpp_control_surface());
+        self.plugin_unregister_csurf_inst(IReaperControlSurface::required_panic(
+            get_cpp_control_surface() as *mut _,
+        ));
     }
 
     // TODO Doc
@@ -1234,11 +1236,11 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         volume: f64,
-        ignoresurf: *mut IReaperControlSurface,
+        ignoresurf: Option<IReaperControlSurface>,
     ) {
         unsafe {
             self.low
-                .CSurf_SetSurfaceVolume(trackid.into(), volume, ignoresurf);
+                .CSurf_SetSurfaceVolume(trackid.into(), volume, option_into(ignoresurf));
         }
     }
 
@@ -1265,11 +1267,11 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         pan: f64,
-        ignoresurf: *mut IReaperControlSurface,
+        ignoresurf: Option<IReaperControlSurface>,
     ) {
         unsafe {
             self.low
-                .CSurf_SetSurfacePan(trackid.into(), pan, ignoresurf);
+                .CSurf_SetSurfacePan(trackid.into(), pan, option_into(ignoresurf));
         }
     }
 
