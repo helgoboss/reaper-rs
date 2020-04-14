@@ -8,8 +8,8 @@ use crate::low_level::raw;
 use crate::low_level;
 use crate::low_level::get_cpp_control_surface;
 use crate::low_level::raw::{
-    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, KbdSectionInfo,
-    TrackEnvelope, GUID, HWND, UNDO_STATE_ALL,
+    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, KbdSectionInfo, GUID, HWND,
+    UNDO_STATE_ALL,
 };
 use crate::medium_level::{
     AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
@@ -17,9 +17,9 @@ use crate::medium_level::{
     IReaperControlSurface, InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue,
     MediaTrack, MessageBoxResult, MessageBoxType, ProjectRef, ReaProject, ReaperPointerType,
     ReaperStringArg, ReaperVersion, RecArmState, RecFx, RecordingInput, RegInstr, Relative,
-    SendOrReceive, StuffMidiMessageTarget, ToggleAction, TrackFxAddByNameVariant, TrackFxRef,
-    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag, WantDefaults,
-    WantMaster, WantUndo,
+    SendOrReceive, StuffMidiMessageTarget, ToggleAction, TrackEnvelope, TrackFxAddByNameVariant,
+    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag,
+    WantDefaults, WantMaster, WantUndo,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
@@ -1031,11 +1031,12 @@ impl Reaper {
         &self,
         track: MediaTrack,
         cfgchunkname: EnvChunkName,
-    ) -> *mut TrackEnvelope {
-        unsafe {
+    ) -> Option<TrackEnvelope> {
+        let ptr = unsafe {
             self.low
                 .GetTrackEnvelopeByChunkName(track.into(), Cow::from(cfgchunkname).as_ptr())
-        }
+        };
+        TrackEnvelope::optional(ptr)
     }
 
     // TODO Doc
@@ -1045,11 +1046,12 @@ impl Reaper {
         &self,
         track: MediaTrack,
         envname: impl Into<ReaperStringArg<'a>>,
-    ) -> *mut TrackEnvelope {
-        unsafe {
+    ) -> Option<TrackEnvelope> {
+        let ptr = unsafe {
             self.low
                 .GetTrackEnvelopeByName(track.into(), envname.into().as_ptr())
-        }
+        };
+        TrackEnvelope::optional(ptr)
     }
 
     // TODO Doc

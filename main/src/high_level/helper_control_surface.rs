@@ -132,7 +132,7 @@ impl HelperControlSurface {
         let env = Reaper::get()
             .medium
             .get_track_envelope_by_name(track.get_raw(), parameter_name);
-        if env.is_null() {
+        if env.is_none() {
             return false;
         }
         use AutomationMode::*;

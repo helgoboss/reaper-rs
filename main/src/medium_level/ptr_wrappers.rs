@@ -57,4 +57,7 @@ macro_rules! define_ptr_wrapper {
 
 define_ptr_wrapper!(MediaTrack, raw::MediaTrack);
 define_ptr_wrapper!(ReaProject, raw::ReaProject);
+define_ptr_wrapper!(TrackEnvelope, raw::TrackEnvelope);
+// Even we create IReaperControlSurface instances ourselves (not REAPER), we don't do it on
+// Rust side but on C++ side. So a pointer wrapper is the right way to go here as well.
 define_ptr_wrapper!(IReaperControlSurface, raw::IReaperControlSurface);
