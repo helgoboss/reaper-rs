@@ -62,9 +62,12 @@ macro_rules! define_ptr_wrapper {
     };
 }
 
+// One of the responsibilities of the medium-level API is to use identifiers which follow the Rust
+// conventions. It just happens that some of the C++ classes already conform to Rust conventions,
+// so we won't rename them.
 define_ptr_wrapper!(MediaTrack, raw::MediaTrack);
 define_ptr_wrapper!(ReaProject, raw::ReaProject);
 define_ptr_wrapper!(TrackEnvelope, raw::TrackEnvelope);
 // Even we create IReaperControlSurface instances ourselves (not REAPER), we don't do it on
 // Rust side but on C++ side. So a pointer wrapper is the right way to go here as well.
-define_ptr_wrapper!(IReaperControlSurface, raw::IReaperControlSurface);
+define_ptr_wrapper!(ReaperControlSurface, raw::IReaperControlSurface);
