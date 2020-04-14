@@ -120,6 +120,10 @@ impl Reaper {
     //  plugin_register(). If you pretend a toggle action to be a hook command, then things
     //  stop working! Completely. This is undefined behavior and this is supposed to be marked as
     //  unsafe.
+    // TODO Either let ReaperPointerType take the pointer itself (type-safe) or introduce
+    //  convenience functions, however signatures only vary in ReaProject case. Maybe there's some
+    //  way to do this without an enum and without convenience functions? Just pass in an object?
+    //  Via Into?
     /// Returns `true` if the given pointer is a valid object of the right type in project `proj`
     /// (`proj` is ignored if pointer is itself a project).
     pub fn validate_ptr_2(

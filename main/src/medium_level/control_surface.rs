@@ -1,10 +1,12 @@
+use super::MediaTrack;
 use crate::low_level;
-use crate::low_level::raw::MediaTrack;
+use crate::low_level::raw;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 
+// TODO Have a critical look at all signatures of this trait (also return values)
 /// This is the medium-level variant of
 /// [`low_level::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation of
 /// this trait can be passed to
@@ -28,25 +30,25 @@ pub trait ControlSurface {
 
     fn set_track_list_change(&self) {}
 
-    fn set_surface_volume(&self, _trackid: *mut MediaTrack, _volume: f64) {}
+    fn set_surface_volume(&self, _trackid: MediaTrack, _volume: f64) {}
 
-    fn set_surface_pan(&self, _trackid: *mut MediaTrack, _pan: f64) {}
+    fn set_surface_pan(&self, _trackid: MediaTrack, _pan: f64) {}
 
-    fn set_surface_mute(&self, _trackid: *mut MediaTrack, _mute: bool) {}
+    fn set_surface_mute(&self, _trackid: MediaTrack, _mute: bool) {}
 
-    fn set_surface_selected(&self, _trackid: *mut MediaTrack, _selected: bool) {}
+    fn set_surface_selected(&self, _trackid: MediaTrack, _selected: bool) {}
 
-    fn set_surface_solo(&self, _trackid: *mut MediaTrack, _solo: bool) {}
+    fn set_surface_solo(&self, _trackid: MediaTrack, _solo: bool) {}
 
-    fn set_surface_rec_arm(&self, _trackid: *mut MediaTrack, _recarm: bool) {}
+    fn set_surface_rec_arm(&self, _trackid: MediaTrack, _recarm: bool) {}
 
     fn set_play_state(&self, _play: bool, _pause: bool, _rec: bool) {}
 
     fn set_repeat_state(&self, _rep: bool) {}
 
-    fn set_track_title(&self, _trackid: *mut MediaTrack, _title: &CStr) {}
+    fn set_track_title(&self, _trackid: MediaTrack, _title: &CStr) {}
 
-    fn get_touch_state(&self, _trackid: *mut MediaTrack, _is_pan: i32) -> bool {
+    fn get_touch_state(&self, _trackid: MediaTrack, _is_pan: i32) -> bool {
         false
     }
 
@@ -54,12 +56,13 @@ pub trait ControlSurface {
 
     fn reset_cached_vol_pan_states(&self) {}
 
-    fn on_track_selection(&self, _trackid: *mut MediaTrack) {}
+    fn on_track_selection(&self, _trackid: MediaTrack) {}
 
     fn is_key_down(&self, _key: i32) -> bool {
         false
     }
 
+    // TODO Should we mark this unsafe to implement?
     fn extended(
         &self,
         _call: i32,
@@ -67,6 +70,70 @@ pub trait ControlSurface {
         _parm2: *mut c_void,
         _parm3: *mut c_void,
     ) -> i32 {
+        0
+    }
+
+    fn ext_setinputmonitor(&self, track: MediaTrack, recmonitor: *mut i32) -> i32 {
+        0
+    }
+
+    fn ext_setfxparam(
+        &self,
+        track: MediaTrack,
+        fxidx_and_paramidx: *mut i32,
+        normalized_value: *mut f64,
+    ) -> i32 {
+        0
+    }
+
+    fn ext_setfxparam_recfx(
+        &self,
+        track: MediaTrack,
+        fxidx_and_paramidx: *mut i32,
+        normalized_value: *mut f64,
+    ) -> i32 {
+        0
+    }
+
+    fn ext_setfxenabled(&self, track: MediaTrack, fxidx: *mut i32, _enabled: bool) -> i32 {
+        0
+    }
+
+    fn ext_setsendvolume(&self, track: MediaTrack, sendidx: *mut i32, volume: *mut f64) -> i32 {
+        0
+    }
+
+    fn ext_setsendpan(&self, track: MediaTrack, sendidx: *mut i32, pan: *mut f64) -> i32 {
+        0
+    }
+
+    fn ext_setfocusedfx(
+        &self,
+        track: Option<MediaTrack>,
+        mediaitemidx: *mut i32,
+        fxidx: *mut i32,
+    ) -> i32 {
+        0
+    }
+
+    fn ext_setfxopen(&self, track: MediaTrack, fxidx: *mut i32, ui_open: bool) -> i32 {
+        0
+    }
+
+    fn ext_setfxchange(&self, track: MediaTrack, flags: i32) -> i32 {
+        0
+    }
+
+    fn ext_setlasttouchedfx(
+        &self,
+        _track: Option<MediaTrack>,
+        _mediaitemidx: *mut i32,
+        _fxidx: *mut i32,
+    ) -> i32 {
+        0
+    }
+
+    fn ext_setbpmandplayrate(&self, bpm: *mut f64, playrate: *mut f64) -> i32 {
         0
     }
 }
@@ -116,28 +183,34 @@ impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T
         self.delegate.set_track_list_change()
     }
 
-    fn SetSurfaceVolume(&self, trackid: *mut MediaTrack, volume: f64) {
-        self.delegate.set_surface_volume(trackid, volume)
+    fn SetSurfaceVolume(&self, trackid: *mut raw::MediaTrack, volume: f64) {
+        self.delegate
+            .set_surface_volume(MediaTrack::required_panic(trackid), volume)
     }
 
-    fn SetSurfacePan(&self, trackid: *mut MediaTrack, pan: f64) {
-        self.delegate.set_surface_pan(trackid, pan)
+    fn SetSurfacePan(&self, trackid: *mut raw::MediaTrack, pan: f64) {
+        self.delegate
+            .set_surface_pan(MediaTrack::required_panic(trackid), pan)
     }
 
-    fn SetSurfaceMute(&self, trackid: *mut MediaTrack, mute: bool) {
-        self.delegate.set_surface_mute(trackid, mute)
+    fn SetSurfaceMute(&self, trackid: *mut raw::MediaTrack, mute: bool) {
+        self.delegate
+            .set_surface_mute(MediaTrack::required_panic(trackid), mute)
     }
 
-    fn SetSurfaceSelected(&self, trackid: *mut MediaTrack, selected: bool) {
-        self.delegate.set_surface_selected(trackid, selected)
+    fn SetSurfaceSelected(&self, trackid: *mut raw::MediaTrack, selected: bool) {
+        self.delegate
+            .set_surface_selected(MediaTrack::required_panic(trackid), selected)
     }
 
-    fn SetSurfaceSolo(&self, trackid: *mut MediaTrack, solo: bool) {
-        self.delegate.set_surface_solo(trackid, solo)
+    fn SetSurfaceSolo(&self, trackid: *mut raw::MediaTrack, solo: bool) {
+        self.delegate
+            .set_surface_solo(MediaTrack::required_panic(trackid), solo)
     }
 
-    fn SetSurfaceRecArm(&self, trackid: *mut MediaTrack, recarm: bool) {
-        self.delegate.set_surface_rec_arm(trackid, recarm)
+    fn SetSurfaceRecArm(&self, trackid: *mut raw::MediaTrack, recarm: bool) {
+        self.delegate
+            .set_surface_rec_arm(MediaTrack::required_panic(trackid), recarm)
     }
 
     fn SetPlayState(&self, play: bool, pause: bool, rec: bool) {
@@ -148,13 +221,16 @@ impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T
         self.delegate.set_repeat_state(rep)
     }
 
-    fn SetTrackTitle(&self, trackid: *mut MediaTrack, title: *const i8) {
+    fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const i8) {
         self.delegate
-            .set_track_title(trackid, unsafe { CStr::from_ptr(title) })
+            .set_track_title(MediaTrack::required_panic(trackid), unsafe {
+                CStr::from_ptr(title)
+            })
     }
 
-    fn GetTouchState(&self, trackid: *mut MediaTrack, isPan: i32) -> bool {
-        self.delegate.get_touch_state(trackid, isPan)
+    fn GetTouchState(&self, trackid: *mut raw::MediaTrack, isPan: i32) -> bool {
+        self.delegate
+            .get_touch_state(MediaTrack::required_panic(trackid), isPan)
     }
 
     fn SetAutoMode(&self, mode: i32) {
@@ -165,8 +241,9 @@ impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T
         self.delegate.reset_cached_vol_pan_states()
     }
 
-    fn OnTrackSelection(&self, trackid: *mut MediaTrack) {
-        self.delegate.on_track_selection(trackid)
+    fn OnTrackSelection(&self, trackid: *mut raw::MediaTrack) {
+        self.delegate
+            .on_track_selection(MediaTrack::required_panic(trackid))
     }
 
     fn IsKeyDown(&self, key: i32) -> bool {
@@ -180,6 +257,61 @@ impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T
         parm2: *mut c_void,
         parm3: *mut c_void,
     ) -> i32 {
-        self.delegate.extended(call, parm1, parm2, parm3)
+        // TODO Make sure that all known CSURF_EXT_ constants are delegated
+        // TODO Some delegate methods still have a bit cryptic parameters
+        match call as u32 {
+            raw::CSURF_EXT_SETINPUTMONITOR => self.delegate.ext_setinputmonitor(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+            ),
+            raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_setfxparam(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as *mut f64,
+            ),
+            raw::CSURF_EXT_SETFXPARAM_RECFX => self.delegate.ext_setfxparam_recfx(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as *mut f64,
+            ),
+            raw::CSURF_EXT_SETFXENABLED => self.delegate.ext_setfxenabled(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as usize != 0,
+            ),
+            raw::CSURF_EXT_SETSENDVOLUME => self.delegate.ext_setsendvolume(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as *mut f64,
+            ),
+            raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_setsendpan(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as *mut f64,
+            ),
+            raw::CSURF_EXT_SETFOCUSEDFX => self.delegate.ext_setfocusedfx(
+                MediaTrack::optional(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as *mut i32,
+            ),
+            raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_setfxopen(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as usize != 0,
+            ),
+            raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_setfxchange(
+                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                parm2 as usize as i32,
+            ),
+            raw::CSURF_EXT_SETLASTTOUCHEDFX => self.delegate.ext_setlasttouchedfx(
+                MediaTrack::optional(parm1 as *mut raw::MediaTrack),
+                parm2 as *mut i32,
+                parm3 as *mut i32,
+            ),
+            raw::CSURF_EXT_SETBPMANDPLAYRATE => self
+                .delegate
+                .ext_setbpmandplayrate(parm1 as *mut f64, parm2 as *mut f64),
+            _ => self.delegate.extended(call, parm1, parm2, parm3),
+        }
     }
 }

@@ -14,6 +14,7 @@ use std::ptr::null_mut;
 // if we don't let anyone create such objects, we can safely assume that this is really a pointer of
 // that type and has not been messed with (by pointer casting - which can be made even with unsafe
 // code!). The contained pointer is non-null.
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct MediaTrack(*mut raw::MediaTrack);
 
 impl MediaTrack {
@@ -23,6 +24,13 @@ impl MediaTrack {
         } else {
             Ok(MediaTrack(ptr))
         }
+    }
+
+    pub(super) fn required_panic(ptr: *mut raw::MediaTrack) -> MediaTrack {
+        if ptr.is_null() {
+            panic!("MediaTrack unexpectedly null");
+        }
+        MediaTrack(ptr)
     }
 
     pub(super) fn optional(ptr: *mut raw::MediaTrack) -> Option<MediaTrack> {
@@ -377,7 +385,7 @@ pub enum ReaperPointerType<'a> {
     MediaItem_Take,
     TrackEnvelope,
     PCM_source,
-    /// If a variant is missing in this enum, you can use this custom one as a last resort. Don't
+    /// If a variant is missing in this enum, you can use this custom one as a resort. Don't
     /// include the trailing asterisk (`*`)! It will be added to the call automatically.
     Custom(Cow<'a, CStr>),
 }
@@ -462,7 +470,7 @@ pub enum TrackInfoKey<'a> {
     P_PARTRACK,
     P_PROJECT,
     P_TCP_LAYOUT,
-    /// If a variant is missing in this enum, you can use this custom one as a last resort.
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
     Custom(Cow<'a, CStr>),
 }
 
@@ -566,7 +574,7 @@ pub enum TrackSendInfoKey<'a> {
     P_SRCTRACK,
     P_ENV(EnvChunkName<'a>),
     P_EXT(Cow<'a, CStr>),
-    /// If a variant is missing in this enum, you can use this custom one as a last resort.
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
     Custom(Cow<'a, CStr>),
 }
 

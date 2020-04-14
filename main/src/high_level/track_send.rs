@@ -1,7 +1,7 @@
 use crate::high_level::{Pan, Reaper, Track, Volume};
-use crate::low_level::raw::MediaTrack;
+use crate::low_level::raw;
 use crate::medium_level::TrackSendInfoKey::P_DESTTRACK;
-use crate::medium_level::{Relative, SendOrReceive};
+use crate::medium_level::{MediaTrack, Relative, SendOrReceive};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
 use std::ptr::null_mut;
@@ -156,10 +156,7 @@ impl TrackSend {
     // Precondition: index set
     fn get_target_track_by_index(&self) -> Option<Track> {
         let target_media_track =
-            get_target_track_raw(&self.source_track, self.index.get().expect("Index not set"));
-        if target_media_track.is_null() {
-            return None;
-        }
+            get_target_track_raw(&self.source_track, self.index.get().expect("Index not set"))?;
         Some(Track::new(
             target_media_track,
             self.source_track.get_project().get_raw(),
@@ -191,15 +188,14 @@ impl TrackSend {
 
 pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
     Track::new(
-        get_target_track_raw(source_track, send_index),
+        get_target_track_raw(source_track, send_index).unwrap(),
         source_track.get_project().get_raw(),
     )
 }
 
-fn get_target_track_raw(source_track: &Track, send_index: u32) -> *mut MediaTrack {
-    Reaper::get().medium.get_track_send_info_desttrack(
-        source_track.get_raw(),
-        SendOrReceive::Send,
-        send_index,
-    )
+fn get_target_track_raw(source_track: &Track, send_index: u32) -> Option<MediaTrack> {
+    Reaper::get()
+        .medium
+        .get_track_send_info_desttrack(source_track.get_raw(), SendOrReceive::Send, send_index)
+        .ok()
 }

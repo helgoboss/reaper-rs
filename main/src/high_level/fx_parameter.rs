@@ -1,7 +1,7 @@
 use crate::high_level::fx::Fx;
 use crate::high_level::Reaper;
-use crate::low_level::raw::MediaTrack;
-use crate::medium_level::GetParameterStepSizesResult;
+use crate::low_level::raw;
+use crate::medium_level::{GetParameterStepSizesResult, MediaTrack};
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
 
@@ -57,7 +57,7 @@ impl FxParameter {
             .expect("Couldn't get FX parameter name")
     }
 
-    fn get_track_raw(&self) -> *mut MediaTrack {
+    fn get_track_raw(&self) -> MediaTrack {
         self.fx.get_track().get_raw()
     }
 

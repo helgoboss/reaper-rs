@@ -54,10 +54,7 @@ impl Project {
     /// track (master track is not obtainable via this method).
     pub fn get_track_by_index(&self, idx: u32) -> Option<Track> {
         self.complain_if_not_available();
-        let media_track = Reaper::get().medium.get_track(self.rea_project, idx);
-        if media_track.is_null() {
-            return None;
-        }
+        let media_track = Reaper::get().medium.get_track(self.rea_project, idx)?;
         Some(Track::new(media_track, self.rea_project))
     }
 
@@ -80,7 +77,7 @@ impl Project {
     pub fn get_tracks(&self) -> impl Iterator<Item = Track> + '_ {
         self.complain_if_not_available();
         (0..self.get_track_count()).map(move |i| {
-            let media_track = Reaper::get().medium.get_track(self.rea_project, i);
+            let media_track = Reaper::get().medium.get_track(self.rea_project, i).unwrap();
             Track::new(media_track, self.rea_project)
         })
     }
@@ -103,25 +100,22 @@ impl Project {
         let media_track =
             Reaper::get()
                 .medium
-                .get_selected_track_2(self.rea_project, 0, want_master);
-        if media_track.is_null() {
-            return None;
-        }
+                .get_selected_track_2(self.rea_project, 0, want_master)?;
         Some(Track::new(media_track, self.rea_project))
     }
 
     pub fn unselect_all_tracks(&self) {
         // TODO-low No project context
-        Reaper::get().medium.set_only_track_selected(null_mut());
+        Reaper::get().medium.set_only_track_selected(None);
     }
 
     pub fn get_selected_tracks(&self, want_master: WantMaster) -> impl Iterator<Item = Track> + '_ {
         self.complain_if_not_available();
         (0..self.get_selected_track_count(want_master)).map(move |i| {
-            let media_track =
-                Reaper::get()
-                    .medium
-                    .get_selected_track_2(self.rea_project, i, want_master);
+            let media_track = Reaper::get()
+                .medium
+                .get_selected_track_2(self.rea_project, i, want_master)
+                .unwrap();
             Track::new(media_track, self.rea_project)
         })
     }
@@ -148,7 +142,7 @@ impl Project {
         let reaper = Reaper::get();
         reaper.medium.insert_track_at_index(index, WantDefaults::No);
         reaper.medium.track_list_update_all_external_surfaces();
-        let media_track = reaper.medium.get_track(self.rea_project, index);
+        let media_track = reaper.medium.get_track(self.rea_project, index).unwrap();
         Track::new(media_track, self.rea_project)
     }
 
