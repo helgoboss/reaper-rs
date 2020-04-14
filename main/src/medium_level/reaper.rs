@@ -195,10 +195,14 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
-    pub fn get_media_track_info_recinput(&self, tr: MediaTrack) -> RecordingInput {
+    pub fn get_media_track_info_recinput(&self, tr: MediaTrack) -> Option<RecordingInput> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECINPUT);
         let rec_input_index = unsafe { copy_void_ptr_target::<i32>(ptr) }.unwrap();
-        RecordingInput::from_rec_input_index(rec_input_index)
+        if rec_input_index < 0 {
+            None
+        } else {
+            Some(RecordingInput::try_from(rec_input_index as u32).unwrap())
+        }
     }
 
     /// Convenience function which returns the given track's number (IP_TRACKNUMBER).

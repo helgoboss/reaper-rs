@@ -24,8 +24,8 @@ use crate::medium_level::TrackInfoKey::{
 };
 use crate::medium_level::{
     AllowGang, AutomationMode, GlobalAutomationOverride, InputMonitoringMode, IsUndoOptional,
-    MediaTrack, MidiRecordingInput, ReaProject, ReaperPointerType, RecArmState, RecordingInput,
-    Relative, TrackInfoKey, TrackRef, TrackSendCategory,
+    MediaTrack, ReaProject, ReaperPointerType, RecArmState, RecordingInput, Relative, TrackInfoKey,
+    TrackRef, TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -113,21 +113,24 @@ impl Track {
         );
     }
 
-    pub fn get_recording_input(&self) -> RecordingInput {
+    pub fn get_recording_input(&self) -> Option<RecordingInput> {
         self.load_and_check_if_necessary_or_complain();
         Reaper::get()
             .medium
             .get_media_track_info_recinput(self.get_raw())
     }
 
-    // TODO-low Support setting other kinds of inputs
-    pub fn set_recording_input(&self, input: MidiRecordingInput) {
+    pub fn set_recording_input(&self, input: Option<RecordingInput>) {
         self.load_and_check_if_necessary_or_complain();
+        let rec_input_index = match input {
+            None => -1,
+            Some(ri) => u32::from(ri) as i32,
+        };
         let reaper = Reaper::get();
         let _ = reaper.medium.set_media_track_info_value(
             self.get_raw(),
             I_RECINPUT,
-            input.get_rec_input_index() as f64,
+            rec_input_index as f64,
         );
         // Only for triggering notification (as manual setting the rec input would also trigger it)
         // This doesn't work for other surfaces but they are also not interested in record input

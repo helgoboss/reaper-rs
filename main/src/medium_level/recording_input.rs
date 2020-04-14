@@ -1,5 +1,5 @@
 use helgoboss_midi::Channel;
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct MidiDeviceId(pub(super) u8);
@@ -11,10 +11,7 @@ pub struct MidiDeviceId(pub(super) u8);
 impl MidiDeviceId {
     /// Creates the MIDI device ID. Panics if the given number is not a valid ID.
     pub fn new(number: u8) -> MidiDeviceId {
-        assert!(
-            number != 63,
-            "ID 63 is not a valid device ID because it represents all devices"
-        );
+        assert!(number < 63, "MIDI device IDs must be <= 62");
         MidiDeviceId(number)
     }
 }
@@ -27,88 +24,71 @@ impl From<MidiDeviceId> for u8 {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum RecordingInput {
-    None,
-    // TODO-low Audio inputs in detail
-    //  record input, <0=no input, 0..n=mono hardware input, 512+n=rearoute input, &1024=stereo
-    // input pair. &4096=MIDI input, if set then low 5 bits represent channel (0=all, 1-16=only
-    // chan), next 6 bits represent physical input (63=all, 62=VKB)
-    Mono,
-    ReaRoute,
-    Stereo,
-    // TODO Don't make MidiRecordingInput an own type
-    Midi(MidiRecordingInput),
+    Mono(u32),
+    ReaRoute(u32),
+    Stereo(u32),
+    Midi {
+        device_id: Option<MidiDeviceId>,
+        channel: Option<Channel>,
+    },
 }
 
-impl RecordingInput {
-    pub fn from_rec_input_index(rec_input_index: i32) -> RecordingInput {
+impl From<RecordingInput> for u32 {
+    fn from(input: RecordingInput) -> Self {
+        use RecordingInput::*;
+        match input {
+            Mono(i) => i,
+            ReaRoute(i) => 512 + i,
+            Stereo(i) => 1024 + i,
+            Midi { device_id, channel } => {
+                let device_high = match device_id {
+                    None => ALL_MIDI_DEVICES_FACTOR,
+                    Some(i) => u8::from(i) as u32,
+                };
+                let channel_low = match channel {
+                    None => 0,
+                    Some(ch) => u32::from(ch) + 1,
+                };
+                4096 + (device_high * 32 + channel_low)
+            }
+        }
+    }
+}
+
+impl TryFrom<u32> for RecordingInput {
+    type Error = ();
+
+    fn try_from(rec_input_index: u32) -> Result<Self, Self::Error> {
+        use RecordingInput::*;
         match rec_input_index {
-            i if i < 0 => RecordingInput::None,
-            i if i < 512 => RecordingInput::Mono,
-            i if i < 1024 => RecordingInput::ReaRoute,
-            i if i < 4096 => RecordingInput::Stereo,
-            _ => RecordingInput::Midi(MidiRecordingInput::new(rec_input_index as u32)),
+            0..=511 => Ok(Mono(rec_input_index)),
+            512..=1023 => Ok(ReaRoute(rec_input_index - 512)),
+            1024..=4095 => Ok(Stereo(rec_input_index - 1024)),
+            4096..=6128 => {
+                let midi_index = rec_input_index - 4096;
+                Ok(Midi {
+                    device_id: {
+                        let raw_device_id = midi_index / 32;
+                        if raw_device_id == ALL_MIDI_DEVICES_FACTOR {
+                            None
+                        } else {
+                            Some(MidiDeviceId::new(raw_device_id as u8))
+                        }
+                    },
+                    channel: {
+                        let channel_id = midi_index % 32;
+                        if channel_id == 0 {
+                            None
+                        } else {
+                            let ch = channel_id - 1;
+                            ch.try_into().ok()
+                        }
+                    },
+                })
+            }
+            _ => Err(()),
         }
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct MidiRecordingInput {
-    rec_input_index: u32,
-}
-
-const ALL_MIDI_DEVICES_ID: u32 = 63;
-
-impl MidiRecordingInput {
-    fn new(rec_input_index: u32) -> Self {
-        MidiRecordingInput { rec_input_index }
-    }
-
-    pub fn from_all_devices_and_channels() -> Self {
-        Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32)
-    }
-
-    pub fn from_all_channels_of_device(device_id: MidiDeviceId) -> Self {
-        Self::from_midi_rec_input_index(u8::from(device_id) as u32 * 32)
-    }
-
-    pub fn from_all_devices_with_channel(channel: u32) -> Self {
-        Self::from_midi_rec_input_index(ALL_MIDI_DEVICES_ID * 32 + channel + 1)
-    }
-
-    pub fn from_device_and_channel(device_id: MidiDeviceId, channel: u32) -> Self {
-        Self::from_midi_rec_input_index(u8::from(device_id) as u32 * 32 + channel + 1)
-    }
-
-    pub fn from_midi_rec_input_index(midi_rec_input_index: u32) -> Self {
-        Self::new(4096 + midi_rec_input_index)
-    }
-
-    pub fn get_rec_input_index(&self) -> u32 {
-        self.rec_input_index
-    }
-
-    pub fn get_midi_rec_input_index(&self) -> u32 {
-        self.rec_input_index - 4096
-    }
-
-    // TODO-low In Rust get_ prefix is not idiomatic. On the other hand, the convention talks
-    //  about exposing members only. Channel is not a member. However I also don't want to
-    //  expose the information if it's a member or not. get_ has an advantage in IDEs and also
-    //  prevents ambiguities if the noun can sound like a verb.
-    pub fn get_channel(&self) -> Option<Channel> {
-        let channel_id = self.get_midi_rec_input_index() % 32;
-        if channel_id == 0 {
-            return None;
-        }
-        let ch = channel_id - 1;
-        ch.try_into().ok()
-    }
-
-    pub fn get_device_id(&self) -> Option<MidiDeviceId> {
-        let raw_device_id = self.get_midi_rec_input_index() / 32;
-        if raw_device_id == ALL_MIDI_DEVICES_ID {
-            return None;
-        }
-        Some(MidiDeviceId::new(raw_device_id as u8))
-    }
-}
+const ALL_MIDI_DEVICES_FACTOR: u32 = 63;

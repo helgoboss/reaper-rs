@@ -44,6 +44,10 @@
 //! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
 //!   of i32). In the unlikely case that the value range has to be extended in future, it's just a
 //!   matter of removing safe casts on user-side code.
+// TODO-low In Rust get_ prefix is not idiomatic. On the other hand, the convention talks
+//  about exposing members only. Channel is not a member. However I also don't want to
+//  expose the information if it's a member or not. get_ has an advantage in IDEs and also
+//  prevents ambiguities if the noun can sound like a verb.
 
 mod constants;
 pub use constants::*;

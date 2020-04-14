@@ -19,8 +19,8 @@ use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
 use reaper_rs::medium_level::{
     AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
-    MessageBoxType, MidiDeviceId, MidiRecordingInput, ReaperVersion, RecordingInput,
-    StuffMidiMessageTarget, TrackInfoKey, TrackRef, WantMaster, WantUndo,
+    MessageBoxType, MidiDeviceId, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
+    TrackInfoKey, TrackRef, WantMaster, WantUndo,
 };
 use std::rc::Rc;
 
@@ -1241,16 +1241,14 @@ fn set_track_recording_input_midi_all_15() -> TestStep {
     step("Set track recording input MIDI all/15", |_, _| {
         // Given
         let track = get_track(0)?;
+        let given_input = Some(RecordingInput::Midi {
+            device_id: None,
+            channel: Some(channel(15)),
+        });
         // When
-        track.set_recording_input(MidiRecordingInput::from_all_devices_with_channel(15));
+        track.set_recording_input(given_input);
         // Then
-        let input = track.get_recording_input();
-        let input_data = match input {
-            RecordingInput::Midi(d) => d,
-            _ => return Err("Expected MIDI input".into()),
-        };
-        check_eq!(input_data.get_channel(), Some(channel(15)));
-        check!(input_data.get_device_id().is_none());
+        check_eq!(track.get_recording_input(), given_input);
         Ok(())
     })
 }
@@ -1259,18 +1257,14 @@ fn set_track_recording_input_midi_7_all() -> TestStep {
     step("Set track recording input MIDI 7/all", |_, _| {
         // Given
         let track = get_track(0)?;
+        let given_input = Some(RecordingInput::Midi {
+            device_id: Some(MidiDeviceId::new(7)),
+            channel: None,
+        });
         // When
-        track.set_recording_input(MidiRecordingInput::from_all_channels_of_device(
-            MidiDeviceId::new(7),
-        ));
+        track.set_recording_input(given_input);
         // Then
-        let input = track.get_recording_input();
-        let input_data = match input {
-            RecordingInput::Midi(d) => d,
-            _ => return Err("Expected MIDI input".into()),
-        };
-        check!(input_data.get_channel().is_none());
-        check_eq!(input_data.get_device_id(), Some(MidiDeviceId::new(7)));
+        check_eq!(track.get_recording_input(), given_input);
         Ok(())
     })
 }
@@ -1279,22 +1273,14 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
     step("Set track recording input MIDI 4/5", |_, _| {
         // Given
         let track = get_track(0)?;
+        let given_input = Some(RecordingInput::Midi {
+            device_id: Some(MidiDeviceId::new(4)),
+            channel: Some(channel(5)),
+        });
         // When
-        track.set_recording_input(MidiRecordingInput::from_device_and_channel(
-            MidiDeviceId::new(4),
-            5,
-        ));
+        track.set_recording_input(given_input);
         // Then
-        let input = track.get_recording_input();
-        let input_data = match input {
-            RecordingInput::Midi(d) => d,
-            _ => return Err("Expected MIDI input".into()),
-        };
-        check_eq!(input_data.get_channel(), Some(channel(5)));
-        check_eq!(
-            input_data.get_device_id().ok_or("Expected device")?,
-            MidiDeviceId::new(4)
-        );
+        check_eq!(track.get_recording_input(), given_input);
         Ok(())
     })
 }
@@ -1303,6 +1289,10 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
     step("Set track recording input MIDI all/all", |reaper, step| {
         // Given
         let track = get_track(0)?;
+        let given_input = Some(RecordingInput::Midi {
+            device_id: None,
+            channel: None,
+        });
         // When
         let (mock, _) = observe_invocations(|mock| {
             reaper
@@ -1312,17 +1302,13 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_recording_input(MidiRecordingInput::from_all_devices_and_channels());
+        track.set_recording_input(given_input);
         // Then
         let input = track.get_recording_input();
-        let input_data = match input {
-            RecordingInput::Midi(d) => d,
-            _ => return Err("Expected MIDI input".into()),
-        };
-        check!(input_data.get_channel().is_none());
-        check!(input_data.get_device_id().is_none());
-        check_eq!(input_data.get_rec_input_index(), 6112);
-        check_eq!(RecordingInput::from_rec_input_index(6112), input);
+        check_eq!(input, given_input);
+        let input = input.unwrap();
+        check_eq!(u32::from(input), 6112);
+        check_eq!(RecordingInput::try_from(6112 as u32), Ok(input));
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
         Ok(())
@@ -1337,7 +1323,7 @@ fn query_track_recording_input() -> TestStep {
         let input = track.get_recording_input();
         // Then
         match input {
-            RecordingInput::Mono => Ok(()),
+            Some(RecordingInput::Mono(0)) => Ok(()),
             _ => Err("Expected MidiRecordingInput".into()),
         }
     })
