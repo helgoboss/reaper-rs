@@ -4,7 +4,7 @@ use std::convert::{TryFrom, TryInto};
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct MidiDeviceId(pub(super) u8);
 
-// TODO Consider creating all newtypes with macros for more consistency and less code:
+// TODO-high Consider creating all newtypes with macros for more consistency and less code:
 //  - https://gitlab.com/williamyaoh/shrinkwraprs
 //  - https://github.com/JelteF/derive_more
 //  - https://github.com/DanielKeep/rust-custom-derive

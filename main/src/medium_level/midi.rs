@@ -5,14 +5,14 @@ use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::os::raw::c_int;
 
-// TODO Doc
+// TODO-doc
 // This is like a MediaTrack object in that it wraps a raw pointer.
-// TODO Can we check the lifetime of this in ValidatePtr2? How does this behave when the MIDI input
-//  device is disconnected? What would get_read_buf() return? If it crashes, we should think about
-//  making it unsafe or expect a closure when calling get_midi_input (latter is probably the way to
-//  go). That closure would expect a reference of the MidiInput. => Well, we could probably check
-//  the validity of the device if we check its presence via GetMIDIInputName with the appropriate
-//  device ID?
+// TODO-medium Can we check the lifetime of this in ValidatePtr2? How does this behave when the MIDI
+// input  device is disconnected? What would get_read_buf() return? If it crashes, we should think
+// about  making it unsafe or expect a closure when calling get_midi_input (latter is probably the
+// way to  go). That closure would expect a reference of the MidiInput. => Well, we could probably
+// check  the validity of the device if we check its presence via GetMIDIInputName with the
+// appropriate  device ID?
 pub struct MidiInput(midi_Input);
 
 impl MidiInput {
@@ -38,7 +38,7 @@ impl MidiInput {
 pub struct MidiEvtList<'a>(&'a MIDI_eventlist);
 
 impl<'a> MidiEvtList<'a> {
-    // TODO Maybe from() would be a better name for all pointer wrappers.
+    // TODO-medium Maybe from() would be a better name for all pointer wrappers.
     pub(super) fn new(raw_evt_list: &'a MIDI_eventlist) -> Self {
         MidiEvtList(raw_evt_list)
     }
@@ -72,12 +72,12 @@ impl<'a> Iterator for MidiEvtListIterator<'a> {
 
 // Represents a borrowed reference to a MIDI event from REAPER. Cheap to copy because it's just a
 // wrapper around MIDI_event_t.
-// TODO Can be converted into an owned MIDI event in case it needs to live longer than REAPER keeps
-//  the event around.
+// TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
+//  keeps  the event around.
 #[derive(Clone, Copy)]
 pub struct MidiEvt<'a>(&'a MIDI_event_t);
 
-// TODO Check everything if conform with API conventions
+// TODO-medium Check everything if conform with API conventions
 //  (e.g. https://rust-lang.github.io/api-guidelines/naming.html)
 impl<'a> MidiEvt<'a> {
     pub unsafe fn new(raw_evt: &'a MIDI_event_t) -> Self {

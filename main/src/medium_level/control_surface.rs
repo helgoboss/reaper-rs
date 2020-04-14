@@ -6,7 +6,7 @@ use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 
-// TODO Have a critical look at all signatures of this trait (also return values)
+// TODO-high Have a critical look at all signatures of this trait (also return values)
 /// This is the medium-level variant of
 /// [`low_level::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation of
 /// this trait can be passed to
@@ -62,7 +62,7 @@ pub trait ControlSurface {
         false
     }
 
-    // TODO Should we mark this unsafe to implement?
+    // TODO-high Should we mark this unsafe to implement?
     fn extended(
         &self,
         _call: i32,
@@ -257,8 +257,7 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
         parm2: *mut c_void,
         parm3: *mut c_void,
     ) -> i32 {
-        // TODO Make sure that all known CSURF_EXT_ constants are delegated
-        // TODO Some delegate methods still have a bit cryptic parameters
+        // TODO-high Make sure that all known CSURF_EXT_ constants are delegated
         match call as u32 {
             raw::CSURF_EXT_SETINPUTMONITOR => self.delegate.ext_setinputmonitor(
                 MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),

@@ -109,7 +109,7 @@ impl From<WantDefaults> for bool {
     }
 }
 
-// TODO Revise names of all enums and their variants
+// TODO-medium Revise names of all enums and their variants
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AllowGang {
     No,
