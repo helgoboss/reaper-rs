@@ -4,12 +4,11 @@
 use super::{
     bindings::root::reaper_rs_control_surface::get_control_surface, firewall, raw::MediaTrack,
 };
-use crate::low_level::raw::IReaperControlSurface;
+use crate::low_level::raw;
 
 use std::ptr::{null, null_mut};
 use std::sync::Once;
 
-// TODO Rename to IReaperControlSurface because it's a 1:1 analog
 /// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`. An implementation
 /// of this trait can be passed to [`install_control_surface`](fn.install_control_surface.html).
 /// As a consequence, REAPER will invoke the respective callback methods.
@@ -40,7 +39,7 @@ use std::sync::Once;
 /// therefore use some unsafe code to prevent the panic. They might find out that they want to check
 /// for reentrancy by using `try_borrow_mut()`. Or they might find out that they want to
 /// avoid this situation by just deferring the event handling to the next main loop cycle.
-pub trait ControlSurface {
+pub trait IReaperControlSurface {
     fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
         null()
     }
@@ -103,13 +102,13 @@ pub trait ControlSurface {
 }
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
-static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn ControlSurface>> = None;
+static mut CONTROL_SURFACE_INSTANCE: Option<Box<dyn IReaperControlSurface>> = None;
 static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
 
 /// This returns a mutable reference. In general this mutability should not be used, just in case
 /// of control surface methods where it's sure that REAPER never reenters them! See
 /// [`ControlSurface`](trait.ControlSurface.html) documentation.
-pub(crate) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurface> {
+pub(crate) fn get_control_surface_instance() -> &'static mut Box<dyn IReaperControlSurface> {
     unsafe { CONTROL_SURFACE_INSTANCE.as_mut().unwrap() }
 }
 
@@ -129,7 +128,7 @@ pub(crate) fn get_control_surface_instance() -> &'static mut Box<dyn ControlSurf
 /// Currently *reaper-rs* supports only one control surface per plug-in. This is not a restriction
 /// dictated by Rust, it's just a bit easier to implement and I don't see many use cases where one
 /// would want multiple control surfaces.
-pub fn install_control_surface(control_surface: impl ControlSurface + 'static) {
+pub fn install_control_surface(control_surface: impl IReaperControlSurface + 'static) {
     // TODO-low Ensure that only called if there's not a control surface registered already
     // Ideally we would have a generic static but as things are now, we need to box it.
     // However, this is not a big deal because control surfaces are only used in the
@@ -149,38 +148,38 @@ pub fn install_control_surface(control_surface: impl ControlSurface + 'static) {
 /// passed to [`plugin_register`](struct.Reaper.html#structfield.plugin_register) as a pointer as in
 /// `plugin_register("csurf_inst", cs as *mut _ as *mut c_void)` for registering and as in
 /// `plugin_register("-csurf_inst", cs as *mut _ as *mut c_void)` for unregistering.
-pub fn get_cpp_control_surface() -> &'static mut IReaperControlSurface {
+pub fn get_cpp_control_surface() -> &'static mut raw::IReaperControlSurface {
     unsafe { &mut *get_control_surface() }
 }
 
 #[no_mangle]
 extern "C" fn GetTypeString(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| get_control_surface_instance().GetTypeString()).unwrap_or(null_mut())
 }
 
 #[no_mangle]
 extern "C" fn GetDescString(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| get_control_surface_instance().GetDescString()).unwrap_or(null_mut())
 }
 
 #[no_mangle]
 extern "C" fn GetConfigString(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| get_control_surface_instance().GetConfigString()).unwrap_or(null_mut())
 }
 
 #[no_mangle]
-extern "C" fn CloseNoReset(_callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn CloseNoReset(_callback_target: *mut Box<dyn IReaperControlSurface>) {
     firewall(|| get_control_surface_instance().CloseNoReset());
 }
 
 #[no_mangle]
-extern "C" fn Run(_callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn Run(_callback_target: *mut Box<dyn IReaperControlSurface>) {
     // "Decoding" the thin pointer is not necessary right now because we have a static variable.
     // However, we leave it. Might come in handy one day to support multiple control surfaces
     // (see https://users.rust-lang.org/t/sending-a-boxed-trait-over-ffi/21708/6)
@@ -188,13 +187,13 @@ extern "C" fn Run(_callback_target: *mut Box<dyn ControlSurface>) {
 }
 
 #[no_mangle]
-extern "C" fn SetTrackListChange(_callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn SetTrackListChange(_callback_target: *mut Box<dyn IReaperControlSurface>) {
     firewall(|| get_control_surface_instance().SetTrackListChange());
 }
 
 #[no_mangle]
 extern "C" fn SetSurfaceVolume(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     volume: f64,
 ) {
@@ -203,7 +202,7 @@ extern "C" fn SetSurfaceVolume(
 
 #[no_mangle]
 extern "C" fn SetSurfacePan(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     pan: f64,
 ) {
@@ -212,7 +211,7 @@ extern "C" fn SetSurfacePan(
 
 #[no_mangle]
 extern "C" fn SetSurfaceMute(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     mute: bool,
 ) {
@@ -221,7 +220,7 @@ extern "C" fn SetSurfaceMute(
 
 #[no_mangle]
 extern "C" fn SetSurfaceSelected(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     selected: bool,
 ) {
@@ -230,7 +229,7 @@ extern "C" fn SetSurfaceSelected(
 
 #[no_mangle]
 extern "C" fn SetSurfaceSolo(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     solo: bool,
 ) {
@@ -239,7 +238,7 @@ extern "C" fn SetSurfaceSolo(
 
 #[no_mangle]
 extern "C" fn SetSurfaceRecArm(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     recarm: bool,
 ) {
@@ -248,7 +247,7 @@ extern "C" fn SetSurfaceRecArm(
 
 #[no_mangle]
 extern "C" fn SetPlayState(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     play: bool,
     pause: bool,
     rec: bool,
@@ -257,13 +256,13 @@ extern "C" fn SetPlayState(
 }
 
 #[no_mangle]
-extern "C" fn SetRepeatState(_callback_target: *mut Box<dyn ControlSurface>, rep: bool) {
+extern "C" fn SetRepeatState(_callback_target: *mut Box<dyn IReaperControlSurface>, rep: bool) {
     firewall(|| get_control_surface_instance().SetRepeatState(rep));
 }
 
 #[no_mangle]
 extern "C" fn SetTrackTitle(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     title: *const ::std::os::raw::c_char,
 ) {
@@ -272,7 +271,7 @@ extern "C" fn SetTrackTitle(
 
 #[no_mangle]
 extern "C" fn GetTouchState(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
     isPan: ::std::os::raw::c_int,
 ) -> bool {
@@ -281,20 +280,20 @@ extern "C" fn GetTouchState(
 
 #[no_mangle]
 extern "C" fn SetAutoMode(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     mode: ::std::os::raw::c_int,
 ) {
     firewall(|| get_control_surface_instance().SetAutoMode(mode));
 }
 
 #[no_mangle]
-extern "C" fn ResetCachedVolPanStates(_callback_target: *mut Box<dyn ControlSurface>) {
+extern "C" fn ResetCachedVolPanStates(_callback_target: *mut Box<dyn IReaperControlSurface>) {
     firewall(|| get_control_surface_instance().ResetCachedVolPanStates());
 }
 
 #[no_mangle]
 extern "C" fn OnTrackSelection(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
 ) {
     firewall(|| get_control_surface_instance().OnTrackSelection(trackid));
@@ -302,7 +301,7 @@ extern "C" fn OnTrackSelection(
 
 #[no_mangle]
 extern "C" fn IsKeyDown(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     key: ::std::os::raw::c_int,
 ) -> bool {
     firewall(|| get_control_surface_instance().IsKeyDown(key)).unwrap_or(false)
@@ -310,7 +309,7 @@ extern "C" fn IsKeyDown(
 
 #[no_mangle]
 extern "C" fn Extended(
-    _callback_target: *mut Box<dyn ControlSurface>,
+    _callback_target: *mut Box<dyn IReaperControlSurface>,
     call: ::std::os::raw::c_int,
     parm1: *mut ::std::os::raw::c_void,
     parm2: *mut ::std::os::raw::c_void,

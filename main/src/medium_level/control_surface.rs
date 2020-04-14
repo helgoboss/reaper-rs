@@ -149,7 +149,7 @@ impl<T: ControlSurface> DelegatingControlSurface<T> {
 }
 
 #[allow(non_snake_case)]
-impl<T: ControlSurface> low_level::ControlSurface for DelegatingControlSurface<T> {
+impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSurface<T> {
     fn GetTypeString(&self) -> *const i8 {
         self.delegate
             .get_type_string()
