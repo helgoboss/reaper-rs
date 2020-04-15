@@ -6,8 +6,8 @@ use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
 use crate::medium_level::{
-    AutomationMode, ControlSurface, InputMonitoringMode, MediaTrack, ReaProject, ReaperPointerType,
-    TrackRef, VersionDependentFxRef,
+    AutomationMode, ControlSurface, InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject,
+    ReaperPointerType, TrackRef, VersionDependentFxRef, VersionDependentTrackFxRef,
 };
 use c_str_macro::c_str;
 use rxrust::prelude::*;
@@ -489,11 +489,11 @@ impl HelperControlSurface {
     fn get_fx_from_parm_fx_index(
         &self,
         track: &Track,
-        parm_fx_index: VersionDependentFxRef,
+        parm_fx_index: VersionDependentTrackFxRef,
         param_index: Option<u32>,
         param_value: Option<f64>,
     ) -> Option<Fx> {
-        use VersionDependentFxRef::*;
+        use VersionDependentTrackFxRef::*;
         match parm_fx_index {
             Old(index) => {
                 let is_input_fx = self.is_probably_input_fx(track, index, param_index, param_value);
@@ -729,7 +729,7 @@ impl ControlSurface for HelperControlSurface {
     fn ext_setfxenabled(
         &self,
         track: MediaTrack,
-        fxidx: VersionDependentFxRef,
+        fxidx: VersionDependentTrackFxRef,
         _enabled: bool,
     ) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
@@ -744,13 +744,9 @@ impl ControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setsendvolume(&self, track: MediaTrack, sendidx: *mut i32, volume: *mut f64) -> i32 {
-        if sendidx.is_null() || volume.is_null() {
-            return 0;
-        }
-        let sendidx = unsafe { *sendidx };
+    fn ext_setsendvolume(&self, track: MediaTrack, sendidx: u32, _volume: f64) -> i32 {
         let track = Track::new(track, None);
-        let track_send = track.get_index_based_send_by_index(sendidx as u32);
+        let track_send = track.get_index_based_send_by_index(sendidx);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -768,13 +764,9 @@ impl ControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setsendpan(&self, track: MediaTrack, sendidx: *mut i32, pan: *mut f64) -> i32 {
-        if sendidx.is_null() || pan.is_null() {
-            return 0;
-        }
-        let sendidx = unsafe { *sendidx };
+    fn ext_setsendpan(&self, track: MediaTrack, sendidx: u32, _pan: f64) -> i32 {
         let track = Track::new(track, None);
-        let track_send = track.get_index_based_send_by_index(sendidx as u32);
+        let track_send = track.get_index_based_send_by_index(sendidx);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -792,38 +784,51 @@ impl ControlSurface for HelperControlSurface {
         1
     }
 
-    // TODO This might need a signature adjustment because it seems to be usable for Take FX, too
-    fn ext_setfocusedfx(
-        &self,
-        track: Option<MediaTrack>,
-        mediaitemidx: *mut i32,
-        fxidx: VersionDependentFxRef,
-    ) -> i32 {
+    fn ext_setfocusedfx(&self, fx_ref: Option<QualifiedFxRef>) -> i32 {
         let reaper = Reaper::get();
-        let track = match track {
+        let fx_ref = match fx_ref {
             None => {
                 // Clear focused FX
                 reaper.subjects.fx_focused.borrow_mut().next(Payload(None));
                 return 0;
             }
-            Some(t) => t,
+            Some(r) => r,
         };
-        // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
-        let track = Track::new(track, None);
-        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
-            // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
-            // chunk manipulations
-            self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
-            reaper
-                .subjects
-                .fx_focused
-                .borrow_mut()
-                .next(Payload(Some(fx)));
+        use VersionDependentFxRef::*;
+        match fx_ref.fx_ref {
+            ItemFx { .. } => {
+                // TODO Not handled right now
+                0
+            }
+            TrackFx(track_fx_ref) => {
+                // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
+                let track = Track::new(fx_ref.track, None);
+                if let Some(fx) = self.get_fx_from_parm_fx_index(&track, track_fx_ref, None, None) {
+                    // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2
+                    // and on chunk manipulations
+                    self.detect_fx_changes_on_track(
+                        track,
+                        true,
+                        !fx.is_input_fx(),
+                        fx.is_input_fx(),
+                    );
+                    reaper
+                        .subjects
+                        .fx_focused
+                        .borrow_mut()
+                        .next(Payload(Some(fx)));
+                }
+                1
+            }
         }
-        1
     }
 
-    fn ext_setfxopen(&self, track: MediaTrack, fxidx: VersionDependentFxRef, ui_open: bool) -> i32 {
+    fn ext_setfxopen(
+        &self,
+        track: MediaTrack,
+        fxidx: VersionDependentTrackFxRef,
+        ui_open: bool,
+    ) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
@@ -853,27 +858,21 @@ impl ControlSurface for HelperControlSurface {
         1
     }
 
-    // TODO Support Take FX
-    fn ext_setlasttouchedfx(
-        &self,
-        _track: Option<MediaTrack>,
-        _mediaitemidx: *mut i32,
-        _fxidx: VersionDependentFxRef,
-    ) -> i32 {
+    fn ext_setlasttouchedfx(&self, _fx_ref: Option<QualifiedFxRef>) -> i32 {
         self.fx_has_been_touched_just_a_moment_ago.replace(true);
         1
     }
 
-    fn ext_setbpmandplayrate(&self, bpm: *mut f64, playrate: *mut f64) -> i32 {
+    fn ext_setbpmandplayrate(&self, bpm: Option<f64>, playrate: Option<f64>) -> i32 {
         let reaper = Reaper::get();
-        if !bpm.is_null() {
+        if bpm.is_some() {
             reaper.subjects.master_tempo_changed.borrow_mut().next(());
             // If there's a tempo envelope, there are just tempo notifications when the tempo is
             // actually changed. So that's okay for "touched".
             // TODO-low What about gradual tempo changes?
             reaper.subjects.master_tempo_touched.borrow_mut().next(());
         }
-        if !playrate.is_null() {
+        if playrate.is_some() {
             reaper
                 .subjects
                 .master_playrate_changed

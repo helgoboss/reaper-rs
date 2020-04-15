@@ -185,14 +185,14 @@ impl Reaper {
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
     pub fn get_media_track_info_recmon(&self, tr: MediaTrack) -> InputMonitoringMode {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECMON);
-        let irecmon = unsafe { copy_void_ptr_target::<i32>(ptr) }.unwrap();
+        let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
     pub fn get_media_track_info_recinput(&self, tr: MediaTrack) -> Option<RecordingInput> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECINPUT);
-        let rec_input_index = unsafe { copy_void_ptr_target::<i32>(ptr) }.unwrap();
+        let rec_input_index = unsafe { unref_as::<i32>(ptr) }.unwrap();
         if rec_input_index < 0 {
             None
         } else {
@@ -214,7 +214,7 @@ impl Reaper {
     /// Convenience function which returns the given track's GUID (GUID).
     pub fn get_media_track_info_guid(&self, tr: MediaTrack) -> GUID {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::GUID);
-        unsafe { copy_void_ptr_target::<GUID>(ptr) }.unwrap()
+        unsafe { unref_as::<GUID>(ptr) }.unwrap()
     }
 
     // TODO-doc
@@ -1081,7 +1081,7 @@ impl Reaper {
     // TODO-doc
     pub fn track_fx_get_fx_guid(&self, track: MediaTrack, fx: TrackFxRef) -> Option<GUID> {
         let ptr = unsafe { self.low.TrackFX_GetFXGUID(track.into(), fx.into()) };
-        unsafe { copy_ptr_target(ptr) }
+        unsafe { unref(ptr) }
     }
 
     // TODO-doc
@@ -1727,15 +1727,15 @@ fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
     Some(value)
 }
 
-unsafe fn copy_ptr_target<T: Copy>(ptr: *const T) -> Option<T> {
+unsafe fn unref<T: Copy>(ptr: *const T) -> Option<T> {
     if ptr.is_null() {
         return None;
     }
     Some(*ptr)
 }
 
-unsafe fn copy_void_ptr_target<T: Copy>(ptr: *mut c_void) -> Option<T> {
-    copy_ptr_target(ptr as *const T)
+unsafe fn unref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
+    unref(ptr as *const T)
 }
 
 unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a CStr> {

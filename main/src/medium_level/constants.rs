@@ -222,16 +222,6 @@ impl From<u32> for TrackFxRef {
     }
 }
 
-/// Used in ControlSurface
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum VersionDependentFxRef {
-    /// In old REAPER versions (< 5.95) the index can represent either input or output FX - we
-    /// don't know.
-    Old(u32),
-    /// In newer REAPER versions, it's possible to distinguish between input and output FX
-    New(TrackFxRef),
-}
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
 pub enum TrackFxAddByNameVariant {
