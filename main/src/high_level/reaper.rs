@@ -379,7 +379,10 @@ impl Reaper {
     }
 
     fn init(&self, task_receiver: Receiver<Task>) {
-        install_control_surface(HelperControlSurface::new(task_receiver));
+        install_control_surface(
+            HelperControlSurface::new(task_receiver),
+            &self.get_version(),
+        );
     }
 
     // Must be idempotent

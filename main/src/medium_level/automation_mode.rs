@@ -7,7 +7,7 @@ pub enum GlobalAutomationOverride {
 }
 
 #[derive(Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
-#[repr(u32)]
+#[repr(i32)]
 pub enum AutomationMode {
     TrimRead = 0,
     Read = 1,
@@ -24,7 +24,7 @@ mod test {
 
     #[test]
     fn to_int() {
-        assert_eq!(3u32, AutomationMode::Write.into());
+        assert_eq!(3, AutomationMode::Write.into());
     }
 
     #[test]

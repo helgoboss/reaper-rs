@@ -1,7 +1,12 @@
 use super::MediaTrack;
 use crate::low_level;
 use crate::low_level::raw;
+use crate::medium_level::{
+    AutomationMode, InputMonitoringMode, ReaperVersion, TrackFxRef, VersionDependentFxRef,
+};
+use c_str_macro::c_str;
 use std::borrow::Cow;
+use std::convert::TryInto;
 use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
@@ -30,6 +35,7 @@ pub trait ControlSurface {
 
     fn set_track_list_change(&self) {}
 
+    // TODO Prevent params from getting underscore
     fn set_surface_volume(&self, _trackid: MediaTrack, _volume: f64) {}
 
     fn set_surface_pan(&self, _trackid: MediaTrack, _pan: f64) {}
@@ -48,22 +54,23 @@ pub trait ControlSurface {
 
     fn set_track_title(&self, _trackid: MediaTrack, _title: &CStr) {}
 
+    // TODO is_pan param
     fn get_touch_state(&self, _trackid: MediaTrack, _is_pan: i32) -> bool {
         false
     }
 
-    fn set_auto_mode(&self, _mode: i32) {}
+    fn set_auto_mode(&self, _mode: AutomationMode) {}
 
     fn reset_cached_vol_pan_states(&self) {}
 
     fn on_track_selection(&self, _trackid: MediaTrack) {}
 
+    // TODO Maybe enum keys
     fn is_key_down(&self, _key: i32) -> bool {
         false
     }
 
-    // TODO-high Should we mark this unsafe to implement?
-    fn extended(
+    unsafe fn extended(
         &self,
         _call: i32,
         _parm1: *mut c_void,
@@ -73,15 +80,17 @@ pub trait ControlSurface {
         0
     }
 
-    fn ext_setinputmonitor(&self, track: MediaTrack, recmonitor: *mut i32) -> i32 {
+    fn ext_setinputmonitor(&self, track: MediaTrack, recmonitor: InputMonitoringMode) -> i32 {
         0
     }
 
     fn ext_setfxparam(
         &self,
         track: MediaTrack,
-        fxidx_and_paramidx: *mut i32,
-        normalized_value: *mut f64,
+        // TODO Check if this is called also for input FX in REAPER < 5.95 - or not at all
+        fx_index: u32,
+        param_index: u32,
+        normalized_value: f64,
     ) -> i32 {
         0
     }
@@ -89,13 +98,19 @@ pub trait ControlSurface {
     fn ext_setfxparam_recfx(
         &self,
         track: MediaTrack,
-        fxidx_and_paramidx: *mut i32,
-        normalized_value: *mut f64,
+        fx_index: u32,
+        param_index: u32,
+        normalized_value: f64,
     ) -> i32 {
         0
     }
 
-    fn ext_setfxenabled(&self, track: MediaTrack, fxidx: *mut i32, _enabled: bool) -> i32 {
+    fn ext_setfxenabled(
+        &self,
+        track: MediaTrack,
+        fxidx: VersionDependentFxRef,
+        _enabled: bool,
+    ) -> i32 {
         0
     }
 
@@ -111,12 +126,12 @@ pub trait ControlSurface {
         &self,
         track: Option<MediaTrack>,
         mediaitemidx: *mut i32,
-        fxidx: *mut i32,
+        fxidx: VersionDependentFxRef,
     ) -> i32 {
         0
     }
 
-    fn ext_setfxopen(&self, track: MediaTrack, fxidx: *mut i32, ui_open: bool) -> i32 {
+    fn ext_setfxopen(&self, track: MediaTrack, fxidx: VersionDependentFxRef, ui_open: bool) -> i32 {
         0
     }
 
@@ -128,7 +143,7 @@ pub trait ControlSurface {
         &self,
         _track: Option<MediaTrack>,
         _mediaitemidx: *mut i32,
-        _fxidx: *mut i32,
+        _fxidx: VersionDependentFxRef,
     ) -> i32 {
         0
     }
@@ -140,11 +155,31 @@ pub trait ControlSurface {
 
 pub struct DelegatingControlSurface<T: ControlSurface> {
     delegate: T,
+    // Capabilities depending on REAPER version
+    supports_detection_of_input_fx: bool,
+    supports_detection_of_input_fx_in_set_fx_change: bool,
 }
 
 impl<T: ControlSurface> DelegatingControlSurface<T> {
-    pub fn new(delegate: T) -> DelegatingControlSurface<T> {
-        DelegatingControlSurface { delegate }
+    pub fn new(delegate: T, reaper_version: &ReaperVersion) -> DelegatingControlSurface<T> {
+        let reaper_version_5_95: ReaperVersion = c_str!("5.95").into();
+        DelegatingControlSurface {
+            delegate,
+            // since pre1,
+            supports_detection_of_input_fx: reaper_version >= &reaper_version_5_95,
+            // since pre2 to be accurate but so what
+            supports_detection_of_input_fx_in_set_fx_change: reaper_version >= &reaper_version_5_95,
+        }
+    }
+
+    fn get_as_version_dependent_fx_ref(&self, ptr: *mut c_void) -> VersionDependentFxRef {
+        let ptr = ptr as *mut i32;
+        let index = unsafe { *ptr } as u32;
+        if self.supports_detection_of_input_fx {
+            VersionDependentFxRef::New(index.into())
+        } else {
+            VersionDependentFxRef::Old(index)
+        }
     }
 }
 
@@ -234,7 +269,8 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
     }
 
     fn SetAutoMode(&self, mode: i32) {
-        self.delegate.set_auto_mode(mode)
+        self.delegate
+            .set_auto_mode(mode.try_into().expect("Unknown automation mode"))
     }
 
     fn ResetCachedVolPanStates(&self) {
@@ -259,23 +295,50 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
     ) -> i32 {
         // TODO-high Make sure that all known CSURF_EXT_ constants are delegated
         match call as u32 {
-            raw::CSURF_EXT_SETINPUTMONITOR => self.delegate.ext_setinputmonitor(
-                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+            raw::CSURF_EXT_SETINPUTMONITOR => {
+                let parm2 = parm2 as *mut i32;
+                let recmon = unsafe { *parm2 };
+                self.delegate.ext_setinputmonitor(
+                    MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                    recmon.try_into().expect("Unknown input monitoring mode"),
+                )
+            }
+            raw::CSURF_EXT_SETFXPARAM | raw::CSURF_EXT_SETFXPARAM_RECFX => {
+                let parm2 = parm2 as *mut i32;
+                let parm3 = parm2 as *mut f64;
+                let fxidx_and_paramidx = unsafe { *parm2 };
+                let normalized_value = unsafe { *parm3 };
+                let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
+                let param_index = fxidx_and_paramidx & 0xffff;
+                match call as u32 {
+                    raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_setfxparam(
+                        MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                        fx_index as u32,
+                        param_index as u32,
+                        normalized_value,
+                    ),
+                    raw::CSURF_EXT_SETFXPARAM_RECFX => self.delegate.ext_setfxparam_recfx(
+                        MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                        fx_index as u32,
+                        param_index as u32,
+                        normalized_value,
+                    ),
+                    _ => unreachable!(),
+                }
+            }
+            raw::CSURF_EXT_SETFOCUSEDFX => self.delegate.ext_setfocusedfx(
+                MediaTrack::optional(parm1 as *mut raw::MediaTrack),
                 parm2 as *mut i32,
+                self.get_as_version_dependent_fx_ref(parm3),
             ),
-            raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_setfxparam(
+            raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_setfxopen(
                 MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                parm2 as *mut i32,
-                parm3 as *mut f64,
-            ),
-            raw::CSURF_EXT_SETFXPARAM_RECFX => self.delegate.ext_setfxparam_recfx(
-                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                parm2 as *mut i32,
-                parm3 as *mut f64,
+                self.get_as_version_dependent_fx_ref(parm2),
+                parm3 as usize != 0,
             ),
             raw::CSURF_EXT_SETFXENABLED => self.delegate.ext_setfxenabled(
                 MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                parm2 as *mut i32,
+                self.get_as_version_dependent_fx_ref(parm2),
                 parm3 as usize != 0,
             ),
             raw::CSURF_EXT_SETSENDVOLUME => self.delegate.ext_setsendvolume(
@@ -288,16 +351,6 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
                 parm2 as *mut i32,
                 parm3 as *mut f64,
             ),
-            raw::CSURF_EXT_SETFOCUSEDFX => self.delegate.ext_setfocusedfx(
-                MediaTrack::optional(parm1 as *mut raw::MediaTrack),
-                parm2 as *mut i32,
-                parm3 as *mut i32,
-            ),
-            raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_setfxopen(
-                MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                parm2 as *mut i32,
-                parm3 as usize != 0,
-            ),
             raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_setfxchange(
                 MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
                 parm2 as usize as i32,
@@ -305,12 +358,12 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
             raw::CSURF_EXT_SETLASTTOUCHEDFX => self.delegate.ext_setlasttouchedfx(
                 MediaTrack::optional(parm1 as *mut raw::MediaTrack),
                 parm2 as *mut i32,
-                parm3 as *mut i32,
+                self.get_as_version_dependent_fx_ref(parm3),
             ),
             raw::CSURF_EXT_SETBPMANDPLAYRATE => self
                 .delegate
                 .ext_setbpmandplayrate(parm1 as *mut f64, parm2 as *mut f64),
-            _ => self.delegate.extended(call, parm1, parm2, parm3),
+            _ => unsafe { self.delegate.extended(call, parm1, parm2, parm3) },
         }
     }
 }

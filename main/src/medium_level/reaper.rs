@@ -1017,7 +1017,7 @@ impl Reaper {
 
     // TODO-doc
     pub fn get_track_automation_mode(&self, tr: MediaTrack) -> AutomationMode {
-        let result = unsafe { self.low.GetTrackAutomationMode(tr.into()) as u32 };
+        let result = unsafe { self.low.GetTrackAutomationMode(tr.into()) };
         AutomationMode::try_from(result).expect("Unknown automation mode")
     }
 
@@ -1027,9 +1027,7 @@ impl Reaper {
         match self.low.GetGlobalAutomationOverride() {
             -1 => None,
             6 => Some(Bypass),
-            x => Some(Mode(
-                AutomationMode::try_from(x as u32).expect("Unknown automation mode"),
-            )),
+            x => Some(Mode(x.try_into().expect("Unknown automation mode"))),
         }
     }
 

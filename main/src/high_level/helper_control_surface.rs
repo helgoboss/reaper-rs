@@ -6,7 +6,8 @@ use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
 };
 use crate::medium_level::{
-    AutomationMode, ControlSurface, MediaTrack, ReaProject, ReaperPointerType, TrackRef,
+    AutomationMode, ControlSurface, InputMonitoringMode, MediaTrack, ReaProject, ReaperPointerType,
+    TrackRef, VersionDependentFxRef,
 };
 use c_str_macro::c_str;
 use rxrust::prelude::*;
@@ -48,7 +49,7 @@ struct TrackData {
     solo: bool,
     recarm: bool,
     number: Option<TrackRef>,
-    recmonitor: i32,
+    recmonitor: InputMonitoringMode,
     recinput: i32,
     guid: Guid,
 }
@@ -193,7 +194,7 @@ impl HelperControlSurface {
                     solo: m.get_media_track_info_value(media_track, I_SOLO) != 0.0,
                     recarm: m.get_media_track_info_value(media_track, I_RECARM) != 0.0,
                     number: m.get_media_track_info_tracknumber(media_track),
-                    recmonitor: m.get_media_track_info_value(media_track, I_RECMON) as i32,
+                    recmonitor: m.get_media_track_info_recmon(media_track),
                     recinput: m.get_media_track_info_value(media_track, I_RECINPUT) as i32,
                     guid: get_media_track_guid(media_track),
                 };
@@ -398,19 +399,13 @@ impl HelperControlSurface {
     fn fx_param_set(
         &self,
         track: MediaTrack,
-        fxidx_and_paramidx: *mut i32,
-        normalized_value: *mut f64,
+        fx_index: u32,
+        param_index: u32,
+        normalized_value: f64,
         is_input_fx_if_supported: bool,
     ) {
-        if fxidx_and_paramidx.is_null() || normalized_value.is_null() {
-            return;
-        }
-        let fxidx_and_paramidx = unsafe { *fxidx_and_paramidx };
-        let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
-        let param_index = fxidx_and_paramidx & 0xffff;
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, None);
-        let normalized_value = unsafe { *normalized_value };
         let is_input_fx = if self.supports_detection_of_input_fx {
             is_input_fx_if_supported
         } else {
@@ -443,8 +438,8 @@ impl HelperControlSurface {
     fn is_probably_input_fx(
         &self,
         track: &Track,
-        fx_index: i32,
-        param_index: Option<i32>,
+        fx_index: u32,
+        param_index: Option<u32>,
         normalized_value: Option<f64>,
     ) -> bool {
         let pairs = self.fx_chain_pair_by_media_track.borrow();
@@ -456,8 +451,8 @@ impl HelperControlSurface {
             }
             Some(pair) => pair,
         };
-        let could_be_input_fx = fx_index < pair.input_fx_guids.len() as i32;
-        let could_be_output_fx = fx_index < pair.output_fx_guids.len() as i32;
+        let could_be_input_fx = (fx_index as usize) < pair.input_fx_guids.len();
+        let could_be_output_fx = (fx_index as usize) < pair.output_fx_guids.len();
         if !could_be_input_fx && !could_be_output_fx {
             false
         } else if could_be_input_fx && !could_be_output_fx {
@@ -473,10 +468,10 @@ impl HelperControlSurface {
                 Some(i) => i,
             };
             // Compare parameter values (a heuristic but so what, it's just for MIDI learn)
-            match track.get_normal_fx_chain().get_fx_by_index(fx_index as u32) {
+            match track.get_normal_fx_chain().get_fx_by_index(fx_index) {
                 None => true,
                 Some(output_fx) => {
-                    let output_fx_param = output_fx.get_parameter_by_index(param_index as u32);
+                    let output_fx_param = output_fx.get_parameter_by_index(param_index);
                     let is_probably_output_fx =
                         Some(output_fx_param.get_reaper_value()) == normalized_value;
                     !is_probably_output_fx
@@ -494,21 +489,22 @@ impl HelperControlSurface {
     fn get_fx_from_parm_fx_index(
         &self,
         track: &Track,
-        parm_fx_index: i32,
-        param_index: Option<i32>,
+        parm_fx_index: VersionDependentFxRef,
+        param_index: Option<u32>,
         param_value: Option<f64>,
     ) -> Option<Fx> {
-        if self.supports_detection_of_input_fx {
-            track.get_fx_by_query_index(parm_fx_index)
-        } else {
-            let is_input_fx =
-                self.is_probably_input_fx(track, parm_fx_index, param_index, param_value);
-            let fx_chain = if is_input_fx {
-                track.get_input_fx_chain()
-            } else {
-                track.get_normal_fx_chain()
-            };
-            fx_chain.get_fx_by_index(parm_fx_index as u32)
+        use VersionDependentFxRef::*;
+        match parm_fx_index {
+            Old(index) => {
+                let is_input_fx = self.is_probably_input_fx(track, index, param_index, param_value);
+                let fx_chain = if is_input_fx {
+                    track.get_input_fx_chain()
+                } else {
+                    track.get_normal_fx_chain()
+                };
+                fx_chain.get_fx_by_index(index)
+            }
+            New(fx_ref) => track.get_fx_by_query_index(fx_ref.into()),
         }
     }
 
@@ -682,15 +678,11 @@ impl ControlSurface for HelperControlSurface {
             .next(track);
     }
 
-    fn ext_setinputmonitor(&self, track: MediaTrack, recmonitor: *mut i32) -> i32 {
-        if recmonitor.is_null() {
-            return 0;
-        }
+    fn ext_setinputmonitor(&self, track: MediaTrack, recmonitor: InputMonitoringMode) -> i32 {
         let mut td = match self.find_track_data_in_normal_state(track) {
             None => return 1,
             Some(td) => td,
         };
-        let recmonitor = unsafe { *recmonitor };
         let reaper = Reaper::get();
         if td.recmonitor != recmonitor {
             td.recmonitor = recmonitor;
@@ -715,28 +707,31 @@ impl ControlSurface for HelperControlSurface {
     fn ext_setfxparam(
         &self,
         track: MediaTrack,
-        fxidx_and_paramidx: *mut i32,
-        normalized_value: *mut f64,
+        fx_index: u32,
+        param_index: u32,
+        normalized_value: f64,
     ) -> i32 {
-        self.fx_param_set(track, fxidx_and_paramidx, normalized_value, false);
+        self.fx_param_set(track, fx_index, param_index, normalized_value, false);
         1
     }
 
     fn ext_setfxparam_recfx(
         &self,
         track: MediaTrack,
-        fxidx_and_paramidx: *mut i32,
-        normalized_value: *mut f64,
+        fx_index: u32,
+        param_index: u32,
+        normalized_value: f64,
     ) -> i32 {
-        self.fx_param_set(track, fxidx_and_paramidx, normalized_value, true);
+        self.fx_param_set(track, fx_index, param_index, normalized_value, true);
         1
     }
 
-    fn ext_setfxenabled(&self, track: MediaTrack, fxidx: *mut i32, _enabled: bool) -> i32 {
-        if fxidx.is_null() {
-            return 0;
-        }
-        let fxidx = unsafe { *fxidx };
+    fn ext_setfxenabled(
+        &self,
+        track: MediaTrack,
+        fxidx: VersionDependentFxRef,
+        _enabled: bool,
+    ) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
@@ -797,11 +792,12 @@ impl ControlSurface for HelperControlSurface {
         1
     }
 
+    // TODO This might need a signature adjustment because it seems to be usable for Take FX, too
     fn ext_setfocusedfx(
         &self,
         track: Option<MediaTrack>,
         mediaitemidx: *mut i32,
-        fxidx: *mut i32,
+        fxidx: VersionDependentFxRef,
     ) -> i32 {
         let reaper = Reaper::get();
         let track = match track {
@@ -812,7 +808,6 @@ impl ControlSurface for HelperControlSurface {
             }
             Some(t) => t,
         };
-        let fxidx = unsafe { *fxidx };
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
@@ -828,11 +823,7 @@ impl ControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setfxopen(&self, track: MediaTrack, fxidx: *mut i32, ui_open: bool) -> i32 {
-        if fxidx.is_null() {
-            return 0;
-        }
-        let fxidx = unsafe { *fxidx };
+    fn ext_setfxopen(&self, track: MediaTrack, fxidx: VersionDependentFxRef, ui_open: bool) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, fxidx, None, None) {
@@ -862,11 +853,12 @@ impl ControlSurface for HelperControlSurface {
         1
     }
 
+    // TODO Support Take FX
     fn ext_setlasttouchedfx(
         &self,
         _track: Option<MediaTrack>,
         _mediaitemidx: *mut i32,
-        _fxidx: *mut i32,
+        _fxidx: VersionDependentFxRef,
     ) -> i32 {
         self.fx_has_been_touched_just_a_moment_ago.replace(true);
         1
