@@ -1,4 +1,5 @@
 use super::MediaTrack;
+use crate::high_level::FxChain;
 use crate::low_level;
 use crate::low_level::raw;
 use crate::medium_level::{AutomationMode, InputMonitoringMode, ReaperVersion, TrackFxRef};
@@ -52,11 +53,13 @@ pub trait ControlSurface {
 
     fn set_track_title(&self, _trackid: MediaTrack, _title: &CStr) {}
 
-    // TODO is_pan param
+    // TODO is_pan param, maybe introduce struct to be immune against future meaning extensions of
+    //  the i32
     fn get_touch_state(&self, _trackid: MediaTrack, _is_pan: i32) -> bool {
         false
     }
 
+    // TODO Automation for what? The global one? Can it be None? Bypass?
     fn set_auto_mode(&self, _mode: AutomationMode) {}
 
     fn reset_cached_vol_pan_states(&self) {}
@@ -78,73 +81,115 @@ pub trait ControlSurface {
         0
     }
 
-    fn ext_setinputmonitor(&self, track: MediaTrack, recmonitor: InputMonitoringMode) -> i32 {
+    fn ext_setinputmonitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
         0
     }
 
-    fn ext_setfxparam(
-        &self,
-        track: MediaTrack,
-        // TODO Check if this is called also for input FX in REAPER < 5.95 - or not at all
-        fx_index: u32,
-        param_index: u32,
-        normalized_value: f64,
-    ) -> i32 {
+    // TODO Check if this is called also for input FX in REAPER < 5.95 - or not at all
+    fn ext_setfxparam(&self, args: ExtSetFxParamArgs) -> i32 {
         0
     }
 
-    fn ext_setfxparam_recfx(
-        &self,
-        track: MediaTrack,
-        fx_index: u32,
-        param_index: u32,
-        normalized_value: f64,
-    ) -> i32 {
+    fn ext_setfxparam_recfx(&self, args: ExtSetFxParamArgs) -> i32 {
         0
     }
 
-    fn ext_setfxenabled(
-        &self,
-        track: MediaTrack,
-        fxidx: VersionDependentTrackFxRef,
-        _enabled: bool,
-    ) -> i32 {
+    fn ext_setfxenabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
         0
     }
 
-    fn ext_setsendvolume(&self, track: MediaTrack, sendidx: u32, volume: f64) -> i32 {
+    fn ext_setsendvolume(&self, args: ExtSetSendVolumeArgs) -> i32 {
         0
     }
 
-    fn ext_setsendpan(&self, track: MediaTrack, sendidx: u32, pan: f64) -> i32 {
+    fn ext_setsendpan(&self, args: ExtSetSendPanArgs) -> i32 {
         0
     }
 
-    fn ext_setfocusedfx(&self, fx_ref: Option<QualifiedFxRef>) -> i32 {
+    fn ext_setfocusedfx(&self, args: ExtSetFocusedFxArgs) -> i32 {
         0
     }
 
-    fn ext_setlasttouchedfx(&self, fx_ref: Option<QualifiedFxRef>) -> i32 {
+    fn ext_setlasttouchedfx(&self, args: ExtSetLastTouchedFxArgs) -> i32 {
         0
     }
 
-    fn ext_setfxopen(
-        &self,
-        track: MediaTrack,
-        fxidx: VersionDependentTrackFxRef,
-        ui_open: bool,
-    ) -> i32 {
+    fn ext_setfxopen(&self, args: ExtSetFxOpenArgs) -> i32 {
         0
     }
 
-    // TODO flags
-    fn ext_setfxchange(&self, track: MediaTrack, flags: i32) -> i32 {
+    fn ext_setfxchange(&self, args: ExtSetFxChangeArgs) -> i32 {
         0
     }
 
-    fn ext_setbpmandplayrate(&self, bpm: Option<f64>, playrate: Option<f64>) -> i32 {
+    fn ext_setbpmandplayrate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
         0
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExtSetInputMonitorArgs {
+    pub track: MediaTrack,
+    pub recmonitor: InputMonitoringMode,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ExtSetFxParamArgs {
+    pub track: MediaTrack,
+    pub fx_index: u32,
+    pub param_index: u32,
+    pub normalized_value: f64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExtSetFxEnabledArgs {
+    pub track: MediaTrack,
+    pub fxidx: VersionDependentTrackFxRef,
+    pub enabled: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ExtSetSendVolumeArgs {
+    pub track: MediaTrack,
+    pub sendidx: u32,
+    pub volume: f64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ExtSetSendPanArgs {
+    pub track: MediaTrack,
+    pub sendidx: u32,
+    pub pan: f64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExtSetFocusedFxArgs {
+    pub fx_ref: Option<QualifiedFxRef>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExtSetLastTouchedFxArgs {
+    pub fx_ref: Option<QualifiedFxRef>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExtSetFxOpenArgs {
+    pub track: MediaTrack,
+    pub fxidx: VersionDependentTrackFxRef,
+    pub ui_open: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExtSetFxChangeArgs {
+    pub track: MediaTrack,
+    // In REAPER < 5.95 we don't know if the change happened on input or normal FX chain
+    pub fx_chain_type: Option<FxChainType>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ExtSetBpmAndPlayRateArgs {
+    pub bpm: Option<f64>,
+    pub playrate: Option<f64>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -157,6 +202,12 @@ pub struct QualifiedFxRef {
 pub enum VersionDependentFxRef {
     ItemFx { item_index: u32, fx_index: u32 },
     TrackFx(VersionDependentTrackFxRef),
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FxChainType {
+    Input,
+    Output,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -339,72 +390,90 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
             match call as u32 {
                 raw::CSURF_EXT_SETINPUTMONITOR => {
                     let recmon: i32 = unref_into(parm2).unwrap();
-                    self.delegate.ext_setinputmonitor(
-                        MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                        recmon.try_into().expect("Unknown input monitoring mode"),
-                    )
+                    self.delegate.ext_setinputmonitor(ExtSetInputMonitorArgs {
+                        track: MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                        recmonitor: recmon.try_into().expect("Unknown input monitoring mode"),
+                    })
                 }
                 raw::CSURF_EXT_SETFXPARAM | raw::CSURF_EXT_SETFXPARAM_RECFX => {
                     let fxidx_and_paramidx: i32 = unref_into(parm2).unwrap();
                     let normalized_value: f64 = unref_into(parm3).unwrap();
                     let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
                     let param_index = fxidx_and_paramidx & 0xffff;
+                    let args = ExtSetFxParamArgs {
+                        track: MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                        fx_index: fx_index as u32,
+                        param_index: param_index as u32,
+                        normalized_value,
+                    };
                     match call as u32 {
-                        raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_setfxparam(
-                            MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                            fx_index as u32,
-                            param_index as u32,
-                            normalized_value,
-                        ),
-                        raw::CSURF_EXT_SETFXPARAM_RECFX => self.delegate.ext_setfxparam_recfx(
-                            MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                            fx_index as u32,
-                            param_index as u32,
-                            normalized_value,
-                        ),
+                        raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_setfxparam(args),
+                        raw::CSURF_EXT_SETFXPARAM_RECFX => self.delegate.ext_setfxparam_recfx(args),
                         _ => unreachable!(),
                     }
                 }
-                raw::CSURF_EXT_SETFOCUSEDFX => self
-                    .delegate
-                    .ext_setfocusedfx(self.get_as_qualified_fx_ref(parm1, parm2, parm3)),
-                raw::CSURF_EXT_SETLASTTOUCHEDFX => self
-                    .delegate
-                    .ext_setlasttouchedfx(self.get_as_qualified_fx_ref(parm1, parm2, parm3)),
-                raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_setfxopen(
-                    MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                    self.get_as_version_dependent_track_fx_ref(parm2),
-                    interpret_as_bool(parm3),
-                ),
+                raw::CSURF_EXT_SETFOCUSEDFX => {
+                    self.delegate.ext_setfocusedfx(ExtSetFocusedFxArgs {
+                        fx_ref: self.get_as_qualified_fx_ref(parm1, parm2, parm3),
+                    })
+                }
+                raw::CSURF_EXT_SETLASTTOUCHEDFX => {
+                    self.delegate.ext_setlasttouchedfx(ExtSetLastTouchedFxArgs {
+                        fx_ref: self.get_as_qualified_fx_ref(parm1, parm2, parm3),
+                    })
+                }
+                raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_setfxopen(ExtSetFxOpenArgs {
+                    track: MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                    fxidx: self.get_as_version_dependent_track_fx_ref(parm2),
+                    ui_open: interpret_as_bool(parm3),
+                }),
                 raw::CSURF_EXT_SETFXENABLED => {
                     if parm1.is_null() {
                         // Don't know how to handle that case. Maybe a bug in REAPER.
                         self.delegate.extended(call, parm1, parm2, parm3)
                     } else {
-                        self.delegate.ext_setfxenabled(
-                            MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                            self.get_as_version_dependent_track_fx_ref(parm2),
-                            interpret_as_bool(parm3),
-                        )
+                        self.delegate.ext_setfxenabled(ExtSetFxEnabledArgs {
+                            track: MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                            fxidx: self.get_as_version_dependent_track_fx_ref(parm2),
+                            enabled: interpret_as_bool(parm3),
+                        })
                     }
                 }
-                raw::CSURF_EXT_SETSENDVOLUME => self.delegate.ext_setsendvolume(
-                    MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                    unref_into::<i32>(parm2).unwrap() as u32,
-                    unref_into(parm3).unwrap(),
-                ),
-                raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_setsendpan(
-                    MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                    unref_into::<i32>(parm2).unwrap() as u32,
-                    unref_into(parm3).unwrap(),
-                ),
-                raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_setfxchange(
-                    MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
-                    parm2 as usize as i32,
-                ),
-                raw::CSURF_EXT_SETBPMANDPLAYRATE => self
-                    .delegate
-                    .ext_setbpmandplayrate(unref_into(parm1), unref_into(parm2)),
+                raw::CSURF_EXT_SETSENDVOLUME => {
+                    self.delegate.ext_setsendvolume(ExtSetSendVolumeArgs {
+                        track: MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                        sendidx: unref_into::<i32>(parm2).unwrap() as u32,
+                        volume: unref_into(parm3).unwrap(),
+                    })
+                }
+                raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_setsendpan(ExtSetSendPanArgs {
+                    track: MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                    sendidx: unref_into::<i32>(parm2).unwrap() as u32,
+                    pan: unref_into(parm3).unwrap(),
+                }),
+                raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_setfxchange(ExtSetFxChangeArgs {
+                    track: MediaTrack::required_panic(parm1 as *mut raw::MediaTrack),
+                    fx_chain_type: {
+                        if self.supports_detection_of_input_fx_in_set_fx_change {
+                            let flags = parm2 as usize as u32;
+                            let fx_chain_type = if (flags & 1) == 1 {
+                                FxChainType::Input
+                            } else {
+                                FxChainType::Output
+                            };
+                            Some(fx_chain_type)
+                        } else {
+                            None
+                        }
+                    },
+                }),
+                raw::CSURF_EXT_SETBPMANDPLAYRATE => {
+                    self.delegate
+                        .ext_setbpmandplayrate(ExtSetBpmAndPlayRateArgs {
+                            bpm: unref_into(parm1),
+                            playrate: unref_into(parm2),
+                        })
+                }
                 _ => self.delegate.extended(call, parm1, parm2, parm3),
             }
         }
