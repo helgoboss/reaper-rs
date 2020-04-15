@@ -1,12 +1,12 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum GlobalAutomationOverride {
     Bypass,
     Mode(AutomationMode),
 }
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
 #[repr(i32)]
 pub enum AutomationMode {
     TrimRead = 0,

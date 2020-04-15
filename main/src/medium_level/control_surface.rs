@@ -10,7 +10,6 @@ use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 
-// TODO-high Have a critical look at all signatures of this trait (also return values)
 /// This is the medium-level variant of
 /// [`low_level::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation of
 /// this trait can be passed to
@@ -34,40 +33,36 @@ pub trait ControlSurface {
 
     fn set_track_list_change(&self) {}
 
-    // TODO Prevent params from getting underscore
-    fn set_surface_volume(&self, _trackid: MediaTrack, _volume: f64) {}
+    fn set_surface_volume(&self, args: SetSurfaceVolumeArgs) {}
 
-    fn set_surface_pan(&self, _trackid: MediaTrack, _pan: f64) {}
+    fn set_surface_pan(&self, args: SetSurfacePanArgs) {}
 
-    fn set_surface_mute(&self, _trackid: MediaTrack, _mute: bool) {}
+    fn set_surface_mute(&self, args: SetSurfaceMuteArgs) {}
 
-    fn set_surface_selected(&self, _trackid: MediaTrack, _selected: bool) {}
+    fn set_surface_selected(&self, args: SetSurfaceSelectedArgs) {}
 
-    fn set_surface_solo(&self, _trackid: MediaTrack, _solo: bool) {}
+    fn set_surface_solo(&self, args: SetSurfaceSoloArgs) {}
 
-    fn set_surface_rec_arm(&self, _trackid: MediaTrack, _recarm: bool) {}
+    fn set_surface_rec_arm(&self, args: SetSurfaceRecArmArgs) {}
 
-    fn set_play_state(&self, _play: bool, _pause: bool, _rec: bool) {}
+    fn set_play_state(&self, args: SetPlayStateArgs) {}
 
-    fn set_repeat_state(&self, _rep: bool) {}
+    fn set_repeat_state(&self, args: SetRepeatStateArgs) {}
 
-    fn set_track_title(&self, _trackid: MediaTrack, _title: &CStr) {}
+    fn set_track_title(&self, args: SetTrackTitleArgs) {}
 
-    // TODO is_pan param, maybe introduce struct to be immune against future meaning extensions of
-    //  the i32
-    fn get_touch_state(&self, _trackid: MediaTrack, _is_pan: i32) -> bool {
+    fn get_touch_state(&self, args: GetTouchStateArgs) -> bool {
         false
     }
 
-    // TODO Automation for what? The global one? Can it be None? Bypass?
-    fn set_auto_mode(&self, _mode: AutomationMode) {}
+    // Automation mode for current track
+    fn set_auto_mode(&self, args: SetAutoModeArgs) {}
 
     fn reset_cached_vol_pan_states(&self) {}
 
-    fn on_track_selection(&self, _trackid: MediaTrack) {}
+    fn on_track_selection(&self, args: OnTrackSelectionArgs) {}
 
-    // TODO Maybe enum keys
-    fn is_key_down(&self, _key: i32) -> bool {
+    fn is_key_down(&self, args: IsKeyDownArgs) -> bool {
         false
     }
 
@@ -85,7 +80,7 @@ pub trait ControlSurface {
         0
     }
 
-    // TODO Check if this is called also for input FX in REAPER < 5.95 - or not at all
+    // TODO-medium Check if this is called also for input FX in REAPER < 5.95 - or not at all
     fn ext_setfxparam(&self, args: ExtSetFxParamArgs) -> i32 {
         0
     }
@@ -125,6 +120,82 @@ pub trait ControlSurface {
     fn ext_setbpmandplayrate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
         0
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SetSurfaceVolumeArgs {
+    pub trackid: MediaTrack,
+    pub volume: f64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SetSurfacePanArgs {
+    pub trackid: MediaTrack,
+    pub pan: f64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetSurfaceMuteArgs {
+    pub trackid: MediaTrack,
+    pub mute: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetSurfaceSelectedArgs {
+    pub trackid: MediaTrack,
+    pub selected: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetSurfaceSoloArgs {
+    pub trackid: MediaTrack,
+    pub solo: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetSurfaceRecArmArgs {
+    pub trackid: MediaTrack,
+    pub recarm: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetPlayStateArgs {
+    pub play: bool,
+    pub pause: bool,
+    pub rec: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetRepeatStateArgs {
+    pub rep: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetTrackTitleArgs<'a> {
+    pub trackid: MediaTrack,
+    pub title: &'a CStr,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct GetTouchStateArgs {
+    pub trackid: MediaTrack,
+    pub is_pan: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetAutoModeArgs {
+    pub mode: AutomationMode,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct OnTrackSelectionArgs {
+    pub trackid: MediaTrack,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct IsKeyDownArgs {
+    // TODO Maybe enum keys
+    pub key: i32,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -311,58 +382,74 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
     }
 
     fn SetSurfaceVolume(&self, trackid: *mut raw::MediaTrack, volume: f64) {
-        self.delegate
-            .set_surface_volume(MediaTrack::required_panic(trackid), volume)
+        self.delegate.set_surface_volume(SetSurfaceVolumeArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            volume,
+        })
     }
 
     fn SetSurfacePan(&self, trackid: *mut raw::MediaTrack, pan: f64) {
-        self.delegate
-            .set_surface_pan(MediaTrack::required_panic(trackid), pan)
+        self.delegate.set_surface_pan(SetSurfacePanArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            pan,
+        })
     }
 
     fn SetSurfaceMute(&self, trackid: *mut raw::MediaTrack, mute: bool) {
-        self.delegate
-            .set_surface_mute(MediaTrack::required_panic(trackid), mute)
+        self.delegate.set_surface_mute(SetSurfaceMuteArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            mute,
+        })
     }
 
     fn SetSurfaceSelected(&self, trackid: *mut raw::MediaTrack, selected: bool) {
-        self.delegate
-            .set_surface_selected(MediaTrack::required_panic(trackid), selected)
+        self.delegate.set_surface_selected(SetSurfaceSelectedArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            selected,
+        })
     }
 
     fn SetSurfaceSolo(&self, trackid: *mut raw::MediaTrack, solo: bool) {
-        self.delegate
-            .set_surface_solo(MediaTrack::required_panic(trackid), solo)
+        self.delegate.set_surface_solo(SetSurfaceSoloArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            solo,
+        })
     }
 
     fn SetSurfaceRecArm(&self, trackid: *mut raw::MediaTrack, recarm: bool) {
-        self.delegate
-            .set_surface_rec_arm(MediaTrack::required_panic(trackid), recarm)
+        self.delegate.set_surface_rec_arm(SetSurfaceRecArmArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            recarm,
+        })
     }
 
     fn SetPlayState(&self, play: bool, pause: bool, rec: bool) {
-        self.delegate.set_play_state(play, pause, rec)
+        self.delegate
+            .set_play_state(SetPlayStateArgs { play, pause, rec })
     }
 
     fn SetRepeatState(&self, rep: bool) {
-        self.delegate.set_repeat_state(rep)
+        self.delegate.set_repeat_state(SetRepeatStateArgs { rep })
     }
 
     fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const i8) {
-        self.delegate
-            .set_track_title(MediaTrack::required_panic(trackid), unsafe {
-                CStr::from_ptr(title)
-            })
+        self.delegate.set_track_title(SetTrackTitleArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            title: unsafe { CStr::from_ptr(title) },
+        })
     }
 
     fn GetTouchState(&self, trackid: *mut raw::MediaTrack, isPan: i32) -> bool {
-        self.delegate
-            .get_touch_state(MediaTrack::required_panic(trackid), isPan)
+        self.delegate.get_touch_state(GetTouchStateArgs {
+            trackid: MediaTrack::required_panic(trackid),
+            is_pan: isPan != 0,
+        })
     }
 
     fn SetAutoMode(&self, mode: i32) {
-        self.delegate
-            .set_auto_mode(mode.try_into().expect("Unknown automation mode"))
+        self.delegate.set_auto_mode(SetAutoModeArgs {
+            mode: mode.try_into().expect("Unknown automation mode"),
+        })
     }
 
     fn ResetCachedVolPanStates(&self) {
@@ -370,12 +457,13 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
     }
 
     fn OnTrackSelection(&self, trackid: *mut raw::MediaTrack) {
-        self.delegate
-            .on_track_selection(MediaTrack::required_panic(trackid))
+        self.delegate.on_track_selection(OnTrackSelectionArgs {
+            trackid: MediaTrack::required_panic(trackid),
+        })
     }
 
     fn IsKeyDown(&self, key: i32) -> bool {
-        self.delegate.is_key_down(key)
+        self.delegate.is_key_down(IsKeyDownArgs { key })
     }
 
     fn Extended(
@@ -386,7 +474,7 @@ impl<T: ControlSurface> low_level::IReaperControlSurface for DelegatingControlSu
         parm3: *mut c_void,
     ) -> i32 {
         unsafe {
-            // TODO-high Make sure that all known CSURF_EXT_ constants are delegated
+            // TODO-low Delegate all known CSURF_EXT_ constants
             match call as u32 {
                 raw::CSURF_EXT_SETINPUTMONITOR => {
                     let recmon: i32 = unref_into(parm2).unwrap();

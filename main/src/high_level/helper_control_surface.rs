@@ -10,7 +10,9 @@ use crate::medium_level::{
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
     FxChainType, InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointerType,
-    TrackRef, VersionDependentFxRef, VersionDependentTrackFxRef,
+    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
+    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackRef, VersionDependentFxRef,
+    VersionDependentTrackFxRef,
 };
 use c_str_macro::c_str;
 use rxrust::prelude::*;
@@ -552,16 +554,16 @@ impl ControlSurface for HelperControlSurface {
         self.detect_track_set_changes();
     }
 
-    fn set_surface_pan(&self, trackid: MediaTrack, pan: f64) {
-        let mut td = match self.find_track_data_in_normal_state(trackid) {
+    fn set_surface_pan(&self, args: SetSurfacePanArgs) {
+        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
             None => return,
             Some(td) => td,
         };
-        if td.pan == pan {
+        if td.pan == args.pan {
             return;
         }
-        td.pan = pan;
-        let track = Track::new(trackid, None);
+        td.pan = args.pan;
+        let track = Track::new(args.trackid, None);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -573,16 +575,16 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
-    fn set_surface_volume(&self, trackid: MediaTrack, volume: f64) {
-        let mut td = match self.find_track_data_in_normal_state(trackid) {
+    fn set_surface_volume(&self, args: SetSurfaceVolumeArgs) {
+        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
             None => return,
             Some(td) => td,
         };
-        if td.volume == volume {
+        if td.volume == args.volume {
             return;
         }
-        td.volume = volume;
-        let track = Track::new(trackid, None);
+        td.volume = args.volume;
+        let track = Track::new(args.trackid, None);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -598,14 +600,14 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
-    fn set_surface_mute(&self, trackid: MediaTrack, mute: bool) {
-        let mut td = match self.find_track_data_in_normal_state(trackid) {
+    fn set_surface_mute(&self, args: SetSurfaceMuteArgs) {
+        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
             None => return,
             Some(td) => td,
         };
-        if td.mute != mute {
-            td.mute = mute;
-            let track = Track::new(trackid, None);
+        if td.mute != args.mute {
+            td.mute = args.mute;
+            let track = Track::new(args.trackid, None);
             let reaper = Reaper::get();
             reaper
                 .subjects
@@ -618,14 +620,14 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
-    fn set_surface_selected(&self, trackid: MediaTrack, selected: bool) {
-        let mut td = match self.find_track_data_in_normal_state(trackid) {
+    fn set_surface_selected(&self, args: SetSurfaceSelectedArgs) {
+        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
             None => return,
             Some(td) => td,
         };
-        if td.selected != selected {
-            td.selected = selected;
-            let track = Track::new(trackid, None);
+        if td.selected != args.selected {
+            td.selected = args.selected;
+            let track = Track::new(args.trackid, None);
             Reaper::get()
                 .subjects
                 .track_selected_changed
@@ -634,14 +636,14 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
-    fn set_surface_solo(&self, trackid: MediaTrack, solo: bool) {
-        let mut td = match self.find_track_data_in_normal_state(trackid) {
+    fn set_surface_solo(&self, args: SetSurfaceSoloArgs) {
+        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
             None => return,
             Some(td) => td,
         };
-        if td.solo != solo {
-            td.solo = solo;
-            let track = Track::new(trackid, None);
+        if td.solo != args.solo {
+            td.solo = args.solo;
+            let track = Track::new(args.trackid, None);
             Reaper::get()
                 .subjects
                 .track_solo_changed
@@ -650,14 +652,14 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
-    fn set_surface_rec_arm(&self, trackid: MediaTrack, recarm: bool) {
-        let mut td = match self.find_track_data_in_normal_state(trackid) {
+    fn set_surface_rec_arm(&self, args: SetSurfaceRecArmArgs) {
+        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
             None => return,
             Some(td) => td,
         };
-        if td.recarm != recarm {
-            td.recarm = recarm;
-            let track = Track::new(trackid, None);
+        if td.recarm != args.recarm {
+            td.recarm = args.recarm;
+            let track = Track::new(args.trackid, None);
             Reaper::get()
                 .subjects
                 .track_arm_changed
@@ -666,12 +668,12 @@ impl ControlSurface for HelperControlSurface {
         }
     }
 
-    fn set_track_title(&self, trackid: MediaTrack, _title: &CStr) {
+    fn set_track_title(&self, args: SetTrackTitleArgs) {
         if self.get_state() == State::PropagatingTrackSetChanges {
             self.decrease_num_track_set_changes_left_to_be_propagated();
             return;
         }
-        let track = Track::new(trackid, None);
+        let track = Track::new(args.trackid, None);
         Reaper::get()
             .subjects
             .track_name_changed
