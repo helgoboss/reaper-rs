@@ -87,7 +87,7 @@ impl Action {
             .section
             .get_kbd_cmds()
             .enumerate()
-            .find(|(_, kbd_cmd)| kbd_cmd.cmd == runtime_data.command_id)
+            .find(|(_, kbd_cmd)| kbd_cmd.cmd() == runtime_data.command_id)
             .map(|(i, _)| i as u32)
     }
 

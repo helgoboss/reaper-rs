@@ -9,9 +9,9 @@ use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::ptr::null_mut;
 
-pub type HookCommand = extern "C" fn(command_index: i32, _flag: i32) -> bool;
+pub type HookCommand = extern "C" fn(command_index: i32, flag: i32) -> bool;
 pub type ToggleAction = extern "C" fn(command_index: i32) -> i32;
-pub type HookPostCommand = extern "C" fn(command_id: u32, _flag: i32);
+pub type HookPostCommand = extern "C" fn(command_id: u32, flag: i32);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WantMaster {

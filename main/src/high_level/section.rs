@@ -1,13 +1,13 @@
 use crate::high_level::Action;
-use crate::low_level::raw::{KbdCmd, KbdSectionInfo};
+use crate::medium_level::{KbdCmd, KbdSectionInfo};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
-    section_info: *mut KbdSectionInfo,
+    section_info: KbdSectionInfo,
 }
 
 impl Section {
-    pub(super) fn new(section_info: *mut KbdSectionInfo) -> Section {
+    pub(super) fn new(section_info: KbdSectionInfo) -> Section {
         Section { section_info }
     }
 
@@ -23,10 +23,10 @@ impl Section {
     }
 
     pub fn get_action_count(&self) -> u32 {
-        self.get_section_info().action_list_cnt as u32
+        self.section_info.action_list_cnt()
     }
 
-    pub fn get_raw(&self) -> *mut KbdSectionInfo {
+    pub fn get_raw(&self) -> KbdSectionInfo {
         self.section_info
     }
 
@@ -34,20 +34,12 @@ impl Section {
         (0..self.get_action_count()).map(move |i| self.get_action_by_index_unchecked(i))
     }
 
-    pub(super) fn get_kbd_cmds(&self) -> impl Iterator<Item = &KbdCmd> + '_ {
-        (0..self.get_action_count()).map(move |i| self.get_kbd_cmd_by_index(i))
-    }
-
-    fn get_kbd_cmd_by_index(&self, index: u32) -> &KbdCmd {
-        unsafe { &*self.get_section_info().action_list.offset(index as isize) }
+    pub(super) fn get_kbd_cmds(&self) -> impl Iterator<Item = KbdCmd> + '_ {
+        (0..self.get_action_count()).map(move |i| self.section_info.get_action_by_index(i).unwrap())
     }
 
     fn get_action_by_index_unchecked(&self, index: u32) -> Action {
-        let kbd_cmd = self.get_kbd_cmd_by_index(index);
-        Action::new(*self, kbd_cmd.cmd, Some(index))
-    }
-
-    fn get_section_info(&self) -> &KbdSectionInfo {
-        unsafe { &*self.section_info }
+        let kbd_cmd = self.section_info.get_action_by_index(index).unwrap();
+        Action::new(*self, kbd_cmd.cmd(), Some(index))
     }
 }

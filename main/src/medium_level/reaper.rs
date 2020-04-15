@@ -7,13 +7,11 @@ use crate::low_level::{midi_Input, midi_Output, raw};
 
 use crate::low_level;
 use crate::low_level::get_cpp_control_surface;
-use crate::low_level::raw::{
-    audio_hook_register_t, gaccel_register_t, KbdSectionInfo, GUID, HWND, UNDO_STATE_ALL,
-};
+use crate::low_level::raw::{audio_hook_register_t, gaccel_register_t, GUID, HWND, UNDO_STATE_ALL};
 use crate::medium_level::{
     AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
     ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
-    InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, MediaTrack,
+    InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, KbdSectionInfo, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
     ReaperControlSurface, ReaperPointerType, ReaperStringArg, ReaperVersion, RecArmState, RecFx,
     RecordingInput, RegInstr, Relative, SendOrReceive, StuffMidiMessageTarget, ToggleAction,
@@ -268,6 +266,14 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high I think the functions registered here with plugin_register,
+    //  these are things we cannot lift to medium-level API style. Because at the end of the day
+    //  REAPER *needs* to be passed a function pointer with exactly that low-level signature.
+    //  Now, function pointers can't capture anything. So we would need a kind of registry object
+    //  which stores our medium-level functions. No way, this is too opinionated for medium-level.
+    //  (similar to why we can't make everything safe in medium-level).
+    //  BUT: We could try the generic approach!!! Be generic on the given medium-level function and
+    //  generate an appropriate low-level function for it. TRY IT! But unregistering must also work.
     pub fn plugin_register_hookpostcommand(
         &self,
         hookpostcommand: HookPostCommand,
@@ -310,6 +316,15 @@ impl Reaper {
     }
 
     // TODO-doc
+    // A reference is in line here (vs. pointer) because gaccel_register_t is a struct created on
+    // our (Rust) side. It doesn't necessary have to be static because we might just write a
+    // script which registers something only shortly and unregisters it again later.
+    // TODO-high I think gaccel_register_t and similar structs registered with plugin_register,
+    //  these are things we cannot lift to medium-level API style. Because at the end of the day
+    //  REAPER *needs* the correct struct here. With structs there's also not the possibility for
+    //  indirection as with function calls. So at a maxium we can provide some optionally usable
+    //  factory method for creating gaccel_register_t. But we must ensure it lives long enough
+    //  ourselves!
     pub fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
@@ -414,8 +429,9 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn section_from_unique_id(&self, unique_id: u32) -> *mut KbdSectionInfo {
-        self.low.SectionFromUniqueID(unique_id as i32)
+    pub fn section_from_unique_id(&self, unique_id: u32) -> Option<KbdSectionInfo> {
+        let ptr = self.low.SectionFromUniqueID(unique_id as i32);
+        KbdSectionInfo::optional(ptr)
     }
 
     // TODO-doc
@@ -1500,14 +1516,15 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO Check if section can be None
     // Returns None if section or command not existing (can't think of any other case)
     pub fn kbd_get_text_from_cmd<R>(
         &self,
         cmd: u32,
-        section: *mut KbdSectionInfo,
+        section: KbdSectionInfo,
         f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = unsafe { self.low.kbd_getTextFromCmd(cmd, section) };
+        let ptr = unsafe { self.low.kbd_getTextFromCmd(cmd, section.into()) };
         unsafe { create_passing_c_str(ptr) }
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| s.to_bytes().len() > 0)
@@ -1515,16 +1532,20 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO Check if section can be None
     // Returns None if action doesn't report on/off states (or if action not existing).
     // Option makes more sense than Result here because this function is at the same time the
     // correct function to be used to determine *if* an action reports on/off states. So
     // "action doesn't report on/off states" is a valid result.
     pub fn get_toggle_command_state_2(
         &self,
-        section: *mut KbdSectionInfo,
+        section: KbdSectionInfo,
         command_id: u32,
     ) -> Option<bool> {
-        let result = unsafe { self.low.GetToggleCommandState2(section, command_id as i32) };
+        let result = unsafe {
+            self.low
+                .GetToggleCommandState2(section.into(), command_id as i32)
+        };
         if result == -1 {
             return None;
         }
