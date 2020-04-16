@@ -198,7 +198,8 @@ impl Action {
     }
 
     fn load_if_necessary_or_complain(&self) -> Ref<RuntimeData> {
-        if self.runtime_data.borrow().is_none() && self.load_by_command_name() {
+        let is_loaded = self.runtime_data.borrow().is_none();
+        if is_loaded && !self.load_by_command_name() {
             panic!("Action not loadable")
         }
         Ref::map(self.runtime_data.borrow(), |rd| rd.as_ref().unwrap())
