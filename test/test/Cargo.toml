@@ -6,8 +6,8 @@ edition = "2018"
 
 
 [dependencies]
-reaper-rs = { path = "../main", features = ["high-level"] }
+reaper-rs = { path = "../../main", features = ["high-level"] }
 c_str_macro = "1.0.2"
-rxrust = { path = '../lib/rxRust'}
+rxrust = { path = '../../lib/rxRust'}
 slog = "2.5.2"
-helgoboss-midi = { path = '../../helgoboss-midi-rs' }
+helgoboss-midi = { path = '../../../helgoboss-midi-rs' }

@@ -2,7 +2,7 @@
 members = [
     "main",
     "macros",
-    "test",
-    "test-extension-plugin",
-    "test-vst-plugin"
+    "test/test",
+    "test/test-extension-plugin",
+    "test/test-vst-plugin"
 ]
