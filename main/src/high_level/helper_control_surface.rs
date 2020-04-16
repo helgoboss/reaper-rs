@@ -1,6 +1,8 @@
 use crate::high_level::fx::Fx;
 use crate::high_level::guid::Guid;
-use crate::high_level::{get_media_track_guid, Payload, Project, Reaper, Task, Track};
+use crate::high_level::{
+    get_media_track_guid, Payload, Project, Reaper, ScheduledTask, Task, Track,
+};
 use crate::low_level::raw;
 use crate::medium_level::TrackInfoKey::{
     B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
@@ -23,12 +25,13 @@ use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
-use std::sync::mpsc::Receiver;
+use std::sync::mpsc::{Receiver, Sender};
 
 const BULK_TASK_EXECUTION_COUNT: usize = 100;
 
-pub struct HelperControlSurface {
-    task_receiver: Receiver<Task>,
+pub(super) struct HelperControlSurface {
+    task_sender: Sender<ScheduledTask>,
+    task_receiver: Receiver<ScheduledTask>,
     last_active_project: Cell<Project>,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
@@ -69,10 +72,14 @@ type ProjectDataMap = HashMap<ReaProject, TrackDataMap>;
 type TrackDataMap = HashMap<MediaTrack, TrackData>;
 
 impl HelperControlSurface {
-    pub fn new(task_receiver: Receiver<Task>) -> HelperControlSurface {
+    pub(super) fn new(
+        task_sender: Sender<ScheduledTask>,
+        task_receiver: Receiver<ScheduledTask>,
+    ) -> HelperControlSurface {
         let reaper = Reaper::get();
         let version = reaper.get_version();
         let surface = HelperControlSurface {
+            task_sender,
             task_receiver,
             last_active_project: Cell::new(reaper.get_current_project()),
             num_track_set_changes_left_to_be_propagated: Default::default(),
@@ -523,7 +530,16 @@ impl ControlSurface for HelperControlSurface {
             .try_iter()
             .take(BULK_TASK_EXECUTION_COUNT)
         {
-            task();
+            match task.desired_execution_time {
+                None => (task.task)(),
+                Some(t) => {
+                    if std::time::SystemTime::now() < t {
+                        self.task_sender.send(task);
+                    } else {
+                        (task.task)()
+                    }
+                }
+            }
         }
     }
 

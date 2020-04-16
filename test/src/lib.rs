@@ -16,6 +16,7 @@ use std::collections::VecDeque;
 use reaper_rs::medium_level::ReaperStringArg;
 use std::ffi::CString;
 use std::iter::FromIterator;
+use std::time::Duration;
 
 pub fn execute_integration_test() {
     let reaper = Reaper::get();
@@ -46,8 +47,9 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, ste
     };
     match result {
         Ok(()) => {
-            reaper
-                .execute_later_in_main_thread(move || execute_next_step(reaper, steps, step_count));
+            reaper.execute_later_in_main_thread_asap(move || {
+                execute_next_step(reaper, steps, step_count)
+            });
         }
         Err(msg) => log_failure(&msg),
     }

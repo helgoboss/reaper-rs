@@ -39,6 +39,7 @@ use crate::medium_level::{
     ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction, TrackRef,
 };
 use helgoboss_midi::{MidiMessage, MidiMessageType};
+use std::time::{Duration, SystemTime};
 
 // See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
 static mut REAPER_INSTANCE: Option<Reaper> = None;
@@ -155,8 +156,21 @@ extern "C" fn process_audio_buffer(
     });
 }
 
-//pub(super) type Task = Box<dyn FnOnce() + Send + 'static>;
 pub(super) type Task = Box<dyn FnOnce() + 'static>;
+
+pub(super) struct ScheduledTask {
+    pub desired_execution_time: Option<std::time::SystemTime>,
+    pub task: Task,
+}
+
+impl ScheduledTask {
+    pub fn new(task: Task, desired_execution_time: Option<std::time::SystemTime>) -> ScheduledTask {
+        ScheduledTask {
+            desired_execution_time,
+            task,
+        }
+    }
+}
 
 pub struct ReaperBuilder {
     medium: medium_level::Reaper,
@@ -216,7 +230,7 @@ pub struct Reaper {
     // reference???  Look into that!!!
     command_by_id: RefCell<HashMap<u32, Command>>,
     pub(super) subjects: EventStreamSubjects,
-    task_sender: Sender<Task>,
+    task_sender: Sender<ScheduledTask>,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
     audio_hook: audio_hook_register_t,
@@ -348,13 +362,13 @@ impl Reaper {
     }
 
     fn setup(medium: medium_level::Reaper, logger: slog::Logger) {
-        let (task_sender, task_receiver) = mpsc::channel::<Task>();
+        let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
         let reaper = Reaper {
             medium,
             logger,
             command_by_id: RefCell::new(HashMap::new()),
             subjects: EventStreamSubjects::new(),
-            task_sender,
+            task_sender: task_sender.clone(),
             main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
             audio_hook: audio_hook_register_t {
@@ -371,12 +385,12 @@ impl Reaper {
                 REAPER_INSTANCE = Some(reaper);
             });
         }
-        Reaper::get().init(task_receiver);
+        Reaper::get().init(task_sender, task_receiver);
     }
 
-    fn init(&self, task_receiver: Receiver<Task>) {
+    fn init(&self, task_sender: Sender<ScheduledTask>, task_receiver: Receiver<ScheduledTask>) {
         install_control_surface(
-            HelperControlSurface::new(task_receiver),
+            HelperControlSurface::new(task_sender, task_receiver),
             &self.get_version(),
         );
     }
@@ -489,7 +503,7 @@ impl Reaper {
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             let command = p.insert(command);
             let acc = &mut command.accelerator_register;
-            self.medium.plugin_register_gaccel(acc);
+            unsafe { self.medium.plugin_register_gaccel(acc) };
         }
     }
 
@@ -796,15 +810,30 @@ impl Reaper {
         self.medium.clear_console();
     }
 
-    pub fn execute_later_in_main_thread(&self, task: impl FnOnce() + 'static) {
-        self.task_sender.send(Box::new(task)).unwrap();
+    pub fn execute_later_in_main_thread(
+        &self,
+        waiting_time: Duration,
+        task: impl FnOnce() + 'static,
+    ) {
+        self.task_sender
+            .send(ScheduledTask::new(
+                Box::new(task),
+                Some(SystemTime::now() + waiting_time),
+            ))
+            .unwrap();
+    }
+
+    pub fn execute_later_in_main_thread_asap(&self, task: impl FnOnce() + 'static) {
+        self.task_sender
+            .send(ScheduledTask::new(Box::new(task), None))
+            .unwrap();
     }
 
     pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) {
         if self.current_thread_is_main_thread() {
             task();
         } else {
-            self.execute_later_in_main_thread(task);
+            self.execute_later_in_main_thread_asap(task);
         }
     }
 

@@ -306,19 +306,19 @@ impl Reaper {
     // A reference is in line here (vs. pointer) because gaccel_register_t is a struct created on
     // our (Rust) side. It doesn't necessary have to be static because we might just write a
     // script which registers something only shortly and unregisters it again later.
-    // TODO-high I think gaccel_register_t and similar structs registered with plugin_register,
-    //  these are things we cannot lift to medium-level API style. Because at the end of the day
-    //  REAPER *needs* the correct struct here. With structs there's also not the possibility for
-    //  indirection as with function calls. So at a maxium we can provide some optionally usable
-    //  factory method for creating gaccel_register_t. But we must ensure it lives long enough
-    //  ourselves!
-    pub fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> Result<(), ()> {
-        let result = unsafe {
-            self.plugin_register(
-                RegInstr::Register(ExtensionType::GAccel),
-                gaccel as *mut _ as *mut c_void,
-            )
-        };
+    //
+    // gaccel_register_t and similar structs registered with plugin_register cannot be,
+    // lifted to medium-level API style. Because at the end of the day
+    // REAPER *needs* the correct struct here. Also, with structs we can't do any indirection as
+    // with function calls. So at a maxium we can provide some optionally usable
+    // factory method for creating such structs. The consumer must ensure that it lives long
+    // enough!
+    // TODO-low Add factory functions for gaccel_register_t
+    pub unsafe fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> Result<(), ()> {
+        let result = self.plugin_register(
+            RegInstr::Register(ExtensionType::GAccel),
+            gaccel as *mut _ as *mut c_void,
+        );
         ok_if_one(result)
     }
 
@@ -1096,8 +1096,8 @@ impl Reaper {
     pub fn get_master_track(&self, proj: Option<ReaProject>) -> MediaTrack {
         let ptr = unsafe { self.low.GetMasterTrack(option_into(proj)) };
         // TODO-high General question: Should we panic if the project is invalid or similar
-        // situations?  Or should we make basically all return types where this might happen
-        // a Result?
+        //  situations?  Or should we make basically all return types where this might happen
+        //  a Result?
         MediaTrack::required_panic(ptr)
     }
 
