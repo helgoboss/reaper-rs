@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 c_str_macro = "1.0.2"
 reaper-rs-low = { path = '../low' }
-# TODO Use crates.io version
+# TODO-medium Use crates.io version
 helgoboss-midi = { path = '../../../helgoboss-midi-rs'}
 num_enum = { version = "0.4.2"}
 enumflags2 = { version = "^0.6", features = ["not_literal"] }

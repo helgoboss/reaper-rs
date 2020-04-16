@@ -1,6 +1,7 @@
 use super::MediaTrack;
 use crate::{AutomationMode, InputMonitoringMode, ReaperVersion, TrackFxRef};
 use c_str_macro::c_str;
+use enumflags2::_internal::core::convert::TryFrom;
 use reaper_rs_low;
 use reaper_rs_low::raw;
 use std::borrow::Cow;
@@ -192,9 +193,35 @@ pub struct OnTrackSelectionArgs {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ModKey {
+    Shift,
+    Control,
+    Menu,
+    Custom(u32),
+}
+
+impl TryFrom<i32> for ModKey {
+    type Error = ();
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        if value < 0 {
+            return Err(());
+        };
+        let value = value as u32;
+        use ModKey::*;
+        let key = match value {
+            raw::VK_SHIFT => Shift,
+            raw::VK_CONTROL => Control,
+            raw::VK_MENU => Menu,
+            _ => Custom(value),
+        };
+        Ok(key)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct IsKeyDownArgs {
-    // TODO Maybe enum keys
-    pub key: i32,
+    pub key: ModKey,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -462,7 +489,9 @@ impl<T: ControlSurface> reaper_rs_low::IReaperControlSurface for DelegatingContr
     }
 
     fn IsKeyDown(&self, key: i32) -> bool {
-        self.delegate.is_key_down(IsKeyDownArgs { key })
+        self.delegate.is_key_down(IsKeyDownArgs {
+            key: key.try_into().expect("Got negative key code"),
+        })
     }
 
     fn Extended(
