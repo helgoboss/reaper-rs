@@ -23,6 +23,7 @@ use reaper_rs::medium_level::{
     TrackInfoKey, TrackRef, WantMaster, WantUndo,
 };
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Creates all integration test steps to be executed. The order matters!
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
@@ -126,6 +127,13 @@ fn show_message_box() -> TestStep {
         );
         // Then
         check_eq!(result, MessageBoxResult::Ok);
+        // // Comment out and close tab to test calling functions on vanished project
+        // let project = reaper.get_current_project().get_raw();
+        // reaper.execute_later_in_main_thread(Duration::from_secs(10), move || {
+        //     let reaper = Reaper::get();
+        //     let master_track = reaper.medium.get_master_track(Some(project));
+        //     reaper.show_console_msg(format!("\nMaster track: {:?}", master_track))
+        // });
         Ok(())
     })
 }
@@ -777,8 +785,10 @@ fn remove_track() -> TestStep {
         check_eq!(track_2.get_guid(), track_2_guid);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track_1);
-        // TODO-high Check all kinds of track functions here on deleted track (medium API), e.g.
-        //  get_track_automation_mode(). Maybe we should use Result return type in some places.
+        let raw = track_1.get_raw();
+        // TODO-high This crashes REAPER! So it should be unsafe.
+        // reaper.medium.set_only_track_selected(Some(raw));
+        // let result = reaper.medium.create_track_send(raw, None);
         Ok(())
     })
 }
