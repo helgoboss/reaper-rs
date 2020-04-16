@@ -99,7 +99,7 @@ impl Action {
                 .medium
                 .kbd_get_text_from_cmd(
                     runtime_data.command_id as u32,
-                    runtime_data.section.get_raw(),
+                    Some(runtime_data.section.get_raw()),
                     |_| (),
                 )
                 .is_some();
@@ -111,7 +111,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         match Reaper::get()
             .medium
-            .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
+            .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
         {
             Some(_) => ActionCharacter::Toggle,
             None => ActionCharacter::Trigger,
@@ -122,7 +122,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         Reaper::get()
             .medium
-            .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
+            .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
             == Some(true)
     }
 
@@ -150,7 +150,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         Reaper::get().medium.kbd_get_text_from_cmd(
             rd.command_id as u32,
-            rd.section.get_raw(),
+            Some(rd.section.get_raw()),
             |s| s.into(),
         )
     }

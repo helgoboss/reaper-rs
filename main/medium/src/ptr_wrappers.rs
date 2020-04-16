@@ -30,7 +30,7 @@ impl KbdSectionInfo {
     //  b) Also store an ID or something (e.g. section ID here) and always refetch it. Same like
     //     with a ... very presumptuous.
     //  So none of this is really feasible on this API level. Which means that we must either rely
-    //  on REAPER itself not running into UB ([] Try and askjf) or just mark the
+    //  on REAPER itself not running into UB (impossible, it does run into UB) or just mark the
     //  methods where this is not possible as unsafe. A higher-level API then should take care of
     //  making things absolutely safe.
     pub fn action_list_cnt(&self) -> u32 {

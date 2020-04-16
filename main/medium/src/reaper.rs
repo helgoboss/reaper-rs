@@ -1573,15 +1573,14 @@ impl Reaper {
 
     // TODO-doc
     // TODO-high-maybe-invalid-ptr-safe
-    // TODO Check if section can be None
     // Returns None if section or command not existing (can't think of any other case)
     pub fn kbd_get_text_from_cmd<R>(
         &self,
         cmd: u32,
-        section: KbdSectionInfo,
+        section: Option<KbdSectionInfo>,
         f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = unsafe { self.low.kbd_getTextFromCmd(cmd, section.into()) };
+        let ptr = unsafe { self.low.kbd_getTextFromCmd(cmd, option_into(section)) };
         unsafe { create_passing_c_str(ptr) }
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| s.to_bytes().len() > 0)
@@ -1590,19 +1589,18 @@ impl Reaper {
 
     // TODO-doc
     // TODO-high-maybe-invalid-ptr-safe
-    // TODO Check if section can be None
     // Returns None if action doesn't report on/off states (or if action not existing).
     // Option makes more sense than Result here because this function is at the same time the
     // correct function to be used to determine *if* an action reports on/off states. So
     // "action doesn't report on/off states" is a valid result.
     pub fn get_toggle_command_state_2(
         &self,
-        section: KbdSectionInfo,
+        section: Option<KbdSectionInfo>,
         command_id: u32,
     ) -> Option<bool> {
         let result = unsafe {
             self.low
-                .GetToggleCommandState2(section.into(), command_id as i32)
+                .GetToggleCommandState2(option_into(section), command_id as i32)
         };
         if result == -1 {
             return None;

@@ -48,7 +48,7 @@
 //  about exposing members only. Channel is not a member. However I also don't want to
 //  expose the information if it's a member or not. get_ has an advantage in IDEs and also
 //  prevents ambiguities if the noun can sound like a verb.
-// TODO Also surrounds callbacks (e.g. hookcommand) with firewall()
+// TODO-medium Also surrounds callbacks (e.g. hookcommand) with firewall()
 
 #[macro_use]
 mod ptr_macros;
