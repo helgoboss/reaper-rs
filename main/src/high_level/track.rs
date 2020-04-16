@@ -24,7 +24,7 @@ use crate::medium_level::TrackInfoKey::{
 };
 use crate::medium_level::{
     AllowGang, AutomationMode, GlobalAutomationOverride, InputMonitoringMode, IsUndoOptional,
-    MediaTrack, ReaProject, ReaperPointerType, RecArmState, RecordingInput, Relative, TrackInfoKey,
+    MediaTrack, ReaProject, ReaperPointer, RecArmState, RecordingInput, Relative, TrackInfoKey,
     TrackRef, TrackSendCategory,
 };
 
@@ -514,12 +514,9 @@ impl Track {
             None => false,
             Some(rea_project) => {
                 if Project::new(rea_project).is_available() {
-                    let raw: *mut raw::MediaTrack = media_track.into();
-                    Reaper::get().medium.validate_ptr_2(
-                        Some(rea_project),
-                        raw as *mut c_void,
-                        ReaperPointerType::MediaTrack,
-                    )
+                    Reaper::get()
+                        .medium
+                        .validate_ptr_2(Some(rea_project), media_track)
                 } else {
                     false
                 }
@@ -585,12 +582,9 @@ impl Track {
         // usage).
         let reaper = Reaper::get();
         let current_project = reaper.get_current_project();
-        let raw_media_track: *mut raw::MediaTrack = media_track.into();
-        let is_valid_in_current_project = reaper.medium.validate_ptr_2(
-            Some(current_project.get_raw()),
-            raw_media_track as *mut c_void,
-            ReaperPointerType::MediaTrack,
-        );
+        let is_valid_in_current_project = reaper
+            .medium
+            .validate_ptr_2(Some(current_project.get_raw()), media_track);
         if is_valid_in_current_project {
             return Some(current_project.get_raw());
         }
@@ -599,13 +593,7 @@ impl Track {
             .get_projects()
             // We already know it's invalid in current project
             .filter(|p| p != &current_project)
-            .find(|p| {
-                reaper.medium.validate_ptr_2(
-                    Some(p.get_raw()),
-                    raw_media_track as *mut c_void,
-                    ReaperPointerType::MediaTrack,
-                )
-            });
+            .find(|p| reaper.medium.validate_ptr_2(Some(p.get_raw()), media_track));
         other_project.map(|p| p.get_raw())
     }
 

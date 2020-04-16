@@ -3,7 +3,7 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::null_mut;
 
-use crate::low_level::{midi_Input, midi_Output, raw};
+use crate::low_level::raw;
 
 use crate::low_level;
 use crate::low_level::get_cpp_control_surface;
@@ -13,7 +13,7 @@ use crate::medium_level::{
     ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
     InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, KbdSectionInfo, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
-    ReaperControlSurface, ReaperPointerType, ReaperStringArg, ReaperVersion, RecArmState, RecFx,
+    ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion, RecArmState, RecFx,
     RecordingInput, RegInstr, Relative, SendOrReceive, StuffMidiMessageTarget, ToggleAction,
     TrackEnvelope, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
     TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
@@ -114,22 +114,20 @@ impl Reaper {
         MediaTrack::optional(ptr)
     }
 
-    // TODO-high Mark more pointer-taking methods as unsafe + provide safe alternatives
-    // TODO-high Either let ReaperPointerType take the pointer itself (type-safe) or introduce
-    //  convenience functions, however signatures only vary in ReaProject case. Maybe there's some
-    //  way to do this without an enum and without convenience functions? Just pass in an object?
-    //  Via Into?
     /// Returns `true` if the given pointer is a valid object of the right type in project `proj`
     /// (`proj` is ignored if pointer is itself a project).
-    pub fn validate_ptr_2(
+    pub fn validate_ptr_2<'a>(
         &self,
         proj: Option<ReaProject>,
-        pointer: *mut c_void,
-        ctypename: ReaperPointerType,
+        pointer: impl Into<ReaperPointer<'a>>,
     ) -> bool {
+        let pointer = pointer.into();
         unsafe {
-            self.low
-                .ValidatePtr2(option_into(proj), pointer, Cow::from(ctypename).as_ptr())
+            self.low.ValidatePtr2(
+                option_into(proj),
+                pointer.as_void(),
+                Cow::from(pointer).as_ptr(),
+            )
         }
     }
 
@@ -490,21 +488,13 @@ impl Reaper {
     // TODO-doc
     pub fn get_midi_input(&self, idx: u32) -> Option<MidiInput> {
         let ptr = self.low.GetMidiInput(idx as i32);
-        if ptr.is_null() {
-            return None;
-        }
-        let raw_midi_input = unsafe { midi_Input::new(ptr) };
-        Some(MidiInput::new(raw_midi_input))
+        MidiInput::optional(ptr)
     }
 
     // TODO-doc
     pub fn get_midi_output(&self, idx: u32) -> Option<MidiOutput> {
         let ptr = self.low.GetMidiOutput(idx as i32);
-        if ptr.is_null() {
-            return None;
-        }
-        let raw_midi_output = unsafe { midi_Output::new(ptr) };
-        Some(MidiOutput::new(raw_midi_output))
+        MidiOutput::optional(ptr)
     }
 
     // TODO-doc
@@ -1251,6 +1241,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high Same like gaccel
     // Returns true on success
     pub fn audio_reg_hardware_hook(&self, is_add: IsAdd, reg: *mut audio_hook_register_t) -> bool {
         unsafe { self.low.Audio_RegHardwareHook(is_add.into(), reg) > 0 }

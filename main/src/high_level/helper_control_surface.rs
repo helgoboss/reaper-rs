@@ -9,7 +9,7 @@ use crate::medium_level::{
     AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    FxChainType, InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointerType,
+    FxChainType, InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointer,
     SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
     SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackRef, VersionDependentFxRef,
     VersionDependentTrackFxRef,
@@ -152,12 +152,7 @@ impl HelperControlSurface {
 
     fn remove_invalid_rea_projects(&self) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
-            let raw_rea_project: *mut raw::ReaProject = (*rea_project).into();
-            if Reaper::get().medium.validate_ptr_2(
-                None,
-                raw_rea_project as *mut c_void,
-                ReaperPointerType::ReaProject,
-            ) {
+            if Reaper::get().medium.validate_ptr_2(None, *rea_project) {
                 true
             } else {
                 Reaper::get()
@@ -356,12 +351,10 @@ impl HelperControlSurface {
     fn remove_invalid_media_tracks(&self, project: Project, track_datas: &mut TrackDataMap) {
         track_datas.retain(|media_track, data| {
             let reaper = Reaper::get();
-            let raw_media_track: *mut raw::MediaTrack = (*media_track).into();
-            if reaper.medium.validate_ptr_2(
-                Some(project.get_raw()),
-                raw_media_track as *mut c_void,
-                ReaperPointerType::MediaTrack,
-            ) {
+            if reaper
+                .medium
+                .validate_ptr_2(Some(project.get_raw()), *media_track)
+            {
                 true
             } else {
                 self.fx_chain_pair_by_media_track
@@ -382,12 +375,10 @@ impl HelperControlSurface {
         let mut tracks_have_been_reordered = false;
         let reaper = Reaper::get();
         for (media_track, track_data) in track_datas.iter_mut() {
-            let raw_media_track: *mut raw::MediaTrack = (*media_track).into();
-            if !reaper.medium.validate_ptr_2(
-                Some(project.get_raw()),
-                raw_media_track as *mut c_void,
-                ReaperPointerType::MediaTrack,
-            ) {
+            if !reaper
+                .medium
+                .validate_ptr_2(Some(project.get_raw()), *media_track)
+            {
                 continue;
             }
             let new_number = reaper.medium.get_media_track_info_tracknumber(*media_track);

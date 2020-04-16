@@ -1,5 +1,4 @@
-use crate::low_level::raw::MIDI_event_t;
-use crate::low_level::{midi_Input, midi_Output, MIDI_eventlist};
+use crate::low_level::raw::{midi_Input, midi_Output, MIDI_event_t, MIDI_eventlist};
 use helgoboss_midi::{MidiMessage, U7};
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -13,13 +12,10 @@ use std::os::raw::c_int;
 // way to  go). That closure would expect a reference of the MidiInput. => Well, we could probably
 // check  the validity of the device if we check its presence via GetMIDIInputName with the
 // appropriate  device ID?
-pub struct MidiInput(midi_Input);
+define_ptr_wrapper!(MidiInput, midi_Input);
+define_ptr_wrapper!(MidiOutput, midi_Output);
 
 impl MidiInput {
-    pub(super) fn new(raw_input: midi_Input) -> MidiInput {
-        MidiInput(raw_input)
-    }
-
     // This expects a function because the result (MIDI event list) is *very* temporary in nature.
     // If we would return a &MidiEventList, we wouldn't be able to find a sane lifetime
     // annotation. If we would return a pointer, we would require the consumer to enter unsafe
@@ -28,13 +24,13 @@ impl MidiInput {
     // especially bad because this code code typically runs in the audio thread and therefore
     // has real-time requirements. Same reasoning like here: https://stackoverflow.com/questions/61106587
     pub fn get_read_buf<R>(&self, mut f: impl FnOnce(&MidiEvtList) -> R) -> R {
-        let raw_evt_list = self.0.GetReadBuf();
-        f(&MidiEvtList::new(&raw_evt_list))
+        unsafe {
+            let raw_evt_list = (*self.0).GetReadBuf();
+            f(&MidiEvtList::new(&*raw_evt_list))
+        }
     }
 }
 
-// This should be an unsized type (only usable as reference). There will maybe be a sized/owned
-// counterpart in future.
 pub struct MidiEvtList<'a>(&'a MIDI_eventlist);
 
 impl<'a> MidiEvtList<'a> {
@@ -118,13 +114,5 @@ impl<'a> MidiMessage for MidiMsg<'a> {
 
     fn get_data_byte_2(&self) -> U7 {
         unsafe { U7::new_unchecked(self.0.midi_message[2]) }
-    }
-}
-
-pub struct MidiOutput(midi_Output);
-
-impl MidiOutput {
-    pub(super) fn new(raw_output: midi_Output) -> MidiOutput {
-        MidiOutput(raw_output)
     }
 }

@@ -49,6 +49,9 @@
 //  expose the information if it's a member or not. get_ has an advantage in IDEs and also
 //  prevents ambiguities if the noun can sound like a verb.
 
+#[macro_use]
+mod ptr_macros;
+
 mod constants;
 pub use constants::*;
 

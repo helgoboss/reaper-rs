@@ -6,7 +6,7 @@ use crate::high_level::guid::Guid;
 use crate::high_level::{Reaper, Tempo, Track};
 use crate::low_level::raw;
 use crate::medium_level::{
-    ProjectRef, ReaProject, ReaperPointerType, TrackRef, WantDefaults, WantMaster, WantUndo,
+    ProjectRef, ReaProject, ReaperPointer, TrackRef, WantDefaults, WantMaster, WantUndo,
 };
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -88,12 +88,7 @@ impl Project {
     }
 
     pub fn is_available(&self) -> bool {
-        let raw_rea_project: *mut raw::ReaProject = self.rea_project.into();
-        Reaper::get().medium.validate_ptr_2(
-            None,
-            raw_rea_project as *mut c_void,
-            ReaperPointerType::ReaProject,
-        )
+        Reaper::get().medium.validate_ptr_2(None, self.rea_project)
     }
 
     pub fn get_selected_track_count(&self, want_master: WantMaster) -> u32 {
