@@ -109,6 +109,7 @@ impl Reaper {
 
     /// Returns the track at the given index. Set `proj` to `null_mut()` in order to look for tracks
     /// in the current project.
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track(&self, proj: Option<ReaProject>, trackidx: u32) -> Option<MediaTrack> {
         let ptr = unsafe { self.low.GetTrack(option_into(proj), trackidx as i32) };
         MediaTrack::optional(ptr)
@@ -156,6 +157,7 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_partrack(&self, tr: MediaTrack) -> Option<MediaTrack> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::P_PARTRACK) as *mut raw::MediaTrack;
         MediaTrack::optional(ptr)
@@ -163,12 +165,14 @@ impl Reaper {
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
     // In REAPER < 5.95 this returns nullptr
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_project(&self, tr: MediaTrack) -> Option<ReaProject> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::P_PROJECT) as *mut raw::ReaProject;
         ReaProject::optional(ptr)
     }
 
     /// Convenience function which let's you use the given track's name (`P_NAME`).
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_name<R>(
         &self,
         tr: MediaTrack,
@@ -179,6 +183,7 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_recmon(&self, tr: MediaTrack) -> InputMonitoringMode {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECMON);
         let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
@@ -186,6 +191,7 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_recinput(&self, tr: MediaTrack) -> Option<RecordingInput> {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::I_RECINPUT);
         let rec_input_index = unsafe { unref_as::<i32>(ptr) }.unwrap();
@@ -197,6 +203,7 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's number (IP_TRACKNUMBER).
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_tracknumber(&self, tr: MediaTrack) -> Option<TrackRef> {
         use TrackRef::*;
         match self.get_media_track_info(tr, TrackInfoKey::IP_TRACKNUMBER) as i32 {
@@ -208,6 +215,7 @@ impl Reaper {
     }
 
     /// Convenience function which returns the given track's GUID (GUID).
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_guid(&self, tr: MediaTrack) -> GUID {
         let ptr = self.get_media_track_info(tr, TrackInfoKey::GUID);
         unsafe { unref_as::<GUID>(ptr) }.unwrap()
@@ -313,6 +321,8 @@ impl Reaper {
     // with function calls. So at a maxium we can provide some optionally usable
     // factory method for creating such structs. The consumer must ensure that it lives long
     // enough!
+    //
+    // Unsfe because consumer must ensure proper lifetime of given reference.
     // TODO-low Add factory functions for gaccel_register_t
     pub unsafe fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> Result<(), ()> {
         let result = self.plugin_register(
@@ -333,7 +343,10 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn plugin_register_csurf_inst(&self, csurf_inst: ReaperControlSurface) -> Result<(), ()> {
+    pub unsafe fn plugin_register_csurf_inst(
+        &self,
+        csurf_inst: ReaperControlSurface,
+    ) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::CSurfInst),
@@ -356,6 +369,7 @@ impl Reaper {
     /// Performs an action belonging to the main action section. To perform non-native actions
     /// (ReaScripts, custom or extension plugins' actions) safely, see
     /// [`named_command_lookup`](struct.Reaper.html#method.named_command_lookup).
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: Option<ReaProject>) {
         unsafe {
             self.low
@@ -364,6 +378,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_set_surface_mute(
         &self,
         trackid: MediaTrack,
@@ -377,6 +392,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_set_surface_solo(
         &self,
         trackid: MediaTrack,
@@ -402,9 +418,11 @@ impl Reaper {
     // This method is not idempotent. If you call it two times, you will have every callback TWICE.
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) -> Result<(), ()> {
-        self.plugin_register_csurf_inst(ReaperControlSurface::required_panic(
-            get_cpp_control_surface() as *mut _,
-        ))
+        unsafe {
+            self.plugin_register_csurf_inst(ReaperControlSurface::required_panic(
+                get_cpp_control_surface() as *mut _,
+            ))
+        }
     }
 
     // TODO-doc
@@ -423,6 +441,7 @@ impl Reaper {
 
     // TODO-doc
     // Kept return value type i32 because I have no idea what the return value is about.
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn kbd_on_main_action_ex(
         &self,
         cmd: u32,
@@ -464,6 +483,7 @@ impl Reaper {
     }
 
     /// Returns the number of tracks in the given project (pass `null_mut()` for current project)
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn count_tracks(&self, proj: Option<ReaProject>) -> u32 {
         unsafe { self.low.CountTracks(option_into(proj)) as u32 }
     }
@@ -524,6 +544,7 @@ impl Reaper {
     // TODO-doc
     // Return type Option or Result can't be easily chosen here because if instantiate is 0, it
     // should be Option, if it's -1 or > 0, it should be Result. So we just keep the i32.
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_add_by_name<'a>(
         &self,
         track: MediaTrack,
@@ -542,6 +563,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_add_by_name_query<'a>(
         &self,
         track: MediaTrack,
@@ -556,6 +578,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_add_by_name_add<'a>(
         &self,
         track: MediaTrack,
@@ -605,11 +628,13 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_enabled(&self, track: MediaTrack, fx: TrackFxRef) -> bool {
         unsafe { self.low.TrackFX_GetEnabled(track.into(), fx.into()) }
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns Err if FX doesn't exist
     pub fn track_fx_get_fx_name(
         &self,
@@ -629,6 +654,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_instrument(&self, track: MediaTrack) -> Option<u32> {
         let index = unsafe { self.low.TrackFX_GetInstrument(track.into()) };
         if index == -1 {
@@ -638,6 +664,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_set_enabled(&self, track: MediaTrack, fx: TrackFxRef, enabled: bool) {
         unsafe {
             self.low
@@ -646,6 +673,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_num_params(&self, track: MediaTrack, fx: TrackFxRef) -> u32 {
         unsafe { self.low.TrackFX_GetNumParams(track.into(), fx.into()) as u32 }
     }
@@ -657,6 +685,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns Err if FX or parameter doesn't exist
     pub fn track_fx_get_param_name(
         &self,
@@ -677,6 +706,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns Err if FX or parameter doesn't exist
     pub fn track_fx_get_formatted_param_value(
         &self,
@@ -704,6 +734,7 @@ impl Reaper {
     // TODO-doc
     // Returns Err if FX or parameter doesn't exist or if FX doesn't support formatting arbitrary
     // parameter values and the given value is not equal to the current one.
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_format_param_value_normalized(
         &self,
         track: MediaTrack,
@@ -731,6 +762,7 @@ impl Reaper {
 
     // TODO-doc
     // Returns Err if FX or parameter doesn't exist
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_set_param_normalized(
         &self,
         track: MediaTrack,
@@ -828,6 +860,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_copy_to_track(
         &self,
         src_track: MediaTrack,
@@ -849,6 +882,7 @@ impl Reaper {
 
     // TODO-doc
     // Returns Err if FX doesn't exist (maybe also in other cases?)
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_delete(&self, track: MediaTrack, fx: TrackFxRef) -> Result<(), ()> {
         let succesful = unsafe { self.low.TrackFX_Delete(track.into(), fx.into()) };
         if !succesful {
@@ -862,6 +896,7 @@ impl Reaper {
     // exist, but that can be checked before). Option makes more sense than Result here because
     // this function is at the same time the correct function to be used to determine *if* a
     // parameter reports step sizes. So "parameter doesn't report step sizes" is a valid result.
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_parameter_step_sizes(
         &self,
         track: MediaTrack,
@@ -899,6 +934,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_param_ex(
         &self,
         track: MediaTrack,
@@ -928,6 +964,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn undo_begin_block_2(&self, proj: Option<ReaProject>) {
         unsafe {
             self.low.Undo_BeginBlock2(option_into(proj));
@@ -935,6 +972,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn undo_end_block_2<'a>(
         &self,
         proj: Option<ReaProject>,
@@ -954,6 +992,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn undo_can_undo_2<R>(
         &self,
         proj: Option<ReaProject>,
@@ -964,6 +1003,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn undo_can_redo_2<R>(
         &self,
         proj: Option<ReaProject>,
@@ -974,18 +1014,21 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns true if there was something to be undone, false if not
     pub fn undo_do_undo_2(&self, proj: Option<ReaProject>) -> bool {
         unsafe { self.low.Undo_DoUndo2(option_into(proj)) != 0 }
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns true if there was something to be redone, false if not
     pub fn undo_do_redo_2(&self, proj: Option<ReaProject>) -> bool {
         unsafe { self.low.Undo_DoRedo2(option_into(proj)) != 0 }
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn mark_project_dirty(&self, proj: Option<ReaProject>) {
         unsafe {
             self.low.MarkProjectDirty(option_into(proj));
@@ -993,6 +1036,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns true if project dirty, false if not
     pub fn is_project_dirty(&self, proj: Option<ReaProject>) -> bool {
         unsafe { self.low.IsProjectDirty(option_into(proj)) != 0 }
@@ -1011,6 +1055,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track_automation_mode(&self, tr: MediaTrack) -> AutomationMode {
         let result = unsafe { self.low.GetTrackAutomationMode(tr.into()) };
         AutomationMode::try_from(result).expect("Unknown automation mode")
@@ -1028,6 +1073,7 @@ impl Reaper {
 
     // TODO-doc
     // TODO-low Test
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track_envelope_by_chunk_name(
         &self,
         track: MediaTrack,
@@ -1043,6 +1089,7 @@ impl Reaper {
     // TODO-doc
     // For getting common envelopes (like volume or pan) I recommend using
     // get_track_envelope_by_chunk_name
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track_envelope_by_name<'a>(
         &self,
         track: MediaTrack,
@@ -1056,6 +1103,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_media_track_info_value(&self, tr: MediaTrack, parmname: TrackInfoKey) -> f64 {
         unsafe {
             self.low
@@ -1064,22 +1112,26 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_count(&self, track: MediaTrack) -> u32 {
         unsafe { self.low.TrackFX_GetCount(track.into()) as u32 }
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_rec_count(&self, track: MediaTrack) -> u32 {
         unsafe { self.low.TrackFX_GetRecCount(track.into()) as u32 }
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_fx_guid(&self, track: MediaTrack, fx: TrackFxRef) -> Option<GUID> {
         let ptr = unsafe { self.low.TrackFX_GetFXGUID(track.into(), fx.into()) };
         unsafe { unref(ptr) }
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_param_normalized(
         &self,
         track: MediaTrack,
@@ -1093,11 +1145,9 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_master_track(&self, proj: Option<ReaProject>) -> MediaTrack {
         let ptr = unsafe { self.low.GetMasterTrack(option_into(proj)) };
-        // TODO-high General question: Should we panic if the project is invalid or similar
-        //  situations?  Or should we make basically all return types where this might happen
-        //  a Result?
         MediaTrack::required_panic(ptr)
     }
 
@@ -1115,6 +1165,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn set_current_bpm(&self, proj: Option<ReaProject>, bpm: f64, want_undo: WantUndo) {
         unsafe {
             self.low
@@ -1123,6 +1174,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn master_get_play_rate(&self, project: Option<ReaProject>) -> f64 {
         unsafe { self.low.Master_GetPlayRate(option_into(project)) }
     }
@@ -1162,6 +1214,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_on_input_monitoring_change_ex(
         &self,
         trackid: MediaTrack,
@@ -1176,6 +1229,7 @@ impl Reaper {
 
     // TODO-doc
     // Returns Err if invalid parameter name given (maybe also in other situations)
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn set_media_track_info_value(
         &self,
         tr: MediaTrack,
@@ -1214,6 +1268,7 @@ impl Reaper {
 
     // TODO-doc
     // I guess it returns Err if the track doesn't exist
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track_ui_vol_pan(&self, track: MediaTrack) -> Result<(f64, f64), ()> {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
@@ -1237,6 +1292,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_set_surface_volume(
         &self,
         trackid: MediaTrack,
@@ -1250,6 +1306,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_on_volume_change_ex(
         &self,
         trackid: MediaTrack,
@@ -1268,6 +1325,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_set_surface_pan(
         &self,
         trackid: MediaTrack,
@@ -1281,6 +1339,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_on_pan_change_ex(
         &self,
         trackid: MediaTrack,
@@ -1295,6 +1354,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn count_selected_tracks_2(&self, proj: Option<ReaProject>, wantmaster: WantMaster) -> u32 {
         unsafe {
             self.low
@@ -1303,6 +1363,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn set_track_selected(&self, track: MediaTrack, selected: bool) {
         unsafe {
             self.low.SetTrackSelected(track.into(), selected);
@@ -1310,6 +1371,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_selected_track_2(
         &self,
         proj: Option<ReaProject>,
@@ -1324,6 +1386,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn set_only_track_selected(&self, track: Option<MediaTrack>) {
         unsafe {
             self.low.SetOnlyTrackSelected(option_into(track));
@@ -1331,6 +1394,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn delete_track(&self, tr: MediaTrack) {
         unsafe {
             self.low.DeleteTrack(tr.into());
@@ -1338,11 +1402,13 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track_num_sends(&self, tr: MediaTrack, category: TrackSendCategory) -> u32 {
         unsafe { self.low.GetTrackNumSends(tr.into(), category.into()) as u32 }
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub unsafe fn get_set_track_send_info(
         &self,
         tr: MediaTrack,
@@ -1371,6 +1437,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track_send_info_desttrack(
         &self,
         tr: MediaTrack,
@@ -1385,6 +1452,7 @@ impl Reaper {
 
     // TODO-doc
     // I guess it returns Err if the track doesn't exist
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn get_track_state_chunk(
         &self,
         track: MediaTrack,
@@ -1403,6 +1471,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn create_track_send(&self, tr: MediaTrack, desttr_in_optional: Option<MediaTrack>) -> u32 {
         unsafe {
             self.low
@@ -1412,6 +1481,7 @@ impl Reaper {
 
     // TODO-doc
     // Seems to return true if was armed and false if not
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_on_rec_arm_change_ex(
         &self,
         trackid: MediaTrack,
@@ -1426,6 +1496,7 @@ impl Reaper {
 
     // TODO-doc
     // Returns Err for example if given chunk is invalid
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn set_track_state_chunk<'a>(
         &self,
         track: MediaTrack,
@@ -1443,6 +1514,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn track_fx_show(&self, track: MediaTrack, index: TrackFxRef, show_flag: FxShowFlag) {
         unsafe {
             self.low
@@ -1451,6 +1523,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_floating_window(&self, track: MediaTrack, index: TrackFxRef) -> HWND {
         unsafe {
             self.low
@@ -1459,11 +1532,13 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_open(&self, track: MediaTrack, fx: TrackFxRef) -> bool {
         unsafe { self.low.TrackFX_GetOpen(track.into(), fx.into()) }
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_on_send_volume_change(
         &self,
         trackid: MediaTrack,
@@ -1482,6 +1557,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     pub fn csurf_on_send_pan_change(
         &self,
         trackid: MediaTrack,
@@ -1496,6 +1572,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // TODO Check if section can be None
     // Returns None if section or command not existing (can't think of any other case)
     pub fn kbd_get_text_from_cmd<R>(
@@ -1512,6 +1589,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // TODO Check if section can be None
     // Returns None if action doesn't report on/off states (or if action not existing).
     // Option makes more sense than Result here because this function is at the same time the
@@ -1544,6 +1622,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns Err if send not existing
     pub fn get_track_send_ui_vol_pan(
         &self,
@@ -1569,6 +1648,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     // Returns Err e.g. if FX doesn't exist
     pub fn track_fx_get_preset_index(
         &self,
@@ -1587,6 +1667,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     // Returns Err e.g. if FX doesn't exist
     pub fn track_fx_set_preset_by_index(
         &self,
@@ -1605,6 +1686,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-probably-invalid-ptr-unsafe
     // Returns Err e.g. if FX doesn't exist
     pub fn track_fx_navigate_presets(
         &self,
@@ -1623,6 +1705,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high-maybe-invalid-ptr-safe
     pub fn track_fx_get_preset(
         &self,
         track: MediaTrack,

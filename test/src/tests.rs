@@ -18,9 +18,9 @@ use super::mock::observe_invocations;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
 use reaper_rs::medium_level::{
-    AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
+    AllowGang, AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
     MessageBoxType, MidiDeviceId, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
-    TrackInfoKey, TrackRef, WantMaster, WantUndo,
+    TrackFxRef, TrackInfoKey, TrackRef, WantMaster, WantUndo,
 };
 use std::rc::Rc;
 use std::time::Duration;
@@ -131,8 +131,9 @@ fn show_message_box() -> TestStep {
         // let project = reaper.get_current_project().get_raw();
         // reaper.execute_later_in_main_thread(Duration::from_secs(10), move || {
         //     let reaper = Reaper::get();
-        //     let master_track = reaper.medium.get_master_track(Some(project));
-        //     reaper.show_console_msg(format!("\nMaster track: {:?}", master_track))
+        //     let object = reaper.medium.get_master_track(Some(project));
+        //     let object = reaper.medium.get_track(Some(project), 0);
+        //     reaper.show_console_msg(format!("\nObject: {:?}", object))
         // });
         Ok(())
     })
@@ -785,10 +786,45 @@ fn remove_track() -> TestStep {
         check_eq!(track_2.get_guid(), track_2_guid);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track_1);
-        let raw = track_1.get_raw();
-        // TODO-high This crashes REAPER! So it should be unsafe.
-        // reaper.medium.set_only_track_selected(Some(raw));
+        // TODO-high This crashes REAPER or shows unexpected behavior! So functions should be
+        //  probably  marked unsafe. Consider making many pointer-checking methods and adding some
+        //  which have _unsafe suffix.
+        // let raw = track_1.get_raw();
+        // reaper.medium.csurf_set_surface_mute(raw, false, None);
+        // reaper.medium.csurf_set_surface_solo(raw, true, None);
+        // reaper
+        //     .medium
+        //     .set_media_track_info_value(raw, TrackInfoKey::B_FREEMODE, 1.0);
+        // reaper.medium.csurf_on_input_monitoring_change_ex(
+        //     raw,
+        //     InputMonitoringMode::Normal,
+        //     AllowGang::Yes,
+        // );
+        // dbg!(
+        //     reaper
+        //         .medium
+        //         .get_media_track_info_value(raw, TrackInfoKey::D_PAN)
+        // );
+        // reaper
+        //     .medium
+        //     .track_fx_set_param_normalized(raw, TrackFxRef::OutputFx(0), 0, 1.0);
+        // dbg!(
+        //     reaper
+        //         .medium
+        //         .track_fx_get_enabled(raw, TrackFxRef::OutputFx(0))
+        // );
         // let result = reaper.medium.create_track_send(raw, None);
+        // dbg!(reaper.medium.get_media_track_info_partrack(raw));
+        // dbg!(reaper.medium.get_media_track_info_project(raw));
+        // dbg!(reaper.medium.get_media_track_info_recmon(raw));
+        // dbg!(reaper.medium.get_media_track_info_recinput(raw));
+        // dbg!(reaper.medium.get_media_track_info_tracknumber(raw));
+        // dbg!(reaper.medium.get_media_track_info_guid(raw));
+        // dbg!(
+        //     reaper
+        //         .medium
+        //         .get_media_track_info_name(raw, |p| p.to_owned())
+        // );
         Ok(())
     })
 }
