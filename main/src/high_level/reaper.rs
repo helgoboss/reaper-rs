@@ -51,7 +51,7 @@ struct HighLevelHookCommand {}
 impl HookCommand for HighLevelHookCommand {
     fn call(command_id: u32, _flag: i32) -> bool {
         // TODO-low Pass on flag
-        let operation = match Reaper::get().command_by_index.borrow().get(&command_id) {
+        let operation = match Reaper::get().command_by_id.borrow().get(&command_id) {
             Some(command) => command.operation.clone(),
             None => return false,
         };
@@ -84,8 +84,7 @@ struct HighLevelToggleAction {}
 
 impl ToggleAction for HighLevelToggleAction {
     fn call(command_id: u32) -> i32 {
-        // TODO command_id == command_index!???
-        if let Some(command) = Reaper::get().command_by_index.borrow().get(&(command_id)) {
+        if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
             match &command.kind {
                 ActionKind::Toggleable(is_on) => {
                     if is_on() {
@@ -215,7 +214,7 @@ pub struct Reaper {
     // might not  be copyable (which we want to explicitly allow, that's why we accept FnMut!).
     // Or is it  possible to give up the map borrow after obtaining the command/operation
     // reference???  Look into that!!!
-    command_by_index: RefCell<HashMap<u32, Command>>,
+    command_by_id: RefCell<HashMap<u32, Command>>,
     pub(super) subjects: EventStreamSubjects,
     task_sender: Sender<Task>,
     main_thread_id: ThreadId,
@@ -353,7 +352,7 @@ impl Reaper {
         let reaper = Reaper {
             medium,
             logger,
-            command_by_index: RefCell::new(HashMap::new()),
+            command_by_id: RefCell::new(HashMap::new()),
             subjects: EventStreamSubjects::new(),
             task_sender,
             main_thread_id: thread::current().id(),
@@ -470,40 +469,40 @@ impl Reaper {
 
     pub fn register_action(
         &self,
-        command_id: &CStr,
+        command_name: &CStr,
         description: impl Into<Cow<'static, CStr>>,
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
-        let command_index = self.medium.plugin_register_command_id(command_id) as u32;
+        let command_id = self.medium.plugin_register_command_id(command_name) as u32;
         let command = Command::new(
-            command_index,
+            command_id,
             description.into(),
             Rc::new(RefCell::new(operation)),
             kind,
         );
-        self.register_command(command_index, command);
-        RegisteredAction::new(command_index)
+        self.register_command(command_id, command);
+        RegisteredAction::new(command_id)
     }
 
-    fn register_command(&self, command_index: u32, command: Command) {
-        if let Entry::Vacant(p) = self.command_by_index.borrow_mut().entry(command_index) {
+    fn register_command(&self, command_id: u32, command: Command) {
+        if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             let command = p.insert(command);
             let acc = &mut command.accelerator_register;
             self.medium.plugin_register_gaccel(acc);
         }
     }
 
-    fn unregister_command(&self, command_index: u32) {
+    fn unregister_command(&self, command_id: u32) {
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
         // if it's not in the map anymore, REAPER won't be able to find it.
-        let mut command_by_index = self.command_by_index.borrow_mut();
-        if let Some(command) = command_by_index.get_mut(&command_index) {
+        let mut command_by_id = self.command_by_id.borrow_mut();
+        if let Some(command) = command_by_id.get_mut(&command_id) {
             let acc = &mut command.accelerator_register;
             self.medium.plugin_unregister_gaccel(acc);
-            command_by_index.remove(&command_index);
+            command_by_id.remove(&command_id);
         }
     }
 
@@ -894,7 +893,7 @@ struct Command {
 
 impl Command {
     fn new(
-        command_index: u32,
+        command_id: u32,
         description: Cow<'static, CStr>,
         operation: Rc<RefCell<dyn FnMut()>>,
         kind: ActionKind,
@@ -907,7 +906,7 @@ impl Command {
                 accel: ACCEL {
                     fVirt: 0,
                     key: 0,
-                    cmd: command_index as c_ushort,
+                    cmd: command_id as c_ushort,
                 },
                 desc: null(),
             },
@@ -918,15 +917,15 @@ impl Command {
 }
 
 pub struct RegisteredAction {
-    command_index: u32,
+    command_id: u32,
 }
 
 impl RegisteredAction {
-    fn new(command_index: u32) -> RegisteredAction {
-        RegisteredAction { command_index }
+    fn new(command_id: u32) -> RegisteredAction {
+        RegisteredAction { command_id }
     }
 
     pub fn unregister(&self) {
-        Reaper::get().unregister_command(self.command_index);
+        Reaper::get().unregister_command(self.command_id);
     }
 }
