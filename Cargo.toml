@@ -3,7 +3,7 @@ members = [
     "main/low",
     "main/medium",
     "main/high",
-    "macros",
+    "main/macros",
     "test/test",
     "test/test-extension-plugin",
     "test/test-vst-plugin"

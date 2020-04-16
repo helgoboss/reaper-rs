@@ -9,7 +9,7 @@ edition = "2018"
 reaper-rs-high = { path = "../../main/high" }
 reaper-rs-low = { path = "../../main/low" }
 reaper-rs-test = { path = "../test" }
-reaper-rs-macros = { path = "../../macros" }
+reaper-rs-macros = { path = "../../main/macros" }
 c_str_macro = "1.0.2"
 rxrust = { path = '../../lib/rxRust'}
 slog = "2.5.2"
