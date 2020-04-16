@@ -1,5 +1,5 @@
 use c_str_macro::c_str;
-use reaper_rs::high_level::{ActionKind, Reaper};
+use reaper_rs_high::{ActionKind, Reaper};
 use reaper_rs_macros::reaper_extension_plugin;
 use std::error::Error;
 

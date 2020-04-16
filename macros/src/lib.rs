@@ -8,8 +8,8 @@ pub fn low_level_reaper_extension_plugin(_attr: TokenStream, input: TokenStream)
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[no_mangle]
-        extern "C" fn ReaperPluginEntry(h_instance: ::reaper_rs::low_level::raw::HINSTANCE, rec: *mut ::reaper_rs::low_level::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
-            ::reaper_rs::low_level::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
+        extern "C" fn ReaperPluginEntry(h_instance: ::reaper_rs_low::raw::HINSTANCE, rec: *mut ::reaper_rs_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
+            ::reaper_rs_low::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
         }
 
         #main_function
@@ -36,28 +36,12 @@ pub fn reaper_extension_plugin(attr: TokenStream, input: TokenStream) -> TokenSt
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[::reaper_rs_macros::low_level_reaper_extension_plugin]
-        fn low_level_main(context: &::reaper_rs::low_level::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
-            ::reaper_rs::high_level::setup_all_with_defaults(context, #email_address);
+        fn low_level_main(context: &::reaper_rs_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
+            ::reaper_rs_high::setup_all_with_defaults(context, #email_address);
             #main_function_name()
         }
 
         #main_function
     };
     tokens.into()
-}
-
-#[test]
-fn main() {
-    use std::env;
-    use std::fs::File;
-    use std::io::Read;
-    use std::process;
-
-    let mut file = File::open("../main/src/experiment.rs").expect("Unable to open experiment.rs");
-
-    let mut src = String::new();
-    file.read_to_string(&mut src).expect("Unable to read file");
-
-    let syntax = syn::parse_file(&src).expect("Unable to parse file");
-    println!("{:#?}", syntax);
 }

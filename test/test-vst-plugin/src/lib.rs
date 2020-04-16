@@ -1,7 +1,7 @@
 use c_str_macro::c_str;
 
-use reaper_rs::high_level::{setup_all_with_defaults, Reaper};
-use reaper_rs::low_level::ReaperPluginContext;
+use reaper_rs_high::{setup_all_with_defaults, Reaper};
+use reaper_rs_low::ReaperPluginContext;
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
 

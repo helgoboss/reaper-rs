@@ -1,6 +1,8 @@
 [workspace]
 members = [
-    "main",
+    "main/low",
+    "main/medium",
+    "main/high",
     "macros",
     "test/test",
     "test/test-extension-plugin",

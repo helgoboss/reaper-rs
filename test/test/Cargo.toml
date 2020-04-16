@@ -6,7 +6,8 @@ edition = "2018"
 
 
 [dependencies]
-reaper-rs = { path = "../../main", features = ["high-level"] }
+reaper-rs-high = { path = "../../main/high" }
+reaper-rs-medium = { path = "../../main/medium" }
 c_str_macro = "1.0.2"
 rxrust = { path = '../../lib/rxRust'}
 slog = "2.5.2"

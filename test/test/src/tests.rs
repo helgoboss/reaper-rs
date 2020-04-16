@@ -6,7 +6,7 @@ use std::ptr::null_mut;
 
 use c_str_macro::c_str;
 
-use reaper_rs::high_level::{
+use reaper_rs_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
     FxParameterValueRange, Guid, MidiInputDevice, Pan, Reaper, Tempo, Track, Volume,
 };
@@ -17,7 +17,7 @@ use crate::api::{step, TestStep};
 use super::mock::observe_invocations;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
-use reaper_rs::medium_level::{
+use reaper_rs_medium::{
     AllowGang, AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MessageBoxResult,
     MessageBoxType, MidiDeviceId, ReaperVersion, RecordingInput, StuffMidiMessageTarget,
     TrackFxRef, TrackInfoKey, TrackRef, WantMaster, WantUndo,

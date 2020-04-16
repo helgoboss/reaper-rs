@@ -1,5 +1,5 @@
 [submodule "lib/WDL"]
-	path = main/lib/WDL
+	path = main/low/lib/WDL
 	url = https://github.com/justinfrankel/WDL.git
 [submodule "lib/rxRust"]
 	path = lib/rxRust

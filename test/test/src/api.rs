@@ -1,4 +1,4 @@
-use reaper_rs::high_level::Reaper;
+use reaper_rs_high::Reaper;
 use rxrust::prelude::*;
 use std::borrow::Cow;
 
