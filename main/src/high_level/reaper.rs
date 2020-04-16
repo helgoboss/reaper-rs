@@ -35,8 +35,8 @@ use crate::low_level::{firewall, ReaperPluginContext};
 use crate::medium_level;
 use crate::medium_level::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    IsAdd, MessageBoxResult, MessageBoxType, MidiEvt, ProjectRef, ReaperStringArg, ReaperVersion,
-    StuffMidiMessageTarget, TrackRef,
+    HookCommand, HookPostCommand, IsAdd, MessageBoxResult, MessageBoxType, MidiEvt, ProjectRef,
+    ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction, TrackRef,
 };
 use helgoboss_midi::{MidiMessage, MidiMessageType};
 
@@ -44,29 +44,28 @@ use helgoboss_midi::{MidiMessage, MidiMessageType};
 static mut REAPER_INSTANCE: Option<Reaper> = None;
 static INIT_REAPER_INSTANCE: Once = Once::new();
 
-// Called by REAPER directly!
+// Called by REAPER (using a delegate function)!
 // Only for main section
-extern "C" fn hook_command(command_index: i32, _flag: i32) -> bool {
-    // TODO-low Pass on flag
-    firewall(|| {
-        let operation = match Reaper::get()
-            .command_by_index
-            .borrow()
-            .get(&(command_index as u32))
-        {
+struct HighLevelHookCommand {}
+
+impl HookCommand for HighLevelHookCommand {
+    fn call(command_id: u32, _flag: i32) -> bool {
+        // TODO-low Pass on flag
+        let operation = match Reaper::get().command_by_index.borrow().get(&command_id) {
             Some(command) => command.operation.clone(),
             None => return false,
         };
         (*operation).borrow_mut().call_mut(());
         true
-    })
-    .unwrap_or(false)
+    }
 }
 
-// Called by REAPER directly!
+// Called by REAPER directly (using a delegate function)!
 // Only for main section
-extern "C" fn hook_post_command(command_id: u32, _flag: i32) {
-    firewall(|| {
+struct HighLevelHookPostCommand {}
+
+impl HookPostCommand for HighLevelHookPostCommand {
+    fn call(command_id: u32, _flag: i32) {
         let reaper = Reaper::get();
         let action = reaper
             .get_main_section()
@@ -76,18 +75,17 @@ extern "C" fn hook_post_command(command_id: u32, _flag: i32) {
             .action_invoked
             .borrow_mut()
             .next(Payload(Rc::new(action)));
-    });
+    }
 }
 
 // Called by REAPER directly!
 // Only for main section
-extern "C" fn toggle_action(command_index: i32) -> i32 {
-    firewall(|| {
-        if let Some(command) = Reaper::get()
-            .command_by_index
-            .borrow()
-            .get(&(command_index as u32))
-        {
+struct HighLevelToggleAction {}
+
+impl ToggleAction for HighLevelToggleAction {
+    fn call(command_id: u32) -> i32 {
+        // TODO command_id == command_index!???
+        if let Some(command) = Reaper::get().command_by_index.borrow().get(&(command_id)) {
             match &command.kind {
                 ActionKind::Toggleable(is_on) => {
                     if is_on() {
@@ -101,8 +99,7 @@ extern "C" fn toggle_action(command_index: i32) -> i32 {
         } else {
             -1
         }
-    })
-    .unwrap_or(-1)
+    }
 }
 
 // Called by REAPER directly!
@@ -387,10 +384,12 @@ impl Reaper {
 
     // Must be idempotent
     pub fn activate(&self) {
-        self.medium.plugin_register_hookcommand(hook_command);
-        self.medium.plugin_register_toggleaction(toggle_action);
         self.medium
-            .plugin_register_hookpostcommand(hook_post_command);
+            .plugin_register_hookcommand::<HighLevelHookCommand>();
+        self.medium
+            .plugin_register_toggleaction::<HighLevelToggleAction>();
+        self.medium
+            .plugin_register_hookpostcommand::<HighLevelHookPostCommand>();
         self.medium.register_control_surface();
         self.medium
             .audio_reg_hardware_hook(IsAdd::Yes, &self.audio_hook as *const _ as *mut _);
@@ -402,9 +401,11 @@ impl Reaper {
             .audio_reg_hardware_hook(IsAdd::No, &self.audio_hook as *const _ as *mut _);
         self.medium.unregister_control_surface();
         self.medium
-            .plugin_unregister_hookpostcommand(hook_post_command);
-        self.medium.plugin_unregister_toggleaction(toggle_action);
-        self.medium.plugin_unregister_hookcommand(hook_command);
+            .plugin_unregister_hookpostcommand::<HighLevelHookPostCommand>();
+        self.medium
+            .plugin_unregister_toggleaction::<HighLevelToggleAction>();
+        self.medium
+            .plugin_unregister_hookcommand::<HighLevelHookCommand>();
     }
 
     pub fn get_version(&self) -> ReaperVersion {

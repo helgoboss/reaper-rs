@@ -3,7 +3,7 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::null_mut;
 
-use crate::low_level::raw;
+use crate::low_level::{firewall, raw};
 
 use crate::low_level;
 use crate::low_level::get_cpp_control_surface;
@@ -222,75 +222,64 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn plugin_register_hookcommand(&self, hookcommand: HookCommand) -> Result<(), ()> {
+    pub fn plugin_register_hookcommand<T: HookCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::HookCommand),
-                hookcommand as *mut c_void,
+                delegating_hook_command::<T> as *mut c_void,
             )
         };
         ok_if_one(result)
     }
 
     // TODO-doc
-    pub fn plugin_unregister_hookcommand(&self, hookcommand: HookCommand) {
+    pub fn plugin_unregister_hookcommand<T: HookCommand>(&self) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::HookCommand),
-                hookcommand as *mut c_void,
+                delegating_hook_command::<T> as *mut c_void,
             );
         }
     }
 
     // TODO-doc
-    pub fn plugin_register_toggleaction(&self, toggleaction: ToggleAction) -> Result<(), ()> {
+    pub fn plugin_register_toggleaction<T: ToggleAction>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::ToggleAction),
-                toggleaction as *mut c_void,
+                delegating_toggle_action::<T> as *mut c_void,
             )
         };
         ok_if_one(result)
     }
 
     // TODO-doc
-    pub fn plugin_unregister_toggleaction(&self, toggleaction: ToggleAction) {
+    pub fn plugin_unregister_toggleaction<T: ToggleAction>(&self) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::ToggleAction),
-                toggleaction as *mut c_void,
+                delegating_toggle_action::<T> as *mut c_void,
             );
         }
     }
 
     // TODO-doc
-    // TODO-high I think the functions registered here with plugin_register,
-    //  these are things we cannot lift to medium-level API style. Because at the end of the day
-    //  REAPER *needs* to be passed a function pointer with exactly that low-level signature.
-    //  Now, function pointers can't capture anything. So we would need a kind of registry object
-    //  which stores our medium-level functions. No way, this is too opinionated for medium-level.
-    //  (similar to why we can't make everything safe in medium-level).
-    //  BUT: We could try the generic approach!!! Be generic on the given medium-level function and
-    //  generate an appropriate low-level function for it. TRY IT! But unregistering must also work.
-    pub fn plugin_register_hookpostcommand(
-        &self,
-        hookpostcommand: HookPostCommand,
-    ) -> Result<(), ()> {
+    pub fn plugin_register_hookpostcommand<T: HookPostCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::HookPostCommand),
-                hookpostcommand as *mut c_void,
+                delegating_hook_post_command::<T> as *mut c_void,
             )
         };
         ok_if_one(result)
     }
 
     // TODO-doc
-    pub fn plugin_unregister_hookpostcommand(&self, hookpostcommand: HookPostCommand) {
+    pub fn plugin_unregister_hookpostcommand<T: HookPostCommand>(&self) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::HookPostCommand),
-                hookpostcommand as *mut c_void,
+                delegating_hook_post_command::<T> as *mut c_void,
             );
         }
     }
@@ -1667,6 +1656,20 @@ impl Reaper {
             }
         }
     }
+}
+
+extern "C" fn delegating_hook_command<T: HookCommand>(command_id: i32, flag: i32) -> bool {
+    firewall(|| T::call(command_id as u32, flag)).unwrap_or(false)
+}
+
+extern "C" fn delegating_toggle_action<T: ToggleAction>(command_id: i32) -> i32 {
+    firewall(|| T::call(command_id as u32)).unwrap_or(-1)
+}
+
+extern "C" fn delegating_hook_post_command<T: HookPostCommand>(command_id: i32, flag: i32) {
+    firewall(|| {
+        T::call(command_id as u32, flag);
+    });
 }
 
 pub enum GetParameterStepSizesResult {

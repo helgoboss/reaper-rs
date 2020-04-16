@@ -352,6 +352,8 @@ fn register_and_unregister_toggle_action() -> TestStep {
         });
         let action = reaper.get_action_by_command_name(c_str!("reaperRsTest2").into());
         // Then
+        let action_index = action.get_index();
+        let command_id = action.get_command_id();
         check!(action.is_available());
         check_eq!(mock.get_invocation_count(), 0);
         check!(!action.is_on());
