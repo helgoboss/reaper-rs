@@ -1,6 +1,5 @@
 [package]
-# TODO Call this "-extension" instead
-name = "reaper-rs-test-plugin"
+name = "reaper-rs-test-extension-plugin"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
 edition = "2018"
@@ -15,5 +14,5 @@ rxrust = { path = '../lib/rxRust'}
 slog = "2.5.2"
 
 [lib]
-name = "reaper_rs_test_plugin"
+name = "reaper_rs_test_extension_plugin"
 crate-type = ["cdylib"]

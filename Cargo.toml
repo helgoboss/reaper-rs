@@ -3,6 +3,6 @@ members = [
     "main",
     "macros",
     "test",
-    "test-plugin",
+    "test-extension-plugin",
     "test-vst-plugin"
 ]
