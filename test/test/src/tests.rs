@@ -130,12 +130,19 @@ fn show_message_box() -> TestStep {
         // Then
         check_eq!(result, MessageBoxResult::Ok);
         // // Comment out and close tab to test calling functions on vanished project
-        // let project = reaper.get_current_project().get_raw();
+        // let raw_project = reaper.get_current_project().get_raw();
+        // let raw_track = reaper
+        //     .get_current_project()
+        //     .get_track_by_index(0)
+        //     .unwrap()
+        //     .get_raw();
         // reaper.execute_later_in_main_thread(Duration::from_secs(10), move || {
         //     let reaper = Reaper::get();
-        //     let object = reaper.medium.get_master_track(Some(project));
-        //     let object = reaper.medium.get_track(Some(project), 0);
-        //     reaper.show_console_msg(format!("\nObject: {:?}", object))
+        //     // let object = reaper.medium.get_master_track(Some(project));
+        //     // let object = reaper.medium.get_track(Some(project), 0);
+        //     dbg!(reaper.medium.validate_ptr(raw_track));
+        //     dbg!(reaper.medium.validate_ptr_2(None, raw_track));
+        //     dbg!(reaper.medium.validate_ptr_2(Some(raw_project), raw_track));
         // });
         Ok(())
     })
@@ -788,185 +795,6 @@ fn remove_track() -> TestStep {
         check_eq!(track_2.get_guid(), track_2_guid);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track_1);
-        use std::panic::catch_unwind;
-        let raw = track_1.get_raw();
-        let med = &reaper.medium;
-        check!(catch_unwind(|| med.get_media_track_info_partrack(raw)).is_err());
-        check!(catch_unwind(|| med.set_only_track_selected(Some(raw))).is_err());
-        check!(catch_unwind(|| med.create_track_send(raw, None)).is_err());
-        check!(catch_unwind(|| med.get_media_track_info_project(raw)).is_err());
-        check!(catch_unwind(|| med.get_media_track_info_name(raw, |p| p.to_owned())).is_err());
-        check!(catch_unwind(|| med.get_media_track_info_recmon(raw)).is_err());
-        check!(catch_unwind(|| med.get_media_track_info_recinput(raw)).is_err());
-        check!(catch_unwind(|| med.get_media_track_info_tracknumber(raw)).is_err());
-        check!(catch_unwind(|| med.get_media_track_info_guid(raw)).is_err());
-        check!(catch_unwind(|| med.csurf_set_surface_mute(raw, false, None)).is_err());
-        check!(catch_unwind(|| med.csurf_set_surface_solo(raw, true, None)).is_err());
-        check!(
-            catch_unwind(|| med.track_fx_add_by_name(
-                raw,
-                "ReaControlMIDI (Cockos)",
-                RecFx::No,
-                TrackFxAddByNameVariant::Query
-            ))
-            .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_add_by_name_query(
-                raw,
-                "ReaControlMIDI (Cockos)",
-                RecFx::No
-            ))
-            .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_add_by_name_add(
-                raw,
-                "ReaControlMIDI (Cockos)",
-                RecFx::No,
-                true
-            ))
-            .is_err()
-        );
-        check!(catch_unwind(|| med.track_fx_get_enabled(raw, TrackFxRef::OutputFx(0))).is_err());
-        check!(catch_unwind(|| med.track_fx_get_fx_name(raw, TrackFxRef::OutputFx(0), 0)).is_err());
-        check!(catch_unwind(|| med.track_fx_get_instrument(raw)).is_err());
-        check!(
-            catch_unwind(|| med.track_fx_set_enabled(raw, TrackFxRef::OutputFx(0), true)).is_err()
-        );
-        check!(catch_unwind(|| med.track_fx_get_num_params(raw, TrackFxRef::OutputFx(0))).is_err());
-        check!(
-            catch_unwind(|| med.track_fx_get_param_name(raw, TrackFxRef::OutputFx(0), 0, 0))
-                .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_get_formatted_param_value(
-                raw,
-                TrackFxRef::OutputFx(0),
-                0,
-                0
-            ))
-            .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_format_param_value_normalized(
-                raw,
-                TrackFxRef::OutputFx(0),
-                0,
-                1.0,
-                0
-            ))
-            .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_set_param_normalized(
-                raw,
-                TrackFxRef::OutputFx(0),
-                0,
-                1.0
-            ))
-            .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_copy_to_track(
-                raw,
-                TrackFxRef::OutputFx(0),
-                raw,
-                TrackFxRef::OutputFx(1),
-                IsMove::Yes
-            ))
-            .is_err()
-        );
-        check!(catch_unwind(|| med.track_fx_delete(raw, TrackFxRef::OutputFx(0))).is_err());
-        check!(
-            catch_unwind(|| med.track_fx_get_parameter_step_sizes(raw, TrackFxRef::OutputFx(0), 0))
-                .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_get_param_ex(raw, TrackFxRef::OutputFx(0), 0)).is_err()
-        );
-        check!(catch_unwind(|| med.get_track_automation_mode(raw)).is_err());
-        check!(
-            catch_unwind(|| med.get_track_envelope_by_chunk_name(raw, EnvChunkName::PANENV2))
-                .is_err()
-        );
-        check!(catch_unwind(|| med.get_track_envelope_by_name(raw, "Volume")).is_err());
-        check!(catch_unwind(|| med.get_media_track_info_value(raw, TrackInfoKey::D_PAN)).is_err());
-        check!(catch_unwind(|| med.track_fx_get_count(raw)).is_err());
-        check!(catch_unwind(|| med.track_fx_get_rec_count(raw)).is_err());
-        check!(catch_unwind(|| med.track_fx_get_fx_guid(raw, TrackFxRef::OutputFx(0))).is_err());
-        check!(
-            catch_unwind(|| med.track_fx_get_param_normalized(raw, TrackFxRef::OutputFx(0), 0))
-                .is_err()
-        );
-        check!(
-            catch_unwind(|| med.csurf_on_input_monitoring_change_ex(
-                raw,
-                InputMonitoringMode::Normal,
-                AllowGang::Yes
-            ))
-            .is_err()
-        );
-        check!(
-            catch_unwind(|| med.set_media_track_info_value(raw, TrackInfoKey::B_FREEMODE, 1.0))
-                .is_err()
-        );
-        check!(catch_unwind(|| med.get_track_ui_vol_pan(raw)).is_err());
-        check!(catch_unwind(|| med.csurf_set_surface_volume(raw, 0.5, None)).is_err());
-        check!(
-            catch_unwind(|| med.csurf_on_volume_change_ex(raw, 0.5, Relative::Yes, AllowGang::Yes))
-                .is_err()
-        );
-        check!(catch_unwind(|| med.csurf_set_surface_pan(raw, 0.5, None)).is_err());
-        check!(
-            catch_unwind(|| med.csurf_on_pan_change_ex(raw, 0.5, Relative::Yes, AllowGang::Yes))
-                .is_err()
-        );
-        check!(catch_unwind(|| med.set_track_selected(raw, true)).is_err());
-        check!(catch_unwind(|| med.delete_track(raw)).is_err());
-        check!(catch_unwind(|| med.get_track_num_sends(raw, TrackSendCategory::Receive)).is_err());
-        check!(
-            catch_unwind(|| med.get_track_send_info_desttrack(raw, SendOrReceive::Send, 0))
-                .is_err()
-        );
-        check!(catch_unwind(|| med.get_track_state_chunk(raw, 0, IsUndoOptional::Yes)).is_err());
-        check!(catch_unwind(|| med.create_track_send(raw, None)).is_err());
-        check!(
-            catch_unwind(|| med.csurf_on_rec_arm_change_ex(raw, RecArmState::Armed, AllowGang::No))
-                .is_err()
-        );
-        check!(
-            catch_unwind(|| med.set_track_state_chunk(raw, "foo", IsUndoOptional::Yes)).is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_show(
-                raw,
-                TrackFxRef::InputFx(0),
-                FxShowFlag::ShowFloatingWindow
-            ))
-            .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_get_floating_window(raw, TrackFxRef::InputFx(0))).is_err()
-        );
-        check!(catch_unwind(|| med.track_fx_get_open(raw, TrackFxRef::InputFx(0))).is_err());
-        check!(
-            catch_unwind(|| med.csurf_on_send_volume_change(raw, 1, 0.5, Relative::No)).is_err()
-        );
-        check!(catch_unwind(|| med.csurf_on_send_pan_change(raw, 1, 0.5, Relative::No)).is_err());
-        check!(catch_unwind(|| med.get_track_send_ui_vol_pan(raw, 1)).is_err());
-        check!(
-            catch_unwind(|| med.track_fx_get_preset_index(raw, TrackFxRef::InputFx(0))).is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_set_preset_by_index(raw, TrackFxRef::InputFx(0), 10))
-                .is_err()
-        );
-        check!(
-            catch_unwind(|| med.track_fx_navigate_presets(raw, TrackFxRef::InputFx(0), -1))
-                .is_err()
-        );
-        check!(catch_unwind(|| med.track_fx_get_preset(raw, TrackFxRef::InputFx(0), 0)).is_err());
         Ok(())
     })
 }

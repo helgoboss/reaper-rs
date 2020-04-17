@@ -140,6 +140,15 @@ impl Reaper {
         }
     }
 
+    // TODO Doc
+    pub fn validate_ptr<'a>(&self, pointer: impl Into<ReaperPointer<'a>>) -> bool {
+        let pointer = pointer.into();
+        unsafe {
+            self.low
+                .ValidatePtr(pointer.as_void(), Cow::from(pointer).as_ptr())
+        }
+    }
+
     /// Shows a message to the user (also useful for debugging). Send "\n" for newline and "" to
     /// clear the console.
     pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
