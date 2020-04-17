@@ -95,6 +95,7 @@ impl From<IsMove> for bool {
     }
 }
 
+// TODO-high There's a similar enum
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RecFx {
     No,

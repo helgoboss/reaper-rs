@@ -123,58 +123,6 @@ impl Reaper {
         MediaTrack::optional(ptr)
     }
 
-    // ### POSSIBILITY 1: Mmh, it would be a good way if we don't want _in_current_project methods
-    // + By default safe
-    // + Same possibilities like original API
-    // - Some/None parameter adds noise although unnecessary because we have speaking
-    //   _in_current_project method ... but wait, we can use Into<Option> ... no, ugly signature,
-    //   too clever
-    // - Not narrowed down enough (unsafe is totally unnecessary in case of None)
-
-    pub fn P1_get_track(&self, proj: Option<ReaProject>, trackidx: u32) -> Option<MediaTrack> {
-        // First do pointer check
-    }
-    pub unsafe fn P1_get_track_unsafe(
-        &self,
-        proj: Option<ReaProject>,
-        trackidx: u32,
-    ) -> Option<MediaTrack> {
-    }
-    pub fn P1_get_track_in_current_project(&self, trackidx: u32) -> Option<MediaTrack> {}
-
-    // ### POSSIBILITY 2: Yes! The downside is not bad. Documentation and clarity makes up for it.
-    // + By default safe
-    // - Have to dig (a bit) deeper for searching within current project
-    // + No unnecessary Some/None parameter, more speaking
-    // + More narrowed down
-
-    pub fn P2_get_track(&self, proj: ReaProject, trackidx: u32) -> Option<MediaTrack> {
-        // First do pointer check
-    }
-    pub unsafe fn P2_get_track_unsafe(
-        &self,
-        proj: ReaProject,
-        trackidx: u32,
-    ) -> Option<MediaTrack> {
-    }
-    pub fn P2_get_track_in_current_project(&self, trackidx: u32) -> Option<MediaTrack> {}
-
-    // ### POSSIBILITY 3: No! The benefit is not convincing. The pointer check is cheap and we can
-    // always opt-out.
-    // + No implicit pointer checks when using original API
-    // - Not idiomatic to have a _safe prefix
-
-    pub unsafe fn P3_get_track(
-        &self,
-        proj: Option<ReaProject>,
-        trackidx: u32,
-    ) -> Option<MediaTrack> {
-    }
-    pub fn P3_get_track_safe(&self, proj: Option<ReaProject>, trackidx: u32) -> Option<MediaTrack> {
-        // First do pointer check
-    }
-    pub fn P3_get_track_in_current_project(&self, trackidx: u32) -> Option<MediaTrack> {}
-
     /// Returns `true` if the given pointer is a valid object of the right type in project `proj`
     /// (`proj` is ignored if pointer is itself a project).
     pub fn validate_ptr_2<'a>(
@@ -644,7 +592,7 @@ impl Reaper {
         track: MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
         rec_fx: RecFx,
-        force_add: bool,
+        force_add: bool, // TODO-high Should be an enum
     ) -> Result<u32, ()> {
         match self.track_fx_add_by_name(
             track,
