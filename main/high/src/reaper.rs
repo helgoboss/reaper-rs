@@ -31,13 +31,13 @@ use crate::{
 use helgoboss_midi::{MidiMessage, MidiMessageType};
 use reaper_rs_low;
 use reaper_rs_low::raw;
-use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, ACCEL, HWND};
+use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, ACCEL};
 use reaper_rs_low::{firewall, ReaperPluginContext};
 use reaper_rs_medium;
 use reaper_rs_medium::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    HookCommand, HookPostCommand, IsAdd, MessageBoxResult, MessageBoxType, MidiEvt, ProjectRef,
-    ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction, TrackRef,
+    HookCommand, HookPostCommand, Hwnd, IsAdd, MessageBoxResult, MessageBoxType, MidiEvt,
+    ProjectRef, ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -791,7 +791,7 @@ impl Reaper {
         )
     }
 
-    pub fn get_main_window(&self) -> HWND {
+    pub fn get_main_window(&self) -> Hwnd {
         self.medium.get_main_hwnd()
     }
 

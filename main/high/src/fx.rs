@@ -7,8 +7,8 @@ use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, Reaper, Track};
-use reaper_rs_low::raw::{GetActiveWindow, HWND};
-use reaper_rs_medium::{FxShowFlag, TrackFxRef};
+use reaper_rs_low::raw::GetActiveWindow;
+use reaper_rs_medium::{FxShowFlag, Hwnd, TrackFxRef};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
@@ -228,7 +228,7 @@ impl Fx {
         self.replace_track_chunk_region(self.get_state_chunk(), chunk);
     }
 
-    pub fn get_floating_window(&self) -> HWND {
+    pub fn get_floating_window(&self) -> Option<Hwnd> {
         self.load_if_necessary_or_complain();
         Reaper::get()
             .medium
@@ -242,16 +242,18 @@ impl Fx {
     }
 
     pub fn window_has_focus(&self) -> bool {
-        let hwnd = self.get_floating_window();
-        if hwnd.is_null() {
-            // FX is not open in floating window. In this case we consider it as focused if the FX
-            // chain of that track is open and the currently displayed FX in the FX chain is this
-            // FX.
-            self.window_is_open()
-        } else {
-            // FX is open in floating window
-            let active_window = unsafe { GetActiveWindow() };
-            active_window == hwnd
+        match self.get_floating_window() {
+            None => {
+                // FX is not open in floating window. In this case we consider it as focused if the
+                // FX chain of that track is open and the currently displayed FX in
+                // the FX chain is this FX.
+                self.window_is_open()
+            }
+            Some(hwnd) => {
+                // FX is open in floating window
+                let active_window = unsafe { GetActiveWindow() };
+                active_window == hwnd.into()
+            }
         }
     }
 

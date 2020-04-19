@@ -177,7 +177,7 @@ impl Action {
             reaper.medium.kbd_on_main_action_ex(
                 action_command_id,
                 KbdActionValue::Relative2(cropped_relative_value),
-                reaper.medium.get_main_hwnd(),
+                Some(reaper.medium.get_main_hwnd()),
                 project.map(|p| p.get_raw()),
             );
         } else {
@@ -188,7 +188,7 @@ impl Action {
             reaper.medium.kbd_on_main_action_ex(
                 action_command_id,
                 KbdActionValue::AbsoluteLowRes(discrete_value),
-                reaper.medium.get_main_hwnd(),
+                Some(reaper.medium.get_main_hwnd()),
                 project.map(|p| p.get_raw()),
             );
             // Main_OnCommandEx would trigger the actionInvoked event but it has not enough

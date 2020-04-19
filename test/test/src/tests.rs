@@ -149,7 +149,7 @@ fn show_message_box() -> TestStep {
             dbg!(med.kbd_on_main_action_ex(
                 4,
                 KbdActionValue::AbsoluteLowRes(u7(127)),
-                null_mut(),
+                None,
                 Some(p)
             ));
             dbg!(med.count_tracks(Some(p)));
@@ -224,9 +224,8 @@ fn get_reaper_window() -> TestStep {
     step("Get REAPER window", |reaper, _| {
         // Given
         // When
-        let window = reaper.get_main_window();
+        reaper.get_main_window();
         // Then
-        check!(!window.is_null());
         Ok(())
     })
 }
@@ -1782,7 +1781,7 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
         });
         fx.show_in_floating_window();
         // Then
-        check!(!fx.get_floating_window().is_null());
+        check!(fx.get_floating_window().is_some());
         check!(fx.window_is_open());
         check!(fx.window_has_focus());
         check!(fx_opened_mock.get_invocation_count() >= 1);
@@ -1803,7 +1802,7 @@ fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             .ok_or("Couldn't find first fx")?;
         // When
         // Then
-        check!(fx.get_floating_window().is_null());
+        check!(fx.get_floating_window().is_none());
         check!(!fx.window_is_open());
         check!(!fx.window_has_focus());
         check!(reaper.get_focused_fx().is_none());

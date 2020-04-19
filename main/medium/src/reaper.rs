@@ -7,7 +7,7 @@ use reaper_rs_low::{firewall, raw};
 
 use crate::{
     AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
-    ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand,
+    ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
     InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, KbdSectionInfo, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
     ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion, RecArmState, RecFx,
@@ -19,7 +19,7 @@ use enumflags2::BitFlags;
 use helgoboss_midi::MidiMessage;
 use reaper_rs_low;
 use reaper_rs_low::get_cpp_control_surface;
-use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, GUID, HWND, UNDO_STATE_ALL};
+use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, GUID, UNDO_STATE_ALL};
 use std::convert::{TryFrom, TryInto};
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
@@ -463,8 +463,7 @@ impl Reaper {
         &self,
         cmd: u32,
         value: KbdActionValue,
-        // TODO-high Wrap HWND pointer!
-        hwnd: HWND,
+        hwnd: Option<Hwnd>,
         proj: Option<ReaProject>,
     ) -> i32 {
         use KbdActionValue::*;
@@ -480,14 +479,20 @@ impl Reaper {
             Relative3(v) => (i32::from(v), -1, 3),
         };
         unsafe {
-            self.low
-                .KBD_OnMainActionEx(cmd as i32, val, valhw, relmode, hwnd, option_into(proj))
+            self.low.KBD_OnMainActionEx(
+                cmd as i32,
+                val,
+                valhw,
+                relmode,
+                option_into(hwnd),
+                option_into(proj),
+            )
         }
     }
 
     /// Returns the REAPER main window handle.
-    pub fn get_main_hwnd(&self) -> HWND {
-        self.low.GetMainHwnd()
+    pub fn get_main_hwnd(&self) -> Hwnd {
+        Hwnd::required_panic(self.low.GetMainHwnd())
     }
 
     // TODO-doc
@@ -602,7 +607,7 @@ impl Reaper {
         track: MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
         rec_fx: RecFx,
-        force_add: bool, // TODO-high Should be an enum
+        force_add: bool, // TODO-medium Should be an enum
     ) -> Result<u32, ()> {
         match self.track_fx_add_by_name(
             track,
@@ -1542,11 +1547,16 @@ impl Reaper {
 
     // TODO-doc
     // TODO-high-invalid-ptr-unsafe
-    pub fn track_fx_get_floating_window(&self, track: MediaTrack, index: TrackFxRef) -> HWND {
-        unsafe {
+    pub fn track_fx_get_floating_window(
+        &self,
+        track: MediaTrack,
+        index: TrackFxRef,
+    ) -> Option<Hwnd> {
+        let ptr = unsafe {
             self.low
                 .TrackFX_GetFloatingWindow(track.into(), index.into())
-        }
+        };
+        Hwnd::optional(ptr)
     }
 
     // TODO-doc
