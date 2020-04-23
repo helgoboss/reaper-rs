@@ -170,9 +170,9 @@ impl Track {
         self.load_and_check_if_necessary_or_complain();
         // It's important that we don't query D_PAN because that returns the wrong value in case an
         // envelope is written
-        let (_, pan) = unsafe { Reaper::get().medium.get_track_ui_vol_pan(self.get_raw()) }
+        let result = unsafe { Reaper::get().medium.get_track_ui_vol_pan(self.get_raw()) }
             .expect("Couldn't get vol/pan");
-        Pan::from_reaper_value(pan)
+        Pan::from_reaper_value(result.pan)
     }
 
     pub fn set_pan(&self, pan: Pan) {
@@ -199,9 +199,9 @@ impl Track {
     pub fn get_volume(&self) -> Volume {
         // It's important that we don't query D_VOL because that returns the wrong value in case an
         // envelope is written
-        let (volume, _) = unsafe { Reaper::get().medium.get_track_ui_vol_pan(self.get_raw()) }
+        let result = unsafe { Reaper::get().medium.get_track_ui_vol_pan(self.get_raw()) }
             .expect("Couldn't get vol/pan");
-        Volume::from_reaper_value(volume)
+        Volume::from_reaper_value(result.volume)
     }
 
     pub fn set_volume(&self, volume: Volume) {

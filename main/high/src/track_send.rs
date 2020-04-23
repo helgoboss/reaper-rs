@@ -84,13 +84,13 @@ impl TrackSend {
     pub fn get_volume(&self) -> Volume {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the
         // wrong value if an envelope is written.
-        let (volume, _) = unsafe {
+        let result = unsafe {
             Reaper::get()
                 .medium
                 .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
         }
         .expect("Couldn't get send vol/pan");
-        Volume::from_reaper_value(volume)
+        Volume::from_reaper_value(result.volume)
     }
 
     pub fn set_volume(&self, volume: Volume) {
@@ -105,13 +105,13 @@ impl TrackSend {
     }
 
     pub fn get_pan(&self) -> Pan {
-        let (_, pan) = unsafe {
+        let result = unsafe {
             Reaper::get()
                 .medium
                 .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
         }
         .expect("Couldn't get send vol/pan");
-        Pan::from_reaper_value(pan)
+        Pan::from_reaper_value(result.pan)
     }
 
     pub fn set_pan(&self, pan: Pan) {

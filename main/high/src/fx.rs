@@ -338,7 +338,7 @@ impl Fx {
                 .track_fx_get_preset_index(self.track.get_raw(), self.get_query_index())
         }
         .expect("Couldn't get preset count")
-        .1
+        .count
     }
 
     pub fn preset_is_dirty(&self) -> bool {

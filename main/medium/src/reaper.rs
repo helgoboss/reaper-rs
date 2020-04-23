@@ -1297,7 +1297,10 @@ impl Reaper {
 
     // TODO-doc
     // I guess it returns Err if the track doesn't exist
-    pub unsafe fn get_track_ui_vol_pan(&self, track: MediaTrack) -> Result<(f64, f64), ()> {
+    pub unsafe fn get_track_ui_vol_pan(
+        &self,
+        track: MediaTrack,
+    ) -> Result<GetTrackUiVolPanResult, ()> {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
         let successful =
@@ -1306,7 +1309,10 @@ impl Reaper {
         if !successful {
             return Err(());
         }
-        Ok((volume.assume_init(), pan.assume_init()))
+        Ok(GetTrackUiVolPanResult {
+            volume: volume.assume_init(),
+            pan: pan.assume_init(),
+        })
     }
 
     // TODO-doc
@@ -1615,13 +1621,12 @@ impl Reaper {
     }
 
     // TODO-doc
-    // TODO-high return struct
     // Returns Err if send not existing
     pub unsafe fn get_track_send_ui_vol_pan(
         &self,
         track: MediaTrack,
         send_index: u32,
-    ) -> Result<(f64, f64), ()> {
+    ) -> Result<GetTrackSendUiVolPanResult, ()> {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
         let successful = self.low.GetTrackSendUIVolPan(
@@ -1633,17 +1638,19 @@ impl Reaper {
         if !successful {
             return Err(());
         }
-        Ok((volume.assume_init(), pan.assume_init()))
+        Ok(GetTrackSendUiVolPanResult {
+            volume: volume.assume_init(),
+            pan: pan.assume_init(),
+        })
     }
 
     // TODO-doc
-    // TODO-high return struct, search for other Result<(
     // Returns Err e.g. if FX doesn't exist
     pub unsafe fn track_fx_get_preset_index(
         &self,
         track: MediaTrack,
         fx: TrackFxRef,
-    ) -> Result<(u32, u32), ()> {
+    ) -> Result<TrackFxGetPresetIndexResult, ()> {
         let mut num_presets = MaybeUninit::uninit();
         let index =
             self.low
@@ -1651,7 +1658,10 @@ impl Reaper {
         if index == -1 {
             return Err(());
         }
-        return Ok((index as u32, num_presets.assume_init() as u32));
+        Ok(TrackFxGetPresetIndexResult {
+            index: index as u32,
+            count: num_presets.assume_init() as u32,
+        })
     }
 
     // TODO-doc
@@ -1777,6 +1787,22 @@ pub struct GetMidiDevNameResult {
 pub struct TrackFxGetPresetResult {
     pub state_matches_preset: bool,
     pub name: Option<CString>,
+}
+
+pub struct TrackFxGetPresetIndexResult {
+    pub index: u32,
+    pub count: u32,
+}
+
+pub struct GetTrackUiVolPanResult {
+    pub volume: f64,
+    pub pan: f64,
+}
+
+// TODO-medium Unify with GetTrackUiVolPanResult?
+pub struct GetTrackSendUiVolPanResult {
+    pub volume: f64,
+    pub pan: f64,
 }
 
 pub enum GetLastTouchedFxResult {
