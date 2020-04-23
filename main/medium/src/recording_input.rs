@@ -1,7 +1,8 @@
+use derive_more::Into;
 use helgoboss_midi::Channel;
 use std::convert::{TryFrom, TryInto};
 
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord, Into)]
 pub struct MidiDeviceId(pub(super) u8);
 
 // TODO-high Consider creating all newtypes with macros for more consistency and less code:
@@ -13,12 +14,6 @@ impl MidiDeviceId {
     pub fn new(number: u8) -> MidiDeviceId {
         assert!(number < 63, "MIDI device IDs must be <= 62");
         MidiDeviceId(number)
-    }
-}
-
-impl From<MidiDeviceId> for u8 {
-    fn from(id: MidiDeviceId) -> Self {
-        id.0
     }
 }
 
