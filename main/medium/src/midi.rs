@@ -1,8 +1,9 @@
 use helgoboss_midi::{MidiMessage, U7};
-use reaper_rs_low::raw::{midi_Input, midi_Output, MIDI_event_t, MIDI_eventlist};
+use reaper_rs_low::raw;
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::os::raw::c_int;
+use std::ptr::NonNull;
 
 // TODO-doc
 // This is like a MediaTrack object in that it wraps a raw pointer.
@@ -12,8 +13,11 @@ use std::os::raw::c_int;
 // way to  go). That closure would expect a reference of the MidiInput. => Well, we could probably
 // check  the validity of the device if we check its presence via GetMIDIInputName with the
 // appropriate  device ID?
-define_ptr_wrapper!(MidiInput, midi_Input);
-define_ptr_wrapper!(MidiOutput, midi_Output);
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct MidiInput(pub NonNull<raw::midi_Input>);
+
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct MidiOutput(pub NonNull<raw::midi_Output>);
 
 impl MidiInput {
     // This expects a function because the result (MIDI event list) is *very* temporary in nature.
@@ -24,16 +28,16 @@ impl MidiInput {
     // especially bad because this code code typically runs in the audio thread and therefore
     // has real-time requirements. Same reasoning like here: https://stackoverflow.com/questions/61106587
     pub unsafe fn get_read_buf<R>(&self, mut f: impl FnOnce(&MidiEvtList) -> R) -> R {
-        let raw_evt_list = (*self.0).GetReadBuf();
+        let raw_evt_list = self.0.as_ref().GetReadBuf();
         f(&MidiEvtList::new(&*raw_evt_list))
     }
 }
 
-pub struct MidiEvtList<'a>(&'a MIDI_eventlist);
+pub struct MidiEvtList<'a>(&'a raw::MIDI_eventlist);
 
 impl<'a> MidiEvtList<'a> {
     // TODO-medium Maybe from() would be a better name for all pointer wrappers.
-    pub(super) fn new(raw_evt_list: &'a MIDI_eventlist) -> Self {
+    pub(super) fn new(raw_evt_list: &'a raw::MIDI_eventlist) -> Self {
         MidiEvtList(raw_evt_list)
     }
 
@@ -46,7 +50,7 @@ impl<'a> MidiEvtList<'a> {
 }
 
 pub struct MidiEvtListIterator<'a> {
-    raw_list: &'a MIDI_eventlist,
+    raw_list: &'a raw::MIDI_eventlist,
     bpos: i32,
 }
 
@@ -69,12 +73,12 @@ impl<'a> Iterator for MidiEvtListIterator<'a> {
 // TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
 //  keeps  the event around.
 #[derive(Clone, Copy)]
-pub struct MidiEvt<'a>(&'a MIDI_event_t);
+pub struct MidiEvt<'a>(&'a raw::MIDI_event_t);
 
 // TODO-medium Check everything if conform with API conventions
 //  (e.g. https://rust-lang.github.io/api-guidelines/naming.html)
 impl<'a> MidiEvt<'a> {
-    pub unsafe fn new(raw_evt: &'a MIDI_event_t) -> Self {
+    pub unsafe fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
         MidiEvt(raw_evt)
     }
 
@@ -87,16 +91,16 @@ impl<'a> MidiEvt<'a> {
     }
 }
 
-impl<'a> From<MidiEvt<'a>> for &'a MIDI_event_t {
+impl<'a> From<MidiEvt<'a>> for &'a raw::MIDI_event_t {
     fn from(outer: MidiEvt<'a>) -> Self {
         outer.0
     }
 }
 
-pub struct MidiMsg<'a>(&'a MIDI_event_t);
+pub struct MidiMsg<'a>(&'a raw::MIDI_event_t);
 
 impl<'a> MidiMsg<'a> {
-    pub(super) fn new(raw_evt: &'a MIDI_event_t) -> Self {
+    pub(super) fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
         MidiMsg(raw_evt)
     }
 }

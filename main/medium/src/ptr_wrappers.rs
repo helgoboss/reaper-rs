@@ -3,7 +3,10 @@
 //! plug-in, yet they could come and go anytime, so 'static would be too optimistic. Annotating
 //! with a lifetime 'a - correlated to another lifetime - would be impossible because we
 //! don't have such another lifetime which can serve as frame of reference. So the best we
-//! can do is wrapping pointers.
+//! can do is wrapping pointers. For all opaque structs we do that simply by creating a type alias
+//! to NonNull because NonNull maintains all the invariants we need (pointer not null) and opaque
+//! structs don't have methods which need to be lifted to medium-level API style. For non-opaque
+//! structs we wrap the NonNull in a newtype because we need to add medium-level API style methods.
 use derive_more::Into;
 use reaper_rs_low::raw;
 use std::convert::Into;

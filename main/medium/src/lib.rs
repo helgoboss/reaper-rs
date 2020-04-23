@@ -70,9 +70,6 @@
 //  on REAPER itself not running into UB (waiting for Justin to comment on some functions) or
 //  just mark the methods where this is not possible as unsafe. A higher-level API then should
 //  take care of making things absolutely safe.
-#[macro_use]
-mod ptr_macros;
-
 mod constants;
 pub use constants::*;
 

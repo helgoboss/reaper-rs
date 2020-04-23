@@ -520,13 +520,13 @@ impl Reaper {
     // TODO-doc
     pub fn get_midi_input(&self, idx: u32) -> Option<MidiInput> {
         let ptr = self.low.GetMidiInput(idx as i32);
-        MidiInput::optional(ptr)
+        NonNull::new(ptr).map(MidiInput)
     }
 
     // TODO-doc
     pub fn get_midi_output(&self, idx: u32) -> Option<MidiOutput> {
         let ptr = self.low.GetMidiOutput(idx as i32);
-        MidiOutput::optional(ptr)
+        NonNull::new(ptr).map(MidiOutput)
     }
 
     // TODO-doc
