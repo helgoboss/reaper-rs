@@ -265,7 +265,7 @@ impl Fx {
             Some(hwnd) => {
                 // FX is open in floating window
                 let active_window = unsafe { GetActiveWindow() };
-                active_window == hwnd.into()
+                active_window == hwnd.as_ptr()
             }
         }
     }

@@ -376,10 +376,10 @@ impl<'a> ReaperPointer<'a> {
         match self {
             MediaTrack(p) => p.as_ptr() as *mut _,
             ReaProject(p) => p.as_ptr() as *mut _,
-            MediaItem(p) => (*p).into(),
-            MediaItemTake(p) => (*p).into(),
-            TrackEnvelope(p) => (*p).into(),
-            PcmSource(p) => (*p).into(),
+            MediaItem(p) => p.as_ptr() as *mut _,
+            MediaItemTake(p) => p.as_ptr() as *mut _,
+            TrackEnvelope(p) => p.as_ptr() as *mut _,
+            PcmSource(p) => p.as_ptr() as *mut _,
             Custom { pointer, .. } => *pointer,
         }
     }

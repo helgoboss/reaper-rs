@@ -365,7 +365,7 @@ impl Reaper {
         let result = unsafe {
             self.plugin_register(
                 RegInstr::Register(ExtensionType::CSurfInst),
-                csurf_inst.into(),
+                csurf_inst.as_ptr() as *mut _,
             )
         };
         ok_if_one(result)
@@ -376,7 +376,7 @@ impl Reaper {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::CSurfInst),
-                csurf_inst.into(),
+                csurf_inst.as_ptr() as *mut _,
             );
         }
     }
@@ -407,7 +407,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfaceMute(trackid.as_ptr(), mute, option_into(ignoresurf));
+            .CSurf_SetSurfaceMute(trackid.as_ptr(), mute, option_non_null_into(ignoresurf));
     }
 
     // TODO-doc
@@ -418,7 +418,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfaceSolo(trackid.as_ptr(), solo, option_into(ignoresurf));
+            .CSurf_SetSurfaceSolo(trackid.as_ptr(), solo, option_non_null_into(ignoresurf));
     }
 
     /// Generates a random GUID.
@@ -435,8 +435,8 @@ impl Reaper {
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) -> Result<(), ()> {
         unsafe {
-            self.plugin_register_csurf_inst(ReaperControlSurface::required_panic(
-                get_cpp_control_surface() as *mut _,
+            self.plugin_register_csurf_inst(require_non_null_panic(
+                get_cpp_control_surface() as *mut _
             ))
         }
     }
@@ -444,8 +444,8 @@ impl Reaper {
     // TODO-doc
     // This method is idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_unregister_csurf_inst(ReaperControlSurface::required_panic(
-            get_cpp_control_surface() as *mut _,
+        self.plugin_unregister_csurf_inst(require_non_null_panic(
+            get_cpp_control_surface() as *mut _
         ));
     }
 
@@ -481,14 +481,14 @@ impl Reaper {
             val,
             valhw,
             relmode,
-            option_into(hwnd),
+            option_non_null_into(hwnd),
             option_non_null_into(proj),
         )
     }
 
     /// Returns the REAPER main window handle.
     pub fn get_main_hwnd(&self) -> Hwnd {
-        Hwnd::required_panic(self.low.GetMainHwnd())
+        require_non_null_panic(self.low.GetMainHwnd())
     }
 
     // TODO-doc
@@ -1118,7 +1118,7 @@ impl Reaper {
         let ptr = self
             .low
             .GetTrackEnvelopeByChunkName(track.as_ptr(), Cow::from(cfgchunkname).as_ptr());
-        TrackEnvelope::optional(ptr)
+        NonNull::new(ptr)
     }
 
     // TODO-doc
@@ -1132,7 +1132,7 @@ impl Reaper {
         let ptr = self
             .low
             .GetTrackEnvelopeByName(track.as_ptr(), envname.into().as_ptr());
-        TrackEnvelope::optional(ptr)
+        NonNull::new(ptr)
     }
 
     // TODO-doc
@@ -1359,7 +1359,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume, option_into(ignoresurf));
+            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume, option_non_null_into(ignoresurf));
     }
 
     // TODO-doc
@@ -1386,7 +1386,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfacePan(trackid.as_ptr(), pan, option_into(ignoresurf));
+            .CSurf_SetSurfacePan(trackid.as_ptr(), pan, option_non_null_into(ignoresurf));
     }
 
     // TODO-doc
@@ -1580,7 +1580,7 @@ impl Reaper {
         let ptr = self
             .low
             .TrackFX_GetFloatingWindow(track.as_ptr(), index.into());
-        Hwnd::optional(ptr)
+        NonNull::new(ptr)
     }
 
     // TODO-doc

@@ -29,22 +29,21 @@ pub fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
 // so we won't rename them.
 pub type ReaProject = NonNull<raw::ReaProject>;
 pub type MediaTrack = NonNull<raw::MediaTrack>;
-// define_ptr_wrapper!(ReaProject, raw::ReaProject);
-define_ptr_wrapper!(MediaItem, raw::MediaItem);
-define_ptr_wrapper!(MediaItemTake, raw::MediaItem_Take);
-define_ptr_wrapper!(PcmSource, raw::PCM_source);
-define_ptr_wrapper!(TrackEnvelope, raw::TrackEnvelope);
+pub type MediaItem = NonNull<raw::MediaItem>;
+pub type MediaItemTake = NonNull<raw::MediaItem_Take>;
+pub type PcmSource = NonNull<raw::PCM_source>;
+pub type TrackEnvelope = NonNull<raw::TrackEnvelope>;
 // Even we create IReaperControlSurface instances ourselves (not REAPER), we don't do it on
 // Rust side but on C++ side. So a pointer wrapper is the right way to go here as well. We also
 // remove the I from the name because it's not following Rust conventions.
-define_ptr_wrapper!(ReaperControlSurface, raw::IReaperControlSurface);
+pub type ReaperControlSurface = NonNull<raw::IReaperControlSurface>;
 // This is unlike MediaTrack and Co. in that it points to a struct which is *not* opaque. Still, we
 // need it as pointer and it has the same lifetime characteristics. The difference is that we add
 // type-safe methods to it to lift the possibilities in the struct to medium-level API style. This
 // is similar to our midi_Input wrapper in low-level REAPER (just that it doesn't lift the API to
 // medium-level API style but restores low-level functionality).
 define_ptr_wrapper!(KbdSectionInfo, raw::KbdSectionInfo);
-define_ptr_wrapper!(Hwnd, raw::HWND__);
+pub type Hwnd = NonNull<raw::HWND__>;
 
 impl KbdSectionInfo {
     pub unsafe fn action_list_cnt(&self) -> u32 {
