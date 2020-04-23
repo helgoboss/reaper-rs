@@ -152,7 +152,7 @@ impl Track {
         };
         // TODO-low This is ugly. Solve in other ways.
         let control_surface = get_control_surface_instance();
-        let super_raw: *mut raw::MediaTrack = self.get_raw().into();
+        let super_raw: *mut raw::MediaTrack = self.get_raw().as_ptr();
         control_surface.Extended(
             CSURF_EXT_SETINPUTMONITOR as i32,
             super_raw as *mut c_void,

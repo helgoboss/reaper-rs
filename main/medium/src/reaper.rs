@@ -1,18 +1,19 @@
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
-use std::ptr::null_mut;
+use std::ptr::{null_mut, NonNull};
 
 use reaper_rs_low::{firewall, raw};
 
 use crate::{
-    AllowGang, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
-    ExtensionType, FxShowFlag, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
-    InputMonitoringMode, IsAdd, IsMove, IsUndoOptional, KbdActionValue, KbdSectionInfo, MediaTrack,
-    MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
-    ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion, RecArmState, RecFx,
-    RecordingInput, RegInstr, Relative, SendOrReceive, StuffMidiMessageTarget, ToggleAction,
-    TrackEnvelope, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    option_non_null_into, require_non_null, require_non_null_panic, AllowGang, AutomationMode,
+    ControlSurface, DelegatingControlSurface, EnvChunkName, ExtensionType, FxShowFlag,
+    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode, IsAdd,
+    IsMove, IsUndoOptional, KbdActionValue, KbdSectionInfo, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject, ReaperControlSurface,
+    ReaperPointer, ReaperStringArg, ReaperVersion, RecArmState, RecFx, RecordingInput, RegInstr,
+    Relative, SendOrReceive, StuffMidiMessageTarget, ToggleAction, TrackEnvelope,
+    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
     TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
 };
 use enumflags2::BitFlags;
@@ -80,7 +81,7 @@ impl Reaper {
         };
         if projfn_out_optional_sz == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
-            let project = ReaProject::optional(ptr)?;
+            let project = NonNull::new(ptr)?;
             Some(EnumProjectsResult {
                 project,
                 file_path: None,
@@ -90,7 +91,7 @@ impl Reaper {
                 with_string_buffer(projfn_out_optional_sz, |buffer, max_size| unsafe {
                     self.low.EnumProjects(idx, buffer, max_size)
                 });
-            let project = ReaProject::optional(ptr)?;
+            let project = NonNull::new(ptr)?;
             if owned_c_string.to_bytes().len() == 0 {
                 return Some(EnumProjectsResult {
                     project,
@@ -119,8 +120,10 @@ impl Reaper {
         proj: Option<ReaProject>,
         trackidx: u32,
     ) -> Option<MediaTrack> {
-        let ptr = self.low.GetTrack(option_into(proj), trackidx as i32);
-        MediaTrack::optional(ptr)
+        let ptr = self
+            .low
+            .GetTrack(option_non_null_into(proj), trackidx as i32);
+        NonNull::new(ptr)
     }
 
     /// Returns `true` if the given pointer is a valid object of the right type in project `proj`
@@ -133,7 +136,7 @@ impl Reaper {
         let pointer = pointer.into();
         unsafe {
             self.low.ValidatePtr2(
-                option_into(proj),
+                option_non_null_into(proj),
                 pointer.as_void(),
                 Cow::from(pointer).as_ptr(),
             )
@@ -166,14 +169,14 @@ impl Reaper {
         set_new_value: *mut c_void,
     ) -> *mut c_void {
         self.low
-            .GetSetMediaTrackInfo(tr.into(), Cow::from(parmname).as_ptr(), set_new_value)
+            .GetSetMediaTrackInfo(tr.as_ptr(), Cow::from(parmname).as_ptr(), set_new_value)
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
     pub unsafe fn get_media_track_info_partrack(&self, tr: MediaTrack) -> Option<MediaTrack> {
         let ptr = self.get_set_media_track_info(tr, TrackInfoKey::P_PARTRACK, null_mut())
             as *mut raw::MediaTrack;
-        MediaTrack::optional(ptr)
+        NonNull::new(ptr)
     }
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
@@ -181,7 +184,7 @@ impl Reaper {
     pub unsafe fn get_media_track_info_project(&self, tr: MediaTrack) -> Option<ReaProject> {
         let ptr = self.get_set_media_track_info(tr, TrackInfoKey::P_PROJECT, null_mut())
             as *mut raw::ReaProject;
-        ReaProject::optional(ptr)
+        NonNull::new(ptr)
     }
 
     /// Convenience function which let's you use the given track's name (`P_NAME`).
@@ -393,7 +396,7 @@ impl Reaper {
         proj: Option<ReaProject>,
     ) {
         self.low
-            .Main_OnCommandEx(command as i32, flag, option_into(proj));
+            .Main_OnCommandEx(command as i32, flag, option_non_null_into(proj));
     }
 
     // TODO-doc
@@ -404,7 +407,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfaceMute(trackid.into(), mute, option_into(ignoresurf));
+            .CSurf_SetSurfaceMute(trackid.as_ptr(), mute, option_into(ignoresurf));
     }
 
     // TODO-doc
@@ -415,7 +418,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfaceSolo(trackid.into(), solo, option_into(ignoresurf));
+            .CSurf_SetSurfaceSolo(trackid.as_ptr(), solo, option_into(ignoresurf));
     }
 
     /// Generates a random GUID.
@@ -479,7 +482,7 @@ impl Reaper {
             valhw,
             relmode,
             option_into(hwnd),
-            option_into(proj),
+            option_non_null_into(proj),
         )
     }
 
@@ -505,7 +508,7 @@ impl Reaper {
     }
 
     pub unsafe fn count_tracks_unchecked(&self, proj: Option<ReaProject>) -> u32 {
-        self.low.CountTracks(option_into(proj)) as u32
+        self.low.CountTracks(option_non_null_into(proj)) as u32
     }
 
     // TODO-doc
@@ -572,7 +575,7 @@ impl Reaper {
         instantiate: TrackFxAddByNameVariant,
     ) -> i32 {
         self.low.TrackFX_AddByName(
-            track.into(),
+            track.as_ptr(),
             fxname.into().as_ptr(),
             rec_fx.into(),
             instantiate.into(),
@@ -644,7 +647,7 @@ impl Reaper {
 
     // TODO-doc
     pub unsafe fn track_fx_get_enabled(&self, track: MediaTrack, fx: TrackFxRef) -> bool {
-        self.low.TrackFX_GetEnabled(track.into(), fx.into())
+        self.low.TrackFX_GetEnabled(track.as_ptr(), fx.into())
     }
 
     // TODO-doc
@@ -658,7 +661,7 @@ impl Reaper {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             self.low
-                .TrackFX_GetFXName(track.into(), fx.into(), buffer, max_size)
+                .TrackFX_GetFXName(track.as_ptr(), fx.into(), buffer, max_size)
         });
         if !successful {
             return Err(());
@@ -668,7 +671,7 @@ impl Reaper {
 
     // TODO-doc
     pub unsafe fn track_fx_get_instrument(&self, track: MediaTrack) -> Option<u32> {
-        let index = self.low.TrackFX_GetInstrument(track.into());
+        let index = self.low.TrackFX_GetInstrument(track.as_ptr());
         if index == -1 {
             return None;
         }
@@ -678,18 +681,18 @@ impl Reaper {
     // TODO-doc
     pub unsafe fn track_fx_set_enabled(&self, track: MediaTrack, fx: TrackFxRef, enabled: bool) {
         self.low
-            .TrackFX_SetEnabled(track.into(), fx.into(), enabled);
+            .TrackFX_SetEnabled(track.as_ptr(), fx.into(), enabled);
     }
 
     // TODO-doc
     pub unsafe fn track_fx_get_num_params(&self, track: MediaTrack, fx: TrackFxRef) -> u32 {
-        self.low.TrackFX_GetNumParams(track.into(), fx.into()) as u32
+        self.low.TrackFX_GetNumParams(track.as_ptr(), fx.into()) as u32
     }
 
     // TODO-doc
     pub fn get_current_project_in_load_save(&self) -> Option<ReaProject> {
         let ptr = self.low.GetCurrentProjectInLoadSave();
-        ReaProject::optional(ptr)
+        NonNull::new(ptr)
     }
 
     // TODO-doc
@@ -704,7 +707,7 @@ impl Reaper {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             self.low
-                .TrackFX_GetParamName(track.into(), fx.into(), param as i32, buffer, max_size)
+                .TrackFX_GetParamName(track.as_ptr(), fx.into(), param as i32, buffer, max_size)
         });
         if !successful {
             return Err(());
@@ -724,7 +727,7 @@ impl Reaper {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             self.low.TrackFX_GetFormattedParamValue(
-                track.into(),
+                track.as_ptr(),
                 fx.into(),
                 param as i32,
                 buffer,
@@ -751,7 +754,7 @@ impl Reaper {
         assert!(buf_sz > 0);
         let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
             self.low.TrackFX_FormatParamValueNormalized(
-                track.into(),
+                track.as_ptr(),
                 fx.into(),
                 param as i32,
                 value,
@@ -776,7 +779,7 @@ impl Reaper {
     ) -> Result<(), ()> {
         let successful =
             self.low
-                .TrackFX_SetParamNormalized(track.into(), fx.into(), param as i32, value);
+                .TrackFX_SetParamNormalized(track.as_ptr(), fx.into(), param as i32, value);
         if !successful {
             return Err(());
         }
@@ -872,9 +875,9 @@ impl Reaper {
         is_move: IsMove,
     ) {
         self.low.TrackFX_CopyToTrack(
-            src_track.into(),
+            src_track.as_ptr(),
             src_fx.into(),
-            dest_track.into(),
+            dest_track.as_ptr(),
             dest_fx.into(),
             is_move.into(),
         );
@@ -883,7 +886,7 @@ impl Reaper {
     // TODO-doc
     // Returns Err if FX doesn't exist (maybe also in other cases?)
     pub unsafe fn track_fx_delete(&self, track: MediaTrack, fx: TrackFxRef) -> Result<(), ()> {
-        let succesful = self.low.TrackFX_Delete(track.into(), fx.into());
+        let succesful = self.low.TrackFX_Delete(track.as_ptr(), fx.into());
         if !succesful {
             return Err(());
         }
@@ -906,7 +909,7 @@ impl Reaper {
         let mut large_step = MaybeUninit::uninit();
         let mut is_toggle = MaybeUninit::uninit();
         let successful = self.low.TrackFX_GetParameterStepSizes(
-            track.into(),
+            track.as_ptr(),
             fx.into(),
             param as i32,
             step.as_mut_ptr(),
@@ -940,7 +943,7 @@ impl Reaper {
         let mut max_val = MaybeUninit::uninit();
         let mut mid_val = MaybeUninit::uninit();
         let value = self.low.TrackFX_GetParamEx(
-            track.into(),
+            track.as_ptr(),
             fx.into(),
             param as i32,
             min_val.as_mut_ptr(),
@@ -963,7 +966,7 @@ impl Reaper {
     }
 
     pub unsafe fn undo_begin_block_2_unchecked(&self, proj: Option<ReaProject>) {
-        self.low.Undo_BeginBlock2(option_into(proj));
+        self.low.Undo_BeginBlock2(option_non_null_into(proj));
     }
 
     // TODO-doc
@@ -985,7 +988,7 @@ impl Reaper {
         extraflags: Option<BitFlags<UndoFlag>>,
     ) {
         self.low.Undo_EndBlock2(
-            option_into(proj),
+            option_non_null_into(proj),
             descchange.into().as_ptr(),
             match extraflags {
                 Some(flags) => flags.bits(),
@@ -1009,7 +1012,7 @@ impl Reaper {
         proj: Option<ReaProject>,
         f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.low.Undo_CanUndo2(option_into(proj));
+        let ptr = self.low.Undo_CanUndo2(option_non_null_into(proj));
         create_passing_c_str(ptr).map(f)
     }
 
@@ -1028,7 +1031,7 @@ impl Reaper {
         proj: Option<ReaProject>,
         f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.low.Undo_CanRedo2(option_into(proj));
+        let ptr = self.low.Undo_CanRedo2(option_non_null_into(proj));
         create_passing_c_str(ptr).map(f)
     }
 
@@ -1040,7 +1043,7 @@ impl Reaper {
     }
 
     pub unsafe fn undo_do_undo_2_unchecked(&self, proj: Option<ReaProject>) -> bool {
-        self.low.Undo_DoUndo2(option_into(proj)) != 0
+        self.low.Undo_DoUndo2(option_non_null_into(proj)) != 0
     }
 
     // TODO-doc
@@ -1051,7 +1054,7 @@ impl Reaper {
     }
 
     pub unsafe fn undo_do_redo_2_unchecked(&self, proj: Option<ReaProject>) -> bool {
-        self.low.Undo_DoRedo2(option_into(proj)) != 0
+        self.low.Undo_DoRedo2(option_non_null_into(proj)) != 0
     }
 
     // TODO-doc
@@ -1063,7 +1066,7 @@ impl Reaper {
     }
 
     pub unsafe fn mark_project_dirty_unchecked(&self, proj: Option<ReaProject>) {
-        self.low.MarkProjectDirty(option_into(proj));
+        self.low.MarkProjectDirty(option_non_null_into(proj));
     }
 
     // TODO-doc
@@ -1074,7 +1077,7 @@ impl Reaper {
     }
 
     pub unsafe fn is_project_dirty_unchecked(&self, proj: Option<ReaProject>) -> bool {
-        self.low.IsProjectDirty(option_into(proj)) != 0
+        self.low.IsProjectDirty(option_non_null_into(proj)) != 0
     }
 
     // TODO-doc
@@ -1091,7 +1094,7 @@ impl Reaper {
 
     // TODO-doc
     pub unsafe fn get_track_automation_mode(&self, tr: MediaTrack) -> AutomationMode {
-        let result = self.low.GetTrackAutomationMode(tr.into());
+        let result = self.low.GetTrackAutomationMode(tr.as_ptr());
         AutomationMode::try_from(result).expect("Unknown automation mode")
     }
 
@@ -1114,7 +1117,7 @@ impl Reaper {
     ) -> Option<TrackEnvelope> {
         let ptr = self
             .low
-            .GetTrackEnvelopeByChunkName(track.into(), Cow::from(cfgchunkname).as_ptr());
+            .GetTrackEnvelopeByChunkName(track.as_ptr(), Cow::from(cfgchunkname).as_ptr());
         TrackEnvelope::optional(ptr)
     }
 
@@ -1128,29 +1131,29 @@ impl Reaper {
     ) -> Option<TrackEnvelope> {
         let ptr = self
             .low
-            .GetTrackEnvelopeByName(track.into(), envname.into().as_ptr());
+            .GetTrackEnvelopeByName(track.as_ptr(), envname.into().as_ptr());
         TrackEnvelope::optional(ptr)
     }
 
     // TODO-doc
     pub unsafe fn get_media_track_info_value(&self, tr: MediaTrack, parmname: TrackInfoKey) -> f64 {
         self.low
-            .GetMediaTrackInfo_Value(tr.into(), Cow::from(parmname).as_ptr())
+            .GetMediaTrackInfo_Value(tr.as_ptr(), Cow::from(parmname).as_ptr())
     }
 
     // TODO-doc
     pub unsafe fn track_fx_get_count(&self, track: MediaTrack) -> u32 {
-        self.low.TrackFX_GetCount(track.into()) as u32
+        self.low.TrackFX_GetCount(track.as_ptr()) as u32
     }
 
     // TODO-doc
     pub unsafe fn track_fx_get_rec_count(&self, track: MediaTrack) -> u32 {
-        self.low.TrackFX_GetRecCount(track.into()) as u32
+        self.low.TrackFX_GetRecCount(track.as_ptr()) as u32
     }
 
     // TODO-doc
     pub unsafe fn track_fx_get_fx_guid(&self, track: MediaTrack, fx: TrackFxRef) -> Option<GUID> {
-        let ptr = self.low.TrackFX_GetFXGUID(track.into(), fx.into());
+        let ptr = self.low.TrackFX_GetFXGUID(track.as_ptr(), fx.into());
         unref(ptr)
     }
 
@@ -1162,7 +1165,7 @@ impl Reaper {
         param: u32,
     ) -> f64 {
         self.low
-            .TrackFX_GetParamNormalized(track.into(), fx.into(), param as i32)
+            .TrackFX_GetParamNormalized(track.as_ptr(), fx.into(), param as i32)
     }
 
     // TODO-doc
@@ -1172,8 +1175,8 @@ impl Reaper {
     }
 
     pub unsafe fn get_master_track_unchecked(&self, proj: Option<ReaProject>) -> MediaTrack {
-        let ptr = self.low.GetMasterTrack(option_into(proj));
-        MediaTrack::required_panic(ptr)
+        let ptr = self.low.GetMasterTrack(option_non_null_into(proj));
+        require_non_null_panic(ptr)
     }
 
     // TODO-doc
@@ -1204,7 +1207,7 @@ impl Reaper {
         want_undo: WantUndo,
     ) {
         self.low
-            .SetCurrentBPM(option_into(proj), bpm, want_undo.into());
+            .SetCurrentBPM(option_non_null_into(proj), bpm, want_undo.into());
     }
 
     // TODO-doc
@@ -1214,7 +1217,7 @@ impl Reaper {
     }
 
     pub unsafe fn master_get_play_rate_unchecked(&self, project: Option<ReaProject>) -> f64 {
-        self.low.Master_GetPlayRate(option_into(project))
+        self.low.Master_GetPlayRate(option_non_null_into(project))
     }
 
     // TODO-doc
@@ -1259,7 +1262,7 @@ impl Reaper {
         allowgang: AllowGang,
     ) -> i32 {
         self.low
-            .CSurf_OnInputMonitorChangeEx(trackid.into(), monitor.into(), allowgang.into())
+            .CSurf_OnInputMonitorChangeEx(trackid.as_ptr(), monitor.into(), allowgang.into())
     }
 
     // TODO-doc
@@ -1272,7 +1275,7 @@ impl Reaper {
     ) -> Result<(), ()> {
         let successful =
             self.low
-                .SetMediaTrackInfo_Value(tr.into(), Cow::from(parmname).as_ptr(), newvalue);
+                .SetMediaTrackInfo_Value(tr.as_ptr(), Cow::from(parmname).as_ptr(), newvalue);
         if !successful {
             return Err(());
         }
@@ -1309,7 +1312,7 @@ impl Reaper {
         let mut pan = MaybeUninit::uninit();
         let successful =
             self.low
-                .GetTrackUIVolPan(track.into(), volume.as_mut_ptr(), pan.as_mut_ptr());
+                .GetTrackUIVolPan(track.as_ptr(), volume.as_mut_ptr(), pan.as_mut_ptr());
         if !successful {
             return Err(());
         }
@@ -1356,7 +1359,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfaceVolume(trackid.into(), volume, option_into(ignoresurf));
+            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume, option_into(ignoresurf));
     }
 
     // TODO-doc
@@ -1367,8 +1370,12 @@ impl Reaper {
         relative: Relative,
         allow_gang: AllowGang,
     ) -> f64 {
-        self.low
-            .CSurf_OnVolumeChangeEx(trackid.into(), volume, relative.into(), allow_gang.into())
+        self.low.CSurf_OnVolumeChangeEx(
+            trackid.as_ptr(),
+            volume,
+            relative.into(),
+            allow_gang.into(),
+        )
     }
 
     // TODO-doc
@@ -1379,7 +1386,7 @@ impl Reaper {
         ignoresurf: Option<ReaperControlSurface>,
     ) {
         self.low
-            .CSurf_SetSurfacePan(trackid.into(), pan, option_into(ignoresurf));
+            .CSurf_SetSurfacePan(trackid.as_ptr(), pan, option_into(ignoresurf));
     }
 
     // TODO-doc
@@ -1391,7 +1398,7 @@ impl Reaper {
         allow_gang: AllowGang,
     ) -> f64 {
         self.low
-            .CSurf_OnPanChangeEx(trackid.into(), pan, relative.into(), allow_gang.into())
+            .CSurf_OnPanChangeEx(trackid.as_ptr(), pan, relative.into(), allow_gang.into())
     }
 
     // TODO-doc
@@ -1406,12 +1413,12 @@ impl Reaper {
         wantmaster: WantMaster,
     ) -> u32 {
         self.low
-            .CountSelectedTracks2(option_into(proj), wantmaster.into()) as u32
+            .CountSelectedTracks2(option_non_null_into(proj), wantmaster.into()) as u32
     }
 
     // TODO-doc
     pub unsafe fn set_track_selected(&self, track: MediaTrack, selected: bool) {
-        self.low.SetTrackSelected(track.into(), selected);
+        self.low.SetTrackSelected(track.as_ptr(), selected);
     }
 
     // TODO-doc
@@ -1431,25 +1438,27 @@ impl Reaper {
         seltrackidx: u32,
         wantmaster: WantMaster,
     ) -> Option<MediaTrack> {
-        let ptr =
-            self.low
-                .GetSelectedTrack2(option_into(proj), seltrackidx as i32, wantmaster.into());
-        MediaTrack::optional(ptr)
+        let ptr = self.low.GetSelectedTrack2(
+            option_non_null_into(proj),
+            seltrackidx as i32,
+            wantmaster.into(),
+        );
+        NonNull::new(ptr)
     }
 
     // TODO-doc
     pub unsafe fn set_only_track_selected(&self, track: Option<MediaTrack>) {
-        self.low.SetOnlyTrackSelected(option_into(track));
+        self.low.SetOnlyTrackSelected(option_non_null_into(track));
     }
 
     // TODO-doc
     pub unsafe fn delete_track(&self, tr: MediaTrack) {
-        self.low.DeleteTrack(tr.into());
+        self.low.DeleteTrack(tr.as_ptr());
     }
 
     // TODO-doc
     pub unsafe fn get_track_num_sends(&self, tr: MediaTrack, category: TrackSendCategory) -> u32 {
-        self.low.GetTrackNumSends(tr.into(), category.into()) as u32
+        self.low.GetTrackNumSends(tr.as_ptr(), category.into()) as u32
     }
 
     // TODO-doc
@@ -1462,7 +1471,7 @@ impl Reaper {
         set_new_value: *mut c_void,
     ) -> *mut c_void {
         self.low.GetSetTrackSendInfo(
-            tr.into(),
+            tr.as_ptr(),
             category.into(),
             sendidx as i32,
             Cow::from(parmname).as_ptr(),
@@ -1484,7 +1493,7 @@ impl Reaper {
             TrackSendInfoKey::P_DESTTRACK,
             null_mut(),
         ) as *mut raw::MediaTrack;
-        MediaTrack::required(ptr)
+        require_non_null(ptr)
     }
 
     // TODO-doc
@@ -1497,8 +1506,12 @@ impl Reaper {
     ) -> Result<CString, ()> {
         let (chunk_content, successful) =
             with_string_buffer(str_need_big_sz, |buffer, max_size| {
-                self.low
-                    .GetTrackStateChunk(track.into(), buffer, max_size, isundo_optional.into())
+                self.low.GetTrackStateChunk(
+                    track.as_ptr(),
+                    buffer,
+                    max_size,
+                    isundo_optional.into(),
+                )
             });
         if !successful {
             return Err(());
@@ -1513,7 +1526,7 @@ impl Reaper {
         desttr_in_optional: Option<MediaTrack>,
     ) -> u32 {
         self.low
-            .CreateTrackSend(tr.into(), option_into(desttr_in_optional)) as u32
+            .CreateTrackSend(tr.as_ptr(), option_non_null_into(desttr_in_optional)) as u32
     }
 
     // TODO-doc
@@ -1525,7 +1538,7 @@ impl Reaper {
         allowgang: AllowGang,
     ) -> bool {
         self.low
-            .CSurf_OnRecArmChangeEx(trackid.into(), recarm.into(), allowgang.into())
+            .CSurf_OnRecArmChangeEx(trackid.as_ptr(), recarm.into(), allowgang.into())
     }
 
     // TODO-doc
@@ -1536,9 +1549,11 @@ impl Reaper {
         str: impl Into<ReaperStringArg<'a>>,
         isundo_optional: IsUndoOptional,
     ) -> Result<(), ()> {
-        let successful =
-            self.low
-                .SetTrackStateChunk(track.into(), str.into().as_ptr(), isundo_optional.into());
+        let successful = self.low.SetTrackStateChunk(
+            track.as_ptr(),
+            str.into().as_ptr(),
+            isundo_optional.into(),
+        );
         if !successful {
             return Err(());
         }
@@ -1553,7 +1568,7 @@ impl Reaper {
         show_flag: FxShowFlag,
     ) {
         self.low
-            .TrackFX_Show(track.into(), index.into(), show_flag.into());
+            .TrackFX_Show(track.as_ptr(), index.into(), show_flag.into());
     }
 
     // TODO-doc
@@ -1564,13 +1579,13 @@ impl Reaper {
     ) -> Option<Hwnd> {
         let ptr = self
             .low
-            .TrackFX_GetFloatingWindow(track.into(), index.into());
+            .TrackFX_GetFloatingWindow(track.as_ptr(), index.into());
         Hwnd::optional(ptr)
     }
 
     // TODO-doc
     pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx: TrackFxRef) -> bool {
-        self.low.TrackFX_GetOpen(track.into(), fx.into())
+        self.low.TrackFX_GetOpen(track.as_ptr(), fx.into())
     }
 
     // TODO-doc
@@ -1582,7 +1597,7 @@ impl Reaper {
         relative: Relative,
     ) -> f64 {
         self.low.CSurf_OnSendVolumeChange(
-            trackid.into(),
+            trackid.as_ptr(),
             send_index as i32,
             volume,
             relative.into(),
@@ -1598,7 +1613,7 @@ impl Reaper {
         relative: Relative,
     ) -> f64 {
         self.low
-            .CSurf_OnSendPanChange(trackid.into(), send_index as i32, pan, relative.into())
+            .CSurf_OnSendPanChange(trackid.as_ptr(), send_index as i32, pan, relative.into())
     }
 
     // TODO-doc
@@ -1656,7 +1671,7 @@ impl Reaper {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
         let successful = self.low.GetTrackSendUIVolPan(
-            track.into(),
+            track.as_ptr(),
             send_index as i32,
             volume.as_mut_ptr(),
             pan.as_mut_ptr(),
@@ -1680,7 +1695,7 @@ impl Reaper {
         let mut num_presets = MaybeUninit::uninit();
         let index =
             self.low
-                .TrackFX_GetPresetIndex(track.into(), fx.into(), num_presets.as_mut_ptr());
+                .TrackFX_GetPresetIndex(track.as_ptr(), fx.into(), num_presets.as_mut_ptr());
         if index == -1 {
             return Err(());
         }
@@ -1700,7 +1715,7 @@ impl Reaper {
     ) -> Result<(), ()> {
         let successful = self
             .low
-            .TrackFX_SetPresetByIndex(track.into(), fx.into(), idx);
+            .TrackFX_SetPresetByIndex(track.as_ptr(), fx.into(), idx);
         if !successful {
             return Err(());
         }
@@ -1717,7 +1732,7 @@ impl Reaper {
     ) -> Result<(), ()> {
         let successful = self
             .low
-            .TrackFX_NavigatePresets(track.into(), fx.into(), presetmove);
+            .TrackFX_NavigatePresets(track.as_ptr(), fx.into(), presetmove);
         if !successful {
             return Err(());
         }
@@ -1734,7 +1749,7 @@ impl Reaper {
         if presetname_sz == 0 {
             let state_matches_preset =
                 self.low
-                    .TrackFX_GetPreset(track.into(), fx.into(), null_mut(), 0);
+                    .TrackFX_GetPreset(track.as_ptr(), fx.into(), null_mut(), 0);
             TrackFxGetPresetResult {
                 state_matches_preset,
                 name: None,
@@ -1743,7 +1758,7 @@ impl Reaper {
             let (name, state_matches_preset) =
                 with_string_buffer(presetname_sz, |buffer, max_size| {
                     self.low
-                        .TrackFX_GetPreset(track.into(), fx.into(), buffer, max_size)
+                        .TrackFX_GetPreset(track.as_ptr(), fx.into(), buffer, max_size)
                 });
             if name.to_bytes().len() == 0 {
                 return TrackFxGetPresetResult {

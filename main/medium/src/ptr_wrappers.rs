@@ -1,11 +1,35 @@
 use reaper_rs_low::raw;
+use std::ptr::{null_mut, NonNull};
 
-// TODO-high Maybe use Option<NonNull<raw::MediaTrack>> instead of Option<MediaTrack>
+pub fn option_non_null_into<T>(option: Option<NonNull<T>>) -> *mut T {
+    match option {
+        None => null_mut(),
+        Some(v) => v.as_ptr(),
+    }
+}
+
+pub fn require_non_null<T>(ptr: *mut T) -> Result<NonNull<T>, ()> {
+    if ptr.is_null() {
+        Err(())
+    } else {
+        Ok(unsafe { NonNull::new_unchecked(ptr) })
+    }
+}
+
+pub fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
+    assert!(
+        !ptr.is_null(),
+        "Raw pointer expected to be not null but was null"
+    );
+    unsafe { NonNull::new_unchecked(ptr) }
+}
+
 // One of the responsibilities of the medium-level API is to use identifiers which follow the Rust
 // conventions. It just happens that some of the C++ classes already conform to Rust conventions,
 // so we won't rename them.
-define_ptr_wrapper!(MediaTrack, raw::MediaTrack);
-define_ptr_wrapper!(ReaProject, raw::ReaProject);
+pub type ReaProject = NonNull<raw::ReaProject>;
+pub type MediaTrack = NonNull<raw::MediaTrack>;
+// define_ptr_wrapper!(ReaProject, raw::ReaProject);
 define_ptr_wrapper!(MediaItem, raw::MediaItem);
 define_ptr_wrapper!(MediaItemTake, raw::MediaItem_Take);
 define_ptr_wrapper!(PcmSource, raw::PCM_source);

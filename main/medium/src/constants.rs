@@ -374,8 +374,8 @@ impl<'a> ReaperPointer<'a> {
     pub fn as_void(&self) -> *mut c_void {
         use ReaperPointer::*;
         match self {
-            MediaTrack(p) => (*p).into(),
-            ReaProject(p) => (*p).into(),
+            MediaTrack(p) => p.as_ptr() as *mut _,
+            ReaProject(p) => p.as_ptr() as *mut _,
             MediaItem(p) => (*p).into(),
             MediaItemTake(p) => (*p).into(),
             TrackEnvelope(p) => (*p).into(),
