@@ -140,9 +140,11 @@ impl HelperControlSurface {
         if !track.is_available() {
             return false;
         }
-        let env = Reaper::get()
-            .medium
-            .get_track_envelope_by_name(track.get_raw(), parameter_name);
+        let env = unsafe {
+            Reaper::get()
+                .medium
+                .get_track_envelope_by_name(track.get_raw(), parameter_name)
+        };
         if env.is_none() {
             return false;
         }
@@ -191,17 +193,19 @@ impl HelperControlSurface {
             track_datas.entry(media_track).or_insert_with(|| {
                 let reaper = Reaper::get();
                 let m = &reaper.medium;
-                let td = TrackData {
-                    volume: m.get_media_track_info_value(media_track, D_VOL),
-                    pan: m.get_media_track_info_value(media_track, D_PAN),
-                    selected: m.get_media_track_info_value(media_track, I_SELECTED) != 0.0,
-                    mute: m.get_media_track_info_value(media_track, B_MUTE) != 0.0,
-                    solo: m.get_media_track_info_value(media_track, I_SOLO) != 0.0,
-                    recarm: m.get_media_track_info_value(media_track, I_RECARM) != 0.0,
-                    number: m.get_media_track_info_tracknumber(media_track),
-                    recmonitor: m.get_media_track_info_recmon(media_track),
-                    recinput: m.get_media_track_info_value(media_track, I_RECINPUT) as i32,
-                    guid: get_media_track_guid(media_track),
+                let td = unsafe {
+                    TrackData {
+                        volume: m.get_media_track_info_value(media_track, D_VOL),
+                        pan: m.get_media_track_info_value(media_track, D_PAN),
+                        selected: m.get_media_track_info_value(media_track, I_SELECTED) != 0.0,
+                        mute: m.get_media_track_info_value(media_track, B_MUTE) != 0.0,
+                        solo: m.get_media_track_info_value(media_track, I_SOLO) != 0.0,
+                        recarm: m.get_media_track_info_value(media_track, I_RECARM) != 0.0,
+                        number: m.get_media_track_info_tracknumber(media_track),
+                        recmonitor: m.get_media_track_info_recmon(media_track),
+                        recinput: m.get_media_track_info_value(media_track, I_RECINPUT) as i32,
+                        guid: get_media_track_guid(media_track),
+                    }
                 };
                 reaper.subjects.track_added.borrow_mut().next(t.clone());
                 self.detect_fx_changes_on_track(t, false, true, true);
@@ -386,7 +390,8 @@ impl HelperControlSurface {
             {
                 continue;
             }
-            let new_number = reaper.medium.get_media_track_info_tracknumber(*media_track);
+            let new_number =
+                unsafe { reaper.medium.get_media_track_info_tracknumber(*media_track) };
             if new_number != track_data.number {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;
@@ -700,9 +705,11 @@ impl ControlSurface for HelperControlSurface {
                 .borrow_mut()
                 .next(Track::new(args.track, None));
         }
-        let recinput = reaper
-            .medium
-            .get_media_track_info_value(args.track, I_RECINPUT) as i32;
+        let recinput = unsafe {
+            reaper
+                .medium
+                .get_media_track_info_value(args.track, I_RECINPUT) as i32
+        };
         if td.recinput != recinput {
             td.recinput = recinput;
             reaper

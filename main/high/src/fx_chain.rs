@@ -19,22 +19,24 @@ impl FxChain {
     pub fn get_fx_count(&self) -> u32 {
         let reaper = Reaper::get();
         if self.is_input_fx {
-            reaper.medium.track_fx_get_rec_count(self.track.get_raw()) as u32
+            unsafe { reaper.medium.track_fx_get_rec_count(self.track.get_raw()) as u32 }
         } else {
-            reaper.medium.track_fx_get_count(self.track.get_raw()) as u32
+            unsafe { reaper.medium.track_fx_get_count(self.track.get_raw()) as u32 }
         }
     }
 
     // Moves within this FX chain
     pub fn move_fx(&self, fx: &Fx, new_index: u32) {
         assert_eq!(fx.get_chain(), *self);
-        Reaper::get().medium.track_fx_copy_to_track(
-            self.track.get_raw(),
-            fx.get_query_index(),
-            self.track.get_raw(),
-            get_fx_query_index(new_index, self.is_input_fx),
-            IsMove::Yes,
-        );
+        unsafe {
+            Reaper::get().medium.track_fx_copy_to_track(
+                self.track.get_raw(),
+                fx.get_query_index(),
+                self.track.get_raw(),
+                get_fx_query_index(new_index, self.is_input_fx),
+                IsMove::Yes,
+            );
+        }
     }
 
     pub fn remove_fx(&self, fx: &Fx) {
@@ -42,9 +44,11 @@ impl FxChain {
         if !fx.is_available() {
             return;
         }
-        let _ = Reaper::get()
-            .medium
-            .track_fx_delete(self.track.get_raw(), fx.get_query_index());
+        let _ = unsafe {
+            Reaper::get()
+                .medium
+                .track_fx_delete(self.track.get_raw(), fx.get_query_index())
+        };
     }
 
     pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
@@ -151,16 +155,17 @@ DOCKED 0
         if self.is_input_fx {
             return None;
         }
-        Reaper::get()
-            .medium
-            .track_fx_get_instrument(self.track.get_raw())
-            .and_then(|fx_index| self.get_fx_by_index(fx_index))
+        unsafe {
+            Reaper::get()
+                .medium
+                .track_fx_get_instrument(self.track.get_raw())
+        }
+        .and_then(|fx_index| self.get_fx_by_index(fx_index))
     }
 
     pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
-        let fx_index = Reaper::get()
-            .medium
-            .track_fx_add_by_name_add(
+        let fx_index = unsafe {
+            Reaper::get().medium.track_fx_add_by_name_add(
                 self.track.get_raw(),
                 original_fx_name,
                 if self.is_input_fx {
@@ -170,7 +175,8 @@ DOCKED 0
                 },
                 true,
             )
-            .ok()?;
+        }
+        .ok()?;
         Some(Fx::from_guid_and_index(
             self.track.clone(),
             get_fx_guid(&self.track, fx_index, self.is_input_fx).expect("Couldn't get GUID"),
@@ -188,15 +194,17 @@ DOCKED 0
     }
 
     pub fn get_first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
-        let fx_index = Reaper::get().medium.track_fx_add_by_name_query(
-            self.track.get_raw(),
-            name,
-            if self.is_input_fx {
-                RecFx::Yes
-            } else {
-                RecFx::No
-            },
-        )?;
+        let fx_index = unsafe {
+            Reaper::get().medium.track_fx_add_by_name_query(
+                self.track.get_raw(),
+                name,
+                if self.is_input_fx {
+                    RecFx::Yes
+                } else {
+                    RecFx::No
+                },
+            )
+        }?;
         Some(Fx::from_guid_and_index(
             self.track.clone(),
             get_fx_guid(&self.track, fx_index, self.is_input_fx).expect("Couldn't get GUID"),

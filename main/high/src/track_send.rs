@@ -84,37 +84,45 @@ impl TrackSend {
     pub fn get_volume(&self) -> Volume {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the
         // wrong value if an envelope is written.
-        let (volume, _) = Reaper::get()
-            .medium
-            .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
-            .expect("Couldn't get send vol/pan");
+        let (volume, _) = unsafe {
+            Reaper::get()
+                .medium
+                .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
+        }
+        .expect("Couldn't get send vol/pan");
         Volume::from_reaper_value(volume)
     }
 
     pub fn set_volume(&self, volume: Volume) {
-        Reaper::get().medium.csurf_on_send_volume_change(
-            self.get_source_track().get_raw(),
-            self.get_index(),
-            volume.get_reaper_value(),
-            Relative::No,
-        );
+        unsafe {
+            Reaper::get().medium.csurf_on_send_volume_change(
+                self.get_source_track().get_raw(),
+                self.get_index(),
+                volume.get_reaper_value(),
+                Relative::No,
+            );
+        }
     }
 
     pub fn get_pan(&self) -> Pan {
-        let (_, pan) = Reaper::get()
-            .medium
-            .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
-            .expect("Couldn't get send vol/pan");
+        let (_, pan) = unsafe {
+            Reaper::get()
+                .medium
+                .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
+        }
+        .expect("Couldn't get send vol/pan");
         Pan::from_reaper_value(pan)
     }
 
     pub fn set_pan(&self, pan: Pan) {
-        Reaper::get().medium.csurf_on_send_pan_change(
-            self.get_source_track().get_raw(),
-            self.get_index(),
-            pan.get_reaper_value(),
-            Relative::No,
-        );
+        unsafe {
+            Reaper::get().medium.csurf_on_send_pan_change(
+                self.get_source_track().get_raw(),
+                self.get_index(),
+                pan.get_reaper_value(),
+                Relative::No,
+            );
+        }
     }
 
     fn load_by_target_track(&self) -> bool {
@@ -194,8 +202,12 @@ pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
 }
 
 fn get_target_track_raw(source_track: &Track, send_index: u32) -> Option<MediaTrack> {
-    Reaper::get()
-        .medium
-        .get_track_send_info_desttrack(source_track.get_raw(), SendOrReceive::Send, send_index)
-        .ok()
+    unsafe {
+        Reaper::get().medium.get_track_send_info_desttrack(
+            source_track.get_raw(),
+            SendOrReceive::Send,
+            send_index,
+        )
+    }
+    .ok()
 }

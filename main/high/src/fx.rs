@@ -62,10 +62,14 @@ impl Fx {
 
     pub fn get_name(&self) -> CString {
         self.load_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .track_fx_get_fx_name(self.track.get_raw(), self.get_query_index(), 256)
-            .expect("Couldn't get track name")
+        unsafe {
+            Reaper::get().medium.track_fx_get_fx_name(
+                self.track.get_raw(),
+                self.get_query_index(),
+                256,
+            )
+        }
+        .expect("Couldn't get track name")
     }
 
     pub fn get_chunk(&self) -> ChunkRegion {
@@ -110,15 +114,20 @@ impl Fx {
 
     pub fn get_parameter_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .track_fx_get_num_params(self.track.get_raw(), self.get_query_index()) as u32
+        unsafe {
+            Reaper::get()
+                .medium
+                .track_fx_get_num_params(self.track.get_raw(), self.get_query_index())
+                as u32
+        }
     }
 
     pub fn is_enabled(&self) -> bool {
-        Reaper::get()
-            .medium
-            .track_fx_get_enabled(self.track.get_raw(), self.get_query_index())
+        unsafe {
+            Reaper::get()
+                .medium
+                .track_fx_get_enabled(self.track.get_raw(), self.get_query_index())
+        }
     }
 
     pub fn get_parameters(&self) -> impl Iterator<Item = FxParameter> + '_ {
@@ -230,15 +239,19 @@ impl Fx {
 
     pub fn get_floating_window(&self) -> Option<Hwnd> {
         self.load_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .track_fx_get_floating_window(self.track.get_raw(), self.get_query_index())
+        unsafe {
+            Reaper::get()
+                .medium
+                .track_fx_get_floating_window(self.track.get_raw(), self.get_query_index())
+        }
     }
 
     pub fn window_is_open(&self) -> bool {
-        Reaper::get()
-            .medium
-            .track_fx_get_open(self.track.get_raw(), self.get_query_index())
+        unsafe {
+            Reaper::get()
+                .medium
+                .track_fx_get_open(self.track.get_raw(), self.get_query_index())
+        }
     }
 
     pub fn window_has_focus(&self) -> bool {
@@ -259,11 +272,13 @@ impl Fx {
 
     pub fn show_in_floating_window(&self) {
         self.load_if_necessary_or_complain();
-        Reaper::get().medium.track_fx_show(
-            self.track.get_raw(),
-            self.get_query_index(),
-            FxShowFlag::ShowFloatingWindow,
-        );
+        unsafe {
+            Reaper::get().medium.track_fx_show(
+                self.track.get_raw(),
+                self.get_query_index(),
+                FxShowFlag::ShowFloatingWindow,
+            );
+        }
     }
 
     fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {
@@ -282,19 +297,23 @@ impl Fx {
     }
 
     pub fn enable(&self) {
-        Reaper::get().medium.track_fx_set_enabled(
-            self.track.get_raw(),
-            self.get_query_index(),
-            true,
-        );
+        unsafe {
+            Reaper::get().medium.track_fx_set_enabled(
+                self.track.get_raw(),
+                self.get_query_index(),
+                true,
+            );
+        }
     }
 
     pub fn disable(&self) {
-        Reaper::get().medium.track_fx_set_enabled(
-            self.track.get_raw(),
-            self.get_query_index(),
-            false,
-        );
+        unsafe {
+            Reaper::get().medium.track_fx_set_enabled(
+                self.track.get_raw(),
+                self.get_query_index(),
+                false,
+            );
+        }
     }
 
     pub fn is_input_fx(&self) -> bool {
@@ -313,35 +332,47 @@ impl Fx {
     pub fn get_preset_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
         // TODO-low Integrate into ReaPlus (current preset index?)
-        Reaper::get()
-            .medium
-            .track_fx_get_preset_index(self.track.get_raw(), self.get_query_index())
-            .expect("Couldn't get preset count")
-            .1
+        unsafe {
+            Reaper::get()
+                .medium
+                .track_fx_get_preset_index(self.track.get_raw(), self.get_query_index())
+        }
+        .expect("Couldn't get preset count")
+        .1
     }
 
     pub fn preset_is_dirty(&self) -> bool {
         self.load_if_necessary_or_complain();
-        !Reaper::get()
-            .medium
-            .track_fx_get_preset(self.track.get_raw(), self.get_query_index(), 0)
-            .state_matches_preset
+        !unsafe {
+            Reaper::get().medium.track_fx_get_preset(
+                self.track.get_raw(),
+                self.get_query_index(),
+                0,
+            )
+        }
+        .state_matches_preset
     }
 
     pub fn get_preset_name(&self) -> Option<CString> {
         self.load_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .track_fx_get_preset(self.track.get_raw(), self.get_query_index(), 2000)
-            .name
+        unsafe {
+            Reaper::get().medium.track_fx_get_preset(
+                self.track.get_raw(),
+                self.get_query_index(),
+                2000,
+            )
+        }
+        .name
     }
 }
 
 pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid> {
     let query_index = get_fx_query_index(index, is_input_fx);
-    let internal = Reaper::get()
-        .medium
-        .track_fx_get_fx_guid(track.get_raw(), query_index);
+    let internal = unsafe {
+        Reaper::get()
+            .medium
+            .track_fx_get_fx_guid(track.get_raw(), query_index)
+    };
     internal.map(|g| Guid::new(g))
 }
 

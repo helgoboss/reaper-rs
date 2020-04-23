@@ -107,7 +107,9 @@ impl Project {
 
     pub fn unselect_all_tracks(&self) {
         // TODO-low No project context
-        Reaper::get().medium.set_only_track_selected(None);
+        unsafe {
+            Reaper::get().medium.set_only_track_selected(None);
+        }
     }
 
     pub fn get_selected_tracks(&self, want_master: WantMaster) -> impl Iterator<Item = Track> + '_ {
@@ -133,7 +135,9 @@ impl Project {
     }
 
     pub fn remove_track(&self, track: &Track) {
-        Reaper::get().medium.delete_track(track.get_raw());
+        unsafe {
+            Reaper::get().medium.delete_track(track.get_raw());
+        }
     }
 
     // TODO-low Introduce variant that doesn't notify ControlSurface

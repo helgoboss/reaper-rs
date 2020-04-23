@@ -129,44 +129,6 @@ fn show_message_box() -> TestStep {
         );
         // Then
         check_eq!(result, MessageBoxResult::Ok);
-        // Comment out and close tab to test calling functions on vanished project
-        let p = reaper.get_current_project().get_raw();
-        let t = reaper
-            .get_current_project()
-            .get_track_by_index(0)
-            .unwrap()
-            .get_raw();
-        reaper.execute_later_in_main_thread(Duration::from_secs(10), move || {
-            let reaper = Reaper::get();
-            let med = &reaper.medium;
-            // Track checks
-            dbg!(med.validate_ptr(t));
-            dbg!(med.validate_ptr_2(None, t));
-            dbg!(med.validate_ptr_2(Some(p), t));
-            // Project checks
-            dbg!(med.get_track(Some(p), 0));
-            dbg!(med.main_on_command_ex(4, 0, Some(p)));
-            dbg!(med.kbd_on_main_action_ex(
-                4,
-                KbdActionValue::AbsoluteLowRes(u7(127)),
-                None,
-                Some(p)
-            ));
-            dbg!(med.count_tracks(Some(p)));
-            dbg!(med.undo_begin_block_2(Some(p)));
-            // dbg!(med.undo_end_block_2(Some(p), "Moin", None));
-            dbg!(med.undo_can_undo_2(Some(p), |s| s.to_owned()));
-            dbg!(med.undo_can_redo_2(Some(p), |s| s.to_owned()));
-            dbg!(med.undo_do_undo_2(Some(p)));
-            dbg!(med.undo_do_redo_2(Some(p)));
-            dbg!(med.mark_project_dirty(Some(p)));
-            dbg!(med.is_project_dirty(Some(p)));
-            // dbg!(med.get_master_track(Some(p)));
-            // dbg!(med.set_current_bpm(Some(p), 0.5, WantUndo::No));
-            dbg!(med.master_get_play_rate(Some(p)));
-            dbg!(med.count_selected_tracks_2(Some(p), WantMaster::No));
-            dbg!(med.get_selected_track_2(Some(p), 0, WantMaster::No));
-        });
         Ok(())
     })
 }

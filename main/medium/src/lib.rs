@@ -49,6 +49,13 @@
 //  expose the information if it's a member or not. get_ has an advantage in IDEs and also
 //  prevents ambiguities if the noun can sound like a verb.
 // TODO-medium Also surrounds callbacks (e.g. hookcommand) with firewall()
+//
+//  2. Should we panic if ptr invalid or return result? Returning None in case it's an Option
+//     result is bad because this is not always the case. I think we should panic. Otherwise
+//     our nice signatures get cluttered up with results. It should be declared as general
+//     precondition for all methods that the passed pointers are valid. This can be made sure
+//     by either always fetching them (jf: "Ideally you shouldn't hang on to pointers longer
+//     than you need them") or by using reactive programming (react when object gets removed).
 
 #[macro_use]
 mod ptr_macros;

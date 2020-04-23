@@ -95,24 +95,26 @@ impl Action {
         if let Some(runtime_data) = self.runtime_data.borrow().as_ref() {
             // See if we can get a description. If yes, the action actually exists. If not, then
             // not.
-            return Reaper::get()
-                .medium
-                .kbd_get_text_from_cmd(
+            return unsafe {
+                Reaper::get().medium.kbd_get_text_from_cmd(
                     runtime_data.command_id as u32,
                     Some(runtime_data.section.get_raw()),
                     |_| (),
                 )
-                .is_some();
+            }
+            .is_some();
         }
         self.load_by_command_name()
     }
 
     pub fn get_character(&self) -> ActionCharacter {
         let rd = self.load_if_necessary_or_complain();
-        match Reaper::get()
-            .medium
-            .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
-        {
+        let state = unsafe {
+            Reaper::get()
+                .medium
+                .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
+        };
+        match state {
             Some(_) => ActionCharacter::Toggle,
             None => ActionCharacter::Trigger,
         }
@@ -120,10 +122,12 @@ impl Action {
 
     pub fn is_on(&self) -> bool {
         let rd = self.load_if_necessary_or_complain();
-        Reaper::get()
-            .medium
-            .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
-            == Some(true)
+        let state = unsafe {
+            Reaper::get()
+                .medium
+                .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
+        };
+        state == Some(true)
     }
 
     pub fn get_command_id(&self) -> u32 {
@@ -148,11 +152,13 @@ impl Action {
 
     pub fn get_name(&self) -> Option<CString> {
         let rd = self.load_if_necessary_or_complain();
-        Reaper::get().medium.kbd_get_text_from_cmd(
-            rd.command_id as u32,
-            Some(rd.section.get_raw()),
-            |s| s.into(),
-        )
+        unsafe {
+            Reaper::get().medium.kbd_get_text_from_cmd(
+                rd.command_id as u32,
+                Some(rd.section.get_raw()),
+                |s| s.into(),
+            )
+        }
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
@@ -174,23 +180,27 @@ impl Action {
                 unsafe { U7::new_unchecked(relative_value.clamp(0, 127) as u8) };
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
-            reaper.medium.kbd_on_main_action_ex(
-                action_command_id,
-                KbdActionValue::Relative2(cropped_relative_value),
-                Some(reaper.medium.get_main_hwnd()),
-                project.map(|p| p.get_raw()),
-            );
+            unsafe {
+                reaper.medium.kbd_on_main_action_ex(
+                    action_command_id,
+                    KbdActionValue::Relative2(cropped_relative_value),
+                    Some(reaper.medium.get_main_hwnd()),
+                    project.map(|p| p.get_raw()),
+                );
+            }
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
             let discrete_value =
                 unsafe { U7::new_unchecked((normalized_value * 127 as f64).round() as u8) };
-            reaper.medium.kbd_on_main_action_ex(
-                action_command_id,
-                KbdActionValue::AbsoluteLowRes(discrete_value),
-                Some(reaper.medium.get_main_hwnd()),
-                project.map(|p| p.get_raw()),
-            );
+            unsafe {
+                reaper.medium.kbd_on_main_action_ex(
+                    action_command_id,
+                    KbdActionValue::AbsoluteLowRes(discrete_value),
+                    Some(reaper.medium.get_main_hwnd()),
+                    project.map(|p| p.get_raw()),
+                );
+            }
             // Main_OnCommandEx would trigger the actionInvoked event but it has not enough
             // parameters for passing values etc.          reaper::
             // Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
