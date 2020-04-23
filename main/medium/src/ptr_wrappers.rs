@@ -1,5 +1,6 @@
 use reaper_rs_low::raw;
 
+// TODO-high Maybe use Option<NonNull<raw::MediaTrack>> instead of Option<MediaTrack>
 // One of the responsibilities of the medium-level API is to use identifiers which follow the Rust
 // conventions. It just happens that some of the C++ classes already conform to Rust conventions,
 // so we won't rename them.

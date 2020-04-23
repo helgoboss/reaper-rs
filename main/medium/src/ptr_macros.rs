@@ -12,9 +12,11 @@ macro_rules! define_ptr_wrapper {
         // with a lifetime 'a - correlated to another lifetime - would be impossible because we
         // don't have such another lifetime which can serve as frame of reference. So the best we
         // can do is making a simple pointer wrapper. The advantage over using the raw pointer is
-        // that we can use Option instead of null (making signatures much better), that we can make
-        // sure the pointer came from REAPER itself and that we can offer methods on the pointers if
-        // necessary.
+        // that we can use Option instead of null making signatures much better (maybe bad argument
+        // because there's NonNull), that we can make sure the pointer came from REAPER itself (bad
+        // argument because this doesn't give us any benefit - even original REAPER pointers can be
+        // invalid because dangling) and that we can offer methods on the pointers if necessary (bad
+        // argument because also possible on pointer struct itself).
         #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
         pub struct $name(*mut $ptr_type);
 
