@@ -252,16 +252,16 @@ pub enum KbdActionValue {
 
 #[derive(Clone, Debug)]
 pub enum RegInstr<'a> {
-    Register(ExtensionType<'a>),
-    Unregister(ExtensionType<'a>),
+    Add(ExtensionType<'a>),
+    Remove(ExtensionType<'a>),
 }
 
 impl<'a> From<RegInstr<'a>> for Cow<'a, CStr> {
     fn from(value: RegInstr<'a>) -> Self {
         use RegInstr::*;
         match value {
-            Register(et) => et.into(),
-            Unregister(et) => concat_c_strs(c_str!("-"), Cow::from(et).as_ref()).into(),
+            Add(et) => et.into(),
+            Remove(et) => concat_c_strs(c_str!("-"), Cow::from(et).as_ref()).into(),
         }
     }
 }

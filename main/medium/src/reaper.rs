@@ -241,10 +241,10 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn plugin_register_hookcommand<T: HookCommand>(&self) -> Result<(), ()> {
+    pub fn plugin_register_hookcommand_add<T: HookCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
-                RegInstr::Register(ExtensionType::HookCommand),
+                RegInstr::Add(ExtensionType::HookCommand),
                 delegating_hook_command::<T> as *mut c_void,
             )
         };
@@ -252,21 +252,20 @@ impl Reaper {
     }
 
     // TODO-doc
-    // TODO-high Rename all plugin_unregister_x to plugin_register_x_unregister
-    pub fn plugin_unregister_hookcommand<T: HookCommand>(&self) {
+    pub fn plugin_register_hookcommand_remove<T: HookCommand>(&self) {
         unsafe {
             self.plugin_register(
-                RegInstr::Unregister(ExtensionType::HookCommand),
+                RegInstr::Remove(ExtensionType::HookCommand),
                 delegating_hook_command::<T> as *mut c_void,
             );
         }
     }
 
     // TODO-doc
-    pub fn plugin_register_toggleaction<T: ToggleAction>(&self) -> Result<(), ()> {
+    pub fn plugin_register_toggleaction_add<T: ToggleAction>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
-                RegInstr::Register(ExtensionType::ToggleAction),
+                RegInstr::Add(ExtensionType::ToggleAction),
                 delegating_toggle_action::<T> as *mut c_void,
             )
         };
@@ -274,20 +273,20 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn plugin_unregister_toggleaction<T: ToggleAction>(&self) {
+    pub fn plugin_register_toggleaction_remove<T: ToggleAction>(&self) {
         unsafe {
             self.plugin_register(
-                RegInstr::Unregister(ExtensionType::ToggleAction),
+                RegInstr::Remove(ExtensionType::ToggleAction),
                 delegating_toggle_action::<T> as *mut c_void,
             );
         }
     }
 
     // TODO-doc
-    pub fn plugin_register_hookpostcommand<T: HookPostCommand>(&self) -> Result<(), ()> {
+    pub fn plugin_register_hookpostcommand_add<T: HookPostCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
-                RegInstr::Register(ExtensionType::HookPostCommand),
+                RegInstr::Add(ExtensionType::HookPostCommand),
                 delegating_hook_post_command::<T> as *mut c_void,
             )
         };
@@ -295,10 +294,10 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn plugin_unregister_hookpostcommand<T: HookPostCommand>(&self) {
+    pub fn plugin_register_hookpostcommand_remove<T: HookPostCommand>(&self) {
         unsafe {
             self.plugin_register(
-                RegInstr::Unregister(ExtensionType::HookPostCommand),
+                RegInstr::Remove(ExtensionType::HookPostCommand),
                 delegating_hook_post_command::<T> as *mut c_void,
             );
         }
@@ -310,13 +309,13 @@ impl Reaper {
     // we can't do that using this signature. If a very large string is passed, it works. If a
     // number of a built-in command is passed, it works.
     // TODO-doc
-    pub fn plugin_register_command_id<'a>(
+    pub fn plugin_register_command_id_add<'a>(
         &self,
         command_id: impl Into<ReaperStringArg<'a>>,
     ) -> u32 {
         unsafe {
             self.plugin_register(
-                RegInstr::Register(ExtensionType::CommandId),
+                RegInstr::Add(ExtensionType::CommandId),
                 command_id.into().as_ptr() as *mut c_void,
             ) as u32
         }
@@ -336,9 +335,9 @@ impl Reaper {
     //
     // Unsfe because consumer must ensure proper lifetime of given reference.
     // TODO-low Add factory functions for gaccel_register_t
-    pub unsafe fn plugin_register_gaccel(&self, gaccel: &gaccel_register_t) -> Result<(), ()> {
+    pub unsafe fn plugin_register_gaccel_add(&self, gaccel: &gaccel_register_t) -> Result<(), ()> {
         let result = self.plugin_register(
-            RegInstr::Register(ExtensionType::GAccel),
+            RegInstr::Add(ExtensionType::GAccel),
             gaccel as *const _ as *mut c_void,
         );
         ok_if_one(result)
@@ -348,23 +347,23 @@ impl Reaper {
     // TODO-medium Not sure if we should use NonNull instead or another mechanism that a) emphasizes
     //  that the address is relevant here, not the value and b) that the address must be stable.
     //  Same goes for similar functions and audio hook stuff.
-    pub fn plugin_unregister_gaccel(&self, gaccel: &gaccel_register_t) {
+    pub fn plugin_register_gaccel_remove(&self, gaccel: &gaccel_register_t) {
         unsafe {
             self.plugin_register(
-                RegInstr::Unregister(ExtensionType::GAccel),
+                RegInstr::Remove(ExtensionType::GAccel),
                 gaccel as *const _ as *mut c_void,
             );
         }
     }
 
     // TODO-doc
-    pub unsafe fn plugin_register_csurf_inst(
+    pub unsafe fn plugin_register_csurf_inst_add(
         &self,
         csurf_inst: ReaperControlSurface,
     ) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register(
-                RegInstr::Register(ExtensionType::CSurfInst),
+                RegInstr::Add(ExtensionType::CSurfInst),
                 csurf_inst.as_ptr() as *mut _,
             )
         };
@@ -372,10 +371,10 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn plugin_unregister_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
+    pub fn plugin_register_csurf_inst_remove(&self, csurf_inst: ReaperControlSurface) {
         unsafe {
             self.plugin_register(
-                RegInstr::Unregister(ExtensionType::CSurfInst),
+                RegInstr::Remove(ExtensionType::CSurfInst),
                 csurf_inst.as_ptr() as *mut _,
             );
         }
@@ -435,7 +434,7 @@ impl Reaper {
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) -> Result<(), ()> {
         unsafe {
-            self.plugin_register_csurf_inst(require_non_null_panic(
+            self.plugin_register_csurf_inst_add(require_non_null_panic(
                 get_cpp_control_surface() as *mut _
             ))
         }
@@ -444,7 +443,7 @@ impl Reaper {
     // TODO-doc
     // This method is idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_unregister_csurf_inst(require_non_null_panic(
+        self.plugin_register_csurf_inst_remove(require_non_null_panic(
             get_cpp_control_surface() as *mut _
         ));
     }
