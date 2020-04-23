@@ -452,7 +452,7 @@ impl Reaper {
     // TODO-doc
     pub fn section_from_unique_id(&self, unique_id: u32) -> Option<KbdSectionInfo> {
         let ptr = self.low.SectionFromUniqueID(unique_id as i32);
-        KbdSectionInfo::optional(ptr)
+        NonNull::new(ptr).map(KbdSectionInfo)
     }
 
     // TODO-doc
@@ -1624,7 +1624,9 @@ impl Reaper {
         section: Option<KbdSectionInfo>,
         f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.low.kbd_getTextFromCmd(cmd, option_into(section));
+        let ptr = self
+            .low
+            .kbd_getTextFromCmd(cmd, section.map(|v| v.0.as_ptr()).unwrap_or(null_mut()));
         create_passing_c_str(ptr)
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| s.to_bytes().len() > 0)
@@ -1643,7 +1645,7 @@ impl Reaper {
     ) -> Option<bool> {
         let result = self
             .low
-            .GetToggleCommandState2(option_into(section), command_id as i32);
+            .GetToggleCommandState2(option_non_null_into(section), command_id as i32);
         if result == -1 {
             return None;
         }
@@ -1911,11 +1913,4 @@ fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
 
 fn ok_if_one(result: i32) -> Result<(), ()> {
     if result == 1 { Ok(()) } else { Err(()) }
-}
-
-fn option_into<T>(option: Option<impl Into<*mut T>>) -> *mut T {
-    match option {
-        None => null_mut(),
-        Some(v) => v.into(),
-    }
 }

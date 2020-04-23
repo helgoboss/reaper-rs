@@ -1,22 +1,9 @@
 macro_rules! define_ptr_wrapper {
     ($name: ident, $ptr_type: path) => {
-        // Only medium-level API can create such objects. This is the most important point why we
-        // don't need `unsafe` for medium-level API methods that take such objects instead of
-        // pointers. Because only if we don't let anyone create such objects, we can safely assume
-        // that this is really a pointer of that type and has not been messed with (by pointer
-        // casting - which can be made even with unsafe code!). The contained pointer is non-null.
+        // The contained pointer is non-null.
+        // The advantage over using NonNull<T> is that we can offer medium-level methods on the
+        // pointers.
         //
-        // We obtain this object directly from REAPER and we can't
-        // give it a sane lifetime annotation. It's "rather" static from the perspective of the
-        // plug-in, yet it could come and go anytime, so 'static would be too optimistic. Annotating
-        // with a lifetime 'a - correlated to another lifetime - would be impossible because we
-        // don't have such another lifetime which can serve as frame of reference. So the best we
-        // can do is making a simple pointer wrapper. The advantage over using the raw pointer is
-        // that we can use Option instead of null making signatures much better (maybe bad argument
-        // because there's NonNull), that we can make sure the pointer came from REAPER itself (bad
-        // argument because this doesn't give us any benefit - even original REAPER pointers can be
-        // invalid because dangling) and that we can offer methods on the pointers if necessary (bad
-        // argument because also possible on pointer struct itself).
         #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
         pub struct $name(*mut $ptr_type);
 
