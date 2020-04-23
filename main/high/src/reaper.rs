@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell, Ref, RefCell, UnsafeCell};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
@@ -188,13 +188,6 @@ impl ReaperBuilder {
         }
     }
 
-    fn with_custom_medium(medium: reaper_rs_medium::Reaper) -> ReaperBuilder {
-        ReaperBuilder {
-            medium,
-            logger: Default::default(),
-        }
-    }
-
     pub fn logger(mut self, logger: slog::Logger) -> ReaperBuilder {
         self.logger = Some(logger);
         self
@@ -233,7 +226,10 @@ pub struct Reaper {
     task_sender: Sender<ScheduledTask>,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
-    audio_hook: audio_hook_register_t,
+    // TODO-low As soon as registered, this must not be accessed anymore. It's mutated by REAPER
+    //  and the containing function pointer is called by REAPER (in audio thread). Maybe there's a
+    //  better way to model that?
+    audio_hook: UnsafeCell<audio_hook_register_t>,
 }
 
 pub(super) struct EventStreamSubjects {
@@ -355,12 +351,6 @@ impl Reaper {
         ReaperBuilder::with_all_functions_loaded(context)
     }
 
-    // TODO-low Make pub when the time has come
-    #[allow(dead_code)]
-    fn with_custom_medium(medium: reaper_rs_medium::Reaper) -> ReaperBuilder {
-        ReaperBuilder::with_custom_medium(medium)
-    }
-
     fn setup(medium: reaper_rs_medium::Reaper, logger: slog::Logger) {
         let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
         let reaper = Reaper {
@@ -371,14 +361,14 @@ impl Reaper {
             task_sender: task_sender.clone(),
             main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
-            audio_hook: audio_hook_register_t {
+            audio_hook: UnsafeCell::new(audio_hook_register_t {
                 OnAudioBuffer: Some(process_audio_buffer),
                 userdata1: null_mut(),
                 userdata2: null_mut(),
                 input_nch: 0,
                 output_nch: 0,
                 GetBuffer: None,
-            },
+            }),
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -395,7 +385,7 @@ impl Reaper {
         );
     }
 
-    // Must be idempotent
+    // TODO-low Must be idempotent
     pub fn activate(&self) {
         self.medium
             .plugin_register_hookcommand::<HighLevelHookCommand>();
@@ -404,14 +394,16 @@ impl Reaper {
         self.medium
             .plugin_register_hookpostcommand::<HighLevelHookPostCommand>();
         self.medium.register_control_surface();
-        self.medium
-            .audio_reg_hardware_hook(IsAdd::Yes, &self.audio_hook as *const _ as *mut _);
+        unsafe {
+            self.medium
+                .audio_reg_hardware_hook_add(&mut *self.audio_hook.get());
+        }
     }
 
-    // Must be idempotent
+    // TODO-low Must be idempotent
     pub fn deactivate(&self) {
         self.medium
-            .audio_reg_hardware_hook(IsAdd::No, &self.audio_hook as *const _ as *mut _);
+            .audio_reg_hardware_hook_remove(unsafe { &*self.audio_hook.get() });
         self.medium.unregister_control_surface();
         self.medium
             .plugin_unregister_hookpostcommand::<HighLevelHookPostCommand>();
@@ -502,7 +494,7 @@ impl Reaper {
     fn register_command(&self, command_id: u32, command: Command) {
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             let command = p.insert(command);
-            let acc = &mut command.accelerator_register;
+            let acc = &command.accelerator_register;
             unsafe { self.medium.plugin_register_gaccel(acc) };
         }
     }
@@ -514,7 +506,7 @@ impl Reaper {
         // if it's not in the map anymore, REAPER won't be able to find it.
         let mut command_by_id = self.command_by_id.borrow_mut();
         if let Some(command) = command_by_id.get_mut(&command_id) {
-            let acc = &mut command.accelerator_register;
+            let acc = &command.accelerator_register;
             self.medium.plugin_unregister_gaccel(acc);
             command_by_id.remove(&command_id);
         }

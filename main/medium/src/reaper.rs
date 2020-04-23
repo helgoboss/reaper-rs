@@ -249,6 +249,7 @@ impl Reaper {
     }
 
     // TODO-doc
+    // TODO-high Rename all plugin_unregister_x to plugin_register_x_unregister
     pub fn plugin_unregister_hookcommand<T: HookCommand>(&self) {
         unsafe {
             self.plugin_register(
@@ -332,20 +333,22 @@ impl Reaper {
     //
     // Unsfe because consumer must ensure proper lifetime of given reference.
     // TODO-low Add factory functions for gaccel_register_t
-    pub unsafe fn plugin_register_gaccel(&self, gaccel: &mut gaccel_register_t) -> Result<(), ()> {
+    pub unsafe fn plugin_register_gaccel(&self, gaccel: &gaccel_register_t) -> Result<(), ()> {
         let result = self.plugin_register(
             RegInstr::Register(ExtensionType::GAccel),
-            gaccel as *mut _ as *mut c_void,
+            gaccel as *const _ as *mut c_void,
         );
         ok_if_one(result)
     }
 
     // TODO-doc
-    pub fn plugin_unregister_gaccel(&self, gaccel: &mut gaccel_register_t) {
+    // TODO-high Actually we don't need a complete reference. That could turn out to be overly
+    //  restrictive for the consumer. We just need an address - a const pointer.
+    pub fn plugin_unregister_gaccel(&self, gaccel: &gaccel_register_t) {
         unsafe {
             self.plugin_register(
                 RegInstr::Unregister(ExtensionType::GAccel),
-                gaccel as *mut _ as *mut c_void,
+                gaccel as *const _ as *mut c_void,
             );
         }
     }
@@ -1315,11 +1318,35 @@ impl Reaper {
         })
     }
 
-    // TODO-doc
-    // TODO-high Same like gaccel
+    // TODO-doc See plugin_register_gaccel for unsafe doc
+    // The given audio_hook_register_t will be modified by REAPER. After registering it, it must
+    // only be accessed from within OnAudioBuffer callback (passed as param).
     // Returns true on success
-    pub fn audio_reg_hardware_hook(&self, is_add: IsAdd, reg: *mut audio_hook_register_t) -> bool {
-        unsafe { self.low.Audio_RegHardwareHook(is_add.into(), reg) > 0 }
+    // TODO-medium Should we even provide this function? The convenience functions are exhaustive.
+    pub unsafe fn audio_reg_hardware_hook(
+        &self,
+        is_add: IsAdd,
+        reg: &mut audio_hook_register_t,
+    ) -> Result<(), ()> {
+        let result = self.low.Audio_RegHardwareHook(is_add.into(), reg as *mut _);
+        ok_if_one(result)
+    }
+
+    pub unsafe fn audio_reg_hardware_hook_add(
+        &self,
+        reg: &mut audio_hook_register_t,
+    ) -> Result<(), ()> {
+        let result = self.low.Audio_RegHardwareHook(true, reg as *mut _);
+        ok_if_one(result)
+    }
+
+    // TODO-high Actually we don't need a complete reference. That could turn out to be overly
+    //  restrictive for the consumer. We just need an address - a const pointer.
+    pub fn audio_reg_hardware_hook_remove(&self, reg: &audio_hook_register_t) {
+        unsafe {
+            self.low
+                .Audio_RegHardwareHook(false, reg as *const _ as *mut _)
+        };
     }
 
     // TODO-doc
