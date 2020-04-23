@@ -23,11 +23,9 @@ impl MidiInput {
     // waste performance because we would need to copy all events first. Latter would be
     // especially bad because this code code typically runs in the audio thread and therefore
     // has real-time requirements. Same reasoning like here: https://stackoverflow.com/questions/61106587
-    pub fn get_read_buf<R>(&self, mut f: impl FnOnce(&MidiEvtList) -> R) -> R {
-        unsafe {
-            let raw_evt_list = (*self.0).GetReadBuf();
-            f(&MidiEvtList::new(&*raw_evt_list))
-        }
+    pub unsafe fn get_read_buf<R>(&self, mut f: impl FnOnce(&MidiEvtList) -> R) -> R {
+        let raw_evt_list = (*self.0).GetReadBuf();
+        f(&MidiEvtList::new(&*raw_evt_list))
     }
 }
 

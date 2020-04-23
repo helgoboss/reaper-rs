@@ -48,8 +48,8 @@ pub type ReaperControlSurface = NonNull<raw::IReaperControlSurface>;
 // This is unlike MediaTrack and Co. in that it points to a struct which is *not* opaque. Still, we
 // need it as pointer and it has the same lifetime characteristics. The difference is that we add
 // type-safe methods to it to lift the possibilities in the struct to medium-level API style. This
-// is similar to our midi_Input wrapper in low-level REAPER (just that it doesn't lift the API to
-// medium-level API style but restores low-level functionality).
+// is similar to our midi_Input wrapper in low-level REAPER (just that latter doesn't lift the API
+// to medium-level API style but restores low-level functionality).
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq, Into)]
 pub struct KbdSectionInfo(pub NonNull<raw::KbdSectionInfo>);
