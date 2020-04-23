@@ -23,7 +23,7 @@ impl Section {
     }
 
     pub fn get_action_count(&self) -> u32 {
-        self.section_info.action_list_cnt()
+        unsafe { self.section_info.action_list_cnt() }
     }
 
     pub fn get_raw(&self) -> KbdSectionInfo {
@@ -35,11 +35,12 @@ impl Section {
     }
 
     pub(super) fn get_kbd_cmds(&self) -> impl Iterator<Item = KbdCmd> + '_ {
-        (0..self.get_action_count()).map(move |i| self.section_info.get_action_by_index(i).unwrap())
+        (0..self.get_action_count())
+            .map(move |i| unsafe { self.section_info.get_action_by_index(i) }.unwrap())
     }
 
     fn get_action_by_index_unchecked(&self, index: u32) -> Action {
-        let kbd_cmd = self.section_info.get_action_by_index(index).unwrap();
+        let kbd_cmd = unsafe { self.section_info.get_action_by_index(index) }.unwrap();
         Action::new(*self, kbd_cmd.cmd(), Some(index))
     }
 }

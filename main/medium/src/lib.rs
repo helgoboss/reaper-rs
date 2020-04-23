@@ -56,7 +56,20 @@
 //     precondition for all methods that the passed pointers are valid. This can be made sure
 //     by either always fetching them (jf: "Ideally you shouldn't hang on to pointers longer
 //     than you need them") or by using reactive programming (react when object gets removed).
-
+// Should we make this unsafe? I think this is no different than with other functions
+//  in  Reaper struct that work on pointers whose lifetimes are not known. We should find ONE
+//  solution. Probably it's good to follow this: If we can guarantee there's no UB, we should do
+//  it, if not, we should mark the method unsafe. Is there any way to guarantee? I see this:
+//  a) Use something like the ValidatePtr function if available. However, calling it for each
+//     invocation is too presumptuous for an unopinionated medium-level API. Or perhaps more
+//     importantly, it's often not possible because we would need a contect ReaProject* pointer
+//     in order to carry out the validation.
+//  b) Also store an ID or something (e.g. section ID here) and always refetch it. Same like
+//     with a ... very presumptuous.
+//  So none of this is really feasible on this API level. Which means that we must either rely
+//  on REAPER itself not running into UB (waiting for Justin to comment on some functions) or
+//  just mark the methods where this is not possible as unsafe. A higher-level API then should
+//  take care of making things absolutely safe.
 #[macro_use]
 mod ptr_macros;
 

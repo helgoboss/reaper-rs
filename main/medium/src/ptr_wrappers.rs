@@ -22,28 +22,13 @@ define_ptr_wrapper!(KbdSectionInfo, raw::KbdSectionInfo);
 define_ptr_wrapper!(Hwnd, raw::HWND__);
 
 impl KbdSectionInfo {
-    // TODO-high Should we make this unsafe? I think this is no different than with other functions
-    //  in  Reaper struct that work on pointers whose lifetimes are not known. We should find ONE
-    //  solution. Probably it's good to follow this: If we can guarantee there's no UB, we should do
-    //  it, if not, we should mark the method unsafe. Is there any way to guarantee? I see this:
-    //  a) Use something like the ValidatePtr function if available. However, calling it for each
-    //     invocation is too presumptuous for an unopinionated medium-level API. Or perhaps more
-    //     importantly, it's often not possible because we would need a contect ReaProject* pointer
-    //     in order to carry out the validation.
-    //  b) Also store an ID or something (e.g. section ID here) and always refetch it. Same like
-    //     with a ... very presumptuous.
-    //  So none of this is really feasible on this API level. Which means that we must either rely
-    //  on REAPER itself not running into UB (waiting for Justin to comment on some functions) or
-    //  just mark the methods where this is not possible as unsafe. A higher-level API then should
-    //  take care of making things absolutely safe.
-    pub fn action_list_cnt(&self) -> u32 {
-        unsafe { (*self.0).action_list_cnt as u32 }
+    pub unsafe fn action_list_cnt(&self) -> u32 {
+        (*self.0).action_list_cnt as u32
     }
 
-    pub fn get_action_by_index<'a>(&'a self, index: u32) -> Option<KbdCmd<'a>> {
-        let array = unsafe {
-            std::slice::from_raw_parts((*self.0).action_list, (*self.0).action_list_cnt as usize)
-        };
+    pub unsafe fn get_action_by_index<'a>(&'a self, index: u32) -> Option<KbdCmd<'a>> {
+        let array =
+            std::slice::from_raw_parts((*self.0).action_list, (*self.0).action_list_cnt as usize);
         let raw_kbd_cmd = array.get(index as usize)?;
         Some(KbdCmd(raw_kbd_cmd))
     }
