@@ -342,8 +342,9 @@ impl Reaper {
     }
 
     // TODO-doc
-    // TODO-high Actually we don't need a complete reference. That could turn out to be overly
-    //  restrictive for the consumer. We just need an address - a const pointer.
+    // TODO-medium Not sure if we should use NonNull instead or another mechanism that a) emphasizes
+    //  that the address is relevant here, not the value and b) that the address must be stable.
+    //  Same goes for similar functions and audio hook stuff.
     pub fn plugin_unregister_gaccel(&self, gaccel: &gaccel_register_t) {
         unsafe {
             self.plugin_register(
@@ -1340,8 +1341,6 @@ impl Reaper {
         ok_if_one(result)
     }
 
-    // TODO-high Actually we don't need a complete reference. That could turn out to be overly
-    //  restrictive for the consumer. We just need an address - a const pointer.
     pub fn audio_reg_hardware_hook_remove(&self, reg: &audio_hook_register_t) {
         unsafe {
             self.low
