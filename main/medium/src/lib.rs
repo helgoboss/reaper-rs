@@ -73,6 +73,9 @@
 mod constants;
 pub use constants::*;
 
+mod enums;
+pub use enums::*;
+
 mod control_surface;
 pub use control_surface::*;
 

@@ -1,7 +1,8 @@
 use crate::{Pan, Reaper, Track, Volume};
 use reaper_rs_low::raw;
 use reaper_rs_medium::TrackSendInfoKey::P_DESTTRACK;
-use reaper_rs_medium::{MediaTrack, Relative, SendOrReceive};
+use reaper_rs_medium::ValueChange::Absolute;
+use reaper_rs_medium::{MediaTrack, SendOrReceive, ValueChange};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
 use std::ptr::null_mut;
@@ -98,8 +99,7 @@ impl TrackSend {
             Reaper::get().medium.csurf_on_send_volume_change(
                 self.get_source_track().get_raw(),
                 self.get_index(),
-                volume.get_reaper_value(),
-                Relative::No,
+                Absolute(volume.get_reaper_value()),
             );
         }
     }
@@ -119,8 +119,7 @@ impl TrackSend {
             Reaper::get().medium.csurf_on_send_pan_change(
                 self.get_source_track().get_raw(),
                 self.get_index(),
-                pan.get_reaper_value(),
-                Relative::No,
+                Absolute(pan.get_reaper_value()),
             );
         }
     }

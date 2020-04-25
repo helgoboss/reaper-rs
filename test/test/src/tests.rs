@@ -18,11 +18,11 @@ use super::mock::observe_invocations;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::{
-    AllowGang, AutomationMode, EnvChunkName, FxShowFlag, GlobalAutomationOverride,
-    InputMonitoringMode, IsMove, IsUndoOptional, KbdActionValue, MessageBoxResult, MessageBoxType,
-    MidiDeviceId, ReaperVersion, RecArmState, RecFx, RecordingInput, Relative, SendOrReceive,
+    AllowGang, AutomationMode, EnvChunkName, FxChainType, FxShowFlag, GlobalAutomationOverride,
+    InputMonitoringMode, IsMove, KbdActionValue, MasterTrackBehavior, MessageBoxResult,
+    MessageBoxType, MidiDeviceId, ReaperVersion, RecArmState, RecordingInput, SendOrReceive,
     StuffMidiMessageTarget, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, WantMaster, WantUndo,
+    TrackSendCategory, WantUndo,
 };
 use std::rc::Rc;
 use std::time::Duration;
@@ -807,9 +807,21 @@ fn select_track_exclusively() -> TestStep {
         check!(track_1.is_selected());
         check!(!track_2.is_selected());
         check!(!track_3.is_selected());
-        check_eq!(project.get_selected_track_count(WantMaster::No), 1);
-        check!(project.get_first_selected_track(WantMaster::No).is_some());
-        check_eq!(project.get_selected_tracks(WantMaster::No).count(), 1);
+        check_eq!(
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            1
+        );
+        check!(
+            project
+                .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
+                .is_some()
+        );
+        check_eq!(
+            project
+                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
+                .count(),
+            1
+        );
         check_eq!(mock.get_invocation_count(), 3);
         Ok(())
     })
@@ -1074,12 +1086,20 @@ fn select_master_track() -> TestStep {
         master_track.select();
         // Then
         check!(master_track.is_selected());
-        check_eq!(project.get_selected_track_count(WantMaster::Yes), 1);
+        check_eq!(
+            project.get_selected_track_count(MasterTrackBehavior::IncludeMasterTrack),
+            1
+        );
         let first_selected_track = project
-            .get_first_selected_track(WantMaster::Yes)
+            .get_first_selected_track(MasterTrackBehavior::IncludeMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check!(first_selected_track.is_master_track());
-        check_eq!(project.get_selected_tracks(WantMaster::Yes).count(), 1);
+        check_eq!(
+            project
+                .get_selected_tracks(MasterTrackBehavior::IncludeMasterTrack)
+                .count(),
+            1
+        );
         // TODO REAPER doesn't notify us about master track selection currently
         check_eq!(mock.get_invocation_count(), 1);
         let last_arg: Track = mock.get_last_arg().into();
@@ -1105,12 +1125,20 @@ fn unselect_track() -> TestStep {
         track.unselect();
         // Then
         check!(!track.is_selected());
-        check_eq!(project.get_selected_track_count(WantMaster::No), 1);
+        check_eq!(
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            1
+        );
         let first_selected_track = project
-            .get_first_selected_track(WantMaster::No)
+            .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(2));
-        check_eq!(project.get_selected_tracks(WantMaster::No).count(), 1);
+        check_eq!(
+            project
+                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
+                .count(),
+            1
+        );
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
         Ok(())
@@ -1137,12 +1165,20 @@ fn select_track() -> TestStep {
         // Then
         check!(track.is_selected());
         check!(track2.is_selected());
-        check_eq!(project.get_selected_track_count(WantMaster::No), 2);
+        check_eq!(
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            2
+        );
         let first_selected_track = project
-            .get_first_selected_track(WantMaster::No)
+            .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(0));
-        check_eq!(project.get_selected_tracks(WantMaster::No).count(), 2);
+        check_eq!(
+            project
+                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
+                .count(),
+            2
+        );
         check_eq!(mock.get_invocation_count(), 2);
         check_eq!(mock.get_last_arg(), track2);
         Ok(())
@@ -1158,7 +1194,10 @@ fn query_track_selection_state() -> TestStep {
         let is_selected = track.is_selected();
         // Then
         check!(!is_selected);
-        check_eq!(project.get_selected_track_count(WantMaster::No), 0);
+        check_eq!(
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            0
+        );
         Ok(())
     })
 }

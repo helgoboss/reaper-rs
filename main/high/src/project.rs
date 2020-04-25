@@ -6,7 +6,7 @@ use crate::guid::Guid;
 use crate::{Reaper, Tempo, Track};
 use reaper_rs_low::raw;
 use reaper_rs_medium::{
-    ProjectRef, ReaProject, ReaperPointer, TrackRef, WantDefaults, WantMaster, WantUndo,
+    MasterTrackBehavior, ProjectRef, ReaProject, ReaperPointer, TrackRef, WantDefaults, WantUndo,
 };
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -91,13 +91,13 @@ impl Project {
         Reaper::get().medium.validate_ptr_2(None, self.rea_project)
     }
 
-    pub fn get_selected_track_count(&self, want_master: WantMaster) -> u32 {
+    pub fn get_selected_track_count(&self, want_master: MasterTrackBehavior) -> u32 {
         Reaper::get()
             .medium
             .count_selected_tracks_2(Some(self.rea_project), want_master) as u32
     }
 
-    pub fn get_first_selected_track(&self, want_master: WantMaster) -> Option<Track> {
+    pub fn get_first_selected_track(&self, want_master: MasterTrackBehavior) -> Option<Track> {
         let media_track =
             Reaper::get()
                 .medium
@@ -112,7 +112,10 @@ impl Project {
         }
     }
 
-    pub fn get_selected_tracks(&self, want_master: WantMaster) -> impl Iterator<Item = Track> + '_ {
+    pub fn get_selected_tracks(
+        &self,
+        want_master: MasterTrackBehavior,
+    ) -> impl Iterator<Item = Track> + '_ {
         self.complain_if_not_available();
         (0..self.get_selected_track_count(want_master)).map(move |i| {
             let media_track = Reaper::get()

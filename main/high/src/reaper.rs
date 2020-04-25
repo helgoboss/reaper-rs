@@ -36,8 +36,8 @@ use reaper_rs_low::{firewall, ReaperPluginContext};
 use reaper_rs_medium;
 use reaper_rs_medium::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    HookCommand, HookPostCommand, Hwnd, IsAdd, MessageBoxResult, MessageBoxType, MidiEvt,
-    ProjectRef, ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction, TrackRef,
+    HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType, MidiEvt, ProjectRef,
+    ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 

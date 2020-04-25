@@ -2,7 +2,7 @@ use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
 use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
 
-use reaper_rs_medium::{IsMove, IsUndoOptional, RecFx};
+use reaper_rs_medium::{FxChainType, IsMove, UndoHint};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -54,7 +54,7 @@ impl FxChain {
     pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
         let mut track_chunk = self
             .track
-            .get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::No);
+            .get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsRequired);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(tag) => {
@@ -112,14 +112,14 @@ DOCKED 0
     pub fn get_chunk(&self) -> Option<ChunkRegion> {
         self.find_chunk_region(
             self.track
-                .get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::No),
+                .get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsRequired),
         )
     }
 
     pub fn set_chunk(&self, chunk: &str) {
         let mut track_chunk = self
             .track
-            .get_chunk(MAX_TRACK_CHUNK_SIZE, IsUndoOptional::No);
+            .get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsRequired);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(r) => {
@@ -169,9 +169,9 @@ DOCKED 0
                 self.track.get_raw(),
                 original_fx_name,
                 if self.is_input_fx {
-                    RecFx::Yes
+                    FxChainType::InputFxChain
                 } else {
-                    RecFx::No
+                    FxChainType::OutputFxChain
                 },
                 true,
             )
@@ -199,9 +199,9 @@ DOCKED 0
                 self.track.get_raw(),
                 name,
                 if self.is_input_fx {
-                    RecFx::Yes
+                    FxChainType::InputFxChain
                 } else {
-                    RecFx::No
+                    FxChainType::OutputFxChain
                 },
             )
         }?;

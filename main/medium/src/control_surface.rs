@@ -1,6 +1,7 @@
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperVersion, TrackFxRef,
+    require_non_null_panic, AutomationMode, FxChainType, InputMonitoringMode, ReaperVersion,
+    TrackFxRef,
 };
 use c_str_macro::c_str;
 use enumflags2::_internal::core::convert::TryFrom;
@@ -304,12 +305,6 @@ pub enum VersionDependentFxRef {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum FxChainType {
-    Input,
-    Output,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum VersionDependentTrackFxRef {
     /// In old REAPER versions (< 5.95) the index can represent either input or output FX - we
     /// don't know.
@@ -575,9 +570,9 @@ impl<T: ControlSurface> reaper_rs_low::IReaperControlSurface for DelegatingContr
                         if self.supports_detection_of_input_fx_in_set_fx_change {
                             let flags = parm2 as usize as u32;
                             let fx_chain_type = if (flags & 1) == 1 {
-                                FxChainType::Input
+                                FxChainType::InputFxChain
                             } else {
-                                FxChainType::Output
+                                FxChainType::OutputFxChain
                             };
                             Some(fx_chain_type)
                         } else {

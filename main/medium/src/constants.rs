@@ -24,54 +24,6 @@ pub trait HookPostCommand {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum WantMaster {
-    No,
-    Yes,
-}
-
-impl From<WantMaster> for bool {
-    fn from(v: WantMaster) -> Self {
-        v == WantMaster::Yes
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum IsUndoOptional {
-    No,
-    Yes,
-}
-
-impl From<IsUndoOptional> for bool {
-    fn from(v: IsUndoOptional) -> Self {
-        v == IsUndoOptional::Yes
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Relative {
-    No,
-    Yes,
-}
-
-impl From<Relative> for bool {
-    fn from(t: Relative) -> Self {
-        t == Relative::Yes
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum IsAdd {
-    No,
-    Yes,
-}
-
-impl From<IsAdd> for bool {
-    fn from(t: IsAdd) -> Self {
-        t == IsAdd::Yes
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WantUndo {
     No,
     Yes,
@@ -92,19 +44,6 @@ pub enum IsMove {
 impl From<IsMove> for bool {
     fn from(t: IsMove) -> Self {
         t == IsMove::Yes
-    }
-}
-
-// TODO-medium There's a similar enum
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum RecFx {
-    No,
-    Yes,
-}
-
-impl From<RecFx> for bool {
-    fn from(t: RecFx) -> Self {
-        t == RecFx::Yes
     }
 }
 
