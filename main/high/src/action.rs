@@ -1,6 +1,6 @@
 use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_rs_medium::KbdActionValue;
+use reaper_rs_medium::ActionValueChange;
 
 use helgoboss_midi::U7;
 use std::borrow::Cow;
@@ -183,7 +183,7 @@ impl Action {
             unsafe {
                 reaper.medium.kbd_on_main_action_ex(
                     action_command_id,
-                    KbdActionValue::Relative2(cropped_relative_value),
+                    ActionValueChange::Relative2(cropped_relative_value),
                     Some(reaper.medium.get_main_hwnd()),
                     project.map(|p| p.get_raw()),
                 );
@@ -196,7 +196,7 @@ impl Action {
             unsafe {
                 reaper.medium.kbd_on_main_action_ex(
                     action_command_id,
-                    KbdActionValue::AbsoluteLowRes(discrete_value),
+                    ActionValueChange::AbsoluteLowRes(discrete_value),
                     Some(reaper.medium.get_main_hwnd()),
                     project.map(|p| p.get_raw()),
                 );

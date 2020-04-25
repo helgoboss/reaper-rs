@@ -6,16 +6,16 @@ use std::ptr::{null_mut, NonNull};
 use reaper_rs_low::{firewall, raw};
 
 use crate::{
-    option_non_null_into, require_non_null, require_non_null_panic, AutomationMode, ControlSurface,
-    DelegatingControlSurface, EnvChunkName, ExtensionType, FxChainType, FxShowFlag, GangBehavior,
-    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
-    KbdActionValue, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
+    option_non_null_into, require_non_null, require_non_null_panic, ActionValueChange,
+    AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName, ExtensionType,
+    FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
+    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject, ReaperControlSurface,
     ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput, RegInstr,
     StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
-    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoHint,
-    ValueChange,
+    TrackFxAddByNameBehavior, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
+    UndoFlag, UndoHint, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -441,11 +441,11 @@ impl Reaper {
     pub unsafe fn kbd_on_main_action_ex(
         &self,
         cmd: u32,
-        value: KbdActionValue,
+        value: ActionValueChange,
         hwnd: Option<Hwnd>,
         proj: Option<ReaProject>,
     ) -> i32 {
-        use KbdActionValue::*;
+        use ActionValueChange::*;
         let (val, valhw, relmode) = match value {
             AbsoluteLowRes(v) => (i32::from(v), -1, 0),
             AbsoluteHighRes(v) => (
@@ -544,8 +544,8 @@ impl Reaper {
         &self,
         track: MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: FxChainType,
-        instantiate: TrackFxAddByNameVariant,
+        rec_fx: TrackFxChainType,
+        instantiate: TrackFxAddByNameBehavior,
     ) -> i32 {
         self.low.TrackFX_AddByName(
             track.as_ptr(),
@@ -559,9 +559,9 @@ impl Reaper {
         &self,
         track: MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: FxChainType,
+        rec_fx: TrackFxChainType,
     ) -> Option<u32> {
-        match self.track_fx_add_by_name(track, fxname, rec_fx, TrackFxAddByNameVariant::Query) {
+        match self.track_fx_add_by_name(track, fxname, rec_fx, TrackFxAddByNameBehavior::Query) {
             -1 => None,
             idx if idx >= 0 => Some(idx as u32),
             _ => unreachable!(),
@@ -572,7 +572,7 @@ impl Reaper {
         &self,
         track: MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: FxChainType,
+        rec_fx: TrackFxChainType,
         force_add: bool, // TODO-medium Should be an enum
     ) -> Result<u32, ()> {
         match self.track_fx_add_by_name(
@@ -580,9 +580,9 @@ impl Reaper {
             fxname,
             rec_fx,
             if force_add {
-                TrackFxAddByNameVariant::Add
+                TrackFxAddByNameBehavior::Add
             } else {
-                TrackFxAddByNameVariant::AddIfNotFound
+                TrackFxAddByNameBehavior::AddIfNotFound
             },
         ) {
             -1 => Err(()),

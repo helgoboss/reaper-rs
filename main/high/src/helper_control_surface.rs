@@ -10,9 +10,9 @@ use reaper_rs_medium::{
     AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    FxChainType, InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointer,
-    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
-    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackRef, VersionDependentFxRef,
+    InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointer, SetSurfaceMuteArgs,
+    SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs,
+    SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef, VersionDependentFxRef,
     VersionDependentTrackFxRef,
 };
 use rxrust::prelude::*;
@@ -845,7 +845,7 @@ impl ControlSurface for HelperControlSurface {
         let track = Track::new(args.track, None);
         match args.fx_chain_type {
             Some(t) => {
-                let is_input_fx = t == FxChainType::InputOrMonitoringFxChain;
+                let is_input_fx = t == TrackFxChainType::InputFxChain;
                 self.detect_fx_changes_on_track(track, true, !is_input_fx, is_input_fx);
             }
             None => {

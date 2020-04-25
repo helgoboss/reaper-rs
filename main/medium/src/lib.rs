@@ -76,6 +76,9 @@ pub use constants::*;
 mod enums;
 pub use enums::*;
 
+mod flags;
+pub use flags::*;
+
 mod control_surface;
 pub use control_surface::*;
 

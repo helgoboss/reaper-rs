@@ -2,7 +2,7 @@ use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
 use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
 
-use reaper_rs_medium::{FxChainType, TransferBehavior, UndoHint};
+use reaper_rs_medium::{TrackFxChainType, TransferBehavior, UndoHint};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -162,9 +162,9 @@ DOCKED 0
                 self.track.get_raw(),
                 original_fx_name,
                 if self.is_input_fx {
-                    FxChainType::InputOrMonitoringFxChain
+                    TrackFxChainType::InputFxChain
                 } else {
-                    FxChainType::NormalFxChain
+                    TrackFxChainType::NormalFxChain
                 },
                 true,
             )
@@ -192,9 +192,9 @@ DOCKED 0
                 self.track.get_raw(),
                 name,
                 if self.is_input_fx {
-                    FxChainType::InputOrMonitoringFxChain
+                    TrackFxChainType::InputFxChain
                 } else {
-                    FxChainType::NormalFxChain
+                    TrackFxChainType::NormalFxChain
                 },
             )
         }?;

@@ -18,11 +18,11 @@ use super::mock::observe_invocations;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::{
-    AutomationMode, EnvChunkName, FxChainType, FxShowFlag, GangBehavior, GlobalAutomationOverride,
-    InputMonitoringMode, KbdActionValue, MasterTrackBehavior, MessageBoxResult, MessageBoxType,
-    MidiDeviceId, ReaperVersion, RecordArmState, RecordingInput, StuffMidiMessageTarget,
-    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
-    TrackSendDirection, TransferBehavior, UndoBehavior,
+    ActionValueChange, AutomationMode, EnvChunkName, FxShowFlag, GangBehavior,
+    GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior, MessageBoxResult,
+    MessageBoxType, MidiDeviceId, ReaperVersion, RecordArmState, RecordingInput,
+    StuffMidiMessageTarget, TrackFxAddByNameBehavior, TrackFxChainType, TrackFxRef, TrackInfoKey,
+    TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
 };
 use std::rc::Rc;
 use std::time::Duration;

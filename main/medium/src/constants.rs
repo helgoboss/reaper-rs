@@ -2,10 +2,8 @@
 use super::{MediaItem, MediaItemTake, MediaTrack, PcmSource, ReaProject, TrackEnvelope};
 use crate::ReaperStringArg;
 use c_str_macro::c_str;
-use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-use reaper_rs_low::raw;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_void;
@@ -32,63 +30,6 @@ impl From<&'static CStr> for ReaperVersion {
     fn from(version_str: &'static CStr) -> Self {
         ReaperVersion { version_str }
     }
-}
-
-#[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
-#[repr(u32)]
-pub enum UndoFlag {
-    Freeze = raw::UNDO_STATE_FREEZE,
-    Fx = raw::UNDO_STATE_FX,
-    Items = raw::UNDO_STATE_ITEMS,
-    MiscCfg = raw::UNDO_STATE_MISCCFG,
-    TrackCfg = raw::UNDO_STATE_TRACKCFG,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum TrackFxRef {
-    InputFx(u32),
-    OutputFx(u32),
-}
-
-// Converts directly to the i32 value that is expected by low-level track-FX related functions
-impl From<TrackFxRef> for i32 {
-    fn from(v: TrackFxRef) -> Self {
-        use TrackFxRef::*;
-        let positive = match v {
-            InputFx(idx) => 0x1000000 + idx,
-            OutputFx(idx) => idx,
-        };
-        positive as i32
-    }
-}
-
-// Converts from a value returned by low-level track-FX related functions turned into u32.
-impl From<u32> for TrackFxRef {
-    fn from(v: u32) -> Self {
-        use TrackFxRef::*;
-        if v >= 0x1000000 {
-            InputFx(v - 0x1000000)
-        } else {
-            OutputFx(v)
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
-#[repr(i32)]
-pub enum TrackFxAddByNameVariant {
-    Add = -1,
-    Query = 0,
-    AddIfNotFound = 1,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum KbdActionValue {
-    AbsoluteLowRes(U7),
-    AbsoluteHighRes(U14),
-    Relative1(U7),
-    Relative2(U7),
-    Relative3(U7),
 }
 
 #[derive(Clone, Debug)]

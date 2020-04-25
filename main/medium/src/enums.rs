@@ -1,17 +1,19 @@
 use crate::MidiDeviceId;
+use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum FxChainType {
+pub enum TrackFxChainType {
     NormalFxChain,
-    InputOrMonitoringFxChain,
+    /// On the master track this corresponds to the monitoring FX chain
+    InputFxChain,
 }
 
 // TODO-medium Maybe better implement this as normal pub(crate) method because it's an
 // implementation detail
-impl From<FxChainType> for bool {
-    fn from(t: FxChainType) -> Self {
-        t == FxChainType::InputOrMonitoringFxChain
+impl From<TrackFxChainType> for bool {
+    fn from(t: TrackFxChainType) -> Self {
+        t == TrackFxChainType::InputFxChain
     }
 }
 
@@ -167,4 +169,51 @@ impl From<StuffMidiMessageTarget> for i32 {
             MidiOutputDevice(id) => 16 + id.0 as i32,
         }
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TrackFxRef {
+    NormalFxChain(u32),
+    InputFxChain(u32),
+}
+
+// Converts directly to the i32 value that is expected by low-level track-FX related functions
+impl From<TrackFxRef> for i32 {
+    fn from(v: TrackFxRef) -> Self {
+        use TrackFxRef::*;
+        let positive = match v {
+            InputFxChain(idx) => 0x1000000 + idx,
+            NormalFxChain(idx) => idx,
+        };
+        positive as i32
+    }
+}
+
+// Converts from a value returned by low-level track-FX related functions turned into u32.
+impl From<u32> for TrackFxRef {
+    fn from(v: u32) -> Self {
+        use TrackFxRef::*;
+        if v >= 0x1000000 {
+            InputFxChain(v - 0x1000000)
+        } else {
+            NormalFxChain(v)
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
+#[repr(i32)]
+pub enum TrackFxAddByNameBehavior {
+    Add = -1,
+    Query = 0,
+    AddIfNotFound = 1,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ActionValueChange {
+    AbsoluteLowRes(U7),
+    AbsoluteHighRes(U14),
+    Relative1(U7),
+    Relative2(U7),
+    Relative3(U7),
 }

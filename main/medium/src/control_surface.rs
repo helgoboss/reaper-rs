@@ -1,6 +1,6 @@
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, FxChainType, InputMonitoringMode, ReaperVersion,
+    require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperVersion, TrackFxChainType,
     TrackFxRef,
 };
 use c_str_macro::c_str;
@@ -283,7 +283,7 @@ pub struct ExtSetFxOpenArgs {
 pub struct ExtSetFxChangeArgs {
     pub track: MediaTrack,
     // In REAPER < 5.95 we don't know if the change happened on input or normal FX chain
-    pub fx_chain_type: Option<FxChainType>,
+    pub fx_chain_type: Option<TrackFxChainType>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -570,9 +570,9 @@ impl<T: ControlSurface> reaper_rs_low::IReaperControlSurface for DelegatingContr
                         if self.supports_detection_of_input_fx_in_set_fx_change {
                             let flags = parm2 as usize as u32;
                             let fx_chain_type = if (flags & 1) == 1 {
-                                FxChainType::InputOrMonitoringFxChain
+                                TrackFxChainType::InputFxChain
                             } else {
-                                FxChainType::NormalFxChain
+                                TrackFxChainType::NormalFxChain
                             };
                             Some(fx_chain_type)
                         } else {
