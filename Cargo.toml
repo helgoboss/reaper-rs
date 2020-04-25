@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "main/main",
     "main/low",
     "main/medium",
     "main/high",
