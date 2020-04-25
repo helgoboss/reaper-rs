@@ -438,7 +438,7 @@ impl Reaper {
                     use TrackRef::*;
                     let track = match track_ref {
                         MasterTrack => self.get_current_project().get_master_track(),
-                        TrackIndex(idx) => {
+                        NormalTrack(idx) => {
                             if idx >= self.get_current_project().get_track_count() {
                                 // Must be in another project
                                 return None;
@@ -793,7 +793,7 @@ impl Reaper {
 
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
-            .map(move |i| self.medium.enum_projects(ProjectRef::TabIndex(i), 0))
+            .map(move |i| self.medium.enum_projects(ProjectRef::Tab(i), 0))
             .take_while(|r| !r.is_none())
             .map(|r| Project::new(r.unwrap().project))
     }

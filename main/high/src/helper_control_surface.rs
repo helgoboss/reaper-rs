@@ -4,7 +4,7 @@ use crate::{get_media_track_guid, Payload, Project, Reaper, ScheduledTask, Task,
 use c_str_macro::c_str;
 use reaper_rs_low::raw;
 use reaper_rs_medium::TrackInfoKey::{
-    B_MUTE, D_PAN, D_VOL, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO,
+    Mute, Pan, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber, Vol,
 };
 use reaper_rs_medium::{
     AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
@@ -195,15 +195,15 @@ impl HelperControlSurface {
                 let m = &reaper.medium;
                 let td = unsafe {
                     TrackData {
-                        volume: m.get_media_track_info_value(media_track, D_VOL),
-                        pan: m.get_media_track_info_value(media_track, D_PAN),
-                        selected: m.get_media_track_info_value(media_track, I_SELECTED) != 0.0,
-                        mute: m.get_media_track_info_value(media_track, B_MUTE) != 0.0,
-                        solo: m.get_media_track_info_value(media_track, I_SOLO) != 0.0,
-                        recarm: m.get_media_track_info_value(media_track, I_RECARM) != 0.0,
+                        volume: m.get_media_track_info_value(media_track, Vol),
+                        pan: m.get_media_track_info_value(media_track, Pan),
+                        selected: m.get_media_track_info_value(media_track, Selected) != 0.0,
+                        mute: m.get_media_track_info_value(media_track, Mute) != 0.0,
+                        solo: m.get_media_track_info_value(media_track, Solo) != 0.0,
+                        recarm: m.get_media_track_info_value(media_track, RecArm) != 0.0,
                         number: m.get_media_track_info_tracknumber(media_track),
                         recmonitor: m.get_media_track_info_recmon(media_track),
-                        recinput: m.get_media_track_info_value(media_track, I_RECINPUT) as i32,
+                        recinput: m.get_media_track_info_value(media_track, RecInput) as i32,
                         guid: get_media_track_guid(media_track),
                     }
                 };
@@ -708,7 +708,7 @@ impl ControlSurface for HelperControlSurface {
         let recinput = unsafe {
             reaper
                 .medium
-                .get_media_track_info_value(args.track, I_RECINPUT) as i32
+                .get_media_track_info_value(args.track, RecInput) as i32
         };
         if td.recinput != recinput {
             td.recinput = recinput;

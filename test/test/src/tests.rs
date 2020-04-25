@@ -146,7 +146,7 @@ fn set_project_tempo() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        project.set_tempo(Tempo::from_bpm(130.0), UndoBehavior::WithoutUndoPoint);
+        project.set_tempo(Tempo::from_bpm(130.0), UndoBehavior::OmitUndoPoint);
         // Then
         check_eq!(project.get_tempo().get_bpm(), 130.0);
         // TODO There should be only one event invocation
@@ -753,10 +753,10 @@ fn remove_track() -> TestStep {
         let project = reaper.get_current_project();
         let track_count_before = project.get_track_count();
         let track_1 = project
-            .get_track_by_ref(TrackRef::TrackIndex(0))
+            .get_track_by_ref(TrackRef::NormalTrack(0))
             .ok_or("Missing track 1")?;
         let track_2 = project
-            .get_track_by_ref(TrackRef::TrackIndex(1))
+            .get_track_by_ref(TrackRef::NormalTrack(1))
             .ok_or("Missing track 2")?;
         let track_2_guid = track_2.get_guid();
         check!(track_1.is_available());
@@ -808,17 +808,17 @@ fn select_track_exclusively() -> TestStep {
         check!(!track_2.is_selected());
         check!(!track_3.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
             1
         );
         check!(
             project
-                .get_first_selected_track(MasterTrackBehavior::WithoutMasterTrack)
+                .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
                 .is_some()
         );
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::WithoutMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
                 .count(),
             1
         );
@@ -1087,16 +1087,16 @@ fn select_master_track() -> TestStep {
         // Then
         check!(master_track.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::WithMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::IncludeMasterTrack),
             1
         );
         let first_selected_track = project
-            .get_first_selected_track(MasterTrackBehavior::WithMasterTrack)
+            .get_first_selected_track(MasterTrackBehavior::IncludeMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check!(first_selected_track.is_master_track());
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::WithMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::IncludeMasterTrack)
                 .count(),
             1
         );
@@ -1126,16 +1126,16 @@ fn unselect_track() -> TestStep {
         // Then
         check!(!track.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
             1
         );
         let first_selected_track = project
-            .get_first_selected_track(MasterTrackBehavior::WithoutMasterTrack)
+            .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(2));
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::WithoutMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
                 .count(),
             1
         );
@@ -1166,16 +1166,16 @@ fn select_track() -> TestStep {
         check!(track.is_selected());
         check!(track2.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
             2
         );
         let first_selected_track = project
-            .get_first_selected_track(MasterTrackBehavior::WithoutMasterTrack)
+            .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(0));
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::WithoutMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
                 .count(),
             2
         );
@@ -1195,7 +1195,7 @@ fn query_track_selection_state() -> TestStep {
         // Then
         check!(!is_selected);
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
             0
         );
         Ok(())

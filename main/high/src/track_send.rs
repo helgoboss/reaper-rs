@@ -1,6 +1,6 @@
 use crate::{Pan, Reaper, Track, Volume};
 use reaper_rs_low::raw;
-use reaper_rs_medium::TrackSendInfoKey::P_DESTTRACK;
+use reaper_rs_medium::TrackSendInfoKey::DestTrack;
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{MediaTrack, TrackSendDirection, ValueChange};
 use rxrust::prelude::PayloadCopy;

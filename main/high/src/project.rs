@@ -33,7 +33,7 @@ impl Project {
     pub fn get_file_path(&self) -> Option<PathBuf> {
         Reaper::get()
             .medium
-            .enum_projects(ProjectRef::TabIndex(self.get_index()), 5000)
+            .enum_projects(ProjectRef::Tab(self.get_index()), 5000)
             .unwrap()
             .file_path
     }
@@ -66,7 +66,7 @@ impl Project {
         use TrackRef::*;
         match track_ref {
             MasterTrack => Some(self.get_master_track()),
-            TrackIndex(idx) => self.get_track_by_index(idx),
+            NormalTrack(idx) => self.get_track_by_index(idx),
         }
     }
 
@@ -151,7 +151,7 @@ impl Project {
         let reaper = Reaper::get();
         reaper
             .medium
-            .insert_track_at_index(index, TrackDefaultsBehavior::WithoutDefaultEnvAndFx);
+            .insert_track_at_index(index, TrackDefaultsBehavior::OmitDefaultEnvAndFx);
         reaper.medium.track_list_update_all_external_surfaces();
         let media_track = reaper
             .medium

@@ -79,7 +79,7 @@ impl Reaper {
         let idx = match proj_ref {
             Current => -1,
             CurrentlyRendering => 0x40000000,
-            TabIndex(i) => i as i32,
+            Tab(i) => i as i32,
         };
         if projfn_out_optional_sz == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
@@ -175,7 +175,7 @@ impl Reaper {
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
     pub unsafe fn get_media_track_info_partrack(&self, tr: MediaTrack) -> Option<MediaTrack> {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::P_PARTRACK, null_mut())
+        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::ParTrack, null_mut())
             as *mut raw::MediaTrack;
         NonNull::new(ptr)
     }
@@ -183,7 +183,7 @@ impl Reaper {
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
     // In REAPER < 5.95 this returns nullptr
     pub unsafe fn get_media_track_info_project(&self, tr: MediaTrack) -> Option<ReaProject> {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::P_PROJECT, null_mut())
+        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Project, null_mut())
             as *mut raw::ReaProject;
         NonNull::new(ptr)
     }
@@ -194,20 +194,20 @@ impl Reaper {
         tr: MediaTrack,
         f: impl Fn(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::P_NAME, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Name, null_mut());
         unsafe { create_passing_c_str(ptr as *const c_char) }.map(f)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
     pub unsafe fn get_media_track_info_recmon(&self, tr: MediaTrack) -> InputMonitoringMode {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::I_RECMON, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::RecMon, null_mut());
         let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
     pub unsafe fn get_media_track_info_recinput(&self, tr: MediaTrack) -> Option<RecordingInput> {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::I_RECINPUT, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::RecInput, null_mut());
         let rec_input_index = unsafe { unref_as::<i32>(ptr) }.unwrap();
         if rec_input_index < 0 {
             None
@@ -219,17 +219,17 @@ impl Reaper {
     /// Convenience function which returns the given track's number (IP_TRACKNUMBER).
     pub unsafe fn get_media_track_info_tracknumber(&self, tr: MediaTrack) -> Option<TrackRef> {
         use TrackRef::*;
-        match self.get_set_media_track_info(tr, TrackInfoKey::IP_TRACKNUMBER, null_mut()) as i32 {
+        match self.get_set_media_track_info(tr, TrackInfoKey::TrackNumber, null_mut()) as i32 {
             -1 => Some(MasterTrack),
             0 => None,
-            n if n > 0 => Some(TrackIndex(n as u32 - 1)),
+            n if n > 0 => Some(NormalTrack(n as u32 - 1)),
             _ => unreachable!(),
         }
     }
 
     /// Convenience function which returns the given track's GUID (GUID).
     pub unsafe fn get_media_track_info_guid(&self, tr: MediaTrack) -> GUID {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::GUID, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Guid, null_mut());
         unsafe { unref_as::<GUID>(ptr) }.unwrap()
     }
 
@@ -1391,7 +1391,7 @@ impl Reaper {
             tr,
             category.into(),
             sendidx,
-            TrackSendInfoKey::P_DESTTRACK,
+            TrackSendInfoKey::DestTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
         require_non_null(ptr)
@@ -1794,7 +1794,7 @@ fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
     if tracknumber == 0 {
         TrackRef::MasterTrack
     } else {
-        TrackRef::TrackIndex(tracknumber - 1)
+        TrackRef::NormalTrack(tracknumber - 1)
     }
 }
 

@@ -70,14 +70,23 @@
 //  on REAPER itself not running into UB (waiting for Justin to comment on some functions) or
 //  just mark the methods where this is not possible as unsafe. A higher-level API then should
 //  take care of making things absolutely safe.
-mod constants;
-pub use constants::*;
+mod reaper_version;
+pub use reaper_version::*;
 
-mod enums;
-pub use enums::*;
+mod misc_enums;
+pub use misc_enums::*;
+
+mod key_enums;
+pub use key_enums::*;
+
+mod fn_traits;
+pub use fn_traits::*;
 
 mod flags;
 pub use flags::*;
+
+mod reaper_pointer;
+pub use reaper_pointer::*;
 
 mod control_surface;
 pub use control_surface::*;

@@ -1,6 +1,9 @@
-use crate::MidiDeviceId;
+use crate::{concat_c_strs, MidiDeviceId, ReaperStringArg};
+use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
+use std::borrow::Cow;
+use std::ffi::CStr;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TrackFxChainType {
@@ -19,13 +22,13 @@ impl From<TrackFxChainType> for bool {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MasterTrackBehavior {
-    WithoutMasterTrack,
-    WithMasterTrack,
+    ExcludeMasterTrack,
+    IncludeMasterTrack,
 }
 
 impl From<MasterTrackBehavior> for bool {
     fn from(v: MasterTrackBehavior) -> Self {
-        v == MasterTrackBehavior::WithMasterTrack
+        v == MasterTrackBehavior::IncludeMasterTrack
     }
 }
 
@@ -64,13 +67,13 @@ impl<T: Copy> ValueChange<T> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum UndoBehavior {
-    WithoutUndoPoint,
-    WithUndoPoint,
+    OmitUndoPoint,
+    AddUndoPoint,
 }
 
 impl From<UndoBehavior> for bool {
     fn from(h: UndoBehavior) -> Self {
-        h == UndoBehavior::WithUndoPoint
+        h == UndoBehavior::AddUndoPoint
     }
 }
 
@@ -88,25 +91,25 @@ impl From<TransferBehavior> for bool {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TrackDefaultsBehavior {
-    WithoutDefaultEnvAndFx,
-    WithDefaultEnvAndFx,
+    OmitDefaultEnvAndFx,
+    AddDefaultEnvAndFx,
 }
 
 impl From<TrackDefaultsBehavior> for bool {
     fn from(v: TrackDefaultsBehavior) -> Self {
-        v == TrackDefaultsBehavior::WithDefaultEnvAndFx
+        v == TrackDefaultsBehavior::AddDefaultEnvAndFx
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum GangBehavior {
-    GangDenied,
-    GangAllowed,
+    DenyGang,
+    AllowGang,
 }
 
 impl From<GangBehavior> for bool {
     fn from(v: GangBehavior) -> Self {
-        v == GangBehavior::GangAllowed
+        v == GangBehavior::AllowGang
     }
 }
 
@@ -216,4 +219,78 @@ pub enum ActionValueChange {
     Relative1(U7),
     Relative2(U7),
     Relative3(U7),
+}
+
+// TODO-medium If those are not extensions and only the complete DLL is the extension, name this
+//  differently.
+#[derive(Clone, Debug)]
+pub enum ExtensionType<'a> {
+    Api(Cow<'a, CStr>),
+    ApiDef(Cow<'a, CStr>),
+    HookCommand,
+    HookPostCommand,
+    HookCommand2,
+    ToggleAction,
+    ActionHelp,
+    CommandId,
+    CommandIdLookup,
+    GAccel,
+    CSurfInst,
+    Custom(Cow<'a, CStr>),
+}
+
+impl<'a> ExtensionType<'a> {
+    pub fn api(func_name: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Api(func_name.into().into_cow())
+    }
+
+    pub fn api_def(func_def: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::ApiDef(func_def.into().into_cow())
+    }
+
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(key.into().into_cow())
+    }
+}
+
+impl<'a> From<ExtensionType<'a>> for Cow<'a, CStr> {
+    fn from(value: ExtensionType<'a>) -> Self {
+        use ExtensionType::*;
+        match value {
+            GAccel => c_str!("gaccel").into(),
+            CSurfInst => c_str!("csurf_inst").into(),
+            Api(func_name) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
+            ApiDef(func_def) => concat_c_strs(c_str!("APIdef_"), func_def.as_ref()).into(),
+            HookCommand => c_str!("hookcommand").into(),
+            HookPostCommand => c_str!("hookpostcommand").into(),
+            HookCommand2 => c_str!("hookcommand2").into(),
+            ToggleAction => c_str!("toggleaction").into(),
+            ActionHelp => c_str!("action_help").into(),
+            CommandId => c_str!("command_id").into(),
+            CommandIdLookup => c_str!("command_id_lookup").into(),
+            Custom(k) => k,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TrackRef {
+    MasterTrack,
+    NormalTrack(u32),
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[repr(i32)]
+pub enum InputMonitoringMode {
+    Off = 0,
+    Normal = 1,
+    /// Tape style
+    NotWhenPlaying = 2,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ProjectRef {
+    Current,
+    CurrentlyRendering,
+    Tab(u32),
 }

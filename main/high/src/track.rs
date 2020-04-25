@@ -20,7 +20,7 @@ use reaper_rs_low::raw;
 use reaper_rs_low::raw::{CSURF_EXT_SETINPUTMONITOR, GUID};
 
 use reaper_rs_medium::TrackInfoKey::{
-    B_MUTE, IP_TRACKNUMBER, I_RECARM, I_RECINPUT, I_RECMON, I_SELECTED, I_SOLO, P_NAME, P_PROJECT,
+    Mute, Name, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber,
 };
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
@@ -83,7 +83,7 @@ impl Track {
         unsafe {
             Reaper::get().medium.get_set_media_track_info(
                 self.get_raw(),
-                P_NAME,
+                Name,
                 name.as_ptr() as *mut c_void,
             );
         }
@@ -115,7 +115,7 @@ impl Track {
             Reaper::get().medium.csurf_on_input_monitoring_change_ex(
                 self.get_raw(),
                 mode,
-                GangBehavior::GangDenied,
+                GangBehavior::DenyGang,
             );
         }
     }
@@ -139,7 +139,7 @@ impl Track {
         let _ = unsafe {
             reaper.medium.set_media_track_info_value(
                 self.get_raw(),
-                I_RECINPUT,
+                RecInput,
                 rec_input_index as f64,
             )
         };
@@ -149,7 +149,7 @@ impl Track {
         let mut rec_mon = unsafe {
             reaper
                 .medium
-                .get_media_track_info_value(self.get_raw(), I_RECMON)
+                .get_media_track_info_value(self.get_raw(), RecMon)
         };
         // TODO-low This is ugly. Solve in other ways.
         let control_surface = get_control_surface_instance();
@@ -184,7 +184,7 @@ impl Track {
             reaper.medium.csurf_on_pan_change_ex(
                 self.get_raw(),
                 Absolute(reaper_value),
-                GangBehavior::GangDenied,
+                GangBehavior::DenyGang,
             );
         }
         // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so
@@ -215,7 +215,7 @@ impl Track {
             reaper.medium.csurf_on_volume_change_ex(
                 self.get_raw(),
                 Absolute(reaper_value),
-                GangBehavior::GangDenied,
+                GangBehavior::DenyGang,
             );
         }
         // Setting the volume programmatically doesn't trigger SetSurfaceVolume in
@@ -239,7 +239,7 @@ impl Track {
         use TrackRef::*;
         match result {
             MasterTrack => None,
-            TrackIndex(idx) => Some(idx),
+            NormalTrack(idx) => Some(idx),
         }
     }
 
@@ -256,7 +256,7 @@ impl Track {
             let recarm = unsafe {
                 Reaper::get()
                     .medium
-                    .get_media_track_info_value(self.get_raw(), I_RECARM)
+                    .get_media_track_info_value(self.get_raw(), RecArm)
             };
             recarm == 1.0
         }
@@ -272,7 +272,7 @@ impl Track {
                 reaper.medium.csurf_on_rec_arm_change_ex(
                     self.get_raw(),
                     RecordArmState::Armed,
-                    GangBehavior::GangDenied,
+                    GangBehavior::DenyGang,
                 );
             }
             // If track was auto-armed before, this would just have switched off the auto-arm but
@@ -281,14 +281,14 @@ impl Track {
             let recarm = unsafe {
                 reaper
                     .medium
-                    .get_media_track_info_value(self.get_raw(), I_RECARM)
+                    .get_media_track_info_value(self.get_raw(), RecArm)
             };
             if recarm != 1.0 {
                 unsafe {
                     reaper.medium.csurf_on_rec_arm_change_ex(
                         self.get_raw(),
                         RecordArmState::Armed,
-                        GangBehavior::GangDenied,
+                        GangBehavior::DenyGang,
                     );
                 }
             }
@@ -304,7 +304,7 @@ impl Track {
                 Reaper::get().medium.csurf_on_rec_arm_change_ex(
                     self.get_raw(),
                     RecordArmState::Unarmed,
-                    GangBehavior::GangDenied,
+                    GangBehavior::DenyGang,
                 );
             }
         }
@@ -343,7 +343,7 @@ impl Track {
         let mute = unsafe {
             Reaper::get()
                 .medium
-                .get_media_track_info_value(self.get_raw(), B_MUTE)
+                .get_media_track_info_value(self.get_raw(), Mute)
         };
         mute == 1.0
     }
@@ -354,7 +354,7 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium
-                .set_media_track_info_value(self.get_raw(), B_MUTE, 1.0)
+                .set_media_track_info_value(self.get_raw(), Mute, 1.0)
         };
         unsafe {
             reaper
@@ -369,7 +369,7 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium
-                .set_media_track_info_value(self.get_raw(), B_MUTE, 0.0)
+                .set_media_track_info_value(self.get_raw(), Mute, 0.0)
         };
         unsafe {
             reaper
@@ -383,7 +383,7 @@ impl Track {
         let solo = unsafe {
             Reaper::get()
                 .medium
-                .get_media_track_info_value(self.get_raw(), I_SOLO)
+                .get_media_track_info_value(self.get_raw(), Solo)
         };
         solo > 0.0
     }
@@ -394,7 +394,7 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium
-                .set_media_track_info_value(self.get_raw(), I_SOLO, 1.0)
+                .set_media_track_info_value(self.get_raw(), Solo, 1.0)
         };
         unsafe {
             reaper
@@ -409,7 +409,7 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium
-                .set_media_track_info_value(self.get_raw(), I_SOLO, 0.0)
+                .set_media_track_info_value(self.get_raw(), Solo, 0.0)
         };
         unsafe {
             reaper
@@ -454,7 +454,7 @@ impl Track {
         let selected = unsafe {
             Reaper::get()
                 .medium
-                .get_media_track_info_value(self.get_raw(), I_SELECTED)
+                .get_media_track_info_value(self.get_raw(), Selected)
         };
         selected == 1.0
     }
