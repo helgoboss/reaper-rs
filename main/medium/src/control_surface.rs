@@ -570,9 +570,9 @@ impl<T: ControlSurface> reaper_rs_low::IReaperControlSurface for DelegatingContr
                         if self.supports_detection_of_input_fx_in_set_fx_change {
                             let flags = parm2 as usize as u32;
                             let fx_chain_type = if (flags & 1) == 1 {
-                                FxChainType::InputFxChain
+                                FxChainType::InputOrMonitoringFxChain
                             } else {
-                                FxChainType::OutputFxChain
+                                FxChainType::NormalFxChain
                             };
                             Some(fx_chain_type)
                         } else {

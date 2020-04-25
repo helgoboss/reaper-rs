@@ -845,7 +845,7 @@ impl ControlSurface for HelperControlSurface {
         let track = Track::new(args.track, None);
         match args.fx_chain_type {
             Some(t) => {
-                let is_input_fx = t == FxChainType::InputFxChain;
+                let is_input_fx = t == FxChainType::InputOrMonitoringFxChain;
                 self.detect_fx_changes_on_track(track, true, !is_input_fx, is_input_fx);
             }
             None => {

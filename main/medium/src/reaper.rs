@@ -6,15 +6,16 @@ use std::ptr::{null_mut, NonNull};
 use reaper_rs_low::{firewall, raw};
 
 use crate::{
-    option_non_null_into, require_non_null, require_non_null_panic, AllowGang, AutomationMode,
-    ControlSurface, DelegatingControlSurface, EnvChunkName, ExtensionType, FxChainType, FxShowFlag,
-    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode, IsMove,
+    option_non_null_into, require_non_null, require_non_null_panic, AutomationMode, ControlSurface,
+    DelegatingControlSurface, EnvChunkName, ExtensionType, FxChainType, FxShowFlag, GangBehavior,
+    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
     KbdActionValue, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperPointer, ReaperStringArg, ReaperVersion, RecArmState, RecordingInput, RegInstr,
-    SendOrReceive, StuffMidiMessageTarget, ToggleAction, TrackEnvelope, TrackFxAddByNameVariant,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendInfoKey, UndoFlag, UndoHint,
-    ValueChange, WantDefaults, WantUndo,
+    ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput, RegInstr,
+    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoHint,
+    ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -490,7 +491,7 @@ impl Reaper {
         self.low.CountTracks(option_non_null_into(proj)) as u32
     }
 
-    pub fn insert_track_at_index(&self, idx: u32, want_defaults: WantDefaults) {
+    pub fn insert_track_at_index(&self, idx: u32, want_defaults: TrackDefaultsBehavior) {
         self.low
             .InsertTrackAtIndex(idx as i32, want_defaults.into());
     }
@@ -828,7 +829,7 @@ impl Reaper {
         src_fx: TrackFxRef,
         dest_track: MediaTrack,
         dest_fx: TrackFxRef,
-        is_move: IsMove,
+        is_move: TransferBehavior,
     ) {
         self.low.TrackFX_CopyToTrack(
             src_track.as_ptr(),
@@ -1123,7 +1124,7 @@ impl Reaper {
         self.low.Master_GetTempo()
     }
 
-    pub fn set_current_bpm(&self, proj: Option<ReaProject>, bpm: f64, want_undo: WantUndo) {
+    pub fn set_current_bpm(&self, proj: Option<ReaProject>, bpm: f64, want_undo: UndoBehavior) {
         self.require_valid_project(proj);
         unsafe {
             self.set_current_bpm_unchecked(proj, bpm, want_undo);
@@ -1134,7 +1135,7 @@ impl Reaper {
         &self,
         proj: Option<ReaProject>,
         bpm: f64,
-        want_undo: WantUndo,
+        want_undo: UndoBehavior,
     ) {
         self.low
             .SetCurrentBPM(option_non_null_into(proj), bpm, want_undo.into());
@@ -1184,7 +1185,7 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         monitor: InputMonitoringMode,
-        allowgang: AllowGang,
+        allowgang: GangBehavior,
     ) -> i32 {
         self.low
             .CSurf_OnInputMonitorChangeEx(trackid.as_ptr(), monitor.into(), allowgang.into())
@@ -1271,7 +1272,7 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         volume: ValueChange<f64>,
-        allow_gang: AllowGang,
+        allow_gang: GangBehavior,
     ) -> f64 {
         self.low.CSurf_OnVolumeChangeEx(
             trackid.as_ptr(),
@@ -1295,7 +1296,7 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         pan: ValueChange<f64>,
-        allow_gang: AllowGang,
+        allow_gang: GangBehavior,
     ) -> f64 {
         self.low.CSurf_OnPanChangeEx(
             trackid.as_ptr(),
@@ -1383,7 +1384,7 @@ impl Reaper {
     pub unsafe fn get_track_send_info_desttrack(
         &self,
         tr: MediaTrack,
-        category: SendOrReceive,
+        category: TrackSendDirection,
         sendidx: u32,
     ) -> Result<MediaTrack, ()> {
         let ptr = self.get_set_track_send_info(
@@ -1431,8 +1432,8 @@ impl Reaper {
     pub unsafe fn csurf_on_rec_arm_change_ex(
         &self,
         trackid: MediaTrack,
-        recarm: RecArmState,
-        allowgang: AllowGang,
+        recarm: RecordArmState,
+        allowgang: GangBehavior,
     ) -> bool {
         self.low
             .CSurf_OnRecArmChangeEx(trackid.as_ptr(), recarm.into(), allowgang.into())

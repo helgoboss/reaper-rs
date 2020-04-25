@@ -2,7 +2,7 @@ use crate::{Pan, Reaper, Track, Volume};
 use reaper_rs_low::raw;
 use reaper_rs_medium::TrackSendInfoKey::P_DESTTRACK;
 use reaper_rs_medium::ValueChange::Absolute;
-use reaper_rs_medium::{MediaTrack, SendOrReceive, ValueChange};
+use reaper_rs_medium::{MediaTrack, TrackSendDirection, ValueChange};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
 use std::ptr::null_mut;
@@ -204,7 +204,7 @@ fn get_target_track_raw(source_track: &Track, send_index: u32) -> Option<MediaTr
     unsafe {
         Reaper::get().medium.get_track_send_info_desttrack(
             source_track.get_raw(),
-            SendOrReceive::Send,
+            TrackSendDirection::Send,
             send_index,
         )
     }

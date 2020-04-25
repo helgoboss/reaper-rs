@@ -18,11 +18,11 @@ use super::mock::observe_invocations;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::{
-    AllowGang, AutomationMode, EnvChunkName, FxChainType, FxShowFlag, GlobalAutomationOverride,
-    InputMonitoringMode, IsMove, KbdActionValue, MasterTrackBehavior, MessageBoxResult,
-    MessageBoxType, MidiDeviceId, ReaperVersion, RecArmState, RecordingInput, SendOrReceive,
-    StuffMidiMessageTarget, TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, WantUndo,
+    AutomationMode, EnvChunkName, FxChainType, FxShowFlag, GangBehavior, GlobalAutomationOverride,
+    InputMonitoringMode, KbdActionValue, MasterTrackBehavior, MessageBoxResult, MessageBoxType,
+    MidiDeviceId, ReaperVersion, RecordArmState, RecordingInput, StuffMidiMessageTarget,
+    TrackFxAddByNameVariant, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendDirection, TransferBehavior, UndoBehavior,
 };
 use std::rc::Rc;
 use std::time::Duration;
@@ -146,7 +146,7 @@ fn set_project_tempo() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        project.set_tempo(Tempo::from_bpm(130.0), WantUndo::No);
+        project.set_tempo(Tempo::from_bpm(130.0), UndoBehavior::WithoutUndoPoint);
         // Then
         check_eq!(project.get_tempo().get_bpm(), 130.0);
         // TODO There should be only one event invocation
@@ -277,7 +277,7 @@ fn stuff_midi_devices() -> TestStep {
                 //  asynchronously that stuffed MIDI messages arrived via
                 // midi_message_received().
             });
-        reaper.stuff_midi_message(StuffMidiMessageTarget::VirtualMidiKeyboard, msg);
+        reaper.stuff_midi_message(StuffMidiMessageTarget::VirtualMidiKeyboardQueue, msg);
         // Then
         Ok(())
     })
@@ -808,17 +808,17 @@ fn select_track_exclusively() -> TestStep {
         check!(!track_2.is_selected());
         check!(!track_3.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
             1
         );
         check!(
             project
-                .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
+                .get_first_selected_track(MasterTrackBehavior::WithoutMasterTrack)
                 .is_some()
         );
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::WithoutMasterTrack)
                 .count(),
             1
         );
@@ -1087,16 +1087,16 @@ fn select_master_track() -> TestStep {
         // Then
         check!(master_track.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::IncludeMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::WithMasterTrack),
             1
         );
         let first_selected_track = project
-            .get_first_selected_track(MasterTrackBehavior::IncludeMasterTrack)
+            .get_first_selected_track(MasterTrackBehavior::WithMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check!(first_selected_track.is_master_track());
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::IncludeMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::WithMasterTrack)
                 .count(),
             1
         );
@@ -1126,16 +1126,16 @@ fn unselect_track() -> TestStep {
         // Then
         check!(!track.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
             1
         );
         let first_selected_track = project
-            .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
+            .get_first_selected_track(MasterTrackBehavior::WithoutMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(2));
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::WithoutMasterTrack)
                 .count(),
             1
         );
@@ -1166,16 +1166,16 @@ fn select_track() -> TestStep {
         check!(track.is_selected());
         check!(track2.is_selected());
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
             2
         );
         let first_selected_track = project
-            .get_first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
+            .get_first_selected_track(MasterTrackBehavior::WithoutMasterTrack)
             .ok_or("Couldn't get first selected track")?;
         check_eq!(first_selected_track.get_index(), Some(0));
         check_eq!(
             project
-                .get_selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
+                .get_selected_tracks(MasterTrackBehavior::WithoutMasterTrack)
                 .count(),
             2
         );
@@ -1195,7 +1195,7 @@ fn query_track_selection_state() -> TestStep {
         // Then
         check!(!is_selected);
         check_eq!(
-            project.get_selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
+            project.get_selected_track_count(MasterTrackBehavior::WithoutMasterTrack),
             0
         );
         Ok(())

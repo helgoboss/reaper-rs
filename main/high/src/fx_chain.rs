@@ -2,7 +2,7 @@ use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
 use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
 
-use reaper_rs_medium::{FxChainType, IsMove, UndoHint};
+use reaper_rs_medium::{FxChainType, TransferBehavior, UndoHint};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -34,7 +34,7 @@ impl FxChain {
                 fx.get_query_index(),
                 self.track.get_raw(),
                 get_fx_query_index(new_index, self.is_input_fx),
-                IsMove::Yes,
+                TransferBehavior::Move,
             );
         }
     }
@@ -52,9 +52,7 @@ impl FxChain {
     }
 
     pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
-        let mut track_chunk = self
-            .track
-            .get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsRequired);
+        let mut track_chunk = self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::Normal);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(tag) => {
@@ -110,16 +108,11 @@ DOCKED 0
     // In Track this returns Chunk, here it returns ChunkRegion. Because REAPER always returns
     // the chunk of the complete track, not just of the FX chain.
     pub fn get_chunk(&self) -> Option<ChunkRegion> {
-        self.find_chunk_region(
-            self.track
-                .get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsRequired),
-        )
+        self.find_chunk_region(self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::Normal))
     }
 
     pub fn set_chunk(&self, chunk: &str) {
-        let mut track_chunk = self
-            .track
-            .get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsRequired);
+        let mut track_chunk = self.track.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::Normal);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(r) => {
@@ -169,9 +162,9 @@ DOCKED 0
                 self.track.get_raw(),
                 original_fx_name,
                 if self.is_input_fx {
-                    FxChainType::InputFxChain
+                    FxChainType::InputOrMonitoringFxChain
                 } else {
-                    FxChainType::OutputFxChain
+                    FxChainType::NormalFxChain
                 },
                 true,
             )
@@ -199,9 +192,9 @@ DOCKED 0
                 self.track.get_raw(),
                 name,
                 if self.is_input_fx {
-                    FxChainType::InputFxChain
+                    FxChainType::InputOrMonitoringFxChain
                 } else {
-                    FxChainType::OutputFxChain
+                    FxChainType::NormalFxChain
                 },
             )
         }?;

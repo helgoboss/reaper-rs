@@ -24,8 +24,8 @@ use reaper_rs_medium::TrackInfoKey::{
 };
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
-    AllowGang, AutomationMode, GlobalAutomationOverride, InputMonitoringMode, MediaTrack,
-    ReaProject, ReaperPointer, RecArmState, RecordingInput, TrackInfoKey, TrackRef,
+    AutomationMode, GangBehavior, GlobalAutomationOverride, InputMonitoringMode, MediaTrack,
+    ReaProject, ReaperPointer, RecordArmState, RecordingInput, TrackInfoKey, TrackRef,
     TrackSendCategory, UndoHint, ValueChange,
 };
 
@@ -115,7 +115,7 @@ impl Track {
             Reaper::get().medium.csurf_on_input_monitoring_change_ex(
                 self.get_raw(),
                 mode,
-                AllowGang::No,
+                GangBehavior::GangDenied,
             );
         }
     }
@@ -184,7 +184,7 @@ impl Track {
             reaper.medium.csurf_on_pan_change_ex(
                 self.get_raw(),
                 Absolute(reaper_value),
-                AllowGang::No,
+                GangBehavior::GangDenied,
             );
         }
         // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so
@@ -215,7 +215,7 @@ impl Track {
             reaper.medium.csurf_on_volume_change_ex(
                 self.get_raw(),
                 Absolute(reaper_value),
-                AllowGang::No,
+                GangBehavior::GangDenied,
             );
         }
         // Setting the volume programmatically doesn't trigger SetSurfaceVolume in
@@ -271,8 +271,8 @@ impl Track {
             unsafe {
                 reaper.medium.csurf_on_rec_arm_change_ex(
                     self.get_raw(),
-                    RecArmState::Armed,
-                    AllowGang::No,
+                    RecordArmState::Armed,
+                    GangBehavior::GangDenied,
                 );
             }
             // If track was auto-armed before, this would just have switched off the auto-arm but
@@ -287,8 +287,8 @@ impl Track {
                 unsafe {
                     reaper.medium.csurf_on_rec_arm_change_ex(
                         self.get_raw(),
-                        RecArmState::Armed,
-                        AllowGang::No,
+                        RecordArmState::Armed,
+                        GangBehavior::GangDenied,
                     );
                 }
             }
@@ -303,15 +303,15 @@ impl Track {
             unsafe {
                 Reaper::get().medium.csurf_on_rec_arm_change_ex(
                     self.get_raw(),
-                    RecArmState::Unarmed,
-                    AllowGang::No,
+                    RecordArmState::Unarmed,
+                    GangBehavior::GangDenied,
                 );
             }
         }
     }
 
     pub fn enable_auto_arm(&self) {
-        let mut chunk = self.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsRequired);
+        let mut chunk = self.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::Normal);
         if get_auto_arm_chunk_line(&chunk).is_some() {
             return;
         }
@@ -419,7 +419,7 @@ impl Track {
     }
 
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
-        get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::UndoIsOptional))
+        get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::IsUndo))
     }
 
     // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains
@@ -444,7 +444,7 @@ impl Track {
             Reaper::get().medium.set_track_state_chunk(
                 self.get_raw(),
                 c_string.as_c_str(),
-                UndoHint::UndoIsOptional,
+                UndoHint::IsUndo,
             )
         };
     }

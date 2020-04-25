@@ -819,7 +819,7 @@ REAPERAPI_DEF //==============================================
 REAPERAPI_DEF //==============================================
 // CSurf_SetPlayState
 
-  void (*CSurf_SetPlayState)(bool play, bool pause, bool rec, IReaperControlSurface* ignoresurf);
+  void (*CSurf_SetPlayState)(bool play, bool pause, bool rec IReaperControlSurface* ignoresurf);
 #endif
 
 #if defined(REAPERAPI_WANT_CSurf_SetRepeatState) || !defined(REAPERAPI_MINIMAL)
