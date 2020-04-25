@@ -392,11 +392,11 @@ impl Reaper {
     // TODO-low Must be idempotent
     pub fn activate(&self) {
         self.medium
-            .plugin_register_hookcommand_add::<HighLevelHookCommand>();
+            .plugin_register_add_hookcommand::<HighLevelHookCommand>();
         self.medium
-            .plugin_register_toggleaction_add::<HighLevelToggleAction>();
+            .plugin_register_add_toggleaction::<HighLevelToggleAction>();
         self.medium
-            .plugin_register_hookpostcommand_add::<HighLevelHookPostCommand>();
+            .plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
         self.medium.register_control_surface();
         unsafe {
             self.medium
@@ -410,11 +410,11 @@ impl Reaper {
             .audio_reg_hardware_hook_remove(unsafe { &*self.audio_hook.get() });
         self.medium.unregister_control_surface();
         self.medium
-            .plugin_register_hookpostcommand_remove::<HighLevelHookPostCommand>();
+            .plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
         self.medium
-            .plugin_register_toggleaction_remove::<HighLevelToggleAction>();
+            .plugin_register_remove_toggleaction::<HighLevelToggleAction>();
         self.medium
-            .plugin_register_hookcommand_remove::<HighLevelHookCommand>();
+            .plugin_register_remove_hookcommand::<HighLevelHookCommand>();
     }
 
     pub fn get_version(&self) -> ReaperVersion {
@@ -484,7 +484,7 @@ impl Reaper {
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
-        let command_id = self.medium.plugin_register_command_id_add(command_name) as u32;
+        let command_id = self.medium.plugin_register_add_command_id(command_name) as u32;
         let command = Command::new(
             command_id,
             description.into(),
@@ -499,7 +499,7 @@ impl Reaper {
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             let command = p.insert(command);
             let acc = &command.accelerator_register;
-            unsafe { self.medium.plugin_register_gaccel_add(acc) };
+            unsafe { self.medium.plugin_register_add_gaccel(acc) };
         }
     }
 
@@ -511,7 +511,7 @@ impl Reaper {
         let mut command_by_id = self.command_by_id.borrow_mut();
         if let Some(command) = command_by_id.get_mut(&command_id) {
             let acc = &command.accelerator_register;
-            self.medium.plugin_register_gaccel_remove(acc);
+            self.medium.plugin_register_remove_gaccel(acc);
             command_by_id.remove(&command_id);
         }
     }

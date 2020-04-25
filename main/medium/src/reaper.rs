@@ -1,3 +1,4 @@
+use c_str_macro::c_str;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
@@ -6,13 +7,13 @@ use std::ptr::{null_mut, NonNull};
 use reaper_rs_low::{firewall, raw};
 
 use crate::{
-    option_non_null_into, require_non_null, require_non_null_panic, ActionValueChange,
-    AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName, ExtensionType,
-    FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
-    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput, RegInstr,
-    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope,
+    concat_c_strs, option_non_null_into, require_non_null, require_non_null_panic,
+    ActionValueChange, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
+    ExtensionType, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand,
+    HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
+    ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState,
+    RecordingInput, StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope,
     TrackFxAddByNameBehavior, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
     TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
     UndoFlag, UndoHint, ValueChange,
@@ -234,63 +235,73 @@ impl Reaper {
 
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
-    pub unsafe fn plugin_register(&self, name: RegInstr, infostruct: *mut c_void) -> i32 {
+    pub unsafe fn plugin_register_add(&self, name: ExtensionType, infostruct: *mut c_void) -> i32 {
         self.low
             .plugin_register(Cow::from(name).as_ptr(), infostruct)
     }
 
-    pub fn plugin_register_hookcommand_add<T: HookCommand>(&self) -> Result<(), ()> {
+    pub unsafe fn plugin_register_remove(
+        &self,
+        name: ExtensionType,
+        infostruct: *mut c_void,
+    ) -> i32 {
+        let name_with_minus = concat_c_strs(c_str!("-"), Cow::from(name).as_ref());
+        self.low
+            .plugin_register(name_with_minus.as_ptr(), infostruct)
+    }
+
+    pub fn plugin_register_add_hookcommand<T: HookCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register(
-                RegInstr::Add(ExtensionType::HookCommand),
+            self.plugin_register_add(
+                ExtensionType::HookCommand,
                 delegating_hook_command::<T> as *mut c_void,
             )
         };
         ok_if_one(result)
     }
 
-    pub fn plugin_register_hookcommand_remove<T: HookCommand>(&self) {
+    pub fn plugin_register_remove_hookcommand<T: HookCommand>(&self) {
         unsafe {
-            self.plugin_register(
-                RegInstr::Remove(ExtensionType::HookCommand),
+            self.plugin_register_remove(
+                ExtensionType::HookCommand,
                 delegating_hook_command::<T> as *mut c_void,
             );
         }
     }
 
-    pub fn plugin_register_toggleaction_add<T: ToggleAction>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_toggleaction<T: ToggleAction>(&self) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register(
-                RegInstr::Add(ExtensionType::ToggleAction),
+            self.plugin_register_add(
+                ExtensionType::ToggleAction,
                 delegating_toggle_action::<T> as *mut c_void,
             )
         };
         ok_if_one(result)
     }
 
-    pub fn plugin_register_toggleaction_remove<T: ToggleAction>(&self) {
+    pub fn plugin_register_remove_toggleaction<T: ToggleAction>(&self) {
         unsafe {
-            self.plugin_register(
-                RegInstr::Remove(ExtensionType::ToggleAction),
+            self.plugin_register_remove(
+                ExtensionType::ToggleAction,
                 delegating_toggle_action::<T> as *mut c_void,
             );
         }
     }
 
-    pub fn plugin_register_hookpostcommand_add<T: HookPostCommand>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_hookpostcommand<T: HookPostCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register(
-                RegInstr::Add(ExtensionType::HookPostCommand),
+            self.plugin_register_add(
+                ExtensionType::HookPostCommand,
                 delegating_hook_post_command::<T> as *mut c_void,
             )
         };
         ok_if_one(result)
     }
 
-    pub fn plugin_register_hookpostcommand_remove<T: HookPostCommand>(&self) {
+    pub fn plugin_register_remove_hookpostcommand<T: HookPostCommand>(&self) {
         unsafe {
-            self.plugin_register(
-                RegInstr::Remove(ExtensionType::HookPostCommand),
+            self.plugin_register_remove(
+                ExtensionType::HookPostCommand,
                 delegating_hook_post_command::<T> as *mut c_void,
             );
         }
@@ -301,13 +312,13 @@ impl Reaper {
     // Passing an empty string actually works (!). If a null pointer is passed, 0 is returned, but
     // we can't do that using this signature. If a very large string is passed, it works. If a
     // number of a built-in command is passed, it works.
-    pub fn plugin_register_command_id_add<'a>(
+    pub fn plugin_register_add_command_id<'a>(
         &self,
         command_id: impl Into<ReaperStringArg<'a>>,
     ) -> u32 {
         unsafe {
-            self.plugin_register(
-                RegInstr::Add(ExtensionType::CommandId),
+            self.plugin_register_add(
+                ExtensionType::CommandId,
                 command_id.into().as_ptr() as *mut c_void,
             ) as u32
         }
@@ -326,45 +337,34 @@ impl Reaper {
     //
     // Unsfe because consumer must ensure proper lifetime of given reference.
     // TODO-low Add factory functions for gaccel_register_t
-    pub unsafe fn plugin_register_gaccel_add(&self, gaccel: &gaccel_register_t) -> Result<(), ()> {
-        let result = self.plugin_register(
-            RegInstr::Add(ExtensionType::GAccel),
-            gaccel as *const _ as *mut c_void,
-        );
+    pub unsafe fn plugin_register_add_gaccel(&self, gaccel: &gaccel_register_t) -> Result<(), ()> {
+        let result =
+            self.plugin_register_add(ExtensionType::GAccel, gaccel as *const _ as *mut c_void);
         ok_if_one(result)
     }
 
     // TODO-medium Not sure if we should use NonNull instead or another mechanism that a) emphasizes
     //  that the address is relevant here, not the value and b) that the address must be stable.
     //  Same goes for similar functions and audio hook stuff.
-    pub fn plugin_register_gaccel_remove(&self, gaccel: &gaccel_register_t) {
+    pub fn plugin_register_remove_gaccel(&self, gaccel: &gaccel_register_t) {
         unsafe {
-            self.plugin_register(
-                RegInstr::Remove(ExtensionType::GAccel),
-                gaccel as *const _ as *mut c_void,
-            );
+            self.plugin_register_remove(ExtensionType::GAccel, gaccel as *const _ as *mut c_void);
         }
     }
 
-    pub unsafe fn plugin_register_csurf_inst_add(
+    pub unsafe fn plugin_register_add_csurf_inst(
         &self,
         csurf_inst: ReaperControlSurface,
     ) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register(
-                RegInstr::Add(ExtensionType::CSurfInst),
-                csurf_inst.as_ptr() as *mut _,
-            )
+            self.plugin_register_add(ExtensionType::CSurfInst, csurf_inst.as_ptr() as *mut _)
         };
         ok_if_one(result)
     }
 
-    pub fn plugin_register_csurf_inst_remove(&self, csurf_inst: ReaperControlSurface) {
+    pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
         unsafe {
-            self.plugin_register(
-                RegInstr::Remove(ExtensionType::CSurfInst),
-                csurf_inst.as_ptr() as *mut _,
-            );
+            self.plugin_register_remove(ExtensionType::CSurfInst, csurf_inst.as_ptr() as *mut _);
         }
     }
 
@@ -419,7 +419,7 @@ impl Reaper {
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) -> Result<(), ()> {
         unsafe {
-            self.plugin_register_csurf_inst_add(require_non_null_panic(
+            self.plugin_register_add_csurf_inst(require_non_null_panic(
                 get_cpp_control_surface() as *mut _
             ))
         }
@@ -427,7 +427,7 @@ impl Reaper {
 
     // This method is idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_register_csurf_inst_remove(require_non_null_panic(
+        self.plugin_register_remove_csurf_inst(require_non_null_panic(
             get_cpp_control_surface() as *mut _
         ));
     }

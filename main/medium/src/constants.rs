@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types)]
 use super::{MediaItem, MediaItemTake, MediaTrack, PcmSource, ReaProject, TrackEnvelope};
-use crate::ReaperStringArg;
+use crate::{concat_c_strs, ReaperStringArg};
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
@@ -29,22 +29,6 @@ pub struct ReaperVersion {
 impl From<&'static CStr> for ReaperVersion {
     fn from(version_str: &'static CStr) -> Self {
         ReaperVersion { version_str }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum RegInstr<'a> {
-    Add(ExtensionType<'a>),
-    Remove(ExtensionType<'a>),
-}
-
-impl<'a> From<RegInstr<'a>> for Cow<'a, CStr> {
-    fn from(value: RegInstr<'a>) -> Self {
-        use RegInstr::*;
-        match value {
-            Add(et) => et.into(),
-            Remove(et) => concat_c_strs(c_str!("-"), Cow::from(et).as_ref()).into(),
-        }
     }
 }
 
@@ -452,10 +436,6 @@ impl<'a> From<EnvChunkName<'a>> for Cow<'a, CStr> {
             Custom(name) => name,
         }
     }
-}
-
-fn concat_c_strs(first: &CStr, second: &CStr) -> CString {
-    CString::new([first.to_bytes(), second.to_bytes()].concat()).unwrap()
 }
 
 #[cfg(test)]
