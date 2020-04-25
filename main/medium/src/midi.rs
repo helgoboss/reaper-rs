@@ -1,4 +1,4 @@
-use helgoboss_midi::{MidiMessage, U7};
+use helgoboss_midi::{ShortMessage, U7};
 use reaper_rs_low::raw;
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -105,16 +105,16 @@ impl<'a> MidiMsg<'a> {
     }
 }
 
-impl<'a> MidiMessage for MidiMsg<'a> {
-    fn get_status_byte(&self) -> u8 {
+impl<'a> ShortMessage for MidiMsg<'a> {
+    fn status_byte(&self) -> u8 {
         self.0.midi_message[0]
     }
 
-    fn get_data_byte_1(&self) -> U7 {
+    fn data_byte_1(&self) -> U7 {
         unsafe { U7::new_unchecked(self.0.midi_message[1]) }
     }
 
-    fn get_data_byte_2(&self) -> U7 {
+    fn data_byte_2(&self) -> U7 {
         unsafe { U7::new_unchecked(self.0.midi_message[2]) }
     }
 }

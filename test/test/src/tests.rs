@@ -16,7 +16,7 @@ use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
 use helgoboss_midi::test_util::{channel, key_number, u7};
-use helgoboss_midi::{MidiMessageFactory, RawMidiMessage};
+use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::{
     AllowGang, AutomationMode, EnvChunkName, FxShowFlag, GlobalAutomationOverride,
     InputMonitoringMode, IsMove, IsUndoOptional, KbdActionValue, MessageBoxResult, MessageBoxType,
@@ -264,7 +264,7 @@ fn use_undoable() -> TestStep {
 fn stuff_midi_devices() -> TestStep {
     step("Stuff MIDI messages", |reaper, step| {
         // Given
-        let msg = RawMidiMessage::note_on(channel(0), key_number(64), u7(100));
+        let msg = RawShortMessage::note_on(channel(0), key_number(64), u7(100));
         // When
         reaper
             .midi_message_received()

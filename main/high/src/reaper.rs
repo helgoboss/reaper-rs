@@ -28,7 +28,7 @@ use crate::{
     create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Section,
     Track,
 };
-use helgoboss_midi::{MidiMessage, MidiMessageType};
+use helgoboss_midi::{ShortMessage, ShortMessageType};
 use reaper_rs_low;
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, ACCEL};
@@ -129,7 +129,7 @@ extern "C" fn process_audio_buffer(
             unsafe {
                 input.get_read_buf(|evt_list| {
                     for evt in evt_list.enum_items(0) {
-                        if evt.get_message().get_type() == MidiMessageType::ActiveSensing {
+                        if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
                             // TODO-low We should forward active sensing. Can be filtered out later.
                             continue;
                         }
@@ -833,7 +833,7 @@ impl Reaper {
         }
     }
 
-    pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl MidiMessage) {
+    pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
         self.medium.stuff_midimessage(target, message);
     }
 

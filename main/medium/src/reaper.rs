@@ -17,7 +17,7 @@ use crate::{
     TrackSendInfoKey, UndoFlag, WantDefaults, WantMaster, WantUndo,
 };
 use enumflags2::BitFlags;
-use helgoboss_midi::MidiMessage;
+use helgoboss_midi::ShortMessage;
 use reaper_rs_low;
 use reaper_rs_low::get_cpp_control_surface;
 use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, GUID, UNDO_STATE_ALL};
@@ -1282,13 +1282,10 @@ impl Reaper {
     }
 
     // TODO-doc
-    pub fn stuff_midimessage(&self, mode: StuffMidiMessageTarget, msg: impl MidiMessage) {
-        self.low.StuffMIDIMessage(
-            mode.into(),
-            msg.get_status_byte().into(),
-            msg.get_data_byte_1().into(),
-            msg.get_data_byte_2().into(),
-        );
+    pub fn stuff_midimessage(&self, mode: StuffMidiMessageTarget, msg: impl ShortMessage) {
+        let bytes = msg.to_bytes();
+        self.low
+            .StuffMIDIMessage(mode.into(), bytes.0.into(), bytes.1.into(), bytes.2.into());
     }
 
     // TODO-doc
