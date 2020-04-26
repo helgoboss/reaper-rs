@@ -7,13 +7,11 @@ use std::ffi::{CStr, CString};
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ReaperVersion {
-    version_str: &'static CStr,
-}
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ReaperVersion(Cow<'static, CStr>);
 
-impl From<&'static CStr> for ReaperVersion {
-    fn from(version_str: &'static CStr) -> Self {
-        ReaperVersion { version_str }
+impl ReaperVersion {
+    pub fn from(expression: impl Into<ReaperStringArg<'static>>) -> ReaperVersion {
+        ReaperVersion(expression.into().into_cow())
     }
 }

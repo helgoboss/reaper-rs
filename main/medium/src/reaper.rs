@@ -1033,7 +1033,7 @@ impl Reaper {
     pub fn get_app_version(&self) -> ReaperVersion {
         let ptr = self.low.GetAppVersion();
         let version_str = unsafe { CStr::from_ptr(ptr) };
-        version_str.into()
+        ReaperVersion::from(version_str)
     }
 
     pub unsafe fn get_track_automation_mode(&self, tr: MediaTrack) -> AutomationMode {

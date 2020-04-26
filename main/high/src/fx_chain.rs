@@ -44,11 +44,23 @@ impl FxChain {
         if !fx.is_available() {
             return;
         }
-        let _ = unsafe {
-            Reaper::get()
-                .medium
-                .track_fx_delete(self.track.get_raw(), fx.get_query_index())
-        };
+        let reaper = Reaper::get();
+        if reaper.medium.low.pointers.TrackFX_Delete.is_some() {
+            unsafe {
+                reaper
+                    .medium
+                    .track_fx_delete(self.track.get_raw(), fx.get_query_index())
+            };
+        } else {
+            let new_chunk = {
+                let fx_chunk_region = fx.get_chunk();
+                fx_chunk_region
+                    .get_parent_chunk()
+                    .delete_region(&fx_chunk_region);
+                fx_chunk_region.get_parent_chunk()
+            };
+            self.track.set_chunk(new_chunk);
+        }
     }
 
     pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {

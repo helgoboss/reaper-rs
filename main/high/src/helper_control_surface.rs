@@ -10,10 +10,10 @@ use reaper_rs_medium::{
     AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointer, SetSurfaceMuteArgs,
-    SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs,
-    SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef, VersionDependentFxRef,
-    VersionDependentTrackFxRef,
+    InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointer, ReaperVersion,
+    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
+    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
+    VersionDependentFxRef, VersionDependentTrackFxRef,
 };
 use rxrust::prelude::*;
 
@@ -76,6 +76,7 @@ impl HelperControlSurface {
     ) -> HelperControlSurface {
         let reaper = Reaper::get();
         let version = reaper.get_version();
+        let reaper_version_5_95 = ReaperVersion::from("5.95");
         let surface = HelperControlSurface {
             task_sender,
             task_receiver,
@@ -85,9 +86,9 @@ impl HelperControlSurface {
             project_datas: Default::default(),
             fx_chain_pair_by_media_track: Default::default(),
             // since pre1,
-            supports_detection_of_input_fx: version >= c_str!("5.95").into(),
+            supports_detection_of_input_fx: version >= reaper_version_5_95,
             // since pre2 to be accurate but so what
-            supports_detection_of_input_fx_in_set_fx_change: version >= c_str!("5.95").into(),
+            supports_detection_of_input_fx_in_set_fx_change: version >= reaper_version_5_95,
         };
         // REAPER doesn't seem to call this automatically when the surface is registered. In our
         // case it's important to call this not at the first change of something (e.g. arm

@@ -323,7 +323,7 @@ pub struct DelegatingControlSurface<T: ControlSurface> {
 
 impl<T: ControlSurface> DelegatingControlSurface<T> {
     pub fn new(delegate: T, reaper_version: &ReaperVersion) -> DelegatingControlSurface<T> {
-        let reaper_version_5_95: ReaperVersion = c_str!("5.95").into();
+        let reaper_version_5_95: ReaperVersion = ReaperVersion::from("5.95");
         DelegatingControlSurface {
             delegate,
             // since pre1,

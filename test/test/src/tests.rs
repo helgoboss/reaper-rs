@@ -15,6 +15,7 @@ use rxrust::prelude::*;
 use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
+use crate::api::VersionRestriction::{AllVersions, Min};
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::{
@@ -119,7 +120,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
 }
 
 fn show_message_box() -> TestStep {
-    step("Show message box", |reaper, _| {
+    step(AllVersions, "Show message box", |reaper, _| {
         // Given
         // When
         let result = reaper.show_message_box(
@@ -134,7 +135,7 @@ fn show_message_box() -> TestStep {
 }
 
 fn set_project_tempo() -> TestStep {
-    step("Set project tempo", |reaper, step| {
+    step(AllVersions, "Set project tempo", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         // When
@@ -157,7 +158,7 @@ fn set_project_tempo() -> TestStep {
 }
 
 fn get_project_tempo() -> TestStep {
-    step("Get project tempo", |reaper, _| {
+    step(AllVersions, "Get project tempo", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         // When
@@ -170,7 +171,7 @@ fn get_project_tempo() -> TestStep {
 }
 
 fn mark_project_as_dirty() -> TestStep {
-    step("Mark project as dirty", |reaper, _| {
+    step(AllVersions, "Mark project as dirty", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         // When
@@ -183,7 +184,7 @@ fn mark_project_as_dirty() -> TestStep {
 }
 
 fn get_reaper_window() -> TestStep {
-    step("Get REAPER window", |reaper, _| {
+    step(AllVersions, "Get REAPER window", |reaper, _| {
         // Given
         // When
         reaper.get_main_window();
@@ -193,7 +194,7 @@ fn get_reaper_window() -> TestStep {
 }
 
 fn redo() -> TestStep {
-    step("Redo", |reaper, _| {
+    step(AllVersions, "Redo", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         let track = get_track(0)?;
@@ -212,7 +213,7 @@ fn redo() -> TestStep {
 }
 
 fn undo() -> TestStep {
-    step("Undo", |reaper, _| {
+    step(AllVersions, "Undo", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         let track = get_track(0)?;
@@ -231,7 +232,7 @@ fn undo() -> TestStep {
 }
 
 fn use_undoable() -> TestStep {
-    step("Use undoable", |reaper, step| {
+    step(AllVersions, "Use undoable", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track = get_track(0)?;
@@ -262,7 +263,7 @@ fn use_undoable() -> TestStep {
 }
 
 fn stuff_midi_devices() -> TestStep {
-    step("Stuff MIDI messages", |reaper, step| {
+    step(AllVersions, "Stuff MIDI messages", |reaper, step| {
         // Given
         let msg = RawShortMessage::note_on(channel(0), key_number(64), u7(100));
         // When
@@ -284,7 +285,7 @@ fn stuff_midi_devices() -> TestStep {
 }
 
 fn query_midi_output_devices() -> TestStep {
-    step("Query MIDI output devices", |reaper, _| {
+    step(AllVersions, "Query MIDI output devices", |reaper, _| {
         // Given
         // When
         let devs = reaper.get_midi_output_devices();
@@ -297,7 +298,7 @@ fn query_midi_output_devices() -> TestStep {
 }
 
 fn query_midi_input_devices() -> TestStep {
-    step("Query MIDI input devices", |reaper, _| {
+    step(AllVersions, "Query MIDI input devices", |reaper, _| {
         // Given
         // When
         let _devs = reaper.get_midi_input_devices();
@@ -311,7 +312,7 @@ fn query_midi_input_devices() -> TestStep {
 }
 
 fn insert_track_at() -> TestStep {
-    step("Insert track at", |reaper, step| {
+    step(AllVersions, "Insert track at", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track_2 = project.get_track_by_index(1).ok_or("Missing track 2")?;
@@ -338,88 +339,96 @@ fn insert_track_at() -> TestStep {
 }
 
 fn register_and_unregister_toggle_action() -> TestStep {
-    step("Register and unregister toggle action", |reaper, _| {
-        // Given
-        // When
-        let (mock, reg) = observe_invocations(|mock| {
-            let cloned_mock = mock.clone();
-            reaper.register_action(
-                c_str!("reaperRsTest2"),
-                c_str!("reaper-rs test toggle action"),
-                move || {
-                    mock.invoke(43);
-                },
-                toggleable(move || cloned_mock.get_invocation_count() % 2 == 1),
-            )
-        });
-        let action = reaper.get_action_by_command_name(c_str!("reaperRsTest2").into());
-        // Then
-        let action_index = action.get_index();
-        let command_id = action.get_command_id();
-        check!(action.is_available());
-        check_eq!(mock.get_invocation_count(), 0);
-        check!(!action.is_on());
-        action.invoke_as_trigger(None);
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), 43);
-        check!(action.is_on());
-        check_eq!(action.get_character(), ActionCharacter::Toggle);
-        check!(action.get_command_id() > 0);
-        check_eq!(
-            action.get_command_name(),
-            Some(c_str!("reaperRsTest2").to_owned())
-        );
-        check_eq!(
-            action.get_name(),
-            Some(c_str!("reaper-rs test toggle action").to_owned())
-        );
-        reg.unregister();
-        check!(!action.is_available());
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Register and unregister toggle action",
+        |reaper, _| {
+            // Given
+            // When
+            let (mock, reg) = observe_invocations(|mock| {
+                let cloned_mock = mock.clone();
+                reaper.register_action(
+                    c_str!("reaperRsTest2"),
+                    c_str!("reaper-rs test toggle action"),
+                    move || {
+                        mock.invoke(43);
+                    },
+                    toggleable(move || cloned_mock.get_invocation_count() % 2 == 1),
+                )
+            });
+            let action = reaper.get_action_by_command_name(c_str!("reaperRsTest2").into());
+            // Then
+            let action_index = action.get_index();
+            let command_id = action.get_command_id();
+            check!(action.is_available());
+            check_eq!(mock.get_invocation_count(), 0);
+            check!(!action.is_on());
+            action.invoke_as_trigger(None);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), 43);
+            check!(action.is_on());
+            check_eq!(action.get_character(), ActionCharacter::Toggle);
+            check!(action.get_command_id() > 0);
+            check_eq!(
+                action.get_command_name(),
+                Some(c_str!("reaperRsTest2").to_owned())
+            );
+            check_eq!(
+                action.get_name(),
+                Some(c_str!("reaper-rs test toggle action").to_owned())
+            );
+            reg.unregister();
+            check!(!action.is_available());
+            Ok(())
+        },
+    )
 }
 
 fn register_and_unregister_action() -> TestStep {
-    step("Register and unregister action", |reaper, _| {
-        // Given
-        // When
-        // TODO Rename RegisteredAction to ActionRegistration or something like that
-        let (mock, reg) = observe_invocations(|mock| {
-            reaper.register_action(
-                c_str!("reaperRsTest"),
-                c_str!("reaper-rs test action"),
-                move || {
-                    mock.invoke(42);
-                },
-                ActionKind::NotToggleable,
-            )
-        });
-        let action = reaper.get_action_by_command_name(c_str!("reaperRsTest").into());
-        // Then
-        check!(action.is_available());
-        check_eq!(mock.get_invocation_count(), 0);
-        action.invoke_as_trigger(None);
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), 42);
-        check_eq!(action.get_character(), ActionCharacter::Trigger);
-        check!(action.get_command_id() > 0);
-        check_eq!(
-            action.get_command_name(),
-            Some(c_str!("reaperRsTest").to_owned())
-        );
-        check!(!action.is_on());
-        check_eq!(
-            action.get_name(),
-            Some(c_str!("reaper-rs test action").to_owned())
-        );
-        reg.unregister();
-        check!(!action.is_available());
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Register and unregister action",
+        |reaper, _| {
+            // Given
+            // When
+            // TODO Rename RegisteredAction to ActionRegistration or something like that
+            let (mock, reg) = observe_invocations(|mock| {
+                reaper.register_action(
+                    c_str!("reaperRsTest"),
+                    c_str!("reaper-rs test action"),
+                    move || {
+                        mock.invoke(42);
+                    },
+                    ActionKind::NotToggleable,
+                )
+            });
+            let action = reaper.get_action_by_command_name(c_str!("reaperRsTest").into());
+            // Then
+            check!(action.is_available());
+            check_eq!(mock.get_invocation_count(), 0);
+            action.invoke_as_trigger(None);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), 42);
+            check_eq!(action.get_character(), ActionCharacter::Trigger);
+            check!(action.get_command_id() > 0);
+            check_eq!(
+                action.get_command_name(),
+                Some(c_str!("reaperRsTest").to_owned())
+            );
+            check!(!action.is_on());
+            check_eq!(
+                action.get_name(),
+                Some(c_str!("reaper-rs test action").to_owned())
+            );
+            reg.unregister();
+            check!(!action.is_available());
+            Ok(())
+        },
+    )
 }
 
 fn main_section_functions() -> TestStep {
-    step("Main section functions", |reaper, _| {
+    step(AllVersions, "Main section functions", |reaper, _| {
         // Given
         let section = reaper.get_main_section();
         // When
@@ -431,7 +440,7 @@ fn main_section_functions() -> TestStep {
 }
 
 fn generate_guid() -> TestStep {
-    step("Generate GUID", |reaper, _| {
+    step(AllVersions, "Generate GUID", |reaper, _| {
         // Given
         // When
         let guid = reaper.generate_guid();
@@ -442,7 +451,7 @@ fn generate_guid() -> TestStep {
 }
 
 fn unsolo_track() -> TestStep {
-    step("Unsolo track", |reaper, step| {
+    step(AllVersions, "Unsolo track", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -464,7 +473,7 @@ fn unsolo_track() -> TestStep {
 }
 
 fn solo_track() -> TestStep {
-    step("Solo track", |reaper, step| {
+    step(AllVersions, "Solo track", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -486,7 +495,7 @@ fn solo_track() -> TestStep {
 }
 
 fn mute_track() -> TestStep {
-    step("Mute track", |reaper, step| {
+    step(AllVersions, "Mute track", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -508,7 +517,7 @@ fn mute_track() -> TestStep {
 }
 
 fn unmute_track() -> TestStep {
-    step("Unmute track", |reaper, step| {
+    step(AllVersions, "Unmute track", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -532,7 +541,7 @@ fn unmute_track() -> TestStep {
 }
 
 fn test_action_invoked_event() -> TestStep {
-    step("Test actionInvoked event", |reaper, step| {
+    step(AllVersions, "Test actionInvoked event", |reaper, step| {
         // Given
         let action = reaper.get_main_section().get_action_by_command_id(1582);
         // When
@@ -555,7 +564,7 @@ fn test_action_invoked_event() -> TestStep {
 }
 
 fn invoke_action() -> TestStep {
-    step("Invoke action", |reaper, step| {
+    step(AllVersions, "Invoke action", |reaper, step| {
         // Given
         let action = reaper.get_main_section().get_action_by_command_id(6);
         let track = get_track(0)?;
@@ -580,7 +589,7 @@ fn invoke_action() -> TestStep {
 }
 
 fn query_action() -> TestStep {
-    step("Query action", |reaper, _| {
+    step(AllVersions, "Query action", |reaper, _| {
         // Given
         let track = get_track(0)?;
         track.select_exclusively();
@@ -613,7 +622,7 @@ fn query_action() -> TestStep {
 }
 
 fn set_track_send_pan() -> TestStep {
-    step("Set track send pan", |reaper, step| {
+    step(AllVersions, "Set track send pan", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
@@ -639,7 +648,7 @@ fn set_track_send_pan() -> TestStep {
 }
 
 fn set_track_send_volume() -> TestStep {
-    step("Set track send volume", |reaper, step| {
+    step(AllVersions, "Set track send volume", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
@@ -664,7 +673,7 @@ fn set_track_send_volume() -> TestStep {
 }
 
 fn query_track_send() -> TestStep {
-    step("Query track send", |reaper, _| {
+    step(AllVersions, "Query track send", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
@@ -689,7 +698,7 @@ fn query_track_send() -> TestStep {
 }
 
 fn add_track_send() -> TestStep {
-    step("Add track send", |reaper, _| {
+    step(AllVersions, "Add track send", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
@@ -716,7 +725,7 @@ fn add_track_send() -> TestStep {
 }
 
 fn query_track_send_count() -> TestStep {
-    step("Query track send count", |_, _| {
+    step(AllVersions, "Query track send count", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -732,7 +741,7 @@ fn query_track_send_count() -> TestStep {
 }
 
 fn query_track_automation_mode() -> TestStep {
-    step("Query track automation mode", |reaper, _| {
+    step(AllVersions, "Query track automation mode", |reaper, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -748,7 +757,7 @@ fn query_track_automation_mode() -> TestStep {
 }
 
 fn remove_track() -> TestStep {
-    step("Remove track", |reaper, step| {
+    step(AllVersions, "Remove track", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track_count_before = project.get_track_count();
@@ -784,7 +793,7 @@ fn remove_track() -> TestStep {
 }
 
 fn select_track_exclusively() -> TestStep {
-    step("Select track exclusively", |reaper, step| {
+    step(AllVersions, "Select track exclusively", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
@@ -829,6 +838,7 @@ fn select_track_exclusively() -> TestStep {
 
 fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
     step(
+        AllVersions,
         "Arm track in auto-arm mode (ignoring auto-arm)",
         |reaper, step| {
             // Given
@@ -859,6 +869,7 @@ fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
 
 fn disarm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
     step(
+        AllVersions,
         "Disarm track in auto-arm mode (ignoring auto-arm)",
         |reaper, step| {
             // Given
@@ -885,38 +896,46 @@ fn disarm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
 }
 
 fn switch_track_to_auto_arm_mode_while_armed() -> TestStep {
-    step("Switch track to auto-arm mode while armed", |_, _| {
-        // Given
-        let track = get_track(0)?;
-        track.unselect();
-        // When
-        track.enable_auto_arm();
-        // Then
-        check!(track.has_auto_arm_enabled());
-        check!(track.is_armed(true));
-        check!(track.is_armed(false));
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Switch track to auto-arm mode while armed",
+        |_, _| {
+            // Given
+            let track = get_track(0)?;
+            track.unselect();
+            // When
+            track.enable_auto_arm();
+            // Then
+            check!(track.has_auto_arm_enabled());
+            check!(track.is_armed(true));
+            check!(track.is_armed(false));
+            Ok(())
+        },
+    )
 }
 
 fn switch_to_normal_track_mode_while_armed() -> TestStep {
-    step("Switch to normal track mode while armed", |_, _| {
-        // Given
-        let track = get_track(0)?;
-        track.arm(true);
-        check!(track.is_armed(true));
-        // When
-        track.disable_auto_arm();
-        // Then
-        check!(!track.has_auto_arm_enabled());
-        check!(track.is_armed(true));
-        check!(track.is_armed(false));
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Switch to normal track mode while armed",
+        |_, _| {
+            // Given
+            let track = get_track(0)?;
+            track.arm(true);
+            check!(track.is_armed(true));
+            // When
+            track.disable_auto_arm();
+            // Then
+            check!(!track.has_auto_arm_enabled());
+            check!(track.is_armed(true));
+            check!(track.is_armed(false));
+            Ok(())
+        },
+    )
 }
 
 fn disable_track_auto_arm_mode() -> TestStep {
-    step("Disable track auto-arm mode", |_, _| {
+    step(AllVersions, "Disable track auto-arm mode", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -930,31 +949,35 @@ fn disable_track_auto_arm_mode() -> TestStep {
 }
 
 fn disarm_track_in_auto_arm_mode() -> TestStep {
-    step("Disarm track in auto-arm mode", |reaper, step| {
-        // Given
-        let track = get_track(0)?;
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .track_arm_changed()
-                .take_until(step.finished)
-                .subscribe(move |t| {
-                    mock.invoke(t);
-                });
-        });
-        track.disarm(true);
-        // Then
-        check!(!track.is_armed(true));
-        check!(!track.is_armed(false));
-        check!(track.has_auto_arm_enabled());
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), track);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Disarm track in auto-arm mode",
+        |reaper, step| {
+            // Given
+            let track = get_track(0)?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .track_arm_changed()
+                    .take_until(step.finished)
+                    .subscribe(move |t| {
+                        mock.invoke(t);
+                    });
+            });
+            track.disarm(true);
+            // Then
+            check!(!track.is_armed(true));
+            check!(!track.is_armed(false));
+            check!(track.has_auto_arm_enabled());
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
+            Ok(())
+        },
+    )
 }
 
 fn arm_track_in_auto_arm_mode() -> TestStep {
-    step("Arm track in auto-arm mode", |reaper, step| {
+    step(AllVersions, "Arm track in auto-arm mode", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -981,7 +1004,7 @@ fn arm_track_in_auto_arm_mode() -> TestStep {
 }
 
 fn enable_track_in_auto_arm_mode() -> TestStep {
-    step("Enable track auto-arm mode", |_, _| {
+    step(AllVersions, "Enable track auto-arm mode", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -995,31 +1018,35 @@ fn enable_track_in_auto_arm_mode() -> TestStep {
 }
 
 fn disarm_track_in_normal_mode() -> TestStep {
-    step("Disarm track in normal mode", |reaper, step| {
-        // Given
-        let track = get_track(0)?;
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .track_arm_changed()
-                .take_until(step.finished)
-                .subscribe(move |t| {
-                    mock.invoke(t);
-                });
-        });
-        track.disarm(true);
-        // Then
-        check!(!track.is_armed(true));
-        check!(!track.is_armed(false));
-        check!(!track.has_auto_arm_enabled());
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), track);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Disarm track in normal mode",
+        |reaper, step| {
+            // Given
+            let track = get_track(0)?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .track_arm_changed()
+                    .take_until(step.finished)
+                    .subscribe(move |t| {
+                        mock.invoke(t);
+                    });
+            });
+            track.disarm(true);
+            // Then
+            check!(!track.is_armed(true));
+            check!(!track.is_armed(false));
+            check!(!track.has_auto_arm_enabled());
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
+            Ok(())
+        },
+    )
 }
 
 fn arm_track_in_normal_mode() -> TestStep {
-    step("Arm track in normal mode", |reaper, step| {
+    step(AllVersions, "Arm track in normal mode", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1043,7 +1070,7 @@ fn arm_track_in_normal_mode() -> TestStep {
 }
 
 fn query_track_arm_state() -> TestStep {
-    step("Query track arm state", |_, _| {
+    step(AllVersions, "Query track arm state", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1057,7 +1084,7 @@ fn query_track_arm_state() -> TestStep {
 }
 
 fn query_track_auto_arm_mode() -> TestStep {
-    step("Query track auto arm mode", |_, _| {
+    step(AllVersions, "Query track auto arm mode", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1069,7 +1096,7 @@ fn query_track_auto_arm_mode() -> TestStep {
 }
 
 fn select_master_track() -> TestStep {
-    step("Select master track", |reaper, step| {
+    step(AllVersions, "Select master track", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let master_track = project.get_master_track();
@@ -1109,7 +1136,7 @@ fn select_master_track() -> TestStep {
 }
 
 fn unselect_track() -> TestStep {
-    step("Unselect track", |reaper, step| {
+    step(AllVersions, "Unselect track", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track = get_track(0)?;
@@ -1146,7 +1173,7 @@ fn unselect_track() -> TestStep {
 }
 
 fn select_track() -> TestStep {
-    step("Select track", |reaper, step| {
+    step(AllVersions, "Select track", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         let track = get_track(0)?;
@@ -1186,7 +1213,7 @@ fn select_track() -> TestStep {
 }
 
 fn query_track_selection_state() -> TestStep {
-    step("Query track selection state", |reaper, _| {
+    step(AllVersions, "Query track selection state", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         let track = get_track(0)?;
@@ -1203,7 +1230,7 @@ fn query_track_selection_state() -> TestStep {
 }
 
 fn set_track_pan() -> TestStep {
-    step("Set track pan", |reaper, step| {
+    step(AllVersions, "Set track pan", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1227,7 +1254,7 @@ fn set_track_pan() -> TestStep {
 }
 
 fn query_track_pan() -> TestStep {
-    step("Query track pan", |_, _| {
+    step(AllVersions, "Query track pan", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1240,7 +1267,7 @@ fn query_track_pan() -> TestStep {
 }
 
 fn set_track_volume() -> TestStep {
-    step("Set track volume", |reaper, step| {
+    step(AllVersions, "Set track volume", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1265,7 +1292,7 @@ fn set_track_volume() -> TestStep {
 }
 
 fn query_track_volume() -> TestStep {
-    step("Query track volume", |_, _| {
+    step(AllVersions, "Query track volume", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1279,39 +1306,47 @@ fn query_track_volume() -> TestStep {
 }
 
 fn set_track_recording_input_midi_all_15() -> TestStep {
-    step("Set track recording input MIDI all/15", |_, _| {
-        // Given
-        let track = get_track(0)?;
-        let given_input = Some(RecordingInput::Midi {
-            device_id: None,
-            channel: Some(channel(15)),
-        });
-        // When
-        track.set_recording_input(given_input);
-        // Then
-        check_eq!(track.get_recording_input(), given_input);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Set track recording input MIDI all/15",
+        |_, _| {
+            // Given
+            let track = get_track(0)?;
+            let given_input = Some(RecordingInput::Midi {
+                device_id: None,
+                channel: Some(channel(15)),
+            });
+            // When
+            track.set_recording_input(given_input);
+            // Then
+            check_eq!(track.get_recording_input(), given_input);
+            Ok(())
+        },
+    )
 }
 
 fn set_track_recording_input_midi_7_all() -> TestStep {
-    step("Set track recording input MIDI 7/all", |_, _| {
-        // Given
-        let track = get_track(0)?;
-        let given_input = Some(RecordingInput::Midi {
-            device_id: Some(MidiDeviceId::new(7)),
-            channel: None,
-        });
-        // When
-        track.set_recording_input(given_input);
-        // Then
-        check_eq!(track.get_recording_input(), given_input);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Set track recording input MIDI 7/all",
+        |_, _| {
+            // Given
+            let track = get_track(0)?;
+            let given_input = Some(RecordingInput::Midi {
+                device_id: Some(MidiDeviceId::new(7)),
+                channel: None,
+            });
+            // When
+            track.set_recording_input(given_input);
+            // Then
+            check_eq!(track.get_recording_input(), given_input);
+            Ok(())
+        },
+    )
 }
 
 fn set_track_recording_input_midi_4_5() -> TestStep {
-    step("Set track recording input MIDI 4/5", |_, _| {
+    step(AllVersions, "Set track recording input MIDI 4/5", |_, _| {
         // Given
         let track = get_track(0)?;
         let given_input = Some(RecordingInput::Midi {
@@ -1327,37 +1362,41 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
 }
 
 fn set_track_recording_input_midi_all_all() -> TestStep {
-    step("Set track recording input MIDI all/all", |reaper, step| {
-        // Given
-        let track = get_track(0)?;
-        let given_input = Some(RecordingInput::Midi {
-            device_id: None,
-            channel: None,
-        });
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .track_input_changed()
-                .take_until(step.finished)
-                .subscribe(move |t| {
-                    mock.invoke(t);
-                });
-        });
-        track.set_recording_input(given_input);
-        // Then
-        let input = track.get_recording_input();
-        check_eq!(input, given_input);
-        let input = input.unwrap();
-        check_eq!(u32::from(input), 6112);
-        check_eq!(RecordingInput::try_from(6112 as u32), Ok(input));
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), track);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Set track recording input MIDI all/all",
+        |reaper, step| {
+            // Given
+            let track = get_track(0)?;
+            let given_input = Some(RecordingInput::Midi {
+                device_id: None,
+                channel: None,
+            });
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .track_input_changed()
+                    .take_until(step.finished)
+                    .subscribe(move |t| {
+                        mock.invoke(t);
+                    });
+            });
+            track.set_recording_input(given_input);
+            // Then
+            let input = track.get_recording_input();
+            check_eq!(input, given_input);
+            let input = input.unwrap();
+            check_eq!(u32::from(input), 6112);
+            check_eq!(RecordingInput::try_from(6112 as u32), Ok(input));
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), track);
+            Ok(())
+        },
+    )
 }
 
 fn query_track_recording_input() -> TestStep {
-    step("Query track recording input", |_, _| {
+    step(AllVersions, "Query track recording input", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1371,7 +1410,7 @@ fn query_track_recording_input() -> TestStep {
 }
 
 fn set_track_input_monitoring() -> TestStep {
-    step("Set track input monitoring", |reaper, step| {
+    step(AllVersions, "Set track input monitoring", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1396,19 +1435,21 @@ fn set_track_input_monitoring() -> TestStep {
 }
 
 fn query_track_input_monitoring() -> TestStep {
-    step("Query track input monitoring", |_, _| {
+    step(AllVersions, "Query track input monitoring", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
         let mode = track.get_input_monitoring_mode();
         // Then
-        check_eq!(mode, InputMonitoringMode::Normal);
+        use InputMonitoringMode::*;
+        // Different REAPER versions have different defaults (I think it changed to Normal from v6)
+        check!(matches!(mode, Off | Normal));
         Ok(())
     })
 }
 
 fn set_track_name() -> TestStep {
-    step("Set track name", |reaper, step| {
+    step(AllVersions, "Set track name", |reaper, step| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1431,7 +1472,7 @@ fn set_track_name() -> TestStep {
 }
 
 fn query_track_name() -> TestStep {
-    step("Query track name", |_, _| {
+    step(AllVersions, "Query track name", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1443,7 +1484,7 @@ fn query_track_name() -> TestStep {
 }
 
 fn query_track_project() -> TestStep {
-    step("Query track project", |reaper, _| {
+    step(AllVersions, "Query track project", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         let track = get_track(0)?;
@@ -1456,20 +1497,24 @@ fn query_track_project() -> TestStep {
 }
 
 fn query_non_existent_track_by_guid() -> TestStep {
-    step("Query non-existent track by GUID", |reaper, _| {
-        // Given
-        let project = reaper.get_current_project();
-        // When
-        let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
-        let found_track = project.get_track_by_guid(&guid);
-        // Then
-        check!(!found_track.is_available());
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Query non-existent track by GUID",
+        |reaper, _| {
+            // Given
+            let project = reaper.get_current_project();
+            // When
+            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            let found_track = project.get_track_by_guid(&guid);
+            // Then
+            check!(!found_track.is_available());
+            Ok(())
+        },
+    )
 }
 
 fn query_track_by_guid() -> TestStep {
-    step("Query track by GUID", |reaper, _| {
+    step(AllVersions, "Query track by GUID", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         let first_track = get_track(0)?;
@@ -1489,7 +1534,7 @@ fn query_track_by_guid() -> TestStep {
 }
 
 fn query_all_tracks() -> TestStep {
-    step("Query all tracks", |reaper, _| {
+    step(AllVersions, "Query all tracks", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         project.add_track();
@@ -1502,7 +1547,7 @@ fn query_all_tracks() -> TestStep {
 }
 
 fn query_master_track() -> TestStep {
-    step("Query master track", |reaper, _| {
+    step(AllVersions, "Query master track", |reaper, _| {
         // Given
         let project = reaper.get_current_project();
         // When
@@ -1515,7 +1560,7 @@ fn query_master_track() -> TestStep {
 
 fn fn_mut_action() -> TestStep {
     #[allow(unreachable_code)]
-    step("FnMut action", |_reaper, _| {
+    step(AllVersions, "FnMut action", |_reaper, _| {
         // TODO-low Add this as new test
         return Ok(());
         let mut i = 0;
@@ -1535,7 +1580,7 @@ fn fn_mut_action() -> TestStep {
 }
 
 fn add_track() -> TestStep {
-    step("Add track", |reaper, step| {
+    step(AllVersions, "Add track", |reaper, step| {
         // Given
         let project = reaper.get_current_project();
         // When
@@ -1558,46 +1603,50 @@ fn add_track() -> TestStep {
 }
 
 fn create_empty_project_in_new_tab() -> TestStep {
-    step("Create empty project in new tab", |reaper, step| {
-        // Given
-        let current_project_before = reaper.get_current_project();
-        let project_count_before = reaper.get_project_count();
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .project_switched()
-                .take_until(step.finished)
-                .subscribe(move |p| {
-                    mock.invoke(p);
-                });
-        });
-        let new_project = reaper.create_empty_project_in_new_tab();
-        // Then
-        check_eq!(current_project_before, current_project_before);
-        check_eq!(reaper.get_project_count(), project_count_before + 1);
-        check_eq!(
-            reaper.get_projects().count() as u32,
-            project_count_before + 1
-        );
-        check_ne!(reaper.get_current_project(), current_project_before);
-        check_eq!(reaper.get_current_project(), new_project);
-        check_ne!(reaper.get_projects().nth(0), Some(new_project));
-        //
-        // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() ==
-        // newProject);
-        // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
-        // projectCountBefore + 1);
-        check_eq!(new_project.get_track_count(), 0);
-        check!(new_project.get_index() > 0);
-        check!(new_project.get_file_path().is_none());
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), new_project);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Create empty project in new tab",
+        |reaper, step| {
+            // Given
+            let current_project_before = reaper.get_current_project();
+            let project_count_before = reaper.get_project_count();
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .project_switched()
+                    .take_until(step.finished)
+                    .subscribe(move |p| {
+                        mock.invoke(p);
+                    });
+            });
+            let new_project = reaper.create_empty_project_in_new_tab();
+            // Then
+            check_eq!(current_project_before, current_project_before);
+            check_eq!(reaper.get_project_count(), project_count_before + 1);
+            check_eq!(
+                reaper.get_projects().count() as u32,
+                project_count_before + 1
+            );
+            check_ne!(reaper.get_current_project(), current_project_before);
+            check_eq!(reaper.get_current_project(), new_project);
+            check_ne!(reaper.get_projects().nth(0), Some(new_project));
+            //
+            // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() ==
+            // newProject);
+            // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
+            // projectCountBefore + 1);
+            check_eq!(new_project.get_track_count(), 0);
+            check!(new_project.get_index() > 0);
+            check!(new_project.get_file_path().is_none());
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), new_project);
+            Ok(())
+        },
+    )
 }
 
 fn basics() -> TestStep {
-    step("Basics", |reaper, _| {
+    step(AllVersions, "Basics", |reaper, _| {
         check!(Guid::try_from(c_str!("{hey}")).is_err());
         reaper.show_console_msg(c_str!("Test string types and encoding:\n"));
         reaper.show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
@@ -1610,7 +1659,7 @@ fn basics() -> TestStep {
 type GetFxChain = Rc<dyn Fn() -> Result<FxChain, &'static str>>;
 
 fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
-    step("Query fx chain", move |_, _| {
+    step(AllVersions, "Query fx chain", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         // When
@@ -1667,7 +1716,7 @@ fn create_fx_steps(
 }
 
 fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
-    step("Query track JS fx by index", move |_, _| {
+    step(AllVersions, "Query track JS fx by index", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let track = fx_chain.get_track();
@@ -1685,7 +1734,8 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(fx.get_name().as_c_str(), c_str!("JS: phaser"));
         let fx_chunk = fx.get_chunk();
         check!(fx_chunk.starts_with("BYPASS 0 0 0"));
-        check!(fx_chunk.ends_with("\nWAK 0 0"));
+        // Different REAPER versions have different results
+        check!(fx_chunk.ends_with("\nWAK 0 0") || fx_chunk.ends_with("\nWAK 0"));
         let tag_chunk = fx.get_tag_chunk();
         check!(tag_chunk.starts_with(r#"<JS phaser """#));
         check!(tag_chunk.ends_with("\n>"));
@@ -1719,83 +1769,91 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
-    step("Add track JS fx by original name", move |reaper, step| {
-        // Given
-        let fx_chain = get_fx_chain()?;
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .fx_added()
-                .take_until(step.finished.clone())
-                .subscribe(move |fx| {
-                    mock.invoke(fx);
-                });
-        });
-        let fx = fx_chain.add_fx_by_original_name(c_str!("phaser"));
-        // Then
-        let fx = fx.ok_or("No FX added")?;
-        check_eq!(fx_chain.get_fx_count(), 3);
-        check_eq!(fx_chain.get_fx_by_index(2), Some(fx.clone()));
-        check_eq!(fx_chain.get_last_fx(), Some(fx.clone()));
-        let fx_guid = fx.get_guid().ok_or("No GUID")?;
-        check!(fx_chain.get_fx_by_guid(&fx_guid).is_available());
-        let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
-        check!(!fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
-        check!(
-            fx_chain
-                .get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)"))
-                .is_some()
-        );
-        check_eq!(
-            fx_chain.get_first_fx_by_name(c_str!("phaser")),
-            Some(fx.clone())
-        );
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), fx.clone());
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Add track JS fx by original name",
+        move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .fx_added()
+                    .take_until(step.finished.clone())
+                    .subscribe(move |fx| {
+                        mock.invoke(fx);
+                    });
+            });
+            let fx = fx_chain.add_fx_by_original_name(c_str!("phaser"));
+            // Then
+            let fx = fx.ok_or("No FX added")?;
+            check_eq!(fx_chain.get_fx_count(), 3);
+            check_eq!(fx_chain.get_fx_by_index(2), Some(fx.clone()));
+            check_eq!(fx_chain.get_last_fx(), Some(fx.clone()));
+            let fx_guid = fx.get_guid().ok_or("No GUID")?;
+            check!(fx_chain.get_fx_by_guid(&fx_guid).is_available());
+            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            check!(!fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
+            check!(
+                fx_chain
+                    .get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)"))
+                    .is_some()
+            );
+            check_eq!(
+                fx_chain.get_first_fx_by_name(c_str!("phaser")),
+                Some(fx.clone())
+            );
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx.clone());
+            Ok(())
+        },
+    )
 }
 
 fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
-    step("Show fx in floating window", move |reaper, step| {
-        // Given
-        let fx_chain = get_fx_chain()?;
-        let fx = fx_chain
-            .get_fx_by_index(0)
-            .ok_or("Couldn't find first fx")?;
-        // When
-        let (fx_opened_mock, _) = observe_invocations(|mock| {
-            reaper
-                .fx_opened()
-                .take_until(step.finished.clone())
-                .subscribe(move |fx| {
-                    mock.invoke(fx);
-                });
-        });
-        let (fx_focused_mock, _) = observe_invocations(|mock| {
-            reaper
-                .fx_focused()
-                .take_until(step.finished)
-                .subscribe(move |fx| {
-                    mock.invoke(fx);
-                });
-        });
-        fx.show_in_floating_window();
-        // Then
-        check!(fx.get_floating_window().is_some());
-        check!(fx.window_is_open());
-        check!(fx.window_has_focus());
-        check!(fx_opened_mock.get_invocation_count() >= 1);
-        check_eq!(fx_opened_mock.get_last_arg(), fx);
-        check_eq!(fx_focused_mock.get_invocation_count(), 0);
-        // Should be > 0 but doesn't work
-        check!(reaper.get_focused_fx().is_none()); // Should be Some but doesn't work
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Show fx in floating window",
+        move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx = fx_chain
+                .get_fx_by_index(0)
+                .ok_or("Couldn't find first fx")?;
+            // When
+            let (fx_opened_mock, _) = observe_invocations(|mock| {
+                reaper
+                    .fx_opened()
+                    .take_until(step.finished.clone())
+                    .subscribe(move |fx| {
+                        mock.invoke(fx);
+                    });
+            });
+            let (fx_focused_mock, _) = observe_invocations(|mock| {
+                reaper
+                    .fx_focused()
+                    .take_until(step.finished)
+                    .subscribe(move |fx| {
+                        mock.invoke(fx);
+                    });
+            });
+            fx.show_in_floating_window();
+            // Then
+            check!(fx.get_floating_window().is_some());
+            check!(fx.window_is_open());
+            check!(fx.window_has_focus());
+            check!(fx_opened_mock.get_invocation_count() >= 1);
+            check_eq!(fx_opened_mock.get_last_arg(), fx);
+            check_eq!(fx_focused_mock.get_invocation_count(), 0);
+            // Should be > 0 but doesn't work
+            check!(reaper.get_focused_fx().is_none()); // Should be Some but doesn't work
+            Ok(())
+        },
+    )
 }
 
 fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
-    step("Query fx floating window", move |reaper, _| {
+    step(AllVersions, "Query fx floating window", move |reaper, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx = fx_chain
@@ -1812,7 +1870,7 @@ fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn set_fx_chain_chunk(get_fx_chain: GetFxChain) -> TestStep {
-    step("Set fx chain chunk", move |_, _| {
+    step(AllVersions, "Set fx chain chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let track = fx_chain.get_track();
@@ -1864,7 +1922,7 @@ WAK 0
 }
 
 fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
-    step("Set fx state chunk", move |_, _| {
+    step(AllVersions, "Set fx state chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
@@ -1902,7 +1960,7 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn set_fx_tag_chunk(get_fx_chain: GetFxChain) -> TestStep {
-    step("Set fx tag chunk", move |_, _| {
+    step(AllVersions, "Set fx tag chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let midi_fx_1 = fx_chain
@@ -1934,7 +1992,7 @@ fn set_fx_tag_chunk(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn set_fx_chunk(get_fx_chain: GetFxChain) -> TestStep {
-    step("Set fx chunk", move |_, _| {
+    step(AllVersions, "Set fx chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
@@ -1958,7 +2016,7 @@ fn set_fx_chunk(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn add_fx_by_chunk(get_fx_chain: GetFxChain) -> TestStep {
-    step("Add FX by chunk", move |reaper, step| {
+    step(AllVersions, "Add FX by chunk", move |reaper, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx_chunk = r#"BYPASS 0 0 0
@@ -2001,7 +2059,7 @@ WAK 0
 }
 
 fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step("Remove FX", move |reaper, step| {
+    step(AllVersions, "Remove FX", move |reaper, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let synth_fx = fx_chain
@@ -2030,34 +2088,39 @@ fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step("Move FX", move |reaper, step| {
-        // Given
-        let fx_chain = get_fx_chain()?;
-        let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
-        let synth_fx = fx_chain
-            .get_fx_by_index(1)
-            .ok_or("Couldn't find synth fx")?;
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .fx_reordered()
-                .take_until(step.finished)
-                .subscribe(move |p| {
-                    mock.invoke(p);
-                });
-        });
-        fx_chain.move_fx(&synth_fx, 0);
-        // Then
-        check_eq!(midi_fx.get_index(), 1);
-        check_eq!(synth_fx.get_index(), 0);
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), fx_chain.get_track());
-        Ok(())
-    })
+    step(
+        Min(ReaperVersion::from("5.95")),
+        "Move FX",
+        move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
+            let synth_fx = fx_chain
+                .get_fx_by_index(1)
+                .ok_or("Couldn't find synth fx")?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .fx_reordered()
+                    .take_until(step.finished)
+                    .subscribe(move |p| {
+                        mock.invoke(p);
+                    });
+            });
+            fx_chain.move_fx(&synth_fx, 0);
+            // Then
+            check_eq!(midi_fx.get_index(), 1);
+            check_eq!(synth_fx.get_index(), 0);
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx_chain.get_track());
+            Ok(())
+        },
+    )
 }
 
 fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> TestStep {
     step(
+        AllVersions,
         "fxParameterValueChanged with heuristic fail in REAPER < 5.95",
         move |reaper, step| {
             // Given
@@ -2101,45 +2164,51 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
 }
 
 fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
-    step("Set fx parameter value", move |reaper, step| {
-        // Given
-        let fx_chain = get_fx_chain()?;
-        let fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find fx")?;
-        let p = fx.get_parameter_by_index(5);
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .fx_parameter_value_changed()
-                .take_until(step.finished)
-                .subscribe(move |p| {
-                    mock.invoke(p);
-                });
-        });
-        p.set_normalized_value(0.3);
-        // Then
-        let last_touched_fx_param = reaper.get_last_touched_fx_parameter();
-        if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95")) {
-            check!(last_touched_fx_param.is_none());
-        } else {
-            check_eq!(last_touched_fx_param, Some(p.clone()));
-        }
-        check_eq!(p.get_formatted_value().as_c_str(), c_str!("-4.44"));
-        check_eq!(p.get_normalized_value(), 0.30000001192092896);
-        check_eq!(p.get_reaper_value(), 0.30000001192092896);
-        check_eq!(
-            p.format_normalized_value(p.get_normalized_value())
-                .as_c_str(),
-            c_str!("-4.44 dB")
-        );
-        // TODO 1 invocation would be better than 2
-        check_eq!(mock.get_invocation_count(), 2);
-        check_eq!(mock.get_last_arg(), p);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Set fx parameter value",
+        move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let fx = fx_chain.get_fx_by_index(1).ok_or("Couldn't find fx")?;
+            let p = fx.get_parameter_by_index(5);
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .fx_parameter_value_changed()
+                    .take_until(step.finished)
+                    .subscribe(move |p| {
+                        mock.invoke(p);
+                    });
+            });
+            p.set_normalized_value(0.3);
+            // Then
+            let last_touched_fx_param = reaper.get_last_touched_fx_parameter();
+            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
+            {
+                check!(last_touched_fx_param.is_none());
+            } else {
+                check_eq!(last_touched_fx_param, Some(p.clone()));
+            }
+            check_eq!(p.get_formatted_value().as_c_str(), c_str!("-4.44"));
+            check_eq!(p.get_normalized_value(), 0.30000001192092896);
+            check_eq!(p.get_reaper_value(), 0.30000001192092896);
+            check_eq!(
+                p.format_normalized_value(p.get_normalized_value())
+                    .as_c_str(),
+                c_str!("-4.44 dB")
+            );
+            // TODO-low 1 invocation would be better than 2 (in v6 it gives us 2)
+            // Different REAPER versions have different results
+            check!(matches!(mock.get_invocation_count(), 1 | 2));
+            check_eq!(mock.get_last_arg(), p);
+            Ok(())
+        },
+    )
 }
 
 fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
-    step("Check fx presets", move |_, _| {
+    step(AllVersions, "Check fx presets", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx = fx_chain
@@ -2155,7 +2224,7 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
-    step("Check fx parameter", move |_, _| {
+    step(AllVersions, "Check fx parameter", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx = fx_chain
@@ -2192,7 +2261,7 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step("Check track fx with 2 fx", move |_, _| {
+    step(AllVersions, "Check track fx with 2 fx", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let track = fx_chain.get_track();
@@ -2228,7 +2297,8 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         );
         let chunk_1 = fx_1.get_chunk();
         check!(chunk_1.starts_with("BYPASS 0 0 0"));
-        check!(chunk_1.ends_with("\nWAK 0 0"));
+        // Different REAPER versions have different results
+        check!(chunk_1.ends_with("\nWAK 0 0") || chunk_1.ends_with("\nWAK 0"));
         let tag_chunk_1 = fx_1.get_tag_chunk();
         check!(tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
         check!(tag_chunk_1.ends_with("\n>"));
@@ -2284,7 +2354,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn enable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step("Enable track fx", move |reaper, step| {
+    step(AllVersions, "Enable track fx", move |reaper, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx_1 = fx_chain
@@ -2309,7 +2379,7 @@ fn enable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step("Disable track fx", move |reaper, step| {
+    step(AllVersions, "Disable track fx", move |reaper, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx_1 = fx_chain
@@ -2334,7 +2404,7 @@ fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step("Check track fx with 1 fx", move |_, _| {
+    step(AllVersions, "Check track fx with 1 fx", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let track = fx_chain.get_track();
@@ -2356,8 +2426,8 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         );
         let chunk = fx_1.get_chunk();
         check!(chunk.starts_with("BYPASS 0 0 0"));
-        //            debug!(reaper.logger, "{:?}", chunk.get_parent_chunk());
-        check!(chunk.ends_with("\nWAK 0 0"));
+        // Different REAPER versions have different results
+        check!(chunk.ends_with("\nWAK 0 0") || chunk.ends_with("\nWAK 0"));
         let tag_chunk = fx_1.get_tag_chunk();
         check!(tag_chunk.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
         check!(tag_chunk.ends_with("\n>"));
@@ -2386,64 +2456,69 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
-    step("Add track fx by original name", move |reaper, step| {
-        // Given
-        let fx_chain = get_fx_chain()?;
-        // When
-        let (mock, _) = observe_invocations(|mock| {
-            reaper
-                .fx_added()
-                .take_until(step.finished)
-                .subscribe(move |t| {
-                    mock.invoke(t);
-                });
-        });
-        let fx = fx_chain.add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"));
-        // Then
-        check!(fx.is_some());
-        check_eq!(fx_chain.get_fx_count(), 1);
-        check_eq!(fx_chain.get_fxs().count(), 1);
-        check_eq!(fx_chain.get_fx_by_index(0), fx);
-        check_eq!(fx_chain.get_first_fx(), fx);
-        check_eq!(fx_chain.get_last_fx(), fx);
-        let fx = fx.unwrap();
-        let guid = fx.get_guid();
-        check!(guid.is_some());
-        let guid = guid.unwrap();
-        let guid_string = guid.to_string_without_braces();
-        check_eq!(guid_string.len(), 36);
-        check!(guid_string.find(|c| c == '{' || c == '}').is_none());
-        check!(fx_chain.get_fx_by_guid(&guid).is_available());
-        check_eq!(fx_chain.get_fx_by_guid(&guid), fx);
-        check!(fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
-        // If this doesn't work, then the index hasn't automatically corrected itself
-        check!(fx_chain.get_fx_by_guid_and_index(&guid, 1).is_available());
-        let non_existing_guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
-        check!(
-            !fx_chain
-                .get_fx_by_guid_and_index(&non_existing_guid, 0)
-                .is_available()
-        );
-        check_eq!(
-            fx_chain.get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")),
-            Some(fx.clone())
-        );
-        let chain_chunk = fx_chain.get_chunk();
-        check!(chain_chunk.is_some());
-        let chain_chunk = chain_chunk.unwrap();
-        check!(chain_chunk.starts_with("<FXCHAIN"));
-        check!(chain_chunk.ends_with("\n>"));
-        let first_tag = chain_chunk.find_first_tag(0);
-        check!(first_tag.is_some());
-        let first_tag = first_tag.unwrap();
-        check_eq!(
-            first_tag.get_content().deref(),
-            chain_chunk.get_content().deref()
-        );
-        check_eq!(mock.get_invocation_count(), 1);
-        check_eq!(mock.get_last_arg(), fx);
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Add track fx by original name",
+        move |reaper, step| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            // When
+            let (mock, _) = observe_invocations(|mock| {
+                reaper
+                    .fx_added()
+                    .take_until(step.finished)
+                    .subscribe(move |t| {
+                        mock.invoke(t);
+                    });
+            });
+            let fx = fx_chain.add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"));
+            // Then
+            check!(fx.is_some());
+            check_eq!(fx_chain.get_fx_count(), 1);
+            check_eq!(fx_chain.get_fxs().count(), 1);
+            check_eq!(fx_chain.get_fx_by_index(0), fx);
+            check_eq!(fx_chain.get_first_fx(), fx);
+            check_eq!(fx_chain.get_last_fx(), fx);
+            let fx = fx.unwrap();
+            let guid = fx.get_guid();
+            check!(guid.is_some());
+            let guid = guid.unwrap();
+            let guid_string = guid.to_string_without_braces();
+            check_eq!(guid_string.len(), 36);
+            check!(guid_string.find(|c| c == '{' || c == '}').is_none());
+            check!(fx_chain.get_fx_by_guid(&guid).is_available());
+            check_eq!(fx_chain.get_fx_by_guid(&guid), fx);
+            check!(fx_chain.get_fx_by_guid_and_index(&guid, 0).is_available());
+            // If this doesn't work, then the index hasn't automatically corrected itself
+            check!(fx_chain.get_fx_by_guid_and_index(&guid, 1).is_available());
+            let non_existing_guid =
+                Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            check!(
+                !fx_chain
+                    .get_fx_by_guid_and_index(&non_existing_guid, 0)
+                    .is_available()
+            );
+            check_eq!(
+                fx_chain.get_first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")),
+                Some(fx.clone())
+            );
+            let chain_chunk = fx_chain.get_chunk();
+            check!(chain_chunk.is_some());
+            let chain_chunk = chain_chunk.unwrap();
+            check!(chain_chunk.starts_with("<FXCHAIN"));
+            check!(chain_chunk.ends_with("\n>"));
+            let first_tag = chain_chunk.find_first_tag(0);
+            check!(first_tag.is_some());
+            let first_tag = first_tag.unwrap();
+            check_eq!(
+                first_tag.get_content().deref(),
+                chain_chunk.get_content().deref()
+            );
+            check_eq!(mock.get_invocation_count(), 1);
+            check_eq!(mock.get_last_arg(), fx);
+            Ok(())
+        },
+    )
 }
 
 fn get_track(index: u32) -> Result<Track, &'static str> {
