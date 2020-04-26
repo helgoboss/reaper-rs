@@ -8,15 +8,15 @@ use reaper_rs_low::{firewall, raw};
 
 use crate::{
     concat_c_strs, option_non_null_into, require_non_null, require_non_null_panic,
-    ActionValueChange, AutomationMode, ControlSurface, DelegatingControlSurface, EnvChunkName,
-    ExtensionType, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand,
+    ActionValueChange, AutomationMode, ChunkCacheHint, ControlSurface, DelegatingControlSurface,
+    EnvChunkName, ExtensionType, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand,
     HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
     ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState,
     RecordingInput, StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope,
     TrackFxAddByNameBehavior, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
     TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
-    UndoFlag, UndoHint, ValueChange,
+    UndoFlag, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -1419,7 +1419,7 @@ impl Reaper {
         &self,
         track: MediaTrack,
         str_need_big_sz: u32,
-        isundo_optional: UndoHint,
+        isundo_optional: ChunkCacheHint,
     ) -> Result<CString, ()> {
         let (chunk_content, successful) =
             with_string_buffer(str_need_big_sz, |buffer, max_size| {
@@ -1427,7 +1427,7 @@ impl Reaper {
                     track.as_ptr(),
                     buffer,
                     max_size,
-                    isundo_optional == UndoHint::IsUndo,
+                    isundo_optional == ChunkCacheHint::UndoMode,
                 )
             });
         if !successful {
@@ -1464,12 +1464,12 @@ impl Reaper {
         &self,
         track: MediaTrack,
         str: impl Into<ReaperStringArg<'a>>,
-        isundo_optional: UndoHint,
+        isundo_optional: ChunkCacheHint,
     ) -> Result<(), ()> {
         let successful = self.low.SetTrackStateChunk(
             track.as_ptr(),
             str.into().as_ptr(),
-            isundo_optional == UndoHint::IsUndo,
+            isundo_optional == ChunkCacheHint::UndoMode,
         );
         if !successful {
             return Err(());

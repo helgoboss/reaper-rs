@@ -18,10 +18,9 @@ pub enum MasterTrackBehavior {
     IncludeMasterTrack,
 }
 
-// TODO-medium Consider jf reply, name accordingly
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum UndoHint {
-    Normal,
+pub enum ChunkCacheHint {
+    NormalMode,
     // Justin Frankel about is_undo parameter:
     //
     // A few notable things that happen with "isundo" set:
@@ -39,7 +38,7 @@ pub enum UndoHint {
     // - the logic in saving the event data for pooled MIDI items is slightly
     // different (in undo mode only one of the items in the pool will encode,
     // with undo=false the first instance in the GetStateChunk will get the data)
-    IsUndo,
+    UndoMode,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

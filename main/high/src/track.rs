@@ -24,9 +24,9 @@ use reaper_rs_medium::TrackInfoKey::{
 };
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
-    AutomationMode, GangBehavior, GlobalAutomationOverride, InputMonitoringMode, MediaTrack,
-    ReaProject, ReaperPointer, RecordArmState, RecordingInput, TrackInfoKey, TrackRef,
-    TrackSendCategory, UndoHint, ValueChange,
+    AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
+    MediaTrack, ReaProject, ReaperPointer, RecordArmState, RecordingInput, TrackInfoKey, TrackRef,
+    TrackSendCategory, ValueChange,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -311,7 +311,7 @@ impl Track {
     }
 
     pub fn enable_auto_arm(&self) {
-        let mut chunk = self.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::Normal);
+        let mut chunk = self.get_chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
         if get_auto_arm_chunk_line(&chunk).is_some() {
             return;
         }
@@ -419,13 +419,13 @@ impl Track {
     }
 
     fn get_auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
-        get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, UndoHint::IsUndo))
+        get_auto_arm_chunk_line(&self.get_chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::UndoMode))
     }
 
     // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains
     // weird FXID_NEXT (in front of FX tag) instead of FXID (behind FX tag). So FX chunk code
     // should be double checked then.
-    pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: UndoHint) -> Chunk {
+    pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: ChunkCacheHint) -> Chunk {
         let chunk_content = unsafe {
             Reaper::get().medium.get_track_state_chunk(
                 self.get_raw(),
@@ -444,7 +444,7 @@ impl Track {
             Reaper::get().medium.set_track_state_chunk(
                 self.get_raw(),
                 c_string.as_c_str(),
-                UndoHint::IsUndo,
+                ChunkCacheHint::UndoMode,
             )
         };
     }
