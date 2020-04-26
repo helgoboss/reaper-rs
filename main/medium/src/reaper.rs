@@ -320,12 +320,12 @@ impl Reaper {
     // number of a built-in command is passed, it works.
     pub fn plugin_register_add_command_id<'a>(
         &self,
-        command_id: impl Into<ReaperStringArg<'a>>,
+        command_name: impl Into<ReaperStringArg<'a>>,
     ) -> u32 {
         unsafe {
             self.plugin_register_add(
                 RegistrationType::CommandId,
-                command_id.into().as_ptr() as *mut c_void,
+                command_name.into().as_ptr() as *mut c_void,
             ) as u32
         }
     }
@@ -541,6 +541,7 @@ impl Reaper {
     // could result in undefined behavior as soon as the current stack frame is left. If it turns
     // out that the function-taking approach is too restrictive in some cases (wouldn't know why),
     // we could always provide a second function get_midi_input_unchecked().
+    // TODO-medium idx should be MidiDeviceId
     pub fn get_midi_input<R>(&self, idx: u32, mut f: impl FnOnce(&MidiInput) -> R) -> Option<R> {
         let ptr = self.low.GetMidiInput(idx as i32);
         if ptr.is_null() {
@@ -857,6 +858,7 @@ impl Reaper {
         }
     }
 
+    // TODO-medium Use tuples
     pub unsafe fn track_fx_copy_to_track(
         &self,
         src_track: MediaTrack,
