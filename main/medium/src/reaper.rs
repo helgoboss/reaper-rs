@@ -8,15 +8,15 @@ use reaper_rs_low::{firewall, raw};
 
 use crate::{
     concat_c_strs, option_non_null_into, require_non_null, require_non_null_panic,
-    ActionValueChange, AutomationMode, ChunkCacheHint, ControlSurface, DelegatingControlSurface,
-    EnvChunkName, ExtensionType, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand,
-    HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
-    MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, ProjectRef, ReaProject,
-    ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState,
-    RecordingInput, StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxAddByNameBehavior, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
-    UndoFlag, ValueChange,
+    ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, ControlSurface,
+    DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag, GangBehavior,
+    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
+    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
+    MidiOutput, ProjectRef, ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg,
+    ReaperVersion, RecordArmState, RecordingInput, RegistrationType, StuffMidiMessageTarget,
+    ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey,
+    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
+    UndoBehavior, UndoFlag, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -236,14 +236,18 @@ impl Reaper {
 
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
-    pub unsafe fn plugin_register_add(&self, name: ExtensionType, infostruct: *mut c_void) -> i32 {
+    pub unsafe fn plugin_register_add(
+        &self,
+        name: RegistrationType,
+        infostruct: *mut c_void,
+    ) -> i32 {
         self.low
             .plugin_register(Cow::from(name).as_ptr(), infostruct)
     }
 
     pub unsafe fn plugin_register_remove(
         &self,
-        name: ExtensionType,
+        name: RegistrationType,
         infostruct: *mut c_void,
     ) -> i32 {
         let name_with_minus = concat_c_strs(c_str!("-"), Cow::from(name).as_ref());
@@ -254,7 +258,7 @@ impl Reaper {
     pub fn plugin_register_add_hookcommand<T: HookCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(
-                ExtensionType::HookCommand,
+                RegistrationType::HookCommand,
                 delegating_hook_command::<T> as *mut c_void,
             )
         };
@@ -264,7 +268,7 @@ impl Reaper {
     pub fn plugin_register_remove_hookcommand<T: HookCommand>(&self) {
         unsafe {
             self.plugin_register_remove(
-                ExtensionType::HookCommand,
+                RegistrationType::HookCommand,
                 delegating_hook_command::<T> as *mut c_void,
             );
         }
@@ -273,7 +277,7 @@ impl Reaper {
     pub fn plugin_register_add_toggleaction<T: ToggleAction>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(
-                ExtensionType::ToggleAction,
+                RegistrationType::ToggleAction,
                 delegating_toggle_action::<T> as *mut c_void,
             )
         };
@@ -283,7 +287,7 @@ impl Reaper {
     pub fn plugin_register_remove_toggleaction<T: ToggleAction>(&self) {
         unsafe {
             self.plugin_register_remove(
-                ExtensionType::ToggleAction,
+                RegistrationType::ToggleAction,
                 delegating_toggle_action::<T> as *mut c_void,
             );
         }
@@ -292,7 +296,7 @@ impl Reaper {
     pub fn plugin_register_add_hookpostcommand<T: HookPostCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(
-                ExtensionType::HookPostCommand,
+                RegistrationType::HookPostCommand,
                 delegating_hook_post_command::<T> as *mut c_void,
             )
         };
@@ -302,7 +306,7 @@ impl Reaper {
     pub fn plugin_register_remove_hookpostcommand<T: HookPostCommand>(&self) {
         unsafe {
             self.plugin_register_remove(
-                ExtensionType::HookPostCommand,
+                RegistrationType::HookPostCommand,
                 delegating_hook_post_command::<T> as *mut c_void,
             );
         }
@@ -319,7 +323,7 @@ impl Reaper {
     ) -> u32 {
         unsafe {
             self.plugin_register_add(
-                ExtensionType::CommandId,
+                RegistrationType::CommandId,
                 command_id.into().as_ptr() as *mut c_void,
             ) as u32
         }
@@ -340,7 +344,7 @@ impl Reaper {
     // TODO-low Add factory functions for gaccel_register_t
     pub unsafe fn plugin_register_add_gaccel(&self, gaccel: &gaccel_register_t) -> Result<(), ()> {
         let result =
-            self.plugin_register_add(ExtensionType::GAccel, gaccel as *const _ as *mut c_void);
+            self.plugin_register_add(RegistrationType::GAccel, gaccel as *const _ as *mut c_void);
         ok_if_one(result)
     }
 
@@ -349,7 +353,10 @@ impl Reaper {
     //  Same goes for similar functions and audio hook stuff.
     pub fn plugin_register_remove_gaccel(&self, gaccel: &gaccel_register_t) {
         unsafe {
-            self.plugin_register_remove(ExtensionType::GAccel, gaccel as *const _ as *mut c_void);
+            self.plugin_register_remove(
+                RegistrationType::GAccel,
+                gaccel as *const _ as *mut c_void,
+            );
         }
     }
 
@@ -358,14 +365,14 @@ impl Reaper {
         csurf_inst: ReaperControlSurface,
     ) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register_add(ExtensionType::CSurfInst, csurf_inst.as_ptr() as *mut _)
+            self.plugin_register_add(RegistrationType::CSurfInst, csurf_inst.as_ptr() as *mut _)
         };
         ok_if_one(result)
     }
 
     pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
         unsafe {
-            self.plugin_register_remove(ExtensionType::CSurfInst, csurf_inst.as_ptr() as *mut _);
+            self.plugin_register_remove(RegistrationType::CSurfInst, csurf_inst.as_ptr() as *mut _);
         }
     }
 
@@ -557,7 +564,7 @@ impl Reaper {
         track: MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
         rec_fx: TrackFxChainType,
-        instantiate: TrackFxAddByNameBehavior,
+        instantiate: FxAddByNameBehavior,
     ) -> i32 {
         self.low.TrackFX_AddByName(
             track.as_ptr(),
@@ -573,7 +580,7 @@ impl Reaper {
         fxname: impl Into<ReaperStringArg<'a>>,
         rec_fx: TrackFxChainType,
     ) -> Option<u32> {
-        match self.track_fx_add_by_name(track, fxname, rec_fx, TrackFxAddByNameBehavior::Query) {
+        match self.track_fx_add_by_name(track, fxname, rec_fx, FxAddByNameBehavior::Query) {
             -1 => None,
             idx if idx >= 0 => Some(idx as u32),
             _ => unreachable!(),
@@ -585,18 +592,9 @@ impl Reaper {
         track: MediaTrack,
         fxname: impl Into<ReaperStringArg<'a>>,
         rec_fx: TrackFxChainType,
-        force_add: bool, // TODO-medium Should be an enum
+        force_add: AddFxBehavior,
     ) -> Result<u32, ()> {
-        match self.track_fx_add_by_name(
-            track,
-            fxname,
-            rec_fx,
-            if force_add {
-                TrackFxAddByNameBehavior::Add
-            } else {
-                TrackFxAddByNameBehavior::AddIfNotFound
-            },
-        ) {
+        match self.track_fx_add_by_name(track, fxname, rec_fx, force_add.into()) {
             -1 => Err(()),
             idx if idx >= 0 => Ok(idx as u32),
             _ => unreachable!(),

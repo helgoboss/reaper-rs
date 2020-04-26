@@ -19,11 +19,11 @@ use crate::api::VersionRestriction::{AllVersions, Min};
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::{
-    ActionValueChange, AutomationMode, EnvChunkName, FxShowFlag, GangBehavior,
+    ActionValueChange, AutomationMode, EnvChunkName, FxAddByNameBehavior, FxShowFlag, GangBehavior,
     GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior, MessageBoxResult,
     MessageBoxType, MidiDeviceId, ReaperPointer, ReaperVersion, RecordArmState, RecordingInput,
-    StuffMidiMessageTarget, TrackFxAddByNameBehavior, TrackFxChainType, TrackFxRef, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
 };
 use std::os::raw::c_void;
 use std::rc::Rc;

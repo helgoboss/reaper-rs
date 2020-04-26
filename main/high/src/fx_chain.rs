@@ -2,7 +2,7 @@ use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
 use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
 
-use reaper_rs_medium::{ChunkCacheHint, TrackFxChainType, TransferBehavior};
+use reaper_rs_medium::{AddFxBehavior, ChunkCacheHint, TrackFxChainType, TransferBehavior};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -224,7 +224,7 @@ DOCKED 0
                 } else {
                     TrackFxChainType::NormalFxChain
                 },
-                true,
+                AddFxBehavior::AlwaysAdd,
             )
         }
         .ok()?;

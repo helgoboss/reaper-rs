@@ -40,8 +40,7 @@ impl<'a> ReaperStringArg<'a> {
     }
 
     /// Consumes this string and spits out the contained cow. Used by code in this crate only.
-    // TODO-medium Should probably be called into_inner()
-    pub(super) fn into_cow(self) -> Cow<'a, CStr> {
+    pub(super) fn into_inner(self) -> Cow<'a, CStr> {
         self.0
     }
 }

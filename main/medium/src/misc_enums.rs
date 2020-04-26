@@ -6,6 +6,22 @@ use std::borrow::Cow;
 use std::ffi::CStr;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AddFxBehavior {
+    AddIfNotFound,
+    AlwaysAdd,
+}
+
+impl From<AddFxBehavior> for FxAddByNameBehavior {
+    fn from(b: AddFxBehavior) -> Self {
+        use AddFxBehavior::*;
+        match b {
+            AddIfNotFound => FxAddByNameBehavior::AddIfNotFound,
+            AlwaysAdd => FxAddByNameBehavior::AlwaysAdd,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TrackFxChainType {
     NormalFxChain,
     /// On the master track this corresponds to the monitoring FX chain
@@ -178,8 +194,8 @@ impl From<u32> for TrackFxRef {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
 #[repr(i32)]
-pub enum TrackFxAddByNameBehavior {
-    Add = -1,
+pub enum FxAddByNameBehavior {
+    AlwaysAdd = -1,
     Query = 0,
     AddIfNotFound = 1,
 }
@@ -194,7 +210,7 @@ pub enum ActionValueChange {
 }
 
 #[derive(Clone, Debug)]
-pub enum ExtensionType<'a> {
+pub enum RegistrationType<'a> {
     Api(Cow<'a, CStr>),
     ApiDef(Cow<'a, CStr>),
     HookCommand,
@@ -209,23 +225,23 @@ pub enum ExtensionType<'a> {
     Custom(Cow<'a, CStr>),
 }
 
-impl<'a> ExtensionType<'a> {
+impl<'a> RegistrationType<'a> {
     pub fn api(func_name: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::Api(func_name.into().into_cow())
+        Self::Api(func_name.into().into_inner())
     }
 
     pub fn api_def(func_def: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::ApiDef(func_def.into().into_cow())
+        Self::ApiDef(func_def.into().into_inner())
     }
 
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::Custom(key.into().into_cow())
+        Self::Custom(key.into().into_inner())
     }
 }
 
-impl<'a> From<ExtensionType<'a>> for Cow<'a, CStr> {
-    fn from(value: ExtensionType<'a>) -> Self {
-        use ExtensionType::*;
+impl<'a> From<RegistrationType<'a>> for Cow<'a, CStr> {
+    fn from(value: RegistrationType<'a>) -> Self {
+        use RegistrationType::*;
         match value {
             GAccel => c_str!("gaccel").into(),
             CSurfInst => c_str!("csurf_inst").into(),

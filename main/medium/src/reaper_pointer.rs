@@ -32,7 +32,7 @@ impl<'a> ReaperPointer<'a> {
     pub fn custom(pointer: *mut c_void, type_name: impl Into<ReaperStringArg<'a>>) -> Self {
         Self::Custom {
             pointer,
-            type_name: type_name.into().into_cow(),
+            type_name: type_name.into().into_inner(),
         }
     }
 

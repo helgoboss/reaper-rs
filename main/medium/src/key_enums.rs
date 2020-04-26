@@ -66,11 +66,11 @@ pub enum TrackInfoKey<'a> {
 
 impl<'a> TrackInfoKey<'a> {
     pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
-        TrackInfoKey::Ext(key.into().into_cow())
+        TrackInfoKey::Ext(key.into().into_inner())
     }
 
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
-        TrackInfoKey::Custom(key.into().into_cow())
+        TrackInfoKey::Custom(key.into().into_inner())
     }
 }
 
@@ -170,11 +170,11 @@ pub enum TrackSendInfoKey<'a> {
 
 impl<'a> TrackSendInfoKey<'a> {
     pub fn p_ext(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
-        TrackSendInfoKey::Ext(key.into().into_cow())
+        TrackSendInfoKey::Ext(key.into().into_inner())
     }
 
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
-        TrackSendInfoKey::Custom(key.into().into_cow())
+        TrackSendInfoKey::Custom(key.into().into_inner())
     }
 }
 
@@ -235,7 +235,7 @@ pub enum EnvChunkName<'a> {
 
 impl<'a> EnvChunkName<'a> {
     pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::Custom(name.into().into_cow())
+        Self::Custom(name.into().into_inner())
     }
 }
 

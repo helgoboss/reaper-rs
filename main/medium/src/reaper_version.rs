@@ -12,6 +12,6 @@ pub struct ReaperVersion(Cow<'static, CStr>);
 
 impl ReaperVersion {
     pub fn from(expression: impl Into<ReaperStringArg<'static>>) -> ReaperVersion {
-        ReaperVersion(expression.into().into_cow())
+        ReaperVersion(expression.into().into_inner())
     }
 }
