@@ -83,7 +83,8 @@ pub trait ControlSurface {
         0
     }
 
-    // TODO-medium Check if this is called also for input FX in REAPER < 5.95 - or not at all
+    /// For REAPER < 5.95 this is called for input FX param changes as well. In this case we just
+    /// don't know if the given FX index refers to the normal or input FX chain.
     fn ext_setfxparam(&self, args: ExtSetFxParamArgs) -> i32 {
         0
     }
