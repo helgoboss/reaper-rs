@@ -6,12 +6,6 @@ use std::os::raw::c_int;
 use std::ptr::NonNull;
 
 // This is like a MediaTrack object in that it wraps a raw pointer.
-// TODO-medium Can we check the lifetime of this in ValidatePtr2? How does this behave when the MIDI
-//  input  device is disconnected? What would get_read_buf() return? If it crashes, we should think
-//  about  making it unsafe or expect a closure when calling get_midi_input (latter is probably the
-//  way to  go). That closure would expect a reference of the MidiInput. => Well, we could probably
-//  check  the validity of the device if we check its presence via GetMIDIInputName with the
-//  appropriate  device ID?
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct MidiInput(pub NonNull<raw::midi_Input>);
 

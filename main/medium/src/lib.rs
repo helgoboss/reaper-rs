@@ -44,7 +44,6 @@
 //! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
 //!   of i32). In the unlikely case that the value range has to be extended in future, it's just a
 //!   matter of removing safe casts on user-side code.
-// TODO-medium Also surrounds callbacks (e.g. hookcommand) with firewall()
 //
 //  2. Should we panic if ptr invalid or return result? Returning None in case it's an Option
 //     result is bad because this is not always the case. I think we should panic. Otherwise

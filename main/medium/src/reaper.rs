@@ -432,6 +432,8 @@ impl Reaper {
         ));
     }
 
+    // TODO-medium Take a closure in order to prevent caching the pointer which is always unsafe
+    //  and also not necessary because we can always lookup by globally unique ID.
     pub fn section_from_unique_id(&self, unique_id: u32) -> Option<KbdSectionInfo> {
         let ptr = self.low.SectionFromUniqueID(unique_id as i32);
         NonNull::new(ptr).map(KbdSectionInfo)
@@ -496,11 +498,19 @@ impl Reaper {
             .InsertTrackAtIndex(idx as i32, want_defaults.into());
     }
 
+    // If the MIDI device is disconnected we wouldn't obtain it in the first place by
+    // get_midi_input(). If we would try to call get_read_buf() on a cached instance of that
+    // pointer, it would crash. Unlike with many other pointers returned by REAPER AFAIK there's
+    // no way to check the validity of a midi_Input via ValidatePtr. So I think it would
+    // *always* be unwise to cache a midi_Input ptr. There's also no need for that because we
+    // have a single global ID (1 - 62) which we can use to quickly lookup the pointer any time.
+    // Because of that we take a closure and pass a reference (https://stackoverflow.com/questions/61106587).
     pub fn get_midi_input(&self, idx: u32) -> Option<MidiInput> {
         let ptr = self.low.GetMidiInput(idx as i32);
         NonNull::new(ptr).map(MidiInput)
     }
 
+    // TODO Make like get_midi_input()
     pub fn get_midi_output(&self, idx: u32) -> Option<MidiOutput> {
         let ptr = self.low.GetMidiOutput(idx as i32);
         NonNull::new(ptr).map(MidiOutput)

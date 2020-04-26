@@ -21,10 +21,11 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::{
     ActionValueChange, AutomationMode, EnvChunkName, FxShowFlag, GangBehavior,
     GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior, MessageBoxResult,
-    MessageBoxType, MidiDeviceId, ReaperVersion, RecordArmState, RecordingInput,
+    MessageBoxType, MidiDeviceId, ReaperPointer, ReaperVersion, RecordArmState, RecordingInput,
     StuffMidiMessageTarget, TrackFxAddByNameBehavior, TrackFxChainType, TrackFxRef, TrackInfoKey,
     TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
 };
+use std::os::raw::c_void;
 use std::rc::Rc;
 use std::time::Duration;
 
