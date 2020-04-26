@@ -188,12 +188,11 @@ impl Reaper {
         NonNull::new(ptr)
     }
 
-    // TODO-medium Maybe upgrade all string-taking closures to FnOnce
     /// Convenience function which let's you use the given track's name (`P_NAME`).
     pub unsafe fn get_media_track_info_name<R>(
         &self,
         tr: MediaTrack,
-        f: impl Fn(&CStr) -> R,
+        f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Name, null_mut());
         unsafe { create_passing_c_str(ptr as *const c_char) }.map(f)
@@ -962,7 +961,7 @@ impl Reaper {
     pub fn undo_can_undo_2<R>(
         &self,
         proj: Option<ReaProject>,
-        f: impl Fn(&CStr) -> R,
+        f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         self.require_valid_project(proj);
         unsafe { self.undo_can_undo_2_unchecked(proj, f) }
@@ -971,7 +970,7 @@ impl Reaper {
     pub unsafe fn undo_can_undo_2_unchecked<R>(
         &self,
         proj: Option<ReaProject>,
-        f: impl Fn(&CStr) -> R,
+        f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         let ptr = self.low.Undo_CanUndo2(option_non_null_into(proj));
         create_passing_c_str(ptr).map(f)
@@ -980,7 +979,7 @@ impl Reaper {
     pub fn undo_can_redo_2<R>(
         &self,
         proj: Option<ReaProject>,
-        f: impl Fn(&CStr) -> R,
+        f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         self.require_valid_project(proj);
         unsafe { self.undo_can_redo_2_unchecked(proj, f) }
@@ -989,7 +988,7 @@ impl Reaper {
     pub unsafe fn undo_can_redo_2_unchecked<R>(
         &self,
         proj: Option<ReaProject>,
-        f: impl Fn(&CStr) -> R,
+        f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         let ptr = self.low.Undo_CanRedo2(option_non_null_into(proj));
         create_passing_c_str(ptr).map(f)
@@ -1534,7 +1533,7 @@ impl Reaper {
         &self,
         cmd: u32,
         section: Option<KbdSectionInfo>,
-        f: impl Fn(&CStr) -> R,
+        f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         let ptr = self
             .low
@@ -1567,7 +1566,7 @@ impl Reaper {
     pub fn reverse_named_command_lookup<R>(
         &self,
         command_id: u32,
-        f: impl Fn(&CStr) -> R,
+        f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         let ptr = self.low.ReverseNamedCommandLookup(command_id as i32);
         unsafe { create_passing_c_str(ptr) }.map(f)
