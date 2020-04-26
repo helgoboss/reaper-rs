@@ -188,6 +188,7 @@ impl Reaper {
         NonNull::new(ptr)
     }
 
+    // TODO-medium Maybe upgrade all string-taking closures to FnOnce
     /// Convenience function which let's you use the given track's name (`P_NAME`).
     pub unsafe fn get_media_track_info_name<R>(
         &self,
@@ -505,15 +506,14 @@ impl Reaper {
     // *always* be unwise to cache a midi_Input ptr. There's also no need for that because we
     // have a single global ID (1 - 62) which we can use to quickly lookup the pointer any time.
     // Because of that we take a closure and pass a reference (https://stackoverflow.com/questions/61106587).
-    pub fn get_midi_input(&self, idx: u32) -> Option<MidiInput> {
+    pub fn get_midi_input<R>(&self, idx: u32, mut f: impl FnOnce(&MidiInput) -> R) -> Option<R> {
         let ptr = self.low.GetMidiInput(idx as i32);
-        NonNull::new(ptr).map(MidiInput)
-    }
-
-    // TODO Make like get_midi_input()
-    pub fn get_midi_output(&self, idx: u32) -> Option<MidiOutput> {
-        let ptr = self.low.GetMidiOutput(idx as i32);
-        NonNull::new(ptr).map(MidiOutput)
+        if ptr.is_null() {
+            return None;
+        }
+        let midi_input = MidiInput(unsafe { NonNull::new_unchecked(ptr) });
+        let result = f(&midi_input);
+        Some(result)
     }
 
     pub fn get_max_midi_inputs(&self) -> u32 {

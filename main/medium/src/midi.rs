@@ -7,22 +7,28 @@ use std::ptr::NonNull;
 
 // This is like a MediaTrack object in that it wraps a raw pointer.
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-pub struct MidiInput(pub NonNull<raw::midi_Input>);
+pub struct MidiInput(pub(crate) NonNull<raw::midi_Input>);
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-pub struct MidiOutput(pub NonNull<raw::midi_Output>);
+pub struct MidiOutput(pub(crate) NonNull<raw::midi_Output>);
 
 impl MidiInput {
-    // This expects a function because the result (MIDI event list) is *very* temporary in nature.
-    // If we would return a &MidiEventList, we wouldn't be able to find a sane lifetime
-    // annotation. If we would return a pointer, we would require the consumer to enter unsafe
-    // world to do anything useful with it. If we would return an owned event list, we would
-    // waste performance because we would need to copy all events first. Latter would be
-    // especially bad because this code code typically runs in the audio thread and therefore
-    // has real-time requirements. Same reasoning like here: https://stackoverflow.com/questions/61106587
-    pub unsafe fn get_read_buf<R>(&self, mut f: impl FnOnce(&MidiEvtList) -> R) -> R {
-        let raw_evt_list = self.0.as_ref().GetReadBuf();
-        f(&MidiEvtList::new(&*raw_evt_list))
+    // In the past this function was unsafe, didn't return the event list and expected a closure
+    // instead that could do something with the event list. That's not necessary anymore since we
+    // ensure in get_midi_input() that we only ever publish valid MidiInput instances, and those
+    // only by a very short-lived reference that's not possible to cache anywhere. That makes it
+    // possible to bind the lifetime of the event list to that MidiInput and everything is fine!
+    // Thanks Rust! If we would return an owned event list, we would waste performance because we
+    // would need to copy all events first. That would be especially bad because this code code
+    // typically runs in the audio thread and therefore has real-time requirements.
+    // Should we mark this as unsafe because it can crash if accessed wrongly from UI thread instead
+    // of audio thread? I don't think so, then we would have to mark most functions as unsafe
+    // because most functions can only be called from UI thread.
+    // TODO-low In theory we could prevent undefined behavior by always checking the thread at
+    //  first.
+    pub fn get_read_buf(&self) -> MidiEvtList<'_> {
+        let raw_evt_list = unsafe { self.0.as_ref() }.GetReadBuf();
+        MidiEvtList::new(unsafe { &*raw_evt_list })
     }
 }
 

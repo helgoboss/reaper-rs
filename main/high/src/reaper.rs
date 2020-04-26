@@ -122,40 +122,39 @@ extern "C" fn process_audio_buffer(
             return;
         }
         for i in 0..reaper.get_max_midi_input_devices() {
-            let input = match reaper.medium.get_midi_input(i) {
-                None => continue,
-                Some(i) => i,
-            };
-            unsafe {
-                input.get_read_buf(|evt_list| {
-                    for evt in evt_list.enum_items(0) {
-                        if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
-                            // TODO-low We should forward active sensing. Can be filtered out later.
-                            continue;
-                        }
-                        // Erase lifetime of event so we can "send" it using rxRust
-                        // TODO This is very hacky and unsafe. It works as long as there's no rxRust
-                        //  subscriber (e.g. operator) involved which attempts to cache the event
-                        //  and use it after this function has returned. Then segmentation faults
-                        // are  about to happen. Alternative would be to
-                        // turn this into an owned event and  send this
-                        // instead. But note that we are in a real-time thread here so we
-                        //  shouldn't allocate on the heap here (so no Rc). That means we would have
-                        // to  copy the owned MIDI event. Probably not an
-                        // issue because it's not big and  cheap to copy.
-                        // Look into this and see if the unsafe code is worth it.
-                        let fake_static_evt: MidiEvt<'static> = {
-                            let raw_evt: &raw::MIDI_event_t = evt.into();
-                            let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
-                            unsafe {
-                                let erased_raw_evt = &*raw_evt_ptr;
-                                MidiEvt::new(erased_raw_evt)
-                            }
-                        };
-                        subject.next(fake_static_evt);
+            reaper.medium.get_midi_input(i, |input| {
+                let evt_list = input.get_read_buf();
+                for evt in evt_list.enum_items(0) {
+                    if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
+                        // TODO-low We should forward active sensing. Can be filtered out
+                        // later.
+                        continue;
                     }
-                });
-            }
+                    // Erase lifetime of event so we can "send" it using rxRust
+                    // TODO This is very hacky and unsafe. It works as long as there's no
+                    // rxRust  subscriber (e.g. operator)
+                    // involved which attempts to cache the event
+                    //  and use it after this function has returned. Then segmentation
+                    // faults are  about to happen. Alternative
+                    // would be to turn this into an owned event
+                    // and  send this instead. But note that we
+                    // are in a real-time thread here so we
+                    //  shouldn't allocate on the heap here (so no Rc). That means we would
+                    // have to  copy the owned MIDI event.
+                    // Probably not an issue because it's not
+                    // big and  cheap to copy. Look into this
+                    // and see if the unsafe code is worth it.
+                    let fake_static_evt: MidiEvt<'static> = {
+                        let raw_evt: &raw::MIDI_event_t = evt.into();
+                        let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
+                        unsafe {
+                            let erased_raw_evt = &*raw_evt_ptr;
+                            MidiEvt::new(erased_raw_evt)
+                        }
+                    };
+                    subject.next(fake_static_evt);
+                }
+            });
         }
     });
 }
