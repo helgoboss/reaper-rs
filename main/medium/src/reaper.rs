@@ -495,8 +495,10 @@ impl Reaper {
     }
 
     pub fn insert_track_at_index(&self, idx: u32, want_defaults: TrackDefaultsBehavior) {
-        self.low
-            .InsertTrackAtIndex(idx as i32, want_defaults.into());
+        self.low.InsertTrackAtIndex(
+            idx as i32,
+            want_defaults == TrackDefaultsBehavior::AddDefaultEnvAndFx,
+        );
     }
 
     // If the MIDI device is disconnected we wouldn't obtain it in the first place by
@@ -560,7 +562,7 @@ impl Reaper {
         self.low.TrackFX_AddByName(
             track.as_ptr(),
             fxname.into().as_ptr(),
-            rec_fx.into(),
+            rec_fx == TrackFxChainType::InputFxChain,
             instantiate.into(),
         )
     }
@@ -846,7 +848,7 @@ impl Reaper {
             src_fx.into(),
             dest_track.as_ptr(),
             dest_fx.into(),
-            is_move.into(),
+            is_move == TransferBehavior::Move,
         );
     }
 
@@ -1147,8 +1149,11 @@ impl Reaper {
         bpm: f64,
         want_undo: UndoBehavior,
     ) {
-        self.low
-            .SetCurrentBPM(option_non_null_into(proj), bpm, want_undo.into());
+        self.low.SetCurrentBPM(
+            option_non_null_into(proj),
+            bpm,
+            want_undo == UndoBehavior::AddUndoPoint,
+        );
     }
 
     pub fn master_get_play_rate(&self, project: Option<ReaProject>) -> f64 {
@@ -1197,8 +1202,11 @@ impl Reaper {
         monitor: InputMonitoringMode,
         allowgang: GangBehavior,
     ) -> i32 {
-        self.low
-            .CSurf_OnInputMonitorChangeEx(trackid.as_ptr(), monitor.into(), allowgang.into())
+        self.low.CSurf_OnInputMonitorChangeEx(
+            trackid.as_ptr(),
+            monitor.into(),
+            allowgang == GangBehavior::AllowGang,
+        )
     }
 
     // Returns Err if invalid parameter name given (maybe also in other situations)
@@ -1285,7 +1293,7 @@ impl Reaper {
             trackid.as_ptr(),
             volume.value(),
             volume.is_relative(),
-            allow_gang.into(),
+            allow_gang == GangBehavior::AllowGang,
         )
     }
 
@@ -1309,7 +1317,7 @@ impl Reaper {
             trackid.as_ptr(),
             pan.value(),
             pan.is_relative(),
-            allow_gang.into(),
+            allow_gang == GangBehavior::AllowGang,
         )
     }
 
@@ -1327,8 +1335,10 @@ impl Reaper {
         proj: Option<ReaProject>,
         wantmaster: MasterTrackBehavior,
     ) -> u32 {
-        self.low
-            .CountSelectedTracks2(option_non_null_into(proj), wantmaster.into()) as u32
+        self.low.CountSelectedTracks2(
+            option_non_null_into(proj),
+            wantmaster == MasterTrackBehavior::IncludeMasterTrack,
+        ) as u32
     }
 
     pub unsafe fn set_track_selected(&self, track: MediaTrack, selected: bool) {
@@ -1354,7 +1364,7 @@ impl Reaper {
         let ptr = self.low.GetSelectedTrack2(
             option_non_null_into(proj),
             seltrackidx as i32,
-            wantmaster.into(),
+            wantmaster == MasterTrackBehavior::IncludeMasterTrack,
         );
         NonNull::new(ptr)
     }
@@ -1417,7 +1427,7 @@ impl Reaper {
                     track.as_ptr(),
                     buffer,
                     max_size,
-                    isundo_optional.into(),
+                    isundo_optional == UndoHint::IsUndo,
                 )
             });
         if !successful {
@@ -1442,8 +1452,11 @@ impl Reaper {
         recarm: RecordArmState,
         allowgang: GangBehavior,
     ) -> bool {
-        self.low
-            .CSurf_OnRecArmChangeEx(trackid.as_ptr(), recarm.into(), allowgang.into())
+        self.low.CSurf_OnRecArmChangeEx(
+            trackid.as_ptr(),
+            recarm.into(),
+            allowgang == GangBehavior::AllowGang,
+        )
     }
 
     // Returns Err for example if given chunk is invalid
@@ -1456,7 +1469,7 @@ impl Reaper {
         let successful = self.low.SetTrackStateChunk(
             track.as_ptr(),
             str.into().as_ptr(),
-            isundo_optional.into(),
+            isundo_optional == UndoHint::IsUndo,
         );
         if !successful {
             return Err(());

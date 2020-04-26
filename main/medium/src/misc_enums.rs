@@ -12,37 +12,34 @@ pub enum TrackFxChainType {
     InputFxChain,
 }
 
-// TODO-medium Maybe better implement this as normal pub(crate) method because it's an
-// implementation detail
-impl From<TrackFxChainType> for bool {
-    fn from(t: TrackFxChainType) -> Self {
-        t == TrackFxChainType::InputFxChain
-    }
-}
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MasterTrackBehavior {
     ExcludeMasterTrack,
     IncludeMasterTrack,
 }
 
-impl From<MasterTrackBehavior> for bool {
-    fn from(v: MasterTrackBehavior) -> Self {
-        v == MasterTrackBehavior::IncludeMasterTrack
-    }
-}
-
 // TODO-medium Consider jf reply, name accordingly
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum UndoHint {
     Normal,
+    // Justin Frankel about is_undo parameter:
+    //
+    // A few notable things that happen with "isundo" set:
+    //
+    // - if undo is set and getting the chunk, then VST/etc plug-in
+    // configurations are cached, e.g. if the plug-in hasn't recently notified
+    // of a parameter change, we use the last configuration state (which is
+    // faster). The downside is if the plug-in doesn't properly report its
+    // state as having changed, you wouldn't get the latest version.
+    // - if undo is set and setting a chunk, envelope lane sizes will not be
+    // updated from the configuration state
+    // - the format in which FX GUIDs are encoded is slightly different in undo
+    // vs normal (to facilitate more efficient re-use of existing plug-in
+    // instances)
+    // - the logic in saving the event data for pooled MIDI items is slightly
+    // different (in undo mode only one of the items in the pool will encode,
+    // with undo=false the first instance in the GetStateChunk will get the data)
     IsUndo,
-}
-
-impl From<UndoHint> for bool {
-    fn from(v: UndoHint) -> Self {
-        v == UndoHint::IsUndo
-    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -71,22 +68,10 @@ pub enum UndoBehavior {
     AddUndoPoint,
 }
 
-impl From<UndoBehavior> for bool {
-    fn from(h: UndoBehavior) -> Self {
-        h == UndoBehavior::AddUndoPoint
-    }
-}
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransferBehavior {
     Copy,
     Move,
-}
-
-impl From<TransferBehavior> for bool {
-    fn from(t: TransferBehavior) -> Self {
-        t == TransferBehavior::Move
-    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -95,22 +80,10 @@ pub enum TrackDefaultsBehavior {
     AddDefaultEnvAndFx,
 }
 
-impl From<TrackDefaultsBehavior> for bool {
-    fn from(v: TrackDefaultsBehavior) -> Self {
-        v == TrackDefaultsBehavior::AddDefaultEnvAndFx
-    }
-}
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum GangBehavior {
     DenyGang,
     AllowGang,
-}
-
-impl From<GangBehavior> for bool {
-    fn from(v: GangBehavior) -> Self {
-        v == GangBehavior::AllowGang
-    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive)]
