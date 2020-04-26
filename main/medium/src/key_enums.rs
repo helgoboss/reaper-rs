@@ -1,5 +1,3 @@
-#![allow(non_camel_case_types)]
-
 use crate::{concat_c_strs, ReaperStringArg};
 use c_str_macro::c_str;
 use std::borrow::Cow;

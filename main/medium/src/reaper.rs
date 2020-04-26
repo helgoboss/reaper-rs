@@ -1222,10 +1222,7 @@ impl Reaper {
     }
 
     // I guess it returns Err if the track doesn't exist
-    pub unsafe fn get_track_ui_vol_pan(
-        &self,
-        track: MediaTrack,
-    ) -> Result<GetTrackUiVolPanResult, ()> {
+    pub unsafe fn get_track_ui_vol_pan(&self, track: MediaTrack) -> Result<VolumeAndPan, ()> {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
         let successful =
@@ -1234,7 +1231,7 @@ impl Reaper {
         if !successful {
             return Err(());
         }
-        Ok(GetTrackUiVolPanResult {
+        Ok(VolumeAndPan {
             volume: volume.assume_init(),
             pan: pan.assume_init(),
         })
@@ -1560,7 +1557,7 @@ impl Reaper {
         &self,
         track: MediaTrack,
         send_index: u32,
-    ) -> Result<GetTrackSendUiVolPanResult, ()> {
+    ) -> Result<VolumeAndPan, ()> {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
         let successful = self.low.GetTrackSendUIVolPan(
@@ -1572,7 +1569,7 @@ impl Reaper {
         if !successful {
             return Err(());
         }
-        Ok(GetTrackSendUiVolPanResult {
+        Ok(VolumeAndPan {
             volume: volume.assume_init(),
             pan: pan.assume_init(),
         })
@@ -1724,13 +1721,7 @@ pub struct TrackFxGetPresetIndexResult {
     pub count: u32,
 }
 
-pub struct GetTrackUiVolPanResult {
-    pub volume: f64,
-    pub pan: f64,
-}
-
-// TODO-medium Unify with GetTrackUiVolPanResult?
-pub struct GetTrackSendUiVolPanResult {
+pub struct VolumeAndPan {
     pub volume: f64,
     pub pan: f64,
 }

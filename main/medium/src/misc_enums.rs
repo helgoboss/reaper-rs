@@ -32,7 +32,7 @@ impl From<MasterTrackBehavior> for bool {
     }
 }
 
-// TODO-medium Wait for jf to explain the meaning of this
+// TODO-medium Consider jf reply, name accordingly
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum UndoHint {
     Normal,
@@ -221,8 +221,6 @@ pub enum ActionValueChange {
     Relative3(U7),
 }
 
-// TODO-medium If those are not extensions and only the complete DLL is the extension, name this
-//  differently.
 #[derive(Clone, Debug)]
 pub enum ExtensionType<'a> {
     Api(Cow<'a, CStr>),

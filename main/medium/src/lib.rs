@@ -1,5 +1,5 @@
 //! Provides all functions from `reaper_plugin_functions.h` with the following small improvements:
-//! TODO-medium
+//! TODO-medium Doc
 //! Doc: Explain that returning CString instead of String is because we also expect CStrings
 //! as ideal arguments (for good reasons). It would not be symmetric to return Strings then.
 //! Should be similar to Lua API, not too far away because there are lots of tutorials already.
@@ -44,10 +44,6 @@
 //! - More restrictive number types where safely applicable (for increased safety, e.g. u32 instead
 //!   of i32). In the unlikely case that the value range has to be extended in future, it's just a
 //!   matter of removing safe casts on user-side code.
-// TODO-medium In Rust get_ prefix is not idiomatic. On the other hand, the convention talks
-//  about exposing members only. Channel is not a member. However I also don't want to
-//  expose the information if it's a member or not. get_ has an advantage in IDEs and also
-//  prevents ambiguities if the noun can sound like a verb.
 // TODO-medium Also surrounds callbacks (e.g. hookcommand) with firewall()
 //
 //  2. Should we panic if ptr invalid or return result? Returning None in case it's an Option

@@ -12,8 +12,6 @@ use std::os::raw::c_void;
 /// close to the raw REAPER API.
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
-// TODO-medium If it's medium-level API's responsibility to create Rust-style code, we should
-// definitely  rename also some enum vales and remove the non_camel_case types allowance!
 #[derive(Clone, Debug)]
 pub enum ReaperPointer<'a> {
     MediaTrack(MediaTrack),
