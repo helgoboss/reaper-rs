@@ -1435,15 +1435,18 @@ fn set_track_input_monitoring() -> TestStep {
 }
 
 fn query_track_input_monitoring() -> TestStep {
-    step(AllVersions, "Query track input monitoring", |_, _| {
+    step(AllVersions, "Query track input monitoring", |reaper, _| {
         // Given
         let track = get_track(0)?;
         // When
         let mode = track.get_input_monitoring_mode();
         // Then
         use InputMonitoringMode::*;
-        // Different REAPER versions have different defaults (I think it changed to Normal from v6)
-        check!(matches!(mode, Off | Normal));
+        if reaper.get_version() < ReaperVersion::from("6") {
+            check_eq!(mode, Off);
+        } else {
+            check_eq!(mode, Normal);
+        }
         Ok(())
     })
 }
@@ -1716,56 +1719,63 @@ fn create_fx_steps(
 }
 
 fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Query track JS fx by index", move |_, _| {
-        // Given
-        let fx_chain = get_fx_chain()?;
-        let track = fx_chain.get_track();
-        // When
-        let fx = fx_chain.get_fx_by_index(2);
-        // Then
-        let fx = fx.ok_or("No FX found")?;
-        check!(fx.is_available());
-        check_eq!(fx.get_index(), 2);
-        check_eq!(
-            i32::from(fx.get_query_index()),
-            if fx_chain.is_input_fx() { 0x1000002 } else { 2 }
-        );
-        check!(fx.get_guid().is_some());
-        check_eq!(fx.get_name().as_c_str(), c_str!("JS: phaser"));
-        let fx_chunk = fx.get_chunk();
-        check!(fx_chunk.starts_with("BYPASS 0 0 0"));
-        // Different REAPER versions have different results
-        check!(fx_chunk.ends_with("\nWAK 0 0") || fx_chunk.ends_with("\nWAK 0"));
-        let tag_chunk = fx.get_tag_chunk();
-        check!(tag_chunk.starts_with(r#"<JS phaser """#));
-        check!(tag_chunk.ends_with("\n>"));
-        let state_chunk = fx.get_state_chunk();
-        check!(!state_chunk.contains("<"));
-        check!(!state_chunk.contains(">"));
-        check_eq!(fx.get_track(), track);
-        check_eq!(fx.is_input_fx(), fx_chain.is_input_fx());
-        check_eq!(fx.get_chain(), fx_chain);
-        check_eq!(fx.get_parameter_count(), 7);
-        check_eq!(fx.get_parameters().count(), 7);
-        let param1 = fx.get_parameter_by_index(0);
-        check!(param1.is_available());
-        // TODO-low Fix for input FX (there it's 1.0 for some reason)
-        // check_eq!(param1.get_step_size(), Some(0.01));
-        check_eq!(
-            param1.get_value_range(),
-            FxParameterValueRange {
-                min_val: 0.0,
-                mid_val: 5.0,
-                max_val: 10.0
+    step(
+        AllVersions,
+        "Query track JS fx by index",
+        move |reaper, _| {
+            // Given
+            let fx_chain = get_fx_chain()?;
+            let track = fx_chain.get_track();
+            // When
+            let fx = fx_chain.get_fx_by_index(2);
+            // Then
+            let fx = fx.ok_or("No FX found")?;
+            check!(fx.is_available());
+            check_eq!(fx.get_index(), 2);
+            check_eq!(
+                i32::from(fx.get_query_index()),
+                if fx_chain.is_input_fx() { 0x1000002 } else { 2 }
+            );
+            check!(fx.get_guid().is_some());
+            check_eq!(fx.get_name().as_c_str(), c_str!("JS: phaser"));
+            let fx_chunk = fx.get_chunk();
+            check!(fx_chunk.starts_with("BYPASS 0 0 0"));
+            if reaper.get_version() < ReaperVersion::from("6") {
+                check!(fx_chunk.ends_with("\nWAK 0"));
+            } else {
+                check!(fx_chunk.ends_with("\nWAK 0 0"));
             }
-        );
-        check!(fx.get_parameter_by_index(6).is_available());
-        check!(!fx.get_parameter_by_index(7).is_available());
-        let fx_info = fx.get_info();
-        let stem = fx_info.file_name.file_stem().ok_or("No stem")?;
-        check_eq!(stem, "phaser");
-        Ok(())
-    })
+            let tag_chunk = fx.get_tag_chunk();
+            check!(tag_chunk.starts_with(r#"<JS phaser """#));
+            check!(tag_chunk.ends_with("\n>"));
+            let state_chunk = fx.get_state_chunk();
+            check!(!state_chunk.contains("<"));
+            check!(!state_chunk.contains(">"));
+            check_eq!(fx.get_track(), track);
+            check_eq!(fx.is_input_fx(), fx_chain.is_input_fx());
+            check_eq!(fx.get_chain(), fx_chain);
+            check_eq!(fx.get_parameter_count(), 7);
+            check_eq!(fx.get_parameters().count(), 7);
+            let param1 = fx.get_parameter_by_index(0);
+            check!(param1.is_available());
+            // TODO-low Fix for input FX (there it's 1.0 for some reason)
+            // check_eq!(param1.get_step_size(), Some(0.01));
+            check_eq!(
+                param1.get_value_range(),
+                FxParameterValueRange {
+                    min_val: 0.0,
+                    mid_val: 5.0,
+                    max_val: 10.0
+                }
+            );
+            check!(fx.get_parameter_by_index(6).is_available());
+            check!(!fx.get_parameter_by_index(7).is_available());
+            let fx_info = fx.get_info();
+            let stem = fx_info.file_name.file_stem().ok_or("No stem")?;
+            check_eq!(stem, "phaser");
+            Ok(())
+        },
+    )
 }
 
 fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
@@ -1803,8 +1813,17 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                 fx_chain.get_first_fx_by_name(c_str!("phaser")),
                 Some(fx.clone())
             );
-            check_eq!(mock.get_invocation_count(), 1);
-            check_eq!(mock.get_last_arg(), fx.clone());
+            if reaper.get_version() < ReaperVersion::from("6") {
+                // Mmh
+                if fx_chain.is_input_fx() {
+                    check_eq!(mock.get_invocation_count(), 2);
+                } else {
+                    check_eq!(mock.get_invocation_count(), 3);
+                }
+            } else {
+                check_eq!(mock.get_invocation_count(), 1);
+                check_eq!(mock.get_last_arg(), fx.clone());
+            }
             Ok(())
         },
     )
@@ -1843,7 +1862,10 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             check!(fx.window_is_open());
             check!(fx.window_has_focus());
             check!(fx_opened_mock.get_invocation_count() >= 1);
-            check_eq!(fx_opened_mock.get_last_arg(), fx);
+            if !fx_chain.is_input_fx() || reaper.get_version() >= ReaperVersion::from("5.95") {
+                // In previous versions it wrongly reports as normal FX
+                check_eq!(fx_opened_mock.get_last_arg(), fx);
+            }
             check_eq!(fx_focused_mock.get_invocation_count(), 0);
             // Should be > 0 but doesn't work
             check!(reaper.get_focused_fx().is_none()); // Should be Some but doesn't work
@@ -2088,34 +2110,34 @@ fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step(
-        Min(ReaperVersion::from("5.95")),
-        "Move FX",
-        move |reaper, step| {
-            // Given
-            let fx_chain = get_fx_chain()?;
-            let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
-            let synth_fx = fx_chain
-                .get_fx_by_index(1)
-                .ok_or("Couldn't find synth fx")?;
-            // When
-            let (mock, _) = observe_invocations(|mock| {
-                reaper
-                    .fx_reordered()
-                    .take_until(step.finished)
-                    .subscribe(move |p| {
-                        mock.invoke(p);
-                    });
-            });
-            fx_chain.move_fx(&synth_fx, 0);
-            // Then
-            check_eq!(midi_fx.get_index(), 1);
-            check_eq!(synth_fx.get_index(), 0);
+    step(AllVersions, "Move FX", move |reaper, step| {
+        // Given
+        let fx_chain = get_fx_chain()?;
+        let midi_fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
+        let synth_fx = fx_chain
+            .get_fx_by_index(1)
+            .ok_or("Couldn't find synth fx")?;
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            reaper
+                .fx_reordered()
+                .take_until(step.finished)
+                .subscribe(move |p| {
+                    mock.invoke(p);
+                });
+        });
+        fx_chain.move_fx(&synth_fx, 0);
+        // Then
+        check_eq!(midi_fx.get_index(), 1);
+        check_eq!(synth_fx.get_index(), 0);
+        if reaper.get_version() < ReaperVersion::from("5.95") {
+            check_eq!(mock.get_invocation_count(), 0);
+        } else {
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), fx_chain.get_track());
-            Ok(())
-        },
-    )
+        }
+        Ok(())
+    })
 }
 
 fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> TestStep {
@@ -2198,9 +2220,17 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                     .as_c_str(),
                 c_str!("-4.44 dB")
             );
-            // TODO-low 1 invocation would be better than 2 (in v6 it gives us 2)
-            // Different REAPER versions have different results
-            check!(matches!(mock.get_invocation_count(), 1 | 2));
+            if reaper.get_version() < ReaperVersion::from("6") {
+                if fx_chain.is_input_fx() {
+                    // Mmh
+                    check_eq!(mock.get_invocation_count(), 2);
+                } else {
+                    check_eq!(mock.get_invocation_count(), 1);
+                }
+            } else {
+                // TODO-low 1 invocation would be better than 2 (in v6 it gives us 2)
+                check_eq!(mock.get_invocation_count(), 2);
+            }
             check_eq!(mock.get_last_arg(), p);
             Ok(())
         },
@@ -2261,7 +2291,7 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Check track fx with 2 fx", move |_, _| {
+    step(AllVersions, "Check track fx with 2 fx", move |reaper, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let track = fx_chain.get_track();
@@ -2297,8 +2327,11 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         );
         let chunk_1 = fx_1.get_chunk();
         check!(chunk_1.starts_with("BYPASS 0 0 0"));
-        // Different REAPER versions have different results
-        check!(chunk_1.ends_with("\nWAK 0 0") || chunk_1.ends_with("\nWAK 0"));
+        if reaper.get_version() < ReaperVersion::from("6") {
+            check!(chunk_1.ends_with("\nWAK 0"));
+        } else {
+            check!(chunk_1.ends_with("\nWAK 0 0"));
+        }
         let tag_chunk_1 = fx_1.get_tag_chunk();
         check!(tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
         check!(tag_chunk_1.ends_with("\n>"));
@@ -2404,7 +2437,7 @@ fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Check track fx with 1 fx", move |_, _| {
+    step(AllVersions, "Check track fx with 1 fx", move |reaper, _| {
         // Given
         let fx_chain = get_fx_chain()?;
         let track = fx_chain.get_track();
@@ -2426,8 +2459,11 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         );
         let chunk = fx_1.get_chunk();
         check!(chunk.starts_with("BYPASS 0 0 0"));
-        // Different REAPER versions have different results
-        check!(chunk.ends_with("\nWAK 0 0") || chunk.ends_with("\nWAK 0"));
+        if reaper.get_version() < ReaperVersion::from("6") {
+            check!(chunk.ends_with("\nWAK 0"));
+        } else {
+            check!(chunk.ends_with("\nWAK 0 0"));
+        }
         let tag_chunk = fx_1.get_tag_chunk();
         check!(tag_chunk.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
         check!(tag_chunk.ends_with("\n>"));

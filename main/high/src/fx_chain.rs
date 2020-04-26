@@ -28,14 +28,53 @@ impl FxChain {
     // Moves within this FX chain
     pub fn move_fx(&self, fx: &Fx, new_index: u32) {
         assert_eq!(fx.get_chain(), *self);
-        unsafe {
-            Reaper::get().medium.track_fx_copy_to_track(
-                self.track.get_raw(),
-                fx.get_query_index(),
-                self.track.get_raw(),
-                get_fx_query_index(new_index, self.is_input_fx),
-                TransferBehavior::Move,
-            );
+        let reaper = Reaper::get();
+        if reaper.medium.low.pointers.TrackFX_CopyToTrack.is_some() {
+            unsafe {
+                reaper.medium.track_fx_copy_to_track(
+                    self.track.get_raw(),
+                    fx.get_query_index(),
+                    self.track.get_raw(),
+                    get_fx_query_index(new_index, self.is_input_fx),
+                    TransferBehavior::Move,
+                );
+            }
+        } else {
+            if !fx.is_available() || fx.get_index() == new_index {
+                return;
+            }
+            let new_chunk = {
+                let actual_new_index = new_index.min(self.get_fx_count() - 1);
+                let original_fx_chunk_region = fx.get_chunk();
+                let current_fx_at_new_index_chunk_region =
+                    self.get_fx_by_index(actual_new_index).unwrap().get_chunk();
+                let original_content = original_fx_chunk_region.get_content().to_owned();
+                if fx.get_index() < actual_new_index {
+                    // Moves down
+                    original_fx_chunk_region
+                        .get_parent_chunk()
+                        .insert_after_region_as_block(
+                            &current_fx_at_new_index_chunk_region,
+                            original_content.as_str(),
+                        );
+                    original_fx_chunk_region
+                        .get_parent_chunk()
+                        .delete_region(&original_fx_chunk_region);
+                } else {
+                    // Moves up
+                    original_fx_chunk_region
+                        .get_parent_chunk()
+                        .delete_region(&original_fx_chunk_region);
+                    original_fx_chunk_region
+                        .get_parent_chunk()
+                        .insert_before_region_as_block(
+                            &current_fx_at_new_index_chunk_region,
+                            original_content.as_str(),
+                        );
+                };
+                original_fx_chunk_region.get_parent_chunk()
+            };
+            self.track.set_chunk(new_chunk)
         }
     }
 
