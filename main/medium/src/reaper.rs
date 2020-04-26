@@ -22,7 +22,9 @@ use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
 use reaper_rs_low;
 use reaper_rs_low::get_cpp_control_surface;
-use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, GUID, UNDO_STATE_ALL};
+use reaper_rs_low::raw::{
+    audio_hook_register_t, gaccel_register_t, midi_Input, GUID, UNDO_STATE_ALL,
+};
 use std::convert::{TryFrom, TryInto};
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
@@ -439,9 +441,29 @@ impl Reaper {
         ));
     }
 
-    // TODO-medium Take a closure in order to prevent caching the pointer which is always unsafe
-    //  and also not necessary because we can always lookup by globally unique ID.
-    pub fn section_from_unique_id(&self, unique_id: u32) -> Option<KbdSectionInfo> {
+    // In order to not need unsafe, we take the closure. For normal medium-level API usage, this is
+    // the safe way to go.
+    pub fn section_from_unique_id<R>(
+        &self,
+        unique_id: u32,
+        f: impl FnOnce(&KbdSectionInfo) -> R,
+    ) -> Option<R> {
+        let ptr = self.low.SectionFromUniqueID(unique_id as i32);
+        if ptr.is_null() {
+            return None;
+        }
+        NonNull::new(ptr).map(|nnp| f(&KbdSectionInfo(nnp)))
+    }
+
+    // The closure-taking function might be too restrictive in some cases, e.g. it wouldn't let us
+    // return an iterator (which is of course lazily evaluated). Also, in some cases we might know
+    // that a section is always valid, e.g. if it's the main section. A higher-level API could
+    // use this for such edge cases. If not the main section, a higher-level API
+    // should check if the section still exists (via section index) before each usage.
+    pub unsafe fn section_from_unique_id_unchecked(
+        &self,
+        unique_id: u32,
+    ) -> Option<KbdSectionInfo> {
         let ptr = self.low.SectionFromUniqueID(unique_id as i32);
         NonNull::new(ptr).map(KbdSectionInfo)
     }
@@ -514,14 +536,17 @@ impl Reaper {
     // *always* be unwise to cache a midi_Input ptr. There's also no need for that because we
     // have a single global ID (1 - 62) which we can use to quickly lookup the pointer any time.
     // Because of that we take a closure and pass a reference (https://stackoverflow.com/questions/61106587).
+    // An alternative would have been to return the pointer wrapper. But then we would have to mark
+    // this function as unsafe in order to make aware of the fact that operations on the result
+    // could result in undefined behavior as soon as the current stack frame is left. If it turns
+    // out that the function-taking approach is too restrictive in some cases (wouldn't know why),
+    // we could always provide a second function get_midi_input_unchecked().
     pub fn get_midi_input<R>(&self, idx: u32, mut f: impl FnOnce(&MidiInput) -> R) -> Option<R> {
         let ptr = self.low.GetMidiInput(idx as i32);
         if ptr.is_null() {
             return None;
         }
-        let midi_input = MidiInput(unsafe { NonNull::new_unchecked(ptr) });
-        let result = f(&midi_input);
-        Some(result)
+        NonNull::new(ptr).map(|nnp| f(&MidiInput(nnp)))
     }
 
     pub fn get_max_midi_inputs(&self) -> u32 {
@@ -1532,7 +1557,7 @@ impl Reaper {
     pub unsafe fn kbd_get_text_from_cmd<R>(
         &self,
         cmd: u32,
-        section: Option<KbdSectionInfo>,
+        section: Option<&KbdSectionInfo>,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         let ptr = self

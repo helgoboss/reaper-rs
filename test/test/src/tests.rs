@@ -433,7 +433,7 @@ fn main_section_functions() -> TestStep {
         // Given
         let section = reaper.get_main_section();
         // When
-        let actions = section.get_actions();
+        let actions = unsafe { section.get_actions() };
         // Then
         check_eq!(actions.count() as u32, section.get_action_count());
         Ok(())

@@ -83,26 +83,34 @@ impl Action {
 
     fn find_index(&self, runtime_data: &RuntimeData) -> Option<u32> {
         // TODO-low Use kbd_enumerateActions
-        runtime_data
-            .section
-            .get_kbd_cmds()
-            .enumerate()
-            .find(|(_, kbd_cmd)| kbd_cmd.cmd() == runtime_data.command_id)
-            .map(|(i, _)| i as u32)
+        let section_id = runtime_data.section.id();
+        Reaper::get()
+            .medium
+            .section_from_unique_id(section_id, |s| {
+                (0..s.action_list_cnt())
+                    .map(move |i| s.get_action_by_index(i).unwrap())
+                    .enumerate()
+                    .find(|(_, kbd_cmd)| kbd_cmd.cmd() == runtime_data.command_id)
+                    .map(|(i, _)| i as u32)
+            })
+            .unwrap()
     }
 
     pub fn is_available(&self) -> bool {
         if let Some(runtime_data) = self.runtime_data.borrow().as_ref() {
             // See if we can get a description. If yes, the action actually exists. If not, then
             // not.
-            return unsafe {
-                Reaper::get().medium.kbd_get_text_from_cmd(
-                    runtime_data.command_id as u32,
-                    Some(runtime_data.section.get_raw()),
-                    |_| (),
-                )
-            }
-            .is_some();
+            let result = runtime_data
+                .section
+                .with_raw(|s| unsafe {
+                    Reaper::get().medium.kbd_get_text_from_cmd(
+                        runtime_data.command_id as u32,
+                        Some(s),
+                        |_| (),
+                    )
+                })
+                .flatten();
+            return result.is_some();
         }
         self.load_by_command_name()
     }
@@ -112,7 +120,7 @@ impl Action {
         let state = unsafe {
             Reaper::get()
                 .medium
-                .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
+                .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
         };
         match state {
             Some(_) => ActionCharacter::Toggle,
@@ -125,7 +133,7 @@ impl Action {
         let state = unsafe {
             Reaper::get()
                 .medium
-                .get_toggle_command_state_2(Some(rd.section.get_raw()), rd.command_id)
+                .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
         };
         state == Some(true)
     }
@@ -155,7 +163,7 @@ impl Action {
         unsafe {
             Reaper::get().medium.kbd_get_text_from_cmd(
                 rd.command_id as u32,
-                Some(rd.section.get_raw()),
+                rd.section.get_raw().as_ref(),
                 |s| s.into(),
             )
         }

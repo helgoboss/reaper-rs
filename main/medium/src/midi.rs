@@ -6,10 +6,10 @@ use std::os::raw::c_int;
 use std::ptr::NonNull;
 
 // This is like a MediaTrack object in that it wraps a raw pointer.
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub struct MidiInput(pub(crate) NonNull<raw::midi_Input>);
 
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub struct MidiOutput(pub(crate) NonNull<raw::midi_Output>);
 
 impl MidiInput {

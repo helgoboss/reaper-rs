@@ -624,11 +624,7 @@ impl Reaper {
     }
 
     pub fn get_main_section(&self) -> Section {
-        Section::new(
-            self.medium
-                .section_from_unique_id(0)
-                .expect("Main section not found"),
-        )
+        Section::new(0)
     }
 
     pub fn create_empty_project_in_new_tab(&self) -> Project {

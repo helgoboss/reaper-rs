@@ -1,14 +1,28 @@
-use crate::Action;
+use crate::{Action, Reaper};
 use reaper_rs_medium::{KbdCmd, KbdSectionInfo};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
-    section_info: KbdSectionInfo,
+    id: u32,
 }
 
 impl Section {
-    pub(super) fn new(section_info: KbdSectionInfo) -> Section {
-        Section { section_info }
+    pub(super) fn new(id: u32) -> Section {
+        Section { id }
+    }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    pub fn with_raw<R>(&self, f: impl FnOnce(&KbdSectionInfo) -> R) -> Option<R> {
+        Reaper::get().medium.section_from_unique_id(self.id, f)
+    }
+
+    pub unsafe fn get_raw(&self) -> Option<KbdSectionInfo> {
+        Reaper::get()
+            .medium
+            .section_from_unique_id_unchecked(self.id)
     }
 
     pub fn get_action_by_command_id(&self, command_id: u32) -> Action {
@@ -16,31 +30,30 @@ impl Section {
     }
 
     pub fn get_action_by_index(&self, index: u32) -> Action {
-        if index >= self.get_action_count() {
-            panic!("No such action index in section")
-        }
-        self.get_action_by_index_unchecked(index)
+        self.with_raw(|s| {
+            assert!(
+                index < s.action_list_cnt(),
+                "No such action index in section"
+            );
+            let kbd_cmd = s.get_action_by_index(index).unwrap();
+            Action::new(*self, kbd_cmd.cmd(), Some(index))
+        })
+        .unwrap()
     }
 
     pub fn get_action_count(&self) -> u32 {
-        unsafe { self.section_info.action_list_cnt() }
+        self.with_raw(|s| s.action_list_cnt()).unwrap()
     }
 
-    pub fn get_raw(&self) -> KbdSectionInfo {
-        self.section_info
-    }
-
-    pub fn get_actions(&self) -> impl Iterator<Item = Action> + '_ {
-        (0..self.get_action_count()).map(move |i| self.get_action_by_index_unchecked(i))
-    }
-
-    pub(super) fn get_kbd_cmds(&self) -> impl Iterator<Item = KbdCmd> + '_ {
-        (0..self.get_action_count())
-            .map(move |i| unsafe { self.section_info.get_action_by_index(i) }.unwrap())
-    }
-
-    fn get_action_by_index_unchecked(&self, index: u32) -> Action {
-        let kbd_cmd = unsafe { self.section_info.get_action_by_index(index) }.unwrap();
-        Action::new(*self, kbd_cmd.cmd(), Some(index))
+    // Unsafe because at the time when the iterator is evaluated, the section could be gone
+    pub unsafe fn get_actions(&self) -> impl Iterator<Item = Action> + '_ {
+        let sec = Reaper::get()
+            .medium
+            .section_from_unique_id_unchecked(self.id)
+            .unwrap();
+        (0..sec.action_list_cnt()).map(move |i| {
+            let kbd_cmd = sec.get_action_by_index(i).unwrap();
+            Action::new(*self, kbd_cmd.cmd(), Some(i))
+        })
     }
 }

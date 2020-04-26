@@ -54,28 +54,27 @@ pub type ReaperControlSurface = NonNull<raw::IReaperControlSurface>;
 // is similar to our midi_Input wrapper in low-level REAPER (just that latter doesn't lift the API
 // to medium-level API style but restores low-level functionality).
 
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq, Into)]
-pub struct KbdSectionInfo(pub NonNull<raw::KbdSectionInfo>);
+#[derive(Debug, Eq, Hash, PartialEq, Into)]
+pub struct KbdSectionInfo(pub(crate) NonNull<raw::KbdSectionInfo>);
 
 impl KbdSectionInfo {
-    pub unsafe fn action_list_cnt(&self) -> u32 {
-        self.0.as_ref().action_list_cnt as u32
+    pub fn action_list_cnt(&self) -> u32 {
+        unsafe { self.0.as_ref() }.action_list_cnt as u32
     }
 
-    pub unsafe fn get_action_by_index<'a>(&'a self, index: u32) -> Option<KbdCmd<'a>> {
-        let array = std::slice::from_raw_parts(
-            self.0.as_ref().action_list,
-            self.0.as_ref().action_list_cnt as usize,
-        );
+    pub fn get_action_by_index(&self, index: u32) -> Option<KbdCmd<'_>> {
+        let array = unsafe {
+            std::slice::from_raw_parts(
+                self.0.as_ref().action_list,
+                self.0.as_ref().action_list_cnt as usize,
+            )
+        };
         let raw_kbd_cmd = array.get(index as usize)?;
         Some(KbdCmd(raw_kbd_cmd))
     }
 }
 
-// There's no point in using references with lifetime annotations in `KbdSectionInfo` because it is
-// impossible to track their lifetimes. However, we can start using lifetime annotations for
-// KbdCmd because its lifetime can be related to the lifetime of the `KbdSectionInfo`.
-pub struct KbdCmd<'a>(pub(super) &'a raw::KbdCmd);
+pub struct KbdCmd<'a>(pub(crate) &'a raw::KbdCmd);
 
 impl<'a> KbdCmd<'a> {
     pub fn cmd(&self) -> u32 {
