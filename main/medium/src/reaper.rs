@@ -16,7 +16,7 @@ use crate::{
     MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
     NotificationBehavior, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
     ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput,
-    RegistrationType, SectionContext, SendTarget, StuffMidiMessageTarget, ToggleAction,
+    RegistrationType, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
     TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
     UndoFlag, UndoScope, ValueChange, WindowContext,
@@ -470,10 +470,10 @@ impl Reaper {
     // the safe way to go.
     pub fn section_from_unique_id<R>(
         &self,
-        unique_id: u32,
+        unique_id: SectionId,
         f: impl FnOnce(&KbdSectionInfo) -> R,
     ) -> Option<R> {
-        let ptr = self.low.SectionFromUniqueID(unique_id as i32);
+        let ptr = self.low.SectionFromUniqueID(unique_id.into());
         if ptr.is_null() {
             return None;
         }
@@ -487,9 +487,9 @@ impl Reaper {
     // should check if the section still exists (via section index) before each usage.
     pub unsafe fn section_from_unique_id_unchecked(
         &self,
-        unique_id: u32,
+        unique_id: SectionId,
     ) -> Option<KbdSectionInfo> {
-        let ptr = self.low.SectionFromUniqueID(unique_id as i32);
+        let ptr = self.low.SectionFromUniqueID(unique_id.into());
         NonNull::new(ptr).map(KbdSectionInfo)
     }
 
@@ -1703,6 +1703,7 @@ impl Reaper {
         &self,
         track: MediaTrack,
         fx: TrackFxRef,
+        // TODO-medium Should we take a u32 here?
         idx: i32,
     ) -> Result<(), ()> {
         let successful = self

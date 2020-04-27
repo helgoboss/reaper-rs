@@ -1,17 +1,17 @@
 use crate::{Action, Reaper};
-use reaper_rs_medium::{CommandId, KbdCmd, KbdSectionInfo};
+use reaper_rs_medium::{CommandId, KbdCmd, KbdSectionInfo, SectionId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
-    id: u32,
+    id: SectionId,
 }
 
 impl Section {
-    pub(super) fn new(id: u32) -> Section {
+    pub(super) fn new(id: SectionId) -> Section {
         Section { id }
     }
 
-    pub fn id(&self) -> u32 {
+    pub fn id(&self) -> SectionId {
         self.id
     }
 

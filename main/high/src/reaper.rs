@@ -40,7 +40,7 @@ use reaper_rs_medium::{
     install_control_surface, CommandId, GetFocusedFxResult, GetLastTouchedFxResult,
     GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType,
     MidiEvt, MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion,
-    StuffMidiMessageTarget, ToggleAction, TrackRef,
+    SectionId, StuffMidiMessageTarget, ToggleAction, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -629,7 +629,7 @@ impl Reaper {
     }
 
     pub fn get_main_section(&self) -> Section {
-        Section::new(0)
+        Section::new(SectionId::new(0))
     }
 
     pub fn create_empty_project_in_new_tab(&self) -> Project {
