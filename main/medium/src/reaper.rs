@@ -8,17 +8,17 @@ use reaper_rs_low::{firewall, raw};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    concat_c_strs, get_cpp_control_surface, option_non_null_into, require_non_null,
-    require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint,
-    ControlSurface, CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName,
-    FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand,
-    HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
-    MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, NotificationBehavior, ProjectContext,
-    ProjectRef, ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion,
+    concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
+    ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, ControlSurface,
+    CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag,
+    GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
+    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiInput, MidiOutput, NotificationBehavior, ProjectContext, ProjectRef,
+    ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion,
     RecordArmState, RecordingInput, RegistrationType, SectionContext, SendTarget,
     StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
     TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange,
+    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -496,7 +496,7 @@ impl Reaper {
         &self,
         cmd: u32,
         value: ActionValueChange,
-        hwnd: Option<Hwnd>,
+        hwnd: WindowContext,
         proj: ProjectContext,
     ) -> i32 {
         use ActionValueChange::*;
@@ -511,14 +511,8 @@ impl Reaper {
             Relative2(v) => (i32::from(v), -1, 2),
             Relative3(v) => (i32::from(v), -1, 3),
         };
-        self.low.KBD_OnMainActionEx(
-            cmd as i32,
-            val,
-            valhw,
-            relmode,
-            option_non_null_into(hwnd),
-            proj.into(),
-        )
+        self.low
+            .KBD_OnMainActionEx(cmd as i32, val, valhw, relmode, hwnd.into(), proj.into())
     }
 
     /// Returns the REAPER main window handle.
@@ -1418,7 +1412,11 @@ impl Reaper {
     }
 
     pub unsafe fn set_only_track_selected(&self, track: Option<MediaTrack>) {
-        self.low.SetOnlyTrackSelected(option_non_null_into(track));
+        let ptr = match track {
+            None => null_mut(),
+            Some(t) => t.as_ptr(),
+        };
+        self.low.SetOnlyTrackSelected(ptr);
     }
 
     pub unsafe fn delete_track(&self, tr: MediaTrack) {

@@ -12,10 +12,6 @@ use reaper_rs_low::raw;
 use std::convert::Into;
 use std::ptr::{null_mut, NonNull};
 
-pub fn option_non_null_into<T, I: Into<NonNull<T>>>(option: Option<I>) -> *mut T {
-    option.map(|v| v.into().as_ptr()).unwrap_or(null_mut())
-}
-
 pub fn require_non_null<T>(ptr: *mut T) -> Result<NonNull<T>, ()> {
     if ptr.is_null() {
         Err(())

@@ -1,11 +1,12 @@
 use crate::{
-    concat_c_strs, KbdSectionInfo, MediaTrack, MidiDeviceId, ReaProject, ReaperControlSurface,
-    ReaperStringArg,
+    concat_c_strs, Hwnd, KbdSectionInfo, MediaTrack, MidiDeviceId, ReaProject,
+    ReaperControlSurface, ReaperStringArg,
 };
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use reaper_rs_low::raw;
+use reaper_rs_low::raw::HWND;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::ptr::null_mut;
@@ -347,6 +348,22 @@ impl<'a> From<SectionContext<'a>> for *mut raw::KbdSectionInfo {
         match c {
             MainSection => null_mut(),
             Sec(i) => i.0.as_ptr(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum WindowContext {
+    MainWindow,
+    Win(Hwnd),
+}
+
+impl From<WindowContext> for HWND {
+    fn from(c: WindowContext) -> Self {
+        use WindowContext::*;
+        match c {
+            Win(h) => h.as_ptr(),
+            MainWindow => null_mut(),
         }
     }
 }

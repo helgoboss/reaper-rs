@@ -5,6 +5,7 @@ use reaper_rs_medium::{ActionValueChange, SectionContext};
 use helgoboss_midi::U7;
 use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_rs_medium::SectionContext::Sec;
+use reaper_rs_medium::WindowContext::Win;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 use std::convert::TryInto;
@@ -194,7 +195,7 @@ impl Action {
                 reaper.medium.kbd_on_main_action_ex(
                     action_command_id,
                     ActionValueChange::Relative2(cropped_relative_value),
-                    Some(reaper.medium.get_main_hwnd()),
+                    Win(reaper.medium.get_main_hwnd()),
                     match project {
                         None => CurrentProject,
                         Some(p) => Proj(p.get_raw()),
@@ -210,7 +211,7 @@ impl Action {
                 reaper.medium.kbd_on_main_action_ex(
                     action_command_id,
                     ActionValueChange::AbsoluteLowRes(discrete_value),
-                    Some(reaper.medium.get_main_hwnd()),
+                    Win(reaper.medium.get_main_hwnd()),
                     match project {
                         None => CurrentProject,
                         Some(p) => Proj(p.get_raw()),
