@@ -18,7 +18,7 @@ use crate::{
     RecordArmState, RecordingInput, RegistrationType, SectionContext, SendTarget,
     StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
     TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, ValueChange,
+    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -972,6 +972,16 @@ impl Reaper {
         .into()
     }
 
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// use reaper_rs_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, UndoFlag::*};
+    ///
+    /// reaper.undo_begin_block_2(CurrentProject);
+    /// // ... do something incredible ...
+    /// reaper.undo_end_block_2(CurrentProject, "Do something incredible", Scoped(Items | Fx));
+    /// ```
     pub fn undo_begin_block_2(&self, proj: ProjectContext) {
         self.require_valid_project(proj);
         unsafe { self.undo_begin_block_2_unchecked(proj) };
@@ -985,7 +995,7 @@ impl Reaper {
         &self,
         proj: ProjectContext,
         descchange: impl Into<ReaperStringArg<'a>>,
-        extraflags: Option<BitFlags<UndoFlag>>,
+        extraflags: UndoScope,
     ) {
         unsafe {
             self.undo_end_block_2_unchecked(proj, descchange, extraflags);
@@ -996,16 +1006,10 @@ impl Reaper {
         &self,
         proj: ProjectContext,
         descchange: impl Into<ReaperStringArg<'a>>,
-        extraflags: Option<BitFlags<UndoFlag>>,
+        extraflags: UndoScope,
     ) {
-        self.low.Undo_EndBlock2(
-            proj.into(),
-            descchange.into().as_ptr(),
-            match extraflags {
-                Some(flags) => flags.bits(),
-                None => UNDO_STATE_ALL,
-            } as i32,
-        );
+        self.low
+            .Undo_EndBlock2(proj.into(), descchange.into().as_ptr(), extraflags.into());
     }
 
     pub fn undo_can_undo_2<R>(
