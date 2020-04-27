@@ -1,17 +1,18 @@
 use crate::Reaper;
+use reaper_rs_medium::MidiOutputDeviceId;
 use std::ffi::CString;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiOutputDevice {
-    id: u32,
+    id: MidiOutputDeviceId,
 }
 
 impl MidiOutputDevice {
-    pub fn new(id: u32) -> Self {
+    pub fn new(id: MidiOutputDeviceId) -> Self {
         MidiOutputDevice { id }
     }
 
-    pub fn get_id(&self) -> u32 {
+    pub fn get_id(&self) -> MidiOutputDeviceId {
         self.id
     }
 

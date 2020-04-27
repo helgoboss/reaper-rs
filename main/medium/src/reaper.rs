@@ -13,12 +13,13 @@ use crate::{
     CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag,
     GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
     InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiInput, MidiOutput, NotificationBehavior, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion,
-    RecordArmState, RecordingInput, RegistrationType, SectionContext, SendTarget,
-    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, WindowContext,
+    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
+    NotificationBehavior, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
+    ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput,
+    RegistrationType, SectionContext, SendTarget, StuffMidiMessageTarget, ToggleAction,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
+    UndoFlag, UndoScope, ValueChange, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -566,9 +567,12 @@ impl Reaper {
     // could result in undefined behavior as soon as the current stack frame is left. If it turns
     // out that the function-taking approach is too restrictive in some cases (wouldn't know why),
     // we could always provide a second function get_midi_input_unchecked().
-    // TODO-medium idx should be MidiDeviceId
-    pub fn get_midi_input<R>(&self, idx: u32, mut f: impl FnOnce(&MidiInput) -> R) -> Option<R> {
-        let ptr = self.low.GetMidiInput(idx as i32);
+    pub fn get_midi_input<R>(
+        &self,
+        idx: MidiInputDeviceId,
+        mut f: impl FnOnce(&MidiInput) -> R,
+    ) -> Option<R> {
+        let ptr = self.low.GetMidiInput(idx.into());
         if ptr.is_null() {
             return None;
         }
@@ -583,16 +587,20 @@ impl Reaper {
         self.low.GetMaxMidiOutputs() as u32
     }
 
-    pub fn get_midi_input_name(&self, dev: u32, nameout_sz: u32) -> GetMidiDevNameResult {
+    pub fn get_midi_input_name(
+        &self,
+        dev: MidiInputDeviceId,
+        nameout_sz: u32,
+    ) -> GetMidiDevNameResult {
         if nameout_sz == 0 {
-            let is_present = unsafe { self.low.GetMIDIInputName(dev as i32, null_mut(), 0) };
+            let is_present = unsafe { self.low.GetMIDIInputName(dev.into(), null_mut(), 0) };
             GetMidiDevNameResult {
                 is_present,
                 name: None,
             }
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
-                self.low.GetMIDIInputName(dev as i32, buffer, max_size)
+                self.low.GetMIDIInputName(dev.into(), buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
                 return GetMidiDevNameResult {
@@ -651,16 +659,20 @@ impl Reaper {
         }
     }
 
-    pub fn get_midi_output_name(&self, dev: u32, nameout_sz: u32) -> GetMidiDevNameResult {
+    pub fn get_midi_output_name(
+        &self,
+        dev: MidiOutputDeviceId,
+        nameout_sz: u32,
+    ) -> GetMidiDevNameResult {
         if nameout_sz == 0 {
-            let is_present = unsafe { self.low.GetMIDIOutputName(dev as i32, null_mut(), 0) };
+            let is_present = unsafe { self.low.GetMIDIOutputName(dev.into(), null_mut(), 0) };
             GetMidiDevNameResult {
                 is_present,
                 name: None,
             }
         } else {
             let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
-                self.low.GetMIDIOutputName(dev as i32, buffer, max_size)
+                self.low.GetMIDIOutputName(dev.into(), buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
                 return GetMidiDevNameResult {

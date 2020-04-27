@@ -22,10 +22,10 @@ use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
     get_cpp_control_surface, ActionValueChange, AutomationMode, CommandId, EnvChunkName,
     FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
-    MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiDeviceId, ReaperPointer,
-    ReaperVersion, RecordArmState, RecordingInput, StuffMidiMessageTarget, TrackFxChainType,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior,
-    UndoBehavior,
+    MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
+    ReaperPointer, ReaperVersion, RecordArmState, RecordingInput, StuffMidiMessageTarget,
+    TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
+    TransferBehavior, UndoBehavior,
 };
 use std::os::raw::c_void;
 use std::rc::Rc;
@@ -292,7 +292,7 @@ fn query_midi_output_devices() -> TestStep {
         // Given
         // When
         let devs = reaper.get_midi_output_devices();
-        let dev_0 = reaper.get_midi_output_device_by_id(0);
+        let dev_0 = reaper.get_midi_output_device_by_id(MidiOutputDeviceId::new(0));
         // Then
         check_ne!(devs.count(), 0);
         check!(dev_0.is_available());
@@ -305,7 +305,7 @@ fn query_midi_input_devices() -> TestStep {
         // Given
         // When
         let _devs = reaper.get_midi_input_devices();
-        let _dev_0 = reaper.get_midi_input_device_by_id(0);
+        let _dev_0 = reaper.get_midi_input_device_by_id(MidiInputDeviceId::new(0));
         // Then
         // TODO There might be no MIDI input devices
         //            check_ne!(devs.count(), 0);
@@ -1344,7 +1344,7 @@ fn set_track_recording_input_midi_7_all() -> TestStep {
             // Given
             let track = get_track(0)?;
             let given_input = Some(RecordingInput::Midi {
-                device_id: Some(MidiDeviceId::new(7)),
+                device_id: Some(MidiInputDeviceId::new(7)),
                 channel: None,
             });
             // When
@@ -1361,7 +1361,7 @@ fn set_track_recording_input_midi_4_5() -> TestStep {
         // Given
         let track = get_track(0)?;
         let given_input = Some(RecordingInput::Midi {
-            device_id: Some(MidiDeviceId::new(4)),
+            device_id: Some(MidiInputDeviceId::new(4)),
             channel: Some(channel(5)),
         });
         // When

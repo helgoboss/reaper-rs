@@ -1,21 +1,7 @@
+use crate::MidiInputDeviceId;
 use derive_more::Into;
 use helgoboss_midi::Channel;
 use std::convert::{TryFrom, TryInto};
-
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord, Into)]
-pub struct MidiDeviceId(pub(super) u8);
-
-// TODO-medium Consider creating all newtypes with macros for more consistency and less code:
-//  - https://gitlab.com/williamyaoh/shrinkwraprs
-//  - https://github.com/JelteF/derive_more
-//  - https://github.com/DanielKeep/rust-custom-derive
-impl MidiDeviceId {
-    /// Creates the MIDI device ID. Panics if the given number is not a valid ID.
-    pub fn new(number: u8) -> MidiDeviceId {
-        assert!(number < 63, "MIDI device IDs must be <= 62");
-        MidiDeviceId(number)
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum RecordingInput {
@@ -23,7 +9,7 @@ pub enum RecordingInput {
     ReaRoute(u32),
     Stereo(u32),
     Midi {
-        device_id: Option<MidiDeviceId>,
+        device_id: Option<MidiInputDeviceId>,
         channel: Option<Channel>,
     },
 }
@@ -38,7 +24,7 @@ impl From<RecordingInput> for u32 {
             Midi { device_id, channel } => {
                 let device_high = match device_id {
                     None => ALL_MIDI_DEVICES_FACTOR,
-                    Some(i) => u8::from(i) as u32,
+                    Some(id) => id.get() as u32,
                 };
                 let channel_low = match channel {
                     None => 0,
@@ -67,7 +53,7 @@ impl TryFrom<u32> for RecordingInput {
                         if raw_device_id == ALL_MIDI_DEVICES_FACTOR {
                             None
                         } else {
-                            Some(MidiDeviceId::new(raw_device_id as u8))
+                            Some(MidiInputDeviceId::new(raw_device_id as u8))
                         }
                     },
                     channel: {

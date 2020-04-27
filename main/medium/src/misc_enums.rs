@@ -1,5 +1,5 @@
 use crate::{
-    concat_c_strs, Hwnd, KbdSectionInfo, MediaTrack, MidiDeviceId, ReaProject,
+    concat_c_strs, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject,
     ReaperControlSurface, ReaperStringArg,
 };
 use c_str_macro::c_str;
@@ -153,7 +153,7 @@ pub enum StuffMidiMessageTarget {
     VirtualMidiKeyboardQueue,
     MidiAsControlInputQueue,
     VirtualMidiKeyboardQueueOnCurrentChannel,
-    MidiOutputDevice(MidiDeviceId),
+    MidiOutputDevice(MidiOutputDeviceId),
 }
 
 impl From<StuffMidiMessageTarget> for i32 {
