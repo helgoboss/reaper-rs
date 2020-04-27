@@ -12,7 +12,7 @@ impl Volume {
     //  the VolumeSliderValue can go beyond 1000, which means that this "normalized value" can go
     //  beyond 1.0! Maybe we should call that value range SoftNormalizedValue.
     pub fn from_normalized_value(normalized_value: f64) -> Volume {
-        assert!(0.0 <= normalized_value);
+        assert!(0.0 <= normalized_value || normalized_value.is_nan());
         Volume { normalized_value }
     }
 

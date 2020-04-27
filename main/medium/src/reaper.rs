@@ -1841,6 +1841,7 @@ pub struct TrackFxGetPresetIndexResult {
     pub count: u32,
 }
 
+#[derive(Debug)]
 pub struct VolumeAndPan {
     pub volume: ReaperVolumeValue,
     pub pan: ReaperPanValue,

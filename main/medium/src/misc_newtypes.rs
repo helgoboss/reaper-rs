@@ -4,7 +4,6 @@ use derive_more::*;
 pub struct CommandId(pub(crate) u32);
 
 impl CommandId {
-    // TODO-medium Should we call all of these from()?
     pub fn new(number: u32) -> CommandId {
         assert_ne!(number, 0, "0 is not a valid command ID");
         CommandId(number)
@@ -144,6 +143,9 @@ impl Db {
     /// Minimum value of this type. Corresponds to -inf dB. There's no maximum value because REAPER
     /// allows to exceed the soft maximum of 12 dB!
     pub const MIN: Db = Db(-1000.0);
+    /// Don't know exactly what it means but this is a state possible in REAPER. Corresponds to 1.#R
+    /// dB.
+    pub const NAN: ReaperVolumeValue = ReaperVolumeValue(f64::NAN);
     // -inf dB
     pub const MINUS_INF: Db = Db::MIN;
     // -150 dB
@@ -154,8 +156,7 @@ impl Db {
     pub const TWELVE_DB: Db = Db(12.0);
 
     pub fn new(value: f64) -> Db {
-        // TODO-medium See ReaperNormalizedVolume NaN values and so on
-        assert!(Db::MIN.get() <= value);
+        assert!(Db::MIN.get() <= value || value.is_nan());
         Db(value)
     }
 
@@ -171,6 +172,9 @@ impl VolumeSliderValue {
     /// Minimum value of this type. Corresponds to -inf dB. There's no maximum value because REAPER
     /// allows to exceed the soft maximum of 12 dB!
     pub const MIN: VolumeSliderValue = VolumeSliderValue(0.0);
+    /// Don't know exactly what it means but this is a state possible in REAPER. Corresponds to 1.#R
+    /// dB.
+    pub const NAN: ReaperVolumeValue = ReaperVolumeValue(f64::NAN);
     // -inf dB
     pub const MINUS_INF_DB: VolumeSliderValue = VolumeSliderValue::MIN;
     // -150 dB
@@ -181,8 +185,7 @@ impl VolumeSliderValue {
     pub const TWELVE_DB: VolumeSliderValue = VolumeSliderValue(1000.0);
 
     pub fn new(value: f64) -> VolumeSliderValue {
-        // TODO-medium See ReaperNormalizedVolume NaN values and so on
-        assert!(VolumeSliderValue::MIN.get() <= value);
+        assert!(VolumeSliderValue::MIN.get() <= value || value.is_nan());
         VolumeSliderValue(value)
     }
 
@@ -199,6 +202,9 @@ impl ReaperVolumeValue {
     /// But it's not. In practice, REAPER considers this as equal to the MINUS_150_DB value.
     /// There's no maximum value because REAPER allows to exceed the soft maximum of 12 dB!
     pub const MIN: ReaperVolumeValue = ReaperVolumeValue(0.0);
+    /// Don't know exactly what it means but this is a state possible in REAPER. Corresponds to 1.#R
+    /// dB.
+    pub const NAN: ReaperVolumeValue = ReaperVolumeValue(f64::NAN);
     /// Corresponds to -150 dB
     pub const MINUS_150_DB: ReaperVolumeValue = ReaperVolumeValue(3.1622776601684e-008);
     // Corresponds to 0 dB
@@ -207,11 +213,7 @@ impl ReaperVolumeValue {
     pub const TWELVE_DB: ReaperVolumeValue = ReaperVolumeValue(3.981071705535);
 
     pub fn new(value: f64) -> ReaperVolumeValue {
-        // TODO-medium From Lua it's possible to achieve somewhat extreme (possibly invalid) values:
-        // 0/0 => -1.#IND dB
-        // 1/0 => 1.#INF dB
-        // TODO-medium From REAPER UI it's possible to go to -inf
-        assert!(ReaperVolumeValue::MIN.get() <= value);
+        assert!(ReaperVolumeValue::MIN.get() <= value || value.is_nan());
         ReaperVolumeValue(value)
     }
 

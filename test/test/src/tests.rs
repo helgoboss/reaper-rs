@@ -18,6 +18,7 @@ use super::mock::observe_invocations;
 use crate::api::VersionRestriction::{AllVersions, Min};
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
+use reaper_rs_medium::NotificationBehavior::NotifyAll;
 use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
     get_cpp_control_surface, ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName,
@@ -26,6 +27,7 @@ use reaper_rs_medium::{
     ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
     RecordArmState, RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef,
     TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    ValueChange,
 };
 use std::os::raw::c_void;
 use std::rc::Rc;
@@ -55,6 +57,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         set_track_recording_input_midi_all_15(),
         query_track_volume(),
         set_track_volume(),
+        set_track_volume_extreme_values(),
         query_track_pan(),
         set_track_pan(),
         query_track_selection_state(),
@@ -1306,6 +1309,57 @@ fn set_track_volume() -> TestStep {
         check_eq!(mock.get_last_arg(), track);
         Ok(())
     })
+}
+
+fn set_track_volume_extreme_values() -> TestStep {
+    step(
+        AllVersions,
+        "Set track volume extreme values",
+        |reaper, _| {
+            // Given
+            let track_1 = get_track(0)?;
+            let track_2 = get_track(1)?;
+            // When
+            let track_1_result = unsafe {
+                reaper.medium.csurf_on_volume_change_ex(
+                    track_1.get_raw(),
+                    ValueChange::Absolute(ReaperVolumeValue::new(1.0 / 0.0)),
+                    GangBehavior::DenyGang,
+                );
+                reaper
+                    .medium
+                    .get_track_ui_vol_pan(track_1.get_raw())
+                    .unwrap()
+            };
+            let track_2_result = unsafe {
+                reaper.medium.csurf_on_volume_change_ex(
+                    track_2.get_raw(),
+                    ValueChange::Absolute(ReaperVolumeValue::new(f64::NAN)),
+                    GangBehavior::DenyGang,
+                );
+                reaper
+                    .medium
+                    .get_track_ui_vol_pan(track_2.get_raw())
+                    .unwrap()
+            };
+            // Then
+            check_eq!(track_1_result.volume, ReaperVolumeValue::new(1.0 / 0.0));
+            let track_1_volume = Volume::from_reaper_value(track_1_result.volume);
+            check_eq!(track_1_volume.get_db(), Db::new(1.0 / 0.0));
+            check_eq!(track_1_volume.get_normalized_value(), 1.0 / 0.0);
+            check_eq!(
+                track_1_volume.get_reaper_value(),
+                ReaperVolumeValue::new(1.0 / 0.0)
+            );
+
+            check!(track_2_result.volume.get().is_nan());
+            let track_2_volume = Volume::from_reaper_value(track_2_result.volume);
+            check!(track_2_volume.get_db().get().is_nan());
+            check!(track_2_volume.get_normalized_value().is_nan());
+            check!(track_2_volume.get_reaper_value().get().is_nan());
+            Ok(())
+        },
+    )
 }
 
 fn query_track_volume() -> TestStep {
