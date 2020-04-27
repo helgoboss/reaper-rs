@@ -1,5 +1,6 @@
 use crate::{
-    concat_c_strs, MediaTrack, MidiDeviceId, ReaProject, ReaperControlSurface, ReaperStringArg,
+    concat_c_strs, KbdSectionInfo, MediaTrack, MidiDeviceId, ReaProject, ReaperControlSurface,
+    ReaperStringArg,
 };
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
@@ -330,6 +331,22 @@ impl From<SendTarget> for *mut raw::MediaTrack {
         match t {
             HardwareOutput => null_mut(),
             OtherTrack(t) => t.as_ptr(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SectionContext<'a> {
+    MainSection,
+    Sec(&'a KbdSectionInfo),
+}
+
+impl<'a> From<SectionContext<'a>> for *mut raw::KbdSectionInfo {
+    fn from(c: SectionContext<'a>) -> Self {
+        use SectionContext::*;
+        match c {
+            MainSection => null_mut(),
+            Sec(i) => i.0.as_ptr(),
         }
     }
 }

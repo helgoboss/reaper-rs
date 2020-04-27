@@ -1,9 +1,10 @@
 use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_rs_medium::ActionValueChange;
+use reaper_rs_medium::{ActionValueChange, SectionContext};
 
 use helgoboss_midi::U7;
 use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
+use reaper_rs_medium::SectionContext::Sec;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 use std::convert::TryInto;
@@ -106,7 +107,7 @@ impl Action {
                 .with_raw(|s| unsafe {
                     Reaper::get().medium.kbd_get_text_from_cmd(
                         runtime_data.command_id as u32,
-                        Some(s),
+                        Sec(s),
                         |_| (),
                     )
                 })
@@ -121,7 +122,7 @@ impl Action {
         let state = unsafe {
             Reaper::get()
                 .medium
-                .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
+                .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
         };
         match state {
             Some(_) => ActionCharacter::Toggle,
@@ -134,7 +135,7 @@ impl Action {
         let state = unsafe {
             Reaper::get()
                 .medium
-                .get_toggle_command_state_2(rd.section.get_raw(), rd.command_id)
+                .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
         };
         state == Some(true)
     }
@@ -164,7 +165,7 @@ impl Action {
         unsafe {
             Reaper::get().medium.kbd_get_text_from_cmd(
                 rd.command_id as u32,
-                rd.section.get_raw().as_ref(),
+                SectionContext::Sec(&rd.section.get_raw()),
                 |s| s.into(),
             )
         }

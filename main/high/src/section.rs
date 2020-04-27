@@ -19,10 +19,11 @@ impl Section {
         Reaper::get().medium.section_from_unique_id(self.id, f)
     }
 
-    pub unsafe fn get_raw(&self) -> Option<KbdSectionInfo> {
+    pub unsafe fn get_raw(&self) -> KbdSectionInfo {
         Reaper::get()
             .medium
             .section_from_unique_id_unchecked(self.id)
+            .unwrap()
     }
 
     pub fn get_action_by_command_id(&self, command_id: u32) -> Action {

@@ -15,10 +15,10 @@ use crate::{
     HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, NotificationBehavior, ProjectContext,
     ProjectRef, ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion,
-    RecordArmState, RecordingInput, RegistrationType, SendTarget, StuffMidiMessageTarget,
-    ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
-    UndoBehavior, UndoFlag, ValueChange,
+    RecordArmState, RecordingInput, RegistrationType, SectionContext, SendTarget,
+    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    TransferBehavior, UndoBehavior, UndoFlag, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -1596,12 +1596,10 @@ impl Reaper {
     pub unsafe fn kbd_get_text_from_cmd<R>(
         &self,
         cmd: u32,
-        section: Option<&KbdSectionInfo>,
+        section: SectionContext,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self
-            .low
-            .kbd_getTextFromCmd(cmd, section.map(|v| v.0.as_ptr()).unwrap_or(null_mut()));
+        let ptr = self.low.kbd_getTextFromCmd(cmd, section.into());
         create_passing_c_str(ptr)
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| s.to_bytes().len() > 0)
@@ -1614,12 +1612,12 @@ impl Reaper {
     // "action doesn't report on/off states" is a valid result.
     pub unsafe fn get_toggle_command_state_2(
         &self,
-        section: Option<KbdSectionInfo>,
+        section: SectionContext,
         command_id: u32,
     ) -> Option<bool> {
         let result = self
             .low
-            .GetToggleCommandState2(option_non_null_into(section), command_id as i32);
+            .GetToggleCommandState2(section.into(), command_id as i32);
         if result == -1 {
             return None;
         }
