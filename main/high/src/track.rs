@@ -19,6 +19,7 @@ use reaper_rs_low::get_control_surface_instance;
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::{CSURF_EXT_SETINPUTMONITOR, GUID};
 
+use reaper_rs_medium::NotificationBehavior::NotifyAll;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::TrackInfoKey::{
     Mute, Name, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber,
@@ -193,7 +194,7 @@ impl Track {
         unsafe {
             reaper
                 .medium
-                .csurf_set_surface_pan(self.get_raw(), reaper_value, None);
+                .csurf_set_surface_pan(self.get_raw(), reaper_value, NotifyAll);
         }
     }
 
@@ -224,7 +225,7 @@ impl Track {
         unsafe {
             reaper
                 .medium
-                .csurf_set_surface_volume(self.get_raw(), reaper_value, None);
+                .csurf_set_surface_volume(self.get_raw(), reaper_value, NotifyAll);
         }
     }
 
@@ -360,7 +361,7 @@ impl Track {
         unsafe {
             reaper
                 .medium
-                .csurf_set_surface_mute(self.get_raw(), true, None);
+                .csurf_set_surface_mute(self.get_raw(), true, NotifyAll);
         }
     }
 
@@ -375,7 +376,7 @@ impl Track {
         unsafe {
             reaper
                 .medium
-                .csurf_set_surface_mute(self.get_raw(), false, None);
+                .csurf_set_surface_mute(self.get_raw(), false, NotifyAll);
         }
     }
 
@@ -400,7 +401,7 @@ impl Track {
         unsafe {
             reaper
                 .medium
-                .csurf_set_surface_solo(self.get_raw(), true, None);
+                .csurf_set_surface_solo(self.get_raw(), true, NotifyAll);
         }
     }
 
@@ -415,7 +416,7 @@ impl Track {
         unsafe {
             reaper
                 .medium
-                .csurf_set_surface_solo(self.get_raw(), false, None);
+                .csurf_set_surface_solo(self.get_raw(), false, NotifyAll);
         }
     }
 

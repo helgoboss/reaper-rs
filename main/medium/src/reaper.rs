@@ -8,21 +8,21 @@ use reaper_rs_low::{firewall, raw};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    concat_c_strs, option_non_null_into, require_non_null, require_non_null_panic,
-    ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, ControlSurface,
-    DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag, GangBehavior,
-    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiOutput, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface, ReaperPointer,
-    ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput, RegistrationType,
-    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, ValueChange,
+    concat_c_strs, get_cpp_control_surface, option_non_null_into, require_non_null,
+    require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint,
+    ControlSurface, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag,
+    GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
+    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiInput, MidiOutput, NotificationBehavior, ProjectContext, ProjectRef,
+    ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion,
+    RecordArmState, RecordingInput, RegistrationType, StuffMidiMessageTarget, ToggleAction,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
+    UndoFlag, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
 use reaper_rs_low;
-use reaper_rs_low::get_cpp_control_surface;
 use reaper_rs_low::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, GUID, UNDO_STATE_ALL,
 };
@@ -411,24 +411,37 @@ impl Reaper {
         self.low.Main_OnCommandEx(command as i32, flag, proj.into());
     }
 
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// use reaper_rs_medium::{NotificationBehavior::NotifyAllExcept, ProjectContext::CurrentProject};
+    /// use reaper_rs_medium::get_cpp_control_surface;
+    ///
+    /// let track = reaper.get_track(CurrentProject, 0).ok_or("Track doesn't exist")?;
+    /// unsafe {
+    ///     reaper.csurf_set_surface_mute(track, true, NotifyAllExcept(get_cpp_control_surface()));
+    /// }
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     pub unsafe fn csurf_set_surface_mute(
         &self,
         trackid: MediaTrack,
         mute: bool,
-        ignoresurf: Option<ReaperControlSurface>,
+        ignoresurf: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfaceMute(trackid.as_ptr(), mute, option_non_null_into(ignoresurf));
+            .CSurf_SetSurfaceMute(trackid.as_ptr(), mute, ignoresurf.into());
     }
 
     pub unsafe fn csurf_set_surface_solo(
         &self,
         trackid: MediaTrack,
         solo: bool,
-        ignoresurf: Option<ReaperControlSurface>,
+        ignoresurf: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfaceSolo(trackid.as_ptr(), solo, option_non_null_into(ignoresurf));
+            .CSurf_SetSurfaceSolo(trackid.as_ptr(), solo, ignoresurf.into());
     }
 
     /// Generates a random GUID.
@@ -443,18 +456,12 @@ impl Reaper {
     // This method is not idempotent. If you call it two times, you will have every callback TWICE.
     // Please take care of unregistering once you are done!
     pub fn register_control_surface(&self) -> Result<(), ()> {
-        unsafe {
-            self.plugin_register_add_csurf_inst(require_non_null_panic(
-                get_cpp_control_surface() as *mut _
-            ))
-        }
+        unsafe { self.plugin_register_add_csurf_inst(get_cpp_control_surface()) }
     }
 
     // This method is idempotent
     pub fn unregister_control_surface(&self) {
-        self.plugin_register_remove_csurf_inst(require_non_null_panic(
-            get_cpp_control_surface() as *mut _
-        ));
+        self.plugin_register_remove_csurf_inst(get_cpp_control_surface());
     }
 
     // In order to not need unsafe, we take the closure. For normal medium-level API usage, this is
@@ -1314,10 +1321,10 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         volume: f64,
-        ignoresurf: Option<ReaperControlSurface>,
+        ignoresurf: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume, option_non_null_into(ignoresurf));
+            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume, ignoresurf.into());
     }
 
     pub unsafe fn csurf_on_volume_change_ex(
@@ -1338,10 +1345,10 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         pan: f64,
-        ignoresurf: Option<ReaperControlSurface>,
+        ignoresurf: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfacePan(trackid.as_ptr(), pan, option_non_null_into(ignoresurf));
+            .CSurf_SetSurfacePan(trackid.as_ptr(), pan, ignoresurf.into());
     }
 
     pub unsafe fn csurf_on_pan_change_ex(

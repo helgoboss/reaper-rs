@@ -20,10 +20,10 @@ use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
-    ActionValueChange, AutomationMode, EnvChunkName, FxAddByNameBehavior, FxShowFlag, GangBehavior,
-    GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior, MessageBoxResult,
-    MessageBoxType, MidiDeviceId, ReaperPointer, ReaperVersion, RecordArmState, RecordingInput,
-    StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    get_cpp_control_surface, ActionValueChange, AutomationMode, EnvChunkName, FxAddByNameBehavior,
+    FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior,
+    MessageBoxResult, MessageBoxType, MidiDeviceId, ReaperPointer, ReaperVersion, RecordArmState,
+    RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
     TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
 };
 use std::os::raw::c_void;

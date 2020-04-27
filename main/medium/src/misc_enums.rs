@@ -1,4 +1,4 @@
-use crate::{concat_c_strs, MidiDeviceId, ReaProject, ReaperStringArg};
+use crate::{concat_c_strs, MidiDeviceId, ReaProject, ReaperControlSurface, ReaperStringArg};
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
@@ -296,6 +296,22 @@ impl From<ProjectContext> for *mut raw::ReaProject {
         match c {
             Proj(p) => p.as_ptr(),
             CurrentProject => null_mut(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NotificationBehavior {
+    NotifyAll,
+    NotifyAllExcept(ReaperControlSurface),
+}
+
+impl From<NotificationBehavior> for *mut raw::IReaperControlSurface {
+    fn from(b: NotificationBehavior) -> Self {
+        use NotificationBehavior::*;
+        match b {
+            NotifyAllExcept(s) => s.as_ptr(),
+            NotifyAll => null_mut(),
         }
     }
 }

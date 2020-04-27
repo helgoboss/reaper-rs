@@ -1,7 +1,7 @@
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperVersion, TrackFxChainType,
-    TrackFxRef,
+    require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperControlSurface,
+    ReaperVersion, TrackFxChainType, TrackFxRef,
 };
 use c_str_macro::c_str;
 use enumflags2::_internal::core::convert::TryFrom;
@@ -312,6 +312,10 @@ pub enum VersionDependentTrackFxRef {
     Old(u32),
     /// In newer REAPER versions, it's possible to distinguish between input and output FX
     New(TrackFxRef),
+}
+
+pub fn get_cpp_control_surface() -> ReaperControlSurface {
+    require_non_null_panic(reaper_rs_low::get_cpp_control_surface() as *mut _)
 }
 
 pub struct DelegatingControlSurface<T: ControlSurface> {

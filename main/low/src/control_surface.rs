@@ -142,6 +142,7 @@ pub fn install_control_surface(control_surface: impl IReaperControlSurface + 'st
     }
 }
 
+/// TODO-medium Maybe better to return a NonNull pointer?
 /// This returns a reference of a `IReaperControlSurface`-implementing C++ object which will
 /// delegate to the Rust [`ControlSurface`](trait.ControlSurface.html) which you installed by
 /// invoking [`install_control_surface`](fn.install_control_surface.html). It needs to be
