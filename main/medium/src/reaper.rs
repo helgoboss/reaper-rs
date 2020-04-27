@@ -10,15 +10,15 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, option_non_null_into, require_non_null,
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint,
-    ControlSurface, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag,
-    GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
-    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiInput, MidiOutput, NotificationBehavior, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion,
-    RecordArmState, RecordingInput, RegistrationType, StuffMidiMessageTarget, ToggleAction,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
-    UndoFlag, ValueChange,
+    ControlSurface, CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName,
+    FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand,
+    HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiInput, MidiOutput, NotificationBehavior, ProjectContext,
+    ProjectRef, ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg, ReaperVersion,
+    RecordArmState, RecordingInput, RegistrationType, SendTarget, StuffMidiMessageTarget,
+    ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey,
+    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
+    UndoBehavior, UndoFlag, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -1480,13 +1480,30 @@ impl Reaper {
         Ok(chunk_content)
     }
 
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// use reaper_rs_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
+    ///
+    /// let src_track = reaper.get_track(CurrentProject, 0).ok_or("Source track doesn't exist")?;
+    /// let send_index = unsafe {
+    ///     reaper.create_track_send(src_track, HardwareOutput)?;
+    /// };
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     pub unsafe fn create_track_send(
         &self,
         tr: MediaTrack,
-        desttr_in_optional: Option<MediaTrack>,
-    ) -> u32 {
-        self.low
-            .CreateTrackSend(tr.as_ptr(), option_non_null_into(desttr_in_optional)) as u32
+        desttr_in_optional: SendTarget,
+    ) -> Result<u32, CreateTrackSendFailed> {
+        let result = self
+            .low
+            .CreateTrackSend(tr.as_ptr(), desttr_in_optional.into());
+        if result < 0 {
+            return Err(CreateTrackSendFailed);
+        }
+        Ok(result as u32)
     }
 
     // Seems to return true if was armed and false if not

@@ -21,6 +21,7 @@ use reaper_rs_low::raw::{CSURF_EXT_SETINPUTMONITOR, GUID};
 
 use reaper_rs_medium::NotificationBehavior::NotifyAll;
 use reaper_rs_medium::ProjectContext::Proj;
+use reaper_rs_medium::SendTarget::OtherTrack;
 use reaper_rs_medium::TrackInfoKey::{
     Mute, Name, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber,
 };
@@ -502,8 +503,9 @@ impl Track {
         let send_index = unsafe {
             Reaper::get()
                 .medium
-                .create_track_send(self.get_raw(), Some(target_track.get_raw()))
-        };
+                .create_track_send(self.get_raw(), OtherTrack(target_track.get_raw()))
+        }
+        .unwrap();
         TrackSend::target_based(self.clone(), target_track, Some(send_index))
     }
 

@@ -109,3 +109,6 @@ pub use message_box::*;
 
 mod ptr_wrappers;
 pub use ptr_wrappers::*;
+
+mod errors;
+pub use errors::*;
