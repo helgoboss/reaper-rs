@@ -65,6 +65,35 @@
 //  on REAPER itself not running into UB (waiting for Justin to comment on some functions) or
 //  just mark the methods where this is not possible as unsafe. A higher-level API then should
 //  take care of making things absolutely safe.
+//
+// # Newtype rules
+//
+// in some cases (like DbVal/Vol) it seems like medium-level API will get too much power. As soon as
+// we provide methods on newtypes that invoke REAPER, we must stop! That's high-level stuff. We
+// should follow clear rules when to introduce newtypes/enums:
+//
+// Clear and done:
+//
+// 1. If original function uses an integer and it reflects limited options which have names, of
+// course introduce an enum 2. If original function uses a bool and the name of the function doesn't
+// give that bool meaning, introduce an enum 3. If a function has multiple results, introduce a
+// struct 4. If a function can have different results, introduce an enum
+// 5. If a function has many parameters of which only certain combinations are valid, introduce an
+// enum for combining those 6. If a function takes a parameter which describes how another parameter
+// is interpreted, introduce a newtype (Absolute/Relative) 7. If a function takes an optional value
+// (Option) and the function name doesn't make one see what a None means, introduce an enum
+// 10. Introduce newtypes for IDs (could make sense especially when some also are returned - because
+// we never want to confuse IDs) 8. If a function takes a number value and that number is restricted
+// in its value range, introduce a meaningful newtype (e.g. Vol, Pan) ... could be quite useful,
+// especially for conversions. And should be available to someone who just wants to deal with the
+// medium-level API. The high-level API should just reuse those types really!
+//
+// Not done:
+//
+// 9. If a function takes whatever number, even if they can have the full range of a primitive,
+// introduce a newtype just for safety and (sometimes) for seeing what's it at about at call site
+// ... no 11. Introduce newtypes for indexes ... no
+
 mod reaper_version;
 pub use reaper_version::*;
 
