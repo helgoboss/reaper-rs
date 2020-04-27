@@ -895,20 +895,17 @@ impl Reaper {
         }
     }
 
-    // TODO-medium Use tuples
     pub unsafe fn track_fx_copy_to_track(
         &self,
-        src_track: MediaTrack,
-        src_fx: TrackFxRef,
-        dest_track: MediaTrack,
-        dest_fx: TrackFxRef,
+        src: (MediaTrack, TrackFxRef),
+        dest: (MediaTrack, TrackFxRef),
         is_move: TransferBehavior,
     ) {
         self.low.TrackFX_CopyToTrack(
-            src_track.as_ptr(),
-            src_fx.into(),
-            dest_track.as_ptr(),
-            dest_fx.into(),
+            src.0.as_ptr(),
+            src.1.into(),
+            dest.0.as_ptr(),
+            dest.1.into(),
             is_move == TransferBehavior::Move,
         );
     }

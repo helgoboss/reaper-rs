@@ -32,10 +32,11 @@ impl FxChain {
         if reaper.medium.low.pointers.TrackFX_CopyToTrack.is_some() {
             unsafe {
                 reaper.medium.track_fx_copy_to_track(
-                    self.track.get_raw(),
-                    fx.get_query_index(),
-                    self.track.get_raw(),
-                    get_fx_query_index(new_index, self.is_input_fx),
+                    (self.track.get_raw(), fx.get_query_index()),
+                    (
+                        self.track.get_raw(),
+                        get_fx_query_index(new_index, self.is_input_fx),
+                    ),
                     TransferBehavior::Move,
                 );
             }
