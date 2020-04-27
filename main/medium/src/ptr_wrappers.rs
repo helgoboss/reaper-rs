@@ -50,7 +50,18 @@ pub type ReaperControlSurface = NonNull<raw::IReaperControlSurface>;
 // type-safe methods to it to lift the possibilities in the struct to medium-level API style. This
 // is similar to our midi_Input wrapper in low-level REAPER (just that latter doesn't lift the API
 // to medium-level API style but restores low-level functionality).
-
+// It's important that this can't be cloned or copied! Unlike MediaTrack and Co. we have a
+// a function section_from_unique_id() which doesn't require unsafe code because it
+// passes a guaranteed valid &KbdSectionInfo to a user-defined closure. The referred object
+// (KbdSectionInfo)  *must not* be copied, otherwise it's possible to let the KbdSectionInfo escape
+// the closure - without any unsafe code! Validity can not be guaranteed anymore.
+// Why don't we wrap a reference of raw::KbdSectionInfo? Then it would be clear that this type is
+// borrow-only. Problem: If we return this type (from an unsafe function), we would have to assign a
+// lifetime annotation - and whatever we would assign, it would be misleading because incorrect.
+// But there's an even better reason: We wouldn't be able to return a value at all because we can't
+// return a reference created in a function. We would need a separate owned version - which brings
+// us back to the pointer wrapper. Having a pointer wrapper allows us to also return (e.g. for
+// unsafe usage). Having a reference wrapper prevents this totally, that's not good.
 #[derive(Debug, Eq, Hash, PartialEq, Into)]
 pub struct KbdSectionInfo(pub(crate) NonNull<raw::KbdSectionInfo>);
 

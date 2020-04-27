@@ -368,6 +368,7 @@ impl From<SendTarget> for *mut raw::MediaTrack {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SectionContext<'a> {
     MainSection,
+    // We need a reference because KbdSectionInfo can't be copied/cloned.
     Sec(&'a KbdSectionInfo),
 }
 

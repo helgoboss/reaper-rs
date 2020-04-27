@@ -5,7 +5,9 @@ use std::marker::PhantomData;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
-// This is like a MediaTrack object in that it wraps a raw pointer.
+// This is like a MediaTrack object in that it wraps a raw pointer. Like KbdSectionInfo, it must not
+// be copied because it's reference-only. It is reference-only so we can offer a medium-level API
+// for it that doesn't require unsafe code.
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub struct MidiInput(pub(crate) NonNull<raw::midi_Input>);
 
