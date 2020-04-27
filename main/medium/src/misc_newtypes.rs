@@ -87,3 +87,19 @@ impl From<MidiOutputDeviceId> for i32 {
         id.0 as i32
     }
 }
+
+/// This value is **not** normalized in the classical sense of being in the unit interval 0.0..=1.0!
+/// It can be > 1.0 (e.g. Wet param of ReaPitch).
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct ReaperNormalizedValue(pub(crate) f64);
+
+impl ReaperNormalizedValue {
+    pub fn new(value: f64) -> ReaperNormalizedValue {
+        assert!(value >= 0.0);
+        ReaperNormalizedValue(value)
+    }
+
+    pub fn get(&self) -> f64 {
+        self.0
+    }
+}

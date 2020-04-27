@@ -23,9 +23,9 @@ use reaper_rs_medium::{
     get_cpp_control_surface, ActionValueChange, AutomationMode, CommandId, EnvChunkName,
     FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
     MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    ReaperPointer, ReaperVersion, RecordArmState, RecordingInput, StuffMidiMessageTarget,
-    TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
-    TransferBehavior, UndoBehavior,
+    ReaperNormalizedValue, ReaperPointer, ReaperVersion, RecordArmState, RecordingInput,
+    StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
 };
 use std::os::raw::c_void;
 use std::rc::Rc;
@@ -1963,7 +1963,7 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
             .get_fx_by_index(1)
             .ok_or("Couldn't find synth fx")?;
         let synth_param_5 = synth_fx.get_parameter_by_index(5);
-        synth_param_5.set_normalized_value(0.0);
+        synth_param_5.set_normalized_value(ReaperNormalizedValue::new(0.0));
         check_ne!(
             synth_param_5.get_formatted_value().as_c_str(),
             c_str!("-6.00")
@@ -2160,7 +2160,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find fx")?;
             let p = fx.get_parameter_by_index(0);
-            p.set_normalized_value(0.5);
+            p.set_normalized_value(ReaperNormalizedValue::new(0.5));
             let other_fx_chain = if fx_chain.is_input_fx() {
                 fx.get_track().get_normal_fx_chain()
             } else {
@@ -2172,7 +2172,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             let p_on_other_fx_chain = fx_on_other_fx_chain.get_parameter_by_index(0);
             // First set parameter on other FX chain to same value (confuses heuristic if
             // fxChain is input FX chain)
-            p_on_other_fx_chain.set_normalized_value(0.5);
+            p_on_other_fx_chain.set_normalized_value(ReaperNormalizedValue::new(0.5));
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper
@@ -2182,7 +2182,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
                         mock.invoke(p);
                     });
             });
-            p.set_normalized_value(0.5);
+            p.set_normalized_value(ReaperNormalizedValue::new(0.5));
             // Then
             check_eq!(mock.get_invocation_count(), 2);
             if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
@@ -2214,7 +2214,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                         mock.invoke(p);
                     });
             });
-            p.set_normalized_value(0.3);
+            p.set_normalized_value(ReaperNormalizedValue::new(0.3));
             // Then
             let last_touched_fx_param = reaper.get_last_touched_fx_parameter();
             if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
@@ -2224,8 +2224,14 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                 check_eq!(last_touched_fx_param, Some(p.clone()));
             }
             check_eq!(p.get_formatted_value().as_c_str(), c_str!("-4.44"));
-            check_eq!(p.get_normalized_value(), 0.30000001192092896);
-            check_eq!(p.get_reaper_value(), 0.30000001192092896);
+            check_eq!(
+                p.get_normalized_value(),
+                ReaperNormalizedValue::new(0.30000001192092896)
+            );
+            check_eq!(
+                p.get_reaper_value(),
+                ReaperNormalizedValue::new(0.30000001192092896)
+            );
             check_eq!(
                 p.format_normalized_value(p.get_normalized_value())
                     .as_c_str(),
@@ -2280,8 +2286,8 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(p.get_character(), FxParameterCharacter::Continuous);
         check_eq!(p.clone(), p);
         check_eq!(p.get_formatted_value().as_c_str(), c_str!("0"));
-        check_eq!(p.get_normalized_value(), 0.5);
-        check_eq!(p.get_reaper_value(), 0.5);
+        check_eq!(p.get_normalized_value(), ReaperNormalizedValue::new(0.5));
+        check_eq!(p.get_reaper_value(), ReaperNormalizedValue::new(0.5));
         check_eq!(
             p.format_normalized_value(p.get_normalized_value())
                 .as_c_str(),

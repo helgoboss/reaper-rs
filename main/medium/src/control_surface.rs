@@ -1,7 +1,7 @@
 use super::MediaTrack;
 use crate::{
     require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperControlSurface,
-    ReaperVersion, TrackFxChainType, TrackFxRef,
+    ReaperNormalizedValue, ReaperVersion, TrackFxChainType, TrackFxRef,
 };
 use c_str_macro::c_str;
 use enumflags2::_internal::core::convert::TryFrom;
@@ -239,7 +239,7 @@ pub struct ExtSetFxParamArgs {
     pub track: MediaTrack,
     pub fx_index: u32,
     pub param_index: u32,
-    pub normalized_value: f64,
+    pub normalized_value: ReaperNormalizedValue,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -522,7 +522,7 @@ impl<T: ControlSurface> reaper_rs_low::IReaperControlSurface for DelegatingContr
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                         fx_index: fx_index as u32,
                         param_index: param_index as u32,
-                        normalized_value,
+                        normalized_value: ReaperNormalizedValue::new(normalized_value),
                     };
                     match call as u32 {
                         raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_setfxparam(args),

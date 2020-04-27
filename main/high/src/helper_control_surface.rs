@@ -10,10 +10,10 @@ use reaper_rs_medium::{
     AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperPointer, ReaperVersion,
-    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
-    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
-    VersionDependentFxRef, VersionDependentTrackFxRef,
+    InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperNormalizedValue,
+    ReaperPointer, ReaperVersion, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
+    SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
+    TrackFxChainType, TrackRef, VersionDependentFxRef, VersionDependentTrackFxRef,
 };
 use rxrust::prelude::*;
 
@@ -449,7 +449,7 @@ impl HelperControlSurface {
         track: &Track,
         fx_index: u32,
         param_index: Option<u32>,
-        normalized_value: Option<f64>,
+        normalized_value: Option<ReaperNormalizedValue>,
     ) -> bool {
         let pairs = self.fx_chain_pair_by_media_track.borrow();
         let pair = match pairs.get(&track.get_raw()) {
@@ -500,7 +500,7 @@ impl HelperControlSurface {
         track: &Track,
         parm_fx_index: VersionDependentTrackFxRef,
         param_index: Option<u32>,
-        param_value: Option<f64>,
+        param_value: Option<ReaperNormalizedValue>,
     ) -> Option<Fx> {
         use VersionDependentTrackFxRef::*;
         match parm_fx_index {

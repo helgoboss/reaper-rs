@@ -15,11 +15,11 @@ use crate::{
     Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
     NotificationBehavior, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput,
-    RegistrationType, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
-    UndoFlag, UndoScope, ValueChange, WindowContext,
+    ReaperNormalizedValue, ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState,
+    RecordingInput, RegistrationType, SectionContext, SectionId, SendTarget,
+    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -777,7 +777,7 @@ impl Reaper {
         track: MediaTrack,
         fx: TrackFxRef,
         param: u32,
-        value: f64,
+        value: ReaperNormalizedValue,
         buf_sz: u32,
     ) -> Result<CString, ()> {
         assert!(buf_sz > 0);
@@ -786,7 +786,7 @@ impl Reaper {
                 track.as_ptr(),
                 fx.into(),
                 param as i32,
-                value,
+                value.get(),
                 buffer,
                 max_size,
             )
@@ -803,11 +803,14 @@ impl Reaper {
         track: MediaTrack,
         fx: TrackFxRef,
         param: u32,
-        value: f64,
+        value: ReaperNormalizedValue,
     ) -> Result<(), ()> {
-        let successful =
-            self.low
-                .TrackFX_SetParamNormalized(track.as_ptr(), fx.into(), param as i32, value);
+        let successful = self.low.TrackFX_SetParamNormalized(
+            track.as_ptr(),
+            fx.into(),
+            param as i32,
+            value.get(),
+        );
         if !successful {
             return Err(());
         }
@@ -1171,9 +1174,14 @@ impl Reaper {
         track: MediaTrack,
         fx: TrackFxRef,
         param: u32,
-    ) -> f64 {
-        self.low
-            .TrackFX_GetParamNormalized(track.as_ptr(), fx.into(), param as i32)
+    ) -> Result<ReaperNormalizedValue, ()> {
+        let raw_value =
+            self.low
+                .TrackFX_GetParamNormalized(track.as_ptr(), fx.into(), param as i32);
+        if raw_value < 0.0 {
+            return Err(());
+        }
+        Ok(ReaperNormalizedValue::new(raw_value))
     }
 
     pub fn get_master_track(&self, proj: ProjectContext) -> MediaTrack {
