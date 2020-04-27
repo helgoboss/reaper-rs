@@ -1,6 +1,6 @@
 use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_rs_medium::{ActionValueChange, SectionContext};
+use reaper_rs_medium::{ActionValueChange, CommandId, SectionContext};
 
 use helgoboss_midi::U7;
 use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
@@ -19,7 +19,7 @@ struct RuntimeData {
     // For built-in actions this ID is globally stable and will always be found. For custom
     // actions, this ID is only stable at runtime and it might be that it can't be found -
     // which means the action is not available.
-    command_id: u32,
+    command_id: CommandId,
     cached_index: Option<u32>,
 }
 
@@ -55,7 +55,7 @@ impl Action {
         }
     }
 
-    pub(super) fn new(section: Section, command_id: u32, index: Option<u32>) -> Action {
+    pub(super) fn new(section: Section, command_id: CommandId, index: Option<u32>) -> Action {
         Action {
             command_name: None,
             runtime_data: RefCell::new(Some(RuntimeData {
@@ -107,7 +107,7 @@ impl Action {
                 .section
                 .with_raw(|s| unsafe {
                     Reaper::get().medium.kbd_get_text_from_cmd(
-                        runtime_data.command_id as u32,
+                        runtime_data.command_id,
                         Sec(s),
                         |_| (),
                     )
@@ -141,7 +141,7 @@ impl Action {
         state == Some(true)
     }
 
-    pub fn get_command_id(&self) -> u32 {
+    pub fn get_command_id(&self) -> CommandId {
         let rd = self.load_if_necessary_or_complain();
         rd.command_id
     }
@@ -165,7 +165,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium.kbd_get_text_from_cmd(
-                rd.command_id as u32,
+                rd.command_id,
                 SectionContext::Sec(&rd.section.get_raw()),
                 |s| s.into(),
             )
@@ -236,12 +236,13 @@ impl Action {
         let fixed_command_name =
             Self::fix_command_name(self.command_name.as_ref().expect("Command name not set"));
         let reaper = Reaper::get();
-        let command_id = reaper
+        let command_id = match reaper
             .medium
-            .named_command_lookup(fixed_command_name.as_ref());
-        if command_id == 0 {
-            return false;
-        }
+            .named_command_lookup(fixed_command_name.as_ref())
+        {
+            None => return false,
+            Some(id) => id,
+        };
         self.runtime_data.replace(Some(RuntimeData {
             section: reaper.get_main_section(),
             command_id,

@@ -7,6 +7,7 @@
 //! to NonNull because NonNull maintains all the invariants we need (pointer not null) and opaque
 //! structs don't have methods which need to be lifted to medium-level API style. For non-opaque
 //! structs we wrap the NonNull in a newtype because we need to add medium-level API style methods.
+use crate::CommandId;
 use derive_more::Into;
 use reaper_rs_low::raw;
 use std::convert::Into;
@@ -73,7 +74,7 @@ impl KbdSectionInfo {
 pub struct KbdCmd<'a>(pub(crate) &'a raw::KbdCmd);
 
 impl<'a> KbdCmd<'a> {
-    pub fn cmd(&self) -> u32 {
-        self.0.cmd
+    pub fn cmd(&self) -> CommandId {
+        CommandId(self.0.cmd)
     }
 }

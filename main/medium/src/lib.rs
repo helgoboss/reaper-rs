@@ -71,6 +71,9 @@ pub use reaper_version::*;
 mod misc_enums;
 pub use misc_enums::*;
 
+mod misc_newtypes;
+pub use misc_newtypes::*;
+
 mod key_enums;
 pub use key_enums::*;
 

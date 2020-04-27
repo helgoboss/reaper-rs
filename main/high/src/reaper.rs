@@ -37,9 +37,10 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType, MidiEvt, ProjectRef,
-    ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction, TrackRef,
+    install_control_surface, CommandId, GetFocusedFxResult, GetLastTouchedFxResult,
+    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType,
+    MidiEvt, ProjectRef, ReaperStringArg, ReaperVersion, StuffMidiMessageTarget, ToggleAction,
+    TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -52,7 +53,7 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 struct HighLevelHookCommand {}
 
 impl HookCommand for HighLevelHookCommand {
-    fn call(command_id: u32, _flag: i32) -> bool {
+    fn call(command_id: CommandId, _flag: i32) -> bool {
         // TODO-low Pass on flag
         let operation = match Reaper::get().command_by_id.borrow().get(&command_id) {
             Some(command) => command.operation.clone(),
@@ -68,7 +69,7 @@ impl HookCommand for HighLevelHookCommand {
 struct HighLevelHookPostCommand {}
 
 impl HookPostCommand for HighLevelHookPostCommand {
-    fn call(command_id: u32, _flag: i32) {
+    fn call(command_id: CommandId, _flag: i32) {
         let reaper = Reaper::get();
         let action = reaper
             .get_main_section()
@@ -86,7 +87,7 @@ impl HookPostCommand for HighLevelHookPostCommand {
 struct HighLevelToggleAction {}
 
 impl ToggleAction for HighLevelToggleAction {
-    fn call(command_id: u32) -> i32 {
+    fn call(command_id: CommandId) -> i32 {
         if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
             match &command.kind {
                 ActionKind::Toggleable(is_on) => {
@@ -226,7 +227,7 @@ pub struct Reaper {
     // might not  be copyable (which we want to explicitly allow, that's why we accept FnMut!).
     // Or is it  possible to give up the map borrow after obtaining the command/operation
     // reference???  Look into that!!!
-    command_by_id: RefCell<HashMap<u32, Command>>,
+    command_by_id: RefCell<HashMap<CommandId, Command>>,
     pub(super) subjects: EventStreamSubjects,
     task_sender: Sender<ScheduledTask>,
     main_thread_id: ThreadId,
@@ -485,7 +486,7 @@ impl Reaper {
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
-        let command_id = self.medium.plugin_register_add_command_id(command_name) as u32;
+        let command_id = self.medium.plugin_register_add_command_id(command_name);
         let command = Command::new(
             command_id,
             description.into(),
@@ -496,7 +497,7 @@ impl Reaper {
         RegisteredAction::new(command_id)
     }
 
-    fn register_command(&self, command_id: u32, command: Command) {
+    fn register_command(&self, command_id: CommandId, command: Command) {
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             let command = p.insert(command);
             let acc = &command.accelerator_register;
@@ -504,7 +505,7 @@ impl Reaper {
         }
     }
 
-    fn unregister_command(&self, command_id: u32) {
+    fn unregister_command(&self, command_id: CommandId) {
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
@@ -631,7 +632,7 @@ impl Reaper {
 
     pub fn create_empty_project_in_new_tab(&self) -> Project {
         self.get_main_section()
-            .get_action_by_command_id(41929)
+            .get_action_by_command_id(CommandId(41929))
             .invoke_as_trigger(None);
         self.get_current_project()
     }
@@ -915,7 +916,7 @@ struct Command {
 
 impl Command {
     fn new(
-        command_id: u32,
+        command_id: CommandId,
         description: Cow<'static, CStr>,
         operation: Rc<RefCell<dyn FnMut()>>,
         kind: ActionKind,
@@ -928,7 +929,7 @@ impl Command {
                 accel: ACCEL {
                     fVirt: 0,
                     key: 0,
-                    cmd: command_id as c_ushort,
+                    cmd: command_id.get() as c_ushort,
                 },
                 desc: null(),
             },
@@ -939,11 +940,11 @@ impl Command {
 }
 
 pub struct RegisteredAction {
-    command_id: u32,
+    command_id: CommandId,
 }
 
 impl RegisteredAction {
-    fn new(command_id: u32) -> RegisteredAction {
+    fn new(command_id: CommandId) -> RegisteredAction {
         RegisteredAction { command_id }
     }
 

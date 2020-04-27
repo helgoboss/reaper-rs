@@ -1,5 +1,5 @@
 use crate::{Action, Reaper};
-use reaper_rs_medium::{KbdCmd, KbdSectionInfo};
+use reaper_rs_medium::{CommandId, KbdCmd, KbdSectionInfo};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
@@ -26,7 +26,7 @@ impl Section {
             .unwrap()
     }
 
-    pub fn get_action_by_command_id(&self, command_id: u32) -> Action {
+    pub fn get_action_by_command_id(&self, command_id: CommandId) -> Action {
         Action::new(*self, command_id, None)
     }
 

@@ -9,7 +9,7 @@ use reaper_rs_low::{firewall, raw};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
-    ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, ControlSurface,
+    ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, CommandId, ControlSurface,
     CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag,
     GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
     InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
@@ -338,13 +338,14 @@ impl Reaper {
     pub fn plugin_register_add_command_id<'a>(
         &self,
         command_name: impl Into<ReaperStringArg<'a>>,
-    ) -> u32 {
-        unsafe {
+    ) -> CommandId {
+        let raw_id = unsafe {
             self.plugin_register_add(
                 RegistrationType::CommandId,
                 command_name.into().as_ptr() as *mut c_void,
             ) as u32
-        }
+        };
+        CommandId(raw_id)
     }
 
     // A reference is in line here (vs. pointer) because gaccel_register_t is a struct created on
@@ -397,18 +398,18 @@ impl Reaper {
     /// Performs an action belonging to the main action section. To perform non-native actions
     /// (ReaScripts, custom or extension plugins' actions) safely, see
     /// [`named_command_lookup`](struct.Reaper.html#method.named_command_lookup).
-    pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: ProjectContext) {
+    pub fn main_on_command_ex(&self, command: CommandId, flag: i32, proj: ProjectContext) {
         self.require_valid_project(proj);
         unsafe { self.main_on_command_ex_unchecked(command, flag, proj) }
     }
 
     pub unsafe fn main_on_command_ex_unchecked(
         &self,
-        command: u32,
+        command: CommandId,
         flag: i32,
         proj: ProjectContext,
     ) {
-        self.low.Main_OnCommandEx(command as i32, flag, proj.into());
+        self.low.Main_OnCommandEx(command.into(), flag, proj.into());
     }
 
     /// # Example
@@ -494,7 +495,7 @@ impl Reaper {
     // Kept return value type i32 because I have no idea what the return value is about.
     pub unsafe fn kbd_on_main_action_ex(
         &self,
-        cmd: u32,
+        cmd: CommandId,
         value: ActionValueChange,
         hwnd: WindowContext,
         proj: ProjectContext,
@@ -512,7 +513,7 @@ impl Reaper {
             Relative3(v) => (i32::from(v), -1, 3),
         };
         self.low
-            .KBD_OnMainActionEx(cmd as i32, val, valhw, relmode, hwnd.into(), proj.into())
+            .KBD_OnMainActionEx(cmd.into(), val, valhw, relmode, hwnd.into(), proj.into())
     }
 
     /// Returns the REAPER main window handle.
@@ -520,8 +521,15 @@ impl Reaper {
         require_non_null_panic(self.low.GetMainHwnd())
     }
 
-    pub fn named_command_lookup<'a>(&self, command_name: impl Into<ReaperStringArg<'a>>) -> u32 {
-        unsafe { self.low.NamedCommandLookup(command_name.into().as_ptr()) as u32 }
+    pub fn named_command_lookup<'a>(
+        &self,
+        command_name: impl Into<ReaperStringArg<'a>>,
+    ) -> Option<CommandId> {
+        let raw_id = unsafe { self.low.NamedCommandLookup(command_name.into().as_ptr()) as u32 };
+        if raw_id == 0 {
+            return None;
+        }
+        Some(CommandId(raw_id))
     }
 
     /// Clears the ReaScript console.
@@ -1597,11 +1605,11 @@ impl Reaper {
     // Returns None if section or command not existing (can't think of any other case)
     pub unsafe fn kbd_get_text_from_cmd<R>(
         &self,
-        cmd: u32,
+        cmd: CommandId,
         section: SectionContext,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.low.kbd_getTextFromCmd(cmd, section.into());
+        let ptr = self.low.kbd_getTextFromCmd(cmd.get(), section.into());
         create_passing_c_str(ptr)
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| s.to_bytes().len() > 0)
@@ -1615,11 +1623,11 @@ impl Reaper {
     pub unsafe fn get_toggle_command_state_2(
         &self,
         section: SectionContext,
-        command_id: u32,
+        command_id: CommandId,
     ) -> Option<bool> {
         let result = self
             .low
-            .GetToggleCommandState2(section.into(), command_id as i32);
+            .GetToggleCommandState2(section.into(), command_id.into());
         if result == -1 {
             return None;
         }
@@ -1629,10 +1637,10 @@ impl Reaper {
     // Returns None if lookup was not successful, that is, the command couldn't be found
     pub fn reverse_named_command_lookup<R>(
         &self,
-        command_id: u32,
+        command_id: CommandId,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.low.ReverseNamedCommandLookup(command_id as i32);
+        let ptr = self.low.ReverseNamedCommandLookup(command_id.into());
         unsafe { create_passing_c_str(ptr) }.map(f)
     }
 
@@ -1754,16 +1762,16 @@ impl Reaper {
 }
 
 extern "C" fn delegating_hook_command<T: HookCommand>(command_id: i32, flag: i32) -> bool {
-    firewall(|| T::call(command_id as u32, flag)).unwrap_or(false)
+    firewall(|| T::call(CommandId(command_id as u32), flag)).unwrap_or(false)
 }
 
 extern "C" fn delegating_toggle_action<T: ToggleAction>(command_id: i32) -> i32 {
-    firewall(|| T::call(command_id as u32)).unwrap_or(-1)
+    firewall(|| T::call(CommandId(command_id as u32))).unwrap_or(-1)
 }
 
 extern "C" fn delegating_hook_post_command<T: HookPostCommand>(command_id: i32, flag: i32) {
     firewall(|| {
-        T::call(command_id as u32, flag);
+        T::call(CommandId(command_id as u32), flag);
     });
 }
 

@@ -20,11 +20,12 @@ use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
-    get_cpp_control_surface, ActionValueChange, AutomationMode, EnvChunkName, FxAddByNameBehavior,
-    FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior,
-    MessageBoxResult, MessageBoxType, MidiDeviceId, ReaperPointer, ReaperVersion, RecordArmState,
-    RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    get_cpp_control_surface, ActionValueChange, AutomationMode, CommandId, EnvChunkName,
+    FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
+    MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiDeviceId, ReaperPointer,
+    ReaperVersion, RecordArmState, RecordingInput, StuffMidiMessageTarget, TrackFxChainType,
+    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior,
+    UndoBehavior,
 };
 use std::os::raw::c_void;
 use std::rc::Rc;
@@ -370,7 +371,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
             check_eq!(mock.get_last_arg(), 43);
             check!(action.is_on());
             check_eq!(action.get_character(), ActionCharacter::Toggle);
-            check!(action.get_command_id() > 0);
+            check!(action.get_command_id() > CommandId(1));
             check_eq!(
                 action.get_command_name(),
                 Some(c_str!("reaperRsTest2").to_owned())
@@ -412,7 +413,7 @@ fn register_and_unregister_action() -> TestStep {
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), 42);
             check_eq!(action.get_character(), ActionCharacter::Trigger);
-            check!(action.get_command_id() > 0);
+            check!(action.get_command_id() > CommandId(1));
             check_eq!(
                 action.get_command_name(),
                 Some(c_str!("reaperRsTest").to_owned())
@@ -545,7 +546,9 @@ fn unmute_track() -> TestStep {
 fn test_action_invoked_event() -> TestStep {
     step(AllVersions, "Test actionInvoked event", |reaper, step| {
         // Given
-        let action = reaper.get_main_section().get_action_by_command_id(1582);
+        let action = reaper
+            .get_main_section()
+            .get_action_by_command_id(CommandId(1582));
         // When
         let (mock, _) = observe_invocations(|mock| {
             reaper
@@ -568,7 +571,9 @@ fn test_action_invoked_event() -> TestStep {
 fn invoke_action() -> TestStep {
     step(AllVersions, "Invoke action", |reaper, step| {
         // Given
-        let action = reaper.get_main_section().get_action_by_command_id(6);
+        let action = reaper
+            .get_main_section()
+            .get_action_by_command_id(CommandId(6));
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
@@ -597,8 +602,12 @@ fn query_action() -> TestStep {
         track.select_exclusively();
         check!(!track.is_muted());
         // When
-        let toggle_action = reaper.get_main_section().get_action_by_command_id(6);
-        let normal_action = reaper.get_main_section().get_action_by_command_id(41075);
+        let toggle_action = reaper
+            .get_main_section()
+            .get_action_by_command_id(CommandId(6));
+        let normal_action = reaper
+            .get_main_section()
+            .get_action_by_command_id(CommandId(41075));
         let normal_action_by_index = reaper
             .get_main_section()
             .get_action_by_index(normal_action.get_index());
@@ -610,7 +619,7 @@ fn query_action() -> TestStep {
         check!(!toggle_action.is_on());
         check!(!normal_action.is_on());
         check_eq!(toggle_action.clone(), toggle_action);
-        check_eq!(toggle_action.get_command_id(), 6);
+        check_eq!(toggle_action.get_command_id(), CommandId(6));
         check!(toggle_action.get_command_name().is_none());
         check_eq!(
             toggle_action.get_name(),
