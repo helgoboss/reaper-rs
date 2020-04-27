@@ -9,17 +9,18 @@ use reaper_rs_low::{firewall, raw};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
-    ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, CommandId, ControlSurface,
-    CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior,
-    FxPresetRef, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand,
-    Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
-    NotificationBehavior, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperNormalizedValue, ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState,
-    RecordingInput, RegistrationType, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, WindowContext,
+    ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint, CommandId,
+    ControlSurface, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
+    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GangBehavior, GlobalAutomationOverride,
+    HookCommand, HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
+    MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectRef,
+    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPointer, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, RegistrationType,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
+    UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -1201,11 +1202,11 @@ impl Reaper {
         guid_string
     }
 
-    pub fn master_get_tempo(&self) -> f64 {
-        self.low.Master_GetTempo()
+    pub fn master_get_tempo(&self) -> Bpm {
+        Bpm(self.low.Master_GetTempo())
     }
 
-    pub fn set_current_bpm(&self, proj: ProjectContext, bpm: f64, want_undo: UndoBehavior) {
+    pub fn set_current_bpm(&self, proj: ProjectContext, bpm: Bpm, want_undo: UndoBehavior) {
         self.require_valid_project(proj);
         unsafe {
             self.set_current_bpm_unchecked(proj, bpm, want_undo);
@@ -1215,24 +1216,31 @@ impl Reaper {
     pub unsafe fn set_current_bpm_unchecked(
         &self,
         proj: ProjectContext,
-        bpm: f64,
+        bpm: Bpm,
         want_undo: UndoBehavior,
     ) {
-        self.low
-            .SetCurrentBPM(proj.into(), bpm, want_undo == UndoBehavior::AddUndoPoint);
+        self.low.SetCurrentBPM(
+            proj.into(),
+            bpm.get(),
+            want_undo == UndoBehavior::AddUndoPoint,
+        );
     }
 
-    pub fn master_get_play_rate(&self, project: ProjectContext) -> f64 {
+    pub fn master_get_play_rate(&self, project: ProjectContext) -> PlaybackSpeedFactor {
         self.require_valid_project(project);
-        unsafe { self.master_get_play_rate(project) }
+        unsafe { self.master_get_play_rate_unchecked(project) }
     }
 
-    pub unsafe fn master_get_play_rate_unchecked(&self, project: ProjectContext) -> f64 {
-        self.low.Master_GetPlayRate(project.into())
+    pub unsafe fn master_get_play_rate_unchecked(
+        &self,
+        project: ProjectContext,
+    ) -> PlaybackSpeedFactor {
+        let raw = unsafe { self.low.Master_GetPlayRate(project.into()) };
+        PlaybackSpeedFactor(raw)
     }
 
-    pub fn csurf_on_play_rate_change(&self, playrate: f64) {
-        self.low.CSurf_OnPlayRateChange(playrate);
+    pub fn csurf_on_play_rate_change(&self, playrate: PlaybackSpeedFactor) {
+        self.low.CSurf_OnPlayRateChange(playrate.get());
     }
 
     pub fn show_message_box<'a>(
@@ -1297,12 +1305,12 @@ impl Reaper {
             .StuffMIDIMessage(mode.into(), bytes.0.into(), bytes.1.into(), bytes.2.into());
     }
 
-    pub fn db2slider(&self, x: f64) -> f64 {
-        self.low.DB2SLIDER(x)
+    pub fn db2slider(&self, x: Db) -> VolumeSliderValue {
+        VolumeSliderValue(self.low.DB2SLIDER(x.get()))
     }
 
-    pub fn slider2db(&self, y: f64) -> f64 {
-        self.low.SLIDER2DB(y)
+    pub fn slider2db(&self, y: VolumeSliderValue) -> Db {
+        Db(self.low.SLIDER2DB(y.get()))
     }
 
     // I guess it returns Err if the track doesn't exist
@@ -1316,7 +1324,7 @@ impl Reaper {
             return Err(());
         }
         Ok(VolumeAndPan {
-            volume: volume.assume_init(),
+            volume: ReaperVolumeValue::new(volume.assume_init()),
             pan: pan.assume_init(),
         })
     }
@@ -1342,25 +1350,28 @@ impl Reaper {
     pub unsafe fn csurf_set_surface_volume(
         &self,
         trackid: MediaTrack,
-        volume: f64,
+        volume: ReaperVolumeValue,
         ignoresurf: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume, ignoresurf.into());
+            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume.get(), ignoresurf.into());
     }
 
+    // Returns the value that has actually been set. This only deviates if 0 is sent. Then it
+    // returns a very slightly higher value - the one which actually corresponds to -150 dB.
     pub unsafe fn csurf_on_volume_change_ex(
         &self,
         trackid: MediaTrack,
-        volume: ValueChange<f64>,
+        volume: ValueChange<ReaperVolumeValue>,
         allow_gang: GangBehavior,
-    ) -> f64 {
-        self.low.CSurf_OnVolumeChangeEx(
+    ) -> ReaperVolumeValue {
+        let raw = self.low.CSurf_OnVolumeChangeEx(
             trackid.as_ptr(),
             volume.value(),
             volume.is_relative(),
             allow_gang == GangBehavior::AllowGang,
-        )
+        );
+        ReaperVolumeValue::new(raw)
     }
 
     pub unsafe fn csurf_set_surface_pan(
@@ -1589,18 +1600,21 @@ impl Reaper {
         self.low.TrackFX_GetOpen(track.as_ptr(), fx.into())
     }
 
+    // Returns the value which has actually been set. If the send doesn't exist, returns 0.0 (which
+    // can also be a valid value that has been set, so not very useful ...).
     pub unsafe fn csurf_on_send_volume_change(
         &self,
         trackid: MediaTrack,
         send_index: u32,
-        volume: ValueChange<f64>,
-    ) -> f64 {
-        self.low.CSurf_OnSendVolumeChange(
+        volume: ValueChange<ReaperVolumeValue>,
+    ) -> ReaperVolumeValue {
+        let raw = self.low.CSurf_OnSendVolumeChange(
             trackid.as_ptr(),
             send_index as i32,
             volume.value(),
             volume.is_relative(),
-        )
+        );
+        ReaperVolumeValue::new(raw)
     }
 
     pub unsafe fn csurf_on_send_pan_change(
@@ -1677,7 +1691,7 @@ impl Reaper {
             return Err(());
         }
         Ok(VolumeAndPan {
-            volume: volume.assume_init(),
+            volume: ReaperVolumeValue::new(volume.assume_init()),
             pan: pan.assume_init(),
         })
     }
@@ -1829,7 +1843,7 @@ pub struct TrackFxGetPresetIndexResult {
 }
 
 pub struct VolumeAndPan {
-    pub volume: f64,
+    pub volume: ReaperVolumeValue,
     pub pan: f64,
 }
 

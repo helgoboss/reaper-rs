@@ -221,8 +221,8 @@ impl Project {
 
     pub fn get_tempo(&self) -> Tempo {
         // TODO This is not project-specific ... why?
-        let tempo = Reaper::get().medium.master_get_tempo();
-        Tempo::from_bpm(tempo)
+        let bpm = Reaper::get().medium.master_get_tempo();
+        Tempo::from_bpm(bpm)
     }
 
     pub fn set_tempo(&self, tempo: Tempo, undo_hint: UndoBehavior) {

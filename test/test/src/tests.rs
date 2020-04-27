@@ -20,11 +20,11 @@ use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
-    get_cpp_control_surface, ActionValueChange, AutomationMode, CommandId, EnvChunkName,
+    get_cpp_control_surface, ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName,
     FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
     MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    ReaperNormalizedValue, ReaperPointer, ReaperVersion, RecordArmState, RecordingInput,
-    StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    ReaperNormalizedValue, ReaperPointer, ReaperVersion, ReaperVolumeValue, RecordArmState,
+    RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
     TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
 };
 use std::os::raw::c_void;
@@ -150,10 +150,13 @@ fn set_project_tempo() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        project.set_tempo(Tempo::from_bpm(130.0), UndoBehavior::OmitUndoPoint);
+        project.set_tempo(
+            Tempo::from_bpm(Bpm::new(130.0)),
+            UndoBehavior::OmitUndoPoint,
+        );
         // Then
-        check_eq!(project.get_tempo().get_bpm(), 130.0);
-        // TODO There should be only one event invocation
+        check_eq!(project.get_tempo().get_bpm(), Bpm::new(130.0));
+        // TODO-low There should be only one event invocation
         check_eq!(mock.get_invocation_count(), 2);
         check_eq!(mock.get_last_arg(), ());
         Ok(())
@@ -167,7 +170,7 @@ fn get_project_tempo() -> TestStep {
         // When
         let tempo = project.get_tempo();
         // Then
-        check_eq!(tempo.get_bpm(), 120.0);
+        check_eq!(tempo.get_bpm(), Bpm::new(120.0));
         check_eq!(tempo.get_normalized_value(), 119.0 / 959.0);
         Ok(())
     })
@@ -676,7 +679,7 @@ fn set_track_send_volume() -> TestStep {
         });
         send.set_volume(Volume::from_normalized_value(0.25));
         // Then
-        check_eq!(send.get_volume().get_db(), -30.009531739774296);
+        check_eq!(send.get_volume().get_db(), Db::new(-30.009531739774296));
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), send);
         Ok(())
@@ -702,8 +705,8 @@ fn query_track_send() -> TestStep {
         check_eq!(send_to_track_3.get_source_track(), track_1);
         check_eq!(send_to_track_2.get_target_track(), track_2);
         check_eq!(send_to_track_3.get_target_track(), track_3);
-        check_eq!(send_to_track_2.get_volume().get_db(), 0.0);
-        check_eq!(send_to_track_3.get_volume().get_db(), 0.0);
+        check_eq!(send_to_track_2.get_volume().get_db(), Db::ZERO_DB);
+        check_eq!(send_to_track_3.get_volume().get_db(), Db::ZERO_DB);
         Ok(())
     })
 }
@@ -1293,8 +1296,11 @@ fn set_track_volume() -> TestStep {
         track.set_volume(Volume::from_normalized_value(0.25));
         // Then
         let volume = track.get_volume();
-        check_eq!(volume.get_reaper_value(), 0.031588093366685013);
-        check_eq!(volume.get_db(), -30.009531739774296);
+        check_eq!(
+            volume.get_reaper_value(),
+            ReaperVolumeValue::new(0.031588093366685013)
+        );
+        check_eq!(volume.get_db(), Db::new(-30.009531739774296));
         check_eq!(volume.get_normalized_value(), 0.25000000000003497);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
@@ -1309,8 +1315,8 @@ fn query_track_volume() -> TestStep {
         // When
         let volume = track.get_volume();
         // Then
-        check_eq!(volume.get_reaper_value(), 1.0);
-        check_eq!(volume.get_db(), 0.0);
+        check_eq!(volume.get_reaper_value(), ReaperVolumeValue::ZERO_DB);
+        check_eq!(volume.get_db(), Db::ZERO_DB);
         check_eq!(volume.get_normalized_value(), 0.71599999999999997);
         Ok(())
     })

@@ -4,12 +4,13 @@ use derive_more::*;
 pub struct CommandId(pub(crate) u32);
 
 impl CommandId {
+    // TODO-medium Should we call all of these from()?
     pub fn new(number: u32) -> CommandId {
         assert_ne!(number, 0, "0 is not a valid command ID");
         CommandId(number)
     }
 
-    pub fn get(&self) -> u32 {
+    pub const fn get(&self) -> u32 {
         self.0
     }
 }
@@ -28,7 +29,7 @@ impl SectionId {
         SectionId(number)
     }
 
-    pub fn get(&self) -> u32 {
+    pub const fn get(&self) -> u32 {
         self.0
     }
 }
@@ -52,10 +53,8 @@ impl MidiInputDeviceId {
         assert!(number < 63, "MIDI device IDs must be <= 62");
         MidiInputDeviceId(number)
     }
-}
 
-impl MidiInputDeviceId {
-    pub fn get(&self) -> u8 {
+    pub const fn get(&self) -> u8 {
         self.0
     }
 }
@@ -74,10 +73,8 @@ impl MidiOutputDeviceId {
     pub fn new(number: u8) -> MidiOutputDeviceId {
         MidiOutputDeviceId(number)
     }
-}
 
-impl MidiOutputDeviceId {
-    pub fn get(&self) -> u8 {
+    pub const fn get(&self) -> u8 {
         self.0
     }
 }
@@ -94,12 +91,137 @@ impl From<MidiOutputDeviceId> for i32 {
 pub struct ReaperNormalizedValue(pub(crate) f64);
 
 impl ReaperNormalizedValue {
+    pub const MIN: ReaperNormalizedValue = ReaperNormalizedValue(0.0);
+
     pub fn new(value: f64) -> ReaperNormalizedValue {
-        assert!(value >= 0.0);
+        assert!(ReaperNormalizedValue::MIN.get() <= value);
         ReaperNormalizedValue(value)
     }
 
-    pub fn get(&self) -> f64 {
+    pub const fn get(&self) -> f64 {
         self.0
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct Bpm(pub(crate) f64);
+
+impl Bpm {
+    pub const MIN: Bpm = Bpm(1.0);
+    pub const MAX: Bpm = Bpm(960.0);
+
+    pub fn new(value: f64) -> Bpm {
+        assert!(Bpm::MIN.get() <= value && value <= Bpm::MAX.get());
+        Bpm(value)
+    }
+
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct PlaybackSpeedFactor(pub(crate) f64);
+
+impl PlaybackSpeedFactor {
+    pub const MIN: PlaybackSpeedFactor = PlaybackSpeedFactor(0.25);
+    pub const MAX: PlaybackSpeedFactor = PlaybackSpeedFactor(4.0);
+
+    pub fn new(value: f64) -> PlaybackSpeedFactor {
+        assert!(PlaybackSpeedFactor::MIN.get() <= value && value <= PlaybackSpeedFactor::MAX.get());
+        PlaybackSpeedFactor(value)
+    }
+
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct Db(pub(crate) f64);
+
+impl Db {
+    /// Minimum value of this type. Corresponds to -inf dB. There's no maximum value because REAPER
+    /// allows to exceed the soft maximum of 12 dB!
+    pub const MIN: Db = Db(-1000.0);
+    // -inf dB
+    pub const MINUS_INF: Db = Db::MIN;
+    // -150 dB
+    pub const MINUS_150_DB: Db = Db(-150.0);
+    // 0 dB
+    pub const ZERO_DB: Db = Db(0.0);
+    // 12 dB
+    pub const TWELVE_DB: Db = Db(12.0);
+
+    pub fn new(value: f64) -> Db {
+        // TODO-medium See ReaperNormalizedVolume NaN values and so on
+        assert!(Db::MIN.get() <= value);
+        Db(value)
+    }
+
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct VolumeSliderValue(pub(crate) f64);
+
+impl VolumeSliderValue {
+    /// Minimum value of this type. Corresponds to -inf dB. There's no maximum value because REAPER
+    /// allows to exceed the soft maximum of 12 dB!
+    pub const MIN: VolumeSliderValue = VolumeSliderValue(0.0);
+    // -inf dB
+    pub const MINUS_INF_DB: VolumeSliderValue = VolumeSliderValue::MIN;
+    // -150 dB
+    pub const MINUS_150_DB: VolumeSliderValue = VolumeSliderValue(2.5138729793972);
+    // 0 dB
+    pub const ZERO_DB: VolumeSliderValue = VolumeSliderValue(716.0);
+    // 12 dB
+    pub const TWELVE_DB: VolumeSliderValue = VolumeSliderValue(1000.0);
+
+    pub fn new(value: f64) -> VolumeSliderValue {
+        // TODO-medium See ReaperNormalizedVolume NaN values and so on
+        assert!(VolumeSliderValue::MIN.get() <= value);
+        VolumeSliderValue(value)
+    }
+
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct ReaperVolumeValue(pub(crate) f64);
+
+impl ReaperVolumeValue {
+    /// Minimum value of this type. If the scale would be linear, this would be less than -150 dB.
+    /// But it's not. In practice, REAPER considers this as equal to the MINUS_150_DB value.
+    /// There's no maximum value because REAPER allows to exceed the soft maximum of 12 dB!
+    pub const MIN: ReaperVolumeValue = ReaperVolumeValue(0.0);
+    /// Corresponds to -150 dB
+    pub const MINUS_150_DB: ReaperVolumeValue = ReaperVolumeValue(3.1622776601684e-008);
+    // Corresponds to 0 dB
+    pub const ZERO_DB: ReaperVolumeValue = ReaperVolumeValue(1.0);
+    // Corresponds to 12 dB
+    pub const TWELVE_DB: ReaperVolumeValue = ReaperVolumeValue(3.981071705535);
+
+    pub fn new(value: f64) -> ReaperVolumeValue {
+        // TODO-medium From Lua it's possible to achieve somewhat extreme (possibly invalid) values:
+        // 0/0 => -1.#IND dB
+        // 1/0 => 1.#INF dB
+        // TODO-medium From REAPER UI it's possible to go to -inf
+        assert!(ReaperVolumeValue::MIN.get() <= value);
+        ReaperVolumeValue(value)
+    }
+
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+}
+
+impl From<ReaperVolumeValue> for f64 {
+    fn from(v: ReaperVolumeValue) -> Self {
+        v.0
     }
 }

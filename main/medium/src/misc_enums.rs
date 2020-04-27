@@ -63,17 +63,17 @@ pub enum ChunkCacheHint {
     UndoMode,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ValueChange<T: Copy> {
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ValueChange<T: Copy + Into<f64>> {
     Absolute(T),
-    Relative(T),
+    Relative(f64),
 }
 
-impl<T: Copy> ValueChange<T> {
-    pub(crate) fn value(&self) -> T {
+impl<T: Copy + Into<f64>> ValueChange<T> {
+    pub(crate) fn value(&self) -> f64 {
         use ValueChange::*;
         match self {
-            Absolute(v) => *v,
+            Absolute(v) => (*v).into(),
             Relative(v) => *v,
         }
     }
