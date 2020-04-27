@@ -287,6 +287,35 @@ pub enum ProjectRef {
     Tab(u32),
 }
 
+impl From<ProjectRef> for i32 {
+    fn from(r: ProjectRef) -> Self {
+        use ProjectRef::*;
+        match r {
+            Current => -1,
+            CurrentlyRendering => 0x40000000,
+            Tab(i) => i as i32,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FxPresetRef {
+    FactoryPreset,
+    DefaultUserPreset,
+    Preset(u32),
+}
+
+impl From<FxPresetRef> for i32 {
+    fn from(r: FxPresetRef) -> Self {
+        use FxPresetRef::*;
+        match r {
+            FactoryPreset => -2,
+            DefaultUserPreset => -1,
+            Preset(idx) => idx as i32,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ProjectContext {
     CurrentProject,

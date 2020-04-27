@@ -10,9 +10,9 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
     ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, CommandId, ControlSurface,
-    CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag,
-    GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
-    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
+    CreateTrackSendFailed, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior,
+    FxPresetRef, FxShowFlag, GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand,
+    Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
     NotificationBehavior, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
     ReaperPointer, ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput,
@@ -91,11 +91,7 @@ impl Reaper {
         projfn_out_optional_sz: u32,
     ) -> Option<EnumProjectsResult> {
         use ProjectRef::*;
-        let idx = match proj_ref {
-            Current => -1,
-            CurrentlyRendering => 0x40000000,
-            Tab(i) => i as i32,
-        };
+        let idx = proj_ref.into();
         if projfn_out_optional_sz == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
             let project = NonNull::new(ptr)?;
@@ -1599,7 +1595,6 @@ impl Reaper {
         )
     }
 
-    // TODO-medium Think about introducing newtypes for params such as SendIndex(3)
     pub unsafe fn csurf_on_send_pan_change(
         &self,
         trackid: MediaTrack,
@@ -1698,17 +1693,16 @@ impl Reaper {
         })
     }
 
-    // Returns Err e.g. if FX doesn't exist
+    // Returns Err e.g. if FX or preset doesn't exist
     pub unsafe fn track_fx_set_preset_by_index(
         &self,
         track: MediaTrack,
         fx: TrackFxRef,
-        // TODO-medium Should we take a u32 here?
-        idx: i32,
+        idx: FxPresetRef,
     ) -> Result<(), ()> {
         let successful = self
             .low
-            .TrackFX_SetPresetByIndex(track.as_ptr(), fx.into(), idx);
+            .TrackFX_SetPresetByIndex(track.as_ptr(), fx.into(), idx.into());
         if !successful {
             return Err(());
         }
