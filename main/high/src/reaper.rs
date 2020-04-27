@@ -634,7 +634,7 @@ impl Reaper {
 
     pub fn create_empty_project_in_new_tab(&self) -> Project {
         self.get_main_section()
-            .get_action_by_command_id(CommandId(41929))
+            .get_action_by_command_id(CommandId::new(41929))
             .invoke_as_trigger(None);
         self.get_current_project()
     }

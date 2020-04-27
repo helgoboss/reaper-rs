@@ -371,7 +371,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
             check_eq!(mock.get_last_arg(), 43);
             check!(action.is_on());
             check_eq!(action.get_character(), ActionCharacter::Toggle);
-            check!(action.get_command_id() > CommandId(1));
+            check!(action.get_command_id() > CommandId::new(1));
             check_eq!(
                 action.get_command_name(),
                 Some(c_str!("reaperRsTest2").to_owned())
@@ -413,7 +413,7 @@ fn register_and_unregister_action() -> TestStep {
             check_eq!(mock.get_invocation_count(), 1);
             check_eq!(mock.get_last_arg(), 42);
             check_eq!(action.get_character(), ActionCharacter::Trigger);
-            check!(action.get_command_id() > CommandId(1));
+            check!(action.get_command_id() > CommandId::new(1));
             check_eq!(
                 action.get_command_name(),
                 Some(c_str!("reaperRsTest").to_owned())
@@ -548,7 +548,7 @@ fn test_action_invoked_event() -> TestStep {
         // Given
         let action = reaper
             .get_main_section()
-            .get_action_by_command_id(CommandId(1582));
+            .get_action_by_command_id(CommandId::new(1582));
         // When
         let (mock, _) = observe_invocations(|mock| {
             reaper
@@ -573,7 +573,7 @@ fn invoke_action() -> TestStep {
         // Given
         let action = reaper
             .get_main_section()
-            .get_action_by_command_id(CommandId(6));
+            .get_action_by_command_id(CommandId::new(6));
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
@@ -604,10 +604,10 @@ fn query_action() -> TestStep {
         // When
         let toggle_action = reaper
             .get_main_section()
-            .get_action_by_command_id(CommandId(6));
+            .get_action_by_command_id(CommandId::new(6));
         let normal_action = reaper
             .get_main_section()
-            .get_action_by_command_id(CommandId(41075));
+            .get_action_by_command_id(CommandId::new(41075));
         let normal_action_by_index = reaper
             .get_main_section()
             .get_action_by_index(normal_action.get_index());
@@ -619,7 +619,7 @@ fn query_action() -> TestStep {
         check!(!toggle_action.is_on());
         check!(!normal_action.is_on());
         check_eq!(toggle_action.clone(), toggle_action);
-        check_eq!(toggle_action.get_command_id(), CommandId(6));
+        check_eq!(toggle_action.get_command_id(), CommandId::new(6));
         check!(toggle_action.get_command_name().is_none());
         check_eq!(
             toggle_action.get_name(),

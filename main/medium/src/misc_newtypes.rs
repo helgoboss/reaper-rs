@@ -3,9 +3,14 @@ use derive_more::*;
 // TODO-medium 0 is used in some functions to represent "not found" and I think therefore not a
 // valid command ID
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
-pub struct CommandId(pub u32);
+pub struct CommandId(pub(crate) u32);
 
 impl CommandId {
+    pub fn new(number: u32) -> CommandId {
+        assert_ne!(number, 0, "0 is not a valid command ID");
+        CommandId(number)
+    }
+
     pub fn get(&self) -> u32 {
         self.0
     }
