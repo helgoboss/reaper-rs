@@ -225,3 +225,29 @@ impl From<ReaperVolumeValue> for f64 {
         v.0
     }
 }
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct ReaperPanValue(pub(crate) f64);
+
+impl ReaperPanValue {
+    pub const MIN: ReaperPanValue = ReaperPanValue(-1.0);
+    pub const LEFT: ReaperPanValue = ReaperPanValue::MIN;
+    pub const CENTER: ReaperPanValue = ReaperPanValue(0.0);
+    pub const RIGHT: ReaperPanValue = ReaperPanValue::MAX;
+    pub const MAX: ReaperPanValue = ReaperPanValue(1.0);
+
+    pub fn new(value: f64) -> ReaperPanValue {
+        assert!(ReaperPanValue::MIN.get() <= value && value <= ReaperPanValue::MAX.get());
+        ReaperPanValue(value)
+    }
+
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+}
+
+impl From<ReaperPanValue> for f64 {
+    fn from(v: ReaperPanValue) -> Self {
+        v.0
+    }
+}

@@ -23,9 +23,9 @@ use reaper_rs_medium::{
     get_cpp_control_surface, ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName,
     FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
     MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    ReaperNormalizedValue, ReaperPointer, ReaperVersion, ReaperVolumeValue, RecordArmState,
-    RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
+    RecordArmState, RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef,
+    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
 };
 use std::os::raw::c_void;
 use std::rc::Rc;
@@ -653,7 +653,7 @@ fn set_track_send_pan() -> TestStep {
         });
         send.set_pan(Pan::from_normalized_value(0.25));
         // Then
-        check_eq!(send.get_pan().get_reaper_value(), -0.5);
+        check_eq!(send.get_pan().get_reaper_value(), ReaperPanValue::new(-0.5));
         check_eq!(send.get_pan().get_normalized_value(), 0.25);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), send);
@@ -1259,7 +1259,7 @@ fn set_track_pan() -> TestStep {
         track.set_pan(Pan::from_normalized_value(0.25));
         // Then
         let pan = track.get_pan();
-        check_eq!(pan.get_reaper_value(), -0.5);
+        check_eq!(pan.get_reaper_value(), ReaperPanValue::new(-0.5));
         check_eq!(pan.get_normalized_value(), 0.25);
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
@@ -1274,7 +1274,7 @@ fn query_track_pan() -> TestStep {
         // When
         let pan = track.get_pan();
         // Then
-        check_eq!(pan.get_reaper_value(), 0.0);
+        check_eq!(pan.get_reaper_value(), ReaperPanValue::CENTER);
         check_eq!(pan.get_normalized_value(), 0.5);
         Ok(())
     })

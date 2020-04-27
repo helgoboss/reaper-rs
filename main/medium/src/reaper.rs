@@ -15,9 +15,9 @@ use crate::{
     HookCommand, HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
     MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPointer, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, RegistrationType,
-    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
+    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
+    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
+    RegistrationType, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
     TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
     UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
@@ -1325,7 +1325,7 @@ impl Reaper {
         }
         Ok(VolumeAndPan {
             volume: ReaperVolumeValue::new(volume.assume_init()),
-            pan: pan.assume_init(),
+            pan: ReaperPanValue::new(pan.assume_init()),
         })
     }
 
@@ -1377,25 +1377,26 @@ impl Reaper {
     pub unsafe fn csurf_set_surface_pan(
         &self,
         trackid: MediaTrack,
-        pan: f64,
+        pan: ReaperPanValue,
         ignoresurf: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfacePan(trackid.as_ptr(), pan, ignoresurf.into());
+            .CSurf_SetSurfacePan(trackid.as_ptr(), pan.get(), ignoresurf.into());
     }
 
     pub unsafe fn csurf_on_pan_change_ex(
         &self,
         trackid: MediaTrack,
-        pan: ValueChange<f64>,
+        pan: ValueChange<ReaperPanValue>,
         allow_gang: GangBehavior,
-    ) -> f64 {
-        self.low.CSurf_OnPanChangeEx(
+    ) -> ReaperPanValue {
+        let raw = self.low.CSurf_OnPanChangeEx(
             trackid.as_ptr(),
             pan.value(),
             pan.is_relative(),
             allow_gang == GangBehavior::AllowGang,
-        )
+        );
+        ReaperPanValue::new(raw)
     }
 
     pub fn count_selected_tracks_2(
@@ -1621,14 +1622,15 @@ impl Reaper {
         &self,
         trackid: MediaTrack,
         send_index: u32,
-        pan: ValueChange<f64>,
-    ) -> f64 {
-        self.low.CSurf_OnSendPanChange(
+        pan: ValueChange<ReaperPanValue>,
+    ) -> ReaperPanValue {
+        let raw = self.low.CSurf_OnSendPanChange(
             trackid.as_ptr(),
             send_index as i32,
             pan.value(),
             pan.is_relative(),
-        )
+        );
+        ReaperPanValue::new(raw)
     }
 
     // Returns None if section or command not existing (can't think of any other case)
@@ -1692,7 +1694,7 @@ impl Reaper {
         }
         Ok(VolumeAndPan {
             volume: ReaperVolumeValue::new(volume.assume_init()),
-            pan: pan.assume_init(),
+            pan: ReaperPanValue::new(pan.assume_init()),
         })
     }
 
@@ -1844,7 +1846,7 @@ pub struct TrackFxGetPresetIndexResult {
 
 pub struct VolumeAndPan {
     pub volume: ReaperVolumeValue,
-    pub pan: f64,
+    pub pan: ReaperPanValue,
 }
 
 pub enum GetLastTouchedFxResult {
