@@ -5,6 +5,7 @@ use std::ptr::null_mut;
 use crate::guid::Guid;
 use crate::{Reaper, Tempo, Track};
 use reaper_rs_low::raw;
+use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::{
     MasterTrackBehavior, ProjectRef, ReaProject, ReaperPointer, TrackDefaultsBehavior, TrackRef,
     UndoBehavior,
@@ -57,7 +58,7 @@ impl Project {
         self.complain_if_not_available();
         let media_track = Reaper::get()
             .medium
-            .get_track(Some(self.rea_project), idx)?;
+            .get_track(Proj(self.rea_project), idx)?;
         Some(Track::new(media_track, Some(self.rea_project)))
     }
 
@@ -82,7 +83,7 @@ impl Project {
         (0..self.get_track_count()).map(move |i| {
             let media_track = Reaper::get()
                 .medium
-                .get_track(Some(self.rea_project), i)
+                .get_track(Proj(self.rea_project), i)
                 .unwrap();
             Track::new(media_track, Some(self.rea_project))
         })
@@ -155,7 +156,7 @@ impl Project {
         reaper.medium.track_list_update_all_external_surfaces();
         let media_track = reaper
             .medium
-            .get_track(Some(self.rea_project), index)
+            .get_track(Proj(self.rea_project), index)
             .unwrap();
         Track::new(media_track, Some(self.rea_project))
     }

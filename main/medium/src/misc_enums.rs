@@ -2,8 +2,10 @@ use crate::{concat_c_strs, MidiDeviceId, ReaProject, ReaperStringArg};
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
+use reaper_rs_low::raw;
 use std::borrow::Cow;
 use std::ffi::CStr;
+use std::ptr::null_mut;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AddFxBehavior {
@@ -281,8 +283,19 @@ pub enum ProjectRef {
     Tab(u32),
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ProjectContext {
     CurrentProject,
     // Mmh, should we allow passing just a project by using impl Into<ProjectContext>?
     Proj(ReaProject),
+}
+
+impl From<ProjectContext> for *mut raw::ReaProject {
+    fn from(c: ProjectContext) -> Self {
+        use ProjectContext::*;
+        match c {
+            Proj(p) => p.as_ptr(),
+            CurrentProject => null_mut(),
+        }
+    }
 }

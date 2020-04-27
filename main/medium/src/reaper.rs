@@ -12,11 +12,11 @@ use crate::{
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxShowFlag, GangBehavior,
     GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiOutput, ProjectRef, ReaProject, ReaperControlSurface, ReaperPointer, ReaperStringArg,
-    ReaperVersion, RecordArmState, RecordingInput, RegistrationType, StuffMidiMessageTarget,
-    ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
-    UndoBehavior, UndoFlag, ValueChange,
+    MidiOutput, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface, ReaperPointer,
+    ReaperStringArg, ReaperVersion, RecordArmState, RecordingInput, RegistrationType,
+    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    TransferBehavior, UndoBehavior, UndoFlag, ValueChange,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -130,24 +130,22 @@ impl Reaper {
     ///
     /// ```no_run
     /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
-    /// use reaper_rs_medium::ProjectRef::Tab;
+    /// use reaper_rs_medium::ProjectContext::CurrentProject;
     ///
-    /// let result = reaper.get_track(None, 3).ok_or("No such track")?;
+    /// let track = reaper.get_track(CurrentProject, 3).ok_or("No such track")?;
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    pub fn get_track(&self, proj: Option<ReaProject>, trackidx: u32) -> Option<MediaTrack> {
-        self.require_valid_project(proj);
+    pub fn get_track(&self, proj: ProjectContext, trackidx: u32) -> Option<MediaTrack> {
+        self.require_valid_project_2(proj);
         unsafe { self.get_track_unchecked(proj, trackidx) }
     }
 
     pub unsafe fn get_track_unchecked(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         trackidx: u32,
     ) -> Option<MediaTrack> {
-        let ptr = self
-            .low
-            .GetTrack(option_non_null_into(proj), trackidx as i32);
+        let ptr = self.low.GetTrack(proj.into(), trackidx as i32);
         NonNull::new(ptr)
     }
 
@@ -1729,6 +1727,15 @@ impl Reaper {
 
     fn require_valid_project(&self, proj: Option<ReaProject>) {
         if let Some(p) = proj {
+            assert!(
+                self.validate_ptr_2(None, p),
+                "ReaProject doesn't exist anymore"
+            )
+        }
+    }
+
+    fn require_valid_project_2(&self, proj: ProjectContext) {
+        if let ProjectContext::Proj(p) = proj {
             assert!(
                 self.validate_ptr_2(None, p),
                 "ReaProject doesn't exist anymore"
