@@ -9,18 +9,19 @@ use reaper_rs_low::{firewall, raw};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
-    ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint, CommandId,
-    ControlSurface, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
-    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GangBehavior, GlobalAutomationOverride,
-    HookCommand, HookPostCommand, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
-    MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
-    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
-    RegistrationType, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
-    UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint,
+    CommandId, ControlSurface, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
+    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GangBehavior,
+    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
+    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
+    ProjectContext, ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue,
+    ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    RecordArmState, RecordingInput, RegistrationType, SectionContext, SectionId, SendTarget,
+    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -359,21 +360,15 @@ impl Reaper {
     //
     // Unsfe because consumer must ensure proper lifetime of given reference.
     // TODO-low Add factory functions for gaccel_register_t
-    pub unsafe fn plugin_register_add_gaccel(&self, gaccel: &gaccel_register_t) -> Result<(), ()> {
+    pub unsafe fn plugin_register_add_gaccel(&self, gaccel: GaccelRegister) -> Result<(), ()> {
         let result =
-            self.plugin_register_add(RegistrationType::GAccel, gaccel as *const _ as *mut c_void);
+            self.plugin_register_add(RegistrationType::Gaccel, gaccel.as_ptr() as *mut c_void);
         ok_if_one(result)
     }
 
-    // TODO-medium Not sure if we should use NonNull instead or another mechanism that a) emphasizes
-    //  that the address is relevant here, not the value and b) that the address must be stable.
-    //  Same goes for similar functions and audio hook stuff.
-    pub fn plugin_register_remove_gaccel(&self, gaccel: &gaccel_register_t) {
+    pub fn plugin_register_remove_gaccel(&self, gaccel: GaccelRegister) {
         unsafe {
-            self.plugin_register_remove(
-                RegistrationType::GAccel,
-                gaccel as *const _ as *mut c_void,
-            );
+            self.plugin_register_remove(RegistrationType::Gaccel, gaccel.as_ptr() as *mut c_void);
         }
     }
 
@@ -382,14 +377,14 @@ impl Reaper {
         csurf_inst: ReaperControlSurface,
     ) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register_add(RegistrationType::CSurfInst, csurf_inst.as_ptr() as *mut _)
+            self.plugin_register_add(RegistrationType::CsurfInst, csurf_inst.as_ptr() as *mut _)
         };
         ok_if_one(result)
     }
 
     pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
         unsafe {
-            self.plugin_register_remove(RegistrationType::CSurfInst, csurf_inst.as_ptr() as *mut _);
+            self.plugin_register_remove(RegistrationType::CsurfInst, csurf_inst.as_ptr() as *mut _);
         }
     }
 
@@ -1329,19 +1324,13 @@ impl Reaper {
     // The given audio_hook_register_t will be modified by REAPER. After registering it, it must
     // only be accessed from within OnAudioBuffer callback (passed as param).
     // Returns true on success
-    pub unsafe fn audio_reg_hardware_hook_add(
-        &self,
-        reg: &mut audio_hook_register_t,
-    ) -> Result<(), ()> {
-        let result = self.low.Audio_RegHardwareHook(true, reg as *mut _);
+    pub unsafe fn audio_reg_hardware_hook_add(&self, reg: AudioHookRegister) -> Result<(), ()> {
+        let result = self.low.Audio_RegHardwareHook(true, reg.as_ptr());
         ok_if_one(result)
     }
 
-    pub fn audio_reg_hardware_hook_remove(&self, reg: &audio_hook_register_t) {
-        unsafe {
-            self.low
-                .Audio_RegHardwareHook(false, reg as *const _ as *mut _)
-        };
+    pub fn audio_reg_hardware_hook_remove(&self, reg: AudioHookRegister) {
+        unsafe { self.low.Audio_RegHardwareHook(false, reg.as_ptr()) };
     }
 
     pub unsafe fn csurf_set_surface_volume(

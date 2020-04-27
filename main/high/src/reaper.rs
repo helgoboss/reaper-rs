@@ -37,10 +37,10 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    install_control_surface, CommandId, GetFocusedFxResult, GetLastTouchedFxResult,
-    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType,
-    MidiEvt, MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion,
-    SectionId, StuffMidiMessageTarget, ToggleAction, TrackRef,
+    install_control_surface, AudioHookRegister, CommandId, GetFocusedFxResult,
+    GetLastTouchedFxResult, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
+    MessageBoxResult, MessageBoxType, MidiEvt, MidiInputDeviceId, MidiOutputDeviceId, ProjectRef,
+    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleAction, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -234,10 +234,10 @@ pub struct Reaper {
     task_sender: Sender<ScheduledTask>,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
-    // TODO-low As soon as registered, this must not be accessed anymore. It's mutated by REAPER
-    //  and the containing function pointer is called by REAPER (in audio thread). Maybe there's a
-    //  better way to model that?
-    audio_hook: UnsafeCell<audio_hook_register_t>,
+    // As soon as registered, this must not be accessed anymore. It's mutated by REAPER
+    // and the containing function pointer is called by REAPER (in audio thread). Maybe there's a
+    // better way to model that?
+    audio_hook: audio_hook_register_t,
 }
 
 pub(super) struct EventStreamSubjects {
@@ -369,14 +369,14 @@ impl Reaper {
             task_sender: task_sender.clone(),
             main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
-            audio_hook: UnsafeCell::new(audio_hook_register_t {
+            audio_hook: audio_hook_register_t {
                 OnAudioBuffer: Some(process_audio_buffer),
                 userdata1: null_mut(),
                 userdata2: null_mut(),
                 input_nch: 0,
                 output_nch: 0,
                 GetBuffer: None,
-            }),
+            },
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -404,14 +404,14 @@ impl Reaper {
         self.medium.register_control_surface();
         unsafe {
             self.medium
-                .audio_reg_hardware_hook_add(&mut *self.audio_hook.get());
+                .audio_reg_hardware_hook_add((&self.audio_hook).into());
         }
     }
 
     // TODO-low Must be idempotent
     pub fn deactivate(&self) {
         self.medium
-            .audio_reg_hardware_hook_remove(unsafe { &*self.audio_hook.get() });
+            .audio_reg_hardware_hook_remove((&self.audio_hook).into());
         self.medium.unregister_control_surface();
         self.medium
             .plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
@@ -503,7 +503,7 @@ impl Reaper {
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             let command = p.insert(command);
             let acc = &command.accelerator_register;
-            unsafe { self.medium.plugin_register_add_gaccel(acc) };
+            unsafe { self.medium.plugin_register_add_gaccel(acc.into()) };
         }
     }
 
@@ -515,7 +515,7 @@ impl Reaper {
         let mut command_by_id = self.command_by_id.borrow_mut();
         if let Some(command) = command_by_id.get_mut(&command_id) {
             let acc = &command.accelerator_register;
-            self.medium.plugin_register_remove_gaccel(acc);
+            self.medium.plugin_register_remove_gaccel(acc.into());
             command_by_id.remove(&command_id);
         }
     }

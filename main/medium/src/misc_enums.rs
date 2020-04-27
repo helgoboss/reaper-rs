@@ -226,8 +226,8 @@ pub enum RegistrationType<'a> {
     ActionHelp,
     CommandId,
     CommandIdLookup,
-    GAccel,
-    CSurfInst,
+    Gaccel,
+    CsurfInst,
     Custom(Cow<'a, CStr>),
 }
 
@@ -249,8 +249,8 @@ impl<'a> From<RegistrationType<'a>> for Cow<'a, CStr> {
     fn from(value: RegistrationType<'a>) -> Self {
         use RegistrationType::*;
         match value {
-            GAccel => c_str!("gaccel").into(),
-            CSurfInst => c_str!("csurf_inst").into(),
+            Gaccel => c_str!("gaccel").into(),
+            CsurfInst => c_str!("csurf_inst").into(),
             Api(func_name) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
             ApiDef(func_def) => concat_c_strs(c_str!("APIdef_"), func_def.as_ref()).into(),
             HookCommand => c_str!("hookcommand").into(),

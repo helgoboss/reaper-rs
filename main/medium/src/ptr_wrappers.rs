@@ -44,6 +44,8 @@ pub type Hwnd = NonNull<raw::HWND__>;
 // Rust side but on C++ side. So a pointer wrapper is the right way to go here as well. We also
 // remove the I from the name because it's not following Rust conventions.
 pub type ReaperControlSurface = NonNull<raw::IReaperControlSurface>;
+pub type GaccelRegister = NonNull<raw::gaccel_register_t>;
+pub type AudioHookRegister = NonNull<raw::audio_hook_register_t>;
 
 // This is unlike MediaTrack and Co. in that it points to a struct which is *not* opaque. Still, we
 // need it as pointer and it has the same lifetime characteristics. The difference is that we add
