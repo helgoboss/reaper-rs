@@ -6,6 +6,7 @@ use std::ptr::{null_mut, NonNull};
 
 use reaper_rs_low::{firewall, raw};
 
+use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, option_non_null_into, require_non_null, require_non_null_panic,
     ActionValueChange, AddFxBehavior, AutomationMode, ChunkCacheHint, ControlSurface,
@@ -136,7 +137,7 @@ impl Reaper {
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     pub fn get_track(&self, proj: ProjectContext, trackidx: u32) -> Option<MediaTrack> {
-        self.require_valid_project_2(proj);
+        self.require_valid_project(proj);
         unsafe { self.get_track_unchecked(proj, trackidx) }
     }
 
@@ -153,16 +154,13 @@ impl Reaper {
     /// (`proj` is ignored if pointer is itself a project).
     pub fn validate_ptr_2<'a>(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         pointer: impl Into<ReaperPointer<'a>>,
     ) -> bool {
         let pointer = pointer.into();
         unsafe {
-            self.low.ValidatePtr2(
-                option_non_null_into(proj),
-                pointer.as_void(),
-                Cow::from(pointer).as_ptr(),
-            )
+            self.low
+                .ValidatePtr2(proj.into(), pointer.as_void(), Cow::from(pointer).as_ptr())
         }
     }
 
@@ -399,7 +397,7 @@ impl Reaper {
     /// Performs an action belonging to the main action section. To perform non-native actions
     /// (ReaScripts, custom or extension plugins' actions) safely, see
     /// [`named_command_lookup`](struct.Reaper.html#method.named_command_lookup).
-    pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: Option<ReaProject>) {
+    pub fn main_on_command_ex(&self, command: u32, flag: i32, proj: ProjectContext) {
         self.require_valid_project(proj);
         unsafe { self.main_on_command_ex_unchecked(command, flag, proj) }
     }
@@ -408,10 +406,9 @@ impl Reaper {
         &self,
         command: u32,
         flag: i32,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
     ) {
-        self.low
-            .Main_OnCommandEx(command as i32, flag, option_non_null_into(proj));
+        self.low.Main_OnCommandEx(command as i32, flag, proj.into());
     }
 
     pub unsafe fn csurf_set_surface_mute(
@@ -493,7 +490,7 @@ impl Reaper {
         cmd: u32,
         value: ActionValueChange,
         hwnd: Option<Hwnd>,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
     ) -> i32 {
         use ActionValueChange::*;
         let (val, valhw, relmode) = match value {
@@ -513,7 +510,7 @@ impl Reaper {
             valhw,
             relmode,
             option_non_null_into(hwnd),
-            option_non_null_into(proj),
+            proj.into(),
         )
     }
 
@@ -532,13 +529,13 @@ impl Reaper {
     }
 
     /// Returns the number of tracks in the given project (pass `null_mut()` for current project)
-    pub fn count_tracks(&self, proj: Option<ReaProject>) -> u32 {
+    pub fn count_tracks(&self, proj: ProjectContext) -> u32 {
         self.require_valid_project(proj);
         unsafe { self.count_tracks_unchecked(proj) }
     }
 
-    pub unsafe fn count_tracks_unchecked(&self, proj: Option<ReaProject>) -> u32 {
-        self.low.CountTracks(option_non_null_into(proj)) as u32
+    pub unsafe fn count_tracks_unchecked(&self, proj: ProjectContext) -> u32 {
+        self.low.CountTracks(proj.into()) as u32
     }
 
     pub fn insert_track_at_index(&self, idx: u32, want_defaults: TrackDefaultsBehavior) {
@@ -968,18 +965,18 @@ impl Reaper {
         .into()
     }
 
-    pub fn undo_begin_block_2(&self, proj: Option<ReaProject>) {
+    pub fn undo_begin_block_2(&self, proj: ProjectContext) {
         self.require_valid_project(proj);
         unsafe { self.undo_begin_block_2_unchecked(proj) };
     }
 
-    pub unsafe fn undo_begin_block_2_unchecked(&self, proj: Option<ReaProject>) {
-        self.low.Undo_BeginBlock2(option_non_null_into(proj));
+    pub unsafe fn undo_begin_block_2_unchecked(&self, proj: ProjectContext) {
+        self.low.Undo_BeginBlock2(proj.into());
     }
 
     pub fn undo_end_block_2<'a>(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         descchange: impl Into<ReaperStringArg<'a>>,
         extraflags: Option<BitFlags<UndoFlag>>,
     ) {
@@ -990,12 +987,12 @@ impl Reaper {
 
     pub unsafe fn undo_end_block_2_unchecked<'a>(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         descchange: impl Into<ReaperStringArg<'a>>,
         extraflags: Option<BitFlags<UndoFlag>>,
     ) {
         self.low.Undo_EndBlock2(
-            option_non_null_into(proj),
+            proj.into(),
             descchange.into().as_ptr(),
             match extraflags {
                 Some(flags) => flags.bits(),
@@ -1006,7 +1003,7 @@ impl Reaper {
 
     pub fn undo_can_undo_2<R>(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         self.require_valid_project(proj);
@@ -1015,16 +1012,16 @@ impl Reaper {
 
     pub unsafe fn undo_can_undo_2_unchecked<R>(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.low.Undo_CanUndo2(option_non_null_into(proj));
+        let ptr = self.low.Undo_CanUndo2(proj.into());
         create_passing_c_str(ptr).map(f)
     }
 
     pub fn undo_can_redo_2<R>(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
         self.require_valid_project(proj);
@@ -1033,52 +1030,52 @@ impl Reaper {
 
     pub unsafe fn undo_can_redo_2_unchecked<R>(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         f: impl FnOnce(&CStr) -> R,
     ) -> Option<R> {
-        let ptr = self.low.Undo_CanRedo2(option_non_null_into(proj));
+        let ptr = self.low.Undo_CanRedo2(proj.into());
         create_passing_c_str(ptr).map(f)
     }
 
     // Returns true if there was something to be undone, false if not
-    pub fn undo_do_undo_2(&self, proj: Option<ReaProject>) -> bool {
+    pub fn undo_do_undo_2(&self, proj: ProjectContext) -> bool {
         self.require_valid_project(proj);
         unsafe { self.undo_do_undo_2_unchecked(proj) }
     }
 
-    pub unsafe fn undo_do_undo_2_unchecked(&self, proj: Option<ReaProject>) -> bool {
-        self.low.Undo_DoUndo2(option_non_null_into(proj)) != 0
+    pub unsafe fn undo_do_undo_2_unchecked(&self, proj: ProjectContext) -> bool {
+        self.low.Undo_DoUndo2(proj.into()) != 0
     }
 
     // Returns true if there was something to be redone, false if not
-    pub fn undo_do_redo_2(&self, proj: Option<ReaProject>) -> bool {
+    pub fn undo_do_redo_2(&self, proj: ProjectContext) -> bool {
         self.require_valid_project(proj);
         unsafe { self.undo_do_redo_2_unchecked(proj) }
     }
 
-    pub unsafe fn undo_do_redo_2_unchecked(&self, proj: Option<ReaProject>) -> bool {
-        self.low.Undo_DoRedo2(option_non_null_into(proj)) != 0
+    pub unsafe fn undo_do_redo_2_unchecked(&self, proj: ProjectContext) -> bool {
+        self.low.Undo_DoRedo2(proj.into()) != 0
     }
 
-    pub fn mark_project_dirty(&self, proj: Option<ReaProject>) {
+    pub fn mark_project_dirty(&self, proj: ProjectContext) {
         self.require_valid_project(proj);
         unsafe {
             self.mark_project_dirty_unchecked(proj);
         }
     }
 
-    pub unsafe fn mark_project_dirty_unchecked(&self, proj: Option<ReaProject>) {
-        self.low.MarkProjectDirty(option_non_null_into(proj));
+    pub unsafe fn mark_project_dirty_unchecked(&self, proj: ProjectContext) {
+        self.low.MarkProjectDirty(proj.into());
     }
 
     // Returns true if project dirty, false if not
-    pub fn is_project_dirty(&self, proj: Option<ReaProject>) -> bool {
+    pub fn is_project_dirty(&self, proj: ProjectContext) -> bool {
         self.require_valid_project(proj);
         unsafe { self.is_project_dirty_unchecked(proj) }
     }
 
-    pub unsafe fn is_project_dirty_unchecked(&self, proj: Option<ReaProject>) -> bool {
-        self.low.IsProjectDirty(option_non_null_into(proj)) != 0
+    pub unsafe fn is_project_dirty_unchecked(&self, proj: ProjectContext) -> bool {
+        self.low.IsProjectDirty(proj.into()) != 0
     }
 
     pub fn track_list_update_all_external_surfaces(&self) {
@@ -1158,13 +1155,13 @@ impl Reaper {
             .TrackFX_GetParamNormalized(track.as_ptr(), fx.into(), param as i32)
     }
 
-    pub fn get_master_track(&self, proj: Option<ReaProject>) -> MediaTrack {
+    pub fn get_master_track(&self, proj: ProjectContext) -> MediaTrack {
         self.require_valid_project(proj);
         unsafe { self.get_master_track_unchecked(proj) }
     }
 
-    pub unsafe fn get_master_track_unchecked(&self, proj: Option<ReaProject>) -> MediaTrack {
-        let ptr = self.low.GetMasterTrack(option_non_null_into(proj));
+    pub unsafe fn get_master_track_unchecked(&self, proj: ProjectContext) -> MediaTrack {
+        let ptr = self.low.GetMasterTrack(proj.into());
         require_non_null_panic(ptr)
     }
 
@@ -1179,7 +1176,7 @@ impl Reaper {
         self.low.Master_GetTempo()
     }
 
-    pub fn set_current_bpm(&self, proj: Option<ReaProject>, bpm: f64, want_undo: UndoBehavior) {
+    pub fn set_current_bpm(&self, proj: ProjectContext, bpm: f64, want_undo: UndoBehavior) {
         self.require_valid_project(proj);
         unsafe {
             self.set_current_bpm_unchecked(proj, bpm, want_undo);
@@ -1188,24 +1185,21 @@ impl Reaper {
 
     pub unsafe fn set_current_bpm_unchecked(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         bpm: f64,
         want_undo: UndoBehavior,
     ) {
-        self.low.SetCurrentBPM(
-            option_non_null_into(proj),
-            bpm,
-            want_undo == UndoBehavior::AddUndoPoint,
-        );
+        self.low
+            .SetCurrentBPM(proj.into(), bpm, want_undo == UndoBehavior::AddUndoPoint);
     }
 
-    pub fn master_get_play_rate(&self, project: Option<ReaProject>) -> f64 {
+    pub fn master_get_play_rate(&self, project: ProjectContext) -> f64 {
         self.require_valid_project(project);
         unsafe { self.master_get_play_rate(project) }
     }
 
-    pub unsafe fn master_get_play_rate_unchecked(&self, project: Option<ReaProject>) -> f64 {
-        self.low.Master_GetPlayRate(option_non_null_into(project))
+    pub unsafe fn master_get_play_rate_unchecked(&self, project: ProjectContext) -> f64 {
+        self.low.Master_GetPlayRate(project.into())
     }
 
     pub fn csurf_on_play_rate_change(&self, playrate: f64) {
@@ -1366,7 +1360,7 @@ impl Reaper {
 
     pub fn count_selected_tracks_2(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         wantmaster: MasterTrackBehavior,
     ) -> u32 {
         self.require_valid_project(proj);
@@ -1375,11 +1369,11 @@ impl Reaper {
 
     pub unsafe fn count_selected_tracks_2_unchecked(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         wantmaster: MasterTrackBehavior,
     ) -> u32 {
         self.low.CountSelectedTracks2(
-            option_non_null_into(proj),
+            proj.into(),
             wantmaster == MasterTrackBehavior::IncludeMasterTrack,
         ) as u32
     }
@@ -1390,7 +1384,7 @@ impl Reaper {
 
     pub fn get_selected_track_2(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         seltrackidx: u32,
         wantmaster: MasterTrackBehavior,
     ) -> Option<MediaTrack> {
@@ -1400,12 +1394,12 @@ impl Reaper {
 
     pub unsafe fn get_selected_track_2_unchecked(
         &self,
-        proj: Option<ReaProject>,
+        proj: ProjectContext,
         seltrackidx: u32,
         wantmaster: MasterTrackBehavior,
     ) -> Option<MediaTrack> {
         let ptr = self.low.GetSelectedTrack2(
-            option_non_null_into(proj),
+            proj.into(),
             seltrackidx as i32,
             wantmaster == MasterTrackBehavior::IncludeMasterTrack,
         );
@@ -1725,19 +1719,10 @@ impl Reaper {
         }
     }
 
-    fn require_valid_project(&self, proj: Option<ReaProject>) {
-        if let Some(p) = proj {
-            assert!(
-                self.validate_ptr_2(None, p),
-                "ReaProject doesn't exist anymore"
-            )
-        }
-    }
-
-    fn require_valid_project_2(&self, proj: ProjectContext) {
+    fn require_valid_project(&self, proj: ProjectContext) {
         if let ProjectContext::Proj(p) = proj {
             assert!(
-                self.validate_ptr_2(None, p),
+                self.validate_ptr_2(CurrentProject, p),
                 "ReaProject doesn't exist anymore"
             )
         }

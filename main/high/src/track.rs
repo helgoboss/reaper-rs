@@ -19,6 +19,7 @@ use reaper_rs_low::get_control_surface_instance;
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::{CSURF_EXT_SETINPUTMONITOR, GUID};
 
+use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::TrackInfoKey::{
     Mute, Name, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber,
 };
@@ -580,7 +581,7 @@ impl Track {
                 if Project::new(rea_project).is_available() {
                     Reaper::get()
                         .medium
-                        .validate_ptr_2(Some(rea_project), media_track)
+                        .validate_ptr_2(Proj(rea_project), media_track)
                 } else {
                     false
                 }
@@ -648,7 +649,7 @@ impl Track {
         let current_project = reaper.get_current_project();
         let is_valid_in_current_project = reaper
             .medium
-            .validate_ptr_2(Some(current_project.get_raw()), media_track);
+            .validate_ptr_2(Proj(current_project.get_raw()), media_track);
         if is_valid_in_current_project {
             return Some(current_project.get_raw());
         }
@@ -657,7 +658,7 @@ impl Track {
             .get_projects()
             // We already know it's invalid in current project
             .filter(|p| p != &current_project)
-            .find(|p| reaper.medium.validate_ptr_2(Some(p.get_raw()), media_track));
+            .find(|p| reaper.medium.validate_ptr_2(Proj(p.get_raw()), media_track));
         other_project.map(|p| p.get_raw())
     }
 

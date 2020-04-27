@@ -18,6 +18,7 @@ use super::mock::observe_invocations;
 use crate::api::VersionRestriction::{AllVersions, Min};
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
+use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
     ActionValueChange, AutomationMode, EnvChunkName, FxAddByNameBehavior, FxShowFlag, GangBehavior,
     GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior, MessageBoxResult,
@@ -556,7 +557,7 @@ fn test_action_invoked_event() -> TestStep {
         });
         reaper
             .medium
-            .main_on_command_ex(action.get_command_id(), 0, None);
+            .main_on_command_ex(action.get_command_id(), 0, CurrentProject);
         // Then
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(*mock.get_last_arg(), action);

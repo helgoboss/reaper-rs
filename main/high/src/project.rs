@@ -5,7 +5,7 @@ use std::ptr::null_mut;
 use crate::guid::Guid;
 use crate::{Reaper, Tempo, Track};
 use reaper_rs_low::raw;
-use reaper_rs_medium::ProjectContext::Proj;
+use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_rs_medium::{
     MasterTrackBehavior, ProjectRef, ReaProject, ReaperPointer, TrackDefaultsBehavior, TrackRef,
     UndoBehavior,
@@ -90,20 +90,22 @@ impl Project {
     }
 
     pub fn is_available(&self) -> bool {
-        Reaper::get().medium.validate_ptr_2(None, self.rea_project)
+        Reaper::get()
+            .medium
+            .validate_ptr_2(CurrentProject, self.rea_project)
     }
 
     pub fn get_selected_track_count(&self, want_master: MasterTrackBehavior) -> u32 {
         Reaper::get()
             .medium
-            .count_selected_tracks_2(Some(self.rea_project), want_master) as u32
+            .count_selected_tracks_2(Proj(self.rea_project), want_master) as u32
     }
 
     pub fn get_first_selected_track(&self, want_master: MasterTrackBehavior) -> Option<Track> {
         let media_track =
             Reaper::get()
                 .medium
-                .get_selected_track_2(Some(self.rea_project), 0, want_master)?;
+                .get_selected_track_2(Proj(self.rea_project), 0, want_master)?;
         Some(Track::new(media_track, Some(self.rea_project)))
     }
 
@@ -122,7 +124,7 @@ impl Project {
         (0..self.get_selected_track_count(want_master)).map(move |i| {
             let media_track = Reaper::get()
                 .medium
-                .get_selected_track_2(Some(self.rea_project), i, want_master)
+                .get_selected_track_2(Proj(self.rea_project), i, want_master)
                 .unwrap();
             Track::new(media_track, Some(self.rea_project))
         })
@@ -130,7 +132,7 @@ impl Project {
 
     pub fn get_track_count(&self) -> u32 {
         self.complain_if_not_available();
-        Reaper::get().medium.count_tracks(Some(self.rea_project)) as u32
+        Reaper::get().medium.count_tracks(Proj(self.rea_project)) as u32
     }
 
     // TODO-low Introduce variant that doesn't notify ControlSurface
@@ -165,7 +167,7 @@ impl Project {
         self.complain_if_not_available();
         let mt = Reaper::get()
             .medium
-            .get_master_track(Some(self.rea_project));
+            .get_master_track(Proj(self.rea_project));
         Track::new(mt, Some(self.rea_project))
     }
 
@@ -184,37 +186,37 @@ impl Project {
 
     pub fn undo(&self) -> bool {
         self.complain_if_not_available();
-        Reaper::get().medium.undo_do_undo_2(Some(self.rea_project))
+        Reaper::get().medium.undo_do_undo_2(Proj(self.rea_project))
     }
 
     pub fn redo(&self) -> bool {
-        Reaper::get().medium.undo_do_redo_2(Some(self.rea_project))
+        Reaper::get().medium.undo_do_redo_2(Proj(self.rea_project))
     }
 
     pub fn mark_as_dirty(&self) {
         Reaper::get()
             .medium
-            .mark_project_dirty(Some(self.rea_project));
+            .mark_project_dirty(Proj(self.rea_project));
     }
 
     pub fn is_dirty(&self) -> bool {
         Reaper::get()
             .medium
-            .is_project_dirty(Some(self.rea_project))
+            .is_project_dirty(Proj(self.rea_project))
     }
 
     pub fn get_label_of_last_undoable_action(&self) -> Option<CString> {
         self.complain_if_not_available();
         Reaper::get()
             .medium
-            .undo_can_undo_2(Some(self.rea_project), |s| s.into())
+            .undo_can_undo_2(Proj(self.rea_project), |s| s.into())
     }
 
     pub fn get_label_of_last_redoable_action(&self) -> Option<CString> {
         self.complain_if_not_available();
         Reaper::get()
             .medium
-            .undo_can_redo_2(Some(self.rea_project), |s| s.into())
+            .undo_can_redo_2(Proj(self.rea_project), |s| s.into())
     }
 
     pub fn get_tempo(&self) -> Tempo {
@@ -227,7 +229,7 @@ impl Project {
         self.complain_if_not_available();
         Reaper::get()
             .medium
-            .set_current_bpm(Some(self.rea_project), tempo.get_bpm(), undo_hint);
+            .set_current_bpm(Proj(self.rea_project), tempo.get_bpm(), undo_hint);
     }
 
     fn complain_if_not_available(&self) {

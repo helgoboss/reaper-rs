@@ -34,6 +34,7 @@ use reaper_rs_low::raw;
 use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, ACCEL};
 use reaper_rs_low::{firewall, ReaperPluginContext};
 use reaper_rs_medium;
+use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::{
     install_control_surface, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
     HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType, MidiEvt, ProjectRef,
@@ -859,7 +860,7 @@ impl Reaper {
             return None;
         }
         self.undo_block_is_active.replace(true);
-        self.medium.undo_begin_block_2(Some(project.get_raw()));
+        self.medium.undo_begin_block_2(Proj(project.get_raw()));
         Some(UndoBlock::new(project, label))
     }
 
@@ -869,7 +870,7 @@ impl Reaper {
             return;
         }
         self.medium
-            .undo_end_block_2(Some(project.get_raw()), label, None);
+            .undo_end_block_2(Proj(project.get_raw()), label, None);
         self.undo_block_is_active.replace(false);
     }
 }

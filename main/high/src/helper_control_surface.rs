@@ -19,6 +19,7 @@ use rxrust::prelude::*;
 
 use std::cell::{Cell, RefCell, RefMut};
 
+use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 use std::os::raw::c_void;
@@ -160,7 +161,10 @@ impl HelperControlSurface {
 
     fn remove_invalid_rea_projects(&self) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
-            if Reaper::get().medium.validate_ptr_2(None, *rea_project) {
+            if Reaper::get()
+                .medium
+                .validate_ptr_2(CurrentProject, *rea_project)
+            {
                 true
             } else {
                 Reaper::get()
@@ -363,7 +367,7 @@ impl HelperControlSurface {
             let reaper = Reaper::get();
             if reaper
                 .medium
-                .validate_ptr_2(Some(project.get_raw()), *media_track)
+                .validate_ptr_2(Proj(project.get_raw()), *media_track)
             {
                 true
             } else {
@@ -387,7 +391,7 @@ impl HelperControlSurface {
         for (media_track, track_data) in track_datas.iter_mut() {
             if !reaper
                 .medium
-                .validate_ptr_2(Some(project.get_raw()), *media_track)
+                .validate_ptr_2(Proj(project.get_raw()), *media_track)
             {
                 continue;
             }
