@@ -72,6 +72,17 @@ impl Reaper {
     ///
     /// With `projfn_out_optional_sz` you can tell REAPER how many characters of the file name you
     /// want. If you are not interested in the file name at all, pass 0.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// use reaper_rs_medium::ProjectRef::Tab;
+    ///
+    /// let result = reaper.enum_projects(Tab(4), 256).ok_or("No such tab")?;
+    /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     pub fn enum_projects(
         &self,
         proj_ref: ProjectRef,
@@ -114,6 +125,16 @@ impl Reaper {
 
     /// Returns the track at the given index. Set `proj` to `null_mut()` in order to look for tracks
     /// in the current project.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// use reaper_rs_medium::ProjectRef::Tab;
+    ///
+    /// let result = reaper.get_track(None, 3).ok_or("No such track")?;
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     pub fn get_track(&self, proj: Option<ReaProject>, trackidx: u32) -> Option<MediaTrack> {
         self.require_valid_project(proj);
         unsafe { self.get_track_unchecked(proj, trackidx) }

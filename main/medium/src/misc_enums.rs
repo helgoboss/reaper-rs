@@ -1,4 +1,4 @@
-use crate::{concat_c_strs, MidiDeviceId, ReaperStringArg};
+use crate::{concat_c_strs, MidiDeviceId, ReaProject, ReaperStringArg};
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
@@ -279,4 +279,10 @@ pub enum ProjectRef {
     Current,
     CurrentlyRendering,
     Tab(u32),
+}
+
+pub enum ProjectContext {
+    CurrentProject,
+    // Mmh, should we allow passing just a project by using impl Into<ProjectContext>?
+    Proj(ReaProject),
 }
