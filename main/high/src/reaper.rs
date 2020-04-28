@@ -37,11 +37,11 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    install_control_surface, Accelerator, AudioHookRegisterHandle, CommandId, GaccelRegister,
-    GaccelRegisterHandle, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
-    HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType, MidiEvt,
-    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
-    StuffMidiMessageTarget, ToggleAction, TrackRef,
+    install_control_surface, AudioHookRegister, CommandId, GaccelRegister, GetFocusedFxResult,
+    GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
+    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumToggleAction,
+    MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId, MidiOutputDeviceId, ProjectRef,
+    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -53,7 +53,7 @@ static INIT_REAPER_INSTANCE: Once = Once::new();
 // Only for main section
 struct HighLevelHookCommand {}
 
-impl HookCommand for HighLevelHookCommand {
+impl MediumHookCommand for HighLevelHookCommand {
     fn call(command_id: CommandId, _flag: i32) -> bool {
         // TODO-low Pass on flag
         let operation = match Reaper::get().command_by_id.borrow().get(&command_id) {
@@ -69,7 +69,7 @@ impl HookCommand for HighLevelHookCommand {
 // Only for main section
 struct HighLevelHookPostCommand {}
 
-impl HookPostCommand for HighLevelHookPostCommand {
+impl MediumHookPostCommand for HighLevelHookPostCommand {
     fn call(command_id: CommandId, _flag: i32) {
         let reaper = Reaper::get();
         let action = reaper
@@ -87,7 +87,7 @@ impl HookPostCommand for HighLevelHookPostCommand {
 // Only for main section
 struct HighLevelToggleAction {}
 
-impl ToggleAction for HighLevelToggleAction {
+impl MediumToggleAction for HighLevelToggleAction {
     fn call(command_id: CommandId) -> i32 {
         if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
             match &command.kind {
@@ -150,12 +150,12 @@ extern "C" fn process_audio_buffer(
                         // Probably not an issue because it's not
                         // big and  cheap to copy. Look into this
                         // and see if the unsafe code is worth it.
-                        let fake_static_evt: MidiEvt<'static> = {
+                        let fake_static_evt: MidiEvent<'static> = {
                             let raw_evt: &raw::MIDI_event_t = evt.into();
                             let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
                             unsafe {
                                 let erased_raw_evt = &*raw_evt_ptr;
-                                MidiEvt::new(erased_raw_evt)
+                                MidiEvent::new(erased_raw_evt)
                             }
                         };
                         subject.next(fake_static_evt);
@@ -283,7 +283,7 @@ pub(super) struct EventStreamSubjects {
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Payload<Rc<Action>>>,
-    pub(super) midi_message_received: EventStreamSubject<MidiEvt<'static>>,
+    pub(super) midi_message_received: EventStreamSubject<MidiEvent<'static>>,
 }
 
 #[derive(Clone)]
@@ -504,15 +504,15 @@ impl Reaper {
         }
         let address = self
             .medium_mut()
-            .plugin_register_add_gaccel(GaccelRegister::new(
-                Accelerator::new(0, 0, command_id),
+            .plugin_register_add_gaccel(MediumGaccelRegister::new(
+                MediumAccelerator::new(0, 0, command_id),
                 description.into(),
             ))
             .unwrap();
         RegisteredAction::new(command_id, address)
     }
 
-    fn unregister_command(&self, command_id: CommandId, gaccel_handle: GaccelRegisterHandle) {
+    fn unregister_command(&self, command_id: CommandId, gaccel_handle: GaccelRegister) {
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
@@ -664,7 +664,7 @@ impl Reaper {
 
     pub fn midi_message_received(
         &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = MidiEvt<'static>> {
+    ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<'static>> {
         self.subjects.midi_message_received.borrow().clone()
     }
 
@@ -929,11 +929,11 @@ pub struct RegisteredAction {
     // For identifying the registered command (= the functions to be executed)
     command_id: CommandId,
     // For identifying the registered action (= description, related keyboard shortcuts etc.)
-    gaccel_handle: GaccelRegisterHandle,
+    gaccel_handle: GaccelRegister,
 }
 
 impl RegisteredAction {
-    fn new(command_id: CommandId, gaccel_handle: GaccelRegisterHandle) -> RegisteredAction {
+    fn new(command_id: CommandId, gaccel_handle: GaccelRegister) -> RegisteredAction {
         RegisteredAction {
             command_id,
             gaccel_handle,

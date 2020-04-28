@@ -10,7 +10,7 @@ use reaper_rs_medium::{
     AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
-    MediaTrack, QualifiedFxRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue,
+    MediaTrack, MediumReaperControlSurface, QualifiedFxRef, ReaProject, ReaperNormalizedValue,
     ReaperPointer, ReaperVersion, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
     SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
     TrackFxChainType, TrackRef, VersionDependentFxRef, VersionDependentTrackFxRef,
@@ -527,7 +527,7 @@ impl HelperControlSurface {
     }
 }
 
-impl ReaperControlSurface for HelperControlSurface {
+impl MediumReaperControlSurface for HelperControlSurface {
     fn run(&mut self) {
         // Invoke custom idle code
         Reaper::get()

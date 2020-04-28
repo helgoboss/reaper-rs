@@ -1,6 +1,6 @@
 use crate::{
-    concat_c_strs, GaccelRegisterHandle, Hwnd, KbdSectionInfoHandle, MediaTrack,
-    MidiOutputDeviceId, ReaProject, ReaperControlSurfaceHandle, ReaperStringArg,
+    concat_c_strs, GaccelRegister, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
+    ReaProject, ReaperControlSurface, ReaperStringArg,
 };
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
@@ -228,8 +228,8 @@ pub enum PluginRegistration<'a> {
     ActionHelp(*mut c_void),
     CommandId(Cow<'a, CStr>),
     CommandIdLookup(*mut c_void),
-    Gaccel(GaccelRegisterHandle),
-    CsurfInst(ReaperControlSurfaceHandle),
+    Gaccel(GaccelRegister),
+    CsurfInst(ReaperControlSurface),
     Custom(Cow<'a, CStr>, *mut c_void),
 }
 
@@ -356,7 +356,7 @@ impl From<ProjectContext> for *mut raw::ReaProject {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum NotificationBehavior {
     NotifyAll,
-    NotifyAllExcept(ReaperControlSurfaceHandle),
+    NotifyAllExcept(ReaperControlSurface),
 }
 
 impl From<NotificationBehavior> for *mut raw::IReaperControlSurface {
@@ -389,7 +389,7 @@ impl From<SendTarget> for *mut raw::MediaTrack {
 pub enum SectionContext<'a> {
     MainSection,
     // We need a reference because KbdSectionInfo can't be copied/cloned.
-    Sec(&'a KbdSectionInfoHandle),
+    Sec(&'a KbdSectionInfo),
 }
 
 impl<'a> From<SectionContext<'a>> for *mut raw::KbdSectionInfo {

@@ -10,19 +10,20 @@ use crate::infostruct_keeper::InfostructKeeper;
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
-    ActionValueChange, AddFxBehavior, AudioHookRegisterHandle, AutomationMode, Bpm, ChunkCacheHint,
+    ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint,
     CommandId, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
-    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GaccelRegisterHandle,
-    GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
-    InputMonitoringMode, KbdSectionInfoHandle, MasterTrackBehavior, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
-    NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperControlSurfaceHandle, ReaperNormalizedValue,
-    ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
-    RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
-    ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
-    UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GangBehavior,
+    GlobalAutomationOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
+    MediaTrack, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
+    MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
+    PluginRegistration, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
+    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
+    StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef,
+    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -46,7 +47,7 @@ use std::path::PathBuf;
 pub struct Reaper {
     /// Returns the low-level REAPER instance
     low: reaper_rs_low::Reaper,
-    gaccels: InfostructKeeper<GaccelRegister, gaccel_register_t>,
+    gaccels: InfostructKeeper<MediumGaccelRegister, gaccel_register_t>,
 }
 
 const ZERO_GUID: GUID = GUID {
@@ -276,7 +277,7 @@ impl Reaper {
             .plugin_register(name_with_minus.as_ptr(), infostruct)
     }
 
-    pub fn plugin_register_add_hookcommand<T: HookCommand>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(PluginRegistration::HookCommand(
                 delegating_hook_command::<T>,
@@ -285,7 +286,7 @@ impl Reaper {
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_hookcommand<T: HookCommand>(&self) {
+    pub fn plugin_register_remove_hookcommand<T: MediumHookCommand>(&self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::HookCommand(
                 delegating_hook_command::<T>,
@@ -293,7 +294,7 @@ impl Reaper {
         }
     }
 
-    pub fn plugin_register_add_toggleaction<T: ToggleAction>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_toggleaction<T: MediumToggleAction>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(PluginRegistration::ToggleAction(
                 delegating_toggle_action::<T>,
@@ -302,7 +303,7 @@ impl Reaper {
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_toggleaction<T: ToggleAction>(&self) {
+    pub fn plugin_register_remove_toggleaction<T: MediumToggleAction>(&self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::ToggleAction(
                 delegating_toggle_action::<T>,
@@ -310,7 +311,7 @@ impl Reaper {
         }
     }
 
-    pub fn plugin_register_add_hookpostcommand<T: HookPostCommand>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(PluginRegistration::HookPostCommand(
                 delegating_hook_post_command::<T>,
@@ -319,7 +320,7 @@ impl Reaper {
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_hookpostcommand<T: HookPostCommand>(&self) {
+    pub fn plugin_register_remove_hookpostcommand<T: MediumHookPostCommand>(&self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::HookPostCommand(
                 delegating_hook_post_command::<T>,
@@ -367,8 +368,8 @@ impl Reaper {
     // REAPER. This is why we can make this function save! No lifetime worries anymore.
     pub fn plugin_register_add_gaccel(
         &mut self,
-        gaccel: GaccelRegister,
-    ) -> Result<GaccelRegisterHandle, ()> {
+        gaccel: MediumGaccelRegister,
+    ) -> Result<GaccelRegister, ()> {
         let handle = self.gaccels.keep(gaccel);
         let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle)) };
         if result != 1 {
@@ -379,8 +380,8 @@ impl Reaper {
 
     pub fn plugin_register_remove_gaccel(
         &mut self,
-        handle: GaccelRegisterHandle,
-    ) -> Result<GaccelRegister, ()> {
+        handle: GaccelRegister,
+    ) -> Result<MediumGaccelRegister, ()> {
         let original = match self.gaccels.release(handle) {
             None => return Err(()),
             Some(o) => o,
@@ -391,13 +392,13 @@ impl Reaper {
 
     pub unsafe fn plugin_register_add_csurf_inst(
         &self,
-        csurf_inst: ReaperControlSurfaceHandle,
+        csurf_inst: ReaperControlSurface,
     ) -> Result<(), ()> {
         let result = unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(csurf_inst)) };
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurfaceHandle) {
+    pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::CsurfInst(csurf_inst));
         }
@@ -479,13 +480,13 @@ impl Reaper {
     pub fn section_from_unique_id<R>(
         &self,
         unique_id: SectionId,
-        f: impl FnOnce(&KbdSectionInfoHandle) -> R,
+        f: impl FnOnce(&KbdSectionInfo) -> R,
     ) -> Option<R> {
         let ptr = self.low().SectionFromUniqueID(unique_id.into());
         if ptr.is_null() {
             return None;
         }
-        NonNull::new(ptr).map(|nnp| f(&KbdSectionInfoHandle(nnp)))
+        NonNull::new(ptr).map(|nnp| f(&KbdSectionInfo(nnp)))
     }
 
     // The closure-taking function might be too restrictive in some cases, e.g. it wouldn't let us
@@ -496,9 +497,9 @@ impl Reaper {
     pub unsafe fn section_from_unique_id_unchecked(
         &self,
         unique_id: SectionId,
-    ) -> Option<KbdSectionInfoHandle> {
+    ) -> Option<KbdSectionInfo> {
         let ptr = self.low().SectionFromUniqueID(unique_id.into());
-        NonNull::new(ptr).map(KbdSectionInfoHandle)
+        NonNull::new(ptr).map(KbdSectionInfo)
     }
 
     // Kept return value type i32 because I have no idea what the return value is about.
@@ -1345,15 +1346,12 @@ impl Reaper {
     // The given audio_hook_register_t will be modified by REAPER. After registering it, it must
     // only be accessed from within OnAudioBuffer callback (passed as param).
     // Returns true on success
-    pub unsafe fn audio_reg_hardware_hook_add(
-        &self,
-        reg: AudioHookRegisterHandle,
-    ) -> Result<(), ()> {
+    pub unsafe fn audio_reg_hardware_hook_add(&self, reg: AudioHookRegister) -> Result<(), ()> {
         let result = self.low().Audio_RegHardwareHook(true, reg.as_ptr());
         ok_if_one(result)
     }
 
-    pub fn audio_reg_hardware_hook_remove(&self, reg: AudioHookRegisterHandle) {
+    pub fn audio_reg_hardware_hook_remove(&self, reg: AudioHookRegister) {
         unsafe { self.low().Audio_RegHardwareHook(false, reg.as_ptr()) };
     }
 
@@ -1802,15 +1800,15 @@ impl Reaper {
     }
 }
 
-extern "C" fn delegating_hook_command<T: HookCommand>(command_id: i32, flag: i32) -> bool {
+extern "C" fn delegating_hook_command<T: MediumHookCommand>(command_id: i32, flag: i32) -> bool {
     firewall(|| T::call(CommandId(command_id as u32), flag)).unwrap_or(false)
 }
 
-extern "C" fn delegating_toggle_action<T: ToggleAction>(command_id: i32) -> i32 {
+extern "C" fn delegating_toggle_action<T: MediumToggleAction>(command_id: i32) -> i32 {
     firewall(|| T::call(CommandId(command_id as u32))).unwrap_or(-1)
 }
 
-extern "C" fn delegating_hook_post_command<T: HookPostCommand>(command_id: i32, flag: i32) {
+extern "C" fn delegating_hook_post_command<T: MediumHookPostCommand>(command_id: i32, flag: i32) {
     firewall(|| {
         T::call(CommandId(command_id as u32), flag);
     });

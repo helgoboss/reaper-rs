@@ -60,9 +60,9 @@ pub type Hwnd = NonNull<raw::HWND__>;
 //
 // TODO-medium Make newtypes already because we might expose internals in better way in future
 // ALternative name: GaccelReg
-pub type GaccelRegisterHandle = NonNull<raw::gaccel_register_t>;
+pub type GaccelRegister = NonNull<raw::gaccel_register_t>;
 // ALternative name: AudioHookReg
-pub type AudioHookRegisterHandle = NonNull<raw::audio_hook_register_t>;
+pub type AudioHookRegister = NonNull<raw::audio_hook_register_t>;
 // This is unlike MediaTrack and Co. in that it points to a struct which is *not* opaque. Still, we
 // need it as pointer and it has the same lifetime characteristics. The difference is that we add
 // type-safe methods to it to lift the possibilities in the struct to medium-level API style. This
@@ -82,13 +82,13 @@ pub type AudioHookRegisterHandle = NonNull<raw::audio_hook_register_t>;
 // unsafe usage). Having a reference wrapper prevents this totally, that's not good.
 // ALternative name: KbdSecInf
 #[derive(Debug, Eq, Hash, PartialEq, Into)]
-pub struct KbdSectionInfoHandle(pub(crate) NonNull<raw::KbdSectionInfo>);
-impl KbdSectionInfoHandle {
+pub struct KbdSectionInfo(pub(crate) NonNull<raw::KbdSectionInfo>);
+impl KbdSectionInfo {
     pub fn action_list_cnt(&self) -> u32 {
         unsafe { self.0.as_ref() }.action_list_cnt as u32
     }
 
-    pub fn get_action_by_index(&self, index: u32) -> Option<KbdCmdHandle<'_>> {
+    pub fn get_action_by_index(&self, index: u32) -> Option<KbdCmd<'_>> {
         let array = unsafe {
             std::slice::from_raw_parts(
                 self.0.as_ref().action_list,
@@ -96,12 +96,12 @@ impl KbdSectionInfoHandle {
             )
         };
         let raw_kbd_cmd = array.get(index as usize)?;
-        Some(KbdCmdHandle(raw_kbd_cmd))
+        Some(KbdCmd(raw_kbd_cmd))
     }
 }
 // ALternative name: ???
-pub struct KbdCmdHandle<'a>(pub(crate) &'a raw::KbdCmd);
-impl<'a> KbdCmdHandle<'a> {
+pub struct KbdCmd<'a>(pub(crate) &'a raw::KbdCmd);
+impl<'a> KbdCmd<'a> {
     pub fn cmd(&self) -> CommandId {
         CommandId(self.0.cmd)
     }
@@ -115,7 +115,7 @@ impl<'a> KbdCmdHandle<'a> {
 //
 // TODO-medium Make newtypes already because we might expose vtable in future
 // ALternative name: PcmSrc
-pub type PcmSourceHandle = NonNull<raw::PCM_source>;
+pub type PcmSource = NonNull<raw::PCM_source>;
 
 // # Internals exposed: no | vtable: yes (Rust <= REAPER)
 //
@@ -124,4 +124,4 @@ pub type PcmSourceHandle = NonNull<raw::PCM_source>;
 // remove the I from the name because it's not following Rust conventions.
 // TODO-medium Make newtypes already because we might expose vtable in future
 // ALternative name: ReaperControlSurf
-pub type ReaperControlSurfaceHandle = NonNull<raw::IReaperControlSurface>;
+pub type ReaperControlSurface = NonNull<raw::IReaperControlSurface>;

@@ -1,11 +1,11 @@
-use super::{DelegatingControlSurface, ReaperControlSurface};
+use super::{DelegatingControlSurface, MediumReaperControlSurface};
 use crate::ReaperVersion;
 use std::ffi::{CStr, CString};
 
 /// The medium-level variant of
 /// [`reaper_rs_low::install_control_surface`](../../low_level/fn.install_control_surface.html).
 pub fn install_control_surface(
-    control_surface: impl ReaperControlSurface + 'static,
+    control_surface: impl MediumReaperControlSurface + 'static,
     reaper_version: &ReaperVersion,
 ) {
     let delegating_control_surface = DelegatingControlSurface::new(control_surface, reaper_version);

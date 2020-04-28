@@ -31,36 +31,36 @@ impl MidiInput {
     // because most functions can only be called from UI thread.
     // TODO-low In theory we could prevent undefined behavior by always checking the thread at
     //  first.
-    pub fn get_read_buf(&self) -> MidiEvtList<'_> {
+    pub fn get_read_buf(&self) -> MidiEventList<'_> {
         let raw_evt_list = unsafe { self.0.as_ref() }.GetReadBuf();
-        MidiEvtList::new(unsafe { &*raw_evt_list })
+        MidiEventList::new(unsafe { &*raw_evt_list })
     }
 }
 
 // # Internals exposed: no | vtable: yes (Rust => REAPER)
 // ALternative name: MidiEvtList
-pub struct MidiEvtList<'a>(&'a raw::MIDI_eventlist);
+pub struct MidiEventList<'a>(&'a raw::MIDI_eventlist);
 
-impl<'a> MidiEvtList<'a> {
+impl<'a> MidiEventList<'a> {
     pub(super) fn new(raw_evt_list: &'a raw::MIDI_eventlist) -> Self {
-        MidiEvtList(raw_evt_list)
+        MidiEventList(raw_evt_list)
     }
 
-    pub fn enum_items(&self, bpos: u32) -> MidiEvtListIterator<'a> {
-        MidiEvtListIterator {
+    pub fn enum_items(&self, bpos: u32) -> MidiEventListIterator<'a> {
+        MidiEventListIterator {
             raw_list: self.0,
             bpos: bpos as i32,
         }
     }
 }
 
-pub struct MidiEvtListIterator<'a> {
+pub struct MidiEventListIterator<'a> {
     raw_list: &'a raw::MIDI_eventlist,
     bpos: i32,
 }
 
-impl<'a> Iterator for MidiEvtListIterator<'a> {
-    type Item = MidiEvt<'a>;
+impl<'a> Iterator for MidiEventListIterator<'a> {
+    type Item = MidiEvent<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let raw_evt = unsafe { self.raw_list.EnumItems(&mut self.bpos as *mut c_int) };
@@ -68,7 +68,7 @@ impl<'a> Iterator for MidiEvtListIterator<'a> {
             // No MIDI events left
             return None;
         }
-        let evt = unsafe { MidiEvt::new(&*raw_evt) };
+        let evt = unsafe { MidiEvent::new(&*raw_evt) };
         Some(evt)
     }
 }
@@ -80,37 +80,37 @@ impl<'a> Iterator for MidiEvtListIterator<'a> {
 // TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
 //  keeps  the event around.
 #[derive(Clone, Copy)]
-pub struct MidiEvt<'a>(&'a raw::MIDI_event_t);
+pub struct MidiEvent<'a>(&'a raw::MIDI_event_t);
 
-impl<'a> MidiEvt<'a> {
+impl<'a> MidiEvent<'a> {
     pub unsafe fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiEvt(raw_evt)
+        MidiEvent(raw_evt)
     }
 
     pub fn get_frame_offset(&self) -> u32 {
         self.0.frame_offset as u32
     }
 
-    pub fn get_message(&self) -> MidiMsg<'a> {
-        MidiMsg::new(self.0)
+    pub fn get_message(&self) -> MidiMessage<'a> {
+        MidiMessage::new(self.0)
     }
 }
 
-impl<'a> From<MidiEvt<'a>> for &'a raw::MIDI_event_t {
-    fn from(outer: MidiEvt<'a>) -> Self {
+impl<'a> From<MidiEvent<'a>> for &'a raw::MIDI_event_t {
+    fn from(outer: MidiEvent<'a>) -> Self {
         outer.0
     }
 }
 
-pub struct MidiMsg<'a>(&'a raw::MIDI_event_t);
+pub struct MidiMessage<'a>(&'a raw::MIDI_event_t);
 
-impl<'a> MidiMsg<'a> {
+impl<'a> MidiMessage<'a> {
     pub(super) fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiMsg(raw_evt)
+        MidiMessage(raw_evt)
     }
 }
 
-impl<'a> ShortMessage for MidiMsg<'a> {
+impl<'a> ShortMessage for MidiMessage<'a> {
     fn status_byte(&self) -> u8 {
         self.0.midi_message[0]
     }

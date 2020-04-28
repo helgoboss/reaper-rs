@@ -5,19 +5,19 @@ use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_ushort;
 
-pub struct GaccelRegister {
+pub struct MediumGaccelRegister {
     owned_desc: Cow<'static, CStr>,
     inner: gaccel_register_t,
 }
 
-pub struct Accelerator {
+pub struct MediumAccelerator {
     inner: raw::ACCEL,
 }
 
-impl GaccelRegister {
-    pub fn new(accel: Accelerator, desc: Cow<'static, CStr>) -> GaccelRegister {
+impl MediumGaccelRegister {
+    pub fn new(accel: MediumAccelerator, desc: Cow<'static, CStr>) -> MediumGaccelRegister {
         let desc_ptr = desc.as_ptr();
-        GaccelRegister {
+        MediumGaccelRegister {
             owned_desc: desc,
             inner: raw::gaccel_register_t {
                 accel: *accel.as_ref(),
@@ -27,16 +27,16 @@ impl GaccelRegister {
     }
 }
 
-impl AsRef<raw::gaccel_register_t> for GaccelRegister {
+impl AsRef<raw::gaccel_register_t> for MediumGaccelRegister {
     fn as_ref(&self) -> &gaccel_register_t {
         &self.inner
     }
 }
 
-impl Accelerator {
+impl MediumAccelerator {
     // TODO-low Make the combination of f_virt and key strongly-typed!
-    pub fn new(f_virt: u8, key: u16, cmd: CommandId) -> Accelerator {
-        Accelerator {
+    pub fn new(f_virt: u8, key: u16, cmd: CommandId) -> MediumAccelerator {
+        MediumAccelerator {
             inner: raw::ACCEL {
                 fVirt: f_virt,
                 key,
@@ -47,7 +47,7 @@ impl Accelerator {
     }
 }
 
-impl AsRef<raw::ACCEL> for Accelerator {
+impl AsRef<raw::ACCEL> for MediumAccelerator {
     fn as_ref(&self) -> &raw::ACCEL {
         &self.inner
     }
