@@ -258,7 +258,7 @@ impl<'a> PluginRegistration<'a> {
             ActionHelp(info_struct) => *info_struct,
             CommandId(command_name) => command_name.as_ptr() as *mut c_void,
             CommandIdLookup(info_struct) => *info_struct,
-            Gaccel(reg) => reg.as_ptr() as *mut c_void,
+            Gaccel(reg) => reg.get().as_ptr() as *mut c_void,
             CsurfInst(inst) => inst.as_ptr() as *mut c_void,
             Custom(_, info_struct) => *info_struct,
         }

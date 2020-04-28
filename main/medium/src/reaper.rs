@@ -370,7 +370,7 @@ impl Reaper {
         &mut self,
         gaccel: MediumGaccelRegister,
     ) -> Result<GaccelRegister, ()> {
-        let handle = self.gaccels.keep(gaccel);
+        let handle = GaccelRegister::new(self.gaccels.keep(gaccel));
         let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle)) };
         if result != 1 {
             return Err(());
@@ -382,7 +382,7 @@ impl Reaper {
         &mut self,
         handle: GaccelRegister,
     ) -> Result<MediumGaccelRegister, ()> {
-        let original = match self.gaccels.release(handle) {
+        let original = match self.gaccels.release(handle.get()) {
             None => return Err(()),
             Some(o) => o,
         };

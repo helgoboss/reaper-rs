@@ -58,10 +58,20 @@ pub type Hwnd = NonNull<raw::HWND__>;
 // pointer is for direction Rust => REAPER while the idiomatic struct is for REAPER => Rust
 // communication)
 //
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Into)]
+pub struct GaccelRegister(pub(crate) NonNull<raw::gaccel_register_t>);
+
+impl GaccelRegister {
+    pub fn new(ptr: NonNull<raw::gaccel_register_t>) -> GaccelRegister {
+        GaccelRegister(ptr)
+    }
+
+    pub(crate) fn get(&self) -> NonNull<raw::gaccel_register_t> {
+        self.0
+    }
+}
+
 // TODO-medium Make newtypes already because we might expose internals in better way in future
-// ALternative name: GaccelReg
-pub type GaccelRegister = NonNull<raw::gaccel_register_t>;
-// ALternative name: AudioHookReg
 pub type AudioHookRegister = NonNull<raw::audio_hook_register_t>;
 // This is unlike MediaTrack and Co. in that it points to a struct which is *not* opaque. Still, we
 // need it as pointer and it has the same lifetime characteristics. The difference is that we add
