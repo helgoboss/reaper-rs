@@ -1,6 +1,6 @@
 use crate::{
-    concat_c_strs, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject,
-    ReaperControlSurface, ReaperStringArg,
+    concat_c_strs, GaccelRegister, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
+    ReaProject, ReaperControlSurface, ReaperStringArg,
 };
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
@@ -9,6 +9,7 @@ use reaper_rs_low::raw;
 use reaper_rs_low::raw::HWND;
 use std::borrow::Cow;
 use std::ffi::CStr;
+use std::os::raw::c_void;
 use std::ptr::null_mut;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -216,51 +217,70 @@ pub enum ActionValueChange {
 }
 
 #[derive(Clone, Debug)]
-pub enum RegistrationType<'a> {
-    Api(Cow<'a, CStr>),
-    ApiDef(Cow<'a, CStr>),
-    HookCommand,
-    HookPostCommand,
-    HookCommand2,
-    ToggleAction,
-    ActionHelp,
-    CommandId,
-    CommandIdLookup,
-    Gaccel,
-    CsurfInst,
-    Custom(Cow<'a, CStr>),
+pub enum PluginRegistration<'a> {
+    // TODO-low Refine all c_void's as soon as used
+    Api(Cow<'a, CStr>, *mut c_void),
+    ApiDef(Cow<'a, CStr>, *mut c_void),
+    HookCommand(extern "C" fn(command_id: i32, flag: i32) -> bool),
+    HookPostCommand(extern "C" fn(command_id: i32, flag: i32)),
+    HookCommand2(*mut c_void),
+    ToggleAction(extern "C" fn(command_id: i32) -> i32),
+    ActionHelp(*mut c_void),
+    CommandId(Cow<'a, CStr>),
+    CommandIdLookup(*mut c_void),
+    Gaccel(GaccelRegister),
+    CsurfInst(ReaperControlSurface),
+    Custom(Cow<'a, CStr>, *mut c_void),
 }
 
-impl<'a> RegistrationType<'a> {
-    pub fn api(func_name: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::Api(func_name.into().into_inner())
+impl<'a> PluginRegistration<'a> {
+    pub fn api(func_name: impl Into<ReaperStringArg<'a>>, func: *mut c_void) -> Self {
+        Self::Api(func_name.into().into_inner(), func)
     }
 
-    pub fn api_def(func_def: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::ApiDef(func_def.into().into_inner())
+    pub fn api_def(func_name: impl Into<ReaperStringArg<'a>>, func_def: *mut c_void) -> Self {
+        Self::ApiDef(func_name.into().into_inner(), func_def)
     }
 
-    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::Custom(key.into().into_inner())
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>, info_struct: *mut c_void) -> Self {
+        Self::Custom(key.into().into_inner(), info_struct)
+    }
+
+    pub(crate) fn infostruct(&self) -> *mut c_void {
+        use PluginRegistration::*;
+        match self {
+            Api(_, func) => *func,
+            ApiDef(_, func_def) => *func_def,
+            HookCommand(func) => *func as *mut c_void,
+            HookPostCommand(func) => *func as *mut c_void,
+            HookCommand2(func) => *func as *mut c_void,
+            ToggleAction(func) => *func as *mut c_void,
+            ActionHelp(info_struct) => *info_struct,
+            CommandId(command_name) => command_name.as_ptr() as *mut c_void,
+            CommandIdLookup(info_struct) => *info_struct,
+            Gaccel(reg) => reg.as_ptr() as *mut c_void,
+            CsurfInst(inst) => inst.as_ptr() as *mut c_void,
+            Custom(_, info_struct) => *info_struct,
+        }
     }
 }
 
-impl<'a> From<RegistrationType<'a>> for Cow<'a, CStr> {
-    fn from(value: RegistrationType<'a>) -> Self {
-        use RegistrationType::*;
+impl<'a> From<PluginRegistration<'a>> for Cow<'a, CStr> {
+    fn from(value: PluginRegistration<'a>) -> Self {
+        use PluginRegistration::*;
         match value {
-            Gaccel => c_str!("gaccel").into(),
-            CsurfInst => c_str!("csurf_inst").into(),
-            Api(func_name) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
-            ApiDef(func_def) => concat_c_strs(c_str!("APIdef_"), func_def.as_ref()).into(),
-            HookCommand => c_str!("hookcommand").into(),
-            HookPostCommand => c_str!("hookpostcommand").into(),
-            HookCommand2 => c_str!("hookcommand2").into(),
-            ToggleAction => c_str!("toggleaction").into(),
-            ActionHelp => c_str!("action_help").into(),
-            CommandId => c_str!("command_id").into(),
-            CommandIdLookup => c_str!("command_id_lookup").into(),
-            Custom(k) => k,
+            Gaccel(_) => c_str!("gaccel").into(),
+            CsurfInst(_) => c_str!("csurf_inst").into(),
+            Api(func_name, _) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
+            ApiDef(func_name, _) => concat_c_strs(c_str!("APIdef_"), func_name.as_ref()).into(),
+            HookCommand(_) => c_str!("hookcommand").into(),
+            HookPostCommand(_) => c_str!("hookpostcommand").into(),
+            HookCommand2(_) => c_str!("hookcommand2").into(),
+            ToggleAction(_) => c_str!("toggleaction").into(),
+            ActionHelp(_) => c_str!("action_help").into(),
+            CommandId(_) => c_str!("command_id").into(),
+            CommandIdLookup(_) => c_str!("command_id_lookup").into(),
+            Custom(k, _) => k,
         }
     }
 }

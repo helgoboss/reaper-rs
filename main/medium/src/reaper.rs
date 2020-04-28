@@ -15,9 +15,9 @@ use crate::{
     GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
-    ProjectContext, ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue,
-    ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
-    RecordArmState, RecordingInput, RegistrationType, SectionContext, SectionId, SendTarget,
+    PluginRegistration, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
+    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
     StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
     TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
     TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
@@ -253,79 +253,67 @@ impl Reaper {
 
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
-    pub unsafe fn plugin_register_add(
-        &self,
-        name: RegistrationType,
-        infostruct: *mut c_void,
-    ) -> i32 {
+    pub unsafe fn plugin_register_add(&self, reg: PluginRegistration) -> i32 {
+        let infostruct = reg.infostruct();
         self.low
-            .plugin_register(Cow::from(name).as_ptr(), infostruct)
+            .plugin_register(Cow::from(reg).as_ptr(), infostruct)
     }
 
-    pub unsafe fn plugin_register_remove(
-        &self,
-        name: RegistrationType,
-        infostruct: *mut c_void,
-    ) -> i32 {
-        let name_with_minus = concat_c_strs(c_str!("-"), Cow::from(name).as_ref());
+    pub unsafe fn plugin_register_remove(&self, reg: PluginRegistration) -> i32 {
+        let infostruct = reg.infostruct();
+        let name_with_minus = concat_c_strs(c_str!("-"), Cow::from(reg).as_ref());
         self.low
             .plugin_register(name_with_minus.as_ptr(), infostruct)
     }
 
     pub fn plugin_register_add_hookcommand<T: HookCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register_add(
-                RegistrationType::HookCommand,
-                delegating_hook_command::<T> as *mut c_void,
-            )
+            self.plugin_register_add(PluginRegistration::HookCommand(
+                delegating_hook_command::<T>,
+            ))
         };
         ok_if_one(result)
     }
 
     pub fn plugin_register_remove_hookcommand<T: HookCommand>(&self) {
         unsafe {
-            self.plugin_register_remove(
-                RegistrationType::HookCommand,
-                delegating_hook_command::<T> as *mut c_void,
-            );
+            self.plugin_register_remove(PluginRegistration::HookCommand(
+                delegating_hook_command::<T>,
+            ));
         }
     }
 
     pub fn plugin_register_add_toggleaction<T: ToggleAction>(&self) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register_add(
-                RegistrationType::ToggleAction,
-                delegating_toggle_action::<T> as *mut c_void,
-            )
+            self.plugin_register_add(PluginRegistration::ToggleAction(
+                delegating_toggle_action::<T>,
+            ))
         };
         ok_if_one(result)
     }
 
     pub fn plugin_register_remove_toggleaction<T: ToggleAction>(&self) {
         unsafe {
-            self.plugin_register_remove(
-                RegistrationType::ToggleAction,
-                delegating_toggle_action::<T> as *mut c_void,
-            );
+            self.plugin_register_remove(PluginRegistration::ToggleAction(
+                delegating_toggle_action::<T>,
+            ));
         }
     }
 
     pub fn plugin_register_add_hookpostcommand<T: HookPostCommand>(&self) -> Result<(), ()> {
         let result = unsafe {
-            self.plugin_register_add(
-                RegistrationType::HookPostCommand,
-                delegating_hook_post_command::<T> as *mut c_void,
-            )
+            self.plugin_register_add(PluginRegistration::HookPostCommand(
+                delegating_hook_post_command::<T>,
+            ))
         };
         ok_if_one(result)
     }
 
     pub fn plugin_register_remove_hookpostcommand<T: HookPostCommand>(&self) {
         unsafe {
-            self.plugin_register_remove(
-                RegistrationType::HookPostCommand,
-                delegating_hook_post_command::<T> as *mut c_void,
-            );
+            self.plugin_register_remove(PluginRegistration::HookPostCommand(
+                delegating_hook_post_command::<T>,
+            ));
         }
     }
 
@@ -339,10 +327,9 @@ impl Reaper {
         command_name: impl Into<ReaperStringArg<'a>>,
     ) -> CommandId {
         let raw_id = unsafe {
-            self.plugin_register_add(
-                RegistrationType::CommandId,
-                command_name.into().as_ptr() as *mut c_void,
-            ) as u32
+            self.plugin_register_add(PluginRegistration::CommandId(
+                command_name.into().into_inner(),
+            )) as u32
         };
         CommandId(raw_id)
     }
@@ -361,14 +348,13 @@ impl Reaper {
     // Unsfe because consumer must ensure proper lifetime of given reference.
     // TODO-low Add factory functions for gaccel_register_t
     pub unsafe fn plugin_register_add_gaccel(&self, gaccel: GaccelRegister) -> Result<(), ()> {
-        let result =
-            self.plugin_register_add(RegistrationType::Gaccel, gaccel.as_ptr() as *mut c_void);
+        let result = self.plugin_register_add(PluginRegistration::Gaccel(gaccel));
         ok_if_one(result)
     }
 
     pub fn plugin_register_remove_gaccel(&self, gaccel: GaccelRegister) {
         unsafe {
-            self.plugin_register_remove(RegistrationType::Gaccel, gaccel.as_ptr() as *mut c_void);
+            self.plugin_register_remove(PluginRegistration::Gaccel(gaccel));
         }
     }
 
@@ -376,15 +362,13 @@ impl Reaper {
         &self,
         csurf_inst: ReaperControlSurface,
     ) -> Result<(), ()> {
-        let result = unsafe {
-            self.plugin_register_add(RegistrationType::CsurfInst, csurf_inst.as_ptr() as *mut _)
-        };
+        let result = unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(csurf_inst)) };
         ok_if_one(result)
     }
 
     pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
         unsafe {
-            self.plugin_register_remove(RegistrationType::CsurfInst, csurf_inst.as_ptr() as *mut _);
+            self.plugin_register_remove(PluginRegistration::CsurfInst(csurf_inst));
         }
     }
 

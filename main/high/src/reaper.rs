@@ -502,6 +502,10 @@ impl Reaper {
     fn register_command(&self, command_id: CommandId, command: Command) {
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             let command = p.insert(command);
+            // TODO-medium It would be cool if we could just move the value over to the API.
+            //  Then we wouldn't have access anymore, which would be good. Unregistering could be
+            //  done by returning a handle. The function could be made safe because the lower API
+            //  would keep the stuff for us and hand it back later.
             let acc = &command.accelerator_register;
             unsafe { self.medium.plugin_register_add_gaccel(acc.into()) };
         }
