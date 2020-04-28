@@ -565,7 +565,7 @@ fn test_action_invoked_event() -> TestStep {
                 });
         });
         reaper
-            .medium
+            .medium()
             .main_on_command_ex(action.get_command_id(), 0, CurrentProject);
         // Then
         check_eq!(mock.get_invocation_count(), 1);
@@ -1321,24 +1321,24 @@ fn set_track_volume_extreme_values() -> TestStep {
             let track_2 = get_track(1)?;
             // When
             let track_1_result = unsafe {
-                reaper.medium.csurf_on_volume_change_ex(
+                reaper.medium().csurf_on_volume_change_ex(
                     track_1.get_raw(),
                     ValueChange::Absolute(ReaperVolumeValue::new(1.0 / 0.0)),
                     GangBehavior::DenyGang,
                 );
                 reaper
-                    .medium
+                    .medium()
                     .get_track_ui_vol_pan(track_1.get_raw())
                     .unwrap()
             };
             let track_2_result = unsafe {
-                reaper.medium.csurf_on_volume_change_ex(
+                reaper.medium().csurf_on_volume_change_ex(
                     track_2.get_raw(),
                     ValueChange::Absolute(ReaperVolumeValue::new(f64::NAN)),
                     GangBehavior::DenyGang,
                 );
                 reaper
-                    .medium
+                    .medium()
                     .get_track_ui_vol_pan(track_2.get_raw())
                     .unwrap()
             };

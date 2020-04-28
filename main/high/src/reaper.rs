@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::cell::{Cell, Ref, RefCell, UnsafeCell};
+use std::cell::{Cell, Ref, RefCell, RefMut, UnsafeCell};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
@@ -218,8 +218,8 @@ pub fn setup_all_with_defaults(context: &ReaperPluginContext, email_address: &'s
 }
 
 pub struct Reaper {
-    medium: reaper_rs_medium::Reaper,
-    pub logger: slog::Logger,
+    medium: RefCell<reaper_rs_medium::Reaper>,
+    logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO-low Adding an action in an action would panic because we have an immutable borrow of
     // the map  to obtain and execute the command, plus a mutable borrow of the map to add the
@@ -363,7 +363,7 @@ impl Reaper {
     fn setup(medium: reaper_rs_medium::Reaper, logger: slog::Logger) {
         let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
         let reaper = Reaper {
-            medium,
+            medium: RefCell::new(medium),
             logger,
             command_by_id: RefCell::new(HashMap::new()),
             subjects: EventStreamSubjects::new(),
@@ -422,8 +422,12 @@ impl Reaper {
             .plugin_register_remove_hookcommand::<HighLevelHookCommand>();
     }
 
-    pub fn medium(&self) -> &reaper_rs_medium::Reaper {
-        &self.medium
+    pub fn medium(&self) -> Ref<reaper_rs_medium::Reaper> {
+        self.medium.borrow()
+    }
+
+    pub fn medium_mut(&self) -> RefMut<reaper_rs_medium::Reaper> {
+        self.medium.borrow_mut()
     }
 
     pub fn get_version(&self) -> ReaperVersion {
@@ -499,7 +503,7 @@ impl Reaper {
             p.insert(command);
         }
         let address = self
-            .medium()
+            .medium_mut()
             .plugin_register_add_gaccel_2(GaccelRegister2::new(
                 Accelerator::new(0, 0, command_id),
                 description.into(),
@@ -515,7 +519,7 @@ impl Reaper {
         // if it's not in the map anymore, REAPER won't be able to find it.
         let mut command_by_id = self.command_by_id.borrow_mut();
         if let Some(command) = command_by_id.get_mut(&command_id) {
-            self.medium()
+            self.medium_mut()
                 .plugin_register_remove_gaccel_2(gaccel_address);
             command_by_id.remove(&command_id);
         }
