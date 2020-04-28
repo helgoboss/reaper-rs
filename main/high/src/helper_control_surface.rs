@@ -144,7 +144,7 @@ impl HelperControlSurface {
         }
         let env = unsafe {
             Reaper::get()
-                .medium
+                .medium()
                 .get_track_envelope_by_name(track.get_raw(), parameter_name)
         };
         if env.is_none() {
@@ -162,7 +162,7 @@ impl HelperControlSurface {
     fn remove_invalid_rea_projects(&self) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
             if Reaper::get()
-                .medium
+                .medium()
                 .validate_ptr_2(CurrentProject, *rea_project)
             {
                 true
@@ -197,7 +197,7 @@ impl HelperControlSurface {
             let media_track = t.get_raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let reaper = Reaper::get();
-                let m = &reaper.medium;
+                let m = &reaper.medium();
                 let td = unsafe {
                     TrackData {
                         volume: m.get_media_track_info_value(media_track, Vol),
@@ -366,7 +366,7 @@ impl HelperControlSurface {
         track_datas.retain(|media_track, data| {
             let reaper = Reaper::get();
             if reaper
-                .medium
+                .medium()
                 .validate_ptr_2(Proj(project.get_raw()), *media_track)
             {
                 true
@@ -390,13 +390,16 @@ impl HelperControlSurface {
         let reaper = Reaper::get();
         for (media_track, track_data) in track_datas.iter_mut() {
             if !reaper
-                .medium
+                .medium()
                 .validate_ptr_2(Proj(project.get_raw()), *media_track)
             {
                 continue;
             }
-            let new_number =
-                unsafe { reaper.medium.get_media_track_info_tracknumber(*media_track) };
+            let new_number = unsafe {
+                reaper
+                    .medium()
+                    .get_media_track_info_tracknumber(*media_track)
+            };
             if new_number != track_data.number {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;
@@ -712,7 +715,7 @@ impl ControlSurface for HelperControlSurface {
         }
         let recinput = unsafe {
             reaper
-                .medium
+                .medium()
                 .get_media_track_info_value(args.track, RecInput) as i32
         };
         if td.recinput != recinput {

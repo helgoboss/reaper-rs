@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_int, c_ushort, c_void};
-use std::ptr::{null, null_mut};
+use std::ptr::{null, null_mut, NonNull};
 use std::rc::Rc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Once};
@@ -37,10 +37,11 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    install_control_surface, AudioHookRegister, CommandId, GetFocusedFxResult,
-    GetLastTouchedFxResult, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
-    MessageBoxResult, MessageBoxType, MidiEvt, MidiInputDeviceId, MidiOutputDeviceId, ProjectRef,
-    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleAction, TrackRef,
+    install_control_surface, Accelerator, AudioHookRegister, CommandId, GaccelRegister,
+    GaccelRegister2, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
+    HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType, MidiEvt,
+    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
+    StuffMidiMessageTarget, ToggleAction, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -126,7 +127,7 @@ extern "C" fn process_audio_buffer(
         }
         for i in 0..reaper.get_max_midi_input_devices() {
             reaper
-                .medium
+                .medium()
                 .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
                     let evt_list = input.get_read_buf();
                     for evt in evt_list.enum_items(0) {
@@ -217,7 +218,7 @@ pub fn setup_all_with_defaults(context: &ReaperPluginContext, email_address: &'s
 }
 
 pub struct Reaper {
-    pub medium: reaper_rs_medium::Reaper,
+    medium: reaper_rs_medium::Reaper,
     pub logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO-low Adding an action in an action would panic because we have an immutable borrow of
@@ -395,34 +396,38 @@ impl Reaper {
 
     // TODO-low Must be idempotent
     pub fn activate(&self) {
-        self.medium
+        self.medium()
             .plugin_register_add_hookcommand::<HighLevelHookCommand>();
-        self.medium
+        self.medium()
             .plugin_register_add_toggleaction::<HighLevelToggleAction>();
-        self.medium
+        self.medium()
             .plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
-        self.medium.register_control_surface();
+        self.medium().register_control_surface();
         unsafe {
-            self.medium
+            self.medium()
                 .audio_reg_hardware_hook_add((&self.audio_hook).into());
         }
     }
 
     // TODO-low Must be idempotent
     pub fn deactivate(&self) {
-        self.medium
+        self.medium()
             .audio_reg_hardware_hook_remove((&self.audio_hook).into());
-        self.medium.unregister_control_surface();
-        self.medium
+        self.medium().unregister_control_surface();
+        self.medium()
             .plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
-        self.medium
+        self.medium()
             .plugin_register_remove_toggleaction::<HighLevelToggleAction>();
-        self.medium
+        self.medium()
             .plugin_register_remove_hookcommand::<HighLevelHookCommand>();
     }
 
+    pub fn medium(&self) -> &reaper_rs_medium::Reaper {
+        &self.medium
+    }
+
     pub fn get_version(&self) -> ReaperVersion {
-        self.medium.get_app_version()
+        self.medium().get_app_version()
     }
 
     pub fn get_last_touched_fx_parameter(&self) -> Option<FxParameter> {
@@ -430,7 +435,7 @@ impl Reaper {
         //  Maybe we should rather rely on our own technique in ControlSurface here!
         // fxQueryIndex is only a real query index since REAPER 5.95, before it didn't say if it's
         // input FX or normal one!
-        self.medium.get_last_touched_fx().and_then(|result| {
+        self.medium().get_last_touched_fx().and_then(|result| {
             use GetLastTouchedFxResult::*;
             match result {
                 TrackFx {
@@ -464,7 +469,7 @@ impl Reaper {
     }
 
     pub fn generate_guid(&self) -> Guid {
-        Guid::new(Reaper::get().medium.gen_guid())
+        Guid::new(Reaper::get().medium().gen_guid())
     }
 
     // Allowing global access to native REAPER functions at all times is valid in my opinion.
@@ -488,48 +493,40 @@ impl Reaper {
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
-        let command_id = self.medium.plugin_register_add_command_id(command_name);
-        let command = Command::new(
-            command_id,
-            description.into(),
-            Rc::new(RefCell::new(operation)),
-            kind,
-        );
-        self.register_command(command_id, command);
-        RegisteredAction::new(command_id)
-    }
-
-    fn register_command(&self, command_id: CommandId, command: Command) {
+        let command_id = self.medium().plugin_register_add_command_id(command_name);
+        let command = Command::new(Rc::new(RefCell::new(operation)), kind);
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
-            let command = p.insert(command);
-            // TODO-medium It would be cool if we could just move the value over to the API.
-            //  Then we wouldn't have access anymore, which would be good. Unregistering could be
-            //  done by returning a handle. The function could be made safe because the lower API
-            //  would keep the stuff for us and hand it back later.
-            let acc = &command.accelerator_register;
-            unsafe { self.medium.plugin_register_add_gaccel(acc.into()) };
+            p.insert(command);
         }
+        let address = self
+            .medium()
+            .plugin_register_add_gaccel_2(GaccelRegister2::new(
+                Accelerator::new(0, 0, command_id),
+                description.into(),
+            ))
+            .unwrap();
+        RegisteredAction::new(command_id, address)
     }
 
-    fn unregister_command(&self, command_id: CommandId) {
+    fn unregister_command(&self, command_id: CommandId, gaccel_address: GaccelRegister) {
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
         // if it's not in the map anymore, REAPER won't be able to find it.
         let mut command_by_id = self.command_by_id.borrow_mut();
         if let Some(command) = command_by_id.get_mut(&command_id) {
-            let acc = &command.accelerator_register;
-            self.medium.plugin_register_remove_gaccel(acc.into());
+            self.medium()
+                .plugin_register_remove_gaccel_2(gaccel_address);
             command_by_id.remove(&command_id);
         }
     }
 
     pub fn get_max_midi_input_devices(&self) -> u32 {
-        self.medium.get_max_midi_inputs()
+        self.medium().get_max_midi_inputs()
     }
 
     pub fn get_max_midi_output_devices(&self) -> u32 {
-        self.medium.get_max_midi_outputs()
+        self.medium().get_max_midi_outputs()
     }
 
     // It's correct that this method returns a non-optional. An id is supposed to uniquely identify
@@ -561,7 +558,7 @@ impl Reaper {
     }
 
     pub fn get_currently_loading_or_saving_project(&self) -> Option<Project> {
-        let ptr = self.medium.get_current_project_in_load_save()?;
+        let ptr = self.medium().get_current_project_in_load_save()?;
         Some(Project::new(ptr))
     }
 
@@ -618,7 +615,7 @@ impl Reaper {
     /// Look into [from_vec_unchecked](CString::from_vec_unchecked) or
     /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.
     pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
-        self.medium.show_console_msg(msg);
+        self.medium().show_console_msg(msg);
     }
 
     // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret
@@ -629,7 +626,7 @@ impl Reaper {
         title: &CStr,
         kind: MessageBoxType,
     ) -> MessageBoxResult {
-        self.medium.show_message_box(msg, title, kind)
+        self.medium().show_message_box(msg, title, kind)
     }
 
     pub fn get_main_section(&self) -> Section {
@@ -687,7 +684,7 @@ impl Reaper {
     // Attention: Returns normal fx only, not input fx!
     // This is not reliable! After REAPER start no focused Fx can be found!
     pub fn get_focused_fx(&self) -> Option<Fx> {
-        self.medium.get_focused_fx().and_then(|res| {
+        self.medium().get_focused_fx().and_then(|res| {
             use GetFocusedFxResult::*;
             match res {
                 ItemFx { .. } => None, // TODO-low implement
@@ -784,7 +781,7 @@ impl Reaper {
 
     pub fn get_current_project(&self) -> Project {
         Project::new(
-            self.medium
+            self.medium()
                 .enum_projects(ProjectRef::Current, 0)
                 .unwrap()
                 .project,
@@ -792,12 +789,12 @@ impl Reaper {
     }
 
     pub fn get_main_window(&self) -> Hwnd {
-        self.medium.get_main_hwnd()
+        self.medium().get_main_hwnd()
     }
 
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
-            .map(move |i| self.medium.enum_projects(ProjectRef::Tab(i), 0))
+            .map(move |i| self.medium().enum_projects(ProjectRef::Tab(i), 0))
             .take_while(|r| !r.is_none())
             .map(|r| Project::new(r.unwrap().project))
     }
@@ -807,7 +804,7 @@ impl Reaper {
     }
 
     pub fn clear_console(&self) {
-        self.medium.clear_console();
+        self.medium().clear_console();
     }
 
     pub fn execute_later_in_main_thread(
@@ -838,7 +835,7 @@ impl Reaper {
     }
 
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
-        self.medium.stuff_midimessage(target, message);
+        self.medium().stuff_midimessage(target, message);
     }
 
     pub fn current_thread_is_main_thread(&self) -> bool {
@@ -850,7 +847,7 @@ impl Reaper {
     }
 
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationOverride> {
-        self.medium.get_global_automation_override()
+        self.medium().get_global_automation_override()
     }
 
     pub fn undoable_action_is_running(&self) -> bool {
@@ -868,7 +865,7 @@ impl Reaper {
             return None;
         }
         self.undo_block_is_active.replace(true);
-        self.medium.undo_begin_block_2(Proj(project.get_raw()));
+        self.medium().undo_begin_block_2(Proj(project.get_raw()));
         Some(UndoBlock::new(project, label))
     }
 
@@ -877,14 +874,13 @@ impl Reaper {
         if !self.undo_block_is_active.get() {
             return;
         }
-        self.medium
+        self.medium()
             .undo_end_block_2(Proj(project.get_raw()), label, All);
         self.undo_block_is_active.replace(false);
     }
 }
 
 struct Command {
-    description: Cow<'static, CStr>,
     /// Reasoning for that type (from inner to outer):
     /// - `FnMut`: We don't use just `fn` because we want to support closures. We don't use just
     ///   `Fn` because we want to support closures that keep mutable references to their captures.
@@ -917,44 +913,28 @@ struct Command {
     ///   we wouldn't need `Rc` (for shared references), we would have to take `Box` instead.
     operation: Rc<RefCell<dyn FnMut()>>,
     kind: ActionKind,
-    accelerator_register: gaccel_register_t,
 }
 
 impl Command {
-    fn new(
-        command_id: CommandId,
-        description: Cow<'static, CStr>,
-        operation: Rc<RefCell<dyn FnMut()>>,
-        kind: ActionKind,
-    ) -> Command {
-        let mut c = Command {
-            description,
-            operation,
-            kind,
-            accelerator_register: gaccel_register_t {
-                accel: ACCEL {
-                    fVirt: 0,
-                    key: 0,
-                    cmd: command_id.get() as c_ushort,
-                },
-                desc: null(),
-            },
-        };
-        c.accelerator_register.desc = c.description.as_ptr();
-        c
+    fn new(operation: Rc<RefCell<dyn FnMut()>>, kind: ActionKind) -> Command {
+        Command { operation, kind }
     }
 }
 
 pub struct RegisteredAction {
     command_id: CommandId,
+    gaccel_address: GaccelRegister,
 }
 
 impl RegisteredAction {
-    fn new(command_id: CommandId) -> RegisteredAction {
-        RegisteredAction { command_id }
+    fn new(command_id: CommandId, gaccel_address: GaccelRegister) -> RegisteredAction {
+        RegisteredAction {
+            command_id,
+            gaccel_address,
+        }
     }
 
     pub fn unregister(&self) {
-        Reaper::get().unregister_command(self.command_id);
+        Reaper::get().unregister_command(self.command_id, self.gaccel_address);
     }
 }

@@ -6,12 +6,13 @@ use std::ptr::{null_mut, NonNull};
 
 use reaper_rs_low::{firewall, raw};
 
+use crate::infostruct_keeper::InfostructKeeper;
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
     ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint,
     CommandId, ControlSurface, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
-    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GangBehavior,
+    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GaccelRegister2, GangBehavior,
     GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
@@ -29,6 +30,7 @@ use reaper_rs_low;
 use reaper_rs_low::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, GUID, UNDO_STATE_ALL,
 };
+use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
@@ -44,6 +46,7 @@ use std::path::PathBuf;
 pub struct Reaper {
     /// Returns the low-level REAPER instance
     pub low: reaper_rs_low::Reaper,
+    gaccels: InfostructKeeper<GaccelRegister2, gaccel_register_t>,
 }
 
 const ZERO_GUID: GUID = GUID {
@@ -69,7 +72,10 @@ impl Reaper {
     /// Creates a new instance by getting hold of a
     /// [`reaper_rs_low::Reaper`](../../low_level/struct.Reaper.html) instance.
     pub fn new(low: reaper_rs_low::Reaper) -> Reaper {
-        Reaper { low }
+        Reaper {
+            low,
+            gaccels: Default::default(),
+        }
     }
 
     /// Returns the requested project and optionally its file name.
@@ -347,8 +353,8 @@ impl Reaper {
     //
     // Unsfe because consumer must ensure proper lifetime of given reference.
     // TODO-low Add factory functions for gaccel_register_t
-    pub unsafe fn plugin_register_add_gaccel(&self, gaccel: GaccelRegister) -> Result<(), ()> {
-        let result = self.plugin_register_add(PluginRegistration::Gaccel(gaccel));
+    pub fn plugin_register_add_gaccel(&self, gaccel: GaccelRegister) -> Result<(), ()> {
+        let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(gaccel)) };
         ok_if_one(result)
     }
 
@@ -356,6 +362,30 @@ impl Reaper {
         unsafe {
             self.plugin_register_remove(PluginRegistration::Gaccel(gaccel));
         }
+    }
+
+    pub fn plugin_register_add_gaccel_2(
+        &mut self,
+        gaccel: GaccelRegister2,
+    ) -> Result<GaccelRegister, ()> {
+        let address = self.gaccels.keep(gaccel);
+        let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(address)) };
+        if result != 1 {
+            return Err(());
+        }
+        Ok(address)
+    }
+
+    pub fn plugin_register_remove_gaccel_2(
+        &mut self,
+        handle: GaccelRegister,
+    ) -> Result<GaccelRegister2, ()> {
+        let original = match self.gaccels.release(handle) {
+            None => return Err(()),
+            Some(o) => o,
+        };
+        unsafe { self.plugin_register_remove(PluginRegistration::Gaccel(handle)) };
+        Ok(original)
     }
 
     pub unsafe fn plugin_register_add_csurf_inst(

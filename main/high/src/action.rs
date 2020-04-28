@@ -88,7 +88,7 @@ impl Action {
         // TODO-low Use kbd_enumerateActions
         let section_id = runtime_data.section.id();
         Reaper::get()
-            .medium
+            .medium()
             .section_from_unique_id(section_id, |s| {
                 (0..s.action_list_cnt())
                     .map(move |i| s.get_action_by_index(i).unwrap())
@@ -106,7 +106,7 @@ impl Action {
             let result = runtime_data
                 .section
                 .with_raw(|s| unsafe {
-                    Reaper::get().medium.kbd_get_text_from_cmd(
+                    Reaper::get().medium().kbd_get_text_from_cmd(
                         runtime_data.command_id,
                         Sec(s),
                         |_| (),
@@ -122,7 +122,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         let state = unsafe {
             Reaper::get()
-                .medium
+                .medium()
                 .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
         };
         match state {
@@ -135,7 +135,7 @@ impl Action {
         let rd = self.load_if_necessary_or_complain();
         let state = unsafe {
             Reaper::get()
-                .medium
+                .medium()
                 .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
         };
         state == Some(true)
@@ -156,7 +156,7 @@ impl Action {
             .or_else(|| {
                 let rd = self.runtime_data.borrow();
                 Reaper::get()
-                    .medium
+                    .medium()
                     .reverse_named_command_lookup(rd.as_ref().unwrap().command_id, |s| s.into())
             })
     }
@@ -164,7 +164,7 @@ impl Action {
     pub fn get_name(&self) -> Option<CString> {
         let rd = self.load_if_necessary_or_complain();
         unsafe {
-            Reaper::get().medium.kbd_get_text_from_cmd(
+            Reaper::get().medium().kbd_get_text_from_cmd(
                 rd.command_id,
                 SectionContext::Sec(&rd.section.get_raw()),
                 |s| s.into(),
@@ -192,10 +192,10 @@ impl Action {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
             unsafe {
-                reaper.medium.kbd_on_main_action_ex(
+                reaper.medium().kbd_on_main_action_ex(
                     action_command_id,
                     ActionValueChange::Relative2(cropped_relative_value),
-                    Win(reaper.medium.get_main_hwnd()),
+                    Win(reaper.medium().get_main_hwnd()),
                     match project {
                         None => CurrentProject,
                         Some(p) => Proj(p.get_raw()),
@@ -208,10 +208,10 @@ impl Action {
             let discrete_value =
                 unsafe { U7::new_unchecked((normalized_value * 127 as f64).round() as u8) };
             unsafe {
-                reaper.medium.kbd_on_main_action_ex(
+                reaper.medium().kbd_on_main_action_ex(
                     action_command_id,
                     ActionValueChange::AbsoluteLowRes(discrete_value),
-                    Win(reaper.medium.get_main_hwnd()),
+                    Win(reaper.medium().get_main_hwnd()),
                     match project {
                         None => CurrentProject,
                         Some(p) => Proj(p.get_raw()),
@@ -237,7 +237,7 @@ impl Action {
             Self::fix_command_name(self.command_name.as_ref().expect("Command name not set"));
         let reaper = Reaper::get();
         let command_id = match reaper
-            .medium
+            .medium()
             .named_command_lookup(fixed_command_name.as_ref())
         {
             None => return false,

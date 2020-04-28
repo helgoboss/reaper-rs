@@ -16,12 +16,12 @@ impl Section {
     }
 
     pub fn with_raw<R>(&self, f: impl FnOnce(&KbdSectionInfo) -> R) -> Option<R> {
-        Reaper::get().medium.section_from_unique_id(self.id, f)
+        Reaper::get().medium().section_from_unique_id(self.id, f)
     }
 
     pub unsafe fn get_raw(&self) -> KbdSectionInfo {
         Reaper::get()
-            .medium
+            .medium()
             .section_from_unique_id_unchecked(self.id)
             .unwrap()
     }
@@ -49,7 +49,7 @@ impl Section {
     // Unsafe because at the time when the iterator is evaluated, the section could be gone
     pub unsafe fn get_actions(&self) -> impl Iterator<Item = Action> + '_ {
         let sec = Reaper::get()
-            .medium
+            .medium()
             .section_from_unique_id_unchecked(self.id)
             .unwrap();
         (0..sec.action_list_cnt()).map(move |i| {

@@ -115,6 +115,12 @@ pub use flags::*;
 mod reaper_pointer;
 pub use reaper_pointer::*;
 
+mod gaccel_register;
+pub use gaccel_register::*;
+
+mod infostruct_keeper;
+use infostruct_keeper::*;
+
 mod control_surface;
 pub use control_surface::*;
 
