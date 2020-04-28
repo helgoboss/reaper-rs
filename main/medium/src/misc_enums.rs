@@ -1,5 +1,5 @@
 use crate::{
-    concat_c_strs, GaccelRegister, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
+    concat_c_strs, GaccelRegisterHandle, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
     ReaProject, ReaperControlSurface, ReaperStringArg,
 };
 use c_str_macro::c_str;
@@ -228,7 +228,7 @@ pub enum PluginRegistration<'a> {
     ActionHelp(*mut c_void),
     CommandId(Cow<'a, CStr>),
     CommandIdLookup(*mut c_void),
-    Gaccel(GaccelRegister),
+    Gaccel(GaccelRegisterHandle),
     CsurfInst(ReaperControlSurface),
     Custom(Cow<'a, CStr>, *mut c_void),
 }

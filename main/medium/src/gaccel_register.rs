@@ -5,7 +5,7 @@ use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_ushort;
 
-pub struct GaccelRegister2 {
+pub struct GaccelRegister {
     owned_desc: Cow<'static, CStr>,
     inner: gaccel_register_t,
 }
@@ -14,10 +14,10 @@ pub struct Accelerator {
     inner: raw::ACCEL,
 }
 
-impl GaccelRegister2 {
-    pub fn new(accel: Accelerator, desc: Cow<'static, CStr>) -> GaccelRegister2 {
+impl GaccelRegister {
+    pub fn new(accel: Accelerator, desc: Cow<'static, CStr>) -> GaccelRegister {
         let desc_ptr = desc.as_ptr();
-        GaccelRegister2 {
+        GaccelRegister {
             owned_desc: desc,
             inner: raw::gaccel_register_t {
                 accel: *accel.as_ref(),
@@ -27,7 +27,7 @@ impl GaccelRegister2 {
     }
 }
 
-impl AsRef<raw::gaccel_register_t> for GaccelRegister2 {
+impl AsRef<raw::gaccel_register_t> for GaccelRegister {
     fn as_ref(&self) -> &gaccel_register_t {
         &self.inner
     }

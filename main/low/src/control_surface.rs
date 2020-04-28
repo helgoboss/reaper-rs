@@ -108,6 +108,7 @@ static INIT_CONTROL_SURFACE_INSTANCE: Once = Once::new();
 /// This returns a mutable reference. In general this mutability should not be used, just in case
 /// of control surface methods where it's sure that REAPER never reenters them! See
 /// [`ControlSurface`](trait.ControlSurface.html) documentation.
+// TODO-medium This must not be public! Bad bad bad!!!
 pub fn get_control_surface_instance() -> &'static mut Box<dyn IReaperControlSurface> {
     unsafe { CONTROL_SURFACE_INSTANCE.as_mut().unwrap() }
 }

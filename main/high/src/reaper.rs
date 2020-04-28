@@ -38,7 +38,7 @@ use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
     install_control_surface, Accelerator, AudioHookRegister, CommandId, GaccelRegister,
-    GaccelRegister2, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
+    GaccelRegisterHandle, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
     HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType, MidiEvt,
     MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
     StuffMidiMessageTarget, ToggleAction, TrackRef,
@@ -504,7 +504,7 @@ impl Reaper {
         }
         let address = self
             .medium_mut()
-            .plugin_register_add_gaccel_2(GaccelRegister2::new(
+            .plugin_register_add_gaccel(GaccelRegister::new(
                 Accelerator::new(0, 0, command_id),
                 description.into(),
             ))
@@ -512,7 +512,7 @@ impl Reaper {
         RegisteredAction::new(command_id, address)
     }
 
-    fn unregister_command(&self, command_id: CommandId, gaccel_address: GaccelRegister) {
+    fn unregister_command(&self, command_id: CommandId, gaccel_handle: GaccelRegisterHandle) {
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
@@ -520,7 +520,7 @@ impl Reaper {
         let mut command_by_id = self.command_by_id.borrow_mut();
         if let Some(command) = command_by_id.get_mut(&command_id) {
             self.medium_mut()
-                .plugin_register_remove_gaccel_2(gaccel_address);
+                .plugin_register_remove_gaccel(gaccel_handle);
             command_by_id.remove(&command_id);
         }
     }
@@ -926,19 +926,21 @@ impl Command {
 }
 
 pub struct RegisteredAction {
+    // For identifying the registered command (= the functions to be executed)
     command_id: CommandId,
-    gaccel_address: GaccelRegister,
+    // For identifying the registered action (= description, related keyboard shortcuts etc.)
+    gaccel_handle: GaccelRegisterHandle,
 }
 
 impl RegisteredAction {
-    fn new(command_id: CommandId, gaccel_address: GaccelRegister) -> RegisteredAction {
+    fn new(command_id: CommandId, gaccel_handle: GaccelRegisterHandle) -> RegisteredAction {
         RegisteredAction {
             command_id,
-            gaccel_address,
+            gaccel_handle,
         }
     }
 
     pub fn unregister(&self) {
-        Reaper::get().unregister_command(self.command_id, self.gaccel_address);
+        Reaper::get().unregister_command(self.command_id, self.gaccel_handle);
     }
 }

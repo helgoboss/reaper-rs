@@ -29,7 +29,7 @@ impl<T: AsRef<R>, R> InfostructKeeper<T, R> {
         stable_ptr_to_infostruct
     }
 
-    pub fn release(&mut self, address: NonNull<R>) -> Option<T> {
-        self.map.remove(&address).map(|boxed| *boxed)
+    pub fn release(&mut self, handle: NonNull<R>) -> Option<T> {
+        self.map.remove(&handle).map(|boxed| *boxed)
     }
 }

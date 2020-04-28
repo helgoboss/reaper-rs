@@ -12,17 +12,17 @@ use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
     ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint,
     CommandId, ControlSurface, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
-    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GaccelRegister2, GangBehavior,
-    GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
-    PluginRegistration, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GaccelRegisterHandle,
+    GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
+    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
+    NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
+    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
+    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
+    UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -46,7 +46,7 @@ use std::path::PathBuf;
 pub struct Reaper {
     /// Returns the low-level REAPER instance
     low: reaper_rs_low::Reaper,
-    gaccels: InfostructKeeper<GaccelRegister2, gaccel_register_t>,
+    gaccels: InfostructKeeper<GaccelRegister, gaccel_register_t>,
 }
 
 const ZERO_GUID: GUID = GUID {
@@ -344,6 +344,8 @@ impl Reaper {
         CommandId(raw_id)
     }
 
+    // # Old description (not valid anymore, problem solved)
+    //
     // A reference is in line here (vs. pointer) because gaccel_register_t is a struct created on
     // our (Rust) side. It doesn't necessary have to be static because we might just write a
     // script which registers something only shortly and unregisters it again later.
@@ -355,35 +357,30 @@ impl Reaper {
     // factory method for creating such structs. The consumer must ensure that it lives long
     // enough!
     //
-    // Unsfe because consumer must ensure proper lifetime of given reference.
-    // TODO-low Add factory functions for gaccel_register_t
-    pub fn plugin_register_add_gaccel(&self, gaccel: GaccelRegister) -> Result<(), ()> {
-        let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(gaccel)) };
-        ok_if_one(result)
-    }
-
-    pub fn plugin_register_remove_gaccel(&self, gaccel: GaccelRegister) {
-        unsafe {
-            self.plugin_register_remove(PluginRegistration::Gaccel(gaccel));
-        }
-    }
-
-    pub fn plugin_register_add_gaccel_2(
+    // Unsafe because consumer must ensure proper lifetime of given reference.
+    //
+    // # New description
+    //
+    // Medium-level API takes care now of keeping the registered infostructs. The API consumer
+    // doesn't need to take care of maintaining a stable address. It's also more safe because
+    // the API consumer needs to give up ownership of the thing given and read or even mutated by
+    // REAPER. This is why we can make this function save! No lifetime worries anymore.
+    pub fn plugin_register_add_gaccel(
         &mut self,
-        gaccel: GaccelRegister2,
-    ) -> Result<GaccelRegister, ()> {
-        let address = self.gaccels.keep(gaccel);
-        let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(address)) };
+        gaccel: GaccelRegister,
+    ) -> Result<GaccelRegisterHandle, ()> {
+        let handle = self.gaccels.keep(gaccel);
+        let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle)) };
         if result != 1 {
             return Err(());
         }
-        Ok(address)
+        Ok(handle)
     }
 
-    pub fn plugin_register_remove_gaccel_2(
+    pub fn plugin_register_remove_gaccel(
         &mut self,
-        handle: GaccelRegister,
-    ) -> Result<GaccelRegister2, ()> {
+        handle: GaccelRegisterHandle,
+    ) -> Result<GaccelRegister, ()> {
         let original = match self.gaccels.release(handle) {
             None => return Err(()),
             Some(o) => o,
