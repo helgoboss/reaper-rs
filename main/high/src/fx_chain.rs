@@ -29,7 +29,13 @@ impl FxChain {
     pub fn move_fx(&self, fx: &Fx, new_index: u32) {
         assert_eq!(fx.get_chain(), *self);
         let reaper = Reaper::get();
-        if reaper.medium().low.pointers.TrackFX_CopyToTrack.is_some() {
+        if reaper
+            .medium()
+            .low()
+            .pointers()
+            .TrackFX_CopyToTrack
+            .is_some()
+        {
             unsafe {
                 reaper.medium().track_fx_copy_to_track(
                     (self.track.get_raw(), fx.get_query_index()),
@@ -85,7 +91,7 @@ impl FxChain {
             return;
         }
         let reaper = Reaper::get();
-        if reaper.medium().low.pointers.TrackFX_Delete.is_some() {
+        if reaper.medium().low().pointers().TrackFX_Delete.is_some() {
             unsafe {
                 reaper
                     .medium()

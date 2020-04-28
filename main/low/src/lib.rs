@@ -34,5 +34,8 @@ pub use reaper_plugin_context::*;
 mod reaper;
 pub use reaper::*;
 
+mod reaper_impl;
+pub use reaper_impl::*;
+
 mod midi;
 pub use midi::*;

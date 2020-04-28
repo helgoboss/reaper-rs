@@ -1,4 +1,7 @@
-# ! [ allow ( non_upper_case_globals ) ] # ! [ allow ( non_camel_case_types ) ] # ! [ allow ( non_snake_case ) ]use super::{bindings::root, ReaperPluginContext};
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+use super::{bindings::root, ReaperPluginContext};
 use c_str_macro::c_str;
 #[doc = r" This is the low-level API access point to all REAPER functions. In order to use it, you first"]
 #[doc = r" must obtain an instance of this struct by invoking [`load`](struct.Reaper.html#method.load)."]
@@ -11,7 +14,7 @@ use c_str_macro::c_str;
 #[doc = r" pointers and panic if they are not available."]
 #[derive(Default)]
 pub struct Reaper {
-    pub pointers: ReaperFunctionPointers,
+    pub(crate) pointers: ReaperFunctionPointers,
 }
 impl Reaper {
     #[doc = r" Loads all available REAPER functions plug-in context and returns a `Reaper` instance"]
