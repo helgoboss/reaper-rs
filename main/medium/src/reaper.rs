@@ -388,6 +388,8 @@ impl Reaper {
         Ok(original)
     }
 
+    // TODO-medium Handle CSurfs almost like other infostructs, use the keeper! Create pairs of
+    //  low-level structs: one on CPP side, one on Rust side, connect them with each other.
     pub unsafe fn plugin_register_add_csurf_inst(
         &self,
         csurf_inst: ReaperControlSurface,
@@ -1365,7 +1367,6 @@ impl Reaper {
         Ok(handle)
     }
 
-    // TODO-medium Now it's time to introduce RAII!
     pub fn audio_reg_hardware_hook_remove(
         &mut self,
         reg_handle: AudioHookRegister,
@@ -1819,6 +1820,21 @@ impl Reaper {
                 self.validate_ptr_2(CurrentProject, p),
                 "ReaProject doesn't exist anymore"
             )
+        }
+    }
+}
+
+impl Drop for Reaper {
+    fn drop(&mut self) {
+        for handle in self.audio_hook_registers.release_all() {
+            unsafe {
+                self.audio_reg_hardware_hook_remove_unchecked(AudioHookRegister::new(handle));
+            }
+        }
+        for handle in self.gaccel_registers.release_all() {
+            unsafe {
+                self.plugin_register_remove(PluginRegistration::Gaccel(GaccelRegister(handle)));
+            }
         }
     }
 }

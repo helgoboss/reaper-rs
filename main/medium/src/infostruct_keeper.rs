@@ -32,4 +32,8 @@ impl<T: AsRef<R>, R> InfostructKeeper<T, R> {
     pub fn release(&mut self, handle: NonNull<R>) -> Option<T> {
         self.map.remove(&handle).map(|boxed| *boxed)
     }
+
+    pub fn release_all(&mut self) -> Vec<NonNull<R>> {
+        self.map.drain().map(|(handle, _)| handle).collect()
+    }
 }
