@@ -37,7 +37,7 @@ pub fn reaper_extension_plugin(attr: TokenStream, input: TokenStream) -> TokenSt
     let tokens = quote! {
         #[::reaper_rs_macros::low_level_reaper_extension_plugin]
         fn low_level_main(context: &::reaper_rs_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
-            ::reaper_rs_high::setup_all_with_defaults(context, #email_address);
+            ::reaper_rs_high::setup_reaper_with_defaults(context, #email_address);
             #main_function_name()
         }
 

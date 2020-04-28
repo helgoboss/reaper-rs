@@ -203,7 +203,7 @@ impl ReaperBuilder {
     }
 }
 
-pub fn setup_all_with_defaults(context: &ReaperPluginContext, email_address: &'static str) {
+pub fn setup_reaper_with_defaults(context: &ReaperPluginContext, email_address: &'static str) {
     Reaper::load(context)
         .logger(create_terminal_logger())
         .setup();
@@ -366,11 +366,19 @@ impl Reaper {
             audio_hook_register_handle: Cell::new(None),
         };
         unsafe {
-            INIT_REAPER_INSTANCE.call_once(|| {
-                REAPER_INSTANCE = Some(reaper);
-            });
+            // TODO-medium call_once() is not good here because a destroyed VST plug-in can still
+            //  keep its static memory after teardown. The next time it boots up, this must be
+            // called again! INIT_REAPER_INSTANCE.call_once(|| {
+            REAPER_INSTANCE = Some(reaper);
+            // });
         }
         Reaper::get().init(task_sender, task_receiver);
+    }
+
+    pub fn teardown() {
+        unsafe {
+            REAPER_INSTANCE = None;
+        }
     }
 
     fn init(&self, task_sender: Sender<ScheduledTask>, task_receiver: Receiver<ScheduledTask>) {
