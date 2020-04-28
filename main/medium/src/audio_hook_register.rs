@@ -32,7 +32,7 @@ pub struct MediumAudioHookRegister {
 }
 
 impl MediumAudioHookRegister {
-    // TODO-medium How to handle the second function and setting one to None?
+    // TODO-low How to handle the second function and setting one to None?
     pub fn new<T: MediumOnAudioBuffer>() -> MediumAudioHookRegister {
         MediumAudioHookRegister {
             inner: audio_hook_register_t {

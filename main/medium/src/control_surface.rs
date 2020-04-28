@@ -315,7 +315,9 @@ pub enum VersionDependentTrackFxRef {
 }
 
 pub fn get_cpp_control_surface() -> ReaperControlSurface {
-    require_non_null_panic(reaper_rs_low::get_cpp_control_surface() as *mut _)
+    ReaperControlSurface::new(require_non_null_panic(
+        reaper_rs_low::get_cpp_control_surface() as *mut _,
+    ))
 }
 
 pub struct DelegatingControlSurface<T: MediumReaperControlSurface> {

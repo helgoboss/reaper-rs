@@ -134,15 +134,35 @@ impl<'a> KbdCmd<'a> {
 // should expose the vtable in an idiomatic way, this pointer is for direction Rust => REAPER while
 // the idiomatic struct is for REAPER => Rust communication)
 //
-// TODO-medium Make newtypes already because we might expose vtable in future
 // ALternative name: PcmSrc
-pub type PcmSource = NonNull<raw::PCM_source>;
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Into)]
+pub struct PcmSource(pub(crate) NonNull<raw::PCM_source>);
+
+impl PcmSource {
+    pub fn new(ptr: NonNull<raw::PCM_source>) -> PcmSource {
+        PcmSource(ptr)
+    }
+
+    pub(crate) fn get(&self) -> NonNull<raw::PCM_source> {
+        self.0
+    }
+}
 
 // # Internals exposed: no | vtable: yes (Rust <= REAPER)
 //
 // Even we create IReaperControlSurface instances ourselves (not REAPER), we don't do it on
 // Rust side but on C++ side. So a pointer wrapper is the right way to go here as well. We also
 // remove the I from the name because it's not following Rust conventions.
-// TODO-medium Make newtypes already because we might expose vtable in future
 // ALternative name: ReaperControlSurf
-pub type ReaperControlSurface = NonNull<raw::IReaperControlSurface>;
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Into)]
+pub struct ReaperControlSurface(pub(crate) NonNull<raw::IReaperControlSurface>);
+
+impl ReaperControlSurface {
+    pub fn new(ptr: NonNull<raw::IReaperControlSurface>) -> ReaperControlSurface {
+        ReaperControlSurface(ptr)
+    }
+
+    pub(crate) fn get(&self) -> NonNull<raw::IReaperControlSurface> {
+        self.0
+    }
+}

@@ -260,7 +260,7 @@ impl<'a> PluginRegistration<'a> {
             CommandId(command_name) => command_name.as_ptr() as *mut c_void,
             CommandIdLookup(info_struct) => *info_struct,
             Gaccel(reg) => reg.get().as_ptr() as *mut c_void,
-            CsurfInst(inst) => inst.as_ptr() as *mut c_void,
+            CsurfInst(inst) => inst.get().as_ptr() as *mut c_void,
             Custom(_, info_struct) => *info_struct,
         }
     }
@@ -364,7 +364,7 @@ impl From<NotificationBehavior> for *mut raw::IReaperControlSurface {
     fn from(b: NotificationBehavior) -> Self {
         use NotificationBehavior::*;
         match b {
-            NotifyAllExcept(s) => s.as_ptr(),
+            NotifyAllExcept(s) => s.get().as_ptr(),
             NotifyAll => null_mut(),
         }
     }
