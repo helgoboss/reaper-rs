@@ -40,8 +40,8 @@ use reaper_rs_medium::{
     install_control_surface, AudioHookRegister, CommandId, GaccelRegister, GetFocusedFxResult,
     GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
     MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
-    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId,
-    MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
+    MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent,
+    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
     StuffMidiMessageTarget, TrackRef,
 };
 use std::time::{Duration, SystemTime};
@@ -107,15 +107,10 @@ impl MediumToggleAction for HighLevelToggleAction {
     }
 }
 
-// Called by REAPER directly!
-extern "C" fn process_audio_buffer(
-    is_post: bool,
-    _len: i32,
-    _srate: f64,
-    _reg: *mut audio_hook_register_t,
-) {
-    // TODO-low Check performance implications for firewall call
-    firewall(|| {
+struct HighOnAudioBuffer {}
+
+impl MediumOnAudioBuffer for HighOnAudioBuffer {
+    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister) {
         if is_post {
             return;
         }
@@ -163,7 +158,7 @@ extern "C" fn process_audio_buffer(
                     }
                 });
         }
-    });
+    }
 }
 
 pub(super) type Task = Box<dyn FnOnce() + 'static>;
@@ -397,7 +392,7 @@ impl Reaper {
         if self.audio_hook_register_handle.get().is_none() {
             let handle = self
                 .medium_mut()
-                .audio_reg_hardware_hook_add(MediumAudioHookRegister::new(process_audio_buffer))
+                .audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<HighOnAudioBuffer>())
                 .unwrap();
             self.audio_hook_register_handle.set(Some(handle))
         }

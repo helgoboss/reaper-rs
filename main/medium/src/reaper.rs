@@ -9,21 +9,21 @@ use reaper_rs_low::{firewall, raw};
 use crate::infostruct_keeper::InfostructKeeper;
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
-    ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint,
-    CommandId, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
-    FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GangBehavior,
-    GlobalAutomationOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
-    MediaTrack, MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand,
-    MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction, MessageBoxResult,
-    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
-    NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
-    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
-    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
-    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
+    get_cpp_control_surface, require_non_null, require_non_null_panic, ActionValueChange,
+    AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint, CommandId,
+    CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior,
+    FxPresetRef, FxShowFlag, GaccelRegister, GangBehavior, GlobalAutomationOverride, Hwnd,
+    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister,
+    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface,
+    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, PluginRegistration,
+    ProjectContext, ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue,
+    ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
+    UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -1821,20 +1821,6 @@ impl Reaper {
             )
         }
     }
-}
-
-extern "C" fn delegating_hook_command<T: MediumHookCommand>(command_id: i32, flag: i32) -> bool {
-    firewall(|| T::call(CommandId(command_id as u32), flag)).unwrap_or(false)
-}
-
-extern "C" fn delegating_toggle_action<T: MediumToggleAction>(command_id: i32) -> i32 {
-    firewall(|| T::call(CommandId(command_id as u32))).unwrap_or(-1)
-}
-
-extern "C" fn delegating_hook_post_command<T: MediumHookPostCommand>(command_id: i32, flag: i32) {
-    firewall(|| {
-        T::call(CommandId(command_id as u32), flag);
-    });
 }
 
 pub enum GetParameterStepSizesResult {
