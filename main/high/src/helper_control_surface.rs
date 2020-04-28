@@ -7,10 +7,10 @@ use reaper_rs_medium::TrackInfoKey::{
     Mute, Pan, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber, Vol,
 };
 use reaper_rs_medium::{
-    AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
-    ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
-    ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    InputMonitoringMode, MediaTrack, QualifiedFxRef, ReaProject, ReaperNormalizedValue,
+    AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
+    ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
+    ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
+    MediaTrack, QualifiedFxRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue,
     ReaperPointer, ReaperVersion, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
     SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
     TrackFxChainType, TrackRef, VersionDependentFxRef, VersionDependentTrackFxRef,
@@ -527,7 +527,7 @@ impl HelperControlSurface {
     }
 }
 
-impl ControlSurface for HelperControlSurface {
+impl ReaperControlSurface for HelperControlSurface {
     fn run(&mut self) {
         // Invoke custom idle code
         Reaper::get()

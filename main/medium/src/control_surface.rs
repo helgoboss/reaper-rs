@@ -1,6 +1,6 @@
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperControlSurface,
+    require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperControlSurfaceHandle,
     ReaperNormalizedValue, ReaperVersion, TrackFxChainType, TrackFxRef,
 };
 use c_str_macro::c_str;
@@ -17,7 +17,7 @@ use std::ptr::null_mut;
 /// [`reaper_rs_low::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation
 /// of this trait can be passed to
 /// [`medium_level::install_control_surface()`](../fn.install_control_surface.html).
-pub trait ControlSurface {
+pub trait ReaperControlSurface {
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
         None
     }
@@ -314,18 +314,18 @@ pub enum VersionDependentTrackFxRef {
     New(TrackFxRef),
 }
 
-pub fn get_cpp_control_surface() -> ReaperControlSurface {
+pub fn get_cpp_control_surface() -> ReaperControlSurfaceHandle {
     require_non_null_panic(reaper_rs_low::get_cpp_control_surface() as *mut _)
 }
 
-pub struct DelegatingControlSurface<T: ControlSurface> {
+pub struct DelegatingControlSurface<T: ReaperControlSurface> {
     delegate: T,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
 }
 
-impl<T: ControlSurface> DelegatingControlSurface<T> {
+impl<T: ReaperControlSurface> DelegatingControlSurface<T> {
     pub fn new(delegate: T, reaper_version: &ReaperVersion) -> DelegatingControlSurface<T> {
         let reaper_version_5_95: ReaperVersion = ReaperVersion::from("5.95");
         DelegatingControlSurface {
@@ -375,7 +375,7 @@ impl<T: ControlSurface> DelegatingControlSurface<T> {
 }
 
 #[allow(non_snake_case)]
-impl<T: ControlSurface> reaper_rs_low::IReaperControlSurface for DelegatingControlSurface<T> {
+impl<T: ReaperControlSurface> reaper_rs_low::IReaperControlSurface for DelegatingControlSurface<T> {
     fn GetTypeString(&self) -> *const i8 {
         self.delegate
             .get_type_string()

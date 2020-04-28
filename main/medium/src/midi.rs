@@ -5,9 +5,12 @@ use std::marker::PhantomData;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
+// # Internals exposed: no | vtable: yes (Rust => REAPER)
+//
 // This is like a MediaTrack object in that it wraps a raw pointer. Like KbdSectionInfo, it must not
 // be copied because it's reference-only. It is reference-only so we can offer a medium-level API
 // for it that doesn't require unsafe code.
+// ALternative name: MidiIn
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub struct MidiInput(pub(crate) NonNull<raw::midi_Input>);
 
@@ -34,6 +37,8 @@ impl MidiInput {
     }
 }
 
+// # Internals exposed: no | vtable: yes (Rust => REAPER)
+// ALternative name: MidiEvtList
 pub struct MidiEvtList<'a>(&'a raw::MIDI_eventlist);
 
 impl<'a> MidiEvtList<'a> {
@@ -68,8 +73,10 @@ impl<'a> Iterator for MidiEvtListIterator<'a> {
     }
 }
 
+// # Internals exposed: yes | vtable: no
 // Represents a borrowed reference to a MIDI event from REAPER. Cheap to copy because it's just a
 // wrapper around MIDI_event_t.
+// ALternative name: MidiEvt
 // TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
 //  keeps  the event around.
 #[derive(Clone, Copy)]

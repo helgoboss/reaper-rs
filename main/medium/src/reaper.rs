@@ -10,19 +10,19 @@ use crate::infostruct_keeper::InfostructKeeper;
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, get_cpp_control_surface, require_non_null, require_non_null_panic,
-    ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint,
-    CommandId, ControlSurface, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
+    ActionValueChange, AddFxBehavior, AudioHookRegisterHandle, AutomationMode, Bpm, ChunkCacheHint,
+    CommandId, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
     FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GaccelRegisterHandle,
     GangBehavior, GlobalAutomationOverride, HookCommand, HookPostCommand, Hwnd,
-    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
+    InputMonitoringMode, KbdSectionInfoHandle, MasterTrackBehavior, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
     NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
-    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
-    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, ToggleAction,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
-    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
-    UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    ReaProject, ReaperControlSurface, ReaperControlSurfaceHandle, ReaperNormalizedValue,
+    ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    ToggleAction, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey,
+    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
+    UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -391,13 +391,13 @@ impl Reaper {
 
     pub unsafe fn plugin_register_add_csurf_inst(
         &self,
-        csurf_inst: ReaperControlSurface,
+        csurf_inst: ReaperControlSurfaceHandle,
     ) -> Result<(), ()> {
         let result = unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(csurf_inst)) };
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
+    pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurfaceHandle) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::CsurfInst(csurf_inst));
         }
@@ -479,13 +479,13 @@ impl Reaper {
     pub fn section_from_unique_id<R>(
         &self,
         unique_id: SectionId,
-        f: impl FnOnce(&KbdSectionInfo) -> R,
+        f: impl FnOnce(&KbdSectionInfoHandle) -> R,
     ) -> Option<R> {
         let ptr = self.low().SectionFromUniqueID(unique_id.into());
         if ptr.is_null() {
             return None;
         }
-        NonNull::new(ptr).map(|nnp| f(&KbdSectionInfo(nnp)))
+        NonNull::new(ptr).map(|nnp| f(&KbdSectionInfoHandle(nnp)))
     }
 
     // The closure-taking function might be too restrictive in some cases, e.g. it wouldn't let us
@@ -496,9 +496,9 @@ impl Reaper {
     pub unsafe fn section_from_unique_id_unchecked(
         &self,
         unique_id: SectionId,
-    ) -> Option<KbdSectionInfo> {
+    ) -> Option<KbdSectionInfoHandle> {
         let ptr = self.low().SectionFromUniqueID(unique_id.into());
-        NonNull::new(ptr).map(KbdSectionInfo)
+        NonNull::new(ptr).map(KbdSectionInfoHandle)
     }
 
     // Kept return value type i32 because I have no idea what the return value is about.
@@ -1345,12 +1345,15 @@ impl Reaper {
     // The given audio_hook_register_t will be modified by REAPER. After registering it, it must
     // only be accessed from within OnAudioBuffer callback (passed as param).
     // Returns true on success
-    pub unsafe fn audio_reg_hardware_hook_add(&self, reg: AudioHookRegister) -> Result<(), ()> {
+    pub unsafe fn audio_reg_hardware_hook_add(
+        &self,
+        reg: AudioHookRegisterHandle,
+    ) -> Result<(), ()> {
         let result = self.low().Audio_RegHardwareHook(true, reg.as_ptr());
         ok_if_one(result)
     }
 
-    pub fn audio_reg_hardware_hook_remove(&self, reg: AudioHookRegister) {
+    pub fn audio_reg_hardware_hook_remove(&self, reg: AudioHookRegisterHandle) {
         unsafe { self.low().Audio_RegHardwareHook(false, reg.as_ptr()) };
     }
 

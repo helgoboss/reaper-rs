@@ -37,7 +37,7 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    install_control_surface, Accelerator, AudioHookRegister, CommandId, GaccelRegister,
+    install_control_surface, Accelerator, AudioHookRegisterHandle, CommandId, GaccelRegister,
     GaccelRegisterHandle, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationOverride,
     HookCommand, HookPostCommand, Hwnd, MessageBoxResult, MessageBoxType, MidiEvt,
     MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,

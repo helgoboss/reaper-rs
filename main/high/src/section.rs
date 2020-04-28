@@ -1,5 +1,5 @@
 use crate::{Action, Reaper};
-use reaper_rs_medium::{CommandId, KbdCmd, KbdSectionInfo, SectionId};
+use reaper_rs_medium::{CommandId, KbdCmdHandle, KbdSectionInfoHandle, SectionId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {
@@ -15,11 +15,11 @@ impl Section {
         self.id
     }
 
-    pub fn with_raw<R>(&self, f: impl FnOnce(&KbdSectionInfo) -> R) -> Option<R> {
+    pub fn with_raw<R>(&self, f: impl FnOnce(&KbdSectionInfoHandle) -> R) -> Option<R> {
         Reaper::get().medium().section_from_unique_id(self.id, f)
     }
 
-    pub unsafe fn get_raw(&self) -> KbdSectionInfo {
+    pub unsafe fn get_raw(&self) -> KbdSectionInfoHandle {
         Reaper::get()
             .medium()
             .section_from_unique_id_unchecked(self.id)

@@ -1,4 +1,4 @@
-use super::{MediaItem, MediaItemTake, MediaTrack, PcmSource, ReaProject, TrackEnvelope};
+use super::{MediaItem, MediaItemTake, MediaTrack, PcmSourceHandle, ReaProject, TrackEnvelope};
 use crate::{concat_c_strs, ReaperStringArg};
 use c_str_macro::c_str;
 use std::borrow::Cow;
@@ -19,7 +19,7 @@ pub enum ReaperPointer<'a> {
     MediaItem(MediaItem),
     MediaItemTake(MediaItemTake),
     TrackEnvelope(TrackEnvelope),
-    PcmSource(PcmSource),
+    PcmSource(PcmSourceHandle),
     /// If a variant is missing in this enum, you can use this custom one as a resort. Don't
     /// include the trailing asterisk (`*`)! It will be added to the call automatically.
     Custom {
@@ -51,21 +51,21 @@ impl<'a> ReaperPointer<'a> {
 }
 
 macro_rules! impl_from_ptr_wrapper_to_enum {
-    ($name: ident) => {
-        impl<'a> From<$name> for ReaperPointer<'a> {
-            fn from(p: $name) -> Self {
-                ReaperPointer::$name(p)
+    ($wrapper_name: ident, $variant_name: ident) => {
+        impl<'a> From<$wrapper_name> for ReaperPointer<'a> {
+            fn from(p: $wrapper_name) -> Self {
+                ReaperPointer::$variant_name(p)
             }
         }
     };
 }
 
-impl_from_ptr_wrapper_to_enum!(MediaTrack);
-impl_from_ptr_wrapper_to_enum!(ReaProject);
-impl_from_ptr_wrapper_to_enum!(MediaItem);
-impl_from_ptr_wrapper_to_enum!(MediaItemTake);
-impl_from_ptr_wrapper_to_enum!(TrackEnvelope);
-impl_from_ptr_wrapper_to_enum!(PcmSource);
+impl_from_ptr_wrapper_to_enum!(MediaTrack, MediaTrack);
+impl_from_ptr_wrapper_to_enum!(ReaProject, ReaProject);
+impl_from_ptr_wrapper_to_enum!(MediaItem, MediaItem);
+impl_from_ptr_wrapper_to_enum!(MediaItemTake, MediaItemTake);
+impl_from_ptr_wrapper_to_enum!(TrackEnvelope, TrackEnvelope);
+impl_from_ptr_wrapper_to_enum!(PcmSourceHandle, PcmSource);
 
 impl<'a> From<ReaperPointer<'a>> for Cow<'a, CStr> {
     fn from(value: ReaperPointer<'a>) -> Self {
