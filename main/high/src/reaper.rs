@@ -390,16 +390,13 @@ impl Reaper {
 
     // TODO-low Must be idempotent
     pub fn activate(&self) {
-        self.medium()
-            .plugin_register_add_hookcommand::<HighLevelHookCommand>();
-        self.medium()
-            .plugin_register_add_toggleaction::<HighLevelToggleAction>();
-        self.medium()
-            .plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
-        self.medium().register_control_surface();
+        let mut medium = self.medium_mut();
+        medium.plugin_register_add_hookcommand::<HighLevelHookCommand>();
+        medium.plugin_register_add_toggleaction::<HighLevelToggleAction>();
+        medium.plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
+        medium.register_control_surface();
         if self.audio_hook_register_handle.get().is_none() {
-            let handle = self
-                .medium_mut()
+            let handle = medium
                 .audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<HighOnAudioBuffer>())
                 .unwrap();
             self.audio_hook_register_handle.set(Some(handle))
@@ -408,17 +405,15 @@ impl Reaper {
 
     // TODO-low Must be idempotent
     pub fn deactivate(&self) {
+        let mut medium = self.medium_mut();
         if let Some(handle) = self.audio_hook_register_handle.get() {
             self.audio_hook_register_handle.set(None);
-            self.medium_mut().audio_reg_hardware_hook_remove(handle);
+            medium.audio_reg_hardware_hook_remove(handle);
         }
-        self.medium().unregister_control_surface();
-        self.medium()
-            .plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
-        self.medium()
-            .plugin_register_remove_toggleaction::<HighLevelToggleAction>();
-        self.medium()
-            .plugin_register_remove_hookcommand::<HighLevelHookCommand>();
+        medium.unregister_control_surface();
+        medium.plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
+        medium.plugin_register_remove_toggleaction::<HighLevelToggleAction>();
+        medium.plugin_register_remove_hookcommand::<HighLevelHookCommand>();
     }
 
     pub fn medium(&self) -> Ref<reaper_rs_medium::Reaper> {
@@ -496,13 +491,13 @@ impl Reaper {
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
-        let command_id = self.medium().plugin_register_add_command_id(command_name);
+        let mut medium = self.medium_mut();
+        let command_id = medium.plugin_register_add_command_id(command_name);
         let command = Command::new(Rc::new(RefCell::new(operation)), kind);
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             p.insert(command);
         }
-        let address = self
-            .medium_mut()
+        let address = medium
             .plugin_register_add_gaccel(MediumGaccelRegister::new(
                 MediumAccelerator::new(0, 0, command_id),
                 description.into(),

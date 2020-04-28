@@ -217,7 +217,7 @@ pub enum ActionValueChange {
     Relative3(U7),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PluginRegistration<'a> {
     // TODO-low Refine all c_void's as soon as used
     Api(Cow<'a, CStr>, *mut c_void),
@@ -247,6 +247,24 @@ impl<'a> PluginRegistration<'a> {
         Self::Custom(key.into().into_inner(), info_struct)
     }
 
+    pub(crate) fn to_owned(self) -> PluginRegistration<'static> {
+        use PluginRegistration::*;
+        match self {
+            Api(func_name, func) => Api(func_name.into_owned().into(), func),
+            ApiDef(func_name, func_def) => ApiDef(func_name.into_owned().into(), func_def),
+            HookCommand(func) => HookCommand(func),
+            HookPostCommand(func) => HookPostCommand(func),
+            HookCommand2(func) => HookCommand2(func),
+            ToggleAction(func) => ToggleAction(func),
+            ActionHelp(info_struct) => ActionHelp(info_struct),
+            CommandId(command_name) => CommandId(command_name.into_owned().into()),
+            CommandIdLookup(info_struct) => CommandIdLookup(info_struct),
+            Gaccel(reg) => Gaccel(reg),
+            CsurfInst(inst) => CsurfInst(inst),
+            Custom(key, info_struct) => Custom(key.into_owned().into(), info_struct),
+        }
+    }
+
     pub(crate) fn infostruct(&self) -> *mut c_void {
         use PluginRegistration::*;
         match self {
@@ -270,8 +288,6 @@ impl<'a> From<PluginRegistration<'a>> for Cow<'a, CStr> {
     fn from(value: PluginRegistration<'a>) -> Self {
         use PluginRegistration::*;
         match value {
-            Gaccel(_) => c_str!("gaccel").into(),
-            CsurfInst(_) => c_str!("csurf_inst").into(),
             Api(func_name, _) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
             ApiDef(func_name, _) => concat_c_strs(c_str!("APIdef_"), func_name.as_ref()).into(),
             HookCommand(_) => c_str!("hookcommand").into(),
@@ -281,7 +297,9 @@ impl<'a> From<PluginRegistration<'a>> for Cow<'a, CStr> {
             ActionHelp(_) => c_str!("action_help").into(),
             CommandId(_) => c_str!("command_id").into(),
             CommandIdLookup(_) => c_str!("command_id_lookup").into(),
-            Custom(k, _) => k,
+            Gaccel(_) => c_str!("gaccel").into(),
+            CsurfInst(_) => c_str!("csurf_inst").into(),
+            Custom(key, _) => key,
         }
     }
 }
@@ -405,7 +423,7 @@ impl<'a> From<SectionContext<'a>> for *mut raw::KbdSectionInfo {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WindowContext {
-    MainWindow,
+    NoWindow,
     Win(Hwnd),
 }
 
@@ -414,7 +432,7 @@ impl From<WindowContext> for HWND {
         use WindowContext::*;
         match c {
             Win(h) => h.as_ptr(),
-            MainWindow => null_mut(),
+            NoWindow => null_mut(),
         }
     }
 }

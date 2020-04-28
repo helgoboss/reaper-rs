@@ -31,7 +31,7 @@ use reaper_rs_low;
 use reaper_rs_low::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, GUID, UNDO_STATE_ALL,
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::convert::{TryFrom, TryInto};
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
@@ -48,6 +48,8 @@ pub struct Reaper {
     low: reaper_rs_low::Reaper,
     gaccel_registers: InfostructKeeper<MediumGaccelRegister, gaccel_register_t>,
     audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, audio_hook_register_t>,
+    plugin_registrations: HashSet<PluginRegistration<'static>>,
+    audio_hook_registrations: HashSet<AudioHookRegister>,
 }
 
 const ZERO_GUID: GUID = GUID {
@@ -77,6 +79,8 @@ impl Reaper {
             low,
             gaccel_registers: Default::default(),
             audio_hook_registers: Default::default(),
+            plugin_registrations: Default::default(),
+            audio_hook_registrations: Default::default(),
         }
     }
 
@@ -265,20 +269,27 @@ impl Reaper {
 
     // Kept return value type i32 because meaning of return value depends very much on the actual
     // thing which is registered and probably is not safe to generalize.
-    pub unsafe fn plugin_register_add(&self, reg: PluginRegistration) -> i32 {
+    // Unregistering is optional! It will be done anyway on Drop via RAII.
+    pub unsafe fn plugin_register_add(&mut self, reg: PluginRegistration) -> i32 {
+        self.plugin_registrations.insert(reg.clone().to_owned());
         let infostruct = reg.infostruct();
-        self.low()
-            .plugin_register(Cow::from(reg).as_ptr(), infostruct)
+        let result = self
+            .low()
+            .plugin_register(Cow::from(reg).as_ptr(), infostruct);
+        result
     }
 
-    pub unsafe fn plugin_register_remove(&self, reg: PluginRegistration) -> i32 {
+    pub unsafe fn plugin_register_remove(&mut self, reg: PluginRegistration) -> i32 {
         let infostruct = reg.infostruct();
-        let name_with_minus = concat_c_strs(c_str!("-"), Cow::from(reg).as_ref());
-        self.low()
-            .plugin_register(name_with_minus.as_ptr(), infostruct)
+        let name_with_minus = concat_c_strs(c_str!("-"), Cow::from(reg.clone()).as_ref());
+        let result = self
+            .low()
+            .plugin_register(name_with_minus.as_ptr(), infostruct);
+        self.plugin_registrations.remove(&reg.to_owned());
+        result
     }
 
-    pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(&mut self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(PluginRegistration::HookCommand(
                 delegating_hook_command::<T>,
@@ -287,7 +298,7 @@ impl Reaper {
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_hookcommand<T: MediumHookCommand>(&self) {
+    pub fn plugin_register_remove_hookcommand<T: MediumHookCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::HookCommand(
                 delegating_hook_command::<T>,
@@ -295,7 +306,7 @@ impl Reaper {
         }
     }
 
-    pub fn plugin_register_add_toggleaction<T: MediumToggleAction>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_toggleaction<T: MediumToggleAction>(&mut self) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(PluginRegistration::ToggleAction(
                 delegating_toggle_action::<T>,
@@ -304,7 +315,7 @@ impl Reaper {
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_toggleaction<T: MediumToggleAction>(&self) {
+    pub fn plugin_register_remove_toggleaction<T: MediumToggleAction>(&mut self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::ToggleAction(
                 delegating_toggle_action::<T>,
@@ -312,7 +323,9 @@ impl Reaper {
         }
     }
 
-    pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(&self) -> Result<(), ()> {
+    pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(
+        &mut self,
+    ) -> Result<(), ()> {
         let result = unsafe {
             self.plugin_register_add(PluginRegistration::HookPostCommand(
                 delegating_hook_post_command::<T>,
@@ -321,7 +334,7 @@ impl Reaper {
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_hookpostcommand<T: MediumHookPostCommand>(&self) {
+    pub fn plugin_register_remove_hookpostcommand<T: MediumHookPostCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::HookPostCommand(
                 delegating_hook_post_command::<T>,
@@ -335,7 +348,7 @@ impl Reaper {
     // we can't do that using this signature. If a very large string is passed, it works. If a
     // number of a built-in command is passed, it works.
     pub fn plugin_register_add_command_id<'a>(
-        &self,
+        &mut self,
         command_name: impl Into<ReaperStringArg<'a>>,
     ) -> CommandId {
         let raw_id = unsafe {
@@ -391,14 +404,14 @@ impl Reaper {
     // TODO-medium Handle CSurfs almost like other infostructs, use the keeper! Create pairs of
     //  low-level structs: one on CPP side, one on Rust side, connect them with each other.
     pub unsafe fn plugin_register_add_csurf_inst(
-        &self,
+        &mut self,
         csurf_inst: ReaperControlSurface,
     ) -> Result<(), ()> {
         let result = unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(csurf_inst)) };
         ok_if_one(result)
     }
 
-    pub fn plugin_register_remove_csurf_inst(&self, csurf_inst: ReaperControlSurface) {
+    pub fn plugin_register_remove_csurf_inst(&mut self, csurf_inst: ReaperControlSurface) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::CsurfInst(csurf_inst));
         }
@@ -466,12 +479,12 @@ impl Reaper {
 
     // This method is not idempotent. If you call it two times, you will have every callback TWICE.
     // Please take care of unregistering once you are done!
-    pub fn register_control_surface(&self) -> Result<(), ()> {
+    pub fn register_control_surface(&mut self) -> Result<(), ()> {
         unsafe { self.plugin_register_add_csurf_inst(get_cpp_control_surface()) }
     }
 
     // This method is idempotent
-    pub fn unregister_control_surface(&self) {
+    pub fn unregister_control_surface(&mut self) {
         self.plugin_register_remove_csurf_inst(get_cpp_control_surface());
     }
 
@@ -1347,15 +1360,17 @@ impl Reaper {
     // only be accessed from within OnAudioBuffer callback (passed as param).
     // Returns true on success
     pub unsafe fn audio_reg_hardware_hook_add_unchecked(
-        &self,
+        &mut self,
         reg: AudioHookRegister,
     ) -> Result<(), ()> {
+        self.audio_hook_registrations.insert(reg);
         let result = self.low().Audio_RegHardwareHook(true, reg.get().as_ptr());
         ok_if_one(result)
     }
 
-    pub unsafe fn audio_reg_hardware_hook_remove_unchecked(&self, reg: AudioHookRegister) {
+    pub unsafe fn audio_reg_hardware_hook_remove_unchecked(&mut self, reg: AudioHookRegister) {
         self.low().Audio_RegHardwareHook(false, reg.get().as_ptr());
+        self.audio_hook_registrations.remove(&reg);
     }
 
     pub fn audio_reg_hardware_hook_add(
@@ -1826,14 +1841,14 @@ impl Reaper {
 
 impl Drop for Reaper {
     fn drop(&mut self) {
-        for handle in self.audio_hook_registers.release_all() {
+        for handle in self.audio_hook_registrations.clone() {
             unsafe {
-                self.audio_reg_hardware_hook_remove_unchecked(AudioHookRegister::new(handle));
+                self.audio_reg_hardware_hook_remove_unchecked(handle);
             }
         }
-        for handle in self.gaccel_registers.release_all() {
+        for reg in self.plugin_registrations.clone() {
             unsafe {
-                self.plugin_register_remove(PluginRegistration::Gaccel(GaccelRegister(handle)));
+                self.plugin_register_remove(reg);
             }
         }
     }

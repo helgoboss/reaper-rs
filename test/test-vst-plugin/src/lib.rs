@@ -1,6 +1,6 @@
 use c_str_macro::c_str;
 
-use reaper_rs_high::{setup_reaper_with_defaults, Reaper};
+use reaper_rs_high::{setup_reaper_with_defaults, ActionKind, Reaper};
 use reaper_rs_low::ReaperPluginContext;
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
@@ -24,12 +24,17 @@ impl Plugin for TestVstPlugin {
     }
 
     fn init(&mut self) {
-        // TODO-high teardown_reaper() on Drop!!!
         let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
         setup_reaper_with_defaults(&context, "info@helgoboss.org");
         let reaper = Reaper::get();
-        reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
         reaper.activate();
+        reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
+        reaper.register_action(
+            c_str!("reaperRsVstIntegrationTests"),
+            c_str!("reaper-rs VST integration tests"),
+            || reaper_rs_test::execute_integration_test(),
+            ActionKind::NotToggleable,
+        );
     }
 }
 
