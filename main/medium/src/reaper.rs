@@ -14,16 +14,16 @@ use crate::{
     CommandId, CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName,
     FxAddByNameBehavior, FxPresetRef, FxShowFlag, GaccelRegister, GangBehavior,
     GlobalAutomationOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
-    MediaTrack, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
-    MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
-    PluginRegistration, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef,
-    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    MediaTrack, MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand,
+    MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction, MessageBoxResult,
+    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
+    NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
+    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
+    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -45,9 +45,9 @@ use std::path::PathBuf;
 /// low-level API by navigating to [`low`](struct.Reaper.html#structfield.low). Of course you are
 /// welcome to contribute to bring the medium-level API on par with the low-level one.  
 pub struct Reaper {
-    /// Returns the low-level REAPER instance
     low: reaper_rs_low::Reaper,
-    gaccels: InfostructKeeper<MediumGaccelRegister, gaccel_register_t>,
+    gaccel_registers: InfostructKeeper<MediumGaccelRegister, gaccel_register_t>,
+    audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, audio_hook_register_t>,
 }
 
 const ZERO_GUID: GUID = GUID {
@@ -75,7 +75,8 @@ impl Reaper {
     pub fn new(low: reaper_rs_low::Reaper) -> Reaper {
         Reaper {
             low,
-            gaccels: Default::default(),
+            gaccel_registers: Default::default(),
+            audio_hook_registers: Default::default(),
         }
     }
 
@@ -368,9 +369,9 @@ impl Reaper {
     // REAPER. This is why we can make this function save! No lifetime worries anymore.
     pub fn plugin_register_add_gaccel(
         &mut self,
-        gaccel: MediumGaccelRegister,
+        reg: MediumGaccelRegister,
     ) -> Result<GaccelRegister, ()> {
-        let handle = GaccelRegister::new(self.gaccels.keep(gaccel));
+        let handle = GaccelRegister::new(self.gaccel_registers.keep(reg));
         let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle)) };
         if result != 1 {
             return Err(());
@@ -380,13 +381,10 @@ impl Reaper {
 
     pub fn plugin_register_remove_gaccel(
         &mut self,
-        handle: GaccelRegister,
+        reg_handle: GaccelRegister,
     ) -> Result<MediumGaccelRegister, ()> {
-        let original = match self.gaccels.release(handle.get()) {
-            None => return Err(()),
-            Some(o) => o,
-        };
-        unsafe { self.plugin_register_remove(PluginRegistration::Gaccel(handle)) };
+        let original = self.gaccel_registers.release(reg_handle.get()).ok_or(())?;
+        unsafe { self.plugin_register_remove(PluginRegistration::Gaccel(reg_handle)) };
         Ok(original)
     }
 
@@ -1346,13 +1344,38 @@ impl Reaper {
     // The given audio_hook_register_t will be modified by REAPER. After registering it, it must
     // only be accessed from within OnAudioBuffer callback (passed as param).
     // Returns true on success
-    pub unsafe fn audio_reg_hardware_hook_add(&self, reg: AudioHookRegister) -> Result<(), ()> {
-        let result = self.low().Audio_RegHardwareHook(true, reg.as_ptr());
+    pub unsafe fn audio_reg_hardware_hook_add_unchecked(
+        &self,
+        reg: AudioHookRegister,
+    ) -> Result<(), ()> {
+        let result = self.low().Audio_RegHardwareHook(true, reg.get().as_ptr());
         ok_if_one(result)
     }
 
-    pub fn audio_reg_hardware_hook_remove(&self, reg: AudioHookRegister) {
-        unsafe { self.low().Audio_RegHardwareHook(false, reg.as_ptr()) };
+    pub unsafe fn audio_reg_hardware_hook_remove_unchecked(&self, reg: AudioHookRegister) {
+        self.low().Audio_RegHardwareHook(false, reg.get().as_ptr());
+    }
+
+    pub fn audio_reg_hardware_hook_add(
+        &mut self,
+        reg: MediumAudioHookRegister,
+    ) -> Result<AudioHookRegister, ()> {
+        let handle = AudioHookRegister::new(self.audio_hook_registers.keep(reg));
+        unsafe { self.audio_reg_hardware_hook_add_unchecked(handle)? };
+        Ok(handle)
+    }
+
+    // TODO-medium Now it's time to introduce RAII!
+    pub fn audio_reg_hardware_hook_remove(
+        &mut self,
+        reg_handle: AudioHookRegister,
+    ) -> Result<MediumAudioHookRegister, ()> {
+        let original = self
+            .audio_hook_registers
+            .release(reg_handle.get())
+            .ok_or(())?;
+        unsafe { self.audio_reg_hardware_hook_remove_unchecked(reg_handle) };
+        Ok(original)
     }
 
     pub unsafe fn csurf_set_surface_volume(

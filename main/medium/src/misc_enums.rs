@@ -1,6 +1,7 @@
 use crate::{
-    concat_c_strs, GaccelRegister, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
-    ReaProject, ReaperControlSurface, ReaperStringArg,
+    concat_c_strs, GaccelRegister, HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo,
+    MediaTrack, MidiOutputDeviceId, ReaProject, ReaperControlSurface, ReaperStringArg,
+    ToggleActionFn,
 };
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
@@ -221,10 +222,10 @@ pub enum PluginRegistration<'a> {
     // TODO-low Refine all c_void's as soon as used
     Api(Cow<'a, CStr>, *mut c_void),
     ApiDef(Cow<'a, CStr>, *mut c_void),
-    HookCommand(extern "C" fn(command_id: i32, flag: i32) -> bool),
-    HookPostCommand(extern "C" fn(command_id: i32, flag: i32)),
+    HookCommand(HookCommandFn),
+    HookPostCommand(HookPostCommandFn),
     HookCommand2(*mut c_void),
-    ToggleAction(extern "C" fn(command_id: i32) -> i32),
+    ToggleAction(ToggleActionFn),
     ActionHelp(*mut c_void),
     CommandId(Cow<'a, CStr>),
     CommandIdLookup(*mut c_void),

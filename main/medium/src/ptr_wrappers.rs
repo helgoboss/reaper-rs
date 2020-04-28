@@ -71,8 +71,19 @@ impl GaccelRegister {
     }
 }
 
-// TODO-medium Make newtypes already because we might expose internals in better way in future
-pub type AudioHookRegister = NonNull<raw::audio_hook_register_t>;
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Into)]
+pub struct AudioHookRegister(pub(crate) NonNull<raw::audio_hook_register_t>);
+
+impl AudioHookRegister {
+    pub fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister {
+        AudioHookRegister(ptr)
+    }
+
+    pub(crate) fn get(&self) -> NonNull<raw::audio_hook_register_t> {
+        self.0
+    }
+}
+
 // This is unlike MediaTrack and Co. in that it points to a struct which is *not* opaque. Still, we
 // need it as pointer and it has the same lifetime characteristics. The difference is that we add
 // type-safe methods to it to lift the possibilities in the struct to medium-level API style. This

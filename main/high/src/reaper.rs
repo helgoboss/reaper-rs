@@ -39,9 +39,10 @@ use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
     install_control_surface, AudioHookRegister, CommandId, GaccelRegister, GetFocusedFxResult,
     GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumToggleAction,
-    MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId, MidiOutputDeviceId, ProjectRef,
-    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
+    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
+    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId,
+    MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
+    StuffMidiMessageTarget, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -235,10 +236,7 @@ pub struct Reaper {
     task_sender: Sender<ScheduledTask>,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
-    // As soon as registered, this must not be accessed anymore. It's mutated by REAPER
-    // and the containing function pointer is called by REAPER (in audio thread). Maybe there's a
-    // better way to model that?
-    audio_hook: audio_hook_register_t,
+    audio_hook_register_handle: Cell<Option<AudioHookRegister>>,
 }
 
 pub(super) struct EventStreamSubjects {
@@ -370,14 +368,7 @@ impl Reaper {
             task_sender: task_sender.clone(),
             main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
-            audio_hook: audio_hook_register_t {
-                OnAudioBuffer: Some(process_audio_buffer),
-                userdata1: null_mut(),
-                userdata2: null_mut(),
-                input_nch: 0,
-                output_nch: 0,
-                GetBuffer: None,
-            },
+            audio_hook_register_handle: Cell::new(None),
         };
         unsafe {
             INIT_REAPER_INSTANCE.call_once(|| {
@@ -403,16 +394,21 @@ impl Reaper {
         self.medium()
             .plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
         self.medium().register_control_surface();
-        unsafe {
-            self.medium()
-                .audio_reg_hardware_hook_add((&self.audio_hook).into());
+        if self.audio_hook_register_handle.get().is_none() {
+            let handle = self
+                .medium_mut()
+                .audio_reg_hardware_hook_add(MediumAudioHookRegister::new(process_audio_buffer))
+                .unwrap();
+            self.audio_hook_register_handle.set(Some(handle))
         }
     }
 
     // TODO-low Must be idempotent
     pub fn deactivate(&self) {
-        self.medium()
-            .audio_reg_hardware_hook_remove((&self.audio_hook).into());
+        if let Some(handle) = self.audio_hook_register_handle.get() {
+            self.audio_hook_register_handle.set(None);
+            self.medium_mut().audio_reg_hardware_hook_remove(handle);
+        }
         self.medium().unregister_control_surface();
         self.medium()
             .plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
