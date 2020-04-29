@@ -114,7 +114,6 @@ pub trait IReaperControlSurface: RefUnwindSafe {
 /// surface before the VST plug-in is destroyed, REAPER will crash** because it will attempt to
 /// invoke functions which are not loaded anymore. This kind of responsibility is gone when using
 /// the high-level API.     
-/// TODO-medium Maybe better to return a NonNull pointer?
 /// This returns a reference of a `IReaperControlSurface`-implementing C++ object which will
 /// delegate to the Rust [`ControlSurface`](trait.ControlSurface.html) which you installed by
 /// invoking [`install_control_surface`](fn.install_control_surface.html). It needs to be
