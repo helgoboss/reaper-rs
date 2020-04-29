@@ -566,7 +566,11 @@ impl Reaper {
         RegisteredAction::new(command_id, address)
     }
 
-    fn unregister_command(&self, command_id: CommandId, gaccel_handle: GaccelRegister) {
+    fn unregister_command(
+        &self,
+        command_id: CommandId,
+        gaccel_handle: NonNull<raw::gaccel_register_t>,
+    ) {
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
@@ -991,11 +995,14 @@ pub struct RegisteredAction {
     // For identifying the registered command (= the functions to be executed)
     command_id: CommandId,
     // For identifying the registered action (= description, related keyboard shortcuts etc.)
-    gaccel_handle: GaccelRegister,
+    gaccel_handle: NonNull<raw::gaccel_register_t>,
 }
 
 impl RegisteredAction {
-    fn new(command_id: CommandId, gaccel_handle: GaccelRegister) -> RegisteredAction {
+    fn new(
+        command_id: CommandId,
+        gaccel_handle: NonNull<raw::gaccel_register_t>,
+    ) -> RegisteredAction {
         RegisteredAction {
             command_id,
             gaccel_handle,

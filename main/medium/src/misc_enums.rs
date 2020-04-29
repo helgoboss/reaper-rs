@@ -229,10 +229,7 @@ pub enum PluginRegistration<'a> {
     ActionHelp(*mut c_void),
     CommandId(Cow<'a, CStr>),
     CommandIdLookup(*mut c_void),
-    // TODO-medium Maybe we should not expect the newtype here but the NonNull pointer. Expecting
-    //  the newtype is more than we need (this might turn out inflexible in some situations,
-    //  especially if the newtype is generic - see AudioHookRegister as example).
-    Gaccel(GaccelRegister),
+    Gaccel(NonNull<raw::gaccel_register_t>),
     CsurfInst(NonNull<raw::IReaperControlSurface>),
     Custom(Cow<'a, CStr>, *mut c_void),
 }
@@ -280,7 +277,7 @@ impl<'a> PluginRegistration<'a> {
             ActionHelp(info_struct) => *info_struct,
             CommandId(command_name) => command_name.as_ptr() as *mut c_void,
             CommandIdLookup(info_struct) => *info_struct,
-            Gaccel(reg) => reg.get().as_ptr() as *mut c_void,
+            Gaccel(reg) => reg.as_ptr() as *mut c_void,
             CsurfInst(inst) => inst.as_ptr() as *mut c_void,
             Custom(_, info_struct) => *info_struct,
         }

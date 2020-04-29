@@ -402,8 +402,8 @@ impl Reaper {
     pub fn plugin_register_add_gaccel(
         &mut self,
         reg: MediumGaccelRegister,
-    ) -> Result<GaccelRegister, ()> {
-        let handle = GaccelRegister::new(self.gaccel_registers.keep(reg));
+    ) -> Result<NonNull<raw::gaccel_register_t>, ()> {
+        let handle = self.gaccel_registers.keep(reg);
         let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle)) };
         if result != 1 {
             return Err(());
@@ -413,10 +413,10 @@ impl Reaper {
 
     pub fn plugin_register_remove_gaccel(
         &mut self,
-        reg_handle: GaccelRegister,
+        reg_handle: NonNull<raw::gaccel_register_t>,
     ) -> Result<MediumGaccelRegister, ()> {
         unsafe { self.plugin_register_remove(PluginRegistration::Gaccel(reg_handle)) };
-        let original = self.gaccel_registers.release(reg_handle.get()).ok_or(())?;
+        let original = self.gaccel_registers.release(reg_handle).ok_or(())?;
         Ok(original)
     }
 
