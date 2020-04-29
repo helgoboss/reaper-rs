@@ -9461,7 +9461,12 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
-            pub fn get_control_surface() -> *mut root::IReaperControlSurface;
+            pub fn add_control_surface(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *mut root::IReaperControlSurface;
+        }
+        extern "C" {
+            pub fn remove_control_surface(surface: *mut root::IReaperControlSurface);
         }
         extern "C" {
             pub fn GetTypeString(

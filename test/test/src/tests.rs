@@ -21,13 +21,12 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_rs_medium::NotificationBehavior::NotifyAll;
 use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
-    get_cpp_control_surface, ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName,
-    FxAddByNameBehavior, FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
-    MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
-    RecordArmState, RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef,
-    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
-    ValueChange,
+    ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName, FxAddByNameBehavior,
+    FxShowFlag, GangBehavior, GlobalAutomationOverride, InputMonitoringMode, MasterTrackBehavior,
+    MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId, ReaperNormalizedValue,
+    ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue, RecordArmState,
+    RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior, ValueChange,
 };
 use std::os::raw::c_void;
 use std::rc::Rc;

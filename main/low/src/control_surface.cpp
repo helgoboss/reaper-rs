@@ -76,8 +76,11 @@ namespace reaper_rs_control_surface {
     }
   };
 
-  IReaperControlSurface* get_control_surface() {
-    static ReaperRsControlSurface CONTROL_SURFACE(nullptr);
-    return (IReaperControlSurface*) &CONTROL_SURFACE;
+  IReaperControlSurface* add_control_surface(void* callback_target) {
+    return new ReaperRsControlSurface(callback_target);
+  }
+
+  void remove_control_surface(IReaperControlSurface* surface) {
+    delete surface;
   }
 }

@@ -128,7 +128,7 @@ mod codegen {
                 /// pointers and panic if they are not available.
                 #[derive(Default)]
                 pub struct Reaper {
-                    pointers: ReaperFunctionPointers,
+                    pub(crate) pointers: ReaperFunctionPointers,
                 }
 
                 impl Reaper {

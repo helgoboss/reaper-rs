@@ -15,7 +15,6 @@ use crate::guid::Guid;
 use crate::track_send::TrackSend;
 
 use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
-use reaper_rs_low::get_control_surface_instance;
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::{CSURF_EXT_SETINPUTMONITOR, GUID};
 
@@ -155,14 +154,14 @@ impl Track {
                 .get_media_track_info_value(self.get_raw(), RecMon)
         };
         // TODO-low This is ugly. Solve in other ways.
-        let control_surface = get_control_surface_instance();
-        let super_raw: *mut raw::MediaTrack = self.get_raw().as_ptr();
-        control_surface.Extended(
-            CSURF_EXT_SETINPUTMONITOR as i32,
-            super_raw as *mut c_void,
-            &mut rec_mon as *mut f64 as *mut c_void,
-            null_mut(),
-        );
+        // let control_surface = get_control_surface_instance();
+        // let super_raw: *mut raw::MediaTrack = self.get_raw().as_ptr();
+        // control_surface.Extended(
+        //     CSURF_EXT_SETINPUTMONITOR as i32,
+        //     super_raw as *mut c_void,
+        //     &mut rec_mon as *mut f64 as *mut c_void,
+        //     null_mut(),
+        // );
     }
 
     pub fn get_raw(&self) -> MediaTrack {

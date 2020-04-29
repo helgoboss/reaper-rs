@@ -3,8 +3,8 @@ use c_str_macro::c_str;
 use reaper_rs_high::{setup_reaper_with_defaults, ActionKind, Reaper};
 use reaper_rs_low::ReaperPluginContext;
 use reaper_rs_medium::{
-    install_control_surface, AudioHookRegister, CommandId, MediumAudioHookRegister,
-    MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
+    AudioHookRegister, CommandId, MediumAudioHookRegister, MediumHookPostCommand,
+    MediumOnAudioBuffer, MediumReaperControlSurface,
 };
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
@@ -46,7 +46,7 @@ impl MediumOnAudioBuffer for MyOnAudioBuffer {
     fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<MyOnAudioBuffer, ()>) {
         let state = reg.user_data_1().unwrap();
         state.counter += 1;
-        println!("Audio hook counter: {}", state.counter)
+        // println!("Audio hook counter: {}", state.counter)
     }
 }
 
@@ -72,8 +72,7 @@ impl TestVstPlugin {
         let low = reaper_rs_low::Reaper::load(&context);
         let mut medium = reaper_rs_medium::Reaper::new(low);
         medium.show_console_msg("Registering control surface ...");
-        medium.register_control_surface();
-        install_control_surface(MyControlSurface, &medium.get_app_version());
+        medium.plugin_register_add_csurf_inst(MyControlSurface);
         medium.show_console_msg("Registering action ...");
         medium.plugin_register_add_hookpostcommand::<MyHookPostCommand>();
         medium.audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<MyOnAudioBuffer, _, _>(

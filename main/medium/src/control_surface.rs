@@ -6,18 +6,19 @@ use crate::{
 use c_str_macro::c_str;
 use enumflags2::_internal::core::convert::TryFrom;
 use reaper_rs_low;
-use reaper_rs_low::raw;
+use reaper_rs_low::{raw, IReaperControlSurface};
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CStr;
 use std::os::raw::c_void;
-use std::ptr::null_mut;
+use std::panic::RefUnwindSafe;
+use std::ptr::{null_mut, NonNull};
 
 /// This is the medium-level variant of
 /// [`reaper_rs_low::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation
 /// of this trait can be passed to
 /// [`medium_level::install_control_surface()`](../fn.install_control_surface.html).
-pub trait MediumReaperControlSurface {
+pub trait MediumReaperControlSurface: RefUnwindSafe {
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
         None
     }
@@ -314,24 +315,21 @@ pub enum VersionDependentTrackFxRef {
     New(TrackFxRef),
 }
 
-pub fn get_cpp_control_surface() -> ReaperControlSurface {
-    ReaperControlSurface::new(require_non_null_panic(
-        reaper_rs_low::get_cpp_control_surface() as *mut _,
-    ))
-}
-
-pub struct DelegatingControlSurface<T: MediumReaperControlSurface> {
-    delegate: T,
+pub struct DelegatingControlSurface {
+    delegate: Box<dyn MediumReaperControlSurface>,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
 }
 
-impl<T: MediumReaperControlSurface> DelegatingControlSurface<T> {
-    pub fn new(delegate: T, reaper_version: &ReaperVersion) -> DelegatingControlSurface<T> {
+impl DelegatingControlSurface {
+    pub fn new(
+        delegate: impl MediumReaperControlSurface + 'static,
+        reaper_version: &ReaperVersion,
+    ) -> DelegatingControlSurface {
         let reaper_version_5_95: ReaperVersion = ReaperVersion::from("5.95");
         DelegatingControlSurface {
-            delegate,
+            delegate: Box::new(delegate),
             // since pre1,
             supports_detection_of_input_fx: reaper_version >= &reaper_version_5_95,
             // since pre2 to be accurate but so what
@@ -377,9 +375,7 @@ impl<T: MediumReaperControlSurface> DelegatingControlSurface<T> {
 }
 
 #[allow(non_snake_case)]
-impl<T: MediumReaperControlSurface> reaper_rs_low::IReaperControlSurface
-    for DelegatingControlSurface<T>
-{
+impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
     fn GetTypeString(&self) -> *const i8 {
         self.delegate
             .get_type_string()

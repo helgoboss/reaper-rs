@@ -37,12 +37,12 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    install_control_surface, AudioHookRegister, CommandId, GaccelRegister, GetFocusedFxResult,
-    GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
-    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
-    MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent,
-    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, RealtimeReaper, ReaperStringArg,
-    ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
+    AudioHookRegister, CommandId, GaccelRegister, GetFocusedFxResult, GetLastTouchedFxResult,
+    GlobalAutomationOverride, Hwnd, MediumAccelerator, MediumAudioHookRegister,
+    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
+    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId,
+    MidiOutputDeviceId, ProjectRef, RealtimeReaper, ReaperStringArg, ReaperVersion, SectionId,
+    StuffMidiMessageTarget, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -249,9 +249,10 @@ pub struct Reaper {
     // reference???  Look into that!!!
     command_by_id: RefCell<HashMap<CommandId, Command>>,
     pub(super) subjects: EventStreamSubjects,
-    task_sender: Sender<ScheduledTask>,
+    task_sender: RefCell<Option<Sender<ScheduledTask>>>,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
+    csurf_inst_handle: Cell<Option<NonNull<raw::IReaperControlSurface>>>,
     audio_hook_register_handle: Cell<Option<NonNull<raw::audio_hook_register_t>>>,
 }
 
@@ -386,21 +387,20 @@ impl Reaper {
             unsafe { REAPER_INSTANCE.borrow().is_none() },
             "There's a Reaper instance already"
         );
-        let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
         let reaper = Reaper {
             medium: RefCell::new(medium),
             logger,
             command_by_id: RefCell::new(HashMap::new()),
             subjects: EventStreamSubjects::new(),
-            task_sender: task_sender.clone(),
+            task_sender: RefCell::new(None),
             main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
+            csurf_inst_handle: Cell::new(None),
             audio_hook_register_handle: Cell::new(None),
         };
         unsafe {
             REAPER_INSTANCE.replace(Some(reaper));
         }
-        Reaper::get().init(task_sender, task_receiver);
     }
 
     // Allowing global access to native REAPER functions at all times is valid in my opinion.
@@ -444,20 +444,21 @@ impl Reaper {
         })
     }
 
-    fn init(&self, task_sender: Sender<ScheduledTask>, task_receiver: Receiver<ScheduledTask>) {
-        install_control_surface(
-            HelperControlSurface::new(task_sender, task_receiver),
-            &self.get_version(),
-        );
-    }
-
     // TODO-low Must be idempotent
     pub fn activate(&self) {
+        let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
+        let helper_control_surface = HelperControlSurface::new(task_sender.clone(), task_receiver);
         let mut medium = self.medium_mut();
         medium.plugin_register_add_hookcommand::<HighLevelHookCommand>();
         medium.plugin_register_add_toggleaction::<HighLevelToggleAction>();
         medium.plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
-        medium.register_control_surface();
+        if self.csurf_inst_handle.get().is_none() {
+            let handle = medium
+                .plugin_register_add_csurf_inst(helper_control_surface)
+                .unwrap();
+            self.task_sender.replace(Some(task_sender));
+            self.csurf_inst_handle.set(Some(handle))
+        }
         if self.audio_hook_register_handle.get().is_none() {
             let realtime_reaper = medium.create_realtime_reaper();
             let handle = medium
@@ -479,7 +480,11 @@ impl Reaper {
             self.audio_hook_register_handle.set(None);
             medium.audio_reg_hardware_hook_remove(handle);
         }
-        medium.unregister_control_surface();
+        if let Some(handle) = self.csurf_inst_handle.get() {
+            self.csurf_inst_handle.set(None);
+            self.task_sender.replace(None);
+            medium.plugin_register_remove_csurf_inst(handle);
+        }
         medium.plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
         medium.plugin_register_remove_toggleaction::<HighLevelToggleAction>();
         medium.plugin_register_remove_hookcommand::<HighLevelHookCommand>();
@@ -864,26 +869,34 @@ impl Reaper {
         &self,
         waiting_time: Duration,
         task: impl FnOnce() + 'static,
-    ) {
-        self.task_sender
+    ) -> Result<(), ()> {
+        let task_sender_ref = self.task_sender.borrow();
+        let task_sender = task_sender_ref.as_ref().ok_or(())?;
+        task_sender
             .send(ScheduledTask::new(
                 Box::new(task),
                 Some(SystemTime::now() + waiting_time),
             ))
-            .unwrap();
+            .map_err(|_| ())
     }
 
-    pub fn execute_later_in_main_thread_asap(&self, task: impl FnOnce() + 'static) {
-        self.task_sender
+    pub fn execute_later_in_main_thread_asap(
+        &self,
+        task: impl FnOnce() + 'static,
+    ) -> Result<(), ()> {
+        let task_sender_ref = self.task_sender.borrow();
+        let task_sender = task_sender_ref.as_ref().ok_or(())?;
+        task_sender
             .send(ScheduledTask::new(Box::new(task), None))
-            .unwrap();
+            .map_err(|_| ())
     }
 
-    pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) {
+    pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) -> Result<(), ()> {
         if self.current_thread_is_main_thread() {
             task();
+            Ok(())
         } else {
-            self.execute_later_in_main_thread_asap(task);
+            self.execute_later_in_main_thread_asap(task)
         }
     }
 

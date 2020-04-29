@@ -11,7 +11,7 @@ use reaper_rs_low::raw::HWND;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_void;
-use std::ptr::null_mut;
+use std::ptr::{null_mut, NonNull};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AddFxBehavior {
@@ -233,7 +233,7 @@ pub enum PluginRegistration<'a> {
     //  the newtype is more than we need (this might turn out inflexible in some situations,
     //  especially if the newtype is generic - see AudioHookRegister as example).
     Gaccel(GaccelRegister),
-    CsurfInst(ReaperControlSurface),
+    CsurfInst(NonNull<raw::IReaperControlSurface>),
     Custom(Cow<'a, CStr>, *mut c_void),
 }
 
@@ -281,7 +281,7 @@ impl<'a> PluginRegistration<'a> {
             CommandId(command_name) => command_name.as_ptr() as *mut c_void,
             CommandIdLookup(info_struct) => *info_struct,
             Gaccel(reg) => reg.get().as_ptr() as *mut c_void,
-            CsurfInst(inst) => inst.get().as_ptr() as *mut c_void,
+            CsurfInst(inst) => inst.as_ptr() as *mut c_void,
             Custom(_, info_struct) => *info_struct,
         }
     }

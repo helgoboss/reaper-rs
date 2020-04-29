@@ -4,27 +4,28 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
-use reaper_rs_low::{firewall, raw};
+use reaper_rs_low::{
+    add_cpp_control_surface, firewall, raw, remove_cpp_control_surface, IReaperControlSurface,
+};
 
 use crate::infostruct_keeper::InfostructKeeper;
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
-    get_cpp_control_surface, require_non_null, require_non_null_panic, ActionValueChange,
-    AddFxBehavior, AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint, CommandId,
-    CreateTrackSendFailed, Db, DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior,
-    FxPresetRef, FxShowFlag, GaccelRegister, GangBehavior, GlobalAutomationOverride, Hwnd,
-    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface,
-    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, PluginRegistration,
-    ProjectContext, ProjectRef, ReaProject, RealtimeReaper, ReaperControlSurface,
-    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef,
-    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
+    AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
+    DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
+    GaccelRegister, GangBehavior, GlobalAutomationOverride, Hwnd, InputMonitoringMode,
+    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
+    MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction,
+    MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
+    NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
+    ReaProject, RealtimeReaper, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
+    ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
+    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
+    TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior,
+    UndoFlag, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -54,8 +55,9 @@ pub struct Reaper {
     // = ~7 kB) or let the consumer wrap medium-level Reaper in an Rc (which would be too
     // presumptuous and also lead to unnecessary indirection).
     low: Rc<reaper_rs_low::Reaper>,
-    gaccel_registers: InfostructKeeper<MediumGaccelRegister, gaccel_register_t>,
-    audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, audio_hook_register_t>,
+    gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
+    audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, raw::audio_hook_register_t>,
+    csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
     plugin_registrations: HashSet<PluginRegistration<'static>>,
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
 }
@@ -87,6 +89,7 @@ impl Reaper {
             low: Rc::new(low),
             gaccel_registers: Default::default(),
             audio_hook_registers: Default::default(),
+            csurf_insts: Default::default(),
             plugin_registrations: Default::default(),
             audio_hook_registrations: Default::default(),
         }
@@ -339,9 +342,6 @@ impl Reaper {
         }
     }
 
-    // TODO-medium Is it possible that T is not a struct but a function? That would save the
-    //  some typing. If that's not possible, try to achieve the same in a non-generic way. What
-    //  would be the price of that?
     pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(
         &mut self,
     ) -> Result<(), ()> {
@@ -415,24 +415,43 @@ impl Reaper {
         &mut self,
         reg_handle: GaccelRegister,
     ) -> Result<MediumGaccelRegister, ()> {
-        let original = self.gaccel_registers.release(reg_handle.get()).ok_or(())?;
         unsafe { self.plugin_register_remove(PluginRegistration::Gaccel(reg_handle)) };
+        let original = self.gaccel_registers.release(reg_handle.get()).ok_or(())?;
         Ok(original)
     }
 
-    // TODO-medium Handle CSurfs almost like other infostructs, use the keeper! Create pairs of
-    //  low-level structs: one on CPP side, one on Rust side, connect them with each other.
-    pub unsafe fn plugin_register_add_csurf_inst(
+    pub fn plugin_register_add_csurf_inst(
         &mut self,
-        csurf_inst: ReaperControlSurface,
-    ) -> Result<(), ()> {
-        let result = unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(csurf_inst)) };
-        ok_if_one(result)
+        control_surface: impl MediumReaperControlSurface + 'static,
+    ) -> Result<NonNull<raw::IReaperControlSurface>, ()> {
+        let rust_control_surface =
+            DelegatingControlSurface::new(control_surface, &self.get_app_version());
+        // We need to box it twice in order to obtain a thin pointer for passing to C as callback
+        // target
+        let rust_control_surface: Box<Box<dyn IReaperControlSurface>> =
+            Box::new(Box::new(rust_control_surface));
+        let cpp_control_surface =
+            unsafe { add_cpp_control_surface(rust_control_surface.as_ref().into()) };
+        self.csurf_insts
+            .insert(cpp_control_surface, rust_control_surface);
+        let result =
+            unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(cpp_control_surface)) };
+        if result != 1 {
+            return Err(());
+        }
+        Ok(cpp_control_surface)
     }
 
-    pub fn plugin_register_remove_csurf_inst(&mut self, csurf_inst: ReaperControlSurface) {
+    pub fn plugin_register_remove_csurf_inst(
+        &mut self,
+        handle: NonNull<raw::IReaperControlSurface>,
+    ) {
         unsafe {
-            self.plugin_register_remove(PluginRegistration::CsurfInst(csurf_inst));
+            self.plugin_register_remove(PluginRegistration::CsurfInst(handle));
+        }
+        self.csurf_insts.remove(&handle);
+        unsafe {
+            remove_cpp_control_surface(handle);
         }
     }
 
@@ -493,17 +512,6 @@ impl Reaper {
             self.low.genGuid(guid.as_mut_ptr());
         }
         unsafe { guid.assume_init() }
-    }
-
-    // This method is not idempotent. If you call it two times, you will have every callback TWICE.
-    // Please take care of unregistering once you are done!
-    pub fn register_control_surface(&mut self) -> Result<(), ()> {
-        unsafe { self.plugin_register_add_csurf_inst(get_cpp_control_surface()) }
-    }
-
-    // This method is idempotent
-    pub fn unregister_control_surface(&mut self) {
-        self.plugin_register_remove_csurf_inst(get_cpp_control_surface());
     }
 
     // In order to not need unsafe, we take the closure. For normal medium-level API usage, this is

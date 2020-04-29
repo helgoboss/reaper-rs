@@ -23,6 +23,7 @@ use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 use std::os::raw::c_void;
+use std::panic::RefUnwindSafe;
 use std::ptr::null_mut;
 use std::sync::mpsc::{Receiver, Sender};
 
@@ -41,6 +42,8 @@ pub(super) struct HelperControlSurface {
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
 }
+
+impl RefUnwindSafe for HelperControlSurface {}
 
 #[derive(PartialEq)]
 enum State {
