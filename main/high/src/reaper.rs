@@ -41,8 +41,8 @@ use reaper_rs_medium::{
     GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
     MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
     MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent,
-    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
-    StuffMidiMessageTarget, TrackRef,
+    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, RealtimeReaper, ReaperStringArg,
+    ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
 };
 use std::time::{Duration, SystemTime};
 
@@ -126,53 +126,58 @@ impl MediumToggleAction for HighLevelToggleAction {
 struct HighOnAudioBuffer {}
 
 impl MediumOnAudioBuffer for HighOnAudioBuffer {
-    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister) {
+    type UserData1 = RealtimeReaper;
+    type UserData2 = ();
+
+    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealtimeReaper, ()>) {
         if is_post {
             return;
         }
         // TODO-low Check performance implications for Reaper instance unwrapping
-        let reaper = Reaper::get();
+        let reaper = match reg.user_data_1() {
+            None => return,
+            Some(r) => r,
+        };
         // TODO-low Should we use an unsafe cell here for better performance?
-        let mut subject = reaper.subjects.midi_message_received.borrow_mut();
-        if subject.subscribed_size() == 0 {
-            return;
-        }
-        for i in 0..reaper.get_max_midi_input_devices() {
-            reaper
-                .medium()
-                .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
-                    let evt_list = input.get_read_buf();
-                    for evt in evt_list.enum_items(0) {
-                        if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
-                            // TODO-low We should forward active sensing. Can be filtered out
-                            // later.
-                            continue;
-                        }
-                        // Erase lifetime of event so we can "send" it using rxRust
-                        // TODO This is very hacky and unsafe. It works as long as there's no
-                        // rxRust  subscriber (e.g. operator)
-                        // involved which attempts to cache the event
-                        //  and use it after this function has returned. Then segmentation
-                        // faults are  about to happen. Alternative
-                        // would be to turn this into an owned event
-                        // and  send this instead. But note that we
-                        // are in a real-time thread here so we
-                        //  shouldn't allocate on the heap here (so no Rc). That means we would
-                        // have to  copy the owned MIDI event.
-                        // Probably not an issue because it's not
-                        // big and  cheap to copy. Look into this
-                        // and see if the unsafe code is worth it.
-                        let fake_static_evt: MidiEvent<'static> = {
-                            let raw_evt: &raw::MIDI_event_t = evt.into();
-                            let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
-                            unsafe {
-                                let erased_raw_evt = &*raw_evt_ptr;
-                                MidiEvent::new(erased_raw_evt)
-                            }
-                        };
-                        subject.next(fake_static_evt);
+        // TODO-medium Fix this
+        // let mut subject = reaper.subjects.midi_message_received.borrow_mut();
+        // if subject.subscribed_size() == 0 {
+        //     return;
+        // }
+        for i in 0..reaper.get_max_midi_inputs() {
+            reaper.get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
+                let evt_list = input.get_read_buf();
+                for evt in evt_list.enum_items(0) {
+                    if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
+                        // TODO-low We should forward active sensing. Can be filtered out
+                        // later.
+                        continue;
                     }
-                });
+                    // Erase lifetime of event so we can "send" it using rxRust
+                    // TODO This is very hacky and unsafe. It works as long as there's no
+                    // rxRust  subscriber (e.g. operator)
+                    // involved which attempts to cache the event
+                    //  and use it after this function has returned. Then segmentation
+                    // faults are  about to happen. Alternative
+                    // would be to turn this into an owned event
+                    // and  send this instead. But note that we
+                    // are in a real-time thread here so we
+                    //  shouldn't allocate on the heap here (so no Rc). That means we would
+                    // have to  copy the owned MIDI event.
+                    // Probably not an issue because it's not
+                    // big and  cheap to copy. Look into this
+                    // and see if the unsafe code is worth it.
+                    let fake_static_evt: MidiEvent<'static> = {
+                        let raw_evt: &raw::MIDI_event_t = evt.into();
+                        let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
+                        unsafe {
+                            let erased_raw_evt = &*raw_evt_ptr;
+                            MidiEvent::new(erased_raw_evt)
+                        }
+                    };
+                    // subject.next(fake_static_evt);
+                }
+            });
         }
     }
 }
@@ -247,7 +252,7 @@ pub struct Reaper {
     task_sender: Sender<ScheduledTask>,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
-    audio_hook_register_handle: Cell<Option<AudioHookRegister>>,
+    audio_hook_register_handle: Cell<Option<NonNull<raw::audio_hook_register_t>>>,
 }
 
 pub(super) struct EventStreamSubjects {
@@ -454,8 +459,14 @@ impl Reaper {
         medium.plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
         medium.register_control_surface();
         if self.audio_hook_register_handle.get().is_none() {
+            let realtime_reaper = medium.create_realtime_reaper();
             let handle = medium
-                .audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<HighOnAudioBuffer>())
+                .audio_reg_hardware_hook_add(
+                    MediumAudioHookRegister::new::<HighOnAudioBuffer, _, _>(
+                        Some(realtime_reaper),
+                        None,
+                    ),
+                )
                 .unwrap();
             self.audio_hook_register_handle.set(Some(handle))
         }

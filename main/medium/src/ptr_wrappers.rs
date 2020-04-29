@@ -11,6 +11,7 @@ use crate::CommandId;
 use derive_more::Into;
 use reaper_rs_low::raw;
 use std::convert::Into;
+use std::marker::PhantomData;
 use std::ptr::{null_mut, NonNull};
 
 pub fn require_non_null<T>(ptr: *mut T) -> Result<NonNull<T>, ()> {
@@ -71,16 +72,28 @@ impl GaccelRegister {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Into)]
-pub struct AudioHookRegister(pub(crate) NonNull<raw::audio_hook_register_t>);
+#[derive(Debug, Eq, Hash, PartialEq, Into)]
+pub struct AudioHookRegister<UD1, UD2>(
+    pub(crate) NonNull<raw::audio_hook_register_t>,
+    PhantomData<(UD1, UD2)>,
+);
 
-impl AudioHookRegister {
-    pub fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister {
-        AudioHookRegister(ptr)
+impl<UD1, UD2> AudioHookRegister<UD1, UD2> {
+    pub fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister<UD1, UD2> {
+        AudioHookRegister(ptr, PhantomData)
     }
 
     pub(crate) fn get(&self) -> NonNull<raw::audio_hook_register_t> {
         self.0
+    }
+
+    pub fn user_data_1(&self) -> Option<&UD1> {
+        let reg = unsafe { self.0.as_ref() };
+        if reg.userdata1.is_null() {
+            return None;
+        }
+        let userdata1 = reg.userdata1 as *mut UD1;
+        Some(unsafe { &*userdata1 })
     }
 }
 

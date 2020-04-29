@@ -25,6 +25,20 @@ impl Plugin for TestVstPlugin {
 
     fn init(&mut self) {
         let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
+        let low = reaper_rs_low::Reaper::load(&context);
+        let medium = reaper_rs_medium::Reaper::new(low);
+    }
+}
+
+impl Drop for TestVstPlugin {
+    fn drop(&mut self) {
+        Reaper::teardown();
+    }
+}
+
+impl TestVstPlugin {
+    fn use_high_level_reaper(&self) {
+        let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
         // TODO-medium This is bad. There must be only one static Reaper instance per module, not
         //  per VST plug-in instance! Even considering the fact that high-level Reaper is static,
         //  we should provide some Rc/RAII mechanism to easily manage the singleton instance.
@@ -38,12 +52,6 @@ impl Plugin for TestVstPlugin {
             || reaper_rs_test::execute_integration_test(),
             ActionKind::NotToggleable,
         );
-    }
-}
-
-impl Drop for TestVstPlugin {
-    fn drop(&mut self) {
-        Reaper::teardown();
     }
 }
 
