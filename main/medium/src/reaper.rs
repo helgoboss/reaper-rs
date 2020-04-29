@@ -214,6 +214,10 @@ impl Reaper {
         NonNull::new(ptr)
     }
 
+    pub fn is_in_real_time_audio(&self) -> bool {
+        self.low().IsInRealTimeAudio() != 0
+    }
+
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
     // In REAPER < 5.95 this returns nullptr
     pub unsafe fn get_media_track_info_project(&self, tr: MediaTrack) -> Option<ReaProject> {

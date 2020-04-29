@@ -14,8 +14,10 @@ use std::borrow::Cow::{Borrowed, Owned};
 use std::collections::VecDeque;
 
 use reaper_rs_medium::ReaperStringArg;
+use std::cell::Ref;
 use std::ffi::CString;
 use std::iter::FromIterator;
+use std::ops::Deref;
 use std::time::Duration;
 
 pub fn execute_integration_test() {
@@ -24,10 +26,10 @@ pub fn execute_integration_test() {
     log("# Testing reaper-rs\n");
     let steps = VecDeque::from_iter(create_test_steps());
     let step_count = steps.len();
-    execute_next_step(reaper, steps, step_count);
+    execute_next_step(reaper.deref(), steps, step_count);
 }
 
-fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, step_count: usize) {
+fn execute_next_step(reaper: &Reaper, mut steps: VecDeque<TestStep>, step_count: usize) {
     let step = match steps.pop_front() {
         Some(step) => step,
         None => {
@@ -49,7 +51,7 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, ste
         match result {
             Ok(()) => {
                 reaper.execute_later_in_main_thread_asap(move || {
-                    execute_next_step(reaper, steps, step_count)
+                    execute_next_step(Reaper::get().deref(), steps, step_count)
                 });
             }
             Err(msg) => log_failure(&msg),
@@ -63,12 +65,12 @@ fn execute_next_step(reaper: &'static Reaper, mut steps: VecDeque<TestStep>, ste
         };
         log_skip(reason);
         reaper.execute_later_in_main_thread_asap(move || {
-            execute_next_step(reaper, steps, step_count)
+            execute_next_step(Reaper::get().deref(), steps, step_count)
         });
     }
 }
 
-fn reaper_version_matches(reaper: &'static Reaper, step: &TestStep) -> bool {
+fn reaper_version_matches(reaper: &Reaper, step: &TestStep) -> bool {
     use VersionRestriction::*;
     match &step.version_restriction {
         AllVersions => true,

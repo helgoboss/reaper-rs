@@ -15,8 +15,6 @@ pub fn firewall<F: FnOnce() -> R + UnwindSafe, R>(f: F) -> Option<R> {
     catch_unwind(f).ok()
 }
 
-// TODO-medium Wait for jf answer concerning "extension plug-in" vs. "plug-in extension"
-//  Then maybe also rename medium-level ExtensionType to something else!
 /// This function basically translates the REAPER extension plug-in main entry point signature
 /// (`ReaperPluginEntry`) to a typical Rust main entry point signature (`main`). It's primarily
 /// intended to be used by macros in the `reaper-rs-macros` crate.

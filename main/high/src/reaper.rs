@@ -46,9 +46,25 @@ use reaper_rs_medium::{
 };
 use std::time::{Duration, SystemTime};
 
-// See https://doc.rust-lang.org/std/sync/struct.Once.html why this is safe in combination with Once
-static mut REAPER_INSTANCE: Option<Reaper> = None;
-static INIT_REAPER_INSTANCE: Once = Once::new();
+/// Access to this variable is encapsulated in 3 functions:
+/// - Reaper::setup()
+/// - Reaper::get()
+/// - Reaper::teardown()
+///
+/// We  make sure that ...
+///
+/// 1. Reaper::setup() is only ever called from the main thread
+///    => Check when entering function
+/// 2. Reaper::get() is only ever called from one thread (main thread). Even the exposed
+///    Reaper reference is not mutable, the struct has members that have interior
+///    mutability, and that is done via RefCells.
+///    => Check when entering function
+///    => Provide a separate RealtimeReaper::get()
+/// 4. Reaper::teardown() is only ever called from the main thread
+///    => Check when entering function
+/// 5. Reaper::teardown() is not called while a get() reference is still active.
+///    => Wrap Option in a RefCell.
+static mut REAPER_INSTANCE: RefCell<Option<Reaper>> = RefCell::new(None);
 
 // Called by REAPER (using a delegate function)!
 // Only for main section
@@ -354,6 +370,17 @@ impl Reaper {
     }
 
     fn setup(medium: reaper_rs_medium::Reaper, logger: slog::Logger) {
+        // We can't check now if we are in main thread because we don't have the main thread ID yet.
+        // But at least we can make sure we are not in an audio thread. Whatever thread we are
+        // in right now, this struct will memorize it as the main thread.
+        assert!(
+            !medium.is_in_real_time_audio(),
+            "Reaper::setup() must be called from main thread"
+        );
+        assert!(
+            unsafe { REAPER_INSTANCE.borrow().is_none() },
+            "There's a Reaper instance already"
+        );
         let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
         let reaper = Reaper {
             medium: RefCell::new(medium),
@@ -366,19 +393,50 @@ impl Reaper {
             audio_hook_register_handle: Cell::new(None),
         };
         unsafe {
-            // TODO-medium call_once() is not good here because a destroyed VST plug-in can still
-            //  keep its static memory after teardown. The next time it boots up, this must be
-            // called again! INIT_REAPER_INSTANCE.call_once(|| {
-            REAPER_INSTANCE = Some(reaper);
-            // });
+            REAPER_INSTANCE.replace(Some(reaper));
         }
         Reaper::get().init(task_sender, task_receiver);
     }
 
+    // Allowing global access to native REAPER functions at all times is valid in my opinion.
+    // Because REAPER itself is not written in Rust and therefore cannot take part in Rust's compile
+    // time guarantees anyway. We need to rely on REAPER at that point and also take care not to do
+    // something which is not allowed in Reaper (by reading documentation and learning from
+    // mistakes ... no compiler is going to save us from them). REAPER as a whole is always mutable
+    // from the perspective of extensions.
+    //
+    // We express that in Rust by making `Reaper` class an immutable (in the sense of non-`&mut`)
+    // singleton and allowing all REAPER functions to be called from an immutable context ...
+    // although they can and often will lead to mutations within REAPER!
+    pub fn get() -> Ref<'static, Reaper> {
+        let reaper =
+            Reaper::obtain_reaper_ref("Reaper::setup() must be called before Reaper::get()");
+        // TODO-medium Introduce RealtimeReaper and activate this!
+        // assert!(
+        //     !reaper.medium().is_in_real_time_audio(),
+        //     "Reaper::get() must be called from main thread"
+        // );
+        reaper
+    }
+
     pub fn teardown() {
-        unsafe {
-            REAPER_INSTANCE = None;
+        {
+            let reaper = Reaper::obtain_reaper_ref("There's no Reaper instance to teardown");
+            assert!(
+                !reaper.medium().is_in_real_time_audio(),
+                "Reaper::teardown() must be called from main thread"
+            );
         }
+        unsafe {
+            REAPER_INSTANCE.replace(None);
+        }
+    }
+
+    fn obtain_reaper_ref(error_msg_if_none: &'static str) -> Ref<'static, Reaper> {
+        Ref::map(unsafe { REAPER_INSTANCE.borrow() }, |r| match r {
+            None => panic!(error_msg_if_none),
+            Some(r) => r,
+        })
     }
 
     fn init(&self, task_sender: Sender<ScheduledTask>, task_receiver: Receiver<ScheduledTask>) {
@@ -468,20 +526,6 @@ impl Reaper {
 
     pub fn generate_guid(&self) -> Guid {
         Guid::new(Reaper::get().medium().gen_guid())
-    }
-
-    // Allowing global access to native REAPER functions at all times is valid in my opinion.
-    // Because REAPER itself is not written in Rust and therefore cannot take part in Rust's compile
-    // time guarantees anyway. We need to rely on REAPER at that point and also take care not to do
-    // something which is not allowed in Reaper (by reading documentation and learning from
-    // mistakes ... no compiler is going to save us from them). REAPER as a whole is always mutable
-    // from the perspective of extensions.
-    //
-    // We express that in Rust by making `Reaper` class an immutable (in the sense of non-`&mut`)
-    // singleton and allowing all REAPER functions to be called from an immutable context ...
-    // although they can and often will lead to mutations within REAPER!
-    pub fn get() -> &'static Reaper {
-        unsafe { REAPER_INSTANCE.as_ref().unwrap() }
     }
 
     pub fn register_action(

@@ -2,6 +2,8 @@ use darling::FromMeta;
 use proc_macro::TokenStream;
 use quote::quote;
 
+// TODO-medium There should be one macro only and it should act differently depending on the
+//  signature!
 #[proc_macro_attribute]
 pub fn low_level_reaper_extension_plugin(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let main_function = syn::parse_macro_input!(input as syn::ItemFn);

@@ -12,7 +12,7 @@ type TestStepResult = Result<(), Cow<'static, str>>;
 pub struct TestStep {
     pub name: Cow<'static, str>,
     pub version_restriction: VersionRestriction,
-    pub operation: Box<dyn FnOnce(&'static Reaper, TestStepContext) -> TestStepResult>,
+    pub operation: Box<dyn FnOnce(&Reaper, TestStepContext) -> TestStepResult>,
 }
 
 pub fn step<Op>(
@@ -21,7 +21,7 @@ pub fn step<Op>(
     operation: Op,
 ) -> TestStep
 where
-    Op: FnOnce(&'static Reaper, TestStepContext) -> TestStepResult + 'static,
+    Op: FnOnce(&Reaper, TestStepContext) -> TestStepResult + 'static,
 {
     TestStep {
         version_restriction,
