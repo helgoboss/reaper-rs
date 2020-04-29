@@ -339,6 +339,9 @@ impl Reaper {
         }
     }
 
+    // TODO-medium Is it possible that T is not a struct but a function? That would save the
+    //  some typing. If that's not possible, try to achieve the same in a non-generic way. What
+    //  would be the price of that?
     pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(
         &mut self,
     ) -> Result<(), ()> {
