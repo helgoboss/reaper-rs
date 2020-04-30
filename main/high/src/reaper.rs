@@ -48,6 +48,7 @@ use reaper_rs_medium::{
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
 
+// Must ONLY ever be accessed from main thread
 /// Access to this variable is encapsulated in 3 functions:
 /// - Reaper::setup()
 /// - Reaper::get()
@@ -66,142 +67,18 @@ use std::time::{Duration, SystemTime};
 ///    => Check when entering function
 /// 5. Reaper::teardown() is not called while a get() reference is still active.
 ///    => Wrap Option in a RefCell.
+///
+/// We could also go the easy way of using one Reaper instance wrapped in a Mutex. Downside: This is
+/// more guarantees than we need. Why should audio thread and main thread fight for access to one
+/// Reaper instance if there can be two instances and each one has their own? That sounds a lot like
+/// thread_local!, but this has the problem of being usable with a closure only.
+///
+/// This outer RefCell is just necessary for creating/destroying the instance safely, so most of the
+/// time it will be borrowed immutably. That's why all the inner RefCells are still necessary!
 static mut REAPER_INSTANCE: RefCell<Option<Reaper>> = RefCell::new(None);
 
+// Here we don't mind having a boring mutex because this is not often accessed.
 static REAPER_GUARD: Lazy<Mutex<Weak<ReaperGuard>>> = Lazy::new(|| Mutex::new(Weak::new()));
-
-// Called by REAPER (using a delegate function)!
-// Only for main section
-struct HighLevelHookCommand {}
-
-impl MediumHookCommand for HighLevelHookCommand {
-    fn call(command_id: CommandId, _flag: i32) -> bool {
-        // TODO-low Pass on flag
-        let operation = match Reaper::get().command_by_id.borrow().get(&command_id) {
-            Some(command) => command.operation.clone(),
-            None => return false,
-        };
-        (*operation).borrow_mut().call_mut(());
-        true
-    }
-}
-
-// Called by REAPER directly (using a delegate function)!
-// Only for main section
-struct HighLevelHookPostCommand {}
-
-impl MediumHookPostCommand for HighLevelHookPostCommand {
-    fn call(command_id: CommandId, _flag: i32) {
-        let reaper = Reaper::get();
-        let action = reaper
-            .get_main_section()
-            .get_action_by_command_id(command_id);
-        reaper
-            .subjects
-            .action_invoked
-            .borrow_mut()
-            .next(Payload(Rc::new(action)));
-    }
-}
-
-// Called by REAPER directly!
-// Only for main section
-struct HighLevelToggleAction {}
-
-impl MediumToggleAction for HighLevelToggleAction {
-    fn call(command_id: CommandId) -> i32 {
-        if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
-            match &command.kind {
-                ActionKind::Toggleable(is_on) => {
-                    if is_on() {
-                        1
-                    } else {
-                        0
-                    }
-                }
-                ActionKind::NotToggleable => -1,
-            }
-        } else {
-            -1
-        }
-    }
-}
-
-struct HighOnAudioBuffer {}
-
-impl MediumOnAudioBuffer for HighOnAudioBuffer {
-    type UserData1 = ReaperFunctions<dyn AudioThread>;
-    type UserData2 = ();
-
-    fn call(
-        is_post: bool,
-        len: i32,
-        srate: f64,
-        reg: AudioHookRegister<ReaperFunctions<dyn AudioThread>>,
-    ) {
-        if is_post {
-            return;
-        }
-        let reaper = reg.user_data_1();
-        // TODO-low Should we use an unsafe cell here for better performance?
-        // TODO-medium Fix this
-        // let mut subject = reaper.subjects.midi_message_received.borrow_mut();
-        // if subject.subscribed_size() == 0 {
-        //     return;
-        // }
-        for i in 0..reaper.get_max_midi_inputs() {
-            reaper.get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
-                let evt_list = input.get_read_buf();
-                for evt in evt_list.enum_items(0) {
-                    if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
-                        // TODO-low We should forward active sensing. Can be filtered out
-                        // later.
-                        continue;
-                    }
-                    // Erase lifetime of event so we can "send" it using rxRust
-                    // TODO This is very hacky and unsafe. It works as long as there's no
-                    // rxRust  subscriber (e.g. operator)
-                    // involved which attempts to cache the event
-                    //  and use it after this function has returned. Then segmentation
-                    // faults are  about to happen. Alternative
-                    // would be to turn this into an owned event
-                    // and  send this instead. But note that we
-                    // are in a real-time thread here so we
-                    //  shouldn't allocate on the heap here (so no Rc). That means we would
-                    // have to  copy the owned MIDI event.
-                    // Probably not an issue because it's not
-                    // big and  cheap to copy. Look into this
-                    // and see if the unsafe code is worth it.
-                    let fake_static_evt: MidiEvent<'static> = {
-                        let raw_evt: &raw::MIDI_event_t = evt.into();
-                        let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
-                        unsafe {
-                            let erased_raw_evt = &*raw_evt_ptr;
-                            MidiEvent::new(erased_raw_evt)
-                        }
-                    };
-                    // subject.next(fake_static_evt);
-                }
-            });
-        }
-    }
-}
-
-pub(super) type Task = Box<dyn FnOnce() + 'static>;
-
-pub(super) struct ScheduledTask {
-    pub desired_execution_time: Option<std::time::SystemTime>,
-    pub task: Task,
-}
-
-impl ScheduledTask {
-    pub fn new(task: Task, desired_execution_time: Option<std::time::SystemTime>) -> ScheduledTask {
-        ScheduledTask {
-            desired_execution_time,
-            task,
-        }
-    }
-}
 
 pub struct ReaperBuilder {
     medium: reaper_rs_medium::Reaper,
@@ -229,6 +106,21 @@ impl ReaperBuilder {
     }
 }
 
+pub struct RealTimeReaper {
+    functions: ReaperFunctions<dyn AudioThread>,
+    receiver: mpsc::Receiver<AudioThreadTaskOp>,
+    sender_to_main_thread: mpsc::Sender<MainThreadTask>,
+    subjects: RealTimeSubjects,
+}
+
+impl RealTimeReaper {
+    pub fn midi_message_received(
+        &self,
+    ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<'static>> {
+        self.subjects.midi_message_received.borrow().clone()
+    }
+}
+
 pub struct Reaper {
     medium: RefCell<reaper_rs_medium::Reaper>,
     logger: slog::Logger,
@@ -243,15 +135,35 @@ pub struct Reaper {
     // Or is it  possible to give up the map borrow after obtaining the command/operation
     // reference???  Look into that!!!
     command_by_id: RefCell<HashMap<CommandId, Command>>,
-    pub(super) subjects: EventStreamSubjects,
-    task_sender: RefCell<Option<Sender<ScheduledTask>>>,
+    pub(super) subjects: MainSubjects,
     main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
-    csurf_inst_handle: Cell<Option<NonNull<raw::IReaperControlSurface>>>,
-    audio_hook_register_handle: Cell<Option<NonNull<raw::audio_hook_register_t>>>,
+    active_data: RefCell<Option<ActiveData>>,
 }
 
-pub(super) struct EventStreamSubjects {
+struct ActiveData {
+    sender_to_main_thread: Sender<MainThreadTask>,
+    sender_to_audio_thread: Sender<AudioThreadTaskOp>,
+    csurf_inst_handle: NonNull<raw::IReaperControlSurface>,
+    audio_hook_register_handle: NonNull<raw::audio_hook_register_t>,
+}
+
+struct RealTimeSubjects {
+    midi_message_received: EventStreamSubject<MidiEvent<'static>>,
+}
+
+impl RealTimeSubjects {
+    fn new() -> RealTimeSubjects {
+        fn default<T>() -> EventStreamSubject<T> {
+            RefCell::new(LocalSubject::new())
+        }
+        RealTimeSubjects {
+            midi_message_received: default(),
+        }
+    }
+}
+
+pub(super) struct MainSubjects {
     // This is a RefCell. So calling next() while another next() is still running will panic.
     // I guess it's good that way because this is very generic code, panicking or not panicking
     // depending on the user's code. And getting a panic is good for becoming aware of the problem
@@ -293,7 +205,6 @@ pub(super) struct EventStreamSubjects {
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Payload<Rc<Action>>>,
-    pub(super) midi_message_received: EventStreamSubject<MidiEvent<'static>>,
 }
 
 #[derive(Clone)]
@@ -301,12 +212,12 @@ pub struct Payload<T>(pub T);
 
 impl<T: Clone> PayloadCopy for Payload<T> {}
 
-impl EventStreamSubjects {
-    fn new() -> EventStreamSubjects {
+impl MainSubjects {
+    fn new() -> MainSubjects {
         fn default<T>() -> EventStreamSubject<T> {
             RefCell::new(LocalSubject::new())
         }
-        EventStreamSubjects {
+        MainSubjects {
             project_switched: default(),
             track_volume_changed: default(),
             track_volume_touched: default(),
@@ -343,7 +254,6 @@ impl EventStreamSubjects {
             main_thread_idle: default(),
             project_closed: default(),
             action_invoked: default(),
-            midi_message_received: default(),
         }
     }
 }
@@ -375,6 +285,7 @@ impl Drop for ReaperGuard {
 
 impl Reaper {
     pub fn guarded(initializer: impl FnOnce()) -> Arc<ReaperGuard> {
+        // TODO-medium Must also be accessed from main thread only.
         let mut result = REAPER_GUARD.lock().unwrap();
         if let Some(rc) = result.upgrade() {
             return rc;
@@ -415,12 +326,10 @@ impl Reaper {
             medium: RefCell::new(medium),
             logger,
             command_by_id: RefCell::new(HashMap::new()),
-            subjects: EventStreamSubjects::new(),
-            task_sender: RefCell::new(None),
+            subjects: MainSubjects::new(),
             main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
-            csurf_inst_handle: Cell::new(None),
-            audio_hook_register_handle: Cell::new(None),
+            active_data: RefCell::new(None),
         };
         unsafe {
             REAPER_INSTANCE.replace(Some(reaper));
@@ -440,11 +349,13 @@ impl Reaper {
     pub fn get() -> Ref<'static, Reaper> {
         let reaper =
             Reaper::obtain_reaper_ref("Reaper::setup() must be called before Reaper::get()");
-        // TODO-medium Introduce RealtimeReaper and activate this!
-        // assert!(
-        //     !reaper.medium().functions().is_in_real_time_audio(),
-        //     "Reaper::get() must be called from main thread"
-        // );
+        // TODO-medium This check is a bit too late. Ideally we would just save the the thread ID
+        //  of the main thread as soon as entering the main entry point (can be done safely using
+        //  OnceCell). Then we could always access that main thread ID and compare.
+        assert!(
+            !reaper.medium().functions().is_in_real_time_audio(),
+            "Reaper::get() must be called from main thread"
+        );
         reaper
     }
 
@@ -468,50 +379,56 @@ impl Reaper {
         })
     }
 
-    // TODO-low Must be idempotent
     pub fn activate(&self) {
-        let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
-        let helper_control_surface = HelperControlSurface::new(task_sender.clone(), task_receiver);
+        let mut active_data = self.active_data.borrow_mut();
+        assert!(active_data.is_none(), "Reaper is already active");
         let real_time_functions = self.medium().create_real_time_functions();
+        let (sender_to_main_thread, main_thread_receiver) = mpsc::channel::<MainThreadTask>();
+        let control_surface =
+            HelperControlSurface::new(sender_to_main_thread.clone(), main_thread_receiver);
         let mut medium = self.medium_mut();
+        // Add functions
         medium.plugin_register_add_hookcommand::<HighLevelHookCommand>();
         medium.plugin_register_add_toggleaction::<HighLevelToggleAction>();
         medium.plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
-        if self.csurf_inst_handle.get().is_none() {
-            let handle = medium
-                .plugin_register_add_csurf_inst(helper_control_surface)
-                .unwrap();
-            self.task_sender.replace(Some(task_sender));
-            self.csurf_inst_handle.set(Some(handle))
-        }
-        if self.audio_hook_register_handle.get().is_none() {
-            let handle = medium
-                .audio_reg_hardware_hook_add(
-                    MediumAudioHookRegister::new::<HighOnAudioBuffer, _, _>(
-                        Some(real_time_functions),
-                        None,
-                    ),
-                )
-                .unwrap();
-            self.audio_hook_register_handle.set(Some(handle))
-        }
+        // Audio hook
+        let (sender_to_audio_thread, audio_thread_receiver) = mpsc::channel::<AudioThreadTaskOp>();
+        let rt_reaper = RealTimeReaper {
+            functions: real_time_functions,
+            receiver: audio_thread_receiver,
+            sender_to_main_thread: sender_to_main_thread.clone(),
+            subjects: RealTimeSubjects::new(),
+        };
+        let audio_hook =
+            MediumAudioHookRegister::new::<HighOnAudioBuffer, _, _>(Some(rt_reaper), None);
+        *active_data = Some(ActiveData {
+            sender_to_main_thread,
+            sender_to_audio_thread,
+            csurf_inst_handle: {
+                medium
+                    .plugin_register_add_csurf_inst(control_surface)
+                    .unwrap()
+            },
+            audio_hook_register_handle: { medium.audio_reg_hardware_hook_add(audio_hook).unwrap() },
+        });
     }
 
-    // TODO-low Must be idempotent
     pub fn deactivate(&self) {
+        let mut active_data = self.active_data.borrow_mut();
+        let ad = match active_data.as_ref() {
+            None => panic!("Reaper is not active"),
+            Some(ad) => ad,
+        };
         let mut medium = self.medium_mut();
-        if let Some(handle) = self.audio_hook_register_handle.get() {
-            self.audio_hook_register_handle.set(None);
-            medium.audio_reg_hardware_hook_remove(handle);
-        }
-        if let Some(handle) = self.csurf_inst_handle.get() {
-            self.csurf_inst_handle.set(None);
-            self.task_sender.replace(None);
-            medium.plugin_register_remove_csurf_inst(handle);
-        }
+        // Remove audio hook
+        medium.audio_reg_hardware_hook_remove(ad.audio_hook_register_handle);
+        // Remove control surface
+        medium.plugin_register_remove_csurf_inst(ad.csurf_inst_handle);
+        // Remove functions
         medium.plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
         medium.plugin_register_remove_toggleaction::<HighLevelToggleAction>();
         medium.plugin_register_remove_hookcommand::<HighLevelHookCommand>();
+        *active_data = None;
     }
 
     pub fn medium(&self) -> Ref<reaper_rs_medium::Reaper> {
@@ -750,12 +667,6 @@ impl Reaper {
         self.subjects.track_added.borrow().clone()
     }
 
-    pub fn midi_message_received(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<'static>> {
-        self.subjects.midi_message_received.borrow().clone()
-    }
-
     // Delivers a GUID-based track (to still be able to identify it even it is deleted)
     pub fn track_removed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
         self.subjects.track_removed.borrow().clone()
@@ -907,36 +818,33 @@ impl Reaper {
     pub fn execute_later_in_main_thread(
         &self,
         waiting_time: Duration,
-        task: impl FnOnce() + 'static,
+        op: impl FnOnce() + 'static,
     ) -> Result<(), ()> {
-        let task_sender_ref = self.task_sender.borrow();
-        let task_sender = task_sender_ref.as_ref().ok_or(())?;
-        task_sender
-            .send(ScheduledTask::new(
-                Box::new(task),
+        let active_data = self.active_data.borrow();
+        let sender = &active_data.as_ref().ok_or(())?.sender_to_main_thread;
+        sender
+            .send(MainThreadTask::new(
+                Box::new(op),
                 Some(SystemTime::now() + waiting_time),
             ))
             .map_err(|_| ())
     }
 
-    pub fn execute_later_in_main_thread_asap(
-        &self,
-        task: impl FnOnce() + 'static,
-    ) -> Result<(), ()> {
-        let task_sender_ref = self.task_sender.borrow();
-        let task_sender = task_sender_ref.as_ref().ok_or(())?;
-        task_sender
-            .send(ScheduledTask::new(Box::new(task), None))
+    pub fn execute_later_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
+        let active_data = self.active_data.borrow();
+        let sender = &active_data.as_ref().ok_or(())?.sender_to_main_thread;
+        sender
+            .send(MainThreadTask::new(Box::new(op), None))
             .map_err(|_| ())
     }
 
-    pub fn execute_when_in_main_thread(&self, task: impl FnOnce() + 'static) -> Result<(), ()> {
-        if self.current_thread_is_main_thread() {
-            task();
-            Ok(())
-        } else {
-            self.execute_later_in_main_thread_asap(task)
-        }
+    pub fn execute_asap_in_audio_thread(
+        &self,
+        op: impl FnOnce(&RealTimeReaper) + 'static,
+    ) -> Result<(), ()> {
+        let active_data = self.active_data.borrow();
+        let sender = &active_data.as_ref().ok_or(())?.sender_to_audio_thread;
+        sender.send(Box::new(op)).map_err(|_| ())
     }
 
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
@@ -1049,5 +957,142 @@ impl RegisteredAction {
 
     pub fn unregister(&self) {
         Reaper::get().unregister_command(self.command_id, self.gaccel_handle);
+    }
+}
+
+// Called by REAPER (using a delegate function)!
+// Only for main section
+struct HighLevelHookCommand {}
+
+impl MediumHookCommand for HighLevelHookCommand {
+    fn call(command_id: CommandId, _flag: i32) -> bool {
+        // TODO-low Pass on flag
+        let operation = match Reaper::get().command_by_id.borrow().get(&command_id) {
+            Some(command) => command.operation.clone(),
+            None => return false,
+        };
+        (*operation).borrow_mut().call_mut(());
+        true
+    }
+}
+
+// Called by REAPER directly (using a delegate function)!
+// Only for main section
+struct HighLevelHookPostCommand {}
+
+impl MediumHookPostCommand for HighLevelHookPostCommand {
+    fn call(command_id: CommandId, _flag: i32) {
+        let reaper = Reaper::get();
+        let action = reaper
+            .get_main_section()
+            .get_action_by_command_id(command_id);
+        reaper
+            .subjects
+            .action_invoked
+            .borrow_mut()
+            .next(Payload(Rc::new(action)));
+    }
+}
+
+// Called by REAPER directly!
+// Only for main section
+struct HighLevelToggleAction {}
+
+impl MediumToggleAction for HighLevelToggleAction {
+    fn call(command_id: CommandId) -> i32 {
+        if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
+            match &command.kind {
+                ActionKind::Toggleable(is_on) => {
+                    if is_on() {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                ActionKind::NotToggleable => -1,
+            }
+        } else {
+            -1
+        }
+    }
+}
+
+struct HighOnAudioBuffer {}
+
+impl MediumOnAudioBuffer for HighOnAudioBuffer {
+    type UserData1 = RealTimeReaper;
+    type UserData2 = ();
+
+    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealTimeReaper>) {
+        if is_post {
+            return;
+        }
+        let reaper = reg.user_data_1();
+        for task in reaper.receiver.try_iter().take(1) {
+            (task)(reaper);
+        }
+        // Process MIDI
+        let mut subject = reaper.subjects.midi_message_received.borrow_mut();
+        if subject.subscribed_size() == 0 {
+            return;
+        }
+        for i in 0..reaper.functions.get_max_midi_inputs() {
+            reaper
+                .functions
+                .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
+                    let evt_list = input.get_read_buf();
+                    for evt in evt_list.enum_items(0) {
+                        if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
+                            // TODO-low We should forward active sensing. Can be filtered out
+                            // later.
+                            continue;
+                        }
+                        // Erase lifetime of event so we can "send" it using rxRust
+                        // TODO This is very hacky and unsafe. It works as long as there's no
+                        // rxRust  subscriber (e.g. operator)
+                        // involved which attempts to cache the event
+                        //  and use it after this function has returned. Then segmentation
+                        // faults are  about to happen. Alternative
+                        // would be to turn this into an owned event
+                        // and  send this instead. But note that we
+                        // are in a real-time thread here so we
+                        //  shouldn't allocate on the heap here (so no Rc). That means we would
+                        // have to  copy the owned MIDI event.
+                        // Probably not an issue because it's not
+                        // big and  cheap to copy. Look into this
+                        // and see if the unsafe code is worth it.
+                        let fake_static_evt: MidiEvent<'static> = {
+                            let raw_evt: &raw::MIDI_event_t = evt.into();
+                            let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
+                            unsafe {
+                                let erased_raw_evt = &*raw_evt_ptr;
+                                MidiEvent::new(erased_raw_evt)
+                            }
+                        };
+                        subject.next(fake_static_evt);
+                    }
+                });
+        }
+    }
+}
+
+type AudioThreadTaskOp = Box<dyn FnOnce(&RealTimeReaper) + 'static>;
+
+type MainThreadTaskOp = Box<dyn FnOnce() + 'static>;
+
+pub(super) struct MainThreadTask {
+    pub desired_execution_time: Option<std::time::SystemTime>,
+    pub op: MainThreadTaskOp,
+}
+
+impl MainThreadTask {
+    pub fn new(
+        op: MainThreadTaskOp,
+        desired_execution_time: Option<std::time::SystemTime>,
+    ) -> MainThreadTask {
+        MainThreadTask {
+            desired_execution_time,
+            op: op,
+        }
     }
 }

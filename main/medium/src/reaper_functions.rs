@@ -234,10 +234,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         NonNull::new(ptr)
     }
 
-    pub fn is_in_real_time_audio(&self) -> bool
-    where
-        S: MainThread,
-    {
+    pub fn is_in_real_time_audio(&self) -> bool {
         self.low.IsInRealTimeAudio() != 0
     }
 

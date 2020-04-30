@@ -1,6 +1,6 @@
 use crate::fx::Fx;
 use crate::guid::Guid;
-use crate::{get_media_track_guid, Payload, Project, Reaper, ScheduledTask, Task, Track};
+use crate::{get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track};
 use c_str_macro::c_str;
 use reaper_rs_low::raw;
 use reaper_rs_medium::TrackInfoKey::{
@@ -30,8 +30,8 @@ use std::sync::mpsc::{Receiver, Sender};
 const BULK_TASK_EXECUTION_COUNT: usize = 100;
 
 pub(super) struct HelperControlSurface {
-    task_sender: Sender<ScheduledTask>,
-    task_receiver: Receiver<ScheduledTask>,
+    task_sender: Sender<MainThreadTask>,
+    task_receiver: Receiver<MainThreadTask>,
     last_active_project: Cell<Project>,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
@@ -75,8 +75,8 @@ type TrackDataMap = HashMap<MediaTrack, TrackData>;
 
 impl HelperControlSurface {
     pub(super) fn new(
-        task_sender: Sender<ScheduledTask>,
-        task_receiver: Receiver<ScheduledTask>,
+        task_sender: Sender<MainThreadTask>,
+        task_receiver: Receiver<MainThreadTask>,
     ) -> HelperControlSurface {
         let reaper = Reaper::get();
         let version = reaper.get_version();
@@ -551,12 +551,12 @@ impl MediumReaperControlSurface for HelperControlSurface {
             .take(BULK_TASK_EXECUTION_COUNT)
         {
             match task.desired_execution_time {
-                None => (task.task)(),
+                None => (task.op)(),
                 Some(t) => {
                     if std::time::SystemTime::now() < t {
                         self.task_sender.send(task);
                     } else {
-                        (task.task)()
+                        (task.op)()
                     }
                 }
             }
