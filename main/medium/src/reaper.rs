@@ -13,14 +13,14 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
     require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
-    AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
+    AudioThread, AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
     GaccelRegister, GangBehavior, GlobalAutomationOverride, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MainThread, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, PluginRegistration,
-    ProjectContext, ProjectRef, ReaProject, RealTimeReaper, ReaperControlSurface, ReaperFunctions,
+    ProjectContext, ProjectRef, ReaProject, ReaperControlSurface, ReaperFunctions,
     ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
     ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
     StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef,
@@ -72,12 +72,13 @@ impl Reaper {
         }
     }
 
+    // TODO-medium Consider using readonly crate
     pub fn functions(&self) -> &ReaperFunctions<dyn MainThread> {
         &self.functions
     }
 
-    pub fn create_real_time_reaper(&self) -> RealTimeReaper {
-        RealTimeReaper::new(self.functions.low().clone())
+    pub fn create_real_time_functions(&self) -> ReaperFunctions<dyn AudioThread> {
+        ReaperFunctions::new(self.functions.low().clone())
     }
 
     // Kept return value type i32 because meaning of return value depends very much on the actual

@@ -136,9 +136,6 @@ pub use reaper::*;
 mod reaper_functions;
 pub use reaper_functions::*;
 
-mod real_time_reaper;
-pub use real_time_reaper::*;
-
 mod util;
 pub use util::*;
 

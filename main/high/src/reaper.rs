@@ -38,12 +38,12 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    AudioHookRegister, CommandId, GaccelRegister, GetFocusedFxResult, GetLastTouchedFxResult,
-    GlobalAutomationOverride, Hwnd, MediumAccelerator, MediumAudioHookRegister,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId,
-    MidiOutputDeviceId, ProjectRef, RealTimeReaper, ReaperStringArg, ReaperVersion, SectionId,
-    StuffMidiMessageTarget, TrackRef,
+    AudioHookRegister, AudioThread, CommandId, GaccelRegister, GetFocusedFxResult,
+    GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
+    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
+    MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent,
+    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperFunctions, ReaperStringArg,
+    ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
 };
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
@@ -130,10 +130,15 @@ impl MediumToggleAction for HighLevelToggleAction {
 struct HighOnAudioBuffer {}
 
 impl MediumOnAudioBuffer for HighOnAudioBuffer {
-    type UserData1 = RealTimeReaper;
+    type UserData1 = ReaperFunctions<dyn AudioThread>;
     type UserData2 = ();
 
-    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealTimeReaper>) {
+    fn call(
+        is_post: bool,
+        len: i32,
+        srate: f64,
+        reg: AudioHookRegister<ReaperFunctions<dyn AudioThread>>,
+    ) {
         if is_post {
             return;
         }
@@ -467,7 +472,7 @@ impl Reaper {
     pub fn activate(&self) {
         let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
         let helper_control_surface = HelperControlSurface::new(task_sender.clone(), task_receiver);
-        let real_time_reaper = self.medium().create_real_time_reaper();
+        let real_time_functions = self.medium().create_real_time_functions();
         let mut medium = self.medium_mut();
         medium.plugin_register_add_hookcommand::<HighLevelHookCommand>();
         medium.plugin_register_add_toggleaction::<HighLevelToggleAction>();
@@ -483,7 +488,7 @@ impl Reaper {
             let handle = medium
                 .audio_reg_hardware_hook_add(
                     MediumAudioHookRegister::new::<HighOnAudioBuffer, _, _>(
-                        Some(real_time_reaper),
+                        Some(real_time_functions),
                         None,
                     ),
                 )
