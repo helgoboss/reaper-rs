@@ -148,6 +148,7 @@ impl HelperControlSurface {
         let env = unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_track_envelope_by_name(track.get_raw(), parameter_name)
         };
         if env.is_none() {
@@ -166,6 +167,7 @@ impl HelperControlSurface {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
             if Reaper::get()
                 .medium()
+                .functions()
                 .validate_ptr_2(CurrentProject, *rea_project)
             {
                 true
@@ -200,18 +202,19 @@ impl HelperControlSurface {
             let media_track = t.get_raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let reaper = Reaper::get();
-                let m = &reaper.medium();
+                let medium = reaper.medium();
+                let func = medium.functions();
                 let td = unsafe {
                     TrackData {
-                        volume: m.get_media_track_info_value(media_track, Vol),
-                        pan: m.get_media_track_info_value(media_track, Pan),
-                        selected: m.get_media_track_info_value(media_track, Selected) != 0.0,
-                        mute: m.get_media_track_info_value(media_track, Mute) != 0.0,
-                        solo: m.get_media_track_info_value(media_track, Solo) != 0.0,
-                        recarm: m.get_media_track_info_value(media_track, RecArm) != 0.0,
-                        number: m.get_media_track_info_tracknumber(media_track),
-                        recmonitor: m.get_media_track_info_recmon(media_track),
-                        recinput: m.get_media_track_info_value(media_track, RecInput) as i32,
+                        volume: func.get_media_track_info_value(media_track, Vol),
+                        pan: func.get_media_track_info_value(media_track, Pan),
+                        selected: func.get_media_track_info_value(media_track, Selected) != 0.0,
+                        mute: func.get_media_track_info_value(media_track, Mute) != 0.0,
+                        solo: func.get_media_track_info_value(media_track, Solo) != 0.0,
+                        recarm: func.get_media_track_info_value(media_track, RecArm) != 0.0,
+                        number: func.get_media_track_info_tracknumber(media_track),
+                        recmonitor: func.get_media_track_info_recmon(media_track),
+                        recinput: func.get_media_track_info_value(media_track, RecInput) as i32,
                         guid: get_media_track_guid(media_track),
                     }
                 };
@@ -370,6 +373,7 @@ impl HelperControlSurface {
             let reaper = Reaper::get();
             if reaper
                 .medium()
+                .functions()
                 .validate_ptr_2(Proj(project.get_raw()), *media_track)
             {
                 true
@@ -394,6 +398,7 @@ impl HelperControlSurface {
         for (media_track, track_data) in track_datas.iter_mut() {
             if !reaper
                 .medium()
+                .functions()
                 .validate_ptr_2(Proj(project.get_raw()), *media_track)
             {
                 continue;
@@ -401,6 +406,7 @@ impl HelperControlSurface {
             let new_number = unsafe {
                 reaper
                     .medium()
+                    .functions()
                     .get_media_track_info_tracknumber(*media_track)
             };
             if new_number != track_data.number {
@@ -719,6 +725,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
         let recinput = unsafe {
             reaper
                 .medium()
+                .functions()
                 .get_media_track_info_value(args.track, RecInput) as i32
         };
         if td.recinput != recinput {

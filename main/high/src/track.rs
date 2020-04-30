@@ -83,7 +83,7 @@ impl Track {
     pub fn set_name(&self, name: &CStr) {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
-            Reaper::get().medium().get_set_media_track_info(
+            Reaper::get().medium().functions().get_set_media_track_info(
                 self.get_raw(),
                 Name,
                 name.as_ptr() as *mut c_void,
@@ -97,6 +97,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_name(self.get_raw(), |n| n.into())
         }
         .unwrap_or_else(|| c_str!("<Master track>").to_owned())
@@ -107,6 +108,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_recmon(self.get_raw())
         }
     }
@@ -114,11 +116,10 @@ impl Track {
     pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
-            Reaper::get().medium().csurf_on_input_monitoring_change_ex(
-                self.get_raw(),
-                mode,
-                GangBehavior::DenyGang,
-            );
+            Reaper::get()
+                .medium()
+                .functions()
+                .csurf_on_input_monitoring_change_ex(self.get_raw(), mode, GangBehavior::DenyGang);
         }
     }
 
@@ -127,6 +128,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_recinput(self.get_raw())
         }
     }
@@ -139,7 +141,7 @@ impl Track {
         };
         let reaper = Reaper::get();
         let _ = unsafe {
-            reaper.medium().set_media_track_info_value(
+            reaper.medium().functions().set_media_track_info_value(
                 self.get_raw(),
                 RecInput,
                 rec_input_index as f64,
@@ -151,6 +153,7 @@ impl Track {
         let mut rec_mon = unsafe {
             reaper
                 .medium()
+                .functions()
                 .get_media_track_info_value(self.get_raw(), RecMon)
         };
         // TODO-low 5198273 This is ugly. Solve in other ways.
@@ -173,8 +176,13 @@ impl Track {
         self.load_and_check_if_necessary_or_complain();
         // It's important that we don't query D_PAN because that returns the wrong value in case an
         // envelope is written
-        let result = unsafe { Reaper::get().medium().get_track_ui_vol_pan(self.get_raw()) }
-            .expect("Couldn't get vol/pan");
+        let result = unsafe {
+            Reaper::get()
+                .medium()
+                .functions()
+                .get_track_ui_vol_pan(self.get_raw())
+        }
+        .expect("Couldn't get vol/pan");
         Pan::from_reaper_value(result.pan)
     }
 
@@ -183,7 +191,7 @@ impl Track {
         let reaper_value = pan.get_reaper_value();
         let reaper = Reaper::get();
         unsafe {
-            reaper.medium().csurf_on_pan_change_ex(
+            reaper.medium().functions().csurf_on_pan_change_ex(
                 self.get_raw(),
                 Absolute(reaper_value),
                 GangBehavior::DenyGang,
@@ -192,17 +200,24 @@ impl Track {
         // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so
         // we need to notify manually
         unsafe {
-            reaper
-                .medium()
-                .csurf_set_surface_pan(self.get_raw(), reaper_value, NotifyAll);
+            reaper.medium().functions().csurf_set_surface_pan(
+                self.get_raw(),
+                reaper_value,
+                NotifyAll,
+            );
         }
     }
 
     pub fn get_volume(&self) -> Volume {
         // It's important that we don't query D_VOL because that returns the wrong value in case an
         // envelope is written
-        let result = unsafe { Reaper::get().medium().get_track_ui_vol_pan(self.get_raw()) }
-            .expect("Couldn't get vol/pan");
+        let result = unsafe {
+            Reaper::get()
+                .medium()
+                .functions()
+                .get_track_ui_vol_pan(self.get_raw())
+        }
+        .expect("Couldn't get vol/pan");
         Volume::from_reaper_value(result.volume)
     }
 
@@ -214,7 +229,7 @@ impl Track {
         // return value reflects the cropped value. The precision became much better with
         // REAPER 5.28.
         unsafe {
-            reaper.medium().csurf_on_volume_change_ex(
+            reaper.medium().functions().csurf_on_volume_change_ex(
                 self.get_raw(),
                 Absolute(reaper_value),
                 GangBehavior::DenyGang,
@@ -223,9 +238,11 @@ impl Track {
         // Setting the volume programmatically doesn't trigger SetSurfaceVolume in
         // HelperControlSurface so we need to notify manually
         unsafe {
-            reaper
-                .medium()
-                .csurf_set_surface_volume(self.get_raw(), reaper_value, NotifyAll);
+            reaper.medium().functions().csurf_set_surface_volume(
+                self.get_raw(),
+                reaper_value,
+                NotifyAll,
+            );
         }
     }
 
@@ -236,6 +253,7 @@ impl Track {
         let result = unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_tracknumber(self.get_raw())
         }?;
         use TrackRef::*;
@@ -258,6 +276,7 @@ impl Track {
             let recarm = unsafe {
                 Reaper::get()
                     .medium()
+                    .functions()
                     .get_media_track_info_value(self.get_raw(), RecArm)
             };
             recarm == 1.0
@@ -271,7 +290,7 @@ impl Track {
         } else {
             let reaper = Reaper::get();
             unsafe {
-                reaper.medium().csurf_on_rec_arm_change_ex(
+                reaper.medium().functions().csurf_on_rec_arm_change_ex(
                     self.get_raw(),
                     RecordArmState::Armed,
                     GangBehavior::DenyGang,
@@ -283,11 +302,12 @@ impl Track {
             let recarm = unsafe {
                 reaper
                     .medium()
+                    .functions()
                     .get_media_track_info_value(self.get_raw(), RecArm)
             };
             if recarm != 1.0 {
                 unsafe {
-                    reaper.medium().csurf_on_rec_arm_change_ex(
+                    reaper.medium().functions().csurf_on_rec_arm_change_ex(
                         self.get_raw(),
                         RecordArmState::Armed,
                         GangBehavior::DenyGang,
@@ -303,11 +323,14 @@ impl Track {
             self.unselect();
         } else {
             unsafe {
-                Reaper::get().medium().csurf_on_rec_arm_change_ex(
-                    self.get_raw(),
-                    RecordArmState::Unarmed,
-                    GangBehavior::DenyGang,
-                );
+                Reaper::get()
+                    .medium()
+                    .functions()
+                    .csurf_on_rec_arm_change_ex(
+                        self.get_raw(),
+                        RecordArmState::Unarmed,
+                        GangBehavior::DenyGang,
+                    );
             }
         }
     }
@@ -345,6 +368,7 @@ impl Track {
         let mute = unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_value(self.get_raw(), Mute)
         };
         mute == 1.0
@@ -356,11 +380,13 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium()
+                .functions()
                 .set_media_track_info_value(self.get_raw(), Mute, 1.0)
         };
         unsafe {
             reaper
                 .medium()
+                .functions()
                 .csurf_set_surface_mute(self.get_raw(), true, NotifyAll);
         }
     }
@@ -371,11 +397,13 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium()
+                .functions()
                 .set_media_track_info_value(self.get_raw(), Mute, 0.0)
         };
         unsafe {
             reaper
                 .medium()
+                .functions()
                 .csurf_set_surface_mute(self.get_raw(), false, NotifyAll);
         }
     }
@@ -385,6 +413,7 @@ impl Track {
         let solo = unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_value(self.get_raw(), Solo)
         };
         solo > 0.0
@@ -396,11 +425,13 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium()
+                .functions()
                 .set_media_track_info_value(self.get_raw(), Solo, 1.0)
         };
         unsafe {
             reaper
                 .medium()
+                .functions()
                 .csurf_set_surface_solo(self.get_raw(), true, NotifyAll);
         }
     }
@@ -411,11 +442,13 @@ impl Track {
         let _ = unsafe {
             reaper
                 .medium()
+                .functions()
                 .set_media_track_info_value(self.get_raw(), Solo, 0.0)
         };
         unsafe {
             reaper
                 .medium()
+                .functions()
                 .csurf_set_surface_solo(self.get_raw(), false, NotifyAll);
         }
     }
@@ -429,7 +462,7 @@ impl Track {
     // should be double checked then.
     pub fn get_chunk(&self, max_chunk_size: u32, undo_is_optional: ChunkCacheHint) -> Chunk {
         let chunk_content = unsafe {
-            Reaper::get().medium().get_track_state_chunk(
+            Reaper::get().medium().functions().get_track_state_chunk(
                 self.get_raw(),
                 max_chunk_size,
                 undo_is_optional,
@@ -443,7 +476,7 @@ impl Track {
     pub fn set_chunk(&self, chunk: Chunk) {
         let c_string: CString = chunk.into();
         let _ = unsafe {
-            Reaper::get().medium().set_track_state_chunk(
+            Reaper::get().medium().functions().set_track_state_chunk(
                 self.get_raw(),
                 c_string.as_c_str(),
                 ChunkCacheHint::UndoMode,
@@ -456,6 +489,7 @@ impl Track {
         let selected = unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_value(self.get_raw(), Selected)
         };
         selected == 1.0
@@ -466,6 +500,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .set_track_selected(self.get_raw(), true);
         }
     }
@@ -475,6 +510,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .set_only_track_selected(Some(self.get_raw()));
         }
     }
@@ -484,6 +520,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .set_track_selected(self.get_raw(), false);
         }
     }
@@ -493,6 +530,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_track_num_sends(self.get_raw(), TrackSendCategory::Send)
         }
     }
@@ -502,6 +540,7 @@ impl Track {
         let send_index = unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .create_track_send(self.get_raw(), OtherTrack(target_track.get_raw()))
         }
         .unwrap();
@@ -583,6 +622,7 @@ impl Track {
                 if Project::new(rea_project).is_available() {
                     Reaper::get()
                         .medium()
+                        .functions()
                         .validate_ptr_2(Proj(rea_project), media_track)
                 } else {
                     false
@@ -651,6 +691,7 @@ impl Track {
         let current_project = reaper.get_current_project();
         let is_valid_in_current_project = reaper
             .medium()
+            .functions()
             .validate_ptr_2(Proj(current_project.get_raw()), media_track);
         if is_valid_in_current_project {
             return Some(current_project.get_raw());
@@ -663,6 +704,7 @@ impl Track {
             .find(|p| {
                 reaper
                     .medium()
+                    .functions()
                     .validate_ptr_2(Proj(p.get_raw()), media_track)
             });
         other_project.map(|p| p.get_raw())
@@ -673,6 +715,7 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_track_automation_mode(self.media_track.get().unwrap())
         }
     }
@@ -700,6 +743,7 @@ impl Track {
         let t = unsafe {
             Reaper::get()
                 .medium()
+                .functions()
                 .get_media_track_info_tracknumber(self.get_raw())
         };
         t == Some(TrackRef::MasterTrack)
@@ -728,6 +772,7 @@ pub fn get_media_track_guid(media_track: MediaTrack) -> Guid {
     let internal = unsafe {
         Reaper::get()
             .medium()
+            .functions()
             .get_media_track_info_guid(media_track)
     };
     Guid::new(internal)
@@ -739,6 +784,7 @@ fn get_track_project_raw(media_track: MediaTrack) -> Option<ReaProject> {
     unsafe {
         Reaper::get()
             .medium()
+            .functions()
             .get_media_track_info_project(media_track)
     }
 }

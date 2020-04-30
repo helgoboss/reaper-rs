@@ -88,7 +88,7 @@ impl MediumReaperControlSurface for MyControlSurface {
         let reaper = self.reaper.upgrade().unwrap();
         let reaper = reaper.borrow();
         for msg in self.receiver.try_iter() {
-            reaper.show_console_msg(msg);
+            reaper.functions().show_console_msg(msg);
         }
     }
 
@@ -103,14 +103,15 @@ impl TestVstPlugin {
         let low = reaper_rs_low::Reaper::load(&context);
         let medium = Rc::new(RefCell::new(reaper_rs_medium::Reaper::new(low)));
         {
-            let mut med = medium.borrow_mut();
             let (sender, receiver) = channel::<String>();
-            med.show_console_msg("Registering control surface ...");
+            let mut med = medium.borrow_mut();
+            med.functions()
+                .show_console_msg("Registering control surface ...");
             med.plugin_register_add_csurf_inst(MyControlSurface {
                 reaper: Rc::downgrade(&medium),
                 receiver,
             });
-            med.show_console_msg("Registering action ...");
+            med.functions().show_console_msg("Registering action ...");
             med.plugin_register_add_hookpostcommand::<MyHookPostCommand>();
             med.audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<MyOnAudioBuffer, _, _>(
                 Some(MyOnAudioBuffer { counter: 0 }),

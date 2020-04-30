@@ -2,26 +2,6 @@ use crate::{MidiInput, MidiInputDeviceId};
 use std::ptr::NonNull;
 use std::rc::Rc;
 
-/// Contains the REAPER functions which must be called in the audio thread only.
-///
-/// # Design
-///
-/// Separating this from the main Reaper struct has the following advantages:
-///
-/// 1. While there's currently no way to make sure at compile time that a function is called in
-/// the correct thread, structurally separating the functions should make things more clear.
-/// Hopefully this will make it easier to spot incorrect usage or to avoid it in the first place.
-///
-/// 2. The main REAPER struct contains not just the REAPER function pointers but also some mutable
-/// management data, e.g. data for keeping track of things registered via `plugin_register_*()`.
-/// Therefore it can't just be copied. So in order to be able to use REAPER functions also from e.g.
-/// the audio hook register, we would need to wrap it in `Arc` (not `Rc`, because we access it
-/// from multiple threads). That's not enough though for most real-world cases. We probably want to
-/// register/unregister things from the main thread not only in the beginning but also at a later
-/// time. That means we need mutable access. So we end up with `Arc<Mutex<Reaper>>`. However, why
-/// going through all that trouble and put up with possible performance issues if we can avoid it?
-/// The RealtimeReaper contains nothing but function pointers, so it's completely standalone and
-/// copyable. Memory overhead for one low-level Reaper copy is small (~800 * 8 byte = ~7 kB).
 #[derive(Clone, Default)]
 pub struct RealTimeReaper {
     low: reaper_rs_low::Reaper,

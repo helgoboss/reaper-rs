@@ -399,7 +399,7 @@ impl Reaper {
         // But at least we can make sure we are not in an audio thread. Whatever thread we are
         // in right now, this struct will memorize it as the main thread.
         assert!(
-            !medium.is_in_real_time_audio(),
+            !medium.functions().is_in_real_time_audio(),
             "Reaper::setup() must be called from main thread"
         );
         assert!(
@@ -437,7 +437,7 @@ impl Reaper {
             Reaper::obtain_reaper_ref("Reaper::setup() must be called before Reaper::get()");
         // TODO-medium Introduce RealtimeReaper and activate this!
         // assert!(
-        //     !reaper.medium().is_in_real_time_audio(),
+        //     !reaper.medium().functions().is_in_real_time_audio(),
         //     "Reaper::get() must be called from main thread"
         // );
         reaper
@@ -447,7 +447,7 @@ impl Reaper {
         {
             let reaper = Reaper::obtain_reaper_ref("There's no Reaper instance to teardown");
             assert!(
-                !reaper.medium().is_in_real_time_audio(),
+                !reaper.medium().functions().is_in_real_time_audio(),
                 "Reaper::teardown() must be called from main thread"
             );
         }
@@ -518,7 +518,7 @@ impl Reaper {
     }
 
     pub fn get_version(&self) -> ReaperVersion {
-        self.medium().get_app_version()
+        self.medium().functions().get_app_version()
     }
 
     pub fn get_last_touched_fx_parameter(&self) -> Option<FxParameter> {
@@ -526,41 +526,44 @@ impl Reaper {
         //  Maybe we should rather rely on our own technique in ControlSurface here!
         // fxQueryIndex is only a real query index since REAPER 5.95, before it didn't say if it's
         // input FX or normal one!
-        self.medium().get_last_touched_fx().and_then(|result| {
-            use GetLastTouchedFxResult::*;
-            match result {
-                TrackFx {
-                    track_ref,
-                    fx_ref,
-                    param_index,
-                } => {
-                    // Track exists in this project
-                    use TrackRef::*;
-                    let track = match track_ref {
-                        MasterTrack => self.get_current_project().get_master_track(),
-                        NormalTrack(idx) => {
-                            if idx >= self.get_current_project().get_track_count() {
-                                // Must be in another project
-                                return None;
+        self.medium()
+            .functions()
+            .get_last_touched_fx()
+            .and_then(|result| {
+                use GetLastTouchedFxResult::*;
+                match result {
+                    TrackFx {
+                        track_ref,
+                        fx_ref,
+                        param_index,
+                    } => {
+                        // Track exists in this project
+                        use TrackRef::*;
+                        let track = match track_ref {
+                            MasterTrack => self.get_current_project().get_master_track(),
+                            NormalTrack(idx) => {
+                                if idx >= self.get_current_project().get_track_count() {
+                                    // Must be in another project
+                                    return None;
+                                }
+                                self.get_current_project().get_track_by_index(idx).unwrap()
                             }
-                            self.get_current_project().get_track_by_index(idx).unwrap()
-                        }
-                    };
-                    // TODO We should rethink the query index methods now that we have an FxRef
-                    //  enum in medium-level API
-                    let fx = match track.get_fx_by_query_index(fx_ref.into()) {
-                        None => return None,
-                        Some(fx) => fx,
-                    };
-                    Some(fx.get_parameter_by_index(param_index))
+                        };
+                        // TODO We should rethink the query index methods now that we have an FxRef
+                        //  enum in medium-level API
+                        let fx = match track.get_fx_by_query_index(fx_ref.into()) {
+                            None => return None,
+                            Some(fx) => fx,
+                        };
+                        Some(fx.get_parameter_by_index(param_index))
+                    }
+                    ItemFx { .. } => None, // TODO-low Implement,
                 }
-                ItemFx { .. } => None, // TODO-low Implement,
-            }
-        })
+            })
     }
 
     pub fn generate_guid(&self) -> Guid {
-        Guid::new(Reaper::get().medium().gen_guid())
+        Guid::new(Reaper::get().medium().functions().gen_guid())
     }
 
     pub fn register_action(
@@ -603,11 +606,11 @@ impl Reaper {
     }
 
     pub fn get_max_midi_input_devices(&self) -> u32 {
-        self.medium().get_max_midi_inputs()
+        self.medium().functions().get_max_midi_inputs()
     }
 
     pub fn get_max_midi_output_devices(&self) -> u32 {
-        self.medium().get_max_midi_outputs()
+        self.medium().functions().get_max_midi_outputs()
     }
 
     // It's correct that this method returns a non-optional. An id is supposed to uniquely identify
@@ -639,7 +642,10 @@ impl Reaper {
     }
 
     pub fn get_currently_loading_or_saving_project(&self) -> Option<Project> {
-        let ptr = self.medium().get_current_project_in_load_save()?;
+        let ptr = self
+            .medium()
+            .functions()
+            .get_current_project_in_load_save()?;
         Some(Project::new(ptr))
     }
 
@@ -696,7 +702,7 @@ impl Reaper {
     /// Look into [from_vec_unchecked](CString::from_vec_unchecked) or
     /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.
     pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
-        self.medium().show_console_msg(msg);
+        self.medium().functions().show_console_msg(msg);
     }
 
     // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret
@@ -707,7 +713,7 @@ impl Reaper {
         title: &CStr,
         kind: MessageBoxType,
     ) -> MessageBoxResult {
-        self.medium().show_message_box(msg, title, kind)
+        self.medium().functions().show_message_box(msg, title, kind)
     }
 
     pub fn get_main_section(&self) -> Section {
@@ -765,7 +771,7 @@ impl Reaper {
     // Attention: Returns normal fx only, not input fx!
     // This is not reliable! After REAPER start no focused Fx can be found!
     pub fn get_focused_fx(&self) -> Option<Fx> {
-        self.medium().get_focused_fx().and_then(|res| {
+        self.medium().functions().get_focused_fx().and_then(|res| {
             use GetFocusedFxResult::*;
             match res {
                 ItemFx { .. } => None, // TODO-low implement
@@ -863,6 +869,7 @@ impl Reaper {
     pub fn get_current_project(&self) -> Project {
         Project::new(
             self.medium()
+                .functions()
                 .enum_projects(ProjectRef::Current, 0)
                 .unwrap()
                 .project,
@@ -870,12 +877,16 @@ impl Reaper {
     }
 
     pub fn get_main_window(&self) -> Hwnd {
-        self.medium().get_main_hwnd()
+        self.medium().functions().get_main_hwnd()
     }
 
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
-            .map(move |i| self.medium().enum_projects(ProjectRef::Tab(i), 0))
+            .map(move |i| {
+                self.medium()
+                    .functions()
+                    .enum_projects(ProjectRef::Tab(i), 0)
+            })
             .take_while(|r| !r.is_none())
             .map(|r| Project::new(r.unwrap().project))
     }
@@ -885,7 +896,7 @@ impl Reaper {
     }
 
     pub fn clear_console(&self) {
-        self.medium().clear_console();
+        self.medium().functions().clear_console();
     }
 
     pub fn execute_later_in_main_thread(
@@ -924,7 +935,7 @@ impl Reaper {
     }
 
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
-        self.medium().stuff_midimessage(target, message);
+        self.medium().functions().stuff_midimessage(target, message);
     }
 
     pub fn current_thread_is_main_thread(&self) -> bool {
@@ -936,7 +947,7 @@ impl Reaper {
     }
 
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationOverride> {
-        self.medium().get_global_automation_override()
+        self.medium().functions().get_global_automation_override()
     }
 
     pub fn undoable_action_is_running(&self) -> bool {
@@ -954,7 +965,9 @@ impl Reaper {
             return None;
         }
         self.undo_block_is_active.replace(true);
-        self.medium().undo_begin_block_2(Proj(project.get_raw()));
+        self.medium()
+            .functions()
+            .undo_begin_block_2(Proj(project.get_raw()));
         Some(UndoBlock::new(project, label))
     }
 
@@ -964,6 +977,7 @@ impl Reaper {
             return;
         }
         self.medium()
+            .functions()
             .undo_end_block_2(Proj(project.get_raw()), label, All);
         self.undo_block_is_active.replace(false);
     }
