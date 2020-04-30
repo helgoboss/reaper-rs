@@ -8,7 +8,7 @@ use std::os::raw::{c_int, c_ushort, c_void};
 use std::ptr::{null, null_mut, NonNull};
 use std::rc::Rc;
 use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{mpsc, Once};
+use std::sync::{mpsc, Arc, Once, Weak};
 use std::thread;
 use std::thread::ThreadId;
 
@@ -29,6 +29,7 @@ use crate::{
     Track,
 };
 use helgoboss_midi::{ShortMessage, ShortMessageType};
+use once_cell::sync::Lazy;
 use reaper_rs_low;
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, ACCEL};
@@ -44,6 +45,7 @@ use reaper_rs_medium::{
     MidiOutputDeviceId, ProjectRef, RealtimeReaper, ReaperStringArg, ReaperVersion, SectionId,
     StuffMidiMessageTarget, TrackRef,
 };
+use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
 
 /// Access to this variable is encapsulated in 3 functions:
@@ -65,6 +67,8 @@ use std::time::{Duration, SystemTime};
 /// 5. Reaper::teardown() is not called while a get() reference is still active.
 ///    => Wrap Option in a RefCell.
 static mut REAPER_INSTANCE: RefCell<Option<Reaper>> = RefCell::new(None);
+
+static REAPER_GUARD: Lazy<Mutex<Weak<ReaperGuard>>> = Lazy::new(|| Mutex::new(Weak::new()));
 
 // Called by REAPER (using a delegate function)!
 // Only for main section
@@ -224,16 +228,6 @@ impl ReaperBuilder {
     }
 }
 
-pub fn setup_reaper_with_defaults(context: &ReaperPluginContext, email_address: &'static str) {
-    Reaper::load(context)
-        .logger(create_terminal_logger())
-        .setup();
-    std::panic::set_hook(create_reaper_panic_hook(
-        create_terminal_logger(),
-        Some(create_default_console_msg_formatter(email_address)),
-    ));
-}
-
 pub struct Reaper {
     medium: RefCell<reaper_rs_medium::Reaper>,
     logger: slog::Logger,
@@ -370,9 +364,38 @@ impl Drop for Reaper {
     }
 }
 
+pub struct ReaperGuard;
+
+impl Drop for ReaperGuard {
+    fn drop(&mut self) {
+        Reaper::teardown()
+    }
+}
+
 impl Reaper {
+    pub fn guarded(initializer: impl FnOnce()) -> Arc<ReaperGuard> {
+        let mut result = REAPER_GUARD.lock().unwrap();
+        if let Some(rc) = result.upgrade() {
+            return rc;
+        }
+        initializer();
+        let arc = Arc::new(ReaperGuard);
+        *result = Arc::downgrade(&arc);
+        arc
+    }
+
     pub fn load(context: &ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder::with_all_functions_loaded(context)
+    }
+
+    pub fn setup_with_defaults(context: &ReaperPluginContext, email_address: &'static str) {
+        Reaper::load(context)
+            .logger(create_terminal_logger())
+            .setup();
+        std::panic::set_hook(create_reaper_panic_hook(
+            create_terminal_logger(),
+            Some(create_default_console_msg_formatter(email_address)),
+        ));
     }
 
     fn setup(medium: reaper_rs_medium::Reaper, logger: slog::Logger) {
