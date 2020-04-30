@@ -20,7 +20,7 @@ use crate::{
     MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction,
     MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
     NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
-    ReaProject, RealtimeReaper, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
+    ReaProject, RealTimeReaper, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
     ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
     RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef,
@@ -46,15 +46,16 @@ use std::rc::Rc;
 /// That's because unlike the low-level API, the medium-level API is hand-written and a perpetual
 /// work in progress. If you can't find the function that you need, you can always resort to the
 /// low-level API by navigating to [`low`](struct.Reaper.html#structfield.low). Of course you are
-/// welcome to contribute to bring the medium-level API on par with the low-level one.  
+/// welcome to contribute to bring the medium-level API on par with the low-level one.
+#[derive(Default)]
 pub struct Reaper {
-    // It's an Rc because we need `RealtimeReaper` to be completely stand-alone (without any
+    // It's an Rc because we need `RealTimeReaper` to be completely stand-alone (without any
     // borrowed stuff) to be able to box it to be able to obtain a stable address for handing it
     // over to Reaper as userdata for audio_hook_register_t. If we wouldn't share low-level Reaper,
     // we would either need to copy it (unnecessary memory overhead, although small, ~800 * 8 byte
     // = ~7 kB) or let the consumer wrap medium-level Reaper in an Rc (which would be too
     // presumptuous and also lead to unnecessary indirection).
-    low: Rc<reaper_rs_low::Reaper>,
+    low: reaper_rs_low::Reaper,
     gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
     audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, raw::audio_hook_register_t>,
     csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
@@ -86,7 +87,7 @@ impl Reaper {
     /// [`reaper_rs_low::Reaper`](../../low_level/struct.Reaper.html) instance.
     pub fn new(low: reaper_rs_low::Reaper) -> Reaper {
         Reaper {
-            low: Rc::new(low),
+            low: low.clone(),
             gaccel_registers: Default::default(),
             audio_hook_registers: Default::default(),
             csurf_insts: Default::default(),
@@ -99,8 +100,8 @@ impl Reaper {
         &self.low
     }
 
-    pub fn create_realtime_reaper(&self) -> RealtimeReaper {
-        RealtimeReaper::new(self.low.clone())
+    pub fn create_real_time_reaper(&self) -> RealTimeReaper {
+        RealTimeReaper::new(self.low.clone())
     }
 
     /// Returns the requested project and optionally its file name.
@@ -111,7 +112,7 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::ProjectRef::Tab;
     ///
     /// let result = reaper.enum_projects(Tab(4), 256).ok_or("No such tab")?;
@@ -160,7 +161,7 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::ProjectContext::CurrentProject;
     ///
     /// let track = reaper.get_track(CurrentProject, 3).ok_or("No such track")?;
@@ -475,13 +476,13 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
-    /// use reaper_rs_medium::{NotificationBehavior::NotifyAllExcept, ProjectContext::CurrentProject};
+    /// # let reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
     /// use reaper_rs_medium::get_cpp_control_surface;
     ///
     /// let track = reaper.get_track(CurrentProject, 0).ok_or("Track doesn't exist")?;
     /// unsafe {
-    ///     reaper.csurf_set_surface_mute(track, true, NotifyAllExcept(get_cpp_control_surface()));
+    ///     reaper.csurf_set_surface_mute(track, true, NotifyAll);
     /// }
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -1013,7 +1014,7 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, UndoFlag::*};
     ///
     /// reaper.undo_begin_block_2(CurrentProject);
@@ -1565,7 +1566,7 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::new(reaper_rs_low::Reaper::default());
+    /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
     ///
     /// let src_track = reaper.get_track(CurrentProject, 0).ok_or("Source track doesn't exist")?;

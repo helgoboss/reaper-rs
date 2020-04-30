@@ -133,8 +133,8 @@ pub use midi::*;
 mod reaper;
 pub use reaper::*;
 
-mod realtime_reaper;
-pub use realtime_reaper::*;
+mod real_time_reaper;
+pub use real_time_reaper::*;
 
 mod util;
 pub use util::*;

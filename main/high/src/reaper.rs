@@ -42,7 +42,7 @@ use reaper_rs_medium::{
     GlobalAutomationOverride, Hwnd, MediumAccelerator, MediumAudioHookRegister,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId,
-    MidiOutputDeviceId, ProjectRef, RealtimeReaper, ReaperStringArg, ReaperVersion, SectionId,
+    MidiOutputDeviceId, ProjectRef, RealTimeReaper, ReaperStringArg, ReaperVersion, SectionId,
     StuffMidiMessageTarget, TrackRef,
 };
 use std::sync::Mutex;
@@ -130,10 +130,10 @@ impl MediumToggleAction for HighLevelToggleAction {
 struct HighOnAudioBuffer {}
 
 impl MediumOnAudioBuffer for HighOnAudioBuffer {
-    type UserData1 = RealtimeReaper;
+    type UserData1 = RealTimeReaper;
     type UserData2 = ();
 
-    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealtimeReaper>) {
+    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealTimeReaper>) {
         if is_post {
             return;
         }
@@ -467,6 +467,7 @@ impl Reaper {
     pub fn activate(&self) {
         let (task_sender, task_receiver) = mpsc::channel::<ScheduledTask>();
         let helper_control_surface = HelperControlSurface::new(task_sender.clone(), task_receiver);
+        let real_time_reaper = self.medium().create_real_time_reaper();
         let mut medium = self.medium_mut();
         medium.plugin_register_add_hookcommand::<HighLevelHookCommand>();
         medium.plugin_register_add_toggleaction::<HighLevelToggleAction>();
@@ -479,11 +480,10 @@ impl Reaper {
             self.csurf_inst_handle.set(Some(handle))
         }
         if self.audio_hook_register_handle.get().is_none() {
-            let realtime_reaper = medium.create_realtime_reaper();
             let handle = medium
                 .audio_reg_hardware_hook_add(
                     MediumAudioHookRegister::new::<HighOnAudioBuffer, _, _>(
-                        Some(realtime_reaper),
+                        Some(real_time_reaper),
                         None,
                     ),
                 )

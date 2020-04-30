@@ -126,7 +126,7 @@ mod codegen {
                 /// option in the [`pointers`](struct.Reaper.html#structfield.pointers) field. The actual methods
                 /// in [`Reaper`](struct.Reaper.html) are just convenience methods which unwrap the function
                 /// pointers and panic if they are not available.
-                #[derive(Default)]
+                #[derive(Clone, Default)]
                 pub struct Reaper {
                     pub(crate) pointers: ReaperFunctionPointers,
                 }
@@ -154,7 +154,7 @@ mod codegen {
                 }
 
                 /// Container for the REAPER function pointers.
-                #[derive(Default)]
+                #[derive(Clone, Default)]
                 pub struct ReaperFunctionPointers {
                     #(
                         pub #names: Option<#fn_ptr_signatures>,
