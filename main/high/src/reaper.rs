@@ -133,15 +133,11 @@ impl MediumOnAudioBuffer for HighOnAudioBuffer {
     type UserData1 = RealtimeReaper;
     type UserData2 = ();
 
-    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealtimeReaper, ()>) {
+    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealtimeReaper>) {
         if is_post {
             return;
         }
-        // TODO-low Check performance implications for Reaper instance unwrapping
-        let reaper = match reg.user_data_1() {
-            None => return,
-            Some(r) => r,
-        };
+        let reaper = reg.user_data_1();
         // TODO-low Should we use an unsafe cell here for better performance?
         // TODO-medium Fix this
         // let mut subject = reaper.subjects.midi_message_received.borrow_mut();

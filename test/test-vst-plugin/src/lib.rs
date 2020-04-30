@@ -6,6 +6,10 @@ use reaper_rs_medium::{
     AudioHookRegister, CommandId, MediumAudioHookRegister, MediumHookPostCommand,
     MediumOnAudioBuffer, MediumReaperControlSurface,
 };
+use std::cell::RefCell;
+use std::panic::RefUnwindSafe;
+use std::rc::{Rc, Weak};
+use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
@@ -15,7 +19,7 @@ plugin_main!(TestVstPlugin);
 #[derive(Default)]
 struct TestVstPlugin {
     host: HostCallback,
-    reaper: Option<reaper_rs_medium::Reaper>,
+    reaper: Option<Rc<RefCell<reaper_rs_medium::Reaper>>>,
     reaper_guard: Option<Arc<ReaperGuard>>,
 }
 
@@ -37,7 +41,8 @@ impl Plugin for TestVstPlugin {
     }
 
     fn init(&mut self) {
-        self.use_high_level_reaper();
+        self.use_medium_level_reaper();
+        // self.use_high_level_reaper();
     }
 }
 
@@ -47,12 +52,19 @@ struct MyOnAudioBuffer {
 
 impl MediumOnAudioBuffer for MyOnAudioBuffer {
     type UserData1 = MyOnAudioBuffer;
-    type UserData2 = ();
+    type UserData2 = Sender<String>;
 
-    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<MyOnAudioBuffer, ()>) {
-        let state = reg.user_data_1().unwrap();
+    fn call(
+        is_post: bool,
+        len: i32,
+        srate: f64,
+        reg: AudioHookRegister<Self::UserData1, Self::UserData2>,
+    ) {
+        let (state, sender) = (reg.user_data_1(), reg.user_data_2());
         state.counter += 1;
-        // println!("Audio hook counter: {}", state.counter)
+        if (state.counter % 50 == 0) {
+            sender.send(format!("Counter: {}", state.counter));
+        }
     }
 }
 
@@ -64,9 +76,22 @@ impl MediumHookPostCommand for MyHookPostCommand {
     }
 }
 
-struct MyControlSurface;
+struct MyControlSurface {
+    reaper: Weak<RefCell<reaper_rs_medium::Reaper>>,
+    receiver: Receiver<String>,
+}
+
+impl RefUnwindSafe for MyControlSurface {}
 
 impl MediumReaperControlSurface for MyControlSurface {
+    fn run(&mut self) {
+        let reaper = self.reaper.upgrade().unwrap();
+        let reaper = reaper.borrow();
+        for msg in self.receiver.try_iter() {
+            reaper.show_console_msg(msg);
+        }
+    }
+
     fn set_track_list_change(&self) {
         println!("Track list changed!")
     }
@@ -76,15 +101,22 @@ impl TestVstPlugin {
     fn use_medium_level_reaper(&mut self) {
         let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
         let low = reaper_rs_low::Reaper::load(&context);
-        let mut medium = reaper_rs_medium::Reaper::new(low);
-        medium.show_console_msg("Registering control surface ...");
-        medium.plugin_register_add_csurf_inst(MyControlSurface);
-        medium.show_console_msg("Registering action ...");
-        medium.plugin_register_add_hookpostcommand::<MyHookPostCommand>();
-        medium.audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<MyOnAudioBuffer, _, _>(
-            Some(MyOnAudioBuffer { counter: 0 }),
-            None,
-        ));
+        let medium = Rc::new(RefCell::new(reaper_rs_medium::Reaper::new(low)));
+        {
+            let mut med = medium.borrow_mut();
+            let (sender, receiver) = channel::<String>();
+            med.show_console_msg("Registering control surface ...");
+            med.plugin_register_add_csurf_inst(MyControlSurface {
+                reaper: Rc::downgrade(&medium),
+                receiver,
+            });
+            med.show_console_msg("Registering action ...");
+            med.plugin_register_add_hookpostcommand::<MyHookPostCommand>();
+            med.audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<MyOnAudioBuffer, _, _>(
+                Some(MyOnAudioBuffer { counter: 0 }),
+                Some(sender),
+            ));
+        }
         self.reaper = Some(medium);
     }
 

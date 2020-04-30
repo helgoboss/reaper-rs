@@ -73,7 +73,7 @@ impl GaccelRegister {
 }
 
 #[derive(Debug, Eq, Hash, PartialEq, Into)]
-pub struct AudioHookRegister<UD1, UD2>(
+pub struct AudioHookRegister<UD1 = (), UD2 = ()>(
     pub(crate) NonNull<raw::audio_hook_register_t>,
     PhantomData<(UD1, UD2)>,
 );
@@ -87,13 +87,18 @@ impl<UD1, UD2> AudioHookRegister<UD1, UD2> {
         self.0
     }
 
-    pub fn user_data_1(&self) -> Option<&mut UD1> {
+    pub fn user_data_1(&self) -> &mut UD1 {
         let reg = unsafe { self.0.as_ref() };
-        if reg.userdata1.is_null() {
-            return None;
-        }
+        assert!(!reg.userdata1.is_null());
         let userdata1 = reg.userdata1 as *mut UD1;
-        Some(unsafe { &mut *userdata1 })
+        unsafe { &mut *userdata1 }
+    }
+
+    pub fn user_data_2(&self) -> &mut UD2 {
+        let reg = unsafe { self.0.as_ref() };
+        assert!(!reg.userdata2.is_null());
+        let userdata2 = reg.userdata2 as *mut UD2;
+        unsafe { &mut *userdata2 }
     }
 }
 
