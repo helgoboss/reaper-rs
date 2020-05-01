@@ -20,13 +20,13 @@ use crate::{
     KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction,
     MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
-    NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectRef,
-    ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
-    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
-    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory,
-    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectPart,
+    ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
+    ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
+    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey,
+    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -965,7 +965,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     ///
     /// ```no_run
     /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, UndoFlag::*};
+    /// use reaper_rs_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, ProjectPart::*};
     ///
     /// reaper.undo_begin_block_2(CurrentProject);
     /// // ... do something incredible ...
@@ -986,6 +986,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         descchange: impl Into<ReaperStringArg<'a>>,
         extraflags: UndoScope,
     ) {
+        self.require_valid_project(proj);
         unsafe {
             self.undo_end_block_2_unchecked(proj, descchange, extraflags);
         }

@@ -20,13 +20,13 @@ use crate::{
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
     MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
-    PluginRegistration, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
+    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperControlSurface,
     ReaperFunctions, ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
     ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId,
     SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
     TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
-    TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange,
-    VolumeSliderValue, WindowContext,
+    TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
