@@ -4,7 +4,7 @@ use reaper_rs_high::{ActionKind, Reaper, ReaperGuard};
 use reaper_rs_low::ReaperPluginContext;
 use reaper_rs_medium::{
     AudioHookRegister, CommandId, MediumAudioHookRegister, MediumHookPostCommand,
-    MediumOnAudioBuffer, MediumReaperControlSurface,
+    MediumOnAudioBuffer, MediumReaperControlSurface, OnAudioBufferArgs,
 };
 use std::cell::RefCell;
 use std::panic::RefUnwindSafe;
@@ -54,13 +54,8 @@ impl MediumOnAudioBuffer for MyOnAudioBuffer {
     type UserData1 = MyOnAudioBuffer;
     type UserData2 = Sender<String>;
 
-    fn call(
-        is_post: bool,
-        len: i32,
-        srate: f64,
-        reg: AudioHookRegister<Self::UserData1, Self::UserData2>,
-    ) {
-        let (state, sender) = (reg.user_data_1(), reg.user_data_2());
+    fn call(args: OnAudioBufferArgs<Self::UserData1, Self::UserData2>) {
+        let (state, sender) = (args.reg.user_data_1(), args.reg.user_data_2());
         state.counter += 1;
         if (state.counter % 50 == 0) {
             sender.send(format!("Counter: {}", state.counter));

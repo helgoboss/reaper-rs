@@ -247,7 +247,7 @@ impl<'a> PluginRegistration<'a> {
         Self::Custom(key.into().into_inner(), info_struct)
     }
 
-    pub(crate) fn to_owned(self) -> PluginRegistration<'static> {
+    pub(crate) fn into_owned(self) -> PluginRegistration<'static> {
         use PluginRegistration::*;
         match self {
             Api(func_name, func) => Api(func_name.into_owned().into(), func),

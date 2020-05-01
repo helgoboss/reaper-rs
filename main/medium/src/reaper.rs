@@ -85,7 +85,7 @@ impl Reaper {
     // thing which is registered and probably is not safe to generalize.
     // Unregistering is optional! It will be done anyway on Drop via RAII.
     pub unsafe fn plugin_register_add(&mut self, reg: PluginRegistration) -> i32 {
-        self.plugin_registrations.insert(reg.clone().to_owned());
+        self.plugin_registrations.insert(reg.clone().into_owned());
         let infostruct = reg.infostruct();
         let result = self
             .functions
@@ -101,7 +101,7 @@ impl Reaper {
             .functions
             .low()
             .plugin_register(name_with_minus.as_ptr(), infostruct);
-        self.plugin_registrations.remove(&reg.to_owned());
+        self.plugin_registrations.remove(&reg.into_owned());
         result
     }
 

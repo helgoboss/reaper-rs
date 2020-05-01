@@ -36,7 +36,7 @@ impl<'a> ReaperPointer<'a> {
         }
     }
 
-    pub fn as_void(&self) -> *mut c_void {
+    pub(crate) fn as_void(&self) -> *mut c_void {
         use ReaperPointer::*;
         match self {
             MediaTrack(p) => p.as_ptr() as *mut _,

@@ -42,8 +42,8 @@ use reaper_rs_medium::{
     GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
     MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
     MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent,
-    MidiInputDeviceId, MidiOutputDeviceId, ProjectRef, ReaperFunctions, ReaperStringArg,
-    ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
+    MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef, ReaperFunctions,
+    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
 };
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
@@ -1033,11 +1033,11 @@ impl MediumOnAudioBuffer for HighOnAudioBuffer {
     type UserData1 = RealTimeReaper;
     type UserData2 = ();
 
-    fn call(is_post: bool, len: i32, srate: f64, reg: AudioHookRegister<RealTimeReaper>) {
-        if is_post {
+    fn call(args: OnAudioBufferArgs<Self::UserData1, Self::UserData2>) {
+        if args.is_post {
             return;
         }
-        let reaper = reg.user_data_1();
+        let reaper = args.reg.user_data_1();
         for task in reaper.receiver.try_iter().take(1) {
             (task)(reaper);
         }

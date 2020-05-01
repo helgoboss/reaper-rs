@@ -72,6 +72,8 @@ impl GaccelRegister {
     }
 }
 
+// It's important that this type is not cloneable! Otherwise it would too easily escape its intended
+// usage scope (audio hook), which would make it unsafe.
 #[derive(Debug, Eq, Hash, PartialEq, Into)]
 pub struct AudioHookRegister<UD1 = (), UD2 = ()>(
     pub(crate) NonNull<raw::audio_hook_register_t>,
