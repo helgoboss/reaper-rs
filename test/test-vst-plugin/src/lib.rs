@@ -53,7 +53,6 @@ struct MyOnAudioBuffer {
 
 impl MediumOnAudioBuffer for MyOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
-        self.counter += 1;
         if (self.counter % 100 == 0) {
             self.sender.send(format!(
                 "Counter: {}, Args: {:?}, Channels: {:?}\n",
@@ -62,6 +61,7 @@ impl MediumOnAudioBuffer for MyOnAudioBuffer {
                 (args.reg.input_nch(), args.reg.output_nch())
             ));
         }
+        self.counter += 1;
     }
 }
 

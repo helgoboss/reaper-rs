@@ -16,7 +16,7 @@ use crate::{
     require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
     AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
-    GaccelRegister, GangBehavior, GlobalAutomationOverride, Hwnd, InputMonitoringMode,
+    GaccelRegister, GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction,
     MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
@@ -1116,11 +1116,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         AutomationMode::try_from(result).expect("Unknown automation mode")
     }
 
-    pub fn get_global_automation_override(&self) -> Option<GlobalAutomationOverride>
+    pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride>
     where
         S: MainThread,
     {
-        use GlobalAutomationOverride::*;
+        use GlobalAutomationModeOverride::*;
         match self.low.GetGlobalAutomationOverride() {
             -1 => None,
             6 => Some(Bypass),

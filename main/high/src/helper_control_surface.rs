@@ -582,7 +582,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
     }
 
     fn set_surface_pan(&self, args: SetSurfacePanArgs) {
-        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
             None => return,
             Some(td) => td,
         };
@@ -590,7 +590,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
             return;
         }
         td.pan = args.pan;
-        let track = Track::new(args.trackid, None);
+        let track = Track::new(args.track, None);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -603,7 +603,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
     }
 
     fn set_surface_volume(&self, args: SetSurfaceVolumeArgs) {
-        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
             None => return,
             Some(td) => td,
         };
@@ -611,7 +611,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
             return;
         }
         td.volume = args.volume;
-        let track = Track::new(args.trackid, None);
+        let track = Track::new(args.track, None);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -628,13 +628,13 @@ impl MediumReaperControlSurface for HelperControlSurface {
     }
 
     fn set_surface_mute(&self, args: SetSurfaceMuteArgs) {
-        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
             None => return,
             Some(td) => td,
         };
         if td.mute != args.mute {
             td.mute = args.mute;
-            let track = Track::new(args.trackid, None);
+            let track = Track::new(args.track, None);
             let reaper = Reaper::get();
             reaper
                 .subjects
@@ -648,13 +648,13 @@ impl MediumReaperControlSurface for HelperControlSurface {
     }
 
     fn set_surface_selected(&self, args: SetSurfaceSelectedArgs) {
-        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
             None => return,
             Some(td) => td,
         };
         if td.selected != args.selected {
             td.selected = args.selected;
-            let track = Track::new(args.trackid, None);
+            let track = Track::new(args.track, None);
             Reaper::get()
                 .subjects
                 .track_selected_changed
@@ -664,13 +664,13 @@ impl MediumReaperControlSurface for HelperControlSurface {
     }
 
     fn set_surface_solo(&self, args: SetSurfaceSoloArgs) {
-        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
             None => return,
             Some(td) => td,
         };
         if td.solo != args.solo {
             td.solo = args.solo;
-            let track = Track::new(args.trackid, None);
+            let track = Track::new(args.track, None);
             Reaper::get()
                 .subjects
                 .track_solo_changed
@@ -680,13 +680,13 @@ impl MediumReaperControlSurface for HelperControlSurface {
     }
 
     fn set_surface_rec_arm(&self, args: SetSurfaceRecArmArgs) {
-        let mut td = match self.find_track_data_in_normal_state(args.trackid) {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
             None => return,
             Some(td) => td,
         };
         if td.recarm != args.recarm {
             td.recarm = args.recarm;
-            let track = Track::new(args.trackid, None);
+            let track = Track::new(args.track, None);
             Reaper::get()
                 .subjects
                 .track_arm_changed
@@ -708,7 +708,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
             .next(track);
     }
 
-    fn ext_setinputmonitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
+    fn ext_set_input_monitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
         let mut td = match self.find_track_data_in_normal_state(args.track) {
             None => return 1,
             Some(td) => td,
@@ -739,17 +739,17 @@ impl MediumReaperControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setfxparam(&self, args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param(&self, args: ExtSetFxParamArgs) -> i32 {
         self.fx_param_set(args, false);
         1
     }
 
-    fn ext_setfxparam_recfx(&self, args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param_rec_fx(&self, args: ExtSetFxParamArgs) -> i32 {
         self.fx_param_set(args, true);
         1
     }
 
-    fn ext_setfxenabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
+    fn ext_set_fx_enabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fxidx, None, None) {
@@ -762,7 +762,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setsendvolume(&self, args: ExtSetSendVolumeArgs) -> i32 {
+    fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
         let track = Track::new(args.track, None);
         let track_send = track.get_index_based_send_by_index(args.sendidx);
         let reaper = Reaper::get();
@@ -782,7 +782,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setsendpan(&self, args: ExtSetSendPanArgs) -> i32 {
+    fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
         let track = Track::new(args.track, None);
         let track_send = track.get_index_based_send_by_index(args.sendidx);
         let reaper = Reaper::get();
@@ -802,7 +802,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setfocusedfx(&self, args: ExtSetFocusedFxArgs) -> i32 {
+    fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
         let reaper = Reaper::get();
         let fx_ref = match args.fx_ref {
             None => {
@@ -841,7 +841,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
         }
     }
 
-    fn ext_setfxopen(&self, args: ExtSetFxOpenArgs) -> i32 {
+    fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
         if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fxidx, None, None) {
@@ -859,7 +859,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setfxchange(&self, args: ExtSetFxChangeArgs) -> i32 {
+    fn ext_set_fx_change(&self, args: ExtSetFxChangeArgs) -> i32 {
         let track = Track::new(args.track, None);
         match args.fx_chain_type {
             Some(t) => {
@@ -873,12 +873,12 @@ impl MediumReaperControlSurface for HelperControlSurface {
         1
     }
 
-    fn ext_setlasttouchedfx(&self, _: ExtSetLastTouchedFxArgs) -> i32 {
+    fn ext_set_last_touched_fx(&self, _: ExtSetLastTouchedFxArgs) -> i32 {
         self.fx_has_been_touched_just_a_moment_ago.replace(true);
         1
     }
 
-    fn ext_setbpmandplayrate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
+    fn ext_set_bpm_and_play_rate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
         let reaper = Reaper::get();
         if args.bpm.is_some() {
             reaper.subjects.master_tempo_changed.borrow_mut().next(());

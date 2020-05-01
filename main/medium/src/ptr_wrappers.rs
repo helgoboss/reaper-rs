@@ -72,30 +72,6 @@ impl GaccelRegister {
     }
 }
 
-// It's important that this type is not cloneable! Otherwise it would too easily escape its intended
-// usage scope (audio hook), which would make it unsafe.
-// We don't include the user-defined data pointers. They are exposed in a better way.
-#[derive(Debug, Eq, Hash, PartialEq, Into)]
-pub struct AudioHookRegister(pub(crate) NonNull<raw::audio_hook_register_t>);
-
-impl AudioHookRegister {
-    pub fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister {
-        AudioHookRegister(ptr)
-    }
-
-    pub(crate) fn get(&self) -> NonNull<raw::audio_hook_register_t> {
-        self.0
-    }
-
-    pub fn input_nch(&self) -> u32 {
-        unsafe { self.0.as_ref() }.input_nch as u32
-    }
-
-    pub fn output_nch(&self) -> u32 {
-        unsafe { self.0.as_ref() }.input_nch as u32
-    }
-}
-
 // This is unlike MediaTrack and Co. in that it points to a struct which is *not* opaque. Still, we
 // need it as pointer and it has the same lifetime characteristics. The difference is that we add
 // type-safe methods to it to lift the possibilities in the struct to medium-level API style. This

@@ -15,7 +15,7 @@ use crate::{
     require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
     AudioThread, AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
-    GaccelRegister, GangBehavior, GlobalAutomationOverride, Hwnd, InputMonitoringMode,
+    GaccelRegister, GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MainThread, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
     MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,

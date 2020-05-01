@@ -40,7 +40,7 @@ use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
     AudioThread, CommandId, GaccelRegister, GetFocusedFxResult, GetLastTouchedFxResult,
-    GlobalAutomationOverride, Hwnd, MediumAccelerator, MediumGaccelRegister, MediumHookCommand,
+    GlobalAutomationModeOverride, Hwnd, MediumAccelerator, MediumGaccelRegister, MediumHookCommand,
     MediumHookPostCommand, MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult,
     MessageBoxType, MidiEvent, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs,
     ProjectRef, ReaperFunctions, ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget,
@@ -921,7 +921,7 @@ impl Reaper {
         self.main_thread_id
     }
 
-    pub fn get_global_automation_override(&self) -> Option<GlobalAutomationOverride> {
+    pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride> {
         self.medium().functions().get_global_automation_override()
     }
 

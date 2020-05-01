@@ -1,4 +1,4 @@
-use crate::{AudioHookRegister, Hertz};
+use crate::Hertz;
 use reaper_rs_low::raw::audio_hook_register_t;
 use reaper_rs_low::{firewall, raw};
 use std::any::Any;
@@ -6,33 +6,59 @@ use std::marker::PhantomData;
 use std::os::raw::c_void;
 use std::ptr::{null_mut, NonNull};
 
-pub(crate) type OnAudioBufferFn =
-    extern "C" fn(is_post: bool, len: i32, srate: f64, reg: *mut audio_hook_register_t);
-
-/// Consumers need to implement this trait if they want to be called back from the audio thread.
+/// Consumers need to implement this trait in order to be called back from the audio thread.
 ///
 /// See [`audio_reg_hardware_hook_add`].
 ///
 /// [`audio_reg_hardware_hook_add`]: struct.Reaper.html#method.audio_reg_hardware_hook_add
 pub trait MediumOnAudioBuffer {
-    /// The actual callback function. It's called twice per frame, first with `is_post` being
-    /// `false`, then `true`.
+    /// The actual callback function.
+    ///
+    /// It's called twice per frame, first with `is_post` being `false`, then `true`.
     fn call(&mut self, args: OnAudioBufferArgs);
 }
 
-// TODO-medium It's cool to be able to use the user-defined data as self. But we still need to
-//  offer access to other data contained in AudioHookRegister.
-//  user-defined data is owned by us can be be manipulated ad lib by us. Other data has different
-// nature:
-//  - input_nch, output_nch => set by REAPER, can be different in each call
-//  - GetBuffer() exposes samples
 #[derive(PartialEq, Debug)]
 pub struct OnAudioBufferArgs {
     pub is_post: bool,
-    pub buffer_length: u32,
-    pub sample_rate: Hertz,
+    pub len: u32,
+    pub srate: Hertz,
     pub reg: AudioHookRegister,
 }
+
+/// Provides access to the current audio buffer contents (not yet implemented).
+//
+// It's important that this type is not cloneable! Otherwise consumers could easily let it escape
+// its intended usage scope (audio hook), which would lead to undefined behavior.
+//
+// We don't expose the user-defined data pointers. The first one is already exposed implicitly as
+// `&mut self` in the callback function. The second one is unnecessary.
+#[derive(Eq, PartialEq, Hash, Debug)]
+pub struct AudioHookRegister(pub(crate) NonNull<raw::audio_hook_register_t>);
+
+impl AudioHookRegister {
+    pub(crate) fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister {
+        AudioHookRegister(ptr)
+    }
+
+    /// Returns the raw pointer.
+    pub fn get(&self) -> NonNull<raw::audio_hook_register_t> {
+        self.0
+    }
+
+    /// Returns the current number of input channels.
+    pub fn input_nch(&self) -> u32 {
+        unsafe { self.0.as_ref() }.input_nch as u32
+    }
+
+    /// Returns the current number of output channels.
+    pub fn output_nch(&self) -> u32 {
+        unsafe { self.0.as_ref() }.input_nch as u32
+    }
+}
+
+pub(crate) type OnAudioBufferFn =
+    extern "C" fn(is_post: bool, len: i32, srate: f64, reg: *mut audio_hook_register_t);
 
 pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
     is_post: bool,
@@ -46,10 +72,8 @@ pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
         let callback_struct: &mut T = decode_user_data(unsafe { reg.as_ref() }.userdata1);
         callback_struct.call(OnAudioBufferArgs {
             is_post,
-            buffer_length: len as u32,
-            // TODO-medium Turn to new_unchecked as soon as we are pretty sure that it can only
-            //  be > 0
-            sample_rate: Hertz::new(srate),
+            len: len as u32,
+            srate: unsafe { Hertz::new_unchecked(srate) },
             reg: AudioHookRegister::new(reg),
         });
     });
@@ -65,11 +89,6 @@ fn decode_user_data<'a, U>(data: *mut c_void) -> &'a mut U {
     unsafe { &mut *data }
 }
 
-/// Consumers need to provide this struct to be called back from the audio thread.
-///
-/// See [`audio_reg_hardware_hook_add`].
-///
-/// [`audio_reg_hardware_hook_add`]: struct.Reaper.html#method.audio_reg_hardware_hook_add
 #[derive(Debug)]
 pub(crate) struct MediumAudioHookRegister {
     inner: raw::audio_hook_register_t,

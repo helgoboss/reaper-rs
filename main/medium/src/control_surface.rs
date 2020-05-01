@@ -1,7 +1,8 @@
 use super::MediaTrack;
 use crate::{
     require_non_null_panic, AutomationMode, InputMonitoringMode, ReaperControlSurface,
-    ReaperNormalizedValue, ReaperVersion, TrackFxChainType, TrackFxRef,
+    ReaperNormalizedValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue, TrackFxChainType,
+    TrackFxRef,
 };
 use c_str_macro::c_str;
 use enumflags2::_internal::core::convert::TryFrom;
@@ -14,25 +15,31 @@ use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
 use std::ptr::{null_mut, NonNull};
 
-/// This is the medium-level variant of
-/// [`reaper_rs_low::ControlSurface`](../../low_level/trait.ControlSurface.html). An implementation
-/// of this trait can be passed to
-/// [`medium_level::install_control_surface()`](../fn.install_control_surface.html).
+/// Consumers need to implement this trait in order to be notified about various REAPER events.
+///
+/// See [`plugin_register_add_csurf_inst`].
+///
+/// [`plugin_register_add_csurf_inst`]: struct.Reaper.html#method.plugin_register_add_csurf_inst
 pub trait MediumReaperControlSurface: RefUnwindSafe {
+    /// simple unique string with only A-Z, 0-9, no spaces or other chars
     fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
         None
     }
 
+    /// human readable description (can include instance specific info)
     fn get_desc_string(&self) -> Option<Cow<'static, CStr>> {
         None
     }
 
+    /// string of configuration data
     fn get_config_string(&self) -> Option<Cow<'static, CStr>> {
         None
     }
 
+    /// close without sending "reset" messages, prevent "reset" being sent on destructor
     fn close_no_reset(&self) {}
 
+    /// called 30x/sec or so.
     fn run(&mut self) {}
 
     fn set_track_list_change(&self) {}
@@ -45,6 +52,7 @@ pub trait MediumReaperControlSurface: RefUnwindSafe {
 
     fn set_surface_selected(&self, args: SetSurfaceSelectedArgs) {}
 
+    /// trackid==master means "any solo"
     fn set_surface_solo(&self, args: SetSurfaceSoloArgs) {}
 
     fn set_surface_rec_arm(&self, args: SetSurfaceRecArmArgs) {}
@@ -59,17 +67,21 @@ pub trait MediumReaperControlSurface: RefUnwindSafe {
         false
     }
 
-    // Automation mode for current track
+    /// automation mode for current track
     fn set_auto_mode(&self, args: SetAutoModeArgs) {}
 
+    /// good to flush your control states here
     fn reset_cached_vol_pan_states(&self) {}
 
+    /// track was selected
     fn on_track_selection(&self, args: OnTrackSelectionArgs) {}
 
+    /// Control, Menu, Shift, etc, whatever makes sense for your surface
     fn is_key_down(&self, args: IsKeyDownArgs) -> bool {
         false
     }
 
+    /// return 0 if unsupported
     unsafe fn extended(
         &self,
         _call: i32,
@@ -80,86 +92,86 @@ pub trait MediumReaperControlSurface: RefUnwindSafe {
         0
     }
 
-    fn ext_setinputmonitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
+    fn ext_set_input_monitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
         0
     }
 
-    /// For REAPER < 5.95 this is called for input FX param changes as well. In this case we just
+    /// For REAPER < 5.95 this is called for FX in the input FX chain as well. In this case we just
     /// don't know if the given FX index refers to the normal or input FX chain.
-    fn ext_setfxparam(&self, args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param(&self, args: ExtSetFxParamArgs) -> i32 {
         0
     }
 
-    fn ext_setfxparam_recfx(&self, args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param_rec_fx(&self, args: ExtSetFxParamArgs) -> i32 {
         0
     }
 
-    fn ext_setfxenabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
+    fn ext_set_fx_enabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
         0
     }
 
-    fn ext_setsendvolume(&self, args: ExtSetSendVolumeArgs) -> i32 {
+    fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
         0
     }
 
-    fn ext_setsendpan(&self, args: ExtSetSendPanArgs) -> i32 {
+    fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
         0
     }
 
-    fn ext_setfocusedfx(&self, args: ExtSetFocusedFxArgs) -> i32 {
+    fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
         0
     }
 
-    fn ext_setlasttouchedfx(&self, args: ExtSetLastTouchedFxArgs) -> i32 {
+    fn ext_set_last_touched_fx(&self, args: ExtSetLastTouchedFxArgs) -> i32 {
         0
     }
 
-    fn ext_setfxopen(&self, args: ExtSetFxOpenArgs) -> i32 {
+    fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
         0
     }
 
-    fn ext_setfxchange(&self, args: ExtSetFxChangeArgs) -> i32 {
+    fn ext_set_fx_change(&self, args: ExtSetFxChangeArgs) -> i32 {
         0
     }
 
-    fn ext_setbpmandplayrate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
+    fn ext_set_bpm_and_play_rate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
         0
     }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SetSurfaceVolumeArgs {
-    pub trackid: MediaTrack,
-    pub volume: f64,
+    pub track: MediaTrack,
+    pub volume: ReaperVolumeValue,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SetSurfacePanArgs {
-    pub trackid: MediaTrack,
-    pub pan: f64,
+    pub track: MediaTrack,
+    pub pan: ReaperPanValue,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SetSurfaceMuteArgs {
-    pub trackid: MediaTrack,
+    pub track: MediaTrack,
     pub mute: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SetSurfaceSelectedArgs {
-    pub trackid: MediaTrack,
+    pub track: MediaTrack,
     pub selected: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SetSurfaceSoloArgs {
-    pub trackid: MediaTrack,
+    pub track: MediaTrack,
     pub solo: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SetSurfaceRecArmArgs {
-    pub trackid: MediaTrack,
+    pub track: MediaTrack,
     pub recarm: bool,
 }
 
@@ -197,7 +209,7 @@ pub struct OnTrackSelectionArgs {
     pub trackid: MediaTrack,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ModKey {
     Shift,
     Control,
@@ -411,42 +423,42 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
 
     fn SetSurfaceVolume(&self, trackid: *mut raw::MediaTrack, volume: f64) {
         self.delegate.set_surface_volume(SetSurfaceVolumeArgs {
-            trackid: require_non_null_panic(trackid),
+            track: require_non_null_panic(trackid),
             volume,
         })
     }
 
     fn SetSurfacePan(&self, trackid: *mut raw::MediaTrack, pan: f64) {
         self.delegate.set_surface_pan(SetSurfacePanArgs {
-            trackid: require_non_null_panic(trackid),
+            track: require_non_null_panic(trackid),
             pan,
         })
     }
 
     fn SetSurfaceMute(&self, trackid: *mut raw::MediaTrack, mute: bool) {
         self.delegate.set_surface_mute(SetSurfaceMuteArgs {
-            trackid: require_non_null_panic(trackid),
+            track: require_non_null_panic(trackid),
             mute,
         })
     }
 
     fn SetSurfaceSelected(&self, trackid: *mut raw::MediaTrack, selected: bool) {
         self.delegate.set_surface_selected(SetSurfaceSelectedArgs {
-            trackid: require_non_null_panic(trackid),
+            track: require_non_null_panic(trackid),
             selected,
         })
     }
 
     fn SetSurfaceSolo(&self, trackid: *mut raw::MediaTrack, solo: bool) {
         self.delegate.set_surface_solo(SetSurfaceSoloArgs {
-            trackid: require_non_null_panic(trackid),
+            track: require_non_null_panic(trackid),
             solo,
         })
     }
 
     fn SetSurfaceRecArm(&self, trackid: *mut raw::MediaTrack, recarm: bool) {
         self.delegate.set_surface_rec_arm(SetSurfaceRecArmArgs {
-            trackid: require_non_null_panic(trackid),
+            track: require_non_null_panic(trackid),
             recarm,
         })
     }
@@ -508,7 +520,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
             match call as u32 {
                 raw::CSURF_EXT_SETINPUTMONITOR => {
                     let recmon: i32 = unref_into(parm2).unwrap();
-                    self.delegate.ext_setinputmonitor(ExtSetInputMonitorArgs {
+                    self.delegate.ext_set_input_monitor(ExtSetInputMonitorArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                         recmonitor: recmon.try_into().expect("Unknown input monitoring mode"),
                     })
@@ -525,22 +537,25 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                         normalized_value: ReaperNormalizedValue::new(normalized_value),
                     };
                     match call as u32 {
-                        raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_setfxparam(args),
-                        raw::CSURF_EXT_SETFXPARAM_RECFX => self.delegate.ext_setfxparam_recfx(args),
+                        raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_set_fx_param(args),
+                        raw::CSURF_EXT_SETFXPARAM_RECFX => {
+                            self.delegate.ext_set_fx_param_rec_fx(args)
+                        }
                         _ => unreachable!(),
                     }
                 }
                 raw::CSURF_EXT_SETFOCUSEDFX => {
-                    self.delegate.ext_setfocusedfx(ExtSetFocusedFxArgs {
+                    self.delegate.ext_set_focused_fx(ExtSetFocusedFxArgs {
                         fx_ref: self.get_as_qualified_fx_ref(parm1, parm2, parm3),
                     })
                 }
                 raw::CSURF_EXT_SETLASTTOUCHEDFX => {
-                    self.delegate.ext_setlasttouchedfx(ExtSetLastTouchedFxArgs {
-                        fx_ref: self.get_as_qualified_fx_ref(parm1, parm2, parm3),
-                    })
+                    self.delegate
+                        .ext_set_last_touched_fx(ExtSetLastTouchedFxArgs {
+                            fx_ref: self.get_as_qualified_fx_ref(parm1, parm2, parm3),
+                        })
                 }
-                raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_setfxopen(ExtSetFxOpenArgs {
+                raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_set_fx_open(ExtSetFxOpenArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                     fxidx: self.get_as_version_dependent_track_fx_ref(parm2),
                     ui_open: interpret_as_bool(parm3),
@@ -550,7 +565,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                         // Don't know how to handle that case. Maybe a bug in REAPER.
                         self.delegate.extended(call, parm1, parm2, parm3)
                     } else {
-                        self.delegate.ext_setfxenabled(ExtSetFxEnabledArgs {
+                        self.delegate.ext_set_fx_enabled(ExtSetFxEnabledArgs {
                             track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                             fxidx: self.get_as_version_dependent_track_fx_ref(parm2),
                             enabled: interpret_as_bool(parm3),
@@ -558,18 +573,18 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                     }
                 }
                 raw::CSURF_EXT_SETSENDVOLUME => {
-                    self.delegate.ext_setsendvolume(ExtSetSendVolumeArgs {
+                    self.delegate.ext_set_send_volume(ExtSetSendVolumeArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                         sendidx: unref_into::<i32>(parm2).unwrap() as u32,
                         volume: unref_into(parm3).unwrap(),
                     })
                 }
-                raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_setsendpan(ExtSetSendPanArgs {
+                raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_set_send_pan(ExtSetSendPanArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                     sendidx: unref_into::<i32>(parm2).unwrap() as u32,
                     pan: unref_into(parm3).unwrap(),
                 }),
-                raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_setfxchange(ExtSetFxChangeArgs {
+                raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_set_fx_change(ExtSetFxChangeArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                     fx_chain_type: {
                         if self.supports_detection_of_input_fx_in_set_fx_change {
@@ -587,7 +602,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                 }),
                 raw::CSURF_EXT_SETBPMANDPLAYRATE => {
                     self.delegate
-                        .ext_setbpmandplayrate(ExtSetBpmAndPlayRateArgs {
+                        .ext_set_bpm_and_play_rate(ExtSetBpmAndPlayRateArgs {
                             bpm: unref_into(parm1),
                             playrate: unref_into(parm2),
                         })

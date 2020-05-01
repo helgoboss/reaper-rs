@@ -26,9 +26,9 @@ use reaper_rs_medium::TrackInfoKey::{
 };
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
-    AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationOverride, InputMonitoringMode,
-    MediaTrack, ReaProject, ReaperPointer, RecordArmState, RecordingInput, TrackInfoKey, TrackRef,
-    TrackSendCategory, ValueChange,
+    AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperPointer, RecordArmState, RecordingInput,
+    TrackInfoKey, TrackRef, TrackSendCategory, ValueChange,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -722,7 +722,7 @@ impl Track {
 
     // None means Bypass
     pub fn get_effective_automation_mode(&self) -> Option<AutomationMode> {
-        use GlobalAutomationOverride::*;
+        use GlobalAutomationModeOverride::*;
         match Reaper::get().get_global_automation_override() {
             None => Some(self.get_automation_mode()),
             Some(Bypass) => None,

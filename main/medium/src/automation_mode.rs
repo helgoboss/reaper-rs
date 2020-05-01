@@ -1,12 +1,16 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum GlobalAutomationOverride {
+/// Global override of track automation modes.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum GlobalAutomationModeOverride {
+    /// All automation is bypassed.
     Bypass,
+    /// Automation mode of all tracks is overridden by this one.
     Mode(AutomationMode),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+/// Possible track automation modes.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive, TryFromPrimitive)]
 #[repr(i32)]
 pub enum AutomationMode {
     TrimRead = 0,
