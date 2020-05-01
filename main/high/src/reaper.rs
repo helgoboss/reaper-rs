@@ -41,11 +41,10 @@ use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
     AudioHookRegister, AudioThread, CommandId, GaccelRegister, GetFocusedFxResult,
     GetLastTouchedFxResult, GlobalAutomationOverride, Hwnd, MediumAccelerator,
-    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
-    MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent,
-    MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef, ReaperFunctions,
-    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult,
-    TrackRef,
+    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
+    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent, MidiInputDeviceId,
+    MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef, ReaperFunctions, ReaperStringArg,
+    ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult, TrackRef,
 };
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
@@ -133,6 +132,59 @@ impl RealTimeReaper {
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<'static>> {
         self.subjects.midi_message_received.borrow().clone()
+    }
+}
+
+impl MediumOnAudioBuffer for RealTimeReaper {
+    fn call(&mut self, args: OnAudioBufferArgs) {
+        if args.is_post {
+            return;
+        }
+        // TODO-medium call() must not be exposed!
+        for task in self.receiver.try_iter().take(1) {
+            (task)(self);
+        }
+        // Process MIDI
+        let mut subject = self.subjects.midi_message_received.borrow_mut();
+        if subject.subscribed_size() == 0 {
+            return;
+        }
+        for i in 0..self.functions.get_max_midi_inputs() {
+            self.functions
+                .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
+                    let evt_list = input.get_read_buf();
+                    for evt in evt_list.enum_items(0) {
+                        if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
+                            // TODO-low We should forward active sensing. Can be filtered out
+                            // later.
+                            continue;
+                        }
+                        // Erase lifetime of event so we can "send" it using rxRust
+                        // TODO This is very hacky and unsafe. It works as long as there's no
+                        // rxRust  subscriber (e.g. operator)
+                        // involved which attempts to cache the event
+                        //  and use it after this function has returned. Then segmentation
+                        // faults are  about to happen. Alternative
+                        // would be to turn this into an owned event
+                        // and  send this instead. But note that we
+                        // are in a real-time thread here so we
+                        //  shouldn't allocate on the heap here (so no Rc). That means we would
+                        // have to  copy the owned MIDI event.
+                        // Probably not an issue because it's not
+                        // big and  cheap to copy. Look into this
+                        // and see if the unsafe code is worth it.
+                        let fake_static_evt: MidiEvent<'static> = {
+                            let raw_evt: &raw::MIDI_event_t = evt.into();
+                            let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
+                            unsafe {
+                                let erased_raw_evt = &*raw_evt_ptr;
+                                MidiEvent::new(erased_raw_evt)
+                            }
+                        };
+                        subject.next(fake_static_evt);
+                    }
+                });
+        }
     }
 }
 
@@ -399,7 +451,7 @@ impl Reaper {
         let control_surface =
             HelperControlSurface::new(sender_to_main_thread.clone(), main_thread_receiver);
         let mut medium = self.medium_mut();
-        // Add functions
+        // Functions
         medium.plugin_register_add_hookcommand::<HighLevelHookCommand>();
         medium.plugin_register_add_toggleaction::<HighLevelToggleAction>();
         medium.plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
@@ -411,8 +463,6 @@ impl Reaper {
             sender_to_main_thread: sender_to_main_thread.clone(),
             subjects: RealTimeSubjects::new(),
         };
-        let audio_hook =
-            MediumAudioHookRegister::new::<HighOnAudioBuffer, _, _>(Some(rt_reaper), None);
         *active_data = Some(ActiveData {
             sender_to_main_thread,
             sender_to_audio_thread,
@@ -421,7 +471,7 @@ impl Reaper {
                     .plugin_register_add_csurf_inst(control_surface)
                     .unwrap()
             },
-            audio_hook_register_handle: { medium.audio_reg_hardware_hook_add(audio_hook).unwrap() },
+            audio_hook_register_handle: { medium.audio_reg_hardware_hook_add(rt_reaper).unwrap() },
         });
     }
 
@@ -1025,65 +1075,6 @@ impl MediumToggleAction for HighLevelToggleAction {
             }
         } else {
             ToggleActionResult::NotRelevant
-        }
-    }
-}
-
-struct HighOnAudioBuffer {}
-
-impl MediumOnAudioBuffer for HighOnAudioBuffer {
-    type UserData1 = RealTimeReaper;
-    type UserData2 = ();
-
-    fn call(args: OnAudioBufferArgs<Self::UserData1, Self::UserData2>) {
-        if args.is_post {
-            return;
-        }
-        let reaper = args.reg.user_data_1();
-        for task in reaper.receiver.try_iter().take(1) {
-            (task)(reaper);
-        }
-        // Process MIDI
-        let mut subject = reaper.subjects.midi_message_received.borrow_mut();
-        if subject.subscribed_size() == 0 {
-            return;
-        }
-        for i in 0..reaper.functions.get_max_midi_inputs() {
-            reaper
-                .functions
-                .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
-                    let evt_list = input.get_read_buf();
-                    for evt in evt_list.enum_items(0) {
-                        if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
-                            // TODO-low We should forward active sensing. Can be filtered out
-                            // later.
-                            continue;
-                        }
-                        // Erase lifetime of event so we can "send" it using rxRust
-                        // TODO This is very hacky and unsafe. It works as long as there's no
-                        // rxRust  subscriber (e.g. operator)
-                        // involved which attempts to cache the event
-                        //  and use it after this function has returned. Then segmentation
-                        // faults are  about to happen. Alternative
-                        // would be to turn this into an owned event
-                        // and  send this instead. But note that we
-                        // are in a real-time thread here so we
-                        //  shouldn't allocate on the heap here (so no Rc). That means we would
-                        // have to  copy the owned MIDI event.
-                        // Probably not an issue because it's not
-                        // big and  cheap to copy. Look into this
-                        // and see if the unsafe code is worth it.
-                        let fake_static_evt: MidiEvent<'static> = {
-                            let raw_evt: &raw::MIDI_event_t = evt.into();
-                            let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
-                            unsafe {
-                                let erased_raw_evt = &*raw_evt_ptr;
-                                MidiEvent::new(erased_raw_evt)
-                            }
-                        };
-                        subject.next(fake_static_evt);
-                    }
-                });
         }
     }
 }

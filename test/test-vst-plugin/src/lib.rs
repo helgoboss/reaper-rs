@@ -3,8 +3,8 @@ use c_str_macro::c_str;
 use reaper_rs_high::{ActionKind, Reaper, ReaperGuard};
 use reaper_rs_low::ReaperPluginContext;
 use reaper_rs_medium::{
-    AudioHookRegister, CommandId, MediumAudioHookRegister, MediumHookPostCommand,
-    MediumOnAudioBuffer, MediumReaperControlSurface, OnAudioBufferArgs,
+    AudioHookRegister, CommandId, MediumHookPostCommand, MediumOnAudioBuffer,
+    MediumReaperControlSurface, OnAudioBufferArgs,
 };
 use std::cell::RefCell;
 use std::panic::RefUnwindSafe;
@@ -47,18 +47,15 @@ impl Plugin for TestVstPlugin {
 }
 
 struct MyOnAudioBuffer {
-    pub counter: u64,
+    sender: std::sync::mpsc::Sender<String>,
+    counter: u64,
 }
 
 impl MediumOnAudioBuffer for MyOnAudioBuffer {
-    type UserData1 = MyOnAudioBuffer;
-    type UserData2 = Sender<String>;
-
-    fn call(args: OnAudioBufferArgs<Self::UserData1, Self::UserData2>) {
-        let (state, sender) = (args.reg.user_data_1(), args.reg.user_data_2());
-        state.counter += 1;
-        if (state.counter % 50 == 0) {
-            sender.send(format!("Counter: {}", state.counter));
+    fn call(&mut self, args: OnAudioBufferArgs) {
+        self.counter += 1;
+        if (self.counter % 50 == 0) {
+            self.sender.send(format!("Counter: {}", self.counter));
         }
     }
 }
@@ -108,10 +105,7 @@ impl TestVstPlugin {
             });
             med.functions().show_console_msg("Registering action ...");
             med.plugin_register_add_hookpostcommand::<MyHookPostCommand>();
-            med.audio_reg_hardware_hook_add(MediumAudioHookRegister::new::<MyOnAudioBuffer, _, _>(
-                Some(MyOnAudioBuffer { counter: 0 }),
-                Some(sender),
-            ));
+            med.audio_reg_hardware_hook_add(MyOnAudioBuffer { sender, counter: 0 });
         }
         self.reaper = Some(medium);
     }

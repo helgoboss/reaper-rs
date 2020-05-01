@@ -17,14 +17,14 @@ use crate::{
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
     GaccelRegister, GangBehavior, GlobalAutomationOverride, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MainThread, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface,
-    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, PluginRegistration,
-    ProjectContext, ProjectRef, ReaProject, ReaperControlSurface, ReaperFunctions,
-    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxRef,
-    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
+    MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
+    PluginRegistration, ProjectContext, ProjectRef, ReaProject, ReaperControlSurface,
+    ReaperFunctions, ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId,
+    SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
     TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
     WindowContext,
 };
@@ -276,11 +276,13 @@ impl Reaper {
         self.audio_hook_registrations.remove(&reg);
     }
 
-    pub fn audio_reg_hardware_hook_add(
+    pub fn audio_reg_hardware_hook_add<T: MediumOnAudioBuffer + 'static>(
         &mut self,
-        reg: MediumAudioHookRegister,
+        callback: T,
     ) -> Result<NonNull<audio_hook_register_t>, ()> {
-        let handle = self.audio_hook_registers.keep(reg);
+        let handle = self
+            .audio_hook_registers
+            .keep(MediumAudioHookRegister::new(callback));
         unsafe { self.audio_reg_hardware_hook_add_unchecked(handle)? };
         Ok(handle)
     }
@@ -288,10 +290,10 @@ impl Reaper {
     pub fn audio_reg_hardware_hook_remove(
         &mut self,
         reg_handle: NonNull<audio_hook_register_t>,
-    ) -> Result<MediumAudioHookRegister, ()> {
-        let original = self.audio_hook_registers.release(reg_handle).ok_or(())?;
+    ) -> Result<(), ()> {
+        self.audio_hook_registers.release(reg_handle).ok_or(())?;
         unsafe { self.audio_reg_hardware_hook_remove_unchecked(reg_handle) };
-        Ok(original)
+        Ok(())
     }
 }
 
