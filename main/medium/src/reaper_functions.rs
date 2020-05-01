@@ -105,6 +105,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
+    // TODO-low Like many functions, this is not marked as unsafe - yet it is still unsafe in one
+    //  way: It must be called in the main thread, otherwise there will be undefined behavior. For
+    //  now, the strategy is to just document it and have the type system help a bit
+    //  (`ReaperFunctions<MainThread>`). However, there *is* a way to make it safe in the sense of
+    //  failing fast without running into undefined behavior: Assert at each function call that we
+    //  are in the main thread. The main thread ID could be easily obtained at construction time
+    //  of medium-level Reaper. So all it needs is acquiring the current thread and compare its ID
+    //  with the main thread ID (both presumably cheap). I think that would be fine. Maybe we should
+    //  provide a feature to turn it on/off or make it a debug_assert only or provide an additional
+    //  unchecked version. In audio-thread functions it might be too much overhead though calling
+    //  is_in_real_time_audio() each time, so maybe we should mark them as unsafe.
     pub fn enum_projects(
         &self,
         proj_ref: ProjectRef,

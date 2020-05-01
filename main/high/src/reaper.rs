@@ -75,6 +75,19 @@ use std::time::{Duration, SystemTime};
 ///
 /// This outer RefCell is just necessary for creating/destroying the instance safely, so most of the
 /// time it will be borrowed immutably. That's why all the inner RefCells are still necessary!
+// TODO-medium Main thread check is not accurate and sometimes happens a bit too late. Ideally we
+//  would just save the the thread ID  of the main thread as soon as entering the main entry point
+//  (can be done safely using  OnceCell). Then we could always access that main thread ID and
+//  compare.
+// TODO-medium In high level API, maybe make only function objects statically accessible. And
+//  probably only the main thread functions object. When getting it, check if in main thread. Expose
+//  a non static reference so it can only be used temporary. We shouldn't expose more than we need.
+//  Protecting the root static RefCell from being accessed from multiple threads is one thing, but
+//  all the inner RefCells ... that's horrible. And we can't prevent it because we want objects such
+//  as Tracks and Co. to be easily cloneable. So they can easily end up in the audio thread ... but
+//  wait. As long as nobody saves the reference to global Reaper instance, we should be safe. Maybe
+//  a  good first step would be to expose it non static. Or even thread-local with closure? But
+//  still, we shouldnt require more than necessary, so just exposing functions is good anyway.
 static mut REAPER_INSTANCE: RefCell<Option<Reaper>> = RefCell::new(None);
 
 // Here we don't mind having a boring mutex because this is not often accessed.
@@ -349,9 +362,6 @@ impl Reaper {
     pub fn get() -> Ref<'static, Reaper> {
         let reaper =
             Reaper::obtain_reaper_ref("Reaper::setup() must be called before Reaper::get()");
-        // TODO-medium This check is a bit too late. Ideally we would just save the the thread ID
-        //  of the main thread as soon as entering the main entry point (can be done safely using
-        //  OnceCell). Then we could always access that main thread ID and compare.
         assert!(
             !reaper.medium().functions().is_in_real_time_audio(),
             "Reaper::get() must be called from main thread"
