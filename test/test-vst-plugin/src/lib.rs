@@ -3,8 +3,8 @@ use c_str_macro::c_str;
 use reaper_rs_high::{ActionKind, Reaper, ReaperGuard};
 use reaper_rs_low::ReaperPluginContext;
 use reaper_rs_medium::{
-    AudioHookRegister, CommandId, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumReaperControlSurface, OnAudioBufferArgs,
+    CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
+    OnAudioBufferArgs,
 };
 use std::cell::RefCell;
 use std::panic::RefUnwindSafe;
@@ -54,8 +54,13 @@ struct MyOnAudioBuffer {
 impl MediumOnAudioBuffer for MyOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
         self.counter += 1;
-        if (self.counter % 50 == 0) {
-            self.sender.send(format!("Counter: {}", self.counter));
+        if (self.counter % 100 == 0) {
+            self.sender.send(format!(
+                "Counter: {}, Args: {:?}, Channels: {:?}\n",
+                self.counter,
+                args,
+                (args.reg.input_nch(), args.reg.output_nch())
+            ));
         }
     }
 }

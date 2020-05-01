@@ -74,33 +74,25 @@ impl GaccelRegister {
 
 // It's important that this type is not cloneable! Otherwise it would too easily escape its intended
 // usage scope (audio hook), which would make it unsafe.
+// We don't include the user-defined data pointers. They are exposed in a better way.
 #[derive(Debug, Eq, Hash, PartialEq, Into)]
-pub struct AudioHookRegister<UD1 = (), UD2 = ()>(
-    pub(crate) NonNull<raw::audio_hook_register_t>,
-    PhantomData<(UD1, UD2)>,
-);
+pub struct AudioHookRegister(pub(crate) NonNull<raw::audio_hook_register_t>);
 
-impl<UD1, UD2> AudioHookRegister<UD1, UD2> {
-    pub fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister<UD1, UD2> {
-        AudioHookRegister(ptr, PhantomData)
+impl AudioHookRegister {
+    pub fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister {
+        AudioHookRegister(ptr)
     }
 
     pub(crate) fn get(&self) -> NonNull<raw::audio_hook_register_t> {
         self.0
     }
 
-    pub fn user_data_1(&self) -> &mut UD1 {
-        let reg = unsafe { self.0.as_ref() };
-        assert!(!reg.userdata1.is_null());
-        let userdata1 = reg.userdata1 as *mut UD1;
-        unsafe { &mut *userdata1 }
+    pub fn input_nch(&self) -> u32 {
+        unsafe { self.0.as_ref() }.input_nch as u32
     }
 
-    pub fn user_data_2(&self) -> &mut UD2 {
-        let reg = unsafe { self.0.as_ref() };
-        assert!(!reg.userdata2.is_null());
-        let userdata2 = reg.userdata2 as *mut UD2;
-        unsafe { &mut *userdata2 }
+    pub fn output_nch(&self) -> u32 {
+        unsafe { self.0.as_ref() }.input_nch as u32
     }
 }
 

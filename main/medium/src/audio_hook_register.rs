@@ -31,7 +31,7 @@ pub struct OnAudioBufferArgs {
     pub is_post: bool,
     pub buffer_length: u32,
     pub sample_rate: Hertz,
-    // pub reg: AudioHookRegister<U1, U2>,
+    pub reg: AudioHookRegister,
 }
 
 pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
@@ -42,19 +42,27 @@ pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
 ) {
     // TODO-low Check performance implications for firewall call
     firewall(|| {
-        let reg: AudioHookRegister<_, ()> =
-            AudioHookRegister::new(unsafe { NonNull::new_unchecked(reg) });
-        T::call(
-            reg.user_data_1(),
-            OnAudioBufferArgs {
-                is_post,
-                buffer_length: len as u32,
-                // TODO-medium Turn to new_unchecked as soon as we are pretty sure that it can only
-                //  be > 0
-                sample_rate: Hertz::new(srate),
-            },
-        );
+        let reg = unsafe { NonNull::new_unchecked(reg) };
+        let callback_struct: &mut T = decode_user_data(unsafe { reg.as_ref() }.userdata1);
+        callback_struct.call(OnAudioBufferArgs {
+            is_post,
+            buffer_length: len as u32,
+            // TODO-medium Turn to new_unchecked as soon as we are pretty sure that it can only
+            //  be > 0
+            sample_rate: Hertz::new(srate),
+            reg: AudioHookRegister::new(reg),
+        });
     });
+}
+
+fn encode_user_data<U>(data: &Box<U>) -> *mut c_void {
+    data.as_ref() as *const _ as *mut c_void
+}
+
+fn decode_user_data<'a, U>(data: *mut c_void) -> &'a mut U {
+    assert!(!data.is_null());
+    let data = data as *mut U;
+    unsafe { &mut *data }
 }
 
 /// Consumers need to provide this struct to be called back from the audio thread.
@@ -85,21 +93,21 @@ impl MediumAudioHookRegister {
     ///
     /// [`audio_reg_hardware_hook_add`]: struct.Reaper.html#method.audio_reg_hardware_hook_add
     pub(crate) fn new<T: MediumOnAudioBuffer + 'static>(callback: T) -> MediumAudioHookRegister {
-        let boxed_callback_struct = Box::new(callback);
+        let callback = Box::new(callback);
         MediumAudioHookRegister {
             inner: audio_hook_register_t {
                 OnAudioBuffer: Some(delegating_on_audio_buffer::<T>),
                 // boxed_callback_struct is not a fat pointer. Even if it would be, thanks to
                 // generics the callback knows what's the concrete type and therefore can restore
-                // the original pointer correctly without needing the vtable part of the fat
+                // the original type correctly without needing the vtable part of the fat
                 // pointer.
-                userdata1: boxed_callback_struct.as_ref() as *const _ as *mut c_void,
+                userdata1: encode_user_data(&callback),
                 userdata2: null_mut(),
                 input_nch: 0,
                 output_nch: 0,
                 GetBuffer: None,
             },
-            owned_user_data_1: Some(boxed_callback_struct),
+            owned_user_data_1: Some(callback),
             owned_user_data_2: None,
         }
     }
