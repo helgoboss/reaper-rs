@@ -35,6 +35,7 @@ use reaper_rs_low::raw;
 use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, ACCEL};
 use reaper_rs_low::{firewall, ReaperPluginContext};
 use reaper_rs_medium;
+use reaper_rs_medium::PluginRegistration::ToggleAction;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
@@ -43,7 +44,8 @@ use reaper_rs_medium::{
     MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
     MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiEvent,
     MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef, ReaperFunctions,
-    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, TrackRef,
+    ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult,
+    TrackRef,
 };
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
@@ -1009,20 +1011,20 @@ impl MediumHookPostCommand for HighLevelHookPostCommand {
 struct HighLevelToggleAction {}
 
 impl MediumToggleAction for HighLevelToggleAction {
-    fn call(command_id: CommandId) -> i32 {
+    fn call(command_id: CommandId) -> ToggleActionResult {
         if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
             match &command.kind {
                 ActionKind::Toggleable(is_on) => {
                     if is_on() {
-                        1
+                        ToggleActionResult::On
                     } else {
-                        0
+                        ToggleActionResult::Off
                     }
                 }
-                ActionKind::NotToggleable => -1,
+                ActionKind::NotToggleable => ToggleActionResult::NotRelevant,
             }
         } else {
-            -1
+            ToggleActionResult::NotRelevant
         }
     }
 }
