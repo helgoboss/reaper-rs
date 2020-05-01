@@ -1,4 +1,4 @@
-use crate::AudioHookRegister;
+use crate::{AudioHookRegister, Hertz};
 use reaper_rs_low::raw::audio_hook_register_t;
 use reaper_rs_low::{firewall, raw};
 use std::any::Any;
@@ -30,8 +30,7 @@ pub trait MediumOnAudioBuffer {
 pub struct OnAudioBufferArgs {
     pub is_post: bool,
     pub buffer_length: u32,
-    // TODO-medium Maybe introduce newtype that makes clear which unit this has
-    pub sample_rate: f64,
+    pub sample_rate: Hertz,
     // pub reg: AudioHookRegister<U1, U2>,
 }
 
@@ -50,7 +49,9 @@ pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
             OnAudioBufferArgs {
                 is_post,
                 buffer_length: len as u32,
-                sample_rate: srate,
+                // TODO-medium Turn to new_unchecked as soon as we are pretty sure that it can only
+                //  be > 0
+                sample_rate: Hertz::new(srate),
             },
         );
     });

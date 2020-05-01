@@ -137,6 +137,24 @@ impl PlaybackSpeedFactor {
 }
 
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct Hertz(pub(crate) f64);
+
+impl Hertz {
+    pub fn new(value: f64) -> Hertz {
+        assert!(0.0 < value);
+        Hertz(value)
+    }
+
+    pub unsafe fn new_unchecked(value: f64) -> Hertz {
+        Hertz(value)
+    }
+
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 pub struct Db(pub(crate) f64);
 
 impl Db {
