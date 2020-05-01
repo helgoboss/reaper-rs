@@ -24,7 +24,7 @@ use crate::{
     ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue, ReaperPointer,
     ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
     SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory,
     TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoScope,
     ValueChange, VolumeSliderValue, WindowContext,
 };
@@ -615,7 +615,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         }
     }
 
-    pub unsafe fn track_fx_get_enabled(&self, track: MediaTrack, fx: TrackFxRef) -> bool
+    pub unsafe fn track_fx_get_enabled(&self, track: MediaTrack, fx: TrackFxLocation) -> bool
     where
         S: MainThread,
     {
@@ -626,7 +626,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_fx_name(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         buf_sz: u32,
     ) -> Result<CString, ()>
     where
@@ -654,12 +654,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         Some(index as u32)
     }
 
-    pub unsafe fn track_fx_set_enabled(&self, track: MediaTrack, fx: TrackFxRef, enabled: bool) {
+    pub unsafe fn track_fx_set_enabled(
+        &self,
+        track: MediaTrack,
+        fx: TrackFxLocation,
+        enabled: bool,
+    ) {
         self.low
             .TrackFX_SetEnabled(track.as_ptr(), fx.into(), enabled);
     }
 
-    pub unsafe fn track_fx_get_num_params(&self, track: MediaTrack, fx: TrackFxRef) -> u32
+    pub unsafe fn track_fx_get_num_params(&self, track: MediaTrack, fx: TrackFxLocation) -> u32
     where
         S: MainThread,
     {
@@ -678,7 +683,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_param_name(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         param: u32,
         buf_sz: u32,
     ) -> Result<CString, ()>
@@ -700,7 +705,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_formatted_param_value(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         param: u32,
         buf_sz: u32,
     ) -> Result<CString, ()>
@@ -728,7 +733,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_format_param_value_normalized(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         param: u32,
         value: ReaperNormalizedValue,
         buf_sz: u32,
@@ -757,7 +762,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_set_param_normalized(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         param: u32,
         value: ReaperNormalizedValue,
     ) -> Result<(), ()>
@@ -861,8 +866,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
 
     pub unsafe fn track_fx_copy_to_track(
         &self,
-        src: (MediaTrack, TrackFxRef),
-        dest: (MediaTrack, TrackFxRef),
+        src: (MediaTrack, TrackFxLocation),
+        dest: (MediaTrack, TrackFxLocation),
         is_move: TransferBehavior,
     ) {
         self.low.TrackFX_CopyToTrack(
@@ -875,7 +880,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     // Returns Err if FX doesn't exist (maybe also in other cases?)
-    pub unsafe fn track_fx_delete(&self, track: MediaTrack, fx: TrackFxRef) -> Result<(), ()>
+    pub unsafe fn track_fx_delete(&self, track: MediaTrack, fx: TrackFxLocation) -> Result<(), ()>
     where
         S: MainThread,
     {
@@ -893,7 +898,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_parameter_step_sizes(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         param: u32,
     ) -> Option<GetParameterStepSizesResult>
     where
@@ -930,7 +935,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_param_ex(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         param: u32,
     ) -> GetParamExResult
     where
@@ -1181,7 +1186,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         self.low.TrackFX_GetRecCount(track.as_ptr()) as u32
     }
 
-    pub unsafe fn track_fx_get_fx_guid(&self, track: MediaTrack, fx: TrackFxRef) -> Option<GUID>
+    pub unsafe fn track_fx_get_fx_guid(
+        &self,
+        track: MediaTrack,
+        fx: TrackFxLocation,
+    ) -> Option<GUID>
     where
         S: MainThread,
     {
@@ -1192,7 +1201,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_param_normalized(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         param: u32,
     ) -> Result<ReaperNormalizedValue, ()>
     where
@@ -1661,7 +1670,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_show(
         &self,
         track: MediaTrack,
-        index: TrackFxRef,
+        index: TrackFxLocation,
         show_flag: FxShowFlag,
     ) {
         self.low
@@ -1671,7 +1680,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_floating_window(
         &self,
         track: MediaTrack,
-        index: TrackFxRef,
+        index: TrackFxLocation,
     ) -> Option<Hwnd>
     where
         S: MainThread,
@@ -1682,7 +1691,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         NonNull::new(ptr)
     }
 
-    pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx: TrackFxRef) -> bool
+    pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx: TrackFxLocation) -> bool
     where
         S: MainThread,
     {
@@ -1808,7 +1817,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_preset_index(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
     ) -> Result<TrackFxGetPresetIndexResult, ()>
     where
         S: MainThread,
@@ -1830,7 +1839,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_set_preset_by_index(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         idx: FxPresetRef,
     ) -> Result<(), ()>
     where
@@ -1849,7 +1858,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_navigate_presets(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         presetmove: i32,
     ) -> Result<(), ()>
     where
@@ -1867,7 +1876,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_preset(
         &self,
         track: MediaTrack,
-        fx: TrackFxRef,
+        fx: TrackFxLocation,
         presetname_sz: u32,
     ) -> TrackFxGetPresetResult
     where
@@ -1984,7 +1993,7 @@ pub struct VolumeAndPan {
 pub enum GetLastTouchedFxResult {
     TrackFx {
         track_ref: TrackRef,
-        fx_ref: TrackFxRef,
+        fx_ref: TrackFxLocation,
         param_index: u32,
     },
     ItemFx {
@@ -2001,7 +2010,7 @@ pub enum GetLastTouchedFxResult {
 pub enum GetFocusedFxResult {
     TrackFx {
         track_ref: TrackRef,
-        fx_ref: TrackFxRef,
+        fx_ref: TrackFxLocation,
     },
     ItemFx {
         track_index: u32,

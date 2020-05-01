@@ -24,9 +24,9 @@ use crate::{
     ReaperFunctions, ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
     ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId,
     SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxRef, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
+    TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoFlag, UndoScope, ValueChange,
+    VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;

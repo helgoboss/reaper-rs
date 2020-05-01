@@ -25,7 +25,7 @@ use reaper_rs_medium::{
     FxShowFlag, GangBehavior, GlobalAutomationModeOverride, InputMonitoringMode,
     MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
     ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
-    RecordArmState, RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxRef,
+    RecordArmState, RecordingInput, StuffMidiMessageTarget, TrackFxChainType, TrackFxLocation,
     TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
     ValueChange,
 };

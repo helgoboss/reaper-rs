@@ -29,7 +29,7 @@ impl From<AddFxBehavior> for FxAddByNameBehavior {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum TrackFxChainType {
     NormalFxChain,
     /// On the master track this corresponds to the monitoring FX chain
@@ -170,16 +170,16 @@ impl From<StuffMidiMessageTarget> for i32 {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum TrackFxRef {
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+pub enum TrackFxLocation {
     NormalFxChain(u32),
     InputFxChain(u32),
 }
 
 // Converts directly to the i32 value that is expected by low-level track-FX related functions
-impl From<TrackFxRef> for i32 {
-    fn from(v: TrackFxRef) -> Self {
-        use TrackFxRef::*;
+impl From<TrackFxLocation> for i32 {
+    fn from(v: TrackFxLocation) -> Self {
+        use TrackFxLocation::*;
         let positive = match v {
             InputFxChain(idx) => 0x1000000 + idx,
             NormalFxChain(idx) => idx,
@@ -189,9 +189,9 @@ impl From<TrackFxRef> for i32 {
 }
 
 // Converts from a value returned by low-level track-FX related functions turned into u32.
-impl From<u32> for TrackFxRef {
+impl From<u32> for TrackFxLocation {
     fn from(v: u32) -> Self {
-        use TrackFxRef::*;
+        use TrackFxLocation::*;
         if v >= 0x1000000 {
             InputFxChain(v - 0x1000000)
         } else {
@@ -310,7 +310,7 @@ pub enum TrackRef {
     NormalTrack(u32),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, IntoPrimitive, TryFromPrimitive)]
 #[repr(i32)]
 pub enum InputMonitoringMode {
     Off = 0,

@@ -10,10 +10,11 @@ use reaper_rs_medium::{
     AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
-    MediaTrack, MediumReaperControlSurface, QualifiedFxRef, ReaProject, ReaperNormalizedValue,
-    ReaperPointer, ReaperVersion, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
-    SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
-    TrackFxChainType, TrackRef, VersionDependentFxRef, VersionDependentTrackFxRef,
+    MediaTrack, MediumReaperControlSurface, QualifiedFxLocation, ReaProject, ReaperNormalizedValue,
+    ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs,
+    SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs,
+    SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
+    VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
 
@@ -52,8 +53,8 @@ enum State {
 }
 
 struct TrackData {
-    volume: f64,
-    pan: f64,
+    volume: ReaperVolumeValue,
+    pan: ReaperPanValue,
     selected: bool,
     mute: bool,
     solo: bool,
@@ -206,8 +207,10 @@ impl HelperControlSurface {
                 let func = medium.functions();
                 let td = unsafe {
                     TrackData {
-                        volume: func.get_media_track_info_value(media_track, Vol),
-                        pan: func.get_media_track_info_value(media_track, Pan),
+                        volume: ReaperVolumeValue::new(
+                            func.get_media_track_info_value(media_track, Vol),
+                        ),
+                        pan: ReaperPanValue::new(func.get_media_track_info_value(media_track, Pan)),
                         selected: func.get_media_track_info_value(media_track, Selected) != 0.0,
                         mute: func.get_media_track_info_value(media_track, Mute) != 0.0,
                         solo: func.get_media_track_info_value(media_track, Solo) != 0.0,
@@ -429,7 +432,7 @@ impl HelperControlSurface {
                 &track,
                 args.fx_index,
                 Some(args.param_index),
-                Some(args.normalized_value),
+                Some(args.value),
             )
         };
         let fx_chain = if is_input_fx {
@@ -510,11 +513,11 @@ impl HelperControlSurface {
     fn get_fx_from_parm_fx_index(
         &self,
         track: &Track,
-        parm_fx_index: VersionDependentTrackFxRef,
+        parm_fx_index: VersionDependentTrackFxLocation,
         param_index: Option<u32>,
         param_value: Option<ReaperNormalizedValue>,
     ) -> Option<Fx> {
-        use VersionDependentTrackFxRef::*;
+        use VersionDependentTrackFxLocation::*;
         match parm_fx_index {
             Old(index) => {
                 let is_input_fx = self.is_probably_input_fx(track, index, param_index, param_value);
@@ -632,8 +635,8 @@ impl MediumReaperControlSurface for HelperControlSurface {
             None => return,
             Some(td) => td,
         };
-        if td.mute != args.mute {
-            td.mute = args.mute;
+        if td.mute != args.is_mute {
+            td.mute = args.is_mute;
             let track = Track::new(args.track, None);
             let reaper = Reaper::get();
             reaper
@@ -652,8 +655,8 @@ impl MediumReaperControlSurface for HelperControlSurface {
             None => return,
             Some(td) => td,
         };
-        if td.selected != args.selected {
-            td.selected = args.selected;
+        if td.selected != args.is_selected {
+            td.selected = args.is_selected;
             let track = Track::new(args.track, None);
             Reaper::get()
                 .subjects
@@ -668,8 +671,8 @@ impl MediumReaperControlSurface for HelperControlSurface {
             None => return,
             Some(td) => td,
         };
-        if td.solo != args.solo {
-            td.solo = args.solo;
+        if td.solo != args.is_solo {
+            td.solo = args.is_solo;
             let track = Track::new(args.track, None);
             Reaper::get()
                 .subjects
@@ -684,8 +687,8 @@ impl MediumReaperControlSurface for HelperControlSurface {
             None => return,
             Some(td) => td,
         };
-        if td.recarm != args.recarm {
-            td.recarm = args.recarm;
+        if td.recarm != args.is_armed {
+            td.recarm = args.is_armed;
             let track = Track::new(args.track, None);
             Reaper::get()
                 .subjects
@@ -700,7 +703,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
             self.decrease_num_track_set_changes_left_to_be_propagated();
             return;
         }
-        let track = Track::new(args.trackid, None);
+        let track = Track::new(args.track, None);
         Reaper::get()
             .subjects
             .track_name_changed
@@ -714,8 +717,8 @@ impl MediumReaperControlSurface for HelperControlSurface {
             Some(td) => td,
         };
         let reaper = Reaper::get();
-        if td.recmonitor != args.recmonitor {
-            td.recmonitor = args.recmonitor;
+        if td.recmonitor != args.mode {
+            td.recmonitor = args.mode;
             reaper
                 .subjects
                 .track_input_monitoring_changed
@@ -752,7 +755,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
     fn ext_set_fx_enabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
-        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fxidx, None, None) {
+        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fx_location, None, None) {
             Reaper::get()
                 .subjects
                 .fx_enabled_changed
@@ -764,7 +767,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
         let track = Track::new(args.track, None);
-        let track_send = track.get_index_based_send_by_index(args.sendidx);
+        let track_send = track.get_index_based_send_by_index(args.send_index);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -784,7 +787,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
         let track = Track::new(args.track, None);
-        let track_send = track.get_index_based_send_by_index(args.sendidx);
+        let track_send = track.get_index_based_send_by_index(args.send_index);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -804,7 +807,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
         let reaper = Reaper::get();
-        let fx_ref = match args.fx_ref {
+        let fx_ref = match args.fx_location {
             None => {
                 // Clear focused FX
                 reaper.subjects.fx_focused.borrow_mut().next(Payload(None));
@@ -812,9 +815,9 @@ impl MediumReaperControlSurface for HelperControlSurface {
             }
             Some(r) => r,
         };
-        use VersionDependentFxRef::*;
-        match fx_ref.fx_ref {
-            ItemFx { .. } => {
+        use VersionDependentFxLocation::*;
+        match fx_ref.fx_location {
+            TakeFx { .. } => {
                 // TODO Not handled right now
                 0
             }
@@ -844,12 +847,12 @@ impl MediumReaperControlSurface for HelperControlSurface {
     fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
-        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fxidx, None, None) {
+        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fx_location, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
             // chunk manipulations
             self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
             let reaper = Reaper::get();
-            let subject = if args.ui_open {
+            let subject = if args.is_open {
                 &reaper.subjects.fx_opened
             } else {
                 &reaper.subjects.fx_closed
@@ -880,14 +883,14 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn ext_set_bpm_and_play_rate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
         let reaper = Reaper::get();
-        if args.bpm.is_some() {
+        if args.tempo.is_some() {
             reaper.subjects.master_tempo_changed.borrow_mut().next(());
             // If there's a tempo envelope, there are just tempo notifications when the tempo is
             // actually changed. So that's okay for "touched".
             // TODO-low What about gradual tempo changes?
             reaper.subjects.master_tempo_touched.borrow_mut().next(());
         }
-        if args.playrate.is_some() {
+        if args.play_rate.is_some() {
             reaper
                 .subjects
                 .master_playrate_changed
