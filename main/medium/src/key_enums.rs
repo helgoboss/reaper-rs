@@ -1,65 +1,260 @@
 use crate::{concat_c_strs, ReaperStringArg};
 use c_str_macro::c_str;
+use reaper_rs_low::raw;
+use reaper_rs_low::raw::GUID;
 use std::borrow::Cow;
 use std::ffi::CStr;
+use std::os::raw::{c_char, c_void};
 
-/// All the possible track info keys which you can pass to `Reaper::get_set_media_track_info()`.
-/// Please raise a reaper-rs issue if you find that an enum variant is missing!
-#[derive(Clone, Debug)]
+/// Track info key which you can pass to [`get_set_media_track_info()`].
+///
+/// Please raise a *reaper-rs* issue if you find that an enum variant is missing!
+///
+/// [`get_set_media_track_info()`]: struct.ReaperFunctions.html#method.get_set_media_track_info
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackInfoKey<'a> {
-    FreeMode,
-    HeightLock,
-    MainSend,
-    Mute,
-    Phase,
-    ShowInMixer,
-    ShowInTcp,
-    BeatAttachMode,
-    MainSendOffs,
-    DualPanL,
-    DualPanR,
-    Pan,
-    PanLaw,
-    PlayOffset,
-    Vol,
-    Width,
-    McpFxSendScale,
-    McpSendRgnScale,
-    Guid,
-    AutoMode,
-    CustomColor,
-    FolderCompact,
-    FolderDepth,
-    FxEn,
-    HeightOverride,
-    McpH,
-    McpW,
-    McpX,
-    McpY,
-    MidiHwOut,
-    Nchan,
-    PanMode,
-    PerfFlags,
-    PlayOffsetFlag,
-    RecArm,
-    RecInput,
-    RecMode,
-    RecMon,
-    RecMonItems,
-    Selected,
-    Solo,
-    TcpH,
-    TcpY,
-    WndH,
-    TrackNumber,
-    Env(EnvChunkName<'a>),
-    Ext(Cow<'a, CStr>),
-    Icon,
-    McpLayout,
-    Name,
+    /// Parent track (read-only).
     ParTrack,
+    /// Parent project (read-only).
     Project,
+    /// Track name (on master returns `null`).
+    Name,
+    /// Track icon.
+    ///
+    /// Full file name or relative to resource path / data / track icons.
+    Icon,
+    /// Layout name.
+    McpLayout,
+    /// Layout name.
     TcpLayout,
+    /// Extension-specific persistent data.
+    Ext(Cow<'a, CStr>),
+    /// 6-byte GUID, can query or update.
+    ///
+    /// If using a `_string()` function, GUID is a string `{xyz-...}`.
+    Guid,
+    /// Muted.
+    Mute,
+    /// Track phase inverted.
+    Phase,
+    /// Track number
+    ///
+    /// 1-based, read-only, returns the i32 directly.
+    ///
+    /// - 0 → not found
+    /// - -1 → master track
+    TrackNumber,
+    /// Soloed.
+    ///
+    /// - 0 → not soloed
+    /// - 1 → soloed
+    /// - 2 → soloed in place
+    /// - 5 → safe soloed
+    /// - 6 → safe soloed in place
+    Solo,
+    /// FX enabled.
+    ///
+    /// - 0 → bypassed
+    /// - != 0 → FX active
+    FxEn,
+    /// Record armed.
+    ///
+    /// - 0 → not record armed
+    /// - 1 → record armed
+    RecArm,
+    /// Record input.
+    ///
+    /// - <0 → no input
+    /// - 0..=n → mono hardware input
+    /// - 512 + n → rearoute input
+    /// - &1024 → stereo input pair
+    /// - &4096 → MIDI input, if set then low 5 bits represent channel (0 → all, 1 - 16 → only
+    ///   channel), next 6 bits represent physical input (63 → all, 62 → VKB)
+    RecInput,
+    /// Record mode.
+    ///
+    /// - 0 → input
+    /// - 1 → stereo out
+    /// - 2 → none
+    /// - 3 → stereo out with latency compensation
+    /// - 4 → midi output
+    /// - 5 → mono out
+    /// - 6 → mono out with latency compensation
+    /// - 7 → MIDI overdub
+    /// - 8 → MIDI replace
+    RecMode,
+    /// Record monitoring.
+    ///
+    /// - 0 → off
+    /// - 1 → normal
+    /// - 2 → not when playing (tape style)
+    RecMon,
+    /// Monitor items while recording.
+    ///
+    /// - 0 → off
+    /// - 1 → on
+    RecMonItems,
+    /// Track automation mode.
+    ///
+    /// - 0 → trim/off
+    /// - 1 → read
+    /// - 2 → touch
+    /// - 3 → write
+    /// - 4 → latch
+    AutoMode,
+    /// Number of track channels.
+    ///
+    /// 2 - 64, even numbers only.
+    Nchan,
+    /// Track selected.
+    ///
+    /// - 0 → unselected
+    /// - 1 → selected
+    Selected,
+    /// Current TCP window height in pixels including envelopes (read-only).
+    WndH,
+    /// Current TCP window height in pixels not including envelopes (read-only).
+    TcpH,
+    /// Current TCP window Y-position in pixels relative to top of arrange view (read-only).
+    TcpY,
+    /// Current MCP X-position in pixels relative to mixer container.
+    McpX,
+    /// Current MCP Y-position in pixels relative to mixer container.
+    McpY,
+    /// Current MCP width in pixels.
+    McpW,
+    /// Current MCP height in pixels.
+    McpH,
+    /// Folder depth change.
+    ///
+    /// - 0 → normal
+    /// - 1 → track is a folder parent
+    /// - -1 → track is the last in the innermost folder
+    /// - -2 → track is the last in the innermost and next-innermost folders
+    /// - ...
+    FolderDepth,
+    /// Folder compacted state (only valid on folders).
+    ///
+    /// - 0 → normal
+    /// - 1 → small
+    /// - 2 → tiny children
+    FolderCompact,
+    /// Track midi hardware output index.
+    ///
+    /// Low 5 bits are which channels (1..=16, 0 → all), next 5 bits are output device index
+    /// (0..=31). < 0 means disabled.
+    MidiHwOut,
+    /// Track performance flags.
+    ///
+    /// &1 → no media buffering
+    /// &2 → no anticipative FX
+    PerfFlags,
+    /// Custom color.
+    ///
+    /// `<OS dependent color> | 0x100000` (i.e. `ColorToNative(r, g, b) | 0x100000`).
+    /// If you don't do `| 0x100000`, then it will not be used, but will store the color anyway.
+    CustomColor,
+    /// Custom height override for TCP window.
+    ///
+    /// 0 for none, otherwise size in pixels.
+    HeightOverride,
+    /// Track height lock.
+    ///
+    /// Must set [`HeightOverride`] before locking.
+    ///
+    /// [`HeightOverride`]: #variant.HeightOverride
+    HeightLock,
+    /// Trim volume of track.
+    ///
+    /// - 0 → -inf
+    /// - 0.5 → -6dB
+    /// - 1 → +0dB
+    /// - 2 → +6dB
+    /// - ...
+    Vol,
+    /// Trim pan of track
+    ///
+    /// -1..=1.
+    Pan,
+    /// Width of track
+    ///
+    /// -1..=1.
+    Width,
+    /// Dual pan position 1.
+    ///
+    /// -1..=1, only if [`PanMode`] == 6.
+    ///
+    /// [`PanMode`]: #variant.PanMode
+    DualPanL,
+    /// Dual pan position 2.
+    ///
+    /// -1..=1, only if [`PanMode`] == 6.
+    ///
+    /// [`PanMode`]: #variant.PanMode
+    DualPanR,
+    /// Pan mode.
+    ///
+    /// - 0 → classic 3.x
+    /// - 3 → new balance
+    /// - 5 → stereo pan
+    /// - 6 → dual pan
+    PanMode,
+    /// Pan law.
+    ///
+    /// - < 0 → project default
+    /// - 1 → +0 dB
+    /// - ...
+    PanLaw,
+    /// TrackEnvelope (read only).
+    Env(EnvChunkName<'a>),
+    /// Track control panel visible in mixer.
+    ///
+    /// Do not use on master track.
+    ShowInMixer,
+    /// Track control panel visible in arrange view.
+    ///
+    /// Do not use on master track.
+    ShowInTcp,
+    /// Track sends audio to parent.
+    MainSend,
+    /// Channel offset of track send to parent.
+    MainSendOffs,
+    /// Track free item positioning enabled
+    ///
+    /// Call [`update_timeline`] after changing.
+    ///
+    /// [`update_timeline`]: struct.Reaper.html#method.update_timeline
+    FreeMode,
+    /// Track timebase.
+    ///
+    /// - -1 → project default
+    /// - 0 → time
+    /// - 1 → beats (position, length, rate)
+    /// - 2 → beats (position only)
+    BeatAttachMode,
+    /// Scale of FX and send area in MCP.
+    ///
+    /// - 0 → minimum allowed
+    /// - 1 → maximum allowed
+    McpFxSendScale,
+    /// Scale of send area as proportion of the FX and send total area.
+    ///
+    /// - 0 → minimum allowed
+    /// - 1 → maximum allowed
+    McpSendRgnScale,
+    /// Track playback offset state.
+    ///
+    /// - &1 → bypassed
+    /// - &2 → offset
+    ///
+    /// Value is measured in samples (otherwise measured in seconds).
+    PlayOffsetFlag,
+    /// Track playback offset.
+    ///
+    /// Units depend on [`PlayOffsetFlag`].
+    ///
+    /// [`PlayOffsetFlag`]: #variant.PlayOffsetFlag
+    PlayOffset,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     Custom(Cow<'a, CStr>),
 }
@@ -141,6 +336,369 @@ impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
     }
 }
 
+pub struct TrackInfo<'a, T> {
+    pub(crate) key: TrackInfoKey<'a>,
+    pub(crate) value: *mut T,
+}
+
+impl<'a> TrackInfo<'a, raw::MediaTrack> {
+    pub fn par_track(value: *mut raw::MediaTrack) -> TrackInfo<'a, raw::MediaTrack> {
+        TrackInfo {
+            key: TrackInfoKey::ParTrack,
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, raw::ReaProject> {
+    pub fn project(value: *mut raw::ReaProject) -> TrackInfo<'a, raw::ReaProject> {
+        TrackInfo {
+            key: TrackInfoKey::Project,
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, c_char> {
+    pub fn name(value: *const c_char) -> TrackInfo<'a, c_char> {
+        TrackInfo {
+            key: TrackInfoKey::Name,
+            value: value as *mut c_char,
+        }
+    }
+    pub fn icon(value: *const c_char) -> TrackInfo<'a, c_char> {
+        TrackInfo {
+            key: TrackInfoKey::Icon,
+            value: value as _,
+        }
+    }
+    pub fn mcp_layout(value: *const c_char) -> TrackInfo<'a, c_char> {
+        TrackInfo {
+            key: TrackInfoKey::McpLayout,
+            value: value as _,
+        }
+    }
+    pub fn tcp_layout(value: *const c_char) -> TrackInfo<'a, c_char> {
+        TrackInfo {
+            key: TrackInfoKey::TcpLayout,
+            value: value as _,
+        }
+    }
+
+    pub fn ext(key: impl Into<ReaperStringArg<'a>>, value: *mut c_char) -> TrackInfo<'a, c_char> {
+        TrackInfo {
+            key: TrackInfoKey::ext(key),
+            value,
+        }
+    }
+    pub fn main_send_offs(value: *mut c_char) -> TrackInfo<'a, c_char> {
+        TrackInfo {
+            key: TrackInfoKey::MainSendOffs,
+            value,
+        }
+    }
+    pub fn beat_attach_mode(value: *mut c_char) -> TrackInfo<'a, c_char> {
+        TrackInfo {
+            key: TrackInfoKey::BeatAttachMode,
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, i32> {
+    pub fn rec_mon(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::RecMon,
+            value,
+        }
+    }
+
+    pub fn rec_input(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::RecInput,
+            value,
+        }
+    }
+
+    pub fn solo(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::Solo,
+            value,
+        }
+    }
+    pub fn fx_en(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::FxEn,
+            value,
+        }
+    }
+    pub fn rec_mode(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::RecMode,
+            value,
+        }
+    }
+    pub fn rec_mon_items(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::RecMonItems,
+            value,
+        }
+    }
+    pub fn auto_mode(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::AutoMode,
+            value,
+        }
+    }
+    pub fn nchan(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::Nchan,
+            value,
+        }
+    }
+    pub fn selected(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::Selected,
+            value,
+        }
+    }
+    pub fn wnd_h(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::WndH,
+            value,
+        }
+    }
+    pub fn tcp_h(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::TcpH,
+            value,
+        }
+    }
+    pub fn tcp_y(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::TcpY,
+            value,
+        }
+    }
+    pub fn mcp_x(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::McpX,
+            value,
+        }
+    }
+    pub fn mcp_y(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::McpY,
+            value,
+        }
+    }
+    pub fn mcp_w(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::McpW,
+            value,
+        }
+    }
+    pub fn mcp_h(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::McpH,
+            value,
+        }
+    }
+    pub fn folder_depth(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::FolderDepth,
+            value,
+        }
+    }
+    pub fn folder_compact(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::FolderCompact,
+            value,
+        }
+    }
+    pub fn midi_hw_out(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::MidiHwOut,
+            value,
+        }
+    }
+    pub fn perf_flags(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::PerfFlags,
+            value,
+        }
+    }
+    pub fn custom_color(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::CustomColor,
+            value,
+        }
+    }
+    pub fn height_override(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::HeightOverride,
+            value,
+        }
+    }
+    pub fn pan_mode(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::PanMode,
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, c_void> {
+    pub fn track_number(value: *mut c_void) -> TrackInfo<'a, c_void> {
+        TrackInfo {
+            key: TrackInfoKey::TrackNumber,
+            value,
+        }
+    }
+
+    pub fn custom(
+        key: impl Into<ReaperStringArg<'a>>,
+        value: *mut c_void,
+    ) -> TrackInfo<'a, c_void> {
+        TrackInfo {
+            key: TrackInfoKey::custom(key),
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, raw::GUID> {
+    pub fn guid(value: *mut raw::GUID) -> TrackInfo<'a, raw::GUID> {
+        TrackInfo {
+            key: TrackInfoKey::Guid,
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, bool> {
+    pub fn mute(value: *mut bool) -> TrackInfo<'a, bool> {
+        TrackInfo {
+            key: TrackInfoKey::Mute,
+            value,
+        }
+    }
+    pub fn phase(value: *mut bool) -> TrackInfo<'a, bool> {
+        TrackInfo {
+            key: TrackInfoKey::Phase,
+            value,
+        }
+    }
+    pub fn height_lock(value: *mut bool) -> TrackInfo<'a, bool> {
+        TrackInfo {
+            key: TrackInfoKey::HeightLock,
+            value,
+        }
+    }
+    pub fn show_in_mixer(value: *mut bool) -> TrackInfo<'a, bool> {
+        TrackInfo {
+            key: TrackInfoKey::ShowInMixer,
+            value,
+        }
+    }
+    pub fn show_in_tcp(value: *mut bool) -> TrackInfo<'a, bool> {
+        TrackInfo {
+            key: TrackInfoKey::ShowInTcp,
+            value,
+        }
+    }
+    pub fn main_send(value: *mut bool) -> TrackInfo<'a, bool> {
+        TrackInfo {
+            key: TrackInfoKey::MainSend,
+            value,
+        }
+    }
+    pub fn free_mode(value: *mut bool) -> TrackInfo<'a, bool> {
+        TrackInfo {
+            key: TrackInfoKey::FreeMode,
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, f64> {
+    pub fn vol(value: *mut f64) -> TrackInfo<'a, f64> {
+        TrackInfo {
+            key: TrackInfoKey::Vol,
+            value,
+        }
+    }
+    pub fn pan(value: *mut f64) -> TrackInfo<'a, f64> {
+        TrackInfo {
+            key: TrackInfoKey::Pan,
+            value,
+        }
+    }
+    pub fn width(value: *mut f64) -> TrackInfo<'a, f64> {
+        TrackInfo {
+            key: TrackInfoKey::Width,
+            value,
+        }
+    }
+    pub fn dual_pan_l(value: *mut f64) -> TrackInfo<'a, f64> {
+        TrackInfo {
+            key: TrackInfoKey::DualPanL,
+            value,
+        }
+    }
+    pub fn dual_pan_r(value: *mut f64) -> TrackInfo<'a, f64> {
+        TrackInfo {
+            key: TrackInfoKey::DualPanR,
+            value,
+        }
+    }
+    pub fn pan_law(value: *mut f64) -> TrackInfo<'a, f64> {
+        TrackInfo {
+            key: TrackInfoKey::PanLaw,
+            value,
+        }
+    }
+    pub fn play_offset(value: *mut f64) -> TrackInfo<'a, f64> {
+        TrackInfo {
+            key: TrackInfoKey::PlayOffset,
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, raw::TrackEnvelope> {
+    pub fn env(
+        name: EnvChunkName<'a>,
+        value: *mut raw::TrackEnvelope,
+    ) -> TrackInfo<'a, raw::TrackEnvelope> {
+        TrackInfo {
+            key: TrackInfoKey::Env(name),
+            value,
+        }
+    }
+}
+
+impl<'a> TrackInfo<'a, f32> {
+    pub fn mcp_fx_send_scale(value: *mut f32) -> TrackInfo<'a, f32> {
+        TrackInfo {
+            key: TrackInfoKey::McpFxSendScale,
+            value,
+        }
+    }
+    pub fn mcp_send_rgn_scale(value: *mut f32) -> TrackInfo<'a, f32> {
+        TrackInfo {
+            key: TrackInfoKey::McpSendRgnScale,
+            value,
+        }
+    }
+    pub fn play_offset_flag(value: *mut i32) -> TrackInfo<'a, i32> {
+        TrackInfo {
+            key: TrackInfoKey::PlayOffsetFlag,
+            value,
+        }
+    }
+}
+
 /// All the possible track send info keys which you can pass to `Reaper::get_set_track_send_info()`.
 ///
 /// The variants are named exactly like the strings which will be passed to the low-level REAPER
@@ -211,7 +769,7 @@ impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
 /// function because the medium-level API is designed to still be close to the raw REAPER API.  
 ///
 /// Please raise a reaper-rs issue if you find that an enum variant is missing!
-#[derive(Clone, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum EnvChunkName<'a> {
     /// Volume (Pre-FX)
     VolEnv,

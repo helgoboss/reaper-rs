@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use std::os::raw::c_void;
 use std::ptr::{null_mut, NonNull};
 
-/// Consumers need to implement this trait in order to be called back from the audio thread.
+/// Consumers need to implement this trait in order to be called back in the audio thread.
 ///
 /// See [`audio_reg_hardware_hook_add`].
 ///

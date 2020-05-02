@@ -15,7 +15,9 @@ use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
 use std::ptr::{null_mut, NonNull};
 
-/// Consumers need to implement this trait in order to be notified about various REAPER events.
+/// Consumers need to implement this trait in order to get notified about various REAPER events.
+///
+/// All callbacks are invoked in the main thread.
 ///
 /// See [`plugin_register_add_csurf_inst`].
 ///
@@ -335,7 +337,7 @@ pub struct ExtSetBpmAndPlayRateArgs {
     pub play_rate: Option<PlaybackSpeedFactor>,
 }
 
-/// Possible modifier keys.
+/// A modifier key.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ModKey {
     /// SHIFT key.

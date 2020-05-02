@@ -24,9 +24,9 @@ use crate::{
     ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
     ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
     RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfo,
+    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -61,7 +61,7 @@ pub trait AllThreads: MainThread + AudioThread {}
 /// Therefore it can't just be copied. So in order to be able to use REAPER functions also from e.g.
 /// the audio hook register, we would need to wrap it in `Arc` (not `Rc`, because we access it
 /// from multiple threads). That's not enough though for most real-world cases. We probably want to
-/// register/unregister things from the main thread not only in the beginning but also at a later
+/// register/unregister things in the main thread not only in the beginning but also at a later
 /// time. That means we need mutable access. So we end up with `Arc<Mutex<Reaper>>`. However, why
 /// going through all that trouble and put up with possible performance issues if we can avoid it?
 /// The RealtimeReaper contains nothing but function pointers, so it's completely standalone and
@@ -212,6 +212,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         }
     }
 
+    pub fn update_timeline(&self)
+    where
+        S: MainThread,
+    {
+        self.low.UpdateTimeline();
+    }
+
     /// Shows a message to the user (also useful for debugging). Send "\n" for newline and "" to
     /// clear the console.
     pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
@@ -222,26 +229,39 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// this function is not fun and requires you to use unsafe code. Consider using one of the
     /// type-safe convenience functions instead. They start with `get_media_track_info_` or
     /// `set_media_track_info_`.
-    pub unsafe fn get_set_media_track_info(
-        &self,
-        tr: MediaTrack,
-        parmname: TrackInfoKey,
-        set_new_value: *mut c_void,
-    ) -> *mut c_void
+    pub unsafe fn get_set_media_track_info<T>(&self, tr: MediaTrack, info: TrackInfo<T>) -> *mut T
     where
         S: MainThread,
     {
-        self.low
-            .GetSetMediaTrackInfo(tr.as_ptr(), Cow::from(parmname).as_ptr(), set_new_value)
+        self.low.GetSetMediaTrackInfo(
+            tr.as_ptr(),
+            Cow::from(info.key).as_ptr(),
+            info.value as *mut c_void,
+        ) as *mut T
+    }
+
+    pub unsafe fn get_set_media_track_info_get_as_string<R>(
+        &self,
+        tr: MediaTrack,
+        info: TrackInfo<c_char>,
+        f: impl FnOnce(&CStr) -> R,
+    ) -> Option<R>
+    where
+        S: MainThread,
+    {
+        let ptr = self.get_set_media_track_info(tr, info);
+        create_passing_c_str(ptr as *const c_char).map(f)
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
-    pub unsafe fn get_media_track_info_partrack(&self, tr: MediaTrack) -> Option<MediaTrack>
+    pub unsafe fn get_set_media_track_info_get_par_track(
+        &self,
+        tr: MediaTrack,
+    ) -> Option<MediaTrack>
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::ParTrack, null_mut())
-            as *mut raw::MediaTrack;
+        let ptr = self.get_set_media_track_info(tr, TrackInfo::par_track(null_mut()));
         NonNull::new(ptr)
     }
 
@@ -251,17 +271,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
     // In REAPER < 5.95 this returns nullptr
-    pub unsafe fn get_media_track_info_project(&self, tr: MediaTrack) -> Option<ReaProject>
+    pub unsafe fn get_set_media_track_info_get_project(&self, tr: MediaTrack) -> Option<ReaProject>
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Project, null_mut())
-            as *mut raw::ReaProject;
+        let ptr = self.get_set_media_track_info(tr, TrackInfo::project(null_mut()));
         NonNull::new(ptr)
     }
 
     /// Convenience function which let's you use the given track's name (`P_NAME`).
-    pub unsafe fn get_media_track_info_name<R>(
+    pub unsafe fn get_set_media_track_info_get_name<R>(
         &self,
         tr: MediaTrack,
         f: impl FnOnce(&CStr) -> R,
@@ -269,27 +288,29 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Name, null_mut());
-        unsafe { create_passing_c_str(ptr as *const c_char) }.map(f)
+        self.get_set_media_track_info_get_as_string(tr, TrackInfo::name(null_mut()), f)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
-    pub unsafe fn get_media_track_info_recmon(&self, tr: MediaTrack) -> InputMonitoringMode
+    pub unsafe fn get_set_media_track_info_get_rec_mon(&self, tr: MediaTrack) -> InputMonitoringMode
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::RecMon, null_mut());
-        let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
+        let ptr = self.get_set_media_track_info(tr, TrackInfo::rec_mon(null_mut()));
+        let irecmon = *ptr;
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
-    pub unsafe fn get_media_track_info_recinput(&self, tr: MediaTrack) -> Option<RecordingInput>
+    pub unsafe fn get_set_media_track_info_get_rec_input(
+        &self,
+        tr: MediaTrack,
+    ) -> Option<RecordingInput>
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::RecInput, null_mut());
-        let rec_input_index = unsafe { unref_as::<i32>(ptr) }.unwrap();
+        let ptr = self.get_set_media_track_info(tr, TrackInfo::rec_input(null_mut()));
+        let rec_input_index = *ptr;
         if rec_input_index < 0 {
             None
         } else {
@@ -298,12 +319,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which returns the given track's number (IP_TRACKNUMBER).
-    pub unsafe fn get_media_track_info_tracknumber(&self, tr: MediaTrack) -> Option<TrackRef>
+    pub unsafe fn get_set_media_track_info_get_track_number(
+        &self,
+        tr: MediaTrack,
+    ) -> Option<TrackRef>
     where
         S: MainThread,
     {
         use TrackRef::*;
-        match self.get_set_media_track_info(tr, TrackInfoKey::TrackNumber, null_mut()) as i32 {
+        let ptr = self.get_set_media_track_info(tr, TrackInfo::track_number(null_mut()));
+        match ptr as i32 {
             -1 => Some(MasterTrack),
             0 => None,
             n if n > 0 => Some(NormalTrack(n as u32 - 1)),
@@ -312,12 +337,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which returns the given track's GUID (GUID).
-    pub unsafe fn get_media_track_info_guid(&self, tr: MediaTrack) -> GUID
+    pub unsafe fn get_set_media_track_info_get_guid(&self, tr: MediaTrack) -> GUID
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Guid, null_mut());
-        unsafe { unref_as::<GUID>(ptr) }.unwrap()
+        let ptr = self.get_set_media_track_info(tr, TrackInfo::guid(null_mut()));
+        *ptr
     }
 
     /// Performs an action belonging to the main action section. To perform non-native actions

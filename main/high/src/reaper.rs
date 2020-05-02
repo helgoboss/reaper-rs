@@ -40,7 +40,7 @@ use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
     AudioThread, CommandId, GaccelRegister, GetFocusedFxResult, GetLastTouchedFxResult,
-    GlobalAutomationModeOverride, Hwnd, MediumAccelerator, MediumGaccelRegister, MediumHookCommand,
+    GlobalAutomationModeOverride, Hwnd, MediumAccel, MediumGaccelRegister, MediumHookCommand,
     MediumHookPostCommand, MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult,
     MessageBoxType, MidiEvent, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs,
     ProjectRef, ReaperFunctions, ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget,
@@ -565,7 +565,7 @@ impl Reaper {
         }
         let address = medium
             .plugin_register_add_gaccel(MediumGaccelRegister::new(
-                MediumAccelerator::new(0, 0, command_id),
+                MediumAccel::new(0, 0, command_id),
                 description.into(),
             ))
             .unwrap();

@@ -3,7 +3,7 @@ use reaper_rs_low::raw;
 
 /// When creating an undo point, this defines what parts of the project might have been affected by
 /// the undoable operation.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum UndoScope {
     /// Everything could have been affected.
     ///
@@ -15,7 +15,7 @@ pub enum UndoScope {
     Scoped(BitFlags<ProjectPart>),
 }
 
-/// Possible parts of a project that could have been affected by an undoable operation.
+/// Part of a project that could have been affected by an undoable operation.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
 #[repr(u32)]
 pub enum ProjectPart {
