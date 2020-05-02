@@ -8,9 +8,9 @@ use std::ptr::{null_mut, NonNull};
 
 /// Consumers need to implement this trait in order to be called back in the audio thread.
 ///
-/// See [`audio_reg_hardware_hook_add`].
+/// See [`audio_reg_hardware_hook_add()`].
 ///
-/// [`audio_reg_hardware_hook_add`]: struct.Reaper.html#method.audio_reg_hardware_hook_add
+/// [`audio_reg_hardware_hook_add()`]: struct.Reaper.html#method.audio_reg_hardware_hook_add
 pub trait MediumOnAudioBuffer {
     /// The actual callback function.
     ///

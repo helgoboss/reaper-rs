@@ -28,7 +28,7 @@ use crate::{
     create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Section,
     Track,
 };
-use helgoboss_midi::{ShortMessage, ShortMessageType};
+use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageFactory, ShortMessageType};
 use once_cell::sync::Lazy;
 use reaper_rs_low;
 use reaper_rs_low::raw;
@@ -42,8 +42,8 @@ use reaper_rs_medium::{
     AudioThread, CommandId, GaccelRegister, GetFocusedFxResult, GetLastTouchedFxResult,
     GlobalAutomationModeOverride, Hwnd, MediumAccel, MediumGaccelRegister, MediumHookCommand,
     MediumHookPostCommand, MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult,
-    MessageBoxType, MidiEvent, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs,
-    ProjectRef, ReaperFunctions, ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget,
+    MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef,
+    ReaperFunctions, ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget,
     ToggleActionResult, TrackRef,
 };
 use std::sync::Mutex;
@@ -130,7 +130,7 @@ pub struct RealTimeReaper {
 impl RealTimeReaper {
     pub fn midi_message_received(
         &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<'static>> {
+    ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<RawShortMessage>> {
         self.subjects.midi_message_received.borrow().clone()
     }
 }
@@ -154,34 +154,15 @@ impl MediumOnAudioBuffer for RealTimeReaper {
                 .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
                     let evt_list = input.get_read_buf();
                     for evt in evt_list.enum_items(0) {
-                        if evt.get_message().r#type() == ShortMessageType::ActiveSensing {
+                        let msg = evt.message();
+                        if msg.r#type() == ShortMessageType::ActiveSensing {
                             // TODO-low We should forward active sensing. Can be filtered out
                             // later.
                             continue;
                         }
-                        // Erase lifetime of event so we can "send" it using rxRust
-                        // TODO This is very hacky and unsafe. It works as long as there's no
-                        // rxRust  subscriber (e.g. operator)
-                        // involved which attempts to cache the event
-                        //  and use it after this function has returned. Then segmentation
-                        // faults are  about to happen. Alternative
-                        // would be to turn this into an owned event
-                        // and  send this instead. But note that we
-                        // are in a real-time thread here so we
-                        //  shouldn't allocate on the heap here (so no Rc). That means we would
-                        // have to  copy the owned MIDI event.
-                        // Probably not an issue because it's not
-                        // big and  cheap to copy. Look into this
-                        // and see if the unsafe code is worth it.
-                        let fake_static_evt: MidiEvent<'static> = {
-                            let raw_evt: &raw::MIDI_event_t = evt.into();
-                            let raw_evt_ptr = raw_evt as *const raw::MIDI_event_t;
-                            unsafe {
-                                let erased_raw_evt = &*raw_evt_ptr;
-                                MidiEvent::new(erased_raw_evt)
-                            }
-                        };
-                        subject.next(fake_static_evt);
+                        let owned_msg: RawShortMessage = msg.to_other();
+                        let owned_evt = MidiEvent::new(evt.frame_offset(), owned_msg);
+                        subject.next(owned_evt);
                     }
                 });
         }
@@ -215,8 +196,20 @@ struct ActiveData {
     audio_hook_register_handle: NonNull<raw::audio_hook_register_t>,
 }
 
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
+pub struct MidiEvent<M> {
+    frame_offset: u32,
+    msg: M,
+}
+
+impl<M> MidiEvent<M> {
+    pub fn new(frame_offset: u32, msg: M) -> MidiEvent<M> {
+        MidiEvent { frame_offset, msg }
+    }
+}
+
 struct RealTimeSubjects {
-    midi_message_received: EventStreamSubject<MidiEvent<'static>>,
+    midi_message_received: EventStreamSubject<MidiEvent<RawShortMessage>>,
 }
 
 impl RealTimeSubjects {

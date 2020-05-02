@@ -5,30 +5,40 @@ use std::marker::PhantomData;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
-// # Internals exposed: no | vtable: yes (Rust => REAPER)
+/// A MIDI input device.
 //
-// This is like a MediaTrack object in that it wraps a raw pointer. Like KbdSectionInfo, it must not
-// be copied because it's reference-only. It is reference-only so we can offer a medium-level API
-// for it that doesn't require unsafe code.
-// ALternative name: MidiIn
-#[derive(Debug, Eq, Hash, PartialEq)]
+// It's important that this type is not cloneable! Otherwise consumers could easily let it escape
+// its intended usage scope (audio hook), which would lead to undefined behavior.
+//
+// Internals exposed: no | vtable: yes (Rust => REAPER)
+#[derive(Eq, PartialEq, Hash, Debug)]
 pub struct MidiInput(pub(crate) NonNull<raw::midi_Input>);
 
-#[derive(Debug, Eq, Hash, PartialEq)]
-pub struct MidiOutput(pub(crate) NonNull<raw::midi_Output>);
-
 impl MidiInput {
-    // In the past this function was unsafe, didn't return the event list and expected a closure
-    // instead that could do something with the event list. That's not necessary anymore since we
-    // ensure in get_midi_input() that we only ever publish valid MidiInput instances, and those
-    // only by a very short-lived reference that's not possible to cache anywhere. That makes it
-    // possible to bind the lifetime of the event list to that MidiInput and everything is fine!
-    // Thanks Rust! If we would return an owned event list, we would waste performance because we
-    // would need to copy all events first. That would be especially bad because this code code
-    // typically runs in the audio thread and therefore has real-time requirements.
-    // Should we mark this as unsafe because it can crash if accessed wrongly from UI thread instead
-    // of audio thread? I don't think so, then we would have to mark most functions as unsafe
-    // because most functions can only be called from UI thread.
+    /// Returns the list of MIDI events which are currently in the buffer.
+    ///
+    /// This must only be called in the audio thread! See [`get_midi_input()`].
+    ///
+    /// # Design
+    ///
+    /// In the past this function was unsafe and expected a closure which let the consumer do
+    /// something with the event list. All of that is not necessary anymore since we ensure in
+    /// [`get_midi_input()`] that we only ever publish valid [`MidiInput`] instances, and those only
+    /// by a very short-lived reference that's not possible to cache anywhere. That makes it
+    /// possible to bind the lifetime of the event list to the one of the [`MidiInput`] and
+    /// everything is fine!
+    ///
+    /// Returning an owned event list would be wasteful because we would need to copy all events
+    /// first. That would be especially bad because this code is supposed to run in the audio
+    /// thread and therefore has real-time requirements.
+    ///
+    /// [`MidiInput`]: struct.MidiInput.html
+    /// [`get_midi_input()`]: struct.ReaperFunctions.html#method.get_midi_input
+    // Should we mark this as unsafe because
+    // it can crash if accessed wrongly from UI thread instead of audio thread? I don't think
+    // so, then we would have to mark most functions as unsafe because most functions can only
+    // be called from UI thread.
+    //
     // TODO-low In theory we could prevent undefined behavior by always checking the thread at
     //  first.
     pub fn get_read_buf(&self) -> MidiEventList<'_> {
@@ -37,8 +47,10 @@ impl MidiInput {
     }
 }
 
-// # Internals exposed: no | vtable: yes (Rust => REAPER)
-// ALternative name: MidiEvtList
+/// A list of MIDI events borrowed from REAPER.
+//
+// Internals exposed: no | vtable: yes (Rust => REAPER)
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct MidiEventList<'a>(&'a raw::MIDI_eventlist);
 
 impl<'a> MidiEventList<'a> {
@@ -46,7 +58,10 @@ impl<'a> MidiEventList<'a> {
         MidiEventList(raw_evt_list)
     }
 
-    pub fn enum_items(&self, bpos: u32) -> MidiEventListIterator<'a> {
+    /// Returns an iterator exposing the contained MIDI events.
+    ///
+    /// `bpos` is the iterator start position.
+    pub fn enum_items(&self, bpos: u32) -> impl Iterator<Item = MidiEvent<'a>> {
         MidiEventListIterator {
             raw_list: self.0,
             bpos: bpos as i32,
@@ -54,7 +69,42 @@ impl<'a> MidiEventList<'a> {
     }
 }
 
-pub struct MidiEventListIterator<'a> {
+/// A MIDI event borrowed from REAPER.
+// # Internals exposed: yes | vtable: no
+// TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
+//  keeps  the event around.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct MidiEvent<'a>(&'a raw::MIDI_event_t);
+
+/// A MIDI message borrowed from REAPER.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct MidiMessage<'a>(&'a raw::MIDI_event_t);
+
+impl<'a> MidiEvent<'a> {
+    pub(crate) unsafe fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
+        MidiEvent(raw_evt)
+    }
+
+    /// Returns the frame offset.
+    ///
+    /// Unit: 1/1024000 of a second, *not* sample frames!
+    pub fn frame_offset(&self) -> u32 {
+        self.0.frame_offset as u32
+    }
+
+    /// Returns the actual message.
+    pub fn message(&self) -> MidiMessage<'a> {
+        MidiMessage::new(self.0)
+    }
+}
+
+impl<'a> MidiMessage<'a> {
+    pub(super) fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
+        MidiMessage(raw_evt)
+    }
+}
+
+struct MidiEventListIterator<'a> {
     raw_list: &'a raw::MIDI_eventlist,
     bpos: i32,
 }
@@ -73,40 +123,9 @@ impl<'a> Iterator for MidiEventListIterator<'a> {
     }
 }
 
-// # Internals exposed: yes | vtable: no
-// Represents a borrowed reference to a MIDI event from REAPER. Cheap to copy because it's just a
-// wrapper around MIDI_event_t.
-// ALternative name: MidiEvt
-// TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
-//  keeps  the event around.
-#[derive(Clone, Copy)]
-pub struct MidiEvent<'a>(&'a raw::MIDI_event_t);
-
-impl<'a> MidiEvent<'a> {
-    pub unsafe fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiEvent(raw_evt)
-    }
-
-    pub fn get_frame_offset(&self) -> u32 {
-        self.0.frame_offset as u32
-    }
-
-    pub fn get_message(&self) -> MidiMessage<'a> {
-        MidiMessage::new(self.0)
-    }
-}
-
 impl<'a> From<MidiEvent<'a>> for &'a raw::MIDI_event_t {
     fn from(outer: MidiEvent<'a>) -> Self {
         outer.0
-    }
-}
-
-pub struct MidiMessage<'a>(&'a raw::MIDI_event_t);
-
-impl<'a> MidiMessage<'a> {
-    pub(super) fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiMessage(raw_evt)
     }
 }
 

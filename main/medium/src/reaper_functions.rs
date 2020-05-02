@@ -19,7 +19,7 @@ use crate::{
     GaccelRegister, GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction,
-    MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
+    MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
     NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectPart,
     ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
     ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
