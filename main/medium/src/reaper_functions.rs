@@ -23,11 +23,10 @@ use crate::{
     NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectPart,
     ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
     ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
-    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrInfo,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfo,
-    TrackInfoKey, TrackInfoStruct, TrackRef, TrackSendCategory, TrackSendDirection,
-    TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
+    TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -256,53 +255,6 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     {
         let ptr = self.get_set_media_track_info(tr, info);
         create_passing_c_str(ptr).map(f)
-    }
-
-    pub unsafe fn get_set_media_track_info_get_as_ptr<'a, T, I: TrackInfo<'a, *mut T>>(
-        &self,
-        tr: MediaTrack,
-        info: I,
-    ) -> Option<NonNull<T>>
-    where
-        S: MainThread,
-    {
-        let ptr = self.get_set_media_track_info(tr, info);
-        NonNull::new(ptr)
-    }
-
-    /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
-    // TODO-medium Maybe irrelevant
-    pub unsafe fn get_set_media_track_info_get_par_track(
-        &self,
-        tr: MediaTrack,
-    ) -> Option<MediaTrack>
-    where
-        S: MainThread,
-    {
-        self.get_set_media_track_info_get_as_ptr(tr, track_infos::par_track(null_mut()))
-    }
-
-    /// Convenience function which returns the given track's parent project (`P_PROJECT`).
-    // In REAPER < 5.95 this returns nullptr
-    // TODO-medium Maybe irrelevant
-    pub unsafe fn get_set_media_track_info_get_project(&self, tr: MediaTrack) -> Option<ReaProject>
-    where
-        S: MainThread,
-    {
-        self.get_set_media_track_info_get_as_ptr(tr, TrackInfoStruct::project(null_mut()))
-    }
-
-    /// Convenience function which let's you use the given track's name (`P_NAME`).
-    // TODO-medium Maybe irrelevant
-    pub unsafe fn get_set_media_track_info_get_name<R>(
-        &self,
-        tr: MediaTrack,
-        f: impl FnOnce(&CStr) -> R,
-    ) -> Option<R>
-    where
-        S: MainThread,
-    {
-        self.get_set_media_track_info_get_as_string(tr, track_infos::name(null_mut()), f)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).

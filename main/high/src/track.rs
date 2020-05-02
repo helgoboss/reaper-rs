@@ -86,7 +86,7 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_set_media_track_info(self.get_raw(), track_infos::name(name.as_ptr()));
+                .get_set_media_track_info(self.get_raw(), track_infos::set_name(name.as_ptr()));
         }
     }
 
@@ -97,7 +97,11 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_set_media_track_info_get_name(self.get_raw(), |n| n.into())
+                .get_set_media_track_info_get_as_string(
+                    self.get_raw(),
+                    track_infos::get_name(),
+                    |n| n.into(),
+                )
         }
         .unwrap_or_else(|| c_str!("<Master track>").to_owned())
     }
@@ -784,7 +788,7 @@ fn get_track_project_raw(media_track: MediaTrack) -> Option<ReaProject> {
         Reaper::get()
             .medium()
             .functions()
-            .get_set_media_track_info_get_project(media_track)
+            .get_set_media_track_info(media_track, track_infos::get_project())
     }
 }
 
