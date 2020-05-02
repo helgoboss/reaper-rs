@@ -19,11 +19,11 @@ pub trait MediumOnAudioBuffer {
 }
 
 #[derive(PartialEq, Debug)]
-pub struct OnAudioBufferArgs {
+pub struct OnAudioBufferArgs<'a> {
     pub is_post: bool,
     pub len: u32,
     pub srate: Hertz,
-    pub reg: AudioHookRegister,
+    pub reg: &'a AudioHookRegister,
 }
 
 /// Provides access to the current audio buffer contents (not yet implemented).
@@ -74,7 +74,7 @@ pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
             is_post,
             len: len as u32,
             srate: unsafe { Hertz::new_unchecked(srate) },
-            reg: AudioHookRegister::new(reg),
+            reg: &AudioHookRegister::new(reg),
         });
     });
 }

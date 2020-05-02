@@ -1,6 +1,7 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-#[derive(Debug, Eq, PartialEq, IntoPrimitive)]
+/// Type of message box to be displayed.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive)]
 #[repr(i32)]
 pub enum MessageBoxType {
     Ok = 0,
@@ -11,7 +12,8 @@ pub enum MessageBoxType {
     RetryCancel = 5,
 }
 
-#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+/// Message box result informing about the user's choice.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, TryFromPrimitive)]
 #[repr(i32)]
 pub enum MessageBoxResult {
     Ok = 1,

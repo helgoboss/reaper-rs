@@ -8,8 +8,6 @@ use std::os::raw::{c_char, c_void};
 
 /// Track info key which you can pass to [`get_set_media_track_info()`].
 ///
-/// Please raise a *reaper-rs* issue if you find that an enum variant is missing!
-///
 /// [`get_set_media_track_info()`]: struct.ReaperFunctions.html#method.get_set_media_track_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackInfoKey<'a> {
@@ -260,10 +258,16 @@ pub enum TrackInfoKey<'a> {
 }
 
 impl<'a> TrackInfoKey<'a> {
+    /// Convenience method for creating an [`Ext`] key.
+    ///
+    /// [`Ext`]: #variant.Ext
     pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
         TrackInfoKey::Ext(key.into().into_inner())
     }
 
+    /// Convenience method for creating a [`Custom`] key.
+    ///
+    /// [`Custom`]: #variant.Custom
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
         TrackInfoKey::Custom(key.into().into_inner())
     }
@@ -336,38 +340,74 @@ impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
     }
 }
 
-/// All the possible track send info keys which you can pass to `Reaper::get_set_track_send_info()`.
+/// Track info key which you can pass to [`get_set_track_send_info()`].
 ///
-/// The variants are named exactly like the strings which will be passed to the low-level REAPER
-/// function because the medium-level API is designed to still be close to the raw REAPER API.  
-///
-/// Please raise a reaper-rs issue if you find that an enum variant is missing!
-#[derive(Clone, Debug)]
+/// [`get_set_track_send_info()`]: struct.ReaperFunctions.html#method.get_set_track_send_info
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackSendInfoKey<'a> {
-    Mono,
-    Mute,
-    Phase,
-    Pan,
-    PanLaw,
-    Vol,
-    AutoMode,
-    DstChan,
-    MidiFlags,
-    SendMode,
-    SrcChan,
+    /// Returns the destination track (read-only).
+    ///
+    /// Only applies for sends/receives.
     DestTrack,
+    /// Returns the source track (read-only).
+    ///
+    /// Only applies for sends/receives.
     SrcTrack,
+    /// Returns the corresponding track send envelope.
     Env(EnvChunkName<'a>),
+    /// Extension-specific persistent data.
     Ext(Cow<'a, CStr>),
+    Mute,
+    /// `true` to flip phase.
+    Phase,
+    Mono,
+    /// 1.0 → +0 dB etc.
+    Vol,
+    /// -1..=1
+    Pan,
+    ///
+    /// - 1.0 → +0.0 dB
+    /// - 0.5 → -6 dB
+    /// - -1.0 → value defined in project
+    PanLaw,
+    ///
+    /// - 0 → post-fader
+    /// - 1 → pre-fx
+    /// - 2 → post-fx (deprecated)
+    /// - 3 → post-fx
+    SendMode,
+    /// Automation mode.
+    ///
+    /// - -1 → use track automation mode
+    /// - 0 → trim/off
+    /// - 1 → read
+    /// - 2 → touch
+    /// - 3 → write
+    /// - 4 → latch
+    AutoMode,
+    /// Index, &1024 → mono, -1 → none
+    SrcChan,
+    /// Index, &1024 → mono, otherwise stereo pair, hwout: &512 → rearoute
+    DstChan,
+    /// 
+    /// - Low 5 bits → source channel (0 → all, 1..=16)
+    /// - Next 5 bits → destination channel (0 → original, 1..=16)
+    MidiFlags,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     Custom(Cow<'a, CStr>),
 }
 
 impl<'a> TrackSendInfoKey<'a> {
+    /// Convenience method for creating an [`Ext`] key.
+    ///
+    /// [`Ext`]: #variant.Ext
     pub fn p_ext(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
         TrackSendInfoKey::Ext(key.into().into_inner())
     }
 
+    /// Convenience method for creating a [`Custom`] key.
+    ///
+    /// [`Custom`]: #variant.Custom
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
         TrackSendInfoKey::Custom(key.into().into_inner())
     }
@@ -400,12 +440,9 @@ impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
     }
 }
 
-/// Common envelope chunk names which you can pass to `TrackInfoKey::P_ENV()`.
+/// Envelope chunk name which you can pass e.g. to [`TrackInfoKey::Env()`].
 ///
-/// The variants are named exactly like the strings which will be passed to the low-level REAPER
-/// function because the medium-level API is designed to still be close to the raw REAPER API.  
-///
-/// Please raise a reaper-rs issue if you find that an enum variant is missing!
+/// [`TrackInfoKey::Env()`]: enum.TrackInfoKey.html#variant.Env
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum EnvChunkName<'a> {
     /// Volume (Pre-FX)
@@ -429,6 +466,9 @@ pub enum EnvChunkName<'a> {
 }
 
 impl<'a> EnvChunkName<'a> {
+    /// Convenience method for creating a [`Custom`] key.
+    ///
+    /// [`Custom`]: #variant.Custom
     pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> Self {
         Self::Custom(name.into().into_inner())
     }
