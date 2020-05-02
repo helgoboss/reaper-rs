@@ -13,8 +13,8 @@ use crate::infostruct_keeper::InfostructKeeper;
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
-    require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
-    AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
+    require_non_null, require_non_null_panic, track_infos, ActionValueChange, AddFxBehavior,
+    AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
     GaccelRegister, GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
@@ -25,8 +25,9 @@ use crate::{
     ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
     RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfo,
-    TrackInfoKey, TrackInfoLike, TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey,
-    TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    TrackInfoKey, TrackInfoStruct, TrackRef, TrackSendCategory, TrackSendDirection,
+    TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 use enumflags2::BitFlags;
 use helgoboss_midi::ShortMessage;
@@ -229,7 +230,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// this function is not fun and requires you to use unsafe code. Consider using one of the
     /// type-safe convenience functions instead. They start with `get_media_track_info_` or
     /// `set_media_track_info_`.
-    pub unsafe fn get_set_media_track_info<'a, T, I: TrackInfoLike<'a, T>>(
+    pub unsafe fn get_set_media_track_info<'a, T, I: TrackInfo<'a, T>>(
         &self,
         tr: MediaTrack,
         info: I,
@@ -244,11 +245,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         I::ptr_as_value(result_ptr)
     }
 
-    pub unsafe fn get_set_media_track_info_get_as_string<
-        'a,
-        I: TrackInfoLike<'a, *const c_char>,
-        R,
-    >(
+    pub unsafe fn get_set_media_track_info_get_as_string<'a, I: TrackInfo<'a, *const c_char>, R>(
         &self,
         tr: MediaTrack,
         info: I,
@@ -261,7 +258,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         create_passing_c_str(ptr).map(f)
     }
 
-    pub unsafe fn get_set_media_track_info_get_as_ptr<'a, T, I: TrackInfoLike<'a, *mut T>>(
+    pub unsafe fn get_set_media_track_info_get_as_ptr<'a, T, I: TrackInfo<'a, *mut T>>(
         &self,
         tr: MediaTrack,
         info: I,
@@ -282,7 +279,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        self.get_set_media_track_info_get_as_ptr(tr, TrackInfo::par_track(null_mut()))
+        self.get_set_media_track_info_get_as_ptr(tr, track_infos::par_track(null_mut()))
     }
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
@@ -292,7 +289,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        self.get_set_media_track_info_get_as_ptr(tr, TrackInfo::project(null_mut()))
+        self.get_set_media_track_info_get_as_ptr(tr, TrackInfoStruct::project(null_mut()))
     }
 
     /// Convenience function which let's you use the given track's name (`P_NAME`).
@@ -305,7 +302,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        self.get_set_media_track_info_get_as_string(tr, TrackInfo::name(null_mut()), f)
+        self.get_set_media_track_info_get_as_string(tr, track_infos::name(null_mut()), f)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
@@ -313,7 +310,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let irecmon = *self.get_set_media_track_info(tr, TrackInfo::rec_mon(null_mut()));
+        let irecmon = *self.get_set_media_track_info(tr, track_infos::rec_mon(null_mut()));
         InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
     }
 
@@ -325,7 +322,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let rec_input_index = *self.get_set_media_track_info(tr, TrackInfo::rec_input(null_mut()));
+        let rec_input_index =
+            *self.get_set_media_track_info(tr, track_infos::rec_input(null_mut()));
         if rec_input_index < 0 {
             None
         } else {
@@ -342,7 +340,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         use TrackRef::*;
-        match self.get_set_media_track_info(tr, TrackInfo::track_number(0)) {
+        match self.get_set_media_track_info(tr, track_infos::track_number(0)) {
             -1 => Some(MasterTrack),
             0 => None,
             n if n > 0 => Some(NormalTrack(n as u32 - 1)),
@@ -355,7 +353,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        *self.get_set_media_track_info(tr, TrackInfo::guid(null_mut()))
+        *self.get_set_media_track_info(tr, track_infos::guid(null_mut()))
     }
 
     /// Performs an action belonging to the main action section. To perform non-native actions

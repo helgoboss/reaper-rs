@@ -337,35 +337,360 @@ impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
 }
 
 mod private {
-    use crate::TrackInfo;
+    use crate::TrackInfoStruct;
 
     pub trait Sealed {}
-    impl<'a, T> Sealed for TrackInfo<'a, *mut T> {}
-    impl<'a, T> Sealed for TrackInfo<'a, *const T> {}
-    impl<'a> Sealed for TrackInfo<'a, i32> {}
+    impl<'a, T> Sealed for TrackInfoStruct<'a, *mut T> {}
+    impl<'a, T> Sealed for TrackInfoStruct<'a, *const T> {}
+    impl<'a> Sealed for TrackInfoStruct<'a, i32> {}
 }
 
-pub trait TrackInfoLike<'a, T>: private::Sealed {
+pub trait TrackInfo<'a, T>: private::Sealed {
     fn ptr_as_value(ptr: *mut c_void) -> T;
     fn key(self) -> TrackInfoKey<'a>;
     fn value_as_ptr(&self) -> *mut c_void;
 }
 
-pub struct TrackInfo<'a, T> {
+pub(crate) struct TrackInfoStruct<'a, T> {
     pub(crate) key: TrackInfoKey<'a>,
     pub(crate) value: T,
 }
 
-impl<'a> TrackInfo<'a, *mut raw::MediaTrack> {
-    pub fn par_track(value: *mut raw::MediaTrack) -> TrackInfo<'a, *mut raw::MediaTrack> {
-        TrackInfo {
+pub mod track_infos {
+    use crate::{EnvChunkName, ReaperStringArg, TrackInfo, TrackInfoKey, TrackInfoStruct};
+    use reaper_rs_low::raw;
+    use std::os::raw::{c_char, c_void};
+
+    pub fn par_track<'a>(value: *mut raw::MediaTrack) -> impl TrackInfo<'a, *mut raw::MediaTrack> {
+        TrackInfoStruct {
             key: TrackInfoKey::ParTrack,
+            value,
+        }
+    }
+    pub fn name<'a>(value: *const c_char) -> impl TrackInfo<'a, *const c_char> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Name,
+            value,
+        }
+    }
+
+    pub fn ext<'a>(
+        key: impl Into<ReaperStringArg<'a>>,
+        value: *mut c_char,
+    ) -> impl TrackInfo<'a, *mut c_char> {
+        TrackInfoStruct {
+            key: TrackInfoKey::ext(key),
+            value,
+        }
+    }
+    pub fn main_send_offs<'a>(value: *mut c_char) -> impl TrackInfo<'a, *mut c_char> {
+        TrackInfoStruct {
+            key: TrackInfoKey::MainSendOffs,
+            value,
+        }
+    }
+    pub fn beat_attach_mode<'a>(value: *mut c_char) -> impl TrackInfo<'a, *mut c_char> {
+        TrackInfoStruct {
+            key: TrackInfoKey::BeatAttachMode,
+            value,
+        }
+    }
+
+    pub fn icon<'a>(value: *const c_char) -> impl TrackInfo<'a, *const c_char> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Icon,
+            value,
+        }
+    }
+    pub fn mcp_layout<'a>(value: *const c_char) -> impl TrackInfo<'a, *const c_char> {
+        TrackInfoStruct {
+            key: TrackInfoKey::McpLayout,
+            value,
+        }
+    }
+    pub fn tcp_layout<'a>(value: *const c_char) -> impl TrackInfo<'a, *const c_char> {
+        TrackInfoStruct {
+            key: TrackInfoKey::TcpLayout,
+            value,
+        }
+    }
+    pub fn rec_mon<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::RecMon,
+            value,
+        }
+    }
+
+    pub fn rec_input<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::RecInput,
+            value,
+        }
+    }
+
+    pub fn solo<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Solo,
+            value,
+        }
+    }
+    pub fn fx_en<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::FxEn,
+            value,
+        }
+    }
+    pub fn rec_mode<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::RecMode,
+            value,
+        }
+    }
+    pub fn rec_mon_items<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::RecMonItems,
+            value,
+        }
+    }
+    pub fn auto_mode<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::AutoMode,
+            value,
+        }
+    }
+    pub fn nchan<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Nchan,
+            value,
+        }
+    }
+    pub fn selected<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Selected,
+            value,
+        }
+    }
+    pub fn wnd_h<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::WndH,
+            value,
+        }
+    }
+    pub fn tcp_h<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::TcpH,
+            value,
+        }
+    }
+    pub fn tcp_y<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::TcpY,
+            value,
+        }
+    }
+    pub fn mcp_x<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::McpX,
+            value,
+        }
+    }
+    pub fn mcp_y<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::McpY,
+            value,
+        }
+    }
+    pub fn mcp_w<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::McpW,
+            value,
+        }
+    }
+    pub fn mcp_h<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::McpH,
+            value,
+        }
+    }
+    pub fn folder_depth<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::FolderDepth,
+            value,
+        }
+    }
+    pub fn folder_compact<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::FolderCompact,
+            value,
+        }
+    }
+    pub fn midi_hw_out<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::MidiHwOut,
+            value,
+        }
+    }
+    pub fn perf_flags<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::PerfFlags,
+            value,
+        }
+    }
+    pub fn custom_color<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::CustomColor,
+            value,
+        }
+    }
+    pub fn height_override<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::HeightOverride,
+            value,
+        }
+    }
+    pub fn pan_mode<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::PanMode,
+            value,
+        }
+    }
+    pub fn play_offset_flag<'a>(value: *mut i32) -> impl TrackInfo<'a, *mut i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::PlayOffsetFlag,
+            value,
+        }
+    }
+    pub fn track_number<'a>(value: i32) -> impl TrackInfo<'a, i32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::TrackNumber,
+            value,
+        }
+    }
+    pub fn guid<'a>(value: *mut raw::GUID) -> impl TrackInfo<'a, *mut raw::GUID> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Guid,
+            value,
+        }
+    }
+    pub fn mute<'a>(value: *mut bool) -> impl TrackInfo<'a, *mut bool> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Mute,
+            value,
+        }
+    }
+    pub fn phase<'a>(value: *mut bool) -> impl TrackInfo<'a, *mut bool> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Phase,
+            value,
+        }
+    }
+    pub fn height_lock<'a>(value: *mut bool) -> impl TrackInfo<'a, *mut bool> {
+        TrackInfoStruct {
+            key: TrackInfoKey::HeightLock,
+            value,
+        }
+    }
+    pub fn show_in_mixer<'a>(value: *mut bool) -> impl TrackInfo<'a, *mut bool> {
+        TrackInfoStruct {
+            key: TrackInfoKey::ShowInMixer,
+            value,
+        }
+    }
+    pub fn show_in_tcp<'a>(value: *mut bool) -> impl TrackInfo<'a, *mut bool> {
+        TrackInfoStruct {
+            key: TrackInfoKey::ShowInTcp,
+            value,
+        }
+    }
+    pub fn main_send<'a>(value: *mut bool) -> impl TrackInfo<'a, *mut bool> {
+        TrackInfoStruct {
+            key: TrackInfoKey::MainSend,
+            value,
+        }
+    }
+    pub fn free_mode<'a>(value: *mut bool) -> impl TrackInfo<'a, *mut bool> {
+        TrackInfoStruct {
+            key: TrackInfoKey::FreeMode,
+            value,
+        }
+    }
+    pub fn vol<'a>(value: *mut f64) -> impl TrackInfo<'a, *mut f64> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Vol,
+            value,
+        }
+    }
+    pub fn pan<'a>(value: *mut f64) -> impl TrackInfo<'a, *mut f64> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Pan,
+            value,
+        }
+    }
+    pub fn width<'a>(value: *mut f64) -> impl TrackInfo<'a, *mut f64> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Width,
+            value,
+        }
+    }
+    pub fn dual_pan_l<'a>(value: *mut f64) -> impl TrackInfo<'a, *mut f64> {
+        TrackInfoStruct {
+            key: TrackInfoKey::DualPanL,
+            value,
+        }
+    }
+    pub fn dual_pan_r<'a>(value: *mut f64) -> impl TrackInfo<'a, *mut f64> {
+        TrackInfoStruct {
+            key: TrackInfoKey::DualPanR,
+            value,
+        }
+    }
+    pub fn pan_law<'a>(value: *mut f64) -> impl TrackInfo<'a, *mut f64> {
+        TrackInfoStruct {
+            key: TrackInfoKey::PanLaw,
+            value,
+        }
+    }
+    pub fn play_offset<'a>(value: *mut f64) -> impl TrackInfo<'a, *mut f64> {
+        TrackInfoStruct {
+            key: TrackInfoKey::PlayOffset,
+            value,
+        }
+    }
+    pub fn env<'a>(
+        name: EnvChunkName<'a>,
+        value: *mut raw::TrackEnvelope,
+    ) -> impl TrackInfo<'a, *mut raw::TrackEnvelope> {
+        TrackInfoStruct {
+            key: TrackInfoKey::Env(name),
+            value,
+        }
+    }
+
+    pub fn mcp_fx_send_scale<'a>(value: *mut f32) -> impl TrackInfo<'a, *mut f32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::McpFxSendScale,
+            value,
+        }
+    }
+    pub fn mcp_send_rgn_scale<'a>(value: *mut f32) -> impl TrackInfo<'a, *mut f32> {
+        TrackInfoStruct {
+            key: TrackInfoKey::McpSendRgnScale,
+            value,
+        }
+    }
+
+    pub fn custom<'a>(
+        key: impl Into<ReaperStringArg<'a>>,
+        value: *mut c_void,
+    ) -> impl TrackInfo<'a, *mut c_void> {
+        TrackInfoStruct {
+            key: TrackInfoKey::custom(key),
             value,
         }
     }
 }
 
-impl<'a, T> TrackInfoLike<'a, *mut T> for TrackInfo<'a, *mut T> {
+impl<'a, T> TrackInfo<'a, *mut T> for TrackInfoStruct<'a, *mut T> {
     fn ptr_as_value(ptr: *mut c_void) -> *mut T {
         ptr as _
     }
@@ -379,7 +704,7 @@ impl<'a, T> TrackInfoLike<'a, *mut T> for TrackInfo<'a, *mut T> {
     }
 }
 
-impl<'a, T> TrackInfoLike<'a, *const T> for TrackInfo<'a, *const T> {
+impl<'a, T> TrackInfo<'a, *const T> for TrackInfoStruct<'a, *const T> {
     fn ptr_as_value(ptr: *mut c_void) -> *const T {
         ptr as _
     }
@@ -393,7 +718,7 @@ impl<'a, T> TrackInfoLike<'a, *const T> for TrackInfo<'a, *const T> {
     }
 }
 
-impl<'a> TrackInfoLike<'a, i32> for TrackInfo<'a, i32> {
+impl<'a> TrackInfo<'a, i32> for TrackInfoStruct<'a, i32> {
     fn ptr_as_value(ptr: *mut c_void) -> i32 {
         ptr as _
     }
@@ -407,357 +732,10 @@ impl<'a> TrackInfoLike<'a, i32> for TrackInfo<'a, i32> {
     }
 }
 
-impl<'a> TrackInfo<'a, *mut raw::ReaProject> {
-    pub fn project(value: *mut raw::ReaProject) -> TrackInfo<'a, *mut raw::ReaProject> {
-        TrackInfo {
+impl<'a> TrackInfoStruct<'a, *mut raw::ReaProject> {
+    pub fn project(value: *mut raw::ReaProject) -> TrackInfoStruct<'a, *mut raw::ReaProject> {
+        TrackInfoStruct {
             key: TrackInfoKey::Project,
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *mut c_char> {
-    pub fn name(value: *const c_char) -> TrackInfo<'a, *const c_char> {
-        TrackInfo {
-            key: TrackInfoKey::Name,
-            value,
-        }
-    }
-
-    pub fn ext(
-        key: impl Into<ReaperStringArg<'a>>,
-        value: *mut c_char,
-    ) -> TrackInfo<'a, *mut c_char> {
-        TrackInfo {
-            key: TrackInfoKey::ext(key),
-            value,
-        }
-    }
-    pub fn main_send_offs(value: *mut c_char) -> TrackInfo<'a, *mut c_char> {
-        TrackInfo {
-            key: TrackInfoKey::MainSendOffs,
-            value,
-        }
-    }
-    pub fn beat_attach_mode(value: *mut c_char) -> TrackInfo<'a, *mut c_char> {
-        TrackInfo {
-            key: TrackInfoKey::BeatAttachMode,
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *const c_char> {
-    pub fn icon(value: *const c_char) -> TrackInfo<'a, *const c_char> {
-        TrackInfo {
-            key: TrackInfoKey::Icon,
-            value,
-        }
-    }
-    pub fn mcp_layout(value: *const c_char) -> TrackInfo<'a, *const c_char> {
-        TrackInfo {
-            key: TrackInfoKey::McpLayout,
-            value,
-        }
-    }
-    pub fn tcp_layout(value: *const c_char) -> TrackInfo<'a, *const c_char> {
-        TrackInfo {
-            key: TrackInfoKey::TcpLayout,
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *mut i32> {
-    pub fn rec_mon(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::RecMon,
-            value,
-        }
-    }
-
-    pub fn rec_input(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::RecInput,
-            value,
-        }
-    }
-
-    pub fn solo(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::Solo,
-            value,
-        }
-    }
-    pub fn fx_en(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::FxEn,
-            value,
-        }
-    }
-    pub fn rec_mode(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::RecMode,
-            value,
-        }
-    }
-    pub fn rec_mon_items(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::RecMonItems,
-            value,
-        }
-    }
-    pub fn auto_mode(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::AutoMode,
-            value,
-        }
-    }
-    pub fn nchan(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::Nchan,
-            value,
-        }
-    }
-    pub fn selected(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::Selected,
-            value,
-        }
-    }
-    pub fn wnd_h(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::WndH,
-            value,
-        }
-    }
-    pub fn tcp_h(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::TcpH,
-            value,
-        }
-    }
-    pub fn tcp_y(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::TcpY,
-            value,
-        }
-    }
-    pub fn mcp_x(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::McpX,
-            value,
-        }
-    }
-    pub fn mcp_y(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::McpY,
-            value,
-        }
-    }
-    pub fn mcp_w(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::McpW,
-            value,
-        }
-    }
-    pub fn mcp_h(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::McpH,
-            value,
-        }
-    }
-    pub fn folder_depth(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::FolderDepth,
-            value,
-        }
-    }
-    pub fn folder_compact(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::FolderCompact,
-            value,
-        }
-    }
-    pub fn midi_hw_out(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::MidiHwOut,
-            value,
-        }
-    }
-    pub fn perf_flags(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::PerfFlags,
-            value,
-        }
-    }
-    pub fn custom_color(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::CustomColor,
-            value,
-        }
-    }
-    pub fn height_override(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::HeightOverride,
-            value,
-        }
-    }
-    pub fn pan_mode(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::PanMode,
-            value,
-        }
-    }
-    pub fn play_offset_flag(value: *mut i32) -> TrackInfo<'a, *mut i32> {
-        TrackInfo {
-            key: TrackInfoKey::PlayOffsetFlag,
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, i32> {
-    pub fn track_number(value: i32) -> TrackInfo<'a, i32> {
-        TrackInfo {
-            key: TrackInfoKey::TrackNumber,
-            value,
-        }
-    }
-}
-impl<'a> TrackInfo<'a, c_void> {
-    pub fn custom(
-        key: impl Into<ReaperStringArg<'a>>,
-        value: *mut c_void,
-    ) -> TrackInfo<'a, *mut c_void> {
-        TrackInfo {
-            key: TrackInfoKey::custom(key),
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *mut raw::GUID> {
-    pub fn guid(value: *mut raw::GUID) -> TrackInfo<'a, *mut raw::GUID> {
-        TrackInfo {
-            key: TrackInfoKey::Guid,
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *mut bool> {
-    pub fn mute(value: *mut bool) -> TrackInfo<'a, *mut bool> {
-        TrackInfo {
-            key: TrackInfoKey::Mute,
-            value,
-        }
-    }
-    pub fn phase(value: *mut bool) -> TrackInfo<'a, *mut bool> {
-        TrackInfo {
-            key: TrackInfoKey::Phase,
-            value,
-        }
-    }
-    pub fn height_lock(value: *mut bool) -> TrackInfo<'a, *mut bool> {
-        TrackInfo {
-            key: TrackInfoKey::HeightLock,
-            value,
-        }
-    }
-    pub fn show_in_mixer(value: *mut bool) -> TrackInfo<'a, *mut bool> {
-        TrackInfo {
-            key: TrackInfoKey::ShowInMixer,
-            value,
-        }
-    }
-    pub fn show_in_tcp(value: *mut bool) -> TrackInfo<'a, *mut bool> {
-        TrackInfo {
-            key: TrackInfoKey::ShowInTcp,
-            value,
-        }
-    }
-    pub fn main_send(value: *mut bool) -> TrackInfo<'a, *mut bool> {
-        TrackInfo {
-            key: TrackInfoKey::MainSend,
-            value,
-        }
-    }
-    pub fn free_mode(value: *mut bool) -> TrackInfo<'a, *mut bool> {
-        TrackInfo {
-            key: TrackInfoKey::FreeMode,
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *mut f64> {
-    pub fn vol(value: *mut f64) -> TrackInfo<'a, *mut f64> {
-        TrackInfo {
-            key: TrackInfoKey::Vol,
-            value,
-        }
-    }
-    pub fn pan(value: *mut f64) -> TrackInfo<'a, *mut f64> {
-        TrackInfo {
-            key: TrackInfoKey::Pan,
-            value,
-        }
-    }
-    pub fn width(value: *mut f64) -> TrackInfo<'a, *mut f64> {
-        TrackInfo {
-            key: TrackInfoKey::Width,
-            value,
-        }
-    }
-    pub fn dual_pan_l(value: *mut f64) -> TrackInfo<'a, *mut f64> {
-        TrackInfo {
-            key: TrackInfoKey::DualPanL,
-            value,
-        }
-    }
-    pub fn dual_pan_r(value: *mut f64) -> TrackInfo<'a, *mut f64> {
-        TrackInfo {
-            key: TrackInfoKey::DualPanR,
-            value,
-        }
-    }
-    pub fn pan_law(value: *mut f64) -> TrackInfo<'a, *mut f64> {
-        TrackInfo {
-            key: TrackInfoKey::PanLaw,
-            value,
-        }
-    }
-    pub fn play_offset(value: *mut f64) -> TrackInfo<'a, *mut f64> {
-        TrackInfo {
-            key: TrackInfoKey::PlayOffset,
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *mut raw::TrackEnvelope> {
-    pub fn env(
-        name: EnvChunkName<'a>,
-        value: *mut raw::TrackEnvelope,
-    ) -> TrackInfo<'a, *mut raw::TrackEnvelope> {
-        TrackInfo {
-            key: TrackInfoKey::Env(name),
-            value,
-        }
-    }
-}
-
-impl<'a> TrackInfo<'a, *mut f32> {
-    pub fn mcp_fx_send_scale(value: *mut f32) -> TrackInfo<'a, *mut f32> {
-        TrackInfo {
-            key: TrackInfoKey::McpFxSendScale,
-            value,
-        }
-    }
-    pub fn mcp_send_rgn_scale(value: *mut f32) -> TrackInfo<'a, *mut f32> {
-        TrackInfo {
-            key: TrackInfoKey::McpSendRgnScale,
             value,
         }
     }

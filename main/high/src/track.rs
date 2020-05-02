@@ -26,9 +26,9 @@ use reaper_rs_medium::TrackInfoKey::{
 };
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
-    AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
+    track_infos, AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperPointer, RecordArmState, RecordingInput,
-    TrackInfo, TrackInfoKey, TrackRef, TrackSendCategory, ValueChange,
+    TrackInfoKey, TrackRef, TrackSendCategory, ValueChange,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -86,7 +86,7 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_set_media_track_info(self.get_raw(), TrackInfo::name(name.as_ptr()));
+                .get_set_media_track_info(self.get_raw(), track_infos::name(name.as_ptr()));
         }
     }
 
