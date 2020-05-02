@@ -239,7 +239,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
-    pub unsafe fn get_media_track_info_partrack(&self, tr: MediaTrack) -> Option<MediaTrack>
+    pub unsafe fn get_set_media_track_info_get_par_track(
+        &self,
+        tr: MediaTrack,
+    ) -> Option<MediaTrack>
     where
         S: MainThread,
     {
@@ -254,7 +257,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
     // In REAPER < 5.95 this returns nullptr
-    pub unsafe fn get_media_track_info_project(&self, tr: MediaTrack) -> Option<ReaProject>
+    pub unsafe fn get_set_media_track_info_get_project(&self, tr: MediaTrack) -> Option<ReaProject>
     where
         S: MainThread,
     {
@@ -264,7 +267,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which let's you use the given track's name (`P_NAME`).
-    pub unsafe fn get_media_track_info_name<R>(
+    pub unsafe fn get_set_media_track_info_get_name<R>(
         &self,
         tr: MediaTrack,
         f: impl FnOnce(&CStr) -> R,
@@ -277,7 +280,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
-    pub unsafe fn get_media_track_info_recmon(&self, tr: MediaTrack) -> InputMonitoringMode
+    pub unsafe fn get_set_media_track_info_get_rec_mon(&self, tr: MediaTrack) -> InputMonitoringMode
     where
         S: MainThread,
     {
@@ -287,7 +290,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
-    pub unsafe fn get_media_track_info_recinput(&self, tr: MediaTrack) -> Option<RecordingInput>
+    pub unsafe fn get_set_media_track_info_get_rec_input(
+        &self,
+        tr: MediaTrack,
+    ) -> Option<RecordingInput>
     where
         S: MainThread,
     {
@@ -301,7 +307,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which returns the given track's number (IP_TRACKNUMBER).
-    pub unsafe fn get_media_track_info_tracknumber(&self, tr: MediaTrack) -> Option<TrackRef>
+    pub unsafe fn get_set_media_track_info_get_track_number(
+        &self,
+        tr: MediaTrack,
+    ) -> Option<TrackRef>
     where
         S: MainThread,
     {
@@ -315,7 +324,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Convenience function which returns the given track's GUID (GUID).
-    pub unsafe fn get_media_track_info_guid(&self, tr: MediaTrack) -> GUID
+    pub unsafe fn get_set_media_track_info_get_guid(&self, tr: MediaTrack) -> GUID
     where
         S: MainThread,
     {

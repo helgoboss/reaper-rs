@@ -215,8 +215,8 @@ impl HelperControlSurface {
                         mute: func.get_media_track_info_value(media_track, Mute) != 0.0,
                         solo: func.get_media_track_info_value(media_track, Solo) != 0.0,
                         recarm: func.get_media_track_info_value(media_track, RecArm) != 0.0,
-                        number: func.get_media_track_info_tracknumber(media_track),
-                        recmonitor: func.get_media_track_info_recmon(media_track),
+                        number: func.get_set_media_track_info_get_track_number(media_track),
+                        recmonitor: func.get_set_media_track_info_get_rec_mon(media_track),
                         recinput: func.get_media_track_info_value(media_track, RecInput) as i32,
                         guid: get_media_track_guid(media_track),
                     }
@@ -410,7 +410,7 @@ impl HelperControlSurface {
                 reaper
                     .medium()
                     .functions()
-                    .get_media_track_info_tracknumber(*media_track)
+                    .get_set_media_track_info_get_track_number(*media_track)
             };
             if new_number != track_data.number {
                 tracks_have_been_reordered = true;

@@ -98,7 +98,7 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_media_track_info_name(self.get_raw(), |n| n.into())
+                .get_set_media_track_info_get_name(self.get_raw(), |n| n.into())
         }
         .unwrap_or_else(|| c_str!("<Master track>").to_owned())
     }
@@ -109,7 +109,7 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_media_track_info_recmon(self.get_raw())
+                .get_set_media_track_info_get_rec_mon(self.get_raw())
         }
     }
 
@@ -129,7 +129,7 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_media_track_info_recinput(self.get_raw())
+                .get_set_media_track_info_get_rec_input(self.get_raw())
         }
     }
 
@@ -254,7 +254,7 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_media_track_info_tracknumber(self.get_raw())
+                .get_set_media_track_info_get_track_number(self.get_raw())
         }?;
         use TrackRef::*;
         match result {
@@ -744,7 +744,7 @@ impl Track {
             Reaper::get()
                 .medium()
                 .functions()
-                .get_media_track_info_tracknumber(self.get_raw())
+                .get_set_media_track_info_get_track_number(self.get_raw())
         };
         t == Some(TrackRef::MasterTrack)
     }
@@ -773,7 +773,7 @@ pub fn get_media_track_guid(media_track: MediaTrack) -> Guid {
         Reaper::get()
             .medium()
             .functions()
-            .get_media_track_info_guid(media_track)
+            .get_set_media_track_info_get_guid(media_track)
     };
     Guid::new(internal)
 }
@@ -785,7 +785,7 @@ fn get_track_project_raw(media_track: MediaTrack) -> Option<ReaProject> {
         Reaper::get()
             .medium()
             .functions()
-            .get_media_track_info_project(media_track)
+            .get_set_media_track_info_get_project(media_track)
     }
 }
 
