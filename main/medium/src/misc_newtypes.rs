@@ -36,11 +36,9 @@ impl CommandId {
     pub const fn get(&self) -> u32 {
         self.0
     }
-}
 
-impl From<CommandId> for i32 {
-    fn from(id: CommandId) -> Self {
-        id.0 as i32
+    pub(crate) fn to_raw(&self) -> i32 {
+        self.0 as i32
     }
 }
 
@@ -62,11 +60,9 @@ impl SectionId {
     pub const fn get(&self) -> u32 {
         self.0
     }
-}
 
-impl From<SectionId> for i32 {
-    fn from(id: SectionId) -> Self {
-        id.0 as i32
+    pub(crate) fn to_raw(&self) -> i32 {
+        self.0 as i32
     }
 }
 
@@ -91,11 +87,9 @@ impl MidiInputDeviceId {
     pub const fn get(&self) -> u8 {
         self.0
     }
-}
 
-impl From<MidiInputDeviceId> for i32 {
-    fn from(id: MidiInputDeviceId) -> Self {
-        id.0 as i32
+    pub(crate) fn to_raw(&self) -> i32 {
+        self.0 as i32
     }
 }
 
@@ -115,11 +109,8 @@ impl MidiOutputDeviceId {
     pub const fn get(&self) -> u8 {
         self.0
     }
-}
-
-impl From<MidiOutputDeviceId> for i32 {
-    fn from(id: MidiOutputDeviceId) -> Self {
-        id.0 as i32
+    pub(crate) fn to_raw(&self) -> i32 {
+        self.0 as i32
     }
 }
 
@@ -388,6 +379,8 @@ impl ReaperVolumeValue {
     }
 }
 
+/// For being able to use it with `ValueChange`.
+#[doc(hidden)]
 impl From<ReaperVolumeValue> for f64 {
     fn from(v: ReaperVolumeValue) -> Self {
         v.0
@@ -435,6 +428,8 @@ impl ReaperPanValue {
     }
 }
 
+/// For being able to use it with `ValueChange`.
+#[doc(hidden)]
 impl From<ReaperPanValue> for f64 {
     fn from(v: ReaperPanValue) -> Self {
         v.0

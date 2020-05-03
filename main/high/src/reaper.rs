@@ -525,7 +525,7 @@ impl Reaper {
                         };
                         // TODO We should rethink the query index methods now that we have an FxRef
                         //  enum in medium-level API
-                        let fx = match track.get_fx_by_query_index(fx_location.into()) {
+                        let fx = match track.get_fx_by_query_index(fx_location.to_raw()) {
                             None => return None,
                             Some(fx) => fx,
                         };
@@ -751,7 +751,7 @@ impl Reaper {
                     self.get_projects()
                         .filter_map(|p| {
                             let track = p.get_track_by_ref(track_ref)?;
-                            let fx = track.get_fx_by_query_index(fx_location.into())?;
+                            let fx = track.get_fx_by_query_index(fx_location.to_raw())?;
                             if fx.window_has_focus() {
                                 Some(fx)
                             } else {

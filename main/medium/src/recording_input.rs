@@ -16,41 +16,12 @@ pub enum RecordingInput {
     },
 }
 
-impl From<RecordingInput> for u32 {
-    fn from(input: RecordingInput) -> Self {
+impl RecordingInput {
+    pub(crate) fn try_from_raw(
+        rec_input_index: i32,
+    ) -> Result<RecordingInput, RecInputIndexInvalid> {
         use RecordingInput::*;
-        match input {
-            Mono(i) => i,
-            ReaRoute(i) => 512 + i,
-            Stereo(i) => 1024 + i,
-            Midi { device_id, channel } => {
-                let device_high = match device_id {
-                    None => ALL_MIDI_DEVICES_FACTOR,
-                    Some(id) => id.get() as u32,
-                };
-                let channel_low = match channel {
-                    None => 0,
-                    Some(ch) => u32::from(ch) + 1,
-                };
-                4096 + (device_high * 32 + channel_low)
-            }
-        }
-    }
-}
-
-/// An error which can be returned when converting an integer type to another integer type with a
-/// smaller value range.
-#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
-#[display(fmt = "recording input index invalid")]
-pub struct RecInputIndexInvalid;
-
-// TODO-medium I think we should replace all of those conversions with private to_raw() methods!
-#[doc(hidden)]
-impl TryFrom<u32> for RecordingInput {
-    type Error = RecInputIndexInvalid;
-
-    fn try_from(rec_input_index: u32) -> Result<Self, Self::Error> {
-        use RecordingInput::*;
+        let rec_input_index = rec_input_index as u32;
         match rec_input_index {
             0..=511 => Ok(Mono(rec_input_index)),
             512..=1023 => Ok(ReaRoute(rec_input_index - 512)),
@@ -80,6 +51,32 @@ impl TryFrom<u32> for RecordingInput {
             _ => Err(RecInputIndexInvalid),
         }
     }
+
+    pub(crate) fn to_raw(&self) -> i32 {
+        use RecordingInput::*;
+        let result = match *self {
+            Mono(i) => i,
+            ReaRoute(i) => 512 + i,
+            Stereo(i) => 1024 + i,
+            Midi { device_id, channel } => {
+                let device_high = match device_id {
+                    None => ALL_MIDI_DEVICES_FACTOR,
+                    Some(id) => id.get() as u32,
+                };
+                let channel_low = match channel {
+                    None => 0,
+                    Some(ch) => u32::from(ch) + 1,
+                };
+                4096 + (device_high * 32 + channel_low)
+            }
+        };
+        result as i32
+    }
 }
+
+/// An error which can be returned when trying to interpret a recording input index.
+#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
+#[display(fmt = "recording input index invalid")]
+pub(crate) struct RecInputIndexInvalid;
 
 const ALL_MIDI_DEVICES_FACTOR: u32 = 63;

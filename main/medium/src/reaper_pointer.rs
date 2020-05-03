@@ -40,7 +40,23 @@ impl<'a> ReaperPointer<'a> {
         }
     }
 
-    pub(crate) fn as_void(&self) -> *mut c_void {
+    pub(crate) fn key_into_raw(self) -> Cow<'a, CStr> {
+        use ReaperPointer::*;
+        match self {
+            MediaTrack(_) => c_str!("MediaTrack*").into(),
+            ReaProject(_) => c_str!("ReaProject*").into(),
+            MediaItem(_) => c_str!("MediaItem*").into(),
+            MediaItemTake(_) => c_str!("MediaItem_Take*").into(),
+            TrackEnvelope(_) => c_str!("TrackEnvelope*").into(),
+            PcmSource(_) => c_str!("PCM_source*").into(),
+            Custom {
+                pointer: _,
+                type_name,
+            } => concat_c_strs(type_name.as_ref(), c_str!("*")).into(),
+        }
+    }
+
+    pub(crate) fn ptr_as_void(&self) -> *mut c_void {
         use ReaperPointer::*;
         match self {
             MediaTrack(p) => p.as_ptr() as *mut _,
@@ -54,6 +70,7 @@ impl<'a> ReaperPointer<'a> {
     }
 }
 
+/// For just having to pass a NonNull pointer to `validate_ptr_2`. Very convenient!
 macro_rules! impl_from_ptr_to_variant {
     ($struct_type: ty, $enum_name: ident) => {
         impl<'a> From<$struct_type> for ReaperPointer<'a> {
@@ -70,21 +87,3 @@ impl_from_ptr_to_variant!(MediaItem, MediaItem);
 impl_from_ptr_to_variant!(MediaItemTake, MediaItemTake);
 impl_from_ptr_to_variant!(TrackEnvelope, TrackEnvelope);
 impl_from_ptr_to_variant!(NonNull<raw::PCM_source>, PcmSource);
-
-impl<'a> From<ReaperPointer<'a>> for Cow<'a, CStr> {
-    fn from(value: ReaperPointer<'a>) -> Self {
-        use ReaperPointer::*;
-        match value {
-            MediaTrack(_) => c_str!("MediaTrack*").into(),
-            ReaProject(_) => c_str!("ReaProject*").into(),
-            MediaItem(_) => c_str!("MediaItem*").into(),
-            MediaItemTake(_) => c_str!("MediaItem_Take*").into(),
-            TrackEnvelope(_) => c_str!("TrackEnvelope*").into(),
-            PcmSource(_) => c_str!("PCM_source*").into(),
-            Custom {
-                pointer: _,
-                type_name,
-            } => concat_c_strs(type_name.as_ref(), c_str!("*")).into(),
-        }
-    }
-}

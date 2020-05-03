@@ -125,12 +125,6 @@ impl<'a> Iterator for MidiEventListIterator<'a> {
     }
 }
 
-impl<'a> From<MidiEvent<'a>> for &'a raw::MIDI_event_t {
-    fn from(outer: MidiEvent<'a>) -> Self {
-        outer.0
-    }
-}
-
 impl<'a> ShortMessage for MidiMessage<'a> {
     fn status_byte(&self) -> u8 {
         self.0.midi_message[0]

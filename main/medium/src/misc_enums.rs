@@ -22,7 +22,7 @@ pub enum AddFxBehavior {
 }
 
 impl From<AddFxBehavior> for FxAddByNameBehavior {
-    fn from(b: AddFxBehavior) -> Self {
+    fn from(b: AddFxBehavior) -> FxAddByNameBehavior {
         use AddFxBehavior::*;
         match b {
             AddIfNotFound => FxAddByNameBehavior::AddIfNotFound,
@@ -184,7 +184,7 @@ pub enum TrackSendCategory {
 }
 
 impl From<TrackSendDirection> for TrackSendCategory {
-    fn from(v: TrackSendDirection) -> Self {
+    fn from(v: TrackSendDirection) -> TrackSendCategory {
         use TrackSendDirection::*;
         match v {
             Receive => TrackSendCategory::Receive,
@@ -208,10 +208,10 @@ pub enum StuffMidiMessageTarget {
     MidiOutputDevice(MidiOutputDeviceId),
 }
 
-impl From<StuffMidiMessageTarget> for i32 {
-    fn from(t: StuffMidiMessageTarget) -> Self {
+impl StuffMidiMessageTarget {
+    pub(crate) fn to_raw(&self) -> i32 {
         use StuffMidiMessageTarget::*;
-        match t {
+        match self {
             VirtualMidiKeyboardQueue => 0,
             MidiAsControlInputQueue => 1,
             VirtualMidiKeyboardQueueOnCurrentChannel => 2,
@@ -231,27 +231,24 @@ pub enum TrackFxLocation {
     InputFxChain(u32),
 }
 
-// Converts directly to the i32 value that is expected by low-level track-FX related functions
-impl From<TrackFxLocation> for i32 {
-    fn from(v: TrackFxLocation) -> Self {
+impl TrackFxLocation {
+    pub(crate) fn from_raw(v: i32) -> TrackFxLocation {
         use TrackFxLocation::*;
-        let positive = match v {
-            InputFxChain(idx) => 0x1000000 + idx,
-            NormalFxChain(idx) => idx,
-        };
-        positive as i32
-    }
-}
-
-// Converts from a value returned by low-level track-FX related functions into u32.
-impl From<u32> for TrackFxLocation {
-    fn from(v: u32) -> Self {
-        use TrackFxLocation::*;
+        let v = v as u32;
         if v >= 0x1000000 {
             InputFxChain(v - 0x1000000)
         } else {
             NormalFxChain(v)
         }
+    }
+
+    pub(crate) fn to_raw(&self) -> i32 {
+        use TrackFxLocation::*;
+        let positive = match *self {
+            InputFxChain(idx) => 0x1000000 + idx,
+            NormalFxChain(idx) => idx,
+        };
+        positive as i32
     }
 }
 
@@ -418,7 +415,25 @@ impl<'a> PluginRegistration<'a> {
         }
     }
 
-    pub(crate) fn infostruct(&self) -> *mut c_void {
+    pub(crate) fn key_into_raw(self) -> Cow<'a, CStr> {
+        use PluginRegistration::*;
+        match self {
+            // Api(func_name, _) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
+            // ApiDef(func_name, _) => concat_c_strs(c_str!("APIdef_"), func_name.as_ref()).into(),
+            HookCommand(_) => c_str!("hookcommand").into(),
+            HookPostCommand(_) => c_str!("hookpostcommand").into(),
+            // HookCommand2(_) => c_str!("hookcommand2").into(),
+            ToggleAction(_) => c_str!("toggleaction").into(),
+            // ActionHelp(_) => c_str!("action_help").into(),
+            CommandId(_) => c_str!("command_id").into(),
+            // CommandIdLookup(_) => c_str!("command_id_lookup").into(),
+            Gaccel(_) => c_str!("gaccel").into(),
+            CsurfInst(_) => c_str!("csurf_inst").into(),
+            Custom(key, _) => key,
+        }
+    }
+
+    pub(crate) fn ptr_to_raw(&self) -> *mut c_void {
         use PluginRegistration::*;
         match self {
             // Api(_, func) => *func,
@@ -433,26 +448,6 @@ impl<'a> PluginRegistration<'a> {
             Gaccel(reg) => reg.as_ptr() as *mut c_void,
             CsurfInst(inst) => inst.as_ptr() as *mut c_void,
             Custom(_, info_struct) => *info_struct,
-        }
-    }
-}
-
-impl<'a> From<PluginRegistration<'a>> for Cow<'a, CStr> {
-    fn from(value: PluginRegistration<'a>) -> Self {
-        use PluginRegistration::*;
-        match value {
-            // Api(func_name, _) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
-            // ApiDef(func_name, _) => concat_c_strs(c_str!("APIdef_"), func_name.as_ref()).into(),
-            HookCommand(_) => c_str!("hookcommand").into(),
-            HookPostCommand(_) => c_str!("hookpostcommand").into(),
-            // HookCommand2(_) => c_str!("hookcommand2").into(),
-            ToggleAction(_) => c_str!("toggleaction").into(),
-            // ActionHelp(_) => c_str!("action_help").into(),
-            CommandId(_) => c_str!("command_id").into(),
-            // CommandIdLookup(_) => c_str!("command_id_lookup").into(),
-            Gaccel(_) => c_str!("gaccel").into(),
-            CsurfInst(_) => c_str!("csurf_inst").into(),
-            Custom(key, _) => key,
         }
     }
 }
@@ -489,10 +484,10 @@ pub enum ProjectRef {
     Tab(u32),
 }
 
-impl From<ProjectRef> for i32 {
-    fn from(r: ProjectRef) -> Self {
+impl ProjectRef {
+    pub(crate) fn to_raw(&self) -> i32 {
         use ProjectRef::*;
-        match r {
+        match *self {
             Current => -1,
             CurrentlyRendering => 0x40000000,
             Tab(i) => i as i32,
@@ -511,10 +506,10 @@ pub enum FxPresetRef {
     Preset(u32),
 }
 
-impl From<FxPresetRef> for i32 {
-    fn from(r: FxPresetRef) -> Self {
+impl FxPresetRef {
+    pub(crate) fn to_raw(&self) -> i32 {
         use FxPresetRef::*;
-        match r {
+        match *self {
             FactoryPreset => -2,
             DefaultUserPreset => -1,
             Preset(idx) => idx as i32,
@@ -531,10 +526,10 @@ pub enum ProjectContext {
     Proj(ReaProject),
 }
 
-impl From<ProjectContext> for *mut raw::ReaProject {
-    fn from(c: ProjectContext) -> Self {
+impl ProjectContext {
+    pub(crate) fn to_raw(&self) -> *mut raw::ReaProject {
         use ProjectContext::*;
-        match c {
+        match self {
             Proj(p) => p.as_ptr(),
             CurrentProject => null_mut(),
         }
@@ -550,10 +545,10 @@ pub enum NotificationBehavior {
     NotifyAllExcept(NonNull<raw::IReaperControlSurface>),
 }
 
-impl From<NotificationBehavior> for *mut raw::IReaperControlSurface {
-    fn from(b: NotificationBehavior) -> Self {
+impl NotificationBehavior {
+    pub(crate) fn to_raw(&self) -> *mut raw::IReaperControlSurface {
         use NotificationBehavior::*;
-        match b {
+        match self {
             NotifyAllExcept(s) => s.as_ptr(),
             NotifyAll => null_mut(),
         }
@@ -569,10 +564,10 @@ pub enum SendTarget {
     OtherTrack(MediaTrack),
 }
 
-impl From<SendTarget> for *mut raw::MediaTrack {
-    fn from(t: SendTarget) -> Self {
+impl SendTarget {
+    pub(crate) fn to_raw(&self) -> *mut raw::MediaTrack {
         use SendTarget::*;
-        match t {
+        match self {
             HardwareOutput => null_mut(),
             OtherTrack(t) => t.as_ptr(),
         }
@@ -590,10 +585,10 @@ pub enum SectionContext<'a> {
     Sec(&'a KbdSectionInfo),
 }
 
-impl<'a> From<SectionContext<'a>> for *mut raw::KbdSectionInfo {
-    fn from(c: SectionContext<'a>) -> Self {
+impl<'a> SectionContext<'a> {
+    pub(crate) fn to_raw(&self) -> *mut raw::KbdSectionInfo {
         use SectionContext::*;
-        match c {
+        match self {
             MainSection => null_mut(),
             Sec(i) => i.0.as_ptr(),
         }
@@ -612,10 +607,10 @@ pub enum WindowContext {
     Win(Hwnd),
 }
 
-impl From<WindowContext> for HWND {
-    fn from(c: WindowContext) -> Self {
+impl WindowContext {
+    pub(crate) fn to_raw(&self) -> HWND {
         use WindowContext::*;
-        match c {
+        match self {
             Win(h) => h.as_ptr(),
             NoWindow => null_mut(),
         }

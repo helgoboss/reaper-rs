@@ -530,7 +530,7 @@ impl HelperControlSurface {
                 };
                 fx_chain.get_fx_by_index(index)
             }
-            New(fx_ref) => track.get_fx_by_query_index(fx_ref.into()),
+            New(fx_ref) => track.get_fx_by_query_index(fx_ref.to_raw()),
         }
     }
 

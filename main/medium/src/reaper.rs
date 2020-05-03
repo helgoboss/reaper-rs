@@ -106,17 +106,17 @@ impl Reaper {
     // Unregistering is optional! It will be done anyway on Drop via RAII.
     pub unsafe fn plugin_register_add(&mut self, reg: PluginRegistration) -> i32 {
         self.plugin_registrations.insert(reg.clone().into_owned());
-        let infostruct = reg.infostruct();
+        let infostruct = reg.ptr_to_raw();
         let result = self
             .functions
             .low()
-            .plugin_register(Cow::from(reg).as_ptr(), infostruct);
+            .plugin_register(reg.key_into_raw().as_ptr(), infostruct);
         result
     }
 
     pub unsafe fn plugin_register_remove(&mut self, reg: PluginRegistration) -> i32 {
-        let infostruct = reg.infostruct();
-        let name_with_minus = concat_c_strs(c_str!("-"), Cow::from(reg.clone()).as_ref());
+        let infostruct = reg.ptr_to_raw();
+        let name_with_minus = concat_c_strs(c_str!("-"), reg.clone().key_into_raw().as_ref());
         let result = self
             .functions
             .low()

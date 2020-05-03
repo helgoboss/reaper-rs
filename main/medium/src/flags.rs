@@ -15,6 +15,16 @@ pub enum UndoScope {
     Scoped(BitFlags<ProjectPart>),
 }
 
+impl UndoScope {
+    pub(crate) fn to_raw(&self) -> i32 {
+        use UndoScope::*;
+        match self {
+            All => raw::UNDO_STATE_ALL as i32,
+            Scoped(flags) => flags.bits() as i32,
+        }
+    }
+}
+
 /// Part of a project that could have been affected by an undoable operation.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
 #[repr(u32)]
@@ -29,14 +39,4 @@ pub enum ProjectPart {
     MiscCfg = raw::UNDO_STATE_MISCCFG,
     /// Track/master vol/pan/routing and aLL envelopes (master included).
     TrackCfg = raw::UNDO_STATE_TRACKCFG,
-}
-
-impl From<UndoScope> for i32 {
-    fn from(s: UndoScope) -> Self {
-        use UndoScope::*;
-        match s {
-            All => raw::UNDO_STATE_ALL as i32,
-            Scoped(flags) => flags.bits() as i32,
-        }
-    }
 }

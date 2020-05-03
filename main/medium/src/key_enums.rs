@@ -277,12 +277,10 @@ impl<'a> TrackInfoKey<'a> {
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
         TrackInfoKey::Custom(key.into().into_inner())
     }
-}
 
-impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
-    fn from(value: TrackInfoKey<'a>) -> Self {
+    pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
         use TrackInfoKey::*;
-        match value {
+        match self {
             FreeMode => c_str!("B_FREEMODE").into(),
             HeightLock => c_str!("B_HEIGHTLOCK").into(),
             MainSend => c_str!("B_MAINSEND").into(),
@@ -329,8 +327,7 @@ impl<'a> From<TrackInfoKey<'a>> for Cow<'a, CStr> {
             WndH => c_str!("I_WNDH").into(),
             TrackNumber => c_str!("IP_TRACKNUMBER").into(),
             Env(env_chunk_name) => {
-                let cow: Cow<CStr> = env_chunk_name.into();
-                concat_c_strs(c_str!("P_ENV:<"), cow.as_ref()).into()
+                concat_c_strs(c_str!("P_ENV:<"), env_chunk_name.into_raw().as_ref()).into()
             }
             Ext(extension_specific_key) => {
                 concat_c_strs(c_str!("P_EXT:"), extension_specific_key.as_ref()).into()
@@ -425,12 +422,10 @@ impl<'a> TrackSendInfoKey<'a> {
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
         TrackSendInfoKey::Custom(key.into().into_inner())
     }
-}
 
-impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
-    fn from(value: TrackSendInfoKey<'a>) -> Self {
+    pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
         use TrackSendInfoKey::*;
-        match value {
+        match self {
             Mono => c_str!("B_MONO").into(),
             Mute => c_str!("B_MUTE").into(),
             Phase => c_str!("B_PHASE").into(),
@@ -445,8 +440,7 @@ impl<'a> From<TrackSendInfoKey<'a>> for Cow<'a, CStr> {
             DestTrack => c_str!("P_DESTTRACK").into(),
             SrcTrack => c_str!("P_SRCTRACK").into(),
             Env(env_chunk_name) => {
-                let cow: Cow<CStr> = env_chunk_name.into();
-                concat_c_strs(c_str!("P_ENV:<"), cow.as_ref()).into()
+                concat_c_strs(c_str!("P_ENV:<"), env_chunk_name.into_raw().as_ref()).into()
             }
             Ext(key) => concat_c_strs(c_str!("P_EXT:"), key.as_ref()).into(),
             Custom(key) => key.into(),
@@ -490,12 +484,10 @@ impl<'a> EnvChunkName<'a> {
     pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> EnvChunkName<'a> {
         EnvChunkName::Custom(name.into().into_inner())
     }
-}
 
-impl<'a> From<EnvChunkName<'a>> for Cow<'a, CStr> {
-    fn from(value: EnvChunkName<'a>) -> Self {
+    pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
         use EnvChunkName::*;
-        match value {
+        match self {
             VolEnv => c_str!("VOLENV").into(),
             PanEnv => c_str!("PANENV").into(),
             VolEnv2 => c_str!("VOLENV2").into(),
@@ -516,21 +508,23 @@ mod tests {
     #[test]
     fn serialize_track_info_key() {
         use TrackInfoKey::*;
-        assert_eq!(Cow::from(Mute).as_ref(), c_str!("B_MUTE"));
+        assert_eq!(Mute.into_raw().as_ref(), c_str!("B_MUTE"));
         assert_eq!(
-            Cow::from(Env(EnvChunkName::VolEnv)).as_ref(),
+            Env(EnvChunkName::VolEnv).into_raw().as_ref(),
             c_str!("P_ENV:<VOLENV")
         );
         assert_eq!(
-            Cow::from(Env(EnvChunkName::Custom(c_str!("MYENV").into()))).as_ref(),
+            Env(EnvChunkName::Custom(c_str!("MYENV").into()))
+                .into_raw()
+                .as_ref(),
             c_str!("P_ENV:<MYENV")
         );
         assert_eq!(
-            Cow::from(TrackInfoKey::ext("SWS_FOO")).as_ref(),
+            TrackInfoKey::ext("SWS_FOO").into_raw().as_ref(),
             c_str!("P_EXT:SWS_FOO")
         );
         assert_eq!(
-            Cow::from(TrackInfoKey::custom(c_str!("BLA"))).as_ref(),
+            TrackInfoKey::custom(c_str!("BLA")).into_raw().as_ref(),
             c_str!("BLA")
         );
     }
