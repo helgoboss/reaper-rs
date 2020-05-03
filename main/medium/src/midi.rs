@@ -1,11 +1,13 @@
 use helgoboss_midi::{ShortMessage, U7};
 use reaper_rs_low::raw;
 
-
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
-/// A MIDI input device.
+/// Pointer to a MIDI input device.
+//
+// Case 3: Internals exposed: no | vtable: yes
+// ===========================================
 //
 // It's important that this type is not cloneable! Otherwise consumers could easily let it escape
 // its intended usage scope (audio hook), which would lead to undefined behavior.

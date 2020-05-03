@@ -7,7 +7,10 @@ use std::os::raw::c_ushort;
 
 /// A kind of action descriptor.
 ///
-/// Contains action description, command ID, and default shortcuts.
+/// Contains action description, command ID and default key binding.
+//
+// Case 2: Internals exposed: yes | vtable: no
+// ===========================================
 // TODO-medium Try the shortcut thing
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct MediumGaccelRegister {

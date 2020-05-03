@@ -1,3 +1,4 @@
+//! This module defines various newtypes in order to achieve more type safety.
 use derive_more::*;
 
 /// A command ID.

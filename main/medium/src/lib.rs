@@ -106,6 +106,84 @@
 // medium-level API style methods. One of the responsibilities of the medium-level API is to use
 // identifiers which follow the Rust conventions. It just happens that some of the C++ classes
 // already conform to Rust conventions, so we won't rename them.
+//
+//
+
+// Case 1: Internals exposed: no | vtable: no
+// ==========================================
+//
+// ## Strategy
+//
+// - Use NonNull pointers directly
+// - Make them more accessible by using a public alias
+//
+// ## Explanation
+//
+// These structs are relevant for the consumers, but only as pointers. Because those structs are
+// completely opaque (internals not exposed, not even a vtable). We don't create a newtype because
+// the NonNull guarantee is all we need and according to medium-level API design, we will never
+// provide any methods on them (no vtable emulation, no convenience methods). Using a newtype just
+// for reasons of symmetry would not be good because it comes with a cost (more code to write,
+// less substitution possibilities) but in this case without any benefit.
+//
+// ## Examples
+//
+// - MediaTrack → MediaTrack
+// - ReaProject → ReaProject
+// - MediaItem_Take → MediaItemTake
+
+// Case 2: Internals exposed: yes | vtable: no
+// ===========================================
+//
+// ## Strategy
+//
+// - **Don't** create an alias for a NonNull pointer! In situations where just the pointer is
+//   interesting and not the internals, just write `NonNull<...>` everywhere.
+// - If the consumer shall get access to the internals: Wrap the NonNull pointer in a public
+//   newtype. This newtype should expose the internals in a way which is idiomatic for Rust (like
+//   the rest of the medium-level API does).
+// - If the consumer needs to be able to create such a struct: Provide an idiomatic Rust factory
+//   function. If that's not enough because the raw struct is not completely owned, write an owned
+//   version of that struct, prefixed with `Medium`. Ideally it should wrap the raw struct.
+//
+// ## Explanation
+//
+// Each of the these structs is relevant to consumers, but unlike `MediaTrack` and Co. it points
+// to a struct which is *not* opaque. Still, we need it as pointer and it has the same lifetime
+// considerations. The difference is that we add type-safe methods to it in order to lift the
+// members of that struct to medium-level API style.
+//
+// ## Examples
+//
+// - KbdSectionInfo → KbdSectionInfo & MediumKdbSectionInfo (not yet existing because not needed
+//   yet)
+// - audio_hook_register_t → AudioHookRegister & MediumAudioHookRegister
+// - gaccel_register_t → GaccelRegister (not yet existing because not needed yet) &
+//   MediumGaccelRegister
+// - ACCEL → Accel (not yet existing because not needed yet) & MediumAccel
+//
+// Case 3: Internals exposed: no | vtable: yes
+// ===========================================
+//
+// ## Strategy
+//
+// - **Don't** create an alias for a NonNull pointer! In situations where just the pointer is
+//   interesting and not the internals, just write `NonNull<...>` everywhere.
+// - If the consumer shall get access to the virtual functions: Wrap NonNull pointer in a public
+//   newtype. This newtype should expose the virtual functions in a way which is idiomatic for Rust.
+//   It's intended for the communication from Rust to REAPER. Hint: This needs companion C code (see
+//   `impl midi_Input`)!
+// - If the consumer needs to be able to provide such a type (for communication from REAPER to
+//   Rust): Create a new trait prefixed with `Medium` which can be implemented by the consumer.
+//   Hint: This needs companion C code in the low-level API (see `IReaperControlSurface`)!
+//
+// ## Examples
+//
+// - PCM_source → PcmSource & MediumPcmSource (both not yet existing because not needed yet)
+// - IReaperControlSurface → ReaperControlSurface (not yet existing because not needed yet) &
+//   MediumReaperControlSurface
+// - midi_Input → MidiInput
+// - MIDI_eventlist → MidiEventList
 
 mod reaper_version;
 pub use reaper_version::*;
@@ -135,7 +213,6 @@ mod audio_hook_register;
 pub use audio_hook_register::*;
 
 mod infostruct_keeper;
-
 
 mod control_surface;
 pub use control_surface::*;

@@ -1,4 +1,3 @@
-
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
@@ -9,24 +8,23 @@ use reaper_rs_low::{
     Reaper,
 };
 
-
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
     require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
     AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
-    GaccelRegister, GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
+    GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo,
+    MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction,
     MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
     NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectPart,
-    ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
-    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey,
-    TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    ProjectRef, ReaProject, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer,
+    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
+    VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -39,7 +37,6 @@ use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
-
 
 pub trait ThreadScope {}
 pub trait MainThread: ThreadScope {}
@@ -124,7 +121,6 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        
         let idx = proj_ref.into();
         if projfn_out_optional_sz == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };

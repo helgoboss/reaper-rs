@@ -26,7 +26,11 @@ pub struct OnAudioBufferArgs<'a> {
     pub reg: &'a AudioHookRegister,
 }
 
-/// Provides access to the current audio buffer contents (not yet implemented).
+/// Pointer to an audio hook register.
+///
+/// In future this should provides access to the current audio buffer contents.
+// Case 2: Internals exposed: yes | vtable: no
+// ===========================================
 //
 // It's important that this type is not cloneable! Otherwise consumers could easily let it escape
 // its intended usage scope (audio hook), which would lead to undefined behavior.

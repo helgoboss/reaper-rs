@@ -1,7 +1,6 @@
 use crate::{
-    HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo,
-    MediaTrack, MidiOutputDeviceId, ReaProject, ReaperControlSurface, ReaperStringArg,
-    ToggleActionFn,
+    HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
+    ReaProject, ReaperStringArg, ToggleActionFn,
 };
 use c_str_macro::c_str;
 use helgoboss_midi::{U14, U7};
@@ -545,14 +544,14 @@ pub enum NotificationBehavior {
     /// All registered control surfaces.
     NotifyAll,
     /// All registered control surfaces except the given one.
-    NotifyAllExcept(ReaperControlSurface),
+    NotifyAllExcept(NonNull<raw::IReaperControlSurface>),
 }
 
 impl From<NotificationBehavior> for *mut raw::IReaperControlSurface {
     fn from(b: NotificationBehavior) -> Self {
         use NotificationBehavior::*;
         match b {
-            NotifyAllExcept(s) => s.get().as_ptr(),
+            NotifyAllExcept(s) => s.as_ptr(),
             NotifyAll => null_mut(),
         }
     }

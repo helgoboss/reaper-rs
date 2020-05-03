@@ -1,8 +1,7 @@
 use c_str_macro::c_str;
 use std::borrow::Cow;
 
-
-use std::ptr::{NonNull};
+use std::ptr::NonNull;
 
 use reaper_rs_low::{
     add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface,
@@ -15,30 +14,23 @@ use crate::{
     require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
     AudioThread, AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowFlag,
-    GaccelRegister, GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode,
-    KbdSectionInfo, MainThread, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
-    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId,
-    SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo,
+    MainThread, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
+    MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
+    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId,
+    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, PluginRegistration,
+    ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctions,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
+    StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
     TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
     TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
     WindowContext,
 };
 
-
 use reaper_rs_low;
-use reaper_rs_low::raw::{
-    audio_hook_register_t,
-};
+use reaper_rs_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
-
-
-
-
 
 /// This is the medium-level API access point to all REAPER functions. In order to use it, you first
 /// must obtain an instance of this struct by invoking [`new`](struct.Reaper.html#method.new).
