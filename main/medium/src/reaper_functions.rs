@@ -39,43 +39,96 @@ use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 
+/// Parent marker trait representing a thread type.
+///
+/// See *Design* section of [`ReaperFunctions`] for more information.
+///
+/// [`ReaperFunctions`]: struct.ReaperFunctions.html
 pub trait ThreadScope: Debug {}
-pub trait MainThread: ThreadScope {}
-pub trait AudioThread: ThreadScope {}
-pub trait AllThreads: MainThread + AudioThread {}
 
-/// Contains the REAPER functions which must be called in the audio thread only.
+/// Marker thread representing the main thread.
+pub trait MainThread: ThreadScope {}
+
+/// Marker thread representing the audio thread.
+pub trait AudioThread: ThreadScope {}
+
+/// This is the main access point for most REAPER functions.
+///
+/// # Basics
+///
+/// You can obtain an instance of this struct by calling [`Reaper::functions()`]. This unlocks all
+/// functions which are safe to execute in the main thread. If you want access to the functions
+/// which are safe to execute in the audio thread, call [`Reaper::create_real_time_functions()`]
+/// instead. REAPER functions which are related to registering/unregistering things are located in
+/// [`Reaper`].
+///
+/// Please note that this struct contains nothing but function pointers, so you are free to clone
+/// it, e.g. in order to make all functions accessible somewhere else. This is sometimes easier than
+/// passing references around. Don't do it too often though. It's just a bitwise copy of all
+/// function pointers, but there are around 800 of them, so each copy will occupy about 7 kB of
+/// memory on a 64-bit system.
+///
+/// # Panics
+///
+/// Don't assume that all REAPER functions exposed here are always available. It's possible that the
+/// user runs your plug-in in an older version of REAPER where a function is missing. See the
+/// documentation of [low-level `Reaper`] for ways how to deal with this.
+///
+/// # Work in progress
+///
+/// Many functions which are available in the low-level API have not been lifted to the medium-level
+/// API yet. Unlike the low-level API, the medium-level one is hand-written and probably a perpetual
+/// work in progress. If you can't find the function that you need, you can always resort to the
+/// low-level API by navigating to [`low()`]. Of course you are welcome to contribute to bring the
+/// medium-level API on par with the low-level one.
 ///
 /// # Design
 ///
-/// Separating this from the main Reaper struct has the following advantages:
+/// ## What's this `<dyn MainThread>` thing about?
 ///
-/// 1. While there's currently no way to make sure at compile time that a function is called in
-/// the correct thread, structurally separating the functions should make things more clear.
-/// Hopefully this will make it easier to spot incorrect usage or to avoid it in the first place.
+/// In REAPER and probably many other DAWs there are at least two important threads:
 ///
-/// 2. The main REAPER struct contains not just the REAPER function pointers but also some mutable
-/// management data, e.g. data for keeping track of things registered via `plugin_register_*()`.
-/// Therefore it can't just be copied. So in order to be able to use REAPER functions also from e.g.
-/// the audio hook register, we would need to wrap it in `Arc` (not `Rc`, because we access it
-/// from multiple threads). That's not enough though for most real-world cases. We probably want to
-/// register/unregister things in the main thread not only in the beginning but also at a later
-/// time. That means we need mutable access. So we end up with `Arc<Mutex<Reaper>>`. However, why
-/// going through all that trouble and put up with possible performance issues if we can avoid it?
-/// The RealtimeReaper contains nothing but function pointers, so it's completely standalone and
-/// copyable. Memory overhead for one low-level Reaper copy is small (~800 * 8 byte = ~7 kB).
+/// 1. The main thread (responsible for the things like UI, driven by the UI main loop).
+/// 2. The audio thread (responsible for processing audio and MIDI buffers, driven by the audio
+/// hardware)
 ///
-/// The alternative to grouping functions via marker traits would have been to implement e.g.
-/// audio-thread functions in a trait CallableFromAudioThread as default functions and create
+/// Most functions offered by REAPER are only safe to be executed in the main thread. If you execute
+/// them in the audio thread, REAPER will crash. Or worse: It will seemingly work on your machine
+/// and crash on someone else's. There are also a few functions which are only safe to be executed
+/// in the audio thread. And there are also very few functions which are safe to be executed from
+/// *any* thread (thread-safe).
+///
+/// There's currently no way to make sure at compile time that a function is called in the correct
+/// thread. Of course that would be the best. In an attempt to still let the compiler help you a
+/// bit, the traits [`MainThread`] and [`AudioThread`] have been introduced. They are marker threads
+/// which are used as type bound on each method which is not thread-safe. So depending on the
+/// context we can e.g. expose an instance of [`ReaperFunctions`] which has only functions unlocked
+/// which are safe to be executed from the audio thread. The compiler will complain if you attempt
+/// to call an audio-thread-only method on `ReaperFunctions<dyn MainThread>` and vice versa.
+///
+/// Of course that technique can't prevent anyone from acquiring a main-thread only instance and
+/// use it in the audio hook. But still, it adds some extra safety.
+///
+/// The alternative to tagging functions via marker traits would have been to implement e.g.
+/// audio-thread-only functions in a trait `CallableFromAudioThread` as default functions and create
 /// a struct that inherits those default functions. Disadvantage: Consumer always would have to
-/// bring the trait into scope to see the functions. That's confusing.
+/// bring the trait into scope to see the functions. That's confusing. It also would provide less
+/// amount of safety.
 ///
-/// It's always possible that a function from the low-level API is missing in the medium-level one.
-/// That's because unlike the low-level API, the medium-level API is hand-written and a perpetual
-/// work in progress. If you can't find the function that you need, you can always resort to the
-/// low-level API by navigating to [`low`](struct.Reaper.html#structfield.functions.low()). Of
-/// course you are welcome to contribute to bring the medium-level API on par with the low-level
-/// one.
+/// ## Why no fail-fast at runtime when getting threading wrong?
+///
+/// Another thing which could help would be to panic when a main-thread-only function is called in
+/// the audio thread or vice versa. This would prevent "it works on my machine" scenarios. However,
+/// this is currently not being done because of possible performance implications.
+///
+/// [`Reaper`]: struct.Reaper.html
+/// [`Reaper#functions()`]: struct.Reaper.html#method.functions
+/// [`Reaper#create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
+/// [`low()`](#method.low)
+/// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
+/// [`MainThread`]: trait.MainThread.html
+/// [`AudioThread`]: trait.AudioThread.html
+/// [`ReaperFunctions`]: struct.ReaperFunctions.html
 #[derive(Clone, Debug)]
 pub struct ReaperFunctions<S: ?Sized + ThreadScope = dyn MainThread> {
     low: reaper_rs_low::Reaper,
@@ -90,6 +143,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         }
     }
 
+    /// Gives access to the low-level Reaper instance.
     pub fn low(&self) -> &reaper_rs_low::Reaper {
         &self.low
     }

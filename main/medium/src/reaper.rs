@@ -35,17 +35,33 @@ use std::collections::{HashMap, HashSet};
 /// This is the main hub for accessing medium-level API functions.
 ///
 /// In order to use this struct, you first must obtain an instance of it by invoking [`new()`].
-///
 /// This struct itself is limited to REAPER functions for registering/unregistering certain things.
 /// You can access all the other functions by calling [`functions()`].
 ///
+/// Please note that this struct will take care of unregistering everything (also audio hooks)
+/// automatically when it gets dropped (good RAII manners).
+///
 /// # Design
 ///
+/// ## Why is there a separation into `Reaper` and `ReaperFunctions`?
+///
 /// Functions for registering/unregistering things have been separated from the rest because they
-/// require more than just access to REAPER functions. They also need data structures to keep
-/// track of the registered things and to offer them a warm and cosy place in memory. As a result,
-/// the struct containing those functions gets pretty important, needs to be mutable and can't just
-/// be cloned ad libitum.
+/// require more than just access to REAPER function pointers. They also need data structures to
+/// keep track of the registered things and to offer them a warm and cosy place in memory. As a
+/// result, this struct gains special importance, needs to be mutable and can't just be cloned as
+/// desired. But there's no reason why this restriction should also apply to all other REAPER
+/// functions. After all, being able to clone and pass things around freely can simplify things a
+/// lot.
+///
+/// ### Example
+///
+/// Here's an example how things can get difficult without the ability to clone: In order to be able
+/// to use REAPER functions also from e.g. the audio hook register, we would need to wrap it in an
+/// `Arc` (not an `Rc`, because we access it from multiple threads). That's not enough though for
+/// most real-world cases. We probably want to register/unregister things (in the main thread) not
+/// only in the beginning but also at a later time. That means we need mutable access. So we end up
+/// with `Arc<Mutex<Reaper>>`. However, why going through all that trouble and put up with possible
+/// performance issues if we can avoid it?
 ///
 /// [`new()`]: #method.new
 /// [`functions()`]: #method.functions

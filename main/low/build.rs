@@ -122,6 +122,8 @@ mod codegen {
                 /// This is the low-level API access point to all REAPER functions. In order to use it, you first
                 /// must obtain an instance of this struct by invoking [`load`](struct.Reaper.html#method.load).
                 ///
+                /// # Panics
+                ///
                 /// Please note that it's possible that functions are *not available*. This can be the case if
                 /// the user runs your plug-in in an older version of REAPER which doesn't have that function yet.
                 /// The availability of a function can be checked by inspecting the respective function pointer
