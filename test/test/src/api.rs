@@ -32,6 +32,6 @@ where
 
 pub enum VersionRestriction {
     AllVersions,
-    Min(ReaperVersion),
-    Max(ReaperVersion),
+    Min(ReaperVersion<'static>),
+    Max(ReaperVersion<'static>),
 }

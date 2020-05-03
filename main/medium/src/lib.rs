@@ -185,9 +185,6 @@
 // - midi_Input → MidiInput
 // - MIDI_eventlist → MidiEventList
 
-mod reaper_version;
-pub use reaper_version::*;
-
 mod misc_enums;
 pub use misc_enums::*;
 

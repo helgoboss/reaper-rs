@@ -1,8 +1,7 @@
 use std::convert::TryFrom;
-use std::ffi::{CStr};
+use std::ffi::CStr;
 use std::iter;
 use std::ops::Deref;
-
 
 use c_str_macro::c_str;
 
@@ -15,7 +14,7 @@ use rxrust::prelude::*;
 use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
-use crate::api::VersionRestriction::{AllVersions};
+use crate::api::VersionRestriction::AllVersions;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
@@ -31,7 +30,6 @@ use reaper_rs_medium::{
 };
 
 use std::rc::Rc;
-
 
 /// Creates all integration test steps to be executed. The order matters!
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
@@ -1522,7 +1520,7 @@ fn query_track_input_monitoring() -> TestStep {
         let mode = track.get_input_monitoring_mode();
         // Then
         use InputMonitoringMode::*;
-        if reaper.get_version() < ReaperVersion::from("6") {
+        if reaper.get_version() < ReaperVersion::new("6") {
             check_eq!(mode, Off);
         } else {
             check_eq!(mode, Normal);
@@ -1820,7 +1818,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             check_eq!(fx.get_name().as_c_str(), c_str!("JS: phaser"));
             let fx_chunk = fx.get_chunk();
             check!(fx_chunk.starts_with("BYPASS 0 0 0"));
-            if reaper.get_version() < ReaperVersion::from("6") {
+            if reaper.get_version() < ReaperVersion::new("6") {
                 check!(fx_chunk.ends_with("\nWAK 0"));
             } else {
                 check!(fx_chunk.ends_with("\nWAK 0 0"));
@@ -1893,7 +1891,7 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                 fx_chain.get_first_fx_by_name(c_str!("phaser")),
                 Some(fx.clone())
             );
-            if reaper.get_version() < ReaperVersion::from("6") {
+            if reaper.get_version() < ReaperVersion::new("6") {
                 // Mmh
                 if fx_chain.is_input_fx() {
                     check_eq!(mock.get_invocation_count(), 2);
@@ -1942,7 +1940,7 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             check!(fx.window_is_open());
             check!(fx.window_has_focus());
             check!(fx_opened_mock.get_invocation_count() >= 1);
-            if !fx_chain.is_input_fx() || reaper.get_version() >= ReaperVersion::from("5.95") {
+            if !fx_chain.is_input_fx() || reaper.get_version() >= ReaperVersion::new("5.95") {
                 // In previous versions it wrongly reports as normal FX
                 check_eq!(fx_opened_mock.get_last_arg(), fx);
             }
@@ -2210,7 +2208,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
         // Then
         check_eq!(midi_fx.get_index(), 1);
         check_eq!(synth_fx.get_index(), 0);
-        if reaper.get_version() < ReaperVersion::from("5.95") {
+        if reaper.get_version() < ReaperVersion::new("5.95") {
             check_eq!(mock.get_invocation_count(), 0);
         } else {
             check_eq!(mock.get_invocation_count(), 1);
@@ -2254,8 +2252,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
             // Then
             check_eq!(mock.get_invocation_count(), 2);
-            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
-            {
+            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::new(c_str!("5.95")) {
                 check_ne!(mock.get_last_arg(), p);
             } else {
                 check_eq!(mock.get_last_arg(), p);
@@ -2286,8 +2283,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.3));
             // Then
             let last_touched_fx_param = reaper.get_last_touched_fx_parameter();
-            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
-            {
+            if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::new(c_str!("5.95")) {
                 check!(last_touched_fx_param.is_none());
             } else {
                 check_eq!(last_touched_fx_param, Some(p.clone()));
@@ -2306,7 +2302,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                     .as_c_str(),
                 c_str!("-4.44 dB")
             );
-            if reaper.get_version() < ReaperVersion::from("6") {
+            if reaper.get_version() < ReaperVersion::new("6") {
                 if fx_chain.is_input_fx() {
                     // Mmh
                     check_eq!(mock.get_invocation_count(), 2);
@@ -2416,7 +2412,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         );
         let chunk_1 = fx_1.get_chunk();
         check!(chunk_1.starts_with("BYPASS 0 0 0"));
-        if reaper.get_version() < ReaperVersion::from("6") {
+        if reaper.get_version() < ReaperVersion::new("6") {
             check!(chunk_1.ends_with("\nWAK 0"));
         } else {
             check!(chunk_1.ends_with("\nWAK 0 0"));
@@ -2548,7 +2544,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         );
         let chunk = fx_1.get_chunk();
         check!(chunk.starts_with("BYPASS 0 0 0"));
-        if reaper.get_version() < ReaperVersion::from("6") {
+        if reaper.get_version() < ReaperVersion::new("6") {
             check!(chunk.ends_with("\nWAK 0"));
         } else {
             check!(chunk.ends_with("\nWAK 0 0"));

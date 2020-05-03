@@ -81,7 +81,7 @@ impl HelperControlSurface {
     ) -> HelperControlSurface {
         let reaper = Reaper::get();
         let version = reaper.get_version();
-        let reaper_version_5_95 = ReaperVersion::from("5.95");
+        let reaper_version_5_95 = ReaperVersion::new("5.95");
         let surface = HelperControlSurface {
             task_sender,
             task_receiver,

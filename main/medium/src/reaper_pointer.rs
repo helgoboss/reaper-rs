@@ -7,14 +7,8 @@ use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
 
-/// Possible REAPER pointer types which can be passed to `Reaper::validate_ptr_2()`.
-///
-/// Except for the trailing asterisk, the variants are named exactly like the strings which will be
-/// passed to the low-level REAPER function because the medium-level API is designed to still be
-/// close to the raw REAPER API.
-///
-/// Please raise a reaper-rs issue if you find that an enum variant is missing!
-#[derive(Clone, Debug)]
+/// Validatable REAPER pointer.
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ReaperPointer<'a> {
     MediaTrack(MediaTrack),
     ReaProject(ReaProject),
@@ -22,8 +16,11 @@ pub enum ReaperPointer<'a> {
     MediaItemTake(MediaItemTake),
     TrackEnvelope(TrackEnvelope),
     PcmSource(NonNull<raw::PCM_source>),
-    /// If a variant is missing in this enum, you can use this custom one as a resort. Don't
-    /// include the trailing asterisk (`*`)! It will be added to the call automatically.
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
     Custom {
         type_name: Cow<'a, CStr>,
         pointer: *mut c_void,
@@ -31,6 +28,11 @@ pub enum ReaperPointer<'a> {
 }
 
 impl<'a> ReaperPointer<'a> {
+    /// Convenience function for creating a [`Custom`] pointer.
+    ///
+    /// **Don't** include the trailing asterisk (`*`)! It will be added automatically.
+    ///
+    /// [`Custom`]: #variant.Custom
     pub fn custom(pointer: *mut c_void, type_name: impl Into<ReaperStringArg<'a>>) -> Self {
         Self::Custom {
             pointer,
@@ -52,7 +54,7 @@ impl<'a> ReaperPointer<'a> {
     }
 }
 
-macro_rules! impl_from_ptr_wrapper_to_enum {
+macro_rules! impl_from_ptr_to_variant {
     ($struct_type: ty, $enum_name: ident) => {
         impl<'a> From<$struct_type> for ReaperPointer<'a> {
             fn from(p: $struct_type) -> Self {
@@ -62,12 +64,12 @@ macro_rules! impl_from_ptr_wrapper_to_enum {
     };
 }
 
-impl_from_ptr_wrapper_to_enum!(MediaTrack, MediaTrack);
-impl_from_ptr_wrapper_to_enum!(ReaProject, ReaProject);
-impl_from_ptr_wrapper_to_enum!(MediaItem, MediaItem);
-impl_from_ptr_wrapper_to_enum!(MediaItemTake, MediaItemTake);
-impl_from_ptr_wrapper_to_enum!(TrackEnvelope, TrackEnvelope);
-impl_from_ptr_wrapper_to_enum!(NonNull<raw::PCM_source>, PcmSource);
+impl_from_ptr_to_variant!(MediaTrack, MediaTrack);
+impl_from_ptr_to_variant!(ReaProject, ReaProject);
+impl_from_ptr_to_variant!(MediaItem, MediaItem);
+impl_from_ptr_to_variant!(MediaItemTake, MediaItemTake);
+impl_from_ptr_to_variant!(TrackEnvelope, TrackEnvelope);
+impl_from_ptr_to_variant!(NonNull<raw::PCM_source>, PcmSource);
 
 impl<'a> From<ReaperPointer<'a>> for Cow<'a, CStr> {
     fn from(value: ReaperPointer<'a>) -> Self {

@@ -390,11 +390,14 @@ impl<'a> PluginRegistration<'a> {
     //     Self::ApiDef(func_name.into().into_inner(), func_def)
     // }
 
-    /// Convenience method for creating a [`Custom`] registration.
+    /// Convenience function for creating a [`Custom`] registration.
     ///
     /// [`Custom`]: #variant.Custom
-    pub fn custom(key: impl Into<ReaperStringArg<'a>>, info_struct: *mut c_void) -> Self {
-        Self::Custom(key.into().into_inner(), info_struct)
+    pub fn custom(
+        key: impl Into<ReaperStringArg<'a>>,
+        info_struct: *mut c_void,
+    ) -> PluginRegistration<'a> {
+        PluginRegistration::Custom(key.into().into_inner(), info_struct)
     }
 
     pub(crate) fn into_owned(self) -> PluginRegistration<'static> {

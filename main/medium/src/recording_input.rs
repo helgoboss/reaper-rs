@@ -1,10 +1,12 @@
 use crate::MidiInputDeviceId;
-
+use derive_more::*;
 use helgoboss_midi::Channel;
 use std::convert::{TryFrom, TryInto};
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+/// Recording input of a track.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum RecordingInput {
+    // TODO-medium Check if those are really indexes!
     Mono(u32),
     ReaRoute(u32),
     Stereo(u32),
@@ -36,8 +38,16 @@ impl From<RecordingInput> for u32 {
     }
 }
 
+/// An error which can be returned when converting an integer type to another integer type with a
+/// smaller value range.
+#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
+#[display(fmt = "recording input index invalid")]
+pub struct RecInputIndexInvalid;
+
+// TODO-medium I think we should replace all of those conversions with private to_raw() methods!
+#[doc(hidden)]
 impl TryFrom<u32> for RecordingInput {
-    type Error = ();
+    type Error = RecInputIndexInvalid;
 
     fn try_from(rec_input_index: u32) -> Result<Self, Self::Error> {
         use RecordingInput::*;
@@ -67,7 +77,7 @@ impl TryFrom<u32> for RecordingInput {
                     },
                 })
             }
-            _ => Err(()),
+            _ => Err(RecInputIndexInvalid),
         }
     }
 }

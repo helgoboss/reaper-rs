@@ -1113,13 +1113,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         self.low.TrackList_UpdateAllExternalSurfaces();
     }
 
-    pub fn get_app_version(&self) -> ReaperVersion
+    pub fn get_app_version(&self) -> ReaperVersion<'static>
     where
         S: MainThread,
     {
         let ptr = self.low.GetAppVersion();
         let version_str = unsafe { CStr::from_ptr(ptr) };
-        ReaperVersion::from(version_str)
+        ReaperVersion::new(version_str)
     }
 
     pub unsafe fn get_track_automation_mode(&self, tr: MediaTrack) -> AutomationMode

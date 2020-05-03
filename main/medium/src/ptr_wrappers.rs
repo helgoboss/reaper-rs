@@ -67,6 +67,7 @@ impl KbdSectionInfo {
 }
 
 /// Borrowed action.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct KbdCmd<'a>(pub(crate) &'a raw::KbdCmd);
 
 impl<'a> KbdCmd<'a> {

@@ -1,10 +1,8 @@
 use crate::{concat_c_strs, ReaperStringArg};
 use c_str_macro::c_str;
 
-
 use std::borrow::Cow;
 use std::ffi::CStr;
-
 
 /// Track info key which you can pass to [`get_set_media_track_info()`].
 ///
@@ -266,14 +264,14 @@ pub enum TrackInfoKey<'a> {
 }
 
 impl<'a> TrackInfoKey<'a> {
-    /// Convenience method for creating an [`Ext`] key.
+    /// Convenience function for creating an [`Ext`] key.
     ///
     /// [`Ext`]: #variant.Ext
     pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
         TrackInfoKey::Ext(key.into().into_inner())
     }
 
-    /// Convenience method for creating a [`Custom`] key.
+    /// Convenience function for creating a [`Custom`] key.
     ///
     /// [`Custom`]: #variant.Custom
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
@@ -414,14 +412,14 @@ pub enum TrackSendInfoKey<'a> {
 }
 
 impl<'a> TrackSendInfoKey<'a> {
-    /// Convenience method for creating an [`Ext`] key.
+    /// Convenience function for creating an [`Ext`] key.
     ///
     /// [`Ext`]: #variant.Ext
     pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
         TrackSendInfoKey::Ext(key.into().into_inner())
     }
 
-    /// Convenience method for creating a [`Custom`] key.
+    /// Convenience function for creating a [`Custom`] key.
     ///
     /// [`Custom`]: #variant.Custom
     pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
@@ -486,7 +484,7 @@ pub enum EnvChunkName<'a> {
 }
 
 impl<'a> EnvChunkName<'a> {
-    /// Convenience method for creating a [`Custom`] key.
+    /// Convenience function for creating a [`Custom`] name.
     ///
     /// [`Custom`]: #variant.Custom
     pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> EnvChunkName<'a> {

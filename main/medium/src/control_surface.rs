@@ -1,18 +1,18 @@
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
-    ReaperVolumeValue, TrackFxChainType, TrackFxLocation,
+    require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
+    TrackFxChainType, TrackFxLocation,
 };
 
-
 use reaper_rs_low;
-use reaper_rs_low::{raw};
+use reaper_rs_low::raw;
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
-use std::ptr::{null_mut};
+use std::ptr::null_mut;
 
 /// Consumers need to implement this trait in order to get notified about various REAPER events.
 ///
@@ -406,7 +406,7 @@ impl DelegatingControlSurface {
         delegate: impl MediumReaperControlSurface + 'static,
         reaper_version: &ReaperVersion,
     ) -> DelegatingControlSurface {
-        let reaper_version_5_95: ReaperVersion = ReaperVersion::from("5.95");
+        let reaper_version_5_95: ReaperVersion = ReaperVersion::new("5.95");
         DelegatingControlSurface {
             delegate: Box::new(delegate),
             // since pre1,

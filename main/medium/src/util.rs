@@ -1,5 +1,3 @@
-
-
 use std::ffi::{CStr, CString};
 
 pub(crate) fn concat_c_strs(first: &CStr, second: &CStr) -> CString {

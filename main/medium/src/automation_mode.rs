@@ -9,7 +9,7 @@ pub enum GlobalAutomationModeOverride {
     Mode(AutomationMode),
 }
 
-/// A track automation mode.
+/// Automation mode of a track.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive, TryFromPrimitive)]
 #[repr(i32)]
 pub enum AutomationMode {
