@@ -2295,11 +2295,11 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             check_eq!(p.get_formatted_value().as_c_str(), c_str!("-4.44"));
             check_eq!(
                 p.get_normalized_value(),
-                ReaperNormalizedValue::new(0.30000001192092896)
+                ReaperNormalizedFxParamValue::new(0.30000001192092896)
             );
             check_eq!(
                 p.get_reaper_value(),
-                ReaperNormalizedValue::new(0.30000001192092896)
+                ReaperNormalizedFxParamValue::new(0.30000001192092896)
             );
             check_eq!(
                 p.format_normalized_value(p.get_normalized_value())
@@ -2355,8 +2355,11 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(p.get_character(), FxParameterCharacter::Continuous);
         check_eq!(p.clone(), p);
         check_eq!(p.get_formatted_value().as_c_str(), c_str!("0"));
-        check_eq!(p.get_normalized_value(), ReaperNormalizedValue::new(0.5));
-        check_eq!(p.get_reaper_value(), ReaperNormalizedValue::new(0.5));
+        check_eq!(
+            p.get_normalized_value(),
+            ReaperNormalizedFxParamValue::new(0.5)
+        );
+        check_eq!(p.get_reaper_value(), ReaperNormalizedFxParamValue::new(0.5));
         check_eq!(
             p.format_normalized_value(p.get_normalized_value())
                 .as_c_str(),

@@ -1,12 +1,3 @@
-//! We obtain many pointers directly from REAPER and we can't
-//! give them a sane lifetime annotation. They are "rather" static from the perspective of the
-//! plug-in, yet they could come and go anytime, so 'static would be too optimistic. Annotating
-//! with a lifetime 'a - correlated to another lifetime - would be impossible because we
-//! don't have such another lifetime which can serve as frame of reference. So the best we
-//! can do is wrapping pointers. For all opaque structs we do that simply by creating a type alias
-//! to NonNull because NonNull maintains all the invariants we need (pointer not null) and opaque
-//! structs don't have methods which need to be lifted to medium-level API style. For non-opaque
-//! structs we wrap the NonNull in a newtype because we need to add medium-level API style methods.
 use crate::CommandId;
 use derive_more::Into;
 use reaper_rs_low::raw;
@@ -14,37 +5,21 @@ use std::convert::Into;
 use std::marker::PhantomData;
 use std::ptr::{null_mut, NonNull};
 
-pub fn require_non_null<T>(ptr: *mut T) -> Result<NonNull<T>, ()> {
-    if ptr.is_null() {
-        Err(())
-    } else {
-        Ok(unsafe { NonNull::new_unchecked(ptr) })
-    }
-}
-
-pub fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
-    assert!(
-        !ptr.is_null(),
-        "Raw pointer expected to be not null but was null"
-    );
-    unsafe { NonNull::new_unchecked(ptr) }
-}
-
-// One of the responsibilities of the medium-level API is to use identifiers which follow the Rust
-// conventions. It just happens that some of the C++ classes already conform to Rust conventions,
-// so we won't rename them.
-
 // # Internals exposed: no | vtable: no
 //
-// Strategy: Give pointer an idiomatic name
+// ## Strategy
 //
-// The following types are relevant for us as pointers only because those structs are completely
-// opaque (internals not exposed, not even a vtable). We don't give them a "Handle" suffix because
-// we know there will probably never be a non-handle version of this! We don't create a newtype
-// because the NonNull guarantee is all we need and according to medium-level API design, we will
-// never provide any methods on them (no vtable, no convenience methods). Using a newtype just for
-// reasons of symmetry would not be good because it would come with a cost (more code to write, less
-// substitution possibilities) but no benefit.
+// - Use NonNull pointers directly
+// - Make them more accessible by using a public alias
+//
+// ## Explanation
+//
+// The following types are relevant to consumers, but only as pointers. Because those structs are
+// completely opaque (internals not exposed, not even a vtable). We don't create a newtype because
+// the NonNull guarantee is all we need and according to medium-level API design, we will never
+// provide any methods on them (no vtable emulation, no convenience methods). Using a newtype just
+// for reasons of symmetry would not be good because it comes with a cost (more code to write,
+// less substitution possibilities) but no benefit.
 pub type ReaProject = NonNull<raw::ReaProject>;
 pub type MediaTrack = NonNull<raw::MediaTrack>;
 pub type MediaItem = NonNull<raw::MediaItem>;
@@ -52,18 +27,22 @@ pub type MediaItemTake = NonNull<raw::MediaItem_Take>;
 pub type TrackEnvelope = NonNull<raw::TrackEnvelope>;
 pub type Hwnd = NonNull<raw::HWND__>;
 
-// Internals exposed: yes | vtable: no
+// # Internals exposed: yes | vtable: no
 //
-// Strategy: Create an idiomatic struct for creating by consumer & wrap pointer in a
-// "Handle"-suffixed newtype (this newtype should expose the internals in an idiomatic way, this
-// pointer is for direction Rust => REAPER while the idiomatic struct is for REAPER => Rust
-// communication)
+// ## Strategy
 //
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Into)]
+// - Wrap NonNull pointer in a public newtype. This newtype should expose the internals in a way
+//   which is idiomatic for Rust (like the rest of the medium-level API does).
+// - If the consumer needs to be able to create such structs as well, create a new struct prefixed
+//   with `Medium` which is completely owned and ideally wraps the the raw struct.
+
+/// Represents an action description with a default key binding.
+#[derive(Eq, PartialEq, Hash, Debug)]
 pub struct GaccelRegister(pub(crate) NonNull<raw::gaccel_register_t>);
 
 impl GaccelRegister {
-    pub fn new(ptr: NonNull<raw::gaccel_register_t>) -> GaccelRegister {
+    /// C
+    pub(crate) fn new(ptr: NonNull<raw::gaccel_register_t>) -> GaccelRegister {
         GaccelRegister(ptr)
     }
 
@@ -153,4 +132,20 @@ impl ReaperControlSurface {
     pub(crate) fn get(&self) -> NonNull<raw::IReaperControlSurface> {
         self.0
     }
+}
+
+pub(crate) fn require_non_null<T>(ptr: *mut T) -> Result<NonNull<T>, ()> {
+    if ptr.is_null() {
+        Err(())
+    } else {
+        Ok(unsafe { NonNull::new_unchecked(ptr) })
+    }
+}
+
+pub(crate) fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
+    assert!(
+        !ptr.is_null(),
+        "Raw pointer expected to be not null but was null"
+    );
+    unsafe { NonNull::new_unchecked(ptr) }
 }

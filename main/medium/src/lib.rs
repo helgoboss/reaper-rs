@@ -93,6 +93,19 @@
 // 9. If a function takes whatever number, even if they can have the full range of a primitive,
 // introduce a newtype just for safety and (sometimes) for seeing what's it at about at call site
 // ... no 11. Introduce newtypes for indexes ... no
+//
+// # Pointer wrappers
+// We obtain many pointers directly from REAPER and we can't give them a sane lifetime annotation.
+// They are "rather" static from the perspective of the plug-in, yet they could come and go anytime,
+// so 'static would be too optimistic. Annotating with a lifetime 'a - correlated to another
+// lifetime - would be impossible because we don't have such another lifetime which can serve as
+// frame of reference. So the best we can do is wrapping pointers. For all opaque structs we do that
+// simply by creating a type alias to NonNull because NonNull maintains all the invariants we need
+// (pointer not null) and opaque structs don't have methods which need to be lifted to medium-level
+// API style. For non-opaque structs we wrap the NonNull in a newtype because we need to add
+// medium-level API style methods. One of the responsibilities of the medium-level API is to use
+// identifiers which follow the Rust conventions. It just happens that some of the C++ classes
+// already conform to Rust conventions, so we won't rename them.
 
 mod reaper_version;
 pub use reaper_version::*;
