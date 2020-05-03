@@ -37,7 +37,8 @@ impl CommandId {
         self.0
     }
 
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         self.0 as i32
     }
 }
@@ -61,7 +62,8 @@ impl SectionId {
         self.0
     }
 
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         self.0 as i32
     }
 }
@@ -88,7 +90,8 @@ impl MidiInputDeviceId {
         self.0
     }
 
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         self.0 as i32
     }
 }
@@ -109,7 +112,9 @@ impl MidiOutputDeviceId {
     pub const fn get(&self) -> u8 {
         self.0
     }
-    pub(crate) fn to_raw(&self) -> i32 {
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         self.0 as i32
     }
 }

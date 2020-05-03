@@ -1463,8 +1463,8 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
             let input = track.get_recording_input();
             check_eq!(input, given_input);
             let input = input.unwrap();
-            check_eq!(u32::from(input), 6112);
-            check_eq!(RecordingInput::try_from(6112 as u32), Ok(input));
+            check_eq!(input.to_raw(), 6112);
+            check_eq!(RecordingInput::try_from_raw(6112), Ok(input));
             // TODO-high Search in project for 5198273 for a hacky way to solve this
             check_eq!(mock.get_invocation_count(), 0);
             // check_eq!(mock.get_last_arg(), track);
@@ -1811,7 +1811,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             check!(fx.is_available());
             check_eq!(fx.get_index(), 2);
             check_eq!(
-                i32::from(fx.get_query_index()),
+                fx.get_query_index().to_raw(),
                 if fx_chain.is_input_fx() { 0x1000002 } else { 2 }
             );
             check!(fx.get_guid().is_some());
@@ -2393,11 +2393,11 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         check_eq!(fx_1.get_index(), 0);
         check_eq!(fx_2.get_index(), 1);
         check_eq!(
-            i32::from(fx_1.get_query_index()),
+            fx_1.get_query_index().to_raw(),
             if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
         );
         check_eq!(
-            i32::from(fx_2.get_query_index()),
+            fx_2.get_query_index().to_raw(),
             if fx_chain.is_input_fx() { 0x1000001 } else { 1 }
         );
         check!(fx_1.get_guid().is_some());
@@ -2534,7 +2534,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         check!(fx_1.is_available());
         check_eq!(fx_1.get_index(), 0);
         check_eq!(
-            i32::from(fx_1.get_query_index()),
+            fx_1.get_query_index().to_raw(),
             if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
         );
         check!(fx_1.get_guid().is_some());

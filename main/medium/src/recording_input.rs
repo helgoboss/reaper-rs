@@ -17,11 +17,16 @@ pub enum RecordingInput {
 }
 
 impl RecordingInput {
-    pub(crate) fn try_from_raw(
-        rec_input_index: i32,
-    ) -> Result<RecordingInput, RecInputIndexInvalid> {
+    /// Converts an integer as returned by the low-level API to a recording input.
+    ///
+    /// # Errors
+    ///
+    /// Fails if the given integer is not a valid recording input index.
+    pub fn try_from_raw(rec_input_index: i32) -> Result<RecordingInput, RecInputIndexInvalid> {
         use RecordingInput::*;
-        let rec_input_index = rec_input_index as u32;
+        let rec_input_index: u32 = rec_input_index
+            .try_into()
+            .map_err(|_| RecInputIndexInvalid)?;
         match rec_input_index {
             0..=511 => Ok(Mono(rec_input_index)),
             512..=1023 => Ok(ReaRoute(rec_input_index - 512)),
@@ -52,7 +57,8 @@ impl RecordingInput {
         }
     }
 
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         use RecordingInput::*;
         let result = match *self {
             Mono(i) => i,
@@ -74,9 +80,9 @@ impl RecordingInput {
     }
 }
 
-/// An error which can be returned when trying to interpret a recording input index.
+/// An error which can occur when trying to convert a low-level recording input index.
 #[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
 #[display(fmt = "recording input index invalid")]
-pub(crate) struct RecInputIndexInvalid;
+pub struct RecInputIndexInvalid;
 
 const ALL_MIDI_DEVICES_FACTOR: u32 = 63;

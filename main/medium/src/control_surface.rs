@@ -448,7 +448,7 @@ impl DelegatingControlSurface {
     ) -> VersionDependentTrackFxLocation {
         let index = unref_into::<i32>(ptr).unwrap();
         if self.supports_detection_of_input_fx {
-            VersionDependentTrackFxLocation::New(TrackFxLocation::from_raw(index))
+            VersionDependentTrackFxLocation::New(TrackFxLocation::try_from_raw(index).unwrap())
         } else {
             VersionDependentTrackFxLocation::Old(index as u32)
         }

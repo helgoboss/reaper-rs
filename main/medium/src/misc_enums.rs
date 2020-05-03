@@ -3,11 +3,13 @@ use crate::{
     ReaProject, ReaperStringArg, ToggleActionFn,
 };
 use c_str_macro::c_str;
+use derive_more::*;
 use helgoboss_midi::{U14, U7};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::HWND;
 use std::borrow::Cow;
+use std::convert::TryInto;
 use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::{null_mut, NonNull};
@@ -209,7 +211,8 @@ pub enum StuffMidiMessageTarget {
 }
 
 impl StuffMidiMessageTarget {
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         use StuffMidiMessageTarget::*;
         match self {
             VirtualMidiKeyboardQueue => 0,
@@ -231,18 +234,26 @@ pub enum TrackFxLocation {
     InputFxChain(u32),
 }
 
+/// An error which can occur when trying to convert a low-level FX index.
+#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
+#[display(fmt = "FX index invalid")]
+pub struct FxIndexInvalid;
+
 impl TrackFxLocation {
-    pub(crate) fn from_raw(v: i32) -> TrackFxLocation {
+    /// Converts an integer as returned by the low-level API to a track FX location.
+    pub fn try_from_raw(v: i32) -> Result<TrackFxLocation, FxIndexInvalid> {
         use TrackFxLocation::*;
-        let v = v as u32;
-        if v >= 0x1000000 {
+        let v: u32 = v.try_into().map_err(|_| FxIndexInvalid)?;
+        let result = if v >= 0x1000000 {
             InputFxChain(v - 0x1000000)
         } else {
             NormalFxChain(v)
-        }
+        };
+        Ok(result)
     }
 
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         use TrackFxLocation::*;
         let positive = match *self {
             InputFxChain(idx) => 0x1000000 + idx,
@@ -485,7 +496,8 @@ pub enum ProjectRef {
 }
 
 impl ProjectRef {
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         use ProjectRef::*;
         match *self {
             Current => -1,
@@ -507,7 +519,8 @@ pub enum FxPresetRef {
 }
 
 impl FxPresetRef {
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         use FxPresetRef::*;
         match *self {
             FactoryPreset => -2,
@@ -527,7 +540,8 @@ pub enum ProjectContext {
 }
 
 impl ProjectContext {
-    pub(crate) fn to_raw(&self) -> *mut raw::ReaProject {
+    /// Converts this value to a raw pointer as expected by the low-level API.
+    pub fn to_raw(&self) -> *mut raw::ReaProject {
         use ProjectContext::*;
         match self {
             Proj(p) => p.as_ptr(),
@@ -546,7 +560,8 @@ pub enum NotificationBehavior {
 }
 
 impl NotificationBehavior {
-    pub(crate) fn to_raw(&self) -> *mut raw::IReaperControlSurface {
+    /// Converts this value to a raw pointer as expected by the low-level API.
+    pub fn to_raw(&self) -> *mut raw::IReaperControlSurface {
         use NotificationBehavior::*;
         match self {
             NotifyAllExcept(s) => s.as_ptr(),
@@ -565,7 +580,8 @@ pub enum SendTarget {
 }
 
 impl SendTarget {
-    pub(crate) fn to_raw(&self) -> *mut raw::MediaTrack {
+    /// Converts this value to a raw pointer as expected by the low-level API.
+    pub fn to_raw(&self) -> *mut raw::MediaTrack {
         use SendTarget::*;
         match self {
             HardwareOutput => null_mut(),
@@ -586,7 +602,8 @@ pub enum SectionContext<'a> {
 }
 
 impl<'a> SectionContext<'a> {
-    pub(crate) fn to_raw(&self) -> *mut raw::KbdSectionInfo {
+    /// Converts this value to a raw pointer as expected by the low-level API.
+    pub fn to_raw(&self) -> *mut raw::KbdSectionInfo {
         use SectionContext::*;
         match self {
             MainSection => null_mut(),
@@ -608,7 +625,8 @@ pub enum WindowContext {
 }
 
 impl WindowContext {
-    pub(crate) fn to_raw(&self) -> HWND {
+    /// Converts this value to a raw pointer as expected by the low-level API.
+    pub fn to_raw(&self) -> HWND {
         use WindowContext::*;
         match self {
             Win(h) => h.as_ptr(),

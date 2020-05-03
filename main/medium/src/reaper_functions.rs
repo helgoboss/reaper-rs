@@ -887,7 +887,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             0 => None,
             1 => Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_location: TrackFxLocation::from_raw(fxnumber),
+                fx_location: TrackFxLocation::try_from_raw(fxnumber).unwrap(),
             }),
             2 => {
                 // TODO-low Add test
@@ -932,7 +932,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         if tracknumber_high_word == 0 {
             Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_location: TrackFxLocation::from_raw(fxnumber),
+                fx_location: TrackFxLocation::try_from_raw(fxnumber).unwrap(),
                 // Although the parameter is called paramnumber, it's zero-based (checked)
                 param_index: paramnumber,
             })

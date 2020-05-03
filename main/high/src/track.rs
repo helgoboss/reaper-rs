@@ -131,7 +131,7 @@ impl Track {
         self.load_and_check_if_necessary_or_complain();
         let rec_input_index = match input {
             None => -1,
-            Some(ri) => u32::from(ri) as i32,
+            Some(ri) => ri.to_raw(),
         };
         let reaper = Reaper::get();
         let _ = unsafe {

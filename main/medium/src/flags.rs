@@ -16,7 +16,8 @@ pub enum UndoScope {
 }
 
 impl UndoScope {
-    pub(crate) fn to_raw(&self) -> i32 {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
         use UndoScope::*;
         match self {
             All => raw::UNDO_STATE_ALL as i32,
