@@ -10,10 +10,10 @@ use reaper_rs_medium::{
     AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
-    MediaTrack, MediumReaperControlSurface, QualifiedFxLocation, ReaProject, ReaperNormalizedValue,
-    ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs,
-    SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs,
-    SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
+    MediaTrack, MediumReaperControlSurface, QualifiedFxLocation, ReaProject,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
+    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
+    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
     VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
@@ -464,7 +464,7 @@ impl HelperControlSurface {
         track: &Track,
         fx_index: u32,
         param_index: Option<u32>,
-        normalized_value: Option<ReaperNormalizedValue>,
+        normalized_value: Option<ReaperNormalizedFxParamValue>,
     ) -> bool {
         let pairs = self.fx_chain_pair_by_media_track.borrow();
         let pair = match pairs.get(&track.get_raw()) {
@@ -515,7 +515,7 @@ impl HelperControlSurface {
         track: &Track,
         parm_fx_index: VersionDependentTrackFxLocation,
         param_index: Option<u32>,
-        param_value: Option<ReaperNormalizedValue>,
+        param_value: Option<ReaperNormalizedFxParamValue>,
     ) -> Option<Fx> {
         use VersionDependentTrackFxLocation::*;
         match parm_fx_index {

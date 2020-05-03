@@ -24,7 +24,7 @@ use reaper_rs_medium::{
     ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName, FxAddByNameBehavior,
     FxShowFlag, GangBehavior, GlobalAutomationModeOverride, InputMonitoringMode,
     MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
     RecordArmState, RecordingInput, SendTarget, StuffMidiMessageTarget, TrackFxChainType,
     TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
     TransferBehavior, UndoBehavior, ValueChange,
@@ -2032,7 +2032,7 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
             .get_fx_by_index(1)
             .ok_or("Couldn't find synth fx")?;
         let synth_param_5 = synth_fx.get_parameter_by_index(5);
-        synth_param_5.set_normalized_value(ReaperNormalizedValue::new(0.0));
+        synth_param_5.set_normalized_value(ReaperNormalizedFxParamValue::new(0.0));
         check_ne!(
             synth_param_5.get_formatted_value().as_c_str(),
             c_str!("-6.00")
@@ -2229,7 +2229,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain.get_fx_by_index(0).ok_or("Couldn't find fx")?;
             let p = fx.get_parameter_by_index(0);
-            p.set_normalized_value(ReaperNormalizedValue::new(0.5));
+            p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
             let other_fx_chain = if fx_chain.is_input_fx() {
                 fx.get_track().get_normal_fx_chain()
             } else {
@@ -2241,7 +2241,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             let p_on_other_fx_chain = fx_on_other_fx_chain.get_parameter_by_index(0);
             // First set parameter on other FX chain to same value (confuses heuristic if
             // fxChain is input FX chain)
-            p_on_other_fx_chain.set_normalized_value(ReaperNormalizedValue::new(0.5));
+            p_on_other_fx_chain.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper
@@ -2251,7 +2251,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
                         mock.invoke(p);
                     });
             });
-            p.set_normalized_value(ReaperNormalizedValue::new(0.5));
+            p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
             // Then
             check_eq!(mock.get_invocation_count(), 2);
             if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))
@@ -2283,7 +2283,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                         mock.invoke(p);
                     });
             });
-            p.set_normalized_value(ReaperNormalizedValue::new(0.3));
+            p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.3));
             // Then
             let last_touched_fx_param = reaper.get_last_touched_fx_parameter();
             if fx_chain.is_input_fx() && reaper.get_version() < ReaperVersion::from(c_str!("5.95"))

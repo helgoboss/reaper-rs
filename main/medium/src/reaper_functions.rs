@@ -21,7 +21,7 @@ use crate::{
     MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction,
     MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
     NotificationBehavior, PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectPart,
-    ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedValue, ReaperPanValue,
+    ProjectRef, ReaProject, ReaperControlSurface, ReaperNormalizedFxParamValue, ReaperPanValue,
     ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmState,
     RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey,
@@ -747,7 +747,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         fx: TrackFxLocation,
         param: u32,
-        value: ReaperNormalizedValue,
+        value: ReaperNormalizedFxParamValue,
         buf_sz: u32,
     ) -> Result<CString, ()>
     where
@@ -776,7 +776,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         fx: TrackFxLocation,
         param: u32,
-        value: ReaperNormalizedValue,
+        value: ReaperNormalizedFxParamValue,
     ) -> Result<(), ()>
     where
         S: MainThread,
@@ -1216,7 +1216,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         fx: TrackFxLocation,
         param: u32,
-    ) -> Result<ReaperNormalizedValue, ()>
+    ) -> Result<ReaperNormalizedFxParamValue, ()>
     where
         S: MainThread,
     {
@@ -1226,7 +1226,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         if raw_value < 0.0 {
             return Err(());
         }
-        Ok(ReaperNormalizedValue::new(raw_value))
+        Ok(ReaperNormalizedFxParamValue::new(raw_value))
     }
 
     pub fn get_master_track(&self, proj: ProjectContext) -> MediaTrack

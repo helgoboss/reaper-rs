@@ -1,4 +1,4 @@
-use crate::Hertz;
+use crate::Hz;
 use reaper_rs_low::raw::audio_hook_register_t;
 use reaper_rs_low::{firewall, raw};
 use std::any::Any;
@@ -22,7 +22,7 @@ pub trait MediumOnAudioBuffer {
 pub struct OnAudioBufferArgs<'a> {
     pub is_post: bool,
     pub len: u32,
-    pub srate: Hertz,
+    pub srate: Hz,
     pub reg: &'a AudioHookRegister,
 }
 
@@ -73,7 +73,7 @@ pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
         callback_struct.call(OnAudioBufferArgs {
             is_post,
             len: len as u32,
-            srate: unsafe { Hertz::new_unchecked(srate) },
+            srate: unsafe { Hz::new_unchecked(srate) },
             reg: &AudioHookRegister::new(reg),
         });
     });

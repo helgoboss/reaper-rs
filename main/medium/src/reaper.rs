@@ -21,7 +21,7 @@ use crate::{
     MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
     PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperControlSurface,
-    ReaperFunctions, ReaperNormalizedValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
+    ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
     ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId,
     SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
     TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
@@ -163,6 +163,9 @@ impl Reaper {
     // Passing an empty string actually works (!). If a null pointer is passed, 0 is returned, but
     // we can't do that using this signature. If a very large string is passed, it works. If a
     // number of a built-in command is passed, it works.
+    //
+    ///  which is unique to the current REAPER
+    //     /// session.
     pub fn plugin_register_add_command_id<'a>(
         &mut self,
         command_name: impl Into<ReaperStringArg<'a>>,

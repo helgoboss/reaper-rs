@@ -1,7 +1,7 @@
 use crate::fx::Fx;
 use crate::Reaper;
 use reaper_rs_low::raw;
-use reaper_rs_medium::{GetParameterStepSizesResult, MediaTrack, ReaperNormalizedValue};
+use reaper_rs_medium::{GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue};
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
 
@@ -19,12 +19,12 @@ impl FxParameter {
     }
 
     // Returns normalized value [0, 1] TODO WRONG!
-    pub fn get_normalized_value(&self) -> ReaperNormalizedValue {
+    pub fn get_normalized_value(&self) -> ReaperNormalizedFxParamValue {
         // TODO-low deal with nullptr MediaTrack (empty string)
         self.get_reaper_value()
     }
 
-    pub fn set_normalized_value(&self, normalized_value: ReaperNormalizedValue) {
+    pub fn set_normalized_value(&self, normalized_value: ReaperNormalizedFxParamValue) {
         let _ = unsafe {
             Reaper::get()
                 .medium()
@@ -38,7 +38,7 @@ impl FxParameter {
         };
     }
 
-    pub fn get_reaper_value(&self) -> ReaperNormalizedValue {
+    pub fn get_reaper_value(&self) -> ReaperNormalizedFxParamValue {
         unsafe {
             Reaper::get()
                 .medium()
@@ -114,7 +114,10 @@ impl FxParameter {
         self.index
     }
 
-    pub fn format_normalized_value(&self, normalized_value: ReaperNormalizedValue) -> CString {
+    pub fn format_normalized_value(
+        &self,
+        normalized_value: ReaperNormalizedFxParamValue,
+    ) -> CString {
         unsafe {
             Reaper::get()
                 .medium()

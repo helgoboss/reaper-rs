@@ -26,6 +26,10 @@ pub enum TrackInfoKey<'a> {
     /// Layout name.
     TcpLayout,
     /// Extension-specific persistent data.
+    ///
+    /// Use [`ext()`] to create this variant.
+    ///
+    /// [`ext()`]: #method.ext
     Ext(Cow<'a, CStr>),
     /// 6-byte GUID, can query or update.
     ///
@@ -254,6 +258,10 @@ pub enum TrackInfoKey<'a> {
     /// [`PlayOffsetFlag`]: #variant.PlayOffsetFlag
     PlayOffset,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
     Custom(Cow<'a, CStr>),
 }
 
@@ -356,6 +364,10 @@ pub enum TrackSendInfoKey<'a> {
     /// Returns the corresponding track send envelope.
     Env(EnvChunkName<'a>),
     /// Extension-specific persistent data.
+    ///
+    /// Use [`ext()`] to create this variant.
+    ///
+    /// [`ext()`]: #method.ext
     Ext(Cow<'a, CStr>),
     Mute,
     /// `true` to flip phase.
@@ -389,11 +401,15 @@ pub enum TrackSendInfoKey<'a> {
     SrcChan,
     /// Index, &1024 → mono, otherwise stereo pair, hwout: &512 → rearoute
     DstChan,
-    /// 
+    ///
     /// - Low 5 bits → source channel (0 → all, 1..=16)
     /// - Next 5 bits → destination channel (0 → original, 1..=16)
     MidiFlags,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
     Custom(Cow<'a, CStr>),
 }
 
@@ -401,7 +417,7 @@ impl<'a> TrackSendInfoKey<'a> {
     /// Convenience method for creating an [`Ext`] key.
     ///
     /// [`Ext`]: #variant.Ext
-    pub fn p_ext(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
+    pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
         TrackSendInfoKey::Ext(key.into().into_inner())
     }
 
@@ -462,6 +478,10 @@ pub enum EnvChunkName<'a> {
     /// Mute
     MuteEnv,
     /// Use this for all non-common envelope names.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
     Custom(Cow<'a, CStr>),
 }
 
@@ -469,8 +489,8 @@ impl<'a> EnvChunkName<'a> {
     /// Convenience method for creating a [`Custom`] key.
     ///
     /// [`Custom`]: #variant.Custom
-    pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::Custom(name.into().into_inner())
+    pub fn custom(name: impl Into<ReaperStringArg<'a>>) -> EnvChunkName<'a> {
+        EnvChunkName::Custom(name.into().into_inner())
     }
 }
 
