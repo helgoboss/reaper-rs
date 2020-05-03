@@ -508,7 +508,7 @@ impl Reaper {
                 match result {
                     TrackFx {
                         track_ref,
-                        fx_ref,
+                        fx_location,
                         param_index,
                     } => {
                         // Track exists in this project
@@ -525,13 +525,13 @@ impl Reaper {
                         };
                         // TODO We should rethink the query index methods now that we have an FxRef
                         //  enum in medium-level API
-                        let fx = match track.get_fx_by_query_index(fx_ref.into()) {
+                        let fx = match track.get_fx_by_query_index(fx_location.into()) {
                             None => return None,
                             Some(fx) => fx,
                         };
                         Some(fx.get_parameter_by_index(param_index))
                     }
-                    ItemFx { .. } => None, // TODO-low Implement,
+                    TakeFx { .. } => None, // TODO-low Implement,
                 }
             })
     }
@@ -742,13 +742,16 @@ impl Reaper {
         self.medium().functions().get_focused_fx().and_then(|res| {
             use GetFocusedFxResult::*;
             match res {
-                ItemFx { .. } => None, // TODO-low implement
-                TrackFx { track_ref, fx_ref } => {
+                TakeFx { .. } => None, // TODO-low implement
+                TrackFx {
+                    track_ref,
+                    fx_location,
+                } => {
                     // We don't know the project so we must check each project
                     self.get_projects()
                         .filter_map(|p| {
                             let track = p.get_track_by_ref(track_ref)?;
-                            let fx = track.get_fx_by_query_index(fx_ref.into())?;
+                            let fx = track.get_fx_by_query_index(fx_location.into())?;
                             if fx.window_has_focus() {
                                 Some(fx)
                             } else {

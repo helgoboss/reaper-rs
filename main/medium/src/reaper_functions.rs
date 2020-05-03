@@ -88,7 +88,7 @@ pub trait AudioThread: ThreadScope {}
 ///
 /// In REAPER and probably many other DAWs there are at least two important threads:
 ///
-/// 1. The main thread (responsible for the things like UI, driven by the UI main loop).
+/// 1. The main thread (responsible for things like UI, driven by the UI main loop).
 /// 2. The audio thread (responsible for processing audio and MIDI buffers, driven by the audio
 /// hardware)
 ///
@@ -102,9 +102,9 @@ pub trait AudioThread: ThreadScope {}
 /// thread. Of course that would be the best. In an attempt to still let the compiler help you a
 /// bit, the traits [`MainThread`] and [`AudioThread`] have been introduced. They are marker threads
 /// which are used as type bound on each method which is not thread-safe. So depending on the
-/// context we can e.g. expose an instance of [`ReaperFunctions`] which has only functions unlocked
-/// which are safe to be executed from the audio thread. The compiler will complain if you attempt
-/// to call an audio-thread-only method on `ReaperFunctions<dyn MainThread>` and vice versa.
+/// context we can expose an instance of [`ReaperFunctions`] which has only functions unlocked
+/// which are safe to be executed from e.g. the audio thread. The compiler will complain if you
+/// attempt to call an audio-thread-only method on `ReaperFunctions<dyn MainThread>` and vice versa.
 ///
 /// Of course that technique can't prevent anyone from acquiring a main-thread only instance and
 /// use it in the audio hook. But still, it adds some extra safety.
@@ -122,9 +122,9 @@ pub trait AudioThread: ThreadScope {}
 /// this is currently not being done because of possible performance implications.
 ///
 /// [`Reaper`]: struct.Reaper.html
-/// [`Reaper#functions()`]: struct.Reaper.html#method.functions
-/// [`Reaper#create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
-/// [`low()`](#method.low)
+/// [`Reaper::functions()`]: struct.Reaper.html#method.functions
+/// [`Reaper::create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
+/// [`low()`]: #method.low
 /// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
 /// [`MainThread`]: trait.MainThread.html
 /// [`AudioThread`]: trait.AudioThread.html
@@ -872,11 +872,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             0 => None,
             1 => Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_ref: fxnumber.into(),
+                fx_location: fxnumber.into(),
             }),
             2 => {
                 // TODO-low Add test
-                Some(ItemFx {
+                Some(TakeFx {
                     // Master track can't contain items
                     track_index: tracknumber - 1,
                     // Although the parameter is called itemnumber, it's zero-based (mentioned in
@@ -916,13 +916,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         if tracknumber_high_word == 0 {
             Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_ref: fxnumber.into(),
+                fx_location: fxnumber.into(),
                 // Although the parameter is called paramnumber, it's zero-based (checked)
                 param_index: paramnumber,
             })
         } else {
             // TODO-low Add test
-            Some(ItemFx {
+            Some(TakeFx {
                 // Master track can't contain items
                 track_index: (tracknumber & 0xFFFF) - 1,
                 item_index: tracknumber_high_word - 1,
@@ -2017,76 +2017,123 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum GetParameterStepSizesResult {
-    // Each of the decimal numbers are > 0
+    /// Normal (non-toggleable) parameter.
+    ///
+    /// Each of the decimal numbers are > 0.
     Normal {
         step: f64,
         small_step: Option<f64>,
         large_step: Option<f64>,
     },
+    /// Toggleable parameter.
     Toggle,
 }
 
-// Each of the attributes can be negative! These are not normalized values (0..1).
+/// Each of these values can be negative! They are not normalized.
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct GetParamExResult {
+    /// Current value.
     pub value: f64,
+    /// Minimum possible value.
     pub min_val: f64,
+    /// Center value.
     pub mid_val: f64,
+    /// Maximum possible value.
     pub max_val: f64,
 }
 
+#[derive(Clone, PartialEq, Hash, Debug)]
 pub struct EnumProjectsResult {
+    /// Project pointer.
     pub project: ReaProject,
+    /// Path to project file (only if project saved and path requested).
     pub file_path: Option<PathBuf>,
 }
 
+#[derive(Clone, PartialEq, Hash, Debug)]
 pub struct GetMidiDevNameResult {
+    /// Whether the device is currently connected.
     pub is_present: bool,
+    /// Name of the device (only if name requested).
     pub name: Option<CString>,
 }
 
+#[derive(Clone, PartialEq, Hash, Debug)]
 pub struct TrackFxGetPresetResult {
+    /// Whether the current state of the FX matches the preset.
+    ///
+    /// `false` if the current FX parameters do not exactly match the preset (in other words, if
+    /// the user loaded the preset but moved the knobs afterwards).
     pub state_matches_preset: bool,
+    /// Name of the preset.
     pub name: Option<CString>,
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct TrackFxGetPresetIndexResult {
+    /// Preset index.
     pub index: u32,
+    /// Total number of presets available.
     pub count: u32,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct VolumeAndPan {
+    /// Volume.
     pub volume: ReaperVolumeValue,
+    /// Pan.
     pub pan: ReaperPanValue,
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum GetLastTouchedFxResult {
+    /// The last touched FX is a track FX.
     TrackFx {
+        /// Track on which the FX is located.
         track_ref: TrackRef,
-        fx_ref: TrackFxLocation,
+        /// Location of the FX on that track.
+        fx_location: TrackFxLocation,
+        /// Index of the last touched parameter.
         param_index: u32,
     },
-    ItemFx {
+    /// The last touched FX is a take FX.
+    TakeFx {
+        /// Index of the track on which the item is located.
         track_index: u32,
-        /// **Attention:** It's an index so it's zero-based (the one-based result from the
-        /// low-level function is transformed).
+        /// Index of the item on that track.
+        ///
+        /// **Attention:** It's an index, so it's zero-based (the one-based result from the
+        /// low-level function has been transformed for more consistency).
         item_index: u32,
+        /// Index of the take within the item.
         take_index: u32,
+        /// Index of the FX within the take FX chain.
         fx_index: u32,
+        /// Index of the last touched parameter.
         param_index: u32,
     },
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum GetFocusedFxResult {
+    /// The currently focused FX is a track FX.
     TrackFx {
+        /// Track on which the FX is located.
         track_ref: TrackRef,
-        fx_ref: TrackFxLocation,
+        /// Location of the FX on that track.
+        fx_location: TrackFxLocation,
     },
-    ItemFx {
+    /// The currently focused FX is a take FX.
+    TakeFx {
+        /// Index of the track on which the item is located.
         track_index: u32,
+        /// Index of the item on that track.
         item_index: u32,
+        /// Index of the take within the item.
         take_index: u32,
+        /// Index of the FX within the take FX chain.
         fx_index: u32,
     },
 }

@@ -14,9 +14,10 @@ use std::ffi::CStr;
 /// command name (a globally unique string identifier for commands added by extensions which is
 /// stable even across different REAPER sessions).
 ///
+/// [`section`]: struct.KbdSectionInfo.html
+///
 /// [^command]: A command is a function that will be executed when a particular action is requested
 /// to be run.
-/// [`section`]: struct.KbdSectionInfo.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
 pub struct CommandId(pub(crate) u32);
 
@@ -353,7 +354,8 @@ impl ReaperVolumeValue {
     ///
     /// It's reasonable to assume that this isn't actually a valid value. However, REAPER doesn't
     /// prevent extensions from setting it, so you might run into it.
-    /// [`f64::NAN`]: std/primitive.f64.html#associatedconstant.NAN
+    ///
+    /// [`f64::NAN`]: /std/primitive.f64.html#associatedconstant.NAN
     pub const NAN: ReaperVolumeValue = ReaperVolumeValue(f64::NAN);
 
     /// The "soft minimum" volume (3.1622776601684e-008 = -150.0 dB).

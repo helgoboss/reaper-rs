@@ -44,7 +44,7 @@ impl MidiInput {
     // TODO-low In theory we could prevent undefined behavior by always checking the thread at
     //  first.
     pub fn get_read_buf(&self) -> MidiEventList<'_> {
-        let raw_evt_list = unsafe { self.0.as_ref() }.GetReadBuf();
+        let raw_evt_list = unsafe { self.0.as_ref().GetReadBuf() };
         MidiEventList::new(unsafe { &*raw_evt_list })
     }
 }

@@ -16,8 +16,8 @@ use super::bindings::root::{midi_Input, MIDI_event_t, MIDI_eventlist};
 // REAPER).
 impl midi_Input {
     // TODO-doc
-    pub fn GetReadBuf(&self) -> *mut MIDI_eventlist {
-        unsafe { midi_Input_GetReadBuf(self as *const _ as *mut _) }
+    pub unsafe fn GetReadBuf(&self) -> *mut MIDI_eventlist {
+        midi_Input_GetReadBuf(self as *const _ as *mut _)
     }
 }
 
@@ -27,6 +27,6 @@ impl MIDI_eventlist {
     // by design this is out of scope of the low-level API. Medium-level API has the responsibility
     // to make things safe to use, low-level API consequently has an unsafe "pointer nature".
     pub unsafe fn EnumItems(&self, bpos: *mut ::std::os::raw::c_int) -> *mut MIDI_event_t {
-        unsafe { MIDI_eventlist_EnumItems(self as *const _ as *mut _, bpos) }
+        MIDI_eventlist_EnumItems(self as *const _ as *mut _, bpos)
     }
 }
