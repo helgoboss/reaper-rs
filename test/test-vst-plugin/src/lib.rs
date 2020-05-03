@@ -9,7 +9,7 @@ use reaper_rs_medium::{
 use std::cell::RefCell;
 use std::panic::RefUnwindSafe;
 use std::rc::{Rc, Weak};
-use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
@@ -53,7 +53,7 @@ struct MyOnAudioBuffer {
 
 impl MediumOnAudioBuffer for MyOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
-        if (self.counter % 100 == 0) {
+        if self.counter % 100 == 0 {
             self.sender.send(format!(
                 "Counter: {}, Args: {:?}, Channels: {:?}\n",
                 self.counter,
@@ -68,7 +68,7 @@ impl MediumOnAudioBuffer for MyOnAudioBuffer {
 struct MyHookPostCommand;
 
 impl MediumHookPostCommand for MyHookPostCommand {
-    fn call(command_id: CommandId, flag: i32) {
+    fn call(command_id: CommandId, _flag: i32) {
         println!("Command {:?} executed", command_id)
     }
 }

@@ -1,19 +1,19 @@
 use std::borrow::Cow;
-use std::cell::{Cell, Ref, RefCell, RefMut, UnsafeCell};
+use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::convert::{TryFrom, TryInto};
+
 use std::ffi::{CStr, CString};
-use std::os::raw::{c_int, c_ushort, c_void};
-use std::ptr::{null, null_mut, NonNull};
+
+use std::ptr::{NonNull};
 use std::rc::Rc;
-use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{mpsc, Arc, Once, Weak};
+use std::sync::mpsc::{Sender};
+use std::sync::{mpsc, Arc, Weak};
 use std::thread;
 use std::thread::ThreadId;
 
-use c_str_macro::c_str;
-use num_enum::IntoPrimitive;
+
+
 
 use rxrust::prelude::*;
 
@@ -28,18 +28,18 @@ use crate::{
     create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Section,
     Track,
 };
-use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageFactory, ShortMessageType};
+use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
 use reaper_rs_low;
 use reaper_rs_low::raw;
-use reaper_rs_low::raw::{audio_hook_register_t, gaccel_register_t, ACCEL};
-use reaper_rs_low::{firewall, ReaperPluginContext};
+
+use reaper_rs_low::{ReaperPluginContext};
 use reaper_rs_medium;
-use reaper_rs_medium::PluginRegistration::ToggleAction;
+
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    AudioThread, CommandId, GaccelRegister, GetFocusedFxResult, GetLastTouchedFxResult,
+    AudioThread, CommandId, GetFocusedFxResult, GetLastTouchedFxResult,
     GlobalAutomationModeOverride, Hwnd, MediumAccel, MediumGaccelRegister, MediumHookCommand,
     MediumHookPostCommand, MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult,
     MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef,
@@ -575,7 +575,7 @@ impl Reaper {
         // removed from the command hash map. Because even if the command still exists in memory,
         // if it's not in the map anymore, REAPER won't be able to find it.
         let mut command_by_id = self.command_by_id.borrow_mut();
-        if let Some(command) = command_by_id.get_mut(&command_id) {
+        if let Some(_command) = command_by_id.get_mut(&command_id) {
             self.medium_mut()
                 .plugin_register_remove_gaccel(gaccel_handle);
             command_by_id.remove(&command_id);

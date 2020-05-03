@@ -2,7 +2,7 @@ use crate::fx::Fx;
 use crate::guid::Guid;
 use crate::{get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track};
 use c_str_macro::c_str;
-use reaper_rs_low::raw;
+
 use reaper_rs_medium::TrackInfoKey::{
     Mute, Pan, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber, Vol,
 };
@@ -23,9 +23,9 @@ use std::cell::{Cell, RefCell, RefMut};
 use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
-use std::os::raw::c_void;
+
 use std::panic::RefUnwindSafe;
-use std::ptr::null_mut;
+
 use std::sync::mpsc::{Receiver, Sender};
 
 const BULK_TASK_EXECUTION_COUNT: usize = 100;

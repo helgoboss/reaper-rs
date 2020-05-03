@@ -3,7 +3,7 @@
 #![allow(non_snake_case)]
 
 use super::bindings::root::reaper_rs_midi::*;
-use super::bindings::root::{midi_Input, midi_Output, MIDI_event_t, MIDI_eventlist};
+use super::bindings::root::{midi_Input, MIDI_event_t, MIDI_eventlist};
 
 // TODO-doc
 // The difference from MediaTrack and ReaProject is that this is a virtual base class in C++ which

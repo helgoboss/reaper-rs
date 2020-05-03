@@ -1,4 +1,4 @@
-use c_str_macro::c_str;
+
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
@@ -9,7 +9,7 @@ use reaper_rs_low::{
     Reaper,
 };
 
-use crate::infostruct_keeper::InfostructKeeper;
+
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
@@ -28,18 +28,18 @@ use crate::{
     TrackRef, TrackSendCategory, TrackSendDirection, TrackSendInfoKey, TransferBehavior,
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
-use enumflags2::BitFlags;
+
 use helgoboss_midi::ShortMessage;
 use reaper_rs_low;
 use reaper_rs_low::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, GUID, UNDO_STATE_ALL,
 };
-use std::collections::{HashMap, HashSet};
+
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
-use std::rc::Rc;
+
 
 pub trait ThreadScope {}
 pub trait MainThread: ThreadScope {}
@@ -124,7 +124,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        use ProjectRef::*;
+        
         let idx = proj_ref.into();
         if projfn_out_optional_sz == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
@@ -1937,7 +1937,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub fn get_midi_input<R>(
         &self,
         idx: MidiInputDeviceId,
-        mut f: impl FnOnce(&MidiInput) -> R,
+        f: impl FnOnce(&MidiInput) -> R,
     ) -> Option<R>
     where
         S: AudioThread,

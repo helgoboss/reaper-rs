@@ -8,9 +8,9 @@ use reaper_rs_medium::SectionContext::Sec;
 use reaper_rs_medium::WindowContext::Win;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
-use std::convert::TryInto;
+
 use std::ffi::{CStr, CString};
-use std::ptr::null_mut;
+
 
 #[derive(Debug, Copy, Clone)]
 struct RuntimeData {

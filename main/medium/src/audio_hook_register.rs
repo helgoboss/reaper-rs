@@ -2,7 +2,7 @@ use crate::Hz;
 use reaper_rs_low::raw::audio_hook_register_t;
 use reaper_rs_low::{firewall, raw};
 use std::any::Any;
-use std::marker::PhantomData;
+
 use std::os::raw::c_void;
 use std::ptr::{null_mut, NonNull};
 

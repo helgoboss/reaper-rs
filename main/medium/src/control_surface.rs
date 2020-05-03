@@ -1,19 +1,18 @@
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor,
-    ReaperControlSurface, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
+    require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
     ReaperVolumeValue, TrackFxChainType, TrackFxLocation,
 };
-use c_str_macro::c_str;
-use enumflags2::_internal::core::convert::TryFrom;
+
+
 use reaper_rs_low;
-use reaper_rs_low::{raw, IReaperControlSurface};
+use reaper_rs_low::{raw};
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
-use std::ptr::{null_mut, NonNull};
+use std::ptr::{null_mut};
 
 /// Consumers need to implement this trait in order to get notified about various REAPER events.
 ///
@@ -64,49 +63,49 @@ pub trait MediumReaperControlSurface: RefUnwindSafe {
     fn set_track_list_change(&self) {}
 
     /// Called when the volume of a track has changed.
-    fn set_surface_volume(&self, args: SetSurfaceVolumeArgs) {}
+    fn set_surface_volume(&self, _args: SetSurfaceVolumeArgs) {}
 
     /// Called when the pan of a track has changed.
-    fn set_surface_pan(&self, args: SetSurfacePanArgs) {}
+    fn set_surface_pan(&self, _args: SetSurfacePanArgs) {}
 
     /// Called when a track has been muted or unmuted.
-    fn set_surface_mute(&self, args: SetSurfaceMuteArgs) {}
+    fn set_surface_mute(&self, _args: SetSurfaceMuteArgs) {}
 
     /// Called when a track has been selected or unselected.
-    fn set_surface_selected(&self, args: SetSurfaceSelectedArgs) {}
+    fn set_surface_selected(&self, _args: SetSurfaceSelectedArgs) {}
 
     /// Called when a track has been soloed or unsoloed.
     ///
     /// If it's the master track, it means "any solo".
-    fn set_surface_solo(&self, args: SetSurfaceSoloArgs) {}
+    fn set_surface_solo(&self, _args: SetSurfaceSoloArgs) {}
 
     /// Called when a track has been armed or unarmed for recording.
-    fn set_surface_rec_arm(&self, args: SetSurfaceRecArmArgs) {}
+    fn set_surface_rec_arm(&self, _args: SetSurfaceRecArmArgs) {}
 
     /// Called when the transport state has changed (playing, paused, recording).
-    fn set_play_state(&self, args: SetPlayStateArgs) {}
+    fn set_play_state(&self, _args: SetPlayStateArgs) {}
 
     /// Called when repeat has been enabled or disabled.
-    fn set_repeat_state(&self, args: SetRepeatStateArgs) {}
+    fn set_repeat_state(&self, _args: SetRepeatStateArgs) {}
 
     /// Called when a track name has changed.
-    fn set_track_title(&self, args: SetTrackTitleArgs) {}
+    fn set_track_title(&self, _args: SetTrackTitleArgs) {}
 
-    fn get_touch_state(&self, args: GetTouchStateArgs) -> bool {
+    fn get_touch_state(&self, _args: GetTouchStateArgs) -> bool {
         false
     }
 
     /// Called when the automation mode of the current track has changed.
-    fn set_auto_mode(&self, args: SetAutoModeArgs) {}
+    fn set_auto_mode(&self, _args: SetAutoModeArgs) {}
 
     /// Should flush the control states.
     fn reset_cached_vol_pan_states(&self) {}
 
     /// Called when a track has been selected.
-    fn on_track_selection(&self, args: OnTrackSelectionArgs) {}
+    fn on_track_selection(&self, _args: OnTrackSelectionArgs) {}
 
     /// Should return whether the given modifier key is currently pressed on the surface.
-    fn is_key_down(&self, args: IsKeyDownArgs) -> bool {
+    fn is_key_down(&self, _args: IsKeyDownArgs) -> bool {
         false
     }
 
@@ -122,12 +121,12 @@ pub trait MediumReaperControlSurface: RefUnwindSafe {
     /// Implementing this is unsafe because you need to deal with raw pointers.
     ///
     /// [`args.call`]: struct.ExtendedArgs.html#structfield.call
-    unsafe fn extended(&self, args: ExtendedArgs) -> i32 {
+    unsafe fn extended(&self, _args: ExtendedArgs) -> i32 {
         0
     }
 
     /// Called when the input monitoring mode of a track has has changed.
-    fn ext_set_input_monitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
+    fn ext_set_input_monitor(&self, _args: ExtSetInputMonitorArgs) -> i32 {
         0
     }
 
@@ -135,54 +134,54 @@ pub trait MediumReaperControlSurface: RefUnwindSafe {
     ///
     /// For REAPER < 5.95 this is also called for an FX in the input FX chain. In this case there's
     /// no way to know whether the given FX index refers to the normal or input FX chain.
-    fn ext_set_fx_param(&self, args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param(&self, _args: ExtSetFxParamArgs) -> i32 {
         0
     }
 
     /// Called when a parameter of an FX in the input FX chain has changed its value.
     ///
     /// Only called for REAPER >= 5.95.
-    fn ext_set_fx_param_rec_fx(&self, args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param_rec_fx(&self, _args: ExtSetFxParamArgs) -> i32 {
         0
     }
 
     /// Called when a an FX has been enabled or disabled.
-    fn ext_set_fx_enabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
+    fn ext_set_fx_enabled(&self, _args: ExtSetFxEnabledArgs) -> i32 {
         0
     }
 
     /// Called when the volume of a track send has changed.
-    fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
+    fn ext_set_send_volume(&self, _args: ExtSetSendVolumeArgs) -> i32 {
         0
     }
 
     /// Called when the pan of a track send has changed.
-    fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
+    fn ext_set_send_pan(&self, _args: ExtSetSendPanArgs) -> i32 {
         0
     }
 
     /// Called when a certain FX has gained focus.
-    fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
+    fn ext_set_focused_fx(&self, _args: ExtSetFocusedFxArgs) -> i32 {
         0
     }
 
     /// Called when a certain FX has been touched.
-    fn ext_set_last_touched_fx(&self, args: ExtSetLastTouchedFxArgs) -> i32 {
+    fn ext_set_last_touched_fx(&self, _args: ExtSetLastTouchedFxArgs) -> i32 {
         0
     }
 
     /// Called when the user interface of a certain FX has been opened.
-    fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
+    fn ext_set_fx_open(&self, _args: ExtSetFxOpenArgs) -> i32 {
         0
     }
 
     /// Called when an FX has been added, removed or when it changed its position in the chain.
-    fn ext_set_fx_change(&self, args: ExtSetFxChangeArgs) -> i32 {
+    fn ext_set_fx_change(&self, _args: ExtSetFxChangeArgs) -> i32 {
         0
     }
 
     /// Called when the master tempo or play rate has changed.
-    fn ext_set_bpm_and_play_rate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
+    fn ext_set_bpm_and_play_rate(&self, _args: ExtSetBpmAndPlayRateArgs) -> i32 {
         0
     }
 }

@@ -1,9 +1,9 @@
 use std::cell::Cell;
 
-use std::convert::TryFrom;
+
 use std::ffi::{CStr, CString};
 use std::os::raw::c_void;
-use std::ptr::null_mut;
+
 
 use c_str_macro::c_str;
 
@@ -15,14 +15,14 @@ use crate::guid::Guid;
 use crate::track_send::TrackSend;
 
 use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
-use reaper_rs_low::raw;
-use reaper_rs_low::raw::{CSURF_EXT_SETINPUTMONITOR, GUID};
+
+
 
 use reaper_rs_medium::NotificationBehavior::NotifyAll;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::SendTarget::OtherTrack;
 use reaper_rs_medium::TrackInfoKey::{
-    Mute, Name, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber,
+    Mute, Name, RecArm, RecInput, RecMon, Selected, Solo,
 };
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
@@ -150,7 +150,7 @@ impl Track {
         // Only for triggering notification (as manual setting the rec input would also trigger it)
         // This doesn't work for other surfaces but they are also not interested in record input
         // changes.
-        let mut rec_mon = unsafe {
+        let _rec_mon = unsafe {
             reaper
                 .medium()
                 .functions()

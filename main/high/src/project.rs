@@ -1,17 +1,17 @@
 use std::ffi::{CStr, CString};
-use std::os::raw::c_void;
-use std::ptr::null_mut;
+
+
 
 use crate::guid::Guid;
 use crate::{Reaper, Tempo, Track};
-use reaper_rs_low::raw;
+
 use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_rs_medium::{
-    MasterTrackBehavior, ProjectRef, ReaProject, ReaperPointer, TrackDefaultsBehavior, TrackRef,
+    MasterTrackBehavior, ProjectRef, ReaProject, TrackDefaultsBehavior, TrackRef,
     UndoBehavior,
 };
 use std::path::PathBuf;
-use std::str::FromStr;
+
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Project {

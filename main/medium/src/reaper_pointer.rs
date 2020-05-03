@@ -77,7 +77,7 @@ impl<'a> From<ReaperPointer<'a>> for Cow<'a, CStr> {
             MediaItemTake(_) => c_str!("MediaItem_Take*").into(),
             TrackEnvelope(_) => c_str!("TrackEnvelope*").into(),
             PcmSource(_) => c_str!("PCM_source*").into(),
-            Custom { pointer, type_name } => concat_c_strs(type_name.as_ref(), c_str!("*")).into(),
+            Custom { pointer: _, type_name } => concat_c_strs(type_name.as_ref(), c_str!("*")).into(),
         }
     }
 }

@@ -1,5 +1,5 @@
 use crate::MidiInputDeviceId;
-use derive_more::Into;
+
 use helgoboss_midi::Channel;
 use std::convert::{TryFrom, TryInto};
 

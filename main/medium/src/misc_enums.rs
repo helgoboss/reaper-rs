@@ -1,5 +1,5 @@
 use crate::{
-    concat_c_strs, GaccelRegister, HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo,
+    HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo,
     MediaTrack, MidiOutputDeviceId, ReaProject, ReaperControlSurface, ReaperStringArg,
     ToggleActionFn,
 };

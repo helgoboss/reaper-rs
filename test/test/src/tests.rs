@@ -1,24 +1,24 @@
 use std::convert::TryFrom;
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr};
 use std::iter;
 use std::ops::Deref;
-use std::ptr::null_mut;
+
 
 use c_str_macro::c_str;
 
 use reaper_rs_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, MidiInputDevice, Pan, Reaper, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, Pan, Reaper, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
 use crate::api::{step, TestStep};
 
 use super::mock::observe_invocations;
-use crate::api::VersionRestriction::{AllVersions, Min};
+use crate::api::VersionRestriction::{AllVersions};
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
-use reaper_rs_medium::NotificationBehavior::NotifyAll;
+
 use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
     ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName, FxAddByNameBehavior,
@@ -29,9 +29,9 @@ use reaper_rs_medium::{
     TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
     TransferBehavior, UndoBehavior, ValueChange,
 };
-use std::os::raw::c_void;
+
 use std::rc::Rc;
-use std::time::Duration;
+
 
 /// Creates all integration test steps to be executed. The order matters!
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
@@ -372,8 +372,8 @@ fn register_and_unregister_toggle_action() -> TestStep {
             });
             let action = reaper.get_action_by_command_name(c_str!("reaperRsTest2").into());
             // Then
-            let action_index = action.get_index();
-            let command_id = action.get_command_id();
+            let _action_index = action.get_index();
+            let _command_id = action.get_command_id();
             check!(action.is_available());
             check_eq!(mock.get_invocation_count(), 0);
             check!(!action.is_on());

@@ -7,7 +7,7 @@ use crate::raw;
 use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
 use std::ptr::{null, null_mut, NonNull};
-use std::sync::Once;
+
 
 /// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`. An implementation
 /// of this trait can be passed to [`install_control_surface`](fn.install_control_surface.html).
@@ -160,7 +160,7 @@ extern "C" fn CloseNoReset(callback_target: *mut Box<dyn IReaperControlSurface>)
 }
 
 #[no_mangle]
-extern "C" fn Run(mut callback_target: *mut Box<dyn IReaperControlSurface>) {
+extern "C" fn Run(callback_target: *mut Box<dyn IReaperControlSurface>) {
     // "Decoding" the thin pointer is not necessary right now because we have a static variable.
     // However, we leave it. Might come in handy one day to support multiple control surfaces
     // (see https://users.rust-lang.org/t/sending-a-boxed-trait-over-ffi/21708/6)
