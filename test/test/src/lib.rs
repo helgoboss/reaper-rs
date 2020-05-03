@@ -9,16 +9,12 @@ use crate::tests::create_test_steps;
 use reaper_rs_high::Reaper;
 use rxrust::prelude::*;
 
-
-
 use std::collections::VecDeque;
 
 use reaper_rs_medium::ReaperStringArg;
 
-
 use std::iter::FromIterator;
 use std::ops::Deref;
-
 
 pub fn execute_integration_test() {
     let reaper = Reaper::get();

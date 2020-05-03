@@ -1,9 +1,7 @@
 use std::cell::Cell;
 
-
 use std::ffi::{CStr, CString};
 use std::os::raw::c_void;
-
 
 use c_str_macro::c_str;
 
@@ -16,14 +14,10 @@ use crate::track_send::TrackSend;
 
 use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
 
-
-
 use reaper_rs_medium::NotificationBehavior::NotifyAll;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::SendTarget::OtherTrack;
-use reaper_rs_medium::TrackInfoKey::{
-    Mute, Name, RecArm, RecInput, RecMon, Selected, Solo,
-};
+use reaper_rs_medium::TrackInfoKey::{Mute, Name, RecArm, RecInput, RecMon, Selected, Solo};
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,

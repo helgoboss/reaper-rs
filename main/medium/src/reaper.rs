@@ -32,15 +32,24 @@ use reaper_rs_low;
 use reaper_rs_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
 
-/// This is the medium-level API access point to all REAPER functions. In order to use it, you first
-/// must obtain an instance of this struct by invoking [`new`](struct.Reaper.html#method.new).
+/// This is the main hub for accessing medium-level API functions.
 ///
-/// It's always possible that a function from the low-level API is missing in the medium-level one.
-/// That's because unlike the low-level API, the medium-level API is hand-written and a perpetual
-/// work in progress. If you can't find the function that you need, you can always resort to the
-/// low-level API by navigating to [`low`](struct.Reaper.html#structfield.functions.low()). Of
-/// course you are welcome to contribute to bring the medium-level API on par with the low-level
-/// one.
+/// In order to use this struct, you first must obtain an instance of it by invoking [`new()`].
+///
+/// This struct itself is limited to REAPER functions for registering/unregistering certain things.
+/// You can access all the other functions by calling [`functions()`].
+///
+/// # Design
+///
+/// Functions for registering/unregistering things have been separated from the rest because they
+/// require more than just access to REAPER functions. They also need data structures to keep
+/// track of the registered things and to offer them a warm and cosy place in memory. As a result,
+/// the struct containing those functions gets pretty important, needs to be mutable and can't just
+/// be cloned ad libitum.
+///
+/// [`new()`]: #method.new
+/// [`functions()`]: #method.functions
+#[derive(Debug)]
 pub struct Reaper {
     functions: ReaperFunctions<dyn MainThread>,
     gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
@@ -51,8 +60,9 @@ pub struct Reaper {
 }
 
 impl Reaper {
-    /// Creates a new instance by getting hold of a
-    /// [`reaper_rs_low::Reaper`](../../low_level/struct.Reaper.html) instance.
+    /// Creates a new instance by getting hold of a [low-level `Reaper`] instance.
+    ///
+    /// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
     pub fn new(low: reaper_rs_low::Reaper) -> Reaper {
         Reaper {
             functions: ReaperFunctions::new(low),
@@ -64,11 +74,13 @@ impl Reaper {
         }
     }
 
-    // TODO-medium Consider using readonly crate
+    /// Gives access to all REAPER functions which can be safely executed in the main thread.
     pub fn functions(&self) -> &ReaperFunctions<dyn MainThread> {
         &self.functions
     }
 
+    /// Creates a new container of REAPER functions with only those unlocked that can be safely
+    /// executed in the audio thread.
     pub fn create_real_time_functions(&self) -> ReaperFunctions<dyn AudioThread> {
         ReaperFunctions::new(self.functions.low().clone())
     }

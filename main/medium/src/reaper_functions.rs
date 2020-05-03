@@ -34,11 +34,12 @@ use reaper_rs_low::raw::{
 };
 
 use std::convert::{TryFrom, TryInto};
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 
-pub trait ThreadScope {}
+pub trait ThreadScope: Debug {}
 pub trait MainThread: ThreadScope {}
 pub trait AudioThread: ThreadScope {}
 pub trait AllThreads: MainThread + AudioThread {}
@@ -68,14 +69,21 @@ pub trait AllThreads: MainThread + AudioThread {}
 /// audio-thread functions in a trait CallableFromAudioThread as default functions and create
 /// a struct that inherits those default functions. Disadvantage: Consumer always would have to
 /// bring the trait into scope to see the functions. That's confusing.
-#[derive(Clone)]
+///
+/// It's always possible that a function from the low-level API is missing in the medium-level one.
+/// That's because unlike the low-level API, the medium-level API is hand-written and a perpetual
+/// work in progress. If you can't find the function that you need, you can always resort to the
+/// low-level API by navigating to [`low`](struct.Reaper.html#structfield.functions.low()). Of
+/// course you are welcome to contribute to bring the medium-level API on par with the low-level
+/// one.
+#[derive(Clone, Debug)]
 pub struct ReaperFunctions<S: ?Sized + ThreadScope = dyn MainThread> {
     low: reaper_rs_low::Reaper,
     p: PhantomData<S>,
 }
 
 impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
-    pub fn new(low: reaper_rs_low::Reaper) -> ReaperFunctions<S> {
+    pub(crate) fn new(low: reaper_rs_low::Reaper) -> ReaperFunctions<S> {
         ReaperFunctions {
             low,
             p: PhantomData,

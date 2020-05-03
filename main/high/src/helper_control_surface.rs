@@ -30,6 +30,7 @@ use std::sync::mpsc::{Receiver, Sender};
 
 const BULK_TASK_EXECUTION_COUNT: usize = 100;
 
+#[derive(Debug)]
 pub(super) struct HelperControlSurface {
     task_sender: Sender<MainThreadTask>,
     task_receiver: Receiver<MainThreadTask>,
@@ -52,6 +53,7 @@ enum State {
     PropagatingTrackSetChanges,
 }
 
+#[derive(Debug)]
 struct TrackData {
     volume: ReaperVolumeValue,
     pan: ReaperPanValue,
@@ -65,7 +67,7 @@ struct TrackData {
     guid: Guid,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 struct FxChainPair {
     input_fx_guids: HashSet<Guid>,
     output_fx_guids: HashSet<Guid>,

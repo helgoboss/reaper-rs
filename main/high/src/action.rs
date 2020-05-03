@@ -11,7 +11,6 @@ use std::cell::{Ref, RefCell};
 
 use std::ffi::{CStr, CString};
 
-
 #[derive(Debug, Copy, Clone)]
 struct RuntimeData {
     section: Section,

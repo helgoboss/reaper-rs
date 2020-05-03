@@ -73,6 +73,7 @@ impl MediumHookPostCommand for MyHookPostCommand {
     }
 }
 
+#[derive(Debug)]
 struct MyControlSurface {
     reaper: Weak<RefCell<reaper_rs_medium::Reaper>>,
     receiver: Receiver<String>,

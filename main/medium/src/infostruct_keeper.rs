@@ -3,6 +3,7 @@ use std::ptr::NonNull;
 
 // Many infostructs are not self-contained (completely owned). This container takes only
 // self-contained things (T). Those self-contained things expose the infostructs (R).
+#[derive(Debug)]
 pub struct InfostructKeeper<T: AsRef<R>, R> {
     // Maps from a pointer (used as sort of type-safe address/handle) to the struct R that's
     // passed to REAPER when doing plugin_register(). The owned struct T is boxed in order to

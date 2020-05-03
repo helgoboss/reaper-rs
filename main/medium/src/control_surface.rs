@@ -10,6 +10,7 @@ use reaper_rs_low::raw;
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CStr;
+use std::fmt::Debug;
 use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
 use std::ptr::null_mut;
@@ -21,7 +22,7 @@ use std::ptr::null_mut;
 /// See [`plugin_register_add_csurf_inst`].
 ///
 /// [`plugin_register_add_csurf_inst`]: struct.Reaper.html#method.plugin_register_add_csurf_inst
-pub trait MediumReaperControlSurface: RefUnwindSafe {
+pub trait MediumReaperControlSurface: RefUnwindSafe + Debug {
     /// Should return the control surface type.
     ///
     /// Must be a simple unique string with only A-Z, 0-9, no spaces or other characters.
@@ -394,6 +395,7 @@ pub enum VersionDependentTrackFxLocation {
     New(TrackFxLocation),
 }
 
+#[derive(Debug)]
 pub(crate) struct DelegatingControlSurface {
     delegate: Box<dyn MediumReaperControlSurface>,
     // Capabilities depending on REAPER version

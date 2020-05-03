@@ -4,10 +4,10 @@
 use super::{firewall, raw::MediaTrack};
 use crate::raw;
 
+use std::fmt::Debug;
 use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
 use std::ptr::{null, null_mut, NonNull};
-
 
 /// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`. An implementation
 /// of this trait can be passed to [`install_control_surface`](fn.install_control_surface.html).
@@ -39,7 +39,7 @@ use std::ptr::{null, null_mut, NonNull};
 /// therefore use some unsafe code to prevent the panic. They might find out that they want to check
 /// for reentrancy by using `try_borrow_mut()`. Or they might find out that they want to
 /// avoid this situation by just deferring the event handling to the next main loop cycle.
-pub trait IReaperControlSurface: RefUnwindSafe {
+pub trait IReaperControlSurface: RefUnwindSafe + Debug {
     fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
         null()
     }

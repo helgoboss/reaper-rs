@@ -5,15 +5,12 @@ use std::collections::HashMap;
 
 use std::ffi::{CStr, CString};
 
-use std::ptr::{NonNull};
+use std::ptr::NonNull;
 use std::rc::Rc;
-use std::sync::mpsc::{Sender};
+use std::sync::mpsc::Sender;
 use std::sync::{mpsc, Arc, Weak};
 use std::thread;
 use std::thread::ThreadId;
-
-
-
 
 use rxrust::prelude::*;
 
@@ -33,7 +30,7 @@ use once_cell::sync::Lazy;
 use reaper_rs_low;
 use reaper_rs_low::raw;
 
-use reaper_rs_low::{ReaperPluginContext};
+use reaper_rs_low::ReaperPluginContext;
 use reaper_rs_medium;
 
 use reaper_rs_medium::ProjectContext::Proj;
