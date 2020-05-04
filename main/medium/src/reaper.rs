@@ -18,14 +18,14 @@ use crate::{
     MainThread, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId,
-    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, PluginRegistration,
-    ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctions,
+    MidiOutputDeviceId, NotRegistered, NotificationBehavior, PlaybackSpeedFactor,
+    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctions,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
-    TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    ReaperVolumeValue, RecordArmState, RecordingInput, RegistrationFailed, SectionContext,
+    SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory,
+    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
+    VolumeSliderValue, WindowContext,
 };
 
 use reaper_rs_low;
@@ -101,19 +101,59 @@ impl Reaper {
         ReaperFunctions::new(self.functions.low().clone())
     }
 
-    // Kept return value type i32 because meaning of return value depends very much on the actual
-    // thing which is registered and probably is not safe to generalize.
-    // Unregistering is optional! It will be done anyway on Drop via RAII.
-    pub unsafe fn plugin_register_add(&mut self, reg: PluginRegistration) -> i32 {
+    /// This is the primary function for plug-ins to register things.
+    ///
+    /// *Things* can be keyboard shortcuts, project importers etc. Typically you register things
+    /// when the plug-in is loaded.
+    ///
+    /// It is not recommended to use this function directly because it's unsafe. Consider using
+    /// the safe convenience functions instead. They all start with `plugin_register_add_`.
+    ///
+    /// The meaning of the return value depends very much on the actual thing being registered. In
+    /// most cases it just returns 1. In any case it's not 0, *reaper-rs* translates this into an
+    /// error.
+    ///
+    /// Also see [`plugin_register_remove()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer or if it dangles during the time it
+    /// is registered. So you must ensure that the registered thing lives long enough and
+    /// has a stable address in memory. Additionally, mutation of the thing while it is registered
+    /// can lead to subtle bugs.
+    ///
+    /// [`plugin_register_remove()`]: #method.plugin_register_remove
+    pub unsafe fn plugin_register_add(
+        &mut self,
+        reg: PluginRegistration,
+    ) -> Result<i32, RegistrationFailed> {
         self.plugin_registrations.insert(reg.clone().into_owned());
         let infostruct = reg.ptr_to_raw();
         let result = self
             .functions
             .low()
             .plugin_register(reg.key_into_raw().as_ptr(), infostruct);
-        result
+        if result == 0 {
+            return Err(RegistrationFailed);
+        }
+        Ok(result)
     }
 
+    /// Unregisters things that you have registered with [`plugin_register_add()`].
+    ///
+    /// Please note that unregistering things manually just for cleaning up is unnecessary in most
+    /// situations because *reaper-rs* takes care of automatically unregistering everything when
+    /// this struct is dropped (RAII). This happens even when using the unsafe function variants.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    ///
+    /// [`plugin_register_add()`]: #method.plugin_register_add
     pub unsafe fn plugin_register_remove(&mut self, reg: PluginRegistration) -> i32 {
         let infostruct = reg.ptr_to_raw();
         let name_with_minus = concat_c_strs(c_str!("-"), reg.clone().key_into_raw().as_ref());
@@ -125,15 +165,25 @@ impl Reaper {
         result
     }
 
-    pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(&mut self) -> Result<(), ()> {
-        let result = unsafe {
+    /// Registers a hook command.
+    ///
+    /// REAPER calls hook commands whenever an action is requested to be run.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(
+        &mut self,
+    ) -> Result<(), RegistrationFailed> {
+        unsafe {
             self.plugin_register_add(PluginRegistration::HookCommand(
                 delegating_hook_command::<T>,
-            ))
-        };
-        ok_if_one(result)
+            ))?;
+        }
+        Ok(())
     }
 
+    /// Unregisters a hook command.
     pub fn plugin_register_remove_hookcommand<T: MediumHookCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::HookCommand(
@@ -142,15 +192,25 @@ impl Reaper {
         }
     }
 
-    pub fn plugin_register_add_toggleaction<T: MediumToggleAction>(&mut self) -> Result<(), ()> {
-        let result = unsafe {
+    /// Registers a toggle action.
+    ///
+    /// REAPER calls toggle actions whenever it wants to know the on/off state of an action.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_toggleaction<T: MediumToggleAction>(
+        &mut self,
+    ) -> Result<(), RegistrationFailed> {
+        unsafe {
             self.plugin_register_add(PluginRegistration::ToggleAction(
                 delegating_toggle_action::<T>,
-            ))
+            ))?
         };
-        ok_if_one(result)
+        Ok(())
     }
 
+    /// Unregisters a toggle action.
     pub fn plugin_register_remove_toggleaction<T: MediumToggleAction>(&mut self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::ToggleAction(
@@ -159,17 +219,25 @@ impl Reaper {
         }
     }
 
+    /// Registers a hook post command.
+    ///
+    /// REAPER calls hook post commands whenever an action of the main section has been performed.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
     pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(
         &mut self,
-    ) -> Result<(), ()> {
-        let result = unsafe {
+    ) -> Result<(), RegistrationFailed> {
+        unsafe {
             self.plugin_register_add(PluginRegistration::HookPostCommand(
                 delegating_hook_post_command::<T>,
-            ))
+            ))?
         };
-        ok_if_one(result)
+        Ok(())
     }
 
+    /// Unregisters a hook post command.
     pub fn plugin_register_remove_hookpostcommand<T: MediumHookPostCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(PluginRegistration::HookPostCommand(
@@ -178,72 +246,98 @@ impl Reaper {
         }
     }
 
-    // Returns the assigned command index.
-    // If the command ID is already used, it just returns the index which has been assigned before.
-    // Passing an empty string actually works (!). If a null pointer is passed, 0 is returned, but
-    // we can't do that using this signature. If a very large string is passed, it works. If a
-    // number of a built-in command is passed, it works.
-    //
-    ///  which is unique to the current REAPER
-    //     /// session.
+    /// Registers a command ID for the given command name.
+    ///
+    /// The given command name must be a unique identifier with only A-Z and 0-9.
+    ///
+    /// Returns the assigned command ID, an ID which is guaranteed to be unique within the current
+    /// REAPER session. If the command name is already in use, it just seems to return the ID
+    /// which has been assigned before.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed (e.g. because not supported or out of actions).
     pub fn plugin_register_add_command_id<'a>(
         &mut self,
         command_name: impl Into<ReaperStringArg<'a>>,
-    ) -> CommandId {
+    ) -> Result<CommandId, RegistrationFailed> {
         let raw_id = unsafe {
             self.plugin_register_add(PluginRegistration::CommandId(
                 command_name.into().into_inner(),
-            )) as u32
+            ))? as u32
         };
-        CommandId(raw_id)
+        Ok(CommandId(raw_id))
     }
 
-    // # Old description (not valid anymore, problem solved)
-    //
-    // A reference is in line here (vs. pointer) because gaccel_register_t is a struct created on
-    // our (Rust) side. It doesn't necessary have to be static because we might just write a
-    // script which registers something only shortly and unregisters it again later.
-    //
-    // gaccel_register_t and similar structs registered with plugin_register cannot be,
-    // lifted to medium-level API style. Because at the end of the day
-    // REAPER *needs* the correct struct here. Also, with structs we can't do any indirection as
-    // with function calls. So at a maxium we can provide some optionally usable
-    // factory method for creating such structs. The consumer must ensure that it lives long
-    // enough!
-    //
-    // Unsafe because consumer must ensure proper lifetime of given reference.
-    //
-    // # New description
-    //
-    // Medium-level API takes care now of keeping the registered infostructs. The API consumer
-    // doesn't need to take care of maintaining a stable address. It's also more safe because
-    // the API consumer needs to give up ownership of the thing given and read or even mutated by
-    // REAPER. This is why we can make this function save! No lifetime worries anymore.
+    /// Registers a an action into the main section.
+    ///
+    /// This consists of a command ID, a description and a default binding for it. It doesn't
+    /// include the actual code to be executed when the action runs (use
+    /// [`plugin_register_add_hookcommand()`] for that).
+    ///
+    /// This function returns a handle which you can use to unregister the action at any time via
+    /// [`plugin_register_remove_gaccel()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    ///
+    /// # Design
+    ///
+    /// This function takes ownership of the passed struct in order to take complete care of it.
+    /// Compared to the alternative of taking a reference or pointer, that releases the API
+    /// consumer from the responsibilities to guarantee a long enough lifetime and to maintain a
+    /// stable address in memory. Giving up ownership also means that the consumer doesn't have
+    /// access to the struct anymore - which is a good thing, because REAPER should be the new
+    /// rightful owner of this struct. Thanks to this we don't need to mark this function as
+    /// unsafe!
+    ///
+    /// [`plugin_register_add_hookcommand()`]: #method.plugin_register_add_hookcommand
+    /// [`plugin_register_remove_gaccel()`]: #method.plugin_register_remove_gaccel
     pub fn plugin_register_add_gaccel(
         &mut self,
         reg: MediumGaccelRegister,
-    ) -> Result<NonNull<raw::gaccel_register_t>, ()> {
+    ) -> Result<NonNull<raw::gaccel_register_t>, RegistrationFailed> {
         let handle = self.gaccel_registers.keep(reg);
-        let result = unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle)) };
-        if result != 1 {
-            return Err(());
-        }
+        unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle))? };
         Ok(handle)
     }
 
+    /// Unregisters an action.
+    ///
+    /// This function hands the once registered action back to you.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the action was not registered.
     pub fn plugin_register_remove_gaccel(
         &mut self,
         reg_handle: NonNull<raw::gaccel_register_t>,
-    ) -> Result<MediumGaccelRegister, ()> {
+    ) -> Result<MediumGaccelRegister, NotRegistered> {
         unsafe { self.plugin_register_remove(PluginRegistration::Gaccel(reg_handle)) };
-        let original = self.gaccel_registers.release(reg_handle).ok_or(())?;
+        let original = self
+            .gaccel_registers
+            .release(reg_handle)
+            .ok_or(NotRegistered)?;
         Ok(original)
     }
 
+    /// Registers a hidden control surface.
+    ///
+    /// This is very useful for being notified by REAPER about all kinds of events.
+    ///
+    /// This function returns a handle which you can use to unregister the control surface at any
+    /// time via [`plugin_register_remove_csurf_inst()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    ///
+    /// [`plugin_register_remove_csurf_inst()`]: #method.plugin_register_remove_csurf_inst
     pub fn plugin_register_add_csurf_inst(
         &mut self,
         control_surface: impl MediumReaperControlSurface + 'static,
-    ) -> Result<NonNull<raw::IReaperControlSurface>, ()> {
+    ) -> Result<NonNull<raw::IReaperControlSurface>, RegistrationFailed> {
         let rust_control_surface =
             DelegatingControlSurface::new(control_surface, &self.functions.get_app_version());
         // We need to box it twice in order to obtain a thin pointer for passing to C as callback
@@ -254,14 +348,11 @@ impl Reaper {
             unsafe { add_cpp_control_surface(rust_control_surface.as_ref().into()) };
         self.csurf_insts
             .insert(cpp_control_surface, rust_control_surface);
-        let result =
-            unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(cpp_control_surface)) };
-        if result != 1 {
-            return Err(());
-        }
+        unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(cpp_control_surface))? };
         Ok(cpp_control_surface)
     }
 
+    /// Unregisters a hidden control surface.
     pub fn plugin_register_remove_csurf_inst(
         &mut self,
         handle: NonNull<raw::IReaperControlSurface>,
@@ -274,21 +365,54 @@ impl Reaper {
             remove_cpp_control_surface(handle);
         }
     }
-    // The given audio_hook_register_t will be modified by REAPER. After registering it, it must
-    // only be accessed from within OnAudioBuffer callback (passed as param).
-    // Returns true on success
+
+    /// Like [`audio_reg_hardware_hook_add`] but doesn't manage memory for you.
+    ///
+    /// Also see [`audio_reg_hardware_hook_remove_unchecked()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer or if it dangles during the time it
+    /// is registered. So you must ensure that the audio hook register lives long enough and
+    /// has a stable address in memory. Additionally, incorrectly accessing the audio hook register
+    /// while it is registered can lead to horrible race conditions and other undefined
+    /// behavior.
+    ///
+    /// [`audio_reg_hardware_hook_remove_unchecked()`]:
+    /// #method.audio_reg_hardware_hook_remove_unchecked
+    /// [`audio_reg_hardware_hook_add`]: #method.audio_reg_hardware_hook_add
     pub unsafe fn audio_reg_hardware_hook_add_unchecked(
         &mut self,
         reg: NonNull<audio_hook_register_t>,
-    ) -> Result<(), ()> {
+    ) -> Result<(), RegistrationFailed> {
         self.audio_hook_registrations.insert(reg);
         let result = self
             .functions
             .low()
             .Audio_RegHardwareHook(true, reg.as_ptr());
-        ok_if_one(result)
+        if result == 0 {
+            return Err(RegistrationFailed);
+        }
+        Ok(())
     }
 
+    /// Unregisters the audio hook register that you have registered with
+    /// [`audio_reg_hardware_hook_add_unchecked()`].
+    ///
+    /// Please note that unregistering audio hook registers manually just for cleaning up is
+    /// unnecessary in most situations because *reaper-rs* takes care of automatically
+    /// unregistering everything when this struct is dropped (RAII). This happens even when using
+    /// the unsafe function variants.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    ///
+    /// [`audio_reg_hardware_hook_add_unchecked()`]: #method.audio_reg_hardware_hook_add_unchecked
     pub unsafe fn audio_reg_hardware_hook_remove_unchecked(
         &mut self,
         reg: NonNull<audio_hook_register_t>,
@@ -299,10 +423,23 @@ impl Reaper {
         self.audio_hook_registrations.remove(&reg);
     }
 
+    /// Registers an audio hook register.
+    ///
+    /// This allows you to get called back in the audio thread before and after REAPER's processing.
+    /// You should be careful with this because you are entering real-time world.
+    ///
+    /// This function returns a handle which you can use to unregister the audio hook register at
+    /// any time via [`audio_reg_hardware_hook_remove()`] (from the main thread).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    ///
+    /// [`audio_reg_hardware_hook_remove()`]: #method.audio_reg_hardware_hook_remove
     pub fn audio_reg_hardware_hook_add<T: MediumOnAudioBuffer + 'static>(
         &mut self,
         callback: T,
-    ) -> Result<NonNull<audio_hook_register_t>, ()> {
+    ) -> Result<NonNull<audio_hook_register_t>, RegistrationFailed> {
         let handle = self
             .audio_hook_registers
             .keep(MediumAudioHookRegister::new(callback));
@@ -310,13 +447,10 @@ impl Reaper {
         Ok(handle)
     }
 
-    pub fn audio_reg_hardware_hook_remove(
-        &mut self,
-        reg_handle: NonNull<audio_hook_register_t>,
-    ) -> Result<(), ()> {
-        self.audio_hook_registers.release(reg_handle).ok_or(())?;
+    /// Unregisters an audio hook register.
+    pub fn audio_reg_hardware_hook_remove(&mut self, reg_handle: NonNull<audio_hook_register_t>) {
         unsafe { self.audio_reg_hardware_hook_remove_unchecked(reg_handle) };
-        Ok(())
+        let _ = self.audio_hook_registers.release(reg_handle);
     }
 }
 
@@ -333,8 +467,4 @@ impl Drop for Reaper {
             }
         }
     }
-}
-
-fn ok_if_one(result: i32) -> Result<(), ()> {
-    if result == 1 { Ok(()) } else { Err(()) }
 }

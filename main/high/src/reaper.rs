@@ -548,7 +548,7 @@ impl Reaper {
         kind: ActionKind,
     ) -> RegisteredAction {
         let mut medium = self.medium_mut();
-        let command_id = medium.plugin_register_add_command_id(command_name);
+        let command_id = medium.plugin_register_add_command_id(command_name).unwrap();
         let command = Command::new(Rc::new(RefCell::new(operation)), kind);
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             p.insert(command);

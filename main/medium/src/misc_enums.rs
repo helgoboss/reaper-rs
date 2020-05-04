@@ -329,13 +329,13 @@ pub enum ActionValueChange {
     Relative3(U7),
 }
 
-/// Something that you can register in REAPER.
+/// A thing that you can register at REAPER.
 // TODO-low "Unlock" all uncommented variants as soon as appropriate types are clear
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum PluginRegistration<'a> {
     // Api(Cow<'a, CStr>, *mut c_void),
     // ApiDef(Cow<'a, CStr>, *mut c_void),
-    /// A hook command (called when an action is requested to be run).
+    /// A hook command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
     ///
@@ -350,7 +350,7 @@ pub enum PluginRegistration<'a> {
     /// reentrancy test...
     /// </pre>
     HookCommand(HookCommandFn),
-    /// A hook post command (called after an action has run).
+    /// A hook post command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
     ///
@@ -362,7 +362,7 @@ pub enum PluginRegistration<'a> {
     /// </pre>
     HookPostCommand(HookPostCommandFn),
     // HookCommand2(*mut c_void),
-    /// A toggle action (called when REAPER wants to know the on/off state of your action).
+    /// A toggle action.
     ///
     /// Extract from `reaper_plugin.h`:
     ///

@@ -36,3 +36,11 @@ pub struct FxOrParameterNotFoundOrCockosExtNotSupported;
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
 #[display(fmt = "invalid track info key")]
 pub struct InvalidTrackInfoKey;
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
+#[display(fmt = "registration failed")]
+pub struct RegistrationFailed;
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
+#[display(fmt = "unregistering failed because this was not registered")]
+pub struct NotRegistered;
