@@ -53,7 +53,7 @@ pub enum MasterTrackBehavior {
     IncludeMasterTrack,
 }
 
-/// Determines how REAPER internally gets or sets a chunk.
+/// A performance/caching hint which determines how REAPER internally gets or sets a chunk.
 ///
 /// Has implications on both performance and chunk content.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -149,18 +149,43 @@ pub enum RecordArmState {
     Armed = 1,
 }
 
-/// Determines how to show/hide a FX user interface.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive)]
-#[repr(i32)]
-pub enum FxShowFlag {
+/// Determines if and how to show/hide a FX user interface.
+// TODO-medium Replace all IntoPrimitive and FromPrimitive with to_raw()/from_raw()
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum FxShowInstruction {
     /// Closes the complete FX chain.
-    HideChain = 0,
-    /// Shows the complete FX chain.
-    ShowChain = 1,
+    HideChain,
+    /// Shows the complete FX chain and makes the given FX visible.
+    ShowChain(TrackFxLocation),
     /// Closes the floating FX window.
-    HideFloatingWindow = 2,
-    /// SHows the floating FX window.
-    ShowFloatingWindow = 3,
+    HideFloatingWindow(TrackFxLocation),
+    /// Shows the floating FX window.
+    ShowFloatingWindow(TrackFxLocation),
+}
+
+impl FxShowInstruction {
+    /// Converts the instruction part of this value to a `showFlag` integer as expected by the
+    /// low-level API.
+    pub fn instruction_to_raw(&self) -> i32 {
+        use FxShowInstruction::*;
+        match self {
+            HideChain => 0,
+            ShowChain(_) => 1,
+            HideFloatingWindow(_) => 2,
+            ShowFloatingWindow(_) => 3,
+        }
+    }
+
+    /// Converts the FX location part of this value to an integer as expected by the low-level API.
+    pub fn location_to_raw(&self) -> i32 {
+        use FxShowInstruction::*;
+        match self {
+            HideChain => 0,
+            ShowChain(l) => l.to_raw(),
+            HideFloatingWindow(l) => l.to_raw(),
+            ShowFloatingWindow(l) => l.to_raw(),
+        }
+    }
 }
 
 /// Defines whether you are referring to a send or a receive.
@@ -206,7 +231,7 @@ pub enum StuffMidiMessageTarget {
     MidiAsControlInputQueue,
     /// Routes the message to REAPER's virtual MIDI keyboard on its current channel.
     VirtualMidiKeyboardQueueOnCurrentChannel,
-    /// Sends the message directly to a MIDI output device.
+    /// Sends the message directly to an external MIDI device.
     MidiOutputDevice(MidiOutputDeviceId),
 }
 
@@ -231,6 +256,8 @@ pub enum TrackFxLocation {
     /// FX index in the normal FX chain.
     NormalFxChain(u32),
     /// FX index in the input FX chain.
+    ///
+    /// On the master track (if applicable) this represents an index in the monitoring FX chain.
     InputFxChain(u32),
 }
 
@@ -266,7 +293,7 @@ impl TrackFxLocation {
 /// Determines the behavior when adding or querying FX.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive)]
 #[repr(i32)]
-pub enum FxAddByNameBehavior {
+pub(crate) enum FxAddByNameBehavior {
     /// Adds the FX even if it already exists in the FX chain.
     AlwaysAdd = -1,
     /// Just queries the FX location.
@@ -463,7 +490,7 @@ impl<'a> PluginRegistration<'a> {
     }
 }
 
-/// Something which refers to a certain track.
+/// Type and location of a certain track.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackRef {
     /// The master track of a project.
@@ -573,7 +600,7 @@ impl NotificationBehavior {
 /// Denotes the target of a send.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum SendTarget {
-    /// A hardware output.
+    /// A hardware output created with default properties.
     HardwareOutput,
     /// Another track.
     OtherTrack(MediaTrack),

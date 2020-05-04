@@ -8,7 +8,7 @@ use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, Reaper, Track};
 use reaper_rs_low::raw::GetActiveWindow;
-use reaper_rs_medium::{FxShowFlag, Hwnd, TrackFxLocation};
+use reaper_rs_medium::{FxShowInstruction, Hwnd, TrackFxLocation};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
@@ -279,8 +279,7 @@ impl Fx {
         unsafe {
             Reaper::get().medium().functions().track_fx_show(
                 self.track.get_raw(),
-                self.get_query_index(),
-                FxShowFlag::ShowFloatingWindow,
+                FxShowInstruction::ShowFloatingWindow(self.get_query_index()),
             );
         }
     }
@@ -378,7 +377,8 @@ pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid>
             .medium()
             .functions()
             .track_fx_get_fx_guid(track.get_raw(), query_index)
-    };
+    }
+    .ok();
     internal.map(|g| Guid::new(g))
 }
 

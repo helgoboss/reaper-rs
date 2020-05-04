@@ -20,9 +20,9 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
 use reaper_rs_medium::ProjectContext::CurrentProject;
 use reaper_rs_medium::{
-    ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName, FxAddByNameBehavior,
-    FxShowFlag, GangBehavior, GlobalAutomationModeOverride, InputMonitoringMode,
-    MasterTrackBehavior, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
+    ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName, FxShowInstruction,
+    GangBehavior, GlobalAutomationModeOverride, InputMonitoringMode, MasterTrackBehavior,
+    MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
     RecordArmState, RecordingInput, SendTarget, StuffMidiMessageTarget, TrackFxChainType,
     TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
