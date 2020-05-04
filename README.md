@@ -49,6 +49,9 @@ let track = reaper.get_current_project();
 - Very fluid
 - Integration tests use this
 
+I think that with the right abstractions in place, you can build sophisticated extensions much
+easier, faster and with less bugs because there's no need to take care of the same low-level
+stuff again and again.
     
 ## Use
 

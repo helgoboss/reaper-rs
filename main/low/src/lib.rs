@@ -1,23 +1,33 @@
 //! This module contains the low-level API of *reaper-rs*.
 //!
-//! It is not recommended to use this API directly because it just exposes the raw C++ REAPER
+//! It is not recommended to use this API directly because it just exposes the raw REAPER C++
 //! functions, types and constants one to one in Rust. If you want idiomatic Rust, type safety and
 //! convenience, please use the [medium-level] or [high-level] API instead.
 //!
-//! The most important goal of the low-level API is to be on par with the C++ REAPER SDK, meaning
-//! that everything which is possible with the C++ REAPER SDK is also possible with the *reaper-rs*
-//! low-level API - ideally using the same style and same naming. It should be a solid base for APIs
-//! built on top of it.
+//! At times it can still be useful to access the low-level API, mostly as fallback if the function
+//! that you are looking for has not yet been lifted to the medium-level API. To get started, best
+//! navigate to the [`Reaper`] struct, which contains all exposed functions.
 //!
-//! Most parts of the low-level API are auto-generated from `reaper_plugin_functions.h`. For a list
-//! of all exposed functions, have a look at the [`Reaper`] struct.
+//! # Design
 //!
-//! # C++ glue code
+//! ## Goal
+//!
+//! The ultimate goal of the low-level API is to be on par with the REAPER C++ SDK, meaning
+//! that everything which is possible with the REAPER C++ SDK is also possible with the *reaper-rs*
+//! low-level API. Improvements regarding safety, convenience or style are not in its scope. It
+//! should serve as a solid base for more idiomatic APIs built on top of it.
+//!
+//! ## Generated code
+//!
+//! Most parts of the low-level API are auto-generated from `reaper_plugin_functions.h` using a
+//! combination of [bindgen](https://docs.rs/bindgen) and custom build script.
+//!
+//! ## C++ glue code
 //!
 //! There's some code which is not auto-generated, most notably the code to "restore" functionality
-//! which "got lost in translation". The problem is that some parts of the REAPER SDK use C++
-//! features, in particular virtual base classes. Rust can't call virtual functions or implement
-//! them.
+//! which "got lost in translation". The problem is that some parts of the REAPER SDK not just use
+//! C but also C++ features, in particular virtual base classes. Rust can't call virtual functions
+//! or implement them.
 //!
 //! The solution is to take a detour via C++ glue code:
 //!
