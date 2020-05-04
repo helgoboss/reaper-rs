@@ -119,24 +119,27 @@ mod codegen {
                 use super::{bindings::root, ReaperPluginContext};
                 use c_str_macro::c_str;
 
-                /// This is the low-level API access point to all REAPER functions. In order to use it, you first
-                /// must obtain an instance of this struct by invoking [`load`](struct.Reaper.html#method.load).
+                /// This is the low-level API access point to all REAPER functions.
+                ///
+                /// In order to use it, you first must obtain an instance of this struct by invoking [`load()`].
                 ///
                 /// # Panics
                 ///
                 /// Please note that it's possible that functions are *not available*. This can be the case if
                 /// the user runs your plug-in in an older version of REAPER which doesn't have that function yet.
                 /// The availability of a function can be checked by inspecting the respective function pointer
-                /// option in the [`pointers`](struct.Reaper.html#structfield.pointers) field. The actual methods
-                /// in [`Reaper`](struct.Reaper.html) are just convenience methods which unwrap the function
-                /// pointers and panic if they are not available.
+                /// option accessible via the [`pointers()`] method. The actual methods in this structs are just
+                /// convenience methods which unwrap the function pointers and panic if they are not available.
+                ///
+                /// [`load()`]: #method.load
+                /// [`pointers()`]: #method.pointers
                 #[derive(Copy, Clone, Debug, Default)]
                 pub struct Reaper {
                     pub(crate) pointers: ReaperFunctionPointers,
                 }
 
                 impl Reaper {
-                    /// Loads all available REAPER functions plug-in context and returns a `Reaper` instance
+                    /// Loads all available REAPER functions from the given plug-in context and returns a `Reaper` instance
                     /// which allows you to call these functions.
                     pub fn load(context: &ReaperPluginContext) -> Reaper {
                         let get_func = &context.function_provider;

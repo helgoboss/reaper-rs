@@ -9,13 +9,15 @@ use std::os::raw::c_void;
 use std::panic::RefUnwindSafe;
 use std::ptr::{null, null_mut, NonNull};
 
-/// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`. An implementation
-/// of this trait can be passed to [`install_control_surface`](fn.install_control_surface.html).
-/// As a consequence, REAPER will invoke the respective callback methods.
+/// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`.
+///
+/// An implementation of this trait can be passed to [`add_cpp_control_surface()`]. After
+/// registering the returned C++ counterpart, REAPER will start invoking the callback methods.
 ///
 /// # Design
 ///
 /// ## Why do most methods here don't take `&mut self` as parameter?
+///
 /// **Short answer:** Because we follow the spirit of Rust here, which is to fail fast and thereby
 /// prevent undefined behavior.
 ///
@@ -39,6 +41,8 @@ use std::ptr::{null, null_mut, NonNull};
 /// therefore use some unsafe code to prevent the panic. They might find out that they want to check
 /// for reentrancy by using `try_borrow_mut()`. Or they might find out that they want to
 /// avoid this situation by just deferring the event handling to the next main loop cycle.
+///
+/// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
 pub trait IReaperControlSurface: RefUnwindSafe + Debug {
     fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
         null()
@@ -101,25 +105,39 @@ pub trait IReaperControlSurface: RefUnwindSafe + Debug {
     }
 }
 
-/// This function for installing a REAPER control surface is provided because
-/// `plugin_register("csurf_inst", my_rust_struct)` isn't going to work. Rust structs can't
+/// Creates an `IReaperControlSurface` object on C++ side and returns a pointer to it.
+///
+/// This function is provided because [`plugin_register()`] isn't going to work if you just pass it
+/// a Rust struct (`reaper.plugin_register("csurf_inst", my_rust_struct)`). Rust structs can't
 /// implement C++ virtual base classes.
 ///
-/// This function sets up the given control surface implemented in Rust but **doesn't yet
-/// register it**! Because you are not using the high-level API, the usual REAPER C++ way to
-/// register a control surface still applies. See
-/// [`get_cpp_control_surface`](fn.get_cpp_control_surface.html). If you register a control surface,
-/// you also must take care of unregistering it at the end. This is especially important for VST
-/// plug-ins because they live shorter than a REAPER session! **If you don't unregister the control
-/// surface before the VST plug-in is destroyed, REAPER will crash** because it will attempt to
-/// invoke functions which are not loaded anymore. This kind of responsibility is gone when using
-/// the high-level API.     
-/// This returns a reference of a `IReaperControlSurface`-implementing C++ object which will
-/// delegate to the Rust [`ControlSurface`](trait.ControlSurface.html) which you installed by
-/// invoking [`install_control_surface`](fn.install_control_surface.html). It needs to be
-/// passed to [`plugin_register`](struct.Reaper.html#structfield.plugin_register) as a pointer as in
-/// `plugin_register("csurf_inst", cs as *mut _ as *mut c_void)` for registering and as in
-/// `plugin_register("-csurf_inst", cs as *mut _ as *mut c_void)` for unregistering.
+/// **This function doesn't yet register the control surface!** The usual REAPER C++ way to register
+/// a control surface still applies. You need to pass the resulting pointer to
+/// [`plugin_register()`]:
+///
+/// ```no_run
+/// // Register
+/// use reaper_rs_low::{add_cpp_control_surface, remove_cpp_control_surface};
+///
+/// unsafe {
+///     let cs = add_cpp_control_surface(bla);
+///     reaper.plugin_register("csurf_inst", cs.as_ptr() as _);
+///     // Unregister
+///     reaper.plugin_register("-csurf_inst", cs.as_ptr() as _);
+///     remove_cpp_control_surface(cs);
+/// }
+/// ```
+///
+/// If you register a control surface, you also must take care of unregistering it at
+/// the end. This is especially important for VST plug-ins because they live shorter than a REAPER
+/// session! **If you don't unregister the control surface before the VST plug-in is destroyed,
+/// REAPER will crash** because it will attempt to invoke functions which are not loaded anymore.
+///
+/// In order to avoid memory leaks, you also must take care of removing the C++ counterpart
+/// surface by calling [`remove_cpp_control_surface()`].
+///
+/// [`plugin_register()`]: struct.Reaper.html#method.plugin_register
+/// [`remove_cpp_control_surface()`]: fn.remove_cpp_control_surface.html
 pub unsafe fn add_cpp_control_surface(
     callback_target: NonNull<Box<dyn IReaperControlSurface>>,
 ) -> NonNull<raw::IReaperControlSurface> {
@@ -129,6 +147,11 @@ pub unsafe fn add_cpp_control_surface(
     NonNull::new_unchecked(instance)
 }
 
+/// Destroys a C++ `IReaperControlSurface` object.
+///
+/// Intended to be used on pointers returned from [`add_cpp_control_surface()`].
+///
+/// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
 pub unsafe fn remove_cpp_control_surface(surface: NonNull<raw::IReaperControlSurface>) {
     crate::bindings::root::reaper_rs_control_surface::remove_control_surface(surface.as_ptr());
 }
