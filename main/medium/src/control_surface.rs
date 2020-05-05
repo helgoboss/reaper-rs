@@ -572,7 +572,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
 
     fn SetAutoMode(&self, mode: i32) {
         self.delegate.set_auto_mode(SetAutoModeArgs {
-            mode: mode.try_into().expect("Unknown automation mode"),
+            mode: AutomationMode::try_from_raw(mode).expect("Unknown automation mode"),
         })
     }
 
@@ -606,7 +606,8 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                     let recmon: i32 = unref_into(parm2).unwrap();
                     self.delegate.ext_set_input_monitor(ExtSetInputMonitorArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                        mode: recmon.try_into().expect("Unknown input monitoring mode"),
+                        mode: InputMonitoringMode::try_from_raw(recmon)
+                            .expect("Unknown input monitoring mode"),
                     })
                 }
                 raw::CSURF_EXT_SETFXPARAM | raw::CSURF_EXT_SETFXPARAM_RECFX => {

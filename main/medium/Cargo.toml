@@ -10,5 +10,4 @@ derive_more = "0.99.5"
 reaper-rs-low = { path = '../low' }
 # TODO-release Use crates.io version
 helgoboss-midi = { path = '../../../helgoboss-midi-rs'}
-num_enum = { version = "0.4.2"}
 enumflags2 = { version = "^0.6", features = ["not_literal"] }

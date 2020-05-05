@@ -384,7 +384,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     {
         let ptr = self.get_set_media_track_info(tr, TrackInfoKey::RecMon, null_mut());
         let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
-        InputMonitoringMode::try_from(irecmon).expect("Unknown input monitoring mode")
+        InputMonitoringMode::try_from_raw(irecmon).expect("Unknown input monitoring mode")
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
@@ -791,7 +791,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             track.as_ptr(),
             fxname.into().as_ptr(),
             rec_fx == TrackFxChainType::InputFxChain,
-            instantiate.into(),
+            instantiate.to_raw(),
         )
     }
 
@@ -1608,7 +1608,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         let result = self.low.GetTrackAutomationMode(tr.as_ptr());
-        AutomationMode::try_from(result).expect("Unknown automation mode")
+        AutomationMode::try_from_raw(result).expect("Unknown automation mode")
     }
 
     /// Returns the global track automation override, if any.
@@ -1620,7 +1620,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         match self.low.GetGlobalAutomationOverride() {
             -1 => None,
             6 => Some(Bypass),
-            x => Some(Mode(x.try_into().expect("Unknown automation mode"))),
+            x => Some(Mode(
+                AutomationMode::try_from_raw(x).expect("Unknown automation mode"),
+            )),
         }
     }
 
@@ -1885,9 +1887,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     {
         let result = unsafe {
             self.low
-                .ShowMessageBox(msg.into().as_ptr(), title.into().as_ptr(), r#type.into())
+                .ShowMessageBox(msg.into().as_ptr(), title.into().as_ptr(), r#type.to_raw())
         };
-        result.try_into().expect("Unknown message box result")
+        MessageBoxResult::try_from_raw(result).expect("Unknown message box result")
     }
 
     /// Parses the given string as GUID.
@@ -1928,9 +1930,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
+        // TODO-medium Improve parameter names everywhere
         self.low.CSurf_OnInputMonitorChangeEx(
             trackid.as_ptr(),
-            monitor.into(),
+            monitor.to_raw(),
             allowgang == GangBehavior::AllowGang,
         )
     }
@@ -2223,7 +2226,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        self.low.GetTrackNumSends(tr.as_ptr(), category.into()) as u32
+        self.low.GetTrackNumSends(tr.as_ptr(), category.to_raw()) as u32
     }
 
     // Gets or sets an attributes of a send, receive or hardware output of the given track.
@@ -2244,7 +2247,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     {
         self.low.GetSetTrackSendInfo(
             tr.as_ptr(),
-            category.into(),
+            category.to_raw(),
             sendidx as i32,
             parmname.into_raw().as_ptr(),
             set_new_value,
@@ -2372,7 +2375,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     {
         self.low.CSurf_OnRecArmChangeEx(
             trackid.as_ptr(),
-            recarm.into(),
+            recarm.to_raw(),
             allowgang == GangBehavior::AllowGang,
         )
     }

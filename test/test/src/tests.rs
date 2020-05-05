@@ -130,10 +130,10 @@ fn show_message_box() -> TestStep {
         let result = reaper.show_message_box(
             c_str!("Tests are finished"),
             c_str!("reaper-rs"),
-            MessageBoxType::Ok,
+            MessageBoxType::Okay,
         );
         // Then
-        check_eq!(result, MessageBoxResult::Ok);
+        check_eq!(result, MessageBoxResult::Okay);
         Ok(())
     })
 }

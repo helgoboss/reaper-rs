@@ -1,11 +1,10 @@
 use crate::{
-    HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
-    ReaProject, ReaperStringArg, ToggleActionFn,
+    ConversionFromRawFailed, HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo, MediaTrack,
+    MidiOutputDeviceId, ReaProject, ReaperStringArg, ToggleActionFn,
 };
 use c_str_macro::c_str;
 use derive_more::*;
 use helgoboss_midi::{U14, U7};
-use num_enum::{IntoPrimitive, TryFromPrimitive};
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::HWND;
 use std::borrow::Cow;
@@ -140,17 +139,26 @@ pub enum GangBehavior {
 }
 
 /// Defines whether a track is armed for recording.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive)]
-#[repr(i32)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum RecordArmState {
     /// Track is not armed for recording.
-    Unarmed = 0,
+    Unarmed,
     /// Track is armed for recording.
-    Armed = 1,
+    Armed,
+}
+
+impl RecordArmState {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
+        use RecordArmState::*;
+        match self {
+            Unarmed => 0,
+            Armed => 1,
+        }
+    }
 }
 
 /// Determines if and how to show/hide a FX user interface.
-// TODO-medium Replace all IntoPrimitive and FromPrimitive with to_raw()/from_raw()
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum FxShowInstruction {
     /// Closes the complete FX chain.
@@ -189,18 +197,16 @@ impl FxShowInstruction {
 }
 
 /// Defines whether you are referring to a send or a receive.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive)]
-#[repr(i32)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackSendDirection {
     /// You are referring to a receive (a send from the other track's perspective).
-    Receive = -1,
+    Receive,
     /// Refers to a track send (a receive from the other track's perspective).
-    Send = 0,
+    Send,
 }
 
 /// Defines the kind of link.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive)]
-#[repr(i32)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackSendCategory {
     /// A receive from another track (a send from that other track's perspective).
     Receive = -1,
@@ -208,6 +214,18 @@ pub enum TrackSendCategory {
     Send = 0,
     /// A hardware output.
     HardwareOutput = 1,
+}
+
+impl TrackSendCategory {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
+        use TrackSendCategory::*;
+        match self {
+            Receive => -1,
+            Send => 0,
+            HardwareOutput => 1,
+        }
+    }
 }
 
 impl From<TrackSendDirection> for TrackSendCategory {
@@ -291,15 +309,26 @@ impl TrackFxLocation {
 }
 
 /// Determines the behavior when adding or querying FX.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive)]
-#[repr(i32)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub(crate) enum FxAddByNameBehavior {
     /// Adds the FX even if it already exists in the FX chain.
-    AlwaysAdd = -1,
+    AlwaysAdd,
     /// Just queries the FX location.
-    Query = 0,
+    Query,
     /// Adds the FX if it hasn't been found in the FX chain.
-    AddIfNotFound = 1,
+    AddIfNotFound,
+}
+
+impl FxAddByNameBehavior {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
+        use FxAddByNameBehavior::*;
+        match self {
+            AlwaysAdd => -1,
+            Query => 0,
+            AddIfNotFound => 1,
+        }
+    }
 }
 
 /// Represents a value change targeted to a REAPER action.
@@ -500,17 +529,38 @@ pub enum TrackRef {
 }
 
 /// Describes whether and how the recording input is monitored.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, IntoPrimitive, TryFromPrimitive)]
-#[repr(i32)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum InputMonitoringMode {
     /// No input monitoring.
-    Off = 0,
+    Off,
     /// Monitoring happens always.
-    Normal = 1,
+    Normal,
     /// Monitoring only happens when playing (tape style).
-    NotWhenPlaying = 2,
+    NotWhenPlaying,
 }
 
+impl InputMonitoringMode {
+    /// Converts an integer as returned by the low-level API to an input monitoring mode.
+    pub fn try_from_raw(v: i32) -> Result<InputMonitoringMode, ConversionFromRawFailed> {
+        use InputMonitoringMode::*;
+        match v {
+            0 => Ok(Off),
+            1 => Ok(Normal),
+            2 => Ok(NotWhenPlaying),
+            _ => Err(ConversionFromRawFailed),
+        }
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(&self) -> i32 {
+        use InputMonitoringMode::*;
+        match self {
+            Off => 0,
+            Normal => 1,
+            NotWhenPlaying => 2,
+        }
+    }
+}
 /// Something which refers to a certain project.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ProjectRef {
