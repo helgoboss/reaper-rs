@@ -2,7 +2,7 @@ use super::MediaTrack;
 use crate::{
     require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
-    TrackFxChainType, TrackFxLocation,
+    TrackFxChainType, TrackFxLocation, TryFromRawError,
 };
 
 use reaper_rs_low;
@@ -352,9 +352,10 @@ pub enum ModKey {
 }
 
 impl ModKey {
-    pub(crate) fn try_from_i32(value: i32) -> Result<ModKey, ()> {
+    /// Converts an integer as returned by the low-level API to a mod key.
+    pub fn try_from_raw(value: i32) -> Result<ModKey, TryFromRawError<i32>> {
         if value < 0 {
-            return Err(());
+            return Err(TryFromRawError::new("couldn't convert to mod key", value));
         };
         let value = value as u32;
         use ModKey::*;
@@ -446,8 +447,8 @@ impl DelegatingControlSurface {
                 )
             } else {
                 VersionDependentFxLocation::TakeFx {
-                    item_index: unref_into::<i32>(media_item_ptr).unwrap() as u32,
-                    fx_index: unref_into::<i32>(fx_index_ptr).unwrap() as u32,
+                    item_index: deref_as::<i32>(media_item_ptr).unwrap() as u32,
+                    fx_index: deref_as::<i32>(fx_index_ptr).unwrap() as u32,
                 }
             },
         })
@@ -457,7 +458,7 @@ impl DelegatingControlSurface {
         &self,
         ptr: *mut c_void,
     ) -> VersionDependentTrackFxLocation {
-        let index = unref_into::<i32>(ptr).unwrap();
+        let index = deref_as::<i32>(ptr).unwrap();
         if self.supports_detection_of_input_fx {
             VersionDependentTrackFxLocation::New(TrackFxLocation::try_from_raw(index).unwrap())
         } else {
@@ -572,7 +573,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
 
     fn SetAutoMode(&self, mode: i32) {
         self.delegate.set_auto_mode(SetAutoModeArgs {
-            mode: AutomationMode::try_from_raw(mode).expect("Unknown automation mode"),
+            mode: AutomationMode::try_from_raw(mode).expect("unknown automation mode"),
         })
     }
 
@@ -588,7 +589,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
 
     fn IsKeyDown(&self, key: i32) -> bool {
         self.delegate.is_key_down(IsKeyDownArgs {
-            key: ModKey::try_from_i32(key).expect("Got negative key code"),
+            key: ModKey::try_from_raw(key).expect("unknown key code"),
         })
     }
 
@@ -603,16 +604,16 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
             // TODO-low Delegate all known CSURF_EXT_ constants
             match call as u32 {
                 raw::CSURF_EXT_SETINPUTMONITOR => {
-                    let recmon: i32 = unref_into(parm2).unwrap();
+                    let recmon: i32 = deref_as(parm2).unwrap();
                     self.delegate.ext_set_input_monitor(ExtSetInputMonitorArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                         mode: InputMonitoringMode::try_from_raw(recmon)
-                            .expect("Unknown input monitoring mode"),
+                            .expect("unknown input monitoring mode"),
                     })
                 }
                 raw::CSURF_EXT_SETFXPARAM | raw::CSURF_EXT_SETFXPARAM_RECFX => {
-                    let fxidx_and_paramidx: i32 = unref_into(parm2).unwrap();
-                    let normalized_value: f64 = unref_into(parm3).unwrap();
+                    let fxidx_and_paramidx: i32 = deref_as(parm2).unwrap();
+                    let normalized_value: f64 = deref_as(parm3).unwrap();
                     let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
                     let param_index = fxidx_and_paramidx & 0xffff;
                     let args = ExtSetFxParamArgs {
@@ -660,14 +661,14 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                 raw::CSURF_EXT_SETSENDVOLUME => {
                     self.delegate.ext_set_send_volume(ExtSetSendVolumeArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                        send_index: unref_into::<i32>(parm2).unwrap() as u32,
-                        volume: unref_into(parm3).unwrap(),
+                        send_index: deref_as::<i32>(parm2).unwrap() as u32,
+                        volume: deref_as(parm3).unwrap(),
                     })
                 }
                 raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_set_send_pan(ExtSetSendPanArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                    send_index: unref_into::<i32>(parm2).unwrap() as u32,
-                    pan: unref_into(parm3).unwrap(),
+                    send_index: deref_as::<i32>(parm2).unwrap() as u32,
+                    pan: deref_as(parm3).unwrap(),
                 }),
                 raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_set_fx_change(ExtSetFxChangeArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
@@ -688,8 +689,8 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                 raw::CSURF_EXT_SETBPMANDPLAYRATE => {
                     self.delegate
                         .ext_set_bpm_and_play_rate(ExtSetBpmAndPlayRateArgs {
-                            tempo: unref_into(parm1),
-                            play_rate: unref_into(parm2),
+                            tempo: deref_as(parm1),
+                            play_rate: deref_as(parm2),
                         })
                 }
                 _ => 0,
@@ -710,7 +711,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
     }
 }
 
-unsafe fn unref_into<T: Copy>(ptr: *mut c_void) -> Option<T> {
+unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
     if ptr.is_null() {
         return None;
     }

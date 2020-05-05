@@ -11,8 +11,8 @@ use reaper_rs_low::{
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
-    require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
-    AutomationMode, Bpm, ChunkCacheHint, CommandId, Db, DelegatingControlSurface, EnvChunkName,
+    require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode,
+    Bpm, ChunkCacheHint, CommandId, Db, DelegatingControlSurface, EnvChunkName,
     FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
     GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
     MediaTrack, MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand,
@@ -206,7 +206,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             }
             let owned_string = owned_c_string
                 .into_string()
-                .expect("Path contains non-UTF8 characters");
+                .expect("project file path contains non-UTF8 characters");
             Some(EnumProjectsResult {
                 project,
                 file_path: Some(PathBuf::from(owned_string)),
@@ -391,7 +391,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
         let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
-        InputMonitoringMode::try_from_raw(irecmon).expect("Unknown input monitoring mode")
+        InputMonitoringMode::try_from_raw(irecmon).expect("unknown input monitoring mode")
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
@@ -1661,7 +1661,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         let result = self.low.GetTrackAutomationMode(track.as_ptr());
-        AutomationMode::try_from_raw(result).expect("Unknown automation mode")
+        AutomationMode::try_from_raw(result).expect("unknown automation mode")
     }
 
     /// Returns the global track automation override, if any.
@@ -1674,7 +1674,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             -1 => None,
             6 => Some(Bypass),
             x => Some(Mode(
-                AutomationMode::try_from_raw(x).expect("Unknown automation mode"),
+                AutomationMode::try_from_raw(x).expect("unknown automation mode"),
             )),
         }
     }
@@ -1961,7 +1961,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
                 r#type.to_raw(),
             )
         };
-        MessageBoxResult::try_from_raw(result).expect("Unknown message box result")
+        MessageBoxResult::try_from_raw(result).expect("unknown message box result")
     }
 
     /// Parses the given string as GUID.
@@ -2367,9 +2367,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             TrackSendAttributeKey::DestTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
-        require_non_null(ptr).map_err(|_| {
-            ReaperFunctionError::new("couldn't get destination track (maybe send doesn't exist)")
-        })
+        NonNull::new(ptr).ok_or(ReaperFunctionError::new(
+            "couldn't get destination track (maybe send doesn't exist)",
+        ))
     }
 
     /// Returns the RPPXML state of the given track.

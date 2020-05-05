@@ -77,14 +77,6 @@ impl<'a> KbdCmd<'a> {
     }
 }
 
-pub(crate) fn require_non_null<T>(ptr: *mut T) -> Result<NonNull<T>, ()> {
-    if ptr.is_null() {
-        Err(())
-    } else {
-        Ok(unsafe { NonNull::new_unchecked(ptr) })
-    }
-}
-
 pub(crate) fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
     assert!(
         !ptr.is_null(),
