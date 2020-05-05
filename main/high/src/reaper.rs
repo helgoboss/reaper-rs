@@ -37,7 +37,7 @@ use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
     AudioThread, CommandId, GetFocusedFxResult, GetLastTouchedFxResult,
-    GlobalAutomationModeOverride, Hwnd, MediumAccel, MediumGaccelRegister, MediumHookCommand,
+    GlobalAutomationModeOverride, Hwnd, MediumGaccelRegister, MediumHookCommand,
     MediumHookPostCommand, MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult,
     MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef,
     ReaperFunctions, ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget,
@@ -543,7 +543,7 @@ impl Reaper {
     pub fn register_action(
         &self,
         command_name: &CStr,
-        description: impl Into<Cow<'static, CStr>>,
+        description: impl Into<ReaperStringArg<'static>>,
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
@@ -554,9 +554,9 @@ impl Reaper {
             p.insert(command);
         }
         let address = medium
-            .plugin_register_add_gaccel(MediumGaccelRegister::new(
-                MediumAccel::new(0, 0, command_id),
-                description.into(),
+            .plugin_register_add_gaccel(MediumGaccelRegister::without_key_binding(
+                command_id,
+                description,
             ))
             .unwrap();
         RegisteredAction::new(command_id, address)

@@ -196,8 +196,6 @@
 //! - [`raw::gaccel_register_t`](../reaper_rs_low/raw/struct.gaccel_register_t.html) →
 //!   `GaccelRegister` (not yet existing) &
 //!   [`MediumGaccelRegister`](struct.MediumGaccelRegister.html)
-//! - [`raw::ACCEL`](../reaper_rs_low/raw/struct.ACCEL.html) → `Accel` (not yet existing) &
-//!   [`MediumAccel`](struct.MediumAccel.html)
 //!
 //! ### Case 3: Internals not exposed | vtable
 //!
