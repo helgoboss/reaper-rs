@@ -6,10 +6,14 @@ use std::convert::{TryFrom, TryInto};
 /// Recording input of a track.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum RecordingInput {
-    // TODO-medium Check if those are really indexes!
+    /// Index refers to a single mono channel.
     Mono(u32),
-    ReaRoute(u32),
+    /// Index refers to a single ReaRoute mono channel.
+    MonoReaRoute(u32),
+    /// Index refers to the first of two channels in a stereo channel pair.
     Stereo(u32),
+    /// Index refers to the first of two channels in a ReaRoute stereo channel pair.
+    StereoReaRoute(u32),
     Midi {
         device_id: Option<MidiInputDeviceId>,
         channel: Option<Channel>,
@@ -29,8 +33,10 @@ impl RecordingInput {
             .map_err(|_| RecInputIndexInvalid)?;
         match rec_input_index {
             0..=511 => Ok(Mono(rec_input_index)),
-            512..=1023 => Ok(ReaRoute(rec_input_index - 512)),
-            1024..=4095 => Ok(Stereo(rec_input_index - 1024)),
+            512..=1023 => Ok(MonoReaRoute(rec_input_index - 512)),
+            1024..=1535 => Ok(Stereo(rec_input_index - 1024)),
+            1536..=2047 => Ok(StereoReaRoute(rec_input_index - 1536)),
+            2048..=4095 => Err(RecInputIndexInvalid),
             4096..=6128 => {
                 let midi_index = rec_input_index - 4096;
                 Ok(Midi {
@@ -62,8 +68,9 @@ impl RecordingInput {
         use RecordingInput::*;
         let result = match *self {
             Mono(i) => i,
-            ReaRoute(i) => 512 + i,
+            MonoReaRoute(i) => 512 + i,
             Stereo(i) => 1024 + i,
+            StereoReaRoute(i) => 1536 + i,
             Midi { device_id, channel } => {
                 let device_high = match device_id {
                     None => ALL_MIDI_DEVICES_FACTOR,

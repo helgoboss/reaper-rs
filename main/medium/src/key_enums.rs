@@ -10,20 +10,34 @@ use std::ffi::CStr;
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackInfoKey<'a> {
     /// Parent track (read-only).
+    ///
+    /// `*mut MediaTrack`
     ParTrack,
     /// Parent project (read-only).
+    ///
+    /// `*mut ReaProject`
     Project,
-    /// Track name (on master returns `null`).
+    /// Track name (on master returns `null_mut()`).
+    ///
+    /// `*mut char`
     Name,
     /// Track icon.
+    ///
+    /// `*const char`
     ///
     /// Full file name or relative to resource path / data / track icons.
     Icon,
     /// Layout name.
+    ///
+    /// `*const char`
     McpLayout,
     /// Layout name.
+    ///
+    /// `*const char`
     TcpLayout,
     /// Extension-specific persistent data.
+    ///
+    /// `*mut char`
     ///
     /// Use [`ext()`] to create this variant.
     ///
@@ -31,13 +45,21 @@ pub enum TrackInfoKey<'a> {
     Ext(Cow<'a, CStr>),
     /// 6-byte GUID, can query or update.
     ///
+    /// `*mut GUID`
+    ///
     /// If using a `_string()` function, GUID is a string `{xyz-...}`.
     Guid,
     /// Muted.
+    ///
+    /// `*mut bool`
     Mute,
     /// Track phase inverted.
+    ///
+    /// `*mut bool`
     Phase,
     /// Track number
+    ///
+    /// `i32`
     ///
     /// 1-based, read-only, returns the i32 directly.
     ///
@@ -45,6 +67,8 @@ pub enum TrackInfoKey<'a> {
     /// - -1 → master track
     TrackNumber,
     /// Soloed.
+    ///
+    /// `*mut i32`
     ///
     /// - 0 → not soloed
     /// - 1 → soloed
@@ -54,15 +78,21 @@ pub enum TrackInfoKey<'a> {
     Solo,
     /// FX enabled.
     ///
+    /// `*mut i32`
+    ///
     /// - 0 → bypassed
     /// - != 0 → FX active
     FxEn,
     /// Record armed.
     ///
+    /// `*mut i32`
+    ///
     /// - 0 → not record armed
     /// - 1 → record armed
     RecArm,
     /// Record input.
+    ///
+    /// `*mut i32`
     ///
     /// - <0 → no input
     /// - 0..=n → mono hardware input
@@ -72,6 +102,8 @@ pub enum TrackInfoKey<'a> {
     ///   channel), next 6 bits represent physical input (63 → all, 62 → VKB)
     RecInput,
     /// Record mode.
+    ///
+    /// `*mut i32`
     ///
     /// - 0 → input
     /// - 1 → stereo out
@@ -85,16 +117,22 @@ pub enum TrackInfoKey<'a> {
     RecMode,
     /// Record monitoring.
     ///
+    /// `*mut i32`
+    ///
     /// - 0 → off
     /// - 1 → normal
     /// - 2 → not when playing (tape style)
     RecMon,
     /// Monitor items while recording.
     ///
+    /// `*mut i32`
+    ///
     /// - 0 → off
     /// - 1 → on
     RecMonItems,
     /// Track automation mode.
+    ///
+    /// `*mut i32`
     ///
     /// - 0 → trim/off
     /// - 1 → read
@@ -104,28 +142,48 @@ pub enum TrackInfoKey<'a> {
     AutoMode,
     /// Number of track channels.
     ///
+    /// `*mut i32`
+    ///
     /// 2 - 64, even numbers only.
     Nchan,
     /// Track selected.
+    ///
+    /// `*mut i32`
     ///
     /// - 0 → unselected
     /// - 1 → selected
     Selected,
     /// Current TCP window height in pixels including envelopes (read-only).
+    ///
+    /// `*mut i32`
     WndH,
     /// Current TCP window height in pixels not including envelopes (read-only).
+    ///
+    /// `*mut i32`
     TcpH,
     /// Current TCP window Y-position in pixels relative to top of arrange view (read-only).
+    ///
+    /// `*mut i32`
     TcpY,
     /// Current MCP X-position in pixels relative to mixer container.
+    ///
+    /// `*mut i32`
     McpX,
     /// Current MCP Y-position in pixels relative to mixer container.
+    ///
+    /// `*mut i32`
     McpY,
     /// Current MCP width in pixels.
+    ///
+    /// `*mut i32`
     McpW,
     /// Current MCP height in pixels.
+    ///
+    /// `*mut i32`
     McpH,
     /// Folder depth change.
+    ///
+    /// `*mut i32`
     ///
     /// - 0 → normal
     /// - 1 → track is a folder parent
@@ -135,36 +193,50 @@ pub enum TrackInfoKey<'a> {
     FolderDepth,
     /// Folder compacted state (only valid on folders).
     ///
+    /// `*mut i32`
+    ///
     /// - 0 → normal
     /// - 1 → small
     /// - 2 → tiny children
     FolderCompact,
     /// Track midi hardware output index.
     ///
+    /// `*mut i32`
+    ///
     /// Low 5 bits are which channels (1..=16, 0 → all), next 5 bits are output device index
     /// (0..=31). < 0 means disabled.
     MidiHwOut,
     /// Track performance flags.
+    ///
+    /// `*mut i32`
     ///
     /// &1 → no media buffering
     /// &2 → no anticipative FX
     PerfFlags,
     /// Custom color.
     ///
+    /// `*mut i32`
+    ///
     /// `<OS dependent color> | 0x100000` (i.e. `ColorToNative(r, g, b) | 0x100000`).
     /// If you don't do `| 0x100000`, then it will not be used, but will store the color anyway.
     CustomColor,
     /// Custom height override for TCP window.
     ///
+    /// `*mut i32`
+    ///
     /// 0 for none, otherwise size in pixels.
     HeightOverride,
     /// Track height lock.
+    ///
+    /// `*mut bool`
     ///
     /// Must set [`HeightOverride`] before locking.
     ///
     /// [`HeightOverride`]: #variant.HeightOverride
     HeightLock,
     /// Trim volume of track.
+    ///
+    /// `*mut f64`
     ///
     /// - 0 → -inf
     /// - 0.5 → -6dB
@@ -174,13 +246,19 @@ pub enum TrackInfoKey<'a> {
     Vol,
     /// Trim pan of track
     ///
+    /// `*mut f64`
+    ///
     /// -1..=1.
     Pan,
     /// Width of track
     ///
+    /// `*mut f64`
+    ///
     /// -1..=1.
     Width,
     /// Dual pan position 1.
+    ///
+    /// `*mut f64`
     ///
     /// -1..=1, only if [`PanMode`] == 6.
     ///
@@ -188,11 +266,15 @@ pub enum TrackInfoKey<'a> {
     DualPanL,
     /// Dual pan position 2.
     ///
+    /// `*mut f64`
+    ///
     /// -1..=1, only if [`PanMode`] == 6.
     ///
     /// [`PanMode`]: #variant.PanMode
     DualPanR,
     /// Pan mode.
+    ///
+    /// `*mut i32`
     ///
     /// - 0 → classic 3.x
     /// - 3 → new balance
@@ -201,31 +283,47 @@ pub enum TrackInfoKey<'a> {
     PanMode,
     /// Pan law.
     ///
+    /// `*mut f64`
+    ///
     /// - < 0 → project default
     /// - 1 → +0 dB
     /// - ...
     PanLaw,
     /// TrackEnvelope (read only).
+    ///
+    /// `*mut TrackEnvelope`
     Env(EnvChunkName<'a>),
     /// Track control panel visible in mixer.
+    ///
+    /// `*mut bool`
     ///
     /// Do not use on master track.
     ShowInMixer,
     /// Track control panel visible in arrange view.
     ///
+    /// `*mut bool`
+    ///
     /// Do not use on master track.
     ShowInTcp,
     /// Track sends audio to parent.
+    ///
+    /// `*mut bool`
     MainSend,
     /// Channel offset of track send to parent.
+    ///
+    /// `*mut char`
     MainSendOffs,
     /// Track free item positioning enabled
+    ///
+    /// `*mut bool`
     ///
     /// Call [`update_timeline`] after changing.
     ///
     /// [`update_timeline`]: struct.Reaper.html#method.update_timeline
     FreeMode,
     /// Track timebase.
+    ///
+    /// `*mut char`
     ///
     /// - -1 → project default
     /// - 0 → time
@@ -234,15 +332,21 @@ pub enum TrackInfoKey<'a> {
     BeatAttachMode,
     /// Scale of FX and send area in MCP.
     ///
+    /// `*mut f32`
+    ///
     /// - 0 → minimum allowed
     /// - 1 → maximum allowed
     McpFxSendScale,
     /// Scale of send area as proportion of the FX and send total area.
     ///
+    /// `*mut f32`
+    ///
     /// - 0 → minimum allowed
     /// - 1 → maximum allowed
     McpSendRgnScale,
     /// Track playback offset state.
+    ///
+    /// `*mut i32`
     ///
     /// - &1 → bypassed
     /// - &2 → offset
@@ -250,6 +354,8 @@ pub enum TrackInfoKey<'a> {
     /// Value is measured in samples (otherwise measured in seconds).
     PlayOffsetFlag,
     /// Track playback offset.
+    ///
+    /// `*mut f64`
     ///
     /// Units depend on [`PlayOffsetFlag`].
     ///
@@ -348,35 +454,67 @@ impl<'a> TrackInfoKey<'a> {
 /// [`get_set_track_send_info()`]: struct.ReaperFunctions.html#method.get_set_track_send_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackSendInfoKey<'a> {
-    /// Returns the destination track (read-only).
+    /// Destination track (read-only).
+    ///
+    /// `*mut MediaTrack`
     ///
     /// Only applies for sends/receives.
     DestTrack,
-    /// Returns the source track (read-only).
+    /// Source track (read-only).
+    ///
+    /// `*mut MediaTrack`
     ///
     /// Only applies for sends/receives.
     SrcTrack,
-    /// Returns the corresponding track send envelope.
+    /// Corresponding track send envelope.
+    ///
+    /// `*mut TrackEnvelope`
     Env(EnvChunkName<'a>),
     /// Extension-specific persistent data.
+    ///
+    /// `*mut char`
     ///
     /// Use [`ext()`] to create this variant.
     ///
     /// [`ext()`]: #method.ext
     Ext(Cow<'a, CStr>),
+    /// Muted.
+    ///
+    /// `*mut bool`
     Mute,
+    /// Phase.
+    ///
+    /// `*mut bool`
+    ///
     /// `true` to flip phase.
     Phase,
+    /// Mono.
+    ///
+    /// `*mut bool`
     Mono,
+    /// Volume.
+    ///
+    /// `*mut f64`
+    ///
     /// 1.0 → +0 dB etc.
     Vol,
+    /// Pan.
+    ///
+    /// `*mut f64`
+    ///
     /// -1..=1
     Pan,
+    /// Pan law.
+    ///
+    /// `*mut f64`
     ///
     /// - 1.0 → +0.0 dB
     /// - 0.5 → -6 dB
     /// - -1.0 → value defined in project
     PanLaw,
+    /// Send mode.
+    ///
+    /// `*mut i32`
     ///
     /// - 0 → post-fader
     /// - 1 → pre-fx
@@ -385,6 +523,8 @@ pub enum TrackSendInfoKey<'a> {
     SendMode,
     /// Automation mode.
     ///
+    /// `*mut i32`
+    ///
     /// - -1 → use track automation mode
     /// - 0 → trim/off
     /// - 1 → read
@@ -392,10 +532,20 @@ pub enum TrackSendInfoKey<'a> {
     /// - 3 → write
     /// - 4 → latch
     AutoMode,
+    /// Source channel.
+    ///
+    /// `*mut i32`
+    ///
     /// Index, &1024 → mono, -1 → none
     SrcChan,
+    /// Destination channel.
+    ///
+    /// `*mut i32`
     /// Index, &1024 → mono, otherwise stereo pair, hwout: &512 → rearoute
     DstChan,
+    /// MIDI flags.
+    ///
+    /// `*mut i32`
     ///
     /// - Low 5 bits → source channel (0 → all, 1..=16)
     /// - Next 5 bits → destination channel (0 → original, 1..=16)
