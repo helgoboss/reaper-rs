@@ -1,4 +1,4 @@
-macro_rules! check {
+macro_rules! assert {
     ($condition:expr) => {{
         let result = if ($condition) {
             Ok(())
@@ -9,7 +9,7 @@ macro_rules! check {
     }};
 }
 
-macro_rules! check_eq {
+macro_rules! assert_eq {
     ($actual:expr, $expected:expr) => {
         match (&$actual, &$expected) {
             (actual_val, expected_val) => {
