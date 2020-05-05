@@ -380,18 +380,29 @@ pub struct QualifiedFxLocation {
 /// Location of a track or take FX.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum VersionDependentFxLocation {
-    // TODO-medium Does this encode take index as well?
-    TakeFx { item_index: u32, fx_index: u32 },
+    /// It's a take FX.
+    ///
+    /// The take index is currently not exposed by REAPER.
+    TakeFx {
+        /// Index of the item on that track.
+        item_index: u32,
+        /// Index of the FX within the take FX chain.
+        fx_index: u32,
+    },
+    /// It's a track FX.
     TrackFx(VersionDependentTrackFxLocation),
 }
 
 /// Location of a track FX.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum VersionDependentTrackFxLocation {
-    /// In REAPER versions < 5.95 this index can refer either to the input or output FX chain - we
-    /// don't know.
+    /// This is REAPER < 5.95.
+    ///
+    /// The given index can refer either to the input or output FX chain - we don't know.
     Old(u32),
-    /// In REAPER versions >= 5.95, it's possible to distinguish between input and output FX
+    /// This is REAPER >= 5.95.
+    ///
+    /// It's possible to distinguish between input and output FX.
     New(TrackFxLocation),
 }
 
