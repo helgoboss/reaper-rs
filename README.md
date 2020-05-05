@@ -175,6 +175,25 @@ reaper-rs access the `HostCallback` function.
 
 - `bindgen` should be executed on Linux (including Windows WSL)
 
+#### Fresh Ubuntu 18.04.3 LTS
+```sh
+sudo apt update
+sudo apt install curl git build-essential -y
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
+source $HOME/.cargo/env
+rustup default nightly # Not necessary if building just low-level oder medium-level API
+cd Downloads
+git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git
+cd reaper-rs
+cargo build
+# => target/debug/libreaper_rs_test_extension_plugin.so
+# => target/debug/libreaper_rs_test_vst_plugin.so
+# Install REAPER and start it at least one time
+ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_rs_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_rs_test_extension_plugin.so
+
+
+```
+
 ## Project background
 
 reaper-rs has been born as part of an effort to port the REAPER extension 
