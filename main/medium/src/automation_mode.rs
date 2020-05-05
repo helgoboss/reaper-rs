@@ -1,4 +1,4 @@
-use crate::ConversionFromRawFailed;
+use crate::TryFromRawError;
 use derive_more::*;
 
 /// Global override of track automation modes.
@@ -23,7 +23,7 @@ pub enum AutomationMode {
 
 impl AutomationMode {
     /// Converts an integer as returned by the low-level API to an automation mode.
-    pub fn try_from_raw(v: i32) -> Result<AutomationMode, ConversionFromRawFailed> {
+    pub fn try_from_raw(v: i32) -> Result<AutomationMode, TryFromRawError<i32>> {
         use AutomationMode::*;
         match v {
             0 => Ok(TrimRead),
@@ -32,7 +32,10 @@ impl AutomationMode {
             3 => Ok(Write),
             4 => Ok(Latch),
             5 => Ok(LatchPreview),
-            _ => Err(ConversionFromRawFailed),
+            _ => Err(TryFromRawError::new(
+                "couldn't convert to automation mode",
+                v,
+            )),
         }
     }
 

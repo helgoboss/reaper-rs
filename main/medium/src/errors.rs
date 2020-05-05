@@ -1,8 +1,11 @@
 use derive_more::*;
-
-pub(crate) type ReaperFunctionResult<T> = Result<T, ReaperFunctionError>;
+use std::fmt::{Debug, Display};
 
 /// An error which can occur when executing a REAPER function.
+///
+/// This is not an error caused by *reaper-rs*, but one reported by REAPER itself.
+/// The error message is not very specific most of the time because REAPER functions usually don't
+/// give information about the cause of the error.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
 #[display(fmt = "REAPER function failed: {}", message)]
 pub struct ReaperFunctionError {
@@ -15,20 +18,22 @@ impl ReaperFunctionError {
     }
 }
 
-// ##### Conversion errors
+pub(crate) type ReaperFunctionResult<T> = Result<T, ReaperFunctionError>;
 
-/// An error which can occur when trying to convert a low-level FX index.
-#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
-#[display(fmt = "FX index invalid")]
-pub struct FxIndexInvalid;
+/// An error which can occur when trying to convert a low-level type to a medium-level type.
+///
+/// This error is caused by *reaper-rs*, not by REAPER itself.
+#[derive(Debug, Clone, Eq, PartialEq, Display)]
+#[display(fmt = "conversion from raw value [{}] failed: {}", raw_value, message)]
+pub struct TryFromRawError<R: Copy> {
+    message: &'static str,
+    raw_value: R,
+}
 
-/// An error which can occur when trying to convert a low-level raw representation to a medium-level
-/// enum variant.
-#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
-#[display(fmt = "conversion from raw representation failed")]
-pub struct ConversionFromRawFailed;
+impl<R: Copy> TryFromRawError<R> {
+    pub(crate) fn new(message: &'static str, raw_value: R) -> TryFromRawError<R> {
+        TryFromRawError { message, raw_value }
+    }
+}
 
-/// An error which can occur when trying to convert a low-level recording input index.
-#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
-#[display(fmt = "recording input index invalid")]
-pub struct RecInputIndexInvalid;
+impl<R: Copy + Display + Debug> std::error::Error for TryFromRawError<R> {}

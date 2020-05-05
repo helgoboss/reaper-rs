@@ -1,6 +1,6 @@
 use crate::{
-    ConversionFromRawFailed, FxIndexInvalid, HookCommandFn, HookPostCommandFn, Hwnd,
-    KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject, ReaperStringArg, ToggleActionFn,
+    HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
+    ReaProject, ReaperStringArg, ToggleActionFn, TryFromRawError,
 };
 use c_str_macro::c_str;
 use derive_more::*;
@@ -281,9 +281,11 @@ pub enum TrackFxLocation {
 
 impl TrackFxLocation {
     /// Converts an integer as returned by the low-level API to a track FX location.
-    pub fn try_from_raw(v: i32) -> Result<TrackFxLocation, FxIndexInvalid> {
+    pub fn try_from_raw(v: i32) -> Result<TrackFxLocation, TryFromRawError<i32>> {
         use TrackFxLocation::*;
-        let v: u32 = v.try_into().map_err(|_| FxIndexInvalid)?;
+        let v: u32 = v
+            .try_into()
+            .map_err(|_| TryFromRawError::new("couldn't convert to track FX location", v))?;
         let result = if v >= 0x1000000 {
             InputFxChain(v - 0x1000000)
         } else {
@@ -536,13 +538,16 @@ pub enum InputMonitoringMode {
 
 impl InputMonitoringMode {
     /// Converts an integer as returned by the low-level API to an input monitoring mode.
-    pub fn try_from_raw(v: i32) -> Result<InputMonitoringMode, ConversionFromRawFailed> {
+    pub fn try_from_raw(v: i32) -> Result<InputMonitoringMode, TryFromRawError<i32>> {
         use InputMonitoringMode::*;
         match v {
             0 => Ok(Off),
             1 => Ok(Normal),
             2 => Ok(NotWhenPlaying),
-            _ => Err(ConversionFromRawFailed),
+            _ => Err(TryFromRawError::new(
+                "couldn't convert to input monitoring mode",
+                v,
+            )),
         }
     }
 

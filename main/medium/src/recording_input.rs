@@ -1,4 +1,4 @@
-use crate::{MidiInputDeviceId, RecInputIndexInvalid};
+use crate::{MidiInputDeviceId, TryFromRawError};
 use derive_more::*;
 use helgoboss_midi::Channel;
 use std::convert::{TryFrom, TryInto};
@@ -26,19 +26,22 @@ impl RecordingInput {
     /// # Errors
     ///
     /// Fails if the given integer is not a valid recording input index.
-    pub fn try_from_raw(rec_input_index: i32) -> Result<RecordingInput, RecInputIndexInvalid> {
+    pub fn try_from_raw(rec_input_index: i32) -> Result<RecordingInput, TryFromRawError<i32>> {
         use RecordingInput::*;
-        let rec_input_index: u32 = rec_input_index
-            .try_into()
-            .map_err(|_| RecInputIndexInvalid)?;
-        match rec_input_index {
-            0..=511 => Ok(Mono(rec_input_index)),
-            512..=1023 => Ok(MonoReaRoute(rec_input_index - 512)),
-            1024..=1535 => Ok(Stereo(rec_input_index - 1024)),
-            1536..=2047 => Ok(StereoReaRoute(rec_input_index - 1536)),
-            2048..=4095 => Err(RecInputIndexInvalid),
+        let v: u32 = rec_input_index.try_into().map_err(|_| {
+            TryFromRawError::new("couldn't convert to recording input", rec_input_index)
+        })?;
+        match v {
+            0..=511 => Ok(Mono(v)),
+            512..=1023 => Ok(MonoReaRoute(v - 512)),
+            1024..=1535 => Ok(Stereo(v - 1024)),
+            1536..=2047 => Ok(StereoReaRoute(v - 1536)),
+            2048..=4095 => Err(TryFromRawError::new(
+                "couldn't convert to recording input",
+                rec_input_index,
+            )),
             4096..=6128 => {
-                let midi_index = rec_input_index - 4096;
+                let midi_index = v - 4096;
                 Ok(Midi {
                     device_id: {
                         let raw_device_id = midi_index / 32;
@@ -59,7 +62,10 @@ impl RecordingInput {
                     },
                 })
             }
-            _ => Err(RecInputIndexInvalid),
+            _ => Err(TryFromRawError::new(
+                "couldn't convert to recording input",
+                rec_input_index,
+            )),
         }
     }
 

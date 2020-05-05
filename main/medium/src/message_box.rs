@@ -1,4 +1,4 @@
-use crate::ConversionFromRawFailed;
+use crate::TryFromRawError;
 
 /// Type of message box to be displayed.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -40,7 +40,7 @@ pub enum MessageBoxResult {
 
 impl MessageBoxResult {
     /// Converts an integer as returned by the low-level API to an automation mode.
-    pub fn try_from_raw(v: i32) -> Result<MessageBoxResult, ConversionFromRawFailed> {
+    pub fn try_from_raw(v: i32) -> Result<MessageBoxResult, TryFromRawError<i32>> {
         use MessageBoxResult::*;
         match v {
             1 => Ok(Okay),
@@ -50,7 +50,10 @@ impl MessageBoxResult {
             5 => Ok(Ignore),
             6 => Ok(Yes),
             7 => Ok(No),
-            _ => Err(ConversionFromRawFailed),
+            _ => Err(TryFromRawError::new(
+                "couldn't convert to message box result",
+                v,
+            )),
         }
     }
 }
