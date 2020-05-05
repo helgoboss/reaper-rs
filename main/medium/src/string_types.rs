@@ -79,7 +79,11 @@ impl<'a> From<&'a CStr> for ReaperStringArg<'a> {
 impl<'a> From<&'a str> for ReaperStringArg<'a> {
     fn from(s: &'a str) -> Self {
         // Requires copying
-        ReaperStringArg(CString::new(s).unwrap().into())
+        ReaperStringArg(
+            CString::new(s)
+                .expect("Rust string too exotic for REAPER")
+                .into(),
+        )
     }
 }
 
@@ -90,6 +94,10 @@ impl<'a> From<&'a str> for ReaperStringArg<'a> {
 impl<'a> From<String> for ReaperStringArg<'a> {
     fn from(s: String) -> Self {
         // Doesn't require copying because we own the string now
-        ReaperStringArg(CString::new(s).unwrap().into())
+        ReaperStringArg(
+            CString::new(s)
+                .expect("Rust string too exotic for REAPER")
+                .into(),
+        )
     }
 }

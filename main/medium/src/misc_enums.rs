@@ -285,7 +285,7 @@ impl TrackFxLocation {
         use TrackFxLocation::*;
         let v: u32 = v
             .try_into()
-            .map_err(|_| TryFromRawError::new("couldn't convert to track FX location", v))?;
+            .map_err(|_| TryFromRawError::new("FX index shouldn't be negative", v))?;
         let result = if v >= 0x1000000 {
             InputFxChain(v - 0x1000000)
         } else {

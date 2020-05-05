@@ -390,7 +390,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
-        let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
+        let irecmon = unsafe { deref_as::<i32>(ptr) }.expect("irecmon pointer is null");
         InputMonitoringMode::try_from_raw(irecmon).expect("unknown input monitoring mode")
     }
 
@@ -407,11 +407,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
-        let rec_input_index = unsafe { unref_as::<i32>(ptr) }.unwrap();
+        let rec_input_index =
+            unsafe { deref_as::<i32>(ptr) }.expect("rec_input_index pointer is null");
         if rec_input_index < 0 {
             None
         } else {
-            Some(RecordingInput::try_from_raw(rec_input_index).unwrap())
+            Some(RecordingInput::try_from_raw(rec_input_index).expect("unknown recording input"))
         }
     }
 
@@ -449,7 +450,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
-        unsafe { unref_as::<GUID>(ptr) }.unwrap()
+        unsafe { deref_as::<GUID>(ptr) }.expect("GUID pointer is null")
     }
 
     /// Returns whether we are in the real-time audio thread.
@@ -1176,7 +1177,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             0 => None,
             1 => Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_location: TrackFxLocation::try_from_raw(fxnumber).unwrap(),
+                fx_location: TrackFxLocation::try_from_raw(fxnumber)
+                    .expect("unknown track FX location"),
             }),
             2 => {
                 // TODO-low Add test
@@ -1224,7 +1226,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         if tracknumber_high_word == 0 {
             Some(TrackFx {
                 track_ref: convert_tracknumber_to_track_ref(tracknumber),
-                fx_location: TrackFxLocation::try_from_raw(fxnumber).unwrap(),
+                fx_location: TrackFxLocation::try_from_raw(fxnumber)
+                    .expect("unknown track FX location"),
                 // Although the parameter is called paramnumber, it's zero-based (checked)
                 param_index: paramnumber,
             })
@@ -1786,7 +1789,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         let ptr = self
             .low
             .TrackFX_GetFXGUID(track.as_ptr(), fx_location.to_raw());
-        unref(ptr).ok_or(ReaperFunctionError::new(
+        deref(ptr).ok_or(ReaperFunctionError::new(
             "couldn't get FX GUID (probably FX doesn't exist)",
         ))
     }
@@ -3031,15 +3034,15 @@ fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
     Some(value)
 }
 
-unsafe fn unref<T: Copy>(ptr: *const T) -> Option<T> {
+unsafe fn deref<T: Copy>(ptr: *const T) -> Option<T> {
     if ptr.is_null() {
         return None;
     }
     Some(*ptr)
 }
 
-unsafe fn unref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
-    unref(ptr as *const T)
+unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
+    deref(ptr as *const T)
 }
 
 unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a CStr> {

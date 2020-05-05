@@ -447,8 +447,10 @@ impl DelegatingControlSurface {
                 )
             } else {
                 VersionDependentFxLocation::TakeFx {
-                    item_index: deref_as::<i32>(media_item_ptr).unwrap() as u32,
-                    fx_index: deref_as::<i32>(fx_index_ptr).unwrap() as u32,
+                    item_index: deref_as::<i32>(media_item_ptr).expect("media item pointer is null")
+                        as u32,
+                    fx_index: deref_as::<i32>(fx_index_ptr).expect("FX index pointer is null")
+                        as u32,
                 }
             },
         })
@@ -458,11 +460,13 @@ impl DelegatingControlSurface {
         &self,
         ptr: *mut c_void,
     ) -> VersionDependentTrackFxLocation {
-        let index = deref_as::<i32>(ptr).unwrap();
+        let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
         if self.supports_detection_of_input_fx {
-            VersionDependentTrackFxLocation::New(TrackFxLocation::try_from_raw(index).unwrap())
+            VersionDependentTrackFxLocation::New(
+                TrackFxLocation::try_from_raw(fx_index).expect("weird FX index"),
+            )
         } else {
-            VersionDependentTrackFxLocation::Old(index as u32)
+            VersionDependentTrackFxLocation::Old(fx_index as u32)
         }
     }
 }
@@ -604,7 +608,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
             // TODO-low Delegate all known CSURF_EXT_ constants
             match call as u32 {
                 raw::CSURF_EXT_SETINPUTMONITOR => {
-                    let recmon: i32 = deref_as(parm2).unwrap();
+                    let recmon: i32 = deref_as(parm2).expect("recmon pointer is null");
                     self.delegate.ext_set_input_monitor(ExtSetInputMonitorArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                         mode: InputMonitoringMode::try_from_raw(recmon)
@@ -612,8 +616,9 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                     })
                 }
                 raw::CSURF_EXT_SETFXPARAM | raw::CSURF_EXT_SETFXPARAM_RECFX => {
-                    let fxidx_and_paramidx: i32 = deref_as(parm2).unwrap();
-                    let normalized_value: f64 = deref_as(parm3).unwrap();
+                    let fxidx_and_paramidx: i32 =
+                        deref_as(parm2).expect("fx/param index pointer is null");
+                    let normalized_value: f64 = deref_as(parm3).expect("value pointer is null");
                     let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
                     let param_index = fxidx_and_paramidx & 0xffff;
                     let args = ExtSetFxParamArgs {
@@ -661,14 +666,15 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                 raw::CSURF_EXT_SETSENDVOLUME => {
                     self.delegate.ext_set_send_volume(ExtSetSendVolumeArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                        send_index: deref_as::<i32>(parm2).unwrap() as u32,
-                        volume: deref_as(parm3).unwrap(),
+                        send_index: deref_as::<i32>(parm2).expect("send index pointer is null")
+                            as u32,
+                        volume: deref_as(parm3).expect("volume pointer is null"),
                     })
                 }
                 raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_set_send_pan(ExtSetSendPanArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                    send_index: deref_as::<i32>(parm2).unwrap() as u32,
-                    pan: deref_as(parm3).unwrap(),
+                    send_index: deref_as::<i32>(parm2).expect("send index pointer is null") as u32,
+                    pan: deref_as(parm3).expect("pan pointer is null"),
                 }),
                 raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_set_fx_change(ExtSetFxChangeArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
