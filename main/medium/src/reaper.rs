@@ -12,18 +12,18 @@ use crate::infostruct_keeper::InfostructKeeper;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
     require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
-    AudioThread, AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
+    AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction,
     GangBehavior, GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo,
     MainThread, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId,
     MidiOutputDeviceId, NotRegistered, NotificationBehavior, PlaybackSpeedFactor,
-    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctions,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmState, RecordingInput, RegistrationFailed, SectionContext,
-    SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory,
+    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, RealTimeAudioThread,
+    ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, RegistrationFailed,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory,
     TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
     VolumeSliderValue, WindowContext,
 };
@@ -96,8 +96,8 @@ impl Reaper {
     }
 
     /// Creates a new container of REAPER functions with only those unlocked that can be safely
-    /// executed in the audio thread.
-    pub fn create_real_time_functions(&self) -> ReaperFunctions<dyn AudioThread> {
+    /// executed in the real-time audio thread.
+    pub fn create_real_time_functions(&self) -> ReaperFunctions<dyn RealTimeAudioThread> {
         ReaperFunctions::new(self.functions.low().clone())
     }
 
@@ -425,8 +425,8 @@ impl Reaper {
 
     /// Registers an audio hook register.
     ///
-    /// This allows you to get called back in the audio thread before and after REAPER's processing.
-    /// You should be careful with this because you are entering real-time world.
+    /// This allows you to get called back in the real-time audio thread before and after REAPER's
+    /// processing. You should be careful with this because you are entering real-time world.
     ///
     /// This function returns a handle which you can use to unregister the audio hook register at
     /// any time via [`audio_reg_hardware_hook_remove()`] (from the main thread).

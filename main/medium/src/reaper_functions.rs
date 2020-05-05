@@ -51,8 +51,8 @@ pub trait ThreadScope: Debug {}
 /// Marker thread representing the main thread.
 pub trait MainThread: ThreadScope {}
 
-/// Marker thread representing the audio thread.
-pub trait AudioThread: ThreadScope {}
+/// Marker thread representing the real-time audio thread.
+pub trait RealTimeAudioThread: ThreadScope {}
 
 /// This is the main access point for most REAPER functions.
 ///
@@ -60,9 +60,9 @@ pub trait AudioThread: ThreadScope {}
 ///
 /// You can obtain an instance of this struct by calling [`Reaper::functions()`]. This unlocks all
 /// functions which are safe to execute in the main thread. If you want access to the functions
-/// which are safe to execute in the audio thread, call [`Reaper::create_real_time_functions()`]
-/// instead. REAPER functions which are related to registering/unregistering things are located in
-/// [`Reaper`].
+/// which are safe to execute in the real-time audio thread, call
+/// [`Reaper::create_real_time_functions()`] instead. REAPER functions which are related to
+/// registering/unregistering things are located in [`Reaper`].
 ///
 /// Please note that this struct contains nothing but function pointers, so you are free to clone
 /// it, e.g. in order to make all functions accessible somewhere else. This is sometimes easier than
@@ -91,37 +91,38 @@ pub trait AudioThread: ThreadScope {}
 /// In REAPER and probably many other DAWs there are at least two important threads:
 ///
 /// 1. The main thread (responsible for things like UI, driven by the UI main loop).
-/// 2. The audio thread (responsible for processing audio and MIDI buffers, driven by the audio
-/// hardware)
+/// 2. The real-time audio thread (responsible for processing audio and MIDI buffers, driven by the
+///    audio hardware)
 ///
 /// Most functions offered by REAPER are only safe to be executed in the main thread. If you execute
-/// them in the audio thread, REAPER will crash. Or worse: It will seemingly work on your machine
+/// them in another thread, REAPER will crash. Or worse: It will seemingly work on your machine
 /// and crash on someone else's. There are also a few functions which are only safe to be executed
 /// in the audio thread. And there are also very few functions which are safe to be executed from
 /// *any* thread (thread-safe).
 ///
 /// There's currently no way to make sure at compile time that a function is called in the correct
 /// thread. Of course that would be the best. In an attempt to still let the compiler help you a
-/// bit, the traits [`MainThread`] and [`AudioThread`] have been introduced. They are marker threads
-/// which are used as type bound on each method which is not thread-safe. So depending on the
-/// context we can expose an instance of [`ReaperFunctions`] which has only functions unlocked
-/// which are safe to be executed from e.g. the audio thread. The compiler will complain if you
-/// attempt to call an audio-thread-only method on `ReaperFunctions<dyn MainThread>` and vice versa.
+/// bit, the traits [`MainThread`] and [`RealTimeAudioThread`] have been introduced. They are marker
+/// threads which are used as type bound on each method which is not thread-safe. So depending on
+/// the context we can expose an instance of [`ReaperFunctions`] which has only functions unlocked
+/// which are safe to be executed from e.g. the real-time audio thread. The compiler will complain
+/// if you attempt to call an audio-thread-only method on `ReaperFunctions<dyn MainThread>` and vice
+/// versa.
 ///
 /// Of course that technique can't prevent anyone from acquiring a main-thread only instance and
 /// use it in the audio hook. But still, it adds some extra safety.
 ///
 /// The alternative to tagging functions via marker traits would have been to implement e.g.
-/// audio-thread-only functions in a trait `CallableFromAudioThread` as default functions and create
-/// a struct that inherits those default functions. Disadvantage: Consumer always would have to
-/// bring the trait into scope to see the functions. That's confusing. It also would provide less
-/// amount of safety.
+/// audio-thread-only functions in a trait `CallableFromRealTimeAudioThread` as default functions
+/// and create a struct that inherits those default functions. Disadvantage: Consumer always would
+/// have to bring the trait into scope to see the functions. That's confusing. It also would provide
+/// less amount of safety.
 ///
 /// ## Why no fail-fast at runtime when getting threading wrong?
 ///
 /// Another thing which could help would be to panic when a main-thread-only function is called in
-/// the audio thread or vice versa. This would prevent "it works on my machine" scenarios. However,
-/// this is currently not being done because of possible performance implications.
+/// the real-time audio thread or vice versa. This would prevent "it works on my machine" scenarios.
+/// However, this is currently not being done because of possible performance implications.
 ///
 /// [`Reaper`]: struct.Reaper.html
 /// [`Reaper::functions()`]: struct.Reaper.html#method.functions
@@ -129,7 +130,7 @@ pub trait AudioThread: ThreadScope {}
 /// [`low()`]: #method.low
 /// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
 /// [`MainThread`]: trait.MainThread.html
-/// [`AudioThread`]: trait.AudioThread.html
+/// [`RealTimeAudioThread`]: trait.RealTimeAudioThread.html
 /// [`ReaperFunctions`]: struct.ReaperFunctions.html
 #[derive(Clone, Debug)]
 pub struct ReaperFunctions<S: ?Sized + ThreadScope = dyn MainThread> {
@@ -447,9 +448,6 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     ///
     /// *Real-time* means somewhere between [`OnAudioBuffer`] calls, not in some worker or
     /// anticipative FX thread.
-    ///
-    /// TODO-medium There are different kinds of audio threads, one being the real-time audio
-    ///  thread.
     ///
     /// [`OnAudioBuffer`]: trait.MediumOnAudioBuffer.html#method.call
     pub fn is_in_real_time_audio(&self) -> bool {
@@ -2771,7 +2769,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         f: impl FnOnce(&MidiInput) -> R,
     ) -> Option<R>
     where
-        S: AudioThread,
+        S: RealTimeAudioThread,
     {
         let ptr = self.low.GetMidiInput(idx.to_raw());
         if ptr.is_null() {

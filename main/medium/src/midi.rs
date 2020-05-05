@@ -19,7 +19,7 @@ pub struct MidiInput(pub(crate) NonNull<raw::midi_Input>);
 impl MidiInput {
     /// Returns the list of MIDI events which are currently in the buffer.
     ///
-    /// This must only be called in the audio thread! See [`get_midi_input()`].
+    /// This must only be called in the real-time audio thread! See [`get_midi_input()`].
     ///
     /// # Design
     ///
@@ -36,13 +36,6 @@ impl MidiInput {
     ///
     /// [`MidiInput`]: struct.MidiInput.html
     /// [`get_midi_input()`]: struct.ReaperFunctions.html#method.get_midi_input
-    // Should we mark this as unsafe because
-    // it can crash if accessed wrongly from UI thread instead of audio thread? I don't think
-    // so, then we would have to mark most functions as unsafe because most functions can only
-    // be called from UI thread.
-    //
-    // TODO-low In theory we could prevent undefined behavior by always checking the thread at
-    //  first.
     pub fn get_read_buf(&self) -> MidiEventList<'_> {
         let raw_evt_list = unsafe { self.0.as_ref().GetReadBuf() };
         MidiEventList::new(unsafe { &*raw_evt_list })

@@ -36,12 +36,11 @@ use reaper_rs_medium;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::UndoScope::All;
 use reaper_rs_medium::{
-    AudioThread, CommandId, GetFocusedFxResult, GetLastTouchedFxResult,
-    GlobalAutomationModeOverride, Hwnd, MediumGaccelRegister, MediumHookCommand,
-    MediumHookPostCommand, MediumOnAudioBuffer, MediumToggleAction, MessageBoxResult,
-    MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef,
-    ReaperFunctions, ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget,
-    ToggleActionResult, TrackRef,
+    CommandId, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd,
+    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
+    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
+    OnAudioBufferArgs, ProjectRef, RealTimeAudioThread, ReaperFunctions, ReaperStringArg,
+    ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult, TrackRef,
 };
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
@@ -118,7 +117,7 @@ impl ReaperBuilder {
 }
 
 pub struct RealTimeReaper {
-    functions: ReaperFunctions<dyn AudioThread>,
+    functions: ReaperFunctions<dyn RealTimeAudioThread>,
     receiver: mpsc::Receiver<AudioThreadTaskOp>,
     sender_to_main_thread: mpsc::Sender<MainThreadTask>,
     subjects: RealTimeSubjects,
