@@ -1,3 +1,4 @@
+use approx::*;
 use std::convert::TryFrom;
 use std::ffi::CStr;
 use std::iter;
@@ -686,7 +687,10 @@ fn set_track_send_volume() -> TestStep {
         });
         send.set_volume(Volume::from_normalized_value(0.25));
         // Then
-        check_eq!(send.get_volume().get_db(), Db::new(-30.009531739774296));
+        check!(abs_diff_eq!(
+            send.get_volume().get_db().get(),
+            -30.009531739774296
+        ));
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), send);
         Ok(())
@@ -1303,12 +1307,15 @@ fn set_track_volume() -> TestStep {
         track.set_volume(Volume::from_normalized_value(0.25));
         // Then
         let volume = track.get_volume();
-        check_eq!(
-            volume.get_reaper_value(),
-            ReaperVolumeValue::new(0.031588093366685013)
-        );
-        check_eq!(volume.get_db(), Db::new(-30.009531739774296));
-        check_eq!(volume.get_normalized_value(), 0.25000000000003497);
+        check!(abs_diff_eq!(
+            volume.get_reaper_value().get(),
+            0.031588093366685013
+        ));
+        check!(abs_diff_eq!(volume.get_db().get(), -30.009531739774296));
+        check!(abs_diff_eq!(
+            volume.get_normalized_value(),
+            0.25000000000003497
+        ));
         check_eq!(mock.get_invocation_count(), 1);
         check_eq!(mock.get_last_arg(), track);
         Ok(())
@@ -1377,7 +1384,10 @@ fn query_track_volume() -> TestStep {
         // Then
         check_eq!(volume.get_reaper_value(), ReaperVolumeValue::ZERO_DB);
         check_eq!(volume.get_db(), Db::ZERO_DB);
-        check_eq!(volume.get_normalized_value(), 0.71599999999999997);
+        check!(abs_diff_eq!(
+            volume.get_normalized_value(),
+            0.71599999999999997
+        ));
         Ok(())
     })
 }
@@ -2290,14 +2300,14 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                 check_eq!(last_touched_fx_param, Some(p.clone()));
             }
             check_eq!(p.get_formatted_value().as_c_str(), c_str!("-4.44"));
-            check_eq!(
-                p.get_normalized_value(),
-                ReaperNormalizedFxParamValue::new(0.30000001192092896)
-            );
-            check_eq!(
-                p.get_reaper_value(),
-                ReaperNormalizedFxParamValue::new(0.30000001192092896)
-            );
+            check!(abs_diff_eq!(
+                p.get_normalized_value().get(),
+                0.30000001192092896
+            ));
+            check!(abs_diff_eq!(
+                p.get_reaper_value().get(),
+                0.30000001192092896
+            ));
             check_eq!(
                 p.format_normalized_value(p.get_normalized_value())
                     .as_c_str(),

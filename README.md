@@ -188,7 +188,7 @@ cd reaper-rs
 cargo build
 # => target/debug/libreaper_rs_test_extension_plugin.so
 # => target/debug/libreaper_rs_test_vst_plugin.so
-# Install REAPER and start it at least one time
+# Download REAPER and start it at least one time
 ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_rs_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_rs_test_extension_plugin.so
 
 
