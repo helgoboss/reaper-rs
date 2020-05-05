@@ -15,16 +15,6 @@ impl ReaperFunctionError {
     }
 }
 
-// ##### Similar, but registration failed
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "registration failed")]
-pub struct RegistrationFailed;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "unregistering failed because this was not registered")]
-pub struct NotRegistered;
-
 // ##### Conversion errors
 
 /// An error which can occur when trying to convert a low-level FX index.

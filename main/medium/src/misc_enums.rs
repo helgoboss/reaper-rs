@@ -356,7 +356,7 @@ pub enum ActionValueChange {
 /// A thing that you can register at REAPER.
 // TODO-low "Unlock" all uncommented variants as soon as appropriate types are clear
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub enum PluginRegistration<'a> {
+pub enum RegistrationObject<'a> {
     // Api(Cow<'a, CStr>, *mut c_void),
     // ApiDef(Cow<'a, CStr>, *mut c_void),
     /// A hook command.
@@ -440,7 +440,7 @@ pub enum PluginRegistration<'a> {
     Custom(Cow<'a, CStr>, *mut c_void),
 }
 
-impl<'a> PluginRegistration<'a> {
+impl<'a> RegistrationObject<'a> {
     // pub fn api(func_name: impl Into<ReaperStringArg<'a>>, func: *mut c_void) -> Self {
     //     Self::Api(func_name.into().into_inner(), func)
     // }
@@ -449,18 +449,18 @@ impl<'a> PluginRegistration<'a> {
     //     Self::ApiDef(func_name.into().into_inner(), func_def)
     // }
 
-    /// Convenience function for creating a [`Custom`] registration.
+    /// Convenience function for creating a [`Custom`] registration object.
     ///
     /// [`Custom`]: #variant.Custom
     pub fn custom(
         key: impl Into<ReaperStringArg<'a>>,
         info_struct: *mut c_void,
-    ) -> PluginRegistration<'a> {
-        PluginRegistration::Custom(key.into().into_inner(), info_struct)
+    ) -> RegistrationObject<'a> {
+        RegistrationObject::Custom(key.into().into_inner(), info_struct)
     }
 
-    pub(crate) fn into_owned(self) -> PluginRegistration<'static> {
-        use PluginRegistration::*;
+    pub(crate) fn into_owned(self) -> RegistrationObject<'static> {
+        use RegistrationObject::*;
         match self {
             // Api(func_name, func) => Api(func_name.into_owned().into(), func),
             // ApiDef(func_name, func_def) => ApiDef(func_name.into_owned().into(), func_def),
@@ -478,7 +478,7 @@ impl<'a> PluginRegistration<'a> {
     }
 
     pub(crate) fn key_into_raw(self) -> Cow<'a, CStr> {
-        use PluginRegistration::*;
+        use RegistrationObject::*;
         match self {
             // Api(func_name, _) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
             // ApiDef(func_name, _) => concat_c_strs(c_str!("APIdef_"), func_name.as_ref()).into(),
@@ -496,7 +496,7 @@ impl<'a> PluginRegistration<'a> {
     }
 
     pub(crate) fn ptr_to_raw(&self) -> *mut c_void {
-        use PluginRegistration::*;
+        use RegistrationObject::*;
         match self {
             // Api(_, func) => *func,
             // ApiDef(_, func_def) => *func_def,

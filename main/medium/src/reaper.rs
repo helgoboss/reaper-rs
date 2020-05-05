@@ -18,10 +18,10 @@ use crate::{
     MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId,
-    MidiOutputDeviceId, NotRegistered, NotificationBehavior, PlaybackSpeedFactor,
-    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, RealTimeAudioThread,
+    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectPart,
+    ProjectRef, ReaProject, RealTimeAudioThread, ReaperFunctionError, ReaperFunctionResult,
     ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput, RegistrationFailed,
+    ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput, RegistrationObject,
     SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackRef,
     TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
@@ -71,7 +71,7 @@ pub struct Reaper {
     gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
     audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, raw::audio_hook_register_t>,
     csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
-    plugin_registrations: HashSet<PluginRegistration<'static>>,
+    plugin_registrations: HashSet<RegistrationObject<'static>>,
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
 }
 
@@ -129,16 +129,17 @@ impl Reaper {
     /// [`plugin_register_remove()`]: #method.plugin_register_remove
     pub unsafe fn plugin_register_add(
         &mut self,
-        reg: PluginRegistration,
-    ) -> Result<i32, RegistrationFailed> {
-        self.plugin_registrations.insert(reg.clone().into_owned());
-        let infostruct = reg.ptr_to_raw();
+        object: RegistrationObject,
+    ) -> ReaperFunctionResult<i32> {
+        self.plugin_registrations
+            .insert(object.clone().into_owned());
+        let infostruct = object.ptr_to_raw();
         let result = self
             .functions
             .low()
-            .plugin_register(reg.key_into_raw().as_ptr(), infostruct);
+            .plugin_register(object.key_into_raw().as_ptr(), infostruct);
         if result == 0 {
-            return Err(RegistrationFailed);
+            return Err(ReaperFunctionError::new("couldn't register thing"));
         }
         Ok(result)
     }
@@ -154,14 +155,14 @@ impl Reaper {
     /// REAPER can crash if you pass an invalid pointer.
     ///
     /// [`plugin_register_add()`]: #method.plugin_register_add
-    pub unsafe fn plugin_register_remove(&mut self, reg: PluginRegistration) -> i32 {
-        let infostruct = reg.ptr_to_raw();
-        let name_with_minus = concat_c_strs(c_str!("-"), reg.clone().key_into_raw().as_ref());
+    pub unsafe fn plugin_register_remove(&mut self, object: RegistrationObject) -> i32 {
+        let infostruct = object.ptr_to_raw();
+        let name_with_minus = concat_c_strs(c_str!("-"), object.clone().key_into_raw().as_ref());
         let result = self
             .functions
             .low()
             .plugin_register(name_with_minus.as_ptr(), infostruct);
-        self.plugin_registrations.remove(&reg.into_owned());
+        self.plugin_registrations.remove(&object.into_owned());
         result
     }
 
@@ -174,9 +175,9 @@ impl Reaper {
     /// Returns an error if the registration failed.
     pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(
         &mut self,
-    ) -> Result<(), RegistrationFailed> {
+    ) -> ReaperFunctionResult<()> {
         unsafe {
-            self.plugin_register_add(PluginRegistration::HookCommand(
+            self.plugin_register_add(RegistrationObject::HookCommand(
                 delegating_hook_command::<T>,
             ))?;
         }
@@ -186,7 +187,7 @@ impl Reaper {
     /// Unregisters a hook command.
     pub fn plugin_register_remove_hookcommand<T: MediumHookCommand>(&mut self) {
         unsafe {
-            self.plugin_register_remove(PluginRegistration::HookCommand(
+            self.plugin_register_remove(RegistrationObject::HookCommand(
                 delegating_hook_command::<T>,
             ));
         }
@@ -201,9 +202,9 @@ impl Reaper {
     /// Returns an error if the registration failed.
     pub fn plugin_register_add_toggleaction<T: MediumToggleAction>(
         &mut self,
-    ) -> Result<(), RegistrationFailed> {
+    ) -> ReaperFunctionResult<()> {
         unsafe {
-            self.plugin_register_add(PluginRegistration::ToggleAction(
+            self.plugin_register_add(RegistrationObject::ToggleAction(
                 delegating_toggle_action::<T>,
             ))?
         };
@@ -213,7 +214,7 @@ impl Reaper {
     /// Unregisters a toggle action.
     pub fn plugin_register_remove_toggleaction<T: MediumToggleAction>(&mut self) {
         unsafe {
-            self.plugin_register_remove(PluginRegistration::ToggleAction(
+            self.plugin_register_remove(RegistrationObject::ToggleAction(
                 delegating_toggle_action::<T>,
             ));
         }
@@ -228,9 +229,9 @@ impl Reaper {
     /// Returns an error if the registration failed.
     pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(
         &mut self,
-    ) -> Result<(), RegistrationFailed> {
+    ) -> ReaperFunctionResult<()> {
         unsafe {
-            self.plugin_register_add(PluginRegistration::HookPostCommand(
+            self.plugin_register_add(RegistrationObject::HookPostCommand(
                 delegating_hook_post_command::<T>,
             ))?
         };
@@ -240,7 +241,7 @@ impl Reaper {
     /// Unregisters a hook post command.
     pub fn plugin_register_remove_hookpostcommand<T: MediumHookPostCommand>(&mut self) {
         unsafe {
-            self.plugin_register_remove(PluginRegistration::HookPostCommand(
+            self.plugin_register_remove(RegistrationObject::HookPostCommand(
                 delegating_hook_post_command::<T>,
             ));
         }
@@ -260,9 +261,9 @@ impl Reaper {
     pub fn plugin_register_add_command_id<'a>(
         &mut self,
         command_name: impl Into<ReaperStringArg<'a>>,
-    ) -> Result<CommandId, RegistrationFailed> {
+    ) -> ReaperFunctionResult<CommandId> {
         let raw_id = unsafe {
-            self.plugin_register_add(PluginRegistration::CommandId(
+            self.plugin_register_add(RegistrationObject::CommandId(
                 command_name.into().into_inner(),
             ))? as u32
         };
@@ -296,30 +297,16 @@ impl Reaper {
     /// [`plugin_register_remove_gaccel()`]: #method.plugin_register_remove_gaccel
     pub fn plugin_register_add_gaccel(
         &mut self,
-        reg: MediumGaccelRegister,
-    ) -> Result<NonNull<raw::gaccel_register_t>, RegistrationFailed> {
-        let handle = self.gaccel_registers.keep(reg);
-        unsafe { self.plugin_register_add(PluginRegistration::Gaccel(handle))? };
+        register: MediumGaccelRegister,
+    ) -> ReaperFunctionResult<NonNull<raw::gaccel_register_t>> {
+        let handle = self.gaccel_registers.keep(register);
+        unsafe { self.plugin_register_add(RegistrationObject::Gaccel(handle))? };
         Ok(handle)
     }
 
     /// Unregisters an action.
-    ///
-    /// This function hands the once registered action back to you.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the action was not registered.
-    pub fn plugin_register_remove_gaccel(
-        &mut self,
-        reg_handle: NonNull<raw::gaccel_register_t>,
-    ) -> Result<MediumGaccelRegister, NotRegistered> {
-        unsafe { self.plugin_register_remove(PluginRegistration::Gaccel(reg_handle)) };
-        let original = self
-            .gaccel_registers
-            .release(reg_handle)
-            .ok_or(NotRegistered)?;
-        Ok(original)
+    pub fn plugin_register_remove_gaccel(&mut self, handle: NonNull<raw::gaccel_register_t>) {
+        unsafe { self.plugin_register_remove(RegistrationObject::Gaccel(handle)) };
     }
 
     /// Registers a hidden control surface.
@@ -337,7 +324,7 @@ impl Reaper {
     pub fn plugin_register_add_csurf_inst(
         &mut self,
         control_surface: impl MediumReaperControlSurface + 'static,
-    ) -> Result<NonNull<raw::IReaperControlSurface>, RegistrationFailed> {
+    ) -> ReaperFunctionResult<NonNull<raw::IReaperControlSurface>> {
         let rust_control_surface =
             DelegatingControlSurface::new(control_surface, &self.functions.get_app_version());
         // We need to box it twice in order to obtain a thin pointer for passing to C as callback
@@ -348,7 +335,7 @@ impl Reaper {
             unsafe { add_cpp_control_surface(rust_control_surface.as_ref().into()) };
         self.csurf_insts
             .insert(cpp_control_surface, rust_control_surface);
-        unsafe { self.plugin_register_add(PluginRegistration::CsurfInst(cpp_control_surface))? };
+        unsafe { self.plugin_register_add(RegistrationObject::CsurfInst(cpp_control_surface))? };
         Ok(cpp_control_surface)
     }
 
@@ -358,7 +345,7 @@ impl Reaper {
         handle: NonNull<raw::IReaperControlSurface>,
     ) {
         unsafe {
-            self.plugin_register_remove(PluginRegistration::CsurfInst(handle));
+            self.plugin_register_remove(RegistrationObject::CsurfInst(handle));
         }
         self.csurf_insts.remove(&handle);
         unsafe {
@@ -387,15 +374,15 @@ impl Reaper {
     /// [`audio_reg_hardware_hook_add`]: #method.audio_reg_hardware_hook_add
     pub unsafe fn audio_reg_hardware_hook_add_unchecked(
         &mut self,
-        reg: NonNull<audio_hook_register_t>,
-    ) -> Result<(), RegistrationFailed> {
-        self.audio_hook_registrations.insert(reg);
+        register: NonNull<audio_hook_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        self.audio_hook_registrations.insert(register);
         let result = self
             .functions
             .low()
-            .Audio_RegHardwareHook(true, reg.as_ptr());
+            .Audio_RegHardwareHook(true, register.as_ptr());
         if result == 0 {
-            return Err(RegistrationFailed);
+            return Err(ReaperFunctionError::new("couldn't register audio hook"));
         }
         Ok(())
     }
@@ -415,12 +402,12 @@ impl Reaper {
     /// [`audio_reg_hardware_hook_add_unchecked()`]: #method.audio_reg_hardware_hook_add_unchecked
     pub unsafe fn audio_reg_hardware_hook_remove_unchecked(
         &mut self,
-        reg: NonNull<audio_hook_register_t>,
+        register: NonNull<audio_hook_register_t>,
     ) {
         self.functions
             .low()
-            .Audio_RegHardwareHook(false, reg.as_ptr());
-        self.audio_hook_registrations.remove(&reg);
+            .Audio_RegHardwareHook(false, register.as_ptr());
+        self.audio_hook_registrations.remove(&register);
     }
 
     /// Registers an audio hook register.
@@ -439,7 +426,7 @@ impl Reaper {
     pub fn audio_reg_hardware_hook_add<T: MediumOnAudioBuffer + 'static>(
         &mut self,
         callback: T,
-    ) -> Result<NonNull<audio_hook_register_t>, RegistrationFailed> {
+    ) -> ReaperFunctionResult<NonNull<audio_hook_register_t>> {
         let handle = self
             .audio_hook_registers
             .keep(MediumAudioHookRegister::new(callback));
@@ -448,9 +435,9 @@ impl Reaper {
     }
 
     /// Unregisters an audio hook register.
-    pub fn audio_reg_hardware_hook_remove(&mut self, reg_handle: NonNull<audio_hook_register_t>) {
-        unsafe { self.audio_reg_hardware_hook_remove_unchecked(reg_handle) };
-        let _ = self.audio_hook_registers.release(reg_handle);
+    pub fn audio_reg_hardware_hook_remove(&mut self, handle: NonNull<audio_hook_register_t>) {
+        unsafe { self.audio_reg_hardware_hook_remove_unchecked(handle) };
+        let _ = self.audio_hook_registers.release(handle);
     }
 }
 
