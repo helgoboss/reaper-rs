@@ -282,7 +282,7 @@ pub struct ExtSetFxParamArgs {
     pub track: MediaTrack,
     pub fx_index: u32,
     pub param_index: u32,
-    pub value: ReaperNormalizedFxParamValue,
+    pub param_value: ReaperNormalizedFxParamValue,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -619,7 +619,7 @@ impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                         fx_index: fx_index as u32,
                         param_index: param_index as u32,
-                        value: ReaperNormalizedFxParamValue::new(normalized_value),
+                        param_value: ReaperNormalizedFxParamValue::new(normalized_value),
                     };
                     match call as u32 {
                         raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_set_fx_param(args),

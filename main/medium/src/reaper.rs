@@ -21,7 +21,7 @@ use crate::{
     MidiOutputDeviceId, NotRegistered, NotificationBehavior, PlaybackSpeedFactor,
     PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, RealTimeAudioThread,
     ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, RegistrationFailed,
+    ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput, RegistrationFailed,
     SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackRef,
     TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,

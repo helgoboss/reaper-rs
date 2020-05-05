@@ -12,8 +12,8 @@ pub struct CreateTrackSendFailed;
 pub struct AddFxFailed;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "GUID expression invalid")]
-pub struct GuidExpressionInvalid;
+#[display(fmt = "GUID string invalid")]
+pub struct GuidStringInvalid;
 
 // TODO-medium with the following, the reason is maybe not exhaustive Maybe also group errors if the
 //  reason is not 100% clear (just use msg).

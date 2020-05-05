@@ -434,7 +434,7 @@ impl HelperControlSurface {
                 &track,
                 args.fx_index,
                 Some(args.param_index),
-                Some(args.value),
+                Some(args.param_value),
             )
         };
         let fx_chain = if is_input_fx {

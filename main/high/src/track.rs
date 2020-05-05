@@ -21,7 +21,7 @@ use reaper_rs_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, 
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperPointer, RecordArmState, RecordingInput,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperPointer, RecordArmMode, RecordingInput,
     TrackAttributeKey, TrackRef, TrackSendCategory, ValueChange,
 };
 
@@ -286,7 +286,7 @@ impl Track {
             unsafe {
                 reaper.medium().functions().csurf_on_rec_arm_change_ex(
                     self.get_raw(),
-                    RecordArmState::Armed,
+                    RecordArmMode::Armed,
                     GangBehavior::DenyGang,
                 );
             }
@@ -303,7 +303,7 @@ impl Track {
                 unsafe {
                     reaper.medium().functions().csurf_on_rec_arm_change_ex(
                         self.get_raw(),
-                        RecordArmState::Armed,
+                        RecordArmMode::Armed,
                         GangBehavior::DenyGang,
                     );
                 }
@@ -322,7 +322,7 @@ impl Track {
                     .functions()
                     .csurf_on_rec_arm_change_ex(
                         self.get_raw(),
-                        RecordArmState::Unarmed,
+                        RecordArmMode::Unarmed,
                         GangBehavior::DenyGang,
                     );
             }

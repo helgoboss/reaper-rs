@@ -15,14 +15,14 @@ use crate::{
     AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxNotFound, FxOrParameterNotFound,
     FxOrParameterNotFoundOrCockosExtNotSupported, FxPresetRef, FxShowInstruction, GangBehavior,
-    GlobalAutomationModeOverride, GuidExpressionInvalid, Hwnd, InputMonitoringMode,
+    GlobalAutomationModeOverride, GuidStringInvalid, Hwnd, InputMonitoringMode,
     InvalidTrackAttributeKey, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
     MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
     MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
     PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctionFailed,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
+    ReaperVolumeValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
     StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
     TrackFxChainType, TrackFxLocation, TrackRef, TrackSendAttributeKey, TrackSendCategory,
     TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
@@ -153,8 +153,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
 
     /// Returns the requested project and optionally its file name.
     ///
-    /// With `projfn_out_optional_sz` you can tell REAPER how many characters of the file name you
-    /// want. If you are not interested in the file name at all, pass 0.
+    /// With `buffer_size` you can tell REAPER how many bytes of the file name you want. If you
+    /// are not interested in the file name at all, pass 0.
     ///
     /// # Example
     ///
@@ -180,14 +180,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     //  is_in_real_time_audio() each time, so maybe we should mark them as unsafe.
     pub fn enum_projects(
         &self,
-        proj_ref: ProjectRef,
-        projfn_out_optional_sz: u32,
+        project_ref: ProjectRef,
+        buffer_size: u32,
     ) -> Option<EnumProjectsResult>
     where
         S: MainThread,
     {
-        let idx = proj_ref.to_raw();
-        if projfn_out_optional_sz == 0 {
+        let idx = project_ref.to_raw();
+        if buffer_size == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
             let project = NonNull::new(ptr)?;
             Some(EnumProjectsResult {
@@ -196,7 +196,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             })
         } else {
             let (owned_c_string, ptr) =
-                with_string_buffer(projfn_out_optional_sz, |buffer, max_size| unsafe {
+                with_string_buffer(buffer_size, |buffer, max_size| unsafe {
                     self.low.EnumProjects(idx, buffer, max_size)
                 });
             let project = NonNull::new(ptr)?;
@@ -231,12 +231,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// let track = reaper.get_track(CurrentProject, 3).ok_or("No such track")?;
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    pub fn get_track(&self, proj: ProjectContext, trackidx: u32) -> Option<MediaTrack>
+    pub fn get_track(&self, project: ProjectContext, track_index: u32) -> Option<MediaTrack>
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.get_track_unchecked(proj, trackidx) }
+        self.require_valid_project(project);
+        unsafe { self.get_track_unchecked(project, track_index) }
     }
 
     /// Like [`get_track()`] but doesn't check if project is valid.
@@ -248,13 +248,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`get_track()`]: #method.get_track
     pub unsafe fn get_track_unchecked(
         &self,
-        proj: ProjectContext,
-        trackidx: u32,
+        project: ProjectContext,
+        track_index: u32,
     ) -> Option<MediaTrack>
     where
         S: MainThread,
     {
-        let ptr = self.low.GetTrack(proj.to_raw(), trackidx as i32);
+        let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
         NonNull::new(ptr)
     }
 
@@ -264,13 +264,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// The project is ignored if the pointer itself is a project.
     pub fn validate_ptr_2<'a>(
         &self,
-        proj: ProjectContext,
+        project: ProjectContext,
         pointer: impl Into<ReaperPointer<'a>>,
     ) -> bool {
         let pointer = pointer.into();
         unsafe {
             self.low.ValidatePtr2(
-                proj.to_raw(),
+                project.to_raw(),
                 pointer.ptr_as_void(),
                 pointer.key_into_raw().as_ptr(),
             )
@@ -302,26 +302,28 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Shows a message to the user in the ReaScript console.
     ///
     /// This is also useful for debugging. Send "\n" for newline and "" to clear the console.
-    pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
-        unsafe { self.low.ShowConsoleMsg(msg.into().as_ptr()) }
+    pub fn show_console_msg<'a>(&self, message: impl Into<ReaperStringArg<'a>>) {
+        unsafe { self.low.ShowConsoleMsg(message.into().as_ptr()) }
     }
 
     /// Gets or sets a track attribute.
+    ///
+    /// Returns the current value if `new_value` is `null_mut()`.
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track or invalid new value.
     pub unsafe fn get_set_media_track_info(
         &self,
-        tr: MediaTrack,
-        parmname: TrackAttributeKey,
-        set_new_value: *mut c_void,
+        track: MediaTrack,
+        attribute_key: TrackAttributeKey,
+        new_value: *mut c_void,
     ) -> *mut c_void
     where
         S: MainThread,
     {
         self.low
-            .GetSetMediaTrackInfo(tr.as_ptr(), parmname.into_raw().as_ptr(), set_new_value)
+            .GetSetMediaTrackInfo(track.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
@@ -331,12 +333,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_set_media_track_info_get_par_track(
         &self,
-        tr: MediaTrack,
+        track: MediaTrack,
     ) -> Option<MediaTrack>
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::ParTrack, null_mut())
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::ParTrack, null_mut())
             as *mut raw::MediaTrack;
         NonNull::new(ptr)
     }
@@ -348,11 +350,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_set_media_track_info_get_project(&self, tr: MediaTrack) -> Option<ReaProject>
+    pub unsafe fn get_set_media_track_info_get_project(
+        &self,
+        track: MediaTrack,
+    ) -> Option<ReaProject>
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::Project, null_mut())
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Project, null_mut())
             as *mut raw::ReaProject;
         NonNull::new(ptr)
     }
@@ -364,14 +369,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_set_media_track_info_get_name<R>(
         &self,
-        tr: MediaTrack,
-        f: impl FnOnce(&CStr) -> R,
+        track: MediaTrack,
+        use_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::Name, null_mut());
-        unsafe { create_passing_c_str(ptr as *const c_char) }.map(f)
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Name, null_mut());
+        unsafe { create_passing_c_str(ptr as *const c_char) }.map(use_name)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
@@ -379,11 +384,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_set_media_track_info_get_rec_mon(&self, tr: MediaTrack) -> InputMonitoringMode
+    pub unsafe fn get_set_media_track_info_get_rec_mon(
+        &self,
+        track: MediaTrack,
+    ) -> InputMonitoringMode
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::RecMon, null_mut());
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
         let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
         InputMonitoringMode::try_from_raw(irecmon).expect("Unknown input monitoring mode")
     }
@@ -395,12 +403,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_set_media_track_info_get_rec_input(
         &self,
-        tr: MediaTrack,
+        track: MediaTrack,
     ) -> Option<RecordingInput>
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::RecInput, null_mut());
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
         let rec_input_index = unsafe { unref_as::<i32>(ptr) }.unwrap();
         if rec_input_index < 0 {
             None
@@ -417,13 +425,15 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_set_media_track_info_get_track_number(
         &self,
-        tr: MediaTrack,
+        track: MediaTrack,
     ) -> Option<TrackRef>
     where
         S: MainThread,
     {
         use TrackRef::*;
-        match self.get_set_media_track_info(tr, TrackAttributeKey::TrackNumber, null_mut()) as i32 {
+        match self.get_set_media_track_info(track, TrackAttributeKey::TrackNumber, null_mut())
+            as i32
+        {
             -1 => Some(MasterTrack),
             0 => None,
             n if n > 0 => Some(NormalTrack(n as u32 - 1)),
@@ -436,11 +446,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_set_media_track_info_get_guid(&self, tr: MediaTrack) -> GUID
+    pub unsafe fn get_set_media_track_info_get_guid(&self, track: MediaTrack) -> GUID
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::Guid, null_mut());
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
         unsafe { unref_as::<GUID>(ptr) }.unwrap()
     }
 
@@ -464,9 +474,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     ///
     /// [`named_command_lookup()`]: #method.named_command_lookup
-    pub fn main_on_command_ex(&self, command: CommandId, flag: i32, proj: ProjectContext) {
-        self.require_valid_project(proj);
-        unsafe { self.main_on_command_ex_unchecked(command, flag, proj) }
+    pub fn main_on_command_ex(&self, command: CommandId, flag: i32, project: ProjectContext) {
+        self.require_valid_project(project);
+        unsafe { self.main_on_command_ex_unchecked(command, flag, project) }
     }
 
     /// Like [`main_on_command_ex()`] but doesn't check if project is valid.
@@ -478,12 +488,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`main_on_command_ex()`]: #method.main_on_command_ex
     pub unsafe fn main_on_command_ex_unchecked(
         &self,
-        command: CommandId,
+        command_id: CommandId,
         flag: i32,
-        proj: ProjectContext,
+        project: ProjectContext,
     ) {
         self.low
-            .Main_OnCommandEx(command.to_raw(), flag, proj.to_raw());
+            .Main_OnCommandEx(command_id.to_raw(), flag, project.to_raw());
     }
 
     /// Mutes or unmutes the given track.
@@ -507,12 +517,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_set_surface_mute(
         &self,
-        trackid: MediaTrack,
+        track: MediaTrack,
         mute: bool,
-        ignoresurf: NotificationBehavior,
+        notification_behavior: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfaceMute(trackid.as_ptr(), mute, ignoresurf.to_raw());
+            .CSurf_SetSurfaceMute(track.as_ptr(), mute, notification_behavior.to_raw());
     }
 
     /// Soloes or unsoloes the given track.
@@ -522,12 +532,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_set_surface_solo(
         &self,
-        trackid: MediaTrack,
+        track: MediaTrack,
         solo: bool,
-        ignoresurf: NotificationBehavior,
+        notification_behavior: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfaceSolo(trackid.as_ptr(), solo, ignoresurf.to_raw());
+            .CSurf_SetSurfaceSolo(track.as_ptr(), solo, notification_behavior.to_raw());
     }
 
     /// Generates a random GUID.
@@ -547,17 +557,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     // the safe way to go.
     pub fn section_from_unique_id<R>(
         &self,
-        unique_id: SectionId,
-        f: impl FnOnce(&KbdSectionInfo) -> R,
+        section_id: SectionId,
+        use_section: impl FnOnce(&KbdSectionInfo) -> R,
     ) -> Option<R>
     where
         S: MainThread,
     {
-        let ptr = self.low.SectionFromUniqueID(unique_id.to_raw());
+        let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         if ptr.is_null() {
             return None;
         }
-        NonNull::new(ptr).map(|nnp| f(&KbdSectionInfo(nnp)))
+        NonNull::new(ptr).map(|nnp| use_section(&KbdSectionInfo(nnp)))
     }
 
     /// Like [`section_from_unique_id()`] but returns the section.
@@ -574,12 +584,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     // should check if the section still exists (via section index) before each usage.
     pub unsafe fn section_from_unique_id_unchecked(
         &self,
-        unique_id: SectionId,
+        section_id: SectionId,
     ) -> Option<KbdSectionInfo>
     where
         S: MainThread,
     {
-        let ptr = self.low.SectionFromUniqueID(unique_id.to_raw());
+        let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         NonNull::new(ptr).map(KbdSectionInfo)
     }
 
@@ -596,16 +606,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     // Kept return value type i32 because I have no idea what the return value is about.
     pub unsafe fn kbd_on_main_action_ex(
         &self,
-        cmd: CommandId,
-        value: ActionValueChange,
-        hwnd: WindowContext,
-        proj: ProjectContext,
+        command_id: CommandId,
+        value_change: ActionValueChange,
+        window: WindowContext,
+        project: ProjectContext,
     ) -> i32
     where
         S: MainThread,
     {
         use ActionValueChange::*;
-        let (val, valhw, relmode) = match value {
+        let (val, valhw, relmode) = match value_change {
             AbsoluteLowRes(v) => (i32::from(v), -1, 0),
             AbsoluteHighRes(v) => (
                 ((u32::from(v) >> 7) & 0x7f) as i32,
@@ -617,12 +627,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             Relative3(v) => (i32::from(v), -1, 3),
         };
         self.low.KBD_OnMainActionEx(
-            cmd.to_raw(),
+            command_id.to_raw(),
             val,
             valhw,
             relmode,
-            hwnd.to_raw(),
-            proj.to_raw(),
+            window.to_raw(),
+            project.to_raw(),
         )
     }
 
@@ -662,12 +672,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn count_tracks(&self, proj: ProjectContext) -> u32
+    pub fn count_tracks(&self, project: ProjectContext) -> u32
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.count_tracks_unchecked(proj) }
+        self.require_valid_project(project);
+        unsafe { self.count_tracks_unchecked(project) }
     }
 
     /// Like [`count_tracks()`] but doesn't check if project is valid.
@@ -677,18 +687,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`count_tracks()`]: #method.count_tracks
-    pub unsafe fn count_tracks_unchecked(&self, proj: ProjectContext) -> u32
+    pub unsafe fn count_tracks_unchecked(&self, project: ProjectContext) -> u32
     where
         S: MainThread,
     {
-        self.low.CountTracks(proj.to_raw()) as u32
+        self.low.CountTracks(project.to_raw()) as u32
     }
 
     /// Creates a new track at the given index.
-    pub fn insert_track_at_index(&self, idx: u32, want_defaults: TrackDefaultsBehavior) {
+    pub fn insert_track_at_index(&self, index: u32, defaults_behavior: TrackDefaultsBehavior) {
         self.low.InsertTrackAtIndex(
-            idx as i32,
-            want_defaults == TrackDefaultsBehavior::AddDefaultEnvAndFx,
+            index as i32,
+            defaults_behavior == TrackDefaultsBehavior::AddDefaultEnvAndFx,
         );
     }
 
@@ -704,25 +714,27 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
 
     /// Returns information about the given MIDI input device.
     ///
-    /// With `nameout_sz` you can tell REAPER how many characters of the device name you want. If
-    /// you are not interested in the device name at all, pass 0.
+    /// With `buffer_size` you can tell REAPER how many bytes of the device name you want.
+    /// If you are not interested in the device name at all, pass 0.
     pub fn get_midi_input_name(
         &self,
-        dev: MidiInputDeviceId,
-        nameout_sz: u32,
+        device_id: MidiInputDeviceId,
+        buffer_size: u32,
     ) -> GetMidiDevNameResult
     where
         S: MainThread,
     {
-        if nameout_sz == 0 {
-            let is_present = unsafe { self.low.GetMIDIInputName(dev.to_raw(), null_mut(), 0) };
+        if buffer_size == 0 {
+            let is_present =
+                unsafe { self.low.GetMIDIInputName(device_id.to_raw(), null_mut(), 0) };
             GetMidiDevNameResult {
                 is_present,
                 name: None,
             }
         } else {
-            let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
-                self.low.GetMIDIInputName(dev.to_raw(), buffer, max_size)
+            let (name, is_present) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+                self.low
+                    .GetMIDIInputName(device_id.to_raw(), buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
                 return GetMidiDevNameResult {
@@ -739,25 +751,29 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
 
     /// Returns information about the given MIDI output device.
     ///
-    /// With `nameout_sz` you can tell REAPER how many characters of the device name you want. If
-    /// you are not interested in the device name at all, pass 0.
+    /// With `buffer_size` you can tell REAPER how many bytes of the device name you want.
+    /// If you are not interested in the device name at all, pass 0.
     pub fn get_midi_output_name(
         &self,
-        dev: MidiOutputDeviceId,
-        nameout_sz: u32,
+        device_id: MidiOutputDeviceId,
+        buffer_size: u32,
     ) -> GetMidiDevNameResult
     where
         S: MainThread,
     {
-        if nameout_sz == 0 {
-            let is_present = unsafe { self.low.GetMIDIOutputName(dev.to_raw(), null_mut(), 0) };
+        if buffer_size == 0 {
+            let is_present = unsafe {
+                self.low
+                    .GetMIDIOutputName(device_id.to_raw(), null_mut(), 0)
+            };
             GetMidiDevNameResult {
                 is_present,
                 name: None,
             }
         } else {
-            let (name, is_present) = with_string_buffer(nameout_sz, |buffer, max_size| unsafe {
-                self.low.GetMIDIOutputName(dev.to_raw(), buffer, max_size)
+            let (name, is_present) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+                self.low
+                    .GetMIDIOutputName(device_id.to_raw(), buffer, max_size)
             });
             if name.to_bytes().len() == 0 {
                 return GetMidiDevNameResult {
@@ -778,18 +794,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     unsafe fn track_fx_add_by_name<'a>(
         &self,
         track: MediaTrack,
-        fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: TrackFxChainType,
-        instantiate: FxAddByNameBehavior,
+        fx_name: impl Into<ReaperStringArg<'a>>,
+        fx_chain_type: TrackFxChainType,
+        behavior: FxAddByNameBehavior,
     ) -> i32
     where
         S: MainThread,
     {
         self.low.TrackFX_AddByName(
             track.as_ptr(),
-            fxname.into().as_ptr(),
-            rec_fx == TrackFxChainType::InputFxChain,
-            instantiate.to_raw(),
+            fx_name.into().as_ptr(),
+            fx_chain_type == TrackFxChainType::InputFxChain,
+            behavior.to_raw(),
         )
     }
 
@@ -804,13 +820,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_add_by_name_query<'a>(
         &self,
         track: MediaTrack,
-        fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: TrackFxChainType,
+        fx_name: impl Into<ReaperStringArg<'a>>,
+        fx_chain_type: TrackFxChainType,
     ) -> Option<u32>
     where
         S: MainThread,
     {
-        match self.track_fx_add_by_name(track, fxname, rec_fx, FxAddByNameBehavior::Query) {
+        match self.track_fx_add_by_name(track, fx_name, fx_chain_type, FxAddByNameBehavior::Query) {
             -1 => None,
             idx if idx >= 0 => Some(idx as u32),
             _ => unreachable!(),
@@ -833,14 +849,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_add_by_name_add<'a>(
         &self,
         track: MediaTrack,
-        fxname: impl Into<ReaperStringArg<'a>>,
-        rec_fx: TrackFxChainType,
-        force_add: AddFxBehavior,
+        fx_name: impl Into<ReaperStringArg<'a>>,
+        fx_chain_type: TrackFxChainType,
+        behavior: AddFxBehavior,
     ) -> Result<u32, AddFxFailed>
     where
         S: MainThread,
     {
-        match self.track_fx_add_by_name(track, fxname, rec_fx, force_add.into()) {
+        match self.track_fx_add_by_name(track, fx_name, fx_chain_type, behavior.into()) {
             -1 => Err(AddFxFailed),
             idx if idx >= 0 => Ok(idx as u32),
             _ => unreachable!(),
@@ -852,16 +868,21 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn track_fx_get_enabled(&self, track: MediaTrack, fx: TrackFxLocation) -> bool
+    pub unsafe fn track_fx_get_enabled(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+    ) -> bool
     where
         S: MainThread,
     {
-        self.low.TrackFX_GetEnabled(track.as_ptr(), fx.to_raw())
+        self.low
+            .TrackFX_GetEnabled(track.as_ptr(), fx_location.to_raw())
     }
 
     /// Returns the name of the given FX.
     ///
-    /// With `buf_sz` you can tell REAPER how many characters of the FX name you want.
+    /// With `buffer_size` you can tell REAPER how many bytes of the FX name you want.
     ///
     /// # Panics
     ///
@@ -877,16 +898,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_fx_name(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        buf_sz: u32,
+        fx_location: TrackFxLocation,
+        buffer_size: u32,
     ) -> Result<CString, FxNotFound>
     where
         S: MainThread,
     {
-        assert!(buf_sz > 0);
-        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+        assert!(buffer_size > 0);
+        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low
-                .TrackFX_GetFXName(track.as_ptr(), fx.to_raw(), buffer, max_size)
+                .TrackFX_GetFXName(track.as_ptr(), fx_location.to_raw(), buffer, max_size)
         });
         if !successful {
             return Err(FxNotFound);
@@ -920,11 +941,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_set_enabled(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        enabled: bool,
+        fx_location: TrackFxLocation,
+        is_enabled: bool,
     ) {
         self.low
-            .TrackFX_SetEnabled(track.as_ptr(), fx.to_raw(), enabled);
+            .TrackFX_SetEnabled(track.as_ptr(), fx_location.to_raw(), is_enabled);
     }
 
     /// Returns the number of parameters of given track FX.
@@ -932,11 +953,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn track_fx_get_num_params(&self, track: MediaTrack, fx: TrackFxLocation) -> u32
+    pub unsafe fn track_fx_get_num_params(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+    ) -> u32
     where
         S: MainThread,
     {
-        self.low.TrackFX_GetNumParams(track.as_ptr(), fx.to_raw()) as u32
+        self.low
+            .TrackFX_GetNumParams(track.as_ptr(), fx_location.to_raw()) as u32
     }
 
     /// Returns the current project if it's just being loaded or saved.
@@ -953,6 +979,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
 
     /// Returns the name of the given track FX parameter.
     ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the parameter name you want.
+    ///
     /// # Panics
     ///
     /// Panics if the given buffer size is 0.
@@ -967,19 +995,19 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_param_name(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        param: u32,
-        buf_sz: u32,
+        fx_location: TrackFxLocation,
+        param_index: u32,
+        buffer_size: u32,
     ) -> Result<CString, FxOrParameterNotFound>
     where
         S: MainThread,
     {
-        assert!(buf_sz > 0);
-        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+        assert!(buffer_size > 0);
+        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low.TrackFX_GetParamName(
                 track.as_ptr(),
-                fx.to_raw(),
-                param as i32,
+                fx_location.to_raw(),
+                param_index as i32,
                 buffer,
                 max_size,
             )
@@ -991,6 +1019,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Returns the current value of the given track FX parameter formatted as string.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the parameter value string you
+    /// want.
     ///
     /// # Panics
     ///
@@ -1006,19 +1037,19 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_formatted_param_value(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        param: u32,
-        buf_sz: u32,
+        fx_location: TrackFxLocation,
+        param_index: u32,
+        buffer_size: u32,
     ) -> Result<CString, FxOrParameterNotFound>
     where
         S: MainThread,
     {
-        assert!(buf_sz > 0);
-        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+        assert!(buffer_size > 0);
+        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low.TrackFX_GetFormattedParamValue(
                 track.as_ptr(),
-                fx.to_raw(),
-                param as i32,
+                fx_location.to_raw(),
+                param_index as i32,
                 buffer,
                 max_size,
             )
@@ -1030,6 +1061,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Returns the given value formatted as string according to the given track FX parameter.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the parameter value string you
+    /// want.
     ///
     /// This only works with FX that supports Cockos VST extensions.
     ///
@@ -1052,21 +1086,21 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_format_param_value_normalized(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        param: u32,
-        value: ReaperNormalizedFxParamValue,
-        buf_sz: u32,
+        fx_location: TrackFxLocation,
+        param_index: u32,
+        param_value: ReaperNormalizedFxParamValue,
+        buffer_size: u32,
     ) -> Result<CString, FxOrParameterNotFoundOrCockosExtNotSupported>
     where
         S: MainThread,
     {
-        assert!(buf_sz > 0);
-        let (name, successful) = with_string_buffer(buf_sz, |buffer, max_size| {
+        assert!(buffer_size > 0);
+        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low.TrackFX_FormatParamValueNormalized(
                 track.as_ptr(),
-                fx.to_raw(),
-                param as i32,
-                value.get(),
+                fx_location.to_raw(),
+                param_index as i32,
+                param_value.get(),
                 buffer,
                 max_size,
             )
@@ -1089,18 +1123,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_set_param_normalized(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        param: u32,
-        value: ReaperNormalizedFxParamValue,
+        fx_location: TrackFxLocation,
+        param_index: u32,
+        param_value: ReaperNormalizedFxParamValue,
     ) -> Result<(), FxOrParameterNotFound>
     where
         S: MainThread,
     {
         let successful = self.low.TrackFX_SetParamNormalized(
             track.as_ptr(),
-            fx.to_raw(),
-            param as i32,
-            value.get(),
+            fx_location.to_raw(),
+            param_index as i32,
+            param_value.get(),
         );
         if !successful {
             return Err(FxOrParameterNotFound);
@@ -1209,16 +1243,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_copy_to_track(
         &self,
-        src: (MediaTrack, TrackFxLocation),
-        dest: (MediaTrack, TrackFxLocation),
-        is_move: TransferBehavior,
+        source: (MediaTrack, TrackFxLocation),
+        destination: (MediaTrack, TrackFxLocation),
+        transfer_behavior: TransferBehavior,
     ) {
         self.low.TrackFX_CopyToTrack(
-            src.0.as_ptr(),
-            src.1.to_raw(),
-            dest.0.as_ptr(),
-            dest.1.to_raw(),
-            is_move == TransferBehavior::Move,
+            source.0.as_ptr(),
+            source.1.to_raw(),
+            destination.0.as_ptr(),
+            destination.1.to_raw(),
+            transfer_behavior == TransferBehavior::Move,
         );
     }
 
@@ -1234,12 +1268,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_delete(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
+        fx_location: TrackFxLocation,
     ) -> Result<(), FxNotFound>
     where
         S: MainThread,
     {
-        let succesful = self.low.TrackFX_Delete(track.as_ptr(), fx.to_raw());
+        let succesful = self
+            .low
+            .TrackFX_Delete(track.as_ptr(), fx_location.to_raw());
         if !succesful {
             return Err(FxNotFound);
         }
@@ -1261,8 +1297,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_parameter_step_sizes(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        param: u32,
+        fx_location: TrackFxLocation,
+        param_index: u32,
     ) -> Option<GetParameterStepSizesResult>
     where
         S: MainThread,
@@ -1273,8 +1309,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         let mut is_toggle = MaybeUninit::uninit();
         let successful = self.low.TrackFX_GetParameterStepSizes(
             track.as_ptr(),
-            fx.to_raw(),
-            param as i32,
+            fx_location.to_raw(),
+            param_index as i32,
             step.as_mut_ptr(),
             small_step.as_mut_ptr(),
             large_step.as_mut_ptr(),
@@ -1288,7 +1324,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             Some(GetParameterStepSizesResult::Toggle)
         } else {
             Some(GetParameterStepSizesResult::Normal {
-                step: step.assume_init(),
+                normal_step: step.assume_init(),
                 small_step: make_some_if_greater_than_zero(small_step.assume_init()),
                 large_step: make_some_if_greater_than_zero(large_step.assume_init()),
             })
@@ -1303,8 +1339,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_param_ex(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        param: u32,
+        fx_location: TrackFxLocation,
+        param_index: u32,
     ) -> GetParamExResult
     where
         S: MainThread,
@@ -1314,17 +1350,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         let mut mid_val = MaybeUninit::uninit();
         let value = self.low.TrackFX_GetParamEx(
             track.as_ptr(),
-            fx.to_raw(),
-            param as i32,
+            fx_location.to_raw(),
+            param_index as i32,
             min_val.as_mut_ptr(),
             max_val.as_mut_ptr(),
             mid_val.as_mut_ptr(),
         );
         GetParamExResult {
-            value,
-            min_val: min_val.assume_init(),
-            mid_val: mid_val.assume_init(),
-            max_val: max_val.assume_init(),
+            current_value: value,
+            min_value: min_val.assume_init(),
+            mid_value: mid_val.assume_init(),
+            max_value: max_val.assume_init(),
         }
         .into()
     }
@@ -1345,9 +1381,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn undo_begin_block_2(&self, proj: ProjectContext) {
-        self.require_valid_project(proj);
-        unsafe { self.undo_begin_block_2_unchecked(proj) };
+    pub fn undo_begin_block_2(&self, project: ProjectContext) {
+        self.require_valid_project(project);
+        unsafe { self.undo_begin_block_2_unchecked(project) };
     }
 
     /// Like [`undo_begin_block_2()`] but doesn't check if project is valid.
@@ -1357,8 +1393,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_begin_block_2()`]: #method.undo_begin_block_2
-    pub unsafe fn undo_begin_block_2_unchecked(&self, proj: ProjectContext) {
-        self.low.Undo_BeginBlock2(proj.to_raw());
+    pub unsafe fn undo_begin_block_2_unchecked(&self, project: ProjectContext) {
+        self.low.Undo_BeginBlock2(project.to_raw());
     }
 
     /// Ends the current undo block.
@@ -1368,13 +1404,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn undo_end_block_2<'a>(
         &self,
-        proj: ProjectContext,
-        descchange: impl Into<ReaperStringArg<'a>>,
-        extraflags: UndoScope,
+        project: ProjectContext,
+        description: impl Into<ReaperStringArg<'a>>,
+        scope: UndoScope,
     ) {
-        self.require_valid_project(proj);
+        self.require_valid_project(project);
         unsafe {
-            self.undo_end_block_2_unchecked(proj, descchange, extraflags);
+            self.undo_end_block_2_unchecked(project, description, scope);
         }
     }
 
@@ -1387,14 +1423,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`undo_end_block_2()`]: #method.undo_end_block_2
     pub unsafe fn undo_end_block_2_unchecked<'a>(
         &self,
-        proj: ProjectContext,
-        descchange: impl Into<ReaperStringArg<'a>>,
-        extraflags: UndoScope,
+        project: ProjectContext,
+        description: impl Into<ReaperStringArg<'a>>,
+        scope: UndoScope,
     ) {
         self.low.Undo_EndBlock2(
-            proj.to_raw(),
-            descchange.into().as_ptr(),
-            extraflags.to_raw(),
+            project.to_raw(),
+            description.into().as_ptr(),
+            scope.to_raw(),
         );
     }
 
@@ -1403,12 +1439,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn undo_can_undo_2<R>(&self, proj: ProjectContext, f: impl FnOnce(&CStr) -> R) -> Option<R>
+    pub fn undo_can_undo_2<R>(
+        &self,
+        project: ProjectContext,
+        use_description: impl FnOnce(&CStr) -> R,
+    ) -> Option<R>
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.undo_can_undo_2_unchecked(proj, f) }
+        self.require_valid_project(project);
+        unsafe { self.undo_can_undo_2_unchecked(project, use_description) }
     }
 
     /// Like [`undo_can_undo_2()`] but doesn't check if project is valid.
@@ -1420,14 +1460,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`undo_can_undo_2()`]: #method.undo_can_undo_2
     pub unsafe fn undo_can_undo_2_unchecked<R>(
         &self,
-        proj: ProjectContext,
-        f: impl FnOnce(&CStr) -> R,
+        project: ProjectContext,
+        use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
         S: MainThread,
     {
-        let ptr = self.low.Undo_CanUndo2(proj.to_raw());
-        create_passing_c_str(ptr).map(f)
+        let ptr = self.low.Undo_CanUndo2(project.to_raw());
+        create_passing_c_str(ptr).map(use_description)
     }
 
     /// Grants temporary access to the description of the next redoable operation, if any.
@@ -1435,12 +1475,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn undo_can_redo_2<R>(&self, proj: ProjectContext, f: impl FnOnce(&CStr) -> R) -> Option<R>
+    pub fn undo_can_redo_2<R>(
+        &self,
+        project: ProjectContext,
+        use_description: impl FnOnce(&CStr) -> R,
+    ) -> Option<R>
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.undo_can_redo_2_unchecked(proj, f) }
+        self.require_valid_project(project);
+        unsafe { self.undo_can_redo_2_unchecked(project, use_description) }
     }
 
     /// Like [`undo_can_redo_2()`] but doesn't check if project is valid.
@@ -1452,14 +1496,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`undo_can_redo_2()`]: #method.undo_can_redo_2
     pub unsafe fn undo_can_redo_2_unchecked<R>(
         &self,
-        proj: ProjectContext,
-        f: impl FnOnce(&CStr) -> R,
+        project: ProjectContext,
+        use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
         S: MainThread,
     {
-        let ptr = self.low.Undo_CanRedo2(proj.to_raw());
-        create_passing_c_str(ptr).map(f)
+        let ptr = self.low.Undo_CanRedo2(project.to_raw());
+        create_passing_c_str(ptr).map(use_description)
     }
 
     /// Makes the last undoable operation undone.
@@ -1469,12 +1513,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn undo_do_undo_2(&self, proj: ProjectContext) -> bool
+    pub fn undo_do_undo_2(&self, project: ProjectContext) -> bool
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.undo_do_undo_2_unchecked(proj) }
+        self.require_valid_project(project);
+        unsafe { self.undo_do_undo_2_unchecked(project) }
     }
 
     /// Like [`undo_do_undo_2()`] but doesn't check if project is valid.
@@ -1484,11 +1528,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_do_undo_2()`]: #method.undo_do_undo_2
-    pub unsafe fn undo_do_undo_2_unchecked(&self, proj: ProjectContext) -> bool
+    pub unsafe fn undo_do_undo_2_unchecked(&self, project: ProjectContext) -> bool
     where
         S: MainThread,
     {
-        self.low.Undo_DoUndo2(proj.to_raw()) != 0
+        self.low.Undo_DoUndo2(project.to_raw()) != 0
     }
 
     /// Executes the next redoable action.
@@ -1498,12 +1542,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn undo_do_redo_2(&self, proj: ProjectContext) -> bool
+    pub fn undo_do_redo_2(&self, project: ProjectContext) -> bool
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.undo_do_redo_2_unchecked(proj) }
+        self.require_valid_project(project);
+        unsafe { self.undo_do_redo_2_unchecked(project) }
     }
 
     /// Like [`undo_do_redo_2()`] but doesn't check if project is valid.
@@ -1513,11 +1557,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_do_redo_2()`]: #method.undo_do_redo_2
-    pub unsafe fn undo_do_redo_2_unchecked(&self, proj: ProjectContext) -> bool
+    pub unsafe fn undo_do_redo_2_unchecked(&self, project: ProjectContext) -> bool
     where
         S: MainThread,
     {
-        self.low.Undo_DoRedo2(proj.to_raw()) != 0
+        self.low.Undo_DoRedo2(project.to_raw()) != 0
     }
 
     /// Marks the given project as dirty.
@@ -1528,10 +1572,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn mark_project_dirty(&self, proj: ProjectContext) {
-        self.require_valid_project(proj);
+    pub fn mark_project_dirty(&self, project: ProjectContext) {
+        self.require_valid_project(project);
         unsafe {
-            self.mark_project_dirty_unchecked(proj);
+            self.mark_project_dirty_unchecked(project);
         }
     }
 
@@ -1542,8 +1586,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`mark_project_dirty()`]: #method.mark_project_dirty
-    pub unsafe fn mark_project_dirty_unchecked(&self, proj: ProjectContext) {
-        self.low.MarkProjectDirty(proj.to_raw());
+    pub unsafe fn mark_project_dirty_unchecked(&self, project: ProjectContext) {
+        self.low.MarkProjectDirty(project.to_raw());
     }
 
     /// Returns whether the given project is dirty.
@@ -1557,12 +1601,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     ///
     /// [`mark_project_dirty()`]: #method.mark_project_dirty
-    pub fn is_project_dirty(&self, proj: ProjectContext) -> bool
+    pub fn is_project_dirty(&self, project: ProjectContext) -> bool
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.is_project_dirty_unchecked(proj) }
+        self.require_valid_project(project);
+        unsafe { self.is_project_dirty_unchecked(project) }
     }
 
     /// Like [`is_project_dirty()`] but doesn't check if project is valid.
@@ -1572,11 +1616,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`is_project_dirty()`]: #method.is_project_dirty
-    pub unsafe fn is_project_dirty_unchecked(&self, proj: ProjectContext) -> bool
+    pub unsafe fn is_project_dirty_unchecked(&self, project: ProjectContext) -> bool
     where
         S: MainThread,
     {
-        self.low.IsProjectDirty(proj.to_raw()) != 0
+        self.low.IsProjectDirty(project.to_raw()) != 0
     }
 
     /// Notifies all control surfaces that something in the track list has changed.
@@ -1601,11 +1645,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_track_automation_mode(&self, tr: MediaTrack) -> AutomationMode
+    pub unsafe fn get_track_automation_mode(&self, track: MediaTrack) -> AutomationMode
     where
         S: MainThread,
     {
-        let result = self.low.GetTrackAutomationMode(tr.as_ptr());
+        let result = self.low.GetTrackAutomationMode(track.as_ptr());
         AutomationMode::try_from_raw(result).expect("Unknown automation mode")
     }
 
@@ -1633,14 +1677,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn get_track_envelope_by_chunk_name(
         &self,
         track: MediaTrack,
-        cfgchunkname: EnvChunkName,
+        chunk_name: EnvChunkName,
     ) -> Option<TrackEnvelope>
     where
         S: MainThread,
     {
         let ptr = self
             .low
-            .GetTrackEnvelopeByChunkName(track.as_ptr(), cfgchunkname.into_raw().as_ptr());
+            .GetTrackEnvelopeByChunkName(track.as_ptr(), chunk_name.into_raw().as_ptr());
         NonNull::new(ptr)
     }
 
@@ -1657,14 +1701,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn get_track_envelope_by_name<'a>(
         &self,
         track: MediaTrack,
-        envname: impl Into<ReaperStringArg<'a>>,
+        env_name: impl Into<ReaperStringArg<'a>>,
     ) -> Option<TrackEnvelope>
     where
         S: MainThread,
     {
         let ptr = self
             .low
-            .GetTrackEnvelopeByName(track.as_ptr(), envname.into().as_ptr());
+            .GetTrackEnvelopeByName(track.as_ptr(), env_name.into().as_ptr());
         NonNull::new(ptr)
     }
 
@@ -1675,14 +1719,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_media_track_info_value(
         &self,
-        tr: MediaTrack,
-        parmname: TrackAttributeKey,
+        track: MediaTrack,
+        attribute_key: TrackAttributeKey,
     ) -> f64
     where
         S: MainThread,
     {
         self.low
-            .GetMediaTrackInfo_Value(tr.as_ptr(), parmname.into_raw().as_ptr())
+            .GetMediaTrackInfo_Value(track.as_ptr(), attribute_key.into_raw().as_ptr())
     }
 
     /// Gets the number of FX instances on the given track's normal FX chain.
@@ -1723,12 +1767,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_fx_guid(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
+        fx_location: TrackFxLocation,
     ) -> Result<GUID, FxNotFound>
     where
         S: MainThread,
     {
-        let ptr = self.low.TrackFX_GetFXGUID(track.as_ptr(), fx.to_raw());
+        let ptr = self
+            .low
+            .TrackFX_GetFXGUID(track.as_ptr(), fx_location.to_raw());
         unref(ptr).ok_or(FxNotFound)
     }
 
@@ -1744,15 +1790,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_param_normalized(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        param: u32,
+        fx_location: TrackFxLocation,
+        param_index: u32,
     ) -> Result<ReaperNormalizedFxParamValue, FxOrParameterNotFound>
     where
         S: MainThread,
     {
-        let raw_value =
-            self.low
-                .TrackFX_GetParamNormalized(track.as_ptr(), fx.to_raw(), param as i32);
+        let raw_value = self.low.TrackFX_GetParamNormalized(
+            track.as_ptr(),
+            fx_location.to_raw(),
+            param_index as i32,
+        );
         if raw_value < 0.0 {
             return Err(FxOrParameterNotFound);
         }
@@ -1764,12 +1812,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn get_master_track(&self, proj: ProjectContext) -> MediaTrack
+    pub fn get_master_track(&self, project: ProjectContext) -> MediaTrack
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.get_master_track_unchecked(proj) }
+        self.require_valid_project(project);
+        unsafe { self.get_master_track_unchecked(project) }
     }
 
     /// Like [`get_master_track()`] but doesn't check if project is valid.
@@ -1779,21 +1827,21 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_master_track()`]: #method.get_master_track
-    pub unsafe fn get_master_track_unchecked(&self, proj: ProjectContext) -> MediaTrack
+    pub unsafe fn get_master_track_unchecked(&self, project: ProjectContext) -> MediaTrack
     where
         S: MainThread,
     {
-        let ptr = self.low.GetMasterTrack(proj.to_raw());
+        let ptr = self.low.GetMasterTrack(project.to_raw());
         require_non_null_panic(ptr)
     }
 
     /// Converts the given GUID to a string (including braces).
-    pub fn guid_to_string(&self, g: &GUID) -> CString
+    pub fn guid_to_string(&self, guid: &GUID) -> CString
     where
         S: MainThread,
     {
         let (guid_string, _) = with_string_buffer(64, |buffer, _| unsafe {
-            self.low.guidToString(g as *const GUID, buffer)
+            self.low.guidToString(guid as *const GUID, buffer)
         });
         guid_string
     }
@@ -1811,10 +1859,15 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn set_current_bpm(&self, proj: ProjectContext, bpm: Bpm, want_undo: UndoBehavior) {
-        self.require_valid_project(proj);
+    pub fn set_current_bpm(
+        &self,
+        project: ProjectContext,
+        tempo: Bpm,
+        undo_behavior: UndoBehavior,
+    ) {
+        self.require_valid_project(project);
         unsafe {
-            self.set_current_bpm_unchecked(proj, bpm, want_undo);
+            self.set_current_bpm_unchecked(project, tempo, undo_behavior);
         }
     }
 
@@ -1827,14 +1880,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`set_current_bpm()`]: #method.set_current_bpm
     pub unsafe fn set_current_bpm_unchecked(
         &self,
-        proj: ProjectContext,
-        bpm: Bpm,
-        want_undo: UndoBehavior,
+        project: ProjectContext,
+        tempo: Bpm,
+        undo_behavior: UndoBehavior,
     ) {
         self.low.SetCurrentBPM(
-            proj.to_raw(),
-            bpm.get(),
-            want_undo == UndoBehavior::AddUndoPoint,
+            project.to_raw(),
+            tempo.get(),
+            undo_behavior == UndoBehavior::AddUndoPoint,
         );
     }
 
@@ -1870,8 +1923,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Sets the master play rate of the current project.
-    pub fn csurf_on_play_rate_change(&self, playrate: PlaybackSpeedFactor) {
-        self.low.CSurf_OnPlayRateChange(playrate.get());
+    pub fn csurf_on_play_rate_change(&self, play_rate: PlaybackSpeedFactor) {
+        self.low.CSurf_OnPlayRateChange(play_rate.get());
     }
 
     /// Shows a message box to the user.
@@ -1879,7 +1932,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Blocks the main thread.
     pub fn show_message_box<'a>(
         &self,
-        msg: impl Into<ReaperStringArg<'a>>,
+        message: impl Into<ReaperStringArg<'a>>,
         title: impl Into<ReaperStringArg<'a>>,
         r#type: MessageBoxType,
     ) -> MessageBoxResult
@@ -1887,8 +1940,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         let result = unsafe {
-            self.low
-                .ShowMessageBox(msg.into().as_ptr(), title.into().as_ptr(), r#type.to_raw())
+            self.low.ShowMessageBox(
+                message.into().as_ptr(),
+                title.into().as_ptr(),
+                r#type.to_raw(),
+            )
         };
         MessageBoxResult::try_from_raw(result).expect("Unknown message box result")
     }
@@ -1897,22 +1953,22 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     ///
     /// # Errors
     ///
-    /// Returns an error if the given string is not a valid GUID expression.
+    /// Returns an error if the given string is not a valid GUID string.
     pub fn string_to_guid<'a>(
         &self,
-        str: impl Into<ReaperStringArg<'a>>,
-    ) -> Result<GUID, GuidExpressionInvalid>
+        guid_string: impl Into<ReaperStringArg<'a>>,
+    ) -> Result<GUID, GuidStringInvalid>
     where
         S: MainThread,
     {
         let mut guid = MaybeUninit::uninit();
         unsafe {
             self.low
-                .stringToGuid(str.into().as_ptr(), guid.as_mut_ptr());
+                .stringToGuid(guid_string.into().as_ptr(), guid.as_mut_ptr());
         }
         let guid = unsafe { guid.assume_init() };
         if guid == ZERO_GUID {
-            return Err(GuidExpressionInvalid);
+            return Err(GuidStringInvalid);
         }
         Ok(guid)
     }
@@ -1924,18 +1980,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_on_input_monitoring_change_ex(
         &self,
-        trackid: MediaTrack,
-        monitor: InputMonitoringMode,
-        allowgang: GangBehavior,
+        track: MediaTrack,
+        mode: InputMonitoringMode,
+        gang_behavior: GangBehavior,
     ) -> i32
     where
         S: MainThread,
     {
-        // TODO-medium Improve parameter names everywhere
         self.low.CSurf_OnInputMonitorChangeEx(
-            trackid.as_ptr(),
-            monitor.to_raw(),
-            allowgang == GangBehavior::AllowGang,
+            track.as_ptr(),
+            mode.to_raw(),
+            gang_behavior == GangBehavior::AllowGang,
         )
     }
 
@@ -1950,16 +2005,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn set_media_track_info_value(
         &self,
-        tr: MediaTrack,
-        parmname: TrackAttributeKey,
-        newvalue: f64,
+        track: MediaTrack,
+        attribute_key: TrackAttributeKey,
+        new_value: f64,
     ) -> Result<(), InvalidTrackAttributeKey>
     where
         S: MainThread,
     {
-        let successful =
-            self.low
-                .SetMediaTrackInfo_Value(tr.as_ptr(), parmname.into_raw().as_ptr(), newvalue);
+        let successful = self.low.SetMediaTrackInfo_Value(
+            track.as_ptr(),
+            attribute_key.into_raw().as_ptr(),
+            new_value,
+        );
         if !successful {
             return Err(InvalidTrackAttributeKey);
         }
@@ -1967,10 +2024,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Stuffs a 3-byte MIDI message into a queue or send it to an external MIDI hardware.
-    pub fn stuff_midimessage(&self, mode: StuffMidiMessageTarget, msg: impl ShortMessage) {
-        let bytes = msg.to_bytes();
+    pub fn stuff_midimessage(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
+        let bytes = message.to_bytes();
         self.low.StuffMIDIMessage(
-            mode.to_raw(),
+            target.to_raw(),
             bytes.0.into(),
             bytes.1.into(),
             bytes.2.into(),
@@ -1978,19 +2035,19 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Converts a decibel value into a volume slider value.
-    pub fn db2slider(&self, x: Db) -> VolumeSliderValue
+    pub fn db2slider(&self, value: Db) -> VolumeSliderValue
     where
         S: MainThread,
     {
-        VolumeSliderValue(self.low.DB2SLIDER(x.get()))
+        VolumeSliderValue(self.low.DB2SLIDER(value.get()))
     }
 
     /// Converts a volume slider value into a decibel value.
-    pub fn slider2db(&self, y: VolumeSliderValue) -> Db
+    pub fn slider2db(&self, value: VolumeSliderValue) -> Db
     where
         S: MainThread,
     {
-        Db(self.low.SLIDER2DB(y.get()))
+        Db(self.low.SLIDER2DB(value.get()))
     }
 
     /// Returns the given track's volume and pan.
@@ -2030,12 +2087,15 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_set_surface_volume(
         &self,
-        trackid: MediaTrack,
+        track: MediaTrack,
         volume: ReaperVolumeValue,
-        ignoresurf: NotificationBehavior,
+        notification_behavior: NotificationBehavior,
     ) {
-        self.low
-            .CSurf_SetSurfaceVolume(trackid.as_ptr(), volume.get(), ignoresurf.to_raw());
+        self.low.CSurf_SetSurfaceVolume(
+            track.as_ptr(),
+            volume.get(),
+            notification_behavior.to_raw(),
+        );
     }
 
     /// Sets the given track's volume, also supports relative changes and gang.
@@ -2048,18 +2108,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_on_volume_change_ex(
         &self,
-        trackid: MediaTrack,
-        volume: ValueChange<ReaperVolumeValue>,
-        allow_gang: GangBehavior,
+        track: MediaTrack,
+        value_change: ValueChange<ReaperVolumeValue>,
+        gang_behavior: GangBehavior,
     ) -> ReaperVolumeValue
     where
         S: MainThread,
     {
         let raw = self.low.CSurf_OnVolumeChangeEx(
-            trackid.as_ptr(),
-            volume.value(),
-            volume.is_relative(),
-            allow_gang == GangBehavior::AllowGang,
+            track.as_ptr(),
+            value_change.value(),
+            value_change.is_relative(),
+            gang_behavior == GangBehavior::AllowGang,
         );
         ReaperVolumeValue::new(raw)
     }
@@ -2071,12 +2131,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_set_surface_pan(
         &self,
-        trackid: MediaTrack,
+        track: MediaTrack,
         pan: ReaperPanValue,
-        ignoresurf: NotificationBehavior,
+        notification_behavior: NotificationBehavior,
     ) {
         self.low
-            .CSurf_SetSurfacePan(trackid.as_ptr(), pan.get(), ignoresurf.to_raw());
+            .CSurf_SetSurfacePan(track.as_ptr(), pan.get(), notification_behavior.to_raw());
     }
 
     /// Sets the given track's pan. Also supports relative changes and gang.
@@ -2088,18 +2148,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_on_pan_change_ex(
         &self,
-        trackid: MediaTrack,
-        pan: ValueChange<ReaperPanValue>,
-        allow_gang: GangBehavior,
+        track: MediaTrack,
+        value_change: ValueChange<ReaperPanValue>,
+        gang_behavior: GangBehavior,
     ) -> ReaperPanValue
     where
         S: MainThread,
     {
         let raw = self.low.CSurf_OnPanChangeEx(
-            trackid.as_ptr(),
-            pan.value(),
-            pan.is_relative(),
-            allow_gang == GangBehavior::AllowGang,
+            track.as_ptr(),
+            value_change.value(),
+            value_change.is_relative(),
+            gang_behavior == GangBehavior::AllowGang,
         );
         ReaperPanValue::new(raw)
     }
@@ -2111,14 +2171,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn count_selected_tracks_2(
         &self,
-        proj: ProjectContext,
-        wantmaster: MasterTrackBehavior,
+        project: ProjectContext,
+        master_track_behavior: MasterTrackBehavior,
     ) -> u32
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.count_selected_tracks_2_unchecked(proj, wantmaster) }
+        self.require_valid_project(project);
+        unsafe { self.count_selected_tracks_2_unchecked(project, master_track_behavior) }
     }
 
     /// Like [`count_selected_tracks_2()`] but doesn't check if project is valid.
@@ -2130,15 +2190,15 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`count_selected_tracks_2()`]: #method.count_selected_tracks_2
     pub unsafe fn count_selected_tracks_2_unchecked(
         &self,
-        proj: ProjectContext,
-        wantmaster: MasterTrackBehavior,
+        project: ProjectContext,
+        master_track_behavior: MasterTrackBehavior,
     ) -> u32
     where
         S: MainThread,
     {
         self.low.CountSelectedTracks2(
-            proj.to_raw(),
-            wantmaster == MasterTrackBehavior::IncludeMasterTrack,
+            project.to_raw(),
+            master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
         ) as u32
     }
 
@@ -2147,8 +2207,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn set_track_selected(&self, track: MediaTrack, selected: bool) {
-        self.low.SetTrackSelected(track.as_ptr(), selected);
+    pub unsafe fn set_track_selected(&self, track: MediaTrack, is_selected: bool) {
+        self.low.SetTrackSelected(track.as_ptr(), is_selected);
     }
 
     /// Returns a selected track from the given project.
@@ -2158,15 +2218,21 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn get_selected_track_2(
         &self,
-        proj: ProjectContext,
-        seltrackidx: u32,
-        wantmaster: MasterTrackBehavior,
+        project: ProjectContext,
+        selected_track_index: u32,
+        master_track_behavior: MasterTrackBehavior,
     ) -> Option<MediaTrack>
     where
         S: MainThread,
     {
-        self.require_valid_project(proj);
-        unsafe { self.get_selected_track_2_unchecked(proj, seltrackidx, wantmaster) }
+        self.require_valid_project(project);
+        unsafe {
+            self.get_selected_track_2_unchecked(
+                project,
+                selected_track_index,
+                master_track_behavior,
+            )
+        }
     }
 
     /// Like [`get_selected_track_2()`] but doesn't check if project is valid.
@@ -2178,17 +2244,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`get_selected_track_2()`]: #method.get_selected_track_2
     pub unsafe fn get_selected_track_2_unchecked(
         &self,
-        proj: ProjectContext,
-        seltrackidx: u32,
-        wantmaster: MasterTrackBehavior,
+        project: ProjectContext,
+        selected_track_index: u32,
+        master_track_behavior: MasterTrackBehavior,
     ) -> Option<MediaTrack>
     where
         S: MainThread,
     {
         let ptr = self.low.GetSelectedTrack2(
-            proj.to_raw(),
-            seltrackidx as i32,
-            wantmaster == MasterTrackBehavior::IncludeMasterTrack,
+            project.to_raw(),
+            selected_track_index as i32,
+            master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
         );
         NonNull::new(ptr)
     }
@@ -2213,8 +2279,8 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn delete_track(&self, tr: MediaTrack) {
-        self.low.DeleteTrack(tr.as_ptr());
+    pub unsafe fn delete_track(&self, track: MediaTrack) {
+        self.low.DeleteTrack(track.as_ptr());
     }
 
     /// Returns the number of sends, receives or hardware outputs of the given track.
@@ -2222,35 +2288,37 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_track_num_sends(&self, tr: MediaTrack, category: TrackSendCategory) -> u32
+    pub unsafe fn get_track_num_sends(&self, track: MediaTrack, category: TrackSendCategory) -> u32
     where
         S: MainThread,
     {
-        self.low.GetTrackNumSends(tr.as_ptr(), category.to_raw()) as u32
+        self.low.GetTrackNumSends(track.as_ptr(), category.to_raw()) as u32
     }
 
     // Gets or sets an attributes of a send, receive or hardware output of the given track.
+    ///
+    /// Returns the current value if `new_value` is `null_mut()`.
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track or invalid new value.
     pub unsafe fn get_set_track_send_info(
         &self,
-        tr: MediaTrack,
+        track: MediaTrack,
         category: TrackSendCategory,
-        sendidx: u32,
-        parmname: TrackSendAttributeKey,
-        set_new_value: *mut c_void,
+        send_index: u32,
+        attribute_key: TrackSendAttributeKey,
+        new_value: *mut c_void,
     ) -> *mut c_void
     where
         S: MainThread,
     {
         self.low.GetSetTrackSendInfo(
-            tr.as_ptr(),
+            track.as_ptr(),
             category.to_raw(),
-            sendidx as i32,
-            parmname.into_raw().as_ptr(),
-            set_new_value,
+            send_index as i32,
+            attribute_key.into_raw().as_ptr(),
+            new_value,
         )
     }
 
@@ -2266,17 +2334,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_track_send_info_desttrack(
         &self,
-        tr: MediaTrack,
-        category: TrackSendDirection,
-        sendidx: u32,
+        track: MediaTrack,
+        direction: TrackSendDirection,
+        send_index: u32,
     ) -> Result<MediaTrack, ReaperFunctionFailed>
     where
         S: MainThread,
     {
         let ptr = self.get_set_track_send_info(
-            tr,
-            category.into(),
-            sendidx,
+            track,
+            direction.into(),
+            send_index,
             TrackSendAttributeKey::DestTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
@@ -2284,6 +2352,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Returns the RPPXML state of the given track.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the chunk you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
     ///
     /// # Errors
     ///
@@ -2295,21 +2369,21 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn get_track_state_chunk(
         &self,
         track: MediaTrack,
-        str_need_big_sz: u32,
-        isundo_optional: ChunkCacheHint,
+        buffer_size: u32,
+        cache_hint: ChunkCacheHint,
     ) -> Result<CString, ReaperFunctionFailed>
     where
         S: MainThread,
     {
-        let (chunk_content, successful) =
-            with_string_buffer(str_need_big_sz, |buffer, max_size| {
-                self.low.GetTrackStateChunk(
-                    track.as_ptr(),
-                    buffer,
-                    max_size,
-                    isundo_optional == ChunkCacheHint::UndoMode,
-                )
-            });
+        assert!(buffer_size > 0);
+        let (chunk_content, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+            self.low.GetTrackStateChunk(
+                track.as_ptr(),
+                buffer,
+                max_size,
+                cache_hint == ChunkCacheHint::UndoMode,
+            )
+        });
         if !successful {
             return Err(ReaperFunctionFailed);
         }
@@ -2342,15 +2416,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn create_track_send(
         &self,
-        tr: MediaTrack,
-        desttr_in_optional: SendTarget,
+        track: MediaTrack,
+        target: SendTarget,
     ) -> Result<u32, CreateTrackSendFailed>
     where
         S: MainThread,
     {
-        let result = self
-            .low
-            .CreateTrackSend(tr.as_ptr(), desttr_in_optional.to_raw());
+        let result = self.low.CreateTrackSend(track.as_ptr(), target.to_raw());
         if result < 0 {
             return Err(CreateTrackSendFailed);
         }
@@ -2366,17 +2438,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_on_rec_arm_change_ex(
         &self,
-        trackid: MediaTrack,
-        recarm: RecordArmState,
-        allowgang: GangBehavior,
+        track: MediaTrack,
+        mode: RecordArmMode,
+        gang_behavior: GangBehavior,
     ) -> bool
     where
         S: MainThread,
     {
         self.low.CSurf_OnRecArmChangeEx(
-            trackid.as_ptr(),
-            recarm.to_raw(),
-            allowgang == GangBehavior::AllowGang,
+            track.as_ptr(),
+            mode.to_raw(),
+            gang_behavior == GangBehavior::AllowGang,
         )
     }
 
@@ -2392,16 +2464,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn set_track_state_chunk<'a>(
         &self,
         track: MediaTrack,
-        str: impl Into<ReaperStringArg<'a>>,
-        isundo_optional: ChunkCacheHint,
+        chunk: impl Into<ReaperStringArg<'a>>,
+        cache_hint: ChunkCacheHint,
     ) -> Result<(), ReaperFunctionFailed>
     where
         S: MainThread,
     {
         let successful = self.low.SetTrackStateChunk(
             track.as_ptr(),
-            str.into().as_ptr(),
-            isundo_optional == ChunkCacheHint::UndoMode,
+            chunk.into().as_ptr(),
+            cache_hint == ChunkCacheHint::UndoMode,
         );
         if !successful {
             return Err(ReaperFunctionFailed);
@@ -2410,11 +2482,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Shows or hides an FX user interface.
-    pub unsafe fn track_fx_show(&self, track: MediaTrack, show_flag: FxShowInstruction) {
+    pub unsafe fn track_fx_show(&self, track: MediaTrack, instruction: FxShowInstruction) {
         self.low.TrackFX_Show(
             track.as_ptr(),
-            show_flag.location_to_raw(),
-            show_flag.instruction_to_raw(),
+            instruction.location_to_raw(),
+            instruction.instruction_to_raw(),
         );
     }
 
@@ -2426,14 +2498,14 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_floating_window(
         &self,
         track: MediaTrack,
-        index: TrackFxLocation,
+        fx_location: TrackFxLocation,
     ) -> Option<Hwnd>
     where
         S: MainThread,
     {
         let ptr = self
             .low
-            .TrackFX_GetFloatingWindow(track.as_ptr(), index.to_raw());
+            .TrackFX_GetFloatingWindow(track.as_ptr(), fx_location.to_raw());
         NonNull::new(ptr)
     }
 
@@ -2444,11 +2516,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx: TrackFxLocation) -> bool
+    pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx_location: TrackFxLocation) -> bool
     where
         S: MainThread,
     {
-        self.low.TrackFX_GetOpen(track.as_ptr(), fx.to_raw())
+        self.low
+            .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
     }
 
     /// Sets the given track send's volume.
@@ -2461,18 +2534,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_on_send_volume_change(
         &self,
-        trackid: MediaTrack,
+        track: MediaTrack,
         send_index: u32,
-        volume: ValueChange<ReaperVolumeValue>,
+        value_change: ValueChange<ReaperVolumeValue>,
     ) -> ReaperVolumeValue
     where
         S: MainThread,
     {
         let raw = self.low.CSurf_OnSendVolumeChange(
-            trackid.as_ptr(),
+            track.as_ptr(),
             send_index as i32,
-            volume.value(),
-            volume.is_relative(),
+            value_change.value(),
+            value_change.is_relative(),
         );
         ReaperVolumeValue::new(raw)
     }
@@ -2486,18 +2559,18 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_on_send_pan_change(
         &self,
-        trackid: MediaTrack,
+        track: MediaTrack,
         send_index: u32,
-        pan: ValueChange<ReaperPanValue>,
+        value_change: ValueChange<ReaperPanValue>,
     ) -> ReaperPanValue
     where
         S: MainThread,
     {
         let raw = self.low.CSurf_OnSendPanChange(
-            trackid.as_ptr(),
+            track.as_ptr(),
             send_index as i32,
-            pan.value(),
-            pan.is_relative(),
+            value_change.value(),
+            value_change.is_relative(),
         );
         ReaperPanValue::new(raw)
     }
@@ -2512,18 +2585,20 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid section.
     pub unsafe fn kbd_get_text_from_cmd<R>(
         &self,
-        cmd: CommandId,
+        command_id: CommandId,
         section: SectionContext,
-        f: impl FnOnce(&CStr) -> R,
+        use_action_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
         S: MainThread,
     {
-        let ptr = self.low.kbd_getTextFromCmd(cmd.get(), section.to_raw());
+        let ptr = self
+            .low
+            .kbd_getTextFromCmd(command_id.get(), section.to_raw());
         create_passing_c_str(ptr)
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| s.to_bytes().len() > 0)
-            .map(f)
+            .map(use_action_name)
     }
 
     /// Returns the current on/off state of a toggleable action.
@@ -2562,13 +2637,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub fn reverse_named_command_lookup<R>(
         &self,
         command_id: CommandId,
-        f: impl FnOnce(&CStr) -> R,
+        use_command_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
         S: MainThread,
     {
         let ptr = self.low.ReverseNamedCommandLookup(command_id.to_raw());
-        unsafe { create_passing_c_str(ptr) }.map(f)
+        unsafe { create_passing_c_str(ptr) }.map(use_command_name)
     }
 
     /// Returns a track send's volume and pan.
@@ -2619,15 +2694,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_preset_index(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
+        fx_location: TrackFxLocation,
     ) -> Result<TrackFxGetPresetIndexResult, ReaperFunctionFailed>
     where
         S: MainThread,
     {
         let mut num_presets = MaybeUninit::uninit();
-        let index =
-            self.low
-                .TrackFX_GetPresetIndex(track.as_ptr(), fx.to_raw(), num_presets.as_mut_ptr());
+        let index = self.low.TrackFX_GetPresetIndex(
+            track.as_ptr(),
+            fx_location.to_raw(),
+            num_presets.as_mut_ptr(),
+        );
         if index == -1 {
             return Err(ReaperFunctionFailed);
         }
@@ -2649,15 +2726,17 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_set_preset_by_index(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        idx: FxPresetRef,
+        fx_location: TrackFxLocation,
+        preset: FxPresetRef,
     ) -> Result<(), ReaperFunctionFailed>
     where
         S: MainThread,
     {
-        let successful =
-            self.low
-                .TrackFX_SetPresetByIndex(track.as_ptr(), fx.to_raw(), idx.to_raw());
+        let successful = self.low.TrackFX_SetPresetByIndex(
+            track.as_ptr(),
+            fx_location.to_raw(),
+            preset.to_raw(),
+        );
         if !successful {
             return Err(ReaperFunctionFailed);
         }
@@ -2679,15 +2758,15 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_navigate_presets(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        presetmove: i32,
+        fx_location: TrackFxLocation,
+        increment: i32,
     ) -> Result<(), ReaperFunctionFailed>
     where
         S: MainThread,
     {
-        let successful = self
-            .low
-            .TrackFX_NavigatePresets(track.as_ptr(), fx.to_raw(), presetmove);
+        let successful =
+            self.low
+                .TrackFX_NavigatePresets(track.as_ptr(), fx_location.to_raw(), increment);
         if !successful {
             return Err(ReaperFunctionFailed);
         }
@@ -2697,10 +2776,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Returns information about the currently selected preset of the given FX.
     ///
     /// *Currently selected* means the preset which is currently showing in the REAPER dropdown.
-    /// TODO-medium Try this: or the full path to a factory preset file for VST3 plug-ins
-    ///  (.vstpreset). We might return paths in that case!?
+    /// TODO-medium Try building and running on Linux.
+    /// TODO-medium Try running tests in latest REAPER version
     ///
-    /// With `presetname_sz` you can tell REAPER how many characters of the preset name you want. If
+    /// With `buffer size` you can tell REAPER how many bytes of the preset name you want. If
     /// you are not interested in the preset name at all, pass 0.
     ///
     /// # Safety
@@ -2709,25 +2788,29 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn track_fx_get_preset(
         &self,
         track: MediaTrack,
-        fx: TrackFxLocation,
-        presetname_sz: u32,
+        fx_location: TrackFxLocation,
+        buffer_size: u32,
     ) -> TrackFxGetPresetResult
     where
         S: MainThread,
     {
-        if presetname_sz == 0 {
+        if buffer_size == 0 {
             let state_matches_preset =
                 self.low
-                    .TrackFX_GetPreset(track.as_ptr(), fx.to_raw(), null_mut(), 0);
+                    .TrackFX_GetPreset(track.as_ptr(), fx_location.to_raw(), null_mut(), 0);
             TrackFxGetPresetResult {
                 state_matches_preset,
                 name: None,
             }
         } else {
             let (name, state_matches_preset) =
-                with_string_buffer(presetname_sz, |buffer, max_size| {
-                    self.low
-                        .TrackFX_GetPreset(track.as_ptr(), fx.to_raw(), buffer, max_size)
+                with_string_buffer(buffer_size, |buffer, max_size| {
+                    self.low.TrackFX_GetPreset(
+                        track.as_ptr(),
+                        fx_location.to_raw(),
+                        buffer,
+                        max_size,
+                    )
                 });
             if name.to_bytes().len() == 0 {
                 return TrackFxGetPresetResult {
@@ -2767,21 +2850,21 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// [`get_read_buf()`]: struct.MidiInput.html#method.get_read_buf
     pub fn get_midi_input<R>(
         &self,
-        idx: MidiInputDeviceId,
-        f: impl FnOnce(&MidiInput) -> R,
+        device_id: MidiInputDeviceId,
+        use_device: impl FnOnce(&MidiInput) -> R,
     ) -> Option<R>
     where
         S: RealTimeAudioThread,
     {
-        let ptr = self.low.GetMidiInput(idx.to_raw());
+        let ptr = self.low.GetMidiInput(device_id.to_raw());
         if ptr.is_null() {
             return None;
         }
-        NonNull::new(ptr).map(|nnp| f(&MidiInput(nnp)))
+        NonNull::new(ptr).map(|nnp| use_device(&MidiInput(nnp)))
     }
 
-    fn require_valid_project(&self, proj: ProjectContext) {
-        if let ProjectContext::Proj(p) = proj {
+    fn require_valid_project(&self, project: ProjectContext) {
+        if let ProjectContext::Proj(p) = project {
             assert!(
                 self.validate_ptr_2(CurrentProject, p),
                 "ReaProject doesn't exist anymore"
@@ -2796,7 +2879,7 @@ pub enum GetParameterStepSizesResult {
     ///
     /// Each of the decimal numbers are > 0.
     Normal {
-        step: f64,
+        normal_step: f64,
         small_step: Option<f64>,
         large_step: Option<f64>,
     },
@@ -2808,13 +2891,13 @@ pub enum GetParameterStepSizesResult {
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct GetParamExResult {
     /// Current value.
-    pub value: f64,
+    pub current_value: f64,
     /// Minimum possible value.
-    pub min_val: f64,
+    pub min_value: f64,
     /// Center value.
-    pub mid_val: f64,
+    pub mid_value: f64,
     /// Maximum possible value.
-    pub max_val: f64,
+    pub max_value: f64,
 }
 
 #[derive(Clone, PartialEq, Hash, Debug)]

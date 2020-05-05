@@ -151,7 +151,9 @@ impl FxParameter {
         use GetParameterStepSizesResult::*;
         match result {
             Normal {
-                step, small_step, ..
+                normal_step,
+                small_step,
+                ..
             } => {
                 let range = self.get_value_range();
                 // We are primarily interested in the smallest step size that makes sense. We can
@@ -160,7 +162,7 @@ impl FxParameter {
                 if span == 0.0 {
                     return None;
                 }
-                let pref_step_size = small_step.unwrap_or(step);
+                let pref_step_size = small_step.unwrap_or(normal_step);
                 Some(pref_step_size / span)
             }
             Toggle => Some(1.0),
@@ -177,9 +179,9 @@ impl FxParameter {
             )
         };
         FxParameterValueRange {
-            min_val: result.min_val,
-            mid_val: result.mid_val,
-            max_val: result.max_val,
+            min_val: result.min_value,
+            mid_val: result.mid_value,
+            max_val: result.max_value,
         }
     }
 }

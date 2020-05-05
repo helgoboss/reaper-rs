@@ -140,17 +140,17 @@ pub enum GangBehavior {
 
 /// Defines whether a track is armed for recording.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum RecordArmState {
+pub enum RecordArmMode {
     /// Track is not armed for recording.
     Unarmed,
     /// Track is armed for recording.
     Armed,
 }
 
-impl RecordArmState {
+impl RecordArmMode {
     /// Converts this value to an integer as expected by the low-level API.
     pub fn to_raw(&self) -> i32 {
-        use RecordArmState::*;
+        use RecordArmMode::*;
         match self {
             Unarmed => 0,
             Armed => 1,
