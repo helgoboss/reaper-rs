@@ -3,7 +3,7 @@ use crate::guid::Guid;
 use crate::{get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track};
 use c_str_macro::c_str;
 
-use reaper_rs_medium::TrackInfoKey::{
+use reaper_rs_medium::TrackAttributeKey::{
     Mute, Pan, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber, Vol,
 };
 use reaper_rs_medium::{

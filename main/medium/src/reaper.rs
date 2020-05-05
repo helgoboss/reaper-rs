@@ -22,10 +22,10 @@ use crate::{
     PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, RealTimeAudioThread,
     ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
     ReaperVersion, ReaperVolumeValue, RecordArmState, RecordingInput, RegistrationFailed,
-    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory,
-    TrackSendDirection, TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
-    VolumeSliderValue, WindowContext,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackRef,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use reaper_rs_low;

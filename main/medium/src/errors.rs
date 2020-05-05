@@ -34,8 +34,8 @@ pub struct FxOrParameterNotFound;
 pub struct FxOrParameterNotFoundOrCockosExtNotSupported;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "invalid track info key")]
-pub struct InvalidTrackInfoKey;
+#[display(fmt = "invalid track attribute key")]
+pub struct InvalidTrackAttributeKey;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
 #[display(fmt = "registration failed")]

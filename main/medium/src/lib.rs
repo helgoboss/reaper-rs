@@ -45,7 +45,7 @@
 //! 2. If the original function uses a string and there's a clear set of predefined
 //!    options, we introduce an enum. Example:
 //! [`get_media_track_info_value()`](struct.ReaperFunctions.html#method.get_media_track_info_value),
-//! [`TrackInfoKey`](enum.TrackInfoKey.html)
+//! [`TrackAttributeKey`](enum.TrackAttributeKey.html)
 //!
 //! 3. If the original function uses a bool and the name of the function doesn't give that bool
 //!    meaning, introduce an enum. Example:

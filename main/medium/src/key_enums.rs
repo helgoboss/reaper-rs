@@ -4,11 +4,11 @@ use c_str_macro::c_str;
 use std::borrow::Cow;
 use std::ffi::CStr;
 
-/// Track info key which you can pass to [`get_set_media_track_info()`].
+/// Track attribute key which you can pass to [`get_set_media_track_info()`].
 ///
 /// [`get_set_media_track_info()`]: struct.ReaperFunctions.html#method.get_set_media_track_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub enum TrackInfoKey<'a> {
+pub enum TrackAttributeKey<'a> {
     /// Parent track (read-only).
     ///
     /// `*mut MediaTrack`
@@ -369,23 +369,23 @@ pub enum TrackInfoKey<'a> {
     Custom(Cow<'a, CStr>),
 }
 
-impl<'a> TrackInfoKey<'a> {
+impl<'a> TrackAttributeKey<'a> {
     /// Convenience function for creating an [`Ext`] key.
     ///
     /// [`Ext`]: #variant.Ext
-    pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
-        TrackInfoKey::Ext(key.into().into_inner())
+    pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackAttributeKey<'a> {
+        TrackAttributeKey::Ext(key.into().into_inner())
     }
 
     /// Convenience function for creating a [`Custom`] key.
     ///
     /// [`Custom`]: #variant.Custom
-    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackInfoKey<'a> {
-        TrackInfoKey::Custom(key.into().into_inner())
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackAttributeKey<'a> {
+        TrackAttributeKey::Custom(key.into().into_inner())
     }
 
     pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
-        use TrackInfoKey::*;
+        use TrackAttributeKey::*;
         match self {
             FreeMode => c_str!("B_FREEMODE").into(),
             HeightLock => c_str!("B_HEIGHTLOCK").into(),
@@ -449,11 +449,11 @@ impl<'a> TrackInfoKey<'a> {
     }
 }
 
-/// Track info key which you can pass to [`get_set_track_send_info()`].
+/// Track send attribute key which you can pass to [`get_set_track_send_info()`].
 ///
 /// [`get_set_track_send_info()`]: struct.ReaperFunctions.html#method.get_set_track_send_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub enum TrackSendInfoKey<'a> {
+pub enum TrackSendAttributeKey<'a> {
     /// Destination track (read-only).
     ///
     /// `*mut MediaTrack`
@@ -558,23 +558,23 @@ pub enum TrackSendInfoKey<'a> {
     Custom(Cow<'a, CStr>),
 }
 
-impl<'a> TrackSendInfoKey<'a> {
+impl<'a> TrackSendAttributeKey<'a> {
     /// Convenience function for creating an [`Ext`] key.
     ///
     /// [`Ext`]: #variant.Ext
-    pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
-        TrackSendInfoKey::Ext(key.into().into_inner())
+    pub fn ext(key: impl Into<ReaperStringArg<'a>>) -> TrackSendAttributeKey<'a> {
+        TrackSendAttributeKey::Ext(key.into().into_inner())
     }
 
     /// Convenience function for creating a [`Custom`] key.
     ///
     /// [`Custom`]: #variant.Custom
-    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackSendInfoKey<'a> {
-        TrackSendInfoKey::Custom(key.into().into_inner())
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TrackSendAttributeKey<'a> {
+        TrackSendAttributeKey::Custom(key.into().into_inner())
     }
 
     pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
-        use TrackSendInfoKey::*;
+        use TrackSendAttributeKey::*;
         match self {
             Mono => c_str!("B_MONO").into(),
             Mute => c_str!("B_MUTE").into(),
@@ -598,9 +598,9 @@ impl<'a> TrackSendInfoKey<'a> {
     }
 }
 
-/// Envelope chunk name which you can pass e.g. to [`TrackInfoKey::Env()`].
+/// Envelope chunk name which you can pass e.g. to [`TrackAttributeKey::Env()`].
 ///
-/// [`TrackInfoKey::Env()`]: enum.TrackInfoKey.html#variant.Env
+/// [`TrackAttributeKey::Env()`]: enum.TrackAttributeKey.html#variant.Env
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum EnvChunkName<'a> {
     /// Volume (Pre-FX)
@@ -656,8 +656,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn serialize_track_info_key() {
-        use TrackInfoKey::*;
+    fn serialize_track_attribute_key() {
+        use TrackAttributeKey::*;
         assert_eq!(Mute.into_raw().as_ref(), c_str!("B_MUTE"));
         assert_eq!(
             Env(EnvChunkName::VolEnv).into_raw().as_ref(),
@@ -670,11 +670,11 @@ mod tests {
             c_str!("P_ENV:<MYENV")
         );
         assert_eq!(
-            TrackInfoKey::ext("SWS_FOO").into_raw().as_ref(),
+            TrackAttributeKey::ext("SWS_FOO").into_raw().as_ref(),
             c_str!("P_EXT:SWS_FOO")
         );
         assert_eq!(
-            TrackInfoKey::custom(c_str!("BLA")).into_raw().as_ref(),
+            TrackAttributeKey::custom(c_str!("BLA")).into_raw().as_ref(),
             c_str!("BLA")
         );
     }

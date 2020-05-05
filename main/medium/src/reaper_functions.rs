@@ -16,16 +16,16 @@ use crate::{
     DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxNotFound, FxOrParameterNotFound,
     FxOrParameterNotFoundOrCockosExtNotSupported, FxPresetRef, FxShowInstruction, GangBehavior,
     GlobalAutomationModeOverride, GuidExpressionInvalid, Hwnd, InputMonitoringMode,
-    InvalidTrackInfoKey, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumReaperControlSurface,
-    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId,
-    MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, PluginRegistration,
-    ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctionFailed,
+    InvalidTrackAttributeKey, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
+    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
+    MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
+    MidiInputDeviceId, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
+    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctionFailed,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
     ReaperVolumeValue, RecordArmState, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxLocation, TrackInfoKey, TrackRef, TrackSendCategory, TrackSendDirection,
-    TrackSendInfoKey, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackRef, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
     WindowContext,
 };
 
@@ -314,7 +314,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn get_set_media_track_info(
         &self,
         tr: MediaTrack,
-        parmname: TrackInfoKey,
+        parmname: TrackAttributeKey,
         set_new_value: *mut c_void,
     ) -> *mut c_void
     where
@@ -336,7 +336,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::ParTrack, null_mut())
+        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::ParTrack, null_mut())
             as *mut raw::MediaTrack;
         NonNull::new(ptr)
     }
@@ -352,7 +352,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Project, null_mut())
+        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::Project, null_mut())
             as *mut raw::ReaProject;
         NonNull::new(ptr)
     }
@@ -370,7 +370,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Name, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::Name, null_mut());
         unsafe { create_passing_c_str(ptr as *const c_char) }.map(f)
     }
 
@@ -383,7 +383,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::RecMon, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::RecMon, null_mut());
         let irecmon = unsafe { unref_as::<i32>(ptr) }.unwrap();
         InputMonitoringMode::try_from_raw(irecmon).expect("Unknown input monitoring mode")
     }
@@ -400,7 +400,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::RecInput, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::RecInput, null_mut());
         let rec_input_index = unsafe { unref_as::<i32>(ptr) }.unwrap();
         if rec_input_index < 0 {
             None
@@ -423,7 +423,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         S: MainThread,
     {
         use TrackRef::*;
-        match self.get_set_media_track_info(tr, TrackInfoKey::TrackNumber, null_mut()) as i32 {
+        match self.get_set_media_track_info(tr, TrackAttributeKey::TrackNumber, null_mut()) as i32 {
             -1 => Some(MasterTrack),
             0 => None,
             n if n > 0 => Some(NormalTrack(n as u32 - 1)),
@@ -440,7 +440,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     where
         S: MainThread,
     {
-        let ptr = self.get_set_media_track_info(tr, TrackInfoKey::Guid, null_mut());
+        let ptr = self.get_set_media_track_info(tr, TrackAttributeKey::Guid, null_mut());
         unsafe { unref_as::<GUID>(ptr) }.unwrap()
     }
 
@@ -1673,7 +1673,11 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_media_track_info_value(&self, tr: MediaTrack, parmname: TrackInfoKey) -> f64
+    pub unsafe fn get_media_track_info_value(
+        &self,
+        tr: MediaTrack,
+        parmname: TrackAttributeKey,
+    ) -> f64
     where
         S: MainThread,
     {
@@ -1784,7 +1788,6 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     }
 
     /// Converts the given GUID to a string (including braces).
-    // TODO-medium Introduce GUID newtype
     pub fn guid_to_string(&self, g: &GUID) -> CString
     where
         S: MainThread,
@@ -1945,13 +1948,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    // TODO-medium Maybe rename TrackInfo to TrackAttribute.
     pub unsafe fn set_media_track_info_value(
         &self,
         tr: MediaTrack,
-        parmname: TrackInfoKey,
+        parmname: TrackAttributeKey,
         newvalue: f64,
-    ) -> Result<(), InvalidTrackInfoKey>
+    ) -> Result<(), InvalidTrackAttributeKey>
     where
         S: MainThread,
     {
@@ -1959,7 +1961,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             self.low
                 .SetMediaTrackInfo_Value(tr.as_ptr(), parmname.into_raw().as_ptr(), newvalue);
         if !successful {
-            return Err(InvalidTrackInfoKey);
+            return Err(InvalidTrackAttributeKey);
         }
         Ok(())
     }
@@ -2237,7 +2239,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         tr: MediaTrack,
         category: TrackSendCategory,
         sendidx: u32,
-        parmname: TrackSendInfoKey,
+        parmname: TrackSendAttributeKey,
         set_new_value: *mut c_void,
     ) -> *mut c_void
     where
@@ -2275,7 +2277,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             tr,
             category.into(),
             sendidx,
-            TrackSendInfoKey::DestTrack,
+            TrackSendAttributeKey::DestTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
         require_non_null(ptr).map_err(|_| ReaperFunctionFailed)

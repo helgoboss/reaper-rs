@@ -17,12 +17,12 @@ use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
 use reaper_rs_medium::NotificationBehavior::NotifyAll;
 use reaper_rs_medium::ProjectContext::Proj;
 use reaper_rs_medium::SendTarget::OtherTrack;
-use reaper_rs_medium::TrackInfoKey::{Mute, Name, RecArm, RecInput, RecMon, Selected, Solo};
+use reaper_rs_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Selected, Solo};
 use reaper_rs_medium::ValueChange::Absolute;
 use reaper_rs_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperPointer, RecordArmState, RecordingInput,
-    TrackInfoKey, TrackRef, TrackSendCategory, ValueChange,
+    TrackAttributeKey, TrackRef, TrackSendCategory, ValueChange,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
