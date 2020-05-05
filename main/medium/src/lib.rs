@@ -2,7 +2,7 @@
 //!
 //! To get started, have a look at the [`Reaper`] struct.
 //!
-//! # Hints
+//! # General usage hints
 //!
 //! - Whenever you find an identifier in this crate that ends with `index`, you can assume it's a
 //!   *zero-based* integer. That means the first index is 0, not 1!
@@ -11,13 +11,12 @@
 //! # Design goals
 //!
 //! The ultimate goal of the medium-level API is to provide all functions offered by the low-level
-//! API, but in an idiomatic and type-safe way which doesn't require the consumer to use `unsafe`
-//! all over the place. The result is still a plain list of functions, where each function is named
-//! like its original with only minor changes. Going all object-oriented, using reactive
-//! extensions, introducing a fluid API, finding function names that make more sense - all of that
-//! is intentionally *out of scope*. The medium-level should stay close to the original SDK. This
-//! has the benefit that Lua and C++ code seen in forum threads, blogs and existing extensions
-//! can help even when writing plug-ins in Rust.
+//! API, but in an idiomatic and type-safe way. The result is still a plain list of functions, where
+//! each function is basically named like its original. Going all object-oriented,
+//! using reactive extensions, introducing a fluid API, finding function names that make more sense
+//! - all of that is intentionally *out of scope*. The medium-level is intended to stay close to the
+//! original SDK. This has the benefit that Lua and C++ code seen in forum threads, blogs and
+//! existing extensions can help even when writing plug-ins in Rust.
 //!
 //! # Design principles
 //!
@@ -26,42 +25,56 @@
 //! ## Follow Rust naming conventions
 //!
 //! Most low-level functions and types don't follow the Rust naming conventions. We adjust them
-//! accordingly while still staying as close as possible to the original name.
+//! accordingly while still staying as close as possible to the original names.
 //!
 //! ## Use unsigned integers where appropriate
 //!
-//! Don't use signed integers when it's totally clear that a number can never be negative.
+//! We don't use signed integers when it's totally clear that a number can never be negative.
 //! Example: [`insert_track_at_index()`](struct.ReaperFunctions.html#method.insert_track_at_index)
 //!
 //! ## Use enums where appropriate
 //!
-//! We want more type-safety and more readable code. Enums can contribute to that a lot. Here's how
+//! We want more type safety and more readable code. Enums can contribute to that a lot. Here's how
 //! we use them:
 //!
-//! 1. If an integer represents a limited set of options which can be easily named, introduce an
-//!    enum. Example: [`AutomationMode`](enum.AutomationMode.html)
+//! 1. If the original function uses an integer which represents a limited set of
+//!    options that can be easily named, we introduce an enum. Example:
+//! [`get_track_automation_mode()`](struct.ReaperFunctions.html#method.insert_track_at_index),
+//! [`AutomationMode`](enum.AutomationMode.html)
 //!
-//! 2. If the original function takes or returns a string and there's a clear set of predefined
-//!    options, introduce an enum. Example: [`TrackInfoKey`](enum.TrackInfoKey.html)
+//! 2. If the original function uses a string and there's a clear set of predefined
+//!    options, we introduce an enum. Example:
+//! [`get_media_track_info_value()`](struct.ReaperFunctions.html#method.get_media_track_info_value),
+//! [`TrackInfoKey`](enum.TrackInfoKey.html)
 //!
 //! 3. If the original function uses a bool and the name of the function doesn't give that bool
-//!    meaning, introduce an enum. Example: [`UndoBehavior`](enum.UndoBehavior.html)
+//!    meaning, introduce an enum. Example:
+//! [`set_current_bpm()`](struct.ReaperFunctions.html#method.set_current_bpm),
+//! [`UndoBehavior`](enum.UndoBehavior.html)
 //!
-//! 4. If a function can have different mutually exclusive results, introduce an enum. Example:
-//!    [`GetLastTouchedFxResult`](enum.GetLastTouchedFxResult.html)
+//! 4. If the original function can have different mutually exclusive results, introduce an enum.
+//!    Example:
+//! [`get_last_touched_fx()`](struct.ReaperFunctions.html#method.get_last_touched_fx),
+//! [`GetLastTouchedFxResult`](enum.GetLastTouchedFxResult.html)
 //!
-//! 5. If a function has several parameters of which only certain combinations are valid, introduce
-//!    an enum for combining those. Example: [`ActionValueChange`](enum.ActionValueChange.html)
+//! 5. If the original function has several parameters of which only certain combinations are valid,
+//!    introduce an enum for combining those. Example:
+//! [`kbd_on_main_action_ex()`](struct.ReaperFunctions.html#method.kbd_on_main_action_ex),
+//! [`ActionValueChange`](enum.ActionValueChange.html)
 //!
-//! 6. If a function takes a parameter which describes how another parameter is interpreted,
-//!    introduce an enum. Example: [`ValueChange`](enum.ValueChange.html)
+//! 6. If the original function takes a parameter which describes how another parameter is
+//!    interpreted, introduce an enum. Example:
+//! [`csurf_on_pan_change_ex()`](struct.ReaperFunctions.html#method.csurf_on_pan_change_ex),
+//! [`ValueChange`](enum.ValueChange.html)
 //!
-//! 7. If a function takes an optional value and one cannot conclude from the function name what a
-//!    `None` would mean, introduce an enum. Example: [`ProjectContext`](enum.ProjectContext.html)
+//! 7. If the original function takes an optional value and one cannot conclude from the function
+//!    name what a `None` would mean, introduce an enum. Example:
+//! [`count_tracks()`](struct.ReaperFunctions.html#method.count_tracks),
+//! [`ProjectContext`](enum.ProjectContext.html)
 //!
 //! The first design didn't have many enums. Then, with every enum introduced in the medium-level
-//! API, I could watch the high-level API code getting cleaner, more understandable and often even
-//! shorter. And even more importantly, I spotted some API usage bugs!
+//! API, the high-level API code was getting cleaner, more understandable and often even shorter.
+//! More importantly, some API usage bugs suddenly became obvious!
 //!
 //! ## Adjust return types where appropriate
 //!
@@ -85,14 +98,45 @@
 //!
 //! We *don't* use newtypes for numbers that represent indexes.
 //!
+//! ## Use convenience functions where necessary
+//!
+//! In general, the medium-level API shouldn't have too much additional magic and convenience.
+//! However, there are some low-level functions which are true allrounders. With allrounders it's
+//! often difficult to find accurate signatures and impossible to avoid `unsafe`. Adding multiple
+//! convenience functions can sometimes help with that, at least with making them a *bit* more
+//! safe to use.
+//! Examples:
+//! [`get_set_media_track_info()`](struct.ReaperFunctions.html#method.get_set_media_track_info),
+//! [`plugin_register_add_command_id()`](struct.Reaper.html#method.plugin_register_add_command_id)
+//!
+//! ## Make it easy to work with strings
+//!
+//! - String parameters are used as described in [`ReaperStringArg`](struct.ReaperStringArg.html).
+//!   Example: [`string_to_guid()`](struct.ReaperFunctions.html#method.string_to_guid)
+//! - Strings in return positions are dealt with in different ways:
+//!     - When returning an owned string, we return `CString` (because that's what comes closest to
+//!       the original REAPER SDK, see [`ReaperStringArg`](struct.ReaperStringArg.html)). Consumers
+//!       can easily convert them to regular Rust strings when needed. Example:
+//!       [`guid_to_string()`](struct.ReaperFunctions.html#method.guid_to_string)
+//!     - When returning a string owned by REAPER and we know that string has a static lifetime, we
+//!       return a `&'static CStr`. Example:
+//!       [`get_app_version()`](struct.ReaperFunctions.html#method.get_app_version)
+//!     - When returning a string owned by REAPER and we can't give it a proper lifetime annotation
+//!       (in most cases we can't), we grant the user only temporary access to that string by taking
+//!       a closure with a `&CStr` argument which is executed right away. Example:
+//!       [`undo_can_undo_2()`](struct.ReaperFunctions.html#method.undo_can_undo_2)
+//! - Strings in enums are often `Cow<CStr>` because we want them to be flexible enough to carry
+//!   both owned and borrowed strings.
+//!
 //! ## Use pointer wrappers where appropriate
 //!
 //! When we deal with REAPER, we have to deal with pointers. REAPER often returns pointers and we
 //! can't give them a sane lifetime annotation. Depending on the type of plug-in and the type of
 //! pointer, some are rather static from the perspective of the plug-in and others can come and go
-//! anytime. In any case, just turning them into `'static` references would be plain wrong. However,
-//! annotating them with a bounded lifetime `'a` (correlated to another lifetime) is also often
-//! impossible, because mostly we don't have another lifetime which can serve as frame of reference.
+//! anytime. In any case, just turning them into `'static` references would be plain wrong. At the
+//! same time, annotating them with a bounded lifetime `'a` (correlated to another lifetime) is
+//! often impossible either, because mostly we don't have another lifetime at the disposal which can
+//! serve as frame of reference.
 //!
 //! In most cases the best we can do is passing pointers around. How exactly this is done,
 //! depends on the characteristics of the pointed-to struct and how it is going to be used.
@@ -180,46 +224,59 @@
 //!   [`MidiEventList`](struct.MidiEventList.html) &
 //! - `PCM_source` → `PcmSource` & `MediumPcmSource` (both not yet existing)
 //!
-//! ## Use convenience functions where necessary
+//! ## Panic/error/safety strategy
 //!
-//! In general, the medium-level API shouldn't have too much additional magic and convenience.
-//! However, there are some low-level functions which are true allrounders. With allrounders it's
-//! often difficult to find accurate signatures and impossible to avoid `unsafe`. Adding multiple
-//! convenience functions can sometimes help with that, at least with making them a *bit* more
-//! safe to use.
-//! Examples:
-//! [`get_set_media_track_info()`](struct.ReaperFunctions.html#method.get_set_media_track_info),
-//! [`plugin_register_add_command_id()`](struct.Reaper.html#method.plugin_register_add_command_id)
+//! - We panic if a REAPER function is not available, e.g. because it's an older REAPER version.
+//!   Rationale: If *all* function signatures would be cluttered up with `Result`s, it would be an
+//!   absolute nightmare to use the API. It's also not necessary: The consumer can always check if
+//!   the function is there, and mostly it is (see
+//!   [`reaper_rs_low::Reaper`](../reaper_rs_low/struct.Reaper.html)).
+//! - We panic when passed parameters don't satisfy documented preconditions which can be easily
+//!   satisfied by consumers. Rationale: This represents incorrect API usage.
+//!     - Luckily, the need for precondition checks is mitigated by using lots of newtypes and
+//!       enums, which don't allow parameters to be out of range in the first place.
+//!   Example: [`track_fx_get_fx_name()`](struct.ReaperFunctions.html#method.track_fx_get_fx_name)
+//! - When a function takes pointers, we generally mark it as `unsafe`. Rationale: Pointers can
+//!   dangle (e.g. a pointer to a track dangles as soon as that track is removed). Passing a
+//!   dangling pointer to a REAPER function can and often will make REAPER crash. Example:
+//!   [`delete_track()`](struct.ReaperFunctions.html#method.delete_track)
+//!     - That's a bit unfortunate, but unavoidable given the medium-level APIs design goal to stay
+//!       close to the original API. The `unsafe` is a hint to the consumer to be extra careful with
+//!       those functions.
+//!     - The consumer *has* ways to ensure that the passed pointer is valid:
 //!
-//! ## CONTINUE Strings
+//!          1. Using obtained pointers right away instead of caching them (preferred)
 //!
-//! Doc: Explain that returning CString instead of String is because we also expect CStrings
-//! as ideal arguments (for good reasons). It would not be symmetric to return Strings then.
+//!          2. Using [`validate_ptr_2()`](struct.ReaperFunctions.html#method.validate_ptr_2) to
+//!             check if the cached pointer is still valid.
+//!          
+//!          3. Using a
+//!             [hidden control surface](struct.Reaper.html#method.plugin_register_add_csurf_inst)
+//!             to be informed whenever e.g. a `MediaTrack` is removed and invalidating the cached
+//!             pointer accordingly.
+//! - There's one exception to this: If the parameters passed to the function in question are enough
+//!   to check whether the pointer is still valid, we do it, right in that function. If it's
+//!   invalid, we panic. We use
+//!   [`validate_ptr_2()`](struct.ReaperFunctions.html#method.validate_ptr_2) to check the pointer.
+//!   Sadly, for all but project pointers it needs a project context to be able to validate a
+//!   pointer. Otherwise we could apply this rule much more. Rationale: This allows us to remove the
+//!   `unsafe` (if there was no other reason for it). That's not ideal either but it's far better
+//!   than undefined behavior. Failing fast without crashing is one of the main design principles of
+//!   *reaper-rs*. Because checking the pointer is an "extra" thing that the medium-level API does,
+//!   we also offer an unsafe `_unchecked` variant of the same function, which doesn't do the check.
+//!   Example: [`count_tracks()`](struct.ReaperFunctions.html#method.count_tracks) and
+//!   [`count_tracks_unchecked()`](struct.ReaperFunctions.html#method.count_tracks_unchecked)
+//! - If a REAPER function can return a value which represents that execution was not successful,
+//!   return a `Result`. Example:
+//!   [`string_to_guid()`](struct.ReaperFunctions.html#method.string_to_guid)
 //!
-//! - When there are string output parameters which can be passed a null pointer, trigger this null
-//!   pointer case when a buffer size of 0 is passed, also use Cow in this case in order to have a
-//!   cheap empty string in null-pointer case
+//! Verdict: Making the API completely safe to use can't be done in the medium-level API. But it can
+//! be done in the high-level API because it's not tied to the original REAPER flat function
+//! signatures. For example, there could be a `Track` struct which holds a `ReaProject` pointer,
+//! the track index and the track's GUID. With that combination it's possible to detect reliably
+//! whether a track is still existing. Needless to say, this is far too opinionated for the
+//! medium-level API.
 //!
-//! ## Panic/Error/Safety strategy
-//! - In all REAPER functions which can fail (mostly indicated by returning false or -1), return
-//!   Result
-//! - Panics if function not available (we should make sure on plug-in load that all necessary
-//!   functions are available)
-//! - Panic if pointer can be checked and we discovered an invalid pointer
-//!     - Should we panic if ptr invalid or return result? Returning None in case it's an Option
-//!       result is bad because this is not always the case. I think we should panic. Otherwise our
-//!       nice signatures get cluttered up with results. It should be declared as general
-//!       precondition for all methods that the passed pointers are valid. This can be made sure by
-//!       either always fetching them (jf: "Ideally you shouldn't hang on to pointers longer than
-//!       you need them") or by using reactive programming (react when object gets removed).
-//! - If we can guarantee there's no UB, we should do it, if not, we should mark the method unsafe.
-//!     - However, Or perhaps more importantly, it's often not possible because we would need a
-//!       contect ReaProject* pointer in order to carry out the validation.
-//! - If we do pointer checks, provide an additional _unchecked variant
-//! - If we can only guarantee no UB if we additionally store an ID or something (e.g. section ID
-//!   here) and always refetch it ... don't do it. Stay unsafe. Too presumptuous, too heavy-weight
-//!   for the medium-level API. Leave that to high-level, should take care to make functions
-//!   absolutely safe to use.
 //!
 //! ## Try to follow "zero-cost" principle
 //!
