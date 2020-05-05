@@ -2,6 +2,7 @@ use darling::FromMeta;
 use proc_macro::TokenStream;
 use quote::quote;
 
+// TODO-medium example
 // TODO-medium There should be one macro only and it should act differently depending on the
 //  signature!
 #[proc_macro_attribute]

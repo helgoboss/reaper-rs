@@ -7,7 +7,6 @@ use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, Reaper, Track};
-use reaper_rs_low::raw::GetActiveWindow;
 use reaper_rs_medium::{FxShowInstruction, Hwnd, TrackFxLocation};
 use rxrust::prelude::PayloadCopy;
 
@@ -268,8 +267,10 @@ impl Fx {
             }
             Some(hwnd) => {
                 // FX is open in floating window
-                let active_window = unsafe { GetActiveWindow() };
-                active_window == hwnd.as_ptr()
+                // TODO-high FIXME I think we need GetActiveWindow in order to solve this
+                // let active_window = unsafe { GetActiveWindow() };
+                // active_window == hwnd.as_ptr()
+                false
             }
         }
     }

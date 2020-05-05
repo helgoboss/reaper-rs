@@ -10,6 +10,7 @@ fn main() {
 fn compile_glue_code() {
     cc::Build::new()
         .cpp(true)
+        .warnings(false)
         .file("src/control_surface.cpp")
         .file("src/midi.cpp")
         .compile("glue");
@@ -34,6 +35,9 @@ mod codegen {
             .derive_hash(true)
             .clang_arg("-xc++")
             .enable_cxx_namespaces()
+            // Tell cargo to invalidate the built crate whenever any of the
+            // included header files changed.
+            .parse_callbacks(Box::new(bindgen::CargoCallbacks))
             .raw_line("#![allow(non_upper_case_globals)]")
             .raw_line("#![allow(non_camel_case_types)]")
             .raw_line("#![allow(non_snake_case)]")
@@ -49,12 +53,9 @@ mod codegen {
             .whitelist_type("audio_hook_register_t")
             .whitelist_type("KbdSectionInfo")
             .whitelist_type("GUID")
-            .whitelist_function("GetActiveWindow")
+            // .whitelist_function("GetActiveWindow")
             .whitelist_function("reaper_rs_control_surface::.*")
             .whitelist_function("reaper_rs_midi::.*")
-            // Tell cargo to invalidate the built crate whenever any of the
-            // included header files changed.
-            .parse_callbacks(Box::new(bindgen::CargoCallbacks))
             .generate()
             .expect("Unable to generate bindings");
         let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
