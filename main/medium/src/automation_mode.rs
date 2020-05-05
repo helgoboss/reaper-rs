@@ -1,3 +1,4 @@
+use crate::ConversionFromRawFailed;
 use derive_more::*;
 
 /// Global override of track automation modes.
@@ -19,12 +20,6 @@ pub enum AutomationMode {
     Latch,
     LatchPreview,
 }
-
-/// An error which can occur when trying to convert a low-level raw representation to a medium-level
-/// enum variant.
-#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
-#[display(fmt = "conversion from raw representation failed")]
-pub struct ConversionFromRawFailed;
 
 impl AutomationMode {
     /// Converts an integer as returned by the low-level API to an automation mode.

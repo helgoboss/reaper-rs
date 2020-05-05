@@ -1,41 +1,21 @@
 use derive_more::*;
 
-// TODO-medium In which cases can this actually happen? E.g. it doesn't happen if a send already
-//  exists between two tracks, also if one tries to create a send to the same track.
-// TODO-medium Maybe group some errors together and just make a different in the msg?
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "creation of track send failed")]
-pub struct CreateTrackSendFailed;
+pub(crate) type ReaperFunctionResult<T> = Result<T, ReaperFunctionError>;
 
+/// An error which can occur when executing a REAPER function.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "adding FX failed")]
-pub struct AddFxFailed;
+#[display(fmt = "REAPER function failed: {}", message)]
+pub struct ReaperFunctionError {
+    message: &'static str,
+}
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "GUID string invalid")]
-pub struct GuidStringInvalid;
+impl ReaperFunctionError {
+    pub(crate) fn new(message: &'static str) -> ReaperFunctionError {
+        ReaperFunctionError { message }
+    }
+}
 
-// TODO-medium with the following, the reason is maybe not exhaustive Maybe also group errors if the
-//  reason is not 100% clear (just use msg).
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "REAPER function failed, reason not exactly clear")]
-pub struct ReaperFunctionFailed;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "FX not found")]
-pub struct FxNotFound;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "FX or FX parameter not found")]
-pub struct FxOrParameterNotFound;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "FX or FX parameter not found or Cockos extensions not supported")]
-pub struct FxOrParameterNotFoundOrCockosExtNotSupported;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "invalid track attribute key")]
-pub struct InvalidTrackAttributeKey;
+// ##### Similar, but registration failed
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
 #[display(fmt = "registration failed")]
@@ -44,3 +24,21 @@ pub struct RegistrationFailed;
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
 #[display(fmt = "unregistering failed because this was not registered")]
 pub struct NotRegistered;
+
+// ##### Conversion errors
+
+/// An error which can occur when trying to convert a low-level FX index.
+#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
+#[display(fmt = "FX index invalid")]
+pub struct FxIndexInvalid;
+
+/// An error which can occur when trying to convert a low-level raw representation to a medium-level
+/// enum variant.
+#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
+#[display(fmt = "conversion from raw representation failed")]
+pub struct ConversionFromRawFailed;
+
+/// An error which can occur when trying to convert a low-level recording input index.
+#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
+#[display(fmt = "recording input index invalid")]
+pub struct RecInputIndexInvalid;

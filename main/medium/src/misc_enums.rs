@@ -1,6 +1,6 @@
 use crate::{
-    ConversionFromRawFailed, HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo, MediaTrack,
-    MidiOutputDeviceId, ReaProject, ReaperStringArg, ToggleActionFn,
+    ConversionFromRawFailed, FxIndexInvalid, HookCommandFn, HookPostCommandFn, Hwnd,
+    KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject, ReaperStringArg, ToggleActionFn,
 };
 use c_str_macro::c_str;
 use derive_more::*;
@@ -278,11 +278,6 @@ pub enum TrackFxLocation {
     /// On the master track (if applicable) this represents an index in the monitoring FX chain.
     InputFxChain(u32),
 }
-
-/// An error which can occur when trying to convert a low-level FX index.
-#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
-#[display(fmt = "FX index invalid")]
-pub struct FxIndexInvalid;
 
 impl TrackFxLocation {
     /// Converts an integer as returned by the low-level API to a track FX location.

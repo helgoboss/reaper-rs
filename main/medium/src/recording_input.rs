@@ -1,4 +1,4 @@
-use crate::MidiInputDeviceId;
+use crate::{MidiInputDeviceId, RecInputIndexInvalid};
 use derive_more::*;
 use helgoboss_midi::Channel;
 use std::convert::{TryFrom, TryInto};
@@ -86,10 +86,5 @@ impl RecordingInput {
         result as i32
     }
 }
-
-/// An error which can occur when trying to convert a low-level recording input index.
-#[derive(Debug, Clone, Eq, PartialEq, Display, Error)]
-#[display(fmt = "recording input index invalid")]
-pub struct RecInputIndexInvalid;
 
 const ALL_MIDI_DEVICES_FACTOR: u32 = 63;

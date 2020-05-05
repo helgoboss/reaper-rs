@@ -11,22 +11,20 @@ use reaper_rs_low::{
 use crate::ProjectContext::CurrentProject;
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
-    require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AddFxFailed,
-    AudioHookRegister, AutomationMode, Bpm, ChunkCacheHint, CommandId, CreateTrackSendFailed, Db,
-    DelegatingControlSurface, EnvChunkName, FxAddByNameBehavior, FxNotFound, FxOrParameterNotFound,
-    FxOrParameterNotFoundOrCockosExtNotSupported, FxPresetRef, FxShowInstruction, GangBehavior,
-    GlobalAutomationModeOverride, GuidStringInvalid, Hwnd, InputMonitoringMode,
-    InvalidTrackAttributeKey, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
-    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
-    MediumReaperControlSurface, MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor,
-    PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctionFailed,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackRef, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    require_non_null, require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister,
+    AutomationMode, Bpm, ChunkCacheHint, CommandId, Db, DelegatingControlSurface, EnvChunkName,
+    FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
+    GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
+    MediaTrack, MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand,
+    MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction, MessageBoxResult,
+    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId, NotificationBehavior,
+    PlaybackSpeedFactor, PluginRegistration, ProjectContext, ProjectPart, ProjectRef, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue,
+    ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode,
+    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackRef, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -852,12 +850,12 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         fx_name: impl Into<ReaperStringArg<'a>>,
         fx_chain_type: TrackFxChainType,
         behavior: AddFxBehavior,
-    ) -> Result<u32, AddFxFailed>
+    ) -> ReaperFunctionResult<u32>
     where
         S: MainThread,
     {
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, behavior.into()) {
-            -1 => Err(AddFxFailed),
+            -1 => Err(ReaperFunctionError::new("FX couldn't be added")),
             idx if idx >= 0 => Ok(idx as u32),
             _ => unreachable!(),
         }
@@ -900,7 +898,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         fx_location: TrackFxLocation,
         buffer_size: u32,
-    ) -> Result<CString, FxNotFound>
+    ) -> ReaperFunctionResult<CString>
     where
         S: MainThread,
     {
@@ -910,7 +908,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
                 .TrackFX_GetFXName(track.as_ptr(), fx_location.to_raw(), buffer, max_size)
         });
         if !successful {
-            return Err(FxNotFound);
+            return Err(ReaperFunctionError::new(
+                "couldn't get FX name (probably FX doesn't exist)",
+            ));
         }
         Ok(name)
     }
@@ -998,7 +998,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
         param_index: u32,
         buffer_size: u32,
-    ) -> Result<CString, FxOrParameterNotFound>
+    ) -> ReaperFunctionResult<CString>
     where
         S: MainThread,
     {
@@ -1013,7 +1013,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             )
         });
         if !successful {
-            return Err(FxOrParameterNotFound);
+            return Err(ReaperFunctionError::new(
+                "couldn't get FX parameter name (probably FX or parameter doesn't exist)",
+            ));
         }
         Ok(name)
     }
@@ -1040,7 +1042,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
         param_index: u32,
         buffer_size: u32,
-    ) -> Result<CString, FxOrParameterNotFound>
+    ) -> ReaperFunctionResult<CString>
     where
         S: MainThread,
     {
@@ -1055,7 +1057,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             )
         });
         if !successful {
-            return Err(FxOrParameterNotFound);
+            return Err(ReaperFunctionError::new(
+                "couldn't format current FX parameter value (probably FX or parameter doesn't exist)",
+            ));
         }
         Ok(name)
     }
@@ -1090,7 +1094,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         param_index: u32,
         param_value: ReaperNormalizedFxParamValue,
         buffer_size: u32,
-    ) -> Result<CString, FxOrParameterNotFoundOrCockosExtNotSupported>
+    ) -> ReaperFunctionResult<CString>
     where
         S: MainThread,
     {
@@ -1106,7 +1110,10 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             )
         });
         if !successful {
-            return Err(FxOrParameterNotFoundOrCockosExtNotSupported);
+            "FX or FX parameter not found or Cockos extensions not supported";
+            return Err(ReaperFunctionError::new(
+                "couldn't format FX parameter value (FX maybe doesn't support Cockos extensions or FX or parameter doesn't exist)",
+            ));
         }
         Ok(name)
     }
@@ -1126,7 +1133,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
         param_index: u32,
         param_value: ReaperNormalizedFxParamValue,
-    ) -> Result<(), FxOrParameterNotFound>
+    ) -> ReaperFunctionResult<()>
     where
         S: MainThread,
     {
@@ -1137,7 +1144,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             param_value.get(),
         );
         if !successful {
-            return Err(FxOrParameterNotFound);
+            return Err(ReaperFunctionError::new(
+                "couldn't set FX parameter value (probably FX or parameter doesn't exist)",
+            ));
         }
         Ok(())
     }
@@ -1269,7 +1278,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
-    ) -> Result<(), FxNotFound>
+    ) -> ReaperFunctionResult<()>
     where
         S: MainThread,
     {
@@ -1277,7 +1286,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             .low
             .TrackFX_Delete(track.as_ptr(), fx_location.to_raw());
         if !succesful {
-            return Err(FxNotFound);
+            return Err(ReaperFunctionError::new(
+                "couldn't delete FX (probably FX doesn't exist)",
+            ));
         }
         Ok(())
     }
@@ -1768,14 +1779,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
-    ) -> Result<GUID, FxNotFound>
+    ) -> ReaperFunctionResult<GUID>
     where
         S: MainThread,
     {
         let ptr = self
             .low
             .TrackFX_GetFXGUID(track.as_ptr(), fx_location.to_raw());
-        unref(ptr).ok_or(FxNotFound)
+        unref(ptr).ok_or(ReaperFunctionError::new(
+            "couldn't get FX GUID (probably FX doesn't exist)",
+        ))
     }
 
     /// Returns the current value of the given track FX in REAPER-normalized form.
@@ -1792,7 +1805,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         fx_location: TrackFxLocation,
         param_index: u32,
-    ) -> Result<ReaperNormalizedFxParamValue, FxOrParameterNotFound>
+    ) -> ReaperFunctionResult<ReaperNormalizedFxParamValue>
     where
         S: MainThread,
     {
@@ -1802,7 +1815,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             param_index as i32,
         );
         if raw_value < 0.0 {
-            return Err(FxOrParameterNotFound);
+            return Err(ReaperFunctionError::new(
+                "couldn't get current FX parameter value (probably FX or parameter doesn't exist)",
+            ));
         }
         Ok(ReaperNormalizedFxParamValue::new(raw_value))
     }
@@ -1957,7 +1972,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub fn string_to_guid<'a>(
         &self,
         guid_string: impl Into<ReaperStringArg<'a>>,
-    ) -> Result<GUID, GuidStringInvalid>
+    ) -> ReaperFunctionResult<GUID>
     where
         S: MainThread,
     {
@@ -1968,7 +1983,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         }
         let guid = unsafe { guid.assume_init() };
         if guid == ZERO_GUID {
-            return Err(GuidStringInvalid);
+            return Err(ReaperFunctionError::new("GUID string is invalid"));
         }
         Ok(guid)
     }
@@ -2008,7 +2023,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         attribute_key: TrackAttributeKey,
         new_value: f64,
-    ) -> Result<(), InvalidTrackAttributeKey>
+    ) -> ReaperFunctionResult<()>
     where
         S: MainThread,
     {
@@ -2018,7 +2033,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             new_value,
         );
         if !successful {
-            return Err(InvalidTrackAttributeKey);
+            return Err(ReaperFunctionError::new(
+                "couldn't set track attribute (maybe attribute key is invalid)",
+            ));
         }
         Ok(())
     }
@@ -2062,7 +2079,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     pub unsafe fn get_track_ui_vol_pan(
         &self,
         track: MediaTrack,
-    ) -> Result<VolumeAndPan, ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<VolumeAndPan>
     where
         S: MainThread,
     {
@@ -2072,7 +2089,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             self.low
                 .GetTrackUIVolPan(track.as_ptr(), volume.as_mut_ptr(), pan.as_mut_ptr());
         if !successful {
-            return Err(ReaperFunctionFailed);
+            return Err(ReaperFunctionError::new(
+                "couldn't get track volume and pan",
+            ));
         }
         Ok(VolumeAndPan {
             volume: ReaperVolumeValue::new(volume.assume_init()),
@@ -2327,7 +2346,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     ///
     /// # Errors
     ///
-    /// Returns an error if the send or receive doesn't exist.
+    /// Returns an error e.g. if the send or receive doesn't exist.
     ///
     /// # Safety
     ///
@@ -2337,7 +2356,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         direction: TrackSendDirection,
         send_index: u32,
-    ) -> Result<MediaTrack, ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<MediaTrack>
     where
         S: MainThread,
     {
@@ -2348,7 +2367,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             TrackSendAttributeKey::DestTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
-        require_non_null(ptr).map_err(|_| ReaperFunctionFailed)
+        require_non_null(ptr).map_err(|_| {
+            ReaperFunctionError::new("couldn't get destination track (maybe send doesn't exist)")
+        })
     }
 
     /// Returns the RPPXML state of the given track.
@@ -2371,7 +2392,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         buffer_size: u32,
         cache_hint: ChunkCacheHint,
-    ) -> Result<CString, ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<CString>
     where
         S: MainThread,
     {
@@ -2385,7 +2406,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             )
         });
         if !successful {
-            return Err(ReaperFunctionFailed);
+            return Err(ReaperFunctionError::new("couldn't get track chunk"));
         }
         Ok(chunk_content)
     }
@@ -2418,13 +2439,13 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         &self,
         track: MediaTrack,
         target: SendTarget,
-    ) -> Result<u32, CreateTrackSendFailed>
+    ) -> ReaperFunctionResult<u32>
     where
         S: MainThread,
     {
         let result = self.low.CreateTrackSend(track.as_ptr(), target.to_raw());
         if result < 0 {
-            return Err(CreateTrackSendFailed);
+            return Err(ReaperFunctionError::new("couldn't create track send"));
         }
         Ok(result as u32)
     }
@@ -2466,7 +2487,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         chunk: impl Into<ReaperStringArg<'a>>,
         cache_hint: ChunkCacheHint,
-    ) -> Result<(), ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<()>
     where
         S: MainThread,
     {
@@ -2476,7 +2497,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             cache_hint == ChunkCacheHint::UndoMode,
         );
         if !successful {
-            return Err(ReaperFunctionFailed);
+            return Err(ReaperFunctionError::new(
+                "couldn't set track chunk (maybe chunk was invalid)",
+            ));
         }
         Ok(())
     }
@@ -2661,7 +2684,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         &self,
         track: MediaTrack,
         send_index: u32,
-    ) -> Result<VolumeAndPan, ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<VolumeAndPan>
     where
         S: MainThread,
     {
@@ -2674,7 +2697,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             pan.as_mut_ptr(),
         );
         if !successful {
-            return Err(ReaperFunctionFailed);
+            return Err(ReaperFunctionError::new(
+                "couldn't get track send volume and pan (probably send doesn't exist)",
+            ));
         }
         Ok(VolumeAndPan {
             volume: ReaperVolumeValue::new(volume.assume_init()),
@@ -2695,7 +2720,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
-    ) -> Result<TrackFxGetPresetIndexResult, ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<TrackFxGetPresetIndexResult>
     where
         S: MainThread,
     {
@@ -2706,7 +2731,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             num_presets.as_mut_ptr(),
         );
         if index == -1 {
-            return Err(ReaperFunctionFailed);
+            return Err(ReaperFunctionError::new(
+                "couldn't get FX preset index (maybe FX doesn't exist)",
+            ));
         }
         Ok(TrackFxGetPresetIndexResult {
             index: index as u32,
@@ -2728,7 +2755,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         fx_location: TrackFxLocation,
         preset: FxPresetRef,
-    ) -> Result<(), ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<()>
     where
         S: MainThread,
     {
@@ -2738,14 +2765,16 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             preset.to_raw(),
         );
         if !successful {
-            return Err(ReaperFunctionFailed);
+            return Err(ReaperFunctionError::new(
+                "couldn't select FX preset (maybe FX doesn't exist)",
+            ));
         }
         Ok(())
     }
 
     /// Navigates within the presets of the given track FX.
     ///
-    /// TODO-example
+    /// TODO-low Example
     ///  presetmove==1 activates the next preset, presetmove==-1 activates the previous preset, etc.
     ///
     /// # Errors
@@ -2760,7 +2789,7 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
         track: MediaTrack,
         fx_location: TrackFxLocation,
         increment: i32,
-    ) -> Result<(), ReaperFunctionFailed>
+    ) -> ReaperFunctionResult<()>
     where
         S: MainThread,
     {
@@ -2768,7 +2797,9 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
             self.low
                 .TrackFX_NavigatePresets(track.as_ptr(), fx_location.to_raw(), increment);
         if !successful {
-            return Err(ReaperFunctionFailed);
+            return Err(ReaperFunctionError::new(
+                "couldn't navigate FX presets (maybe FX doesn't exist)",
+            ));
         }
         Ok(())
     }
@@ -2777,7 +2808,6 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     ///
     /// *Currently selected* means the preset which is currently showing in the REAPER dropdown.
     /// TODO-medium Try building and running on Linux.
-    /// TODO-medium Try running tests in latest REAPER version
     ///
     /// With `buffer size` you can tell REAPER how many bytes of the preset name you want. If
     /// you are not interested in the preset name at all, pass 0.
