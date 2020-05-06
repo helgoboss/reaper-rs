@@ -2440,10 +2440,26 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         assert!(!state_chunk_1.contains(">"));
         let fx_1_info = fx_1.get_info();
         let fx_2_info = fx_2.get_info();
-        let stem_1 = fx_1_info.file_name.file_stem().ok_or("No stem")?;
-        let stem_2 = fx_2_info.file_name.file_stem().ok_or("No stem")?;
-        assert_eq!(stem_1, "reacontrolmidi");
-        assert_eq!(stem_2, "reasynth");
+        let fx_1_file_name = fx_1_info
+            .file_name
+            .file_name()
+            .ok_or("FX 1 has no file name")?;
+        let fx_2_file_name = fx_2_info
+            .file_name
+            .file_name()
+            .ok_or("FX 2 has no file name")?;
+        assert!(matches!(
+            fx_1_file_name
+                .to_str()
+                .expect("FX 1 file name is not valid unicode"),
+            "reacontrolmidi.dll" | "reacontrolmidi.vst.so"
+        ));
+        assert!(matches!(
+            fx_2_file_name
+                .to_str()
+                .expect("FX 1 file name is not valid unicode"),
+            "reasynth.dll" | "reasynth.vst.so"
+        ));
         assert_eq!(fx_1.get_track(), track);
         assert_eq!(fx_2.get_track(), track);
         assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
@@ -2572,8 +2588,13 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         assert!(!state_chunk.contains(">"));
 
         let fx_1_info = fx_1.get_info();
-        let stem = fx_1_info.file_name.file_stem().ok_or("No stem")?;
-        assert_eq!(stem, "reacontrolmidi");
+        let file_name = fx_1_info.file_name.file_name().ok_or("No FX file name")?;
+        assert!(matches!(
+            file_name
+                .to_str()
+                .expect("FX 1 file name is not valid unicode"),
+            "reacontrolmidi.dll" | "reacontrolmidi.vst.so"
+        ));
         assert_eq!(fx_1_info.type_expression, "VST");
         assert_eq!(fx_1_info.sub_type_expression, "VST");
         assert_eq!(fx_1_info.effect_name, "ReaControlMIDI");
