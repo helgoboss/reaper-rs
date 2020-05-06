@@ -16,17 +16,18 @@ use crate::{
     Bpm, ChunkCacheHint, CommandId, Db, DelegatingControlSurface, EnvChunkName,
     FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
     GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MainThread,
-    MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
+    MainThreadType, MasterTrackBehavior, MediaTrack, MediumAudioHookRegister, MediumGaccelRegister,
     MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId,
     MidiOutputDeviceId, NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectPart,
-    ProjectRef, ReaProject, RealTimeAudioThread, ReaperFunctionError, ReaperFunctionResult,
-    ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput, RegistrationObject,
-    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackRef,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
-    UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    ProjectRef, ReaProject, RealTimeAudioThread, RealTimeAudioThreadType, ReaperFunctionError,
+    ReaperFunctionResult, ReaperFunctions, ReaperNormalizedFxParamValue, ReaperPanValue,
+    ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode,
+    RecordingInput, RegistrationObject, SectionContext, SectionId, SendTarget,
+    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackRef, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use reaper_rs_low;
@@ -66,9 +67,9 @@ use std::collections::{HashMap, HashSet};
 ///
 /// [`new()`]: #method.new
 /// [`functions()`]: #method.functions
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Reaper {
-    functions: ReaperFunctions<dyn MainThread>,
+    functions: ReaperFunctions<MainThread>,
     gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
     audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, raw::audio_hook_register_t>,
     csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
@@ -100,13 +101,13 @@ impl Reaper {
     }
 
     /// Gives access to all REAPER functions which can be safely executed in the main thread.
-    pub fn functions(&self) -> &ReaperFunctions<dyn MainThread> {
+    pub fn functions(&self) -> &ReaperFunctions<MainThread> {
         &self.functions
     }
 
     /// Creates a new container of REAPER functions with only those unlocked that can be safely
     /// executed in the real-time audio thread.
-    pub fn create_real_time_functions(&self) -> ReaperFunctions<dyn RealTimeAudioThread> {
+    pub fn create_real_time_functions(&self) -> ReaperFunctions<RealTimeAudioThread> {
         ReaperFunctions::new(self.functions.low().clone())
     }
 
