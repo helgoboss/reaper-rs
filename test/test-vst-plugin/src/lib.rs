@@ -41,8 +41,8 @@ impl Plugin for TestVstPlugin {
     }
 
     fn init(&mut self) {
-        self.use_medium_level_reaper();
-        // self.use_high_level_reaper();
+        // self.use_medium_level_reaper();
+        self.use_high_level_reaper();
     }
 }
 
@@ -119,10 +119,6 @@ impl TestVstPlugin {
     fn use_high_level_reaper(&mut self) {
         let guard = Reaper::guarded(|| {
             let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
-            // TODO-medium This is bad. There must be only one static Reaper instance per module,
-            // not  per VST plug-in instance! Even considering the fact that high-level
-            // Reaper is static,  we should provide some Rc/RAII mechanism to easily
-            // manage the singleton instance.
             Reaper::setup_with_defaults(&context, "info@helgoboss.org");
             let reaper = Reaper::get();
             reaper.activate();
