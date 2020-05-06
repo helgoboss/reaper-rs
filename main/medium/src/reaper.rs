@@ -5,6 +5,7 @@ use std::ptr::NonNull;
 
 use reaper_rs_low::{
     add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface,
+    ReaperPluginContext,
 };
 
 use crate::infostruct_keeper::InfostructKeeper;
@@ -88,6 +89,14 @@ impl Reaper {
             plugin_registrations: Default::default(),
             audio_hook_registrations: Default::default(),
         }
+    }
+
+    /// Loads all available REAPER functions from the given plug-in context.
+    ///
+    /// Returns a medium-level `Reaper` instance which allows you to call these functions.
+    pub fn load(context: &ReaperPluginContext) -> Reaper {
+        let low = reaper_rs_low::Reaper::load(context);
+        Reaper::new(low)
     }
 
     /// Gives access to all REAPER functions which can be safely executed in the main thread.

@@ -1314,7 +1314,11 @@ fn set_track_volume() -> TestStep {
             epsilon = 0.0000000000001
         ));
         let db = volume.get_db().get();
-        assert!(abs_diff_eq!(db, -30.009531739774296, epsilon = 0.0000000000001));
+        assert!(abs_diff_eq!(
+            db,
+            -30.009531739774296,
+            epsilon = 0.0000000000001
+        ));
         assert!(abs_diff_eq!(
             volume.get_normalized_value(),
             0.25000000000003497,

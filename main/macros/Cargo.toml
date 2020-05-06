@@ -8,6 +8,9 @@ edition = "2018"
 quote = "1.0.2"
 syn = { version = "1.0.14", features = ["full"] }
 darling = "0.10.2"
+reaper-rs-low = { path = "../../main/low" }
+reaper-rs-medium = { path = "../../main/medium" }
+reaper-rs-high = { path = "../../main/high" }
 
 [lib]
 proc-macro = true

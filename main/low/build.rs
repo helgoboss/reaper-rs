@@ -140,8 +140,9 @@ mod codegen {
                 }
 
                 impl Reaper {
-                    /// Loads all available REAPER functions from the given plug-in context and returns a `Reaper` instance
-                    /// which allows you to call these functions.
+                    /// Loads all available REAPER functions from the given plug-in context.
+                    ///
+                    /// Returns a low-level `Reaper` instance which allows you to call these functions.
                     pub fn load(context: &ReaperPluginContext) -> Reaper {
                         let get_func = &context.function_provider;
                         let pointers = unsafe {
