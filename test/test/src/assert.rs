@@ -43,7 +43,7 @@ was expected to be equal to expression `{expected_expr}`
     };
 }
 
-macro_rules! check_ne {
+macro_rules! assert_ne {
     ($actual:expr, $expected:expr) => {
         match (&$actual, &$expected) {
             (actual_val, expected_val) => {
