@@ -108,25 +108,42 @@ pub trait IReaperControlSurface: RefUnwindSafe + Debug {
 /// Creates an `IReaperControlSurface` object on C++ side and returns a pointer to it.
 ///
 /// This function is provided because [`plugin_register()`] isn't going to work if you just pass it
-/// a Rust struct (`reaper.plugin_register("csurf_inst", my_rust_struct)`). Rust structs can't
+/// a Rust struct as in `reaper.plugin_register("csurf_inst", my_rust_struct)`. Rust structs can't
 /// implement C++ virtual base classes.
 ///
 /// **This function doesn't yet register the control surface!** The usual REAPER C++ way to register
 /// a control surface still applies. You need to pass the resulting pointer to
-/// [`plugin_register()`]:
+/// [`plugin_register()`].
+///
+/// # Example
 ///
 /// ```no_run
-/// // Register
-/// use reaper_rs_low::{add_cpp_control_surface, remove_cpp_control_surface};
+/// # let reaper = reaper_rs_low::Reaper::default();
+/// use reaper_rs_low::{add_cpp_control_surface, remove_cpp_control_surface, IReaperControlSurface};
+/// use std::ffi::CString;
+/// use std::ptr::NonNull;
+/// use c_str_macro::c_str;
 ///
 /// unsafe {
-///     let cs = add_cpp_control_surface(bla);
-///     reaper.plugin_register("csurf_inst", cs.as_ptr() as _);
+///     // Register
+///     #[derive(Debug)]
+///     struct MyControlSurface;
+///     impl IReaperControlSurface for MyControlSurface {
+///         fn SetTrackListChange(&self) {
+///             println!("Tracks changed");
+///         }
+///     }
+///     let rust_cs: Box<dyn IReaperControlSurface> = Box::new(MyControlSurface);
+///     let thin_ptr_to_rust_cs: NonNull<_> = (&rust_cs).into();
+///     let cpp_cs = add_cpp_control_surface(thin_ptr_to_rust_cs);
+///     reaper.plugin_register(c_str!("csurf_inst").as_ptr(), cpp_cs.as_ptr() as _);
 ///     // Unregister
-///     reaper.plugin_register("-csurf_inst", cs.as_ptr() as _);
-///     remove_cpp_control_surface(cs);
+///     reaper.plugin_register(c_str!("-csurf_inst").as_ptr(), cpp_cs.as_ptr() as _);
+///     remove_cpp_control_surface(cpp_cs);
 /// }
 /// ```
+///
+/// # Cleaning up
 ///
 /// If you register a control surface, you also must take care of unregistering it at
 /// the end. This is especially important for VST plug-ins because they live shorter than a REAPER
@@ -135,6 +152,11 @@ pub trait IReaperControlSurface: RefUnwindSafe + Debug {
 ///
 /// In order to avoid memory leaks, you also must take care of removing the C++ counterpart
 /// surface by calling [`remove_cpp_control_surface()`].
+///
+/// # Safety
+///
+/// This function is highly unsafe for all the reasons mentioned above. Better use the medium-level
+/// API instead, which makes registering a breeze.
 ///
 /// [`plugin_register()`]: struct.Reaper.html#method.plugin_register
 /// [`remove_cpp_control_surface()`]: fn.remove_cpp_control_surface.html

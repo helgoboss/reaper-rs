@@ -1,4 +1,6 @@
-//! This module contains the medium-level API of *reaper-rs*.
+#![doc(html_root_url = "https://docs.rs/reaper-rs-medium/0.1.0")]
+
+//! This crate contains the medium-level API of *reaper-rs*.
 //!
 //! To get started, have a look at the [`Reaper`] struct.
 //!
@@ -7,6 +9,21 @@
 //! - Whenever you find an identifier in this crate that ends with `index`, you can assume it's a
 //!   *zero-based* integer. That means the first index is 0, not 1!
 //!
+//! # Example
+//!
+//! ```no_run
+//! # let reaper = reaper_rs_medium::Reaper::default();
+//!
+//! reaper.s(c_str!("Hello world from reaper-rs low-level API!").as_ptr());
+//! let track = reaper.GetTrack(null_mut(), 0);
+//! reaper.DeleteTrack(track);
+//! use reaper_rs_medium::ProjectRef::Tab;
+//! use reaper_rs_medium::ReaperMainThreadFunctions;
+//!
+//! let result = reaper.enum_projects(Tab(4), 256).ok_or("No such tab")?;
+//! let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
+//! # Ok::<_, Box<dyn std::error::Error>>(())
+//! ```
 //!
 //! # Design goals
 //!

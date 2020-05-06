@@ -35,6 +35,9 @@ mod codegen {
             .derive_hash(true)
             .clang_arg("-xc++")
             .enable_cxx_namespaces()
+            // If we activate layout tests, we would have to regenerate at each build because tests
+            // will fail on Linux if generated on Windows and vice versa.
+            .layout_tests(false)
             // Tell cargo to invalidate the built crate whenever any of the
             // included header files changed.
             .parse_callbacks(Box::new(bindgen::CargoCallbacks))

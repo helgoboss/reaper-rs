@@ -3,10 +3,3 @@ name = "reaper-rs"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
 edition = "2018"
-
-# TODO-medium Maybe remove this aggregation crate
-
-[dependencies]
-reaper-rs-high = { path = "../high" }
-reaper-rs-medium = { path = "../medium" }
-reaper-rs-low = { path = "../low" }

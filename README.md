@@ -2,40 +2,69 @@
 
 [REAPER](https://www.reaper.fm/) bindings for the [Rust](https://www.rust-lang.org/) programming language
 
-**Attention: *reaper-rs* is in alpha stage. While the low-level API should not change much anymore, the medium-level
-API is definitely not stable yet and the high-level API is completely in a state of flux!**
-
----
+[![Latest Version](https://img.shields.io/crates/v/reaper-rs.svg)](https://crates.io/crates/reaper-rs)
+[![documentation](https://docs.rs/reaper-rs/badge.svg)](https://docs.rs/reaper-rs)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/helgoboss/reaper-rs/master/LICENSE)
 
 ## Introduction
 
 *reaper-rs* allows programmers to write plug-ins for the [REAPER](https://www.reaper.fm/) DAW 
-(digital audio workstation) using the  [Rust](https://www.rust-lang.org/) programming 
+(digital audio workstation) in the  [Rust](https://www.rust-lang.org/) programming 
 language. It does so by providing raw Rust bindings to the 
 [REAPER C++ SDK](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
 
 ## Basics
 
-*reaper-rs* consists of three APIs with different abstraction levels:
+*reaper-rs* consists of 3 APIs with different abstraction levels:
 
 ### 1. Low-level API
 
-Characteristics:
-- Makes access of function pointers safe
-- Not really a pleasure to work with because it still doesn't use Rust types
-- Advantage: Very easy to keep up-to-date because it's completely auto-generated
+| Completion: ![](https://via.placeholder.com/15/aed581/000000?text=+) ~90% | API stability: ![](https://via.placeholder.com/15/ffd54f/000000?text=+) nearly stable |
+| ---------- | --------- |
+| some virtual function calls are still missing | pretty polished already, no breaking changes planned |
+
+This API just consists of the raw bindings, nothing more. It's mostly unsafe and not intended to be used 
+directly. However, it serves as the foundation for other APIs and is easy to keep up-to-date because it's 
+mostly auto-generated from `reaper_plugin_functions.h`. 
+
+Example:
+
+```rust
+unsafe {
+    reaper.ShowConsoleMsg(c_str!("Hello world from reaper-rs low-level API!").as_ptr());
+    let track = reaper.GetTrack(null_mut(), 0);
+    reaper.DeleteTrack(track);
+}
+```
 
 ### 2. Medium-level API
 
-Characteristics:
-- Uses low-level API
-- Exposes the original REAPER SDK functions almost 1:1, so as closely as possible **but** contains 
-  some improvements, like being able to deal with Rust strings instead of C-strings
-- Not very opinionated, just some obvious common-sense adjustments probably every Rust programmer
-  would do in order to get the API closer to Rust (if you don't think so and want to suggest a
-  different form of adjustment for the low-level API, please raise an issue)
+| Completion: ![](https://via.placeholder.com/15/ff8a65/000000?text=+) ~13% | API stability: ![](https://via.placeholder.com/15/ffd54f/000000?text=+) nearly stable |
+| ---------- | --------- |
+| roughly 100 of 800 functions implemented (all the functions necessary for implementing [ReaLearn](https://www.helgoboss.org/projects/realearn/)) | pretty polished already, no breaking changes planned |
+
+This API builds on top of the low-level API. It exposes the original REAPER SDK functions almost
+one to one, but in an idiomatic and type-safe way. It's a big step forward from the raw bindings
+and already quite convenient to use. Its focus is on stability rather than exploring new territory.
+ 
+Since the high-level API is still very unstable, this is currently the recommended API.
+
+Example:
+
+```rust
+unsafe {
+    reaper.ShowConsoleMsg(c_str!("Hello world from reaper-rs low-level API!").as_ptr());
+    let track = reaper.GetTrack(null_mut(), 0);
+    reaper.DeleteTrack(track);
+}
+```
    
 ### 3. High-level API
+
+| Completion: ![](https://via.placeholder.com/15/ff8a65/000000?text=+) ~13% | API stability: ![](https://via.placeholder.com/15/ff8a65/000000?text=+) unstable |
+| ---------- | --------- |
+| roughly on par with the medium-level  API | completely in a state of flux (but working) |
+
 
 Example TODO:
 ```rust
@@ -53,7 +82,7 @@ I think that with the right abstractions in place, you can build sophisticated e
 easier, faster and with less bugs because there's no need to take care of the same low-level
 stuff again and again.
     
-## Use
+## Usage
 
 In addition to writing REAPER extension plug-ins, *reaper-rs* can be used for developing VST plug-ins that use REAPER 
 functions. No matter what you choose, the possibilities of interacting with REAPER are essentially the same. The
@@ -175,6 +204,10 @@ reaper-rs access the `HostCallback` function.
 
 - `bindgen` should be executed on Linux (including Windows WSL)
 
+#### Windows 10
+
+- rustup default nightly-x86_64-pc-windows-msvc
+
 #### Fresh Ubuntu 18.04.3 LTS
 ```sh
 sudo apt update
@@ -194,19 +227,11 @@ ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_rs_test_extension_plugin.
 
 ```
 
+## Tests
+
 ## Project background
 
-reaper-rs has been born as part of an effort to port the REAPER extension 
+*reaper-rs* has been born as part of an effort to port the REAPER VST plug-in 
 [ReaLearn](https://www.helgoboss.org/projects/realearn/) to Rust and publish it as open-source project. The high-level
-API is heavily inspired by ReaPlus, a C++ facade for the REAPER SDK which is a basic building block of the original ReaLearn. 
-
-## Project status
-
-reaper-rs is still in alpha stage
-
-- TODO Known issues and points of improvement
-- TODO Incomplete (different APIs have different level of "incomplete")
-- TODO Mention TODOs in code
-- TODO UI
-- Future improvements:
-    - [ ] Provide an extension of reaper_plugin macro which allows to load just some functions  
+API is heavily inspired by ReaPlus, a C++ facade for the REAPER SDK which is a basic building block of the original 
+ReaLearn.

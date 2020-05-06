@@ -19,8 +19,9 @@ pub struct Reaper {
     pub(crate) pointers: ReaperFunctionPointers,
 }
 impl Reaper {
-    #[doc = r" Loads all available REAPER functions from the given plug-in context and returns a `Reaper` instance"]
-    #[doc = r" which allows you to call these functions."]
+    #[doc = r" Loads all available REAPER functions from the given plug-in context."]
+    #[doc = r""]
+    #[doc = r" Returns a low-level `Reaper` instance which allows you to call these functions."]
     pub fn load(context: &ReaperPluginContext) -> Reaper {
         let get_func = &context.function_provider;
         let pointers = unsafe {

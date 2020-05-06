@@ -22,6 +22,10 @@ impl ReaperPluginContext {
     /// It requires the [`reaper_plugin_info_t`] struct that REAPER provides when calling the
     /// `ReaperPluginEntry` function (the main entry point for any extension plug-in).
     ///
+    /// It's recommended to use the `reaper_extension_plugin` macro in the
+    /// [reaper-rs-macros](https://crates.io/crates/reaper-rs-macros) crate instead of calling
+    /// this function directly.
+    ///
     /// [`reaper_plugin_info_t`]: raw/struct.reaper_plugin_info_t.html
     pub fn from_extension_plugin(
         rec: *mut reaper_plugin_info_t,

@@ -130,7 +130,7 @@ pub trait RealTimeAudioThread: ThreadScope {}
 /// [`MainThread`]: trait.MainThread.html
 /// [`RealTimeAudioThread`]: trait.RealTimeAudioThread.html
 /// [`ReaperFunctions`]: struct.ReaperFunctions.html
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ReaperFunctions<S: ?Sized + ThreadScope = dyn MainThread> {
     low: reaper_rs_low::Reaper,
     p: PhantomData<S>,
@@ -2810,7 +2810,6 @@ impl<S: ?Sized + ThreadScope> ReaperFunctions<S> {
     /// Returns information about the currently selected preset of the given FX.
     ///
     /// *Currently selected* means the preset which is currently showing in the REAPER dropdown.
-    /// TODO-medium Try building and running on Linux.
     ///
     /// With `buffer size` you can tell REAPER how many bytes of the preset name you want. If
     /// you are not interested in the preset name at all, pass 0.

@@ -13,7 +13,7 @@ use quote::quote;
 /// #[reaper_extension_plugin]
 /// fn main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
 ///     let reaper = reaper_rs_medium::Reaper::load(context);
-///     reaper.show_console_msg("Hello world from *reaper-rs* medium-level API!");
+///     reaper.show_console_msg("Hello world from reaper-rs medium-level API!");
 ///     Ok(())
 /// }
 /// ```
@@ -29,7 +29,7 @@ use quote::quote;
 /// #[reaper_extension_plugin(email_address = "support@example.org")]
 /// fn main() -> Result<(), Box<dyn Error>> {
 ///     let reaper = Reaper::get();
-///     reaper.show_console_msg("Hello world from *reaper-rs* high-level API!");
+///     reaper.show_console_msg("Hello world from reaper-rs high-level API!");
 ///     Ok(())
 /// }
 /// ```

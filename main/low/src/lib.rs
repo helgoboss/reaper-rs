@@ -1,4 +1,6 @@
-//! This module contains the low-level API of *reaper-rs*.
+#![doc(html_root_url = "https://docs.rs/reaper-rs-low/0.1.0")]
+
+//! This crate contains the low-level API of *reaper-rs*.
 //!
 //! It is not recommended to use this API directly because it just exposes the raw REAPER C++
 //! functions, types and constants one to one in Rust. If you want idiomatic Rust, type safety and
@@ -8,6 +10,20 @@
 //! that you are looking for has not yet been lifted to the medium-level API. To get started, best
 //! navigate to the [`Reaper`] struct, which contains all exposed functions.
 //!
+//! # Example
+//!
+//! ```no_run
+//! # let reaper = reaper_rs_low::Reaper::default();
+//! use c_str_macro::c_str;
+//! use std::ptr::null_mut;
+//!
+//! unsafe {
+//!     reaper.ShowConsoleMsg(c_str!("Hello world from reaper-rs low-level API!").as_ptr());
+//!     let track = reaper.GetTrack(null_mut(), 0);
+//!     reaper.DeleteTrack(track);
+//! }
+//! ```
+//!
 //! # Design
 //!
 //! ## Goal
@@ -15,7 +31,7 @@
 //! The ultimate goal of the low-level API is to be on par with the REAPER C++ SDK, meaning
 //! that everything which is possible with the REAPER C++ SDK is also possible with the *reaper-rs*
 //! low-level API. Improvements regarding safety, convenience or style are not in its scope. It
-//! should serve as a solid base for more idiomatic APIs built on top of it.
+//! should serve as a base for more idiomatic APIs built on top of it.
 //!
 //! ## Generated code
 //!
