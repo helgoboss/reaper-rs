@@ -689,7 +689,8 @@ fn set_track_send_volume() -> TestStep {
         // Then
         assert!(abs_diff_eq!(
             send.get_volume().get_db().get(),
-            -30.009531739774296
+            -30.009531739774296,
+            epsilon = 0.0000000000001
         ));
         assert_eq!(mock.get_invocation_count(), 1);
         assert_eq!(mock.get_last_arg(), send);
@@ -1309,12 +1310,15 @@ fn set_track_volume() -> TestStep {
         let volume = track.get_volume();
         assert!(abs_diff_eq!(
             volume.get_reaper_value().get(),
-            0.031588093366685013
+            0.031588093366685013,
+            epsilon = 0.0000000000001
         ));
-        assert!(abs_diff_eq!(volume.get_db().get(), -30.009531739774296));
+        let db = volume.get_db().get();
+        assert!(abs_diff_eq!(db, -30.009531739774296, epsilon = 0.0000000000001));
         assert!(abs_diff_eq!(
             volume.get_normalized_value(),
-            0.25000000000003497
+            0.25000000000003497,
+            epsilon = 0.0000000000001
         ));
         assert_eq!(mock.get_invocation_count(), 1);
         assert_eq!(mock.get_last_arg(), track);
