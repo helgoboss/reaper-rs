@@ -12,7 +12,7 @@ reaper-rs-low = { path = "../../main/low" }
 reaper-rs-test = { path = "../test" }
 reaper-rs-macros = { path = "../../main/macros" }
 c_str_macro = "1.0.2"
-rxrust = { path = '../../lib/rxRust'}
+rxrust = "0.8.3"
 slog = "2.5.2"
 
 [lib]
