@@ -210,7 +210,7 @@ impl Reaper {
     ///         true
     ///     }
     /// }
-    /// reaper.plugin_register_add_hookcommand::<MyHookCommand>();
+    /// reaper.plugin_register_add_hook_command::<MyHookCommand>();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     ///
@@ -224,7 +224,7 @@ impl Reaper {
     /// only, not a function pointer. That allows us to lift the API to medium-level style.
     /// The alternative would have been to expect a function pointer, but then consumers would have
     /// to deal with raw types.
-    pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(
+    pub fn plugin_register_add_hook_command<T: MediumHookCommand>(
         &mut self,
     ) -> ReaperFunctionResult<()> {
         unsafe {
@@ -236,7 +236,7 @@ impl Reaper {
     }
 
     /// Unregisters a hook command.
-    pub fn plugin_register_remove_hookcommand<T: MediumHookCommand>(&mut self) {
+    pub fn plugin_register_remove_hook_command<T: MediumHookCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookCommand(
                 delegating_hook_command::<T>,
@@ -248,13 +248,13 @@ impl Reaper {
     ///
     /// REAPER calls toggle actions whenever it wants to know the on/off state of an action.
     ///
-    /// See [`plugin_register_add_hookcommand()`](#method.plugin_register_add_hookcommand) for an
+    /// See [`plugin_register_add_hook_command()`](#method.plugin_register_add_hook_command) for an
     /// example.
     ///
     /// # Errors
     ///
     /// Returns an error if the registration failed.
-    pub fn plugin_register_add_toggleaction<T: MediumToggleAction>(
+    pub fn plugin_register_add_toggle_action<T: MediumToggleAction>(
         &mut self,
     ) -> ReaperFunctionResult<()> {
         unsafe {
@@ -266,7 +266,7 @@ impl Reaper {
     }
 
     /// Unregisters a toggle action.
-    pub fn plugin_register_remove_toggleaction<T: MediumToggleAction>(&mut self) {
+    pub fn plugin_register_remove_toggle_action<T: MediumToggleAction>(&mut self) {
         unsafe {
             self.plugin_register_remove(RegistrationObject::ToggleAction(
                 delegating_toggle_action::<T>,
@@ -278,13 +278,13 @@ impl Reaper {
     ///
     /// REAPER calls hook post commands whenever an action of the main section has been performed.
     ///
-    /// See [`plugin_register_add_hookcommand()`](#method.plugin_register_add_hookcommand) for an
+    /// See [`plugin_register_add_hook_command()`](#method.plugin_register_add_hook_command) for an
     /// example.
     ///
     /// # Errors
     ///
     /// Returns an error if the registration failed.
-    pub fn plugin_register_add_hookpostcommand<T: MediumHookPostCommand>(
+    pub fn plugin_register_add_hook_post_command<T: MediumHookPostCommand>(
         &mut self,
     ) -> ReaperFunctionResult<()> {
         unsafe {
@@ -296,7 +296,7 @@ impl Reaper {
     }
 
     /// Unregisters a hook post command.
-    pub fn plugin_register_remove_hookpostcommand<T: MediumHookPostCommand>(&mut self) {
+    pub fn plugin_register_remove_hook_post_command<T: MediumHookPostCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookPostCommand(
                 delegating_hook_post_command::<T>,
@@ -331,7 +331,7 @@ impl Reaper {
     ///
     /// This consists of a command ID, a description and a default binding for it. It doesn't
     /// include the actual code to be executed when the action runs (use
-    /// [`plugin_register_add_hookcommand()`] for that).
+    /// [`plugin_register_add_hook_command()`] for that).
     ///
     /// This function returns a handle which you can use to unregister the action at any time via
     /// [`plugin_register_remove_gaccel()`].
@@ -350,7 +350,7 @@ impl Reaper {
     /// rightful owner of this struct. Thanks to this we don't need to mark this function as
     /// unsafe!
     ///
-    /// [`plugin_register_add_hookcommand()`]: #method.plugin_register_add_hookcommand
+    /// [`plugin_register_add_hook_command()`]: #method.plugin_register_add_hook_command
     /// [`plugin_register_remove_gaccel()`]: #method.plugin_register_remove_gaccel
     pub fn plugin_register_add_gaccel(
         &mut self,

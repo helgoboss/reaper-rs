@@ -466,9 +466,9 @@ impl Reaper {
             HelperControlSurface::new(sender_to_main_thread.clone(), main_thread_receiver);
         let mut medium = self.medium_mut();
         // Functions
-        medium.plugin_register_add_hookcommand::<HighLevelHookCommand>();
-        medium.plugin_register_add_toggleaction::<HighLevelToggleAction>();
-        medium.plugin_register_add_hookpostcommand::<HighLevelHookPostCommand>();
+        medium.plugin_register_add_hook_command::<HighLevelHookCommand>();
+        medium.plugin_register_add_toggle_action::<HighLevelToggleAction>();
+        medium.plugin_register_add_hook_post_command::<HighLevelHookPostCommand>();
         // Audio hook
         let (sender_to_audio_thread, audio_thread_receiver) = mpsc::channel::<AudioThreadTaskOp>();
         let rt_reaper = RealTimeReaper {
@@ -501,9 +501,9 @@ impl Reaper {
         // Remove control surface
         medium.plugin_register_remove_csurf_inst(ad.csurf_inst_handle);
         // Remove functions
-        medium.plugin_register_remove_hookpostcommand::<HighLevelHookPostCommand>();
-        medium.plugin_register_remove_toggleaction::<HighLevelToggleAction>();
-        medium.plugin_register_remove_hookcommand::<HighLevelHookCommand>();
+        medium.plugin_register_remove_hook_post_command::<HighLevelHookPostCommand>();
+        medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
+        medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
         *active_data = None;
     }
 

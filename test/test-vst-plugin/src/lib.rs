@@ -110,7 +110,7 @@ impl TestVstPlugin {
                 receiver,
             });
             med.functions().show_console_msg("Registering action ...");
-            med.plugin_register_add_hookpostcommand::<MyHookPostCommand>();
+            med.plugin_register_add_hook_post_command::<MyHookPostCommand>();
             med.audio_reg_hardware_hook_add(MyOnAudioBuffer { sender, counter: 0 });
         }
         self.reaper = Some(medium);
