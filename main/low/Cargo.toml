@@ -9,7 +9,15 @@ readme = "../../README.md"
 keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
 edition = "2018"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
-exclude = ["/lib"]
+include = [
+    "/lib/reaper/reaper_plugin.h",
+    "/lib/WDL/WDL/swell/*.h",
+    "/src",
+    "/tests",
+    "/build.rs",
+    "/Cargo.toml",
+    "/CHANGELOG.md",
+]
 build = "build.rs"
 
 [features]
