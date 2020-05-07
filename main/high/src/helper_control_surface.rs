@@ -3,10 +3,10 @@ use crate::guid::Guid;
 use crate::{get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track};
 use c_str_macro::c_str;
 
-use reaper_rs_medium::TrackAttributeKey::{
+use reaper_medium::TrackAttributeKey::{
     Mute, Pan, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber, Vol,
 };
-use reaper_rs_medium::{
+use reaper_medium::{
     AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
@@ -20,7 +20,7 @@ use rxrust::prelude::*;
 
 use std::cell::{Cell, RefCell, RefMut};
 
-use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
+use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 

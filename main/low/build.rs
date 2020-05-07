@@ -57,8 +57,8 @@ mod codegen {
             .whitelist_type("KbdSectionInfo")
             .whitelist_type("GUID")
             // .whitelist_function("GetActiveWindow")
-            .whitelist_function("reaper_rs_control_surface::.*")
-            .whitelist_function("reaper_rs_midi::.*")
+            .whitelist_function("reaper_control_surface::.*")
+            .whitelist_function("reaper_midi::.*")
             .generate()
             .expect("Unable to generate bindings");
         let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
@@ -89,13 +89,13 @@ mod codegen {
         /// Orchestrates the complete generation process
         fn generate() {
             let fn_ptrs = parse_reaper_fn_ptrs();
-            let result = generate_reaper_rs_token_stream(&fn_ptrs);
+            let result = generate_reaper_token_stream(&fn_ptrs);
             std::fs::write("src/reaper.rs", result.to_string()).expect("Unable to write file");
         }
 
         /// Generates the token stream. All of this could also be done in a procedural macro but
         /// I prefer the code generation approach for now.
-        fn generate_reaper_rs_token_stream(fn_ptrs: &Vec<ReaperFnPtr>) -> proc_macro2::TokenStream {
+        fn generate_reaper_token_stream(fn_ptrs: &Vec<ReaperFnPtr>) -> proc_macro2::TokenStream {
             let names: Vec<_> = fn_ptrs.iter().map(|p| p.name.clone()).collect();
             let fn_ptr_signatures: Vec<_> = fn_ptrs
                 .iter()

@@ -1,7 +1,7 @@
 use crate::fx::Fx;
 use crate::Reaper;
 
-use reaper_rs_medium::{GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue};
+use reaper_medium::{GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue};
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
 

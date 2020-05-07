@@ -2,7 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use super::bindings::root::reaper_rs_midi::*;
+use super::bindings::root::reaper_midi::*;
 use super::bindings::root::{midi_Input, MIDI_event_t, MIDI_eventlist};
 
 impl midi_Input {

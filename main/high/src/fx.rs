@@ -7,7 +7,7 @@ use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, Reaper, Track};
-use reaper_rs_medium::{FxShowInstruction, Hwnd, TrackFxLocation};
+use reaper_medium::{FxShowInstruction, Hwnd, TrackFxLocation};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]

@@ -1,5 +1,5 @@
-use reaper_rs_high::Reaper;
-use reaper_rs_medium::ReaperVersion;
+use reaper_high::Reaper;
+use reaper_medium::ReaperVersion;
 use rxrust::prelude::*;
 use std::borrow::Cow;
 

@@ -118,8 +118,8 @@ pub trait IReaperControlSurface: RefUnwindSafe + Debug {
 /// # Example
 ///
 /// ```no_run
-/// # let reaper = reaper_rs_low::Reaper::default();
-/// use reaper_rs_low::{add_cpp_control_surface, remove_cpp_control_surface, IReaperControlSurface};
+/// # let reaper = reaper_low::Reaper::default();
+/// use reaper_low::{add_cpp_control_surface, remove_cpp_control_surface, IReaperControlSurface};
 /// use std::ffi::CString;
 /// use std::ptr::NonNull;
 /// use c_str_macro::c_str;
@@ -163,7 +163,7 @@ pub trait IReaperControlSurface: RefUnwindSafe + Debug {
 pub unsafe fn add_cpp_control_surface(
     callback_target: NonNull<Box<dyn IReaperControlSurface>>,
 ) -> NonNull<raw::IReaperControlSurface> {
-    let instance = crate::bindings::root::reaper_rs_control_surface::add_control_surface(
+    let instance = crate::bindings::root::reaper_control_surface::add_control_surface(
         callback_target.as_ptr() as *mut c_void,
     );
     NonNull::new_unchecked(instance)
@@ -175,7 +175,7 @@ pub unsafe fn add_cpp_control_surface(
 ///
 /// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
 pub unsafe fn remove_cpp_control_surface(surface: NonNull<raw::IReaperControlSurface>) {
-    crate::bindings::root::reaper_rs_control_surface::remove_control_surface(surface.as_ptr());
+    crate::bindings::root::reaper_control_surface::remove_control_surface(surface.as_ptr());
 }
 
 #[no_mangle]

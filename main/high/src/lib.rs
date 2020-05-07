@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```no_run
-//! # let reaper = reaper_rs_high::Reaper::default();
+//! # let reaper = reaper_high::Reaper::default();
 //! use rxrust::prelude::*;
 //!
 //! reaper.show_console_msg("Hello world from reaper-rs high-level API!");

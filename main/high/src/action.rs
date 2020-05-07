@@ -1,11 +1,11 @@
 use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_rs_medium::{ActionValueChange, CommandId, SectionContext};
+use reaper_medium::{ActionValueChange, CommandId, SectionContext};
 
 use helgoboss_midi::U7;
-use reaper_rs_medium::ProjectContext::{CurrentProject, Proj};
-use reaper_rs_medium::SectionContext::Sec;
-use reaper_rs_medium::WindowContext::Win;
+use reaper_medium::ProjectContext::{CurrentProject, Proj};
+use reaper_medium::SectionContext::Sec;
+use reaper_medium::WindowContext::Win;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 

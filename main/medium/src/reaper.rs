@@ -2,7 +2,7 @@ use c_str_macro::c_str;
 
 use std::ptr::NonNull;
 
-use reaper_rs_low::{
+use reaper_low::{
     add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface,
     ReaperPluginContext,
 };
@@ -16,8 +16,8 @@ use crate::{
     MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope, ReaperFunctionError,
     ReaperFunctionResult, ReaperFunctions, ReaperStringArg, RegistrationObject,
 };
-use reaper_rs_low;
-use reaper_rs_low::raw::audio_hook_register_t;
+use reaper_low;
+use reaper_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
 
 /// This is the main hub for accessing medium-level API functions.
@@ -66,8 +66,8 @@ pub struct Reaper {
 impl Reaper {
     /// Creates a new instance by getting hold of a [low-level `Reaper`] instance.
     ///
-    /// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
-    pub fn new(low: reaper_rs_low::Reaper) -> Reaper {
+    /// [low-level `Reaper`]: /reaper_low/struct.Reaper.html
+    pub fn new(low: reaper_low::Reaper) -> Reaper {
         Reaper {
             functions: ReaperFunctions::new(low),
             gaccel_registers: Default::default(),
@@ -82,7 +82,7 @@ impl Reaper {
     ///
     /// Returns a medium-level `Reaper` instance which allows you to call these functions.
     pub fn load(context: &ReaperPluginContext) -> Reaper {
-        let low = reaper_rs_low::Reaper::load(context);
+        let low = reaper_low::Reaper::load(context);
         Reaper::new(low)
     }
 
@@ -181,8 +181,8 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let mut reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::{MediumHookCommand, CommandId};
+    /// # let mut reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::{MediumHookCommand, CommandId};
     ///
     /// // Usually you would use a dynamic command ID that you have obtained via
     /// // `plugin_register_add_command_id()`. Unfortunately that command ID must be exposed as
@@ -367,8 +367,8 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let mut reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::MediumReaperControlSurface;
+    /// # let mut reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::MediumReaperControlSurface;
     ///
     /// #[derive(Debug)]
     /// struct MyControlSurface;
@@ -487,8 +487,8 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let mut reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::{
+    /// # let mut reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::{
     ///     MediumReaperControlSurface, MediumOnAudioBuffer, OnAudioBufferArgs,
     ///     ReaperFunctions, RealTimeAudioThreadScope, MidiInputDeviceId
     /// };

@@ -1,15 +1,3 @@
-[package]
-name = "reaper-rs"
-version = "0.1.0"
-authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
-license = "MIT"
-description = "Bindings for the REAPER C++ API - meta crate"
-repository = "https://github.com/helgoboss/reaper-rs"
-readme = "README.md"
-keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
-edition = "2018"
-categories = ["api-bindings", "multimedia", "multimedia::audio"]
-
 [workspace]
 members = [
     "main/low",
@@ -20,6 +8,3 @@ members = [
     "test/test-extension-plugin",
     "test/test-vst-plugin"
 ]
-
-[dev-dependencies]
-version-sync = "0.9"

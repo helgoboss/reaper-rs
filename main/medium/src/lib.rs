@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/reaper-rs-medium/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/reaper-medium/0.1.0")]
 
 //! This crate contains the medium-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
@@ -12,8 +12,8 @@
 //! # Example
 //!
 //! ```no_run
-//! # let reaper = reaper_rs_medium::Reaper::default();
-//! use reaper_rs_medium::ProjectContext::CurrentProject;
+//! # let reaper = reaper_medium::Reaper::default();
+//! use reaper_medium::ProjectContext::CurrentProject;
 //!
 //! let functions = reaper.functions();
 //! functions.show_console_msg("Hello world from reaper-rs medium-level API!");
@@ -173,11 +173,11 @@
 //!
 //! #### Examples
 //!
-//! - [`raw::MediaTrack`](../reaper_rs_low/raw/struct.MediaTrack.html) →
+//! - [`raw::MediaTrack`](../reaper_low/raw/struct.MediaTrack.html) →
 //!   [`MediaTrack`](type.MediaTrack.html)
-//! - [`raw::ReaProject`](../reaper_rs_low/raw/struct.ReaProject.html) →
+//! - [`raw::ReaProject`](../reaper_low/raw/struct.ReaProject.html) →
 //!   [`ReaProject`](type.ReaProject.html)
-//! - [`raw::MediaItem_Take`](../reaper_rs_low/raw/struct.MediaItem_Take.html) →
+//! - [`raw::MediaItem_Take`](../reaper_low/raw/struct.MediaItem_Take.html) →
 //!   [`MediaItemTake`](type.MediaItemTake.html)
 //!
 //! ### Case 2: Internals exposed | no vtable
@@ -195,21 +195,20 @@
 //!
 //! #### Explanation
 //!
-//! Unlike [`raw::MediaTrack`](../reaper_rs_low/raw/struct.MediaTrack.html) and friends, these
+//! Unlike [`raw::MediaTrack`](../reaper_low/raw/struct.MediaTrack.html) and friends, these
 //! structs are *not* opaque. Still, we need them as pointers and they have the same lifetime
 //! considerations. The difference is that we add type-safe methods to them in order to lift their
 //! members to medium-level API style.
 //!
 //! #### Examples
 //!
-//! - [`raw::KbdSectionInfo`](../reaper_rs_low/raw/struct.KbdSectionInfo.html) →
+//! - [`raw::KbdSectionInfo`](../reaper_low/raw/struct.KbdSectionInfo.html) →
 //!   [`KbdSectionInfo`](struct.KbdSectionInfo.html) & `MediumKdbSectionInfo` (not yet existing)
-//! - [`raw::audio_hook_register_t`](../reaper_rs_low/raw/struct.audio_hook_register_t.html) →
+//! - [`raw::audio_hook_register_t`](../reaper_low/raw/struct.audio_hook_register_t.html) →
 //!   [`AudioHookRegister`](struct.AudioHookRegister.html) &
 //!   [`MediumAudioHookRegister`](struct.MediumAudioHookRegister.html)
-//! - [`raw::gaccel_register_t`](../reaper_rs_low/raw/struct.gaccel_register_t.html) →
-//!   `GaccelRegister` (not yet existing) &
-//!   [`MediumGaccelRegister`](struct.MediumGaccelRegister.html)
+//! - [`raw::gaccel_register_t`](../reaper_low/raw/struct.gaccel_register_t.html) → `GaccelRegister`
+//!   (not yet existing) & [`MediumGaccelRegister`](struct.MediumGaccelRegister.html)
 //!
 //! ### Case 3: Internals not exposed | vtable
 //!
@@ -227,12 +226,12 @@
 //!
 //! #### Examples
 //!
-//! - [`raw::IReaperControlSurface`](../reaper_rs_low/raw/struct.IReaperControlSurface.html) →
+//! - [`raw::IReaperControlSurface`](../reaper_low/raw/struct.IReaperControlSurface.html) →
 //!   `ReaperControlSurface` (not yet existing) &
 //!   [`MediumReaperControlSurface`](struct.MediumReaperControlSurface.html)
-//! - [`raw::midi_Input`](../reaper_rs_low/raw/struct.midi_Input.html) →
+//! - [`raw::midi_Input`](../reaper_low/raw/struct.midi_Input.html) →
 //!   [`MidiInput`](struct.MidiInput.html) &
-//! - [`raw::MIDI_eventlist`](../reaper_rs_low/raw/struct.MIDI_eventlist.html) →
+//! - [`raw::MIDI_eventlist`](../reaper_low/raw/struct.MIDI_eventlist.html) →
 //!   [`MidiEventList`](struct.MidiEventList.html) &
 //! - `PCM_source` → `PcmSource` & `MediumPcmSource` (both not yet existing)
 //!
@@ -242,7 +241,7 @@
 //!   Rationale: If *all* function signatures would be cluttered up with `Result`s, it would be an
 //!   absolute nightmare to use the API. It's also not necessary: The consumer can always check if
 //!   the function is there, and mostly it is (see
-//!   [`reaper_rs_low::Reaper`](../reaper_rs_low/struct.Reaper.html)).
+//!   [`reaper_low::Reaper`](../reaper_low/struct.Reaper.html)).
 //! - We panic when passed parameters don't satisfy documented preconditions which can be easily
 //!   satisfied by consumers. Rationale: This represents incorrect API usage.
 //!     - Luckily, the need for precondition checks is mitigated by using lots of newtypes and

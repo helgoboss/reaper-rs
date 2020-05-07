@@ -26,15 +26,15 @@ use crate::{
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
-use reaper_rs_low;
-use reaper_rs_low::raw;
+use reaper_low;
+use reaper_low::raw;
 
-use reaper_rs_low::ReaperPluginContext;
-use reaper_rs_medium;
+use reaper_low::ReaperPluginContext;
+use reaper_medium;
 
-use reaper_rs_medium::ProjectContext::Proj;
-use reaper_rs_medium::UndoScope::All;
-use reaper_rs_medium::{
+use reaper_medium::ProjectContext::Proj;
+use reaper_medium::UndoScope::All;
+use reaper_medium::{
     CommandId, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
@@ -91,7 +91,7 @@ static mut REAPER_INSTANCE: RefCell<Option<Reaper>> = RefCell::new(None);
 static REAPER_GUARD: Lazy<Mutex<Weak<ReaperGuard>>> = Lazy::new(|| Mutex::new(Weak::new()));
 
 pub struct ReaperBuilder {
-    medium: reaper_rs_medium::Reaper,
+    medium: reaper_medium::Reaper,
     logger: Option<slog::Logger>,
 }
 
@@ -99,8 +99,8 @@ impl ReaperBuilder {
     fn with_all_functions_loaded(context: &ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder {
             medium: {
-                let low = reaper_rs_low::Reaper::load(context);
-                reaper_rs_medium::Reaper::new(low)
+                let low = reaper_low::Reaper::load(context);
+                reaper_medium::Reaper::new(low)
             },
             logger: Default::default(),
         }
@@ -167,7 +167,7 @@ impl MediumOnAudioBuffer for RealTimeReaper {
 
 #[derive(Debug)]
 pub struct Reaper {
-    medium: RefCell<reaper_rs_medium::Reaper>,
+    medium: RefCell<reaper_medium::Reaper>,
     logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO-low Adding an action in an action would panic because we have an immutable borrow of
@@ -389,7 +389,7 @@ impl Reaper {
         ));
     }
 
-    fn setup(medium: reaper_rs_medium::Reaper, logger: slog::Logger) {
+    fn setup(medium: reaper_medium::Reaper, logger: slog::Logger) {
         // We can't check now if we are in main thread because we don't have the main thread ID yet.
         // But at least we can make sure we are not in an audio thread. Whatever thread we are
         // in right now, this struct will memorize it as the main thread.
@@ -505,11 +505,11 @@ impl Reaper {
         *active_data = None;
     }
 
-    pub fn medium(&self) -> Ref<reaper_rs_medium::Reaper> {
+    pub fn medium(&self) -> Ref<reaper_medium::Reaper> {
         self.medium.borrow()
     }
 
-    pub fn medium_mut(&self) -> RefMut<reaper_rs_medium::Reaper> {
+    pub fn medium_mut(&self) -> RefMut<reaper_medium::Reaper> {
         self.medium.borrow_mut()
     }
 

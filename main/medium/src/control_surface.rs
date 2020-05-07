@@ -5,8 +5,8 @@ use crate::{
     TrackFxChainType, TrackFxLocation, TryFromRawError,
 };
 
-use reaper_rs_low;
-use reaper_rs_low::raw;
+use reaper_low;
+use reaper_low::raw;
 use std::borrow::Cow;
 
 use std::ffi::CStr;
@@ -472,7 +472,7 @@ impl DelegatingControlSurface {
 }
 
 #[allow(non_snake_case)]
-impl reaper_rs_low::IReaperControlSurface for DelegatingControlSurface {
+impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     fn GetTypeString(&self) -> *const i8 {
         self.delegate
             .get_type_string()

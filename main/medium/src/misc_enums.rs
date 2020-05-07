@@ -5,8 +5,8 @@ use crate::{
 use c_str_macro::c_str;
 
 use helgoboss_midi::{U14, U7};
-use reaper_rs_low::raw;
-use reaper_rs_low::raw::HWND;
+use reaper_low::raw;
+use reaper_low::raw::HWND;
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CStr;

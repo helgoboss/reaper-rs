@@ -7862,7 +7862,7 @@ pub mod root {
             >;
         }
     }
-    pub mod reaper_rs_control_surface {
+    pub mod reaper_control_surface {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
@@ -7995,7 +7995,7 @@ pub mod root {
             ) -> ::std::os::raw::c_int;
         }
     }
-    pub mod reaper_rs_midi {
+    pub mod reaper_midi {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {

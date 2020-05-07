@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/reaper-rs-low/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/reaper-low/0.1.0")]
 
 //! This crate contains the low-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```no_run
-//! # let reaper = reaper_rs_low::Reaper::default();
+//! # let reaper = reaper_low::Reaper::default();
 //! use c_str_macro::c_str;
 //! use std::ptr::null_mut;
 //!
@@ -58,8 +58,8 @@
 //!       function → Rust function)
 //!     - Example: `control_surface.cpp` & `control_surface.rs`
 //!
-//! [medium-level]: /reaper_rs_medium/index.html
-//! [high-level]: /reaper_rs_high/index.html
+//! [medium-level]: /reaper_medium/index.html
+//! [high-level]: /reaper_high/index.html
 //! [`Reaper`]: struct.Reaper.html
 mod bindings;
 

@@ -1,6 +1,6 @@
 use crate::{CommandId, ReaperStringArg};
-use reaper_rs_low::raw;
-use reaper_rs_low::raw::gaccel_register_t;
+use reaper_low::raw;
+use reaper_low::raw::gaccel_register_t;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::os::raw::c_ushort;

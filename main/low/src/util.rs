@@ -21,7 +21,7 @@ pub fn firewall<F: FnOnce() -> R + UnwindSafe, R>(f: F) -> Option<R> {
 ///
 /// This function basically translates the REAPER extension plug-in main entry point signature
 /// (`ReaperPluginEntry()`) to a typical Rust main entry point signature (`main()`). It is
-/// intended to be used by macros in the `reaper-rs-macros` crate.
+/// intended to be used by macros in the `reaper-macros` crate.
 pub fn bootstrap_extension_plugin(
     _h_instance: HINSTANCE,
     rec: *mut reaper_plugin_info_t,

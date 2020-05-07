@@ -1,8 +1,8 @@
 use c_str_macro::c_str;
 
-use reaper_rs_high::{ActionKind, Reaper, ReaperGuard};
-use reaper_rs_low::ReaperPluginContext;
-use reaper_rs_medium::{
+use reaper_high::{ActionKind, Reaper, ReaperGuard};
+use reaper_low::ReaperPluginContext;
+use reaper_medium::{
     CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     OnAudioBufferArgs,
 };
@@ -19,7 +19,7 @@ plugin_main!(TestVstPlugin);
 #[derive(Default)]
 struct TestVstPlugin {
     host: HostCallback,
-    reaper: Option<Rc<RefCell<reaper_rs_medium::Reaper>>>,
+    reaper: Option<Rc<RefCell<reaper_medium::Reaper>>>,
     reaper_guard: Option<Arc<ReaperGuard>>,
 }
 
@@ -75,7 +75,7 @@ impl MediumHookPostCommand for MyHookPostCommand {
 
 #[derive(Debug)]
 struct MyControlSurface {
-    reaper: Weak<RefCell<reaper_rs_medium::Reaper>>,
+    reaper: Weak<RefCell<reaper_medium::Reaper>>,
     receiver: Receiver<String>,
 }
 
@@ -98,8 +98,8 @@ impl MediumReaperControlSurface for MyControlSurface {
 impl TestVstPlugin {
     fn use_medium_level_reaper(&mut self) {
         let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
-        let low = reaper_rs_low::Reaper::load(&context);
-        let medium = Rc::new(RefCell::new(reaper_rs_medium::Reaper::new(low)));
+        let low = reaper_low::Reaper::load(&context);
+        let medium = Rc::new(RefCell::new(reaper_medium::Reaper::new(low)));
         {
             let (sender, receiver) = channel::<String>();
             let mut med = medium.borrow_mut();
@@ -126,7 +126,7 @@ impl TestVstPlugin {
             reaper.register_action(
                 c_str!("reaperRsVstIntegrationTests"),
                 c_str!("reaper-rs VST integration tests"),
-                || reaper_rs_test::execute_integration_test(),
+                || reaper_test::execute_integration_test(),
                 ActionKind::NotToggleable,
             );
         });

@@ -1,4 +1,4 @@
-use reaper_rs_medium::ReaperPanValue;
+use reaper_medium::ReaperPanValue;
 
 pub struct Pan {
     normalized_value: f64,

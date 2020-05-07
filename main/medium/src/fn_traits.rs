@@ -1,5 +1,5 @@
 use crate::CommandId;
-use reaper_rs_low::firewall;
+use reaper_low::firewall;
 
 pub(crate) type HookCommandFn = extern "C" fn(command_id: i32, flag: i32) -> bool;
 

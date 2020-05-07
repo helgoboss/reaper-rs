@@ -1,19 +1,19 @@
 [package]
-name = "reaper-rs-test-vst-plugin"
+name = "reaper-test-vst-plugin"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
 edition = "2018"
 publish = false
 
 [dependencies]
-reaper-rs-high = { path = "../../main/high" }
-reaper-rs-medium = { path = "../../main/medium" }
-reaper-rs-low = { path = "../../main/low" }
-reaper-rs-test = { path = "../test" }
+reaper-high = { path = "../../main/high" }
+reaper-medium = { path = "../../main/medium" }
+reaper-low = { path = "../../main/low" }
+reaper-test = { path = "../test" }
 c_str_macro = "1.0.2"
 vst = "0.2.0"
 rxrust = "0.8.3"
 
 [lib]
-name = "reaper_rs_test_vst_plugin"
+name = "reaper_test_vst_plugin"
 crate-type = ["cdylib"]

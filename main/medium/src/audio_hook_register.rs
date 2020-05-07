@@ -1,6 +1,6 @@
 use crate::Hz;
-use reaper_rs_low::raw::audio_hook_register_t;
-use reaper_rs_low::{firewall, raw};
+use reaper_low::raw::audio_hook_register_t;
+use reaper_low::{firewall, raw};
 use std::any::Any;
 
 use std::os::raw::c_void;

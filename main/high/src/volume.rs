@@ -1,5 +1,5 @@
 use crate::Reaper;
-use reaper_rs_medium::{Db, ReaperVolumeValue, VolumeSliderValue};
+use reaper_medium::{Db, ReaperVolumeValue, VolumeSliderValue};
 
 pub struct Volume {
     normalized_value: f64,

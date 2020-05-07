@@ -1,7 +1,7 @@
 use c_str_macro::c_str;
-use reaper_rs_high::{ActionKind, Reaper};
+use reaper_high::{ActionKind, Reaper};
 
-use reaper_rs_macros::reaper_extension_plugin;
+use reaper_macros::reaper_extension_plugin;
 use std::error::Error;
 
 #[reaper_extension_plugin(email_address = "info@helgoboss.org")]
@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     reaper.register_action(
         c_str!("reaperRsIntegrationTests"),
         c_str!("reaper-rs integration tests"),
-        || reaper_rs_test::execute_integration_test(),
+        || reaper_test::execute_integration_test(),
         ActionKind::NotToggleable,
     );
     Ok(())

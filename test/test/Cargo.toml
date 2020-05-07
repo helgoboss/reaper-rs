@@ -1,5 +1,5 @@
 [package]
-name = "reaper-rs-test"
+name = "reaper-test"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
 edition = "2018"
@@ -7,9 +7,9 @@ publish = false
 
 
 [dependencies]
-reaper-rs-high = { path = "../../main/high" }
-reaper-rs-medium = { path = "../../main/medium" }
-reaper-rs-low = { path = "../../main/low" }
+reaper-high = { path = "../../main/high" }
+reaper-medium = { path = "../../main/medium" }
+reaper-low = { path = "../../main/low" }
 c_str_macro = "1.0.2"
 rxrust = "0.8.3"
 slog = "2.5.2"

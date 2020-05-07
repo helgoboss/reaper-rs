@@ -2,7 +2,7 @@ use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
-use reaper_rs_low::raw;
+use reaper_low::raw;
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
@@ -20,8 +20,8 @@ use crate::{
 };
 
 use helgoboss_midi::ShortMessage;
-use reaper_rs_low;
-use reaper_rs_low::raw::GUID;
+use reaper_low;
+use reaper_low::raw::GUID;
 
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -122,18 +122,18 @@ impl AudioThreadOnly for RealTimeAudioThreadScope {}
 /// [`Reaper::functions()`]: struct.Reaper.html#method.functions
 /// [`Reaper::create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
 /// [`low()`]: #method.low
-/// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
+/// [low-level `Reaper`]: /reaper_low/struct.Reaper.html
 /// [`MainThreadOnly`]: trait.MainThreadOnly.html
 /// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html
 /// [`ReaperFunctions`]: struct.ReaperFunctions.html
 #[derive(Clone, Debug, Default)]
 pub struct ReaperFunctions<UsageScope = MainThreadScope> {
-    low: reaper_rs_low::Reaper,
+    low: reaper_low::Reaper,
     p: PhantomData<UsageScope>,
 }
 
 impl<UsageScope> ReaperFunctions<UsageScope> {
-    pub(crate) fn new(low: reaper_rs_low::Reaper) -> ReaperFunctions<UsageScope> {
+    pub(crate) fn new(low: reaper_low::Reaper) -> ReaperFunctions<UsageScope> {
         ReaperFunctions {
             low,
             p: PhantomData,
@@ -141,7 +141,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Gives access to the low-level Reaper instance.
-    pub fn low(&self) -> &reaper_rs_low::Reaper {
+    pub fn low(&self) -> &reaper_low::Reaper {
         &self.low
     }
 
@@ -153,8 +153,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::ProjectRef::Tab;
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::ProjectRef::Tab;
     ///
     /// let result = reaper.functions().enum_projects(Tab(4), 256).ok_or("No such tab")?;
     /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
@@ -218,8 +218,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::ProjectContext::CurrentProject;
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::ProjectContext::CurrentProject;
     ///
     /// let track = reaper.functions().get_track(CurrentProject, 3).ok_or("No such track")?;
     /// # Ok::<_, Box<dyn std::error::Error>>(())
@@ -256,8 +256,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::ProjectContext::CurrentProject;
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::ProjectContext::CurrentProject;
     ///
     /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("No track")?;
     /// let track_is_valid = reaper.functions().validate_ptr_2(CurrentProject, track);
@@ -377,9 +377,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # use reaper_rs_medium::ProjectContext::CurrentProject;
+    /// # use reaper_medium::ProjectContext::CurrentProject;
     /// use std::ffi::CString;
-    /// let reaper = reaper_rs_medium::Reaper::default();
+    /// let reaper = reaper_medium::Reaper::default();
     ///
     /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no track")?;
     /// let track_name_c_string = unsafe {
@@ -537,8 +537,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
     ///
     /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// unsafe {
@@ -588,8 +588,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::SectionId;
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::SectionId;
     ///
     /// let action_count =
     ///     reaper.functions().section_from_unique_id(SectionId::new(1), |s| s.action_list_cnt());
@@ -1432,8 +1432,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, ProjectPart::*};
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, ProjectPart::*};
     ///
     /// reaper.functions().undo_begin_block_2(CurrentProject);
     /// // ... modify something ...
@@ -2473,8 +2473,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
     ///
     /// let src_track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// let send_index = unsafe {
@@ -2832,9 +2832,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::ProjectContext::CurrentProject;
-    /// use reaper_rs_medium::TrackFxLocation::NormalFxChain;
+    /// # let reaper = reaper_medium::Reaper::default();
+    /// use reaper_medium::ProjectContext::CurrentProject;
+    /// use reaper_medium::TrackFxLocation::NormalFxChain;
     ///
     /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// // Navigate 2 presets "up"

@@ -14,12 +14,12 @@ use crate::track_send::TrackSend;
 
 use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
 
-use reaper_rs_medium::NotificationBehavior::NotifyAll;
-use reaper_rs_medium::ProjectContext::Proj;
-use reaper_rs_medium::SendTarget::OtherTrack;
-use reaper_rs_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Selected, Solo};
-use reaper_rs_medium::ValueChange::Absolute;
-use reaper_rs_medium::{
+use reaper_medium::NotificationBehavior::NotifyAll;
+use reaper_medium::ProjectContext::Proj;
+use reaper_medium::SendTarget::OtherTrack;
+use reaper_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Selected, Solo};
+use reaper_medium::ValueChange::Absolute;
+use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperPointer, RecordArmMode, RecordingInput,
     TrackAttributeKey, TrackRef, TrackSendCategory, ValueChange,

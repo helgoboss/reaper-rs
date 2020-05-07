@@ -1,5 +1,5 @@
 use crate::normalized_value::is_normalized_value;
-use reaper_rs_medium::Bpm;
+use reaper_medium::Bpm;
 
 const BPM_SPAN: f64 = Bpm::MAX.get() - Bpm::MIN.get();
 

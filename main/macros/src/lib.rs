@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/reaper-rs-macros/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/reaper-macros/0.1.0")]
 
 //! This crate is part of [reaper-rs](https://github.com/helgoboss/reaper-rs) and contains a
 //! [simple attribute macro](attr.reaper_extension_plugin.html) to simplify bootstrapping REAPER
@@ -12,9 +12,9 @@ use quote::quote;
 /// Use the macro like this:
 /// ```no_run
 /// use std::error::Error;
-/// use reaper_rs_macros::reaper_extension_plugin;
-/// use reaper_rs_low::ReaperPluginContext;
-/// use reaper_rs_medium::Reaper;
+/// use reaper_macros::reaper_extension_plugin;
+/// use reaper_low::ReaperPluginContext;
+/// use reaper_medium::Reaper;
 ///
 /// #[reaper_extension_plugin]
 /// fn plugin_main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
@@ -29,8 +29,8 @@ use quote::quote;
 ///
 /// ```no_run
 /// use std::error::Error;
-/// use reaper_rs_macros::reaper_extension_plugin;
-/// use reaper_rs_high::Reaper;
+/// use reaper_macros::reaper_extension_plugin;
+/// use reaper_high::Reaper;
 ///
 /// #[reaper_extension_plugin(email_address = "support@example.org")]
 /// fn plugin_main() -> Result<(), Box<dyn Error>> {
@@ -70,8 +70,8 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[no_mangle]
-        extern "C" fn ReaperPluginEntry(h_instance: ::reaper_rs_low::raw::HINSTANCE, rec: *mut ::reaper_rs_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
-                ::reaper_rs_low::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
+        extern "C" fn ReaperPluginEntry(h_instance: ::reaper_low::raw::HINSTANCE, rec: *mut ::reaper_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
+                ::reaper_low::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
         }
 
         #main_function
@@ -88,9 +88,9 @@ fn generate_high_level_plugin_code(
         .expect("E-mail address for error reports missing");
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
-        #[::reaper_rs_macros::reaper_extension_plugin]
-        fn low_level_plugin_main(context: &::reaper_rs_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
-            ::reaper_rs_high::Reaper::setup_with_defaults(context, #email_address);
+        #[::reaper_macros::reaper_extension_plugin]
+        fn low_level_plugin_main(context: &::reaper_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
+            ::reaper_high::Reaper::setup_with_defaults(context, #email_address);
             #main_function_name()
         }
 

@@ -1,5 +1,5 @@
 [package]
-name = "reaper-rs-medium"
+name = "reaper-medium"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
 license = "MIT"
@@ -13,7 +13,7 @@ categories = ["api-bindings", "multimedia", "multimedia::audio"]
 [dependencies]
 c_str_macro = "1.0.2"
 derive_more = "0.99.5"
-reaper-rs-low = { path = '../low' }
+reaper-low = { path = '../low' }
 helgoboss-midi = { path = '../../../helgoboss-midi-rs'}
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
 

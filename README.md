@@ -2,8 +2,6 @@
 
 [Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
 
-[![Latest Version](https://img.shields.io/crates/v/reaper-rs.svg)](https://crates.io/crates/reaper-rs)
-[![documentation](https://docs.rs/reaper-rs/badge.svg)](https://docs.rs/reaper-rs)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/helgoboss/reaper-rs/master/LICENSE)
 
 ## Introduction
@@ -17,16 +15,19 @@ language. It does so by providing raw Rust bindings for the
 
 _reaper-rs_ consists of 4 production crates:
 
-- [reaper-rs-macros](https://crates.io/crates/reaper-rs-macros)
-- [reaper-rs-low](https://crates.io/crates/reaper-rs-low)
-- [reaper-rs-medium](https://crates.io/crates/reaper-rs-medium)
-- [reaper-rs-high](https://crates.io/crates/reaper-rs-high)
+- [reaper-macros](https://crates.io/crates/reaper-macros)
+- [reaper-low](https://crates.io/crates/reaper-low)
+- [reaper-medium](https://crates.io/crates/reaper-medium)
+- [reaper-high](https://crates.io/crates/reaper-high)
 
-`reaper-rs-macros` provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
+`reaper-macros` provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
 
-The remaining 3 crates represent the 3 different APIs of _reaper-rs_.
+The remaining crates represent the 3 different APIs of _reaper-rs_.
 
 ### 1. Low-level API
+
+[![Latest Version](https://img.shields.io/crates/v/reaper-low.svg)](https://crates.io/crates/reaper-low)
+[![documentation](https://docs.rs/reaper-low/badge.svg)](https://docs.rs/reaper-low)
 
 This API contains the raw bindings, nothing more. It's unsafe to a large extent and not intended to be used
 directly. However, it serves as foundation for all the other APIs and is easy to keep up-to-date because it's
@@ -51,6 +52,9 @@ unsafe {
 ```
 
 ### 2. Medium-level API
+
+[![Latest Version](https://img.shields.io/crates/v/reaper-medium.svg)](https://crates.io/crates/reaper-medium)
+[![documentation](https://docs.rs/reaper-medium/badge.svg)](https://docs.rs/reaper-medium)
 
 This API builds on top of the low-level API. It exposes the original REAPER C++ API functions almost
 one to one, but in an idiomatic and type-safe way. It's a big step forward from the raw bindings
@@ -120,9 +124,9 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-reaper-rs-low = "0.1.0"
-reaper-rs-medium = "0.1.0"
-reaper-rs-macros = "0.1.0"
+reaper-low = "0.1.0"
+reaper-medium = "0.1.0"
+reaper-macros = "0.1.0"
 
 [lib]
 name = "my_reaper_extension_plugin"
@@ -133,9 +137,9 @@ Then in your `lib.rs`:
 
 ```rust
 use std::error::Error;
-use reaper_rs_macros::reaper_extension_plugin;
-use reaper_rs_low::ReaperPluginContext;
-use reaper_rs_medium::Reaper;
+use reaper_macros::reaper_extension_plugin;
+use reaper_low::ReaperPluginContext;
+use reaper_medium::Reaper;
 
 #[reaper_extension_plugin]
 fn plugin_main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
@@ -146,7 +150,7 @@ fn plugin_main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
 ```
 
 The macro doesn't do much more than exposing an `extern "C" ReaperPluginEntry()` function which calls
-`reaper_rs_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use
+`reaper_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use
 macros, have a look into the macro implementation. No magic there.
 
 ### REAPER VST plug-in
@@ -160,8 +164,8 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-reaper-rs-low = "0.1.0"
-reaper-rs-medium = "0.1.0"
+reaper-low = "0.1.0"
+reaper-medium = "0.1.0"
 vst = "0.2.0"
 
 [lib]
@@ -173,8 +177,8 @@ Then in your `lib.rs`:
 
 ```rust
 use vst::plugin::{Info, Plugin, HostCallback};
-use reaper_rs_low::ReaperPluginContext;
-use reaper_rs_medium::Reaper;
+use reaper_low::ReaperPluginContext;
+use reaper_medium::Reaper;
 
 #[derive(Default)]
 struct MyReaperVstPlugin {
@@ -219,16 +223,16 @@ At first you might want to become familiar with the directory structure:
 
 | Directory entry               | Content                           | 
 | ----------------------------- | --------------------------------- |
-| `/`                           | Workspace root (`reaper-rs`)      |
+| `/`                           | Workspace root              |
 | `/main`                       | Production code                   |
-| `/main/high`                  | `reaper-rs-high`                  |
-| `/main/low`                   | `reaper-rs-low`                   |
-| `/main/macros`                | `reaper-rs-macros`                |
-| `/main/medium`                | `reaper-rs-medium`                |
+| `/main/high`                  | `reaper-high`                  |
+| `/main/low`                   | `reaper-low`                   |
+| `/main/macros`                | `reaper-macros`                |
+| `/main/medium`                | `reaper-medium`                |
 | `/test`                       | Integration test code             |
-| `/test/test`                  | `reaper-rs-test`                  |
-| `/test/test-extension-plugin` | `reaper-rs-test-extension-plugin` |
-| `/test/test-vst-plugin`       | `reaper-rs-test-vst-plugin`       | 
+| `/test/test`                  | `reaper-test`                  |
+| `/test/test-extension-plugin` | `reaper-test-extension-plugin` |
+| `/test/test-vst-plugin`       | `reaper-test-vst-plugin`       | 
 
 #### Windows
 
@@ -251,7 +255,7 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star: (the instructions
    - [Download](https://www.rust-lang.org/tools/install) and execute `rustup-init.exe`
    - Accept the defaults
    - Set the correct toolchain default (_nightly_ toolchain is not necessary if you only want to build
-     `reaper-rs-low` and `reaper-rs-medium`) :star:
+     `reaper-low` and `reaper-medium`) :star:
      ```batch
      rustup default nightly-x86_64-pc-windows-msvc
      ```
@@ -301,9 +305,9 @@ cargo build
 # ...
 
 # Then continue
-ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_rs_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_rs_test_extension_plugin.so
+ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_test_extension_plugin.so
 mkdir -p $HOME/.config/REAPER/UserPlugins/FX
-ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_rs_test_vst_plugin.so $HOME/.config/REAPER/UserPlugins/FX/reaper_rs_test_extension_plugin.so
+ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_vst_plugin.so $HOME/.config/REAPER/UserPlugins/FX/reaper_test_extension_plugin.so
 ```
 
 That's it!
@@ -316,12 +320,12 @@ _To be done_
 
 When building the complete _reaper-rs_ workspace, 3 test crates are produced:
 
-- `reaper-rs-test`
-- `reaper-rs-test-extension-plugin`
-- `reaper-rs-test-vst-plugin`
+- `reaper-test`
+- `reaper-test-extension-plugin`
+- `reaper-test-vst-plugin`
 
-`reaper-rs-test` provides an integration test that is supposed to be run in REAPER itself. This is the main testing
-mechanism for _reaper-rs_. `reaper-rs-test_extension_plugin` and `reaper-rs-test_vst_plugin` are both test plug-ins
+`reaper-test` provides an integration test that is supposed to be run in REAPER itself. This is the main testing
+mechanism for _reaper-rs_. `reaper-test-extension-plugin` and `reaper-test-vst-plugin` are both test plug-ins
 which register the integration test as REAPER action.
 
 Running the integration test is not only a good way to find _reaper-rs_ regression bugs, but can also help to expose

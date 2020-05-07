@@ -6,7 +6,7 @@ use std::ops::Deref;
 
 use c_str_macro::c_str;
 
-use reaper_rs_high::{
+use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
     FxParameterValueRange, Guid, Pan, Reaper, Tempo, Track, Volume,
 };
@@ -19,8 +19,8 @@ use crate::api::VersionRestriction::AllVersions;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
-use reaper_rs_medium::ProjectContext::CurrentProject;
-use reaper_rs_medium::{
+use reaper_medium::ProjectContext::CurrentProject;
+use reaper_medium::{
     ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName, FxShowInstruction,
     GangBehavior, GlobalAutomationModeOverride, InputMonitoringMode, MasterTrackBehavior,
     MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,

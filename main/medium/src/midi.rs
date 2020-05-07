@@ -1,5 +1,5 @@
 use helgoboss_midi::{ShortMessage, U7};
-use reaper_rs_low::raw;
+use reaper_low::raw;
 
 use std::os::raw::c_int;
 use std::ptr::NonNull;
