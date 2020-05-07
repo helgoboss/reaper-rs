@@ -5,29 +5,30 @@ use quote::quote;
 /// Macro for easily bootstrapping a REAPER extension plug-in.
 ///
 /// Use the macro like this:
-/// ```
+/// ```no_run
 /// use std::error::Error;
 /// use reaper_rs_macros::reaper_extension_plugin;
 /// use reaper_rs_low::ReaperPluginContext;
+/// use reaper_rs_medium::Reaper;
 ///
 /// #[reaper_extension_plugin]
-/// fn main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
-///     let reaper = reaper_rs_medium::Reaper::load(context);
-///     reaper.show_console_msg("Hello world from reaper-rs medium-level API!");
+/// fn plugin_main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
+///     let reaper = Reaper::load(context);
+///     reaper.functions().show_console_msg("Hello world from reaper-rs medium-level API!");
 ///     Ok(())
 /// }
 /// ```
 ///
 /// If you want to start with a preconfigured high-level `Reaper` instance right away, use the macro
-/// like this:
+/// like this (please note that the high-level API has not been published yet):
 ///
-/// ```
+/// ```no_run
 /// use std::error::Error;
 /// use reaper_rs_macros::reaper_extension_plugin;
 /// use reaper_rs_high::Reaper;
 ///
 /// #[reaper_extension_plugin(email_address = "support@example.org")]
-/// fn main() -> Result<(), Box<dyn Error>> {
+/// fn plugin_main() -> Result<(), Box<dyn Error>> {
 ///     let reaper = Reaper::get();
 ///     reaper.show_console_msg("Hello world from reaper-rs high-level API!");
 ///     Ok(())
@@ -65,7 +66,7 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let tokens = quote! {
         #[no_mangle]
         extern "C" fn ReaperPluginEntry(h_instance: ::reaper_rs_low::raw::HINSTANCE, rec: *mut ::reaper_rs_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
-            ::reaper_rs_low::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
+                ::reaper_rs_low::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
         }
 
         #main_function
@@ -83,7 +84,7 @@ fn generate_high_level_plugin_code(
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[::reaper_rs_macros::reaper_extension_plugin]
-        fn low_level_main(context: &::reaper_rs_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
+        fn low_level_plugin_main(context: &::reaper_rs_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
             ::reaper_rs_high::Reaper::setup_with_defaults(context, #email_address);
             #main_function_name()
         }
@@ -104,3 +105,6 @@ struct ReaperExtensionPluginMacroArgs {
     /// Necessary for high-level plug-ins only.
     email_address: Option<String>,
 }
+
+#[cfg(doctest)]
+doc_comment::doctest!("../../../README.md");

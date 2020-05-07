@@ -173,9 +173,8 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// ```no_run
     /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::ProjectRef::Tab;
-    /// use reaper_rs_medium::ReaperMainThreadFunctions;
     ///
-    /// let result = reaper.enum_projects(Tab(4), 256).ok_or("No such tab")?;
+    /// let result = reaper.functions().enum_projects(Tab(4), 256).ok_or("No such tab")?;
     /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -240,7 +239,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::ProjectContext::CurrentProject;
     ///
-    /// let track = reaper.get_track(CurrentProject, 3).ok_or("No such track")?;
+    /// let track = reaper.functions().get_track(CurrentProject, 3).ok_or("No such track")?;
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     pub fn get_track(&self, project: ProjectContext, track_index: u32) -> Option<MediaTrack>
@@ -516,11 +515,10 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// ```no_run
     /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
-    /// use reaper_rs_medium::get_cpp_control_surface;
     ///
-    /// let track = reaper.get_track(CurrentProject, 0).ok_or("Track doesn't exist")?;
+    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("Track doesn't exist")?;
     /// unsafe {
-    ///     reaper.csurf_set_surface_mute(track, true, NotifyAll);
+    ///     reaper.functions().csurf_set_surface_mute(track, true, NotifyAll);
     /// }
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -1401,9 +1399,9 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, ProjectPart::*};
     ///
-    /// reaper.undo_begin_block_2(CurrentProject);
+    /// reaper.functions().undo_begin_block_2(CurrentProject);
     /// // ... modify something ...
-    /// reaper.undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
+    /// reaper.functions().undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
     /// ```
     ///
     /// # Panics
@@ -2438,9 +2436,9 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
     ///
-    /// let src_track = reaper.get_track(CurrentProject, 0).ok_or("Source track doesn't exist")?;
+    /// let src_track = reaper.functions().get_track(CurrentProject, 0).ok_or("Source track doesn't exist")?;
     /// let send_index = unsafe {
-    ///     reaper.create_track_send(src_track, HardwareOutput)?;
+    ///     reaper.functions().create_track_send(src_track, HardwareOutput)?;
     /// };
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```

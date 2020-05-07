@@ -13,15 +13,12 @@
 //!
 //! ```no_run
 //! # let reaper = reaper_rs_medium::Reaper::default();
+//! use reaper_rs_medium::ProjectContext::CurrentProject;
 //!
-//! reaper.s(c_str!("Hello world from reaper-rs low-level API!").as_ptr());
-//! let track = reaper.GetTrack(null_mut(), 0);
-//! reaper.DeleteTrack(track);
-//! use reaper_rs_medium::ProjectRef::Tab;
-//! use reaper_rs_medium::ReaperMainThreadFunctions;
-//!
-//! let result = reaper.enum_projects(Tab(4), 256).ok_or("No such tab")?;
-//! let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
+//! let functions = reaper.functions();
+//! functions.show_console_msg("Hello world from reaper-rs medium-level API!");
+//! let track = functions.get_track(CurrentProject, 0).ok_or("no tracks")?;
+//! unsafe { functions.delete_track(track); }
 //! # Ok::<_, Box<dyn std::error::Error>>(())
 //! ```
 //!

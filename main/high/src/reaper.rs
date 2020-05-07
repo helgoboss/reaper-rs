@@ -43,6 +43,7 @@ use reaper_rs_medium::{
     ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult,
     TrackRef,
 };
+use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
 
@@ -166,6 +167,7 @@ impl MediumOnAudioBuffer for RealTimeReaper {
     }
 }
 
+#[derive(Debug)]
 pub struct Reaper {
     medium: RefCell<reaper_rs_medium::Reaper>,
     logger: slog::Logger,
@@ -186,6 +188,21 @@ pub struct Reaper {
     active_data: RefCell<Option<ActiveData>>,
 }
 
+impl Default for Reaper {
+    fn default() -> Self {
+        Reaper {
+            medium: Default::default(),
+            logger: create_std_logger(),
+            command_by_id: Default::default(),
+            subjects: Default::default(),
+            main_thread_id: std::thread::current().id(),
+            undo_block_is_active: Default::default(),
+            active_data: Default::default(),
+        }
+    }
+}
+
+#[derive(Debug)]
 struct ActiveData {
     sender_to_main_thread: Sender<MainThreadTask>,
     sender_to_audio_thread: Sender<AudioThreadTaskOp>,
@@ -220,6 +237,7 @@ impl RealTimeSubjects {
     }
 }
 
+#[derive(Default)]
 pub(super) struct MainSubjects {
     // This is a RefCell. So calling next() while another next() is still running will panic.
     // I guess it's good that way because this is very generic code, panicking or not panicking
@@ -262,6 +280,12 @@ pub(super) struct MainSubjects {
     pub(super) main_thread_idle: EventStreamSubject<bool>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Payload<Rc<Action>>>,
+}
+
+impl Debug for MainSubjects {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MainSubjects").finish()
+    }
 }
 
 #[derive(Clone)]
@@ -635,13 +659,13 @@ impl Reaper {
     /// # Examples
     ///
     /// ## Passing literal with zero runtime overhead
-    /// ```
+    /// ```no_compile
     /// reaper.show_console_msg(c_str!("Hello from Rust!"))
     /// ```
     /// - Uses macro `c_str!` to create new 0-terminated static literal embedded in binary
     ///
     /// ## Passing 0-terminated literal with borrowing
-    /// ```
+    /// ```no_compile
     /// let literal = "Hello from Rust!\0";
     /// reaper.show_console_msg(CStr::from_bytes_with_nul(literal.as_bytes()).unwrap())
     /// ```
@@ -650,7 +674,7 @@ impl Reaper {
     /// - No copying involved
     ///
     /// ## Passing 0-terminated owned string with borrowing
-    /// ```
+    /// ```no_compile
     /// let owned = String::from("Hello from Rust!\0");
     /// reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap())
     /// ```
@@ -659,7 +683,7 @@ impl Reaper {
     /// - No copying involved
     ///
     /// ## Passing not 0-terminated owned string with moving
-    /// ```
+    /// ```no_compile
     /// let owned = String::from("Hello from Rust!");
     /// reaper.show_console_msg(&CString::new(owned).unwrap())
     /// ```
@@ -984,6 +1008,12 @@ struct Command {
     ///   we wouldn't need `Rc` (for shared references), we would have to take `Box` instead.
     operation: Rc<RefCell<dyn FnMut()>>,
     kind: ActionKind,
+}
+
+impl Debug for Command {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Command").finish()
+    }
 }
 
 impl Command {
