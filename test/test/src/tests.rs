@@ -282,7 +282,7 @@ fn stuff_midi_devices() -> TestStep {
                 //  the rest happens in audio thread. I think we need to use shared subjects.
                 .take_until(step.finished)
                 .subscribe(move |_evt| {
-                    println!("MOIN");
+                    println!("MIDI event arrived");
                     // Right now not invoked because MIDI message arrives async.
                     // TODO As soon as we have an Observable which is not generic on Observer,
                     // introduce  steps which return an
