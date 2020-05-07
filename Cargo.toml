@@ -20,3 +20,6 @@ members = [
     "test/test-extension-plugin",
     "test/test-vst-plugin"
 ]
+
+[dev-dependencies]
+version-sync = "0.9"

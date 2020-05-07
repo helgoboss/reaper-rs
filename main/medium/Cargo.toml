@@ -16,3 +16,6 @@ derive_more = "0.99.5"
 reaper-rs-low = { path = '../low' }
 helgoboss-midi = { path = '../../../helgoboss-midi-rs'}
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
+
+[dev-dependencies]
+version-sync = "0.9"

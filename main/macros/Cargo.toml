@@ -21,6 +21,7 @@ reaper-rs-medium = { path = "../../main/medium" }
 reaper-rs-high = { path = "../../main/high" }
 vst = "0.2.0"
 doc-comment = "0.3.3"
+version-sync = "0.9"
 
 [lib]
 proc-macro = true
