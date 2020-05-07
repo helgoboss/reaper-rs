@@ -57,7 +57,7 @@ impl<'a> MidiEventList<'a> {
     ///
     /// `bpos` is the iterator start position.
     pub fn enum_items(&self, bpos: u32) -> impl Iterator<Item = MidiEvent<'a>> {
-        MidiEventListIterator {
+        EnumItems {
             raw_list: self.0,
             bpos: bpos as i32,
         }
@@ -99,12 +99,12 @@ impl<'a> MidiMessage<'a> {
     }
 }
 
-struct MidiEventListIterator<'a> {
+struct EnumItems<'a> {
     raw_list: &'a raw::MIDI_eventlist,
     bpos: i32,
 }
 
-impl<'a> Iterator for MidiEventListIterator<'a> {
+impl<'a> Iterator for EnumItems<'a> {
     type Item = MidiEvent<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
