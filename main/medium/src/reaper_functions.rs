@@ -2664,7 +2664,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     {
         let ptr = self
             .low
-            .kbd_getTextFromCmd(command_id.get(), section.to_raw());
+            .kbd_getTextFromCmd(command_id.get() as _, section.to_raw());
         create_passing_c_str(ptr)
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| s.to_bytes().len() > 0)

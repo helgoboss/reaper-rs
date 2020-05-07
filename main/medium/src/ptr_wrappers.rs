@@ -73,7 +73,7 @@ pub struct KbdCmd<'a>(pub(crate) &'a raw::KbdCmd);
 impl<'a> KbdCmd<'a> {
     /// Returns the command ID of this action.
     pub fn cmd(&self) -> CommandId {
-        CommandId(self.0.cmd)
+        CommandId(self.0.cmd as _)
     }
 }
 
