@@ -271,6 +271,18 @@ impl<S: ThreadType> ReaperFunctions<S> {
 
     /// Checks if the given pointer is still valid.
     ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::ProjectContext::CurrentProject;
+    ///
+    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("No track")?;
+    /// let track_is_valid = reaper.functions().validate_ptr_2(CurrentProject, track);
+    /// assert!(track_is_valid);
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
+    ///
     /// Returns `true` if the pointer is a valid object of the correct type in the given project.
     /// The project is ignored if the pointer itself is a project.
     pub fn validate_ptr_2<'a>(
@@ -320,6 +332,9 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Gets or sets a track attribute.
     ///
     /// Returns the current value if `new_value` is `null_mut()`.
+    ///
+    /// It's recommended to use one of the convenience functions instead. They all start with
+    /// `get_set_media_track_info_` and are more type-safe.
     ///
     /// # Safety
     ///
@@ -374,6 +389,30 @@ impl<S: ThreadType> ReaperFunctions<S> {
     }
 
     /// Convenience function which grants temporary access to the given track's name (`P_NAME`).
+    ///
+    /// Returns `None` if the given track is the master track.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use reaper_rs_medium::ProjectContext::CurrentProject;
+    /// use std::ffi::CString;
+    /// let reaper = reaper_rs_medium::Reaper::default();
+    ///
+    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no track")?;
+    /// let track_name_c_string = unsafe {
+    ///     reaper.functions().get_set_media_track_info_get_name(
+    ///         track,
+    ///         |name| name.to_owned()
+    ///     )
+    /// };
+    /// let track_name = match &track_name_c_string {
+    ///     None => "Master track",
+    ///     Some(name) => name.to_str()?
+    /// };
+    /// reaper.functions().show_console_msg(format!("Track name is {}", track_name));
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     ///
     /// # Safety
     ///
@@ -510,22 +549,22 @@ impl<S: ThreadType> ReaperFunctions<S> {
 
     /// Mutes or unmutes the given track.
     ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    ///
     /// # Example
     ///
     /// ```no_run
     /// # let reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
     ///
-    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("Track doesn't exist")?;
+    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// unsafe {
     ///     reaper.functions().csurf_set_surface_mute(track, true, NotifyAll);
     /// }
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    ///
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid track.
     pub unsafe fn csurf_set_surface_mute(
         &self,
         track: MediaTrack,
@@ -564,6 +603,18 @@ impl<S: ThreadType> ReaperFunctions<S> {
     }
 
     /// Grants temporary access to the section with the given ID.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::SectionId;
+    ///
+    /// let action_count =
+    ///     reaper.functions().section_from_unique_id(SectionId::new(1), |s| s.action_list_cnt());
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
+    //
     // In order to not need unsafe, we take the closure. For normal medium-level API usage, this is
     // the safe way to go.
     pub fn section_from_unique_id<R>(
@@ -1393,6 +1444,10 @@ impl<S: ThreadType> ReaperFunctions<S> {
 
     /// Starts a new undo block.
     ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    ///
     /// # Example
     ///
     /// ```no_run
@@ -1403,10 +1458,6 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// // ... modify something ...
     /// reaper.functions().undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
     /// ```
-    ///
-    /// # Panics
-    ///
-    /// Panics if the given project is not valid anymore.
     pub fn undo_begin_block_2(&self, project: ProjectContext) {
         self.require_valid_project(project);
         unsafe { self.undo_begin_block_2_unchecked(project) };
@@ -2430,19 +2481,6 @@ impl<S: ThreadType> ReaperFunctions<S> {
     ///
     /// Returns the index of the created send or receive.
     ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # let reaper = reaper_rs_medium::Reaper::default();
-    /// use reaper_rs_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
-    ///
-    /// let src_track = reaper.functions().get_track(CurrentProject, 0).ok_or("Source track doesn't exist")?;
-    /// let send_index = unsafe {
-    ///     reaper.functions().create_track_send(src_track, HardwareOutput)?;
-    /// };
-    /// # Ok::<_, Box<dyn std::error::Error>>(())
-    /// ```
-    ///
     /// # Errors
     ///
     /// Returns an error if not successful (unclear when this happens).
@@ -2450,6 +2488,19 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
+    ///
+    /// let src_track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// let send_index = unsafe {
+    ///     reaper.functions().create_track_send(src_track, HardwareOutput)?;
+    /// };
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     pub unsafe fn create_track_send(
         &self,
         track: MediaTrack,
@@ -2789,9 +2840,6 @@ impl<S: ThreadType> ReaperFunctions<S> {
 
     /// Navigates within the presets of the given track FX.
     ///
-    /// TODO-low Example
-    ///  presetmove==1 activates the next preset, presetmove==-1 activates the previous preset, etc.
-    ///
     /// # Errors
     ///
     /// Returns an error e.g. if the FX doesn't exist.
@@ -2799,6 +2847,21 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::ProjectContext::CurrentProject;
+    /// use reaper_rs_medium::TrackFxLocation::NormalFxChain;
+    ///
+    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// // Navigate 2 presets "up"
+    /// unsafe {
+    ///     reaper.functions().track_fx_navigate_presets(track, NormalFxChain(0), -2)?
+    /// };
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     pub unsafe fn track_fx_navigate_presets(
         &self,
         track: MediaTrack,
@@ -2876,6 +2939,8 @@ impl<S: ThreadType> ReaperFunctions<S> {
     ///
     /// This function is typically called in the [audio hook]. But it's also okay to call it in a
     /// VST plug-in as long as [`is_in_real_time_audio()`] returns `true`.
+    ///
+    /// See [audio hook] for an example.
     ///
     /// # Design
     ///

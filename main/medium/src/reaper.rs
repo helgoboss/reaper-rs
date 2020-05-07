@@ -188,6 +188,10 @@ impl Reaper {
     /// high-level API makes that much easier (it just takes an arbitrary closure). For the
     /// medium-level API this is out of scope.
     ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    ///
     /// # Example
     ///
     /// ```no_run
@@ -199,7 +203,7 @@ impl Reaper {
     /// // a static variable. The high-level API provides a solution for that.
     /// const MY_COMMAND_ID: CommandId = unsafe { CommandId::new_unchecked(42000) };
     ///
-    /// struct MyHookCommand {}
+    /// struct MyHookCommand;
     ///
     /// impl MediumHookCommand for MyHookCommand {
     ///     fn call(command_id: CommandId, _flag: i32) -> bool {
@@ -213,10 +217,6 @@ impl Reaper {
     /// reaper.plugin_register_add_hook_command::<MyHookCommand>();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the registration failed.
     ///
     /// # Design
     ///
@@ -368,7 +368,8 @@ impl Reaper {
 
     /// Registers a hidden control surface.
     ///
-    /// This is very useful for being notified by REAPER about all kinds of events.
+    /// This is very useful for being notified by REAPER about all kinds of events in the main
+    /// thread.
     ///
     /// This function returns a handle which you can use to unregister the control surface at any
     /// time via [`plugin_register_remove_csurf_inst()`].
@@ -376,6 +377,24 @@ impl Reaper {
     /// # Errors
     ///
     /// Returns an error if the registration failed.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let mut reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::MediumReaperControlSurface;
+    ///
+    /// #[derive(Debug)]
+    /// struct MyControlSurface;
+    ///
+    /// impl MediumReaperControlSurface for MyControlSurface {
+    ///     fn set_track_list_change(&self) {
+    ///         println!("Tracks changed");
+    ///     }
+    /// }
+    /// reaper.plugin_register_add_csurf_inst(MyControlSurface);
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     ///
     /// [`plugin_register_remove_csurf_inst()`]: #method.plugin_register_remove_csurf_inst
     pub fn plugin_register_add_csurf_inst(
@@ -478,6 +497,43 @@ impl Reaper {
     /// # Errors
     ///
     /// Returns an error if the registration failed.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let mut reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::{
+    ///     MediumReaperControlSurface, MediumOnAudioBuffer, OnAudioBufferArgs,
+    ///     ReaperFunctions, RealTimeAudioThread, MidiInputDeviceId
+    /// };
+    ///
+    /// struct MyOnAudioBuffer {
+    ///     counter: u64,
+    ///     functions: ReaperFunctions<RealTimeAudioThread>,
+    /// }
+    ///
+    /// impl MediumOnAudioBuffer for MyOnAudioBuffer {
+    ///     fn call(&mut self, args: OnAudioBufferArgs) {
+    ///         // Mutate some own state (safe because we are the owner)
+    ///         if self.counter % 100 == 0 {
+    ///             println!("Audio hook callback counter: {}\n", self.counter);
+    ///         }
+    ///         self.counter += 1;
+    ///         // Read some MIDI events
+    ///         self.functions.get_midi_input(MidiInputDeviceId::new(0), |input| {
+    ///             for event in input.get_read_buf().enum_items(0) {
+    ///                 println!("Received MIDI event {:?}", event);
+    ///             }   
+    ///         });
+    ///     }
+    /// }
+    ///
+    /// reaper.audio_reg_hardware_hook_add(MyOnAudioBuffer {
+    ///     counter: 0,
+    ///     functions: reaper.create_real_time_functions()
+    /// });
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     ///
     /// [`audio_reg_hardware_hook_remove()`]: #method.audio_reg_hardware_hook_remove
     pub fn audio_reg_hardware_hook_add<T: MediumOnAudioBuffer + 'static>(
