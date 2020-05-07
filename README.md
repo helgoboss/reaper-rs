@@ -8,31 +8,31 @@
 
 ## Introduction
 
-*reaper-rs* allows programmers to write plug-ins for the [REAPER](https://www.reaper.fm/) DAW 
-(digital audio workstation) in the  [Rust](https://www.rust-lang.org/) programming 
-language. It does so by providing raw Rust bindings for the 
+_reaper-rs_ allows programmers to write plug-ins for the [REAPER](https://www.reaper.fm/) DAW
+(digital audio workstation) in the [Rust](https://www.rust-lang.org/) programming
+language. It does so by providing raw Rust bindings for the
 [REAPER C++ API](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
 
 ## Basics
 
-*reaper-rs* consists of 4 production crates:
+_reaper-rs_ consists of 4 production crates:
 
-- [reaper_rs_macros](https://crates.io/crates/reaper_rs_macros)
-- [reaper_rs_low](https://crates.io/crates/reaper_rs_low)
-- [reaper_rs_medium](https://crates.io/crates/reaper_rs_medium)
-- [reaper_rs_high](https://crates.io/crates/reaper_rs_high)
+- [reaper-rs-macros](https://crates.io/crates/reaper-rs-macros)
+- [reaper-rs-low](https://crates.io/crates/reaper-rs-low)
+- [reaper-rs-medium](https://crates.io/crates/reaper-rs-medium)
+- [reaper-rs-high](https://crates.io/crates/reaper-rs-high)
 
-`reaper_rs_macros` provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
+`reaper-rs-macros` provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
 
-The remaining 3 crates represent the 3 different APIs of *reaper-rs*.
+The remaining 3 crates represent the 3 different APIs of _reaper-rs_.
 
 ### 1. Low-level API
 
-This API contains the raw bindings, nothing more. It's unsafe to a large extent and not intended to be used 
-directly. However, it serves as foundation for all the other APIs and is easy to keep up-to-date because it's 
+This API contains the raw bindings, nothing more. It's unsafe to a large extent and not intended to be used
+directly. However, it serves as foundation for all the other APIs and is easy to keep up-to-date because it's
 mostly auto-generated from `reaper_plugin_functions.h`. It also can serve as last resort if a function has not
 yet been implemented in the medium-level API (although I rather want encourage to contribute to the medium-level API
-in such a case). 
+in such a case).
 
 Status:
 
@@ -55,7 +55,7 @@ unsafe {
 This API builds on top of the low-level API. It exposes the original REAPER C++ API functions almost
 one to one, but in an idiomatic and type-safe way. It's a big step forward from the raw bindings
 and far more convenient to use. Its focus is on stability rather than exploring new paradigms.
-Since the high-level API is still very unstable, *this is the recommended API*.
+Since the high-level API is still very unstable, _this is the recommended API_.
 
 Status:
 
@@ -71,12 +71,12 @@ functions.show_console_msg("Hello world from reaper-rs medium-level API!");
 let track = functions.get_track(CurrentProject, 0).ok_or("no tracks")?;
 unsafe { functions.delete_track(track); }
 ```
-   
+
 ### 3. High-level API
 
-This API builds on top of the medium-level API. It makes a break with the "flat functions" nature of the original 
+This API builds on top of the medium-level API. It makes a break with the "flat functions" nature of the original
 REAPER C++ API and replaces it with an API that uses reactive and object-oriented paradigms. This break makes it
-possible to provide a very intuitive API which can be used completely without `unsafe`. 
+possible to provide a very intuitive API which can be used completely without `unsafe`.
 
 Status:
 
@@ -96,18 +96,18 @@ project.remove_track(&track);
 
 ## Usage
 
-The procedure depends on the desired *type* of plug-in. 
-In addition to writing REAPER extension plug-ins, *reaper-rs* can be used for developing VST plug-ins 
-that use REAPER functions. No matter what you choose, the possibilities of interacting with REAPER are 
+The procedure depends on the desired _type_ of plug-in.
+In addition to writing REAPER extension plug-ins, _reaper-rs_ can be used for developing VST plug-ins
+that use REAPER functions. No matter what you choose, the possibilities of interacting with REAPER are
 essentially the same. The difference between the two is the context in which your plug-in will run.
 
-An extension plug-in is loaded when REAPER starts and remains active until REAPER quits, so it's 
-perfectly suited to add some functions to REAPER which should be available globally. Popular examples are 
+An extension plug-in is loaded when REAPER starts and remains active until REAPER quits, so it's
+perfectly suited to add some functions to REAPER which should be available globally. Popular examples are
 [SWS](https://www.sws-extension.org/) and [ReaPack](https://reapack.com/) (both written in C++).
 
-A REAPER VST plug-in is loaded as track, take or monitoring FX as part of a particular REAPER project, 
-just like any instrument or effect plug-in out there. That also means it can be instantiated multiple 
-times. Examples are [Playtime](https://www.helgoboss.org/projects/playtime/) (written in C++) and 
+A REAPER VST plug-in is loaded as track, take or monitoring FX as part of a particular REAPER project,
+just like any instrument or effect plug-in out there. That also means it can be instantiated multiple
+times. Examples are [Playtime](https://www.helgoboss.org/projects/playtime/) (written in C++) and
 [ReaLearn](https://www.helgoboss.org/projects/realearn/) (written in C++ but being ported to Rust).
 
 In both cases you need to make a library crate of type `cdylib`.
@@ -130,6 +130,7 @@ crate-type = ["cdylib"]
 ```
 
 Then in your `lib.rs`:
+
 ```rust
 use std::error::Error;
 use reaper_rs_macros::reaper_extension_plugin;
@@ -150,10 +151,10 @@ macros, have a look into the macro implementation. No magic there.
 
 ### REAPER VST plug-in
 
-A REAPER VST plug-in is nothing else than a normal VST plug-in which gets access to functions from the REAPER C++ API. 
+A REAPER VST plug-in is nothing else than a normal VST plug-in which gets access to functions from the REAPER C++ API.
 Luckily, there is a Rust crate for creating VST plug-ins already: [vst-rs](https://crates.io/crates/vst).
-So all you need to do is write a VST plug-in via *vst-rs* and gain access to the REAPER functions by letting
-*reaper-rs* access the `HostCallback` function.
+So all you need to do is write a VST plug-in via _vst-rs_ and gain access to the REAPER functions by letting
+_reaper-rs_ access the `HostCallback` function.
 
 Add this to your `Cargo.toml`:
 
@@ -169,6 +170,7 @@ crate-type = ["cdylib"]
 ```
 
 Then in your `lib.rs`:
+
 ```rust
 use vst::plugin::{Info, Plugin, HostCallback};
 use reaper_rs_low::ReaperPluginContext;
@@ -204,65 +206,78 @@ impl Plugin for MyReaperVstPlugin {
 
 vst::plugin_main!(MyReaperVstPlugin);
 ```
-    
+
 ## Contribute
 
 Contributions are very welcome! Especially to the medium-level API.
 
 ### Build
 
-Thanks to Cargo, building *reaper-rs* is not a big deal.  
+Thanks to Cargo, building _reaper-rs_ is not a big deal.
+
+At first you might want to become familiar with the directory structure:
+
+| Directory entry               | Content                           | 
+| ----------------------------- | --------------------------------- |
+| `/`                           | Workspace root (`reaper-rs`)      |
+| `/main`                       | Production code                   |
+| `/main/high`                  | `reaper-rs-high`                  |
+| `/main/low`                   | `reaper-rs-low`                   |
+| `/main/macros`                | `reaper-rs-macros`                |
+| `/main/medium`                | `reaper-rs-medium`                |
+| `/test`                       | Integration test code             |
+| `/test/test`                  | `reaper-rs-test`                  |
+| `/test/test-extension-plugin` | `reaper-rs-test-extension-plugin` |
+| `/test/test-vst-plugin`       | `reaper-rs-test-vst-plugin`       | 
 
 #### Windows
 
-In the following you will find the instructions for Windows 10. Points where you have to consider the target 
+In the following you will find the instructions for Windows 10. Points where you have to consider the target
 architecture (REAPER 32-bit vs. 64-bit) are marked with :star: (the instructions assume 64-bit).
 
 1. Setup "Build tools for Visual Studio 2019"
-    - Rust uses native build toolchains. On Windows, it's necessary to use the MSVC (Microsoft Visual Studio
-      C++) toolchain because REAPER plug-ins only work with that.
-    - [Visual Studio downloads](https://visualstudio.microsoft.com/downloads/) → All downloads → Tools for Visual Studio 2019
-      → Build Tools for Visual Studio 2019
-    - Start it and follow the installer instructions
-    - Required components
-        - Workloads tab
-            - "C++ build tools" (large box on the left)
-            - Make sure "Windows 10 SDK" is checked on the right side (usually it is)
-        - Language packs
-            - English
+   - Rust uses native build toolchains. On Windows, it's necessary to use the MSVC (Microsoft Visual Studio
+     C++) toolchain because REAPER plug-ins only work with that.
+   - [Visual Studio downloads](https://visualstudio.microsoft.com/downloads/) → All downloads → Tools for Visual Studio 2019
+     → Build Tools for Visual Studio 2019
+   - Start it and follow the installer instructions
+   - Required components
+     - Workloads tab
+       - "C++ build tools" (large box on the left)
+       - Make sure "Windows 10 SDK" is checked on the right side (usually it is)
+     - Language packs
+       - English
 2. Setup Rust
-    - [Download](https://www.rust-lang.org/tools/install)  and execute `rustup-init.exe` 
-    - Accept the defaults
-    - Set the correct toolchain default (*nightly* toolchain is not necessary if you only want to build 
-      `reaper_rs_low` and `reaper_rs_medium`) :star:
-        ```batch
-        rustup default nightly-x86_64-pc-windows-msvc
-        ```
+   - [Download](https://www.rust-lang.org/tools/install) and execute `rustup-init.exe`
+   - Accept the defaults
+   - Set the correct toolchain default (_nightly_ toolchain is not necessary if you only want to build
+     `reaper-rs-low` and `reaper-rs-medium`) :star:
+     ```batch
+     rustup default nightly-x86_64-pc-windows-msvc
+     ```
 3. Download and install [Git for Windows](https://git-scm.com/download/win)
-4. Clone the *reaper-rs* Git repository
-    ```batch
-    git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git`
-    ```
-5. Build *reaper-rs*
-    ```batch
-    cd reaper-rs
-    cargo build
-    ```
+4. Clone the _reaper-rs_ Git repository
+   ```batch
+   git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git`
+   ```
+5. Build _reaper-rs_
+   ```batch
+   cd reaper-rs
+   cargo build
+   ```
 
 This is how you regenerate the low-level API:
 
 1. [Download](https://releases.llvm.org/download.html) and install LLVM for Windows 64-bit :star:
 2. Build with the `generate` feature enabled
-    ```batch
-    cd main\low
-    cargo build --features generate
-    ``` 
-
-
+   ```batch
+   cd main\low
+   cargo build --features generate
+   ```
 
 #### Linux
 
-Complete instructions to build *reaper-rs* from a *fresh* Ubuntu 18.04.3 LTS installation and make the test plug-ins
+Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS installation and make the test plug-ins
 available in REAPER:
 
 ```sh
@@ -295,27 +310,27 @@ That's it!
 
 #### Mac OS X
 
-*To be done*
+_To be done_
 
 ### Test
 
-When building the complete *reaper-rs* workspace, 3 test crates are produced:
+When building the complete _reaper-rs_ workspace, 3 test crates are produced:
 
-- `reaper_rs_test`
-- `reaper_rs_test_extension_plugin`
-- `reaper_rs_test_vst_plugin`
+- `reaper-rs-test`
+- `reaper-rs-test-extension-plugin`
+- `reaper-rs-test-vst-plugin`
 
-`reaper_rs_test` provides an integration test that is supposed to be run in REAPER itself. This is the main testing
-mechanism for *reaper-rs*. `reaper_rs_test_extension_plugin` and `reaper_rs_test_vst_plugin` are both test plug-ins 
+`reaper-rs-test` provides an integration test that is supposed to be run in REAPER itself. This is the main testing
+mechanism for _reaper-rs_. `reaper-rs-test_extension_plugin` and `reaper-rs-test_vst_plugin` are both test plug-ins
 which register the integration test as REAPER action.
 
-Running the integration test is not only a good way to find *reaper-rs* regression bugs, but can also help to expose
+Running the integration test is not only a good way to find _reaper-rs_ regression bugs, but can also help to expose
 subtle changes in the REAPER C++ API itself. Currently, the test assertions are very strict in order to reveal even
 the slightest deviations.
 
 ## Project background
 
-*reaper-rs* has been born as part of an effort to port the REAPER VST plug-in 
+_reaper-rs_ has been born as part of an effort to port the REAPER VST plug-in
 [ReaLearn](https://www.helgoboss.org/projects/realearn/) to Rust and publish it as open-source project. The high-level
 API is heavily inspired by ReaPlus, a C++ facade for the native REAPER C++ API, which is a basic
 building block of the original ReaLearn.
