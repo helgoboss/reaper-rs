@@ -11,10 +11,10 @@ use crate::infostruct_keeper::InfostructKeeper;
 
 use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
-    CommandId, DelegatingControlSurface, MainThread, MediumAudioHookRegister, MediumGaccelRegister,
-    MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
-    MediumToggleAction, RealTimeAudioThread, ReaperFunctionError, ReaperFunctionResult,
-    ReaperFunctions, ReaperStringArg, RegistrationObject,
+    CommandId, DelegatingControlSurface, MainThreadScope, MediumAudioHookRegister,
+    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
+    MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope, ReaperFunctionError,
+    ReaperFunctionResult, ReaperFunctions, ReaperStringArg, RegistrationObject,
 };
 use reaper_rs_low;
 use reaper_rs_low::raw::audio_hook_register_t;
@@ -55,7 +55,7 @@ use std::collections::{HashMap, HashSet};
 /// [`functions()`]: #method.functions
 #[derive(Debug, Default)]
 pub struct Reaper {
-    functions: ReaperFunctions<MainThread>,
+    functions: ReaperFunctions<MainThreadScope>,
     gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
     audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, raw::audio_hook_register_t>,
     csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
@@ -87,13 +87,13 @@ impl Reaper {
     }
 
     /// Gives access to all REAPER functions which can be safely executed in the main thread.
-    pub fn functions(&self) -> &ReaperFunctions<MainThread> {
+    pub fn functions(&self) -> &ReaperFunctions<MainThreadScope> {
         &self.functions
     }
 
     /// Creates a new container of REAPER functions with only those unlocked that can be safely
     /// executed in the real-time audio thread.
-    pub fn create_real_time_functions(&self) -> ReaperFunctions<RealTimeAudioThread> {
+    pub fn create_real_time_functions(&self) -> ReaperFunctions<RealTimeAudioThreadScope> {
         ReaperFunctions::new(self.functions.low().clone())
     }
 
@@ -490,12 +490,12 @@ impl Reaper {
     /// # let mut reaper = reaper_rs_medium::Reaper::default();
     /// use reaper_rs_medium::{
     ///     MediumReaperControlSurface, MediumOnAudioBuffer, OnAudioBufferArgs,
-    ///     ReaperFunctions, RealTimeAudioThread, MidiInputDeviceId
+    ///     ReaperFunctions, RealTimeAudioThreadScope, MidiInputDeviceId
     /// };
     ///
     /// struct MyOnAudioBuffer {
     ///     counter: u64,
-    ///     functions: ReaperFunctions<RealTimeAudioThread>,
+    ///     functions: ReaperFunctions<RealTimeAudioThreadScope>,
     /// }
     ///
     /// impl MediumOnAudioBuffer for MyOnAudioBuffer {

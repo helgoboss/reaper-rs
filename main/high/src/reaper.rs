@@ -38,7 +38,7 @@ use reaper_rs_medium::{
     CommandId, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    OnAudioBufferArgs, ProjectRef, RealTimeAudioThread, ReaperFunctions, ReaperStringArg,
+    OnAudioBufferArgs, ProjectRef, RealTimeAudioThreadScope, ReaperFunctions, ReaperStringArg,
     ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult, TrackRef,
 };
 use std::fmt::{Debug, Formatter};
@@ -117,7 +117,7 @@ impl ReaperBuilder {
 }
 
 pub struct RealTimeReaper {
-    functions: ReaperFunctions<RealTimeAudioThread>,
+    functions: ReaperFunctions<RealTimeAudioThreadScope>,
     receiver: mpsc::Receiver<AudioThreadTaskOp>,
     sender_to_main_thread: mpsc::Sender<MainThreadTask>,
     subjects: RealTimeSubjects,

@@ -28,24 +28,25 @@ use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 
-/// A usage scope which unlocks all functions that are safe to execute in the main thread.
-pub trait MainThreadScope {}
+/// Represents a privilege to execute functions which are only safe to execute from the main thread.
+pub trait MainThreadOnly {}
 
-/// Zero-size type implementing the main thread scope.
+/// A usage scope which unlocks all functions that are safe to execute from the main thread.
 #[derive(Debug, Default)]
-pub struct MainThread(pub(crate) ());
+pub struct MainThreadScope(pub(crate) ());
 
-impl MainThreadScope for MainThread {}
+impl MainThreadOnly for MainThreadScope {}
 
-/// A usage scope which unlocks all functions that are safe to execute in the real-time audio
+/// Represents a privilege to execute functions which are only safe to execute from the real-time
+/// audio thread.
+pub trait AudioThreadOnly {}
+
+/// A usage scope which unlocks all functions that are safe to execute from the real-time audio
 /// thread.
-pub trait RealTimeAudioThreadScope {}
-
-/// Zero-size type implementing the real-time audio thread scope.
 #[derive(Debug)]
-pub struct RealTimeAudioThread(pub(crate) ());
+pub struct RealTimeAudioThreadScope(pub(crate) ());
 
-impl RealTimeAudioThreadScope for RealTimeAudioThread {}
+impl AudioThreadOnly for RealTimeAudioThreadScope {}
 
 /// This is the main access point for most REAPER functions.
 ///
@@ -79,7 +80,7 @@ impl RealTimeAudioThreadScope for RealTimeAudioThread {}
 ///
 /// # Design
 ///
-/// ## What's the `<MainThread>` in `ReaperFunctions<MainThread>` about?
+/// ## What's the `<MainThreadScope>` in `ReaperFunctions<MainThreadScope>` about?
 ///
 /// In REAPER and probably many other DAWs there are at least two important threads:
 ///
@@ -95,12 +96,12 @@ impl RealTimeAudioThreadScope for RealTimeAudioThread {}
 ///
 /// There's currently no way to make sure at compile time that a function is called in the correct
 /// thread. Of course that would be the best. In an attempt to still let the compiler help you a
-/// bit, the traits [`MainThreadScope`] and [`RealTimeAudioThreadScope`] have been introduced. They
-/// are marker threads which are used as type bound on each method which is not thread-safe. So
+/// bit, the traits [`MainThreadOnly`] and [`RealTimeAudioThreadOnly`] have been introduced. They
+/// are marker traits which are used as type bound on each method which is not thread-safe. So
 /// depending on the context we can expose an instance of [`ReaperFunctions`] which has only
 /// functions unlocked which are safe to be executed from e.g. the real-time audio thread. The
-/// compiler will complain if you attempt to call an audio-thread-only method on
-/// `ReaperFunctions<MainThread>` and vice versa.
+/// compiler will complain if you attempt to call a real-time-audio-thread-only method on
+/// `ReaperFunctions<MainThreadScope>` and vice versa.
 ///
 /// Of course that technique can't prevent anyone from acquiring a main-thread only instance and
 /// use it in the audio hook. But still, it adds some extra safety.
@@ -122,11 +123,11 @@ impl RealTimeAudioThreadScope for RealTimeAudioThread {}
 /// [`Reaper::create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
 /// [`low()`]: #method.low
 /// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
-/// [`MainThreadScope`]: trait.MainThreadScope.html
-/// [`RealTimeAudioThreadScope`]: trait.RealTimeAudioThreadScope.html
+/// [`MainThreadOnly`]: trait.MainThreadOnly.html
+/// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html
 /// [`ReaperFunctions`]: struct.ReaperFunctions.html
 #[derive(Clone, Debug, Default)]
-pub struct ReaperFunctions<UsageScope = MainThread> {
+pub struct ReaperFunctions<UsageScope = MainThreadScope> {
     low: reaper_rs_low::Reaper,
     p: PhantomData<UsageScope>,
 }
@@ -176,7 +177,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> Option<EnumProjectsResult>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let idx = project_ref.to_raw();
         if buffer_size == 0 {
@@ -225,7 +226,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// ```
     pub fn get_track(&self, project: ProjectContext, track_index: u32) -> Option<MediaTrack>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.get_track_unchecked(project, track_index) }
@@ -244,7 +245,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         track_index: u32,
     ) -> Option<MediaTrack>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
         NonNull::new(ptr)
@@ -286,7 +287,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Returns `true` if the pointer is a valid object of the correct type in the current project.
     pub fn validate_ptr<'a>(&self, pointer: impl Into<ReaperPointer<'a>>) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let pointer = pointer.into();
         unsafe {
@@ -298,7 +299,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Redraws the arrange view and ruler.
     pub fn update_timeline(&self)
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.UpdateTimeline();
     }
@@ -327,7 +328,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         new_value: *mut c_void,
     ) -> *mut c_void
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low
             .GetSetMediaTrackInfo(track.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
@@ -343,7 +344,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         track: MediaTrack,
     ) -> Option<MediaTrack>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::ParTrack, null_mut())
             as *mut raw::MediaTrack;
@@ -362,7 +363,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         track: MediaTrack,
     ) -> Option<ReaProject>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Project, null_mut())
             as *mut raw::ReaProject;
@@ -404,7 +405,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Name, null_mut());
         create_passing_c_str(ptr as *const c_char).map(use_name)
@@ -420,7 +421,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         track: MediaTrack,
     ) -> InputMonitoringMode
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
         let irecmon = deref_as::<i32>(ptr).expect("irecmon pointer is null");
@@ -437,7 +438,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         track: MediaTrack,
     ) -> Option<RecordingInput>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
         let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
@@ -459,7 +460,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         track: MediaTrack,
     ) -> Option<TrackRef>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         use TrackRef::*;
         match self.get_set_media_track_info(track, TrackAttributeKey::TrackNumber, null_mut())
@@ -479,7 +480,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_set_media_track_info_get_guid(&self, track: MediaTrack) -> GUID
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
         deref_as::<GUID>(ptr).expect("GUID pointer is null")
@@ -573,7 +574,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Generates a random GUID.
     pub fn gen_guid(&self) -> GUID
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut guid = MaybeUninit::uninit();
         unsafe {
@@ -603,7 +604,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_section: impl FnOnce(&KbdSectionInfo) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         if ptr.is_null() {
@@ -629,7 +630,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         section_id: SectionId,
     ) -> Option<KbdSectionInfo>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         NonNull::new(ptr).map(KbdSectionInfo)
@@ -654,7 +655,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         project: ProjectContext,
     ) -> i32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         use ActionValueChange::*;
         let (val, valhw, relmode) = match value_change {
@@ -681,7 +682,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Returns the REAPER main window handle.
     pub fn get_main_hwnd(&self) -> Hwnd
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         require_non_null_panic(self.low.GetMainHwnd())
     }
@@ -695,7 +696,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         command_name: impl Into<ReaperStringArg<'a>>,
     ) -> Option<CommandId>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let raw_id = unsafe { self.low.NamedCommandLookup(command_name.into().as_ptr()) as u32 };
         if raw_id == 0 {
@@ -716,7 +717,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Panics if the given project is not valid anymore.
     pub fn count_tracks(&self, project: ProjectContext) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.count_tracks_unchecked(project) }
@@ -731,7 +732,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// [`count_tracks()`]: #method.count_tracks
     pub unsafe fn count_tracks_unchecked(&self, project: ProjectContext) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.CountTracks(project.to_raw()) as u32
     }
@@ -764,7 +765,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> GetMidiDevNameResult
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         if buffer_size == 0 {
             let is_present =
@@ -801,7 +802,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> GetMidiDevNameResult
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         if buffer_size == 0 {
             let is_present = unsafe {
@@ -841,7 +842,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         behavior: FxAddByNameBehavior,
     ) -> i32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.TrackFX_AddByName(
             track.as_ptr(),
@@ -866,7 +867,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         fx_chain_type: TrackFxChainType,
     ) -> Option<u32>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, FxAddByNameBehavior::Query) {
             -1 => None,
@@ -896,7 +897,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         behavior: AddFxBehavior,
     ) -> ReaperFunctionResult<u32>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, behavior.into()) {
             -1 => Err(ReaperFunctionError::new("FX couldn't be added")),
@@ -916,7 +917,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         fx_location: TrackFxLocation,
     ) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low
             .TrackFX_GetEnabled(track.as_ptr(), fx_location.to_raw())
@@ -944,7 +945,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -968,7 +969,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_instrument(&self, track: MediaTrack) -> Option<u32>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let index = self.low.TrackFX_GetInstrument(track.as_ptr());
         if index == -1 {
@@ -1003,7 +1004,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         fx_location: TrackFxLocation,
     ) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low
             .TrackFX_GetNumParams(track.as_ptr(), fx_location.to_raw()) as u32
@@ -1015,7 +1016,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     // TODO-low `project_config_extension_t` is not yet ported
     pub fn get_current_project_in_load_save(&self) -> Option<ReaProject>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.GetCurrentProjectInLoadSave();
         NonNull::new(ptr)
@@ -1044,7 +1045,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -1088,7 +1089,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -1140,7 +1141,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -1179,7 +1180,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         param_value: ReaperNormalizedFxParamValue,
     ) -> ReaperFunctionResult<()>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let successful = self.low.TrackFX_SetParamNormalized(
             track.as_ptr(),
@@ -1201,7 +1202,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Returns `None` if no FX window has focus.
     pub fn get_focused_fx(&self) -> Option<GetFocusedFxResult>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut tracknumber = MaybeUninit::uninit();
         let mut itemnumber = MaybeUninit::uninit();
@@ -1246,7 +1247,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Returns `None` otherwise.
     pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut tracknumber = MaybeUninit::uninit();
         let mut fxnumber = MaybeUninit::uninit();
@@ -1326,7 +1327,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         fx_location: TrackFxLocation,
     ) -> ReaperFunctionResult<()>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let succesful = self
             .low
@@ -1358,7 +1359,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         param_index: u32,
     ) -> Option<GetParameterStepSizesResult>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut step = MaybeUninit::uninit();
         let mut small_step = MaybeUninit::uninit();
@@ -1400,7 +1401,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         param_index: u32,
     ) -> GetParamExResult
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut min_val = MaybeUninit::uninit();
         let mut max_val = MaybeUninit::uninit();
@@ -1502,7 +1503,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.undo_can_undo_2_unchecked(project, use_description) }
@@ -1521,7 +1522,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.Undo_CanUndo2(project.to_raw());
         create_passing_c_str(ptr).map(use_description)
@@ -1538,7 +1539,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.undo_can_redo_2_unchecked(project, use_description) }
@@ -1557,7 +1558,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.Undo_CanRedo2(project.to_raw());
         create_passing_c_str(ptr).map(use_description)
@@ -1572,7 +1573,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Panics if the given project is not valid anymore.
     pub fn undo_do_undo_2(&self, project: ProjectContext) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.undo_do_undo_2_unchecked(project) }
@@ -1587,7 +1588,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// [`undo_do_undo_2()`]: #method.undo_do_undo_2
     pub unsafe fn undo_do_undo_2_unchecked(&self, project: ProjectContext) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.Undo_DoUndo2(project.to_raw()) != 0
     }
@@ -1601,7 +1602,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Panics if the given project is not valid anymore.
     pub fn undo_do_redo_2(&self, project: ProjectContext) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.undo_do_redo_2_unchecked(project) }
@@ -1616,7 +1617,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// [`undo_do_redo_2()`]: #method.undo_do_redo_2
     pub unsafe fn undo_do_redo_2_unchecked(&self, project: ProjectContext) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.Undo_DoRedo2(project.to_raw()) != 0
     }
@@ -1660,7 +1661,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// [`mark_project_dirty()`]: #method.mark_project_dirty
     pub fn is_project_dirty(&self, project: ProjectContext) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.is_project_dirty_unchecked(project) }
@@ -1675,7 +1676,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// [`is_project_dirty()`]: #method.is_project_dirty
     pub unsafe fn is_project_dirty_unchecked(&self, project: ProjectContext) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.IsProjectDirty(project.to_raw()) != 0
     }
@@ -1690,7 +1691,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Returns the version of the REAPER application in which this plug-in is currently running.
     pub fn get_app_version(&self) -> ReaperVersion<'static>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.GetAppVersion();
         let version_str = unsafe { CStr::from_ptr(ptr) };
@@ -1704,7 +1705,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_track_automation_mode(&self, track: MediaTrack) -> AutomationMode
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let result = self.low.GetTrackAutomationMode(track.as_ptr());
         AutomationMode::try_from_raw(result).expect("unknown automation mode")
@@ -1713,7 +1714,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Returns the global track automation override, if any.
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         use GlobalAutomationModeOverride::*;
         match self.low.GetGlobalAutomationOverride() {
@@ -1737,7 +1738,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         chunk_name: EnvChunkName,
     ) -> Option<TrackEnvelope>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self
             .low
@@ -1761,7 +1762,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         env_name: impl Into<ReaperStringArg<'a>>,
     ) -> Option<TrackEnvelope>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self
             .low
@@ -1780,7 +1781,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         attribute_key: TrackAttributeKey,
     ) -> f64
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low
             .GetMediaTrackInfo_Value(track.as_ptr(), attribute_key.into_raw().as_ptr())
@@ -1793,7 +1794,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_count(&self, track: MediaTrack) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.TrackFX_GetCount(track.as_ptr()) as u32
     }
@@ -1807,7 +1808,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_rec_count(&self, track: MediaTrack) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.TrackFX_GetRecCount(track.as_ptr()) as u32
     }
@@ -1827,7 +1828,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         fx_location: TrackFxLocation,
     ) -> ReaperFunctionResult<GUID>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self
             .low
@@ -1853,7 +1854,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         param_index: u32,
     ) -> ReaperFunctionResult<ReaperNormalizedFxParamValue>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let raw_value = self.low.TrackFX_GetParamNormalized(
             track.as_ptr(),
@@ -1875,7 +1876,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Panics if the given project is not valid anymore.
     pub fn get_master_track(&self, project: ProjectContext) -> MediaTrack
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.get_master_track_unchecked(project) }
@@ -1890,7 +1891,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// [`get_master_track()`]: #method.get_master_track
     pub unsafe fn get_master_track_unchecked(&self, project: ProjectContext) -> MediaTrack
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.GetMasterTrack(project.to_raw());
         require_non_null_panic(ptr)
@@ -1899,7 +1900,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Converts the given GUID to a string (including braces).
     pub fn guid_to_string(&self, guid: &GUID) -> CString
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let (guid_string, _) = with_string_buffer(64, |buffer, _| unsafe {
             self.low.guidToString(guid as *const GUID, buffer)
@@ -1910,7 +1911,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Returns the master tempo of the current project.
     pub fn master_get_tempo(&self) -> Bpm
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         Bpm(self.low.Master_GetTempo())
     }
@@ -1959,7 +1960,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Panics if the given project is not valid anymore.
     pub fn master_get_play_rate(&self, project: ProjectContext) -> PlaybackSpeedFactor
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.master_get_play_rate_unchecked(project) }
@@ -1977,7 +1978,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         project: ProjectContext,
     ) -> PlaybackSpeedFactor
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let raw = self.low.Master_GetPlayRate(project.to_raw());
         PlaybackSpeedFactor(raw)
@@ -1998,7 +1999,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         r#type: MessageBoxType,
     ) -> MessageBoxResult
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let result = unsafe {
             self.low.ShowMessageBox(
@@ -2020,7 +2021,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         guid_string: impl Into<ReaperStringArg<'a>>,
     ) -> ReaperFunctionResult<GUID>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut guid = MaybeUninit::uninit();
         unsafe {
@@ -2046,7 +2047,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         gang_behavior: GangBehavior,
     ) -> i32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.CSurf_OnInputMonitorChangeEx(
             track.as_ptr(),
@@ -2071,7 +2072,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         new_value: f64,
     ) -> ReaperFunctionResult<()>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let successful = self.low.SetMediaTrackInfo_Value(
             track.as_ptr(),
@@ -2100,7 +2101,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Converts a decibel value into a volume slider value.
     pub fn db2slider(&self, value: Db) -> VolumeSliderValue
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         VolumeSliderValue(self.low.DB2SLIDER(value.get()))
     }
@@ -2108,7 +2109,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Converts a volume slider value into a decibel value.
     pub fn slider2db(&self, value: VolumeSliderValue) -> Db
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         Db(self.low.SLIDER2DB(value.get()))
     }
@@ -2127,7 +2128,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         track: MediaTrack,
     ) -> ReaperFunctionResult<VolumeAndPan>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
@@ -2178,7 +2179,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         gang_behavior: GangBehavior,
     ) -> ReaperVolumeValue
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let raw = self.low.CSurf_OnVolumeChangeEx(
             track.as_ptr(),
@@ -2218,7 +2219,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         gang_behavior: GangBehavior,
     ) -> ReaperPanValue
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let raw = self.low.CSurf_OnPanChangeEx(
             track.as_ptr(),
@@ -2240,7 +2241,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         master_track_behavior: MasterTrackBehavior,
     ) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.count_selected_tracks_2_unchecked(project, master_track_behavior) }
@@ -2259,7 +2260,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         master_track_behavior: MasterTrackBehavior,
     ) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.CountSelectedTracks2(
             project.to_raw(),
@@ -2288,7 +2289,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         master_track_behavior: MasterTrackBehavior,
     ) -> Option<MediaTrack>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe {
@@ -2314,7 +2315,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         master_track_behavior: MasterTrackBehavior,
     ) -> Option<MediaTrack>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.GetSelectedTrack2(
             project.to_raw(),
@@ -2355,7 +2356,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_track_num_sends(&self, track: MediaTrack, category: TrackSendCategory) -> u32
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.GetTrackNumSends(track.as_ptr(), category.to_raw()) as u32
     }
@@ -2376,7 +2377,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         new_value: *mut c_void,
     ) -> *mut c_void
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.GetSetTrackSendInfo(
             track.as_ptr(),
@@ -2404,7 +2405,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         send_index: u32,
     ) -> ReaperFunctionResult<MediaTrack>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.get_set_track_send_info(
             track,
@@ -2440,7 +2441,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         cache_hint: ChunkCacheHint,
     ) -> ReaperFunctionResult<CString>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         assert!(buffer_size > 0);
         let (chunk_content, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -2487,7 +2488,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         target: SendTarget,
     ) -> ReaperFunctionResult<u32>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let result = self.low.CreateTrackSend(track.as_ptr(), target.to_raw());
         if result < 0 {
@@ -2510,7 +2511,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         gang_behavior: GangBehavior,
     ) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low.CSurf_OnRecArmChangeEx(
             track.as_ptr(),
@@ -2535,7 +2536,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         cache_hint: ChunkCacheHint,
     ) -> ReaperFunctionResult<()>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let successful = self.low.SetTrackStateChunk(
             track.as_ptr(),
@@ -2570,7 +2571,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         fx_location: TrackFxLocation,
     ) -> Option<Hwnd>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self
             .low
@@ -2587,7 +2588,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx_location: TrackFxLocation) -> bool
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         self.low
             .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
@@ -2608,7 +2609,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         value_change: ValueChange<ReaperVolumeValue>,
     ) -> ReaperVolumeValue
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let raw = self.low.CSurf_OnSendVolumeChange(
             track.as_ptr(),
@@ -2633,7 +2634,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         value_change: ValueChange<ReaperPanValue>,
     ) -> ReaperPanValue
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let raw = self.low.CSurf_OnSendPanChange(
             track.as_ptr(),
@@ -2659,7 +2660,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_action_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self
             .low
@@ -2687,7 +2688,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         command_id: CommandId,
     ) -> Option<bool>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let result = self
             .low
@@ -2709,7 +2710,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_command_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let ptr = self.low.ReverseNamedCommandLookup(command_id.to_raw());
         unsafe { create_passing_c_str(ptr) }.map(use_command_name)
@@ -2732,7 +2733,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         send_index: u32,
     ) -> ReaperFunctionResult<VolumeAndPan>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
@@ -2768,7 +2769,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         fx_location: TrackFxLocation,
     ) -> ReaperFunctionResult<TrackFxGetPresetIndexResult>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let mut num_presets = MaybeUninit::uninit();
         let index = self.low.TrackFX_GetPresetIndex(
@@ -2803,7 +2804,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         preset: FxPresetRef,
     ) -> ReaperFunctionResult<()>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let successful = self.low.TrackFX_SetPresetByIndex(
             track.as_ptr(),
@@ -2849,7 +2850,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         increment: i32,
     ) -> ReaperFunctionResult<()>
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         let successful =
             self.low
@@ -2879,7 +2880,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         buffer_size: u32,
     ) -> TrackFxGetPresetResult
     where
-        UsageScope: MainThreadScope,
+        UsageScope: MainThreadOnly,
     {
         if buffer_size == 0 {
             let state_matches_preset =
@@ -2943,7 +2944,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         use_device: impl FnOnce(&MidiInput) -> R,
     ) -> Option<R>
     where
-        UsageScope: RealTimeAudioThreadScope,
+        UsageScope: AudioThreadOnly,
     {
         let ptr = self.low.GetMidiInput(device_id.to_raw());
         if ptr.is_null() {
