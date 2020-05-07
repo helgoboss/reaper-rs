@@ -25,7 +25,7 @@ pub(crate) type ReaperFunctionResult<T> = Result<T, ReaperFunctionError>;
 /// This error is caused by *reaper-rs*, not by REAPER itself.
 #[derive(Debug, Clone, Eq, PartialEq, Display)]
 #[display(fmt = "conversion from raw value [{}] failed: {}", raw_value, message)]
-pub struct TryFromRawError<R: Copy> {
+pub struct TryFromRawError<R> {
     message: &'static str,
     raw_value: R,
 }
