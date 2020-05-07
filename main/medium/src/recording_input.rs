@@ -1,7 +1,7 @@
 use crate::{MidiInputDeviceId, TryFromRawError};
-use derive_more::*;
+
 use helgoboss_midi::Channel;
-use std::convert::{TryFrom, TryInto};
+use std::convert::{TryInto};
 
 /// Recording input of a track.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

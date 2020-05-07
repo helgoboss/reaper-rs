@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
@@ -33,7 +33,7 @@ use reaper_rs_low::raw::{
     audio_hook_register_t, gaccel_register_t, midi_Input, GUID, UNDO_STATE_ALL,
 };
 
-use std::convert::{TryFrom, TryInto};
+
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;

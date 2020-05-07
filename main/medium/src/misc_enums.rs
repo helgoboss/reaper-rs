@@ -3,7 +3,7 @@ use crate::{
     ReaProject, ReaperStringArg, ToggleActionFn, TryFromRawError,
 };
 use c_str_macro::c_str;
-use derive_more::*;
+
 use helgoboss_midi::{U14, U7};
 use reaper_rs_low::raw;
 use reaper_rs_low::raw::HWND;

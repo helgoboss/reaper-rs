@@ -265,7 +265,7 @@ impl Fx {
                 // the FX chain is this FX.
                 self.window_is_open()
             }
-            Some(hwnd) => {
+            Some(_hwnd) => {
                 // FX is open in floating window
                 // TODO-high FIXME I think we need GetActiveWindow in order to solve this
                 // let active_window = unsafe { GetActiveWindow() };

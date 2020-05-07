@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+
 use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -39,7 +39,7 @@ use reaper_rs_medium::{
     CommandId, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
     MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    OnAudioBufferArgs, ProjectRef, RealTimeAudioThread, RealTimeAudioThreadType, ReaperFunctions,
+    OnAudioBufferArgs, ProjectRef, RealTimeAudioThread, ReaperFunctions,
     ReaperStringArg, ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult,
     TrackRef,
 };

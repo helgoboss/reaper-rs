@@ -1,5 +1,5 @@
 use crate::TryFromRawError;
-use derive_more::*;
+
 
 /// Global override of track automation modes.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -56,7 +56,7 @@ impl AutomationMode {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::convert::TryFrom;
+    
 
     #[test]
     fn to_int() {

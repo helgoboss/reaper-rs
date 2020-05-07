@@ -2,7 +2,7 @@
 //! using different strategies, depending on the characteristics of the struct. Sometimes it's just
 //! a type alias, sometimes a wrapper.  
 use crate::CommandId;
-use derive_more::Into;
+
 use reaper_rs_low::raw;
 
 use std::ptr::NonNull;
