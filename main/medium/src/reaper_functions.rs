@@ -28,32 +28,33 @@ use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 
-/// Parent marker trait representing a thread type.
+/// A scope that determines which features may be used.
 ///
 /// See [here](struct.ReaperFunctions.html#design) for more information.
-pub trait ThreadType: Debug {}
+pub trait UsageScope: Debug {}
 
-/// Marker trait representing the main thread type.
-pub trait MainThreadType: ThreadType {}
+/// A usage scope which unlocks all functions that are safe to execute in the main thread.
+pub trait MainThreadScope: UsageScope {}
 
-/// Zero-size type implementing the main thread type.
+/// Zero-size type implementing the main thread scope.
 #[derive(Debug, Default)]
 pub struct MainThread(pub(crate) ());
 
-impl ThreadType for MainThread {}
+impl UsageScope for MainThread {}
 
-impl MainThreadType for MainThread {}
+impl MainThreadScope for MainThread {}
 
-/// Marker trait representing the real-time audio thread type.
-pub trait RealTimeAudioThreadType: ThreadType {}
+/// A usage scope which unlocks all functions that are safe to execute in the real-time audio
+/// thread.
+pub trait RealTimeAudioThreadScope: UsageScope {}
 
-/// Zero-size type implementing the real-time audio thread type.
+/// Zero-size type implementing the real-time audio thread scope.
 #[derive(Debug)]
 pub struct RealTimeAudioThread(pub(crate) ());
 
-impl ThreadType for RealTimeAudioThread {}
+impl UsageScope for RealTimeAudioThread {}
 
-impl RealTimeAudioThreadType for RealTimeAudioThread {}
+impl RealTimeAudioThreadScope for RealTimeAudioThread {}
 
 /// This is the main access point for most REAPER functions.
 ///
@@ -103,12 +104,12 @@ impl RealTimeAudioThreadType for RealTimeAudioThread {}
 ///
 /// There's currently no way to make sure at compile time that a function is called in the correct
 /// thread. Of course that would be the best. In an attempt to still let the compiler help you a
-/// bit, the traits [`MainThread`] and [`RealTimeAudioThread`] have been introduced. They are marker
-/// threads which are used as type bound on each method which is not thread-safe. So depending on
-/// the context we can expose an instance of [`ReaperFunctions`] which has only functions unlocked
-/// which are safe to be executed from e.g. the real-time audio thread. The compiler will complain
-/// if you attempt to call an audio-thread-only method on `ReaperFunctions<MainThread>` and vice
-/// versa.
+/// bit, the traits [`MainThreadScope`] and [`RealTimeAudioThreadScope`] have been introduced. They
+/// are marker threads which are used as type bound on each method which is not thread-safe. So
+/// depending on the context we can expose an instance of [`ReaperFunctions`] which has only
+/// functions unlocked which are safe to be executed from e.g. the real-time audio thread. The
+/// compiler will complain if you attempt to call an audio-thread-only method on
+/// `ReaperFunctions<MainThread>` and vice versa.
 ///
 /// Of course that technique can't prevent anyone from acquiring a main-thread only instance and
 /// use it in the audio hook. But still, it adds some extra safety.
@@ -130,16 +131,16 @@ impl RealTimeAudioThreadType for RealTimeAudioThread {}
 /// [`Reaper::create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
 /// [`low()`]: #method.low
 /// [low-level `Reaper`]: /reaper_rs_low/struct.Reaper.html
-/// [`MainThread`]: trait.MainThread.html
-/// [`RealTimeAudioThread`]: trait.RealTimeAudioThread.html
+/// [`MainThreadScope`]: trait.MainThreadScope.html
+/// [`RealTimeAudioThreadScope`]: trait.RealTimeAudioThreadScope.html
 /// [`ReaperFunctions`]: struct.ReaperFunctions.html
 #[derive(Clone, Debug, Default)]
-pub struct ReaperFunctions<S: ThreadType = MainThread> {
+pub struct ReaperFunctions<S: UsageScope = MainThread> {
     low: reaper_rs_low::Reaper,
     p: PhantomData<S>,
 }
 
-impl<S: ThreadType> ReaperFunctions<S> {
+impl<S: UsageScope> ReaperFunctions<S> {
     pub(crate) fn new(low: reaper_rs_low::Reaper) -> ReaperFunctions<S> {
         ReaperFunctions {
             low,
@@ -184,7 +185,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> Option<EnumProjectsResult>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let idx = project_ref.to_raw();
         if buffer_size == 0 {
@@ -233,7 +234,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// ```
     pub fn get_track(&self, project: ProjectContext, track_index: u32) -> Option<MediaTrack>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.get_track_unchecked(project, track_index) }
@@ -252,7 +253,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         track_index: u32,
     ) -> Option<MediaTrack>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
         NonNull::new(ptr)
@@ -294,7 +295,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Returns `true` if the pointer is a valid object of the correct type in the current project.
     pub fn validate_ptr<'a>(&self, pointer: impl Into<ReaperPointer<'a>>) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let pointer = pointer.into();
         unsafe {
@@ -306,7 +307,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Redraws the arrange view and ruler.
     pub fn update_timeline(&self)
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.UpdateTimeline();
     }
@@ -335,7 +336,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         new_value: *mut c_void,
     ) -> *mut c_void
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low
             .GetSetMediaTrackInfo(track.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
@@ -351,7 +352,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         track: MediaTrack,
     ) -> Option<MediaTrack>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::ParTrack, null_mut())
             as *mut raw::MediaTrack;
@@ -370,7 +371,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         track: MediaTrack,
     ) -> Option<ReaProject>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Project, null_mut())
             as *mut raw::ReaProject;
@@ -412,7 +413,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Name, null_mut());
         create_passing_c_str(ptr as *const c_char).map(use_name)
@@ -428,7 +429,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         track: MediaTrack,
     ) -> InputMonitoringMode
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
         let irecmon = deref_as::<i32>(ptr).expect("irecmon pointer is null");
@@ -445,7 +446,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         track: MediaTrack,
     ) -> Option<RecordingInput>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
         let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
@@ -467,7 +468,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         track: MediaTrack,
     ) -> Option<TrackRef>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         use TrackRef::*;
         match self.get_set_media_track_info(track, TrackAttributeKey::TrackNumber, null_mut())
@@ -487,7 +488,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_set_media_track_info_get_guid(&self, track: MediaTrack) -> GUID
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
         deref_as::<GUID>(ptr).expect("GUID pointer is null")
@@ -581,7 +582,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Generates a random GUID.
     pub fn gen_guid(&self) -> GUID
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut guid = MaybeUninit::uninit();
         unsafe {
@@ -611,7 +612,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_section: impl FnOnce(&KbdSectionInfo) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         if ptr.is_null() {
@@ -637,7 +638,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         section_id: SectionId,
     ) -> Option<KbdSectionInfo>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         NonNull::new(ptr).map(KbdSectionInfo)
@@ -662,7 +663,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         project: ProjectContext,
     ) -> i32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         use ActionValueChange::*;
         let (val, valhw, relmode) = match value_change {
@@ -689,7 +690,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Returns the REAPER main window handle.
     pub fn get_main_hwnd(&self) -> Hwnd
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         require_non_null_panic(self.low.GetMainHwnd())
     }
@@ -703,7 +704,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         command_name: impl Into<ReaperStringArg<'a>>,
     ) -> Option<CommandId>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let raw_id = unsafe { self.low.NamedCommandLookup(command_name.into().as_ptr()) as u32 };
         if raw_id == 0 {
@@ -724,7 +725,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn count_tracks(&self, project: ProjectContext) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.count_tracks_unchecked(project) }
@@ -739,7 +740,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// [`count_tracks()`]: #method.count_tracks
     pub unsafe fn count_tracks_unchecked(&self, project: ProjectContext) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.CountTracks(project.to_raw()) as u32
     }
@@ -772,7 +773,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> GetMidiDevNameResult
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         if buffer_size == 0 {
             let is_present =
@@ -809,7 +810,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> GetMidiDevNameResult
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         if buffer_size == 0 {
             let is_present = unsafe {
@@ -849,7 +850,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         behavior: FxAddByNameBehavior,
     ) -> i32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.TrackFX_AddByName(
             track.as_ptr(),
@@ -874,7 +875,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         fx_chain_type: TrackFxChainType,
     ) -> Option<u32>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, FxAddByNameBehavior::Query) {
             -1 => None,
@@ -904,7 +905,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         behavior: AddFxBehavior,
     ) -> ReaperFunctionResult<u32>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, behavior.into()) {
             -1 => Err(ReaperFunctionError::new("FX couldn't be added")),
@@ -924,7 +925,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
     ) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low
             .TrackFX_GetEnabled(track.as_ptr(), fx_location.to_raw())
@@ -952,7 +953,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -976,7 +977,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_instrument(&self, track: MediaTrack) -> Option<u32>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let index = self.low.TrackFX_GetInstrument(track.as_ptr());
         if index == -1 {
@@ -1011,7 +1012,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
     ) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low
             .TrackFX_GetNumParams(track.as_ptr(), fx_location.to_raw()) as u32
@@ -1023,7 +1024,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     // TODO-low `project_config_extension_t` is not yet ported
     pub fn get_current_project_in_load_save(&self) -> Option<ReaProject>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.GetCurrentProjectInLoadSave();
         NonNull::new(ptr)
@@ -1052,7 +1053,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -1096,7 +1097,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -1148,7 +1149,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> ReaperFunctionResult<CString>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -1187,7 +1188,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         param_value: ReaperNormalizedFxParamValue,
     ) -> ReaperFunctionResult<()>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let successful = self.low.TrackFX_SetParamNormalized(
             track.as_ptr(),
@@ -1209,7 +1210,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Returns `None` if no FX window has focus.
     pub fn get_focused_fx(&self) -> Option<GetFocusedFxResult>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut tracknumber = MaybeUninit::uninit();
         let mut itemnumber = MaybeUninit::uninit();
@@ -1254,7 +1255,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Returns `None` otherwise.
     pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut tracknumber = MaybeUninit::uninit();
         let mut fxnumber = MaybeUninit::uninit();
@@ -1334,7 +1335,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
     ) -> ReaperFunctionResult<()>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let succesful = self
             .low
@@ -1366,7 +1367,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         param_index: u32,
     ) -> Option<GetParameterStepSizesResult>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut step = MaybeUninit::uninit();
         let mut small_step = MaybeUninit::uninit();
@@ -1408,7 +1409,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         param_index: u32,
     ) -> GetParamExResult
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut min_val = MaybeUninit::uninit();
         let mut max_val = MaybeUninit::uninit();
@@ -1510,7 +1511,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.undo_can_undo_2_unchecked(project, use_description) }
@@ -1529,7 +1530,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.Undo_CanUndo2(project.to_raw());
         create_passing_c_str(ptr).map(use_description)
@@ -1546,7 +1547,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.undo_can_redo_2_unchecked(project, use_description) }
@@ -1565,7 +1566,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_description: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.Undo_CanRedo2(project.to_raw());
         create_passing_c_str(ptr).map(use_description)
@@ -1580,7 +1581,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn undo_do_undo_2(&self, project: ProjectContext) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.undo_do_undo_2_unchecked(project) }
@@ -1595,7 +1596,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// [`undo_do_undo_2()`]: #method.undo_do_undo_2
     pub unsafe fn undo_do_undo_2_unchecked(&self, project: ProjectContext) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.Undo_DoUndo2(project.to_raw()) != 0
     }
@@ -1609,7 +1610,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn undo_do_redo_2(&self, project: ProjectContext) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.undo_do_redo_2_unchecked(project) }
@@ -1624,7 +1625,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// [`undo_do_redo_2()`]: #method.undo_do_redo_2
     pub unsafe fn undo_do_redo_2_unchecked(&self, project: ProjectContext) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.Undo_DoRedo2(project.to_raw()) != 0
     }
@@ -1668,7 +1669,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// [`mark_project_dirty()`]: #method.mark_project_dirty
     pub fn is_project_dirty(&self, project: ProjectContext) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.is_project_dirty_unchecked(project) }
@@ -1683,7 +1684,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// [`is_project_dirty()`]: #method.is_project_dirty
     pub unsafe fn is_project_dirty_unchecked(&self, project: ProjectContext) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.IsProjectDirty(project.to_raw()) != 0
     }
@@ -1698,7 +1699,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Returns the version of the REAPER application in which this plug-in is currently running.
     pub fn get_app_version(&self) -> ReaperVersion<'static>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.GetAppVersion();
         let version_str = unsafe { CStr::from_ptr(ptr) };
@@ -1712,7 +1713,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_track_automation_mode(&self, track: MediaTrack) -> AutomationMode
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let result = self.low.GetTrackAutomationMode(track.as_ptr());
         AutomationMode::try_from_raw(result).expect("unknown automation mode")
@@ -1721,7 +1722,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Returns the global track automation override, if any.
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         use GlobalAutomationModeOverride::*;
         match self.low.GetGlobalAutomationOverride() {
@@ -1745,7 +1746,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         chunk_name: EnvChunkName,
     ) -> Option<TrackEnvelope>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self
             .low
@@ -1769,7 +1770,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         env_name: impl Into<ReaperStringArg<'a>>,
     ) -> Option<TrackEnvelope>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self
             .low
@@ -1788,7 +1789,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         attribute_key: TrackAttributeKey,
     ) -> f64
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low
             .GetMediaTrackInfo_Value(track.as_ptr(), attribute_key.into_raw().as_ptr())
@@ -1801,7 +1802,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_count(&self, track: MediaTrack) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.TrackFX_GetCount(track.as_ptr()) as u32
     }
@@ -1815,7 +1816,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_rec_count(&self, track: MediaTrack) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.TrackFX_GetRecCount(track.as_ptr()) as u32
     }
@@ -1835,7 +1836,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
     ) -> ReaperFunctionResult<GUID>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self
             .low
@@ -1861,7 +1862,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         param_index: u32,
     ) -> ReaperFunctionResult<ReaperNormalizedFxParamValue>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let raw_value = self.low.TrackFX_GetParamNormalized(
             track.as_ptr(),
@@ -1883,7 +1884,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn get_master_track(&self, project: ProjectContext) -> MediaTrack
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.get_master_track_unchecked(project) }
@@ -1898,7 +1899,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// [`get_master_track()`]: #method.get_master_track
     pub unsafe fn get_master_track_unchecked(&self, project: ProjectContext) -> MediaTrack
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.GetMasterTrack(project.to_raw());
         require_non_null_panic(ptr)
@@ -1907,7 +1908,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Converts the given GUID to a string (including braces).
     pub fn guid_to_string(&self, guid: &GUID) -> CString
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let (guid_string, _) = with_string_buffer(64, |buffer, _| unsafe {
             self.low.guidToString(guid as *const GUID, buffer)
@@ -1918,7 +1919,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Returns the master tempo of the current project.
     pub fn master_get_tempo(&self) -> Bpm
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         Bpm(self.low.Master_GetTempo())
     }
@@ -1967,7 +1968,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Panics if the given project is not valid anymore.
     pub fn master_get_play_rate(&self, project: ProjectContext) -> PlaybackSpeedFactor
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.master_get_play_rate_unchecked(project) }
@@ -1985,7 +1986,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         project: ProjectContext,
     ) -> PlaybackSpeedFactor
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let raw = self.low.Master_GetPlayRate(project.to_raw());
         PlaybackSpeedFactor(raw)
@@ -2006,7 +2007,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         r#type: MessageBoxType,
     ) -> MessageBoxResult
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let result = unsafe {
             self.low.ShowMessageBox(
@@ -2028,7 +2029,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         guid_string: impl Into<ReaperStringArg<'a>>,
     ) -> ReaperFunctionResult<GUID>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut guid = MaybeUninit::uninit();
         unsafe {
@@ -2054,7 +2055,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         gang_behavior: GangBehavior,
     ) -> i32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.CSurf_OnInputMonitorChangeEx(
             track.as_ptr(),
@@ -2079,7 +2080,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         new_value: f64,
     ) -> ReaperFunctionResult<()>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let successful = self.low.SetMediaTrackInfo_Value(
             track.as_ptr(),
@@ -2108,7 +2109,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Converts a decibel value into a volume slider value.
     pub fn db2slider(&self, value: Db) -> VolumeSliderValue
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         VolumeSliderValue(self.low.DB2SLIDER(value.get()))
     }
@@ -2116,7 +2117,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// Converts a volume slider value into a decibel value.
     pub fn slider2db(&self, value: VolumeSliderValue) -> Db
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         Db(self.low.SLIDER2DB(value.get()))
     }
@@ -2135,7 +2136,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         track: MediaTrack,
     ) -> ReaperFunctionResult<VolumeAndPan>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
@@ -2186,7 +2187,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         gang_behavior: GangBehavior,
     ) -> ReaperVolumeValue
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let raw = self.low.CSurf_OnVolumeChangeEx(
             track.as_ptr(),
@@ -2226,7 +2227,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         gang_behavior: GangBehavior,
     ) -> ReaperPanValue
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let raw = self.low.CSurf_OnPanChangeEx(
             track.as_ptr(),
@@ -2248,7 +2249,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         master_track_behavior: MasterTrackBehavior,
     ) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe { self.count_selected_tracks_2_unchecked(project, master_track_behavior) }
@@ -2267,7 +2268,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         master_track_behavior: MasterTrackBehavior,
     ) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.CountSelectedTracks2(
             project.to_raw(),
@@ -2296,7 +2297,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         master_track_behavior: MasterTrackBehavior,
     ) -> Option<MediaTrack>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.require_valid_project(project);
         unsafe {
@@ -2322,7 +2323,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         master_track_behavior: MasterTrackBehavior,
     ) -> Option<MediaTrack>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.GetSelectedTrack2(
             project.to_raw(),
@@ -2363,7 +2364,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_track_num_sends(&self, track: MediaTrack, category: TrackSendCategory) -> u32
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.GetTrackNumSends(track.as_ptr(), category.to_raw()) as u32
     }
@@ -2384,7 +2385,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         new_value: *mut c_void,
     ) -> *mut c_void
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.GetSetTrackSendInfo(
             track.as_ptr(),
@@ -2412,7 +2413,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         send_index: u32,
     ) -> ReaperFunctionResult<MediaTrack>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.get_set_track_send_info(
             track,
@@ -2448,7 +2449,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         cache_hint: ChunkCacheHint,
     ) -> ReaperFunctionResult<CString>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         assert!(buffer_size > 0);
         let (chunk_content, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
@@ -2495,7 +2496,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         target: SendTarget,
     ) -> ReaperFunctionResult<u32>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let result = self.low.CreateTrackSend(track.as_ptr(), target.to_raw());
         if result < 0 {
@@ -2518,7 +2519,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         gang_behavior: GangBehavior,
     ) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low.CSurf_OnRecArmChangeEx(
             track.as_ptr(),
@@ -2543,7 +2544,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         cache_hint: ChunkCacheHint,
     ) -> ReaperFunctionResult<()>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let successful = self.low.SetTrackStateChunk(
             track.as_ptr(),
@@ -2578,7 +2579,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
     ) -> Option<Hwnd>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self
             .low
@@ -2595,7 +2596,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx_location: TrackFxLocation) -> bool
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         self.low
             .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
@@ -2616,7 +2617,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         value_change: ValueChange<ReaperVolumeValue>,
     ) -> ReaperVolumeValue
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let raw = self.low.CSurf_OnSendVolumeChange(
             track.as_ptr(),
@@ -2641,7 +2642,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         value_change: ValueChange<ReaperPanValue>,
     ) -> ReaperPanValue
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let raw = self.low.CSurf_OnSendPanChange(
             track.as_ptr(),
@@ -2667,7 +2668,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_action_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self
             .low
@@ -2695,7 +2696,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         command_id: CommandId,
     ) -> Option<bool>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let result = self
             .low
@@ -2717,7 +2718,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_command_name: impl FnOnce(&CStr) -> R,
     ) -> Option<R>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let ptr = self.low.ReverseNamedCommandLookup(command_id.to_raw());
         unsafe { create_passing_c_str(ptr) }.map(use_command_name)
@@ -2740,7 +2741,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         send_index: u32,
     ) -> ReaperFunctionResult<VolumeAndPan>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
@@ -2776,7 +2777,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         fx_location: TrackFxLocation,
     ) -> ReaperFunctionResult<TrackFxGetPresetIndexResult>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let mut num_presets = MaybeUninit::uninit();
         let index = self.low.TrackFX_GetPresetIndex(
@@ -2811,7 +2812,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         preset: FxPresetRef,
     ) -> ReaperFunctionResult<()>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let successful = self.low.TrackFX_SetPresetByIndex(
             track.as_ptr(),
@@ -2857,7 +2858,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         increment: i32,
     ) -> ReaperFunctionResult<()>
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         let successful =
             self.low
@@ -2887,7 +2888,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         buffer_size: u32,
     ) -> TrackFxGetPresetResult
     where
-        S: MainThreadType,
+        S: MainThreadScope,
     {
         if buffer_size == 0 {
             let state_matches_preset =
@@ -2951,7 +2952,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         use_device: impl FnOnce(&MidiInput) -> R,
     ) -> Option<R>
     where
-        S: RealTimeAudioThreadType,
+        S: RealTimeAudioThreadScope,
     {
         let ptr = self.low.GetMidiInput(device_id.to_raw());
         if ptr.is_null() {
