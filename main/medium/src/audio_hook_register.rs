@@ -3,7 +3,7 @@ use reaper_low::raw::audio_hook_register_t;
 use reaper_low::{firewall, raw};
 use std::any::Any;
 
-use std::os::raw::c_void;
+use std::os::raw::{c_int, c_void};
 use std::ptr::{null_mut, NonNull};
 
 /// Consumers need to implement this trait in order to be called back in the real-time audio thread.
@@ -63,7 +63,7 @@ impl AudioHookRegister {
 
 pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
     is_post: bool,
-    len: i32,
+    len: c_int,
     srate: f64,
     reg: *mut audio_hook_register_t,
 ) {

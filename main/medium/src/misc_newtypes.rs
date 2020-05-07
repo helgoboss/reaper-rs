@@ -19,6 +19,10 @@ use std::ffi::CStr;
 /// [^command]: A command is a function that will be executed when a particular action is requested
 /// to be run.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+// c_ulong is u64 on Linux, but on Windows u32. We don't want the consumer to deal with those
+// toolchain differences and therefore choose u32. Rationale: The REAPER header files represent
+// command IDs usually as c_int, which is basically always i32. Also makes sense ... why would
+// someone need 2^64 commands!
 pub struct CommandId(pub(crate) u32);
 
 impl CommandId {

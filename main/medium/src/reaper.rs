@@ -310,9 +310,9 @@ impl Reaper {
         let raw_id = unsafe {
             self.plugin_register_add(RegistrationObject::CommandId(
                 command_name.into().into_inner(),
-            ))? as u32
+            ))?
         };
-        Ok(CommandId(raw_id))
+        Ok(CommandId(raw_id as _))
     }
 
     /// Registers a an action into the main section.

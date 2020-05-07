@@ -1,7 +1,6 @@
 use crate::CommandId;
 use reaper_low::firewall;
-
-pub(crate) type HookCommandFn = extern "C" fn(command_id: i32, flag: i32) -> bool;
+use std::os::raw::c_int;
 
 /// Consumers need to implement this trait in order to define what should happen when a certain
 /// action is invoked.
@@ -17,19 +16,21 @@ pub trait MediumHookCommand {
     fn call(command_id: CommandId, flag: i32) -> bool;
 }
 
+pub(crate) type HookCommandFn = extern "C" fn(command_id: c_int, flag: c_int) -> bool;
+
+pub(crate) extern "C" fn delegating_hook_command<T: MediumHookCommand>(
+    command_id: c_int,
+    flag: c_int,
+) -> bool {
+    firewall(|| T::call(CommandId(command_id as _), flag)).unwrap_or(false)
+}
+
 /// Consumers need to implement this trait in order to let REAPER know if a toggleable action is
 /// currently *on* or *off*.
 pub trait MediumToggleAction {
     /// The actual callback function called by REAPER to check if an action registered by an
     /// extension has an *on* or *off* state.
     fn call(command_id: CommandId) -> ToggleActionResult;
-}
-
-/// Consumers need to implement this trait in order to get notified after an action of the main
-/// section has run.
-pub trait MediumHookPostCommand {
-    // The actual callback called after an action of the main section has been performed.
-    fn call(command_id: CommandId, flag: i32);
 }
 
 pub enum ToggleActionResult {
@@ -41,21 +42,14 @@ pub enum ToggleActionResult {
     On,
 }
 
-pub(crate) extern "C" fn delegating_hook_command<T: MediumHookCommand>(
-    command_id: i32,
-    flag: i32,
-) -> bool {
-    firewall(|| T::call(CommandId(command_id as u32), flag)).unwrap_or(false)
-}
+pub(crate) type ToggleActionFn = extern "C" fn(command_id: c_int) -> c_int;
 
-pub(crate) type HookPostCommandFn = extern "C" fn(command_id: i32, flag: i32);
-
-pub(crate) type ToggleActionFn = extern "C" fn(command_id: i32) -> i32;
-
-pub(crate) extern "C" fn delegating_toggle_action<T: MediumToggleAction>(command_id: i32) -> i32 {
+pub(crate) extern "C" fn delegating_toggle_action<T: MediumToggleAction>(
+    command_id: c_int,
+) -> c_int {
     firewall(|| {
         use ToggleActionResult::*;
-        match T::call(CommandId(command_id as u32)) {
+        match T::call(CommandId(command_id as _)) {
             NotRelevant => -1,
             Off => 0,
             On => 1,
@@ -64,11 +58,20 @@ pub(crate) extern "C" fn delegating_toggle_action<T: MediumToggleAction>(command
     .unwrap_or(-1)
 }
 
+/// Consumers need to implement this trait in order to get notified after an action of the main
+/// section has run.
+pub trait MediumHookPostCommand {
+    // The actual callback called after an action of the main section has been performed.
+    fn call(command_id: CommandId, flag: i32);
+}
+
+pub(crate) type HookPostCommandFn = extern "C" fn(command_id: c_int, flag: c_int);
+
 pub(crate) extern "C" fn delegating_hook_post_command<T: MediumHookPostCommand>(
-    command_id: i32,
-    flag: i32,
+    command_id: c_int,
+    flag: c_int,
 ) {
     firewall(|| {
-        T::call(CommandId(command_id as u32), flag);
+        T::call(CommandId(command_id as _), flag);
     });
 }
