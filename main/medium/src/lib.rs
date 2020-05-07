@@ -28,9 +28,9 @@
 //! API, but in an idiomatic and type-safe way. The result is still a plain list of functions, where
 //! each function is basically named like its original. Going all object-oriented,
 //! using reactive extensions, introducing a fluid API, finding function names that make more sense
-//! - all of that is intentionally *out of scope*. The medium-level is intended to stay close to the
-//! original SDK. This has the benefit that Lua and C++ code seen in forum threads, blogs and
-//! existing extensions can help even when writing plug-ins in Rust.
+//! ... all of that is intentionally *out of scope*. The medium-level API is intended to stay close
+//! to the original SDK. This has the benefit that ReaScript (e.g. Lua) and C++ code seen in forum
+//! threads, blogs and existing extensions can be helpful even for writing plug-ins in Rust.
 //!
 //! # Design principles
 //!

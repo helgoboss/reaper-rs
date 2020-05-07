@@ -28,15 +28,17 @@ The remaining 3 crates represent the 3 different APIs of *reaper-rs*.
 
 ### 1. Low-level API
 
-This API just consists of the raw bindings, nothing more. It's mostly unsafe and not intended to be used 
-directly. However, it serves as the foundation for other APIs and is easy to keep up-to-date because it's 
-mostly auto-generated from `reaper_plugin_functions.h`. 
+This API contains the raw bindings, nothing more. It's unsafe to a large extent and not intended to be used 
+directly. However, it serves as foundation for all the other APIs and is easy to keep up-to-date because it's 
+mostly auto-generated from `reaper_plugin_functions.h`. It also can serve as last resort if a function has not
+yet been implemented in the medium-level API (although I rather want encourage to contribute to the medium-level API
+in such a case). 
 
 Status:
 
-- ![](https://via.placeholder.com/15/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/15/ffd54f/000000?text=+) **API stability**: nearly stable (pretty polished already, no breaking changes planned)
-- ![](https://via.placeholder.com/15/aed581/000000?text=+) **Completion**: ~95% (some virtual function calls are still missing)
+- ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: nearly stable (quite polished already, breaking changes possible but not planned)
+- ![](https://via.placeholder.com/30/aed581/000000?text=+) **Completion**: ~95% (some virtual function calls still missing)
 
 Example:
 
@@ -52,14 +54,14 @@ unsafe {
 
 This API builds on top of the low-level API. It exposes the original REAPER SDK functions almost
 one to one, but in an idiomatic and type-safe way. It's a big step forward from the raw bindings
-and already quite convenient to use. Its focus is on stability rather than exploring new paradigms.
+and far more convenient to use. Its focus is on stability rather than exploring new paradigms.
 Since the high-level API is still very unstable, *this is the recommended API*.
 
 Status:
 
-- ![](https://via.placeholder.com/15/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/15/ffd54f/000000?text=+) **API stability**: nearly stable (pretty polished already, no breaking changes planned)
-- ![](https://via.placeholder.com/15/ff8a65/000000?text=+) **Completion**: ~13% (solid foundation, roughly 100 of 800 functions implemented)
+- ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: nearly stable (quite polished already, breaking changes possible but not planned)
+- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (solid foundation, roughly 100 of 800 functions implemented)
 
 Example:
 
@@ -78,9 +80,9 @@ possible to provide a very intuitive API which can be used completely without `u
 
 Status:
 
-- ![](https://via.placeholder.com/15/ff8a65/000000?text=+) **crates.io**: not published
-- ![](https://via.placeholder.com/15/ff8a65/000000?text=+) **API stability**: unstable (completely in a state of flux (but working))
-- ![](https://via.placeholder.com/15/ff8a65/000000?text=+) **Completion**: ~13% (roughly on par with the medium-level API)
+- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **crates.io**: not published
+- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **API stability**: unstable (in a state of flux, but working)
+- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (roughly on par with the medium-level API)
 
 Example:
 
@@ -94,12 +96,13 @@ project.remove_track(&track);
 
 ## Usage
 
+The procedure depends on the desired *type* of plug-in. 
 In addition to writing REAPER extension plug-ins, *reaper-rs* can be used for developing VST plug-ins 
 that use REAPER functions. No matter what you choose, the possibilities of interacting with REAPER are 
 essentially the same. The difference between the two is the context in which your plug-in will run.
 
 An extension plug-in is loaded when REAPER starts and remains active until REAPER quits, so it's 
-perfect to add some functions to REAPER which should be available globally. Popular examples are 
+perfectly suited to add some functions to REAPER which should be available globally. Popular examples are 
 [SWS](https://www.sws-extension.org/) and [ReaPack](https://reapack.com/) (both written in C++).
 
 A REAPER VST plug-in is loaded as track, take or monitoring FX as part of a particular REAPER project, 
@@ -148,8 +151,8 @@ macros, have a look into the macro implementation. No magic there.
 ### REAPER VST plug-in
 
 A REAPER VST plug-in is nothing else than a normal VST plug-in which gets access to functions from the REAPER SDK. 
-There is already a Rust crate for creating normal VST plug-ins: [vst-rs](https://crates.io/crates/vst).
-So all you need to do is write a VST plug-in via *vst-rs* and get access to the REAPER functions by letting
+Luckily, there is a Rust crate for creating VST plug-ins already: [vst-rs](https://crates.io/crates/vst).
+So all you need to do is write a VST plug-in via *vst-rs* and gain access to the REAPER functions by letting
 *reaper-rs* access the `HostCallback` function.
 
 Add this to your `Cargo.toml`:
@@ -158,7 +161,6 @@ Add this to your `Cargo.toml`:
 [dependencies]
 reaper-rs-low = "0.1.0"
 reaper-rs-medium = "0.1.0"
-reaper-rs-macros = "0.1.0"
 vst = "0.2.0"
 
 [lib]
@@ -203,11 +205,13 @@ impl Plugin for MyReaperVstPlugin {
 vst::plugin_main!(MyReaperVstPlugin);
 ```
     
-## Contributing
+## Contribute
 
 Contributions are very welcome! Especially to the medium-level API.
 
 ### Build
+
+Thanks to Cargo, building *reaper-rs* is not a big deal.  
 
 TODO
  
@@ -216,9 +220,50 @@ TODO
 
 #### Windows
 
-TODO
+In the following you will find the instructions for Windows 10. Points where you have to consider the target 
+architecture (REAPER 32-bit vs. 64-bit) are marked with :star: (the instructions assume 64-bit).
 
-- rustup default nightly-x86_64-pc-windows-msvc
+1. Setup "Build tools for Visual Studio 2019"
+    - Rust uses native build toolchains. On Windows, it's necessary to use the MSVC (Microsoft Visual Studio
+      C++) toolchain because REAPER plug-ins only work with that.
+    - [Visual Studio downloads](https://visualstudio.microsoft.com/downloads/) → All downloads → Tools for Visual Studio 2019
+      → Build Tools for Visual Studio 2019
+    - Start it and follow the installer instructions
+    - Required components
+        - Workloads tab
+            - "C++ build tools" (large box on the left)
+            - Make sure "Windows 10 SDK" is checked on the right side (usually it is)
+        - Language packs
+            - English
+2. Setup Rust
+    - [Download](https://www.rust-lang.org/tools/install)  and execute `rustup-init.exe` 
+    - Accept the defaults
+    - Set the correct toolchain default (*nightly* toolchain is not necessary if you only want to build 
+      `reaper_rs_low` and `reaper_rs_medium`) :star:
+        ```batch
+        rustup default nightly-x86_64-pc-windows-msvc
+        ```
+3. Download and install [Git for Windows](https://git-scm.com/download/win)
+4. Clone the *reaper-rs* Git repository
+    ```batch
+    git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git`
+    ```
+5. Build *reaper-rs*
+    ```batch
+    cd reaper-rs
+    cargo build
+    ```
+
+This is how you regenerate the low-level API:
+
+1. [Download](https://releases.llvm.org/download.html) and install LLVM for Windows 64-bit :star:
+2. Build with the `generate` feature enabled
+    ```batch
+    cd main\low
+    cargo build --features generate
+    ``` 
+
+
 
 #### Linux
 
@@ -255,7 +300,7 @@ That's it!
 
 #### Mac OS X
 
-TODO
+*To be done*
 
 ### Test
 
@@ -266,16 +311,16 @@ When building the complete *reaper-rs* workspace, 3 test crates are produced:
 - `reaper_rs_test_vst_plugin`
 
 `reaper_rs_test` provides an integration test that is supposed to be run in REAPER itself. This is the main testing
-mechanism for *reaper-rs*. `reaper_rs_test_extension_plugin` and `reaper_rs_test_vst_plugin` are both test plug-ins which register the
-integration test as REAPER action.
+mechanism for *reaper-rs*. `reaper_rs_test_extension_plugin` and `reaper_rs_test_vst_plugin` are both test plug-ins 
+which register the integration test as REAPER action.
 
 Running the integration test is not only a good way to find *reaper-rs* regression bugs, but can also help to expose
-subtle changes in the REAPER SDK behavior itself. Currently, the test assertions are very strict to reveal even
+subtle changes in the REAPER SDK itself. Currently, the test assertions are very strict in order to reveal even
 the slightest deviations.
 
 ## Project background
 
 *reaper-rs* has been born as part of an effort to port the REAPER VST plug-in 
 [ReaLearn](https://www.helgoboss.org/projects/realearn/) to Rust and publish it as open-source project. The high-level
-API is heavily inspired by ReaPlus, a C++ facade for the REAPER SDK which is a basic building block of the original 
+API is heavily inspired by ReaPlus, a C++ facade for the REAPER SDK, which is a basic building block of the original 
 ReaLearn.
