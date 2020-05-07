@@ -278,6 +278,10 @@ This is how you regenerate the low-level API:
    cd main\low
    cargo build --features generate
    ```
+3. Format `main\low\src\reaper.rs` properly
+    ```batch
+    cargo fmt
+    ```
 
 #### Linux
 
