@@ -1,6 +1,6 @@
 #![doc(html_root_url = "https://docs.rs/reaper-rs-medium/0.1.0")]
 
-//! This crate contains the medium-level API of *reaper-rs*.
+//! This crate contains the medium-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
 //! To get started, have a look at the [`Reaper`] struct.
 //!
@@ -29,7 +29,7 @@
 //! each function is basically named like its original. Going all object-oriented,
 //! using reactive extensions, introducing a fluid API, finding function names that make more sense
 //! ... all of that is intentionally *out of scope*. The medium-level API is intended to stay close
-//! to the original SDK. This has the benefit that ReaScript (e.g. Lua) and C++ code seen in forum
+//! to the original API. This has the benefit that ReaScript (e.g. Lua) and C++ code seen in forum
 //! threads, blogs and existing extensions can be helpful even for writing plug-ins in Rust.
 //!
 //! # Design principles
@@ -129,7 +129,7 @@
 //!   Example: [`string_to_guid()`](struct.ReaperFunctions.html#method.string_to_guid)
 //! - Strings in return positions are dealt with in different ways:
 //!     - When returning an owned string, we return `CString` (because that's what comes closest to
-//!       the original REAPER SDK, see [`ReaperStringArg`](struct.ReaperStringArg.html)). Consumers
+//!       the original REAPER API, see [`ReaperStringArg`](struct.ReaperStringArg.html)). Consumers
 //!       can easily convert them to regular Rust strings when needed. Example:
 //!       [`guid_to_string()`](struct.ReaperFunctions.html#method.guid_to_string)
 //!     - When returning a string owned by REAPER and we know that string has a static lifetime, we

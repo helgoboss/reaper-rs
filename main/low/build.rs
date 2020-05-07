@@ -5,8 +5,8 @@ fn main() {
     compile_glue_code();
 }
 
-/// Compiles C++ glue code. This is necessary to interact with those parts of the REAPER SDK that
-/// use pure virtual interface classes and therefore the C++ ABI.
+/// Compiles C++ glue code. This is necessary to interact with those parts of the REAPER C++ API
+/// that use pure virtual interface classes and therefore the C++ ABI.
 fn compile_glue_code() {
     cc::Build::new()
         .cpp(true)

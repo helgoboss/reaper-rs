@@ -1,3 +1,8 @@
+#![doc(html_root_url = "https://docs.rs/reaper-rs-low/0.1.0")]
+
+//! This crate is part of [reaper-rs](https://github.com/helgoboss/reaper-rs) and contains a
+//! [simple attribute macro](attr.reaper_extension_plugin.html) to simplify bootstrapping REAPER
+//! extension plug-ins.
 use darling::FromMeta;
 use proc_macro::TokenStream;
 use quote::quote;

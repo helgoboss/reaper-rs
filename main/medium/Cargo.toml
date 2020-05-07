@@ -2,12 +2,17 @@
 name = "reaper-rs-medium"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
+license = "MIT"
+description = "Bindings for the REAPER C++ API - medium-level API"
+repository = "https://github.com/helgoboss/reaper-rs"
+readme = "../../README.md"
+keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
 edition = "2018"
+categories = ["api-bindings", "multimedia", "multimedia::audio"]
 
 [dependencies]
 c_str_macro = "1.0.2"
 derive_more = "0.99.5"
 reaper-rs-low = { path = '../low' }
-# TODO-release Use crates.io version
 helgoboss-midi = { path = '../../../helgoboss-midi-rs'}
 enumflags2 = { version = "^0.6", features = ["not_literal"] }

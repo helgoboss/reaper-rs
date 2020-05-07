@@ -1,6 +1,6 @@
 #![doc(html_root_url = "https://docs.rs/reaper-rs-low/0.1.0")]
 
-//! This crate contains the low-level API of *reaper-rs*.
+//! This crate contains the low-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
 //! It is not recommended to use this API directly because it just exposes the raw REAPER C++
 //! functions, types and constants one to one in Rust. If you want idiomatic Rust, type safety and
@@ -28,8 +28,8 @@
 //!
 //! ## Goal
 //!
-//! The ultimate goal of the low-level API is to be on par with the REAPER C++ SDK, meaning
-//! that everything which is possible with the REAPER C++ SDK is also possible with the *reaper-rs*
+//! The ultimate goal of the low-level API is to be on par with the REAPER C++ API, meaning
+//! that everything which is possible with the REAPER C++ API is also possible with the *reaper-rs*
 //! low-level API. Improvements regarding safety, convenience or style are not in its scope. It
 //! should serve as a base for more idiomatic APIs built on top of it.
 //!
@@ -41,9 +41,9 @@
 //! ## C++ glue code
 //!
 //! There's some code which is not auto-generated, most notably the code to "restore" functionality
-//! which "got lost in translation". The problem is that some parts of the REAPER SDK not just use
-//! C but also C++ features, in particular virtual base classes. Rust can't call virtual functions
-//! or implement them.
+//! which "got lost in translation". The problem is that some parts of the REAPER C++ API not just
+//! use C but also C++ features, in particular virtual base classes. Rust can't call virtual
+//! functions or implement them.
 //!
 //! The solution is to take a detour via C++ glue code:
 //!
@@ -64,7 +64,7 @@
 mod bindings;
 
 pub mod raw {
-    //! Exposes important raw types, functions and constants from the C++ REAPER SDK.
+    //! Exposes important raw types, functions and constants from the C++ REAPER API.
     pub use super::bindings::root::{
         audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, reaper_plugin_info_t,
         IReaperControlSurface, KbdCmd, KbdSectionInfo, MIDI_event_t, MIDI_eventlist, MediaItem,

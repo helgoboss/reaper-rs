@@ -1,6 +1,6 @@
 # reaper-rs
 
-[REAPER](https://www.reaper.fm/) bindings for the [Rust](https://www.rust-lang.org/) programming language
+[Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
 
 [![Latest Version](https://img.shields.io/crates/v/reaper-rs.svg)](https://crates.io/crates/reaper-rs)
 [![documentation](https://docs.rs/reaper-rs/badge.svg)](https://docs.rs/reaper-rs)
@@ -10,8 +10,8 @@
 
 *reaper-rs* allows programmers to write plug-ins for the [REAPER](https://www.reaper.fm/) DAW 
 (digital audio workstation) in the  [Rust](https://www.rust-lang.org/) programming 
-language. It does so by providing raw Rust bindings to the 
-[REAPER C++ SDK](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
+language. It does so by providing raw Rust bindings for the 
+[REAPER C++ API](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
 
 ## Basics
 
@@ -52,7 +52,7 @@ unsafe {
 
 ### 2. Medium-level API
 
-This API builds on top of the low-level API. It exposes the original REAPER SDK functions almost
+This API builds on top of the low-level API. It exposes the original REAPER C++ API functions almost
 one to one, but in an idiomatic and type-safe way. It's a big step forward from the raw bindings
 and far more convenient to use. Its focus is on stability rather than exploring new paradigms.
 Since the high-level API is still very unstable, *this is the recommended API*.
@@ -75,7 +75,7 @@ unsafe { functions.delete_track(track); }
 ### 3. High-level API
 
 This API builds on top of the medium-level API. It makes a break with the "flat functions" nature of the original 
-REAPER SDK and replaces it with an API that uses reactive and object-oriented paradigms. This break makes it
+REAPER C++ API and replaces it with an API that uses reactive and object-oriented paradigms. This break makes it
 possible to provide a very intuitive API which can be used completely without `unsafe`. 
 
 Status:
@@ -150,7 +150,7 @@ macros, have a look into the macro implementation. No magic there.
 
 ### REAPER VST plug-in
 
-A REAPER VST plug-in is nothing else than a normal VST plug-in which gets access to functions from the REAPER SDK. 
+A REAPER VST plug-in is nothing else than a normal VST plug-in which gets access to functions from the REAPER C++ API. 
 Luckily, there is a Rust crate for creating VST plug-ins already: [vst-rs](https://crates.io/crates/vst).
 So all you need to do is write a VST plug-in via *vst-rs* and gain access to the REAPER functions by letting
 *reaper-rs* access the `HostCallback` function.
@@ -310,12 +310,12 @@ mechanism for *reaper-rs*. `reaper_rs_test_extension_plugin` and `reaper_rs_test
 which register the integration test as REAPER action.
 
 Running the integration test is not only a good way to find *reaper-rs* regression bugs, but can also help to expose
-subtle changes in the REAPER SDK itself. Currently, the test assertions are very strict in order to reveal even
+subtle changes in the REAPER C++ API itself. Currently, the test assertions are very strict in order to reveal even
 the slightest deviations.
 
 ## Project background
 
 *reaper-rs* has been born as part of an effort to port the REAPER VST plug-in 
 [ReaLearn](https://www.helgoboss.org/projects/realearn/) to Rust and publish it as open-source project. The high-level
-API is heavily inspired by ReaPlus, a C++ facade for the REAPER SDK, which is a basic building block of the original 
-ReaLearn.
+API is heavily inspired by ReaPlus, a C++ facade for the native REAPER C++ API, which is a basic
+building block of the original ReaLearn.

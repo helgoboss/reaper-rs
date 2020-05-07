@@ -1,5 +1,5 @@
 #![feature(fn_traits, clamp, backtrace)]
-//! This crate contains the high-level API of *reaper-rs*.
+//! This crate contains the high-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
 //! **This API is not polished and will still undergo many changes!**
 //!

@@ -693,7 +693,7 @@ impl Reaper {
     ///
     /// If you really need absolutely zero-overhead, you need to resort to unsafe functions. But
     /// this should be done only in situations when you are very constrained, e.g. in audio thread
-    /// (which is forbidden to call most of the REAPER SDK functions anyway).
+    /// (which is forbidden to call most of the REAPER functions anyway).
     ///
     /// Look into [from_vec_unchecked](CString::from_vec_unchecked) or
     /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.

@@ -14,8 +14,8 @@ use std::os::raw::c_char;
 /// ## Why C strings and not regular Rust strings?
 ///
 /// We use a sort of C string because that perfectly accounts for the medium-level API's design goal
-/// to be still as close to the original REAPER SDK as possible (while at the same time introducing
-/// Rust's type safety). The C++ REAPER SDK generally expects C strings (`*const c_char`).
+/// to be still as close to the original REAPER API as possible (while at the same time introducing
+/// Rust's type safety). The C++ REAPER API generally expects C strings (`*const c_char`).
 /// Fortunately UTF-8 encoded ones - which makes a character set conversion unnecessary.
 ///
 /// ## Why `&CStr` and not `*const c_char`?
