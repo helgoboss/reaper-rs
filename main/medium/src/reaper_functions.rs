@@ -29,7 +29,7 @@ use std::mem::MaybeUninit;
 use std::path::PathBuf;
 
 /// Represents a privilege to execute functions which are only safe to execute from the main thread.
-pub trait MainThreadOnly {}
+pub trait MainThreadOnly: private::Sealed {}
 
 /// A usage scope which unlocks all functions that are safe to execute from the main thread.
 #[derive(Debug, Default)]
@@ -39,7 +39,7 @@ impl MainThreadOnly for MainThreadScope {}
 
 /// Represents a privilege to execute functions which are only safe to execute from the real-time
 /// audio thread.
-pub trait AudioThreadOnly {}
+pub trait AudioThreadOnly: private::Sealed {}
 
 /// A usage scope which unlocks all functions that are safe to execute from the real-time audio
 /// thread.
@@ -3135,3 +3135,12 @@ const ZERO_GUID: GUID = GUID {
     Data3: 0,
     Data4: [0; 8],
 };
+
+mod private {
+    use crate::{MainThreadScope, RealTimeAudioThreadScope};
+
+    pub trait Sealed {}
+
+    impl Sealed for MainThreadScope {}
+    impl Sealed for RealTimeAudioThreadScope {}
+}
