@@ -13,5 +13,5 @@ reaper-low = { path = "../../main/low" }
 c_str_macro = "1.0.2"
 rxrust = "0.8.3"
 slog = "2.5.2"
-helgoboss-midi = { path = '../../../helgoboss-midi-rs' }
+helgoboss-midi = { version = "0.1.0" }
 approx = "0.3.2"

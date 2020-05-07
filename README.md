@@ -18,7 +18,7 @@ _reaper-rs_ consists of 4 production crates:
 - [reaper-macros](https://crates.io/crates/reaper-macros)
 - [reaper-low](https://crates.io/crates/reaper-low)
 - [reaper-medium](https://crates.io/crates/reaper-medium)
-- [reaper-high](https://crates.io/crates/reaper-high)
+- `reaper-high` (not yet published)
 
 `reaper-macros` provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
 

@@ -22,7 +22,8 @@ use std::collections::{HashMap, HashSet};
 
 /// This is the main hub for accessing medium-level API functions.
 ///
-/// In order to use this struct, you first must obtain an instance of it by invoking [`new()`].
+/// In order to use this struct, you first must obtain an instance of it by invoking [`new()`]
+/// or [`load()`].
 /// This struct itself is limited to REAPER functions for registering/unregistering certain things.
 /// You can access all the other functions by calling [`functions()`].
 ///
@@ -52,6 +53,7 @@ use std::collections::{HashMap, HashSet};
 /// performance issues if we can avoid it?
 ///
 /// [`new()`]: #method.new
+/// [`load()`]: #method.load
 /// [`functions()`]: #method.functions
 #[derive(Debug, Default)]
 pub struct Reaper {

@@ -14,7 +14,7 @@ categories = ["api-bindings", "multimedia", "multimedia::audio"]
 c_str_macro = "1.0.2"
 derive_more = "0.99.5"
 reaper-low = { path = '../low' }
-helgoboss-midi = { path = '../../../helgoboss-midi-rs'}
+helgoboss-midi = { version = "0.1.0" }
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
 
 [dev-dependencies]
