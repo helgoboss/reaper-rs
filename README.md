@@ -145,7 +145,7 @@ fn plugin_main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
 ```
 
 The macro doesn't do much more than exposing an `extern "C" ReaperPluginEntry()` function which calls
-functions `reaper_rs_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use
+`reaper_rs_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use
 macros, have a look into the macro implementation. No magic there.
 
 ### REAPER VST plug-in
@@ -212,11 +212,6 @@ Contributions are very welcome! Especially to the medium-level API.
 ### Build
 
 Thanks to Cargo, building *reaper-rs* is not a big deal.  
-
-TODO
- 
-- Regenerating the low-level functions can be done via
-    `cargo build --features "generate"` and should be executed in Windows
 
 #### Windows
 

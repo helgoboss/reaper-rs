@@ -180,9 +180,50 @@ impl Reaper {
     ///
     /// REAPER calls hook commands whenever an action is requested to be run.
     ///
+    /// This method doesn't take a closure because REAPER expects a plain function pointer here.
+    /// Unlike [`audio_reg_hardware_hook_add`](#method.audio_reg_hardware_hook_add), REAPER
+    /// doesn't offer the possibiity to pass a context to the function. So we can't access any
+    /// context data in the hook command. You will probably have to use a kind of static
+    /// variable which contains command IDs in order to make proper use of this method. The
+    /// high-level API makes that much easier (it just takes an arbitrary closure). For the
+    /// medium-level API this is out of scope.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let mut reaper = reaper_rs_medium::Reaper::default();
+    /// use reaper_rs_medium::{MediumHookCommand, CommandId};
+    ///
+    /// // Usually you would use a dynamic command ID that you have obtained via
+    /// // `plugin_register_add_command_id()`. Unfortunately that command ID must be exposed as
+    /// // a static variable. The high-level API provides a solution for that.
+    /// const MY_COMMAND_ID: CommandId = unsafe { CommandId::new_unchecked(42000) };
+    ///
+    /// struct MyHookCommand {}
+    ///
+    /// impl MediumHookCommand for MyHookCommand {
+    ///     fn call(command_id: CommandId, _flag: i32) -> bool {
+    ///         if command_id != MY_COMMAND_ID {
+    ///             return false;
+    ///         }           
+    ///         println!("Executing my command!");
+    ///         true
+    ///     }
+    /// }
+    /// reaper.plugin_register_add_hookcommand::<MyHookCommand>();
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
+    ///
     /// # Errors
     ///
     /// Returns an error if the registration failed.
+    ///
+    /// # Design
+    ///
+    /// You will note that this method has a somewhat strange signature: It expects a type parameter
+    /// only, not a function pointer. That allows us to lift the API to medium-level style.
+    /// The alternative would have been to expect a function pointer, but then consumers would have
+    /// to deal with raw types.
     pub fn plugin_register_add_hookcommand<T: MediumHookCommand>(
         &mut self,
     ) -> ReaperFunctionResult<()> {
@@ -206,6 +247,9 @@ impl Reaper {
     /// Registers a toggle action.
     ///
     /// REAPER calls toggle actions whenever it wants to know the on/off state of an action.
+    ///
+    /// See [`plugin_register_add_hookcommand()`](#method.plugin_register_add_hookcommand) for an
+    /// example.
     ///
     /// # Errors
     ///
@@ -233,6 +277,9 @@ impl Reaper {
     /// Registers a hook post command.
     ///
     /// REAPER calls hook post commands whenever an action of the main section has been performed.
+    ///
+    /// See [`plugin_register_add_hookcommand()`](#method.plugin_register_add_hookcommand) for an
+    /// example.
     ///
     /// # Errors
     ///

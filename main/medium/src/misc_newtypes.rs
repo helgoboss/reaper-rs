@@ -32,6 +32,15 @@ impl CommandId {
         CommandId(value)
     }
 
+    /// Creates a command ID without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is greater than 0.
+    pub const unsafe fn new_unchecked(value: u32) -> CommandId {
+        CommandId(value)
+    }
+
     /// Returns the wrapped value.
     pub const fn get(&self) -> u32 {
         self.0
