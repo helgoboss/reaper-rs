@@ -1,27 +1,19 @@
-
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
-use reaper_rs_low::{
-    add_cpp_control_surface, firewall, raw, remove_cpp_control_surface, IReaperControlSurface,
-    Reaper,
-};
+use reaper_rs_low::raw;
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
-    require_non_null_panic, ActionValueChange, AddFxBehavior, AudioHookRegister, AutomationMode,
-    Bpm, ChunkCacheHint, CommandId, Db, DelegatingControlSurface, EnvChunkName,
-    FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
+    require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint,
+    CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
     GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
-    MediaTrack, MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand,
-    MediumHookPostCommand, MediumReaperControlSurface, MediumToggleAction, MessageBoxResult,
-    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId, NotificationBehavior,
-    PlaybackSpeedFactor, ProjectContext, ProjectPart, ProjectRef, ReaProject, ReaperFunctionError,
-    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer,
-    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput,
-    RegistrationObject, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
+    NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectRef, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue,
+    ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode,
+    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
     TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
     TrackRef, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
@@ -29,10 +21,7 @@ use crate::{
 
 use helgoboss_midi::ShortMessage;
 use reaper_rs_low;
-use reaper_rs_low::raw::{
-    audio_hook_register_t, gaccel_register_t, midi_Input, GUID, UNDO_STATE_ALL,
-};
-
+use reaper_rs_low::raw::GUID;
 
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -426,7 +415,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         S: MainThreadType,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Name, null_mut());
-        unsafe { create_passing_c_str(ptr as *const c_char) }.map(use_name)
+        create_passing_c_str(ptr as *const c_char).map(use_name)
     }
 
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
@@ -442,7 +431,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         S: MainThreadType,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
-        let irecmon = unsafe { deref_as::<i32>(ptr) }.expect("irecmon pointer is null");
+        let irecmon = deref_as::<i32>(ptr).expect("irecmon pointer is null");
         InputMonitoringMode::try_from_raw(irecmon).expect("unknown input monitoring mode")
     }
 
@@ -459,8 +448,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         S: MainThreadType,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
-        let rec_input_index =
-            unsafe { deref_as::<i32>(ptr) }.expect("rec_input_index pointer is null");
+        let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
         if rec_input_index < 0 {
             None
         } else {
@@ -502,7 +490,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
         S: MainThreadType,
     {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
-        unsafe { deref_as::<GUID>(ptr) }.expect("GUID pointer is null")
+        deref_as::<GUID>(ptr).expect("GUID pointer is null")
     }
 
     /// Returns whether we are in the real-time audio thread.
@@ -1999,7 +1987,7 @@ impl<S: ThreadType> ReaperFunctions<S> {
     where
         S: MainThreadType,
     {
-        let raw = unsafe { self.low.Master_GetPlayRate(project.to_raw()) };
+        let raw = self.low.Master_GetPlayRate(project.to_raw());
         PlaybackSpeedFactor(raw)
     }
 

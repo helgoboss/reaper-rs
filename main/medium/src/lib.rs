@@ -345,7 +345,7 @@ mod reaper_functions;
 pub use reaper_functions::*;
 
 mod util;
-pub use util::*;
+use util::*;
 
 mod string_types;
 pub use string_types::*;

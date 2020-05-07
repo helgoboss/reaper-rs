@@ -61,9 +61,6 @@ impl AudioHookRegister {
     }
 }
 
-pub(crate) type OnAudioBufferFn =
-    extern "C" fn(is_post: bool, len: i32, srate: f64, reg: *mut audio_hook_register_t);
-
 pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
     is_post: bool,
     len: i32,
