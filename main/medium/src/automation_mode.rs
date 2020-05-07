@@ -1,6 +1,5 @@
 use crate::TryFromRawError;
 
-
 /// Global override of track automation modes.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum GlobalAutomationModeOverride {
@@ -56,7 +55,6 @@ impl AutomationMode {
 #[cfg(test)]
 mod test {
     use super::*;
-    
 
     #[test]
     fn to_int() {
