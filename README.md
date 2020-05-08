@@ -215,24 +215,44 @@ vst::plugin_main!(MyReaperVstPlugin);
 
 Contributions are very welcome! Especially to the medium-level API.
 
+### Directory structure
+
+| Directory entry               | Content                                                 |
+| ----------------------------- | ------------------------------------------------------- |
+| `/`                           | Workspace root                                          |
+| `/main`                       | Production code                                         |
+| `/main/high`                  | High-level API (`reaper-high`)                          |
+| `/main/low`                   | Low-level API (`reaper-low`)                            |
+| `/main/macros`                | Macros (`reaper-macros`)                                |
+| `/main/medium`                | Medium-level API (`reaper-medium`)                      |
+| `/test`                       | Integration test code                                   |
+| `/test/test`                  | Integration test logic (`reaper-test`)                  |
+| `/test/test-extension-plugin` | Test extension plug-in (`reaper-test-extension-plugin`) |
+| `/test/test-vst-plugin`       | Test VST plug-in (`reaper-test-vst-plugin`)             |
+
+### Low-level API code generation
+
+`reaper-low` has several generated files, namely `bindings.rs` and `reaper.rs`.
+These files are not generated with each build though. In order to decrease build time and improve
+IDE/debugging support, they are included in the Git repository like any other Rust source.
+
+You can generate these files on demand (see build section), e.g. after you have adjusted
+`reaper_plugin_functions.h`. Depending on the operating system on which you generate the
+files, `bindings.rs` can look quite differently (whereas `reaper.rs` should end up the
+same). The reason is that `reaper_plugin.h` includes `windows.h` on Windows only.
+On Linux and Mac OS X, it uses `swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement.
+
+Most parts of `bindings.rs` are used to generate `reaper.rs` and otherwise ignored, but a few
+structs, types and constants are published as part of the `raw` module. In order to have
+deterministic builds, for now the convention is to only commit files generated on Linux.
+Rationale: `swell.h` is a sort of subset of `windows.h`, so if things work
+with the subset, they also should work for the superset. The inverse isn't true.
+It's not clear yet whether this strategy is 100% correct, but for now it seems about right. 
+Besides, having the files generated on Linux is good for CI.
+
 ### Build
 
 Thanks to Cargo, building _reaper-rs_ is not a big deal.
-
-At first you might want to become familiar with the directory structure:
-
-| Directory entry               | Content                           | 
-| ----------------------------- | --------------------------------- |
-| `/`                           | Workspace root              |
-| `/main`                       | Production code                   |
-| `/main/high`                  | `reaper-high`                  |
-| `/main/low`                   | `reaper-low`                   |
-| `/main/macros`                | `reaper-macros`                |
-| `/main/medium`                | `reaper-medium`                |
-| `/test`                       | Integration test code             |
-| `/test/test`                  | `reaper-test`                  |
-| `/test/test-extension-plugin` | `reaper-test-extension-plugin` |
-| `/test/test-vst-plugin`       | `reaper-test-vst-plugin`       | 
 
 #### Windows
 
@@ -270,23 +290,19 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star: (the instructions
    cargo build
    ```
 
-This is how you regenerate the low-level API:
+Regenerate the low-level API (the resulting code should not be pushed!):
 
 1. [Download](https://releases.llvm.org/download.html) and install LLVM for Windows 64-bit :star:
 2. Build with the `generate` feature enabled
    ```batch
    cd main\low
    cargo build --features generate
+   cargo fmt
    ```
-3. Format `main\low\src\reaper.rs` properly
-    ```batch
-    cargo fmt
-    ```
 
 #### Linux
 
-Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS installation and make the test plug-ins
-available in REAPER:
+Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS installation:
 
 ```sh
 # Install basic stuff
@@ -304,17 +320,25 @@ cd Downloads
 git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git
 cd reaper-rs
 cargo build
-
-# At this point, download REAPER for Linux and start it at least one time!
-# ...
-
-# Then continue
-ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_test_extension_plugin.so
-mkdir -p $HOME/.config/REAPER/UserPlugins/FX
-ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_vst_plugin.so $HOME/.config/REAPER/UserPlugins/FX/reaper_test_extension_plugin.so
 ```
 
-That's it!
+Make the test plug-ins available in REAPER:
+
+1. Download REAPER for Linux and start it at least one time.
+2. Create symbolic links
+   ```sh
+   ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_test_extension_plugin.so
+   mkdir -p $HOME/.config/REAPER/UserPlugins/FX
+   ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_vst_plugin.so $HOME/.config/REAPER/UserPlugins/FX/reaper_test_extension_plugin.so
+   ```
+
+Regenerate the low-level API:
+
+```sh
+cd main/low
+cargo build --features generate
+cargo fmt
+```
 
 #### Mac OS X
 

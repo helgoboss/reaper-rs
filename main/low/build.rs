@@ -26,9 +26,9 @@ mod codegen {
 
     /// Generates the low-level `bindings.rs` file from REAPER C++ headers
     fn generate_bindings() {
-        println!("cargo:rerun-if-changed=src/bindgen.hpp");
+        println!("cargo:rerun-if-changed=src/wrapper.hpp");
         let bindings = bindgen::Builder::default()
-            .header("src/bindgen.hpp")
+            .header("src/wrapper.hpp")
             .opaque_type("timex")
             .derive_eq(true)
             .derive_partialeq(true)

@@ -11,10 +11,7 @@ pub mod root {
     use self::super::root;
     pub const VK_LBUTTON: u32 = 1;
     pub const VK_RBUTTON: u32 = 2;
-    pub const VK_CANCEL: u32 = 3;
     pub const VK_MBUTTON: u32 = 4;
-    pub const VK_XBUTTON1: u32 = 5;
-    pub const VK_XBUTTON2: u32 = 6;
     pub const VK_BACK: u32 = 8;
     pub const VK_TAB: u32 = 9;
     pub const VK_CLEAR: u32 = 12;
@@ -24,18 +21,7 @@ pub mod root {
     pub const VK_MENU: u32 = 18;
     pub const VK_PAUSE: u32 = 19;
     pub const VK_CAPITAL: u32 = 20;
-    pub const VK_KANA: u32 = 21;
-    pub const VK_HANGEUL: u32 = 21;
-    pub const VK_HANGUL: u32 = 21;
-    pub const VK_JUNJA: u32 = 23;
-    pub const VK_FINAL: u32 = 24;
-    pub const VK_HANJA: u32 = 25;
-    pub const VK_KANJI: u32 = 25;
     pub const VK_ESCAPE: u32 = 27;
-    pub const VK_CONVERT: u32 = 28;
-    pub const VK_NONCONVERT: u32 = 29;
-    pub const VK_ACCEPT: u32 = 30;
-    pub const VK_MODECHANGE: u32 = 31;
     pub const VK_SPACE: u32 = 32;
     pub const VK_PRIOR: u32 = 33;
     pub const VK_NEXT: u32 = 34;
@@ -47,15 +33,11 @@ pub mod root {
     pub const VK_DOWN: u32 = 40;
     pub const VK_SELECT: u32 = 41;
     pub const VK_PRINT: u32 = 42;
-    pub const VK_EXECUTE: u32 = 43;
     pub const VK_SNAPSHOT: u32 = 44;
     pub const VK_INSERT: u32 = 45;
     pub const VK_DELETE: u32 = 46;
     pub const VK_HELP: u32 = 47;
     pub const VK_LWIN: u32 = 91;
-    pub const VK_RWIN: u32 = 92;
-    pub const VK_APPS: u32 = 93;
-    pub const VK_SLEEP: u32 = 95;
     pub const VK_NUMPAD0: u32 = 96;
     pub const VK_NUMPAD1: u32 = 97;
     pub const VK_NUMPAD2: u32 = 98;
@@ -96,111 +78,8 @@ pub mod root {
     pub const VK_F22: u32 = 133;
     pub const VK_F23: u32 = 134;
     pub const VK_F24: u32 = 135;
-    pub const VK_NAVIGATION_VIEW: u32 = 136;
-    pub const VK_NAVIGATION_MENU: u32 = 137;
-    pub const VK_NAVIGATION_UP: u32 = 138;
-    pub const VK_NAVIGATION_DOWN: u32 = 139;
-    pub const VK_NAVIGATION_LEFT: u32 = 140;
-    pub const VK_NAVIGATION_RIGHT: u32 = 141;
-    pub const VK_NAVIGATION_ACCEPT: u32 = 142;
-    pub const VK_NAVIGATION_CANCEL: u32 = 143;
     pub const VK_NUMLOCK: u32 = 144;
     pub const VK_SCROLL: u32 = 145;
-    pub const VK_OEM_NEC_EQUAL: u32 = 146;
-    pub const VK_OEM_FJ_JISHO: u32 = 146;
-    pub const VK_OEM_FJ_MASSHOU: u32 = 147;
-    pub const VK_OEM_FJ_TOUROKU: u32 = 148;
-    pub const VK_OEM_FJ_LOYA: u32 = 149;
-    pub const VK_OEM_FJ_ROYA: u32 = 150;
-    pub const VK_LSHIFT: u32 = 160;
-    pub const VK_RSHIFT: u32 = 161;
-    pub const VK_LCONTROL: u32 = 162;
-    pub const VK_RCONTROL: u32 = 163;
-    pub const VK_LMENU: u32 = 164;
-    pub const VK_RMENU: u32 = 165;
-    pub const VK_BROWSER_BACK: u32 = 166;
-    pub const VK_BROWSER_FORWARD: u32 = 167;
-    pub const VK_BROWSER_REFRESH: u32 = 168;
-    pub const VK_BROWSER_STOP: u32 = 169;
-    pub const VK_BROWSER_SEARCH: u32 = 170;
-    pub const VK_BROWSER_FAVORITES: u32 = 171;
-    pub const VK_BROWSER_HOME: u32 = 172;
-    pub const VK_VOLUME_MUTE: u32 = 173;
-    pub const VK_VOLUME_DOWN: u32 = 174;
-    pub const VK_VOLUME_UP: u32 = 175;
-    pub const VK_MEDIA_NEXT_TRACK: u32 = 176;
-    pub const VK_MEDIA_PREV_TRACK: u32 = 177;
-    pub const VK_MEDIA_STOP: u32 = 178;
-    pub const VK_MEDIA_PLAY_PAUSE: u32 = 179;
-    pub const VK_LAUNCH_MAIL: u32 = 180;
-    pub const VK_LAUNCH_MEDIA_SELECT: u32 = 181;
-    pub const VK_LAUNCH_APP1: u32 = 182;
-    pub const VK_LAUNCH_APP2: u32 = 183;
-    pub const VK_OEM_1: u32 = 186;
-    pub const VK_OEM_PLUS: u32 = 187;
-    pub const VK_OEM_COMMA: u32 = 188;
-    pub const VK_OEM_MINUS: u32 = 189;
-    pub const VK_OEM_PERIOD: u32 = 190;
-    pub const VK_OEM_2: u32 = 191;
-    pub const VK_OEM_3: u32 = 192;
-    pub const VK_GAMEPAD_A: u32 = 195;
-    pub const VK_GAMEPAD_B: u32 = 196;
-    pub const VK_GAMEPAD_X: u32 = 197;
-    pub const VK_GAMEPAD_Y: u32 = 198;
-    pub const VK_GAMEPAD_RIGHT_SHOULDER: u32 = 199;
-    pub const VK_GAMEPAD_LEFT_SHOULDER: u32 = 200;
-    pub const VK_GAMEPAD_LEFT_TRIGGER: u32 = 201;
-    pub const VK_GAMEPAD_RIGHT_TRIGGER: u32 = 202;
-    pub const VK_GAMEPAD_DPAD_UP: u32 = 203;
-    pub const VK_GAMEPAD_DPAD_DOWN: u32 = 204;
-    pub const VK_GAMEPAD_DPAD_LEFT: u32 = 205;
-    pub const VK_GAMEPAD_DPAD_RIGHT: u32 = 206;
-    pub const VK_GAMEPAD_MENU: u32 = 207;
-    pub const VK_GAMEPAD_VIEW: u32 = 208;
-    pub const VK_GAMEPAD_LEFT_THUMBSTICK_BUTTON: u32 = 209;
-    pub const VK_GAMEPAD_RIGHT_THUMBSTICK_BUTTON: u32 = 210;
-    pub const VK_GAMEPAD_LEFT_THUMBSTICK_UP: u32 = 211;
-    pub const VK_GAMEPAD_LEFT_THUMBSTICK_DOWN: u32 = 212;
-    pub const VK_GAMEPAD_LEFT_THUMBSTICK_RIGHT: u32 = 213;
-    pub const VK_GAMEPAD_LEFT_THUMBSTICK_LEFT: u32 = 214;
-    pub const VK_GAMEPAD_RIGHT_THUMBSTICK_UP: u32 = 215;
-    pub const VK_GAMEPAD_RIGHT_THUMBSTICK_DOWN: u32 = 216;
-    pub const VK_GAMEPAD_RIGHT_THUMBSTICK_RIGHT: u32 = 217;
-    pub const VK_GAMEPAD_RIGHT_THUMBSTICK_LEFT: u32 = 218;
-    pub const VK_OEM_4: u32 = 219;
-    pub const VK_OEM_5: u32 = 220;
-    pub const VK_OEM_6: u32 = 221;
-    pub const VK_OEM_7: u32 = 222;
-    pub const VK_OEM_8: u32 = 223;
-    pub const VK_OEM_AX: u32 = 225;
-    pub const VK_OEM_102: u32 = 226;
-    pub const VK_ICO_HELP: u32 = 227;
-    pub const VK_ICO_00: u32 = 228;
-    pub const VK_PROCESSKEY: u32 = 229;
-    pub const VK_ICO_CLEAR: u32 = 230;
-    pub const VK_PACKET: u32 = 231;
-    pub const VK_OEM_RESET: u32 = 233;
-    pub const VK_OEM_JUMP: u32 = 234;
-    pub const VK_OEM_PA1: u32 = 235;
-    pub const VK_OEM_PA2: u32 = 236;
-    pub const VK_OEM_PA3: u32 = 237;
-    pub const VK_OEM_WSCTRL: u32 = 238;
-    pub const VK_OEM_CUSEL: u32 = 239;
-    pub const VK_OEM_ATTN: u32 = 240;
-    pub const VK_OEM_FINISH: u32 = 241;
-    pub const VK_OEM_COPY: u32 = 242;
-    pub const VK_OEM_AUTO: u32 = 243;
-    pub const VK_OEM_ENLW: u32 = 244;
-    pub const VK_OEM_BACKTAB: u32 = 245;
-    pub const VK_ATTN: u32 = 246;
-    pub const VK_CRSEL: u32 = 247;
-    pub const VK_EXSEL: u32 = 248;
-    pub const VK_EREOF: u32 = 249;
-    pub const VK_PLAY: u32 = 250;
-    pub const VK_ZOOM: u32 = 251;
-    pub const VK_NONAME: u32 = 252;
-    pub const VK_PA1: u32 = 253;
-    pub const VK_OEM_CLEAR: u32 = 254;
     pub const REAPER_PLUGIN_VERSION: u32 = 526;
     pub const CSURF_EXT_RESET: u32 = 131071;
     pub const CSURF_EXT_SETINPUTMONITOR: u32 = 65537;
@@ -231,27 +110,89 @@ pub mod root {
     pub const UNDO_STATE_MISCCFG: u32 = 8;
     pub const UNDO_STATE_FREEZE: u32 = 16;
     pub type ReaSample = f64;
-    pub type DWORD = ::std::os::raw::c_ulong;
-    pub type BYTE = ::std::os::raw::c_uchar;
-    pub type WORD = ::std::os::raw::c_ushort;
-    pub type UINT = ::std::os::raw::c_uint;
-    pub type INT_PTR = ::std::os::raw::c_longlong;
-    pub type UINT_PTR = ::std::os::raw::c_ulonglong;
-    pub type LONG_PTR = ::std::os::raw::c_longlong;
-    pub type ULONG_PTR = ::std::os::raw::c_ulonglong;
-    pub type LONG = ::std::os::raw::c_long;
-    pub type HANDLE = *mut ::std::os::raw::c_void;
+    pub type __intptr_t = ::std::os::raw::c_long;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct _LIST_ENTRY {
-        pub Flink: *mut root::_LIST_ENTRY,
-        pub Blink: *mut root::_LIST_ENTRY,
+    pub struct __pthread_internal_list {
+        pub __prev: *mut root::__pthread_internal_list,
+        pub __next: *mut root::__pthread_internal_list,
     }
-    pub type LIST_ENTRY = root::_LIST_ENTRY;
+    pub type __pthread_list_t = root::__pthread_internal_list;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct __pthread_mutex_s {
+        pub __lock: ::std::os::raw::c_int,
+        pub __count: ::std::os::raw::c_uint,
+        pub __owner: ::std::os::raw::c_int,
+        pub __nusers: ::std::os::raw::c_uint,
+        pub __kind: ::std::os::raw::c_int,
+        pub __spins: ::std::os::raw::c_short,
+        pub __elision: ::std::os::raw::c_short,
+        pub __list: root::__pthread_list_t,
+    }
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub union pthread_mutex_t {
+        pub __data: root::__pthread_mutex_s,
+        pub __size: [::std::os::raw::c_char; 40usize],
+        pub __align: ::std::os::raw::c_long,
+        _bindgen_union_align: [u64; 5usize],
+    }
+    pub mod std {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+    }
+    pub mod __gnu_cxx {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+    }
+    pub type INT_PTR = isize;
+    pub type LONG_PTR = isize;
+    pub type ULONG_PTR = usize;
+    pub type DWORD = ::std::os::raw::c_uint;
+    pub type UINT = ::std::os::raw::c_uint;
+    pub type WPARAM = root::ULONG_PTR;
+    pub type LPARAM = root::LONG_PTR;
+    pub type LRESULT = root::LONG_PTR;
+    pub type LONG = ::std::os::raw::c_int;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct HWND__ {
+        _unused: [u8; 0],
+    }
+    pub type HWND = *mut root::HWND__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct HMENU__ {
+        _unused: [u8; 0],
+    }
+    pub type HMENU = *mut root::HMENU__;
+    pub type HINSTANCE = *mut ::std::os::raw::c_void;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct POINT {
+        pub x: root::LONG,
+        pub y: root::LONG,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct RECT {
+        pub left: root::LONG,
+        pub top: root::LONG,
+        pub right: root::LONG,
+        pub bottom: root::LONG,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct ACCEL {
+        pub fVirt: ::std::os::raw::c_uchar,
+        pub key: ::std::os::raw::c_ushort,
+        pub cmd: ::std::os::raw::c_ushort,
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct _GUID {
-        pub Data1: ::std::os::raw::c_ulong,
+        pub Data1: ::std::os::raw::c_uint,
         pub Data2: ::std::os::raw::c_ushort,
         pub Data3: ::std::os::raw::c_ushort,
         pub Data4: [::std::os::raw::c_uchar; 8usize],
@@ -259,82 +200,7 @@ pub mod root {
     pub type GUID = root::_GUID;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct _RTL_CRITICAL_SECTION_DEBUG {
-        pub Type: root::WORD,
-        pub CreatorBackTraceIndex: root::WORD,
-        pub CriticalSection: *mut root::_RTL_CRITICAL_SECTION,
-        pub ProcessLocksList: root::LIST_ENTRY,
-        pub EntryCount: root::DWORD,
-        pub ContentionCount: root::DWORD,
-        pub Flags: root::DWORD,
-        pub CreatorBackTraceIndexHigh: root::WORD,
-        pub SpareWORD: root::WORD,
-    }
-    pub type PRTL_CRITICAL_SECTION_DEBUG = *mut root::_RTL_CRITICAL_SECTION_DEBUG;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct _RTL_CRITICAL_SECTION {
-        pub DebugInfo: root::PRTL_CRITICAL_SECTION_DEBUG,
-        pub LockCount: root::LONG,
-        pub RecursionCount: root::LONG,
-        pub OwningThread: root::HANDLE,
-        pub LockSemaphore: root::HANDLE,
-        pub SpinCount: root::ULONG_PTR,
-    }
-    pub type RTL_CRITICAL_SECTION = root::_RTL_CRITICAL_SECTION;
-    pub type WPARAM = root::UINT_PTR;
-    pub type LPARAM = root::LONG_PTR;
-    pub type LRESULT = root::LONG_PTR;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct HINSTANCE__ {
-        pub unused: ::std::os::raw::c_int,
-    }
-    pub type HINSTANCE = *mut root::HINSTANCE__;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct HWND__ {
-        pub unused: ::std::os::raw::c_int,
-    }
-    pub type HWND = *mut root::HWND__;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct HDC__ {
-        pub unused: ::std::os::raw::c_int,
-    }
-    pub type HDC = *mut root::HDC__;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct HFONT__ {
-        pub unused: ::std::os::raw::c_int,
-    }
-    pub type HFONT = *mut root::HFONT__;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct HMENU__ {
-        pub unused: ::std::os::raw::c_int,
-    }
-    pub type HMENU = *mut root::HMENU__;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct tagRECT {
-        pub left: root::LONG,
-        pub top: root::LONG,
-        pub right: root::LONG,
-        pub bottom: root::LONG,
-    }
-    pub type RECT = root::tagRECT;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct tagPOINT {
-        pub x: root::LONG,
-        pub y: root::LONG,
-    }
-    pub type POINT = root::tagPOINT;
-    pub type CRITICAL_SECTION = root::RTL_CRITICAL_SECTION;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct tagMSG {
+    pub struct MSG {
         pub hwnd: root::HWND,
         pub message: root::UINT,
         pub wParam: root::WPARAM,
@@ -342,15 +208,18 @@ pub mod root {
         pub time: root::DWORD,
         pub pt: root::POINT,
     }
-    pub type MSG = root::tagMSG;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct tagACCEL {
-        pub fVirt: root::BYTE,
-        pub key: root::WORD,
-        pub cmd: root::WORD,
+    #[derive(Debug, Copy, Clone)]
+    pub struct HDC__ {
+        _unused: [u8; 0],
     }
-    pub type ACCEL = root::tagACCEL;
+    pub type HDC = *mut root::HDC__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct HGDIOBJ__ {
+        _unused: [u8; 0],
+    }
+    pub type HFONT = *mut root::HGDIOBJ__;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct reaper_plugin_info_t {
@@ -431,7 +300,7 @@ pub mod root {
         root::PCM_source_peaktransfer_t__bindgen_ty_1 = 3;
     pub const PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_DRUM_TRIANGLE_MODE:
         root::PCM_source_peaktransfer_t__bindgen_ty_1 = 4;
-    pub type PCM_source_peaktransfer_t__bindgen_ty_1 = i32;
+    pub type PCM_source_peaktransfer_t__bindgen_ty_1 = u32;
     #[repr(C)]
     pub struct PCM_source__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
@@ -555,9 +424,9 @@ pub mod root {
         pub extended_data: [*mut ::std::os::raw::c_void; 32usize],
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, PartialEq)]
+    #[derive(Copy, Clone)]
     pub struct preview_register_t {
-        pub cs: root::CRITICAL_SECTION,
+        pub mutex: root::pthread_mutex_t,
         pub src: *mut root::PCM_source,
         pub m_out_chan: ::std::os::raw::c_int,
         pub curpos: f64,
@@ -652,7 +521,7 @@ pub mod root {
             _unused: [u8; 0],
         }
         extern "C" {
-            #[link_name = "\u{1}?__mergesort@reaper_functions@@3P6AXPEAX_K1P6AHPEBX2@Z0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11__mergesortE"]
             pub static mut __mergesort: ::std::option::Option<
                 unsafe extern "C" fn(
                     base: *mut ::std::os::raw::c_void,
@@ -669,7 +538,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddCustomizableMenu@reaper_functions@@3P6A_NPEBD00_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19AddCustomizableMenuE"]
             pub static mut AddCustomizableMenu: ::std::option::Option<
                 unsafe extern "C" fn(
                     menuidstr: *const ::std::os::raw::c_char,
@@ -680,18 +549,18 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddExtensionsMainMenu@reaper_functions@@3P6A_NXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21AddExtensionsMainMenuE"]
             pub static mut AddExtensionsMainMenu:
                 ::std::option::Option<unsafe extern "C" fn() -> bool>;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddMediaItemToTrack@reaper_functions@@3P6APEAVMediaItem@@PEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19AddMediaItemToTrackE"]
             pub static mut AddMediaItemToTrack: ::std::option::Option<
                 unsafe extern "C" fn(tr: *mut root::MediaTrack) -> *mut root::MediaItem,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddProjectMarker@reaper_functions@@3P6AHPEAVReaProject@@_NNNPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16AddProjectMarkerE"]
             pub static mut AddProjectMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -704,7 +573,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddProjectMarker2@reaper_functions@@3P6AHPEAVReaProject@@_NNNPEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17AddProjectMarker2E"]
             pub static mut AddProjectMarker2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -718,7 +587,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddRemoveReaScript@reaper_functions@@3P6AH_NHPEBD0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18AddRemoveReaScriptE"]
             pub static mut AddRemoveReaScript: ::std::option::Option<
                 unsafe extern "C" fn(
                     add: bool,
@@ -729,13 +598,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddTakeToMediaItem@reaper_functions@@3P6APEAVMediaItem_Take@@PEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18AddTakeToMediaItemE"]
             pub static mut AddTakeToMediaItem: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaItem_Take,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AddTempoTimeSigMarker@reaper_functions@@3P6A_NPEAVReaProject@@NNHH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21AddTempoTimeSigMarkerE"]
             pub static mut AddTempoTimeSigMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -748,7 +617,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?adjustZoom@reaper_functions@@3P6AXNH_NH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10adjustZoomE"]
             pub static mut adjustZoom: ::std::option::Option<
                 unsafe extern "C" fn(
                     amt: f64,
@@ -759,22 +628,22 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AnyTrackSolo@reaper_functions@@3P6A_NPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12AnyTrackSoloE"]
             pub static mut AnyTrackSolo:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> bool>;
         }
         extern "C" {
-            #[link_name = "\u{1}?APIExists@reaper_functions@@3P6A_NPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9APIExistsE"]
             pub static mut APIExists: ::std::option::Option<
                 unsafe extern "C" fn(function_name: *const ::std::os::raw::c_char) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?APITest@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions7APITestE"]
             pub static mut APITest: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?ApplyNudge@reaper_functions@@3P6A_NPEAVReaProject@@HHHN_NH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10ApplyNudgeE"]
             pub static mut ApplyNudge: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -788,7 +657,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ArmCommand@reaper_functions@@3P6AXHPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10ArmCommandE"]
             pub static mut ArmCommand: ::std::option::Option<
                 unsafe extern "C" fn(
                     cmd: ::std::os::raw::c_int,
@@ -797,25 +666,25 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Audio_Init@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10Audio_InitE"]
             pub static mut Audio_Init: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Audio_IsPreBuffer@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17Audio_IsPreBufferE"]
             pub static mut Audio_IsPreBuffer:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Audio_IsRunning@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15Audio_IsRunningE"]
             pub static mut Audio_IsRunning:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Audio_Quit@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10Audio_QuitE"]
             pub static mut Audio_Quit: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Audio_RegHardwareHook@reaper_functions@@3P6AH_NPEAUaudio_hook_register_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21Audio_RegHardwareHookE"]
             pub static mut Audio_RegHardwareHook: ::std::option::Option<
                 unsafe extern "C" fn(
                     isAdd: bool,
@@ -824,30 +693,30 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AudioAccessorStateChanged@reaper_functions@@3P6A_NPEAVAudioAccessor@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25AudioAccessorStateChangedE"]
             pub static mut AudioAccessorStateChanged: ::std::option::Option<
                 unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AudioAccessorUpdate@reaper_functions@@3P6AXPEAVAudioAccessor@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19AudioAccessorUpdateE"]
             pub static mut AudioAccessorUpdate: ::std::option::Option<
                 unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?AudioAccessorValidateState@reaper_functions@@3P6A_NPEAVAudioAccessor@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26AudioAccessorValidateStateE"]
             pub static mut AudioAccessorValidateState: ::std::option::Option<
                 unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?BypassFxAllTracks@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17BypassFxAllTracksE"]
             pub static mut BypassFxAllTracks:
                 ::std::option::Option<unsafe extern "C" fn(bypass: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CalculatePeaks@reaper_functions@@3P6AHPEAUPCM_source_transfer_t@@PEAUPCM_source_peaktransfer_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14CalculatePeaksE"]
             pub static mut CalculatePeaks: ::std::option::Option<
                 unsafe extern "C" fn(
                     srcBlock: *mut root::PCM_source_transfer_t,
@@ -856,7 +725,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CalculatePeaksFloatSrcPtr@reaper_functions@@3P6AHPEAUPCM_source_transfer_t@@PEAUPCM_source_peaktransfer_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25CalculatePeaksFloatSrcPtrE"]
             pub static mut CalculatePeaksFloatSrcPtr: ::std::option::Option<
                 unsafe extern "C" fn(
                     srcBlock: *mut root::PCM_source_transfer_t,
@@ -865,19 +734,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ClearAllRecArmed@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16ClearAllRecArmedE"]
             pub static mut ClearAllRecArmed: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?ClearConsole@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12ClearConsoleE"]
             pub static mut ClearConsole: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?ClearPeakCache@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14ClearPeakCacheE"]
             pub static mut ClearPeakCache: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?ColorFromNative@reaper_functions@@3P6AXHPEAH00@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15ColorFromNativeE"]
             pub static mut ColorFromNative: ::std::option::Option<
                 unsafe extern "C" fn(
                     col: ::std::os::raw::c_int,
@@ -888,7 +757,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ColorToNative@reaper_functions@@3P6AHHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13ColorToNativeE"]
             pub static mut ColorToNative: ::std::option::Option<
                 unsafe extern "C" fn(
                     r: ::std::os::raw::c_int,
@@ -898,7 +767,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountActionShortcuts@reaper_functions@@3P6AHPEAUKbdSectionInfo@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CountActionShortcutsE"]
             pub static mut CountActionShortcuts: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
@@ -907,19 +776,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountAutomationItems@reaper_functions@@3P6AHPEAVTrackEnvelope@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CountAutomationItemsE"]
             pub static mut CountAutomationItems: ::std::option::Option<
                 unsafe extern "C" fn(env: *mut root::TrackEnvelope) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountEnvelopePoints@reaper_functions@@3P6AHPEAVTrackEnvelope@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CountEnvelopePointsE"]
             pub static mut CountEnvelopePoints: ::std::option::Option<
                 unsafe extern "C" fn(envelope: *mut root::TrackEnvelope) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountEnvelopePointsEx@reaper_functions@@3P6AHPEAVTrackEnvelope@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21CountEnvelopePointsExE"]
             pub static mut CountEnvelopePointsEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -928,13 +797,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountMediaItems@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15CountMediaItemsE"]
             pub static mut CountMediaItems: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountProjectMarkers@reaper_functions@@3P6AHPEAVReaProject@@PEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CountProjectMarkersE"]
             pub static mut CountProjectMarkers: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -944,19 +813,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountSelectedMediaItems@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23CountSelectedMediaItemsE"]
             pub static mut CountSelectedMediaItems: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountSelectedTracks@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CountSelectedTracksE"]
             pub static mut CountSelectedTracks: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountSelectedTracks2@reaper_functions@@3P6AHPEAVReaProject@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CountSelectedTracks2E"]
             pub static mut CountSelectedTracks2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -965,19 +834,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountTakeEnvelopes@reaper_functions@@3P6AHPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18CountTakeEnvelopesE"]
             pub static mut CountTakeEnvelopes: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountTakes@reaper_functions@@3P6AHPEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10CountTakesE"]
             pub static mut CountTakes: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountTCPFXParms@reaper_functions@@3P6AHPEAVReaProject@@PEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15CountTCPFXParmsE"]
             pub static mut CountTCPFXParms: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -986,31 +855,31 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountTempoTimeSigMarkers@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24CountTempoTimeSigMarkersE"]
             pub static mut CountTempoTimeSigMarkers: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountTrackEnvelopes@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CountTrackEnvelopesE"]
             pub static mut CountTrackEnvelopes: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountTrackMediaItems@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CountTrackMediaItemsE"]
             pub static mut CountTrackMediaItems: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CountTracks@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11CountTracksE"]
             pub static mut CountTracks: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CreateLocalOscHandler@reaper_functions@@3P6APEAXPEAX0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21CreateLocalOscHandlerE"]
             pub static mut CreateLocalOscHandler: ::std::option::Option<
                 unsafe extern "C" fn(
                     obj: *mut ::std::os::raw::c_void,
@@ -1019,13 +888,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CreateMIDIInput@reaper_functions@@3P6APEAVmidi_Input@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15CreateMIDIInputE"]
             pub static mut CreateMIDIInput: ::std::option::Option<
                 unsafe extern "C" fn(dev: ::std::os::raw::c_int) -> *mut root::midi_Input,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CreateMIDIOutput@reaper_functions@@3P6APEAVmidi_Output@@H_NPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16CreateMIDIOutputE"]
             pub static mut CreateMIDIOutput: ::std::option::Option<
                 unsafe extern "C" fn(
                     dev: ::std::os::raw::c_int,
@@ -1035,7 +904,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CreateNewMIDIItemInProj@reaper_functions@@3P6APEAVMediaItem@@PEAVMediaTrack@@NNPEB_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23CreateNewMIDIItemInProjE"]
             pub static mut CreateNewMIDIItemInProj: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -1046,7 +915,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CreateTakeAudioAccessor@reaper_functions@@3P6APEAVAudioAccessor@1@PEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23CreateTakeAudioAccessorE"]
             pub static mut CreateTakeAudioAccessor: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -1054,7 +923,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CreateTrackAudioAccessor@reaper_functions@@3P6APEAVAudioAccessor@1@PEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24CreateTrackAudioAccessorE"]
             pub static mut CreateTrackAudioAccessor: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -1062,7 +931,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CreateTrackSend@reaper_functions@@3P6AHPEAVMediaTrack@@0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15CreateTrackSendE"]
             pub static mut CreateTrackSend: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -1071,12 +940,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_FlushUndo@reaper_functions@@3P6AX_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15CSurf_FlushUndoE"]
             pub static mut CSurf_FlushUndo:
                 ::std::option::Option<unsafe extern "C" fn(force: bool)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_GetTouchState@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CSurf_GetTouchStateE"]
             pub static mut CSurf_GetTouchState: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1085,31 +954,31 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_GoEnd@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11CSurf_GoEndE"]
             pub static mut CSurf_GoEnd: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_GoStart@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13CSurf_GoStartE"]
             pub static mut CSurf_GoStart: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_NumTracks@reaper_functions@@3P6AH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15CSurf_NumTracksE"]
             pub static mut CSurf_NumTracks:
                 ::std::option::Option<unsafe extern "C" fn(mcpView: bool) -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnArrow@reaper_functions@@3P6AXH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13CSurf_OnArrowE"]
             pub static mut CSurf_OnArrow: ::std::option::Option<
                 unsafe extern "C" fn(whichdir: ::std::os::raw::c_int, wantzoom: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnFwd@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11CSurf_OnFwdE"]
             pub static mut CSurf_OnFwd:
                 ::std::option::Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnFXChange@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16CSurf_OnFXChangeE"]
             pub static mut CSurf_OnFXChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1118,7 +987,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnInputMonitorChange@reaper_functions@@3P6AHPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26CSurf_OnInputMonitorChangeE"]
             pub static mut CSurf_OnInputMonitorChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1127,7 +996,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnInputMonitorChangeEx@reaper_functions@@3P6AHPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions28CSurf_OnInputMonitorChangeExE"]
             pub static mut CSurf_OnInputMonitorChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1137,7 +1006,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnMuteChange@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18CSurf_OnMuteChangeE"]
             pub static mut CSurf_OnMuteChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1146,7 +1015,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnMuteChangeEx@reaper_functions@@3P6A_NPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CSurf_OnMuteChangeExE"]
             pub static mut CSurf_OnMuteChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1156,13 +1025,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnOscControlMessage@reaper_functions@@3P6AXPEBDPEBM@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25CSurf_OnOscControlMessageE"]
             pub static mut CSurf_OnOscControlMessage: ::std::option::Option<
                 unsafe extern "C" fn(msg: *const ::std::os::raw::c_char, arg: *const f32),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnPanChange@reaper_functions@@3P6ANPEAVMediaTrack@@N_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17CSurf_OnPanChangeE"]
             pub static mut CSurf_OnPanChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1172,7 +1041,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnPanChangeEx@reaper_functions@@3P6ANPEAVMediaTrack@@N_N1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CSurf_OnPanChangeExE"]
             pub static mut CSurf_OnPanChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1183,20 +1052,20 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnPause@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13CSurf_OnPauseE"]
             pub static mut CSurf_OnPause: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnPlay@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12CSurf_OnPlayE"]
             pub static mut CSurf_OnPlay: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnPlayRateChange@reaper_functions@@3P6AXN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22CSurf_OnPlayRateChangeE"]
             pub static mut CSurf_OnPlayRateChange:
                 ::std::option::Option<unsafe extern "C" fn(playrate: f64)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnRecArmChange@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CSurf_OnRecArmChangeE"]
             pub static mut CSurf_OnRecArmChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1205,7 +1074,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnRecArmChangeEx@reaper_functions@@3P6A_NPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22CSurf_OnRecArmChangeExE"]
             pub static mut CSurf_OnRecArmChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1215,11 +1084,11 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnRecord@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14CSurf_OnRecordE"]
             pub static mut CSurf_OnRecord: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnRecvPanChange@reaper_functions@@3P6ANPEAVMediaTrack@@HN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21CSurf_OnRecvPanChangeE"]
             pub static mut CSurf_OnRecvPanChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1230,7 +1099,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnRecvVolumeChange@reaper_functions@@3P6ANPEAVMediaTrack@@HN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24CSurf_OnRecvVolumeChangeE"]
             pub static mut CSurf_OnRecvVolumeChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1241,24 +1110,24 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnRew@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11CSurf_OnRewE"]
             pub static mut CSurf_OnRew:
                 ::std::option::Option<unsafe extern "C" fn(seekplay: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnRewFwd@reaper_functions@@3P6AXHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14CSurf_OnRewFwdE"]
             pub static mut CSurf_OnRewFwd: ::std::option::Option<
                 unsafe extern "C" fn(seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnScroll@reaper_functions@@3P6AXHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14CSurf_OnScrollE"]
             pub static mut CSurf_OnScroll: ::std::option::Option<
                 unsafe extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnSelectedChange@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22CSurf_OnSelectedChangeE"]
             pub static mut CSurf_OnSelectedChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1267,7 +1136,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnSendPanChange@reaper_functions@@3P6ANPEAVMediaTrack@@HN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21CSurf_OnSendPanChangeE"]
             pub static mut CSurf_OnSendPanChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1278,7 +1147,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnSendVolumeChange@reaper_functions@@3P6ANPEAVMediaTrack@@HN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24CSurf_OnSendVolumeChangeE"]
             pub static mut CSurf_OnSendVolumeChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1289,7 +1158,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnSoloChange@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18CSurf_OnSoloChangeE"]
             pub static mut CSurf_OnSoloChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1298,7 +1167,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnSoloChangeEx@reaper_functions@@3P6A_NPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CSurf_OnSoloChangeExE"]
             pub static mut CSurf_OnSoloChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1308,21 +1177,21 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnStop@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12CSurf_OnStopE"]
             pub static mut CSurf_OnStop: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnTempoChange@reaper_functions@@3P6AXN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CSurf_OnTempoChangeE"]
             pub static mut CSurf_OnTempoChange:
                 ::std::option::Option<unsafe extern "C" fn(bpm: f64)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnTrackSelection@reaper_functions@@3P6AXPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22CSurf_OnTrackSelectionE"]
             pub static mut CSurf_OnTrackSelection:
                 ::std::option::Option<unsafe extern "C" fn(trackid: *mut root::MediaTrack)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnVolumeChange@reaper_functions@@3P6ANPEAVMediaTrack@@N_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CSurf_OnVolumeChangeE"]
             pub static mut CSurf_OnVolumeChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1332,7 +1201,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnVolumeChangeEx@reaper_functions@@3P6ANPEAVMediaTrack@@N_N1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22CSurf_OnVolumeChangeExE"]
             pub static mut CSurf_OnVolumeChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1343,7 +1212,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnWidthChange@reaper_functions@@3P6ANPEAVMediaTrack@@N_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CSurf_OnWidthChangeE"]
             pub static mut CSurf_OnWidthChange: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1353,7 +1222,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnWidthChangeEx@reaper_functions@@3P6ANPEAVMediaTrack@@N_N1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21CSurf_OnWidthChangeExE"]
             pub static mut CSurf_OnWidthChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1364,22 +1233,22 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_OnZoom@reaper_functions@@3P6AXHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12CSurf_OnZoomE"]
             pub static mut CSurf_OnZoom: ::std::option::Option<
                 unsafe extern "C" fn(xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_ResetAllCachedVolPanStates@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions32CSurf_ResetAllCachedVolPanStatesE"]
             pub static mut CSurf_ResetAllCachedVolPanStates:
                 ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_ScrubAmt@reaper_functions@@3P6AXN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14CSurf_ScrubAmtE"]
             pub static mut CSurf_ScrubAmt: ::std::option::Option<unsafe extern "C" fn(amt: f64)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetAutoMode@reaper_functions@@3P6AXHPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17CSurf_SetAutoModeE"]
             pub static mut CSurf_SetAutoMode: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: ::std::os::raw::c_int,
@@ -1388,7 +1257,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetPlayState@reaper_functions@@3P6AX_N00PEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18CSurf_SetPlayStateE"]
             pub static mut CSurf_SetPlayState: ::std::option::Option<
                 unsafe extern "C" fn(
                     play: bool,
@@ -1399,13 +1268,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetRepeatState@reaper_functions@@3P6AX_NPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CSurf_SetRepeatStateE"]
             pub static mut CSurf_SetRepeatState: ::std::option::Option<
                 unsafe extern "C" fn(rep: bool, ignoresurf: *mut root::IReaperControlSurface),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetSurfaceMute@reaper_functions@@3P6AXPEAVMediaTrack@@_NPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CSurf_SetSurfaceMuteE"]
             pub static mut CSurf_SetSurfaceMute: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1415,7 +1284,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetSurfacePan@reaper_functions@@3P6AXPEAVMediaTrack@@NPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19CSurf_SetSurfacePanE"]
             pub static mut CSurf_SetSurfacePan: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1425,7 +1294,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetSurfaceRecArm@reaper_functions@@3P6AXPEAVMediaTrack@@_NPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22CSurf_SetSurfaceRecArmE"]
             pub static mut CSurf_SetSurfaceRecArm: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1435,7 +1304,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetSurfaceSelected@reaper_functions@@3P6AXPEAVMediaTrack@@_NPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24CSurf_SetSurfaceSelectedE"]
             pub static mut CSurf_SetSurfaceSelected: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1445,7 +1314,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetSurfaceSolo@reaper_functions@@3P6AXPEAVMediaTrack@@_NPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20CSurf_SetSurfaceSoloE"]
             pub static mut CSurf_SetSurfaceSolo: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1455,7 +1324,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetSurfaceVolume@reaper_functions@@3P6AXPEAVMediaTrack@@NPEAVIReaperControlSurface@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22CSurf_SetSurfaceVolumeE"]
             pub static mut CSurf_SetSurfaceVolume: ::std::option::Option<
                 unsafe extern "C" fn(
                     trackid: *mut root::MediaTrack,
@@ -1465,11 +1334,11 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_SetTrackListChange@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24CSurf_SetTrackListChangeE"]
             pub static mut CSurf_SetTrackListChange: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_TrackFromID@reaper_functions@@3P6APEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17CSurf_TrackFromIDE"]
             pub static mut CSurf_TrackFromID: ::std::option::Option<
                 unsafe extern "C" fn(
                     idx: ::std::os::raw::c_int,
@@ -1478,7 +1347,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?CSurf_TrackToID@reaper_functions@@3P6AHPEAVMediaTrack@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15CSurf_TrackToIDE"]
             pub static mut CSurf_TrackToID: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -1487,11 +1356,11 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DB2SLIDER@reaper_functions@@3P6ANN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9DB2SLIDERE"]
             pub static mut DB2SLIDER: ::std::option::Option<unsafe extern "C" fn(x: f64) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteActionShortcut@reaper_functions@@3P6A_NPEAUKbdSectionInfo@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20DeleteActionShortcutE"]
             pub static mut DeleteActionShortcut: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
@@ -1501,7 +1370,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteEnvelopePointEx@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21DeleteEnvelopePointExE"]
             pub static mut DeleteEnvelopePointEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -1511,7 +1380,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteEnvelopePointRange@reaper_functions@@3P6A_NPEAVTrackEnvelope@@NN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24DeleteEnvelopePointRangeE"]
             pub static mut DeleteEnvelopePointRange: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -1521,7 +1390,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteEnvelopePointRangeEx@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HNN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26DeleteEnvelopePointRangeExE"]
             pub static mut DeleteEnvelopePointRangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -1532,7 +1401,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteExtState@reaper_functions@@3P6AXPEBD0_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14DeleteExtStateE"]
             pub static mut DeleteExtState: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *const ::std::os::raw::c_char,
@@ -1542,7 +1411,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteProjectMarker@reaper_functions@@3P6A_NPEAVReaProject@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19DeleteProjectMarkerE"]
             pub static mut DeleteProjectMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -1552,7 +1421,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteProjectMarkerByIndex@reaper_functions@@3P6A_NPEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26DeleteProjectMarkerByIndexE"]
             pub static mut DeleteProjectMarkerByIndex: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -1561,7 +1430,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteTakeStretchMarkers@reaper_functions@@3P6AHPEAVMediaItem_Take@@HPEBH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24DeleteTakeStretchMarkersE"]
             pub static mut DeleteTakeStretchMarkers: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -1571,7 +1440,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteTempoTimeSigMarker@reaper_functions@@3P6A_NPEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24DeleteTempoTimeSigMarkerE"]
             pub static mut DeleteTempoTimeSigMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -1580,30 +1449,30 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteTrack@reaper_functions@@3P6AXPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11DeleteTrackE"]
             pub static mut DeleteTrack:
                 ::std::option::Option<unsafe extern "C" fn(tr: *mut root::MediaTrack)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?DeleteTrackMediaItem@reaper_functions@@3P6A_NPEAVMediaTrack@@PEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20DeleteTrackMediaItemE"]
             pub static mut DeleteTrackMediaItem: ::std::option::Option<
                 unsafe extern "C" fn(tr: *mut root::MediaTrack, it: *mut root::MediaItem) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DestroyAudioAccessor@reaper_functions@@3P6AXPEAVAudioAccessor@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20DestroyAudioAccessorE"]
             pub static mut DestroyAudioAccessor: ::std::option::Option<
                 unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DestroyLocalOscHandler@reaper_functions@@3P6AXPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22DestroyLocalOscHandlerE"]
             pub static mut DestroyLocalOscHandler: ::std::option::Option<
                 unsafe extern "C" fn(local_osc_handler: *mut ::std::os::raw::c_void),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DoActionShortcutDialog@reaper_functions@@3P6A_NPEAUHWND__@@PEAUKbdSectionInfo@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22DoActionShortcutDialogE"]
             pub static mut DoActionShortcutDialog: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -1614,7 +1483,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Dock_UpdateDockID@reaper_functions@@3P6AXPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17Dock_UpdateDockIDE"]
             pub static mut Dock_UpdateDockID: ::std::option::Option<
                 unsafe extern "C" fn(
                     ident_str: *const ::std::os::raw::c_char,
@@ -1623,13 +1492,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockGetPosition@reaper_functions@@3P6AHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15DockGetPositionE"]
             pub static mut DockGetPosition: ::std::option::Option<
                 unsafe extern "C" fn(whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockIsChildOfDock@reaper_functions@@3P6AHPEAUHWND__@@PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17DockIsChildOfDockE"]
             pub static mut DockIsChildOfDock: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -1638,12 +1507,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockWindowActivate@reaper_functions@@3P6AXPEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18DockWindowActivateE"]
             pub static mut DockWindowActivate:
                 ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockWindowAdd@reaper_functions@@3P6AXPEAUHWND__@@PEBDH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13DockWindowAddE"]
             pub static mut DockWindowAdd: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -1654,7 +1523,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockWindowAddEx@reaper_functions@@3P6AXPEAUHWND__@@PEBD1_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15DockWindowAddExE"]
             pub static mut DockWindowAddEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -1665,21 +1534,21 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockWindowRefresh@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17DockWindowRefreshE"]
             pub static mut DockWindowRefresh: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockWindowRefreshForHWND@reaper_functions@@3P6AXPEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24DockWindowRefreshForHWNDE"]
             pub static mut DockWindowRefreshForHWND:
                 ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?DockWindowRemove@reaper_functions@@3P6AXPEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16DockWindowRemoveE"]
             pub static mut DockWindowRemove:
                 ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?DuplicateCustomizableMenu@reaper_functions@@3P6A_NPEAX0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25DuplicateCustomizableMenuE"]
             pub static mut DuplicateCustomizableMenu: ::std::option::Option<
                 unsafe extern "C" fn(
                     srcmenu: *mut ::std::os::raw::c_void,
@@ -1688,7 +1557,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EditTempoTimeSigMarker@reaper_functions@@3P6A_NPEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22EditTempoTimeSigMarkerE"]
             pub static mut EditTempoTimeSigMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -1697,12 +1566,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnsureNotCompletelyOffscreen@reaper_functions@@3P6AXPEAUtagRECT@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions28EnsureNotCompletelyOffscreenE"]
             pub static mut EnsureNotCompletelyOffscreen:
                 ::std::option::Option<unsafe extern "C" fn(rInOut: *mut root::RECT)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumerateFiles@reaper_functions@@3P6APEBDPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14EnumerateFilesE"]
             pub static mut EnumerateFiles: ::std::option::Option<
                 unsafe extern "C" fn(
                     path: *const ::std::os::raw::c_char,
@@ -1711,7 +1580,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumerateSubdirectories@reaper_functions@@3P6APEBDPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23EnumerateSubdirectoriesE"]
             pub static mut EnumerateSubdirectories: ::std::option::Option<
                 unsafe extern "C" fn(
                     path: *const ::std::os::raw::c_char,
@@ -1720,7 +1589,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumPitchShiftModes@reaper_functions@@3P6A_NHPEAPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19EnumPitchShiftModesE"]
             pub static mut EnumPitchShiftModes: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: ::std::os::raw::c_int,
@@ -1729,7 +1598,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumPitchShiftSubModes@reaper_functions@@3P6APEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22EnumPitchShiftSubModesE"]
             pub static mut EnumPitchShiftSubModes: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: ::std::os::raw::c_int,
@@ -1738,7 +1607,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumProjectMarkers@reaper_functions@@3P6AHHPEA_NPEAN1PEAPEBDPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18EnumProjectMarkersE"]
             pub static mut EnumProjectMarkers: ::std::option::Option<
                 unsafe extern "C" fn(
                     idx: ::std::os::raw::c_int,
@@ -1751,7 +1620,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumProjectMarkers2@reaper_functions@@3P6AHPEAVReaProject@@HPEA_NPEAN2PEAPEBDPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19EnumProjectMarkers2E"]
             pub static mut EnumProjectMarkers2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -1765,7 +1634,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumProjectMarkers3@reaper_functions@@3P6AHPEAVReaProject@@HPEA_NPEAN2PEAPEBDPEAH4@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19EnumProjectMarkers3E"]
             pub static mut EnumProjectMarkers3: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -1780,7 +1649,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumProjects@reaper_functions@@3P6APEAVReaProject@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12EnumProjectsE"]
             pub static mut EnumProjects: ::std::option::Option<
                 unsafe extern "C" fn(
                     idx: ::std::os::raw::c_int,
@@ -1790,7 +1659,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumProjExtState@reaper_functions@@3P6A_NPEAVReaProject@@PEBDHPEADH2H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16EnumProjExtStateE"]
             pub static mut EnumProjExtState: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -1804,7 +1673,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumRegionRenderMatrix@reaper_functions@@3P6APEAVMediaTrack@@PEAVReaProject@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22EnumRegionRenderMatrixE"]
             pub static mut EnumRegionRenderMatrix: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -1814,7 +1683,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumTrackMIDIProgramNames@reaper_functions@@3P6A_NHHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25EnumTrackMIDIProgramNamesE"]
             pub static mut EnumTrackMIDIProgramNames: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: ::std::os::raw::c_int,
@@ -1825,7 +1694,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?EnumTrackMIDIProgramNamesEx@reaper_functions@@3P6A_NPEAVReaProject@@PEAVMediaTrack@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27EnumTrackMIDIProgramNamesExE"]
             pub static mut EnumTrackMIDIProgramNamesEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -1837,7 +1706,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Envelope_Evaluate@reaper_functions@@3P6AHPEAVTrackEnvelope@@NNHPEAN111@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17Envelope_EvaluateE"]
             pub static mut Envelope_Evaluate: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -1852,7 +1721,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Envelope_FormatValue@reaper_functions@@3P6AXPEAVTrackEnvelope@@NPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20Envelope_FormatValueE"]
             pub static mut Envelope_FormatValue: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -1863,7 +1732,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Envelope_GetParentTake@reaper_functions@@3P6APEAVMediaItem_Take@@PEAVTrackEnvelope@@PEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22Envelope_GetParentTakeE"]
             pub static mut Envelope_GetParentTake: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -1873,7 +1742,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Envelope_GetParentTrack@reaper_functions@@3P6APEAVMediaTrack@@PEAVTrackEnvelope@@PEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23Envelope_GetParentTrackE"]
             pub static mut Envelope_GetParentTrack: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -1883,13 +1752,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Envelope_SortPoints@reaper_functions@@3P6A_NPEAVTrackEnvelope@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19Envelope_SortPointsE"]
             pub static mut Envelope_SortPoints: ::std::option::Option<
                 unsafe extern "C" fn(envelope: *mut root::TrackEnvelope) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Envelope_SortPointsEx@reaper_functions@@3P6A_NPEAVTrackEnvelope@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21Envelope_SortPointsExE"]
             pub static mut Envelope_SortPointsEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -1898,7 +1767,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ExecProcess@reaper_functions@@3P6APEBDPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11ExecProcessE"]
             pub static mut ExecProcess: ::std::option::Option<
                 unsafe extern "C" fn(
                     cmdline: *const ::std::os::raw::c_char,
@@ -1907,13 +1776,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?file_exists@reaper_functions@@3P6A_NPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11file_existsE"]
             pub static mut file_exists: ::std::option::Option<
                 unsafe extern "C" fn(path: *const ::std::os::raw::c_char) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?FindTempoTimeSigMarker@reaper_functions@@3P6AHPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22FindTempoTimeSigMarkerE"]
             pub static mut FindTempoTimeSigMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -1922,7 +1791,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?format_timestr@reaper_functions@@3P6AXNPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14format_timestrE"]
             pub static mut format_timestr: ::std::option::Option<
                 unsafe extern "C" fn(
                     tpos: f64,
@@ -1932,7 +1801,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?format_timestr_len@reaper_functions@@3P6AXNPEADHNH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18format_timestr_lenE"]
             pub static mut format_timestr_len: ::std::option::Option<
                 unsafe extern "C" fn(
                     tpos: f64,
@@ -1944,7 +1813,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?format_timestr_pos@reaper_functions@@3P6AXNPEADHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18format_timestr_posE"]
             pub static mut format_timestr_pos: ::std::option::Option<
                 unsafe extern "C" fn(
                     tpos: f64,
@@ -1955,16 +1824,16 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?FreeHeapPtr@reaper_functions@@3P6AXPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11FreeHeapPtrE"]
             pub static mut FreeHeapPtr:
                 ::std::option::Option<unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?genGuid@reaper_functions@@3P6AXPEAU_GUID@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions7genGuidE"]
             pub static mut genGuid: ::std::option::Option<unsafe extern "C" fn(g: *mut root::GUID)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?get_config_var@reaper_functions@@3P6APEAXPEBDPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14get_config_varE"]
             pub static mut get_config_var: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -1973,7 +1842,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?get_config_var_string@reaper_functions@@3P6A_NPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21get_config_var_stringE"]
             pub static mut get_config_var_string: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -1983,12 +1852,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?get_ini_file@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12get_ini_fileE"]
             pub static mut get_ini_file:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?get_midi_config_var@reaper_functions@@3P6APEAXPEBDPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19get_midi_config_varE"]
             pub static mut get_midi_config_var: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -1997,7 +1866,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetActionShortcutDesc@reaper_functions@@3P6A_NPEAUKbdSectionInfo@@HHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetActionShortcutDescE"]
             pub static mut GetActionShortcutDesc: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
@@ -2009,24 +1878,24 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetActiveTake@reaper_functions@@3P6APEAVMediaItem_Take@@PEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetActiveTakeE"]
             pub static mut GetActiveTake: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaItem_Take,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetAllProjectPlayStates@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetAllProjectPlayStatesE"]
             pub static mut GetAllProjectPlayStates: ::std::option::Option<
                 unsafe extern "C" fn(ignoreProject: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetAppVersion@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetAppVersionE"]
             pub static mut GetAppVersion:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetArmedCommand@reaper_functions@@3P6AHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetArmedCommandE"]
             pub static mut GetArmedCommand: ::std::option::Option<
                 unsafe extern "C" fn(
                     secOut: *mut ::std::os::raw::c_char,
@@ -2035,13 +1904,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetAudioAccessorEndTime@reaper_functions@@3P6ANPEAVAudioAccessor@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetAudioAccessorEndTimeE"]
             pub static mut GetAudioAccessorEndTime: ::std::option::Option<
                 unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetAudioAccessorHash@reaper_functions@@3P6AXPEAVAudioAccessor@1@PEAD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetAudioAccessorHashE"]
             pub static mut GetAudioAccessorHash: ::std::option::Option<
                 unsafe extern "C" fn(
                     accessor: *mut root::reaper_functions::AudioAccessor,
@@ -2050,7 +1919,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetAudioAccessorSamples@reaper_functions@@3P6AHPEAVAudioAccessor@1@HHNHPEAN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetAudioAccessorSamplesE"]
             pub static mut GetAudioAccessorSamples: ::std::option::Option<
                 unsafe extern "C" fn(
                     accessor: *mut root::reaper_functions::AudioAccessor,
@@ -2063,13 +1932,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetAudioAccessorStartTime@reaper_functions@@3P6ANPEAVAudioAccessor@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25GetAudioAccessorStartTimeE"]
             pub static mut GetAudioAccessorStartTime: ::std::option::Option<
                 unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetAudioDeviceInfo@reaper_functions@@3P6A_NPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetAudioDeviceInfoE"]
             pub static mut GetAudioDeviceInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     attribute: *const ::std::os::raw::c_char,
@@ -2079,7 +1948,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetColorTheme@reaper_functions@@3P6A_JHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetColorThemeE"]
             pub static mut GetColorTheme: ::std::option::Option<
                 unsafe extern "C" fn(
                     idx: ::std::os::raw::c_int,
@@ -2088,7 +1957,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetColorThemeStruct@reaper_functions@@3P6APEAXPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetColorThemeStructE"]
             pub static mut GetColorThemeStruct: ::std::option::Option<
                 unsafe extern "C" fn(
                     szOut: *mut ::std::os::raw::c_int,
@@ -2096,7 +1965,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetConfigWantsDock@reaper_functions@@3P6AHPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetConfigWantsDockE"]
             pub static mut GetConfigWantsDock: ::std::option::Option<
                 unsafe extern "C" fn(
                     ident_str: *const ::std::os::raw::c_char,
@@ -2104,44 +1973,44 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetContextMenu@reaper_functions@@3P6APEAUHMENU__@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetContextMenuE"]
             pub static mut GetContextMenu: ::std::option::Option<
                 unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> root::HMENU,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetCurrentProjectInLoadSave@reaper_functions@@3P6APEAVReaProject@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27GetCurrentProjectInLoadSaveE"]
             pub static mut GetCurrentProjectInLoadSave:
                 ::std::option::Option<unsafe extern "C" fn() -> *mut root::ReaProject>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetCursorContext@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetCursorContextE"]
             pub static mut GetCursorContext:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetCursorContext2@reaper_functions@@3P6AH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetCursorContext2E"]
             pub static mut GetCursorContext2: ::std::option::Option<
                 unsafe extern "C" fn(want_last_valid: bool) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetCursorPosition@reaper_functions@@3P6ANXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetCursorPositionE"]
             pub static mut GetCursorPosition: ::std::option::Option<unsafe extern "C" fn() -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetCursorPositionEx@reaper_functions@@3P6ANPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetCursorPositionExE"]
             pub static mut GetCursorPositionEx:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetDisplayedMediaItemColor@reaper_functions@@3P6AHPEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26GetDisplayedMediaItemColorE"]
             pub static mut GetDisplayedMediaItemColor: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetDisplayedMediaItemColor2@reaper_functions@@3P6AHPEAVMediaItem@@PEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27GetDisplayedMediaItemColor2E"]
             pub static mut GetDisplayedMediaItemColor2: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -2150,7 +2019,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopeInfo_Value@reaper_functions@@3P6ANPEAVTrackEnvelope@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetEnvelopeInfo_ValueE"]
             pub static mut GetEnvelopeInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::TrackEnvelope,
@@ -2159,7 +2028,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopeName@reaper_functions@@3P6A_NPEAVTrackEnvelope@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetEnvelopeNameE"]
             pub static mut GetEnvelopeName: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -2169,7 +2038,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopePoint@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HPEAN1PEAH1PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetEnvelopePointE"]
             pub static mut GetEnvelopePoint: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -2183,7 +2052,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopePointByTime@reaper_functions@@3P6AHPEAVTrackEnvelope@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetEnvelopePointByTimeE"]
             pub static mut GetEnvelopePointByTime: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -2192,7 +2061,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopePointByTimeEx@reaper_functions@@3P6AHPEAVTrackEnvelope@@HN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetEnvelopePointByTimeExE"]
             pub static mut GetEnvelopePointByTimeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -2202,7 +2071,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopePointEx@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HHPEAN1PEAH1PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetEnvelopePointExE"]
             pub static mut GetEnvelopePointEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -2217,13 +2086,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopeScalingMode@reaper_functions@@3P6AHPEAVTrackEnvelope@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetEnvelopeScalingModeE"]
             pub static mut GetEnvelopeScalingMode: ::std::option::Option<
                 unsafe extern "C" fn(env: *mut root::TrackEnvelope) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetEnvelopeStateChunk@reaper_functions@@3P6A_NPEAVTrackEnvelope@@PEADH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetEnvelopeStateChunkE"]
             pub static mut GetEnvelopeStateChunk: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -2234,12 +2103,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetExePath@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10GetExePathE"]
             pub static mut GetExePath:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetExtState@reaper_functions@@3P6APEBDPEBD0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11GetExtStateE"]
             pub static mut GetExtState: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *const ::std::os::raw::c_char,
@@ -2248,7 +2117,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetFocusedFX@reaper_functions@@3P6AHPEAH00@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetFocusedFXE"]
             pub static mut GetFocusedFX: ::std::option::Option<
                 unsafe extern "C" fn(
                     tracknumberOut: *mut ::std::os::raw::c_int,
@@ -2258,7 +2127,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetFreeDiskSpaceForRecordPath@reaper_functions@@3P6AHPEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions29GetFreeDiskSpaceForRecordPathE"]
             pub static mut GetFreeDiskSpaceForRecordPath: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2267,7 +2136,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetFXEnvelope@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVMediaTrack@@HH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetFXEnvelopeE"]
             pub static mut GetFXEnvelope: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -2278,16 +2147,16 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetGlobalAutomationOverride@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27GetGlobalAutomationOverrideE"]
             pub static mut GetGlobalAutomationOverride:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetHZoomLevel@reaper_functions@@3P6ANXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetHZoomLevelE"]
             pub static mut GetHZoomLevel: ::std::option::Option<unsafe extern "C" fn() -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetIconThemePointer@reaper_functions@@3P6APEAXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetIconThemePointerE"]
             pub static mut GetIconThemePointer: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -2295,7 +2164,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetIconThemePointerForDPI@reaper_functions@@3P6APEAXPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25GetIconThemePointerForDPIE"]
             pub static mut GetIconThemePointerForDPI: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -2304,7 +2173,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetIconThemeStruct@reaper_functions@@3P6APEAXPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetIconThemeStructE"]
             pub static mut GetIconThemeStruct: ::std::option::Option<
                 unsafe extern "C" fn(
                     szOut: *mut ::std::os::raw::c_int,
@@ -2312,7 +2181,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetInputChannelName@reaper_functions@@3P6APEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetInputChannelNameE"]
             pub static mut GetInputChannelName: ::std::option::Option<
                 unsafe extern "C" fn(
                     channelIndex: ::std::os::raw::c_int,
@@ -2320,7 +2189,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetInputOutputLatency@reaper_functions@@3P6AXPEAH0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetInputOutputLatencyE"]
             pub static mut GetInputOutputLatency: ::std::option::Option<
                 unsafe extern "C" fn(
                     inputlatencyOut: *mut ::std::os::raw::c_int,
@@ -2329,7 +2198,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetItemEditingTime2@reaper_functions@@3P6ANPEAPEAVPCM_source@@PEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetItemEditingTime2E"]
             pub static mut GetItemEditingTime2: ::std::option::Option<
                 unsafe extern "C" fn(
                     which_itemOut: *mut *mut root::PCM_source,
@@ -2338,7 +2207,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetItemFromPoint@reaper_functions@@3P6APEAVMediaItem@@HH_NPEAPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetItemFromPointE"]
             pub static mut GetItemFromPoint: ::std::option::Option<
                 unsafe extern "C" fn(
                     screen_x: ::std::os::raw::c_int,
@@ -2349,13 +2218,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetItemProjectContext@reaper_functions@@3P6APEAVReaProject@@PEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetItemProjectContextE"]
             pub static mut GetItemProjectContext: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::ReaProject,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetItemStateChunk@reaper_functions@@3P6A_NPEAVMediaItem@@PEADH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetItemStateChunkE"]
             pub static mut GetItemStateChunk: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -2366,12 +2235,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetLastColorThemeFile@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetLastColorThemeFileE"]
             pub static mut GetLastColorThemeFile:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetLastMarkerAndCurRegion@reaper_functions@@3P6AXPEAVReaProject@@NPEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25GetLastMarkerAndCurRegionE"]
             pub static mut GetLastMarkerAndCurRegion: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2382,7 +2251,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetLastTouchedFX@reaper_functions@@3P6A_NPEAH00@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetLastTouchedFXE"]
             pub static mut GetLastTouchedFX: ::std::option::Option<
                 unsafe extern "C" fn(
                     tracknumberOut: *mut ::std::os::raw::c_int,
@@ -2392,42 +2261,42 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetLastTouchedTrack@reaper_functions@@3P6APEAVMediaTrack@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetLastTouchedTrackE"]
             pub static mut GetLastTouchedTrack:
                 ::std::option::Option<unsafe extern "C" fn() -> *mut root::MediaTrack>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMainHwnd@reaper_functions@@3P6APEAUHWND__@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11GetMainHwndE"]
             pub static mut GetMainHwnd: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMasterMuteSoloFlags@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetMasterMuteSoloFlagsE"]
             pub static mut GetMasterMuteSoloFlags:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMasterTrack@reaper_functions@@3P6APEAVMediaTrack@@PEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetMasterTrackE"]
             pub static mut GetMasterTrack: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::MediaTrack,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMasterTrackVisibility@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetMasterTrackVisibilityE"]
             pub static mut GetMasterTrackVisibility:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMaxMidiInputs@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetMaxMidiInputsE"]
             pub static mut GetMaxMidiInputs:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMaxMidiOutputs@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetMaxMidiOutputsE"]
             pub static mut GetMaxMidiOutputs:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItem@reaper_functions@@3P6APEAVMediaItem@@PEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetMediaItemE"]
             pub static mut GetMediaItem: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2436,13 +2305,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItem_Track@reaper_functions@@3P6APEAVMediaTrack@@PEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetMediaItem_TrackE"]
             pub static mut GetMediaItem_Track: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaTrack,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemInfo_Value@reaper_functions@@3P6ANPEAVMediaItem@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetMediaItemInfo_ValueE"]
             pub static mut GetMediaItemInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -2451,13 +2320,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemNumTakes@reaper_functions@@3P6AHPEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetMediaItemNumTakesE"]
             pub static mut GetMediaItemNumTakes: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTake@reaper_functions@@3P6APEAVMediaItem_Take@@PEAVMediaItem@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetMediaItemTakeE"]
             pub static mut GetMediaItemTake: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -2466,13 +2335,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTake_Item@reaper_functions@@3P6APEAVMediaItem@@PEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetMediaItemTake_ItemE"]
             pub static mut GetMediaItemTake_Item: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *mut root::MediaItem,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTake_Peaks@reaper_functions@@3P6AHPEAVMediaItem_Take@@NNHHHPEAN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetMediaItemTake_PeaksE"]
             pub static mut GetMediaItemTake_Peaks: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -2486,19 +2355,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTake_Source@reaper_functions@@3P6APEAVPCM_source@@PEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetMediaItemTake_SourceE"]
             pub static mut GetMediaItemTake_Source: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *mut root::PCM_source,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTake_Track@reaper_functions@@3P6APEAVMediaTrack@@PEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetMediaItemTake_TrackE"]
             pub static mut GetMediaItemTake_Track: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *mut root::MediaTrack,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTakeByGUID@reaper_functions@@3P6APEAVMediaItem_Take@@PEAVReaProject@@PEBU_GUID@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetMediaItemTakeByGUIDE"]
             pub static mut GetMediaItemTakeByGUID: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -2507,7 +2376,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTakeInfo_Value@reaper_functions@@3P6ANPEAVMediaItem_Take@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26GetMediaItemTakeInfo_ValueE"]
             pub static mut GetMediaItemTakeInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -2516,13 +2385,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaItemTrack@reaper_functions@@3P6APEAVMediaTrack@@PEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetMediaItemTrackE"]
             pub static mut GetMediaItemTrack: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem) -> *mut root::MediaTrack,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaSourceFileName@reaper_functions@@3P6AXPEAVPCM_source@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetMediaSourceFileNameE"]
             pub static mut GetMediaSourceFileName: ::std::option::Option<
                 unsafe extern "C" fn(
                     source: *mut root::PCM_source,
@@ -2532,7 +2401,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaSourceLength@reaper_functions@@3P6ANPEAVPCM_source@@PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetMediaSourceLengthE"]
             pub static mut GetMediaSourceLength: ::std::option::Option<
                 unsafe extern "C" fn(
                     source: *mut root::PCM_source,
@@ -2541,25 +2410,25 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaSourceNumChannels@reaper_functions@@3P6AHPEAVPCM_source@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25GetMediaSourceNumChannelsE"]
             pub static mut GetMediaSourceNumChannels: ::std::option::Option<
                 unsafe extern "C" fn(source: *mut root::PCM_source) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaSourceParent@reaper_functions@@3P6APEAVPCM_source@@PEAV2@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetMediaSourceParentE"]
             pub static mut GetMediaSourceParent: ::std::option::Option<
                 unsafe extern "C" fn(src: *mut root::PCM_source) -> *mut root::PCM_source,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaSourceSampleRate@reaper_functions@@3P6AHPEAVPCM_source@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetMediaSourceSampleRateE"]
             pub static mut GetMediaSourceSampleRate: ::std::option::Option<
                 unsafe extern "C" fn(source: *mut root::PCM_source) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaSourceType@reaper_functions@@3P6AXPEAVPCM_source@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetMediaSourceTypeE"]
             pub static mut GetMediaSourceType: ::std::option::Option<
                 unsafe extern "C" fn(
                     source: *mut root::PCM_source,
@@ -2569,7 +2438,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMediaTrackInfo_Value@reaper_functions@@3P6ANPEAVMediaTrack@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetMediaTrackInfo_ValueE"]
             pub static mut GetMediaTrackInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -2578,7 +2447,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMIDIInputName@reaper_functions@@3P6A_NHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetMIDIInputNameE"]
             pub static mut GetMIDIInputName: ::std::option::Option<
                 unsafe extern "C" fn(
                     dev: ::std::os::raw::c_int,
@@ -2588,7 +2457,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMIDIOutputName@reaper_functions@@3P6A_NHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetMIDIOutputNameE"]
             pub static mut GetMIDIOutputName: ::std::option::Option<
                 unsafe extern "C" fn(
                     dev: ::std::os::raw::c_int,
@@ -2598,12 +2467,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMixerScroll@reaper_functions@@3P6APEAVMediaTrack@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetMixerScrollE"]
             pub static mut GetMixerScroll:
                 ::std::option::Option<unsafe extern "C" fn() -> *mut root::MediaTrack>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMouseModifier@reaper_functions@@3P6AXPEBDHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetMouseModifierE"]
             pub static mut GetMouseModifier: ::std::option::Option<
                 unsafe extern "C" fn(
                     context: *const ::std::os::raw::c_char,
@@ -2614,7 +2483,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMousePosition@reaper_functions@@3P6AXPEAH0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetMousePositionE"]
             pub static mut GetMousePosition: ::std::option::Option<
                 unsafe extern "C" fn(
                     xOut: *mut ::std::os::raw::c_int,
@@ -2623,37 +2492,37 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetNumAudioInputs@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetNumAudioInputsE"]
             pub static mut GetNumAudioInputs:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetNumAudioOutputs@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetNumAudioOutputsE"]
             pub static mut GetNumAudioOutputs:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetNumMIDIInputs@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetNumMIDIInputsE"]
             pub static mut GetNumMIDIInputs:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetNumMIDIOutputs@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetNumMIDIOutputsE"]
             pub static mut GetNumMIDIOutputs:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetNumTracks@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetNumTracksE"]
             pub static mut GetNumTracks:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetOS@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions5GetOSE"]
             pub static mut GetOS:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetOutputChannelName@reaper_functions@@3P6APEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetOutputChannelNameE"]
             pub static mut GetOutputChannelName: ::std::option::Option<
                 unsafe extern "C" fn(
                     channelIndex: ::std::os::raw::c_int,
@@ -2661,17 +2530,17 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetOutputLatency@reaper_functions@@3P6ANXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetOutputLatencyE"]
             pub static mut GetOutputLatency: ::std::option::Option<unsafe extern "C" fn() -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetParentTrack@reaper_functions@@3P6APEAVMediaTrack@@PEAV2@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetParentTrackE"]
             pub static mut GetParentTrack: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> *mut root::MediaTrack,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPeakFileName@reaper_functions@@3P6AXPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetPeakFileNameE"]
             pub static mut GetPeakFileName: ::std::option::Option<
                 unsafe extern "C" fn(
                     fn_: *const ::std::os::raw::c_char,
@@ -2681,7 +2550,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPeakFileNameEx@reaper_functions@@3P6AXPEBDPEADH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetPeakFileNameExE"]
             pub static mut GetPeakFileNameEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     fn_: *const ::std::os::raw::c_char,
@@ -2692,7 +2561,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPeakFileNameEx2@reaper_functions@@3P6AXPEBDPEADH_N0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetPeakFileNameEx2E"]
             pub static mut GetPeakFileNameEx2: ::std::option::Option<
                 unsafe extern "C" fn(
                     fn_: *const ::std::os::raw::c_char,
@@ -2704,7 +2573,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPeaksBitmap@reaper_functions@@3P6APEAXPEAUPCM_source_peaktransfer_t@@NHHPEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetPeaksBitmapE"]
             pub static mut GetPeaksBitmap: ::std::option::Option<
                 unsafe extern "C" fn(
                     pks: *mut root::PCM_source_peaktransfer_t,
@@ -2716,36 +2585,36 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPlayPosition@reaper_functions@@3P6ANXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetPlayPositionE"]
             pub static mut GetPlayPosition: ::std::option::Option<unsafe extern "C" fn() -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPlayPosition2@reaper_functions@@3P6ANXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetPlayPosition2E"]
             pub static mut GetPlayPosition2: ::std::option::Option<unsafe extern "C" fn() -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPlayPosition2Ex@reaper_functions@@3P6ANPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetPlayPosition2ExE"]
             pub static mut GetPlayPosition2Ex:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPlayPositionEx@reaper_functions@@3P6ANPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetPlayPositionExE"]
             pub static mut GetPlayPositionEx:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPlayState@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetPlayStateE"]
             pub static mut GetPlayState:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPlayStateEx@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetPlayStateExE"]
             pub static mut GetPlayStateEx: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPreferredDiskReadMode@reaper_functions@@3P6AXPEAH00@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetPreferredDiskReadModeE"]
             pub static mut GetPreferredDiskReadMode: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: *mut ::std::os::raw::c_int,
@@ -2755,7 +2624,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPreferredDiskReadModePeak@reaper_functions@@3P6AXPEAH00@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions28GetPreferredDiskReadModePeakE"]
             pub static mut GetPreferredDiskReadModePeak: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: *mut ::std::os::raw::c_int,
@@ -2765,7 +2634,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetPreferredDiskWriteMode@reaper_functions@@3P6AXPEAH00@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25GetPreferredDiskWriteModeE"]
             pub static mut GetPreferredDiskWriteMode: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: *mut ::std::os::raw::c_int,
@@ -2775,12 +2644,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectLength@reaper_functions@@3P6ANPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetProjectLengthE"]
             pub static mut GetProjectLength:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectName@reaper_functions@@3P6AXPEAVReaProject@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetProjectNameE"]
             pub static mut GetProjectName: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2790,7 +2659,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectPath@reaper_functions@@3P6AXPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetProjectPathE"]
             pub static mut GetProjectPath: ::std::option::Option<
                 unsafe extern "C" fn(
                     buf: *mut ::std::os::raw::c_char,
@@ -2799,7 +2668,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectPathEx@reaper_functions@@3P6AXPEAVReaProject@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetProjectPathExE"]
             pub static mut GetProjectPathEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2809,24 +2678,24 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectStateChangeCount@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26GetProjectStateChangeCountE"]
             pub static mut GetProjectStateChangeCount: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectTimeOffset@reaper_functions@@3P6ANPEAVReaProject@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetProjectTimeOffsetE"]
             pub static mut GetProjectTimeOffset: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, rndframe: bool) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectTimeSignature@reaper_functions@@3P6AXPEAN0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetProjectTimeSignatureE"]
             pub static mut GetProjectTimeSignature:
                 ::std::option::Option<unsafe extern "C" fn(bpmOut: *mut f64, bpiOut: *mut f64)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjectTimeSignature2@reaper_functions@@3P6AXPEAVReaProject@@PEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetProjectTimeSignature2E"]
             pub static mut GetProjectTimeSignature2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2836,7 +2705,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetProjExtState@reaper_functions@@3P6AHPEAVReaProject@@PEBD1PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetProjExtStateE"]
             pub static mut GetProjExtState: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2848,18 +2717,18 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetResourcePath@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetResourcePathE"]
             pub static mut GetResourcePath:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSelectedEnvelope@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetSelectedEnvelopeE"]
             pub static mut GetSelectedEnvelope: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::TrackEnvelope,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSelectedMediaItem@reaper_functions@@3P6APEAVMediaItem@@PEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetSelectedMediaItemE"]
             pub static mut GetSelectedMediaItem: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2868,7 +2737,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSelectedTrack@reaper_functions@@3P6APEAVMediaTrack@@PEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetSelectedTrackE"]
             pub static mut GetSelectedTrack: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2877,7 +2746,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSelectedTrack2@reaper_functions@@3P6APEAVMediaTrack@@PEAVReaProject@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetSelectedTrack2E"]
             pub static mut GetSelectedTrack2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2887,13 +2756,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSelectedTrackEnvelope@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetSelectedTrackEnvelopeE"]
             pub static mut GetSelectedTrackEnvelope: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> *mut root::TrackEnvelope,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSet_ArrangeView2@reaper_functions@@3P6AXPEAVReaProject@@_NHHPEAN2@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetSet_ArrangeView2E"]
             pub static mut GetSet_ArrangeView2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2906,7 +2775,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSet_LoopTimeRange@reaper_functions@@3P6AX_N0PEAN10@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetSet_LoopTimeRangeE"]
             pub static mut GetSet_LoopTimeRange: ::std::option::Option<
                 unsafe extern "C" fn(
                     isSet: bool,
@@ -2918,7 +2787,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSet_LoopTimeRange2@reaper_functions@@3P6AXPEAVReaProject@@_N1PEAN21@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetSet_LoopTimeRange2E"]
             pub static mut GetSet_LoopTimeRange2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -2931,7 +2800,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetAutomationItemInfo@reaper_functions@@3P6ANPEAVTrackEnvelope@@HPEBDN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetSetAutomationItemInfoE"]
             pub static mut GetSetAutomationItemInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -2943,7 +2812,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetAutomationItemInfo_String@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HPEBDPEAD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions31GetSetAutomationItemInfo_StringE"]
             pub static mut GetSetAutomationItemInfo_String: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -2955,7 +2824,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetEnvelopeInfo_String@reaper_functions@@3P6A_NPEAVTrackEnvelope@@PEBDPEAD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25GetSetEnvelopeInfo_StringE"]
             pub static mut GetSetEnvelopeInfo_String: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -2966,7 +2835,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetEnvelopeState@reaper_functions@@3P6A_NPEAVTrackEnvelope@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetSetEnvelopeStateE"]
             pub static mut GetSetEnvelopeState: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -2976,7 +2845,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetEnvelopeState2@reaper_functions@@3P6A_NPEAVTrackEnvelope@@PEADH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetSetEnvelopeState2E"]
             pub static mut GetSetEnvelopeState2: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -2987,7 +2856,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetItemState@reaper_functions@@3P6A_NPEAVMediaItem@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetSetItemStateE"]
             pub static mut GetSetItemState: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -2997,7 +2866,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetItemState2@reaper_functions@@3P6A_NPEAVMediaItem@@PEADH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetSetItemState2E"]
             pub static mut GetSetItemState2: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -3008,7 +2877,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetMediaItemInfo@reaper_functions@@3P6APEAXPEAVMediaItem@@PEBDPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetSetMediaItemInfoE"]
             pub static mut GetSetMediaItemInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -3018,7 +2887,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetMediaItemInfo_String@reaper_functions@@3P6A_NPEAVMediaItem@@PEBDPEAD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26GetSetMediaItemInfo_StringE"]
             pub static mut GetSetMediaItemInfo_String: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -3029,7 +2898,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetMediaItemTakeInfo@reaper_functions@@3P6APEAXPEAVMediaItem_Take@@PEBDPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetSetMediaItemTakeInfoE"]
             pub static mut GetSetMediaItemTakeInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     tk: *mut root::MediaItem_Take,
@@ -3039,7 +2908,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetMediaItemTakeInfo_String@reaper_functions@@3P6A_NPEAVMediaItem_Take@@PEBDPEAD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions30GetSetMediaItemTakeInfo_StringE"]
             pub static mut GetSetMediaItemTakeInfo_String: ::std::option::Option<
                 unsafe extern "C" fn(
                     tk: *mut root::MediaItem_Take,
@@ -3050,7 +2919,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetMediaTrackInfo@reaper_functions@@3P6APEAXPEAVMediaTrack@@PEBDPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetSetMediaTrackInfoE"]
             pub static mut GetSetMediaTrackInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3060,7 +2929,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetMediaTrackInfo_String@reaper_functions@@3P6A_NPEAVMediaTrack@@PEBDPEAD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27GetSetMediaTrackInfo_StringE"]
             pub static mut GetSetMediaTrackInfo_String: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3071,7 +2940,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetObjectState@reaper_functions@@3P6APEADPEAXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetSetObjectStateE"]
             pub static mut GetSetObjectState: ::std::option::Option<
                 unsafe extern "C" fn(
                     obj: *mut ::std::os::raw::c_void,
@@ -3080,7 +2949,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetObjectState2@reaper_functions@@3P6APEADPEAXPEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetSetObjectState2E"]
             pub static mut GetSetObjectState2: ::std::option::Option<
                 unsafe extern "C" fn(
                     obj: *mut ::std::os::raw::c_void,
@@ -3090,7 +2959,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetProjectAuthor@reaper_functions@@3P6AXPEAVReaProject@@_NPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetSetProjectAuthorE"]
             pub static mut GetSetProjectAuthor: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3101,7 +2970,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetProjectGrid@reaper_functions@@3P6AHPEAVReaProject@@_NPEANPEAH2@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetSetProjectGridE"]
             pub static mut GetSetProjectGrid: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -3113,7 +2982,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetProjectInfo@reaper_functions@@3P6ANPEAVReaProject@@PEBDN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetSetProjectInfoE"]
             pub static mut GetSetProjectInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -3124,7 +2993,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetProjectInfo_String@reaper_functions@@3P6A_NPEAVReaProject@@PEBDPEAD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetSetProjectInfo_StringE"]
             pub static mut GetSetProjectInfo_String: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -3135,7 +3004,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetProjectNotes@reaper_functions@@3P6AXPEAVReaProject@@_NPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetSetProjectNotesE"]
             pub static mut GetSetProjectNotes: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3146,13 +3015,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetRepeat@reaper_functions@@3P6AHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetSetRepeatE"]
             pub static mut GetSetRepeat: ::std::option::Option<
                 unsafe extern "C" fn(val: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetRepeatEx@reaper_functions@@3P6AHPEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetSetRepeatExE"]
             pub static mut GetSetRepeatEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3161,7 +3030,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetTrackGroupMembership@reaper_functions@@3P6AIPEAVMediaTrack@@PEBDII@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26GetSetTrackGroupMembershipE"]
             pub static mut GetSetTrackGroupMembership: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3172,7 +3041,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetTrackGroupMembershipHigh@reaper_functions@@3P6AIPEAVMediaTrack@@PEBDII@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions30GetSetTrackGroupMembershipHighE"]
             pub static mut GetSetTrackGroupMembershipHigh: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3183,7 +3052,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetTrackMIDISupportFile@reaper_functions@@3P6APEBDPEAVReaProject@@PEAVMediaTrack@@HPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26GetSetTrackMIDISupportFileE"]
             pub static mut GetSetTrackMIDISupportFile: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3194,7 +3063,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetTrackSendInfo@reaper_functions@@3P6APEAXPEAVMediaTrack@@HHPEBDPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetSetTrackSendInfoE"]
             pub static mut GetSetTrackSendInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3206,7 +3075,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetTrackSendInfo_String@reaper_functions@@3P6A_NPEAVMediaTrack@@HHPEBDPEAD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26GetSetTrackSendInfo_StringE"]
             pub static mut GetSetTrackSendInfo_String: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3219,7 +3088,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetTrackState@reaper_functions@@3P6A_NPEAVMediaTrack@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetSetTrackStateE"]
             pub static mut GetSetTrackState: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3229,7 +3098,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSetTrackState2@reaper_functions@@3P6A_NPEAVMediaTrack@@PEADH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetSetTrackState2E"]
             pub static mut GetSetTrackState2: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3240,13 +3109,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetSubProjectFromSource@reaper_functions@@3P6APEAVReaProject@@PEAVPCM_source@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetSubProjectFromSourceE"]
             pub static mut GetSubProjectFromSource: ::std::option::Option<
                 unsafe extern "C" fn(src: *mut root::PCM_source) -> *mut root::ReaProject,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTake@reaper_functions@@3P6APEAVMediaItem_Take@@PEAVMediaItem@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions7GetTakeE"]
             pub static mut GetTake: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -3255,7 +3124,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTakeEnvelope@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetTakeEnvelopeE"]
             pub static mut GetTakeEnvelope: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -3264,7 +3133,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTakeEnvelopeByName@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVMediaItem_Take@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetTakeEnvelopeByNameE"]
             pub static mut GetTakeEnvelopeByName: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -3273,7 +3142,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTakeName@reaper_functions@@3P6APEBDPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11GetTakeNameE"]
             pub static mut GetTakeName: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -3281,13 +3150,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTakeNumStretchMarkers@reaper_functions@@3P6AHPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24GetTakeNumStretchMarkersE"]
             pub static mut GetTakeNumStretchMarkers: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTakeStretchMarker@reaper_functions@@3P6AHPEAVMediaItem_Take@@HPEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetTakeStretchMarkerE"]
             pub static mut GetTakeStretchMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -3298,7 +3167,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTakeStretchMarkerSlope@reaper_functions@@3P6ANPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25GetTakeStretchMarkerSlopeE"]
             pub static mut GetTakeStretchMarkerSlope: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -3307,7 +3176,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTCPFXParm@reaper_functions@@3P6A_NPEAVReaProject@@PEAVMediaTrack@@HPEAH2@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetTCPFXParmE"]
             pub static mut GetTCPFXParm: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -3319,7 +3188,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTempoMatchPlayRate@reaper_functions@@3P6A_NPEAVPCM_source@@NNNPEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetTempoMatchPlayRateE"]
             pub static mut GetTempoMatchPlayRate: ::std::option::Option<
                 unsafe extern "C" fn(
                     source: *mut root::PCM_source,
@@ -3332,7 +3201,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTempoTimeSigMarker@reaper_functions@@3P6A_NPEAVReaProject@@HPEANPEAH1122PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetTempoTimeSigMarkerE"]
             pub static mut GetTempoTimeSigMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3348,13 +3217,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetToggleCommandState@reaper_functions@@3P6AHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetToggleCommandStateE"]
             pub static mut GetToggleCommandState: ::std::option::Option<
                 unsafe extern "C" fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetToggleCommandState2@reaper_functions@@3P6AHPEAUKbdSectionInfo@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetToggleCommandState2E"]
             pub static mut GetToggleCommandState2: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
@@ -3363,7 +3232,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetToggleCommandStateEx@reaper_functions@@3P6AHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetToggleCommandStateExE"]
             pub static mut GetToggleCommandStateEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     section_id: ::std::os::raw::c_int,
@@ -3372,7 +3241,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetToggleCommandStateThroughHooks@reaper_functions@@3P6AHPEAUKbdSectionInfo@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions33GetToggleCommandStateThroughHooksE"]
             pub static mut GetToggleCommandStateThroughHooks: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
@@ -3381,12 +3250,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTooltipWindow@reaper_functions@@3P6APEAUHWND__@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetTooltipWindowE"]
             pub static mut GetTooltipWindow:
                 ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrack@reaper_functions@@3P6APEAVMediaTrack@@PEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions8GetTrackE"]
             pub static mut GetTrack: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3395,25 +3264,25 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackAutomationMode@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetTrackAutomationModeE"]
             pub static mut GetTrackAutomationMode: ::std::option::Option<
                 unsafe extern "C" fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackColor@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetTrackColorE"]
             pub static mut GetTrackColor: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackDepth@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetTrackDepthE"]
             pub static mut GetTrackDepth: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackEnvelope@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetTrackEnvelopeE"]
             pub static mut GetTrackEnvelope: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3422,7 +3291,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackEnvelopeByChunkName@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVMediaTrack@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27GetTrackEnvelopeByChunkNameE"]
             pub static mut GetTrackEnvelopeByChunkName: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3431,7 +3300,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackEnvelopeByName@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVMediaTrack@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetTrackEnvelopeByNameE"]
             pub static mut GetTrackEnvelopeByName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3440,7 +3309,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackFromPoint@reaper_functions@@3P6APEAVMediaTrack@@HHPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetTrackFromPointE"]
             pub static mut GetTrackFromPoint: ::std::option::Option<
                 unsafe extern "C" fn(
                     screen_x: ::std::os::raw::c_int,
@@ -3450,13 +3319,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackGUID@reaper_functions@@3P6APEAU_GUID@@PEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetTrackGUIDE"]
             pub static mut GetTrackGUID: ::std::option::Option<
                 unsafe extern "C" fn(tr: *mut root::MediaTrack) -> *mut root::GUID,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackInfo@reaper_functions@@3P6APEBD_JPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetTrackInfoE"]
             pub static mut GetTrackInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: root::INT_PTR,
@@ -3465,7 +3334,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackMediaItem@reaper_functions@@3P6APEAVMediaItem@@PEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17GetTrackMediaItemE"]
             pub static mut GetTrackMediaItem: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3474,7 +3343,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackMIDILyrics@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEADPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetTrackMIDILyricsE"]
             pub static mut GetTrackMIDILyrics: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3485,7 +3354,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackMIDINoteName@reaper_functions@@3P6APEBDHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetTrackMIDINoteNameE"]
             pub static mut GetTrackMIDINoteName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: ::std::os::raw::c_int,
@@ -3495,7 +3364,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackMIDINoteNameEx@reaper_functions@@3P6APEBDPEAVReaProject@@PEAVMediaTrack@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetTrackMIDINoteNameExE"]
             pub static mut GetTrackMIDINoteNameEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3506,7 +3375,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackMIDINoteRange@reaper_functions@@3P6AXPEAVReaProject@@PEAVMediaTrack@@PEAH2@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetTrackMIDINoteRangeE"]
             pub static mut GetTrackMIDINoteRange: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3517,7 +3386,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackName@reaper_functions@@3P6A_NPEAVMediaTrack@@PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetTrackNameE"]
             pub static mut GetTrackName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3527,13 +3396,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackNumMediaItems@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetTrackNumMediaItemsE"]
             pub static mut GetTrackNumMediaItems: ::std::option::Option<
                 unsafe extern "C" fn(tr: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackNumSends@reaper_functions@@3P6AHPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetTrackNumSendsE"]
             pub static mut GetTrackNumSends: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3542,7 +3411,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackReceiveName@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19GetTrackReceiveNameE"]
             pub static mut GetTrackReceiveName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3553,7 +3422,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackReceiveUIMute@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21GetTrackReceiveUIMuteE"]
             pub static mut GetTrackReceiveUIMute: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3563,7 +3432,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackReceiveUIVolPan@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23GetTrackReceiveUIVolPanE"]
             pub static mut GetTrackReceiveUIVolPan: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3574,7 +3443,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackSendInfo_Value@reaper_functions@@3P6ANPEAVMediaTrack@@HHPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetTrackSendInfo_ValueE"]
             pub static mut GetTrackSendInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -3585,7 +3454,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackSendName@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetTrackSendNameE"]
             pub static mut GetTrackSendName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3596,7 +3465,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackSendUIMute@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetTrackSendUIMuteE"]
             pub static mut GetTrackSendUIMute: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3606,7 +3475,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackSendUIVolPan@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20GetTrackSendUIVolPanE"]
             pub static mut GetTrackSendUIVolPan: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3617,7 +3486,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackState@reaper_functions@@3P6APEBDPEAVMediaTrack@@PEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetTrackStateE"]
             pub static mut GetTrackState: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3626,7 +3495,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackStateChunk@reaper_functions@@3P6A_NPEAVMediaTrack@@PEADH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18GetTrackStateChunkE"]
             pub static mut GetTrackStateChunk: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3637,13 +3506,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackUIMute@reaper_functions@@3P6A_NPEAVMediaTrack@@PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GetTrackUIMuteE"]
             pub static mut GetTrackUIMute: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack, muteOut: *mut bool) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackUIPan@reaper_functions@@3P6A_NPEAVMediaTrack@@PEAN1PEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetTrackUIPanE"]
             pub static mut GetTrackUIPan: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3654,7 +3523,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetTrackUIVolPan@reaper_functions@@3P6A_NPEAVMediaTrack@@PEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16GetTrackUIVolPanE"]
             pub static mut GetTrackUIVolPan: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -3664,7 +3533,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetUnderrunTime@reaper_functions@@3P6AXPEAI00@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15GetUnderrunTimeE"]
             pub static mut GetUnderrunTime: ::std::option::Option<
                 unsafe extern "C" fn(
                     audio_xrunOutOptional: *mut ::std::os::raw::c_uint,
@@ -3674,7 +3543,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetUserFileNameForRead@reaper_functions@@3P6A_NPEADPEBD1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22GetUserFileNameForReadE"]
             pub static mut GetUserFileNameForRead: ::std::option::Option<
                 unsafe extern "C" fn(
                     filenameNeed4096: *mut ::std::os::raw::c_char,
@@ -3684,7 +3553,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetUserInputs@reaper_functions@@3P6A_NPEBDH0PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetUserInputsE"]
             pub static mut GetUserInputs: ::std::option::Option<
                 unsafe extern "C" fn(
                     title: *const ::std::os::raw::c_char,
@@ -3696,7 +3565,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GoToMarker@reaper_functions@@3P6AXPEAVReaProject@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10GoToMarkerE"]
             pub static mut GoToMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3706,7 +3575,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GoToRegion@reaper_functions@@3P6AXPEAVReaProject@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10GoToRegionE"]
             pub static mut GoToRegion: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3716,7 +3585,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GR_SelectColor@reaper_functions@@3P6AHPEAUHWND__@@PEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14GR_SelectColorE"]
             pub static mut GR_SelectColor: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -3725,19 +3594,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GSC_mainwnd@reaper_functions@@3P6AHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11GSC_mainwndE"]
             pub static mut GSC_mainwnd: ::std::option::Option<
                 unsafe extern "C" fn(t: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?guidToString@reaper_functions@@3P6AXPEBU_GUID@@PEAD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12guidToStringE"]
             pub static mut guidToString: ::std::option::Option<
                 unsafe extern "C" fn(g: *const root::GUID, destNeed64: *mut ::std::os::raw::c_char),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?HasExtState@reaper_functions@@3P6A_NPEBD0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11HasExtStateE"]
             pub static mut HasExtState: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *const ::std::os::raw::c_char,
@@ -3746,13 +3615,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?HasTrackMIDIPrograms@reaper_functions@@3P6APEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20HasTrackMIDIProgramsE"]
             pub static mut HasTrackMIDIPrograms: ::std::option::Option<
                 unsafe extern "C" fn(track: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?HasTrackMIDIProgramsEx@reaper_functions@@3P6APEBDPEAVReaProject@@PEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22HasTrackMIDIProgramsExE"]
             pub static mut HasTrackMIDIProgramsEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -3761,7 +3630,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Help_Set@reaper_functions@@3P6AXPEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions8Help_SetE"]
             pub static mut Help_Set: ::std::option::Option<
                 unsafe extern "C" fn(
                     helpstring: *const ::std::os::raw::c_char,
@@ -3770,7 +3639,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?HiresPeaksFromSource@reaper_functions@@3P6AXPEAVPCM_source@@PEAUPCM_source_peaktransfer_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20HiresPeaksFromSourceE"]
             pub static mut HiresPeaksFromSource: ::std::option::Option<
                 unsafe extern "C" fn(
                     src: *mut root::PCM_source,
@@ -3779,7 +3648,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?image_resolve_fn@reaper_functions@@3P6AXPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16image_resolve_fnE"]
             pub static mut image_resolve_fn: ::std::option::Option<
                 unsafe extern "C" fn(
                     in_: *const ::std::os::raw::c_char,
@@ -3789,7 +3658,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?InsertAutomationItem@reaper_functions@@3P6AHPEAVTrackEnvelope@@HNN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20InsertAutomationItemE"]
             pub static mut InsertAutomationItem: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -3800,7 +3669,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?InsertEnvelopePoint@reaper_functions@@3P6A_NPEAVTrackEnvelope@@NNHN_NPEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19InsertEnvelopePointE"]
             pub static mut InsertEnvelopePoint: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -3814,7 +3683,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?InsertEnvelopePointEx@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HNNHN_NPEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21InsertEnvelopePointExE"]
             pub static mut InsertEnvelopePointEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -3829,7 +3698,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?InsertMedia@reaper_functions@@3P6AHPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11InsertMediaE"]
             pub static mut InsertMedia: ::std::option::Option<
                 unsafe extern "C" fn(
                     file: *const ::std::os::raw::c_char,
@@ -3838,7 +3707,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?InsertMediaSection@reaper_functions@@3P6AHPEBDHNNN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18InsertMediaSectionE"]
             pub static mut InsertMediaSection: ::std::option::Option<
                 unsafe extern "C" fn(
                     file: *const ::std::os::raw::c_char,
@@ -3850,18 +3719,18 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?InsertTrackAtIndex@reaper_functions@@3P6AXH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18InsertTrackAtIndexE"]
             pub static mut InsertTrackAtIndex: ::std::option::Option<
                 unsafe extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsInRealTimeAudio@reaper_functions@@3P6AHXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17IsInRealTimeAudioE"]
             pub static mut IsInRealTimeAudio:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsItemTakeActiveForPlayback@reaper_functions@@3P6A_NPEAVMediaItem@@PEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27IsItemTakeActiveForPlaybackE"]
             pub static mut IsItemTakeActiveForPlayback: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -3870,39 +3739,39 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsMediaExtension@reaper_functions@@3P6A_NPEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16IsMediaExtensionE"]
             pub static mut IsMediaExtension: ::std::option::Option<
                 unsafe extern "C" fn(ext: *const ::std::os::raw::c_char, wantOthers: bool) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsMediaItemSelected@reaper_functions@@3P6A_NPEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19IsMediaItemSelectedE"]
             pub static mut IsMediaItemSelected:
                 ::std::option::Option<unsafe extern "C" fn(item: *mut root::MediaItem) -> bool>;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsProjectDirty@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14IsProjectDirtyE"]
             pub static mut IsProjectDirty: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsREAPER@reaper_functions@@3P6A_NXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions8IsREAPERE"]
             pub static mut IsREAPER: ::std::option::Option<unsafe extern "C" fn() -> bool>;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsTrackSelected@reaper_functions@@3P6A_NPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15IsTrackSelectedE"]
             pub static mut IsTrackSelected:
                 ::std::option::Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> bool>;
         }
         extern "C" {
-            #[link_name = "\u{1}?IsTrackVisible@reaper_functions@@3P6A_NPEAVMediaTrack@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14IsTrackVisibleE"]
             pub static mut IsTrackVisible: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack, mixer: bool) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_create@reaper_functions@@3P6APEAVjoystick_device@1@PEBU_GUID@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15joystick_createE"]
             pub static mut joystick_create: ::std::option::Option<
                 unsafe extern "C" fn(
                     guid: *const root::GUID,
@@ -3911,13 +3780,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_destroy@reaper_functions@@3P6AXPEAVjoystick_device@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16joystick_destroyE"]
             pub static mut joystick_destroy: ::std::option::Option<
                 unsafe extern "C" fn(device: *mut root::reaper_functions::joystick_device),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_enum@reaper_functions@@3P6APEBDHPEAPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13joystick_enumE"]
             pub static mut joystick_enum: ::std::option::Option<
                 unsafe extern "C" fn(
                     index: ::std::os::raw::c_int,
@@ -3926,7 +3795,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_getaxis@reaper_functions@@3P6ANPEAVjoystick_device@1@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16joystick_getaxisE"]
             pub static mut joystick_getaxis: ::std::option::Option<
                 unsafe extern "C" fn(
                     dev: *mut root::reaper_functions::joystick_device,
@@ -3935,7 +3804,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_getbuttonmask@reaper_functions@@3P6AIPEAVjoystick_device@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22joystick_getbuttonmaskE"]
             pub static mut joystick_getbuttonmask: ::std::option::Option<
                 unsafe extern "C" fn(
                     dev: *mut root::reaper_functions::joystick_device,
@@ -3943,7 +3812,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_getinfo@reaper_functions@@3P6AHPEAVjoystick_device@1@PEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16joystick_getinfoE"]
             pub static mut joystick_getinfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     dev: *mut root::reaper_functions::joystick_device,
@@ -3953,7 +3822,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_getpov@reaper_functions@@3P6ANPEAVjoystick_device@1@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15joystick_getpovE"]
             pub static mut joystick_getpov: ::std::option::Option<
                 unsafe extern "C" fn(
                     dev: *mut root::reaper_functions::joystick_device,
@@ -3962,13 +3831,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?joystick_update@reaper_functions@@3P6A_NPEAVjoystick_device@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15joystick_updateE"]
             pub static mut joystick_update: ::std::option::Option<
                 unsafe extern "C" fn(dev: *mut root::reaper_functions::joystick_device) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_enumerateActions@reaper_functions@@3P6AHPEAUKbdSectionInfo@@HPEAPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20kbd_enumerateActionsE"]
             pub static mut kbd_enumerateActions: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
@@ -3978,13 +3847,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_formatKeyName@reaper_functions@@3P6AXPEAUtagACCEL@@PEAD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17kbd_formatKeyNameE"]
             pub static mut kbd_formatKeyName: ::std::option::Option<
                 unsafe extern "C" fn(ac: *mut root::ACCEL, s: *mut ::std::os::raw::c_char),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_getCommandName@reaper_functions@@3P6AXHPEADPEAUKbdSectionInfo@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18kbd_getCommandNameE"]
             pub static mut kbd_getCommandName: ::std::option::Option<
                 unsafe extern "C" fn(
                     cmd: ::std::os::raw::c_int,
@@ -3994,7 +3863,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_getTextFromCmd@reaper_functions@@3P6APEBDKPEAUKbdSectionInfo@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18kbd_getTextFromCmdE"]
             pub static mut kbd_getTextFromCmd: ::std::option::Option<
                 unsafe extern "C" fn(
                     cmd: root::DWORD,
@@ -4003,7 +3872,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?KBD_OnMainActionEx@reaper_functions@@3P6AHHHHHPEAUHWND__@@PEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18KBD_OnMainActionExE"]
             pub static mut KBD_OnMainActionEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     cmd: ::std::os::raw::c_int,
@@ -4016,7 +3885,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_OnMidiEvent@reaper_functions@@3P6AXPEAUMIDI_event_t@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15kbd_OnMidiEventE"]
             pub static mut kbd_OnMidiEvent: ::std::option::Option<
                 unsafe extern "C" fn(
                     evt: *mut root::MIDI_event_t,
@@ -4025,7 +3894,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_OnMidiList@reaper_functions@@3P6AXPEAVMIDI_eventlist@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14kbd_OnMidiListE"]
             pub static mut kbd_OnMidiList: ::std::option::Option<
                 unsafe extern "C" fn(
                     list: *mut root::MIDI_eventlist,
@@ -4034,13 +3903,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_ProcessActionsMenu@reaper_functions@@3P6AXPEAUHMENU__@@PEAUKbdSectionInfo@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22kbd_ProcessActionsMenuE"]
             pub static mut kbd_ProcessActionsMenu: ::std::option::Option<
                 unsafe extern "C" fn(menu: root::HMENU, section: *mut root::KbdSectionInfo),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_processMidiEventActionEx@reaper_functions@@3P6A_NPEAUMIDI_event_t@@PEAUKbdSectionInfo@@PEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions28kbd_processMidiEventActionExE"]
             pub static mut kbd_processMidiEventActionEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     evt: *mut root::MIDI_event_t,
@@ -4050,13 +3919,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_reprocessMenu@reaper_functions@@3P6AXPEAUHMENU__@@PEAUKbdSectionInfo@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17kbd_reprocessMenuE"]
             pub static mut kbd_reprocessMenu: ::std::option::Option<
                 unsafe extern "C" fn(menu: root::HMENU, section: *mut root::KbdSectionInfo),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_RunCommandThroughHooks@reaper_functions@@3P6A_NPEAUKbdSectionInfo@@PEAH111PEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26kbd_RunCommandThroughHooksE"]
             pub static mut kbd_RunCommandThroughHooks: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
@@ -4069,7 +3938,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_translateAccelerator@reaper_functions@@3P6AHPEAUHWND__@@PEAUtagMSG@@PEAUKbdSectionInfo@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24kbd_translateAcceleratorE"]
             pub static mut kbd_translateAccelerator: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -4079,7 +3948,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?kbd_translateMouse@reaper_functions@@3P6A_NPEAXPEAE@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18kbd_translateMouseE"]
             pub static mut kbd_translateMouse: ::std::option::Option<
                 unsafe extern "C" fn(
                     winmsg: *mut ::std::os::raw::c_void,
@@ -4088,19 +3957,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__Destroy@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE__DestroyE"]
             pub static mut LICE__Destroy: ::std::option::Option<
                 unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__DestroyFont@reaper_functions@@3P6AXPEAVLICE_IFont@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17LICE__DestroyFontE"]
             pub static mut LICE__DestroyFont: ::std::option::Option<
                 unsafe extern "C" fn(font: *mut root::reaper_functions::LICE_IFont),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__DrawText@reaper_functions@@3P6AHPEAVLICE_IFont@1@PEAVLICE_IBitmap@1@PEBDHPEAUtagRECT@@I@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14LICE__DrawTextE"]
             pub static mut LICE__DrawText: ::std::option::Option<
                 unsafe extern "C" fn(
                     font: *mut root::reaper_functions::LICE_IFont,
@@ -4113,7 +3982,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__GetBits@reaper_functions@@3P6APEAXPEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE__GetBitsE"]
             pub static mut LICE__GetBits: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4121,13 +3990,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__GetDC@reaper_functions@@3P6APEAUHDC__@@PEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11LICE__GetDCE"]
             pub static mut LICE__GetDC: ::std::option::Option<
                 unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> root::HDC,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__GetHeight@reaper_functions@@3P6AHPEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15LICE__GetHeightE"]
             pub static mut LICE__GetHeight: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4135,7 +4004,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__GetRowSpan@reaper_functions@@3P6AHPEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16LICE__GetRowSpanE"]
             pub static mut LICE__GetRowSpan: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4143,7 +4012,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__GetWidth@reaper_functions@@3P6AHPEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14LICE__GetWidthE"]
             pub static mut LICE__GetWidth: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4151,13 +4020,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__IsFlipped@reaper_functions@@3P6A_NPEAVLICE_IBitmap@1@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15LICE__IsFlippedE"]
             pub static mut LICE__IsFlipped: ::std::option::Option<
                 unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__resize@reaper_functions@@3P6A_NPEAVLICE_IBitmap@1@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12LICE__resizeE"]
             pub static mut LICE__resize: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4167,7 +4036,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__SetBkColor@reaper_functions@@3P6AIPEAVLICE_IFont@1@I@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16LICE__SetBkColorE"]
             pub static mut LICE__SetBkColor: ::std::option::Option<
                 unsafe extern "C" fn(
                     font: *mut root::reaper_functions::LICE_IFont,
@@ -4176,7 +4045,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__SetFromHFont@reaper_functions@@3P6AXPEAVLICE_IFont@1@PEAUHFONT__@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18LICE__SetFromHFontE"]
             pub static mut LICE__SetFromHFont: ::std::option::Option<
                 unsafe extern "C" fn(
                     font: *mut root::reaper_functions::LICE_IFont,
@@ -4186,7 +4055,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__SetTextColor@reaper_functions@@3P6AIPEAVLICE_IFont@1@I@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18LICE__SetTextColorE"]
             pub static mut LICE__SetTextColor: ::std::option::Option<
                 unsafe extern "C" fn(
                     font: *mut root::reaper_functions::LICE_IFont,
@@ -4195,7 +4064,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE__SetTextCombineMode@reaper_functions@@3P6AXPEAVLICE_IFont@1@HM@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24LICE__SetTextCombineModeE"]
             pub static mut LICE__SetTextCombineMode: ::std::option::Option<
                 unsafe extern "C" fn(
                     ifont: *mut root::reaper_functions::LICE_IFont,
@@ -4205,7 +4074,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_Arc@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@MMMMMIMH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions8LICE_ArcE"]
             pub static mut LICE_Arc: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4222,7 +4091,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_Blit@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@0HHHHHHMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9LICE_BlitE"]
             pub static mut LICE_Blit: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4239,7 +4108,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_Blur@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@0HHHHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9LICE_BlurE"]
             pub static mut LICE_Blur: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4254,7 +4123,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_BorderedRect@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHIIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17LICE_BorderedRectE"]
             pub static mut LICE_BorderedRect: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4270,7 +4139,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_Circle@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@MMMIMH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11LICE_CircleE"]
             pub static mut LICE_Circle: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4285,7 +4154,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_Clear@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@I@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10LICE_ClearE"]
             pub static mut LICE_Clear: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4294,7 +4163,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_ClearRect@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHII@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14LICE_ClearRectE"]
             pub static mut LICE_ClearRect: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4308,7 +4177,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_ClipLine@reaper_functions@@3P6A_NPEAH000HHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_ClipLineE"]
             pub static mut LICE_ClipLine: ::std::option::Option<
                 unsafe extern "C" fn(
                     pX1Out: *mut ::std::os::raw::c_int,
@@ -4323,7 +4192,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_Copy@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9LICE_CopyE"]
             pub static mut LICE_Copy: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4332,7 +4201,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_CreateBitmap@reaper_functions@@3P6APEAVLICE_IBitmap@1@HHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17LICE_CreateBitmapE"]
             pub static mut LICE_CreateBitmap: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: ::std::os::raw::c_int,
@@ -4342,13 +4211,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_CreateFont@reaper_functions@@3P6APEAVLICE_IFont@1@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15LICE_CreateFontE"]
             pub static mut LICE_CreateFont: ::std::option::Option<
                 unsafe extern "C" fn() -> *mut root::reaper_functions::LICE_IFont,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_DrawCBezier@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@NNNNNNNNIMH_NN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16LICE_DrawCBezierE"]
             pub static mut LICE_DrawCBezier: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4369,7 +4238,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_DrawChar@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHDIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_DrawCharE"]
             pub static mut LICE_DrawChar: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4383,7 +4252,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_DrawGlyph@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHIPEAEHHMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14LICE_DrawGlyphE"]
             pub static mut LICE_DrawGlyph: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4399,7 +4268,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_DrawRect@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_DrawRectE"]
             pub static mut LICE_DrawRect: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4414,7 +4283,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_DrawText@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHPEBDIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_DrawTextE"]
             pub static mut LICE_DrawText: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4428,7 +4297,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_FillCBezier@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@NNNNNNNNHIMH_NN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16LICE_FillCBezierE"]
             pub static mut LICE_FillCBezier: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4450,7 +4319,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_FillCircle@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@MMMIMH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15LICE_FillCircleE"]
             pub static mut LICE_FillCircle: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4465,7 +4334,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_FillConvexPolygon@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@PEAH1HIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22LICE_FillConvexPolygonE"]
             pub static mut LICE_FillConvexPolygon: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4479,7 +4348,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_FillRect@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_FillRectE"]
             pub static mut LICE_FillRect: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4494,7 +4363,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_FillTrapezoid@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHHHIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18LICE_FillTrapezoidE"]
             pub static mut LICE_FillTrapezoid: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4511,7 +4380,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_FillTriangle@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHHHIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17LICE_FillTriangleE"]
             pub static mut LICE_FillTriangle: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4528,7 +4397,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_GetPixel@reaper_functions@@3P6AIPEAVLICE_IBitmap@1@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_GetPixelE"]
             pub static mut LICE_GetPixel: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4538,7 +4407,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_GradRect@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHMMMMMMMMMMMMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_GradRectE"]
             pub static mut LICE_GradRect: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4563,7 +4432,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_Line@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@MMMMIMH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9LICE_LineE"]
             pub static mut LICE_Line: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4579,7 +4448,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_LineInt@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHIMH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12LICE_LineIntE"]
             pub static mut LICE_LineInt: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4595,7 +4464,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_LoadPNG@reaper_functions@@3P6APEAVLICE_IBitmap@1@PEBDPEAV21@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12LICE_LoadPNGE"]
             pub static mut LICE_LoadPNG: ::std::option::Option<
                 unsafe extern "C" fn(
                     filename: *const ::std::os::raw::c_char,
@@ -4604,7 +4473,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_LoadPNGFromResource@reaper_functions@@3P6APEAVLICE_IBitmap@1@PEAUHINSTANCE__@@PEBDPEAV21@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24LICE_LoadPNGFromResourceE"]
             pub static mut LICE_LoadPNGFromResource: ::std::option::Option<
                 unsafe extern "C" fn(
                     hInst: root::HINSTANCE,
@@ -4614,7 +4483,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_MeasureText@reaper_functions@@3P6AXPEBDPEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16LICE_MeasureTextE"]
             pub static mut LICE_MeasureText: ::std::option::Option<
                 unsafe extern "C" fn(
                     string: *const ::std::os::raw::c_char,
@@ -4624,7 +4493,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_MultiplyAddRect@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHHHMMMMMMMM@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20LICE_MultiplyAddRectE"]
             pub static mut LICE_MultiplyAddRect: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4644,7 +4513,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_PutPixel@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHIMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13LICE_PutPixelE"]
             pub static mut LICE_PutPixel: ::std::option::Option<
                 unsafe extern "C" fn(
                     bm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4657,7 +4526,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_RotatedBlit@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@0HHHHMMMMM_NMHMM@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16LICE_RotatedBlitE"]
             pub static mut LICE_RotatedBlit: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4680,7 +4549,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_RoundRect@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@MMMMHIMH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14LICE_RoundRectE"]
             pub static mut LICE_RoundRect: ::std::option::Option<
                 unsafe extern "C" fn(
                     drawbm: *mut root::reaper_functions::LICE_IBitmap,
@@ -4697,7 +4566,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_ScaledBlit@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@0HHHHMMMMMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15LICE_ScaledBlitE"]
             pub static mut LICE_ScaledBlit: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4716,7 +4585,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?LICE_SimpleFill@reaper_functions@@3P6AXPEAVLICE_IBitmap@1@HHIII@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15LICE_SimpleFillE"]
             pub static mut LICE_SimpleFill: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -4729,7 +4598,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Loop_OnArrow@reaper_functions@@3P6A_NPEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12Loop_OnArrowE"]
             pub static mut Loop_OnArrow: ::std::option::Option<
                 unsafe extern "C" fn(
                     project: *mut root::ReaProject,
@@ -4738,13 +4607,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Main_OnCommand@reaper_functions@@3P6AXHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14Main_OnCommandE"]
             pub static mut Main_OnCommand: ::std::option::Option<
                 unsafe extern "C" fn(command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Main_OnCommandEx@reaper_functions@@3P6AXHHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16Main_OnCommandExE"]
             pub static mut Main_OnCommandEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     command: ::std::os::raw::c_int,
@@ -4754,60 +4623,60 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Main_openProject@reaper_functions@@3P6AXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16Main_openProjectE"]
             pub static mut Main_openProject:
                 ::std::option::Option<unsafe extern "C" fn(name: *const ::std::os::raw::c_char)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Main_SaveProject@reaper_functions@@3P6AXPEAVReaProject@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16Main_SaveProjectE"]
             pub static mut Main_SaveProject: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, forceSaveAsInOptional: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Main_UpdateLoopInfo@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19Main_UpdateLoopInfoE"]
             pub static mut Main_UpdateLoopInfo:
                 ::std::option::Option<unsafe extern "C" fn(ignoremask: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MarkProjectDirty@reaper_functions@@3P6AXPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16MarkProjectDirtyE"]
             pub static mut MarkProjectDirty:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MarkTrackItemsDirty@reaper_functions@@3P6AXPEAVMediaTrack@@PEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19MarkTrackItemsDirtyE"]
             pub static mut MarkTrackItemsDirty: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack, item: *mut root::MediaItem),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Master_GetPlayRate@reaper_functions@@3P6ANPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18Master_GetPlayRateE"]
             pub static mut Master_GetPlayRate:
                 ::std::option::Option<unsafe extern "C" fn(project: *mut root::ReaProject) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Master_GetPlayRateAtTime@reaper_functions@@3P6ANNPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24Master_GetPlayRateAtTimeE"]
             pub static mut Master_GetPlayRateAtTime: ::std::option::Option<
                 unsafe extern "C" fn(time_s: f64, proj: *mut root::ReaProject) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Master_GetTempo@reaper_functions@@3P6ANXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15Master_GetTempoE"]
             pub static mut Master_GetTempo: ::std::option::Option<unsafe extern "C" fn() -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Master_NormalizePlayRate@reaper_functions@@3P6ANN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24Master_NormalizePlayRateE"]
             pub static mut Master_NormalizePlayRate: ::std::option::Option<
                 unsafe extern "C" fn(playrate: f64, isnormalized: bool) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Master_NormalizeTempo@reaper_functions@@3P6ANN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21Master_NormalizeTempoE"]
             pub static mut Master_NormalizeTempo:
                 ::std::option::Option<unsafe extern "C" fn(bpm: f64, isnormalized: bool) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MB@reaper_functions@@3P6AHPEBD0H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions2MBE"]
             pub static mut MB: ::std::option::Option<
                 unsafe extern "C" fn(
                     msg: *const ::std::os::raw::c_char,
@@ -4817,7 +4686,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MediaItemDescendsFromTrack@reaper_functions@@3P6AHPEAVMediaItem@@PEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26MediaItemDescendsFromTrackE"]
             pub static mut MediaItemDescendsFromTrack: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -4826,7 +4695,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_CountEvts@reaper_functions@@3P6AHPEAVMediaItem_Take@@PEAH11@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14MIDI_CountEvtsE"]
             pub static mut MIDI_CountEvts: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4837,7 +4706,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_DeleteCC@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13MIDI_DeleteCCE"]
             pub static mut MIDI_DeleteCC: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4846,7 +4715,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_DeleteEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14MIDI_DeleteEvtE"]
             pub static mut MIDI_DeleteEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4855,7 +4724,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_DeleteNote@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15MIDI_DeleteNoteE"]
             pub static mut MIDI_DeleteNote: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4864,7 +4733,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_DeleteTextSysexEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23MIDI_DeleteTextSysexEvtE"]
             pub static mut MIDI_DeleteTextSysexEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4873,12 +4742,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_DisableSort@reaper_functions@@3P6AXPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16MIDI_DisableSortE"]
             pub static mut MIDI_DisableSort:
                 ::std::option::Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_EnumSelCC@reaper_functions@@3P6AHPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14MIDI_EnumSelCCE"]
             pub static mut MIDI_EnumSelCC: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4887,7 +4756,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_EnumSelEvts@reaper_functions@@3P6AHPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16MIDI_EnumSelEvtsE"]
             pub static mut MIDI_EnumSelEvts: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4896,7 +4765,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_EnumSelNotes@reaper_functions@@3P6AHPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17MIDI_EnumSelNotesE"]
             pub static mut MIDI_EnumSelNotes: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4905,7 +4774,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_EnumSelTextSysexEvts@reaper_functions@@3P6AHPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25MIDI_EnumSelTextSysexEvtsE"]
             pub static mut MIDI_EnumSelTextSysexEvts: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4914,17 +4783,17 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_eventlist_Create@reaper_functions@@3P6APEAVMIDI_eventlist@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21MIDI_eventlist_CreateE"]
             pub static mut MIDI_eventlist_Create:
                 ::std::option::Option<unsafe extern "C" fn() -> *mut root::MIDI_eventlist>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_eventlist_Destroy@reaper_functions@@3P6AXPEAVMIDI_eventlist@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22MIDI_eventlist_DestroyE"]
             pub static mut MIDI_eventlist_Destroy:
                 ::std::option::Option<unsafe extern "C" fn(evtlist: *mut root::MIDI_eventlist)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetAllEvts@reaper_functions@@3P6A_NPEAVMediaItem_Take@@PEADPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15MIDI_GetAllEvtsE"]
             pub static mut MIDI_GetAllEvts: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4934,7 +4803,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetCC@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEA_N1PEANPEAH333@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10MIDI_GetCCE"]
             pub static mut MIDI_GetCC: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4950,7 +4819,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetCCShape@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEAHPEAN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15MIDI_GetCCShapeE"]
             pub static mut MIDI_GetCCShape: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4961,7 +4830,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEA_N1PEANPEADPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11MIDI_GetEvtE"]
             pub static mut MIDI_GetEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4975,7 +4844,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetGrid@reaper_functions@@3P6ANPEAVMediaItem_Take@@PEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12MIDI_GetGridE"]
             pub static mut MIDI_GetGrid: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4985,7 +4854,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetHash@reaper_functions@@3P6A_NPEAVMediaItem_Take@@_NPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12MIDI_GetHashE"]
             pub static mut MIDI_GetHash: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -4996,7 +4865,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetNote@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEA_N1PEAN2PEAH33@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12MIDI_GetNoteE"]
             pub static mut MIDI_GetNote: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5012,43 +4881,43 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetPPQPos_EndOfMeasure@reaper_functions@@3P6ANPEAVMediaItem_Take@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27MIDI_GetPPQPos_EndOfMeasureE"]
             pub static mut MIDI_GetPPQPos_EndOfMeasure: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetPPQPos_StartOfMeasure@reaper_functions@@3P6ANPEAVMediaItem_Take@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions29MIDI_GetPPQPos_StartOfMeasureE"]
             pub static mut MIDI_GetPPQPos_StartOfMeasure: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetPPQPosFromProjQN@reaper_functions@@3P6ANPEAVMediaItem_Take@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24MIDI_GetPPQPosFromProjQNE"]
             pub static mut MIDI_GetPPQPosFromProjQN: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take, projqn: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetPPQPosFromProjTime@reaper_functions@@3P6ANPEAVMediaItem_Take@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26MIDI_GetPPQPosFromProjTimeE"]
             pub static mut MIDI_GetPPQPosFromProjTime: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take, projtime: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetProjQNFromPPQPos@reaper_functions@@3P6ANPEAVMediaItem_Take@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24MIDI_GetProjQNFromPPQPosE"]
             pub static mut MIDI_GetProjQNFromPPQPos: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetProjTimeFromPPQPos@reaper_functions@@3P6ANPEAVMediaItem_Take@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26MIDI_GetProjTimeFromPPQPosE"]
             pub static mut MIDI_GetProjTimeFromPPQPos: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetScale@reaper_functions@@3P6A_NPEAVMediaItem_Take@@PEAH1PEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13MIDI_GetScaleE"]
             pub static mut MIDI_GetScale: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5060,7 +4929,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetTextSysexEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEA_N1PEANPEAHPEAD3@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20MIDI_GetTextSysexEvtE"]
             pub static mut MIDI_GetTextSysexEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5075,7 +4944,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_GetTrackHash@reaper_functions@@3P6A_NPEAVMediaTrack@@_NPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17MIDI_GetTrackHashE"]
             pub static mut MIDI_GetTrackHash: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -5086,7 +4955,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_InsertCC@reaper_functions@@3P6A_NPEAVMediaItem_Take@@_N1NHHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13MIDI_InsertCCE"]
             pub static mut MIDI_InsertCC: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5101,7 +4970,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_InsertEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@_N1NPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14MIDI_InsertEvtE"]
             pub static mut MIDI_InsertEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5114,7 +4983,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_InsertNote@reaper_functions@@3P6A_NPEAVMediaItem_Take@@_N1NNHHHPEB_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15MIDI_InsertNoteE"]
             pub static mut MIDI_InsertNote: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5130,7 +4999,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_InsertTextSysexEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@_N1NHPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23MIDI_InsertTextSysexEvtE"]
             pub static mut MIDI_InsertTextSysexEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5144,17 +5013,17 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?midi_reinit@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11midi_reinitE"]
             pub static mut midi_reinit: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SelectAll@reaper_functions@@3P6AXPEAVMediaItem_Take@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14MIDI_SelectAllE"]
             pub static mut MIDI_SelectAll: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take, select: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SetAllEvts@reaper_functions@@3P6A_NPEAVMediaItem_Take@@PEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15MIDI_SetAllEvtsE"]
             pub static mut MIDI_SetAllEvts: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5164,7 +5033,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SetCC@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEB_N1PEBNPEBH3331@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10MIDI_SetCCE"]
             pub static mut MIDI_SetCC: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5181,7 +5050,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SetCCShape@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHNPEB_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15MIDI_SetCCShapeE"]
             pub static mut MIDI_SetCCShape: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5193,7 +5062,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SetEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEB_N1PEBNPEBDH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11MIDI_SetEvtE"]
             pub static mut MIDI_SetEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5208,13 +5077,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SetItemExtents@reaper_functions@@3P6A_NPEAVMediaItem@@NN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19MIDI_SetItemExtentsE"]
             pub static mut MIDI_SetItemExtents: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem, startQN: f64, endQN: f64) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SetNote@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEB_N1PEBN2PEBH331@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12MIDI_SetNoteE"]
             pub static mut MIDI_SetNote: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5231,7 +5100,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_SetTextSysexEvt@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEB_N1PEBNPEBHPEBDH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20MIDI_SetTextSysexEvtE"]
             pub static mut MIDI_SetTextSysexEvt: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -5247,23 +5116,23 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDI_Sort@reaper_functions@@3P6AXPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9MIDI_SortE"]
             pub static mut MIDI_Sort:
                 ::std::option::Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_GetActive@reaper_functions@@3P6APEAUHWND__@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20MIDIEditor_GetActiveE"]
             pub static mut MIDIEditor_GetActive:
                 ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_GetMode@reaper_functions@@3P6AHPEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18MIDIEditor_GetModeE"]
             pub static mut MIDIEditor_GetMode: ::std::option::Option<
                 unsafe extern "C" fn(midieditor: root::HWND) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_GetSetting_int@reaper_functions@@3P6AHPEAUHWND__@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25MIDIEditor_GetSetting_intE"]
             pub static mut MIDIEditor_GetSetting_int: ::std::option::Option<
                 unsafe extern "C" fn(
                     midieditor: root::HWND,
@@ -5272,7 +5141,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_GetSetting_str@reaper_functions@@3P6A_NPEAUHWND__@@PEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25MIDIEditor_GetSetting_strE"]
             pub static mut MIDIEditor_GetSetting_str: ::std::option::Option<
                 unsafe extern "C" fn(
                     midieditor: root::HWND,
@@ -5283,13 +5152,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_GetTake@reaper_functions@@3P6APEAVMediaItem_Take@@PEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18MIDIEditor_GetTakeE"]
             pub static mut MIDIEditor_GetTake: ::std::option::Option<
                 unsafe extern "C" fn(midieditor: root::HWND) -> *mut root::MediaItem_Take,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_LastFocused_OnCommand@reaper_functions@@3P6A_NH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions32MIDIEditor_LastFocused_OnCommandE"]
             pub static mut MIDIEditor_LastFocused_OnCommand: ::std::option::Option<
                 unsafe extern "C" fn(
                     command_id: ::std::os::raw::c_int,
@@ -5298,7 +5167,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_OnCommand@reaper_functions@@3P6A_NPEAUHWND__@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20MIDIEditor_OnCommandE"]
             pub static mut MIDIEditor_OnCommand: ::std::option::Option<
                 unsafe extern "C" fn(
                     midieditor: root::HWND,
@@ -5307,7 +5176,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MIDIEditor_SetSetting_int@reaper_functions@@3P6A_NPEAUHWND__@@PEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25MIDIEditor_SetSetting_intE"]
             pub static mut MIDIEditor_SetSetting_int: ::std::option::Option<
                 unsafe extern "C" fn(
                     midieditor: root::HWND,
@@ -5317,30 +5186,30 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?mkpanstr@reaper_functions@@3P6AXPEADN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions8mkpanstrE"]
             pub static mut mkpanstr: ::std::option::Option<
                 unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, pan: f64),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?mkvolpanstr@reaper_functions@@3P6AXPEADNN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11mkvolpanstrE"]
             pub static mut mkvolpanstr: ::std::option::Option<
                 unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64, pan: f64),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?mkvolstr@reaper_functions@@3P6AXPEADN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions8mkvolstrE"]
             pub static mut mkvolstr: ::std::option::Option<
                 unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MoveEditCursor@reaper_functions@@3P6AXN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14MoveEditCursorE"]
             pub static mut MoveEditCursor:
                 ::std::option::Option<unsafe extern "C" fn(adjamt: f64, dosel: bool)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?MoveMediaItemToTrack@reaper_functions@@3P6A_NPEAVMediaItem@@PEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20MoveMediaItemToTrackE"]
             pub static mut MoveMediaItemToTrack: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -5349,17 +5218,17 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?MuteAllTracks@reaper_functions@@3P6AX_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13MuteAllTracksE"]
             pub static mut MuteAllTracks: ::std::option::Option<unsafe extern "C" fn(mute: bool)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?my_getViewport@reaper_functions@@3P6AXPEAUtagRECT@@PEBU2@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14my_getViewportE"]
             pub static mut my_getViewport: ::std::option::Option<
                 unsafe extern "C" fn(r: *mut root::RECT, sr: *const root::RECT, wantWorkArea: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?NamedCommandLookup@reaper_functions@@3P6AHPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18NamedCommandLookupE"]
             pub static mut NamedCommandLookup: ::std::option::Option<
                 unsafe extern "C" fn(
                     command_name: *const ::std::os::raw::c_char,
@@ -5367,40 +5236,40 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?OnPauseButton@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13OnPauseButtonE"]
             pub static mut OnPauseButton: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?OnPauseButtonEx@reaper_functions@@3P6AXPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15OnPauseButtonExE"]
             pub static mut OnPauseButtonEx:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?OnPlayButton@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12OnPlayButtonE"]
             pub static mut OnPlayButton: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?OnPlayButtonEx@reaper_functions@@3P6AXPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14OnPlayButtonExE"]
             pub static mut OnPlayButtonEx:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?OnStopButton@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12OnStopButtonE"]
             pub static mut OnStopButton: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?OnStopButtonEx@reaper_functions@@3P6AXPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14OnStopButtonExE"]
             pub static mut OnStopButtonEx:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?OpenColorThemeFile@reaper_functions@@3P6A_NPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18OpenColorThemeFileE"]
             pub static mut OpenColorThemeFile: ::std::option::Option<
                 unsafe extern "C" fn(fn_: *const ::std::os::raw::c_char) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?OpenMediaExplorer@reaper_functions@@3P6APEAUHWND__@@PEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17OpenMediaExplorerE"]
             pub static mut OpenMediaExplorer: ::std::option::Option<
                 unsafe extern "C" fn(
                     mediafn: *const ::std::os::raw::c_char,
@@ -5409,7 +5278,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?OscLocalMessageToHost@reaper_functions@@3P6AXPEBDPEBN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21OscLocalMessageToHostE"]
             pub static mut OscLocalMessageToHost: ::std::option::Option<
                 unsafe extern "C" fn(
                     message: *const ::std::os::raw::c_char,
@@ -5418,13 +5287,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?parse_timestr@reaper_functions@@3P6ANPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13parse_timestrE"]
             pub static mut parse_timestr: ::std::option::Option<
                 unsafe extern "C" fn(buf: *const ::std::os::raw::c_char) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?parse_timestr_len@reaper_functions@@3P6ANPEBDNH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17parse_timestr_lenE"]
             pub static mut parse_timestr_len: ::std::option::Option<
                 unsafe extern "C" fn(
                     buf: *const ::std::os::raw::c_char,
@@ -5434,7 +5303,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?parse_timestr_pos@reaper_functions@@3P6ANPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17parse_timestr_posE"]
             pub static mut parse_timestr_pos: ::std::option::Option<
                 unsafe extern "C" fn(
                     buf: *const ::std::os::raw::c_char,
@@ -5443,13 +5312,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?parsepanstr@reaper_functions@@3P6ANPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11parsepanstrE"]
             pub static mut parsepanstr: ::std::option::Option<
                 unsafe extern "C" fn(str: *const ::std::os::raw::c_char) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Sink_Create@reaper_functions@@3P6APEAVPCM_sink@@PEBD0HHH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15PCM_Sink_CreateE"]
             pub static mut PCM_Sink_Create: ::std::option::Option<
                 unsafe extern "C" fn(
                     filename: *const ::std::os::raw::c_char,
@@ -5462,7 +5331,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Sink_CreateEx@reaper_functions@@3P6APEAVPCM_sink@@PEAVReaProject@@PEBD1HHH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17PCM_Sink_CreateExE"]
             pub static mut PCM_Sink_CreateEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -5476,7 +5345,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Sink_CreateMIDIFile@reaper_functions@@3P6APEAVPCM_sink@@PEBD0HNH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23PCM_Sink_CreateMIDIFileE"]
             pub static mut PCM_Sink_CreateMIDIFile: ::std::option::Option<
                 unsafe extern "C" fn(
                     filename: *const ::std::os::raw::c_char,
@@ -5488,7 +5357,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Sink_CreateMIDIFileEx@reaper_functions@@3P6APEAVPCM_sink@@PEAVReaProject@@PEBD1HNH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25PCM_Sink_CreateMIDIFileExE"]
             pub static mut PCM_Sink_CreateMIDIFileEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -5501,7 +5370,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Sink_Enum@reaper_functions@@3P6AIHPEAPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13PCM_Sink_EnumE"]
             pub static mut PCM_Sink_Enum: ::std::option::Option<
                 unsafe extern "C" fn(
                     idx: ::std::os::raw::c_int,
@@ -5510,7 +5379,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Sink_GetExtension@reaper_functions@@3P6APEBDPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21PCM_Sink_GetExtensionE"]
             pub static mut PCM_Sink_GetExtension: ::std::option::Option<
                 unsafe extern "C" fn(
                     data: *const ::std::os::raw::c_char,
@@ -5519,7 +5388,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Sink_ShowConfig@reaper_functions@@3P6APEAUHWND__@@PEBDHPEAU2@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19PCM_Sink_ShowConfigE"]
             pub static mut PCM_Sink_ShowConfig: ::std::option::Option<
                 unsafe extern "C" fn(
                     cfg: *const ::std::os::raw::c_char,
@@ -5529,7 +5398,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Source_CreateFromFile@reaper_functions@@3P6APEAVPCM_source@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25PCM_Source_CreateFromFileE"]
             pub static mut PCM_Source_CreateFromFile: ::std::option::Option<
                 unsafe extern "C" fn(
                     filename: *const ::std::os::raw::c_char,
@@ -5537,7 +5406,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Source_CreateFromFileEx@reaper_functions@@3P6APEAVPCM_source@@PEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27PCM_Source_CreateFromFileExE"]
             pub static mut PCM_Source_CreateFromFileEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     filename: *const ::std::os::raw::c_char,
@@ -5546,7 +5415,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Source_CreateFromSimple@reaper_functions@@3P6APEAVPCM_source@@PEAVISimpleMediaDecoder@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27PCM_Source_CreateFromSimpleE"]
             pub static mut PCM_Source_CreateFromSimple: ::std::option::Option<
                 unsafe extern "C" fn(
                     dec: *mut root::ISimpleMediaDecoder,
@@ -5555,7 +5424,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Source_CreateFromType@reaper_functions@@3P6APEAVPCM_source@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25PCM_Source_CreateFromTypeE"]
             pub static mut PCM_Source_CreateFromType: ::std::option::Option<
                 unsafe extern "C" fn(
                     sourcetype: *const ::std::os::raw::c_char,
@@ -5563,12 +5432,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Source_Destroy@reaper_functions@@3P6AXPEAVPCM_source@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18PCM_Source_DestroyE"]
             pub static mut PCM_Source_Destroy:
                 ::std::option::Option<unsafe extern "C" fn(src: *mut root::PCM_source)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Source_GetPeaks@reaper_functions@@3P6AHPEAVPCM_source@@NNHHHPEAN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19PCM_Source_GetPeaksE"]
             pub static mut PCM_Source_GetPeaks: ::std::option::Option<
                 unsafe extern "C" fn(
                     src: *mut root::PCM_source,
@@ -5582,7 +5451,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PCM_Source_GetSectionInfo@reaper_functions@@3P6A_NPEAVPCM_source@@PEAN1PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25PCM_Source_GetSectionInfoE"]
             pub static mut PCM_Source_GetSectionInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     src: *mut root::PCM_source,
@@ -5593,7 +5462,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PeakBuild_Create@reaper_functions@@3P6APEAVREAPER_PeakBuild_Interface@@PEAVPCM_source@@PEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16PeakBuild_CreateE"]
             pub static mut PeakBuild_Create: ::std::option::Option<
                 unsafe extern "C" fn(
                     src: *mut root::PCM_source,
@@ -5604,7 +5473,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PeakBuild_CreateEx@reaper_functions@@3P6APEAVREAPER_PeakBuild_Interface@@PEAVPCM_source@@PEBDHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18PeakBuild_CreateExE"]
             pub static mut PeakBuild_CreateEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     src: *mut root::PCM_source,
@@ -5616,7 +5485,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PeakGet_Create@reaper_functions@@3P6APEAVREAPER_PeakGet_Interface@@PEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14PeakGet_CreateE"]
             pub static mut PeakGet_Create: ::std::option::Option<
                 unsafe extern "C" fn(
                     fn_: *const ::std::os::raw::c_char,
@@ -5626,7 +5495,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PitchShiftSubModeMenu@reaper_functions@@3P6AHPEAUHWND__@@HHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21PitchShiftSubModeMenuE"]
             pub static mut PitchShiftSubModeMenu: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -5638,7 +5507,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PlayPreview@reaper_functions@@3P6AHPEAUpreview_register_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11PlayPreviewE"]
             pub static mut PlayPreview: ::std::option::Option<
                 unsafe extern "C" fn(
                     preview: *mut root::preview_register_t,
@@ -5646,7 +5515,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PlayPreviewEx@reaper_functions@@3P6AHPEAUpreview_register_t@@HN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13PlayPreviewExE"]
             pub static mut PlayPreviewEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     preview: *mut root::preview_register_t,
@@ -5656,7 +5525,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PlayTrackPreview@reaper_functions@@3P6AHPEAUpreview_register_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16PlayTrackPreviewE"]
             pub static mut PlayTrackPreview: ::std::option::Option<
                 unsafe extern "C" fn(
                     preview: *mut root::preview_register_t,
@@ -5664,7 +5533,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PlayTrackPreview2@reaper_functions@@3P6AHPEAVReaProject@@PEAUpreview_register_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17PlayTrackPreview2E"]
             pub static mut PlayTrackPreview2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -5673,7 +5542,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PlayTrackPreview2Ex@reaper_functions@@3P6AHPEAVReaProject@@PEAUpreview_register_t@@HN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19PlayTrackPreview2ExE"]
             pub static mut PlayTrackPreview2Ex: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -5684,7 +5553,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?plugin_getapi@reaper_functions@@3P6APEAXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13plugin_getapiE"]
             pub static mut plugin_getapi: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -5692,17 +5561,17 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?plugin_getFilterList@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20plugin_getFilterListE"]
             pub static mut plugin_getFilterList:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?plugin_getImportableProjectFilterList@reaper_functions@@3P6APEBDXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions37plugin_getImportableProjectFilterListE"]
             pub static mut plugin_getImportableProjectFilterList:
                 ::std::option::Option<unsafe extern "C" fn() -> *const ::std::os::raw::c_char>;
         }
         extern "C" {
-            #[link_name = "\u{1}?plugin_register@reaper_functions@@3P6AHPEBDPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15plugin_registerE"]
             pub static mut plugin_register: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -5711,17 +5580,17 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?PluginWantsAlwaysRunFx@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22PluginWantsAlwaysRunFxE"]
             pub static mut PluginWantsAlwaysRunFx:
                 ::std::option::Option<unsafe extern "C" fn(amt: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?PreventUIRefresh@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16PreventUIRefreshE"]
             pub static mut PreventUIRefresh:
                 ::std::option::Option<unsafe extern "C" fn(prevent_count: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?projectconfig_var_addr@reaper_functions@@3P6APEAXPEAVReaProject@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22projectconfig_var_addrE"]
             pub static mut projectconfig_var_addr: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -5730,7 +5599,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?projectconfig_var_getoffs@reaper_functions@@3P6AHPEBDPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25projectconfig_var_getoffsE"]
             pub static mut projectconfig_var_getoffs: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -5739,7 +5608,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?realloc_cmd_ptr@reaper_functions@@3P6A_NPEAPEADPEAHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15realloc_cmd_ptrE"]
             pub static mut realloc_cmd_ptr: ::std::option::Option<
                 unsafe extern "C" fn(
                     ptr: *mut *mut ::std::os::raw::c_char,
@@ -5749,7 +5618,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ReaperGetPitchShiftAPI@reaper_functions@@3P6APEAVIReaperPitchShift@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22ReaperGetPitchShiftAPIE"]
             pub static mut ReaperGetPitchShiftAPI: ::std::option::Option<
                 unsafe extern "C" fn(
                     version: ::std::os::raw::c_int,
@@ -5757,12 +5626,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ReaScriptError@reaper_functions@@3P6AXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14ReaScriptErrorE"]
             pub static mut ReaScriptError:
                 ::std::option::Option<unsafe extern "C" fn(errmsg: *const ::std::os::raw::c_char)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?RecursiveCreateDirectory@reaper_functions@@3P6AHPEBD_K@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24RecursiveCreateDirectoryE"]
             pub static mut RecursiveCreateDirectory: ::std::option::Option<
                 unsafe extern "C" fn(
                     path: *const ::std::os::raw::c_char,
@@ -5771,18 +5640,18 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?reduce_open_files@reaper_functions@@3P6AHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17reduce_open_filesE"]
             pub static mut reduce_open_files: ::std::option::Option<
                 unsafe extern "C" fn(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?RefreshToolbar@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14RefreshToolbarE"]
             pub static mut RefreshToolbar:
                 ::std::option::Option<unsafe extern "C" fn(command_id: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?RefreshToolbar2@reaper_functions@@3P6AXHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15RefreshToolbar2E"]
             pub static mut RefreshToolbar2: ::std::option::Option<
                 unsafe extern "C" fn(
                     section_id: ::std::os::raw::c_int,
@@ -5791,7 +5660,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?relative_fn@reaper_functions@@3P6AXPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11relative_fnE"]
             pub static mut relative_fn: ::std::option::Option<
                 unsafe extern "C" fn(
                     in_: *const ::std::os::raw::c_char,
@@ -5801,7 +5670,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?RemoveTrackSend@reaper_functions@@3P6A_NPEAVMediaTrack@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15RemoveTrackSendE"]
             pub static mut RemoveTrackSend: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -5811,7 +5680,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?RenderFileSection@reaper_functions@@3P6A_NPEBD0NNN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17RenderFileSectionE"]
             pub static mut RenderFileSection: ::std::option::Option<
                 unsafe extern "C" fn(
                     source_filename: *const ::std::os::raw::c_char,
@@ -5823,7 +5692,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ReorderSelectedTracks@reaper_functions@@3P6A_NHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21ReorderSelectedTracksE"]
             pub static mut ReorderSelectedTracks: ::std::option::Option<
                 unsafe extern "C" fn(
                     beforeTrackIdx: ::std::os::raw::c_int,
@@ -5832,19 +5701,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Resample_EnumModes@reaper_functions@@3P6APEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18Resample_EnumModesE"]
             pub static mut Resample_EnumModes: ::std::option::Option<
                 unsafe extern "C" fn(mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Resampler_Create@reaper_functions@@3P6APEAVREAPER_Resample_Interface@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16Resampler_CreateE"]
             pub static mut Resampler_Create: ::std::option::Option<
                 unsafe extern "C" fn() -> *mut root::REAPER_Resample_Interface,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?resolve_fn@reaper_functions@@3P6AXPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10resolve_fnE"]
             pub static mut resolve_fn: ::std::option::Option<
                 unsafe extern "C" fn(
                     in_: *const ::std::os::raw::c_char,
@@ -5854,7 +5723,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?resolve_fn2@reaper_functions@@3P6AXPEBDPEADH0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11resolve_fn2E"]
             pub static mut resolve_fn2: ::std::option::Option<
                 unsafe extern "C" fn(
                     in_: *const ::std::os::raw::c_char,
@@ -5865,7 +5734,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ReverseNamedCommandLookup@reaper_functions@@3P6APEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25ReverseNamedCommandLookupE"]
             pub static mut ReverseNamedCommandLookup: ::std::option::Option<
                 unsafe extern "C" fn(
                     command_id: ::std::os::raw::c_int,
@@ -5873,19 +5742,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ScaleFromEnvelopeMode@reaper_functions@@3P6ANHN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21ScaleFromEnvelopeModeE"]
             pub static mut ScaleFromEnvelopeMode: ::std::option::Option<
                 unsafe extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ScaleToEnvelopeMode@reaper_functions@@3P6ANHN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19ScaleToEnvelopeModeE"]
             pub static mut ScaleToEnvelopeMode: ::std::option::Option<
                 unsafe extern "C" fn(scaling_mode: ::std::os::raw::c_int, val: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?screenset_register@reaper_functions@@3P6AXPEADPEAX1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18screenset_registerE"]
             pub static mut screenset_register: ::std::option::Option<
                 unsafe extern "C" fn(
                     id: *mut ::std::os::raw::c_char,
@@ -5895,7 +5764,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?screenset_registerNew@reaper_functions@@3P6AXPEADP6A_JHPEBDPEAX2H@Z2@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21screenset_registerNewE"]
             pub static mut screenset_registerNew: ::std::option::Option<
                 unsafe extern "C" fn(
                     id: *mut ::std::os::raw::c_char,
@@ -5905,39 +5774,39 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?screenset_unregister@reaper_functions@@3P6AXPEAD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20screenset_unregisterE"]
             pub static mut screenset_unregister:
                 ::std::option::Option<unsafe extern "C" fn(id: *mut ::std::os::raw::c_char)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?screenset_unregisterByParam@reaper_functions@@3P6AXPEAX@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27screenset_unregisterByParamE"]
             pub static mut screenset_unregisterByParam:
                 ::std::option::Option<unsafe extern "C" fn(param: *mut ::std::os::raw::c_void)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?screenset_updateLastFocus@reaper_functions@@3P6AXPEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25screenset_updateLastFocusE"]
             pub static mut screenset_updateLastFocus:
                 ::std::option::Option<unsafe extern "C" fn(prevWin: root::HWND)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?SectionFromUniqueID@reaper_functions@@3P6APEAUKbdSectionInfo@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19SectionFromUniqueIDE"]
             pub static mut SectionFromUniqueID: ::std::option::Option<
                 unsafe extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SelectAllMediaItems@reaper_functions@@3P6AXPEAVReaProject@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19SelectAllMediaItemsE"]
             pub static mut SelectAllMediaItems: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, selected: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SelectProjectInstance@reaper_functions@@3P6AXPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21SelectProjectInstanceE"]
             pub static mut SelectProjectInstance:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?SendLocalOscMessage@reaper_functions@@3P6AXPEAXPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19SendLocalOscMessageE"]
             pub static mut SendLocalOscMessage: ::std::option::Option<
                 unsafe extern "C" fn(
                     local_osc_handler: *mut ::std::os::raw::c_void,
@@ -5947,24 +5816,24 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetActiveTake@reaper_functions@@3P6AXPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13SetActiveTakeE"]
             pub static mut SetActiveTake:
                 ::std::option::Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetAutomationMode@reaper_functions@@3P6AXH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetAutomationModeE"]
             pub static mut SetAutomationMode: ::std::option::Option<
                 unsafe extern "C" fn(mode: ::std::os::raw::c_int, onlySel: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetCurrentBPM@reaper_functions@@3P6AXPEAVReaProject@@N_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13SetCurrentBPME"]
             pub static mut SetCurrentBPM: ::std::option::Option<
                 unsafe extern "C" fn(__proj: *mut root::ReaProject, bpm: f64, wantUndo: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetCursorContext@reaper_functions@@3P6AXHPEAVTrackEnvelope@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16SetCursorContextE"]
             pub static mut SetCursorContext: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: ::std::os::raw::c_int,
@@ -5973,13 +5842,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetEditCurPos@reaper_functions@@3P6AXN_N0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13SetEditCurPosE"]
             pub static mut SetEditCurPos: ::std::option::Option<
                 unsafe extern "C" fn(time: f64, moveview: bool, seekplay: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetEditCurPos2@reaper_functions@@3P6AXPEAVReaProject@@N_N1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14SetEditCurPos2E"]
             pub static mut SetEditCurPos2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -5990,7 +5859,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetEnvelopePoint@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HPEAN1PEAH1PEA_N3@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16SetEnvelopePointE"]
             pub static mut SetEnvelopePoint: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -6005,7 +5874,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetEnvelopePointEx@reaper_functions@@3P6A_NPEAVTrackEnvelope@@HHPEAN1PEAH1PEA_N3@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18SetEnvelopePointExE"]
             pub static mut SetEnvelopePointEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     envelope: *mut root::TrackEnvelope,
@@ -6021,7 +5890,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetEnvelopeStateChunk@reaper_functions@@3P6A_NPEAVTrackEnvelope@@PEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21SetEnvelopeStateChunkE"]
             pub static mut SetEnvelopeStateChunk: ::std::option::Option<
                 unsafe extern "C" fn(
                     env: *mut root::TrackEnvelope,
@@ -6031,7 +5900,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetExtState@reaper_functions@@3P6AXPEBD00_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11SetExtStateE"]
             pub static mut SetExtState: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *const ::std::os::raw::c_char,
@@ -6042,12 +5911,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetGlobalAutomationOverride@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27SetGlobalAutomationOverrideE"]
             pub static mut SetGlobalAutomationOverride:
                 ::std::option::Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetItemStateChunk@reaper_functions@@3P6A_NPEAVMediaItem@@PEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetItemStateChunkE"]
             pub static mut SetItemStateChunk: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -6057,13 +5926,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMasterTrackVisibility@reaper_functions@@3P6AHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24SetMasterTrackVisibilityE"]
             pub static mut SetMasterTrackVisibility: ::std::option::Option<
                 unsafe extern "C" fn(flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMediaItemInfo_Value@reaper_functions@@3P6A_NPEAVMediaItem@@PEBDN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22SetMediaItemInfo_ValueE"]
             pub static mut SetMediaItemInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -6073,7 +5942,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMediaItemLength@reaper_functions@@3P6A_NPEAVMediaItem@@N_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18SetMediaItemLengthE"]
             pub static mut SetMediaItemLength: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -6083,7 +5952,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMediaItemPosition@reaper_functions@@3P6A_NPEAVMediaItem@@N_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20SetMediaItemPositionE"]
             pub static mut SetMediaItemPosition: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -6093,13 +5962,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMediaItemSelected@reaper_functions@@3P6AXPEAVMediaItem@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20SetMediaItemSelectedE"]
             pub static mut SetMediaItemSelected: ::std::option::Option<
                 unsafe extern "C" fn(item: *mut root::MediaItem, selected: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMediaItemTake_Source@reaper_functions@@3P6A_NPEAVMediaItem_Take@@PEAVPCM_source@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23SetMediaItemTake_SourceE"]
             pub static mut SetMediaItemTake_Source: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6108,7 +5977,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMediaItemTakeInfo_Value@reaper_functions@@3P6A_NPEAVMediaItem_Take@@PEBDN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26SetMediaItemTakeInfo_ValueE"]
             pub static mut SetMediaItemTakeInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6118,7 +5987,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMediaTrackInfo_Value@reaper_functions@@3P6A_NPEAVMediaTrack@@PEBDN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23SetMediaTrackInfo_ValueE"]
             pub static mut SetMediaTrackInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -6128,19 +5997,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMIDIEditorGrid@reaper_functions@@3P6AXPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetMIDIEditorGridE"]
             pub static mut SetMIDIEditorGrid: ::std::option::Option<
                 unsafe extern "C" fn(project: *mut root::ReaProject, division: f64),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMixerScroll@reaper_functions@@3P6APEAVMediaTrack@@PEAV2@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14SetMixerScrollE"]
             pub static mut SetMixerScroll: ::std::option::Option<
                 unsafe extern "C" fn(leftmosttrack: *mut root::MediaTrack) -> *mut root::MediaTrack,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetMouseModifier@reaper_functions@@3P6AXPEBDH0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16SetMouseModifierE"]
             pub static mut SetMouseModifier: ::std::option::Option<
                 unsafe extern "C" fn(
                     context: *const ::std::os::raw::c_char,
@@ -6150,18 +6019,18 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetOnlyTrackSelected@reaper_functions@@3P6AXPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20SetOnlyTrackSelectedE"]
             pub static mut SetOnlyTrackSelected:
                 ::std::option::Option<unsafe extern "C" fn(track: *mut root::MediaTrack)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjectGrid@reaper_functions@@3P6AXPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14SetProjectGridE"]
             pub static mut SetProjectGrid: ::std::option::Option<
                 unsafe extern "C" fn(project: *mut root::ReaProject, division: f64),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjectMarker@reaper_functions@@3P6A_NH_NNNPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16SetProjectMarkerE"]
             pub static mut SetProjectMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     markrgnindexnumber: ::std::os::raw::c_int,
@@ -6173,7 +6042,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjectMarker2@reaper_functions@@3P6A_NPEAVReaProject@@H_NNNPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetProjectMarker2E"]
             pub static mut SetProjectMarker2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6186,7 +6055,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjectMarker3@reaper_functions@@3P6A_NPEAVReaProject@@H_NNNPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetProjectMarker3E"]
             pub static mut SetProjectMarker3: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6200,7 +6069,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjectMarker4@reaper_functions@@3P6A_NPEAVReaProject@@H_NNNPEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetProjectMarker4E"]
             pub static mut SetProjectMarker4: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6215,7 +6084,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjectMarkerByIndex@reaper_functions@@3P6A_NPEAVReaProject@@H_NNNHPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23SetProjectMarkerByIndexE"]
             pub static mut SetProjectMarkerByIndex: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6230,7 +6099,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjectMarkerByIndex2@reaper_functions@@3P6A_NPEAVReaProject@@H_NNNHPEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24SetProjectMarkerByIndex2E"]
             pub static mut SetProjectMarkerByIndex2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6246,7 +6115,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetProjExtState@reaper_functions@@3P6AHPEAVReaProject@@PEBD11@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15SetProjExtStateE"]
             pub static mut SetProjExtState: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6257,7 +6126,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetRegionRenderMatrix@reaper_functions@@3P6AXPEAVReaProject@@HPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21SetRegionRenderMatrixE"]
             pub static mut SetRegionRenderMatrix: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6268,13 +6137,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetRenderLastError@reaper_functions@@3P6AXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18SetRenderLastErrorE"]
             pub static mut SetRenderLastError: ::std::option::Option<
                 unsafe extern "C" fn(errorstr: *const ::std::os::raw::c_char),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTakeStretchMarker@reaper_functions@@3P6AHPEAVMediaItem_Take@@HNPEBN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20SetTakeStretchMarkerE"]
             pub static mut SetTakeStretchMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6285,7 +6154,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTakeStretchMarkerSlope@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25SetTakeStretchMarkerSlopeE"]
             pub static mut SetTakeStretchMarkerSlope: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6295,7 +6164,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTempoTimeSigMarker@reaper_functions@@3P6A_NPEAVReaProject@@HNHNNHH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21SetTempoTimeSigMarkerE"]
             pub static mut SetTempoTimeSigMarker: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6311,7 +6180,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetToggleCommandState@reaper_functions@@3P6A_NHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21SetToggleCommandStateE"]
             pub static mut SetToggleCommandState: ::std::option::Option<
                 unsafe extern "C" fn(
                     section_id: ::std::os::raw::c_int,
@@ -6321,19 +6190,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackAutomationMode@reaper_functions@@3P6AXPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22SetTrackAutomationModeE"]
             pub static mut SetTrackAutomationMode: ::std::option::Option<
                 unsafe extern "C" fn(tr: *mut root::MediaTrack, mode: ::std::os::raw::c_int),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackColor@reaper_functions@@3P6AXPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13SetTrackColorE"]
             pub static mut SetTrackColor: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack, color: ::std::os::raw::c_int),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackMIDILyrics@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18SetTrackMIDILyricsE"]
             pub static mut SetTrackMIDILyrics: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -6343,7 +6212,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackMIDINoteName@reaper_functions@@3P6A_NHHHPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20SetTrackMIDINoteNameE"]
             pub static mut SetTrackMIDINoteName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: ::std::os::raw::c_int,
@@ -6354,7 +6223,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackMIDINoteNameEx@reaper_functions@@3P6A_NPEAVReaProject@@PEAVMediaTrack@@HHPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22SetTrackMIDINoteNameExE"]
             pub static mut SetTrackMIDINoteNameEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -6366,13 +6235,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackSelected@reaper_functions@@3P6AXPEAVMediaTrack@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16SetTrackSelectedE"]
             pub static mut SetTrackSelected: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack, selected: bool),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackSendInfo_Value@reaper_functions@@3P6A_NPEAVMediaTrack@@HHPEBDN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22SetTrackSendInfo_ValueE"]
             pub static mut SetTrackSendInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -6384,7 +6253,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackSendUIPan@reaper_functions@@3P6A_NPEAVMediaTrack@@HNH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetTrackSendUIPanE"]
             pub static mut SetTrackSendUIPan: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -6395,7 +6264,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackSendUIVol@reaper_functions@@3P6A_NPEAVMediaTrack@@HNH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17SetTrackSendUIVolE"]
             pub static mut SetTrackSendUIVol: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -6406,7 +6275,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SetTrackStateChunk@reaper_functions@@3P6A_NPEAVMediaTrack@@PEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18SetTrackStateChunkE"]
             pub static mut SetTrackStateChunk: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -6416,18 +6285,18 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ShowActionList@reaper_functions@@3P6AXPEAUKbdSectionInfo@@PEAUHWND__@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14ShowActionListE"]
             pub static mut ShowActionList: ::std::option::Option<
                 unsafe extern "C" fn(caller: *mut root::KbdSectionInfo, callerWnd: root::HWND),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ShowConsoleMsg@reaper_functions@@3P6AXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14ShowConsoleMsgE"]
             pub static mut ShowConsoleMsg:
                 ::std::option::Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?ShowMessageBox@reaper_functions@@3P6AHPEBD0H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14ShowMessageBoxE"]
             pub static mut ShowMessageBox: ::std::option::Option<
                 unsafe extern "C" fn(
                     msg: *const ::std::os::raw::c_char,
@@ -6437,7 +6306,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ShowPopupMenu@reaper_functions@@3P6AXPEBDHHPEAUHWND__@@PEAXHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13ShowPopupMenuE"]
             pub static mut ShowPopupMenu: ::std::option::Option<
                 unsafe extern "C" fn(
                     name: *const ::std::os::raw::c_char,
@@ -6451,27 +6320,27 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SLIDER2DB@reaper_functions@@3P6ANN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9SLIDER2DBE"]
             pub static mut SLIDER2DB: ::std::option::Option<unsafe extern "C" fn(y: f64) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?SnapToGrid@reaper_functions@@3P6ANPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10SnapToGridE"]
             pub static mut SnapToGrid: ::std::option::Option<
                 unsafe extern "C" fn(project: *mut root::ReaProject, time_pos: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?SoloAllTracks@reaper_functions@@3P6AXH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13SoloAllTracksE"]
             pub static mut SoloAllTracks:
                 ::std::option::Option<unsafe extern "C" fn(solo: ::std::os::raw::c_int)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Splash_GetWnd@reaper_functions@@3P6APEAUHWND__@@XZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13Splash_GetWndE"]
             pub static mut Splash_GetWnd:
                 ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
         }
         extern "C" {
-            #[link_name = "\u{1}?SplitMediaItem@reaper_functions@@3P6APEAVMediaItem@@PEAV2@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14SplitMediaItemE"]
             pub static mut SplitMediaItem: ::std::option::Option<
                 unsafe extern "C" fn(
                     item: *mut root::MediaItem,
@@ -6480,7 +6349,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?StopPreview@reaper_functions@@3P6AHPEAUpreview_register_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11StopPreviewE"]
             pub static mut StopPreview: ::std::option::Option<
                 unsafe extern "C" fn(
                     preview: *mut root::preview_register_t,
@@ -6488,7 +6357,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?StopTrackPreview@reaper_functions@@3P6AHPEAUpreview_register_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16StopTrackPreviewE"]
             pub static mut StopTrackPreview: ::std::option::Option<
                 unsafe extern "C" fn(
                     preview: *mut root::preview_register_t,
@@ -6496,7 +6365,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?StopTrackPreview2@reaper_functions@@3P6AHPEAXPEAUpreview_register_t@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17StopTrackPreview2E"]
             pub static mut StopTrackPreview2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut ::std::os::raw::c_void,
@@ -6505,13 +6374,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?stringToGuid@reaper_functions@@3P6AXPEBDPEAU_GUID@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12stringToGuidE"]
             pub static mut stringToGuid: ::std::option::Option<
                 unsafe extern "C" fn(str: *const ::std::os::raw::c_char, g: *mut root::GUID),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?StuffMIDIMessage@reaper_functions@@3P6AXHHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16StuffMIDIMessageE"]
             pub static mut StuffMIDIMessage: ::std::option::Option<
                 unsafe extern "C" fn(
                     mode: ::std::os::raw::c_int,
@@ -6522,7 +6391,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_AddByName@reaper_functions@@3P6AHPEAVMediaItem_Take@@PEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TakeFX_AddByNameE"]
             pub static mut TakeFX_AddByName: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6532,7 +6401,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_CopyToTake@reaper_functions@@3P6AXPEAVMediaItem_Take@@H0H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TakeFX_CopyToTakeE"]
             pub static mut TakeFX_CopyToTake: ::std::option::Option<
                 unsafe extern "C" fn(
                     src_take: *mut root::MediaItem_Take,
@@ -6544,7 +6413,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_CopyToTrack@reaper_functions@@3P6AXPEAVMediaItem_Take@@HPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TakeFX_CopyToTrackE"]
             pub static mut TakeFX_CopyToTrack: ::std::option::Option<
                 unsafe extern "C" fn(
                     src_take: *mut root::MediaItem_Take,
@@ -6556,7 +6425,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_Delete@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13TakeFX_DeleteE"]
             pub static mut TakeFX_Delete: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6565,7 +6434,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_EndParamEdit@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19TakeFX_EndParamEditE"]
             pub static mut TakeFX_EndParamEdit: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6575,7 +6444,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_FormatParamValue@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHNPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23TakeFX_FormatParamValueE"]
             pub static mut TakeFX_FormatParamValue: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6588,7 +6457,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_FormatParamValueNormalized@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHNPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions33TakeFX_FormatParamValueNormalizedE"]
             pub static mut TakeFX_FormatParamValueNormalized: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6601,19 +6470,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetChainVisible@reaper_functions@@3P6AHPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22TakeFX_GetChainVisibleE"]
             pub static mut TakeFX_GetChainVisible: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetCount@reaper_functions@@3P6AHPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15TakeFX_GetCountE"]
             pub static mut TakeFX_GetCount: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetEnabled@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TakeFX_GetEnabledE"]
             pub static mut TakeFX_GetEnabled: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6622,7 +6491,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetEnvelope@reaper_functions@@3P6APEAVTrackEnvelope@@PEAVMediaItem_Take@@HH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TakeFX_GetEnvelopeE"]
             pub static mut TakeFX_GetEnvelope: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6633,7 +6502,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetFloatingWindow@reaper_functions@@3P6APEAUHWND__@@PEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24TakeFX_GetFloatingWindowE"]
             pub static mut TakeFX_GetFloatingWindow: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6642,7 +6511,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetFormattedParamValue@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions29TakeFX_GetFormattedParamValueE"]
             pub static mut TakeFX_GetFormattedParamValue: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6654,7 +6523,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetFXGUID@reaper_functions@@3P6APEAU_GUID@@PEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TakeFX_GetFXGUIDE"]
             pub static mut TakeFX_GetFXGUID: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6663,7 +6532,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetFXName@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TakeFX_GetFXNameE"]
             pub static mut TakeFX_GetFXName: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6674,7 +6543,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetIOSize@reaper_functions@@3P6AHPEAVMediaItem_Take@@HPEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TakeFX_GetIOSizeE"]
             pub static mut TakeFX_GetIOSize: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6685,7 +6554,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetNamedConfigParm@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25TakeFX_GetNamedConfigParmE"]
             pub static mut TakeFX_GetNamedConfigParm: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6697,7 +6566,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetNumParams@reaper_functions@@3P6AHPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19TakeFX_GetNumParamsE"]
             pub static mut TakeFX_GetNumParams: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6706,7 +6575,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetOffline@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TakeFX_GetOfflineE"]
             pub static mut TakeFX_GetOffline: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6715,7 +6584,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetOpen@reaper_functions@@3P6A_NPEAVMediaItem_Take@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14TakeFX_GetOpenE"]
             pub static mut TakeFX_GetOpen: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6724,7 +6593,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetParam@reaper_functions@@3P6ANPEAVMediaItem_Take@@HHPEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15TakeFX_GetParamE"]
             pub static mut TakeFX_GetParam: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6736,7 +6605,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetParameterStepSizes@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHPEAN11PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions28TakeFX_GetParameterStepSizesE"]
             pub static mut TakeFX_GetParameterStepSizes: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6750,7 +6619,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetParamEx@reaper_functions@@3P6ANPEAVMediaItem_Take@@HHPEAN11@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TakeFX_GetParamExE"]
             pub static mut TakeFX_GetParamEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6763,7 +6632,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetParamName@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19TakeFX_GetParamNameE"]
             pub static mut TakeFX_GetParamName: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6775,7 +6644,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetParamNormalized@reaper_functions@@3P6ANPEAVMediaItem_Take@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25TakeFX_GetParamNormalizedE"]
             pub static mut TakeFX_GetParamNormalized: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6785,7 +6654,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetPinMappings@reaper_functions@@3P6AHPEAVMediaItem_Take@@HHHPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21TakeFX_GetPinMappingsE"]
             pub static mut TakeFX_GetPinMappings: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaItem_Take,
@@ -6797,7 +6666,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetPreset@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TakeFX_GetPresetE"]
             pub static mut TakeFX_GetPreset: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6808,7 +6677,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetPresetIndex@reaper_functions@@3P6AHPEAVMediaItem_Take@@HPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21TakeFX_GetPresetIndexE"]
             pub static mut TakeFX_GetPresetIndex: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6818,7 +6687,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_GetUserPresetFilename@reaper_functions@@3P6AXPEAVMediaItem_Take@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions28TakeFX_GetUserPresetFilenameE"]
             pub static mut TakeFX_GetUserPresetFilename: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6829,7 +6698,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_NavigatePresets@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22TakeFX_NavigatePresetsE"]
             pub static mut TakeFX_NavigatePresets: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6839,7 +6708,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetEnabled@reaper_functions@@3P6AXPEAVMediaItem_Take@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TakeFX_SetEnabledE"]
             pub static mut TakeFX_SetEnabled: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6849,7 +6718,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetNamedConfigParm@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEBD1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25TakeFX_SetNamedConfigParmE"]
             pub static mut TakeFX_SetNamedConfigParm: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6860,7 +6729,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetOffline@reaper_functions@@3P6AXPEAVMediaItem_Take@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TakeFX_SetOfflineE"]
             pub static mut TakeFX_SetOffline: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6870,7 +6739,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetOpen@reaper_functions@@3P6AXPEAVMediaItem_Take@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14TakeFX_SetOpenE"]
             pub static mut TakeFX_SetOpen: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6880,7 +6749,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetParam@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15TakeFX_SetParamE"]
             pub static mut TakeFX_SetParam: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6891,7 +6760,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetParamNormalized@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25TakeFX_SetParamNormalizedE"]
             pub static mut TakeFX_SetParamNormalized: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6902,7 +6771,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetPinMappings@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HHHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21TakeFX_SetPinMappingsE"]
             pub static mut TakeFX_SetPinMappings: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaItem_Take,
@@ -6915,7 +6784,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetPreset@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TakeFX_SetPresetE"]
             pub static mut TakeFX_SetPreset: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6925,7 +6794,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_SetPresetByIndex@reaper_functions@@3P6A_NPEAVMediaItem_Take@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23TakeFX_SetPresetByIndexE"]
             pub static mut TakeFX_SetPresetByIndex: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6935,7 +6804,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeFX_Show@reaper_functions@@3P6AXPEAVMediaItem_Take@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11TakeFX_ShowE"]
             pub static mut TakeFX_Show: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
@@ -6945,13 +6814,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TakeIsMIDI@reaper_functions@@3P6A_NPEAVMediaItem_Take@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions10TakeIsMIDIE"]
             pub static mut TakeIsMIDI: ::std::option::Option<
                 unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> bool,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ThemeLayout_GetLayout@reaper_functions@@3P6A_NPEBDHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21ThemeLayout_GetLayoutE"]
             pub static mut ThemeLayout_GetLayout: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *const ::std::os::raw::c_char,
@@ -6962,7 +6831,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ThemeLayout_GetParameter@reaper_functions@@3P6APEBDHPEAPEBDPEAH111@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24ThemeLayout_GetParameterE"]
             pub static mut ThemeLayout_GetParameter: ::std::option::Option<
                 unsafe extern "C" fn(
                     wp: ::std::os::raw::c_int,
@@ -6975,11 +6844,11 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ThemeLayout_RefreshAll@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22ThemeLayout_RefreshAllE"]
             pub static mut ThemeLayout_RefreshAll: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?ThemeLayout_SetLayout@reaper_functions@@3P6A_NPEBD0@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21ThemeLayout_SetLayoutE"]
             pub static mut ThemeLayout_SetLayout: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *const ::std::os::raw::c_char,
@@ -6988,7 +6857,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ThemeLayout_SetParameter@reaper_functions@@3P6A_NHH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24ThemeLayout_SetParameterE"]
             pub static mut ThemeLayout_SetParameter: ::std::option::Option<
                 unsafe extern "C" fn(
                     wp: ::std::os::raw::c_int,
@@ -6998,11 +6867,11 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?time_precise@reaper_functions@@3P6ANXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12time_preciseE"]
             pub static mut time_precise: ::std::option::Option<unsafe extern "C" fn() -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap2_beatsToTime@reaper_functions@@3P6ANPEAVReaProject@@NPEBH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TimeMap2_beatsToTimeE"]
             pub static mut TimeMap2_beatsToTime: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7012,25 +6881,25 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap2_GetDividedBpmAtTime@reaper_functions@@3P6ANPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions28TimeMap2_GetDividedBpmAtTimeE"]
             pub static mut TimeMap2_GetDividedBpmAtTime: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, time: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap2_GetNextChangeTime@reaper_functions@@3P6ANPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26TimeMap2_GetNextChangeTimeE"]
             pub static mut TimeMap2_GetNextChangeTime: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, time: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap2_QNToTime@reaper_functions@@3P6ANPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TimeMap2_QNToTimeE"]
             pub static mut TimeMap2_QNToTime: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, qn: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap2_timeToBeats@reaper_functions@@3P6ANPEAVReaProject@@NPEAH1PEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TimeMap2_timeToBeatsE"]
             pub static mut TimeMap2_timeToBeats: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7043,13 +6912,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap2_timeToQN@reaper_functions@@3P6ANPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TimeMap2_timeToQNE"]
             pub static mut TimeMap2_timeToQN: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, tpos: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_curFrameRate@reaper_functions@@3P6ANPEAVReaProject@@PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TimeMap_curFrameRateE"]
             pub static mut TimeMap_curFrameRate: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7058,12 +6927,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_GetDividedBpmAtTime@reaper_functions@@3P6ANN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27TimeMap_GetDividedBpmAtTimeE"]
             pub static mut TimeMap_GetDividedBpmAtTime:
                 ::std::option::Option<unsafe extern "C" fn(time: f64) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_GetMeasureInfo@reaper_functions@@3P6ANPEAVReaProject@@HPEAN1PEAH21@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22TimeMap_GetMeasureInfoE"]
             pub static mut TimeMap_GetMeasureInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7077,7 +6946,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_GetMetronomePattern@reaper_functions@@3P6AHPEAVReaProject@@NPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27TimeMap_GetMetronomePatternE"]
             pub static mut TimeMap_GetMetronomePattern: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7088,7 +6957,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_GetTimeSigAtTime@reaper_functions@@3P6AXPEAVReaProject@@NPEAH1PEAN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24TimeMap_GetTimeSigAtTimeE"]
             pub static mut TimeMap_GetTimeSigAtTime: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7100,7 +6969,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_QNToMeasures@reaper_functions@@3P6AHPEAVReaProject@@NPEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TimeMap_QNToMeasuresE"]
             pub static mut TimeMap_QNToMeasures: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7111,29 +6980,29 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_QNToTime@reaper_functions@@3P6ANN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TimeMap_QNToTimeE"]
             pub static mut TimeMap_QNToTime:
                 ::std::option::Option<unsafe extern "C" fn(qn: f64) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_QNToTime_abs@reaper_functions@@3P6ANPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TimeMap_QNToTime_absE"]
             pub static mut TimeMap_QNToTime_abs: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, qn: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_timeToQN@reaper_functions@@3P6ANN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TimeMap_timeToQNE"]
             pub static mut TimeMap_timeToQN:
                 ::std::option::Option<unsafe extern "C" fn(tpos: f64) -> f64>;
         }
         extern "C" {
-            #[link_name = "\u{1}?TimeMap_timeToQN_abs@reaper_functions@@3P6ANPEAVReaProject@@N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TimeMap_timeToQN_absE"]
             pub static mut TimeMap_timeToQN_abs: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject, tpos: f64) -> f64,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ToggleTrackSendUIMute@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21ToggleTrackSendUIMuteE"]
             pub static mut ToggleTrackSendUIMute: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7142,7 +7011,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Track_GetPeakHoldDB@reaper_functions@@3P6ANPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19Track_GetPeakHoldDBE"]
             pub static mut Track_GetPeakHoldDB: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7152,7 +7021,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Track_GetPeakInfo@reaper_functions@@3P6ANPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17Track_GetPeakInfoE"]
             pub static mut Track_GetPeakInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7161,7 +7030,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackCtl_SetToolTip@reaper_functions@@3P6AXPEBDHH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19TrackCtl_SetToolTipE"]
             pub static mut TrackCtl_SetToolTip: ::std::option::Option<
                 unsafe extern "C" fn(
                     fmt: *const ::std::os::raw::c_char,
@@ -7172,7 +7041,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_AddByName@reaper_functions@@3P6AHPEAVMediaTrack@@PEBD_NH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TrackFX_AddByNameE"]
             pub static mut TrackFX_AddByName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7183,7 +7052,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_CopyToTake@reaper_functions@@3P6AXPEAVMediaTrack@@HPEAVMediaItem_Take@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_CopyToTakeE"]
             pub static mut TrackFX_CopyToTake: ::std::option::Option<
                 unsafe extern "C" fn(
                     src_track: *mut root::MediaTrack,
@@ -7195,7 +7064,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_CopyToTrack@reaper_functions@@3P6AXPEAVMediaTrack@@H0H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19TrackFX_CopyToTrackE"]
             pub static mut TrackFX_CopyToTrack: ::std::option::Option<
                 unsafe extern "C" fn(
                     src_track: *mut root::MediaTrack,
@@ -7207,7 +7076,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_Delete@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14TrackFX_DeleteE"]
             pub static mut TrackFX_Delete: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7216,7 +7085,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_EndParamEdit@reaper_functions@@3P6A_NPEAVMediaTrack@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TrackFX_EndParamEditE"]
             pub static mut TrackFX_EndParamEdit: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7226,7 +7095,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_FormatParamValue@reaper_functions@@3P6A_NPEAVMediaTrack@@HHNPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24TrackFX_FormatParamValueE"]
             pub static mut TrackFX_FormatParamValue: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7239,7 +7108,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_FormatParamValueNormalized@reaper_functions@@3P6A_NPEAVMediaTrack@@HHNPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions34TrackFX_FormatParamValueNormalizedE"]
             pub static mut TrackFX_FormatParamValueNormalized: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7252,7 +7121,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetByName@reaper_functions@@3P6AHPEAVMediaTrack@@PEBD_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TrackFX_GetByNameE"]
             pub static mut TrackFX_GetByName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7262,19 +7131,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetChainVisible@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23TrackFX_GetChainVisibleE"]
             pub static mut TrackFX_GetChainVisible: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetCount@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TrackFX_GetCountE"]
             pub static mut TrackFX_GetCount: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetEnabled@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_GetEnabledE"]
             pub static mut TrackFX_GetEnabled: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7283,7 +7152,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetEQ@reaper_functions@@3P6AHPEAVMediaTrack@@_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13TrackFX_GetEQE"]
             pub static mut TrackFX_GetEQ: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7292,7 +7161,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetEQBandEnabled@reaper_functions@@3P6A_NPEAVMediaTrack@@HHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24TrackFX_GetEQBandEnabledE"]
             pub static mut TrackFX_GetEQBandEnabled: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7303,7 +7172,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetEQParam@reaper_functions@@3P6A_NPEAVMediaTrack@@HHPEAH11PEAN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_GetEQParamE"]
             pub static mut TrackFX_GetEQParam: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7317,7 +7186,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetFloatingWindow@reaper_functions@@3P6APEAUHWND__@@PEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions25TrackFX_GetFloatingWindowE"]
             pub static mut TrackFX_GetFloatingWindow: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7326,7 +7195,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetFormattedParamValue@reaper_functions@@3P6A_NPEAVMediaTrack@@HHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions30TrackFX_GetFormattedParamValueE"]
             pub static mut TrackFX_GetFormattedParamValue: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7338,7 +7207,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetFXGUID@reaper_functions@@3P6APEAU_GUID@@PEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TrackFX_GetFXGUIDE"]
             pub static mut TrackFX_GetFXGUID: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7347,7 +7216,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetFXName@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TrackFX_GetFXNameE"]
             pub static mut TrackFX_GetFXName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7358,13 +7227,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetInstrument@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21TrackFX_GetInstrumentE"]
             pub static mut TrackFX_GetInstrument: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetIOSize@reaper_functions@@3P6AHPEAVMediaTrack@@HPEAH1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TrackFX_GetIOSizeE"]
             pub static mut TrackFX_GetIOSize: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7375,7 +7244,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetNamedConfigParm@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEBDPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26TrackFX_GetNamedConfigParmE"]
             pub static mut TrackFX_GetNamedConfigParm: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7387,7 +7256,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetNumParams@reaper_functions@@3P6AHPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TrackFX_GetNumParamsE"]
             pub static mut TrackFX_GetNumParams: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7396,7 +7265,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetOffline@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_GetOfflineE"]
             pub static mut TrackFX_GetOffline: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7405,7 +7274,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetOpen@reaper_functions@@3P6A_NPEAVMediaTrack@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15TrackFX_GetOpenE"]
             pub static mut TrackFX_GetOpen: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7414,7 +7283,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetParam@reaper_functions@@3P6ANPEAVMediaTrack@@HHPEAN1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TrackFX_GetParamE"]
             pub static mut TrackFX_GetParam: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7426,7 +7295,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetParameterStepSizes@reaper_functions@@3P6A_NPEAVMediaTrack@@HHPEAN11PEA_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions29TrackFX_GetParameterStepSizesE"]
             pub static mut TrackFX_GetParameterStepSizes: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7440,7 +7309,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetParamEx@reaper_functions@@3P6ANPEAVMediaTrack@@HHPEAN11@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_GetParamExE"]
             pub static mut TrackFX_GetParamEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7453,7 +7322,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetParamName@reaper_functions@@3P6A_NPEAVMediaTrack@@HHPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20TrackFX_GetParamNameE"]
             pub static mut TrackFX_GetParamName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7465,7 +7334,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetParamNormalized@reaper_functions@@3P6ANPEAVMediaTrack@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26TrackFX_GetParamNormalizedE"]
             pub static mut TrackFX_GetParamNormalized: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7475,7 +7344,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetPinMappings@reaper_functions@@3P6AHPEAVMediaTrack@@HHHPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22TrackFX_GetPinMappingsE"]
             pub static mut TrackFX_GetPinMappings: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -7487,7 +7356,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetPreset@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TrackFX_GetPresetE"]
             pub static mut TrackFX_GetPreset: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7498,7 +7367,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetPresetIndex@reaper_functions@@3P6AHPEAVMediaTrack@@HPEAH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22TrackFX_GetPresetIndexE"]
             pub static mut TrackFX_GetPresetIndex: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7508,19 +7377,19 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetRecChainVisible@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26TrackFX_GetRecChainVisibleE"]
             pub static mut TrackFX_GetRecChainVisible: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetRecCount@reaper_functions@@3P6AHPEAVMediaTrack@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19TrackFX_GetRecCountE"]
             pub static mut TrackFX_GetRecCount: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_GetUserPresetFilename@reaper_functions@@3P6AXPEAVMediaTrack@@HPEADH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions29TrackFX_GetUserPresetFilenameE"]
             pub static mut TrackFX_GetUserPresetFilename: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7531,7 +7400,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_NavigatePresets@reaper_functions@@3P6A_NPEAVMediaTrack@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23TrackFX_NavigatePresetsE"]
             pub static mut TrackFX_NavigatePresets: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7541,7 +7410,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetEnabled@reaper_functions@@3P6AXPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_SetEnabledE"]
             pub static mut TrackFX_SetEnabled: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7551,7 +7420,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetEQBandEnabled@reaper_functions@@3P6A_NPEAVMediaTrack@@HHH_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24TrackFX_SetEQBandEnabledE"]
             pub static mut TrackFX_SetEQBandEnabled: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7563,7 +7432,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetEQParam@reaper_functions@@3P6A_NPEAVMediaTrack@@HHHHN_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_SetEQParamE"]
             pub static mut TrackFX_SetEQParam: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7577,7 +7446,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetNamedConfigParm@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEBD1@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26TrackFX_SetNamedConfigParmE"]
             pub static mut TrackFX_SetNamedConfigParm: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7588,7 +7457,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetOffline@reaper_functions@@3P6AXPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18TrackFX_SetOfflineE"]
             pub static mut TrackFX_SetOffline: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7598,7 +7467,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetOpen@reaper_functions@@3P6AXPEAVMediaTrack@@H_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15TrackFX_SetOpenE"]
             pub static mut TrackFX_SetOpen: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7608,7 +7477,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetParam@reaper_functions@@3P6A_NPEAVMediaTrack@@HHN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16TrackFX_SetParamE"]
             pub static mut TrackFX_SetParam: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7619,7 +7488,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetParamNormalized@reaper_functions@@3P6A_NPEAVMediaTrack@@HHN@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions26TrackFX_SetParamNormalizedE"]
             pub static mut TrackFX_SetParamNormalized: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7630,7 +7499,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetPinMappings@reaper_functions@@3P6A_NPEAVMediaTrack@@HHHHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions22TrackFX_SetPinMappingsE"]
             pub static mut TrackFX_SetPinMappings: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
@@ -7643,7 +7512,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetPreset@reaper_functions@@3P6A_NPEAVMediaTrack@@HPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions17TrackFX_SetPresetE"]
             pub static mut TrackFX_SetPreset: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7653,7 +7522,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_SetPresetByIndex@reaper_functions@@3P6A_NPEAVMediaTrack@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions24TrackFX_SetPresetByIndexE"]
             pub static mut TrackFX_SetPresetByIndex: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7663,7 +7532,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackFX_Show@reaper_functions@@3P6AXPEAVMediaTrack@@HH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12TrackFX_ShowE"]
             pub static mut TrackFX_Show: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
@@ -7673,50 +7542,50 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackList_AdjustWindows@reaper_functions@@3P6AX_N@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23TrackList_AdjustWindowsE"]
             pub static mut TrackList_AdjustWindows:
                 ::std::option::Option<unsafe extern "C" fn(isMinor: bool)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?TrackList_UpdateAllExternalSurfaces@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions35TrackList_UpdateAllExternalSurfacesE"]
             pub static mut TrackList_UpdateAllExternalSurfaces:
                 ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_BeginBlock@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions15Undo_BeginBlockE"]
             pub static mut Undo_BeginBlock: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_BeginBlock2@reaper_functions@@3P6AXPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions16Undo_BeginBlock2E"]
             pub static mut Undo_BeginBlock2:
                 ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_CanRedo2@reaper_functions@@3P6APEBDPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13Undo_CanRedo2E"]
             pub static mut Undo_CanRedo2: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_CanUndo2@reaper_functions@@3P6APEBDPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13Undo_CanUndo2E"]
             pub static mut Undo_CanUndo2: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> *const ::std::os::raw::c_char,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_DoRedo2@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12Undo_DoRedo2E"]
             pub static mut Undo_DoRedo2: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_DoUndo2@reaper_functions@@3P6AHPEAVReaProject@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12Undo_DoUndo2E"]
             pub static mut Undo_DoUndo2: ::std::option::Option<
                 unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_EndBlock@reaper_functions@@3P6AXPEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13Undo_EndBlockE"]
             pub static mut Undo_EndBlock: ::std::option::Option<
                 unsafe extern "C" fn(
                     descchange: *const ::std::os::raw::c_char,
@@ -7725,7 +7594,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_EndBlock2@reaper_functions@@3P6AXPEAVReaProject@@PEBDH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14Undo_EndBlock2E"]
             pub static mut Undo_EndBlock2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7735,13 +7604,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_OnStateChange@reaper_functions@@3P6AXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions18Undo_OnStateChangeE"]
             pub static mut Undo_OnStateChange: ::std::option::Option<
                 unsafe extern "C" fn(descchange: *const ::std::os::raw::c_char),
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_OnStateChange2@reaper_functions@@3P6AXPEAVReaProject@@PEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19Undo_OnStateChange2E"]
             pub static mut Undo_OnStateChange2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7750,7 +7619,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_OnStateChange_Item@reaper_functions@@3P6AXPEAVReaProject@@PEBDPEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions23Undo_OnStateChange_ItemE"]
             pub static mut Undo_OnStateChange_Item: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7760,7 +7629,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_OnStateChangeEx@reaper_functions@@3P6AXPEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20Undo_OnStateChangeExE"]
             pub static mut Undo_OnStateChangeEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     descchange: *const ::std::os::raw::c_char,
@@ -7770,7 +7639,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?Undo_OnStateChangeEx2@reaper_functions@@3P6AXPEAVReaProject@@PEBDHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions21Undo_OnStateChangeEx2E"]
             pub static mut Undo_OnStateChangeEx2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7781,7 +7650,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?update_disk_counters@reaper_functions@@3P6AXHH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions20update_disk_countersE"]
             pub static mut update_disk_counters: ::std::option::Option<
                 unsafe extern "C" fn(
                     readamt: ::std::os::raw::c_int,
@@ -7790,20 +7659,20 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?UpdateArrange@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13UpdateArrangeE"]
             pub static mut UpdateArrange: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?UpdateItemInProject@reaper_functions@@3P6AXPEAVMediaItem@@@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions19UpdateItemInProjectE"]
             pub static mut UpdateItemInProject:
                 ::std::option::Option<unsafe extern "C" fn(item: *mut root::MediaItem)>;
         }
         extern "C" {
-            #[link_name = "\u{1}?UpdateTimeline@reaper_functions@@3P6AXXZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions14UpdateTimelineE"]
             pub static mut UpdateTimeline: ::std::option::Option<unsafe extern "C" fn()>;
         }
         extern "C" {
-            #[link_name = "\u{1}?ValidatePtr@reaper_functions@@3P6A_NPEAXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions11ValidatePtrE"]
             pub static mut ValidatePtr: ::std::option::Option<
                 unsafe extern "C" fn(
                     pointer: *mut ::std::os::raw::c_void,
@@ -7812,7 +7681,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ValidatePtr2@reaper_functions@@3P6A_NPEAVReaProject@@PEAXPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12ValidatePtr2E"]
             pub static mut ValidatePtr2: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
@@ -7822,7 +7691,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?ViewPrefs@reaper_functions@@3P6AXHPEBD@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions9ViewPrefsE"]
             pub static mut ViewPrefs: ::std::option::Option<
                 unsafe extern "C" fn(
                     page: ::std::os::raw::c_int,
@@ -7831,7 +7700,7 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?WDL_VirtualWnd_ScaledBlitBG@reaper_functions@@3P6A_NPEAVLICE_IBitmap@1@PEAVWDL_VirtualWnd_BGCfg@1@HHHHHHHHMH@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions27WDL_VirtualWnd_ScaledBlitBGE"]
             pub static mut WDL_VirtualWnd_ScaledBlitBG: ::std::option::Option<
                 unsafe extern "C" fn(
                     dest: *mut root::reaper_functions::LICE_IBitmap,
@@ -7850,13 +7719,13 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMidiInput@reaper_functions@@3P6APEAVmidi_Input@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions12GetMidiInputE"]
             pub static mut GetMidiInput: ::std::option::Option<
                 unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input,
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}?GetMidiOutput@reaper_functions@@3P6APEAVmidi_Output@@H@ZEA"]
+            #[link_name = "\u{1}_ZN16reaper_functions13GetMidiOutputE"]
             pub static mut GetMidiOutput: ::std::option::Option<
                 unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output,
             >;
