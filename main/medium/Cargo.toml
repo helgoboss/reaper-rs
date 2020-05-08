@@ -13,7 +13,7 @@ categories = ["api-bindings", "multimedia", "multimedia::audio"]
 [dependencies]
 c_str_macro = "1.0.2"
 derive_more = "0.99.5"
-reaper-low = { path = '../low' }
+reaper-low = { version = "0.1.0", path = '../low' }
 helgoboss-midi = { version = "0.1.0" }
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
 
