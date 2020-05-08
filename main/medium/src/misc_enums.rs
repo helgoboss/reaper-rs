@@ -1,12 +1,11 @@
 use crate::{
-    HookCommandFn, HookPostCommandFn, Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId,
-    ReaProject, ReaperStringArg, ToggleActionFn, TryFromRawError,
+    Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject, ReaperStringArg,
+    TryFromRawError,
 };
 use c_str_macro::c_str;
 
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
-use reaper_low::raw::HWND;
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -375,7 +374,7 @@ pub enum RegistrationObject<'a> {
     /// recursion if doing so! > in fact, any use of this hook should benefit from a simple
     /// reentrancy test...
     /// </pre>
-    HookCommand(HookCommandFn),
+    HookCommand(raw::HookCommandFn),
     /// A hook post command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
@@ -386,7 +385,7 @@ pub enum RegistrationObject<'a> {
     ///  NON_API: void postCommand(int command, int flag);
     ///           register("hookpostcommand",postCommand);
     /// </pre>
-    HookPostCommand(HookPostCommandFn),
+    HookPostCommand(raw::HookPostCommandFn),
     // HookCommand2(*mut c_void),
     /// A toggle action.
     ///
@@ -404,7 +403,7 @@ pub enum RegistrationObject<'a> {
     ///   0=action belongs to this extension and is currently set to "off"
     ///   1=action belongs to this extension and is currently set to "on"
     /// </pre>
-    ToggleAction(ToggleActionFn),
+    ToggleAction(raw::ToggleActionFn),
     // ActionHelp(*mut c_void),
     /// A command ID for the given command name.
     ///
@@ -703,7 +702,7 @@ pub enum WindowContext {
 
 impl WindowContext {
     /// Converts this value to a raw pointer as expected by the low-level API.
-    pub fn to_raw(&self) -> HWND {
+    pub fn to_raw(&self) -> raw::HWND {
         use WindowContext::*;
         match self {
             Win(h) => h.as_ptr(),

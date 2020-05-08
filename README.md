@@ -20,7 +20,7 @@ _reaper-rs_ consists of 4 production crates:
 - [reaper-medium](https://crates.io/crates/reaper-medium)
 - `reaper-high` (not yet published)
 
-`reaper-macros` provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
+[reaper-macros](https://crates.io/crates/reaper-macros) provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
 
 The remaining crates represent the 3 different APIs of _reaper-rs_.
 
@@ -38,7 +38,7 @@ in such a case).
 Status:
 
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: nearly stable (quite polished already, breaking changes possible but not planned)
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes possible but not planned)
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **Completion**: ~95% (some virtual function calls still missing)
 
 Example:
@@ -64,7 +64,7 @@ Since the high-level API is still very unstable, _this is the recommended API_.
 Status:
 
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: nearly stable (quite polished already, breaking changes possible but not planned)
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes possible but not planned)
 - ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (solid foundation, roughly 100 of 800 functions implemented)
 
 Example:
@@ -80,7 +80,7 @@ unsafe { functions.delete_track(track); }
 
 This API builds on top of the medium-level API. It makes a break with the "flat functions" nature of the original
 REAPER C++ API and replaces it with an API that uses reactive and object-oriented paradigms. This break makes it
-possible to provide a very intuitive API which can be used completely without `unsafe`.
+possible to provide an intuitive API which can be used completely without `unsafe`.
 
 Status:
 

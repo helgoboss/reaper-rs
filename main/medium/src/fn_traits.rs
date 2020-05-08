@@ -16,8 +16,6 @@ pub trait MediumHookCommand {
     fn call(command_id: CommandId, flag: i32) -> bool;
 }
 
-pub(crate) type HookCommandFn = extern "C" fn(command_id: c_int, flag: c_int) -> bool;
-
 pub(crate) extern "C" fn delegating_hook_command<T: MediumHookCommand>(
     command_id: c_int,
     flag: c_int,
@@ -42,8 +40,6 @@ pub enum ToggleActionResult {
     On,
 }
 
-pub(crate) type ToggleActionFn = extern "C" fn(command_id: c_int) -> c_int;
-
 pub(crate) extern "C" fn delegating_toggle_action<T: MediumToggleAction>(
     command_id: c_int,
 ) -> c_int {
@@ -64,8 +60,6 @@ pub trait MediumHookPostCommand {
     // The actual callback called after an action of the main section has been performed.
     fn call(command_id: CommandId, flag: i32);
 }
-
-pub(crate) type HookPostCommandFn = extern "C" fn(command_id: c_int, flag: c_int);
 
 pub(crate) extern "C" fn delegating_hook_post_command<T: MediumHookPostCommand>(
     command_id: c_int,
