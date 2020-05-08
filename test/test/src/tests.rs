@@ -108,7 +108,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         mark_project_as_dirty(),
         get_project_tempo(),
         set_project_tempo(),
-        show_message_box(),
     ]
     .into_iter();
     let output_fx_steps = create_fx_steps("Output FX chain", || {
@@ -122,21 +121,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         .chain(output_fx_steps)
         .chain(input_fx_steps)
         .chain(steps_b)
-}
-
-fn show_message_box() -> TestStep {
-    step(AllVersions, "Show message box", |reaper, _| {
-        // Given
-        // When
-        let result = reaper.show_message_box(
-            c_str!("Tests are finished"),
-            c_str!("reaper-rs"),
-            MessageBoxType::Okay,
-        );
-        // Then
-        assert_eq!(result, MessageBoxResult::Okay);
-        Ok(())
-    })
 }
 
 fn set_project_tempo() -> TestStep {

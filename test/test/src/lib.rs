@@ -16,20 +16,30 @@ use reaper_medium::ReaperStringArg;
 use std::iter::FromIterator;
 use std::ops::Deref;
 
-pub fn execute_integration_test() {
+/// Executes the complete integration test.
+///
+/// Calls the given callback as soon as finished (either when the first test step failed
+/// or when all steps have executed successfully).
+pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) {
     let reaper = Reaper::get();
     reaper.clear_console();
     log("# Testing reaper-rs\n");
     let steps = VecDeque::from_iter(create_test_steps());
     let step_count = steps.len();
-    execute_next_step(reaper.deref(), steps, step_count);
+    execute_next_step(reaper.deref(), steps, step_count, on_finish);
 }
 
-fn execute_next_step(reaper: &Reaper, mut steps: VecDeque<TestStep>, step_count: usize) {
+fn execute_next_step(
+    reaper: &Reaper,
+    mut steps: VecDeque<TestStep>,
+    step_count: usize,
+    on_finish: impl Fn(Result<(), &str>) + 'static,
+) {
     let step = match steps.pop_front() {
         Some(step) => step,
         None => {
             log("\n\n**Integration test was successful**");
+            on_finish(Ok(()));
             return;
         }
     };
@@ -47,10 +57,13 @@ fn execute_next_step(reaper: &Reaper, mut steps: VecDeque<TestStep>, step_count:
         match result {
             Ok(()) => {
                 reaper.execute_later_in_main_thread_asap(move || {
-                    execute_next_step(Reaper::get().deref(), steps, step_count)
+                    execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
                 });
             }
-            Err(msg) => log_failure(&msg),
+            Err(msg) => {
+                log_failure(&msg);
+                on_finish(Err(&msg));
+            }
         }
     } else {
         // REAPER version doesn't match
@@ -61,7 +74,7 @@ fn execute_next_step(reaper: &Reaper, mut steps: VecDeque<TestStep>, step_count:
         };
         log_skip(reason);
         reaper.execute_later_in_main_thread_asap(move || {
-            execute_next_step(Reaper::get().deref(), steps, step_count)
+            execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
         });
     }
 }

@@ -21,7 +21,12 @@
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "environment": [
+                {
+                    "name": "RUN_REAPER_RS_INTEGRATION_TEST",
+                    "value": "true"
+                }
+            ],
             "externalConsole": false
         }
     ]
