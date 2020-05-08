@@ -27,7 +27,7 @@ use quote::quote;
 /// If you want to start with a preconfigured high-level `Reaper` instance right away, use the macro
 /// like this (please note that the high-level API has not been published yet):
 ///
-/// ```no_run
+/// ```no_run,ignore
 /// use std::error::Error;
 /// use reaper_macros::reaper_extension_plugin;
 /// use reaper_high::Reaper;
