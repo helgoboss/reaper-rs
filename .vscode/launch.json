@@ -24,7 +24,7 @@
             "environment": [
                 {
                     "name": "RUN_REAPER_RS_INTEGRATION_TEST",
-                    "value": "true"
+                    "value": ""
                 }
             ],
             "externalConsole": false
