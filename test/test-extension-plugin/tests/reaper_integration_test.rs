@@ -20,7 +20,7 @@ fn run_reaper_integration_test() {
 
 fn run_on_linux(target_dir_path: &Path, reaper_download_dir_path: &Path) -> Result<()> {
     let reaper_home_path = setup_reaper_for_linux(reaper_download_dir_path)?;
-    install_plugin(&target_dir_path, &reaper_home_path);
+    install_plugin(&target_dir_path, &reaper_home_path)?;
     let reaper_executable = reaper_home_path.join("reaper");
     run_integration_test_in_reaper(&reaper_executable)?;
     Ok(())
@@ -29,15 +29,21 @@ fn run_on_linux(target_dir_path: &Path, reaper_download_dir_path: &Path) -> Resu
 fn install_plugin(target_dir_path: &Path, reaper_home_path: &Path) -> Result<()> {
     let reaper_user_plugins_dir_path = reaper_home_path.join("UserPlugins");
     let plugin_file_name = "libreaper_test_extension_plugin.so";
-    fs::create_dir_all(&reaper_user_plugins_dir_path);
-    fs::copy(
-        target_dir_path.join("debug").join(plugin_file_name),
-        reaper_user_plugins_dir_path.join(plugin_file_name),
-    )?;
+    fs::create_dir_all(&reaper_user_plugins_dir_path)?;
+    let plugin_file_path = target_dir_path.join("debug").join(plugin_file_name);
+    let target_path = reaper_user_plugins_dir_path.join(plugin_file_name);
+    println!("Copying plug-in to {:?}...", &target_path);
+    fs::copy(&plugin_file_path, &target_path)?;
+    println!(
+        "Plug-in copied to {:?}: {:#?}",
+        &target_path,
+        fs::metadata(&target_path)
+    );
     Ok(())
 }
 
 fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
+    println!("Starting REAPER ({:?})...", &reaper_executable);
     let mut child = Command::new(reaper_executable)
         .env("RUN_REAPER_RS_INTEGRATION_TEST", "true")
         .spawn()?;
@@ -75,12 +81,15 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     }
     let reaper_tarball_path = reaper_download_dir_path.join("reaper-linux.tar.xz");
     if !reaper_tarball_path.exists() {
+        println!("Downloading REAPER to ({:?})...", &reaper_tarball_path);
         download(
             "https://www.reaper.fm/files/6.x/reaper609_linux_x86_64.tar.xz",
             &reaper_tarball_path,
         )?;
     }
+    println!("Unpacking REAPER tarball...");
     unpack_tar_xz(&reaper_tarball_path, &reaper_download_dir_path)?;
+    println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
 
