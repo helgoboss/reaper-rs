@@ -360,6 +360,13 @@ Running the integration test is not only a good way to find _reaper-rs_ regressi
 subtle changes in the REAPER C++ API itself. Currently, the test assertions are very strict in order to reveal even
 the slightest deviations.
 
+On Linux you can run the integration test automatically (downloads, unpacks and executes REAPER):
+
+```sh
+cd test/test-extension-plugin
+cargo test --features run-reaper-integration-test -- --nocapture
+``` 
+
 ## Project background
 
 _reaper-rs_ has been born as part of an effort to port the REAPER VST plug-in
