@@ -15,6 +15,7 @@ use reaper_medium::ReaperStringArg;
 
 use std::iter::FromIterator;
 use std::ops::Deref;
+use std::panic::AssertUnwindSafe;
 
 /// Executes the complete integration test.
 ///
@@ -50,7 +51,10 @@ fn execute_next_step(
             let context = TestStepContext {
                 finished: finished.clone(),
             };
-            let result = (step.operation)(reaper, context);
+            let step_name = step.name.clone();
+            let result =
+                std::panic::catch_unwind(AssertUnwindSafe(|| (step.operation)(reaper, context)))
+                    .unwrap_or_else(|_| Err(format!("Test [{}] panicked", step_name).into()));
             finished.complete();
             result
         };

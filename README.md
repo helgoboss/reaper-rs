@@ -307,7 +307,7 @@ Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS ins
 ```sh
 # Install basic stuff
 sudo apt update
-sudo apt install curl git build-essential -y
+sudo apt install curl git build-essential pkg-config libssl-dev liblzma-dev -y
 
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
@@ -327,8 +327,8 @@ Make the test plug-ins available in REAPER:
 1. Download REAPER for Linux and start it at least one time.
 2. Create symbolic links
    ```sh
-   ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_test_extension_plugin.so
    mkdir -p $HOME/.config/REAPER/UserPlugins/FX
+   ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_test_extension_plugin.so
    ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_vst_plugin.so $HOME/.config/REAPER/UserPlugins/FX/reaper_test_extension_plugin.so
    ```
 
