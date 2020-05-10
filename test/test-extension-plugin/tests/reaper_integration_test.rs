@@ -27,13 +27,19 @@ fn run_on_linux(target_dir_path: &Path, reaper_download_dir_path: &Path) -> Resu
 }
 
 fn install_plugin(target_dir_path: &Path, reaper_home_path: &Path) -> Result<()> {
-    let reaper_user_plugins_dir_path = reaper_home_path.join("UserPlugins");
-    let plugin_file_name = "libreaper_test_extension_plugin.so";
-    fs::create_dir_all(&reaper_user_plugins_dir_path)?;
-    let plugin_file_path = target_dir_path.join("debug").join(plugin_file_name);
-    let target_path = reaper_user_plugins_dir_path.join(plugin_file_name);
+    let source_path = target_dir_path
+        .join("debug")
+        .join("libreaper_test_extension_plugin.so");
+    let target_path = reaper_home_path
+        .join("UserPlugins")
+        .join("reaper_test_extension_plugin.so");
+    fs::create_dir_all(target_path.parent().ok_or("no parent")?)?;
+    Command::new("ls -R")
+        .current_dir(target_dir_path)
+        .spawn()?
+        .wait()?;
     println!("Copying plug-in to {:?}...", &target_path);
-    fs::copy(&plugin_file_path, &target_path)?;
+    fs::copy(&source_path, &target_path)?;
     println!(
         "Plug-in copied to {:?}: {:#?}",
         &target_path,
@@ -89,6 +95,11 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     }
     println!("Unpacking REAPER tarball...");
     unpack_tar_xz(&reaper_tarball_path, &reaper_download_dir_path)?;
+    println!("Activating REAPER portable mode...");
+    fs::OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(reaper_home_path.join("reaper.ini"));
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
