@@ -41,7 +41,7 @@ fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
     let mut child = Command::new(reaper_executable)
         .env("RUN_REAPER_RS_INTEGRATION_TEST", "true")
         .spawn()?;
-    let exit_status = child.wait_timeout(Duration::from_secs(20))?;
+    let exit_status = child.wait_timeout(Duration::from_secs(120))?;
     let exit_status = match exit_status {
         None => {
             child.kill()?;
