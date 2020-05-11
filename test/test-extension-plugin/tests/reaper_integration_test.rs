@@ -1,3 +1,5 @@
+#![cfg(feature = "run-reaper-integration-test")]
+#![cfg(target_os = "linux")]
 use std::error::Error;
 use std::fs::File;
 use std::path::{Path, PathBuf};
@@ -8,8 +10,6 @@ use wait_timeout::ChildExt;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
-#[cfg(feature = "run-reaper-integration-test")]
-#[cfg(target_os = "linux")]
 #[test]
 fn run_reaper_integration_test() {
     let target_dir_path = std::env::current_dir().unwrap().join("../../target");

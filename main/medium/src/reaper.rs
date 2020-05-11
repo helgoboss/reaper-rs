@@ -88,6 +88,16 @@ impl Reaper {
     }
 
     /// Gives access to all REAPER functions which can be safely executed in the main thread.
+    ///
+    /// # Example
+    ///
+    /// If the REAPER functions are needed somewhere else, just clone them:
+    ///
+    /// ```no_run
+    /// # let mut reaper = reaper_medium::Reaper::default();
+    /// let standalone_functions = reaper.functions().clone();
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
     pub fn functions(&self) -> &ReaperFunctions<MainThreadScope> {
         &self.functions
     }

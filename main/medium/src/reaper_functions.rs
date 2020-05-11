@@ -31,7 +31,7 @@ use std::path::PathBuf;
 pub trait MainThreadOnly: private::Sealed {}
 
 /// A usage scope which unlocks all functions that are safe to execute from the main thread.
-#[derive(Debug, Default)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct MainThreadScope(pub(crate) ());
 
 impl MainThreadOnly for MainThreadScope {}
@@ -42,7 +42,7 @@ pub trait AudioThreadOnly: private::Sealed {}
 
 /// A usage scope which unlocks all functions that are safe to execute from the real-time audio
 /// thread.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct RealTimeAudioThreadScope(pub(crate) ());
 
 impl AudioThreadOnly for RealTimeAudioThreadScope {}

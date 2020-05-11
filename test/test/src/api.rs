@@ -30,8 +30,13 @@ where
     }
 }
 
+// Although currently not used, the Min and Max feature should be available
+#[allow(dead_code)]
 pub enum VersionRestriction {
+    /// Executes this step in all REAPER versions.
     AllVersions,
+    /// Executes this step in all REAPER versions equal or above the given one.
     Min(ReaperVersion<'static>),
+    /// Executes this step in all REAPER versions equal or below the given one.
     Max(ReaperVersion<'static>),
 }

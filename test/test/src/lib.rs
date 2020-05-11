@@ -60,9 +60,11 @@ fn execute_next_step(
         };
         match result {
             Ok(()) => {
-                reaper.execute_later_in_main_thread_asap(move || {
-                    execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
-                });
+                reaper
+                    .execute_later_in_main_thread_asap(move || {
+                        execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
+                    })
+                    .expect("couldn't schedule next test step");
             }
             Err(msg) => {
                 log_failure(&msg);
@@ -77,9 +79,11 @@ fn execute_next_step(
             _ => unreachable!(),
         };
         log_skip(reason);
-        reaper.execute_later_in_main_thread_asap(move || {
-            execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
-        });
+        reaper
+            .execute_later_in_main_thread_asap(move || {
+                execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
+            })
+            .expect("couldn't schedule next test step");
     }
 }
 

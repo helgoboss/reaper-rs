@@ -21,13 +21,10 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
-    ActionValueChange, AutomationMode, Bpm, CommandId, Db, EnvChunkName, FxShowInstruction,
-    GangBehavior, GlobalAutomationModeOverride, InputMonitoringMode, MasterTrackBehavior,
-    MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
-    RecordArmMode, RecordingInput, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
-    TrackFxChainType, TrackFxLocation, TrackRef, TrackSendCategory, TrackSendDirection,
-    TransferBehavior, UndoBehavior, ValueChange,
+    AutomationMode, Bpm, CommandId, Db, GangBehavior, InputMonitoringMode, MasterTrackBehavior,
+    MidiInputDeviceId, MidiOutputDeviceId, ReaperNormalizedFxParamValue, ReaperPanValue,
+    ReaperVersion, ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackRef,
+    UndoBehavior, ValueChange,
 };
 
 use std::rc::Rc;
@@ -259,22 +256,24 @@ fn stuff_midi_devices() -> TestStep {
         // Given
         let msg = RawShortMessage::note_on(channel(0), key_number(64), u7(100));
         // When
-        reaper.execute_asap_in_audio_thread(|rt_reaper| {
-            rt_reaper
-                .midi_message_received()
-                // TODO-medium This is fishy. next() will be called from main thread although
-                //  the rest happens in audio thread. I think we need to use shared subjects.
-                .take_until(step.finished)
-                .subscribe(move |_evt| {
-                    println!("MIDI event arrived");
-                    // Right now not invoked because MIDI message arrives async.
-                    // TODO As soon as we have an Observable which is not generic on Observer,
-                    // introduce  steps which return an
-                    // Observable<TestStepResult, ()> in order to test
-                    //  asynchronously that stuffed MIDI messages arrived via
-                    // midi_message_received().
-                });
-        });
+        reaper
+            .execute_asap_in_audio_thread(|rt_reaper| {
+                rt_reaper
+                    .midi_message_received()
+                    // TODO-medium This is fishy. next() will be called from main thread although
+                    //  the rest happens in audio thread. I think we need to use shared subjects.
+                    .take_until(step.finished)
+                    .subscribe(move |_evt| {
+                        println!("MIDI event arrived");
+                        // Right now not invoked because MIDI message arrives async.
+                        // TODO As soon as we have an Observable which is not generic on Observer,
+                        // introduce  steps which return an
+                        // Observable<TestStepResult, ()> in order to test
+                        //  asynchronously that stuffed MIDI messages arrived via
+                        // midi_message_received().
+                    });
+            })
+            .map_err(|_| "couldn't schedule for execution in audio thread")?;
         reaper.stuff_midi_message(StuffMidiMessageTarget::VirtualMidiKeyboardQueue, msg);
         // Then
         Ok(())
@@ -285,7 +284,7 @@ fn query_midi_output_devices() -> TestStep {
     step(AllVersions, "Query MIDI output devices", |reaper, _| {
         // Given
         // When
-        reaper.get_midi_output_devices();
+        reaper.get_midi_output_devices().count();
         reaper.get_midi_output_device_by_id(MidiOutputDeviceId::new(0));
         Ok(())
     })
@@ -295,7 +294,7 @@ fn query_midi_input_devices() -> TestStep {
     step(AllVersions, "Query MIDI input devices", |reaper, _| {
         // Given
         // When
-        let _devs = reaper.get_midi_input_devices();
+        let _devs = reaper.get_midi_input_devices().count();
         let _dev_0 = reaper.get_midi_input_device_by_id(MidiInputDeviceId::new(0));
         // Then
         // TODO There might be no MIDI input devices
