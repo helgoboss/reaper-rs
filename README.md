@@ -39,7 +39,7 @@ in such a case).
 Status:
 
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes possible but not planned)
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes still possible)
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **Completion**: ~95% (some virtual function calls still missing)
 
 Example:
@@ -65,7 +65,7 @@ Since the high-level API is still very unstable, _this is the recommended API_.
 Status:
 
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes possible but not planned)
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes still possible)
 - ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (solid foundation, roughly 100 of 800 functions implemented)
 
 #### Examples
@@ -291,8 +291,8 @@ Thanks to Cargo, building _reaper-rs_ is not a big deal.
 
 #### Windows
 
-In the following you will find the instructions for Windows 10. Points where you have to consider the target
-architecture (REAPER 32-bit vs. 64-bit) are marked with :star: (the instructions assume 64-bit).
+In the following you will find the complete instructions for Windows 10, including Rust setup. Points where you have to consider the target
+architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
 
 1. Setup "Build tools for Visual Studio 2019"
    - Rust uses native build toolchains. On Windows, it's necessary to use the MSVC (Microsoft Visual Studio
@@ -325,7 +325,7 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star: (the instructions
    cargo build
    ```
 
-Regenerate the low-level API (the resulting code should not be pushed!):
+Regenerate the low-level API (the resulting code should not be pushed, see [above](#low-level-api-code-generation)):
 
 1. [Download](https://releases.llvm.org/download.html) and install LLVM for Windows 64-bit :star:
 2. Build with the `generate` feature enabled
@@ -337,7 +337,8 @@ Regenerate the low-level API (the resulting code should not be pushed!):
 
 #### Linux
 
-Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS installation:
+Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS installation, 
+including Rust setup:
 
 ```sh
 # Install basic stuff
