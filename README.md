@@ -343,7 +343,7 @@ including Rust setup:
 ```sh
 # Install basic stuff
 sudo apt update
-sudo apt install curl git build-essential pkg-config libssl-dev liblzma-dev -y
+sudo apt install curl git build-essential pkg-config libssl-dev liblzma-dev llvm-dev libclang-dev clang -y
 
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
