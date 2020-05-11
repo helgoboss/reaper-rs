@@ -1,3 +1,4 @@
+#![allow(clippy::float_cmp)]
 use approx::*;
 use std::convert::TryFrom;
 use std::ffi::CStr;
@@ -129,8 +130,8 @@ fn set_project_tempo() -> TestStep {
             reaper
                 .master_tempo_changed()
                 .take_until(step.finished)
-                .subscribe(move |t| {
-                    mock.invoke(t);
+                .subscribe(move |_| {
+                    mock.invoke(());
                 });
         });
         project.set_tempo(
@@ -141,7 +142,6 @@ fn set_project_tempo() -> TestStep {
         assert_eq!(project.get_tempo().get_bpm(), Bpm::new(130.0));
         // TODO-low There should be only one event invocation
         assert_eq!(mock.get_invocation_count(), 2);
-        assert_eq!(mock.get_last_arg(), ());
         Ok(())
     })
 }
@@ -154,7 +154,7 @@ fn get_project_tempo() -> TestStep {
         let tempo = project.get_tempo();
         // Then
         assert_eq!(tempo.get_bpm(), Bpm::new(120.0));
-        assert_eq!(tempo.get_normalized_value(), 119.0 / 959.0);
+        assert!(abs_diff_eq!(tempo.get_normalized_value(), 119.0 / 959.0));
         Ok(())
     })
 }
@@ -669,8 +669,8 @@ fn set_track_send_volume() -> TestStep {
         // Then
         assert!(abs_diff_eq!(
             send.get_volume().get_db().get(),
-            -30.009531739774296,
-            epsilon = 0.0000000000001
+            -30.009_531_739_774_296,
+            epsilon = 0.000_000_000_000_1
         ));
         assert_eq!(mock.get_invocation_count(), 1);
         assert_eq!(mock.get_last_arg(), send);
@@ -1135,8 +1135,7 @@ fn select_master_track() -> TestStep {
         );
         // TODO REAPER doesn't notify us about master track selection currently
         assert_eq!(mock.get_invocation_count(), 1);
-        let last_arg: Track = mock.get_last_arg().into();
-        assert_eq!(last_arg.get_index(), Some(2));
+        assert_eq!(mock.get_last_arg().get_index(), Some(2));
         Ok(())
     })
 }
@@ -1290,19 +1289,19 @@ fn set_track_volume() -> TestStep {
         let volume = track.get_volume();
         assert!(abs_diff_eq!(
             volume.get_reaper_value().get(),
-            0.031588093366685013,
-            epsilon = 0.0000000000001
+            0.031_588_093_366_685_01,
+            epsilon = 0.000_000_000_000_1
         ));
         let db = volume.get_db().get();
         assert!(abs_diff_eq!(
             db,
-            -30.009531739774296,
-            epsilon = 0.0000000000001
+            -30.009_531_739_774_296,
+            epsilon = 0.000_000_000_000_1
         ));
         assert!(abs_diff_eq!(
             volume.get_normalized_value(),
-            0.25000000000003497,
-            epsilon = 0.0000000000001
+            0.250_000_000_000_034_97,
+            epsilon = 0.000_000_000_000_1
         ));
         assert_eq!(mock.get_invocation_count(), 1);
         assert_eq!(mock.get_last_arg(), track);
@@ -1372,10 +1371,7 @@ fn query_track_volume() -> TestStep {
         // Then
         assert_eq!(volume.get_reaper_value(), ReaperVolumeValue::ZERO_DB);
         assert_eq!(volume.get_db(), Db::ZERO_DB);
-        assert!(abs_diff_eq!(
-            volume.get_normalized_value(),
-            0.71599999999999997
-        ));
+        assert!(abs_diff_eq!(volume.get_normalized_value(), 0.716));
         Ok(())
     })
 }
@@ -1708,7 +1704,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
             );
             assert_ne!(reaper.get_current_project(), current_project_before);
             assert_eq!(reaper.get_current_project(), new_project);
-            assert_ne!(reaper.get_projects().nth(0), Some(new_project));
+            assert_ne!(reaper.get_projects().next(), Some(new_project));
             //
             // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() ==
             // newProject);
@@ -1786,7 +1782,7 @@ fn create_fx_steps(
         query_fx_floating_window(get_fx_chain.clone()),
         show_fx_in_floating_window(get_fx_chain.clone()),
         add_track_js_fx_by_original_name(get_fx_chain.clone()),
-        query_track_js_fx_by_index(get_fx_chain.clone()),
+        query_track_js_fx_by_index(get_fx_chain),
     ];
     steps.into_iter().map(move |s| TestStep {
         name: format!("{} - {}", prefix, s.name).into(),
@@ -1810,7 +1806,11 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(fx.get_index(), 2);
             assert_eq!(
                 fx.get_query_index().to_raw(),
-                if fx_chain.is_input_fx() { 0x1000002 } else { 2 }
+                if fx_chain.is_input_fx() {
+                    0x0100_0002
+                } else {
+                    2
+                }
             );
             assert!(fx.get_guid().is_some());
             assert_eq!(fx.get_name().as_c_str(), c_str!("JS: phaser"));
@@ -1898,7 +1898,7 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                 }
             } else {
                 assert_eq!(mock.get_invocation_count(), 1);
-                assert_eq!(mock.get_last_arg(), fx.clone());
+                assert_eq!(mock.get_last_arg(), fx);
             }
             Ok(())
         },
@@ -2290,11 +2290,11 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(p.get_formatted_value().as_c_str(), c_str!("-4.44"));
             assert!(abs_diff_eq!(
                 p.get_normalized_value().get(),
-                0.30000001192092896
+                0.300_000_011_920_928_96
             ));
             assert!(abs_diff_eq!(
                 p.get_reaper_value().get(),
-                0.30000001192092896
+                0.300_000_011_920_928_96
             ));
             assert_eq!(
                 p.format_normalized_value(p.get_normalized_value())
@@ -2375,6 +2375,7 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
+    #[allow(clippy::cognitive_complexity)]
     step(AllVersions, "Check track fx with 2 fx", move |reaper, _| {
         // Given
         let fx_chain = get_fx_chain()?;
@@ -2393,11 +2394,19 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(fx_2.get_index(), 1);
         assert_eq!(
             fx_1.get_query_index().to_raw(),
-            if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
+            if fx_chain.is_input_fx() {
+                0x0100_0000
+            } else {
+                0
+            }
         );
         assert_eq!(
             fx_2.get_query_index().to_raw(),
-            if fx_chain.is_input_fx() { 0x1000001 } else { 1 }
+            if fx_chain.is_input_fx() {
+                0x0100_0001
+            } else {
+                1
+            }
         );
         assert!(fx_1.get_guid().is_some());
         assert!(fx_2.get_guid().is_some());
@@ -2458,22 +2467,38 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         assert!(!fx_1.get_parameter_by_index(17).is_available());
         assert!(
             track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000000 } else { 0 })
+                .get_fx_by_query_index(if fx_chain.is_input_fx() {
+                    0x0100_0000
+                } else {
+                    0
+                })
                 .is_some()
         );
         assert!(
             track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0x1000001 } else { 1 })
+                .get_fx_by_query_index(if fx_chain.is_input_fx() {
+                    0x0100_0001
+                } else {
+                    1
+                })
                 .is_some()
         );
         assert!(
             !track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 0 } else { 0x1000000 })
+                .get_fx_by_query_index(if fx_chain.is_input_fx() {
+                    0
+                } else {
+                    0x0100_0000
+                })
                 .is_some()
         );
         assert!(
             !track
-                .get_fx_by_query_index(if fx_chain.is_input_fx() { 1 } else { 0x1000001 })
+                .get_fx_by_query_index(if fx_chain.is_input_fx() {
+                    1
+                } else {
+                    0x0100_0001
+                })
                 .is_some()
         );
         if !fx_chain.is_input_fx() {
@@ -2537,6 +2562,7 @@ fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
+    #[allow(clippy::cognitive_complexity)]
     step(AllVersions, "Check track fx with 1 fx", move |reaper, _| {
         // Given
         let fx_chain = get_fx_chain()?;
@@ -2550,7 +2576,11 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(fx_1.get_index(), 0);
         assert_eq!(
             fx_1.get_query_index().to_raw(),
-            if fx_chain.is_input_fx() { 0x1000000 } else { 0 }
+            if fx_chain.is_input_fx() {
+                0x0100_0000
+            } else {
+                0
+            }
         );
         assert!(fx_1.get_guid().is_some());
         assert_eq!(
