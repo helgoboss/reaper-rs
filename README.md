@@ -68,13 +68,47 @@ Status:
 - ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes possible but not planned)
 - ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (solid foundation, roughly 100 of 800 functions implemented)
 
-Example:
+#### Examples
 
+Basics: 
 ```rust,ignore
 let functions = reaper.functions();
 functions.show_console_msg("Hello world from reaper-rs medium-level API!");
 let track = functions.get_track(CurrentProject, 0).ok_or("no tracks")?;
 unsafe { functions.delete_track(track); }
+```
+
+Control surface: 
+```rust,ignore
+#[derive(Debug)]
+struct MyControlSurface;
+
+impl MediumReaperControlSurface for MyControlSurface {
+    fn set_track_list_change(&self) {
+        println!("Tracks changed");
+    }
+}
+
+reaper.plugin_register_add_csurf_inst(MyControlSurface);
+```
+
+Audio hook:
+
+```rust,ignore
+struct MyOnAudioBuffer {
+    counter: u64
+}
+
+impl MediumOnAudioBuffer for MyOnAudioBuffer {
+    fn call(&mut self, args: OnAudioBufferArgs) {
+        if self.counter % 100 == 0 {
+            println!("Audio hook callback counter: {}\n", self.counter);
+        }
+        self.counter += 1;
+    }
+}
+
+reaper.audio_reg_hardware_hook_add(MyOnAudioBuffer { counter: 0 });
 ```
 
 ### 3. High-level API
