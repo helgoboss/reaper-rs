@@ -34,8 +34,12 @@ fn install_plugin(target_dir_path: &Path, reaper_home_path: &Path) -> Result<()>
         .join("UserPlugins")
         .join("reaper_test_extension_plugin.so");
     fs::create_dir_all(target_path.parent().ok_or("no parent")?)?;
-    Command::new("ls -R")
+    Command::new("ls")
         .current_dir(target_dir_path)
+        .spawn()?
+        .wait()?;
+    Command::new("ls")
+        .current_dir(source_path.parent().unwrap())
         .spawn()?
         .wait()?;
     println!("Copying plug-in to {:?}...", &target_path);
@@ -99,7 +103,7 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     fs::OpenOptions::new()
         .create(true)
         .write(true)
-        .open(reaper_home_path.join("reaper.ini"));
+        .open(reaper_home_path.join("reaper.ini"))?;
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
