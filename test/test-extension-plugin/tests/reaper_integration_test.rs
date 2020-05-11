@@ -34,14 +34,6 @@ fn install_plugin(target_dir_path: &Path, reaper_home_path: &Path) -> Result<()>
         .join("UserPlugins")
         .join("reaper_test_extension_plugin.so");
     fs::create_dir_all(target_path.parent().ok_or("no parent")?)?;
-    Command::new("ls")
-        .current_dir(target_dir_path)
-        .spawn()?
-        .wait()?;
-    Command::new("ls")
-        .current_dir(source_path.parent().unwrap())
-        .spawn()?
-        .wait()?;
     println!("Copying plug-in to {:?}...", &target_path);
     fs::copy(&source_path, &target_path)?;
     println!(
