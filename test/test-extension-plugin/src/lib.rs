@@ -7,20 +7,22 @@ use std::process;
 
 #[reaper_extension_plugin(email_address = "info@helgoboss.org")]
 fn main() -> Result<(), Box<dyn Error>> {
+    println!("From REAPER: Launching reaper-rs reaper-test-extension-plugin...");
     let reaper = Reaper::get();
     reaper.activate();
     reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
     if std::env::var("RUN_REAPER_RS_INTEGRATION_TEST").is_ok() {
+        println!("From REAPER: Entering reaper-rs integration test...");
         reaper_test::execute_integration_test(|result| {
             match result {
                 Ok(_) => {
-                    println!("reaper-rs integration test executed successfully");
+                    println!("From REAPER: reaper-rs integration test executed successfully");
                     process::exit(0)
                 }
                 Err(reason) => {
                     // We use a particular exit code to distinguish test failure from other possible
                     // exit paths.
-                    eprintln!("reaper-rs integration test failed: {}", reason);
+                    eprintln!("From REAPER: reaper-rs integration test failed: {}", reason);
                     process::exit(172)
                 }
             }

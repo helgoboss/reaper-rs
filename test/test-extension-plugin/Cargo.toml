@@ -6,6 +6,8 @@ edition = "2018"
 publish = false
 
 [features]
+default = ["run-reaper-integration-test"]
+
 # Linux only: When testing with this feature enabled, REAPER will be fired up (a dedicated downloaded instance)
 # executing the reaper-rs integration tests. Even works on headless systems.
 run-reaper-integration-test = []
