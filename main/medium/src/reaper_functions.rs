@@ -20,7 +20,6 @@ use crate::{
 };
 
 use helgoboss_midi::ShortMessage;
-use reaper_low;
 use reaper_low::raw::GUID;
 
 use std::fmt::Debug;
@@ -193,7 +192,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
                     self.low.EnumProjects(idx, buffer, max_size)
                 });
             let project = NonNull::new(ptr)?;
-            if owned_c_string.to_bytes().len() == 0 {
+            if owned_c_string.to_bytes().is_empty() {
                 return Some(EnumProjectsResult {
                     project,
                     file_path: None,
@@ -779,7 +778,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
                 self.low
                     .GetMIDIInputName(device_id.to_raw(), buffer, max_size)
             });
-            if name.to_bytes().len() == 0 {
+            if name.to_bytes().is_empty() {
                 return GetMidiDevNameResult {
                     is_present,
                     name: None,
@@ -818,7 +817,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
                 self.low
                     .GetMIDIOutputName(device_id.to_raw(), buffer, max_size)
             });
-            if name.to_bytes().len() == 0 {
+            if name.to_bytes().is_empty() {
                 return GetMidiDevNameResult {
                     is_present,
                     name: None,
@@ -1155,7 +1154,6 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
             )
         });
         if !successful {
-            "FX or FX parameter not found or Cockos extensions not supported";
             return Err(ReaperFunctionError::new(
                 "couldn't format FX parameter value (FX maybe doesn't support Cockos extensions or FX or parameter doesn't exist)",
             ));
@@ -1420,7 +1418,6 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
             mid_value: mid_val.assume_init(),
             max_value: max_val.assume_init(),
         }
-        .into()
     }
 
     /// Starts a new undo block.
@@ -1833,9 +1830,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         let ptr = self
             .low
             .TrackFX_GetFXGUID(track.as_ptr(), fx_location.to_raw());
-        deref(ptr).ok_or(ReaperFunctionError::new(
-            "couldn't get FX GUID (probably FX doesn't exist)",
-        ))
+        deref(ptr).ok_or_else(|| {
+            ReaperFunctionError::new("couldn't get FX GUID (probably FX doesn't exist)")
+        })
     }
 
     /// Returns the current value of the given track FX in REAPER-normalized form.
@@ -2414,9 +2411,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
             TrackSendAttributeKey::DestTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
-        NonNull::new(ptr).ok_or(ReaperFunctionError::new(
-            "couldn't get destination track (maybe send doesn't exist)",
-        ))
+        NonNull::new(ptr).ok_or_else(|| {
+            ReaperFunctionError::new("couldn't get destination track (maybe send doesn't exist)")
+        })
     }
 
     /// Returns the RPPXML state of the given track.
@@ -2552,6 +2549,10 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Shows or hides an FX user interface.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
     pub unsafe fn track_fx_show(&self, track: MediaTrack, instruction: FxShowInstruction) {
         self.low.TrackFX_Show(
             track.as_ptr(),
@@ -2667,7 +2668,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
             .kbd_getTextFromCmd(command_id.get() as _, section.to_raw());
         create_passing_c_str(ptr)
             // Removed action returns empty string for some reason. We want None in this case!
-            .filter(|s| s.to_bytes().len() > 0)
+            .filter(|s| !s.to_bytes().is_empty())
             .map(use_action_name)
     }
 
@@ -2696,7 +2697,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         if result == -1 {
             return None;
         }
-        return Some(result != 0);
+        Some(result != 0)
     }
 
     /// Grants temporary access to the name of the command registered under the given command ID.
@@ -2900,7 +2901,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
                         max_size,
                     )
                 });
-            if name.to_bytes().len() == 0 {
+            if name.to_bytes().is_empty() {
                 return TrackFxGetPresetResult {
                     state_matches_preset,
                     name: None,

@@ -21,8 +21,8 @@ use reaper_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Sel
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperPointer, RecordArmMode, RecordingInput,
-    TrackAttributeKey, TrackRef, TrackSendCategory, ValueChange,
+    InputMonitoringMode, MediaTrack, ReaProject, RecordArmMode, RecordingInput, TrackRef,
+    TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;

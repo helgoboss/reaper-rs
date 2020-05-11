@@ -80,6 +80,9 @@ pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
     });
 }
 
+// We really need a box here in order to obtain a thin pointer. We must not consume it, that's why
+// we take it as reference.
+#[allow(clippy::borrowed_box)]
 fn encode_user_data<U>(data: &Box<U>) -> *mut c_void {
     data.as_ref() as *const _ as *mut c_void
 }

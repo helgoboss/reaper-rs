@@ -56,7 +56,7 @@ impl<'a> MidiEventList<'a> {
     /// Returns an iterator exposing the contained MIDI events.
     ///
     /// `bpos` is the iterator start position.
-    pub fn enum_items(&self, bpos: u32) -> impl Iterator<Item = MidiEvent<'a>> {
+    pub fn enum_items(self, bpos: u32) -> impl Iterator<Item = MidiEvent<'a>> {
         EnumItems {
             raw_list: self.0,
             bpos: bpos as i32,
@@ -83,12 +83,12 @@ impl<'a> MidiEvent<'a> {
     /// Returns the frame offset.
     ///
     /// Unit: 1/1024000 of a second, *not* sample frames!
-    pub fn frame_offset(&self) -> u32 {
+    pub fn frame_offset(self) -> u32 {
         self.0.frame_offset as u32
     }
 
     /// Returns the actual message.
-    pub fn message(&self) -> MidiMessage<'a> {
+    pub fn message(self) -> MidiMessage<'a> {
         MidiMessage::new(self.0)
     }
 }

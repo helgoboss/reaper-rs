@@ -119,6 +119,7 @@ impl ReaperBuilder {
 pub struct RealTimeReaper {
     functions: ReaperFunctions<RealTimeAudioThreadScope>,
     receiver: mpsc::Receiver<AudioThreadTaskOp>,
+    #[allow(dead_code)]
     sender_to_main_thread: mpsc::Sender<MainThreadTask>,
     subjects: RealTimeSubjects,
 }

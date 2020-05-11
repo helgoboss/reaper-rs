@@ -173,6 +173,11 @@ pub unsafe fn add_cpp_control_surface(
 ///
 /// Intended to be used on pointers returned from [`add_cpp_control_surface()`].
 ///
+/// # Safety
+///
+/// REAPER can crash if you pass an invalid pointer because C++ will attempt to free the wrong
+/// location in memory.
+///
 /// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
 pub unsafe fn remove_cpp_control_surface(surface: NonNull<raw::IReaperControlSurface>) {
     crate::bindings::root::reaper_control_surface::remove_control_surface(surface.as_ptr());

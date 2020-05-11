@@ -3,18 +3,16 @@ use crate::guid::Guid;
 use crate::{get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track};
 use c_str_macro::c_str;
 
-use reaper_medium::TrackAttributeKey::{
-    Mute, Pan, RecArm, RecInput, RecMon, Selected, Solo, TrackNumber, Vol,
-};
+use reaper_medium::TrackAttributeKey::{Mute, Pan, RecArm, RecInput, Selected, Solo, Vol};
 use reaper_medium::{
     AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
-    MediaTrack, MediumReaperControlSurface, QualifiedFxLocation, ReaProject,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperVersion, ReaperVolumeValue,
-    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
-    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
-    VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    MediaTrack, MediumReaperControlSurface, ReaProject, ReaperNormalizedFxParamValue,
+    ReaperPanValue, ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs, SetSurfacePanArgs,
+    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
+    SetTrackTitleArgs, TrackFxChainType, TrackRef, VersionDependentFxLocation,
+    VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
 

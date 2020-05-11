@@ -70,9 +70,9 @@ impl RecordingInput {
     }
 
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use RecordingInput::*;
-        let result = match *self {
+        let result = match self {
             Mono(i) => i,
             MonoReaRoute(i) => 512 + i,
             Stereo(i) => 1024 + i,

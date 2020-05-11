@@ -68,8 +68,8 @@ fn create_vst_plugin_function_provider(host_callback: HostCallbackProc) -> Funct
         #[allow(overflowing_literals)]
         host_callback(
             null_mut(),
-            0xdeadbeef,
-            0xdeadf00d,
+            0xdead_beef,
+            0xdead_f00d,
             0,
             name.as_ptr() as *mut c_void,
             0.0,

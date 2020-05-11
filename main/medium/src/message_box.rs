@@ -13,7 +13,7 @@ pub enum MessageBoxType {
 
 impl MessageBoxType {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use MessageBoxType::*;
         match self {
             Okay => 0,

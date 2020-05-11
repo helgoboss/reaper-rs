@@ -148,7 +148,7 @@ pub enum RecordArmMode {
 
 impl RecordArmMode {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use RecordArmMode::*;
         match self {
             Unarmed => 0,
@@ -217,7 +217,7 @@ pub enum TrackSendCategory {
 
 impl TrackSendCategory {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use TrackSendCategory::*;
         match self {
             Receive => -1,
@@ -254,7 +254,7 @@ pub enum StuffMidiMessageTarget {
 
 impl StuffMidiMessageTarget {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use StuffMidiMessageTarget::*;
         match self {
             VirtualMidiKeyboardQueue => 0,
@@ -285,8 +285,8 @@ impl TrackFxLocation {
         let v: u32 = v
             .try_into()
             .map_err(|_| TryFromRawError::new("FX index shouldn't be negative", v))?;
-        let result = if v >= 0x1000000 {
-            InputFxChain(v - 0x1000000)
+        let result = if v >= 0x0100_0000 {
+            InputFxChain(v - 0x0100_0000)
         } else {
             NormalFxChain(v)
         };
@@ -294,10 +294,10 @@ impl TrackFxLocation {
     }
 
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use TrackFxLocation::*;
-        let positive = match *self {
-            InputFxChain(idx) => 0x1000000 + idx,
+        let positive = match self {
+            InputFxChain(idx) => 0x0100_0000 + idx,
             NormalFxChain(idx) => idx,
         };
         positive as i32
@@ -317,7 +317,7 @@ pub(crate) enum FxAddByNameBehavior {
 
 impl FxAddByNameBehavior {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use FxAddByNameBehavior::*;
         match self {
             AlwaysAdd => -1,
@@ -551,7 +551,7 @@ impl InputMonitoringMode {
     }
 
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use InputMonitoringMode::*;
         match self {
             Off => 0,
@@ -573,11 +573,11 @@ pub enum ProjectRef {
 
 impl ProjectRef {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use ProjectRef::*;
-        match *self {
+        match self {
             Current => -1,
-            CurrentlyRendering => 0x40000000,
+            CurrentlyRendering => 0x4000_0000,
             Tab(i) => i as i32,
         }
     }
@@ -596,9 +596,9 @@ pub enum FxPresetRef {
 
 impl FxPresetRef {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use FxPresetRef::*;
-        match *self {
+        match self {
             FactoryPreset => -2,
             DefaultUserPreset => -1,
             Preset(idx) => idx as i32,
@@ -617,7 +617,7 @@ pub enum ProjectContext {
 
 impl ProjectContext {
     /// Converts this value to a raw pointer as expected by the low-level API.
-    pub fn to_raw(&self) -> *mut raw::ReaProject {
+    pub fn to_raw(self) -> *mut raw::ReaProject {
         use ProjectContext::*;
         match self {
             Proj(p) => p.as_ptr(),
@@ -637,7 +637,7 @@ pub enum NotificationBehavior {
 
 impl NotificationBehavior {
     /// Converts this value to a raw pointer as expected by the low-level API.
-    pub fn to_raw(&self) -> *mut raw::IReaperControlSurface {
+    pub fn to_raw(self) -> *mut raw::IReaperControlSurface {
         use NotificationBehavior::*;
         match self {
             NotifyAllExcept(s) => s.as_ptr(),
@@ -657,7 +657,7 @@ pub enum SendTarget {
 
 impl SendTarget {
     /// Converts this value to a raw pointer as expected by the low-level API.
-    pub fn to_raw(&self) -> *mut raw::MediaTrack {
+    pub fn to_raw(self) -> *mut raw::MediaTrack {
         use SendTarget::*;
         match self {
             HardwareOutput => null_mut(),
@@ -679,7 +679,7 @@ pub enum SectionContext<'a> {
 
 impl<'a> SectionContext<'a> {
     /// Converts this value to a raw pointer as expected by the low-level API.
-    pub fn to_raw(&self) -> *mut raw::KbdSectionInfo {
+    pub fn to_raw(self) -> *mut raw::KbdSectionInfo {
         use SectionContext::*;
         match self {
             MainSection => null_mut(),
@@ -702,7 +702,7 @@ pub enum WindowContext {
 
 impl WindowContext {
     /// Converts this value to a raw pointer as expected by the low-level API.
-    pub fn to_raw(&self) -> raw::HWND {
+    pub fn to_raw(self) -> raw::HWND {
         use WindowContext::*;
         match self {
             Win(h) => h.as_ptr(),

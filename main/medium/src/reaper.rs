@@ -16,7 +16,6 @@ use crate::{
     MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope, ReaperFunctionError,
     ReaperFunctionResult, ReaperFunctions, ReaperStringArg, RegistrationObject,
 };
-use reaper_low;
 use reaper_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
 
@@ -96,7 +95,7 @@ impl Reaper {
     /// Creates a new container of REAPER functions with only those unlocked that can be safely
     /// executed in the real-time audio thread.
     pub fn create_real_time_functions(&self) -> ReaperFunctions<RealTimeAudioThreadScope> {
-        ReaperFunctions::new(self.functions.low().clone())
+        ReaperFunctions::new(*self.functions.low())
     }
 
     /// This is the primary function for plug-ins to register things.

@@ -593,7 +593,7 @@ impl<'a> TrackSendAttributeKey<'a> {
                 concat_c_strs(c_str!("P_ENV:<"), env_chunk_name.into_raw().as_ref()).into()
             }
             Ext(key) => concat_c_strs(c_str!("P_EXT:"), key.as_ref()).into(),
-            Custom(key) => key.into(),
+            Custom(key) => key,
         }
     }
 }

@@ -1,3 +1,4 @@
+#![allow(renamed_and_removed_lints)]
 use enumflags2::BitFlags;
 use reaper_low::raw;
 
@@ -17,7 +18,7 @@ pub enum UndoScope {
 
 impl UndoScope {
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         use UndoScope::*;
         match self {
             All => raw::UNDO_STATE_ALL as i32,

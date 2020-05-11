@@ -5,7 +5,6 @@ use crate::{
     TrackFxChainType, TrackFxLocation, TryFromRawError,
 };
 
-use reaper_low;
 use reaper_low::raw;
 use std::borrow::Cow;
 

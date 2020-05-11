@@ -70,18 +70,15 @@ mod codegen {
     /// Generates the low-level `reaper.rs` file from the previously generated `bindings.rs`
     fn generate_reaper() {
         use proc_macro2::Span;
-        use quote::ToTokens;
-        use std::env;
         use std::fs::File;
         use std::io::Read;
-        use std::process;
         use syn::punctuated::Punctuated;
-        use syn::token::{And, Brace, Colon, Colon2, Comma, Fn, Paren, Pub, SelfValue, Unsafe};
+        use syn::token::{And, Colon, Fn, Paren, Pub, SelfValue, Unsafe};
         use syn::{
-            AngleBracketedGenericArguments, Block, Expr, ExprCall, ExprPath, FnArg, ForeignItem,
-            ForeignItemStatic, GenericArgument, Ident, ImplItem, ImplItemMethod, Item,
-            ItemForeignMod, ItemMod, Pat, PatIdent, PatType, Path, PathArguments, PathSegment,
-            Receiver, ReturnType, Signature, Type, TypeBareFn, VisPublic, Visibility,
+            Block, Expr, ExprCall, ExprPath, FnArg, ForeignItem, ForeignItemStatic,
+            GenericArgument, Ident, ImplItem, ImplItemMethod, Item, ItemForeignMod, ItemMod, Pat,
+            PatIdent, PatType, Path, PathArguments, PathSegment, Receiver, Signature, Type,
+            TypeBareFn, VisPublic, Visibility,
         };
 
         generate();
@@ -200,8 +197,24 @@ mod codegen {
 
         /// Generates a method definition in the body of `impl Reaper`
         fn generate_reaper_method(ptr: ReaperFnPtr) -> ImplItem {
+            let has_pointer_args = ptr.has_pointer_args();
+            let attrs = if has_pointer_args {
+                vec![
+                    syn::parse_quote! {
+                        /// # Safety
+                    },
+                    syn::parse_quote! {
+                        ///
+                    },
+                    syn::parse_quote! {
+                        /// REAPER can crash if you pass an invalid pointer
+                    },
+                ]
+            } else {
+                vec![]
+            };
             ImplItem::Method(ImplItemMethod {
-                attrs: vec![],
+                attrs,
                 vis: Visibility::Public(VisPublic {
                     pub_token: Pub {
                         span: Span::call_site(),
@@ -211,7 +224,7 @@ mod codegen {
                 sig: Signature {
                     constness: None,
                     asyncness: None,
-                    unsafety: if ptr.has_pointer_args() {
+                    unsafety: if has_pointer_args {
                         Some(Unsafe {
                             span: Span::call_site(),
                         })

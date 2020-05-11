@@ -46,12 +46,12 @@ impl CommandId {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> u32 {
+    pub const fn get(self) -> u32 {
         self.0
     }
 
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         self.0 as i32
     }
 }
@@ -71,12 +71,12 @@ impl SectionId {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> u32 {
+    pub const fn get(self) -> u32 {
         self.0
     }
 
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         self.0 as i32
     }
 }
@@ -99,12 +99,12 @@ impl MidiInputDeviceId {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> u8 {
+    pub const fn get(self) -> u8 {
         self.0
     }
 
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         self.0 as i32
     }
 }
@@ -122,12 +122,12 @@ impl MidiOutputDeviceId {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> u8 {
+    pub const fn get(self) -> u8 {
         self.0
     }
 
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(&self) -> i32 {
+    pub fn to_raw(self) -> i32 {
         self.0 as i32
     }
 }
@@ -155,7 +155,7 @@ impl ReaperNormalizedFxParamValue {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
@@ -183,7 +183,7 @@ impl Bpm {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
@@ -211,7 +211,7 @@ impl PlaybackSpeedFactor {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
@@ -241,7 +241,7 @@ impl Hz {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
@@ -290,7 +290,7 @@ impl Db {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
@@ -319,7 +319,7 @@ impl VolumeSliderValue {
     pub const MINUS_INF_DB: VolumeSliderValue = VolumeSliderValue(0.0);
 
     /// The "soft minimum" volume (2.5138729793972 = -150.0 dB).
-    pub const MINUS_150_DB: VolumeSliderValue = VolumeSliderValue(2.5138729793972);
+    pub const MINUS_150_DB: VolumeSliderValue = VolumeSliderValue(2.513_872_979_397_2);
 
     /// The "unaltered" volume (716.0 = 0.0 dB).
     pub const ZERO_DB: VolumeSliderValue = VolumeSliderValue(716.0);
@@ -339,7 +339,7 @@ impl VolumeSliderValue {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
@@ -372,13 +372,13 @@ impl ReaperVolumeValue {
     /// When setting a value, use [`MIN`] (0.0) instead because this is just an approximation.
     ///
     /// [`MIN`]: #associatedconstant.MIN
-    pub const MINUS_150_DB: ReaperVolumeValue = ReaperVolumeValue(3.1622776601684e-008);
+    pub const MINUS_150_DB: ReaperVolumeValue = ReaperVolumeValue(3.162_277_660_168_4e-_008);
 
     /// The "unaltered" volume (1.0 = 0.0 dB).
     pub const ZERO_DB: ReaperVolumeValue = ReaperVolumeValue(1.0);
 
     /// The "soft maximum" volume (3.981071705535 = 12.0 dB).
-    pub const TWELVE_DB: ReaperVolumeValue = ReaperVolumeValue(3.981071705535);
+    pub const TWELVE_DB: ReaperVolumeValue = ReaperVolumeValue(3.981_071_705_535);
 
     /// Creates a REAPER volume value.
     ///
@@ -392,7 +392,7 @@ impl ReaperVolumeValue {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
@@ -441,7 +441,7 @@ impl ReaperPanValue {
     }
 
     /// Returns the wrapped value.
-    pub const fn get(&self) -> f64 {
+    pub const fn get(self) -> f64 {
         self.0
     }
 }
