@@ -36,11 +36,6 @@ fn install_plugin(target_dir_path: &Path, reaper_home_path: &Path) -> Result<()>
     fs::create_dir_all(target_path.parent().ok_or("no parent")?)?;
     println!("Copying plug-in to {:?}...", &target_path);
     fs::copy(&source_path, &target_path)?;
-    println!(
-        "Plug-in copied to {:?}: {:#?}",
-        &target_path,
-        fs::metadata(&target_path)
-    );
     Ok(())
 }
 
