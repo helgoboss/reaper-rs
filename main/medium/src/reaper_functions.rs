@@ -121,7 +121,7 @@ impl AudioThreadOnly for RealTimeAudioThreadScope {}
 /// [`Reaper::functions()`]: struct.Reaper.html#method.functions
 /// [`Reaper::create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
 /// [`low()`]: #method.low
-/// [low-level `Reaper`]: /reaper_low/struct.Reaper.html
+/// [low-level `Reaper`]: https://docs.rs/reaper-low
 /// [`MainThreadOnly`]: trait.MainThreadOnly.html
 /// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html
 /// [`ReaperFunctions`]: struct.ReaperFunctions.html

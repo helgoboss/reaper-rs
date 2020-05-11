@@ -364,7 +364,7 @@ impl ReaperVolumeValue {
     /// It's reasonable to assume that this isn't actually a valid value. However, REAPER doesn't
     /// prevent extensions from setting it, so you might run into it.
     ///
-    /// [`f64::NAN`]: /std/primitive.f64.html#associatedconstant.NAN
+    /// [`f64::NAN`]: https://doc.rust-lang.org/std/f64/constant.NAN.html
     pub const NAN: ReaperVolumeValue = ReaperVolumeValue(f64::NAN);
 
     /// The "soft minimum" volume (3.1622776601684e-008 = -150.0 dB).

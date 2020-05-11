@@ -4,7 +4,7 @@
 //!
 //! It is not recommended to use this API directly because it just exposes the raw REAPER C++
 //! functions, types and constants one to one in Rust. If you want idiomatic Rust, type safety and
-//! convenience, please use the [medium-level] or [high-level] API instead.
+//! convenience, please use the [medium-level] or high-level API instead.
 //!
 //! At times it can still be useful to access the low-level API, mostly as fallback if the function
 //! that you are looking for has not yet been lifted to the medium-level API. To get started, best
@@ -58,8 +58,7 @@
 //!       function → Rust function)
 //!     - Example: `control_surface.cpp` & `control_surface.rs`
 //!
-//! [medium-level]: /reaper_medium/index.html
-//! [high-level]: /reaper_high/index.html
+//! [medium-level]: https://docs.rs/reaper-medium
 //! [`Reaper`]: struct.Reaper.html
 mod bindings;
 

@@ -67,7 +67,7 @@ pub struct Reaper {
 impl Reaper {
     /// Creates a new instance by getting hold of a [low-level `Reaper`] instance.
     ///
-    /// [low-level `Reaper`]: /reaper_low/struct.Reaper.html
+    /// [low-level `Reaper`]: https://docs.rs/reaper-low
     pub fn new(low: reaper_low::Reaper) -> Reaper {
         Reaper {
             functions: ReaperFunctions::new(low),

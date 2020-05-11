@@ -39,7 +39,7 @@ impl ReaperPluginContext {
     /// It requires the host callback which [vst-rs](https://crates.io/crates/vst) passes to the
     /// plugin's [`new()`] function.
     ///
-    /// [`new()`]: /vst/plugin/trait.Plugin.html#method.new
+    /// [`new()`]: https://docs.rs/vst/0.2.0/vst/plugin/trait.Plugin.html#method.new
     pub fn from_vst_plugin(host: HostCallback) -> Result<ReaperPluginContext, &'static str> {
         let host_callback = host.raw_callback().ok_or("Host callback not available")?;
         let function_provider = create_vst_plugin_function_provider(host_callback);
