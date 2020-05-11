@@ -26,11 +26,9 @@ use crate::{
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
-use reaper_low;
 use reaper_low::raw;
 
 use reaper_low::ReaperPluginContext;
-use reaper_medium;
 
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
@@ -465,9 +463,15 @@ impl Reaper {
             HelperControlSurface::new(sender_to_main_thread.clone(), main_thread_receiver);
         let mut medium = self.medium_mut();
         // Functions
-        medium.plugin_register_add_hook_command::<HighLevelHookCommand>();
-        medium.plugin_register_add_toggle_action::<HighLevelToggleAction>();
-        medium.plugin_register_add_hook_post_command::<HighLevelHookPostCommand>();
+        medium
+            .plugin_register_add_hook_command::<HighLevelHookCommand>()
+            .expect("couldn't register hook command");
+        medium
+            .plugin_register_add_toggle_action::<HighLevelToggleAction>()
+            .expect("couldn't register toggle command");
+        medium
+            .plugin_register_add_hook_post_command::<HighLevelHookPostCommand>()
+            .expect("couldn't register hook post command");
         // Audio hook
         let (sender_to_audio_thread, audio_thread_receiver) = mpsc::channel::<AudioThreadTaskOp>();
         let rt_reaper = RealTimeReaper {
@@ -963,7 +967,7 @@ impl Reaper {
     }
 
     // Doesn't attempt to end a block if we are not in an undo block.
-    pub(super) fn leave_undo_block_internal(&self, project: &Project, label: &CStr) {
+    pub(super) fn leave_undo_block_internal(&self, project: Project, label: &CStr) {
         if !self.undo_block_is_active.get() {
             return;
         }
@@ -1117,7 +1121,7 @@ impl MainThreadTask {
     ) -> MainThreadTask {
         MainThreadTask {
             desired_execution_time,
-            op: op,
+            op,
         }
     }
 }

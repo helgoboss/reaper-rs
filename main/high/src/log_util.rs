@@ -52,7 +52,7 @@ pub fn create_reaper_panic_hook(
 pub fn extract_panic_message(panic_info: &PanicInfo) -> String {
     let payload = panic_info.payload();
     match payload.downcast_ref::<&str>() {
-        Some(p) => p.to_string(),
+        Some(p) => (*p).to_string(),
         None => match payload.downcast_ref::<String>() {
             Some(p) => p.clone(),
             None => String::from("Unknown error"),

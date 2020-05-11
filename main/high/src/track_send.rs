@@ -53,13 +53,11 @@ impl TrackSend {
     pub fn is_available(&self) -> bool {
         if self.is_index_based() {
             self.index_is_in_range()
+        } else if self.is_loaded_and_at_correct_index() {
+            true
         } else {
-            if self.is_loaded_and_at_correct_index() {
-                true
-            } else {
-                // Not yet loaded or at wrong index
-                self.load_by_target_track()
-            }
+            // Not yet loaded or at wrong index
+            self.load_by_target_track()
         }
     }
 

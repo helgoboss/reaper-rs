@@ -380,12 +380,12 @@ pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid>
             .track_fx_get_fx_guid(track.get_raw(), query_index)
     }
     .ok();
-    internal.map(|g| Guid::new(g))
+    internal.map(Guid::new)
 }
 
 pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
-    if query_index >= 0x1000000 {
-        ((query_index - 0x1000000) as u32, true)
+    if query_index >= 0x0100_0000 {
+        ((query_index - 0x0100_0000) as u32, true)
     } else {
         (query_index as u32, false)
     }

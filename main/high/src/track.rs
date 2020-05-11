@@ -70,7 +70,7 @@ impl Track {
         Track {
             media_track: Cell::new(None),
             rea_project: Cell::new(Some(project.get_raw())),
-            guid: guid,
+            guid,
         }
     }
 
@@ -262,6 +262,7 @@ impl Track {
         self.get_auto_arm_chunk_line().is_some()
     }
 
+    #[allow(clippy::float_cmp)]
     pub fn is_armed(&self, support_auto_arm: bool) -> bool {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.is_selected()
@@ -299,6 +300,7 @@ impl Track {
                     .functions()
                     .get_media_track_info_value(self.get_raw(), RecArm)
             };
+            #[allow(clippy::float_cmp)]
             if recarm != 1.0 {
                 unsafe {
                     reaper.medium().functions().csurf_on_rec_arm_change_ex(
@@ -357,6 +359,7 @@ impl Track {
         self.set_chunk(chunk);
     }
 
+    #[allow(clippy::float_cmp)]
     pub fn is_muted(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
         let mute = unsafe {
@@ -478,6 +481,7 @@ impl Track {
         };
     }
 
+    #[allow(clippy::float_cmp)]
     pub fn is_selected(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
         let selected = unsafe {

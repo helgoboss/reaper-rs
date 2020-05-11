@@ -12,11 +12,11 @@ impl MidiInputDevice {
         MidiInputDevice { id }
     }
 
-    pub fn get_id(&self) -> MidiInputDeviceId {
+    pub fn get_id(self) -> MidiInputDeviceId {
         self.id
     }
 
-    pub fn get_name(&self) -> CString {
+    pub fn get_name(self) -> CString {
         Reaper::get()
             .medium()
             .functions()
@@ -27,7 +27,7 @@ impl MidiInputDevice {
 
     // For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if
     // the device ever existed, even if it's disconnected now.
-    pub fn is_available(&self) -> bool {
+    pub fn is_available(self) -> bool {
         let result = Reaper::get()
             .medium()
             .functions()
@@ -36,7 +36,7 @@ impl MidiInputDevice {
     }
 
     // Only returns true if the device is connected (= present)
-    pub fn is_connected(&self) -> bool {
+    pub fn is_connected(self) -> bool {
         // In REAPER 5.94 GetMIDIInputName doesn't accept nullptr as name buffer on OS X
         Reaper::get()
             .medium()

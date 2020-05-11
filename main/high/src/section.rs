@@ -11,18 +11,21 @@ impl Section {
         Section { id }
     }
 
-    pub fn id(&self) -> SectionId {
+    pub fn id(self) -> SectionId {
         self.id
     }
 
-    pub fn with_raw<R>(&self, f: impl FnOnce(&KbdSectionInfo) -> R) -> Option<R> {
+    pub fn with_raw<R>(self, f: impl FnOnce(&KbdSectionInfo) -> R) -> Option<R> {
         Reaper::get()
             .medium()
             .functions()
             .section_from_unique_id(self.id, f)
     }
 
-    pub unsafe fn get_raw(&self) -> KbdSectionInfo {
+    /// # Safety
+    ///
+    /// The lifetime of the returned section is unbounded.
+    pub unsafe fn get_raw(self) -> KbdSectionInfo {
         Reaper::get()
             .medium()
             .functions()
@@ -30,28 +33,30 @@ impl Section {
             .unwrap()
     }
 
-    pub fn get_action_by_command_id(&self, command_id: CommandId) -> Action {
-        Action::new(*self, command_id, None)
+    pub fn get_action_by_command_id(self, command_id: CommandId) -> Action {
+        Action::new(self, command_id, None)
     }
 
-    pub fn get_action_by_index(&self, index: u32) -> Action {
+    pub fn get_action_by_index(self, index: u32) -> Action {
         self.with_raw(|s| {
             assert!(
                 index < s.action_list_cnt(),
                 "No such action index in section"
             );
             let kbd_cmd = s.get_action_by_index(index).unwrap();
-            Action::new(*self, kbd_cmd.cmd(), Some(index))
+            Action::new(self, kbd_cmd.cmd(), Some(index))
         })
         .unwrap()
     }
 
-    pub fn get_action_count(&self) -> u32 {
+    pub fn get_action_count(self) -> u32 {
         self.with_raw(|s| s.action_list_cnt()).unwrap()
     }
 
-    // Unsafe because at the time when the iterator is evaluated, the section could be gone
-    pub unsafe fn get_actions(&self) -> impl Iterator<Item = Action> + '_ {
+    /// # Safety
+    ///
+    /// Unsafe because at the time when the iterator is evaluated, the section could be gone.
+    pub unsafe fn get_actions(self) -> impl Iterator<Item = Action> + 'static {
         let sec = Reaper::get()
             .medium()
             .functions()
@@ -59,7 +64,7 @@ impl Section {
             .unwrap();
         (0..sec.action_list_cnt()).map(move |i| {
             let kbd_cmd = sec.get_action_by_index(i).unwrap();
-            Action::new(*self, kbd_cmd.cmd(), Some(i))
+            Action::new(self, kbd_cmd.cmd(), Some(i))
         })
     }
 }

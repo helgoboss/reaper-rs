@@ -115,6 +115,7 @@ impl FxChain {
                     .medium()
                     .functions()
                     .track_fx_delete(self.track.get_raw(), fx.get_query_index())
+                    .expect("couldn't delete track FX")
             };
         } else {
             let new_chunk = {
@@ -158,7 +159,7 @@ DOCKED 0
             }
         }
         self.track.set_chunk(track_chunk);
-        return self.get_last_fx();
+        self.get_last_fx()
     }
 
     // Returned FX has GUIDs set

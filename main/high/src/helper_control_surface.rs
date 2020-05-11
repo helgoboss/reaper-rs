@@ -24,6 +24,7 @@ use std::ffi::CStr;
 
 use std::panic::RefUnwindSafe;
 
+use std::cmp::Ordering;
 use std::sync::mpsc::{Receiver, Sender};
 
 const BULK_TASK_EXECUTION_COUNT: usize = 100;
@@ -115,7 +116,7 @@ impl HelperControlSurface {
         }
     }
 
-    fn find_track_data_in_normal_state<'a>(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
+    fn find_track_data_in_normal_state(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
         if self.get_state() == State::PropagatingTrackSetChanges {
             return None;
         }
@@ -132,7 +133,7 @@ impl HelperControlSurface {
         }))
     }
 
-    fn find_track_data<'a>(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
+    fn find_track_data(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
         let track_data_map = self.find_track_data_map()?;
         if !track_data_map.contains_key(&track) {
             return None;
@@ -189,12 +190,11 @@ impl HelperControlSurface {
         let track_datas = project_datas.entry(project.get_raw()).or_default();
         let old_track_count = track_datas.len() as u32;
         let new_track_count = project.get_track_count();
-        if new_track_count < old_track_count {
-            self.remove_invalid_media_tracks(project, track_datas);
-        } else if new_track_count > old_track_count {
-            self.add_missing_media_tracks(project, track_datas);
-        } else {
-            self.update_media_track_positions(project, track_datas);
+        use Ordering::*;
+        match new_track_count.cmp(&old_track_count) {
+            Less => self.remove_invalid_media_tracks(project, track_datas),
+            Equal => self.update_media_track_positions(project, track_datas),
+            Greater => self.add_missing_media_tracks(project, track_datas),
         }
     }
 
@@ -264,11 +264,7 @@ impl HelperControlSurface {
             && !added_or_removed_input_fx
             && !added_or_removed_output_fx
         {
-            Reaper::get()
-                .subjects
-                .fx_reordered
-                .borrow_mut()
-                .next(track.into());
+            Reaper::get().subjects.fx_reordered.borrow_mut().next(track);
         }
     }
 
@@ -287,25 +283,30 @@ impl HelperControlSurface {
             track.get_normal_fx_chain()
         };
         let new_fx_count = fx_chain.get_fx_count();
-        if new_fx_count < old_fx_count {
-            self.remove_invalid_fx(
-                track,
-                old_fx_guids,
-                is_input_fx,
-                notify_listeners_about_changes,
-            );
-            true
-        } else if new_fx_count > old_fx_count {
-            self.add_missing_fx(
-                track,
-                old_fx_guids,
-                is_input_fx,
-                notify_listeners_about_changes,
-            );
-            true
-        } else {
-            // Reordering (or nothing)
-            false
+        use Ordering::*;
+        match new_fx_count.cmp(&old_fx_count) {
+            Less => {
+                self.remove_invalid_fx(
+                    track,
+                    old_fx_guids,
+                    is_input_fx,
+                    notify_listeners_about_changes,
+                );
+                true
+            }
+            Equal => {
+                // Reordering (or nothing)
+                false
+            }
+            Greater => {
+                self.add_missing_fx(
+                    track,
+                    old_fx_guids,
+                    is_input_fx,
+                    notify_listeners_about_changes,
+                );
+                true
+            }
         }
     }
 
@@ -332,7 +333,7 @@ impl HelperControlSurface {
                         .subjects
                         .fx_removed
                         .borrow_mut()
-                        .next(removed_fx.into());
+                        .next(removed_fx);
                 }
                 false
             }
@@ -354,7 +355,7 @@ impl HelperControlSurface {
         for fx in fx_chain.get_fxs() {
             let was_inserted = fx_guids.insert(fx.get_guid().expect("No FX GUID set"));
             if was_inserted && notify_listeners_about_changes {
-                Reaper::get().subjects.fx_added.borrow_mut().next(fx.into());
+                Reaper::get().subjects.fx_added.borrow_mut().next(fx);
             }
         }
     }
@@ -385,11 +386,7 @@ impl HelperControlSurface {
                     .borrow_mut()
                     .remove(media_track);
                 let track = project.get_track_by_guid(&data.guid);
-                reaper
-                    .subjects
-                    .track_removed
-                    .borrow_mut()
-                    .next(track.into());
+                reaper.subjects.track_removed.borrow_mut().next(track);
                 false
             }
         });
@@ -557,7 +554,9 @@ impl MediumReaperControlSurface for HelperControlSurface {
                 None => (task.op)(),
                 Some(t) => {
                     if std::time::SystemTime::now() < t {
-                        self.task_sender.send(task);
+                        self.task_sender
+                            .send(task)
+                            .expect("couldn't reschedule main thread task");
                     } else {
                         (task.op)()
                     }

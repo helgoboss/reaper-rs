@@ -56,7 +56,7 @@ impl convert::TryFrom<&CStr> for Guid {
             .medium()
             .functions()
             .string_to_guid(value)
-            .map(|g| Guid::new(g))
+            .map(Guid::new)
             .map_err(|_| "Invalid GUID")
     }
 }

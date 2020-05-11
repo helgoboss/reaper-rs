@@ -209,7 +209,7 @@ impl Action {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
             let discrete_value =
-                unsafe { U7::new_unchecked((normalized_value * 127 as f64).round() as u8) };
+                unsafe { U7::new_unchecked((normalized_value * 127.0).round() as u8) };
             unsafe {
                 reaper.medium().functions().kbd_on_main_action_ex(
                     action_command_id,
@@ -255,7 +255,7 @@ impl Action {
         true
     }
 
-    fn fix_command_name<'a>(command_name: &'a CStr) -> Cow<'a, CStr> {
+    fn fix_command_name(command_name: &CStr) -> Cow<CStr> {
         let bytes = command_name.to_bytes();
         if !bytes.len() == 0 && bytes[0] == b'_' {
             // Command already contains underscore. Great.
@@ -267,7 +267,7 @@ impl Action {
         // Doesn't contain underscore but should contain one because it's a custom action or an
         // explicitly named command.
         let with_underscore = CString::new([c_str!("_").to_bytes(), bytes].concat()).unwrap();
-        return Cow::from(with_underscore);
+        Cow::from(with_underscore)
     }
 }
 

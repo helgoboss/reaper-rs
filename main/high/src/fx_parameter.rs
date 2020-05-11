@@ -85,7 +85,7 @@ impl FxParameter {
         };
         use GetParameterStepSizesResult::*;
         match result {
-            None => return FxParameterCharacter::Continuous,
+            None => FxParameterCharacter::Continuous,
             Some(Toggle) => FxParameterCharacter::Toggle,
             Some(Normal { .. }) => FxParameterCharacter::Discrete,
         }

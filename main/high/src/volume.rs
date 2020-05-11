@@ -5,7 +5,7 @@ pub struct Volume {
     normalized_value: f64,
 }
 
-const LN10_OVER_TWENTY: f64 = 0.11512925464970228420089957273422;
+const LN10_OVER_TWENTY: f64 = 0.115_129_254_649_702_28;
 
 impl Volume {
     // TODO Attention! Because of the fact that REAPER allows exceeding the soft maximum of 12 dB,

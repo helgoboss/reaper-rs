@@ -107,7 +107,7 @@ impl Chunk {
         if pos >= content.len() - 1 {
             return false;
         }
-        if content[pos..].chars().next() == Some('\n') {
+        if content[pos..].starts_with('\n') {
             return false;
         }
         content.insert(pos, '\n');
@@ -381,7 +381,7 @@ impl ChunkRegion {
             return None;
         }
         let content = self.get_content();
-        if content[relative_search_start_pos..].starts_with("<") {
+        if content[relative_search_start_pos..].starts_with('<') {
             self.parse_tag_starting_from(relative_search_start_pos)
         } else {
             let tag_opener_with_new_line = "\n<";

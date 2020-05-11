@@ -16,11 +16,11 @@ impl Tempo {
         Tempo(Bpm::new(Bpm::MIN.get() + normalized_value * BPM_SPAN))
     }
 
-    pub fn get_normalized_value(&self) -> f64 {
+    pub fn get_normalized_value(self) -> f64 {
         (self.0.get() - Bpm::MIN.get()) / BPM_SPAN
     }
 
-    pub fn get_bpm(&self) -> Bpm {
+    pub fn get_bpm(self) -> Bpm {
         self.0
     }
 }
