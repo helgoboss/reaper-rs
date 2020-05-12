@@ -39,7 +39,7 @@ fn execute_next_step(
     let step = match steps.pop_front() {
         Some(step) => step,
         None => {
-            log("\n\n**Integration test was successful**");
+            log("\n\n**Integration test was successful**\n\n");
             on_finish(Ok(()));
             return;
         }

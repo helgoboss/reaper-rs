@@ -4,6 +4,9 @@ use c_str_macro::c_str;
 #[doc = r""]
 #[doc = r" In order to use it, you first must obtain an instance of this struct by invoking [`load()`]."]
 #[doc = r""]
+#[doc = r" `Default::default()` will give you an instance which panics on each function call. It's"]
+#[doc = r" intended to be used for example code only."]
+#[doc = r""]
 #[doc = r" # Panics"]
 #[doc = r""]
 #[doc = r" Please note that it's possible that functions are *not available*. This can be the case if"]
@@ -17,1920 +20,2464 @@ use c_str_macro::c_str;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Reaper {
     pub(crate) pointers: ReaperFunctionPointers,
+    pub(crate) plugin_context: Option<ReaperPluginContext>,
 }
 impl Reaper {
     #[doc = r" Loads all available REAPER functions from the given plug-in context."]
     #[doc = r""]
     #[doc = r" Returns a low-level `Reaper` instance which allows you to call these functions."]
-    pub fn load(context: &ReaperPluginContext) -> Reaper {
-        let get_func = &context.function_provider;
+    pub fn load(plugin_context: ReaperPluginContext) -> Reaper {
         let pointers = unsafe {
             ReaperFunctionPointers {
-                __mergesort: std::mem::transmute(get_func(c_str!(stringify!(__mergesort)))),
-                AddCustomizableMenu: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddCustomizableMenu
-                )))),
-                AddExtensionsMainMenu: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddExtensionsMainMenu
-                )))),
-                AddMediaItemToTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddMediaItemToTrack
-                )))),
-                AddProjectMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddProjectMarker
-                )))),
-                AddProjectMarker2: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddProjectMarker2
-                )))),
-                AddRemoveReaScript: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddRemoveReaScript
-                )))),
-                AddTakeToMediaItem: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddTakeToMediaItem
-                )))),
-                AddTempoTimeSigMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    AddTempoTimeSigMarker
-                )))),
-                adjustZoom: std::mem::transmute(get_func(c_str!(stringify!(adjustZoom)))),
-                AnyTrackSolo: std::mem::transmute(get_func(c_str!(stringify!(AnyTrackSolo)))),
-                APIExists: std::mem::transmute(get_func(c_str!(stringify!(APIExists)))),
-                APITest: std::mem::transmute(get_func(c_str!(stringify!(APITest)))),
-                ApplyNudge: std::mem::transmute(get_func(c_str!(stringify!(ApplyNudge)))),
-                ArmCommand: std::mem::transmute(get_func(c_str!(stringify!(ArmCommand)))),
-                Audio_Init: std::mem::transmute(get_func(c_str!(stringify!(Audio_Init)))),
-                Audio_IsPreBuffer: std::mem::transmute(get_func(c_str!(stringify!(
-                    Audio_IsPreBuffer
-                )))),
-                Audio_IsRunning: std::mem::transmute(get_func(c_str!(stringify!(Audio_IsRunning)))),
-                Audio_Quit: std::mem::transmute(get_func(c_str!(stringify!(Audio_Quit)))),
-                Audio_RegHardwareHook: std::mem::transmute(get_func(c_str!(stringify!(
-                    Audio_RegHardwareHook
-                )))),
-                AudioAccessorStateChanged: std::mem::transmute(get_func(c_str!(stringify!(
-                    AudioAccessorStateChanged
-                )))),
-                AudioAccessorUpdate: std::mem::transmute(get_func(c_str!(stringify!(
-                    AudioAccessorUpdate
-                )))),
-                AudioAccessorValidateState: std::mem::transmute(get_func(c_str!(stringify!(
-                    AudioAccessorValidateState
-                )))),
-                BypassFxAllTracks: std::mem::transmute(get_func(c_str!(stringify!(
-                    BypassFxAllTracks
-                )))),
-                CalculatePeaks: std::mem::transmute(get_func(c_str!(stringify!(CalculatePeaks)))),
-                CalculatePeaksFloatSrcPtr: std::mem::transmute(get_func(c_str!(stringify!(
-                    CalculatePeaksFloatSrcPtr
-                )))),
-                ClearAllRecArmed: std::mem::transmute(get_func(c_str!(stringify!(
-                    ClearAllRecArmed
-                )))),
-                ClearConsole: std::mem::transmute(get_func(c_str!(stringify!(ClearConsole)))),
-                ClearPeakCache: std::mem::transmute(get_func(c_str!(stringify!(ClearPeakCache)))),
-                ColorFromNative: std::mem::transmute(get_func(c_str!(stringify!(ColorFromNative)))),
-                ColorToNative: std::mem::transmute(get_func(c_str!(stringify!(ColorToNative)))),
-                CountActionShortcuts: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountActionShortcuts
-                )))),
-                CountAutomationItems: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountAutomationItems
-                )))),
-                CountEnvelopePoints: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountEnvelopePoints
-                )))),
-                CountEnvelopePointsEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountEnvelopePointsEx
-                )))),
-                CountMediaItems: std::mem::transmute(get_func(c_str!(stringify!(CountMediaItems)))),
-                CountProjectMarkers: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountProjectMarkers
-                )))),
-                CountSelectedMediaItems: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountSelectedMediaItems
-                )))),
-                CountSelectedTracks: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountSelectedTracks
-                )))),
-                CountSelectedTracks2: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountSelectedTracks2
-                )))),
-                CountTakeEnvelopes: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountTakeEnvelopes
-                )))),
-                CountTakes: std::mem::transmute(get_func(c_str!(stringify!(CountTakes)))),
-                CountTCPFXParms: std::mem::transmute(get_func(c_str!(stringify!(CountTCPFXParms)))),
-                CountTempoTimeSigMarkers: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountTempoTimeSigMarkers
-                )))),
-                CountTrackEnvelopes: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountTrackEnvelopes
-                )))),
-                CountTrackMediaItems: std::mem::transmute(get_func(c_str!(stringify!(
-                    CountTrackMediaItems
-                )))),
-                CountTracks: std::mem::transmute(get_func(c_str!(stringify!(CountTracks)))),
-                CreateLocalOscHandler: std::mem::transmute(get_func(c_str!(stringify!(
-                    CreateLocalOscHandler
-                )))),
-                CreateMIDIInput: std::mem::transmute(get_func(c_str!(stringify!(CreateMIDIInput)))),
-                CreateMIDIOutput: std::mem::transmute(get_func(c_str!(stringify!(
-                    CreateMIDIOutput
-                )))),
-                CreateNewMIDIItemInProj: std::mem::transmute(get_func(c_str!(stringify!(
-                    CreateNewMIDIItemInProj
-                )))),
-                CreateTakeAudioAccessor: std::mem::transmute(get_func(c_str!(stringify!(
-                    CreateTakeAudioAccessor
-                )))),
-                CreateTrackAudioAccessor: std::mem::transmute(get_func(c_str!(stringify!(
-                    CreateTrackAudioAccessor
-                )))),
-                CreateTrackSend: std::mem::transmute(get_func(c_str!(stringify!(CreateTrackSend)))),
-                CSurf_FlushUndo: std::mem::transmute(get_func(c_str!(stringify!(CSurf_FlushUndo)))),
-                CSurf_GetTouchState: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_GetTouchState
-                )))),
-                CSurf_GoEnd: std::mem::transmute(get_func(c_str!(stringify!(CSurf_GoEnd)))),
-                CSurf_GoStart: std::mem::transmute(get_func(c_str!(stringify!(CSurf_GoStart)))),
-                CSurf_NumTracks: std::mem::transmute(get_func(c_str!(stringify!(CSurf_NumTracks)))),
-                CSurf_OnArrow: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnArrow)))),
-                CSurf_OnFwd: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnFwd)))),
-                CSurf_OnFXChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnFXChange
-                )))),
-                CSurf_OnInputMonitorChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnInputMonitorChange
-                )))),
-                CSurf_OnInputMonitorChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnInputMonitorChangeEx
-                )))),
-                CSurf_OnMuteChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnMuteChange
-                )))),
-                CSurf_OnMuteChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnMuteChangeEx
-                )))),
-                CSurf_OnOscControlMessage: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnOscControlMessage
-                )))),
-                CSurf_OnPanChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnPanChange
-                )))),
-                CSurf_OnPanChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnPanChangeEx
-                )))),
-                CSurf_OnPause: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnPause)))),
-                CSurf_OnPlay: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnPlay)))),
-                CSurf_OnPlayRateChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnPlayRateChange
-                )))),
-                CSurf_OnRecArmChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnRecArmChange
-                )))),
-                CSurf_OnRecArmChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnRecArmChangeEx
-                )))),
-                CSurf_OnRecord: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnRecord)))),
-                CSurf_OnRecvPanChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnRecvPanChange
-                )))),
-                CSurf_OnRecvVolumeChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnRecvVolumeChange
-                )))),
-                CSurf_OnRew: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnRew)))),
-                CSurf_OnRewFwd: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnRewFwd)))),
-                CSurf_OnScroll: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnScroll)))),
-                CSurf_OnSelectedChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnSelectedChange
-                )))),
-                CSurf_OnSendPanChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnSendPanChange
-                )))),
-                CSurf_OnSendVolumeChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnSendVolumeChange
-                )))),
-                CSurf_OnSoloChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnSoloChange
-                )))),
-                CSurf_OnSoloChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnSoloChangeEx
-                )))),
-                CSurf_OnStop: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnStop)))),
-                CSurf_OnTempoChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnTempoChange
-                )))),
-                CSurf_OnTrackSelection: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnTrackSelection
-                )))),
-                CSurf_OnVolumeChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnVolumeChange
-                )))),
-                CSurf_OnVolumeChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnVolumeChangeEx
-                )))),
-                CSurf_OnWidthChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnWidthChange
-                )))),
-                CSurf_OnWidthChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_OnWidthChangeEx
-                )))),
-                CSurf_OnZoom: std::mem::transmute(get_func(c_str!(stringify!(CSurf_OnZoom)))),
-                CSurf_ResetAllCachedVolPanStates: std::mem::transmute(get_func(c_str!(
-                    stringify!(CSurf_ResetAllCachedVolPanStates)
-                ))),
-                CSurf_ScrubAmt: std::mem::transmute(get_func(c_str!(stringify!(CSurf_ScrubAmt)))),
-                CSurf_SetAutoMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetAutoMode
-                )))),
-                CSurf_SetPlayState: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetPlayState
-                )))),
-                CSurf_SetRepeatState: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetRepeatState
-                )))),
-                CSurf_SetSurfaceMute: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetSurfaceMute
-                )))),
-                CSurf_SetSurfacePan: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetSurfacePan
-                )))),
-                CSurf_SetSurfaceRecArm: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetSurfaceRecArm
-                )))),
-                CSurf_SetSurfaceSelected: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetSurfaceSelected
-                )))),
-                CSurf_SetSurfaceSolo: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetSurfaceSolo
-                )))),
-                CSurf_SetSurfaceVolume: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetSurfaceVolume
-                )))),
-                CSurf_SetTrackListChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_SetTrackListChange
-                )))),
-                CSurf_TrackFromID: std::mem::transmute(get_func(c_str!(stringify!(
-                    CSurf_TrackFromID
-                )))),
-                CSurf_TrackToID: std::mem::transmute(get_func(c_str!(stringify!(CSurf_TrackToID)))),
-                DB2SLIDER: std::mem::transmute(get_func(c_str!(stringify!(DB2SLIDER)))),
-                DeleteActionShortcut: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteActionShortcut
-                )))),
-                DeleteEnvelopePointEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteEnvelopePointEx
-                )))),
-                DeleteEnvelopePointRange: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteEnvelopePointRange
-                )))),
-                DeleteEnvelopePointRangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteEnvelopePointRangeEx
-                )))),
-                DeleteExtState: std::mem::transmute(get_func(c_str!(stringify!(DeleteExtState)))),
-                DeleteProjectMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteProjectMarker
-                )))),
-                DeleteProjectMarkerByIndex: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteProjectMarkerByIndex
-                )))),
-                DeleteTakeStretchMarkers: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteTakeStretchMarkers
-                )))),
-                DeleteTempoTimeSigMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteTempoTimeSigMarker
-                )))),
-                DeleteTrack: std::mem::transmute(get_func(c_str!(stringify!(DeleteTrack)))),
-                DeleteTrackMediaItem: std::mem::transmute(get_func(c_str!(stringify!(
-                    DeleteTrackMediaItem
-                )))),
-                DestroyAudioAccessor: std::mem::transmute(get_func(c_str!(stringify!(
-                    DestroyAudioAccessor
-                )))),
-                DestroyLocalOscHandler: std::mem::transmute(get_func(c_str!(stringify!(
-                    DestroyLocalOscHandler
-                )))),
-                DoActionShortcutDialog: std::mem::transmute(get_func(c_str!(stringify!(
-                    DoActionShortcutDialog
-                )))),
-                Dock_UpdateDockID: std::mem::transmute(get_func(c_str!(stringify!(
-                    Dock_UpdateDockID
-                )))),
-                DockGetPosition: std::mem::transmute(get_func(c_str!(stringify!(DockGetPosition)))),
-                DockIsChildOfDock: std::mem::transmute(get_func(c_str!(stringify!(
-                    DockIsChildOfDock
-                )))),
-                DockWindowActivate: std::mem::transmute(get_func(c_str!(stringify!(
-                    DockWindowActivate
-                )))),
-                DockWindowAdd: std::mem::transmute(get_func(c_str!(stringify!(DockWindowAdd)))),
-                DockWindowAddEx: std::mem::transmute(get_func(c_str!(stringify!(DockWindowAddEx)))),
-                DockWindowRefresh: std::mem::transmute(get_func(c_str!(stringify!(
-                    DockWindowRefresh
-                )))),
-                DockWindowRefreshForHWND: std::mem::transmute(get_func(c_str!(stringify!(
-                    DockWindowRefreshForHWND
-                )))),
-                DockWindowRemove: std::mem::transmute(get_func(c_str!(stringify!(
-                    DockWindowRemove
-                )))),
-                DuplicateCustomizableMenu: std::mem::transmute(get_func(c_str!(stringify!(
-                    DuplicateCustomizableMenu
-                )))),
-                EditTempoTimeSigMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    EditTempoTimeSigMarker
-                )))),
-                EnsureNotCompletelyOffscreen: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnsureNotCompletelyOffscreen
-                )))),
-                EnumerateFiles: std::mem::transmute(get_func(c_str!(stringify!(EnumerateFiles)))),
-                EnumerateSubdirectories: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumerateSubdirectories
-                )))),
-                EnumPitchShiftModes: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumPitchShiftModes
-                )))),
-                EnumPitchShiftSubModes: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumPitchShiftSubModes
-                )))),
-                EnumProjectMarkers: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumProjectMarkers
-                )))),
-                EnumProjectMarkers2: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumProjectMarkers2
-                )))),
-                EnumProjectMarkers3: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumProjectMarkers3
-                )))),
-                EnumProjects: std::mem::transmute(get_func(c_str!(stringify!(EnumProjects)))),
-                EnumProjExtState: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumProjExtState
-                )))),
-                EnumRegionRenderMatrix: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumRegionRenderMatrix
-                )))),
-                EnumTrackMIDIProgramNames: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumTrackMIDIProgramNames
-                )))),
-                EnumTrackMIDIProgramNamesEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    EnumTrackMIDIProgramNamesEx
-                )))),
-                Envelope_Evaluate: std::mem::transmute(get_func(c_str!(stringify!(
-                    Envelope_Evaluate
-                )))),
-                Envelope_FormatValue: std::mem::transmute(get_func(c_str!(stringify!(
-                    Envelope_FormatValue
-                )))),
-                Envelope_GetParentTake: std::mem::transmute(get_func(c_str!(stringify!(
-                    Envelope_GetParentTake
-                )))),
-                Envelope_GetParentTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    Envelope_GetParentTrack
-                )))),
-                Envelope_SortPoints: std::mem::transmute(get_func(c_str!(stringify!(
-                    Envelope_SortPoints
-                )))),
-                Envelope_SortPointsEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    Envelope_SortPointsEx
-                )))),
-                ExecProcess: std::mem::transmute(get_func(c_str!(stringify!(ExecProcess)))),
-                file_exists: std::mem::transmute(get_func(c_str!(stringify!(file_exists)))),
-                FindTempoTimeSigMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    FindTempoTimeSigMarker
-                )))),
-                format_timestr: std::mem::transmute(get_func(c_str!(stringify!(format_timestr)))),
-                format_timestr_len: std::mem::transmute(get_func(c_str!(stringify!(
-                    format_timestr_len
-                )))),
-                format_timestr_pos: std::mem::transmute(get_func(c_str!(stringify!(
-                    format_timestr_pos
-                )))),
-                FreeHeapPtr: std::mem::transmute(get_func(c_str!(stringify!(FreeHeapPtr)))),
-                genGuid: std::mem::transmute(get_func(c_str!(stringify!(genGuid)))),
-                get_config_var: std::mem::transmute(get_func(c_str!(stringify!(get_config_var)))),
-                get_config_var_string: std::mem::transmute(get_func(c_str!(stringify!(
-                    get_config_var_string
-                )))),
-                get_ini_file: std::mem::transmute(get_func(c_str!(stringify!(get_ini_file)))),
-                get_midi_config_var: std::mem::transmute(get_func(c_str!(stringify!(
-                    get_midi_config_var
-                )))),
-                GetActionShortcutDesc: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetActionShortcutDesc
-                )))),
-                GetActiveTake: std::mem::transmute(get_func(c_str!(stringify!(GetActiveTake)))),
-                GetAllProjectPlayStates: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetAllProjectPlayStates
-                )))),
-                GetAppVersion: std::mem::transmute(get_func(c_str!(stringify!(GetAppVersion)))),
-                GetArmedCommand: std::mem::transmute(get_func(c_str!(stringify!(GetArmedCommand)))),
-                GetAudioAccessorEndTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetAudioAccessorEndTime
-                )))),
-                GetAudioAccessorHash: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetAudioAccessorHash
-                )))),
-                GetAudioAccessorSamples: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetAudioAccessorSamples
-                )))),
-                GetAudioAccessorStartTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetAudioAccessorStartTime
-                )))),
-                GetAudioDeviceInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetAudioDeviceInfo
-                )))),
-                GetColorTheme: std::mem::transmute(get_func(c_str!(stringify!(GetColorTheme)))),
-                GetColorThemeStruct: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetColorThemeStruct
-                )))),
-                GetConfigWantsDock: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetConfigWantsDock
-                )))),
-                GetContextMenu: std::mem::transmute(get_func(c_str!(stringify!(GetContextMenu)))),
-                GetCurrentProjectInLoadSave: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetCurrentProjectInLoadSave
-                )))),
-                GetCursorContext: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetCursorContext
-                )))),
-                GetCursorContext2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetCursorContext2
-                )))),
-                GetCursorPosition: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetCursorPosition
-                )))),
-                GetCursorPositionEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetCursorPositionEx
-                )))),
-                GetDisplayedMediaItemColor: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetDisplayedMediaItemColor
-                )))),
-                GetDisplayedMediaItemColor2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetDisplayedMediaItemColor2
-                )))),
-                GetEnvelopeInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetEnvelopeInfo_Value
-                )))),
-                GetEnvelopeName: std::mem::transmute(get_func(c_str!(stringify!(GetEnvelopeName)))),
-                GetEnvelopePoint: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetEnvelopePoint
-                )))),
-                GetEnvelopePointByTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetEnvelopePointByTime
-                )))),
-                GetEnvelopePointByTimeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetEnvelopePointByTimeEx
-                )))),
-                GetEnvelopePointEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetEnvelopePointEx
-                )))),
-                GetEnvelopeScalingMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetEnvelopeScalingMode
-                )))),
-                GetEnvelopeStateChunk: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetEnvelopeStateChunk
-                )))),
-                GetExePath: std::mem::transmute(get_func(c_str!(stringify!(GetExePath)))),
-                GetExtState: std::mem::transmute(get_func(c_str!(stringify!(GetExtState)))),
-                GetFocusedFX: std::mem::transmute(get_func(c_str!(stringify!(GetFocusedFX)))),
-                GetFreeDiskSpaceForRecordPath: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetFreeDiskSpaceForRecordPath
-                )))),
-                GetFXEnvelope: std::mem::transmute(get_func(c_str!(stringify!(GetFXEnvelope)))),
-                GetGlobalAutomationOverride: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetGlobalAutomationOverride
-                )))),
-                GetHZoomLevel: std::mem::transmute(get_func(c_str!(stringify!(GetHZoomLevel)))),
-                GetIconThemePointer: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetIconThemePointer
-                )))),
-                GetIconThemePointerForDPI: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetIconThemePointerForDPI
-                )))),
-                GetIconThemeStruct: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetIconThemeStruct
-                )))),
-                GetInputChannelName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetInputChannelName
-                )))),
-                GetInputOutputLatency: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetInputOutputLatency
-                )))),
-                GetItemEditingTime2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetItemEditingTime2
-                )))),
-                GetItemFromPoint: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetItemFromPoint
-                )))),
-                GetItemProjectContext: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetItemProjectContext
-                )))),
-                GetItemStateChunk: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetItemStateChunk
-                )))),
-                GetLastColorThemeFile: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetLastColorThemeFile
-                )))),
-                GetLastMarkerAndCurRegion: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetLastMarkerAndCurRegion
-                )))),
-                GetLastTouchedFX: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetLastTouchedFX
-                )))),
-                GetLastTouchedTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetLastTouchedTrack
-                )))),
-                GetMainHwnd: std::mem::transmute(get_func(c_str!(stringify!(GetMainHwnd)))),
-                GetMasterMuteSoloFlags: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMasterMuteSoloFlags
-                )))),
-                GetMasterTrack: std::mem::transmute(get_func(c_str!(stringify!(GetMasterTrack)))),
-                GetMasterTrackVisibility: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMasterTrackVisibility
-                )))),
-                GetMaxMidiInputs: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMaxMidiInputs
-                )))),
-                GetMaxMidiOutputs: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMaxMidiOutputs
-                )))),
-                GetMediaItem: std::mem::transmute(get_func(c_str!(stringify!(GetMediaItem)))),
-                GetMediaItem_Track: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItem_Track
-                )))),
-                GetMediaItemInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemInfo_Value
-                )))),
-                GetMediaItemNumTakes: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemNumTakes
-                )))),
-                GetMediaItemTake: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTake
-                )))),
-                GetMediaItemTake_Item: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTake_Item
-                )))),
-                GetMediaItemTake_Peaks: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTake_Peaks
-                )))),
-                GetMediaItemTake_Source: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTake_Source
-                )))),
-                GetMediaItemTake_Track: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTake_Track
-                )))),
-                GetMediaItemTakeByGUID: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTakeByGUID
-                )))),
-                GetMediaItemTakeInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTakeInfo_Value
-                )))),
-                GetMediaItemTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaItemTrack
-                )))),
-                GetMediaSourceFileName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaSourceFileName
-                )))),
-                GetMediaSourceLength: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaSourceLength
-                )))),
-                GetMediaSourceNumChannels: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaSourceNumChannels
-                )))),
-                GetMediaSourceParent: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaSourceParent
-                )))),
-                GetMediaSourceSampleRate: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaSourceSampleRate
-                )))),
-                GetMediaSourceType: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaSourceType
-                )))),
-                GetMediaTrackInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMediaTrackInfo_Value
-                )))),
-                GetMIDIInputName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMIDIInputName
-                )))),
-                GetMIDIOutputName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMIDIOutputName
-                )))),
-                GetMixerScroll: std::mem::transmute(get_func(c_str!(stringify!(GetMixerScroll)))),
-                GetMouseModifier: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMouseModifier
-                )))),
-                GetMousePosition: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetMousePosition
-                )))),
-                GetNumAudioInputs: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetNumAudioInputs
-                )))),
-                GetNumAudioOutputs: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetNumAudioOutputs
-                )))),
-                GetNumMIDIInputs: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetNumMIDIInputs
-                )))),
-                GetNumMIDIOutputs: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetNumMIDIOutputs
-                )))),
-                GetNumTracks: std::mem::transmute(get_func(c_str!(stringify!(GetNumTracks)))),
-                GetOS: std::mem::transmute(get_func(c_str!(stringify!(GetOS)))),
-                GetOutputChannelName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetOutputChannelName
-                )))),
-                GetOutputLatency: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetOutputLatency
-                )))),
-                GetParentTrack: std::mem::transmute(get_func(c_str!(stringify!(GetParentTrack)))),
-                GetPeakFileName: std::mem::transmute(get_func(c_str!(stringify!(GetPeakFileName)))),
-                GetPeakFileNameEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPeakFileNameEx
-                )))),
-                GetPeakFileNameEx2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPeakFileNameEx2
-                )))),
-                GetPeaksBitmap: std::mem::transmute(get_func(c_str!(stringify!(GetPeaksBitmap)))),
-                GetPlayPosition: std::mem::transmute(get_func(c_str!(stringify!(GetPlayPosition)))),
-                GetPlayPosition2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPlayPosition2
-                )))),
-                GetPlayPosition2Ex: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPlayPosition2Ex
-                )))),
-                GetPlayPositionEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPlayPositionEx
-                )))),
-                GetPlayState: std::mem::transmute(get_func(c_str!(stringify!(GetPlayState)))),
-                GetPlayStateEx: std::mem::transmute(get_func(c_str!(stringify!(GetPlayStateEx)))),
-                GetPreferredDiskReadMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPreferredDiskReadMode
-                )))),
-                GetPreferredDiskReadModePeak: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPreferredDiskReadModePeak
-                )))),
-                GetPreferredDiskWriteMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetPreferredDiskWriteMode
-                )))),
-                GetProjectLength: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetProjectLength
-                )))),
-                GetProjectName: std::mem::transmute(get_func(c_str!(stringify!(GetProjectName)))),
-                GetProjectPath: std::mem::transmute(get_func(c_str!(stringify!(GetProjectPath)))),
-                GetProjectPathEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetProjectPathEx
-                )))),
-                GetProjectStateChangeCount: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetProjectStateChangeCount
-                )))),
-                GetProjectTimeOffset: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetProjectTimeOffset
-                )))),
-                GetProjectTimeSignature: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetProjectTimeSignature
-                )))),
-                GetProjectTimeSignature2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetProjectTimeSignature2
-                )))),
-                GetProjExtState: std::mem::transmute(get_func(c_str!(stringify!(GetProjExtState)))),
-                GetResourcePath: std::mem::transmute(get_func(c_str!(stringify!(GetResourcePath)))),
-                GetSelectedEnvelope: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSelectedEnvelope
-                )))),
-                GetSelectedMediaItem: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSelectedMediaItem
-                )))),
-                GetSelectedTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSelectedTrack
-                )))),
-                GetSelectedTrack2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSelectedTrack2
-                )))),
-                GetSelectedTrackEnvelope: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSelectedTrackEnvelope
-                )))),
-                GetSet_ArrangeView2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSet_ArrangeView2
-                )))),
-                GetSet_LoopTimeRange: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSet_LoopTimeRange
-                )))),
-                GetSet_LoopTimeRange2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSet_LoopTimeRange2
-                )))),
-                GetSetAutomationItemInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetAutomationItemInfo
-                )))),
-                GetSetAutomationItemInfo_String: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetAutomationItemInfo_String
-                )))),
-                GetSetEnvelopeInfo_String: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetEnvelopeInfo_String
-                )))),
-                GetSetEnvelopeState: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetEnvelopeState
-                )))),
-                GetSetEnvelopeState2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetEnvelopeState2
-                )))),
-                GetSetItemState: std::mem::transmute(get_func(c_str!(stringify!(GetSetItemState)))),
-                GetSetItemState2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetItemState2
-                )))),
-                GetSetMediaItemInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetMediaItemInfo
-                )))),
-                GetSetMediaItemInfo_String: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetMediaItemInfo_String
-                )))),
-                GetSetMediaItemTakeInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetMediaItemTakeInfo
-                )))),
-                GetSetMediaItemTakeInfo_String: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetMediaItemTakeInfo_String
-                )))),
-                GetSetMediaTrackInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetMediaTrackInfo
-                )))),
-                GetSetMediaTrackInfo_String: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetMediaTrackInfo_String
-                )))),
-                GetSetObjectState: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetObjectState
-                )))),
-                GetSetObjectState2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetObjectState2
-                )))),
-                GetSetProjectAuthor: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetProjectAuthor
-                )))),
-                GetSetProjectGrid: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetProjectGrid
-                )))),
-                GetSetProjectInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetProjectInfo
-                )))),
-                GetSetProjectInfo_String: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetProjectInfo_String
-                )))),
-                GetSetProjectNotes: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetProjectNotes
-                )))),
-                GetSetRepeat: std::mem::transmute(get_func(c_str!(stringify!(GetSetRepeat)))),
-                GetSetRepeatEx: std::mem::transmute(get_func(c_str!(stringify!(GetSetRepeatEx)))),
-                GetSetTrackGroupMembership: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetTrackGroupMembership
-                )))),
-                GetSetTrackGroupMembershipHigh: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetTrackGroupMembershipHigh
-                )))),
-                GetSetTrackMIDISupportFile: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetTrackMIDISupportFile
-                )))),
-                GetSetTrackSendInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetTrackSendInfo
-                )))),
-                GetSetTrackSendInfo_String: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetTrackSendInfo_String
-                )))),
-                GetSetTrackState: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetTrackState
-                )))),
-                GetSetTrackState2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSetTrackState2
-                )))),
-                GetSubProjectFromSource: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetSubProjectFromSource
-                )))),
-                GetTake: std::mem::transmute(get_func(c_str!(stringify!(GetTake)))),
-                GetTakeEnvelope: std::mem::transmute(get_func(c_str!(stringify!(GetTakeEnvelope)))),
-                GetTakeEnvelopeByName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTakeEnvelopeByName
-                )))),
-                GetTakeName: std::mem::transmute(get_func(c_str!(stringify!(GetTakeName)))),
-                GetTakeNumStretchMarkers: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTakeNumStretchMarkers
-                )))),
-                GetTakeStretchMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTakeStretchMarker
-                )))),
-                GetTakeStretchMarkerSlope: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTakeStretchMarkerSlope
-                )))),
-                GetTCPFXParm: std::mem::transmute(get_func(c_str!(stringify!(GetTCPFXParm)))),
-                GetTempoMatchPlayRate: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTempoMatchPlayRate
-                )))),
-                GetTempoTimeSigMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTempoTimeSigMarker
-                )))),
-                GetToggleCommandState: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetToggleCommandState
-                )))),
-                GetToggleCommandState2: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetToggleCommandState2
-                )))),
-                GetToggleCommandStateEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetToggleCommandStateEx
-                )))),
-                GetToggleCommandStateThroughHooks: std::mem::transmute(get_func(c_str!(
-                    stringify!(GetToggleCommandStateThroughHooks)
-                ))),
-                GetTooltipWindow: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTooltipWindow
-                )))),
-                GetTrack: std::mem::transmute(get_func(c_str!(stringify!(GetTrack)))),
-                GetTrackAutomationMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackAutomationMode
-                )))),
-                GetTrackColor: std::mem::transmute(get_func(c_str!(stringify!(GetTrackColor)))),
-                GetTrackDepth: std::mem::transmute(get_func(c_str!(stringify!(GetTrackDepth)))),
-                GetTrackEnvelope: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackEnvelope
-                )))),
-                GetTrackEnvelopeByChunkName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackEnvelopeByChunkName
-                )))),
-                GetTrackEnvelopeByName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackEnvelopeByName
-                )))),
-                GetTrackFromPoint: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackFromPoint
-                )))),
-                GetTrackGUID: std::mem::transmute(get_func(c_str!(stringify!(GetTrackGUID)))),
-                GetTrackInfo: std::mem::transmute(get_func(c_str!(stringify!(GetTrackInfo)))),
-                GetTrackMediaItem: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackMediaItem
-                )))),
-                GetTrackMIDILyrics: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackMIDILyrics
-                )))),
-                GetTrackMIDINoteName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackMIDINoteName
-                )))),
-                GetTrackMIDINoteNameEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackMIDINoteNameEx
-                )))),
-                GetTrackMIDINoteRange: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackMIDINoteRange
-                )))),
-                GetTrackName: std::mem::transmute(get_func(c_str!(stringify!(GetTrackName)))),
-                GetTrackNumMediaItems: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackNumMediaItems
-                )))),
-                GetTrackNumSends: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackNumSends
-                )))),
-                GetTrackReceiveName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackReceiveName
-                )))),
-                GetTrackReceiveUIMute: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackReceiveUIMute
-                )))),
-                GetTrackReceiveUIVolPan: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackReceiveUIVolPan
-                )))),
-                GetTrackSendInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackSendInfo_Value
-                )))),
-                GetTrackSendName: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackSendName
-                )))),
-                GetTrackSendUIMute: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackSendUIMute
-                )))),
-                GetTrackSendUIVolPan: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackSendUIVolPan
-                )))),
-                GetTrackState: std::mem::transmute(get_func(c_str!(stringify!(GetTrackState)))),
-                GetTrackStateChunk: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackStateChunk
-                )))),
-                GetTrackUIMute: std::mem::transmute(get_func(c_str!(stringify!(GetTrackUIMute)))),
-                GetTrackUIPan: std::mem::transmute(get_func(c_str!(stringify!(GetTrackUIPan)))),
-                GetTrackUIVolPan: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetTrackUIVolPan
-                )))),
-                GetUnderrunTime: std::mem::transmute(get_func(c_str!(stringify!(GetUnderrunTime)))),
-                GetUserFileNameForRead: std::mem::transmute(get_func(c_str!(stringify!(
-                    GetUserFileNameForRead
-                )))),
-                GetUserInputs: std::mem::transmute(get_func(c_str!(stringify!(GetUserInputs)))),
-                GoToMarker: std::mem::transmute(get_func(c_str!(stringify!(GoToMarker)))),
-                GoToRegion: std::mem::transmute(get_func(c_str!(stringify!(GoToRegion)))),
-                GR_SelectColor: std::mem::transmute(get_func(c_str!(stringify!(GR_SelectColor)))),
-                GSC_mainwnd: std::mem::transmute(get_func(c_str!(stringify!(GSC_mainwnd)))),
-                guidToString: std::mem::transmute(get_func(c_str!(stringify!(guidToString)))),
-                HasExtState: std::mem::transmute(get_func(c_str!(stringify!(HasExtState)))),
-                HasTrackMIDIPrograms: std::mem::transmute(get_func(c_str!(stringify!(
-                    HasTrackMIDIPrograms
-                )))),
-                HasTrackMIDIProgramsEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    HasTrackMIDIProgramsEx
-                )))),
-                Help_Set: std::mem::transmute(get_func(c_str!(stringify!(Help_Set)))),
-                HiresPeaksFromSource: std::mem::transmute(get_func(c_str!(stringify!(
-                    HiresPeaksFromSource
-                )))),
-                image_resolve_fn: std::mem::transmute(get_func(c_str!(stringify!(
-                    image_resolve_fn
-                )))),
-                InsertAutomationItem: std::mem::transmute(get_func(c_str!(stringify!(
-                    InsertAutomationItem
-                )))),
-                InsertEnvelopePoint: std::mem::transmute(get_func(c_str!(stringify!(
-                    InsertEnvelopePoint
-                )))),
-                InsertEnvelopePointEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    InsertEnvelopePointEx
-                )))),
-                InsertMedia: std::mem::transmute(get_func(c_str!(stringify!(InsertMedia)))),
-                InsertMediaSection: std::mem::transmute(get_func(c_str!(stringify!(
-                    InsertMediaSection
-                )))),
-                InsertTrackAtIndex: std::mem::transmute(get_func(c_str!(stringify!(
-                    InsertTrackAtIndex
-                )))),
-                IsInRealTimeAudio: std::mem::transmute(get_func(c_str!(stringify!(
-                    IsInRealTimeAudio
-                )))),
-                IsItemTakeActiveForPlayback: std::mem::transmute(get_func(c_str!(stringify!(
-                    IsItemTakeActiveForPlayback
-                )))),
-                IsMediaExtension: std::mem::transmute(get_func(c_str!(stringify!(
-                    IsMediaExtension
-                )))),
-                IsMediaItemSelected: std::mem::transmute(get_func(c_str!(stringify!(
-                    IsMediaItemSelected
-                )))),
-                IsProjectDirty: std::mem::transmute(get_func(c_str!(stringify!(IsProjectDirty)))),
-                IsREAPER: std::mem::transmute(get_func(c_str!(stringify!(IsREAPER)))),
-                IsTrackSelected: std::mem::transmute(get_func(c_str!(stringify!(IsTrackSelected)))),
-                IsTrackVisible: std::mem::transmute(get_func(c_str!(stringify!(IsTrackVisible)))),
-                joystick_create: std::mem::transmute(get_func(c_str!(stringify!(joystick_create)))),
-                joystick_destroy: std::mem::transmute(get_func(c_str!(stringify!(
-                    joystick_destroy
-                )))),
-                joystick_enum: std::mem::transmute(get_func(c_str!(stringify!(joystick_enum)))),
-                joystick_getaxis: std::mem::transmute(get_func(c_str!(stringify!(
-                    joystick_getaxis
-                )))),
-                joystick_getbuttonmask: std::mem::transmute(get_func(c_str!(stringify!(
-                    joystick_getbuttonmask
-                )))),
-                joystick_getinfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    joystick_getinfo
-                )))),
-                joystick_getpov: std::mem::transmute(get_func(c_str!(stringify!(joystick_getpov)))),
-                joystick_update: std::mem::transmute(get_func(c_str!(stringify!(joystick_update)))),
-                kbd_enumerateActions: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_enumerateActions
-                )))),
-                kbd_formatKeyName: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_formatKeyName
-                )))),
-                kbd_getCommandName: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_getCommandName
-                )))),
-                kbd_getTextFromCmd: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_getTextFromCmd
-                )))),
-                KBD_OnMainActionEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    KBD_OnMainActionEx
-                )))),
-                kbd_OnMidiEvent: std::mem::transmute(get_func(c_str!(stringify!(kbd_OnMidiEvent)))),
-                kbd_OnMidiList: std::mem::transmute(get_func(c_str!(stringify!(kbd_OnMidiList)))),
-                kbd_ProcessActionsMenu: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_ProcessActionsMenu
-                )))),
-                kbd_processMidiEventActionEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_processMidiEventActionEx
-                )))),
-                kbd_reprocessMenu: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_reprocessMenu
-                )))),
-                kbd_RunCommandThroughHooks: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_RunCommandThroughHooks
-                )))),
-                kbd_translateAccelerator: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_translateAccelerator
-                )))),
-                kbd_translateMouse: std::mem::transmute(get_func(c_str!(stringify!(
-                    kbd_translateMouse
-                )))),
-                LICE__Destroy: std::mem::transmute(get_func(c_str!(stringify!(LICE__Destroy)))),
-                LICE__DestroyFont: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE__DestroyFont
-                )))),
-                LICE__DrawText: std::mem::transmute(get_func(c_str!(stringify!(LICE__DrawText)))),
-                LICE__GetBits: std::mem::transmute(get_func(c_str!(stringify!(LICE__GetBits)))),
-                LICE__GetDC: std::mem::transmute(get_func(c_str!(stringify!(LICE__GetDC)))),
-                LICE__GetHeight: std::mem::transmute(get_func(c_str!(stringify!(LICE__GetHeight)))),
-                LICE__GetRowSpan: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE__GetRowSpan
-                )))),
-                LICE__GetWidth: std::mem::transmute(get_func(c_str!(stringify!(LICE__GetWidth)))),
-                LICE__IsFlipped: std::mem::transmute(get_func(c_str!(stringify!(LICE__IsFlipped)))),
-                LICE__resize: std::mem::transmute(get_func(c_str!(stringify!(LICE__resize)))),
-                LICE__SetBkColor: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE__SetBkColor
-                )))),
-                LICE__SetFromHFont: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE__SetFromHFont
-                )))),
-                LICE__SetTextColor: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE__SetTextColor
-                )))),
-                LICE__SetTextCombineMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE__SetTextCombineMode
-                )))),
-                LICE_Arc: std::mem::transmute(get_func(c_str!(stringify!(LICE_Arc)))),
-                LICE_Blit: std::mem::transmute(get_func(c_str!(stringify!(LICE_Blit)))),
-                LICE_Blur: std::mem::transmute(get_func(c_str!(stringify!(LICE_Blur)))),
-                LICE_BorderedRect: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_BorderedRect
-                )))),
-                LICE_Circle: std::mem::transmute(get_func(c_str!(stringify!(LICE_Circle)))),
-                LICE_Clear: std::mem::transmute(get_func(c_str!(stringify!(LICE_Clear)))),
-                LICE_ClearRect: std::mem::transmute(get_func(c_str!(stringify!(LICE_ClearRect)))),
-                LICE_ClipLine: std::mem::transmute(get_func(c_str!(stringify!(LICE_ClipLine)))),
-                LICE_Copy: std::mem::transmute(get_func(c_str!(stringify!(LICE_Copy)))),
-                LICE_CreateBitmap: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_CreateBitmap
-                )))),
-                LICE_CreateFont: std::mem::transmute(get_func(c_str!(stringify!(LICE_CreateFont)))),
-                LICE_DrawCBezier: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_DrawCBezier
-                )))),
-                LICE_DrawChar: std::mem::transmute(get_func(c_str!(stringify!(LICE_DrawChar)))),
-                LICE_DrawGlyph: std::mem::transmute(get_func(c_str!(stringify!(LICE_DrawGlyph)))),
-                LICE_DrawRect: std::mem::transmute(get_func(c_str!(stringify!(LICE_DrawRect)))),
-                LICE_DrawText: std::mem::transmute(get_func(c_str!(stringify!(LICE_DrawText)))),
-                LICE_FillCBezier: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_FillCBezier
-                )))),
-                LICE_FillCircle: std::mem::transmute(get_func(c_str!(stringify!(LICE_FillCircle)))),
-                LICE_FillConvexPolygon: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_FillConvexPolygon
-                )))),
-                LICE_FillRect: std::mem::transmute(get_func(c_str!(stringify!(LICE_FillRect)))),
-                LICE_FillTrapezoid: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_FillTrapezoid
-                )))),
-                LICE_FillTriangle: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_FillTriangle
-                )))),
-                LICE_GetPixel: std::mem::transmute(get_func(c_str!(stringify!(LICE_GetPixel)))),
-                LICE_GradRect: std::mem::transmute(get_func(c_str!(stringify!(LICE_GradRect)))),
-                LICE_Line: std::mem::transmute(get_func(c_str!(stringify!(LICE_Line)))),
-                LICE_LineInt: std::mem::transmute(get_func(c_str!(stringify!(LICE_LineInt)))),
-                LICE_LoadPNG: std::mem::transmute(get_func(c_str!(stringify!(LICE_LoadPNG)))),
-                LICE_LoadPNGFromResource: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_LoadPNGFromResource
-                )))),
-                LICE_MeasureText: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_MeasureText
-                )))),
-                LICE_MultiplyAddRect: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_MultiplyAddRect
-                )))),
-                LICE_PutPixel: std::mem::transmute(get_func(c_str!(stringify!(LICE_PutPixel)))),
-                LICE_RotatedBlit: std::mem::transmute(get_func(c_str!(stringify!(
-                    LICE_RotatedBlit
-                )))),
-                LICE_RoundRect: std::mem::transmute(get_func(c_str!(stringify!(LICE_RoundRect)))),
-                LICE_ScaledBlit: std::mem::transmute(get_func(c_str!(stringify!(LICE_ScaledBlit)))),
-                LICE_SimpleFill: std::mem::transmute(get_func(c_str!(stringify!(LICE_SimpleFill)))),
-                Loop_OnArrow: std::mem::transmute(get_func(c_str!(stringify!(Loop_OnArrow)))),
-                Main_OnCommand: std::mem::transmute(get_func(c_str!(stringify!(Main_OnCommand)))),
-                Main_OnCommandEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    Main_OnCommandEx
-                )))),
-                Main_openProject: std::mem::transmute(get_func(c_str!(stringify!(
-                    Main_openProject
-                )))),
-                Main_SaveProject: std::mem::transmute(get_func(c_str!(stringify!(
-                    Main_SaveProject
-                )))),
-                Main_UpdateLoopInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    Main_UpdateLoopInfo
-                )))),
-                MarkProjectDirty: std::mem::transmute(get_func(c_str!(stringify!(
-                    MarkProjectDirty
-                )))),
-                MarkTrackItemsDirty: std::mem::transmute(get_func(c_str!(stringify!(
-                    MarkTrackItemsDirty
-                )))),
-                Master_GetPlayRate: std::mem::transmute(get_func(c_str!(stringify!(
-                    Master_GetPlayRate
-                )))),
-                Master_GetPlayRateAtTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    Master_GetPlayRateAtTime
-                )))),
-                Master_GetTempo: std::mem::transmute(get_func(c_str!(stringify!(Master_GetTempo)))),
-                Master_NormalizePlayRate: std::mem::transmute(get_func(c_str!(stringify!(
-                    Master_NormalizePlayRate
-                )))),
-                Master_NormalizeTempo: std::mem::transmute(get_func(c_str!(stringify!(
-                    Master_NormalizeTempo
-                )))),
-                MB: std::mem::transmute(get_func(c_str!(stringify!(MB)))),
-                MediaItemDescendsFromTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    MediaItemDescendsFromTrack
-                )))),
-                MIDI_CountEvts: std::mem::transmute(get_func(c_str!(stringify!(MIDI_CountEvts)))),
-                MIDI_DeleteCC: std::mem::transmute(get_func(c_str!(stringify!(MIDI_DeleteCC)))),
-                MIDI_DeleteEvt: std::mem::transmute(get_func(c_str!(stringify!(MIDI_DeleteEvt)))),
-                MIDI_DeleteNote: std::mem::transmute(get_func(c_str!(stringify!(MIDI_DeleteNote)))),
-                MIDI_DeleteTextSysexEvt: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_DeleteTextSysexEvt
-                )))),
-                MIDI_DisableSort: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_DisableSort
-                )))),
-                MIDI_EnumSelCC: std::mem::transmute(get_func(c_str!(stringify!(MIDI_EnumSelCC)))),
-                MIDI_EnumSelEvts: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_EnumSelEvts
-                )))),
-                MIDI_EnumSelNotes: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_EnumSelNotes
-                )))),
-                MIDI_EnumSelTextSysexEvts: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_EnumSelTextSysexEvts
-                )))),
-                MIDI_eventlist_Create: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_eventlist_Create
-                )))),
-                MIDI_eventlist_Destroy: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_eventlist_Destroy
-                )))),
-                MIDI_GetAllEvts: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetAllEvts)))),
-                MIDI_GetCC: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetCC)))),
-                MIDI_GetCCShape: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetCCShape)))),
-                MIDI_GetEvt: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetEvt)))),
-                MIDI_GetGrid: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetGrid)))),
-                MIDI_GetHash: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetHash)))),
-                MIDI_GetNote: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetNote)))),
-                MIDI_GetPPQPos_EndOfMeasure: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetPPQPos_EndOfMeasure
-                )))),
-                MIDI_GetPPQPos_StartOfMeasure: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetPPQPos_StartOfMeasure
-                )))),
-                MIDI_GetPPQPosFromProjQN: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetPPQPosFromProjQN
-                )))),
-                MIDI_GetPPQPosFromProjTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetPPQPosFromProjTime
-                )))),
-                MIDI_GetProjQNFromPPQPos: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetProjQNFromPPQPos
-                )))),
-                MIDI_GetProjTimeFromPPQPos: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetProjTimeFromPPQPos
-                )))),
-                MIDI_GetScale: std::mem::transmute(get_func(c_str!(stringify!(MIDI_GetScale)))),
-                MIDI_GetTextSysexEvt: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetTextSysexEvt
-                )))),
-                MIDI_GetTrackHash: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_GetTrackHash
-                )))),
-                MIDI_InsertCC: std::mem::transmute(get_func(c_str!(stringify!(MIDI_InsertCC)))),
-                MIDI_InsertEvt: std::mem::transmute(get_func(c_str!(stringify!(MIDI_InsertEvt)))),
-                MIDI_InsertNote: std::mem::transmute(get_func(c_str!(stringify!(MIDI_InsertNote)))),
-                MIDI_InsertTextSysexEvt: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_InsertTextSysexEvt
-                )))),
-                midi_reinit: std::mem::transmute(get_func(c_str!(stringify!(midi_reinit)))),
-                MIDI_SelectAll: std::mem::transmute(get_func(c_str!(stringify!(MIDI_SelectAll)))),
-                MIDI_SetAllEvts: std::mem::transmute(get_func(c_str!(stringify!(MIDI_SetAllEvts)))),
-                MIDI_SetCC: std::mem::transmute(get_func(c_str!(stringify!(MIDI_SetCC)))),
-                MIDI_SetCCShape: std::mem::transmute(get_func(c_str!(stringify!(MIDI_SetCCShape)))),
-                MIDI_SetEvt: std::mem::transmute(get_func(c_str!(stringify!(MIDI_SetEvt)))),
-                MIDI_SetItemExtents: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_SetItemExtents
-                )))),
-                MIDI_SetNote: std::mem::transmute(get_func(c_str!(stringify!(MIDI_SetNote)))),
-                MIDI_SetTextSysexEvt: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDI_SetTextSysexEvt
-                )))),
-                MIDI_Sort: std::mem::transmute(get_func(c_str!(stringify!(MIDI_Sort)))),
-                MIDIEditor_GetActive: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDIEditor_GetActive
-                )))),
-                MIDIEditor_GetMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDIEditor_GetMode
-                )))),
-                MIDIEditor_GetSetting_int: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDIEditor_GetSetting_int
-                )))),
-                MIDIEditor_GetSetting_str: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDIEditor_GetSetting_str
-                )))),
-                MIDIEditor_GetTake: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDIEditor_GetTake
-                )))),
-                MIDIEditor_LastFocused_OnCommand: std::mem::transmute(get_func(c_str!(
-                    stringify!(MIDIEditor_LastFocused_OnCommand)
-                ))),
-                MIDIEditor_OnCommand: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDIEditor_OnCommand
-                )))),
-                MIDIEditor_SetSetting_int: std::mem::transmute(get_func(c_str!(stringify!(
-                    MIDIEditor_SetSetting_int
-                )))),
-                mkpanstr: std::mem::transmute(get_func(c_str!(stringify!(mkpanstr)))),
-                mkvolpanstr: std::mem::transmute(get_func(c_str!(stringify!(mkvolpanstr)))),
-                mkvolstr: std::mem::transmute(get_func(c_str!(stringify!(mkvolstr)))),
-                MoveEditCursor: std::mem::transmute(get_func(c_str!(stringify!(MoveEditCursor)))),
-                MoveMediaItemToTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    MoveMediaItemToTrack
-                )))),
-                MuteAllTracks: std::mem::transmute(get_func(c_str!(stringify!(MuteAllTracks)))),
-                my_getViewport: std::mem::transmute(get_func(c_str!(stringify!(my_getViewport)))),
-                NamedCommandLookup: std::mem::transmute(get_func(c_str!(stringify!(
-                    NamedCommandLookup
-                )))),
-                OnPauseButton: std::mem::transmute(get_func(c_str!(stringify!(OnPauseButton)))),
-                OnPauseButtonEx: std::mem::transmute(get_func(c_str!(stringify!(OnPauseButtonEx)))),
-                OnPlayButton: std::mem::transmute(get_func(c_str!(stringify!(OnPlayButton)))),
-                OnPlayButtonEx: std::mem::transmute(get_func(c_str!(stringify!(OnPlayButtonEx)))),
-                OnStopButton: std::mem::transmute(get_func(c_str!(stringify!(OnStopButton)))),
-                OnStopButtonEx: std::mem::transmute(get_func(c_str!(stringify!(OnStopButtonEx)))),
-                OpenColorThemeFile: std::mem::transmute(get_func(c_str!(stringify!(
-                    OpenColorThemeFile
-                )))),
-                OpenMediaExplorer: std::mem::transmute(get_func(c_str!(stringify!(
-                    OpenMediaExplorer
-                )))),
-                OscLocalMessageToHost: std::mem::transmute(get_func(c_str!(stringify!(
-                    OscLocalMessageToHost
-                )))),
-                parse_timestr: std::mem::transmute(get_func(c_str!(stringify!(parse_timestr)))),
-                parse_timestr_len: std::mem::transmute(get_func(c_str!(stringify!(
-                    parse_timestr_len
-                )))),
-                parse_timestr_pos: std::mem::transmute(get_func(c_str!(stringify!(
-                    parse_timestr_pos
-                )))),
-                parsepanstr: std::mem::transmute(get_func(c_str!(stringify!(parsepanstr)))),
-                PCM_Sink_Create: std::mem::transmute(get_func(c_str!(stringify!(PCM_Sink_Create)))),
-                PCM_Sink_CreateEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Sink_CreateEx
-                )))),
-                PCM_Sink_CreateMIDIFile: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Sink_CreateMIDIFile
-                )))),
-                PCM_Sink_CreateMIDIFileEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Sink_CreateMIDIFileEx
-                )))),
-                PCM_Sink_Enum: std::mem::transmute(get_func(c_str!(stringify!(PCM_Sink_Enum)))),
-                PCM_Sink_GetExtension: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Sink_GetExtension
-                )))),
-                PCM_Sink_ShowConfig: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Sink_ShowConfig
-                )))),
-                PCM_Source_CreateFromFile: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Source_CreateFromFile
-                )))),
-                PCM_Source_CreateFromFileEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Source_CreateFromFileEx
-                )))),
-                PCM_Source_CreateFromSimple: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Source_CreateFromSimple
-                )))),
-                PCM_Source_CreateFromType: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Source_CreateFromType
-                )))),
-                PCM_Source_Destroy: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Source_Destroy
-                )))),
-                PCM_Source_GetPeaks: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Source_GetPeaks
-                )))),
-                PCM_Source_GetSectionInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    PCM_Source_GetSectionInfo
-                )))),
-                PeakBuild_Create: std::mem::transmute(get_func(c_str!(stringify!(
-                    PeakBuild_Create
-                )))),
-                PeakBuild_CreateEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    PeakBuild_CreateEx
-                )))),
-                PeakGet_Create: std::mem::transmute(get_func(c_str!(stringify!(PeakGet_Create)))),
-                PitchShiftSubModeMenu: std::mem::transmute(get_func(c_str!(stringify!(
-                    PitchShiftSubModeMenu
-                )))),
-                PlayPreview: std::mem::transmute(get_func(c_str!(stringify!(PlayPreview)))),
-                PlayPreviewEx: std::mem::transmute(get_func(c_str!(stringify!(PlayPreviewEx)))),
-                PlayTrackPreview: std::mem::transmute(get_func(c_str!(stringify!(
-                    PlayTrackPreview
-                )))),
-                PlayTrackPreview2: std::mem::transmute(get_func(c_str!(stringify!(
-                    PlayTrackPreview2
-                )))),
-                PlayTrackPreview2Ex: std::mem::transmute(get_func(c_str!(stringify!(
-                    PlayTrackPreview2Ex
-                )))),
-                plugin_getapi: std::mem::transmute(get_func(c_str!(stringify!(plugin_getapi)))),
-                plugin_getFilterList: std::mem::transmute(get_func(c_str!(stringify!(
-                    plugin_getFilterList
-                )))),
-                plugin_getImportableProjectFilterList: std::mem::transmute(get_func(c_str!(
-                    stringify!(plugin_getImportableProjectFilterList)
-                ))),
-                plugin_register: std::mem::transmute(get_func(c_str!(stringify!(plugin_register)))),
-                PluginWantsAlwaysRunFx: std::mem::transmute(get_func(c_str!(stringify!(
-                    PluginWantsAlwaysRunFx
-                )))),
-                PreventUIRefresh: std::mem::transmute(get_func(c_str!(stringify!(
-                    PreventUIRefresh
-                )))),
-                projectconfig_var_addr: std::mem::transmute(get_func(c_str!(stringify!(
-                    projectconfig_var_addr
-                )))),
-                projectconfig_var_getoffs: std::mem::transmute(get_func(c_str!(stringify!(
-                    projectconfig_var_getoffs
-                )))),
-                realloc_cmd_ptr: std::mem::transmute(get_func(c_str!(stringify!(realloc_cmd_ptr)))),
-                ReaperGetPitchShiftAPI: std::mem::transmute(get_func(c_str!(stringify!(
-                    ReaperGetPitchShiftAPI
-                )))),
-                ReaScriptError: std::mem::transmute(get_func(c_str!(stringify!(ReaScriptError)))),
-                RecursiveCreateDirectory: std::mem::transmute(get_func(c_str!(stringify!(
-                    RecursiveCreateDirectory
-                )))),
-                reduce_open_files: std::mem::transmute(get_func(c_str!(stringify!(
-                    reduce_open_files
-                )))),
-                RefreshToolbar: std::mem::transmute(get_func(c_str!(stringify!(RefreshToolbar)))),
-                RefreshToolbar2: std::mem::transmute(get_func(c_str!(stringify!(RefreshToolbar2)))),
-                relative_fn: std::mem::transmute(get_func(c_str!(stringify!(relative_fn)))),
-                RemoveTrackSend: std::mem::transmute(get_func(c_str!(stringify!(RemoveTrackSend)))),
-                RenderFileSection: std::mem::transmute(get_func(c_str!(stringify!(
-                    RenderFileSection
-                )))),
-                ReorderSelectedTracks: std::mem::transmute(get_func(c_str!(stringify!(
-                    ReorderSelectedTracks
-                )))),
-                Resample_EnumModes: std::mem::transmute(get_func(c_str!(stringify!(
-                    Resample_EnumModes
-                )))),
-                Resampler_Create: std::mem::transmute(get_func(c_str!(stringify!(
-                    Resampler_Create
-                )))),
-                resolve_fn: std::mem::transmute(get_func(c_str!(stringify!(resolve_fn)))),
-                resolve_fn2: std::mem::transmute(get_func(c_str!(stringify!(resolve_fn2)))),
-                ReverseNamedCommandLookup: std::mem::transmute(get_func(c_str!(stringify!(
-                    ReverseNamedCommandLookup
-                )))),
-                ScaleFromEnvelopeMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    ScaleFromEnvelopeMode
-                )))),
-                ScaleToEnvelopeMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    ScaleToEnvelopeMode
-                )))),
-                screenset_register: std::mem::transmute(get_func(c_str!(stringify!(
-                    screenset_register
-                )))),
-                screenset_registerNew: std::mem::transmute(get_func(c_str!(stringify!(
-                    screenset_registerNew
-                )))),
-                screenset_unregister: std::mem::transmute(get_func(c_str!(stringify!(
-                    screenset_unregister
-                )))),
-                screenset_unregisterByParam: std::mem::transmute(get_func(c_str!(stringify!(
-                    screenset_unregisterByParam
-                )))),
-                screenset_updateLastFocus: std::mem::transmute(get_func(c_str!(stringify!(
-                    screenset_updateLastFocus
-                )))),
-                SectionFromUniqueID: std::mem::transmute(get_func(c_str!(stringify!(
-                    SectionFromUniqueID
-                )))),
-                SelectAllMediaItems: std::mem::transmute(get_func(c_str!(stringify!(
-                    SelectAllMediaItems
-                )))),
-                SelectProjectInstance: std::mem::transmute(get_func(c_str!(stringify!(
-                    SelectProjectInstance
-                )))),
-                SendLocalOscMessage: std::mem::transmute(get_func(c_str!(stringify!(
-                    SendLocalOscMessage
-                )))),
-                SetActiveTake: std::mem::transmute(get_func(c_str!(stringify!(SetActiveTake)))),
-                SetAutomationMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetAutomationMode
-                )))),
-                SetCurrentBPM: std::mem::transmute(get_func(c_str!(stringify!(SetCurrentBPM)))),
-                SetCursorContext: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetCursorContext
-                )))),
-                SetEditCurPos: std::mem::transmute(get_func(c_str!(stringify!(SetEditCurPos)))),
-                SetEditCurPos2: std::mem::transmute(get_func(c_str!(stringify!(SetEditCurPos2)))),
-                SetEnvelopePoint: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetEnvelopePoint
-                )))),
-                SetEnvelopePointEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetEnvelopePointEx
-                )))),
-                SetEnvelopeStateChunk: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetEnvelopeStateChunk
-                )))),
-                SetExtState: std::mem::transmute(get_func(c_str!(stringify!(SetExtState)))),
-                SetGlobalAutomationOverride: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetGlobalAutomationOverride
-                )))),
-                SetItemStateChunk: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetItemStateChunk
-                )))),
-                SetMasterTrackVisibility: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMasterTrackVisibility
-                )))),
-                SetMediaItemInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMediaItemInfo_Value
-                )))),
-                SetMediaItemLength: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMediaItemLength
-                )))),
-                SetMediaItemPosition: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMediaItemPosition
-                )))),
-                SetMediaItemSelected: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMediaItemSelected
-                )))),
-                SetMediaItemTake_Source: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMediaItemTake_Source
-                )))),
-                SetMediaItemTakeInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMediaItemTakeInfo_Value
-                )))),
-                SetMediaTrackInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMediaTrackInfo_Value
-                )))),
-                SetMIDIEditorGrid: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMIDIEditorGrid
-                )))),
-                SetMixerScroll: std::mem::transmute(get_func(c_str!(stringify!(SetMixerScroll)))),
-                SetMouseModifier: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetMouseModifier
-                )))),
-                SetOnlyTrackSelected: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetOnlyTrackSelected
-                )))),
-                SetProjectGrid: std::mem::transmute(get_func(c_str!(stringify!(SetProjectGrid)))),
-                SetProjectMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetProjectMarker
-                )))),
-                SetProjectMarker2: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetProjectMarker2
-                )))),
-                SetProjectMarker3: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetProjectMarker3
-                )))),
-                SetProjectMarker4: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetProjectMarker4
-                )))),
-                SetProjectMarkerByIndex: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetProjectMarkerByIndex
-                )))),
-                SetProjectMarkerByIndex2: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetProjectMarkerByIndex2
-                )))),
-                SetProjExtState: std::mem::transmute(get_func(c_str!(stringify!(SetProjExtState)))),
-                SetRegionRenderMatrix: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetRegionRenderMatrix
-                )))),
-                SetRenderLastError: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetRenderLastError
-                )))),
-                SetTakeStretchMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTakeStretchMarker
-                )))),
-                SetTakeStretchMarkerSlope: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTakeStretchMarkerSlope
-                )))),
-                SetTempoTimeSigMarker: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTempoTimeSigMarker
-                )))),
-                SetToggleCommandState: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetToggleCommandState
-                )))),
-                SetTrackAutomationMode: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackAutomationMode
-                )))),
-                SetTrackColor: std::mem::transmute(get_func(c_str!(stringify!(SetTrackColor)))),
-                SetTrackMIDILyrics: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackMIDILyrics
-                )))),
-                SetTrackMIDINoteName: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackMIDINoteName
-                )))),
-                SetTrackMIDINoteNameEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackMIDINoteNameEx
-                )))),
-                SetTrackSelected: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackSelected
-                )))),
-                SetTrackSendInfo_Value: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackSendInfo_Value
-                )))),
-                SetTrackSendUIPan: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackSendUIPan
-                )))),
-                SetTrackSendUIVol: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackSendUIVol
-                )))),
-                SetTrackStateChunk: std::mem::transmute(get_func(c_str!(stringify!(
-                    SetTrackStateChunk
-                )))),
-                ShowActionList: std::mem::transmute(get_func(c_str!(stringify!(ShowActionList)))),
-                ShowConsoleMsg: std::mem::transmute(get_func(c_str!(stringify!(ShowConsoleMsg)))),
-                ShowMessageBox: std::mem::transmute(get_func(c_str!(stringify!(ShowMessageBox)))),
-                ShowPopupMenu: std::mem::transmute(get_func(c_str!(stringify!(ShowPopupMenu)))),
-                SLIDER2DB: std::mem::transmute(get_func(c_str!(stringify!(SLIDER2DB)))),
-                SnapToGrid: std::mem::transmute(get_func(c_str!(stringify!(SnapToGrid)))),
-                SoloAllTracks: std::mem::transmute(get_func(c_str!(stringify!(SoloAllTracks)))),
-                Splash_GetWnd: std::mem::transmute(get_func(c_str!(stringify!(Splash_GetWnd)))),
-                SplitMediaItem: std::mem::transmute(get_func(c_str!(stringify!(SplitMediaItem)))),
-                StopPreview: std::mem::transmute(get_func(c_str!(stringify!(StopPreview)))),
-                StopTrackPreview: std::mem::transmute(get_func(c_str!(stringify!(
-                    StopTrackPreview
-                )))),
-                StopTrackPreview2: std::mem::transmute(get_func(c_str!(stringify!(
-                    StopTrackPreview2
-                )))),
-                stringToGuid: std::mem::transmute(get_func(c_str!(stringify!(stringToGuid)))),
-                StuffMIDIMessage: std::mem::transmute(get_func(c_str!(stringify!(
-                    StuffMIDIMessage
-                )))),
-                TakeFX_AddByName: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_AddByName
-                )))),
-                TakeFX_CopyToTake: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_CopyToTake
-                )))),
-                TakeFX_CopyToTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_CopyToTrack
-                )))),
-                TakeFX_Delete: std::mem::transmute(get_func(c_str!(stringify!(TakeFX_Delete)))),
-                TakeFX_EndParamEdit: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_EndParamEdit
-                )))),
-                TakeFX_FormatParamValue: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_FormatParamValue
-                )))),
-                TakeFX_FormatParamValueNormalized: std::mem::transmute(get_func(c_str!(
-                    stringify!(TakeFX_FormatParamValueNormalized)
-                ))),
-                TakeFX_GetChainVisible: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetChainVisible
-                )))),
-                TakeFX_GetCount: std::mem::transmute(get_func(c_str!(stringify!(TakeFX_GetCount)))),
-                TakeFX_GetEnabled: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetEnabled
-                )))),
-                TakeFX_GetEnvelope: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetEnvelope
-                )))),
-                TakeFX_GetFloatingWindow: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetFloatingWindow
-                )))),
-                TakeFX_GetFormattedParamValue: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetFormattedParamValue
-                )))),
-                TakeFX_GetFXGUID: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetFXGUID
-                )))),
-                TakeFX_GetFXName: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetFXName
-                )))),
-                TakeFX_GetIOSize: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetIOSize
-                )))),
-                TakeFX_GetNamedConfigParm: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetNamedConfigParm
-                )))),
-                TakeFX_GetNumParams: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetNumParams
-                )))),
-                TakeFX_GetOffline: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetOffline
-                )))),
-                TakeFX_GetOpen: std::mem::transmute(get_func(c_str!(stringify!(TakeFX_GetOpen)))),
-                TakeFX_GetParam: std::mem::transmute(get_func(c_str!(stringify!(TakeFX_GetParam)))),
-                TakeFX_GetParameterStepSizes: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetParameterStepSizes
-                )))),
-                TakeFX_GetParamEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetParamEx
-                )))),
-                TakeFX_GetParamName: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetParamName
-                )))),
-                TakeFX_GetParamNormalized: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetParamNormalized
-                )))),
-                TakeFX_GetPinMappings: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetPinMappings
-                )))),
-                TakeFX_GetPreset: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetPreset
-                )))),
-                TakeFX_GetPresetIndex: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetPresetIndex
-                )))),
-                TakeFX_GetUserPresetFilename: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_GetUserPresetFilename
-                )))),
-                TakeFX_NavigatePresets: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_NavigatePresets
-                )))),
-                TakeFX_SetEnabled: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_SetEnabled
-                )))),
-                TakeFX_SetNamedConfigParm: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_SetNamedConfigParm
-                )))),
-                TakeFX_SetOffline: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_SetOffline
-                )))),
-                TakeFX_SetOpen: std::mem::transmute(get_func(c_str!(stringify!(TakeFX_SetOpen)))),
-                TakeFX_SetParam: std::mem::transmute(get_func(c_str!(stringify!(TakeFX_SetParam)))),
-                TakeFX_SetParamNormalized: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_SetParamNormalized
-                )))),
-                TakeFX_SetPinMappings: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_SetPinMappings
-                )))),
-                TakeFX_SetPreset: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_SetPreset
-                )))),
-                TakeFX_SetPresetByIndex: std::mem::transmute(get_func(c_str!(stringify!(
-                    TakeFX_SetPresetByIndex
-                )))),
-                TakeFX_Show: std::mem::transmute(get_func(c_str!(stringify!(TakeFX_Show)))),
-                TakeIsMIDI: std::mem::transmute(get_func(c_str!(stringify!(TakeIsMIDI)))),
-                ThemeLayout_GetLayout: std::mem::transmute(get_func(c_str!(stringify!(
-                    ThemeLayout_GetLayout
-                )))),
-                ThemeLayout_GetParameter: std::mem::transmute(get_func(c_str!(stringify!(
-                    ThemeLayout_GetParameter
-                )))),
-                ThemeLayout_RefreshAll: std::mem::transmute(get_func(c_str!(stringify!(
-                    ThemeLayout_RefreshAll
-                )))),
-                ThemeLayout_SetLayout: std::mem::transmute(get_func(c_str!(stringify!(
-                    ThemeLayout_SetLayout
-                )))),
-                ThemeLayout_SetParameter: std::mem::transmute(get_func(c_str!(stringify!(
-                    ThemeLayout_SetParameter
-                )))),
-                time_precise: std::mem::transmute(get_func(c_str!(stringify!(time_precise)))),
-                TimeMap2_beatsToTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap2_beatsToTime
-                )))),
-                TimeMap2_GetDividedBpmAtTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap2_GetDividedBpmAtTime
-                )))),
-                TimeMap2_GetNextChangeTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap2_GetNextChangeTime
-                )))),
-                TimeMap2_QNToTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap2_QNToTime
-                )))),
-                TimeMap2_timeToBeats: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap2_timeToBeats
-                )))),
-                TimeMap2_timeToQN: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap2_timeToQN
-                )))),
-                TimeMap_curFrameRate: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_curFrameRate
-                )))),
-                TimeMap_GetDividedBpmAtTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_GetDividedBpmAtTime
-                )))),
-                TimeMap_GetMeasureInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_GetMeasureInfo
-                )))),
-                TimeMap_GetMetronomePattern: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_GetMetronomePattern
-                )))),
-                TimeMap_GetTimeSigAtTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_GetTimeSigAtTime
-                )))),
-                TimeMap_QNToMeasures: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_QNToMeasures
-                )))),
-                TimeMap_QNToTime: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_QNToTime
-                )))),
-                TimeMap_QNToTime_abs: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_QNToTime_abs
-                )))),
-                TimeMap_timeToQN: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_timeToQN
-                )))),
-                TimeMap_timeToQN_abs: std::mem::transmute(get_func(c_str!(stringify!(
-                    TimeMap_timeToQN_abs
-                )))),
-                ToggleTrackSendUIMute: std::mem::transmute(get_func(c_str!(stringify!(
-                    ToggleTrackSendUIMute
-                )))),
-                Track_GetPeakHoldDB: std::mem::transmute(get_func(c_str!(stringify!(
-                    Track_GetPeakHoldDB
-                )))),
-                Track_GetPeakInfo: std::mem::transmute(get_func(c_str!(stringify!(
-                    Track_GetPeakInfo
-                )))),
-                TrackCtl_SetToolTip: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackCtl_SetToolTip
-                )))),
-                TrackFX_AddByName: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_AddByName
-                )))),
-                TrackFX_CopyToTake: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_CopyToTake
-                )))),
-                TrackFX_CopyToTrack: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_CopyToTrack
-                )))),
-                TrackFX_Delete: std::mem::transmute(get_func(c_str!(stringify!(TrackFX_Delete)))),
-                TrackFX_EndParamEdit: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_EndParamEdit
-                )))),
-                TrackFX_FormatParamValue: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_FormatParamValue
-                )))),
-                TrackFX_FormatParamValueNormalized: std::mem::transmute(get_func(c_str!(
-                    stringify!(TrackFX_FormatParamValueNormalized)
-                ))),
-                TrackFX_GetByName: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetByName
-                )))),
-                TrackFX_GetChainVisible: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetChainVisible
-                )))),
-                TrackFX_GetCount: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetCount
-                )))),
-                TrackFX_GetEnabled: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetEnabled
-                )))),
-                TrackFX_GetEQ: std::mem::transmute(get_func(c_str!(stringify!(TrackFX_GetEQ)))),
-                TrackFX_GetEQBandEnabled: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetEQBandEnabled
-                )))),
-                TrackFX_GetEQParam: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetEQParam
-                )))),
-                TrackFX_GetFloatingWindow: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetFloatingWindow
-                )))),
-                TrackFX_GetFormattedParamValue: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetFormattedParamValue
-                )))),
-                TrackFX_GetFXGUID: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetFXGUID
-                )))),
-                TrackFX_GetFXName: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetFXName
-                )))),
-                TrackFX_GetInstrument: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetInstrument
-                )))),
-                TrackFX_GetIOSize: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetIOSize
-                )))),
-                TrackFX_GetNamedConfigParm: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetNamedConfigParm
-                )))),
-                TrackFX_GetNumParams: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetNumParams
-                )))),
-                TrackFX_GetOffline: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetOffline
-                )))),
-                TrackFX_GetOpen: std::mem::transmute(get_func(c_str!(stringify!(TrackFX_GetOpen)))),
-                TrackFX_GetParam: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetParam
-                )))),
-                TrackFX_GetParameterStepSizes: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetParameterStepSizes
-                )))),
-                TrackFX_GetParamEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetParamEx
-                )))),
-                TrackFX_GetParamName: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetParamName
-                )))),
-                TrackFX_GetParamNormalized: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetParamNormalized
-                )))),
-                TrackFX_GetPinMappings: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetPinMappings
-                )))),
-                TrackFX_GetPreset: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetPreset
-                )))),
-                TrackFX_GetPresetIndex: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetPresetIndex
-                )))),
-                TrackFX_GetRecChainVisible: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetRecChainVisible
-                )))),
-                TrackFX_GetRecCount: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetRecCount
-                )))),
-                TrackFX_GetUserPresetFilename: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_GetUserPresetFilename
-                )))),
-                TrackFX_NavigatePresets: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_NavigatePresets
-                )))),
-                TrackFX_SetEnabled: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetEnabled
-                )))),
-                TrackFX_SetEQBandEnabled: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetEQBandEnabled
-                )))),
-                TrackFX_SetEQParam: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetEQParam
-                )))),
-                TrackFX_SetNamedConfigParm: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetNamedConfigParm
-                )))),
-                TrackFX_SetOffline: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetOffline
-                )))),
-                TrackFX_SetOpen: std::mem::transmute(get_func(c_str!(stringify!(TrackFX_SetOpen)))),
-                TrackFX_SetParam: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetParam
-                )))),
-                TrackFX_SetParamNormalized: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetParamNormalized
-                )))),
-                TrackFX_SetPinMappings: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetPinMappings
-                )))),
-                TrackFX_SetPreset: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetPreset
-                )))),
-                TrackFX_SetPresetByIndex: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackFX_SetPresetByIndex
-                )))),
-                TrackFX_Show: std::mem::transmute(get_func(c_str!(stringify!(TrackFX_Show)))),
-                TrackList_AdjustWindows: std::mem::transmute(get_func(c_str!(stringify!(
-                    TrackList_AdjustWindows
-                )))),
-                TrackList_UpdateAllExternalSurfaces: std::mem::transmute(get_func(c_str!(
-                    stringify!(TrackList_UpdateAllExternalSurfaces)
-                ))),
-                Undo_BeginBlock: std::mem::transmute(get_func(c_str!(stringify!(Undo_BeginBlock)))),
-                Undo_BeginBlock2: std::mem::transmute(get_func(c_str!(stringify!(
-                    Undo_BeginBlock2
-                )))),
-                Undo_CanRedo2: std::mem::transmute(get_func(c_str!(stringify!(Undo_CanRedo2)))),
-                Undo_CanUndo2: std::mem::transmute(get_func(c_str!(stringify!(Undo_CanUndo2)))),
-                Undo_DoRedo2: std::mem::transmute(get_func(c_str!(stringify!(Undo_DoRedo2)))),
-                Undo_DoUndo2: std::mem::transmute(get_func(c_str!(stringify!(Undo_DoUndo2)))),
-                Undo_EndBlock: std::mem::transmute(get_func(c_str!(stringify!(Undo_EndBlock)))),
-                Undo_EndBlock2: std::mem::transmute(get_func(c_str!(stringify!(Undo_EndBlock2)))),
-                Undo_OnStateChange: std::mem::transmute(get_func(c_str!(stringify!(
-                    Undo_OnStateChange
-                )))),
-                Undo_OnStateChange2: std::mem::transmute(get_func(c_str!(stringify!(
-                    Undo_OnStateChange2
-                )))),
-                Undo_OnStateChange_Item: std::mem::transmute(get_func(c_str!(stringify!(
-                    Undo_OnStateChange_Item
-                )))),
-                Undo_OnStateChangeEx: std::mem::transmute(get_func(c_str!(stringify!(
-                    Undo_OnStateChangeEx
-                )))),
-                Undo_OnStateChangeEx2: std::mem::transmute(get_func(c_str!(stringify!(
-                    Undo_OnStateChangeEx2
-                )))),
-                update_disk_counters: std::mem::transmute(get_func(c_str!(stringify!(
-                    update_disk_counters
-                )))),
-                UpdateArrange: std::mem::transmute(get_func(c_str!(stringify!(UpdateArrange)))),
-                UpdateItemInProject: std::mem::transmute(get_func(c_str!(stringify!(
-                    UpdateItemInProject
-                )))),
-                UpdateTimeline: std::mem::transmute(get_func(c_str!(stringify!(UpdateTimeline)))),
-                ValidatePtr: std::mem::transmute(get_func(c_str!(stringify!(ValidatePtr)))),
-                ValidatePtr2: std::mem::transmute(get_func(c_str!(stringify!(ValidatePtr2)))),
-                ViewPrefs: std::mem::transmute(get_func(c_str!(stringify!(ViewPrefs)))),
-                WDL_VirtualWnd_ScaledBlitBG: std::mem::transmute(get_func(c_str!(stringify!(
-                    WDL_VirtualWnd_ScaledBlitBG
-                )))),
-                GetMidiInput: std::mem::transmute(get_func(c_str!(stringify!(GetMidiInput)))),
-                GetMidiOutput: std::mem::transmute(get_func(c_str!(stringify!(GetMidiOutput)))),
+                __mergesort: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(__mergesort)).as_ptr()),
+                ),
+                AddCustomizableMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddCustomizableMenu)).as_ptr()),
+                ),
+                AddExtensionsMainMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddExtensionsMainMenu)).as_ptr()),
+                ),
+                AddMediaItemToTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddMediaItemToTrack)).as_ptr()),
+                ),
+                AddProjectMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddProjectMarker)).as_ptr()),
+                ),
+                AddProjectMarker2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddProjectMarker2)).as_ptr()),
+                ),
+                AddRemoveReaScript: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddRemoveReaScript)).as_ptr()),
+                ),
+                AddTakeToMediaItem: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddTakeToMediaItem)).as_ptr()),
+                ),
+                AddTempoTimeSigMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AddTempoTimeSigMarker)).as_ptr()),
+                ),
+                adjustZoom: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(adjustZoom)).as_ptr()),
+                ),
+                AnyTrackSolo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AnyTrackSolo)).as_ptr()),
+                ),
+                APIExists: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(APIExists)).as_ptr()),
+                ),
+                APITest: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(APITest)).as_ptr()),
+                ),
+                ApplyNudge: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ApplyNudge)).as_ptr()),
+                ),
+                ArmCommand: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ArmCommand)).as_ptr()),
+                ),
+                Audio_Init: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Audio_Init)).as_ptr()),
+                ),
+                Audio_IsPreBuffer: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Audio_IsPreBuffer)).as_ptr()),
+                ),
+                Audio_IsRunning: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Audio_IsRunning)).as_ptr()),
+                ),
+                Audio_Quit: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Audio_Quit)).as_ptr()),
+                ),
+                Audio_RegHardwareHook: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Audio_RegHardwareHook)).as_ptr()),
+                ),
+                AudioAccessorStateChanged: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AudioAccessorStateChanged)).as_ptr()),
+                ),
+                AudioAccessorUpdate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AudioAccessorUpdate)).as_ptr()),
+                ),
+                AudioAccessorValidateState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(AudioAccessorValidateState)).as_ptr()),
+                ),
+                BypassFxAllTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(BypassFxAllTracks)).as_ptr()),
+                ),
+                CalculatePeaks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CalculatePeaks)).as_ptr()),
+                ),
+                CalculatePeaksFloatSrcPtr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CalculatePeaksFloatSrcPtr)).as_ptr()),
+                ),
+                ClearAllRecArmed: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ClearAllRecArmed)).as_ptr()),
+                ),
+                ClearConsole: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ClearConsole)).as_ptr()),
+                ),
+                ClearPeakCache: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ClearPeakCache)).as_ptr()),
+                ),
+                ColorFromNative: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ColorFromNative)).as_ptr()),
+                ),
+                ColorToNative: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ColorToNative)).as_ptr()),
+                ),
+                CountActionShortcuts: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountActionShortcuts)).as_ptr()),
+                ),
+                CountAutomationItems: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountAutomationItems)).as_ptr()),
+                ),
+                CountEnvelopePoints: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountEnvelopePoints)).as_ptr()),
+                ),
+                CountEnvelopePointsEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountEnvelopePointsEx)).as_ptr()),
+                ),
+                CountMediaItems: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountMediaItems)).as_ptr()),
+                ),
+                CountProjectMarkers: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountProjectMarkers)).as_ptr()),
+                ),
+                CountSelectedMediaItems: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountSelectedMediaItems)).as_ptr()),
+                ),
+                CountSelectedTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountSelectedTracks)).as_ptr()),
+                ),
+                CountSelectedTracks2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountSelectedTracks2)).as_ptr()),
+                ),
+                CountTakeEnvelopes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountTakeEnvelopes)).as_ptr()),
+                ),
+                CountTakes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountTakes)).as_ptr()),
+                ),
+                CountTCPFXParms: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountTCPFXParms)).as_ptr()),
+                ),
+                CountTempoTimeSigMarkers: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountTempoTimeSigMarkers)).as_ptr()),
+                ),
+                CountTrackEnvelopes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountTrackEnvelopes)).as_ptr()),
+                ),
+                CountTrackMediaItems: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountTrackMediaItems)).as_ptr()),
+                ),
+                CountTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CountTracks)).as_ptr()),
+                ),
+                CreateLocalOscHandler: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CreateLocalOscHandler)).as_ptr()),
+                ),
+                CreateMIDIInput: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CreateMIDIInput)).as_ptr()),
+                ),
+                CreateMIDIOutput: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CreateMIDIOutput)).as_ptr()),
+                ),
+                CreateNewMIDIItemInProj: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CreateNewMIDIItemInProj)).as_ptr()),
+                ),
+                CreateTakeAudioAccessor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CreateTakeAudioAccessor)).as_ptr()),
+                ),
+                CreateTrackAudioAccessor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CreateTrackAudioAccessor)).as_ptr()),
+                ),
+                CreateTrackSend: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CreateTrackSend)).as_ptr()),
+                ),
+                CSurf_FlushUndo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_FlushUndo)).as_ptr()),
+                ),
+                CSurf_GetTouchState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_GetTouchState)).as_ptr()),
+                ),
+                CSurf_GoEnd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_GoEnd)).as_ptr()),
+                ),
+                CSurf_GoStart: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_GoStart)).as_ptr()),
+                ),
+                CSurf_NumTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_NumTracks)).as_ptr()),
+                ),
+                CSurf_OnArrow: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnArrow)).as_ptr()),
+                ),
+                CSurf_OnFwd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnFwd)).as_ptr()),
+                ),
+                CSurf_OnFXChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnFXChange)).as_ptr()),
+                ),
+                CSurf_OnInputMonitorChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnInputMonitorChange)).as_ptr()),
+                ),
+                CSurf_OnInputMonitorChangeEx: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(CSurf_OnInputMonitorChangeEx)).as_ptr()),
+                ),
+                CSurf_OnMuteChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnMuteChange)).as_ptr()),
+                ),
+                CSurf_OnMuteChangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnMuteChangeEx)).as_ptr()),
+                ),
+                CSurf_OnOscControlMessage: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnOscControlMessage)).as_ptr()),
+                ),
+                CSurf_OnPanChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnPanChange)).as_ptr()),
+                ),
+                CSurf_OnPanChangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnPanChangeEx)).as_ptr()),
+                ),
+                CSurf_OnPause: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnPause)).as_ptr()),
+                ),
+                CSurf_OnPlay: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnPlay)).as_ptr()),
+                ),
+                CSurf_OnPlayRateChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnPlayRateChange)).as_ptr()),
+                ),
+                CSurf_OnRecArmChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnRecArmChange)).as_ptr()),
+                ),
+                CSurf_OnRecArmChangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnRecArmChangeEx)).as_ptr()),
+                ),
+                CSurf_OnRecord: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnRecord)).as_ptr()),
+                ),
+                CSurf_OnRecvPanChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnRecvPanChange)).as_ptr()),
+                ),
+                CSurf_OnRecvVolumeChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnRecvVolumeChange)).as_ptr()),
+                ),
+                CSurf_OnRew: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnRew)).as_ptr()),
+                ),
+                CSurf_OnRewFwd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnRewFwd)).as_ptr()),
+                ),
+                CSurf_OnScroll: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnScroll)).as_ptr()),
+                ),
+                CSurf_OnSelectedChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnSelectedChange)).as_ptr()),
+                ),
+                CSurf_OnSendPanChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnSendPanChange)).as_ptr()),
+                ),
+                CSurf_OnSendVolumeChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnSendVolumeChange)).as_ptr()),
+                ),
+                CSurf_OnSoloChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnSoloChange)).as_ptr()),
+                ),
+                CSurf_OnSoloChangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnSoloChangeEx)).as_ptr()),
+                ),
+                CSurf_OnStop: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnStop)).as_ptr()),
+                ),
+                CSurf_OnTempoChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnTempoChange)).as_ptr()),
+                ),
+                CSurf_OnTrackSelection: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnTrackSelection)).as_ptr()),
+                ),
+                CSurf_OnVolumeChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnVolumeChange)).as_ptr()),
+                ),
+                CSurf_OnVolumeChangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnVolumeChangeEx)).as_ptr()),
+                ),
+                CSurf_OnWidthChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnWidthChange)).as_ptr()),
+                ),
+                CSurf_OnWidthChangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnWidthChangeEx)).as_ptr()),
+                ),
+                CSurf_OnZoom: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_OnZoom)).as_ptr()),
+                ),
+                CSurf_ResetAllCachedVolPanStates: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(CSurf_ResetAllCachedVolPanStates)).as_ptr()),
+                ),
+                CSurf_ScrubAmt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_ScrubAmt)).as_ptr()),
+                ),
+                CSurf_SetAutoMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetAutoMode)).as_ptr()),
+                ),
+                CSurf_SetPlayState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetPlayState)).as_ptr()),
+                ),
+                CSurf_SetRepeatState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetRepeatState)).as_ptr()),
+                ),
+                CSurf_SetSurfaceMute: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetSurfaceMute)).as_ptr()),
+                ),
+                CSurf_SetSurfacePan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetSurfacePan)).as_ptr()),
+                ),
+                CSurf_SetSurfaceRecArm: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetSurfaceRecArm)).as_ptr()),
+                ),
+                CSurf_SetSurfaceSelected: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetSurfaceSelected)).as_ptr()),
+                ),
+                CSurf_SetSurfaceSolo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetSurfaceSolo)).as_ptr()),
+                ),
+                CSurf_SetSurfaceVolume: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetSurfaceVolume)).as_ptr()),
+                ),
+                CSurf_SetTrackListChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_SetTrackListChange)).as_ptr()),
+                ),
+                CSurf_TrackFromID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_TrackFromID)).as_ptr()),
+                ),
+                CSurf_TrackToID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(CSurf_TrackToID)).as_ptr()),
+                ),
+                DB2SLIDER: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DB2SLIDER)).as_ptr()),
+                ),
+                DeleteActionShortcut: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteActionShortcut)).as_ptr()),
+                ),
+                DeleteEnvelopePointEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteEnvelopePointEx)).as_ptr()),
+                ),
+                DeleteEnvelopePointRange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteEnvelopePointRange)).as_ptr()),
+                ),
+                DeleteEnvelopePointRangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteEnvelopePointRangeEx)).as_ptr()),
+                ),
+                DeleteExtState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteExtState)).as_ptr()),
+                ),
+                DeleteProjectMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteProjectMarker)).as_ptr()),
+                ),
+                DeleteProjectMarkerByIndex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteProjectMarkerByIndex)).as_ptr()),
+                ),
+                DeleteTakeStretchMarkers: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteTakeStretchMarkers)).as_ptr()),
+                ),
+                DeleteTempoTimeSigMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteTempoTimeSigMarker)).as_ptr()),
+                ),
+                DeleteTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteTrack)).as_ptr()),
+                ),
+                DeleteTrackMediaItem: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DeleteTrackMediaItem)).as_ptr()),
+                ),
+                DestroyAudioAccessor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DestroyAudioAccessor)).as_ptr()),
+                ),
+                DestroyLocalOscHandler: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DestroyLocalOscHandler)).as_ptr()),
+                ),
+                DoActionShortcutDialog: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DoActionShortcutDialog)).as_ptr()),
+                ),
+                Dock_UpdateDockID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Dock_UpdateDockID)).as_ptr()),
+                ),
+                DockGetPosition: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockGetPosition)).as_ptr()),
+                ),
+                DockIsChildOfDock: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockIsChildOfDock)).as_ptr()),
+                ),
+                DockWindowActivate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockWindowActivate)).as_ptr()),
+                ),
+                DockWindowAdd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockWindowAdd)).as_ptr()),
+                ),
+                DockWindowAddEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockWindowAddEx)).as_ptr()),
+                ),
+                DockWindowRefresh: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockWindowRefresh)).as_ptr()),
+                ),
+                DockWindowRefreshForHWND: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockWindowRefreshForHWND)).as_ptr()),
+                ),
+                DockWindowRemove: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DockWindowRemove)).as_ptr()),
+                ),
+                DuplicateCustomizableMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(DuplicateCustomizableMenu)).as_ptr()),
+                ),
+                EditTempoTimeSigMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EditTempoTimeSigMarker)).as_ptr()),
+                ),
+                EnsureNotCompletelyOffscreen: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(EnsureNotCompletelyOffscreen)).as_ptr()),
+                ),
+                EnumerateFiles: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumerateFiles)).as_ptr()),
+                ),
+                EnumerateSubdirectories: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumerateSubdirectories)).as_ptr()),
+                ),
+                EnumPitchShiftModes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumPitchShiftModes)).as_ptr()),
+                ),
+                EnumPitchShiftSubModes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumPitchShiftSubModes)).as_ptr()),
+                ),
+                EnumProjectMarkers: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumProjectMarkers)).as_ptr()),
+                ),
+                EnumProjectMarkers2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumProjectMarkers2)).as_ptr()),
+                ),
+                EnumProjectMarkers3: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumProjectMarkers3)).as_ptr()),
+                ),
+                EnumProjects: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumProjects)).as_ptr()),
+                ),
+                EnumProjExtState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumProjExtState)).as_ptr()),
+                ),
+                EnumRegionRenderMatrix: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumRegionRenderMatrix)).as_ptr()),
+                ),
+                EnumTrackMIDIProgramNames: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(EnumTrackMIDIProgramNames)).as_ptr()),
+                ),
+                EnumTrackMIDIProgramNamesEx: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(EnumTrackMIDIProgramNamesEx)).as_ptr()),
+                ),
+                Envelope_Evaluate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Envelope_Evaluate)).as_ptr()),
+                ),
+                Envelope_FormatValue: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Envelope_FormatValue)).as_ptr()),
+                ),
+                Envelope_GetParentTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Envelope_GetParentTake)).as_ptr()),
+                ),
+                Envelope_GetParentTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Envelope_GetParentTrack)).as_ptr()),
+                ),
+                Envelope_SortPoints: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Envelope_SortPoints)).as_ptr()),
+                ),
+                Envelope_SortPointsEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Envelope_SortPointsEx)).as_ptr()),
+                ),
+                ExecProcess: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ExecProcess)).as_ptr()),
+                ),
+                file_exists: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(file_exists)).as_ptr()),
+                ),
+                FindTempoTimeSigMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(FindTempoTimeSigMarker)).as_ptr()),
+                ),
+                format_timestr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(format_timestr)).as_ptr()),
+                ),
+                format_timestr_len: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(format_timestr_len)).as_ptr()),
+                ),
+                format_timestr_pos: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(format_timestr_pos)).as_ptr()),
+                ),
+                FreeHeapPtr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(FreeHeapPtr)).as_ptr()),
+                ),
+                genGuid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(genGuid)).as_ptr()),
+                ),
+                get_config_var: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(get_config_var)).as_ptr()),
+                ),
+                get_config_var_string: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(get_config_var_string)).as_ptr()),
+                ),
+                get_ini_file: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(get_ini_file)).as_ptr()),
+                ),
+                get_midi_config_var: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(get_midi_config_var)).as_ptr()),
+                ),
+                GetActionShortcutDesc: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetActionShortcutDesc)).as_ptr()),
+                ),
+                GetActiveTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetActiveTake)).as_ptr()),
+                ),
+                GetAllProjectPlayStates: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetAllProjectPlayStates)).as_ptr()),
+                ),
+                GetAppVersion: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetAppVersion)).as_ptr()),
+                ),
+                GetArmedCommand: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetArmedCommand)).as_ptr()),
+                ),
+                GetAudioAccessorEndTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetAudioAccessorEndTime)).as_ptr()),
+                ),
+                GetAudioAccessorHash: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetAudioAccessorHash)).as_ptr()),
+                ),
+                GetAudioAccessorSamples: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetAudioAccessorSamples)).as_ptr()),
+                ),
+                GetAudioAccessorStartTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetAudioAccessorStartTime)).as_ptr()),
+                ),
+                GetAudioDeviceInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetAudioDeviceInfo)).as_ptr()),
+                ),
+                GetColorTheme: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetColorTheme)).as_ptr()),
+                ),
+                GetColorThemeStruct: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetColorThemeStruct)).as_ptr()),
+                ),
+                GetConfigWantsDock: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetConfigWantsDock)).as_ptr()),
+                ),
+                GetContextMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetContextMenu)).as_ptr()),
+                ),
+                GetCurrentProjectInLoadSave: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetCurrentProjectInLoadSave)).as_ptr()),
+                ),
+                GetCursorContext: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetCursorContext)).as_ptr()),
+                ),
+                GetCursorContext2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetCursorContext2)).as_ptr()),
+                ),
+                GetCursorPosition: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetCursorPosition)).as_ptr()),
+                ),
+                GetCursorPositionEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetCursorPositionEx)).as_ptr()),
+                ),
+                GetDisplayedMediaItemColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetDisplayedMediaItemColor)).as_ptr()),
+                ),
+                GetDisplayedMediaItemColor2: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetDisplayedMediaItemColor2)).as_ptr()),
+                ),
+                GetEnvelopeInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopeInfo_Value)).as_ptr()),
+                ),
+                GetEnvelopeName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopeName)).as_ptr()),
+                ),
+                GetEnvelopePoint: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopePoint)).as_ptr()),
+                ),
+                GetEnvelopePointByTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopePointByTime)).as_ptr()),
+                ),
+                GetEnvelopePointByTimeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopePointByTimeEx)).as_ptr()),
+                ),
+                GetEnvelopePointEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopePointEx)).as_ptr()),
+                ),
+                GetEnvelopeScalingMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopeScalingMode)).as_ptr()),
+                ),
+                GetEnvelopeStateChunk: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetEnvelopeStateChunk)).as_ptr()),
+                ),
+                GetExePath: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetExePath)).as_ptr()),
+                ),
+                GetExtState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetExtState)).as_ptr()),
+                ),
+                GetFocusedFX: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetFocusedFX)).as_ptr()),
+                ),
+                GetFreeDiskSpaceForRecordPath: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetFreeDiskSpaceForRecordPath)).as_ptr()),
+                ),
+                GetFXEnvelope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetFXEnvelope)).as_ptr()),
+                ),
+                GetGlobalAutomationOverride: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetGlobalAutomationOverride)).as_ptr()),
+                ),
+                GetHZoomLevel: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetHZoomLevel)).as_ptr()),
+                ),
+                GetIconThemePointer: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetIconThemePointer)).as_ptr()),
+                ),
+                GetIconThemePointerForDPI: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetIconThemePointerForDPI)).as_ptr()),
+                ),
+                GetIconThemeStruct: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetIconThemeStruct)).as_ptr()),
+                ),
+                GetInputChannelName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetInputChannelName)).as_ptr()),
+                ),
+                GetInputOutputLatency: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetInputOutputLatency)).as_ptr()),
+                ),
+                GetItemEditingTime2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetItemEditingTime2)).as_ptr()),
+                ),
+                GetItemFromPoint: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetItemFromPoint)).as_ptr()),
+                ),
+                GetItemProjectContext: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetItemProjectContext)).as_ptr()),
+                ),
+                GetItemStateChunk: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetItemStateChunk)).as_ptr()),
+                ),
+                GetLastColorThemeFile: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetLastColorThemeFile)).as_ptr()),
+                ),
+                GetLastMarkerAndCurRegion: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetLastMarkerAndCurRegion)).as_ptr()),
+                ),
+                GetLastTouchedFX: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetLastTouchedFX)).as_ptr()),
+                ),
+                GetLastTouchedTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetLastTouchedTrack)).as_ptr()),
+                ),
+                GetMainHwnd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMainHwnd)).as_ptr()),
+                ),
+                GetMasterMuteSoloFlags: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMasterMuteSoloFlags)).as_ptr()),
+                ),
+                GetMasterTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMasterTrack)).as_ptr()),
+                ),
+                GetMasterTrackVisibility: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMasterTrackVisibility)).as_ptr()),
+                ),
+                GetMaxMidiInputs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMaxMidiInputs)).as_ptr()),
+                ),
+                GetMaxMidiOutputs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMaxMidiOutputs)).as_ptr()),
+                ),
+                GetMediaItem: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItem)).as_ptr()),
+                ),
+                GetMediaItem_Track: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItem_Track)).as_ptr()),
+                ),
+                GetMediaItemInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemInfo_Value)).as_ptr()),
+                ),
+                GetMediaItemNumTakes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemNumTakes)).as_ptr()),
+                ),
+                GetMediaItemTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTake)).as_ptr()),
+                ),
+                GetMediaItemTake_Item: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTake_Item)).as_ptr()),
+                ),
+                GetMediaItemTake_Peaks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTake_Peaks)).as_ptr()),
+                ),
+                GetMediaItemTake_Source: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTake_Source)).as_ptr()),
+                ),
+                GetMediaItemTake_Track: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTake_Track)).as_ptr()),
+                ),
+                GetMediaItemTakeByGUID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTakeByGUID)).as_ptr()),
+                ),
+                GetMediaItemTakeInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTakeInfo_Value)).as_ptr()),
+                ),
+                GetMediaItemTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaItemTrack)).as_ptr()),
+                ),
+                GetMediaSourceFileName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaSourceFileName)).as_ptr()),
+                ),
+                GetMediaSourceLength: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaSourceLength)).as_ptr()),
+                ),
+                GetMediaSourceNumChannels: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaSourceNumChannels)).as_ptr()),
+                ),
+                GetMediaSourceParent: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaSourceParent)).as_ptr()),
+                ),
+                GetMediaSourceSampleRate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaSourceSampleRate)).as_ptr()),
+                ),
+                GetMediaSourceType: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaSourceType)).as_ptr()),
+                ),
+                GetMediaTrackInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMediaTrackInfo_Value)).as_ptr()),
+                ),
+                GetMIDIInputName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMIDIInputName)).as_ptr()),
+                ),
+                GetMIDIOutputName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMIDIOutputName)).as_ptr()),
+                ),
+                GetMixerScroll: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMixerScroll)).as_ptr()),
+                ),
+                GetMouseModifier: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMouseModifier)).as_ptr()),
+                ),
+                GetMousePosition: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMousePosition)).as_ptr()),
+                ),
+                GetNumAudioInputs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetNumAudioInputs)).as_ptr()),
+                ),
+                GetNumAudioOutputs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetNumAudioOutputs)).as_ptr()),
+                ),
+                GetNumMIDIInputs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetNumMIDIInputs)).as_ptr()),
+                ),
+                GetNumMIDIOutputs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetNumMIDIOutputs)).as_ptr()),
+                ),
+                GetNumTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetNumTracks)).as_ptr()),
+                ),
+                GetOS: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetOS)).as_ptr()),
+                ),
+                GetOutputChannelName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetOutputChannelName)).as_ptr()),
+                ),
+                GetOutputLatency: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetOutputLatency)).as_ptr()),
+                ),
+                GetParentTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetParentTrack)).as_ptr()),
+                ),
+                GetPeakFileName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPeakFileName)).as_ptr()),
+                ),
+                GetPeakFileNameEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPeakFileNameEx)).as_ptr()),
+                ),
+                GetPeakFileNameEx2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPeakFileNameEx2)).as_ptr()),
+                ),
+                GetPeaksBitmap: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPeaksBitmap)).as_ptr()),
+                ),
+                GetPlayPosition: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPlayPosition)).as_ptr()),
+                ),
+                GetPlayPosition2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPlayPosition2)).as_ptr()),
+                ),
+                GetPlayPosition2Ex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPlayPosition2Ex)).as_ptr()),
+                ),
+                GetPlayPositionEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPlayPositionEx)).as_ptr()),
+                ),
+                GetPlayState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPlayState)).as_ptr()),
+                ),
+                GetPlayStateEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPlayStateEx)).as_ptr()),
+                ),
+                GetPreferredDiskReadMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPreferredDiskReadMode)).as_ptr()),
+                ),
+                GetPreferredDiskReadModePeak: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetPreferredDiskReadModePeak)).as_ptr()),
+                ),
+                GetPreferredDiskWriteMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetPreferredDiskWriteMode)).as_ptr()),
+                ),
+                GetProjectLength: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectLength)).as_ptr()),
+                ),
+                GetProjectName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectName)).as_ptr()),
+                ),
+                GetProjectPath: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectPath)).as_ptr()),
+                ),
+                GetProjectPathEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectPathEx)).as_ptr()),
+                ),
+                GetProjectStateChangeCount: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectStateChangeCount)).as_ptr()),
+                ),
+                GetProjectTimeOffset: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectTimeOffset)).as_ptr()),
+                ),
+                GetProjectTimeSignature: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectTimeSignature)).as_ptr()),
+                ),
+                GetProjectTimeSignature2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjectTimeSignature2)).as_ptr()),
+                ),
+                GetProjExtState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetProjExtState)).as_ptr()),
+                ),
+                GetResourcePath: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetResourcePath)).as_ptr()),
+                ),
+                GetSelectedEnvelope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSelectedEnvelope)).as_ptr()),
+                ),
+                GetSelectedMediaItem: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSelectedMediaItem)).as_ptr()),
+                ),
+                GetSelectedTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSelectedTrack)).as_ptr()),
+                ),
+                GetSelectedTrack2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSelectedTrack2)).as_ptr()),
+                ),
+                GetSelectedTrackEnvelope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSelectedTrackEnvelope)).as_ptr()),
+                ),
+                GetSet_ArrangeView2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSet_ArrangeView2)).as_ptr()),
+                ),
+                GetSet_LoopTimeRange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSet_LoopTimeRange)).as_ptr()),
+                ),
+                GetSet_LoopTimeRange2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSet_LoopTimeRange2)).as_ptr()),
+                ),
+                GetSetAutomationItemInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetAutomationItemInfo)).as_ptr()),
+                ),
+                GetSetAutomationItemInfo_String: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetSetAutomationItemInfo_String)).as_ptr()),
+                ),
+                GetSetEnvelopeInfo_String: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetEnvelopeInfo_String)).as_ptr()),
+                ),
+                GetSetEnvelopeState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetEnvelopeState)).as_ptr()),
+                ),
+                GetSetEnvelopeState2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetEnvelopeState2)).as_ptr()),
+                ),
+                GetSetItemState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetItemState)).as_ptr()),
+                ),
+                GetSetItemState2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetItemState2)).as_ptr()),
+                ),
+                GetSetMediaItemInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetMediaItemInfo)).as_ptr()),
+                ),
+                GetSetMediaItemInfo_String: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetMediaItemInfo_String)).as_ptr()),
+                ),
+                GetSetMediaItemTakeInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetMediaItemTakeInfo)).as_ptr()),
+                ),
+                GetSetMediaItemTakeInfo_String: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetSetMediaItemTakeInfo_String)).as_ptr()),
+                ),
+                GetSetMediaTrackInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetMediaTrackInfo)).as_ptr()),
+                ),
+                GetSetMediaTrackInfo_String: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetSetMediaTrackInfo_String)).as_ptr()),
+                ),
+                GetSetObjectState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetObjectState)).as_ptr()),
+                ),
+                GetSetObjectState2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetObjectState2)).as_ptr()),
+                ),
+                GetSetProjectAuthor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetProjectAuthor)).as_ptr()),
+                ),
+                GetSetProjectGrid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetProjectGrid)).as_ptr()),
+                ),
+                GetSetProjectInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetProjectInfo)).as_ptr()),
+                ),
+                GetSetProjectInfo_String: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetProjectInfo_String)).as_ptr()),
+                ),
+                GetSetProjectNotes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetProjectNotes)).as_ptr()),
+                ),
+                GetSetRepeat: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetRepeat)).as_ptr()),
+                ),
+                GetSetRepeatEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetRepeatEx)).as_ptr()),
+                ),
+                GetSetTrackGroupMembership: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetTrackGroupMembership)).as_ptr()),
+                ),
+                GetSetTrackGroupMembershipHigh: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetSetTrackGroupMembershipHigh)).as_ptr()),
+                ),
+                GetSetTrackMIDISupportFile: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetTrackMIDISupportFile)).as_ptr()),
+                ),
+                GetSetTrackSendInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetTrackSendInfo)).as_ptr()),
+                ),
+                GetSetTrackSendInfo_String: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetTrackSendInfo_String)).as_ptr()),
+                ),
+                GetSetTrackState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetTrackState)).as_ptr()),
+                ),
+                GetSetTrackState2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSetTrackState2)).as_ptr()),
+                ),
+                GetSubProjectFromSource: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetSubProjectFromSource)).as_ptr()),
+                ),
+                GetTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTake)).as_ptr()),
+                ),
+                GetTakeEnvelope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTakeEnvelope)).as_ptr()),
+                ),
+                GetTakeEnvelopeByName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTakeEnvelopeByName)).as_ptr()),
+                ),
+                GetTakeName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTakeName)).as_ptr()),
+                ),
+                GetTakeNumStretchMarkers: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTakeNumStretchMarkers)).as_ptr()),
+                ),
+                GetTakeStretchMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTakeStretchMarker)).as_ptr()),
+                ),
+                GetTakeStretchMarkerSlope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTakeStretchMarkerSlope)).as_ptr()),
+                ),
+                GetTCPFXParm: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTCPFXParm)).as_ptr()),
+                ),
+                GetTempoMatchPlayRate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTempoMatchPlayRate)).as_ptr()),
+                ),
+                GetTempoTimeSigMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTempoTimeSigMarker)).as_ptr()),
+                ),
+                GetToggleCommandState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetToggleCommandState)).as_ptr()),
+                ),
+                GetToggleCommandState2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetToggleCommandState2)).as_ptr()),
+                ),
+                GetToggleCommandStateEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetToggleCommandStateEx)).as_ptr()),
+                ),
+                GetToggleCommandStateThroughHooks: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetToggleCommandStateThroughHooks)).as_ptr()),
+                ),
+                GetTooltipWindow: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTooltipWindow)).as_ptr()),
+                ),
+                GetTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrack)).as_ptr()),
+                ),
+                GetTrackAutomationMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackAutomationMode)).as_ptr()),
+                ),
+                GetTrackColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackColor)).as_ptr()),
+                ),
+                GetTrackDepth: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackDepth)).as_ptr()),
+                ),
+                GetTrackEnvelope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackEnvelope)).as_ptr()),
+                ),
+                GetTrackEnvelopeByChunkName: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(GetTrackEnvelopeByChunkName)).as_ptr()),
+                ),
+                GetTrackEnvelopeByName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackEnvelopeByName)).as_ptr()),
+                ),
+                GetTrackFromPoint: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackFromPoint)).as_ptr()),
+                ),
+                GetTrackGUID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackGUID)).as_ptr()),
+                ),
+                GetTrackInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackInfo)).as_ptr()),
+                ),
+                GetTrackMediaItem: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackMediaItem)).as_ptr()),
+                ),
+                GetTrackMIDILyrics: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackMIDILyrics)).as_ptr()),
+                ),
+                GetTrackMIDINoteName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackMIDINoteName)).as_ptr()),
+                ),
+                GetTrackMIDINoteNameEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackMIDINoteNameEx)).as_ptr()),
+                ),
+                GetTrackMIDINoteRange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackMIDINoteRange)).as_ptr()),
+                ),
+                GetTrackName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackName)).as_ptr()),
+                ),
+                GetTrackNumMediaItems: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackNumMediaItems)).as_ptr()),
+                ),
+                GetTrackNumSends: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackNumSends)).as_ptr()),
+                ),
+                GetTrackReceiveName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackReceiveName)).as_ptr()),
+                ),
+                GetTrackReceiveUIMute: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackReceiveUIMute)).as_ptr()),
+                ),
+                GetTrackReceiveUIVolPan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackReceiveUIVolPan)).as_ptr()),
+                ),
+                GetTrackSendInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackSendInfo_Value)).as_ptr()),
+                ),
+                GetTrackSendName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackSendName)).as_ptr()),
+                ),
+                GetTrackSendUIMute: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackSendUIMute)).as_ptr()),
+                ),
+                GetTrackSendUIVolPan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackSendUIVolPan)).as_ptr()),
+                ),
+                GetTrackState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackState)).as_ptr()),
+                ),
+                GetTrackStateChunk: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackStateChunk)).as_ptr()),
+                ),
+                GetTrackUIMute: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackUIMute)).as_ptr()),
+                ),
+                GetTrackUIPan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackUIPan)).as_ptr()),
+                ),
+                GetTrackUIVolPan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetTrackUIVolPan)).as_ptr()),
+                ),
+                GetUnderrunTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetUnderrunTime)).as_ptr()),
+                ),
+                GetUserFileNameForRead: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetUserFileNameForRead)).as_ptr()),
+                ),
+                GetUserInputs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetUserInputs)).as_ptr()),
+                ),
+                GoToMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GoToMarker)).as_ptr()),
+                ),
+                GoToRegion: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GoToRegion)).as_ptr()),
+                ),
+                GR_SelectColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GR_SelectColor)).as_ptr()),
+                ),
+                GSC_mainwnd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GSC_mainwnd)).as_ptr()),
+                ),
+                guidToString: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(guidToString)).as_ptr()),
+                ),
+                HasExtState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(HasExtState)).as_ptr()),
+                ),
+                HasTrackMIDIPrograms: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(HasTrackMIDIPrograms)).as_ptr()),
+                ),
+                HasTrackMIDIProgramsEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(HasTrackMIDIProgramsEx)).as_ptr()),
+                ),
+                Help_Set: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Help_Set)).as_ptr()),
+                ),
+                HiresPeaksFromSource: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(HiresPeaksFromSource)).as_ptr()),
+                ),
+                image_resolve_fn: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(image_resolve_fn)).as_ptr()),
+                ),
+                InsertAutomationItem: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(InsertAutomationItem)).as_ptr()),
+                ),
+                InsertEnvelopePoint: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(InsertEnvelopePoint)).as_ptr()),
+                ),
+                InsertEnvelopePointEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(InsertEnvelopePointEx)).as_ptr()),
+                ),
+                InsertMedia: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(InsertMedia)).as_ptr()),
+                ),
+                InsertMediaSection: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(InsertMediaSection)).as_ptr()),
+                ),
+                InsertTrackAtIndex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(InsertTrackAtIndex)).as_ptr()),
+                ),
+                IsInRealTimeAudio: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(IsInRealTimeAudio)).as_ptr()),
+                ),
+                IsItemTakeActiveForPlayback: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(IsItemTakeActiveForPlayback)).as_ptr()),
+                ),
+                IsMediaExtension: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(IsMediaExtension)).as_ptr()),
+                ),
+                IsMediaItemSelected: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(IsMediaItemSelected)).as_ptr()),
+                ),
+                IsProjectDirty: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(IsProjectDirty)).as_ptr()),
+                ),
+                IsREAPER: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(IsREAPER)).as_ptr()),
+                ),
+                IsTrackSelected: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(IsTrackSelected)).as_ptr()),
+                ),
+                IsTrackVisible: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(IsTrackVisible)).as_ptr()),
+                ),
+                joystick_create: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_create)).as_ptr()),
+                ),
+                joystick_destroy: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_destroy)).as_ptr()),
+                ),
+                joystick_enum: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_enum)).as_ptr()),
+                ),
+                joystick_getaxis: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_getaxis)).as_ptr()),
+                ),
+                joystick_getbuttonmask: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_getbuttonmask)).as_ptr()),
+                ),
+                joystick_getinfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_getinfo)).as_ptr()),
+                ),
+                joystick_getpov: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_getpov)).as_ptr()),
+                ),
+                joystick_update: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(joystick_update)).as_ptr()),
+                ),
+                kbd_enumerateActions: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_enumerateActions)).as_ptr()),
+                ),
+                kbd_formatKeyName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_formatKeyName)).as_ptr()),
+                ),
+                kbd_getCommandName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_getCommandName)).as_ptr()),
+                ),
+                kbd_getTextFromCmd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_getTextFromCmd)).as_ptr()),
+                ),
+                KBD_OnMainActionEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(KBD_OnMainActionEx)).as_ptr()),
+                ),
+                kbd_OnMidiEvent: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_OnMidiEvent)).as_ptr()),
+                ),
+                kbd_OnMidiList: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_OnMidiList)).as_ptr()),
+                ),
+                kbd_ProcessActionsMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_ProcessActionsMenu)).as_ptr()),
+                ),
+                kbd_processMidiEventActionEx: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(kbd_processMidiEventActionEx)).as_ptr()),
+                ),
+                kbd_reprocessMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_reprocessMenu)).as_ptr()),
+                ),
+                kbd_RunCommandThroughHooks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_RunCommandThroughHooks)).as_ptr()),
+                ),
+                kbd_translateAccelerator: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_translateAccelerator)).as_ptr()),
+                ),
+                kbd_translateMouse: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(kbd_translateMouse)).as_ptr()),
+                ),
+                LICE__Destroy: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__Destroy)).as_ptr()),
+                ),
+                LICE__DestroyFont: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__DestroyFont)).as_ptr()),
+                ),
+                LICE__DrawText: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__DrawText)).as_ptr()),
+                ),
+                LICE__GetBits: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__GetBits)).as_ptr()),
+                ),
+                LICE__GetDC: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__GetDC)).as_ptr()),
+                ),
+                LICE__GetHeight: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__GetHeight)).as_ptr()),
+                ),
+                LICE__GetRowSpan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__GetRowSpan)).as_ptr()),
+                ),
+                LICE__GetWidth: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__GetWidth)).as_ptr()),
+                ),
+                LICE__IsFlipped: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__IsFlipped)).as_ptr()),
+                ),
+                LICE__resize: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__resize)).as_ptr()),
+                ),
+                LICE__SetBkColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__SetBkColor)).as_ptr()),
+                ),
+                LICE__SetFromHFont: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__SetFromHFont)).as_ptr()),
+                ),
+                LICE__SetTextColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__SetTextColor)).as_ptr()),
+                ),
+                LICE__SetTextCombineMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE__SetTextCombineMode)).as_ptr()),
+                ),
+                LICE_Arc: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_Arc)).as_ptr()),
+                ),
+                LICE_Blit: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_Blit)).as_ptr()),
+                ),
+                LICE_Blur: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_Blur)).as_ptr()),
+                ),
+                LICE_BorderedRect: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_BorderedRect)).as_ptr()),
+                ),
+                LICE_Circle: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_Circle)).as_ptr()),
+                ),
+                LICE_Clear: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_Clear)).as_ptr()),
+                ),
+                LICE_ClearRect: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_ClearRect)).as_ptr()),
+                ),
+                LICE_ClipLine: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_ClipLine)).as_ptr()),
+                ),
+                LICE_Copy: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_Copy)).as_ptr()),
+                ),
+                LICE_CreateBitmap: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_CreateBitmap)).as_ptr()),
+                ),
+                LICE_CreateFont: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_CreateFont)).as_ptr()),
+                ),
+                LICE_DrawCBezier: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_DrawCBezier)).as_ptr()),
+                ),
+                LICE_DrawChar: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_DrawChar)).as_ptr()),
+                ),
+                LICE_DrawGlyph: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_DrawGlyph)).as_ptr()),
+                ),
+                LICE_DrawRect: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_DrawRect)).as_ptr()),
+                ),
+                LICE_DrawText: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_DrawText)).as_ptr()),
+                ),
+                LICE_FillCBezier: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_FillCBezier)).as_ptr()),
+                ),
+                LICE_FillCircle: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_FillCircle)).as_ptr()),
+                ),
+                LICE_FillConvexPolygon: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_FillConvexPolygon)).as_ptr()),
+                ),
+                LICE_FillRect: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_FillRect)).as_ptr()),
+                ),
+                LICE_FillTrapezoid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_FillTrapezoid)).as_ptr()),
+                ),
+                LICE_FillTriangle: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_FillTriangle)).as_ptr()),
+                ),
+                LICE_GetPixel: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_GetPixel)).as_ptr()),
+                ),
+                LICE_GradRect: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_GradRect)).as_ptr()),
+                ),
+                LICE_Line: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_Line)).as_ptr()),
+                ),
+                LICE_LineInt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_LineInt)).as_ptr()),
+                ),
+                LICE_LoadPNG: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_LoadPNG)).as_ptr()),
+                ),
+                LICE_LoadPNGFromResource: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_LoadPNGFromResource)).as_ptr()),
+                ),
+                LICE_MeasureText: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_MeasureText)).as_ptr()),
+                ),
+                LICE_MultiplyAddRect: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_MultiplyAddRect)).as_ptr()),
+                ),
+                LICE_PutPixel: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_PutPixel)).as_ptr()),
+                ),
+                LICE_RotatedBlit: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_RotatedBlit)).as_ptr()),
+                ),
+                LICE_RoundRect: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_RoundRect)).as_ptr()),
+                ),
+                LICE_ScaledBlit: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_ScaledBlit)).as_ptr()),
+                ),
+                LICE_SimpleFill: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(LICE_SimpleFill)).as_ptr()),
+                ),
+                Loop_OnArrow: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Loop_OnArrow)).as_ptr()),
+                ),
+                Main_OnCommand: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Main_OnCommand)).as_ptr()),
+                ),
+                Main_OnCommandEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Main_OnCommandEx)).as_ptr()),
+                ),
+                Main_openProject: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Main_openProject)).as_ptr()),
+                ),
+                Main_SaveProject: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Main_SaveProject)).as_ptr()),
+                ),
+                Main_UpdateLoopInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Main_UpdateLoopInfo)).as_ptr()),
+                ),
+                MarkProjectDirty: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MarkProjectDirty)).as_ptr()),
+                ),
+                MarkTrackItemsDirty: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MarkTrackItemsDirty)).as_ptr()),
+                ),
+                Master_GetPlayRate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Master_GetPlayRate)).as_ptr()),
+                ),
+                Master_GetPlayRateAtTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Master_GetPlayRateAtTime)).as_ptr()),
+                ),
+                Master_GetTempo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Master_GetTempo)).as_ptr()),
+                ),
+                Master_NormalizePlayRate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Master_NormalizePlayRate)).as_ptr()),
+                ),
+                Master_NormalizeTempo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Master_NormalizeTempo)).as_ptr()),
+                ),
+                MB: std::mem::transmute(plugin_context.GetFunc(c_str!(stringify!(MB)).as_ptr())),
+                MediaItemDescendsFromTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MediaItemDescendsFromTrack)).as_ptr()),
+                ),
+                MIDI_CountEvts: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_CountEvts)).as_ptr()),
+                ),
+                MIDI_DeleteCC: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_DeleteCC)).as_ptr()),
+                ),
+                MIDI_DeleteEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_DeleteEvt)).as_ptr()),
+                ),
+                MIDI_DeleteNote: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_DeleteNote)).as_ptr()),
+                ),
+                MIDI_DeleteTextSysexEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_DeleteTextSysexEvt)).as_ptr()),
+                ),
+                MIDI_DisableSort: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_DisableSort)).as_ptr()),
+                ),
+                MIDI_EnumSelCC: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_EnumSelCC)).as_ptr()),
+                ),
+                MIDI_EnumSelEvts: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_EnumSelEvts)).as_ptr()),
+                ),
+                MIDI_EnumSelNotes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_EnumSelNotes)).as_ptr()),
+                ),
+                MIDI_EnumSelTextSysexEvts: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_EnumSelTextSysexEvts)).as_ptr()),
+                ),
+                MIDI_eventlist_Create: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_eventlist_Create)).as_ptr()),
+                ),
+                MIDI_eventlist_Destroy: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_eventlist_Destroy)).as_ptr()),
+                ),
+                MIDI_GetAllEvts: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetAllEvts)).as_ptr()),
+                ),
+                MIDI_GetCC: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetCC)).as_ptr()),
+                ),
+                MIDI_GetCCShape: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetCCShape)).as_ptr()),
+                ),
+                MIDI_GetEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetEvt)).as_ptr()),
+                ),
+                MIDI_GetGrid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetGrid)).as_ptr()),
+                ),
+                MIDI_GetHash: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetHash)).as_ptr()),
+                ),
+                MIDI_GetNote: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetNote)).as_ptr()),
+                ),
+                MIDI_GetPPQPos_EndOfMeasure: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(MIDI_GetPPQPos_EndOfMeasure)).as_ptr()),
+                ),
+                MIDI_GetPPQPos_StartOfMeasure: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(MIDI_GetPPQPos_StartOfMeasure)).as_ptr()),
+                ),
+                MIDI_GetPPQPosFromProjQN: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetPPQPosFromProjQN)).as_ptr()),
+                ),
+                MIDI_GetPPQPosFromProjTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetPPQPosFromProjTime)).as_ptr()),
+                ),
+                MIDI_GetProjQNFromPPQPos: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetProjQNFromPPQPos)).as_ptr()),
+                ),
+                MIDI_GetProjTimeFromPPQPos: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetProjTimeFromPPQPos)).as_ptr()),
+                ),
+                MIDI_GetScale: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetScale)).as_ptr()),
+                ),
+                MIDI_GetTextSysexEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetTextSysexEvt)).as_ptr()),
+                ),
+                MIDI_GetTrackHash: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_GetTrackHash)).as_ptr()),
+                ),
+                MIDI_InsertCC: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_InsertCC)).as_ptr()),
+                ),
+                MIDI_InsertEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_InsertEvt)).as_ptr()),
+                ),
+                MIDI_InsertNote: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_InsertNote)).as_ptr()),
+                ),
+                MIDI_InsertTextSysexEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_InsertTextSysexEvt)).as_ptr()),
+                ),
+                midi_reinit: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(midi_reinit)).as_ptr()),
+                ),
+                MIDI_SelectAll: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SelectAll)).as_ptr()),
+                ),
+                MIDI_SetAllEvts: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SetAllEvts)).as_ptr()),
+                ),
+                MIDI_SetCC: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SetCC)).as_ptr()),
+                ),
+                MIDI_SetCCShape: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SetCCShape)).as_ptr()),
+                ),
+                MIDI_SetEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SetEvt)).as_ptr()),
+                ),
+                MIDI_SetItemExtents: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SetItemExtents)).as_ptr()),
+                ),
+                MIDI_SetNote: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SetNote)).as_ptr()),
+                ),
+                MIDI_SetTextSysexEvt: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_SetTextSysexEvt)).as_ptr()),
+                ),
+                MIDI_Sort: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDI_Sort)).as_ptr()),
+                ),
+                MIDIEditor_GetActive: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDIEditor_GetActive)).as_ptr()),
+                ),
+                MIDIEditor_GetMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDIEditor_GetMode)).as_ptr()),
+                ),
+                MIDIEditor_GetSetting_int: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDIEditor_GetSetting_int)).as_ptr()),
+                ),
+                MIDIEditor_GetSetting_str: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDIEditor_GetSetting_str)).as_ptr()),
+                ),
+                MIDIEditor_GetTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDIEditor_GetTake)).as_ptr()),
+                ),
+                MIDIEditor_LastFocused_OnCommand: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(MIDIEditor_LastFocused_OnCommand)).as_ptr()),
+                ),
+                MIDIEditor_OnCommand: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDIEditor_OnCommand)).as_ptr()),
+                ),
+                MIDIEditor_SetSetting_int: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MIDIEditor_SetSetting_int)).as_ptr()),
+                ),
+                mkpanstr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(mkpanstr)).as_ptr()),
+                ),
+                mkvolpanstr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(mkvolpanstr)).as_ptr()),
+                ),
+                mkvolstr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(mkvolstr)).as_ptr()),
+                ),
+                MoveEditCursor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MoveEditCursor)).as_ptr()),
+                ),
+                MoveMediaItemToTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MoveMediaItemToTrack)).as_ptr()),
+                ),
+                MuteAllTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(MuteAllTracks)).as_ptr()),
+                ),
+                my_getViewport: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(my_getViewport)).as_ptr()),
+                ),
+                NamedCommandLookup: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(NamedCommandLookup)).as_ptr()),
+                ),
+                OnPauseButton: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OnPauseButton)).as_ptr()),
+                ),
+                OnPauseButtonEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OnPauseButtonEx)).as_ptr()),
+                ),
+                OnPlayButton: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OnPlayButton)).as_ptr()),
+                ),
+                OnPlayButtonEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OnPlayButtonEx)).as_ptr()),
+                ),
+                OnStopButton: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OnStopButton)).as_ptr()),
+                ),
+                OnStopButtonEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OnStopButtonEx)).as_ptr()),
+                ),
+                OpenColorThemeFile: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OpenColorThemeFile)).as_ptr()),
+                ),
+                OpenMediaExplorer: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OpenMediaExplorer)).as_ptr()),
+                ),
+                OscLocalMessageToHost: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(OscLocalMessageToHost)).as_ptr()),
+                ),
+                parse_timestr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(parse_timestr)).as_ptr()),
+                ),
+                parse_timestr_len: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(parse_timestr_len)).as_ptr()),
+                ),
+                parse_timestr_pos: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(parse_timestr_pos)).as_ptr()),
+                ),
+                parsepanstr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(parsepanstr)).as_ptr()),
+                ),
+                PCM_Sink_Create: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Sink_Create)).as_ptr()),
+                ),
+                PCM_Sink_CreateEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Sink_CreateEx)).as_ptr()),
+                ),
+                PCM_Sink_CreateMIDIFile: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Sink_CreateMIDIFile)).as_ptr()),
+                ),
+                PCM_Sink_CreateMIDIFileEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Sink_CreateMIDIFileEx)).as_ptr()),
+                ),
+                PCM_Sink_Enum: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Sink_Enum)).as_ptr()),
+                ),
+                PCM_Sink_GetExtension: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Sink_GetExtension)).as_ptr()),
+                ),
+                PCM_Sink_ShowConfig: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Sink_ShowConfig)).as_ptr()),
+                ),
+                PCM_Source_CreateFromFile: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Source_CreateFromFile)).as_ptr()),
+                ),
+                PCM_Source_CreateFromFileEx: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(PCM_Source_CreateFromFileEx)).as_ptr()),
+                ),
+                PCM_Source_CreateFromSimple: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(PCM_Source_CreateFromSimple)).as_ptr()),
+                ),
+                PCM_Source_CreateFromType: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Source_CreateFromType)).as_ptr()),
+                ),
+                PCM_Source_Destroy: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Source_Destroy)).as_ptr()),
+                ),
+                PCM_Source_GetPeaks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Source_GetPeaks)).as_ptr()),
+                ),
+                PCM_Source_GetSectionInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PCM_Source_GetSectionInfo)).as_ptr()),
+                ),
+                PeakBuild_Create: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PeakBuild_Create)).as_ptr()),
+                ),
+                PeakBuild_CreateEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PeakBuild_CreateEx)).as_ptr()),
+                ),
+                PeakGet_Create: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PeakGet_Create)).as_ptr()),
+                ),
+                PitchShiftSubModeMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PitchShiftSubModeMenu)).as_ptr()),
+                ),
+                PlayPreview: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PlayPreview)).as_ptr()),
+                ),
+                PlayPreviewEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PlayPreviewEx)).as_ptr()),
+                ),
+                PlayTrackPreview: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PlayTrackPreview)).as_ptr()),
+                ),
+                PlayTrackPreview2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PlayTrackPreview2)).as_ptr()),
+                ),
+                PlayTrackPreview2Ex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PlayTrackPreview2Ex)).as_ptr()),
+                ),
+                plugin_getapi: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(plugin_getapi)).as_ptr()),
+                ),
+                plugin_getFilterList: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(plugin_getFilterList)).as_ptr()),
+                ),
+                plugin_getImportableProjectFilterList: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str!(stringify!(plugin_getImportableProjectFilterList)).as_ptr(),
+                    ),
+                ),
+                plugin_register: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(plugin_register)).as_ptr()),
+                ),
+                PluginWantsAlwaysRunFx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PluginWantsAlwaysRunFx)).as_ptr()),
+                ),
+                PreventUIRefresh: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(PreventUIRefresh)).as_ptr()),
+                ),
+                projectconfig_var_addr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(projectconfig_var_addr)).as_ptr()),
+                ),
+                projectconfig_var_getoffs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(projectconfig_var_getoffs)).as_ptr()),
+                ),
+                realloc_cmd_ptr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(realloc_cmd_ptr)).as_ptr()),
+                ),
+                ReaperGetPitchShiftAPI: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ReaperGetPitchShiftAPI)).as_ptr()),
+                ),
+                ReaScriptError: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ReaScriptError)).as_ptr()),
+                ),
+                RecursiveCreateDirectory: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(RecursiveCreateDirectory)).as_ptr()),
+                ),
+                reduce_open_files: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(reduce_open_files)).as_ptr()),
+                ),
+                RefreshToolbar: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(RefreshToolbar)).as_ptr()),
+                ),
+                RefreshToolbar2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(RefreshToolbar2)).as_ptr()),
+                ),
+                relative_fn: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(relative_fn)).as_ptr()),
+                ),
+                RemoveTrackSend: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(RemoveTrackSend)).as_ptr()),
+                ),
+                RenderFileSection: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(RenderFileSection)).as_ptr()),
+                ),
+                ReorderSelectedTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ReorderSelectedTracks)).as_ptr()),
+                ),
+                Resample_EnumModes: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Resample_EnumModes)).as_ptr()),
+                ),
+                Resampler_Create: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Resampler_Create)).as_ptr()),
+                ),
+                resolve_fn: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(resolve_fn)).as_ptr()),
+                ),
+                resolve_fn2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(resolve_fn2)).as_ptr()),
+                ),
+                ReverseNamedCommandLookup: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ReverseNamedCommandLookup)).as_ptr()),
+                ),
+                ScaleFromEnvelopeMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ScaleFromEnvelopeMode)).as_ptr()),
+                ),
+                ScaleToEnvelopeMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ScaleToEnvelopeMode)).as_ptr()),
+                ),
+                screenset_register: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(screenset_register)).as_ptr()),
+                ),
+                screenset_registerNew: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(screenset_registerNew)).as_ptr()),
+                ),
+                screenset_unregister: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(screenset_unregister)).as_ptr()),
+                ),
+                screenset_unregisterByParam: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(screenset_unregisterByParam)).as_ptr()),
+                ),
+                screenset_updateLastFocus: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(screenset_updateLastFocus)).as_ptr()),
+                ),
+                SectionFromUniqueID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SectionFromUniqueID)).as_ptr()),
+                ),
+                SelectAllMediaItems: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SelectAllMediaItems)).as_ptr()),
+                ),
+                SelectProjectInstance: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SelectProjectInstance)).as_ptr()),
+                ),
+                SendLocalOscMessage: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SendLocalOscMessage)).as_ptr()),
+                ),
+                SetActiveTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetActiveTake)).as_ptr()),
+                ),
+                SetAutomationMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetAutomationMode)).as_ptr()),
+                ),
+                SetCurrentBPM: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetCurrentBPM)).as_ptr()),
+                ),
+                SetCursorContext: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetCursorContext)).as_ptr()),
+                ),
+                SetEditCurPos: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetEditCurPos)).as_ptr()),
+                ),
+                SetEditCurPos2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetEditCurPos2)).as_ptr()),
+                ),
+                SetEnvelopePoint: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetEnvelopePoint)).as_ptr()),
+                ),
+                SetEnvelopePointEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetEnvelopePointEx)).as_ptr()),
+                ),
+                SetEnvelopeStateChunk: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetEnvelopeStateChunk)).as_ptr()),
+                ),
+                SetExtState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetExtState)).as_ptr()),
+                ),
+                SetGlobalAutomationOverride: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(SetGlobalAutomationOverride)).as_ptr()),
+                ),
+                SetItemStateChunk: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetItemStateChunk)).as_ptr()),
+                ),
+                SetMasterTrackVisibility: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMasterTrackVisibility)).as_ptr()),
+                ),
+                SetMediaItemInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMediaItemInfo_Value)).as_ptr()),
+                ),
+                SetMediaItemLength: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMediaItemLength)).as_ptr()),
+                ),
+                SetMediaItemPosition: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMediaItemPosition)).as_ptr()),
+                ),
+                SetMediaItemSelected: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMediaItemSelected)).as_ptr()),
+                ),
+                SetMediaItemTake_Source: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMediaItemTake_Source)).as_ptr()),
+                ),
+                SetMediaItemTakeInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMediaItemTakeInfo_Value)).as_ptr()),
+                ),
+                SetMediaTrackInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMediaTrackInfo_Value)).as_ptr()),
+                ),
+                SetMIDIEditorGrid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMIDIEditorGrid)).as_ptr()),
+                ),
+                SetMixerScroll: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMixerScroll)).as_ptr()),
+                ),
+                SetMouseModifier: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetMouseModifier)).as_ptr()),
+                ),
+                SetOnlyTrackSelected: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetOnlyTrackSelected)).as_ptr()),
+                ),
+                SetProjectGrid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjectGrid)).as_ptr()),
+                ),
+                SetProjectMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjectMarker)).as_ptr()),
+                ),
+                SetProjectMarker2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjectMarker2)).as_ptr()),
+                ),
+                SetProjectMarker3: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjectMarker3)).as_ptr()),
+                ),
+                SetProjectMarker4: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjectMarker4)).as_ptr()),
+                ),
+                SetProjectMarkerByIndex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjectMarkerByIndex)).as_ptr()),
+                ),
+                SetProjectMarkerByIndex2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjectMarkerByIndex2)).as_ptr()),
+                ),
+                SetProjExtState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetProjExtState)).as_ptr()),
+                ),
+                SetRegionRenderMatrix: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetRegionRenderMatrix)).as_ptr()),
+                ),
+                SetRenderLastError: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetRenderLastError)).as_ptr()),
+                ),
+                SetTakeStretchMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTakeStretchMarker)).as_ptr()),
+                ),
+                SetTakeStretchMarkerSlope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTakeStretchMarkerSlope)).as_ptr()),
+                ),
+                SetTempoTimeSigMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTempoTimeSigMarker)).as_ptr()),
+                ),
+                SetToggleCommandState: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetToggleCommandState)).as_ptr()),
+                ),
+                SetTrackAutomationMode: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackAutomationMode)).as_ptr()),
+                ),
+                SetTrackColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackColor)).as_ptr()),
+                ),
+                SetTrackMIDILyrics: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackMIDILyrics)).as_ptr()),
+                ),
+                SetTrackMIDINoteName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackMIDINoteName)).as_ptr()),
+                ),
+                SetTrackMIDINoteNameEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackMIDINoteNameEx)).as_ptr()),
+                ),
+                SetTrackSelected: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackSelected)).as_ptr()),
+                ),
+                SetTrackSendInfo_Value: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackSendInfo_Value)).as_ptr()),
+                ),
+                SetTrackSendUIPan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackSendUIPan)).as_ptr()),
+                ),
+                SetTrackSendUIVol: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackSendUIVol)).as_ptr()),
+                ),
+                SetTrackStateChunk: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SetTrackStateChunk)).as_ptr()),
+                ),
+                ShowActionList: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ShowActionList)).as_ptr()),
+                ),
+                ShowConsoleMsg: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ShowConsoleMsg)).as_ptr()),
+                ),
+                ShowMessageBox: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ShowMessageBox)).as_ptr()),
+                ),
+                ShowPopupMenu: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ShowPopupMenu)).as_ptr()),
+                ),
+                SLIDER2DB: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SLIDER2DB)).as_ptr()),
+                ),
+                SnapToGrid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SnapToGrid)).as_ptr()),
+                ),
+                SoloAllTracks: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SoloAllTracks)).as_ptr()),
+                ),
+                Splash_GetWnd: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Splash_GetWnd)).as_ptr()),
+                ),
+                SplitMediaItem: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(SplitMediaItem)).as_ptr()),
+                ),
+                StopPreview: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(StopPreview)).as_ptr()),
+                ),
+                StopTrackPreview: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(StopTrackPreview)).as_ptr()),
+                ),
+                StopTrackPreview2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(StopTrackPreview2)).as_ptr()),
+                ),
+                stringToGuid: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(stringToGuid)).as_ptr()),
+                ),
+                StuffMIDIMessage: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(StuffMIDIMessage)).as_ptr()),
+                ),
+                TakeFX_AddByName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_AddByName)).as_ptr()),
+                ),
+                TakeFX_CopyToTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_CopyToTake)).as_ptr()),
+                ),
+                TakeFX_CopyToTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_CopyToTrack)).as_ptr()),
+                ),
+                TakeFX_Delete: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_Delete)).as_ptr()),
+                ),
+                TakeFX_EndParamEdit: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_EndParamEdit)).as_ptr()),
+                ),
+                TakeFX_FormatParamValue: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_FormatParamValue)).as_ptr()),
+                ),
+                TakeFX_FormatParamValueNormalized: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TakeFX_FormatParamValueNormalized)).as_ptr()),
+                ),
+                TakeFX_GetChainVisible: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetChainVisible)).as_ptr()),
+                ),
+                TakeFX_GetCount: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetCount)).as_ptr()),
+                ),
+                TakeFX_GetEnabled: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetEnabled)).as_ptr()),
+                ),
+                TakeFX_GetEnvelope: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetEnvelope)).as_ptr()),
+                ),
+                TakeFX_GetFloatingWindow: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetFloatingWindow)).as_ptr()),
+                ),
+                TakeFX_GetFormattedParamValue: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TakeFX_GetFormattedParamValue)).as_ptr()),
+                ),
+                TakeFX_GetFXGUID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetFXGUID)).as_ptr()),
+                ),
+                TakeFX_GetFXName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetFXName)).as_ptr()),
+                ),
+                TakeFX_GetIOSize: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetIOSize)).as_ptr()),
+                ),
+                TakeFX_GetNamedConfigParm: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetNamedConfigParm)).as_ptr()),
+                ),
+                TakeFX_GetNumParams: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetNumParams)).as_ptr()),
+                ),
+                TakeFX_GetOffline: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetOffline)).as_ptr()),
+                ),
+                TakeFX_GetOpen: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetOpen)).as_ptr()),
+                ),
+                TakeFX_GetParam: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetParam)).as_ptr()),
+                ),
+                TakeFX_GetParameterStepSizes: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TakeFX_GetParameterStepSizes)).as_ptr()),
+                ),
+                TakeFX_GetParamEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetParamEx)).as_ptr()),
+                ),
+                TakeFX_GetParamName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetParamName)).as_ptr()),
+                ),
+                TakeFX_GetParamNormalized: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetParamNormalized)).as_ptr()),
+                ),
+                TakeFX_GetPinMappings: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetPinMappings)).as_ptr()),
+                ),
+                TakeFX_GetPreset: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetPreset)).as_ptr()),
+                ),
+                TakeFX_GetPresetIndex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_GetPresetIndex)).as_ptr()),
+                ),
+                TakeFX_GetUserPresetFilename: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TakeFX_GetUserPresetFilename)).as_ptr()),
+                ),
+                TakeFX_NavigatePresets: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_NavigatePresets)).as_ptr()),
+                ),
+                TakeFX_SetEnabled: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetEnabled)).as_ptr()),
+                ),
+                TakeFX_SetNamedConfigParm: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetNamedConfigParm)).as_ptr()),
+                ),
+                TakeFX_SetOffline: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetOffline)).as_ptr()),
+                ),
+                TakeFX_SetOpen: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetOpen)).as_ptr()),
+                ),
+                TakeFX_SetParam: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetParam)).as_ptr()),
+                ),
+                TakeFX_SetParamNormalized: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetParamNormalized)).as_ptr()),
+                ),
+                TakeFX_SetPinMappings: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetPinMappings)).as_ptr()),
+                ),
+                TakeFX_SetPreset: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetPreset)).as_ptr()),
+                ),
+                TakeFX_SetPresetByIndex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_SetPresetByIndex)).as_ptr()),
+                ),
+                TakeFX_Show: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeFX_Show)).as_ptr()),
+                ),
+                TakeIsMIDI: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TakeIsMIDI)).as_ptr()),
+                ),
+                ThemeLayout_GetLayout: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ThemeLayout_GetLayout)).as_ptr()),
+                ),
+                ThemeLayout_GetParameter: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ThemeLayout_GetParameter)).as_ptr()),
+                ),
+                ThemeLayout_RefreshAll: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ThemeLayout_RefreshAll)).as_ptr()),
+                ),
+                ThemeLayout_SetLayout: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ThemeLayout_SetLayout)).as_ptr()),
+                ),
+                ThemeLayout_SetParameter: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ThemeLayout_SetParameter)).as_ptr()),
+                ),
+                time_precise: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(time_precise)).as_ptr()),
+                ),
+                TimeMap2_beatsToTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap2_beatsToTime)).as_ptr()),
+                ),
+                TimeMap2_GetDividedBpmAtTime: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TimeMap2_GetDividedBpmAtTime)).as_ptr()),
+                ),
+                TimeMap2_GetNextChangeTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap2_GetNextChangeTime)).as_ptr()),
+                ),
+                TimeMap2_QNToTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap2_QNToTime)).as_ptr()),
+                ),
+                TimeMap2_timeToBeats: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap2_timeToBeats)).as_ptr()),
+                ),
+                TimeMap2_timeToQN: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap2_timeToQN)).as_ptr()),
+                ),
+                TimeMap_curFrameRate: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_curFrameRate)).as_ptr()),
+                ),
+                TimeMap_GetDividedBpmAtTime: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TimeMap_GetDividedBpmAtTime)).as_ptr()),
+                ),
+                TimeMap_GetMeasureInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_GetMeasureInfo)).as_ptr()),
+                ),
+                TimeMap_GetMetronomePattern: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TimeMap_GetMetronomePattern)).as_ptr()),
+                ),
+                TimeMap_GetTimeSigAtTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_GetTimeSigAtTime)).as_ptr()),
+                ),
+                TimeMap_QNToMeasures: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_QNToMeasures)).as_ptr()),
+                ),
+                TimeMap_QNToTime: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_QNToTime)).as_ptr()),
+                ),
+                TimeMap_QNToTime_abs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_QNToTime_abs)).as_ptr()),
+                ),
+                TimeMap_timeToQN: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_timeToQN)).as_ptr()),
+                ),
+                TimeMap_timeToQN_abs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TimeMap_timeToQN_abs)).as_ptr()),
+                ),
+                ToggleTrackSendUIMute: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ToggleTrackSendUIMute)).as_ptr()),
+                ),
+                Track_GetPeakHoldDB: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Track_GetPeakHoldDB)).as_ptr()),
+                ),
+                Track_GetPeakInfo: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Track_GetPeakInfo)).as_ptr()),
+                ),
+                TrackCtl_SetToolTip: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackCtl_SetToolTip)).as_ptr()),
+                ),
+                TrackFX_AddByName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_AddByName)).as_ptr()),
+                ),
+                TrackFX_CopyToTake: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_CopyToTake)).as_ptr()),
+                ),
+                TrackFX_CopyToTrack: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_CopyToTrack)).as_ptr()),
+                ),
+                TrackFX_Delete: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_Delete)).as_ptr()),
+                ),
+                TrackFX_EndParamEdit: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_EndParamEdit)).as_ptr()),
+                ),
+                TrackFX_FormatParamValue: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_FormatParamValue)).as_ptr()),
+                ),
+                TrackFX_FormatParamValueNormalized: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TrackFX_FormatParamValueNormalized)).as_ptr()),
+                ),
+                TrackFX_GetByName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetByName)).as_ptr()),
+                ),
+                TrackFX_GetChainVisible: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetChainVisible)).as_ptr()),
+                ),
+                TrackFX_GetCount: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetCount)).as_ptr()),
+                ),
+                TrackFX_GetEnabled: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetEnabled)).as_ptr()),
+                ),
+                TrackFX_GetEQ: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetEQ)).as_ptr()),
+                ),
+                TrackFX_GetEQBandEnabled: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetEQBandEnabled)).as_ptr()),
+                ),
+                TrackFX_GetEQParam: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetEQParam)).as_ptr()),
+                ),
+                TrackFX_GetFloatingWindow: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetFloatingWindow)).as_ptr()),
+                ),
+                TrackFX_GetFormattedParamValue: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TrackFX_GetFormattedParamValue)).as_ptr()),
+                ),
+                TrackFX_GetFXGUID: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetFXGUID)).as_ptr()),
+                ),
+                TrackFX_GetFXName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetFXName)).as_ptr()),
+                ),
+                TrackFX_GetInstrument: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetInstrument)).as_ptr()),
+                ),
+                TrackFX_GetIOSize: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetIOSize)).as_ptr()),
+                ),
+                TrackFX_GetNamedConfigParm: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetNamedConfigParm)).as_ptr()),
+                ),
+                TrackFX_GetNumParams: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetNumParams)).as_ptr()),
+                ),
+                TrackFX_GetOffline: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetOffline)).as_ptr()),
+                ),
+                TrackFX_GetOpen: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetOpen)).as_ptr()),
+                ),
+                TrackFX_GetParam: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetParam)).as_ptr()),
+                ),
+                TrackFX_GetParameterStepSizes: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TrackFX_GetParameterStepSizes)).as_ptr()),
+                ),
+                TrackFX_GetParamEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetParamEx)).as_ptr()),
+                ),
+                TrackFX_GetParamName: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetParamName)).as_ptr()),
+                ),
+                TrackFX_GetParamNormalized: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetParamNormalized)).as_ptr()),
+                ),
+                TrackFX_GetPinMappings: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetPinMappings)).as_ptr()),
+                ),
+                TrackFX_GetPreset: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetPreset)).as_ptr()),
+                ),
+                TrackFX_GetPresetIndex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetPresetIndex)).as_ptr()),
+                ),
+                TrackFX_GetRecChainVisible: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetRecChainVisible)).as_ptr()),
+                ),
+                TrackFX_GetRecCount: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_GetRecCount)).as_ptr()),
+                ),
+                TrackFX_GetUserPresetFilename: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TrackFX_GetUserPresetFilename)).as_ptr()),
+                ),
+                TrackFX_NavigatePresets: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_NavigatePresets)).as_ptr()),
+                ),
+                TrackFX_SetEnabled: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetEnabled)).as_ptr()),
+                ),
+                TrackFX_SetEQBandEnabled: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetEQBandEnabled)).as_ptr()),
+                ),
+                TrackFX_SetEQParam: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetEQParam)).as_ptr()),
+                ),
+                TrackFX_SetNamedConfigParm: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetNamedConfigParm)).as_ptr()),
+                ),
+                TrackFX_SetOffline: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetOffline)).as_ptr()),
+                ),
+                TrackFX_SetOpen: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetOpen)).as_ptr()),
+                ),
+                TrackFX_SetParam: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetParam)).as_ptr()),
+                ),
+                TrackFX_SetParamNormalized: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetParamNormalized)).as_ptr()),
+                ),
+                TrackFX_SetPinMappings: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetPinMappings)).as_ptr()),
+                ),
+                TrackFX_SetPreset: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetPreset)).as_ptr()),
+                ),
+                TrackFX_SetPresetByIndex: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_SetPresetByIndex)).as_ptr()),
+                ),
+                TrackFX_Show: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackFX_Show)).as_ptr()),
+                ),
+                TrackList_AdjustWindows: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(TrackList_AdjustWindows)).as_ptr()),
+                ),
+                TrackList_UpdateAllExternalSurfaces: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(TrackList_UpdateAllExternalSurfaces)).as_ptr()),
+                ),
+                Undo_BeginBlock: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_BeginBlock)).as_ptr()),
+                ),
+                Undo_BeginBlock2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_BeginBlock2)).as_ptr()),
+                ),
+                Undo_CanRedo2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_CanRedo2)).as_ptr()),
+                ),
+                Undo_CanUndo2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_CanUndo2)).as_ptr()),
+                ),
+                Undo_DoRedo2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_DoRedo2)).as_ptr()),
+                ),
+                Undo_DoUndo2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_DoUndo2)).as_ptr()),
+                ),
+                Undo_EndBlock: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_EndBlock)).as_ptr()),
+                ),
+                Undo_EndBlock2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_EndBlock2)).as_ptr()),
+                ),
+                Undo_OnStateChange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_OnStateChange)).as_ptr()),
+                ),
+                Undo_OnStateChange2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_OnStateChange2)).as_ptr()),
+                ),
+                Undo_OnStateChange_Item: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_OnStateChange_Item)).as_ptr()),
+                ),
+                Undo_OnStateChangeEx: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_OnStateChangeEx)).as_ptr()),
+                ),
+                Undo_OnStateChangeEx2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(Undo_OnStateChangeEx2)).as_ptr()),
+                ),
+                update_disk_counters: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(update_disk_counters)).as_ptr()),
+                ),
+                UpdateArrange: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(UpdateArrange)).as_ptr()),
+                ),
+                UpdateItemInProject: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(UpdateItemInProject)).as_ptr()),
+                ),
+                UpdateTimeline: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(UpdateTimeline)).as_ptr()),
+                ),
+                ValidatePtr: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ValidatePtr)).as_ptr()),
+                ),
+                ValidatePtr2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ValidatePtr2)).as_ptr()),
+                ),
+                ViewPrefs: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(ViewPrefs)).as_ptr()),
+                ),
+                WDL_VirtualWnd_ScaledBlitBG: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str!(stringify!(WDL_VirtualWnd_ScaledBlitBG)).as_ptr()),
+                ),
+                GetMidiInput: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMidiInput)).as_ptr()),
+                ),
+                GetMidiOutput: std::mem::transmute(
+                    plugin_context.GetFunc(c_str!(stringify!(GetMidiOutput)).as_ptr()),
+                ),
             }
         };
-        Reaper { pointers }
+        Reaper {
+            pointers,
+            plugin_context: Some(plugin_context),
+        }
     }
     #[doc = r" # Safety"]
     #[doc = r""]

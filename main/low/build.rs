@@ -51,6 +51,7 @@ mod codegen {
             .whitelist_var("REAPER_PLUGIN_VERSION")
             .whitelist_var("UNDO_STATE_.*")
             .whitelist_var("VK_.*")
+            .whitelist_var("DLL_PROCESS_ATTACH")
             .whitelist_type("HINSTANCE")
             .whitelist_type("reaper_plugin_info_t")
             .whitelist_type("gaccel_register_t")
@@ -128,6 +129,9 @@ mod codegen {
                 ///
                 /// In order to use it, you first must obtain an instance of this struct by invoking [`load()`].
                 ///
+                /// `Default::default()` will give you an instance which panics on each function call. It's
+                /// intended to be used for example code only.
+                ///
                 /// # Panics
                 ///
                 /// Please note that it's possible that functions are *not available*. This can be the case if
@@ -141,23 +145,27 @@ mod codegen {
                 #[derive(Copy, Clone, Debug, Default)]
                 pub struct Reaper {
                     pub(crate) pointers: ReaperFunctionPointers,
+                    // The only reason why this can be None is that we want to support Default. We want Default
+                    // in order to be able to create rustdoc example code in higher-level APIs without needing a
+                    // proper plug-in context.
+                    pub(crate) plugin_context: Option<ReaperPluginContext>,
                 }
 
                 impl Reaper {
                     /// Loads all available REAPER functions from the given plug-in context.
                     ///
                     /// Returns a low-level `Reaper` instance which allows you to call these functions.
-                    pub fn load(context: &ReaperPluginContext) -> Reaper {
-                        let get_func = &context.function_provider;
+                    pub fn load(plugin_context: ReaperPluginContext) -> Reaper {
                         let pointers = unsafe {
                             ReaperFunctionPointers {
                                 #(
-                                    #names: std::mem::transmute(get_func(c_str!(stringify!(#names)))),
+                                    #names: std::mem::transmute(plugin_context.GetFunc(c_str!(stringify!(#names)).as_ptr())),
                                 )*
                             }
                         };
                         Reaper {
-                            pointers
+                            pointers,
+                            plugin_context: Some(plugin_context)
                         }
                     }
 

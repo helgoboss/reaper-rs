@@ -28,6 +28,7 @@ generate = ["bindgen", "quote", "syn", "proc-macro2"]
 [dependencies]
 c_str_macro = "1.0.2"
 vst = "0.2.0"
+derive_more = "0.99.5"
 
 [dev-dependencies]
 version-sync = "0.9"

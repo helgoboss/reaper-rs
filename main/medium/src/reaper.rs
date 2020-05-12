@@ -54,6 +54,9 @@ use std::collections::{HashMap, HashSet};
 /// [`new()`]: #method.new
 /// [`load()`]: #method.load
 /// [`functions()`]: #method.functions
+// TODO-medium Add some doc from https://www.reaper.fm/sdk/vst/vst_ext.php
+// TODO-medium Lift low-level ReaperPluginContext functions to medium-level style. Especially the
+//  VST host context stuff: https://www.reaper.fm/sdk/vst/vst_ext.php.
 #[derive(Debug, Default)]
 pub struct Reaper {
     functions: ReaperFunctions<MainThreadScope>,
@@ -82,7 +85,7 @@ impl Reaper {
     /// Loads all available REAPER functions from the given plug-in context.
     ///
     /// Returns a medium-level `Reaper` instance which allows you to call these functions.
-    pub fn load(context: &ReaperPluginContext) -> Reaper {
+    pub fn load(context: ReaperPluginContext) -> Reaper {
         let low = reaper_low::Reaper::load(context);
         Reaper::new(low)
     }

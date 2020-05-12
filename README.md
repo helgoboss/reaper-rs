@@ -177,7 +177,7 @@ use reaper_low::ReaperPluginContext;
 use reaper_medium::Reaper;
 
 #[reaper_extension_plugin]
-fn plugin_main(context: &ReaperPluginContext) -> Result<(), Box<dyn Error>> {
+fn plugin_main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
     let reaper = Reaper::load(context);
     reaper.functions().show_console_msg("Hello world from reaper-rs medium-level API!");
     Ok(())
@@ -212,8 +212,10 @@ Then in your `lib.rs`:
 
 ```rust
 use vst::plugin::{Info, Plugin, HostCallback};
-use reaper_low::ReaperPluginContext;
+use reaper_low::{ReaperPluginContext, reaper_vst_plugin};
 use reaper_medium::Reaper;
+
+reaper_vst_plugin!();
 
 #[derive(Default)]
 struct MyReaperVstPlugin {
@@ -234,8 +236,8 @@ impl Plugin for MyReaperVstPlugin {
     }
 
     fn init(&mut self) {
-        if let Ok(context) = ReaperPluginContext::from_vst_plugin(self.host) {
-            let reaper = Reaper::load(&context);
+        if let Ok(context) = ReaperPluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context()) {
+            let reaper = Reaper::load(context);
             reaper
                 .functions()
                 .show_console_msg("Hello world from reaper-rs medium-level API!");
@@ -396,12 +398,9 @@ Running the integration test is not only a good way to find _reaper-rs_ regressi
 subtle changes in the REAPER C++ API itself. Currently, the test assertions are very strict in order to reveal even
 the slightest deviations.
 
-On Linux you can run the integration test automatically (downloads, unpacks and executes REAPER):
-
-```sh
-cd test/test-extension-plugin
-cargo test --features run-reaper-integration-test -- --nocapture
-``` 
+On Linux, the REAPER integration test will be run automatically as Cargo integration test `run_reaper_integration_test`
+when invoking `cargo test` (downloads, unpacks and executes REAPER). This test is part of 
+`reaper-test-extension-plugin`. It can be disabled by building that crate with `--no-default-features`.
 
 ## Project background
 

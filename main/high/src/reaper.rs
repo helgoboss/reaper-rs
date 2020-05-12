@@ -94,7 +94,7 @@ pub struct ReaperBuilder {
 }
 
 impl ReaperBuilder {
-    fn with_all_functions_loaded(context: &ReaperPluginContext) -> ReaperBuilder {
+    fn with_all_functions_loaded(context: ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder {
             medium: {
                 let low = reaper_low::Reaper::load(context);
@@ -374,11 +374,11 @@ impl Reaper {
         arc
     }
 
-    pub fn load(context: &ReaperPluginContext) -> ReaperBuilder {
+    pub fn load(context: ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder::with_all_functions_loaded(context)
     }
 
-    pub fn setup_with_defaults(context: &ReaperPluginContext, email_address: &'static str) {
+    pub fn setup_with_defaults(context: ReaperPluginContext, email_address: &'static str) {
         Reaper::load(context)
             .logger(create_terminal_logger())
             .setup();

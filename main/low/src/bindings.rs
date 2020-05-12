@@ -10,6 +10,7 @@
 pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
+    pub const DLL_PROCESS_ATTACH: u32 = 1;
     pub const VK_LBUTTON: u32 = 1;
     pub const VK_RBUTTON: u32 = 2;
     pub const VK_MBUTTON: u32 = 4;
