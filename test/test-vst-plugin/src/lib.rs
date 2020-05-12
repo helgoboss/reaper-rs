@@ -104,8 +104,13 @@ impl TestVstPlugin {
     // Exists for demonstration purposes and quick tests
     #[allow(dead_code)]
     fn use_medium_level_reaper(&mut self) {
-        let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
-        let low = reaper_low::Reaper::load(&context);
+        let context = ReaperPluginContext::from_vst_plugin(
+            self.host
+                .raw_callback()
+                .expect("host callback not available"),
+        )
+        .unwrap();
+        let low = reaper_low::Reaper::load(context);
         let mut med = reaper_medium::Reaper::new(low);
         {
             let (sender, receiver) = channel::<String>();
@@ -127,8 +132,13 @@ impl TestVstPlugin {
 
     fn use_high_level_reaper(&mut self) {
         let guard = Reaper::guarded(|| {
-            let context = ReaperPluginContext::from_vst_plugin(self.host).unwrap();
-            Reaper::setup_with_defaults(&context, "info@helgoboss.org");
+            let context = ReaperPluginContext::from_vst_plugin(
+                self.host
+                    .raw_callback()
+                    .expect("host callback not available"),
+            )
+            .unwrap();
+            Reaper::setup_with_defaults(context, "info@helgoboss.org");
             let reaper = Reaper::get();
             reaper.activate();
             reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));

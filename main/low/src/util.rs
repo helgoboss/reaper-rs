@@ -1,5 +1,6 @@
 use super::raw::{reaper_plugin_info_t, HINSTANCE};
 use super::ReaperPluginContext;
+use crate::ContextFromExtensionPluginError;
 use std::error::Error;
 use std::panic::{catch_unwind, UnwindSafe};
 
@@ -22,18 +23,26 @@ pub fn firewall<F: FnOnce() -> R + UnwindSafe, R>(f: F) -> Option<R> {
 /// This function basically translates the REAPER extension plug-in main entry point signature
 /// (`ReaperPluginEntry()`) to a typical Rust main entry point signature (`main()`). It is
 /// intended to be used by macros in the `reaper-macros` crate.
-pub fn bootstrap_extension_plugin(
-    _h_instance: HINSTANCE,
+///
+/// # Safety
+///
+/// REAPER can crash if you pass an invalid pointer.
+pub unsafe fn bootstrap_extension_plugin(
+    h_instance: HINSTANCE,
     rec: *mut reaper_plugin_info_t,
-    init: fn(&ReaperPluginContext) -> Result<(), Box<dyn Error>>,
+    init: fn(ReaperPluginContext) -> Result<(), Box<dyn Error>>,
 ) -> i32 {
     // TODO-low Log early errors
     firewall(|| {
-        let context = match ReaperPluginContext::from_extension_plugin(rec) {
-            Err(_) => return 0,
+        if rec.is_null() {
+            return 0;
+        }
+        let rec = *rec;
+        let context = match ReaperPluginContext::from_extension_plugin(h_instance, rec) {
             Ok(c) => c,
+            Err(_) => return 0,
         };
-        match init(&context) {
+        match init(context) {
             Ok(_) => 1,
             Err(_) => 0,
         }

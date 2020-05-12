@@ -8,6 +8,8 @@ impl Reaper {
 
     /// Returns the plug-in context.
     pub fn plugin_context(&self) -> &ReaperPluginContext {
-        todo!()
+        self.plugin_context
+            .as_ref()
+            .expect("plug-in context not available on demo instances")
     }
 }
