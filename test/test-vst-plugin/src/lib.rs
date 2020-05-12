@@ -14,6 +14,13 @@ use vst::plugin_main;
 
 plugin_main!(TestVstPlugin);
 
+#[allow(non_snake_case)]
+#[no_mangle]
+extern "system" fn DllMain(hinstance: *const u8, _: u32, _: *const u8) -> u32 {
+    let bla = 5;
+    1
+}
+
 #[derive(Default)]
 struct TestVstPlugin {
     host: HostCallback,
