@@ -28,6 +28,8 @@ use reaper_medium::{
     UndoBehavior, ValueChange,
 };
 
+use reaper_low::{raw, TypeSpecificReaperPluginContext};
+use std::os::raw::{c_int, c_void};
 use std::rc::Rc;
 
 /// Creates all integration test steps to be executed. The order matters!
@@ -35,6 +37,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     // In theory all steps could be declared inline. But that makes the IDE become terribly slow.
     let steps_a = vec![
         basics(),
+        plugin_context(),
         create_empty_project_in_new_tab(),
         add_track(),
         fn_mut_action(),
@@ -1727,16 +1730,62 @@ fn basics() -> TestStep {
         reaper.show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
         reaper.show_console_msg("- &str: 范例文字äöüß\n");
         reaper.show_console_msg(String::from("- String: 范例文字äöüß"));
+        Ok(())
+    })
+}
+
+#[allow(overflowing_literals)]
+fn plugin_context() -> TestStep {
+    step(AllVersions, "Plugin context", |reaper, _| {
+        // Given
         let medium = reaper.medium();
         let plugin_context = medium.functions().low().plugin_context();
-        assert!(!plugin_context.h_instance().is_null());
+        // When
+        // Then
+        // GetFunc
         let show_console_msg_func =
             unsafe { plugin_context.GetFunc(c_str!("ShowConsoleMsg").as_ptr()) };
         assert!(!show_console_msg_func.is_null());
         let bla_func = unsafe { plugin_context.GetFunc(c_str!("Bla").as_ptr()) };
         assert!(bla_func.is_null());
+        // GetSwellFunc
         let swell_func = unsafe { plugin_context.GetSwellFunc(c_str!("DefWindowProc").as_ptr()) };
-        assert!(swell_func.is_null());
+        if cfg!(target_os = "windows") {
+            assert!(swell_func.is_null());
+        } else {
+            assert!(!swell_func.is_null());
+        }
+        use TypeSpecificReaperPluginContext::*;
+        match plugin_context.type_specific() {
+            Extension(ctx) => {
+                assert!(!plugin_context.h_instance().is_null());
+                assert_eq!(ctx.caller_version(), raw::REAPER_PLUGIN_VERSION as c_int);
+                assert_eq!(ctx.hwnd_main(), medium.functions().get_main_hwnd());
+                unsafe {
+                    let result = ctx.Register(
+                        c_str!("command_id").as_ptr(),
+                        c_str!("REAPER_RS_foo").as_ptr() as *mut c_void,
+                    );
+                    assert!(result > 0);
+                }
+            }
+            Vst(_ctx) => {
+                if cfg!(target_os = "windows") {
+                    assert!(!plugin_context.h_instance().is_null());
+                } else {
+                    assert!(plugin_context.h_instance().is_null());
+                }
+                // TODO-medium We must pass the AEffect for this to work. Refactor test step API
+                //  a bit so that it only takes one parameter which also contains passed AEffect.
+                // unsafe {
+                //     let project =
+                //         ctx.host_callback(null_mut(), 0xdead_beef, 0xdead_f00d, 3, null_mut(),
+                // 0.0)             as *mut raw::ReaProject;
+                //     let project = NonNull::new(project).ok_or("project is null")?;
+                //     assert!(medium.functions().validate_ptr(project));
+                // }
+            }
+        };
         Ok(())
     })
 }

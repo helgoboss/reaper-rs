@@ -5,7 +5,7 @@ use crate::raw;
 use derive_more::Display;
 use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::{null_mut, NonNull};
-use vst::api::HostCallbackProc;
+use vst::api::{AEffect, HostCallbackProc};
 use vst::plugin::HostCallback;
 
 type GetFuncFn = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
@@ -26,7 +26,7 @@ pub struct ReaperPluginContext {
 
 /// Additional stuff available in the plug-in context specific to a certain plug-in type.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-enum TypeSpecificReaperPluginContext {
+pub enum TypeSpecificReaperPluginContext {
     /// This is an extension plug-in.
     Extension(ReaperExtensionPluginContext),
     /// This is a VST plug-in.
@@ -35,7 +35,7 @@ enum TypeSpecificReaperPluginContext {
 
 /// Additional data available in the context of extension plug-ins.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-struct ReaperExtensionPluginContext {
+pub struct ReaperExtensionPluginContext {
     caller_version: c_int,
     hwnd_main: NonNull<raw::HWND__>,
     register: RegisterFn,
@@ -44,7 +44,7 @@ struct ReaperExtensionPluginContext {
 
 /// Additional data available in the context of VST plug-ins.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-struct ReaperVstPluginContext {
+pub struct ReaperVstPluginContext {
     host_callback: HostCallbackProc,
 }
 
@@ -171,6 +171,59 @@ impl ReaperPluginContext {
             Some(f) => f,
         };
         get_swell_func(name)
+    }
+
+    /// Returns the type-specific plug-in context.
+    pub fn type_specific(&self) -> &TypeSpecificReaperPluginContext {
+        &self.type_specific
+    }
+}
+
+impl ReaperExtensionPluginContext {
+    /// Returns the caller version from `reaper_plugin_info_t`.
+    pub fn caller_version(&self) -> c_int {
+        self.caller_version
+    }
+
+    /// Returns the main window from `reaper_plugin_info_t`.
+    pub fn hwnd_main(&self) -> NonNull<raw::HWND__> {
+        self.hwnd_main
+    }
+
+    /// This is the same like [`Reaper::plugin_register()`].
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    ///
+    /// [`Reaper::plugin_register()`]: struct.Reaper.html#method.plugin_register
+    pub unsafe fn Register(
+        &self,
+        name: *const ::std::os::raw::c_char,
+        infostruct: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int {
+        (self.register)(name, infostruct)
+    }
+}
+
+impl ReaperVstPluginContext {
+    /// Generic host callback function for communicating with REAPER from the VST plug-in.
+    ///
+    /// This is just a pass-through to the VST host callback.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn host_callback(
+        &self,
+        effect: *mut AEffect,
+        opcode: i32,
+        index: i32,
+        value: isize,
+        ptr: *mut c_void,
+        opt: f32,
+    ) -> isize {
+        (self.host_callback)(effect, opcode, index, value, ptr, opt)
     }
 }
 
