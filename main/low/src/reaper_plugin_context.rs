@@ -215,7 +215,7 @@ impl ReaperVstPluginContext {
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn host_callback(
-        &self,
+        self,
         effect: *mut AEffect,
         opcode: i32,
         index: i32,

@@ -99,7 +99,6 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
             pub fn static_context() -> reaper_low::StaticReaperExtensionPluginContext {
                 reaper_low::StaticReaperExtensionPluginContext {
                     get_swell_func: unsafe { SWELL_GET_FUNC },
-                    ..Default::default()
                 }
             }
         }

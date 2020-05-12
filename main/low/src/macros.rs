@@ -70,7 +70,6 @@ macro_rules! reaper_vst_plugin {
                 $crate::StaticReaperVstPluginContext {
                     h_instance: unsafe { HINSTANCE },
                     get_swell_func: unsafe { GET_FUNC },
-                    ..Default::default()
                 }
             }
         }
