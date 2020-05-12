@@ -79,6 +79,12 @@ pub use reaper::*;
 mod reaper_impl;
 pub use reaper_impl::*;
 
+mod swell;
+pub use swell::*;
+
+mod swell_impl;
+pub use swell_impl::*;
+
 mod midi;
 pub use midi::*;
 

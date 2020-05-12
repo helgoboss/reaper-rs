@@ -28,8 +28,9 @@ use reaper_medium::{
     UndoBehavior, ValueChange,
 };
 
-use reaper_low::{raw, TypeSpecificReaperPluginContext};
+use reaper_low::{raw, Swell, TypeSpecificReaperPluginContext};
 use std::os::raw::{c_int, c_void};
+use std::ptr::null_mut;
 use std::rc::Rc;
 
 /// Creates all integration test steps to be executed. The order matters!
@@ -109,6 +110,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         mark_project_as_dirty(),
         get_project_tempo(),
         set_project_tempo(),
+        swell(),
     ]
     .into_iter();
     let output_fx_steps = create_fx_steps("Output FX chain", || {
@@ -122,6 +124,35 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         .chain(output_fx_steps)
         .chain(input_fx_steps)
         .chain(steps_b)
+}
+
+fn swell() -> TestStep {
+    step(AllVersions, "SWELL", |reaper, _| {
+        if cfg!(target_os = "windows") {
+            Ok(())
+        } else {
+            // Given
+            let swell = Swell::load(
+                reaper
+                    .medium()
+                    .functions()
+                    .low()
+                    .plugin_context()
+                    .swell_function_provider()
+                    .expect("SWELL function provider not available although Linux"),
+            );
+            // When
+            unsafe {
+                swell.MessageBox(
+                    null_mut(),
+                    c_str!("Hello world from SWELL").as_ptr(),
+                    c_str!("reaper-rs SWELL").as_ptr(),
+                    1,
+                );
+            }
+            Ok(())
+        }
+    })
 }
 
 fn set_project_tempo() -> TestStep {
@@ -1749,10 +1780,13 @@ fn plugin_context() -> TestStep {
         let bla_func = unsafe { plugin_context.GetFunc(c_str!("Bla").as_ptr()) };
         assert!(bla_func.is_null());
         // GetSwellFunc
-        let swell_func = unsafe { plugin_context.GetSwellFunc(c_str!("DefWindowProc").as_ptr()) };
+        let swell_function_provider = plugin_context.swell_function_provider();
         if cfg!(target_os = "windows") {
-            assert!(swell_func.is_null());
+            assert!(swell_function_provider.is_none());
         } else {
+            let swell_function_provider =
+                swell_function_provider.ok_or("SWELL function provider not available")?;
+            let swell_func = unsafe { swell_function_provider(c_str!("DefWindowProc").as_ptr()) };
             assert!(!swell_func.is_null());
         }
         use TypeSpecificReaperPluginContext::*;

@@ -150,13 +150,22 @@ pub mod root {
     }
     pub type INT_PTR = isize;
     pub type LONG_PTR = isize;
+    pub type UINT_PTR = usize;
     pub type ULONG_PTR = usize;
+    pub type DWORD_PTR = usize;
+    pub type BOOL = ::std::os::raw::c_schar;
+    pub type WORD = ::std::os::raw::c_ushort;
     pub type DWORD = ::std::os::raw::c_uint;
     pub type UINT = ::std::os::raw::c_uint;
     pub type WPARAM = root::ULONG_PTR;
     pub type LPARAM = root::LONG_PTR;
     pub type LRESULT = root::LONG_PTR;
+    pub type LPVOID = *mut ::std::os::raw::c_void;
     pub type LONG = ::std::os::raw::c_int;
+    pub type SHORT = ::std::os::raw::c_short;
+    pub type LPTSTR = *mut ::std::os::raw::c_char;
+    pub type LPCTSTR = *const ::std::os::raw::c_char;
+    pub type ULONGLONG = ::std::os::raw::c_ulonglong;
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
     pub struct HWND__ {
@@ -169,12 +178,29 @@ pub mod root {
         _unused: [u8; 0],
     }
     pub type HMENU = *mut root::HMENU__;
+    pub type HANDLE = *mut ::std::os::raw::c_void;
     pub type HINSTANCE = *mut ::std::os::raw::c_void;
+    pub type HDROP = *mut ::std::os::raw::c_void;
+    pub type TIMERPROC = ::std::option::Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            uMsg: root::UINT,
+            idEvent: root::UINT_PTR,
+            dwTime: root::DWORD,
+        ),
+    >;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct POINT {
         pub x: root::LONG,
         pub y: root::LONG,
+    }
+    pub type LPPOINT = *mut root::POINT;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct POINTS {
+        pub x: root::SHORT,
+        pub y: root::SHORT,
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -184,12 +210,19 @@ pub mod root {
         pub right: root::LONG,
         pub bottom: root::LONG,
     }
+    pub type LPRECT = *mut root::RECT;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct ACCEL {
         pub fVirt: ::std::os::raw::c_uchar,
         pub key: ::std::os::raw::c_ushort,
         pub cmd: ::std::os::raw::c_ushort,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct FILETIME {
+        pub dwLowDateTime: root::DWORD,
+        pub dwHighDateTime: root::DWORD,
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -218,10 +251,241 @@ pub mod root {
     pub type HDC = *mut root::HDC__;
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
+    pub struct HCURSOR__ {
+        _unused: [u8; 0],
+    }
+    pub type HCURSOR = *mut root::HCURSOR__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
     pub struct HGDIOBJ__ {
         _unused: [u8; 0],
     }
+    pub type HBITMAP = *mut root::HGDIOBJ__;
+    pub type HICON = *mut root::HGDIOBJ__;
+    pub type HGDIOBJ = *mut root::HGDIOBJ__;
+    pub type HBRUSH = *mut root::HGDIOBJ__;
+    pub type HPEN = *mut root::HGDIOBJ__;
     pub type HFONT = *mut root::HGDIOBJ__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct LVCOLUMN {
+        pub mask: ::std::os::raw::c_int,
+        pub fmt: ::std::os::raw::c_int,
+        pub cx: ::std::os::raw::c_int,
+        pub pszText: *mut ::std::os::raw::c_char,
+        pub cchTextMax: ::std::os::raw::c_int,
+        pub iSubItem: ::std::os::raw::c_int,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct LVITEM {
+        pub mask: ::std::os::raw::c_int,
+        pub iItem: ::std::os::raw::c_int,
+        pub iSubItem: ::std::os::raw::c_int,
+        pub state: ::std::os::raw::c_int,
+        pub stateMask: ::std::os::raw::c_int,
+        pub pszText: *mut ::std::os::raw::c_char,
+        pub cchTextMax: ::std::os::raw::c_int,
+        pub iImage: ::std::os::raw::c_int,
+        pub lParam: root::LPARAM,
+    }
+    pub type PFNLVCOMPARE = ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: root::LPARAM,
+            arg2: root::LPARAM,
+            arg3: root::LPARAM,
+        ) -> ::std::os::raw::c_int,
+    >;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct HIMAGELIST__ {
+        _unused: [u8; 0],
+    }
+    pub type HIMAGELIST = *mut root::HIMAGELIST__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct LVHITTESTINFO {
+        pub pt: root::POINT,
+        pub flags: root::UINT,
+        pub iItem: ::std::os::raw::c_int,
+        pub iSubItem: ::std::os::raw::c_int,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct HDITEM {
+        pub mask: root::UINT,
+        pub cxy: ::std::os::raw::c_int,
+        pub pszText: *mut ::std::os::raw::c_char,
+        pub hbm: root::HBITMAP,
+        pub cchTextMax: ::std::os::raw::c_int,
+        pub fmt: ::std::os::raw::c_int,
+        pub lParam: root::LPARAM,
+        pub iImage: ::std::os::raw::c_int,
+        pub iOrder: ::std::os::raw::c_int,
+        pub type_: root::UINT,
+        pub pvFilter: *mut ::std::os::raw::c_void,
+        pub state: root::UINT,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct TCITEM {
+        pub mask: root::UINT,
+        pub dwState: root::DWORD,
+        pub dwStateMask: root::DWORD,
+        pub pszText: *mut ::std::os::raw::c_char,
+        pub cchTextMax: ::std::os::raw::c_int,
+        pub iImage: ::std::os::raw::c_int,
+        pub lParam: root::LPARAM,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct HTREEITEM__ {
+        _unused: [u8; 0],
+    }
+    pub type HTREEITEM = *mut root::HTREEITEM__;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct TVITEM {
+        pub mask: root::UINT,
+        pub hItem: root::HTREEITEM,
+        pub state: root::UINT,
+        pub stateMask: root::UINT,
+        pub pszText: *mut ::std::os::raw::c_char,
+        pub cchTextMax: ::std::os::raw::c_int,
+        pub iImage: ::std::os::raw::c_int,
+        pub iSelectedImage: ::std::os::raw::c_int,
+        pub cChildren: ::std::os::raw::c_int,
+        pub lParam: root::LPARAM,
+    }
+    pub type LPTVITEM = *mut root::TVITEM;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct TVINSERTSTRUCT {
+        pub hParent: root::HTREEITEM,
+        pub hInsertAfter: root::HTREEITEM,
+        pub item: root::TVITEM,
+    }
+    pub type TV_INSERTSTRUCT = root::TVINSERTSTRUCT;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct TVHITTESTINFO {
+        pub pt: root::POINT,
+        pub flags: root::UINT,
+        pub hItem: root::HTREEITEM,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct MENUITEMINFO {
+        pub cbSize: ::std::os::raw::c_uint,
+        pub fMask: ::std::os::raw::c_uint,
+        pub fType: ::std::os::raw::c_uint,
+        pub fState: ::std::os::raw::c_uint,
+        pub wID: ::std::os::raw::c_uint,
+        pub hSubMenu: root::HMENU,
+        pub hbmpChecked: root::HICON,
+        pub hbmpUnchecked: root::HICON,
+        pub dwItemData: root::DWORD_PTR,
+        pub dwTypeData: *mut ::std::os::raw::c_char,
+        pub cch: ::std::os::raw::c_int,
+        pub hbmpItem: root::HBITMAP,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct LOGFONT {
+        pub lfHeight: ::std::os::raw::c_int,
+        pub lfWidth: ::std::os::raw::c_int,
+        pub lfEscapement: ::std::os::raw::c_int,
+        pub lfOrientation: ::std::os::raw::c_int,
+        pub lfWeight: ::std::os::raw::c_int,
+        pub lfItalic: ::std::os::raw::c_char,
+        pub lfUnderline: ::std::os::raw::c_char,
+        pub lfStrikeOut: ::std::os::raw::c_char,
+        pub lfCharSet: ::std::os::raw::c_char,
+        pub lfOutPrecision: ::std::os::raw::c_char,
+        pub lfClipPrecision: ::std::os::raw::c_char,
+        pub lfQuality: ::std::os::raw::c_char,
+        pub lfPitchAndFamily: ::std::os::raw::c_char,
+        pub lfFaceName: [::std::os::raw::c_char; 32usize],
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct TEXTMETRIC {
+        pub tmHeight: root::LONG,
+        pub tmAscent: root::LONG,
+        pub tmDescent: root::LONG,
+        pub tmInternalLeading: root::LONG,
+        pub tmAveCharWidth: root::LONG,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct PAINTSTRUCT {
+        pub hdc: root::HDC,
+        pub fErase: root::BOOL,
+        pub rcPaint: root::RECT,
+    }
+    pub type DLGPROC = ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: root::HWND,
+            arg2: root::UINT,
+            arg3: root::WPARAM,
+            arg4: root::LPARAM,
+        ) -> root::INT_PTR,
+    >;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct tagGESTUREINFO {
+        pub cbSize: root::UINT,
+        pub dwFlags: root::DWORD,
+        pub dwID: root::DWORD,
+        pub hwndTarget: root::HWND,
+        pub ptsLocation: root::POINTS,
+        pub dwInstanceID: root::DWORD,
+        pub dwSequenceID: root::DWORD,
+        pub ullArguments: root::ULONGLONG,
+        pub cbExtraArgs: root::UINT,
+    }
+    pub type GESTUREINFO = root::tagGESTUREINFO;
+    pub type PROPENUMPROCEX = ::std::option::Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            lpszString: *const ::std::os::raw::c_char,
+            hData: root::HANDLE,
+            lParam: root::LPARAM,
+        ) -> root::BOOL,
+    >;
+    pub type SWELL_ControlCreatorProc = ::std::option::Option<
+        unsafe extern "C" fn(
+            parent: root::HWND,
+            cname: *const ::std::os::raw::c_char,
+            idx: ::std::os::raw::c_int,
+            classname: *const ::std::os::raw::c_char,
+            style: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+        ) -> root::HWND,
+    >;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct SWELL_DialogResourceIndex {
+        _unused: [u8; 0],
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct SWELL_MenuResourceIndex {
+        _unused: [u8; 0],
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct _ICONINFO {
+        pub fIcon: root::BOOL,
+        pub xHotspot: root::DWORD,
+        pub yHotspot: root::DWORD,
+        pub hbmMask: root::HBITMAP,
+        pub hbmColor: root::HBITMAP,
+    }
+    pub type ICONINFO = root::_ICONINFO;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct reaper_plugin_info_t {
@@ -7730,6 +7994,2279 @@ pub mod root {
             #[link_name = "\u{1}_ZN16reaper_functions13GetMidiOutputE"]
             pub static mut GetMidiOutput: ::std::option::Option<
                 unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output,
+            >;
+        }
+    }
+    pub mod swell_functions {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub static mut lstrcpyn: ::std::option::Option<
+                unsafe extern "C" fn(
+                    dest: *mut ::std::os::raw::c_char,
+                    src: *const ::std::os::raw::c_char,
+                    l: ::std::os::raw::c_int,
+                ) -> *mut ::std::os::raw::c_char,
+            >;
+        }
+        extern "C" {
+            pub static mut MulDiv: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: ::std::os::raw::c_int,
+                    arg2: ::std::os::raw::c_int,
+                    arg3: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut Sleep:
+                ::std::option::Option<unsafe extern "C" fn(ms: ::std::os::raw::c_int)>;
+        }
+        extern "C" {
+            pub static mut GetTickCount:
+                ::std::option::Option<unsafe extern "C" fn() -> root::DWORD>;
+        }
+        extern "C" {
+            pub static mut GetFileTime: ::std::option::Option<
+                unsafe extern "C" fn(
+                    filedes: ::std::os::raw::c_int,
+                    lpCreationTime: *mut root::FILETIME,
+                    lpLastAccessTime: *mut root::FILETIME,
+                    lpLastWriteTime: *mut root::FILETIME,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut WritePrivateProfileString: ::std::option::Option<
+                unsafe extern "C" fn(
+                    appname: *const ::std::os::raw::c_char,
+                    keyname: *const ::std::os::raw::c_char,
+                    val: *const ::std::os::raw::c_char,
+                    fn_: *const ::std::os::raw::c_char,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut GetPrivateProfileString: ::std::option::Option<
+                unsafe extern "C" fn(
+                    appname: *const ::std::os::raw::c_char,
+                    keyname: *const ::std::os::raw::c_char,
+                    def: *const ::std::os::raw::c_char,
+                    ret: *mut ::std::os::raw::c_char,
+                    retsize: ::std::os::raw::c_int,
+                    fn_: *const ::std::os::raw::c_char,
+                ) -> root::DWORD,
+            >;
+        }
+        extern "C" {
+            pub static mut GetPrivateProfileInt: ::std::option::Option<
+                unsafe extern "C" fn(
+                    appname: *const ::std::os::raw::c_char,
+                    keyname: *const ::std::os::raw::c_char,
+                    def: ::std::os::raw::c_int,
+                    fn_: *const ::std::os::raw::c_char,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetPrivateProfileStruct: ::std::option::Option<
+                unsafe extern "C" fn(
+                    appname: *const ::std::os::raw::c_char,
+                    keyname: *const ::std::os::raw::c_char,
+                    buf: *mut ::std::os::raw::c_void,
+                    bufsz: ::std::os::raw::c_int,
+                    fn_: *const ::std::os::raw::c_char,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut WritePrivateProfileStruct: ::std::option::Option<
+                unsafe extern "C" fn(
+                    appname: *const ::std::os::raw::c_char,
+                    keyname: *const ::std::os::raw::c_char,
+                    buf: *const ::std::os::raw::c_void,
+                    bufsz: ::std::os::raw::c_int,
+                    fn_: *const ::std::os::raw::c_char,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut WritePrivateProfileSection: ::std::option::Option<
+                unsafe extern "C" fn(
+                    appname: *const ::std::os::raw::c_char,
+                    strings: *const ::std::os::raw::c_char,
+                    fn_: *const ::std::os::raw::c_char,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut GetPrivateProfileSection: ::std::option::Option<
+                unsafe extern "C" fn(
+                    appname: *const ::std::os::raw::c_char,
+                    strout: *mut ::std::os::raw::c_char,
+                    strout_len: root::DWORD,
+                    fn_: *const ::std::os::raw::c_char,
+                ) -> root::DWORD,
+            >;
+        }
+        extern "C" {
+            pub static mut GetModuleFileName: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hInst: root::HINSTANCE,
+                    fn_: *mut ::std::os::raw::c_char,
+                    nSize: root::DWORD,
+                ) -> root::DWORD,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_PtInRect: ::std::option::Option<
+                unsafe extern "C" fn(r: *const root::RECT, p: root::POINT) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut ShellExecute: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwndDlg: root::HWND,
+                    action: *const ::std::os::raw::c_char,
+                    content1: *const ::std::os::raw::c_char,
+                    content2: *const ::std::os::raw::c_char,
+                    content3: *const ::std::os::raw::c_char,
+                    blah: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut MessageBox: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwndParent: root::HWND,
+                    text: *const ::std::os::raw::c_char,
+                    caption: *const ::std::os::raw::c_char,
+                    type_: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut BrowseForFiles: ::std::option::Option<
+                unsafe extern "C" fn(
+                    text: *const ::std::os::raw::c_char,
+                    initialdir: *const ::std::os::raw::c_char,
+                    initialfile: *const ::std::os::raw::c_char,
+                    allowmul: bool,
+                    extlist: *const ::std::os::raw::c_char,
+                ) -> *mut ::std::os::raw::c_char,
+            >;
+        }
+        extern "C" {
+            pub static mut BrowseForSaveFile: ::std::option::Option<
+                unsafe extern "C" fn(
+                    text: *const ::std::os::raw::c_char,
+                    initialdir: *const ::std::os::raw::c_char,
+                    initialfile: *const ::std::os::raw::c_char,
+                    extlist: *const ::std::os::raw::c_char,
+                    fn_: *mut ::std::os::raw::c_char,
+                    fnsize: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut BrowseForDirectory: ::std::option::Option<
+                unsafe extern "C" fn(
+                    text: *const ::std::os::raw::c_char,
+                    initialdir: *const ::std::os::raw::c_char,
+                    fn_: *mut ::std::os::raw::c_char,
+                    fnsize: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut BrowseFile_SetTemplate: ::std::option::Option<
+                unsafe extern "C" fn(
+                    dlgid: *const ::std::os::raw::c_char,
+                    dlgProc: root::DLGPROC,
+                    reshead: *mut root::SWELL_DialogResourceIndex,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut GetDlgItem: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut ShowWindow: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut DestroyWindow:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetGestureInfo: ::std::option::Option<
+                unsafe extern "C" fn(
+                    lParam: root::LPARAM,
+                    gi: *mut root::GESTUREINFO,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_HideApp: ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut SetDlgItemText: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                    text: *const ::std::os::raw::c_char,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SetDlgItemInt: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                    val: ::std::os::raw::c_int,
+                    issigned: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut GetDlgItemInt: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                    translated: *mut root::BOOL,
+                    issigned: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetDlgItemText: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                    text: *mut ::std::os::raw::c_char,
+                    textlen: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut CheckDlgButton: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                    check: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut IsDlgButtonChecked: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut EnableWindow: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, enable: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut SetFocus: ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut GetFocus: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
+        }
+        extern "C" {
+            pub static mut SetForegroundWindow:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut GetForegroundWindow:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
+        }
+        extern "C" {
+            pub static mut SetCapture:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HWND>;
+        }
+        extern "C" {
+            pub static mut GetCapture: ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
+        }
+        extern "C" {
+            pub static mut ReleaseCapture: ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut IsChild: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwndParent: root::HWND,
+                    hwndChild: root::HWND,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetParent:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HWND>;
+        }
+        extern "C" {
+            pub static mut SetParent: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, newPar: root::HWND) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut GetWindow: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut EnumWindows: ::std::option::Option<
+                unsafe extern "C" fn(
+                    proc_: ::std::option::Option<
+                        unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
+                    >,
+                    lp: root::LPARAM,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut FindWindowEx: ::std::option::Option<
+                unsafe extern "C" fn(
+                    par: root::HWND,
+                    lastw: root::HWND,
+                    classname: *const ::std::os::raw::c_char,
+                    title: *const ::std::os::raw::c_char,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut ClientToScreen:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND, p: *mut root::POINT)>;
+        }
+        extern "C" {
+            pub static mut ScreenToClient:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND, p: *mut root::POINT)>;
+        }
+        extern "C" {
+            pub static mut GetWindowRect: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut GetWindowContentViewRect:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT)>;
+        }
+        extern "C" {
+            pub static mut GetClientRect:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT)>;
+        }
+        extern "C" {
+            pub static mut WindowFromPoint:
+                ::std::option::Option<unsafe extern "C" fn(p: root::POINT) -> root::HWND>;
+        }
+        extern "C" {
+            pub static mut WinOffsetRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    lprc: root::LPRECT,
+                    dx: ::std::os::raw::c_int,
+                    dy: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut WinSetRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    lprc: root::LPRECT,
+                    xLeft: ::std::os::raw::c_int,
+                    yTop: ::std::os::raw::c_int,
+                    xRight: ::std::os::raw::c_int,
+                    yBottom: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut WinUnionRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    out: *mut root::RECT,
+                    in1: *const root::RECT,
+                    in2: *const root::RECT,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut WinIntersectRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    out: *mut root::RECT,
+                    in1: *const root::RECT,
+                    in2: *const root::RECT,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SetWindowPos: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    unused: root::HWND,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    cx: ::std::os::raw::c_int,
+                    cy: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetWindowLevel: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    newlevel: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut InvalidateRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    r: *const root::RECT,
+                    eraseBk: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut UpdateWindow:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut GetWindowLong: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                ) -> root::LONG_PTR,
+            >;
+        }
+        extern "C" {
+            pub static mut SetWindowLong: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                    val: root::LONG_PTR,
+                ) -> root::LONG_PTR,
+            >;
+        }
+        extern "C" {
+            pub static mut ScrollWindow: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    xamt: ::std::os::raw::c_int,
+                    yamt: ::std::os::raw::c_int,
+                    lpRect: *const root::RECT,
+                    lpClipRect: *const root::RECT,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut EnumPropsEx: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    arg2: root::PROPENUMPROCEX,
+                    arg3: root::LPARAM,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetProp: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    arg2: *const ::std::os::raw::c_char,
+                ) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut SetProp: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    arg2: *const ::std::os::raw::c_char,
+                    arg3: root::HANDLE,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut RemoveProp: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    arg2: *const ::std::os::raw::c_char,
+                ) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut IsWindowVisible:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> bool>;
+        }
+        extern "C" {
+            pub static mut IsWindow:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> bool>;
+        }
+        extern "C" {
+            pub static mut SetTimer: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    timerid: root::UINT_PTR,
+                    rate: root::UINT,
+                    tProc: root::TIMERPROC,
+                ) -> root::UINT_PTR,
+            >;
+        }
+        extern "C" {
+            pub static mut KillTimer: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetExtendedListViewStyleEx: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    mask: ::std::os::raw::c_int,
+                    style: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_InsertColumn: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    pos: ::std::os::raw::c_int,
+                    lvc: *const root::LVCOLUMN,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_DeleteColumn: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, pos: ::std::os::raw::c_int) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetColumn: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    pos: ::std::os::raw::c_int,
+                    lvc: *const root::LVCOLUMN,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetColumnWidth: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    pos: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_InsertItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    item: *const root::LVITEM,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetItemText: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    ipos: ::std::os::raw::c_int,
+                    cpos: ::std::os::raw::c_int,
+                    txt: *const ::std::os::raw::c_char,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetItem: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, item: *mut root::LVITEM) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetNextItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    istart: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetItem: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, item: *mut root::LVITEM) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetItemState: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    ipos: ::std::os::raw::c_int,
+                    mask: root::UINT,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_DeleteItem: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, ipos: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_DeleteAllItems:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut ListView_GetSelectedCount:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut ListView_GetItemCount:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut ListView_GetSelectionMark:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut ListView_SetColumnWidth: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    colpos: ::std::os::raw::c_int,
+                    wid: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetItemState: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    item: ::std::os::raw::c_int,
+                    state: root::UINT,
+                    statemask: root::UINT,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_RedrawItems: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    startitem: ::std::os::raw::c_int,
+                    enditem: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetItemCount: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, cnt: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_EnsureVisible: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetSubItemRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    item: ::std::os::raw::c_int,
+                    subitem: ::std::os::raw::c_int,
+                    code: ::std::os::raw::c_int,
+                    r: *mut root::RECT,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetImageList: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    imagelist: root::HIMAGELIST,
+                    which: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_HitTest: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    pinf: *mut root::LVHITTESTINFO,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SubItemHitTest: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    pinf: *mut root::LVHITTESTINFO,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetItemText: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    item: ::std::os::raw::c_int,
+                    subitem: ::std::os::raw::c_int,
+                    text: *mut ::std::os::raw::c_char,
+                    textmax: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SortItems: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    compf: root::PFNLVCOMPARE,
+                    parm: root::LPARAM,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetItemRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    item: ::std::os::raw::c_int,
+                    r: *mut root::RECT,
+                    code: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_Scroll: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    xscroll: ::std::os::raw::c_int,
+                    yscroll: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetTopIndex:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut ListView_GetCountPerPage:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut ListView_SetColumnOrderArray: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    cnt: ::std::os::raw::c_int,
+                    arr: *mut ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetColumnOrderArray: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    cnt: ::std::os::raw::c_int,
+                    arr: *mut ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetHeader:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> root::HWND>;
+        }
+        extern "C" {
+            pub static mut Header_GetItemCount:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut Header_GetItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    col: ::std::os::raw::c_int,
+                    hi: *mut root::HDITEM,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut Header_SetItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    col: ::std::os::raw::c_int,
+                    hi: *mut root::HDITEM,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetListViewHeaderHeight:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut ImageList_CreateEx:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HIMAGELIST>;
+        }
+        extern "C" {
+            pub static mut ImageList_Remove: ::std::option::Option<
+                unsafe extern "C" fn(
+                    list: root::HIMAGELIST,
+                    idx: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut ImageList_ReplaceIcon: ::std::option::Option<
+                unsafe extern "C" fn(
+                    list: root::HIMAGELIST,
+                    offset: ::std::os::raw::c_int,
+                    image: root::HICON,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ImageList_Add: ::std::option::Option<
+                unsafe extern "C" fn(
+                    list: root::HIMAGELIST,
+                    image: root::HBITMAP,
+                    mask: root::HBITMAP,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut ImageList_Destroy:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HIMAGELIST)>;
+        }
+        extern "C" {
+            pub static mut TabCtrl_GetItemCount: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut TabCtrl_DeleteItem: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut TabCtrl_InsertItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                    item: *mut root::TCITEM,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut TabCtrl_SetCurSel: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    idx: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut TabCtrl_GetCurSel: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut TabCtrl_AdjustRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    fLarger: root::BOOL,
+                    r: *mut root::RECT,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_InsertItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    ins: *mut root::TV_INSERTSTRUCT,
+                ) -> root::HTREEITEM,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_Expand: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    item: root::HTREEITEM,
+                    flag: root::UINT,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_GetSelection:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HTREEITEM>;
+        }
+        extern "C" {
+            pub static mut TreeView_DeleteItem: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM),
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_DeleteAllItems:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut TreeView_SelectItem: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM),
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_GetItem: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_SetItem: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_HitTest: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    hti: *mut root::TVHITTESTINFO,
+                ) -> root::HTREEITEM,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_SetIndent: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, indent: ::std::os::raw::c_int) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_GetChild: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_GetNextSibling: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_GetRoot:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HTREEITEM>;
+        }
+        extern "C" {
+            pub static mut TreeView_SetBkColor: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_SetTextColor: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetBkColor: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetTextBkColor: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetTextColor: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetGridColor: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_SetSelColors: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    colors: *mut ::std::os::raw::c_int,
+                    ncolors: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_ModalWindowStart: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_ModalWindowRun: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: *mut ::std::os::raw::c_void,
+                    ret: *mut ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_ModalWindowEnd:
+                ::std::option::Option<unsafe extern "C" fn(ctx: *mut ::std::os::raw::c_void)>;
+        }
+        extern "C" {
+            pub static mut SWELL_CloseWindow:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut CreatePopupMenu:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HMENU>;
+        }
+        extern "C" {
+            pub static mut CreatePopupMenuEx: ::std::option::Option<
+                unsafe extern "C" fn(title: *const ::std::os::raw::c_char) -> root::HMENU,
+            >;
+        }
+        extern "C" {
+            pub static mut DestroyMenu:
+                ::std::option::Option<unsafe extern "C" fn(hMenu: root::HMENU)>;
+        }
+        extern "C" {
+            pub static mut AddMenuItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    pos: ::std::os::raw::c_int,
+                    name: *const ::std::os::raw::c_char,
+                    tagid: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetSubMenu: ::std::option::Option<
+                unsafe extern "C" fn(hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU,
+            >;
+        }
+        extern "C" {
+            pub static mut GetMenuItemCount: ::std::option::Option<
+                unsafe extern "C" fn(hMenu: root::HMENU) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetMenuItemID: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    pos: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SetMenuItemModifier: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    idx: ::std::os::raw::c_int,
+                    flag: ::std::os::raw::c_int,
+                    code: ::std::os::raw::c_int,
+                    mask: ::std::os::raw::c_uint,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut SetMenuItemText: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    idx: ::std::os::raw::c_int,
+                    flag: ::std::os::raw::c_int,
+                    text: *const ::std::os::raw::c_char,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut EnableMenuItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    idx: ::std::os::raw::c_int,
+                    en: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut DeleteMenu: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    idx: ::std::os::raw::c_int,
+                    flag: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut CheckMenuItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    idx: ::std::os::raw::c_int,
+                    chk: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut InsertMenuItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    pos: ::std::os::raw::c_int,
+                    byPos: root::BOOL,
+                    mi: *mut root::MENUITEMINFO,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_InsertMenu: ::std::option::Option<
+                unsafe extern "C" fn(
+                    menu: root::HMENU,
+                    pos: ::std::os::raw::c_int,
+                    flag: ::std::os::raw::c_uint,
+                    idx: root::UINT_PTR,
+                    str: *const ::std::os::raw::c_char,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut GetMenuItemInfo: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    pos: ::std::os::raw::c_int,
+                    byPos: root::BOOL,
+                    mi: *mut root::MENUITEMINFO,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SetMenuItemInfo: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    pos: ::std::os::raw::c_int,
+                    byPos: root::BOOL,
+                    mi: *mut root::MENUITEMINFO,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut DrawMenuBar:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut SWELL_LoadMenu: ::std::option::Option<
+                unsafe extern "C" fn(
+                    head: *mut root::SWELL_MenuResourceIndex,
+                    resid: *const ::std::os::raw::c_char,
+                ) -> root::HMENU,
+            >;
+        }
+        extern "C" {
+            pub static mut TrackPopupMenu: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    flags: ::std::os::raw::c_int,
+                    xpos: ::std::os::raw::c_int,
+                    ypos: ::std::os::raw::c_int,
+                    resvd: ::std::os::raw::c_int,
+                    hwnd: root::HWND,
+                    r: *const root::RECT,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetMenuDestination:
+                ::std::option::Option<unsafe extern "C" fn(menu: root::HMENU, hwnd: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut SWELL_DuplicateMenu:
+                ::std::option::Option<unsafe extern "C" fn(menu: root::HMENU) -> root::HMENU>;
+        }
+        extern "C" {
+            pub static mut SetMenu: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, menu: root::HMENU) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut GetMenu:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HMENU>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetDefaultWindowMenu:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HMENU>;
+        }
+        extern "C" {
+            pub static mut SWELL_SetDefaultWindowMenu:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HMENU)>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetDefaultModalWindowMenu:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HMENU>;
+        }
+        extern "C" {
+            pub static mut SWELL_SetDefaultModalWindowMenu:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HMENU)>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetCurrentMenu:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HMENU>;
+        }
+        extern "C" {
+            pub static mut SWELL_SetCurrentMenu:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HMENU)>;
+        }
+        extern "C" {
+            pub static mut SWELL_DialogBox: ::std::option::Option<
+                unsafe extern "C" fn(
+                    reshead: *mut root::SWELL_DialogResourceIndex,
+                    resid: *const ::std::os::raw::c_char,
+                    parent: root::HWND,
+                    dlgproc: root::DLGPROC,
+                    param: root::LPARAM,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_CreateDialog: ::std::option::Option<
+                unsafe extern "C" fn(
+                    reshead: *mut root::SWELL_DialogResourceIndex,
+                    resid: *const ::std::os::raw::c_char,
+                    parent: root::HWND,
+                    dlgproc: root::DLGPROC,
+                    param: root::LPARAM,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_RegisterCustomControlCreator:
+                ::std::option::Option<unsafe extern "C" fn(proc_: root::SWELL_ControlCreatorProc)>;
+        }
+        extern "C" {
+            pub static mut SWELL_UnregisterCustomControlCreator:
+                ::std::option::Option<unsafe extern "C" fn(proc_: root::SWELL_ControlCreatorProc)>;
+        }
+        extern "C" {
+            pub static mut DefWindowProc: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    msg: root::UINT,
+                    wParam: root::WPARAM,
+                    lParam: root::LPARAM,
+                ) -> root::LRESULT,
+            >;
+        }
+        extern "C" {
+            pub static mut EndDialog: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetDefaultButtonID: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwndDlg: root::HWND,
+                    onlyIfEnabled: bool,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SendMessage: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    arg2: root::UINT,
+                    arg3: root::WPARAM,
+                    arg4: root::LPARAM,
+                ) -> root::LRESULT,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_BroadcastMessage: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM),
+            >;
+        }
+        extern "C" {
+            pub static mut PostMessage: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    msg: root::UINT,
+                    wParam: root::WPARAM,
+                    lParam: root::LPARAM,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MessageQueue_Flush: ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut SWELL_MessageQueue_Clear:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND)>;
+        }
+        extern "C" {
+            pub static mut SWELL_KeyToASCII: ::std::option::Option<
+                unsafe extern "C" fn(
+                    wParam: ::std::os::raw::c_int,
+                    lParam: ::std::os::raw::c_int,
+                    newflags: *mut ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetAsyncKeyState: ::std::option::Option<
+                unsafe extern "C" fn(key: ::std::os::raw::c_int) -> root::WORD,
+            >;
+        }
+        extern "C" {
+            pub static mut GetCursorPos:
+                ::std::option::Option<unsafe extern "C" fn(pt: *mut root::POINT)>;
+        }
+        extern "C" {
+            pub static mut GetMessagePos:
+                ::std::option::Option<unsafe extern "C" fn() -> root::DWORD>;
+        }
+        extern "C" {
+            pub static mut SWELL_LoadCursor: ::std::option::Option<
+                unsafe extern "C" fn(idx: *const ::std::os::raw::c_char) -> root::HCURSOR,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetCursor:
+                ::std::option::Option<unsafe extern "C" fn(curs: root::HCURSOR)>;
+        }
+        extern "C" {
+            pub static mut SWELL_EnableRightClickEmulate:
+                ::std::option::Option<unsafe extern "C" fn(enable: root::BOOL)>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetCursor:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HCURSOR>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetLastSetCursor:
+                ::std::option::Option<unsafe extern "C" fn() -> root::HCURSOR>;
+        }
+        extern "C" {
+            pub static mut SWELL_IsCursorVisible:
+                ::std::option::Option<unsafe extern "C" fn() -> bool>;
+        }
+        extern "C" {
+            pub static mut SWELL_ShowCursor: ::std::option::Option<
+                unsafe extern "C" fn(bShow: root::BOOL) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetCursorPos: ::std::option::Option<
+                unsafe extern "C" fn(
+                    X: ::std::os::raw::c_int,
+                    Y: ::std::os::raw::c_int,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetViewPort: ::std::option::Option<
+                unsafe extern "C" fn(
+                    r: *mut root::RECT,
+                    sourcerect: *const root::RECT,
+                    wantWork: bool,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut OpenClipboard:
+                ::std::option::Option<unsafe extern "C" fn(hwndDlg: root::HWND) -> bool>;
+        }
+        extern "C" {
+            pub static mut CloseClipboard: ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut GetClipboardData:
+                ::std::option::Option<unsafe extern "C" fn(type_: root::UINT) -> root::HANDLE>;
+        }
+        extern "C" {
+            pub static mut EmptyClipboard: ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut SetClipboardData:
+                ::std::option::Option<unsafe extern "C" fn(type_: root::UINT, h: root::HANDLE)>;
+        }
+        extern "C" {
+            pub static mut RegisterClipboardFormat: ::std::option::Option<
+                unsafe extern "C" fn(desc: *const ::std::os::raw::c_char) -> root::UINT,
+            >;
+        }
+        extern "C" {
+            pub static mut EnumClipboardFormats:
+                ::std::option::Option<unsafe extern "C" fn(lastfmt: root::UINT) -> root::UINT>;
+        }
+        extern "C" {
+            pub static mut GlobalAlloc: ::std::option::Option<
+                unsafe extern "C" fn(
+                    flags: ::std::os::raw::c_int,
+                    sz: ::std::os::raw::c_int,
+                ) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut GlobalLock: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HANDLE) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut GlobalSize: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HANDLE) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GlobalUnlock:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HANDLE)>;
+        }
+        extern "C" {
+            pub static mut GlobalFree: ::std::option::Option<unsafe extern "C" fn(h: root::HANDLE)>;
+        }
+        extern "C" {
+            pub static mut CreateThread: ::std::option::Option<
+                unsafe extern "C" fn(
+                    TA: *mut ::std::os::raw::c_void,
+                    stackSize: root::DWORD,
+                    ThreadProc: ::std::option::Option<
+                        unsafe extern "C" fn(arg1: root::LPVOID) -> root::DWORD,
+                    >,
+                    parm: root::LPVOID,
+                    cf: root::DWORD,
+                    tidOut: *mut root::DWORD,
+                ) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut CreateEvent: ::std::option::Option<
+                unsafe extern "C" fn(
+                    SA: *mut ::std::os::raw::c_void,
+                    manualReset: root::BOOL,
+                    initialSig: root::BOOL,
+                    ignored: *const ::std::os::raw::c_char,
+                ) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut CreateEventAsSocket: ::std::option::Option<
+                unsafe extern "C" fn(
+                    SA: *mut ::std::os::raw::c_void,
+                    manualReset: root::BOOL,
+                    initialSig: root::BOOL,
+                    ignored: *const ::std::os::raw::c_char,
+                ) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut GetCurrentThreadId:
+                ::std::option::Option<unsafe extern "C" fn() -> root::DWORD>;
+        }
+        extern "C" {
+            pub static mut WaitForSingleObject: ::std::option::Option<
+                unsafe extern "C" fn(hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD,
+            >;
+        }
+        extern "C" {
+            pub static mut WaitForAnySocketObject: ::std::option::Option<
+                unsafe extern "C" fn(
+                    numObjs: ::std::os::raw::c_int,
+                    objs: *mut root::HANDLE,
+                    msTO: root::DWORD,
+                ) -> root::DWORD,
+            >;
+        }
+        extern "C" {
+            pub static mut CloseHandle:
+                ::std::option::Option<unsafe extern "C" fn(hand: root::HANDLE) -> root::BOOL>;
+        }
+        extern "C" {
+            pub static mut SetThreadPriority: ::std::option::Option<
+                unsafe extern "C" fn(evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SetEvent:
+                ::std::option::Option<unsafe extern "C" fn(evt: root::HANDLE) -> root::BOOL>;
+        }
+        extern "C" {
+            pub static mut ResetEvent:
+                ::std::option::Option<unsafe extern "C" fn(evt: root::HANDLE) -> root::BOOL>;
+        }
+        extern "C" {
+            pub static mut SWELL_CreateProcessFromPID: ::std::option::Option<
+                unsafe extern "C" fn(pid: ::std::os::raw::c_int) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_CreateProcess: ::std::option::Option<
+                unsafe extern "C" fn(
+                    exe: *const ::std::os::raw::c_char,
+                    nparams: ::std::os::raw::c_int,
+                    params: *mut *const ::std::os::raw::c_char,
+                ) -> root::HANDLE,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetProcessExitCode: ::std::option::Option<
+                unsafe extern "C" fn(hand: root::HANDLE) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut LoadLibraryGlobals: ::std::option::Option<
+                unsafe extern "C" fn(
+                    fileName: *const ::std::os::raw::c_char,
+                    symbolsAsGlobals: bool,
+                ) -> root::HINSTANCE,
+            >;
+        }
+        extern "C" {
+            pub static mut LoadLibrary: ::std::option::Option<
+                unsafe extern "C" fn(fileName: *const ::std::os::raw::c_char) -> root::HINSTANCE,
+            >;
+        }
+        extern "C" {
+            pub static mut GetProcAddress: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hInst: root::HINSTANCE,
+                    procName: *const ::std::os::raw::c_char,
+                ) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut FreeLibrary:
+                ::std::option::Option<unsafe extern "C" fn(hInst: root::HINSTANCE) -> root::BOOL>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetBundle: ::std::option::Option<
+                unsafe extern "C" fn(hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_CreateMemContext: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hdc: root::HDC,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                ) -> root::HDC,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_DeleteGfxContext:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HDC)>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetCtxGC: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetCtxFrameBuffer: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_PushClipRegion:
+                ::std::option::Option<unsafe extern "C" fn(ctx: root::HDC)>;
+        }
+        extern "C" {
+            pub static mut SWELL_SetClipRegion:
+                ::std::option::Option<unsafe extern "C" fn(ctx: root::HDC, r: *const root::RECT)>;
+        }
+        extern "C" {
+            pub static mut SWELL_PopClipRegion:
+                ::std::option::Option<unsafe extern "C" fn(ctx: root::HDC)>;
+        }
+        extern "C" {
+            pub static mut CreateFontIndirect: ::std::option::Option<
+                unsafe extern "C" fn(arg1: *mut root::LOGFONT) -> root::HFONT,
+            >;
+        }
+        extern "C" {
+            pub static mut CreateFont: ::std::option::Option<
+                unsafe extern "C" fn(
+                    lfHeight: ::std::os::raw::c_int,
+                    lfWidth: ::std::os::raw::c_int,
+                    lfEscapement: ::std::os::raw::c_int,
+                    lfOrientation: ::std::os::raw::c_int,
+                    lfWeight: ::std::os::raw::c_int,
+                    lfItalic: ::std::os::raw::c_char,
+                    lfUnderline: ::std::os::raw::c_char,
+                    lfStrikeOut: ::std::os::raw::c_char,
+                    lfCharSet: ::std::os::raw::c_char,
+                    lfOutPrecision: ::std::os::raw::c_char,
+                    lfClipPrecision: ::std::os::raw::c_char,
+                    lfQuality: ::std::os::raw::c_char,
+                    lfPitchAndFamily: ::std::os::raw::c_char,
+                    lfFaceName: *const ::std::os::raw::c_char,
+                ) -> root::HFONT,
+            >;
+        }
+        extern "C" {
+            pub static mut CreatePen: ::std::option::Option<
+                unsafe extern "C" fn(
+                    attr: ::std::os::raw::c_int,
+                    wid: ::std::os::raw::c_int,
+                    col: ::std::os::raw::c_int,
+                ) -> root::HPEN,
+            >;
+        }
+        extern "C" {
+            pub static mut CreateSolidBrush: ::std::option::Option<
+                unsafe extern "C" fn(col: ::std::os::raw::c_int) -> root::HBRUSH,
+            >;
+        }
+        extern "C" {
+            pub static mut CreatePenAlpha: ::std::option::Option<
+                unsafe extern "C" fn(
+                    attr: ::std::os::raw::c_int,
+                    wid: ::std::os::raw::c_int,
+                    col: ::std::os::raw::c_int,
+                    alpha: f32,
+                ) -> root::HPEN,
+            >;
+        }
+        extern "C" {
+            pub static mut CreateSolidBrushAlpha: ::std::option::Option<
+                unsafe extern "C" fn(col: ::std::os::raw::c_int, alpha: f32) -> root::HBRUSH,
+            >;
+        }
+        extern "C" {
+            pub static mut SelectObject: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ,
+            >;
+        }
+        extern "C" {
+            pub static mut GetStockObject: ::std::option::Option<
+                unsafe extern "C" fn(wh: ::std::os::raw::c_int) -> root::HGDIOBJ,
+            >;
+        }
+        extern "C" {
+            pub static mut DeleteObject:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HGDIOBJ)>;
+        }
+        extern "C" {
+            pub static mut SWELL_FillRect: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC, r: *const root::RECT, br: root::HBRUSH),
+            >;
+        }
+        extern "C" {
+            pub static mut Rectangle: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    l: ::std::os::raw::c_int,
+                    t: ::std::os::raw::c_int,
+                    r: ::std::os::raw::c_int,
+                    b: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut Ellipse: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    l: ::std::os::raw::c_int,
+                    t: ::std::os::raw::c_int,
+                    r: ::std::os::raw::c_int,
+                    b: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_Polygon: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    pts: *mut root::POINT,
+                    npts: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut MoveToEx: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    op: *mut root::POINT,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_LineTo: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetPixel: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    c: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut PolyBezierTo: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    pts: *mut root::POINT,
+                    np: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_DrawText: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    buf: *const ::std::os::raw::c_char,
+                    len: ::std::os::raw::c_int,
+                    r: *mut root::RECT,
+                    align: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SetTextColor: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut GetTextColor: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SetBkColor: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut SetBkMode: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut GetGlyphIndicesW: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    buf: *mut u32,
+                    len: ::std::os::raw::c_int,
+                    indices: *mut ::std::os::raw::c_ushort,
+                    flags: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut RoundRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    x2: ::std::os::raw::c_int,
+                    y2: ::std::os::raw::c_int,
+                    xrnd: ::std::os::raw::c_int,
+                    yrnd: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut PolyPolyline: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    pts: *mut root::POINT,
+                    cnts: *mut root::DWORD,
+                    nseg: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut GetTextMetrics: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC, tm: *mut root::TEXTMETRIC) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut GetTextFace: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ctx: root::HDC,
+                    nCount: ::std::os::raw::c_int,
+                    lpFaceName: root::LPTSTR,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut GetObject: ::std::option::Option<
+                unsafe extern "C" fn(
+                    icon: root::HICON,
+                    bmsz: ::std::os::raw::c_int,
+                    _bm: *mut ::std::os::raw::c_void,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut CreateIconIndirect: ::std::option::Option<
+                unsafe extern "C" fn(iconinfo: *mut root::ICONINFO) -> root::HICON,
+            >;
+        }
+        extern "C" {
+            pub static mut LoadNamedImage: ::std::option::Option<
+                unsafe extern "C" fn(
+                    name: *const ::std::os::raw::c_char,
+                    alphaFromMask: bool,
+                ) -> root::HICON,
+            >;
+        }
+        extern "C" {
+            pub static mut DrawImageInRect: ::std::option::Option<
+                unsafe extern "C" fn(ctx: root::HDC, img: root::HICON, r: *const root::RECT),
+            >;
+        }
+        extern "C" {
+            pub static mut BitBlt: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hdcOut: root::HDC,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    hdcIn: root::HDC,
+                    xin: ::std::os::raw::c_int,
+                    yin: ::std::os::raw::c_int,
+                    mode: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut StretchBlt: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hdcOut: root::HDC,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    hdcIn: root::HDC,
+                    xin: ::std::os::raw::c_int,
+                    yin: ::std::os::raw::c_int,
+                    srcw: ::std::os::raw::c_int,
+                    srch: ::std::os::raw::c_int,
+                    mode: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut StretchBltFromMem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hdcOut: root::HDC,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    bits: *const ::std::os::raw::c_void,
+                    srcw: ::std::os::raw::c_int,
+                    srch: ::std::os::raw::c_int,
+                    srcspan: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetScaling256:
+                ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
+        }
+        extern "C" {
+            pub static mut SWELL_ExtendedAPI: ::std::option::Option<
+                unsafe extern "C" fn(
+                    key: *const ::std::os::raw::c_char,
+                    v: *mut ::std::os::raw::c_void,
+                ) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut GetSysColor: ::std::option::Option<
+                unsafe extern "C" fn(idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut CreateBitmap: ::std::option::Option<
+                unsafe extern "C" fn(
+                    width: ::std::os::raw::c_int,
+                    height: ::std::os::raw::c_int,
+                    numplanes: ::std::os::raw::c_int,
+                    bitsperpixel: ::std::os::raw::c_int,
+                    bits: *mut ::std::os::raw::c_uchar,
+                ) -> root::HBITMAP,
+            >;
+        }
+        extern "C" {
+            pub static mut SetOpaque:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND, isopaque: bool)>;
+        }
+        extern "C" {
+            pub static mut SetAllowNoMiddleManRendering:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND, allow: bool)>;
+        }
+        extern "C" {
+            pub static mut BeginPaint: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC,
+            >;
+        }
+        extern "C" {
+            pub static mut EndPaint: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut GetDC:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND) -> root::HDC>;
+        }
+        extern "C" {
+            pub static mut GetWindowDC:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND) -> root::HDC>;
+        }
+        extern "C" {
+            pub static mut ReleaseDC:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND, arg2: root::HDC)>;
+        }
+        extern "C" {
+            pub static mut SWELL_FillDialogBackground: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hdc: root::HDC,
+                    r: *const root::RECT,
+                    level: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_CloneGDIObject:
+                ::std::option::Option<unsafe extern "C" fn(a: root::HGDIOBJ) -> root::HGDIOBJ>;
+        }
+        extern "C" {
+            pub static mut GetSystemMetrics: ::std::option::Option<
+                unsafe extern "C" fn(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut DragQueryPoint: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut DragFinish:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HDROP)>;
+        }
+        extern "C" {
+            pub static mut DragQueryFile: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HDROP,
+                    arg2: root::UINT,
+                    arg3: *mut ::std::os::raw::c_char,
+                    arg4: root::UINT,
+                ) -> root::UINT,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_InitiateDragDrop: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    srcrect: *mut root::RECT,
+                    srcfn: *const ::std::os::raw::c_char,
+                    callback: ::std::option::Option<
+                        unsafe extern "C" fn(droppath: *const ::std::os::raw::c_char),
+                    >,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_InitiateDragDropOfFileList: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    srcrect: *mut root::RECT,
+                    srclist: *mut *const ::std::os::raw::c_char,
+                    srccount: ::std::os::raw::c_int,
+                    icon: root::HICON,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_FinishDragDrop: ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut SWELL_DrawFocusRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwndPar: root::HWND,
+                    rct: *mut root::RECT,
+                    handle: *mut *mut ::std::os::raw::c_void,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeSetCurParms: ::std::option::Option<
+                unsafe extern "C" fn(
+                    xscale: f32,
+                    yscale: f32,
+                    xtrans: f32,
+                    ytrans: f32,
+                    parent: root::HWND,
+                    doauto: bool,
+                    dosizetofit: bool,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeButton: ::std::option::Option<
+                unsafe extern "C" fn(
+                    def: ::std::os::raw::c_int,
+                    label: *const ::std::os::raw::c_char,
+                    idx: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeEditField: ::std::option::Option<
+                unsafe extern "C" fn(
+                    idx: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeLabel: ::std::option::Option<
+                unsafe extern "C" fn(
+                    align: ::std::os::raw::c_int,
+                    label: *const ::std::os::raw::c_char,
+                    idx: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeControl: ::std::option::Option<
+                unsafe extern "C" fn(
+                    cname: *const ::std::os::raw::c_char,
+                    idx: ::std::os::raw::c_int,
+                    classname: *const ::std::os::raw::c_char,
+                    style: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    exstyle: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeCombo: ::std::option::Option<
+                unsafe extern "C" fn(
+                    idx: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeGroupBox: ::std::option::Option<
+                unsafe extern "C" fn(
+                    name: *const ::std::os::raw::c_char,
+                    idx: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    style: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeCheckBox: ::std::option::Option<
+                unsafe extern "C" fn(
+                    name: *const ::std::os::raw::c_char,
+                    idx: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_MakeListBox: ::std::option::Option<
+                unsafe extern "C" fn(
+                    idx: ::std::os::raw::c_int,
+                    x: ::std::os::raw::c_int,
+                    y: ::std::os::raw::c_int,
+                    w: ::std::os::raw::c_int,
+                    h: ::std::os::raw::c_int,
+                    styles: ::std::os::raw::c_int,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_Menu_AddMenuItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    name: *const ::std::os::raw::c_char,
+                    idx: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_uint,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GenerateMenuFromList: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hMenu: root::HMENU,
+                    list: *const ::std::os::raw::c_void,
+                    listsz: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GenerateDialogFromList: ::std::option::Option<
+                unsafe extern "C" fn(
+                    list: *const ::std::os::raw::c_void,
+                    listsz: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut _controlfp: ::std::option::Option<
+                unsafe extern "C" fn(
+                    flag: ::std::os::raw::c_uint,
+                    mask: ::std::os::raw::c_uint,
+                ) -> ::std::os::raw::c_uint,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_Internal_PostMessage_Init:
+                ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut SWELL_LoadCursorFromFile: ::std::option::Option<
+                unsafe extern "C" fn(fn_: *const ::std::os::raw::c_char) -> root::HCURSOR,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetWindowWantRaiseAmt: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, amt: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetWindowWantRaiseAmt: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetListViewFastClickMask: ::std::option::Option<
+                unsafe extern "C" fn(hList: root::HWND, mask: ::std::os::raw::c_int),
+            >;
+        }
+        extern "C" {
+            pub static mut GetTempPath: ::std::option::Option<
+                unsafe extern "C" fn(sz: ::std::os::raw::c_int, buf: *mut ::std::os::raw::c_char),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_initargs: ::std::option::Option<
+                unsafe extern "C" fn(
+                    argc: *mut ::std::os::raw::c_int,
+                    argv: *mut *mut *mut ::std::os::raw::c_char,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_RunMessageLoop: ::std::option::Option<unsafe extern "C" fn()>;
+        }
+        extern "C" {
+            pub static mut SWELL_CreateXBridgeWindow: ::std::option::Option<
+                unsafe extern "C" fn(
+                    viewpar: root::HWND,
+                    wref: *mut *mut ::std::os::raw::c_void,
+                    arg1: *mut root::RECT,
+                ) -> root::HWND,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GenerateGUID:
+                ::std::option::Option<unsafe extern "C" fn(g: *mut ::std::os::raw::c_void) -> bool>;
+        }
+        extern "C" {
+            pub static mut EnumChildWindows: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    cwEnumFunc: ::std::option::Option<
+                        unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
+                    >,
+                    lParam: root::LPARAM,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_IsGroupBox:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND) -> root::BOOL>;
+        }
+        extern "C" {
+            pub static mut SWELL_IsButton:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND) -> root::BOOL>;
+        }
+        extern "C" {
+            pub static mut SWELL_IsStaticText:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND) -> root::BOOL>;
+        }
+        extern "C" {
+            pub static mut SWELL_GetDesiredControlSize:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT)>;
+        }
+        extern "C" {
+            pub static mut AddFontResourceEx: ::std::option::Option<
+                unsafe extern "C" fn(
+                    str: root::LPCTSTR,
+                    fl: root::DWORD,
+                    pdv: *mut ::std::os::raw::c_void,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_Register_Cursor_Resource: ::std::option::Option<
+                unsafe extern "C" fn(
+                    idx: *const ::std::os::raw::c_char,
+                    name: *const ::std::os::raw::c_char,
+                    hotspot_x: ::std::os::raw::c_int,
+                    hotspot_y: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_ChooseColor: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    arg2: *mut ::std::os::raw::c_int,
+                    ncustom: ::std::os::raw::c_int,
+                    custom: *mut ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_ChooseFont: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::LOGFONT) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut IsWindowEnabled:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND) -> bool>;
+        }
+        extern "C" {
+            pub static mut GetClassName: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HWND,
+                    arg2: *mut ::std::os::raw::c_char,
+                    arg3: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_SetClassName: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char),
             >;
         }
     }

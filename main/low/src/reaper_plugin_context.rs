@@ -21,7 +21,7 @@ pub(crate) type GetSwellFuncFn = unsafe extern "C" fn(name: *const c_char) -> *m
 pub struct ReaperPluginContext {
     type_specific: TypeSpecificReaperPluginContext,
     h_instance: raw::HINSTANCE,
-    get_swell_func: Option<GetSwellFuncFn>,
+    get_swell_func_ptr: Option<GetSwellFuncFn>,
 }
 
 /// Additional stuff available in the plug-in context specific to a certain plug-in type.
@@ -92,7 +92,7 @@ impl ReaperPluginContext {
                 },
             ),
             h_instance,
-            get_swell_func: static_context.get_swell_func,
+            get_swell_func_ptr: static_context.get_swell_func,
         })
     }
 
@@ -117,7 +117,7 @@ impl ReaperPluginContext {
                 host_callback,
             }),
             h_instance: static_context.h_instance,
-            get_swell_func: static_context.get_swell_func,
+            get_swell_func_ptr: static_context.get_swell_func,
         })
     }
 
@@ -155,22 +155,12 @@ impl ReaperPluginContext {
         self.h_instance
     }
 
-    /// On Linux, this returns a generic SWELL API function by its name.
+    /// On Linux, this returns a pointer to a function for getting a generic SWELL API function by
+    /// its name.
     ///
-    /// On Windows, this just returns `null`.
-    ///
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid pointer.
-    pub unsafe fn GetSwellFunc(
-        &self,
-        name: *const ::std::os::raw::c_char,
-    ) -> *mut ::std::os::raw::c_void {
-        let get_swell_func = match self.get_swell_func.as_ref() {
-            None => return null_mut(),
-            Some(f) => f,
-        };
-        get_swell_func(name)
+    /// On Windows, this returns `None`.
+    pub fn swell_function_provider(&self) -> Option<GetSwellFuncFn> {
+        *self.get_swell_func_ptr
     }
 
     /// Returns the type-specific plug-in context.
