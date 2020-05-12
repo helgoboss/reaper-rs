@@ -71,7 +71,10 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let tokens = quote! {
         #[no_mangle]
         unsafe extern "C" fn ReaperPluginEntry(h_instance: ::reaper_low::raw::HINSTANCE, rec: *mut ::reaper_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
-                ::reaper_low::bootstrap_extension_plugin(h_instance, rec, #main_function_name)
+            let static_context = ::reaper_low::StaticReaperExtensionPluginContext {
+                ..Default::default()
+            };
+            ::reaper_low::bootstrap_extension_plugin(h_instance, rec, static_context, #main_function_name)
         }
 
         #main_function

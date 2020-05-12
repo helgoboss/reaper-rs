@@ -81,3 +81,5 @@ pub use reaper_impl::*;
 
 mod midi;
 pub use midi::*;
+
+mod macros;

@@ -1727,6 +1727,16 @@ fn basics() -> TestStep {
         reaper.show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
         reaper.show_console_msg("- &str: 范例文字äöüß\n");
         reaper.show_console_msg(String::from("- String: 范例文字äöüß"));
+        let medium = reaper.medium();
+        let plugin_context = medium.functions().low().plugin_context();
+        assert!(!plugin_context.h_instance().is_null());
+        let show_console_msg_func =
+            unsafe { plugin_context.GetFunc(c_str!("ShowConsoleMsg").as_ptr()) };
+        assert!(!show_console_msg_func.is_null());
+        let bla_func = unsafe { plugin_context.GetFunc(c_str!("Bla").as_ptr()) };
+        assert!(bla_func.is_null());
+        let swell_func = unsafe { plugin_context.GetSwellFunc(c_str!("DefWindowProc").as_ptr()) };
+        assert!(swell_func.is_null());
         Ok(())
     })
 }

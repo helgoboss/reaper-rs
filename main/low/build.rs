@@ -51,6 +51,7 @@ mod codegen {
             .whitelist_var("REAPER_PLUGIN_VERSION")
             .whitelist_var("UNDO_STATE_.*")
             .whitelist_var("VK_.*")
+            .whitelist_var("DLL_PROCESS_ATTACH")
             .whitelist_type("HINSTANCE")
             .whitelist_type("reaper_plugin_info_t")
             .whitelist_type("gaccel_register_t")

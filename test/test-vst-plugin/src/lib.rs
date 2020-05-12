@@ -1,7 +1,7 @@
 use c_str_macro::c_str;
 
 use reaper_high::{ActionKind, Reaper, ReaperGuard};
-use reaper_low::ReaperPluginContext;
+use reaper_low::{reaper_vst_plugin, ReaperPluginContext};
 use reaper_medium::{
     CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     OnAudioBufferArgs,
@@ -13,13 +13,7 @@ use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
 
 plugin_main!(TestVstPlugin);
-
-#[allow(non_snake_case)]
-#[no_mangle]
-extern "system" fn DllMain(hinstance: *const u8, _: u32, _: *const u8) -> u32 {
-    let bla = 5;
-    1
-}
+reaper_vst_plugin!();
 
 #[derive(Default)]
 struct TestVstPlugin {
@@ -104,12 +98,9 @@ impl TestVstPlugin {
     // Exists for demonstration purposes and quick tests
     #[allow(dead_code)]
     fn use_medium_level_reaper(&mut self) {
-        let context = ReaperPluginContext::from_vst_plugin(
-            self.host
-                .raw_callback()
-                .expect("host callback not available"),
-        )
-        .unwrap();
+        let context =
+            ReaperPluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context())
+                .unwrap();
         let low = reaper_low::Reaper::load(context);
         let mut med = reaper_medium::Reaper::new(low);
         {
@@ -133,9 +124,8 @@ impl TestVstPlugin {
     fn use_high_level_reaper(&mut self) {
         let guard = Reaper::guarded(|| {
             let context = ReaperPluginContext::from_vst_plugin(
-                self.host
-                    .raw_callback()
-                    .expect("host callback not available"),
+                &self.host,
+                reaper_vst_plugin::static_context(),
             )
             .unwrap();
             Reaper::setup_with_defaults(context, "info@helgoboss.org");

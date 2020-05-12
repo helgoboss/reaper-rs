@@ -1,4 +1,4 @@
-use crate::{raw, Reaper, ReaperFunctionPointers, ReaperPluginContext};
+use crate::{Reaper, ReaperFunctionPointers, ReaperPluginContext};
 
 impl Reaper {
     /// Gives access to the REAPER function pointers.
