@@ -69,11 +69,44 @@ pub fn reaper_extension_plugin(attr: TokenStream, input: TokenStream) -> TokenSt
 fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
+        mod reaper_extension_plugin {
+            static mut SWELL_GET_FUNC: Option<
+                unsafe extern "C" fn(
+                    name: *const std::os::raw::c_char,
+                ) -> *mut std::os::raw::c_void,
+            > = None;
+            static INIT_SWELL_GET_FUNC: std::sync::Once = std::sync::Once::new();
+
+            #[allow(non_snake_case)]
+            #[no_mangle]
+            extern "C" fn SWELL_dllMain(
+                hinstance: reaper_low::raw::HINSTANCE,
+                reason: u32,
+                get_func: Option<
+                    unsafe extern "C" fn(
+                        name: *const std::os::raw::c_char,
+                    ) -> *mut std::os::raw::c_void,
+                >,
+            ) -> std::os::raw::c_int {
+                if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
+                    INIT_SWELL_GET_FUNC.call_once(|| {
+                        unsafe { SWELL_GET_FUNC = get_func };
+                    });
+                }
+                1
+            }
+
+            pub fn static_context() -> reaper_low::StaticReaperExtensionPluginContext {
+                reaper_low::StaticReaperExtensionPluginContext {
+                    get_swell_func: unsafe { SWELL_GET_FUNC },
+                    ..Default::default()
+                }
+            }
+        }
+
         #[no_mangle]
         unsafe extern "C" fn ReaperPluginEntry(h_instance: ::reaper_low::raw::HINSTANCE, rec: *mut ::reaper_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
-            let static_context = ::reaper_low::StaticReaperExtensionPluginContext {
-                ..Default::default()
-            };
+            let static_context = reaper_extension_plugin::static_context();
             ::reaper_low::bootstrap_extension_plugin(h_instance, rec, static_context, #main_function_name)
         }
 

@@ -21,8 +21,8 @@
 macro_rules! reaper_vst_plugin {
     () => {
         mod reaper_vst_plugin {
-            static mut REAPER_VST_PLUGIN_HINSTANCE: $crate::raw::HINSTANCE = std::ptr::null_mut();
-            static INIT_REAPER_VST_PLUGIN_HINSTANCE: std::sync::Once = std::sync::Once::new();
+            static mut HINSTANCE: $crate::raw::HINSTANCE = std::ptr::null_mut();
+            static INIT_HINSTANCE: std::sync::Once = std::sync::Once::new();
 
             #[cfg(target_os = "windows")]
             #[allow(non_snake_case)]
@@ -33,19 +33,19 @@ macro_rules! reaper_vst_plugin {
                 _: *const u8,
             ) -> u32 {
                 if (reason == $crate::raw::DLL_PROCESS_ATTACH) {
-                    INIT_REAPER_VST_PLUGIN_HINSTANCE.call_once(|| {
-                        unsafe { REAPER_VST_PLUGIN_HINSTANCE = hinstance };
+                    INIT_HINSTANCE.call_once(|| {
+                        unsafe { HINSTANCE = hinstance };
                     });
                 }
                 1
             }
 
-            static mut REAPER_VST_PLUGIN_SWELL_GET_FUNC: Option<
+            static mut GET_FUNC: Option<
                 unsafe extern "C" fn(
                     name: *const std::os::raw::c_char,
                 ) -> *mut std::os::raw::c_void,
             > = None;
-            static INIT_REAPER_VST_PLUGIN_SWELL_GET_FUNC: std::sync::Once = std::sync::Once::new();
+            static INIT_GET_FUNC: std::sync::Once = std::sync::Once::new();
 
             #[allow(non_snake_case)]
             #[no_mangle]
@@ -59,8 +59,8 @@ macro_rules! reaper_vst_plugin {
                 >,
             ) -> std::os::raw::c_int {
                 if (reason == $crate::raw::DLL_PROCESS_ATTACH) {
-                    INIT_REAPER_VST_PLUGIN_SWELL_GET_FUNC.call_once(|| {
-                        unsafe { REAPER_VST_PLUGIN_SWELL_GET_FUNC = get_func };
+                    INIT_GET_FUNC.call_once(|| {
+                        unsafe { GET_FUNC = get_func };
                     });
                 }
                 1
@@ -68,8 +68,8 @@ macro_rules! reaper_vst_plugin {
 
             pub fn static_context() -> $crate::StaticReaperVstPluginContext {
                 $crate::StaticReaperVstPluginContext {
-                    h_instance: unsafe { REAPER_VST_PLUGIN_HINSTANCE },
-                    get_swell_func: unsafe { REAPER_VST_PLUGIN_SWELL_GET_FUNC },
+                    h_instance: unsafe { HINSTANCE },
+                    get_swell_func: unsafe { GET_FUNC },
                     ..Default::default()
                 }
             }
