@@ -471,10 +471,16 @@ pub mod root {
     pub struct SWELL_DialogResourceIndex {
         _unused: [u8; 0],
     }
+    extern "C" {
+        pub static mut SWELL_curmodule_dialogresource_head: *mut root::SWELL_DialogResourceIndex;
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
     pub struct SWELL_MenuResourceIndex {
         _unused: [u8; 0],
+    }
+    extern "C" {
+        pub static mut SWELL_curmodule_menuresource_head: *mut root::SWELL_MenuResourceIndex;
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]

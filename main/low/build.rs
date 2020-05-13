@@ -50,6 +50,7 @@ mod codegen {
                 .raw_line("#![allow(dead_code)]")
                 .whitelist_var("reaper_functions::.*")
                 .whitelist_var("swell_functions::.*")
+                .whitelist_var("SWELL_.*")
                 .whitelist_var("CSURF_EXT_.*")
                 .whitelist_var("REAPER_PLUGIN_VERSION")
                 .whitelist_var("UNDO_STATE_.*")
@@ -61,7 +62,6 @@ mod codegen {
                 .whitelist_type("audio_hook_register_t")
                 .whitelist_type("KbdSectionInfo")
                 .whitelist_type("GUID")
-                // .whitelist_function("GetActiveWindow")
                 .whitelist_function("reaper_control_surface::.*")
                 .whitelist_function("reaper_midi::.*")
                 .generate()
@@ -374,7 +374,7 @@ mod codegen {
                         ///
                     },
                     syn::parse_quote! {
-                        /// REAPER can crash if you pass an invalid pointer
+                        /// REAPER can crash if you pass an invalid pointer.
                     },
                 ]
             } else {
