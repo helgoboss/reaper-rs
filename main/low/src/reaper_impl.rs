@@ -1,6 +1,36 @@
 use crate::{Reaper, ReaperFunctionPointers, ReaperPluginContext};
 
+// This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
+static mut INSTANCE: Option<Reaper> = None;
+static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
+
 impl Reaper {
+    /// Makes the given instance available globally.
+    ///
+    /// After this has been called, the instance can be queried globally using `get()`.
+    ///
+    /// This can be called once only. Subsequent calls won't have any effect!
+    pub fn make_available_globally(functions: Reaper) {
+        unsafe {
+            INIT_INSTANCE.call_once(|| INSTANCE = Some(functions));
+        }
+    }
+
+    /// Gives access to the instance which you made available globally before.
+    ///
+    /// # Panics
+    ///
+    /// This panics if [`make_available_globally()`] has not been called before.
+    ///
+    /// [`make_available_globally()`]: fn.make_available_globally.html
+    pub fn get() -> &'static Reaper {
+        unsafe {
+            INSTANCE
+                .as_ref()
+                .expect("call `make_available_globally()` before using `get()`")
+        }
+    }
+
     /// Gives access to the REAPER function pointers.
     pub fn pointers(&self) -> &ReaperFunctionPointers {
         &self.pointers
