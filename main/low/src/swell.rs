@@ -975,6 +975,7 @@ impl Swell {
         };
         Swell { pointers }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -992,6 +993,7 @@ impl Swell {
             Some(f) => f(dest, src, l),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn MulDiv(
         &self,
         arg1: ::std::os::raw::c_int,
@@ -1006,6 +1008,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn Sleep(&self, ms: ::std::os::raw::c_int) {
         match self.pointers.Sleep {
             None => panic!(format!(
@@ -1015,6 +1018,7 @@ impl Swell {
             Some(f) => f(ms),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetTickCount(&self) -> root::DWORD {
         match self.pointers.GetTickCount {
             None => panic!(format!(
@@ -1024,6 +1028,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1042,6 +1047,7 @@ impl Swell {
             Some(f) => f(filedes, lpCreationTime, lpLastAccessTime, lpLastWriteTime),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1060,6 +1066,7 @@ impl Swell {
             Some(f) => f(appname, keyname, val, fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1080,6 +1087,7 @@ impl Swell {
             Some(f) => f(appname, keyname, def, ret, retsize, fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1098,6 +1106,7 @@ impl Swell {
             Some(f) => f(appname, keyname, def, fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1117,6 +1126,7 @@ impl Swell {
             Some(f) => f(appname, keyname, buf, bufsz, fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1136,6 +1146,7 @@ impl Swell {
             Some(f) => f(appname, keyname, buf, bufsz, fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1153,6 +1164,7 @@ impl Swell {
             Some(f) => f(appname, strings, fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1171,6 +1183,7 @@ impl Swell {
             Some(f) => f(appname, strout, strout_len, fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1188,6 +1201,7 @@ impl Swell {
             Some(f) => f(hInst, fn_, nSize),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1200,6 +1214,7 @@ impl Swell {
             Some(f) => f(r, p),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1220,6 +1235,7 @@ impl Swell {
             Some(f) => f(hwndDlg, action, content1, content2, content3, blah),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1238,6 +1254,7 @@ impl Swell {
             Some(f) => f(hwndParent, text, caption, type_),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1257,6 +1274,7 @@ impl Swell {
             Some(f) => f(text, initialdir, initialfile, allowmul, extlist),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1277,6 +1295,7 @@ impl Swell {
             Some(f) => f(text, initialdir, initialfile, extlist, fn_, fnsize),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1295,6 +1314,7 @@ impl Swell {
             Some(f) => f(text, initialdir, fn_, fnsize),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1312,6 +1332,7 @@ impl Swell {
             Some(f) => f(dlgid, dlgProc, reshead),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetDlgItem {
             None => panic!(format!(
@@ -1321,6 +1342,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.ShowWindow {
             None => panic!(format!(
@@ -1330,6 +1352,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DestroyWindow(&self, hwnd: root::HWND) {
         match self.pointers.DestroyWindow {
             None => panic!(format!(
@@ -1339,6 +1362,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1355,6 +1379,7 @@ impl Swell {
             Some(f) => f(lParam, gi),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_HideApp(&self) {
         match self.pointers.SWELL_HideApp {
             None => panic!(format!(
@@ -1364,6 +1389,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1381,6 +1407,7 @@ impl Swell {
             Some(f) => f(arg1, idx, text),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetDlgItemInt(
         &self,
         arg1: root::HWND,
@@ -1396,6 +1423,7 @@ impl Swell {
             Some(f) => f(arg1, idx, val, issigned),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1414,6 +1442,7 @@ impl Swell {
             Some(f) => f(arg1, idx, translated, issigned),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1432,6 +1461,7 @@ impl Swell {
             Some(f) => f(arg1, idx, text, textlen),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CheckDlgButton(
         &self,
         hwnd: root::HWND,
@@ -1446,6 +1476,7 @@ impl Swell {
             Some(f) => f(hwnd, idx, check),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn IsDlgButtonChecked(
         &self,
         hwnd: root::HWND,
@@ -1459,6 +1490,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
         match self.pointers.EnableWindow {
             None => panic!(format!(
@@ -1468,6 +1500,7 @@ impl Swell {
             Some(f) => f(hwnd, enable),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetFocus(&self, hwnd: root::HWND) {
         match self.pointers.SetFocus {
             None => panic!(format!(
@@ -1477,6 +1510,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetFocus(&self) -> root::HWND {
         match self.pointers.GetFocus {
             None => panic!(format!(
@@ -1486,6 +1520,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetForegroundWindow(&self, hwnd: root::HWND) {
         match self.pointers.SetForegroundWindow {
             None => panic!(format!(
@@ -1495,6 +1530,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetForegroundWindow(&self) -> root::HWND {
         match self.pointers.GetForegroundWindow {
             None => panic!(format!(
@@ -1504,6 +1540,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.SetCapture {
             None => panic!(format!(
@@ -1513,6 +1550,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetCapture(&self) -> root::HWND {
         match self.pointers.GetCapture {
             None => panic!(format!(
@@ -1522,6 +1560,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ReleaseCapture(&self) {
         match self.pointers.ReleaseCapture {
             None => panic!(format!(
@@ -1531,6 +1570,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn IsChild(&self, hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.IsChild {
             None => panic!(format!(
@@ -1540,6 +1580,7 @@ impl Swell {
             Some(f) => f(hwndParent, hwndChild),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.GetParent {
             None => panic!(format!(
@@ -1549,6 +1590,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
         match self.pointers.SetParent {
             None => panic!(format!(
@@ -1558,6 +1600,7 @@ impl Swell {
             Some(f) => f(hwnd, newPar),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetWindow {
             None => panic!(format!(
@@ -1567,6 +1610,7 @@ impl Swell {
             Some(f) => f(hwnd, what),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EnumWindows(
         &self,
         proc_: ::std::option::Option<
@@ -1582,6 +1626,7 @@ impl Swell {
             Some(f) => f(proc_, lp),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1600,6 +1645,7 @@ impl Swell {
             Some(f) => f(par, lastw, classname, title),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1612,6 +1658,7 @@ impl Swell {
             Some(f) => f(hwnd, p),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1624,6 +1671,7 @@ impl Swell {
             Some(f) => f(hwnd, p),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1636,6 +1684,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1648,6 +1697,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1660,6 +1710,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
         match self.pointers.WindowFromPoint {
             None => panic!(format!(
@@ -1669,6 +1720,7 @@ impl Swell {
             Some(f) => f(p),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn WinOffsetRect(
         &self,
         lprc: root::LPRECT,
@@ -1683,6 +1735,7 @@ impl Swell {
             Some(f) => f(lprc, dx, dy),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn WinSetRect(
         &self,
         lprc: root::LPRECT,
@@ -1699,6 +1752,7 @@ impl Swell {
             Some(f) => f(lprc, xLeft, yTop, xRight, yBottom),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1716,6 +1770,7 @@ impl Swell {
             Some(f) => f(out, in1, in2),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1733,6 +1788,7 @@ impl Swell {
             Some(f) => f(out, in1, in2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetWindowPos(
         &self,
         hwnd: root::HWND,
@@ -1751,6 +1807,7 @@ impl Swell {
             Some(f) => f(hwnd, unused, x, y, cx, cy, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetWindowLevel(
         &self,
         hwnd: root::HWND,
@@ -1764,6 +1821,7 @@ impl Swell {
             Some(f) => f(hwnd, newlevel),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1781,6 +1839,7 @@ impl Swell {
             Some(f) => f(hwnd, r, eraseBk),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn UpdateWindow(&self, hwnd: root::HWND) {
         match self.pointers.UpdateWindow {
             None => panic!(format!(
@@ -1790,6 +1849,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetWindowLong(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR {
         match self.pointers.GetWindowLong {
             None => panic!(format!(
@@ -1799,6 +1859,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetWindowLong(
         &self,
         hwnd: root::HWND,
@@ -1813,6 +1874,7 @@ impl Swell {
             Some(f) => f(hwnd, idx, val),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1832,6 +1894,7 @@ impl Swell {
             Some(f) => f(hwnd, xamt, yamt, lpRect, lpClipRect),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EnumPropsEx(
         &self,
         arg1: root::HWND,
@@ -1846,6 +1909,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1862,6 +1926,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1879,6 +1944,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1895,6 +1961,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindowVisible {
             None => panic!(format!(
@@ -1904,6 +1971,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn IsWindow(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindow {
             None => panic!(format!(
@@ -1913,6 +1981,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetTimer(
         &self,
         hwnd: root::HWND,
@@ -1928,6 +1997,7 @@ impl Swell {
             Some(f) => f(hwnd, timerid, rate, tProc),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
         match self.pointers.KillTimer {
             None => panic!(format!(
@@ -1937,6 +2007,7 @@ impl Swell {
             Some(f) => f(hwnd, timerid),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetExtendedListViewStyleEx(
         &self,
         h: root::HWND,
@@ -1951,6 +2022,7 @@ impl Swell {
             Some(f) => f(h, mask, style),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1968,6 +2040,7 @@ impl Swell {
             Some(f) => f(h, pos, lvc),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_DeleteColumn(&self, h: root::HWND, pos: ::std::os::raw::c_int) -> bool {
         match self.pointers.ListView_DeleteColumn {
             None => panic!(format!(
@@ -1977,6 +2050,7 @@ impl Swell {
             Some(f) => f(h, pos),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -1994,6 +2068,7 @@ impl Swell {
             Some(f) => f(h, pos, lvc),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetColumnWidth(
         &self,
         h: root::HWND,
@@ -2007,6 +2082,7 @@ impl Swell {
             Some(f) => f(h, pos),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2023,6 +2099,7 @@ impl Swell {
             Some(f) => f(h, item),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2041,6 +2118,7 @@ impl Swell {
             Some(f) => f(h, ipos, cpos, txt),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2053,6 +2131,7 @@ impl Swell {
             Some(f) => f(h, item),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetNextItem(
         &self,
         h: root::HWND,
@@ -2067,6 +2146,7 @@ impl Swell {
             Some(f) => f(h, istart, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2079,6 +2159,7 @@ impl Swell {
             Some(f) => f(h, item),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetItemState(
         &self,
         h: root::HWND,
@@ -2093,6 +2174,7 @@ impl Swell {
             Some(f) => f(h, ipos, mask),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_DeleteItem(&self, h: root::HWND, ipos: ::std::os::raw::c_int) {
         match self.pointers.ListView_DeleteItem {
             None => panic!(format!(
@@ -2102,6 +2184,7 @@ impl Swell {
             Some(f) => f(h, ipos),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_DeleteAllItems(&self, h: root::HWND) {
         match self.pointers.ListView_DeleteAllItems {
             None => panic!(format!(
@@ -2111,6 +2194,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetSelectedCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectedCount {
             None => panic!(format!(
@@ -2120,6 +2204,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetItemCount {
             None => panic!(format!(
@@ -2129,6 +2214,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetSelectionMark(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectionMark {
             None => panic!(format!(
@@ -2138,6 +2224,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetColumnWidth(
         &self,
         h: root::HWND,
@@ -2152,6 +2239,7 @@ impl Swell {
             Some(f) => f(h, colpos, wid),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetItemState(
         &self,
         h: root::HWND,
@@ -2167,6 +2255,7 @@ impl Swell {
             Some(f) => f(h, item, state, statemask),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_RedrawItems(
         &self,
         h: root::HWND,
@@ -2181,6 +2270,7 @@ impl Swell {
             Some(f) => f(h, startitem, enditem),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetItemCount(&self, h: root::HWND, cnt: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetItemCount {
             None => panic!(format!(
@@ -2190,6 +2280,7 @@ impl Swell {
             Some(f) => f(h, cnt),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_EnsureVisible(&self, h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL) {
         match self.pointers.ListView_EnsureVisible {
             None => panic!(format!(
@@ -2199,6 +2290,7 @@ impl Swell {
             Some(f) => f(h, i, pok),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2218,6 +2310,7 @@ impl Swell {
             Some(f) => f(h, item, subitem, code, r),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetImageList(
         &self,
         h: root::HWND,
@@ -2232,6 +2325,7 @@ impl Swell {
             Some(f) => f(h, imagelist, which),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2248,6 +2342,7 @@ impl Swell {
             Some(f) => f(h, pinf),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2264,6 +2359,7 @@ impl Swell {
             Some(f) => f(h, pinf),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2283,6 +2379,7 @@ impl Swell {
             Some(f) => f(hwnd, item, subitem, text, textmax),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SortItems(
         &self,
         hwnd: root::HWND,
@@ -2297,6 +2394,7 @@ impl Swell {
             Some(f) => f(hwnd, compf, parm),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2315,6 +2413,7 @@ impl Swell {
             Some(f) => f(h, item, r, code),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_Scroll(
         &self,
         h: root::HWND,
@@ -2329,6 +2428,7 @@ impl Swell {
             Some(f) => f(h, xscroll, yscroll),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetTopIndex(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetTopIndex {
             None => panic!(format!(
@@ -2338,6 +2438,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetCountPerPage(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetCountPerPage {
             None => panic!(format!(
@@ -2347,6 +2448,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2364,6 +2466,7 @@ impl Swell {
             Some(f) => f(h, cnt, arr),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2381,6 +2484,7 @@ impl Swell {
             Some(f) => f(h, cnt, arr),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_GetHeader(&self, h: root::HWND) -> root::HWND {
         match self.pointers.ListView_GetHeader {
             None => panic!(format!(
@@ -2390,6 +2494,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn Header_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.Header_GetItemCount {
             None => panic!(format!(
@@ -2399,6 +2504,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2416,6 +2522,7 @@ impl Swell {
             Some(f) => f(h, col, hi),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2433,6 +2540,7 @@ impl Swell {
             Some(f) => f(h, col, hi),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetListViewHeaderHeight(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetListViewHeaderHeight {
             None => panic!(format!(
@@ -2442,6 +2550,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ImageList_CreateEx(&self) -> root::HIMAGELIST {
         match self.pointers.ImageList_CreateEx {
             None => panic!(format!(
@@ -2451,6 +2560,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ImageList_Remove(
         &self,
         list: root::HIMAGELIST,
@@ -2464,6 +2574,7 @@ impl Swell {
             Some(f) => f(list, idx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ImageList_ReplaceIcon(
         &self,
         list: root::HIMAGELIST,
@@ -2478,6 +2589,7 @@ impl Swell {
             Some(f) => f(list, offset, image),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ImageList_Add(
         &self,
         list: root::HIMAGELIST,
@@ -2492,6 +2604,7 @@ impl Swell {
             Some(f) => f(list, image, mask),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ImageList_Destroy(&self, arg1: root::HIMAGELIST) {
         match self.pointers.ImageList_Destroy {
             None => panic!(format!(
@@ -2501,6 +2614,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TabCtrl_GetItemCount(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetItemCount {
             None => panic!(format!(
@@ -2510,6 +2624,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TabCtrl_DeleteItem(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL {
         match self.pointers.TabCtrl_DeleteItem {
             None => panic!(format!(
@@ -2519,6 +2634,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2536,6 +2652,7 @@ impl Swell {
             Some(f) => f(hwnd, idx, item),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TabCtrl_SetCurSel(
         &self,
         hwnd: root::HWND,
@@ -2549,6 +2666,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TabCtrl_GetCurSel(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetCurSel {
             None => panic!(format!(
@@ -2558,6 +2676,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2575,6 +2694,7 @@ impl Swell {
             Some(f) => f(hwnd, fLarger, r),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2591,6 +2711,7 @@ impl Swell {
             Some(f) => f(hwnd, ins),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_Expand(
         &self,
         hwnd: root::HWND,
@@ -2605,6 +2726,7 @@ impl Swell {
             Some(f) => f(hwnd, item, flag),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_GetSelection(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetSelection {
             None => panic!(format!(
@@ -2614,6 +2736,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_DeleteItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_DeleteItem {
             None => panic!(format!(
@@ -2623,6 +2746,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_DeleteAllItems(&self, hwnd: root::HWND) {
         match self.pointers.TreeView_DeleteAllItems {
             None => panic!(format!(
@@ -2632,6 +2756,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_SelectItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_SelectItem {
             None => panic!(format!(
@@ -2641,6 +2766,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_GetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_GetItem {
             None => panic!(format!(
@@ -2650,6 +2776,7 @@ impl Swell {
             Some(f) => f(hwnd, pitem),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_SetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_SetItem {
             None => panic!(format!(
@@ -2659,6 +2786,7 @@ impl Swell {
             Some(f) => f(hwnd, pitem),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2675,6 +2803,7 @@ impl Swell {
             Some(f) => f(hwnd, hti),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_SetIndent(
         &self,
         hwnd: root::HWND,
@@ -2688,6 +2817,7 @@ impl Swell {
             Some(f) => f(hwnd, indent),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_GetChild(&self, hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM {
         match self.pointers.TreeView_GetChild {
             None => panic!(format!(
@@ -2697,6 +2827,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_GetNextSibling(
         &self,
         hwnd: root::HWND,
@@ -2710,6 +2841,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_GetRoot(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetRoot {
             None => panic!(format!(
@@ -2719,6 +2851,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetBkColor {
             None => panic!(format!(
@@ -2728,6 +2861,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn TreeView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetTextColor {
             None => panic!(format!(
@@ -2737,6 +2871,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetBkColor {
             None => panic!(format!(
@@ -2746,6 +2881,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetTextBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextBkColor {
             None => panic!(format!(
@@ -2755,6 +2891,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextColor {
             None => panic!(format!(
@@ -2764,6 +2901,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ListView_SetGridColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetGridColor {
             None => panic!(format!(
@@ -2773,6 +2911,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2790,6 +2929,7 @@ impl Swell {
             Some(f) => f(hwnd, colors, ncolors),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_ModalWindowStart(&self, hwnd: root::HWND) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_ModalWindowStart {
             None => panic!(format!(
@@ -2799,6 +2939,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2815,6 +2956,7 @@ impl Swell {
             Some(f) => f(ctx, ret),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2827,6 +2969,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_CloseWindow(&self, hwnd: root::HWND) {
         match self.pointers.SWELL_CloseWindow {
             None => panic!(format!(
@@ -2836,6 +2979,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CreatePopupMenu(&self) -> root::HMENU {
         match self.pointers.CreatePopupMenu {
             None => panic!(format!(
@@ -2845,6 +2989,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2857,6 +3002,7 @@ impl Swell {
             Some(f) => f(title),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DestroyMenu(&self, hMenu: root::HMENU) {
         match self.pointers.DestroyMenu {
             None => panic!(format!(
@@ -2866,6 +3012,7 @@ impl Swell {
             Some(f) => f(hMenu),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2884,6 +3031,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, name, tagid),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
         match self.pointers.GetSubMenu {
             None => panic!(format!(
@@ -2893,6 +3041,7 @@ impl Swell {
             Some(f) => f(hMenu, pos),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
         match self.pointers.GetMenuItemCount {
             None => panic!(format!(
@@ -2902,6 +3051,7 @@ impl Swell {
             Some(f) => f(hMenu),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetMenuItemID(
         &self,
         hMenu: root::HMENU,
@@ -2915,6 +3065,7 @@ impl Swell {
             Some(f) => f(hMenu, pos),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetMenuItemModifier(
         &self,
         hMenu: root::HMENU,
@@ -2931,6 +3082,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, flag, code, mask),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -2949,6 +3101,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, flag, text),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EnableMenuItem(
         &self,
         hMenu: root::HMENU,
@@ -2963,6 +3116,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, en),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DeleteMenu(
         &self,
         hMenu: root::HMENU,
@@ -2977,6 +3131,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, flag),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CheckMenuItem(
         &self,
         hMenu: root::HMENU,
@@ -2991,6 +3146,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, chk),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3009,6 +3165,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3028,6 +3185,7 @@ impl Swell {
             Some(f) => f(menu, pos, flag, idx, str),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3046,6 +3204,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3064,6 +3223,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DrawMenuBar(&self, arg1: root::HWND) {
         match self.pointers.DrawMenuBar {
             None => panic!(format!(
@@ -3073,6 +3233,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3089,6 +3250,7 @@ impl Swell {
             Some(f) => f(head, resid),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3110,6 +3272,7 @@ impl Swell {
             Some(f) => f(hMenu, flags, xpos, ypos, resvd, hwnd, r),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetMenuDestination(&self, menu: root::HMENU, hwnd: root::HWND) {
         match self.pointers.SWELL_SetMenuDestination {
             None => panic!(format!(
@@ -3119,6 +3282,7 @@ impl Swell {
             Some(f) => f(menu, hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_DuplicateMenu(&self, menu: root::HMENU) -> root::HMENU {
         match self.pointers.SWELL_DuplicateMenu {
             None => panic!(format!(
@@ -3128,6 +3292,7 @@ impl Swell {
             Some(f) => f(menu),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
         match self.pointers.SetMenu {
             None => panic!(format!(
@@ -3137,6 +3302,7 @@ impl Swell {
             Some(f) => f(hwnd, menu),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
         match self.pointers.GetMenu {
             None => panic!(format!(
@@ -3146,6 +3312,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetDefaultWindowMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetDefaultWindowMenu {
             None => panic!(format!(
@@ -3155,6 +3322,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetDefaultWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultWindowMenu {
             None => panic!(format!(
@@ -3164,6 +3332,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetDefaultModalWindowMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetDefaultModalWindowMenu {
             None => panic!(format!(
@@ -3173,6 +3342,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetDefaultModalWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultModalWindowMenu {
             None => panic!(format!(
@@ -3182,6 +3352,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetCurrentMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetCurrentMenu {
             None => panic!(format!(
@@ -3191,6 +3362,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetCurrentMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetCurrentMenu {
             None => panic!(format!(
@@ -3200,6 +3372,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3219,6 +3392,7 @@ impl Swell {
             Some(f) => f(reshead, resid, parent, dlgproc, param),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3238,6 +3412,7 @@ impl Swell {
             Some(f) => f(reshead, resid, parent, dlgproc, param),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_RegisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
         match self.pointers.SWELL_RegisterCustomControlCreator {
             None => panic!(format!(
@@ -3247,6 +3422,7 @@ impl Swell {
             Some(f) => f(proc_),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_UnregisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
         match self.pointers.SWELL_UnregisterCustomControlCreator {
             None => panic!(format!(
@@ -3256,6 +3432,7 @@ impl Swell {
             Some(f) => f(proc_),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DefWindowProc(
         &self,
         hwnd: root::HWND,
@@ -3271,6 +3448,7 @@ impl Swell {
             Some(f) => f(hwnd, msg, wParam, lParam),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.EndDialog {
             None => panic!(format!(
@@ -3280,6 +3458,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetDefaultButtonID(
         &self,
         hwndDlg: root::HWND,
@@ -3293,6 +3472,7 @@ impl Swell {
             Some(f) => f(hwndDlg, onlyIfEnabled),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SendMessage(
         &self,
         arg1: root::HWND,
@@ -3308,6 +3488,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3, arg4),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_BroadcastMessage(&self, arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM) {
         match self.pointers.SWELL_BroadcastMessage {
             None => panic!(format!(
@@ -3317,6 +3498,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn PostMessage(
         &self,
         hwnd: root::HWND,
@@ -3332,6 +3514,7 @@ impl Swell {
             Some(f) => f(hwnd, msg, wParam, lParam),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_MessageQueue_Flush(&self) {
         match self.pointers.SWELL_MessageQueue_Flush {
             None => panic!(format!(
@@ -3341,6 +3524,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_MessageQueue_Clear(&self, h: root::HWND) {
         match self.pointers.SWELL_MessageQueue_Clear {
             None => panic!(format!(
@@ -3350,6 +3534,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3367,6 +3552,7 @@ impl Swell {
             Some(f) => f(wParam, lParam, newflags),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetAsyncKeyState(&self, key: ::std::os::raw::c_int) -> root::WORD {
         match self.pointers.GetAsyncKeyState {
             None => panic!(format!(
@@ -3376,6 +3562,7 @@ impl Swell {
             Some(f) => f(key),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3388,6 +3575,7 @@ impl Swell {
             Some(f) => f(pt),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetMessagePos(&self) -> root::DWORD {
         match self.pointers.GetMessagePos {
             None => panic!(format!(
@@ -3397,6 +3585,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3409,6 +3598,7 @@ impl Swell {
             Some(f) => f(idx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetCursor(&self, curs: root::HCURSOR) {
         match self.pointers.SWELL_SetCursor {
             None => panic!(format!(
@@ -3418,6 +3608,7 @@ impl Swell {
             Some(f) => f(curs),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_EnableRightClickEmulate(&self, enable: root::BOOL) {
         match self.pointers.SWELL_EnableRightClickEmulate {
             None => panic!(format!(
@@ -3427,6 +3618,7 @@ impl Swell {
             Some(f) => f(enable),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetCursor(&self) -> root::HCURSOR {
         match self.pointers.SWELL_GetCursor {
             None => panic!(format!(
@@ -3436,6 +3628,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetLastSetCursor(&self) -> root::HCURSOR {
         match self.pointers.SWELL_GetLastSetCursor {
             None => panic!(format!(
@@ -3445,6 +3638,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_IsCursorVisible(&self) -> bool {
         match self.pointers.SWELL_IsCursorVisible {
             None => panic!(format!(
@@ -3454,6 +3648,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_ShowCursor(&self, bShow: root::BOOL) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_ShowCursor {
             None => panic!(format!(
@@ -3463,6 +3658,7 @@ impl Swell {
             Some(f) => f(bShow),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetCursorPos(
         &self,
         X: ::std::os::raw::c_int,
@@ -3476,6 +3672,7 @@ impl Swell {
             Some(f) => f(X, Y),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3493,6 +3690,7 @@ impl Swell {
             Some(f) => f(r, sourcerect, wantWork),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
         match self.pointers.OpenClipboard {
             None => panic!(format!(
@@ -3502,6 +3700,7 @@ impl Swell {
             Some(f) => f(hwndDlg),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CloseClipboard(&self) {
         match self.pointers.CloseClipboard {
             None => panic!(format!(
@@ -3511,6 +3710,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
         match self.pointers.GetClipboardData {
             None => panic!(format!(
@@ -3520,6 +3720,7 @@ impl Swell {
             Some(f) => f(type_),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EmptyClipboard(&self) {
         match self.pointers.EmptyClipboard {
             None => panic!(format!(
@@ -3529,6 +3730,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
         match self.pointers.SetClipboardData {
             None => panic!(format!(
@@ -3538,6 +3740,7 @@ impl Swell {
             Some(f) => f(type_, h),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3553,6 +3756,7 @@ impl Swell {
             Some(f) => f(desc),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
         match self.pointers.EnumClipboardFormats {
             None => panic!(format!(
@@ -3562,6 +3766,7 @@ impl Swell {
             Some(f) => f(lastfmt),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GlobalAlloc(
         &self,
         flags: ::std::os::raw::c_int,
@@ -3575,6 +3780,7 @@ impl Swell {
             Some(f) => f(flags, sz),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
         match self.pointers.GlobalLock {
             None => panic!(format!(
@@ -3584,6 +3790,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GlobalSize(&self, h: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.GlobalSize {
             None => panic!(format!(
@@ -3593,6 +3800,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GlobalUnlock(&self, h: root::HANDLE) {
         match self.pointers.GlobalUnlock {
             None => panic!(format!(
@@ -3602,6 +3810,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GlobalFree(&self, h: root::HANDLE) {
         match self.pointers.GlobalFree {
             None => panic!(format!(
@@ -3611,6 +3820,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3631,6 +3841,7 @@ impl Swell {
             Some(f) => f(TA, stackSize, ThreadProc, parm, cf, tidOut),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3649,6 +3860,7 @@ impl Swell {
             Some(f) => f(SA, manualReset, initialSig, ignored),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3667,6 +3879,7 @@ impl Swell {
             Some(f) => f(SA, manualReset, initialSig, ignored),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetCurrentThreadId(&self) -> root::DWORD {
         match self.pointers.GetCurrentThreadId {
             None => panic!(format!(
@@ -3676,6 +3889,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn WaitForSingleObject(&self, hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD {
         match self.pointers.WaitForSingleObject {
             None => panic!(format!(
@@ -3685,6 +3899,7 @@ impl Swell {
             Some(f) => f(hand, msTO),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3702,6 +3917,7 @@ impl Swell {
             Some(f) => f(numObjs, objs, msTO),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CloseHandle(&self, hand: root::HANDLE) -> root::BOOL {
         match self.pointers.CloseHandle {
             None => panic!(format!(
@@ -3711,6 +3927,7 @@ impl Swell {
             Some(f) => f(hand),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetThreadPriority(&self, evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL {
         match self.pointers.SetThreadPriority {
             None => panic!(format!(
@@ -3720,6 +3937,7 @@ impl Swell {
             Some(f) => f(evt, prio),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.SetEvent {
             None => panic!(format!(
@@ -3729,6 +3947,7 @@ impl Swell {
             Some(f) => f(evt),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ResetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.ResetEvent {
             None => panic!(format!(
@@ -3738,6 +3957,7 @@ impl Swell {
             Some(f) => f(evt),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_CreateProcessFromPID(&self, pid: ::std::os::raw::c_int) -> root::HANDLE {
         match self.pointers.SWELL_CreateProcessFromPID {
             None => panic!(format!(
@@ -3747,6 +3967,7 @@ impl Swell {
             Some(f) => f(pid),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3764,6 +3985,7 @@ impl Swell {
             Some(f) => f(exe, nparams, params),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetProcessExitCode(&self, hand: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetProcessExitCode {
             None => panic!(format!(
@@ -3773,6 +3995,7 @@ impl Swell {
             Some(f) => f(hand),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3789,6 +4012,7 @@ impl Swell {
             Some(f) => f(fileName, symbolsAsGlobals),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3801,6 +4025,7 @@ impl Swell {
             Some(f) => f(fileName),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3817,6 +4042,7 @@ impl Swell {
             Some(f) => f(hInst, procName),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn FreeLibrary(&self, hInst: root::HINSTANCE) -> root::BOOL {
         match self.pointers.FreeLibrary {
             None => panic!(format!(
@@ -3826,6 +4052,7 @@ impl Swell {
             Some(f) => f(hInst),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetBundle(&self, hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetBundle {
             None => panic!(format!(
@@ -3835,6 +4062,7 @@ impl Swell {
             Some(f) => f(hInst),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_CreateMemContext(
         &self,
         hdc: root::HDC,
@@ -3849,6 +4077,7 @@ impl Swell {
             Some(f) => f(hdc, w, h),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_DeleteGfxContext(&self, arg1: root::HDC) {
         match self.pointers.SWELL_DeleteGfxContext {
             None => panic!(format!(
@@ -3858,6 +4087,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetCtxGC(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxGC {
             None => panic!(format!(
@@ -3867,6 +4097,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetCtxFrameBuffer(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxFrameBuffer {
             None => panic!(format!(
@@ -3876,6 +4107,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_PushClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PushClipRegion {
             None => panic!(format!(
@@ -3885,6 +4117,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3897,6 +4130,7 @@ impl Swell {
             Some(f) => f(ctx, r),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_PopClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PopClipRegion {
             None => panic!(format!(
@@ -3906,6 +4140,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3918,6 +4153,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -3961,6 +4197,7 @@ impl Swell {
             ),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CreatePen(
         &self,
         attr: ::std::os::raw::c_int,
@@ -3975,6 +4212,7 @@ impl Swell {
             Some(f) => f(attr, wid, col),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CreateSolidBrush(&self, col: ::std::os::raw::c_int) -> root::HBRUSH {
         match self.pointers.CreateSolidBrush {
             None => panic!(format!(
@@ -3984,6 +4222,7 @@ impl Swell {
             Some(f) => f(col),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CreatePenAlpha(
         &self,
         attr: ::std::os::raw::c_int,
@@ -3999,6 +4238,7 @@ impl Swell {
             Some(f) => f(attr, wid, col, alpha),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn CreateSolidBrushAlpha(&self, col: ::std::os::raw::c_int, alpha: f32) -> root::HBRUSH {
         match self.pointers.CreateSolidBrushAlpha {
             None => panic!(format!(
@@ -4008,6 +4248,7 @@ impl Swell {
             Some(f) => f(col, alpha),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SelectObject(&self, ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SelectObject {
             None => panic!(format!(
@@ -4017,6 +4258,7 @@ impl Swell {
             Some(f) => f(ctx, pen),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetStockObject(&self, wh: ::std::os::raw::c_int) -> root::HGDIOBJ {
         match self.pointers.GetStockObject {
             None => panic!(format!(
@@ -4026,6 +4268,7 @@ impl Swell {
             Some(f) => f(wh),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DeleteObject(&self, arg1: root::HGDIOBJ) {
         match self.pointers.DeleteObject {
             None => panic!(format!(
@@ -4035,6 +4278,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4047,6 +4291,7 @@ impl Swell {
             Some(f) => f(ctx, r, br),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn Rectangle(
         &self,
         ctx: root::HDC,
@@ -4063,6 +4308,7 @@ impl Swell {
             Some(f) => f(ctx, l, t, r, b),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn Ellipse(
         &self,
         ctx: root::HDC,
@@ -4079,6 +4325,7 @@ impl Swell {
             Some(f) => f(ctx, l, t, r, b),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4096,6 +4343,7 @@ impl Swell {
             Some(f) => f(ctx, pts, npts),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4114,6 +4362,7 @@ impl Swell {
             Some(f) => f(ctx, x, y, op),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_LineTo(&self, ctx: root::HDC, x: ::std::os::raw::c_int, y: ::std::os::raw::c_int) {
         match self.pointers.SWELL_LineTo {
             None => panic!(format!(
@@ -4123,6 +4372,7 @@ impl Swell {
             Some(f) => f(ctx, x, y),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetPixel(
         &self,
         ctx: root::HDC,
@@ -4138,6 +4388,7 @@ impl Swell {
             Some(f) => f(ctx, x, y, c),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4155,6 +4406,7 @@ impl Swell {
             Some(f) => f(ctx, pts, np),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4174,6 +4426,7 @@ impl Swell {
             Some(f) => f(ctx, buf, len, r, align),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetTextColor {
             None => panic!(format!(
@@ -4183,6 +4436,7 @@ impl Swell {
             Some(f) => f(ctx, col),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetTextColor(&self, ctx: root::HDC) -> ::std::os::raw::c_int {
         match self.pointers.GetTextColor {
             None => panic!(format!(
@@ -4192,6 +4446,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetBkColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkColor {
             None => panic!(format!(
@@ -4201,6 +4456,7 @@ impl Swell {
             Some(f) => f(ctx, col),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetBkMode(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkMode {
             None => panic!(format!(
@@ -4210,6 +4466,7 @@ impl Swell {
             Some(f) => f(ctx, col),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4229,6 +4486,7 @@ impl Swell {
             Some(f) => f(ctx, buf, len, indices, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn RoundRect(
         &self,
         ctx: root::HDC,
@@ -4247,6 +4505,7 @@ impl Swell {
             Some(f) => f(ctx, x, y, x2, y2, xrnd, yrnd),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4265,6 +4524,7 @@ impl Swell {
             Some(f) => f(ctx, pts, cnts, nseg),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4277,6 +4537,7 @@ impl Swell {
             Some(f) => f(ctx, tm),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetTextFace(
         &self,
         ctx: root::HDC,
@@ -4291,6 +4552,7 @@ impl Swell {
             Some(f) => f(ctx, nCount, lpFaceName),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4308,6 +4570,7 @@ impl Swell {
             Some(f) => f(icon, bmsz, _bm),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4320,6 +4583,7 @@ impl Swell {
             Some(f) => f(iconinfo),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4336,6 +4600,7 @@ impl Swell {
             Some(f) => f(name, alphaFromMask),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4348,6 +4613,7 @@ impl Swell {
             Some(f) => f(ctx, img, r),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn BitBlt(
         &self,
         hdcOut: root::HDC,
@@ -4368,6 +4634,7 @@ impl Swell {
             Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, mode),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn StretchBlt(
         &self,
         hdcOut: root::HDC,
@@ -4390,6 +4657,7 @@ impl Swell {
             Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, srcw, srch, mode),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4413,6 +4681,7 @@ impl Swell {
             Some(f) => f(hdcOut, x, y, w, h, bits, srcw, srch, srcspan),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetScaling256(&self) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetScaling256 {
             None => panic!(format!(
@@ -4422,6 +4691,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4438,6 +4708,7 @@ impl Swell {
             Some(f) => f(key, v),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetSysColor(&self, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSysColor {
             None => panic!(format!(
@@ -4447,6 +4718,7 @@ impl Swell {
             Some(f) => f(idx),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4466,6 +4738,7 @@ impl Swell {
             Some(f) => f(width, height, numplanes, bitsperpixel, bits),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetOpaque(&self, h: root::HWND, isopaque: bool) {
         match self.pointers.SetOpaque {
             None => panic!(format!(
@@ -4475,6 +4748,7 @@ impl Swell {
             Some(f) => f(h, isopaque),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SetAllowNoMiddleManRendering(&self, h: root::HWND, allow: bool) {
         match self.pointers.SetAllowNoMiddleManRendering {
             None => panic!(format!(
@@ -4484,6 +4758,7 @@ impl Swell {
             Some(f) => f(h, allow),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4496,6 +4771,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4508,6 +4784,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetDC {
             None => panic!(format!(
@@ -4517,6 +4794,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetWindowDC {
             None => panic!(format!(
@@ -4526,6 +4804,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
         match self.pointers.ReleaseDC {
             None => panic!(format!(
@@ -4535,6 +4814,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4552,6 +4832,7 @@ impl Swell {
             Some(f) => f(hdc, r, level),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_CloneGDIObject(&self, a: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SWELL_CloneGDIObject {
             None => panic!(format!(
@@ -4561,6 +4842,7 @@ impl Swell {
             Some(f) => f(a),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn GetSystemMetrics(&self, arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSystemMetrics {
             None => panic!(format!(
@@ -4570,6 +4852,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DragQueryPoint(&self, arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL {
         match self.pointers.DragQueryPoint {
             None => panic!(format!(
@@ -4579,6 +4862,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn DragFinish(&self, arg1: root::HDROP) {
         match self.pointers.DragFinish {
             None => panic!(format!(
@@ -4588,6 +4872,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4606,6 +4891,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3, arg4),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4626,6 +4912,7 @@ impl Swell {
             Some(f) => f(arg1, srcrect, srcfn, callback),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4645,6 +4932,7 @@ impl Swell {
             Some(f) => f(arg1, srcrect, srclist, srccount, icon),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_FinishDragDrop(&self) {
         match self.pointers.SWELL_FinishDragDrop {
             None => panic!(format!(
@@ -4654,6 +4942,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4671,6 +4960,7 @@ impl Swell {
             Some(f) => f(hwndPar, rct, handle),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_MakeSetCurParms(
         &self,
         xscale: f32,
@@ -4689,6 +4979,7 @@ impl Swell {
             Some(f) => f(xscale, yscale, xtrans, ytrans, parent, doauto, dosizetofit),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4711,6 +5002,7 @@ impl Swell {
             Some(f) => f(def, label, idx, x, y, w, h, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_MakeEditField(
         &self,
         idx: ::std::os::raw::c_int,
@@ -4728,6 +5020,7 @@ impl Swell {
             Some(f) => f(idx, x, y, w, h, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4750,6 +5043,7 @@ impl Swell {
             Some(f) => f(align, label, idx, x, y, w, h, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4773,6 +5067,7 @@ impl Swell {
             Some(f) => f(cname, idx, classname, style, x, y, w, h, exstyle),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_MakeCombo(
         &self,
         idx: ::std::os::raw::c_int,
@@ -4790,6 +5085,7 @@ impl Swell {
             Some(f) => f(idx, x, y, w, h, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4811,6 +5107,7 @@ impl Swell {
             Some(f) => f(name, idx, x, y, w, h, style),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4832,6 +5129,7 @@ impl Swell {
             Some(f) => f(name, idx, x, y, w, h, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_MakeListBox(
         &self,
         idx: ::std::os::raw::c_int,
@@ -4849,6 +5147,7 @@ impl Swell {
             Some(f) => f(idx, x, y, w, h, styles),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4867,6 +5166,7 @@ impl Swell {
             Some(f) => f(hMenu, name, idx, flags),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4884,6 +5184,7 @@ impl Swell {
             Some(f) => f(hMenu, list, listsz),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4900,6 +5201,7 @@ impl Swell {
             Some(f) => f(list, listsz),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn _controlfp(
         &self,
         flag: ::std::os::raw::c_uint,
@@ -4913,6 +5215,7 @@ impl Swell {
             Some(f) => f(flag, mask),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_Internal_PostMessage_Init(&self) {
         match self.pointers.SWELL_Internal_PostMessage_Init {
             None => panic!(format!(
@@ -4922,6 +5225,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4937,6 +5241,7 @@ impl Swell {
             Some(f) => f(fn_),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetWindowWantRaiseAmt(&self, h: root::HWND, amt: ::std::os::raw::c_int) {
         match self.pointers.SWELL_SetWindowWantRaiseAmt {
             None => panic!(format!(
@@ -4946,6 +5251,7 @@ impl Swell {
             Some(f) => f(h, amt),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_GetWindowWantRaiseAmt(&self, arg1: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetWindowWantRaiseAmt {
             None => panic!(format!(
@@ -4955,6 +5261,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_SetListViewFastClickMask(&self, hList: root::HWND, mask: ::std::os::raw::c_int) {
         match self.pointers.SWELL_SetListViewFastClickMask {
             None => panic!(format!(
@@ -4964,6 +5271,7 @@ impl Swell {
             Some(f) => f(hList, mask),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4976,6 +5284,7 @@ impl Swell {
             Some(f) => f(sz, buf),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -4992,6 +5301,7 @@ impl Swell {
             Some(f) => f(argc, argv),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_RunMessageLoop(&self) {
         match self.pointers.SWELL_RunMessageLoop {
             None => panic!(format!(
@@ -5001,6 +5311,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5018,6 +5329,7 @@ impl Swell {
             Some(f) => f(viewpar, wref, arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5030,6 +5342,7 @@ impl Swell {
             Some(f) => f(g),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn EnumChildWindows(
         &self,
         hwnd: root::HWND,
@@ -5046,6 +5359,7 @@ impl Swell {
             Some(f) => f(hwnd, cwEnumFunc, lParam),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_IsGroupBox(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsGroupBox {
             None => panic!(format!(
@@ -5055,6 +5369,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_IsButton(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsButton {
             None => panic!(format!(
@@ -5064,6 +5379,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn SWELL_IsStaticText(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsStaticText {
             None => panic!(format!(
@@ -5073,6 +5389,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5085,6 +5402,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5102,6 +5420,7 @@ impl Swell {
             Some(f) => f(str, fl, pdv),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5120,6 +5439,7 @@ impl Swell {
             Some(f) => f(idx, name, hotspot_x, hotspot_y),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5138,6 +5458,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, ncustom, custom),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5150,6 +5471,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_os = "linux")]
     pub fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
         match self.pointers.IsWindowEnabled {
             None => panic!(format!(
@@ -5159,6 +5481,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5176,6 +5499,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
+    #[cfg(target_os = "linux")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer"]
@@ -5187,6 +5511,2611 @@ impl Swell {
             )),
             Some(f) => f(arg1, arg2),
         }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn lstrcpyn(
+        &self,
+        dest: *mut ::std::os::raw::c_char,
+        src: *const ::std::os::raw::c_char,
+        l: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char {
+        unsafe { windows::lstrcpyn(dest, src, l) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn MulDiv(
+        &self,
+        arg1: ::std::os::raw::c_int,
+        arg2: ::std::os::raw::c_int,
+        arg3: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::MulDiv(arg1, arg2, arg3) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn Sleep(&self, ms: ::std::os::raw::c_int) {
+        unsafe { windows::Sleep(ms) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetTickCount(&self) -> root::DWORD {
+        unsafe { windows::GetTickCount() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetFileTime(
+        &self,
+        filedes: ::std::os::raw::c_int,
+        lpCreationTime: *mut root::FILETIME,
+        lpLastAccessTime: *mut root::FILETIME,
+        lpLastWriteTime: *mut root::FILETIME,
+    ) -> root::BOOL {
+        unsafe { windows::GetFileTime(filedes, lpCreationTime, lpLastAccessTime, lpLastWriteTime) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn WritePrivateProfileString(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        keyname: *const ::std::os::raw::c_char,
+        val: *const ::std::os::raw::c_char,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::BOOL {
+        unsafe { windows::WritePrivateProfileString(appname, keyname, val, fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetPrivateProfileString(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        keyname: *const ::std::os::raw::c_char,
+        def: *const ::std::os::raw::c_char,
+        ret: *mut ::std::os::raw::c_char,
+        retsize: ::std::os::raw::c_int,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::DWORD {
+        unsafe { windows::GetPrivateProfileString(appname, keyname, def, ret, retsize, fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetPrivateProfileInt(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        keyname: *const ::std::os::raw::c_char,
+        def: ::std::os::raw::c_int,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::GetPrivateProfileInt(appname, keyname, def, fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetPrivateProfileStruct(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        keyname: *const ::std::os::raw::c_char,
+        buf: *mut ::std::os::raw::c_void,
+        bufsz: ::std::os::raw::c_int,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::BOOL {
+        unsafe { windows::GetPrivateProfileStruct(appname, keyname, buf, bufsz, fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn WritePrivateProfileStruct(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        keyname: *const ::std::os::raw::c_char,
+        buf: *const ::std::os::raw::c_void,
+        bufsz: ::std::os::raw::c_int,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::BOOL {
+        unsafe { windows::WritePrivateProfileStruct(appname, keyname, buf, bufsz, fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn WritePrivateProfileSection(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        strings: *const ::std::os::raw::c_char,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::BOOL {
+        unsafe { windows::WritePrivateProfileSection(appname, strings, fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetPrivateProfileSection(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        strout: *mut ::std::os::raw::c_char,
+        strout_len: root::DWORD,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::DWORD {
+        unsafe { windows::GetPrivateProfileSection(appname, strout, strout_len, fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetModuleFileName(
+        &self,
+        hInst: root::HINSTANCE,
+        fn_: *mut ::std::os::raw::c_char,
+        nSize: root::DWORD,
+    ) -> root::DWORD {
+        unsafe { windows::GetModuleFileName(hInst, fn_, nSize) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_PtInRect(&self, r: *const root::RECT, p: root::POINT) -> root::BOOL {
+        unsafe { windows::SWELL_PtInRect(r, p) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ShellExecute(
+        &self,
+        hwndDlg: root::HWND,
+        action: *const ::std::os::raw::c_char,
+        content1: *const ::std::os::raw::c_char,
+        content2: *const ::std::os::raw::c_char,
+        content3: *const ::std::os::raw::c_char,
+        blah: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::ShellExecute(hwndDlg, action, content1, content2, content3, blah) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn MessageBox(
+        &self,
+        hwndParent: root::HWND,
+        text: *const ::std::os::raw::c_char,
+        caption: *const ::std::os::raw::c_char,
+        type_: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::MessageBox(hwndParent, text, caption, type_) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn BrowseForFiles(
+        &self,
+        text: *const ::std::os::raw::c_char,
+        initialdir: *const ::std::os::raw::c_char,
+        initialfile: *const ::std::os::raw::c_char,
+        allowmul: bool,
+        extlist: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char {
+        unsafe { windows::BrowseForFiles(text, initialdir, initialfile, allowmul, extlist) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn BrowseForSaveFile(
+        &self,
+        text: *const ::std::os::raw::c_char,
+        initialdir: *const ::std::os::raw::c_char,
+        initialfile: *const ::std::os::raw::c_char,
+        extlist: *const ::std::os::raw::c_char,
+        fn_: *mut ::std::os::raw::c_char,
+        fnsize: ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::BrowseForSaveFile(text, initialdir, initialfile, extlist, fn_, fnsize) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn BrowseForDirectory(
+        &self,
+        text: *const ::std::os::raw::c_char,
+        initialdir: *const ::std::os::raw::c_char,
+        fn_: *mut ::std::os::raw::c_char,
+        fnsize: ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::BrowseForDirectory(text, initialdir, fn_, fnsize) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn BrowseFile_SetTemplate(
+        &self,
+        dlgid: *const ::std::os::raw::c_char,
+        dlgProc: root::DLGPROC,
+        reshead: *mut root::SWELL_DialogResourceIndex,
+    ) {
+        unsafe { windows::BrowseFile_SetTemplate(dlgid, dlgProc, reshead) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
+        unsafe { windows::GetDlgItem(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
+        unsafe { windows::ShowWindow(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DestroyWindow(&self, hwnd: root::HWND) {
+        unsafe { windows::DestroyWindow(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_GetGestureInfo(
+        &self,
+        lParam: root::LPARAM,
+        gi: *mut root::GESTUREINFO,
+    ) -> root::BOOL {
+        unsafe { windows::SWELL_GetGestureInfo(lParam, gi) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_HideApp(&self) {
+        unsafe { windows::SWELL_HideApp() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SetDlgItemText(
+        &self,
+        arg1: root::HWND,
+        idx: ::std::os::raw::c_int,
+        text: *const ::std::os::raw::c_char,
+    ) -> root::BOOL {
+        unsafe { windows::SetDlgItemText(arg1, idx, text) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetDlgItemInt(
+        &self,
+        arg1: root::HWND,
+        idx: ::std::os::raw::c_int,
+        val: ::std::os::raw::c_int,
+        issigned: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::SetDlgItemInt(arg1, idx, val, issigned) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetDlgItemInt(
+        &self,
+        arg1: root::HWND,
+        idx: ::std::os::raw::c_int,
+        translated: *mut root::BOOL,
+        issigned: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::GetDlgItemInt(arg1, idx, translated, issigned) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetDlgItemText(
+        &self,
+        arg1: root::HWND,
+        idx: ::std::os::raw::c_int,
+        text: *mut ::std::os::raw::c_char,
+        textlen: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::GetDlgItemText(arg1, idx, text, textlen) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CheckDlgButton(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        check: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::CheckDlgButton(hwnd, idx, check) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn IsDlgButtonChecked(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::IsDlgButtonChecked(hwnd, idx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
+        unsafe { windows::EnableWindow(hwnd, enable) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetFocus(&self, hwnd: root::HWND) {
+        unsafe { windows::SetFocus(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetFocus(&self) -> root::HWND {
+        unsafe { windows::GetFocus() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetForegroundWindow(&self, hwnd: root::HWND) {
+        unsafe { windows::SetForegroundWindow(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetForegroundWindow(&self) -> root::HWND {
+        unsafe { windows::GetForegroundWindow() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
+        unsafe { windows::SetCapture(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetCapture(&self) -> root::HWND {
+        unsafe { windows::GetCapture() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ReleaseCapture(&self) {
+        unsafe { windows::ReleaseCapture() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn IsChild(&self, hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::IsChild(hwndParent, hwndChild) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
+        unsafe { windows::GetParent(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
+        unsafe { windows::SetParent(hwnd, newPar) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
+        unsafe { windows::GetWindow(hwnd, what) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EnumWindows(
+        &self,
+        proc_: ::std::option::Option<
+            unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
+        >,
+        lp: root::LPARAM,
+    ) -> root::BOOL {
+        unsafe { windows::EnumWindows(proc_, lp) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn FindWindowEx(
+        &self,
+        par: root::HWND,
+        lastw: root::HWND,
+        classname: *const ::std::os::raw::c_char,
+        title: *const ::std::os::raw::c_char,
+    ) -> root::HWND {
+        unsafe { windows::FindWindowEx(par, lastw, classname, title) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ClientToScreen(&self, hwnd: root::HWND, p: *mut root::POINT) {
+        unsafe { windows::ClientToScreen(hwnd, p) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ScreenToClient(&self, hwnd: root::HWND, p: *mut root::POINT) {
+        unsafe { windows::ScreenToClient(hwnd, p) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetWindowRect(&self, hwnd: root::HWND, r: *mut root::RECT) -> bool {
+        unsafe { windows::GetWindowRect(hwnd, r) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetWindowContentViewRect(&self, hwnd: root::HWND, r: *mut root::RECT) {
+        unsafe { windows::GetWindowContentViewRect(hwnd, r) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetClientRect(&self, hwnd: root::HWND, r: *mut root::RECT) {
+        unsafe { windows::GetClientRect(hwnd, r) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
+        unsafe { windows::WindowFromPoint(p) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn WinOffsetRect(
+        &self,
+        lprc: root::LPRECT,
+        dx: ::std::os::raw::c_int,
+        dy: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::WinOffsetRect(lprc, dx, dy) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn WinSetRect(
+        &self,
+        lprc: root::LPRECT,
+        xLeft: ::std::os::raw::c_int,
+        yTop: ::std::os::raw::c_int,
+        xRight: ::std::os::raw::c_int,
+        yBottom: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::WinSetRect(lprc, xLeft, yTop, xRight, yBottom) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn WinUnionRect(
+        &self,
+        out: *mut root::RECT,
+        in1: *const root::RECT,
+        in2: *const root::RECT,
+    ) {
+        unsafe { windows::WinUnionRect(out, in1, in2) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn WinIntersectRect(
+        &self,
+        out: *mut root::RECT,
+        in1: *const root::RECT,
+        in2: *const root::RECT,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::WinIntersectRect(out, in1, in2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetWindowPos(
+        &self,
+        hwnd: root::HWND,
+        unused: root::HWND,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        cx: ::std::os::raw::c_int,
+        cy: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::SetWindowPos(hwnd, unused, x, y, cx, cy, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetWindowLevel(
+        &self,
+        hwnd: root::HWND,
+        newlevel: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_SetWindowLevel(hwnd, newlevel) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn InvalidateRect(
+        &self,
+        hwnd: root::HWND,
+        r: *const root::RECT,
+        eraseBk: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::InvalidateRect(hwnd, r, eraseBk) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn UpdateWindow(&self, hwnd: root::HWND) {
+        unsafe { windows::UpdateWindow(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetWindowLong(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR {
+        unsafe { windows::GetWindowLong(hwnd, idx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetWindowLong(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        val: root::LONG_PTR,
+    ) -> root::LONG_PTR {
+        unsafe { windows::SetWindowLong(hwnd, idx, val) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ScrollWindow(
+        &self,
+        hwnd: root::HWND,
+        xamt: ::std::os::raw::c_int,
+        yamt: ::std::os::raw::c_int,
+        lpRect: *const root::RECT,
+        lpClipRect: *const root::RECT,
+    ) -> root::BOOL {
+        unsafe { windows::ScrollWindow(hwnd, xamt, yamt, lpRect, lpClipRect) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EnumPropsEx(
+        &self,
+        arg1: root::HWND,
+        arg2: root::PROPENUMPROCEX,
+        arg3: root::LPARAM,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::EnumPropsEx(arg1, arg2, arg3) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetProp(
+        &self,
+        arg1: root::HWND,
+        arg2: *const ::std::os::raw::c_char,
+    ) -> root::HANDLE {
+        unsafe { windows::GetProp(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SetProp(
+        &self,
+        arg1: root::HWND,
+        arg2: *const ::std::os::raw::c_char,
+        arg3: root::HANDLE,
+    ) -> root::BOOL {
+        unsafe { windows::SetProp(arg1, arg2, arg3) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn RemoveProp(
+        &self,
+        arg1: root::HWND,
+        arg2: *const ::std::os::raw::c_char,
+    ) -> root::HANDLE {
+        unsafe { windows::RemoveProp(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
+        unsafe { windows::IsWindowVisible(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn IsWindow(&self, hwnd: root::HWND) -> bool {
+        unsafe { windows::IsWindow(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetTimer(
+        &self,
+        hwnd: root::HWND,
+        timerid: root::UINT_PTR,
+        rate: root::UINT,
+        tProc: root::TIMERPROC,
+    ) -> root::UINT_PTR {
+        unsafe { windows::SetTimer(hwnd, timerid, rate, tProc) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
+        unsafe { windows::KillTimer(hwnd, timerid) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetExtendedListViewStyleEx(
+        &self,
+        h: root::HWND,
+        mask: ::std::os::raw::c_int,
+        style: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::ListView_SetExtendedListViewStyleEx(h, mask, style) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_InsertColumn(
+        &self,
+        h: root::HWND,
+        pos: ::std::os::raw::c_int,
+        lvc: *const root::LVCOLUMN,
+    ) {
+        unsafe { windows::ListView_InsertColumn(h, pos, lvc) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_DeleteColumn(&self, h: root::HWND, pos: ::std::os::raw::c_int) -> bool {
+        unsafe { windows::ListView_DeleteColumn(h, pos) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_SetColumn(
+        &self,
+        h: root::HWND,
+        pos: ::std::os::raw::c_int,
+        lvc: *const root::LVCOLUMN,
+    ) {
+        unsafe { windows::ListView_SetColumn(h, pos, lvc) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetColumnWidth(
+        &self,
+        h: root::HWND,
+        pos: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetColumnWidth(h, pos) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_InsertItem(
+        &self,
+        h: root::HWND,
+        item: *const root::LVITEM,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_InsertItem(h, item) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_SetItemText(
+        &self,
+        h: root::HWND,
+        ipos: ::std::os::raw::c_int,
+        cpos: ::std::os::raw::c_int,
+        txt: *const ::std::os::raw::c_char,
+    ) {
+        unsafe { windows::ListView_SetItemText(h, ipos, cpos, txt) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_SetItem(&self, h: root::HWND, item: *mut root::LVITEM) -> bool {
+        unsafe { windows::ListView_SetItem(h, item) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetNextItem(
+        &self,
+        h: root::HWND,
+        istart: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetNextItem(h, istart, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_GetItem(&self, h: root::HWND, item: *mut root::LVITEM) -> bool {
+        unsafe { windows::ListView_GetItem(h, item) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetItemState(
+        &self,
+        h: root::HWND,
+        ipos: ::std::os::raw::c_int,
+        mask: root::UINT,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetItemState(h, ipos, mask) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_DeleteItem(&self, h: root::HWND, ipos: ::std::os::raw::c_int) {
+        unsafe { windows::ListView_DeleteItem(h, ipos) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_DeleteAllItems(&self, h: root::HWND) {
+        unsafe { windows::ListView_DeleteAllItems(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetSelectedCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetSelectedCount(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetItemCount(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetSelectionMark(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetSelectionMark(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetColumnWidth(
+        &self,
+        h: root::HWND,
+        colpos: ::std::os::raw::c_int,
+        wid: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::ListView_SetColumnWidth(h, colpos, wid) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetItemState(
+        &self,
+        h: root::HWND,
+        item: ::std::os::raw::c_int,
+        state: root::UINT,
+        statemask: root::UINT,
+    ) -> bool {
+        unsafe { windows::ListView_SetItemState(h, item, state, statemask) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_RedrawItems(
+        &self,
+        h: root::HWND,
+        startitem: ::std::os::raw::c_int,
+        enditem: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::ListView_RedrawItems(h, startitem, enditem) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetItemCount(&self, h: root::HWND, cnt: ::std::os::raw::c_int) {
+        unsafe { windows::ListView_SetItemCount(h, cnt) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_EnsureVisible(&self, h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL) {
+        unsafe { windows::ListView_EnsureVisible(h, i, pok) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_GetSubItemRect(
+        &self,
+        h: root::HWND,
+        item: ::std::os::raw::c_int,
+        subitem: ::std::os::raw::c_int,
+        code: ::std::os::raw::c_int,
+        r: *mut root::RECT,
+    ) -> bool {
+        unsafe { windows::ListView_GetSubItemRect(h, item, subitem, code, r) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetImageList(
+        &self,
+        h: root::HWND,
+        imagelist: root::HIMAGELIST,
+        which: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::ListView_SetImageList(h, imagelist, which) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_HitTest(
+        &self,
+        h: root::HWND,
+        pinf: *mut root::LVHITTESTINFO,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_HitTest(h, pinf) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_SubItemHitTest(
+        &self,
+        h: root::HWND,
+        pinf: *mut root::LVHITTESTINFO,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_SubItemHitTest(h, pinf) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_GetItemText(
+        &self,
+        hwnd: root::HWND,
+        item: ::std::os::raw::c_int,
+        subitem: ::std::os::raw::c_int,
+        text: *mut ::std::os::raw::c_char,
+        textmax: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::ListView_GetItemText(hwnd, item, subitem, text, textmax) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SortItems(
+        &self,
+        hwnd: root::HWND,
+        compf: root::PFNLVCOMPARE,
+        parm: root::LPARAM,
+    ) {
+        unsafe { windows::ListView_SortItems(hwnd, compf, parm) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_GetItemRect(
+        &self,
+        h: root::HWND,
+        item: ::std::os::raw::c_int,
+        r: *mut root::RECT,
+        code: ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::ListView_GetItemRect(h, item, r, code) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_Scroll(
+        &self,
+        h: root::HWND,
+        xscroll: ::std::os::raw::c_int,
+        yscroll: ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::ListView_Scroll(h, xscroll, yscroll) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetTopIndex(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetTopIndex(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetCountPerPage(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::ListView_GetCountPerPage(h) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_SetColumnOrderArray(
+        &self,
+        h: root::HWND,
+        cnt: ::std::os::raw::c_int,
+        arr: *mut ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::ListView_SetColumnOrderArray(h, cnt, arr) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_GetColumnOrderArray(
+        &self,
+        h: root::HWND,
+        cnt: ::std::os::raw::c_int,
+        arr: *mut ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::ListView_GetColumnOrderArray(h, cnt, arr) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_GetHeader(&self, h: root::HWND) -> root::HWND {
+        unsafe { windows::ListView_GetHeader(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn Header_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::Header_GetItemCount(h) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn Header_GetItem(
+        &self,
+        h: root::HWND,
+        col: ::std::os::raw::c_int,
+        hi: *mut root::HDITEM,
+    ) -> root::BOOL {
+        unsafe { windows::Header_GetItem(h, col, hi) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn Header_SetItem(
+        &self,
+        h: root::HWND,
+        col: ::std::os::raw::c_int,
+        hi: *mut root::HDITEM,
+    ) -> root::BOOL {
+        unsafe { windows::Header_SetItem(h, col, hi) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetListViewHeaderHeight(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_GetListViewHeaderHeight(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ImageList_CreateEx(&self) -> root::HIMAGELIST {
+        unsafe { windows::ImageList_CreateEx() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ImageList_Remove(
+        &self,
+        list: root::HIMAGELIST,
+        idx: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::ImageList_Remove(list, idx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ImageList_ReplaceIcon(
+        &self,
+        list: root::HIMAGELIST,
+        offset: ::std::os::raw::c_int,
+        image: root::HICON,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ImageList_ReplaceIcon(list, offset, image) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ImageList_Add(
+        &self,
+        list: root::HIMAGELIST,
+        image: root::HBITMAP,
+        mask: root::HBITMAP,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::ImageList_Add(list, image, mask) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ImageList_Destroy(&self, arg1: root::HIMAGELIST) {
+        unsafe { windows::ImageList_Destroy(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TabCtrl_GetItemCount(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::TabCtrl_GetItemCount(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TabCtrl_DeleteItem(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL {
+        unsafe { windows::TabCtrl_DeleteItem(hwnd, idx) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn TabCtrl_InsertItem(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        item: *mut root::TCITEM,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::TabCtrl_InsertItem(hwnd, idx, item) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TabCtrl_SetCurSel(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::TabCtrl_SetCurSel(hwnd, idx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TabCtrl_GetCurSel(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::TabCtrl_GetCurSel(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn TabCtrl_AdjustRect(
+        &self,
+        hwnd: root::HWND,
+        fLarger: root::BOOL,
+        r: *mut root::RECT,
+    ) -> root::BOOL {
+        unsafe { windows::TabCtrl_AdjustRect(hwnd, fLarger, r) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn TreeView_InsertItem(
+        &self,
+        hwnd: root::HWND,
+        ins: *mut root::TV_INSERTSTRUCT,
+    ) -> root::HTREEITEM {
+        unsafe { windows::TreeView_InsertItem(hwnd, ins) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_Expand(
+        &self,
+        hwnd: root::HWND,
+        item: root::HTREEITEM,
+        flag: root::UINT,
+    ) -> root::BOOL {
+        unsafe { windows::TreeView_Expand(hwnd, item, flag) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_GetSelection(&self, hwnd: root::HWND) -> root::HTREEITEM {
+        unsafe { windows::TreeView_GetSelection(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_DeleteItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
+        unsafe { windows::TreeView_DeleteItem(hwnd, item) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_DeleteAllItems(&self, hwnd: root::HWND) {
+        unsafe { windows::TreeView_DeleteAllItems(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_SelectItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
+        unsafe { windows::TreeView_SelectItem(hwnd, item) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_GetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
+        unsafe { windows::TreeView_GetItem(hwnd, pitem) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_SetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
+        unsafe { windows::TreeView_SetItem(hwnd, pitem) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn TreeView_HitTest(
+        &self,
+        hwnd: root::HWND,
+        hti: *mut root::TVHITTESTINFO,
+    ) -> root::HTREEITEM {
+        unsafe { windows::TreeView_HitTest(hwnd, hti) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_SetIndent(
+        &self,
+        hwnd: root::HWND,
+        indent: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::TreeView_SetIndent(hwnd, indent) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_GetChild(&self, hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM {
+        unsafe { windows::TreeView_GetChild(hwnd, item) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_GetNextSibling(
+        &self,
+        hwnd: root::HWND,
+        item: root::HTREEITEM,
+    ) -> root::HTREEITEM {
+        unsafe { windows::TreeView_GetNextSibling(hwnd, item) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_GetRoot(&self, hwnd: root::HWND) -> root::HTREEITEM {
+        unsafe { windows::TreeView_GetRoot(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+        unsafe { windows::TreeView_SetBkColor(hwnd, color) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn TreeView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+        unsafe { windows::TreeView_SetTextColor(hwnd, color) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+        unsafe { windows::ListView_SetBkColor(hwnd, color) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetTextBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+        unsafe { windows::ListView_SetTextBkColor(hwnd, color) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+        unsafe { windows::ListView_SetTextColor(hwnd, color) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ListView_SetGridColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+        unsafe { windows::ListView_SetGridColor(hwnd, color) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn ListView_SetSelColors(
+        &self,
+        hwnd: root::HWND,
+        colors: *mut ::std::os::raw::c_int,
+        ncolors: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::ListView_SetSelColors(hwnd, colors, ncolors) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_ModalWindowStart(&self, hwnd: root::HWND) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::SWELL_ModalWindowStart(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_ModalWindowRun(
+        &self,
+        ctx: *mut ::std::os::raw::c_void,
+        ret: *mut ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::SWELL_ModalWindowRun(ctx, ret) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_ModalWindowEnd(&self, ctx: *mut ::std::os::raw::c_void) {
+        unsafe { windows::SWELL_ModalWindowEnd(ctx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_CloseWindow(&self, hwnd: root::HWND) {
+        unsafe { windows::SWELL_CloseWindow(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CreatePopupMenu(&self) -> root::HMENU {
+        unsafe { windows::CreatePopupMenu() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreatePopupMenuEx(&self, title: *const ::std::os::raw::c_char) -> root::HMENU {
+        unsafe { windows::CreatePopupMenuEx(title) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DestroyMenu(&self, hMenu: root::HMENU) {
+        unsafe { windows::DestroyMenu(hMenu) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn AddMenuItem(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        name: *const ::std::os::raw::c_char,
+        tagid: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::AddMenuItem(hMenu, pos, name, tagid) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
+        unsafe { windows::GetSubMenu(hMenu, pos) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
+        unsafe { windows::GetMenuItemCount(hMenu) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetMenuItemID(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::GetMenuItemID(hMenu, pos) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetMenuItemModifier(
+        &self,
+        hMenu: root::HMENU,
+        idx: ::std::os::raw::c_int,
+        flag: ::std::os::raw::c_int,
+        code: ::std::os::raw::c_int,
+        mask: ::std::os::raw::c_uint,
+    ) -> bool {
+        unsafe { windows::SetMenuItemModifier(hMenu, idx, flag, code, mask) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SetMenuItemText(
+        &self,
+        hMenu: root::HMENU,
+        idx: ::std::os::raw::c_int,
+        flag: ::std::os::raw::c_int,
+        text: *const ::std::os::raw::c_char,
+    ) -> bool {
+        unsafe { windows::SetMenuItemText(hMenu, idx, flag, text) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EnableMenuItem(
+        &self,
+        hMenu: root::HMENU,
+        idx: ::std::os::raw::c_int,
+        en: ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::EnableMenuItem(hMenu, idx, en) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DeleteMenu(
+        &self,
+        hMenu: root::HMENU,
+        idx: ::std::os::raw::c_int,
+        flag: ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::DeleteMenu(hMenu, idx, flag) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CheckMenuItem(
+        &self,
+        hMenu: root::HMENU,
+        idx: ::std::os::raw::c_int,
+        chk: ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::CheckMenuItem(hMenu, idx, chk) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn InsertMenuItem(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        byPos: root::BOOL,
+        mi: *mut root::MENUITEMINFO,
+    ) {
+        unsafe { windows::InsertMenuItem(hMenu, pos, byPos, mi) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_InsertMenu(
+        &self,
+        menu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        flag: ::std::os::raw::c_uint,
+        idx: root::UINT_PTR,
+        str: *const ::std::os::raw::c_char,
+    ) {
+        unsafe { windows::SWELL_InsertMenu(menu, pos, flag, idx, str) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetMenuItemInfo(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        byPos: root::BOOL,
+        mi: *mut root::MENUITEMINFO,
+    ) -> root::BOOL {
+        unsafe { windows::GetMenuItemInfo(hMenu, pos, byPos, mi) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SetMenuItemInfo(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        byPos: root::BOOL,
+        mi: *mut root::MENUITEMINFO,
+    ) -> root::BOOL {
+        unsafe { windows::SetMenuItemInfo(hMenu, pos, byPos, mi) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DrawMenuBar(&self, arg1: root::HWND) {
+        unsafe { windows::DrawMenuBar(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_LoadMenu(
+        &self,
+        head: *mut root::SWELL_MenuResourceIndex,
+        resid: *const ::std::os::raw::c_char,
+    ) -> root::HMENU {
+        unsafe { windows::SWELL_LoadMenu(head, resid) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn TrackPopupMenu(
+        &self,
+        hMenu: root::HMENU,
+        flags: ::std::os::raw::c_int,
+        xpos: ::std::os::raw::c_int,
+        ypos: ::std::os::raw::c_int,
+        resvd: ::std::os::raw::c_int,
+        hwnd: root::HWND,
+        r: *const root::RECT,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::TrackPopupMenu(hMenu, flags, xpos, ypos, resvd, hwnd, r) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetMenuDestination(&self, menu: root::HMENU, hwnd: root::HWND) {
+        unsafe { windows::SWELL_SetMenuDestination(menu, hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_DuplicateMenu(&self, menu: root::HMENU) -> root::HMENU {
+        unsafe { windows::SWELL_DuplicateMenu(menu) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
+        unsafe { windows::SetMenu(hwnd, menu) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
+        unsafe { windows::GetMenu(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetDefaultWindowMenu(&self) -> root::HMENU {
+        unsafe { windows::SWELL_GetDefaultWindowMenu() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetDefaultWindowMenu(&self, arg1: root::HMENU) {
+        unsafe { windows::SWELL_SetDefaultWindowMenu(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetDefaultModalWindowMenu(&self) -> root::HMENU {
+        unsafe { windows::SWELL_GetDefaultModalWindowMenu() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetDefaultModalWindowMenu(&self, arg1: root::HMENU) {
+        unsafe { windows::SWELL_SetDefaultModalWindowMenu(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetCurrentMenu(&self) -> root::HMENU {
+        unsafe { windows::SWELL_GetCurrentMenu() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetCurrentMenu(&self, arg1: root::HMENU) {
+        unsafe { windows::SWELL_SetCurrentMenu(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_DialogBox(
+        &self,
+        reshead: *mut root::SWELL_DialogResourceIndex,
+        resid: *const ::std::os::raw::c_char,
+        parent: root::HWND,
+        dlgproc: root::DLGPROC,
+        param: root::LPARAM,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_DialogBox(reshead, resid, parent, dlgproc, param) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_CreateDialog(
+        &self,
+        reshead: *mut root::SWELL_DialogResourceIndex,
+        resid: *const ::std::os::raw::c_char,
+        parent: root::HWND,
+        dlgproc: root::DLGPROC,
+        param: root::LPARAM,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_CreateDialog(reshead, resid, parent, dlgproc, param) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_RegisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
+        unsafe { windows::SWELL_RegisterCustomControlCreator(proc_) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_UnregisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
+        unsafe { windows::SWELL_UnregisterCustomControlCreator(proc_) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DefWindowProc(
+        &self,
+        hwnd: root::HWND,
+        msg: root::UINT,
+        wParam: root::WPARAM,
+        lParam: root::LPARAM,
+    ) -> root::LRESULT {
+        unsafe { windows::DefWindowProc(hwnd, msg, wParam, lParam) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
+        unsafe { windows::EndDialog(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetDefaultButtonID(
+        &self,
+        hwndDlg: root::HWND,
+        onlyIfEnabled: bool,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_GetDefaultButtonID(hwndDlg, onlyIfEnabled) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SendMessage(
+        &self,
+        arg1: root::HWND,
+        arg2: root::UINT,
+        arg3: root::WPARAM,
+        arg4: root::LPARAM,
+    ) -> root::LRESULT {
+        unsafe { windows::SendMessage(arg1, arg2, arg3, arg4) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_BroadcastMessage(&self, arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM) {
+        unsafe { windows::SWELL_BroadcastMessage(arg1, arg2, arg3) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn PostMessage(
+        &self,
+        hwnd: root::HWND,
+        msg: root::UINT,
+        wParam: root::WPARAM,
+        lParam: root::LPARAM,
+    ) -> root::BOOL {
+        unsafe { windows::PostMessage(hwnd, msg, wParam, lParam) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_MessageQueue_Flush(&self) {
+        unsafe { windows::SWELL_MessageQueue_Flush() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_MessageQueue_Clear(&self, h: root::HWND) {
+        unsafe { windows::SWELL_MessageQueue_Clear(h) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_KeyToASCII(
+        &self,
+        wParam: ::std::os::raw::c_int,
+        lParam: ::std::os::raw::c_int,
+        newflags: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_KeyToASCII(wParam, lParam, newflags) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetAsyncKeyState(&self, key: ::std::os::raw::c_int) -> root::WORD {
+        unsafe { windows::GetAsyncKeyState(key) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetCursorPos(&self, pt: *mut root::POINT) {
+        unsafe { windows::GetCursorPos(pt) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetMessagePos(&self) -> root::DWORD {
+        unsafe { windows::GetMessagePos() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_LoadCursor(&self, idx: *const ::std::os::raw::c_char) -> root::HCURSOR {
+        unsafe { windows::SWELL_LoadCursor(idx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetCursor(&self, curs: root::HCURSOR) {
+        unsafe { windows::SWELL_SetCursor(curs) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_EnableRightClickEmulate(&self, enable: root::BOOL) {
+        unsafe { windows::SWELL_EnableRightClickEmulate(enable) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetCursor(&self) -> root::HCURSOR {
+        unsafe { windows::SWELL_GetCursor() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetLastSetCursor(&self) -> root::HCURSOR {
+        unsafe { windows::SWELL_GetLastSetCursor() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_IsCursorVisible(&self) -> bool {
+        unsafe { windows::SWELL_IsCursorVisible() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_ShowCursor(&self, bShow: root::BOOL) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_ShowCursor(bShow) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetCursorPos(
+        &self,
+        X: ::std::os::raw::c_int,
+        Y: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::SWELL_SetCursorPos(X, Y) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_GetViewPort(
+        &self,
+        r: *mut root::RECT,
+        sourcerect: *const root::RECT,
+        wantWork: bool,
+    ) {
+        unsafe { windows::SWELL_GetViewPort(r, sourcerect, wantWork) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
+        unsafe { windows::OpenClipboard(hwndDlg) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CloseClipboard(&self) {
+        unsafe { windows::CloseClipboard() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
+        unsafe { windows::GetClipboardData(type_) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EmptyClipboard(&self) {
+        unsafe { windows::EmptyClipboard() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
+        unsafe { windows::SetClipboardData(type_, h) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn RegisterClipboardFormat(
+        &self,
+        desc: *const ::std::os::raw::c_char,
+    ) -> root::UINT {
+        unsafe { windows::RegisterClipboardFormat(desc) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
+        unsafe { windows::EnumClipboardFormats(lastfmt) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GlobalAlloc(
+        &self,
+        flags: ::std::os::raw::c_int,
+        sz: ::std::os::raw::c_int,
+    ) -> root::HANDLE {
+        unsafe { windows::GlobalAlloc(flags, sz) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::GlobalLock(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GlobalSize(&self, h: root::HANDLE) -> ::std::os::raw::c_int {
+        unsafe { windows::GlobalSize(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GlobalUnlock(&self, h: root::HANDLE) {
+        unsafe { windows::GlobalUnlock(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GlobalFree(&self, h: root::HANDLE) {
+        unsafe { windows::GlobalFree(h) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreateThread(
+        &self,
+        TA: *mut ::std::os::raw::c_void,
+        stackSize: root::DWORD,
+        ThreadProc: ::std::option::Option<unsafe extern "C" fn(arg1: root::LPVOID) -> root::DWORD>,
+        parm: root::LPVOID,
+        cf: root::DWORD,
+        tidOut: *mut root::DWORD,
+    ) -> root::HANDLE {
+        unsafe { windows::CreateThread(TA, stackSize, ThreadProc, parm, cf, tidOut) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreateEvent(
+        &self,
+        SA: *mut ::std::os::raw::c_void,
+        manualReset: root::BOOL,
+        initialSig: root::BOOL,
+        ignored: *const ::std::os::raw::c_char,
+    ) -> root::HANDLE {
+        unsafe { windows::CreateEvent(SA, manualReset, initialSig, ignored) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreateEventAsSocket(
+        &self,
+        SA: *mut ::std::os::raw::c_void,
+        manualReset: root::BOOL,
+        initialSig: root::BOOL,
+        ignored: *const ::std::os::raw::c_char,
+    ) -> root::HANDLE {
+        unsafe { windows::CreateEventAsSocket(SA, manualReset, initialSig, ignored) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetCurrentThreadId(&self) -> root::DWORD {
+        unsafe { windows::GetCurrentThreadId() }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn WaitForSingleObject(&self, hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD {
+        unsafe { windows::WaitForSingleObject(hand, msTO) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn WaitForAnySocketObject(
+        &self,
+        numObjs: ::std::os::raw::c_int,
+        objs: *mut root::HANDLE,
+        msTO: root::DWORD,
+    ) -> root::DWORD {
+        unsafe { windows::WaitForAnySocketObject(numObjs, objs, msTO) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CloseHandle(&self, hand: root::HANDLE) -> root::BOOL {
+        unsafe { windows::CloseHandle(hand) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetThreadPriority(&self, evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL {
+        unsafe { windows::SetThreadPriority(evt, prio) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetEvent(&self, evt: root::HANDLE) -> root::BOOL {
+        unsafe { windows::SetEvent(evt) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ResetEvent(&self, evt: root::HANDLE) -> root::BOOL {
+        unsafe { windows::ResetEvent(evt) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_CreateProcessFromPID(&self, pid: ::std::os::raw::c_int) -> root::HANDLE {
+        unsafe { windows::SWELL_CreateProcessFromPID(pid) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_CreateProcess(
+        &self,
+        exe: *const ::std::os::raw::c_char,
+        nparams: ::std::os::raw::c_int,
+        params: *mut *const ::std::os::raw::c_char,
+    ) -> root::HANDLE {
+        unsafe { windows::SWELL_CreateProcess(exe, nparams, params) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetProcessExitCode(&self, hand: root::HANDLE) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_GetProcessExitCode(hand) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn LoadLibraryGlobals(
+        &self,
+        fileName: *const ::std::os::raw::c_char,
+        symbolsAsGlobals: bool,
+    ) -> root::HINSTANCE {
+        unsafe { windows::LoadLibraryGlobals(fileName, symbolsAsGlobals) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn LoadLibrary(&self, fileName: *const ::std::os::raw::c_char) -> root::HINSTANCE {
+        unsafe { windows::LoadLibrary(fileName) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetProcAddress(
+        &self,
+        hInst: root::HINSTANCE,
+        procName: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::GetProcAddress(hInst, procName) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn FreeLibrary(&self, hInst: root::HINSTANCE) -> root::BOOL {
+        unsafe { windows::FreeLibrary(hInst) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetBundle(&self, hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::SWELL_GetBundle(hInst) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_CreateMemContext(
+        &self,
+        hdc: root::HDC,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+    ) -> root::HDC {
+        unsafe { windows::SWELL_CreateMemContext(hdc, w, h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_DeleteGfxContext(&self, arg1: root::HDC) {
+        unsafe { windows::SWELL_DeleteGfxContext(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetCtxGC(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::SWELL_GetCtxGC(ctx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetCtxFrameBuffer(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::SWELL_GetCtxFrameBuffer(ctx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_PushClipRegion(&self, ctx: root::HDC) {
+        unsafe { windows::SWELL_PushClipRegion(ctx) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_SetClipRegion(&self, ctx: root::HDC, r: *const root::RECT) {
+        unsafe { windows::SWELL_SetClipRegion(ctx, r) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_PopClipRegion(&self, ctx: root::HDC) {
+        unsafe { windows::SWELL_PopClipRegion(ctx) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreateFontIndirect(&self, arg1: *mut root::LOGFONT) -> root::HFONT {
+        unsafe { windows::CreateFontIndirect(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreateFont(
+        &self,
+        lfHeight: ::std::os::raw::c_int,
+        lfWidth: ::std::os::raw::c_int,
+        lfEscapement: ::std::os::raw::c_int,
+        lfOrientation: ::std::os::raw::c_int,
+        lfWeight: ::std::os::raw::c_int,
+        lfItalic: ::std::os::raw::c_char,
+        lfUnderline: ::std::os::raw::c_char,
+        lfStrikeOut: ::std::os::raw::c_char,
+        lfCharSet: ::std::os::raw::c_char,
+        lfOutPrecision: ::std::os::raw::c_char,
+        lfClipPrecision: ::std::os::raw::c_char,
+        lfQuality: ::std::os::raw::c_char,
+        lfPitchAndFamily: ::std::os::raw::c_char,
+        lfFaceName: *const ::std::os::raw::c_char,
+    ) -> root::HFONT {
+        unsafe {
+            windows::CreateFont(
+                lfHeight,
+                lfWidth,
+                lfEscapement,
+                lfOrientation,
+                lfWeight,
+                lfItalic,
+                lfUnderline,
+                lfStrikeOut,
+                lfCharSet,
+                lfOutPrecision,
+                lfClipPrecision,
+                lfQuality,
+                lfPitchAndFamily,
+                lfFaceName,
+            )
+        }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CreatePen(
+        &self,
+        attr: ::std::os::raw::c_int,
+        wid: ::std::os::raw::c_int,
+        col: ::std::os::raw::c_int,
+    ) -> root::HPEN {
+        unsafe { windows::CreatePen(attr, wid, col) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CreateSolidBrush(&self, col: ::std::os::raw::c_int) -> root::HBRUSH {
+        unsafe { windows::CreateSolidBrush(col) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CreatePenAlpha(
+        &self,
+        attr: ::std::os::raw::c_int,
+        wid: ::std::os::raw::c_int,
+        col: ::std::os::raw::c_int,
+        alpha: f32,
+    ) -> root::HPEN {
+        unsafe { windows::CreatePenAlpha(attr, wid, col, alpha) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn CreateSolidBrushAlpha(&self, col: ::std::os::raw::c_int, alpha: f32) -> root::HBRUSH {
+        unsafe { windows::CreateSolidBrushAlpha(col, alpha) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SelectObject(&self, ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ {
+        unsafe { windows::SelectObject(ctx, pen) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetStockObject(&self, wh: ::std::os::raw::c_int) -> root::HGDIOBJ {
+        unsafe { windows::GetStockObject(wh) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DeleteObject(&self, arg1: root::HGDIOBJ) {
+        unsafe { windows::DeleteObject(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_FillRect(&self, ctx: root::HDC, r: *const root::RECT, br: root::HBRUSH) {
+        unsafe { windows::SWELL_FillRect(ctx, r, br) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn Rectangle(
+        &self,
+        ctx: root::HDC,
+        l: ::std::os::raw::c_int,
+        t: ::std::os::raw::c_int,
+        r: ::std::os::raw::c_int,
+        b: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::Rectangle(ctx, l, t, r, b) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn Ellipse(
+        &self,
+        ctx: root::HDC,
+        l: ::std::os::raw::c_int,
+        t: ::std::os::raw::c_int,
+        r: ::std::os::raw::c_int,
+        b: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::Ellipse(ctx, l, t, r, b) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_Polygon(
+        &self,
+        ctx: root::HDC,
+        pts: *mut root::POINT,
+        npts: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::SWELL_Polygon(ctx, pts, npts) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn MoveToEx(
+        &self,
+        ctx: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        op: *mut root::POINT,
+    ) {
+        unsafe { windows::MoveToEx(ctx, x, y, op) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_LineTo(&self, ctx: root::HDC, x: ::std::os::raw::c_int, y: ::std::os::raw::c_int) {
+        unsafe { windows::SWELL_LineTo(ctx, x, y) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetPixel(
+        &self,
+        ctx: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        c: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::SWELL_SetPixel(ctx, x, y, c) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn PolyBezierTo(
+        &self,
+        ctx: root::HDC,
+        pts: *mut root::POINT,
+        np: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::PolyBezierTo(ctx, pts, np) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_DrawText(
+        &self,
+        ctx: root::HDC,
+        buf: *const ::std::os::raw::c_char,
+        len: ::std::os::raw::c_int,
+        r: *mut root::RECT,
+        align: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_DrawText(ctx, buf, len, r, align) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+        unsafe { windows::SetTextColor(ctx, col) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetTextColor(&self, ctx: root::HDC) -> ::std::os::raw::c_int {
+        unsafe { windows::GetTextColor(ctx) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetBkColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+        unsafe { windows::SetBkColor(ctx, col) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetBkMode(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+        unsafe { windows::SetBkMode(ctx, col) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetGlyphIndicesW(
+        &self,
+        ctx: root::HDC,
+        buf: *mut u32,
+        len: ::std::os::raw::c_int,
+        indices: *mut ::std::os::raw::c_ushort,
+        flags: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::GetGlyphIndicesW(ctx, buf, len, indices, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn RoundRect(
+        &self,
+        ctx: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        x2: ::std::os::raw::c_int,
+        y2: ::std::os::raw::c_int,
+        xrnd: ::std::os::raw::c_int,
+        yrnd: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::RoundRect(ctx, x, y, x2, y2, xrnd, yrnd) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn PolyPolyline(
+        &self,
+        ctx: root::HDC,
+        pts: *mut root::POINT,
+        cnts: *mut root::DWORD,
+        nseg: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::PolyPolyline(ctx, pts, cnts, nseg) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetTextMetrics(&self, ctx: root::HDC, tm: *mut root::TEXTMETRIC) -> root::BOOL {
+        unsafe { windows::GetTextMetrics(ctx, tm) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetTextFace(
+        &self,
+        ctx: root::HDC,
+        nCount: ::std::os::raw::c_int,
+        lpFaceName: root::LPTSTR,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::GetTextFace(ctx, nCount, lpFaceName) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetObject(
+        &self,
+        icon: root::HICON,
+        bmsz: ::std::os::raw::c_int,
+        _bm: *mut ::std::os::raw::c_void,
+    ) -> root::BOOL {
+        unsafe { windows::GetObject(icon, bmsz, _bm) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreateIconIndirect(&self, iconinfo: *mut root::ICONINFO) -> root::HICON {
+        unsafe { windows::CreateIconIndirect(iconinfo) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn LoadNamedImage(
+        &self,
+        name: *const ::std::os::raw::c_char,
+        alphaFromMask: bool,
+    ) -> root::HICON {
+        unsafe { windows::LoadNamedImage(name, alphaFromMask) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn DrawImageInRect(&self, ctx: root::HDC, img: root::HICON, r: *const root::RECT) {
+        unsafe { windows::DrawImageInRect(ctx, img, r) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn BitBlt(
+        &self,
+        hdcOut: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        hdcIn: root::HDC,
+        xin: ::std::os::raw::c_int,
+        yin: ::std::os::raw::c_int,
+        mode: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::BitBlt(hdcOut, x, y, w, h, hdcIn, xin, yin, mode) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn StretchBlt(
+        &self,
+        hdcOut: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        hdcIn: root::HDC,
+        xin: ::std::os::raw::c_int,
+        yin: ::std::os::raw::c_int,
+        srcw: ::std::os::raw::c_int,
+        srch: ::std::os::raw::c_int,
+        mode: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::StretchBlt(hdcOut, x, y, w, h, hdcIn, xin, yin, srcw, srch, mode) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn StretchBltFromMem(
+        &self,
+        hdcOut: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        bits: *const ::std::os::raw::c_void,
+        srcw: ::std::os::raw::c_int,
+        srch: ::std::os::raw::c_int,
+        srcspan: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::StretchBltFromMem(hdcOut, x, y, w, h, bits, srcw, srch, srcspan) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetScaling256(&self) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_GetScaling256() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_ExtendedAPI(
+        &self,
+        key: *const ::std::os::raw::c_char,
+        v: *mut ::std::os::raw::c_void,
+    ) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::SWELL_ExtendedAPI(key, v) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetSysColor(&self, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
+        unsafe { windows::GetSysColor(idx) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn CreateBitmap(
+        &self,
+        width: ::std::os::raw::c_int,
+        height: ::std::os::raw::c_int,
+        numplanes: ::std::os::raw::c_int,
+        bitsperpixel: ::std::os::raw::c_int,
+        bits: *mut ::std::os::raw::c_uchar,
+    ) -> root::HBITMAP {
+        unsafe { windows::CreateBitmap(width, height, numplanes, bitsperpixel, bits) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetOpaque(&self, h: root::HWND, isopaque: bool) {
+        unsafe { windows::SetOpaque(h, isopaque) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetAllowNoMiddleManRendering(&self, h: root::HWND, allow: bool) {
+        unsafe { windows::SetAllowNoMiddleManRendering(h, allow) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn BeginPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC {
+        unsafe { windows::BeginPaint(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn EndPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::BOOL {
+        unsafe { windows::EndPaint(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetDC(&self, arg1: root::HWND) -> root::HDC {
+        unsafe { windows::GetDC(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
+        unsafe { windows::GetWindowDC(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
+        unsafe { windows::ReleaseDC(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_FillDialogBackground(
+        &self,
+        hdc: root::HDC,
+        r: *const root::RECT,
+        level: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::SWELL_FillDialogBackground(hdc, r, level) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_CloneGDIObject(&self, a: root::HGDIOBJ) -> root::HGDIOBJ {
+        unsafe { windows::SWELL_CloneGDIObject(a) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GetSystemMetrics(&self, arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
+        unsafe { windows::GetSystemMetrics(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DragQueryPoint(&self, arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL {
+        unsafe { windows::DragQueryPoint(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn DragFinish(&self, arg1: root::HDROP) {
+        unsafe { windows::DragFinish(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn DragQueryFile(
+        &self,
+        arg1: root::HDROP,
+        arg2: root::UINT,
+        arg3: *mut ::std::os::raw::c_char,
+        arg4: root::UINT,
+    ) -> root::UINT {
+        unsafe { windows::DragQueryFile(arg1, arg2, arg3, arg4) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_InitiateDragDrop(
+        &self,
+        arg1: root::HWND,
+        srcrect: *mut root::RECT,
+        srcfn: *const ::std::os::raw::c_char,
+        callback: ::std::option::Option<
+            unsafe extern "C" fn(droppath: *const ::std::os::raw::c_char),
+        >,
+    ) {
+        unsafe { windows::SWELL_InitiateDragDrop(arg1, srcrect, srcfn, callback) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_InitiateDragDropOfFileList(
+        &self,
+        arg1: root::HWND,
+        srcrect: *mut root::RECT,
+        srclist: *mut *const ::std::os::raw::c_char,
+        srccount: ::std::os::raw::c_int,
+        icon: root::HICON,
+    ) {
+        unsafe { windows::SWELL_InitiateDragDropOfFileList(arg1, srcrect, srclist, srccount, icon) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_FinishDragDrop(&self) {
+        unsafe { windows::SWELL_FinishDragDrop() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_DrawFocusRect(
+        &self,
+        hwndPar: root::HWND,
+        rct: *mut root::RECT,
+        handle: *mut *mut ::std::os::raw::c_void,
+    ) {
+        unsafe { windows::SWELL_DrawFocusRect(hwndPar, rct, handle) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_MakeSetCurParms(
+        &self,
+        xscale: f32,
+        yscale: f32,
+        xtrans: f32,
+        ytrans: f32,
+        parent: root::HWND,
+        doauto: bool,
+        dosizetofit: bool,
+    ) {
+        unsafe {
+            windows::SWELL_MakeSetCurParms(
+                xscale,
+                yscale,
+                xtrans,
+                ytrans,
+                parent,
+                doauto,
+                dosizetofit,
+            )
+        }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_MakeButton(
+        &self,
+        def: ::std::os::raw::c_int,
+        label: *const ::std::os::raw::c_char,
+        idx: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeButton(def, label, idx, x, y, w, h, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_MakeEditField(
+        &self,
+        idx: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeEditField(idx, x, y, w, h, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_MakeLabel(
+        &self,
+        align: ::std::os::raw::c_int,
+        label: *const ::std::os::raw::c_char,
+        idx: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeLabel(align, label, idx, x, y, w, h, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_MakeControl(
+        &self,
+        cname: *const ::std::os::raw::c_char,
+        idx: ::std::os::raw::c_int,
+        classname: *const ::std::os::raw::c_char,
+        style: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        exstyle: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeControl(cname, idx, classname, style, x, y, w, h, exstyle) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_MakeCombo(
+        &self,
+        idx: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeCombo(idx, x, y, w, h, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_MakeGroupBox(
+        &self,
+        name: *const ::std::os::raw::c_char,
+        idx: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        style: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeGroupBox(name, idx, x, y, w, h, style) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_MakeCheckBox(
+        &self,
+        name: *const ::std::os::raw::c_char,
+        idx: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeCheckBox(name, idx, x, y, w, h, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_MakeListBox(
+        &self,
+        idx: ::std::os::raw::c_int,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        styles: ::std::os::raw::c_int,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_MakeListBox(idx, x, y, w, h, styles) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_Menu_AddMenuItem(
+        &self,
+        hMenu: root::HMENU,
+        name: *const ::std::os::raw::c_char,
+        idx: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_uint,
+    ) {
+        unsafe { windows::SWELL_Menu_AddMenuItem(hMenu, name, idx, flags) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_GenerateMenuFromList(
+        &self,
+        hMenu: root::HMENU,
+        list: *const ::std::os::raw::c_void,
+        listsz: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_GenerateMenuFromList(hMenu, list, listsz) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_GenerateDialogFromList(
+        &self,
+        list: *const ::std::os::raw::c_void,
+        listsz: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::SWELL_GenerateDialogFromList(list, listsz) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn _controlfp(
+        &self,
+        flag: ::std::os::raw::c_uint,
+        mask: ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_uint {
+        unsafe { windows::_controlfp(flag, mask) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_Internal_PostMessage_Init(&self) {
+        unsafe { windows::SWELL_Internal_PostMessage_Init() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_LoadCursorFromFile(
+        &self,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::HCURSOR {
+        unsafe { windows::SWELL_LoadCursorFromFile(fn_) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetWindowWantRaiseAmt(&self, h: root::HWND, amt: ::std::os::raw::c_int) {
+        unsafe { windows::SWELL_SetWindowWantRaiseAmt(h, amt) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_GetWindowWantRaiseAmt(&self, arg1: root::HWND) -> ::std::os::raw::c_int {
+        unsafe { windows::SWELL_GetWindowWantRaiseAmt(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_SetListViewFastClickMask(&self, hList: root::HWND, mask: ::std::os::raw::c_int) {
+        unsafe { windows::SWELL_SetListViewFastClickMask(hList, mask) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetTempPath(&self, sz: ::std::os::raw::c_int, buf: *mut ::std::os::raw::c_char) {
+        unsafe { windows::GetTempPath(sz, buf) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_initargs(
+        &self,
+        argc: *mut ::std::os::raw::c_int,
+        argv: *mut *mut *mut ::std::os::raw::c_char,
+    ) {
+        unsafe { windows::SWELL_initargs(argc, argv) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_RunMessageLoop(&self) {
+        unsafe { windows::SWELL_RunMessageLoop() }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_CreateXBridgeWindow(
+        &self,
+        viewpar: root::HWND,
+        wref: *mut *mut ::std::os::raw::c_void,
+        arg1: *mut root::RECT,
+    ) -> root::HWND {
+        unsafe { windows::SWELL_CreateXBridgeWindow(viewpar, wref, arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_GenerateGUID(&self, g: *mut ::std::os::raw::c_void) -> bool {
+        unsafe { windows::SWELL_GenerateGUID(g) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn EnumChildWindows(
+        &self,
+        hwnd: root::HWND,
+        cwEnumFunc: ::std::option::Option<
+            unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
+        >,
+        lParam: root::LPARAM,
+    ) -> root::BOOL {
+        unsafe { windows::EnumChildWindows(hwnd, cwEnumFunc, lParam) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_IsGroupBox(&self, arg1: root::HWND) -> root::BOOL {
+        unsafe { windows::SWELL_IsGroupBox(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_IsButton(&self, arg1: root::HWND) -> root::BOOL {
+        unsafe { windows::SWELL_IsButton(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SWELL_IsStaticText(&self, arg1: root::HWND) -> root::BOOL {
+        unsafe { windows::SWELL_IsStaticText(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_GetDesiredControlSize(&self, hwnd: root::HWND, r: *mut root::RECT) {
+        unsafe { windows::SWELL_GetDesiredControlSize(hwnd, r) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn AddFontResourceEx(
+        &self,
+        str: root::LPCTSTR,
+        fl: root::DWORD,
+        pdv: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::AddFontResourceEx(str, fl, pdv) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_Register_Cursor_Resource(
+        &self,
+        idx: *const ::std::os::raw::c_char,
+        name: *const ::std::os::raw::c_char,
+        hotspot_x: ::std::os::raw::c_int,
+        hotspot_y: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::SWELL_Register_Cursor_Resource(idx, name, hotspot_x, hotspot_y) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_ChooseColor(
+        &self,
+        arg1: root::HWND,
+        arg2: *mut ::std::os::raw::c_int,
+        ncustom: ::std::os::raw::c_int,
+        custom: *mut ::std::os::raw::c_int,
+    ) -> bool {
+        unsafe { windows::SWELL_ChooseColor(arg1, arg2, ncustom, custom) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_ChooseFont(&self, arg1: root::HWND, arg2: *mut root::LOGFONT) -> bool {
+        unsafe { windows::SWELL_ChooseFont(arg1, arg2) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
+        unsafe { windows::IsWindowEnabled(arg1) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn GetClassName(
+        &self,
+        arg1: root::HWND,
+        arg2: *mut ::std::os::raw::c_char,
+        arg3: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { windows::GetClassName(arg1, arg2, arg3) }
+    }
+    #[cfg(target_os = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer"]
+    pub unsafe fn SWELL_SetClassName(&self, arg1: root::HWND, arg2: *const ::std::os::raw::c_char) {
+        unsafe { windows::SWELL_SetClassName(arg1, arg2) }
     }
 }
 #[doc = r" Container for the SWELL function pointers."]
@@ -6515,5 +9444,1688 @@ pub struct SwellFunctionPointers {
 impl std::fmt::Debug for SwellFunctionPointers {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SwellFunctionPointers").finish()
+    }
+}
+#[cfg(target_os = "windows")]
+mod windows {
+    use crate::bindings::root;
+    extern "C" {
+        pub fn lstrcpyn(
+            dest: *mut ::std::os::raw::c_char,
+            src: *const ::std::os::raw::c_char,
+            l: ::std::os::raw::c_int,
+        ) -> *mut ::std::os::raw::c_char;
+    }
+    extern "C" {
+        pub fn MulDiv(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_int,
+            arg3: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn Sleep(ms: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn GetTickCount() -> root::DWORD;
+    }
+    extern "C" {
+        pub fn GetFileTime(
+            filedes: ::std::os::raw::c_int,
+            lpCreationTime: *mut root::FILETIME,
+            lpLastAccessTime: *mut root::FILETIME,
+            lpLastWriteTime: *mut root::FILETIME,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn WritePrivateProfileString(
+            appname: *const ::std::os::raw::c_char,
+            keyname: *const ::std::os::raw::c_char,
+            val: *const ::std::os::raw::c_char,
+            fn_: *const ::std::os::raw::c_char,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn GetPrivateProfileString(
+            appname: *const ::std::os::raw::c_char,
+            keyname: *const ::std::os::raw::c_char,
+            def: *const ::std::os::raw::c_char,
+            ret: *mut ::std::os::raw::c_char,
+            retsize: ::std::os::raw::c_int,
+            fn_: *const ::std::os::raw::c_char,
+        ) -> root::DWORD;
+    }
+    extern "C" {
+        pub fn GetPrivateProfileInt(
+            appname: *const ::std::os::raw::c_char,
+            keyname: *const ::std::os::raw::c_char,
+            def: ::std::os::raw::c_int,
+            fn_: *const ::std::os::raw::c_char,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetPrivateProfileStruct(
+            appname: *const ::std::os::raw::c_char,
+            keyname: *const ::std::os::raw::c_char,
+            buf: *mut ::std::os::raw::c_void,
+            bufsz: ::std::os::raw::c_int,
+            fn_: *const ::std::os::raw::c_char,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn WritePrivateProfileStruct(
+            appname: *const ::std::os::raw::c_char,
+            keyname: *const ::std::os::raw::c_char,
+            buf: *const ::std::os::raw::c_void,
+            bufsz: ::std::os::raw::c_int,
+            fn_: *const ::std::os::raw::c_char,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn WritePrivateProfileSection(
+            appname: *const ::std::os::raw::c_char,
+            strings: *const ::std::os::raw::c_char,
+            fn_: *const ::std::os::raw::c_char,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn GetPrivateProfileSection(
+            appname: *const ::std::os::raw::c_char,
+            strout: *mut ::std::os::raw::c_char,
+            strout_len: root::DWORD,
+            fn_: *const ::std::os::raw::c_char,
+        ) -> root::DWORD;
+    }
+    extern "C" {
+        pub fn GetModuleFileName(
+            hInst: root::HINSTANCE,
+            fn_: *mut ::std::os::raw::c_char,
+            nSize: root::DWORD,
+        ) -> root::DWORD;
+    }
+    extern "C" {
+        pub fn SWELL_PtInRect(r: *const root::RECT, p: root::POINT) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn ShellExecute(
+            hwndDlg: root::HWND,
+            action: *const ::std::os::raw::c_char,
+            content1: *const ::std::os::raw::c_char,
+            content2: *const ::std::os::raw::c_char,
+            content3: *const ::std::os::raw::c_char,
+            blah: ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn MessageBox(
+            hwndParent: root::HWND,
+            text: *const ::std::os::raw::c_char,
+            caption: *const ::std::os::raw::c_char,
+            type_: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn BrowseForFiles(
+            text: *const ::std::os::raw::c_char,
+            initialdir: *const ::std::os::raw::c_char,
+            initialfile: *const ::std::os::raw::c_char,
+            allowmul: bool,
+            extlist: *const ::std::os::raw::c_char,
+        ) -> *mut ::std::os::raw::c_char;
+    }
+    extern "C" {
+        pub fn BrowseForSaveFile(
+            text: *const ::std::os::raw::c_char,
+            initialdir: *const ::std::os::raw::c_char,
+            initialfile: *const ::std::os::raw::c_char,
+            extlist: *const ::std::os::raw::c_char,
+            fn_: *mut ::std::os::raw::c_char,
+            fnsize: ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn BrowseForDirectory(
+            text: *const ::std::os::raw::c_char,
+            initialdir: *const ::std::os::raw::c_char,
+            fn_: *mut ::std::os::raw::c_char,
+            fnsize: ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn BrowseFile_SetTemplate(
+            dlgid: *const ::std::os::raw::c_char,
+            dlgProc: root::DLGPROC,
+            reshead: *mut root::SWELL_DialogResourceIndex,
+        );
+    }
+    extern "C" {
+        pub fn GetDlgItem(arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND;
+    }
+    extern "C" {
+        pub fn ShowWindow(arg1: root::HWND, arg2: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn DestroyWindow(hwnd: root::HWND);
+    }
+    extern "C" {
+        pub fn SWELL_GetGestureInfo(lParam: root::LPARAM, gi: *mut root::GESTUREINFO)
+        -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_HideApp();
+    }
+    extern "C" {
+        pub fn SetDlgItemText(
+            arg1: root::HWND,
+            idx: ::std::os::raw::c_int,
+            text: *const ::std::os::raw::c_char,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SetDlgItemInt(
+            arg1: root::HWND,
+            idx: ::std::os::raw::c_int,
+            val: ::std::os::raw::c_int,
+            issigned: ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn GetDlgItemInt(
+            arg1: root::HWND,
+            idx: ::std::os::raw::c_int,
+            translated: *mut root::BOOL,
+            issigned: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetDlgItemText(
+            arg1: root::HWND,
+            idx: ::std::os::raw::c_int,
+            text: *mut ::std::os::raw::c_char,
+            textlen: ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn CheckDlgButton(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            check: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn IsDlgButtonChecked(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn EnableWindow(hwnd: root::HWND, enable: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn SetFocus(hwnd: root::HWND);
+    }
+    extern "C" {
+        pub fn GetFocus() -> root::HWND;
+    }
+    extern "C" {
+        pub fn SetForegroundWindow(hwnd: root::HWND);
+    }
+    extern "C" {
+        pub fn GetForegroundWindow() -> root::HWND;
+    }
+    extern "C" {
+        pub fn SetCapture(hwnd: root::HWND) -> root::HWND;
+    }
+    extern "C" {
+        pub fn GetCapture() -> root::HWND;
+    }
+    extern "C" {
+        pub fn ReleaseCapture();
+    }
+    extern "C" {
+        pub fn IsChild(hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetParent(hwnd: root::HWND) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SetParent(hwnd: root::HWND, newPar: root::HWND) -> root::HWND;
+    }
+    extern "C" {
+        pub fn GetWindow(hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND;
+    }
+    extern "C" {
+        pub fn EnumWindows(
+            proc_: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
+            >,
+            lp: root::LPARAM,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn FindWindowEx(
+            par: root::HWND,
+            lastw: root::HWND,
+            classname: *const ::std::os::raw::c_char,
+            title: *const ::std::os::raw::c_char,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn ClientToScreen(hwnd: root::HWND, p: *mut root::POINT);
+    }
+    extern "C" {
+        pub fn ScreenToClient(hwnd: root::HWND, p: *mut root::POINT);
+    }
+    extern "C" {
+        pub fn GetWindowRect(hwnd: root::HWND, r: *mut root::RECT) -> bool;
+    }
+    extern "C" {
+        pub fn GetWindowContentViewRect(hwnd: root::HWND, r: *mut root::RECT);
+    }
+    extern "C" {
+        pub fn GetClientRect(hwnd: root::HWND, r: *mut root::RECT);
+    }
+    extern "C" {
+        pub fn WindowFromPoint(p: root::POINT) -> root::HWND;
+    }
+    extern "C" {
+        pub fn WinOffsetRect(
+            lprc: root::LPRECT,
+            dx: ::std::os::raw::c_int,
+            dy: ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn WinSetRect(
+            lprc: root::LPRECT,
+            xLeft: ::std::os::raw::c_int,
+            yTop: ::std::os::raw::c_int,
+            xRight: ::std::os::raw::c_int,
+            yBottom: ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn WinUnionRect(out: *mut root::RECT, in1: *const root::RECT, in2: *const root::RECT);
+    }
+    extern "C" {
+        pub fn WinIntersectRect(
+            out: *mut root::RECT,
+            in1: *const root::RECT,
+            in2: *const root::RECT,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SetWindowPos(
+            hwnd: root::HWND,
+            unused: root::HWND,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            cx: ::std::os::raw::c_int,
+            cy: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_SetWindowLevel(
+            hwnd: root::HWND,
+            newlevel: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn InvalidateRect(
+            hwnd: root::HWND,
+            r: *const root::RECT,
+            eraseBk: ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn UpdateWindow(hwnd: root::HWND);
+    }
+    extern "C" {
+        pub fn GetWindowLong(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR;
+    }
+    extern "C" {
+        pub fn SetWindowLong(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            val: root::LONG_PTR,
+        ) -> root::LONG_PTR;
+    }
+    extern "C" {
+        pub fn ScrollWindow(
+            hwnd: root::HWND,
+            xamt: ::std::os::raw::c_int,
+            yamt: ::std::os::raw::c_int,
+            lpRect: *const root::RECT,
+            lpClipRect: *const root::RECT,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn EnumPropsEx(
+            arg1: root::HWND,
+            arg2: root::PROPENUMPROCEX,
+            arg3: root::LPARAM,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetProp(arg1: root::HWND, arg2: *const ::std::os::raw::c_char) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn SetProp(
+            arg1: root::HWND,
+            arg2: *const ::std::os::raw::c_char,
+            arg3: root::HANDLE,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn RemoveProp(arg1: root::HWND, arg2: *const ::std::os::raw::c_char) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn IsWindowVisible(hwnd: root::HWND) -> bool;
+    }
+    extern "C" {
+        pub fn IsWindow(hwnd: root::HWND) -> bool;
+    }
+    extern "C" {
+        pub fn SetTimer(
+            hwnd: root::HWND,
+            timerid: root::UINT_PTR,
+            rate: root::UINT,
+            tProc: root::TIMERPROC,
+        ) -> root::UINT_PTR;
+    }
+    extern "C" {
+        pub fn KillTimer(hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn ListView_SetExtendedListViewStyleEx(
+            h: root::HWND,
+            mask: ::std::os::raw::c_int,
+            style: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn ListView_InsertColumn(
+            h: root::HWND,
+            pos: ::std::os::raw::c_int,
+            lvc: *const root::LVCOLUMN,
+        );
+    }
+    extern "C" {
+        pub fn ListView_DeleteColumn(h: root::HWND, pos: ::std::os::raw::c_int) -> bool;
+    }
+    extern "C" {
+        pub fn ListView_SetColumn(
+            h: root::HWND,
+            pos: ::std::os::raw::c_int,
+            lvc: *const root::LVCOLUMN,
+        );
+    }
+    extern "C" {
+        pub fn ListView_GetColumnWidth(
+            h: root::HWND,
+            pos: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_InsertItem(
+            h: root::HWND,
+            item: *const root::LVITEM,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_SetItemText(
+            h: root::HWND,
+            ipos: ::std::os::raw::c_int,
+            cpos: ::std::os::raw::c_int,
+            txt: *const ::std::os::raw::c_char,
+        );
+    }
+    extern "C" {
+        pub fn ListView_SetItem(h: root::HWND, item: *mut root::LVITEM) -> bool;
+    }
+    extern "C" {
+        pub fn ListView_GetNextItem(
+            h: root::HWND,
+            istart: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_GetItem(h: root::HWND, item: *mut root::LVITEM) -> bool;
+    }
+    extern "C" {
+        pub fn ListView_GetItemState(
+            h: root::HWND,
+            ipos: ::std::os::raw::c_int,
+            mask: root::UINT,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_DeleteItem(h: root::HWND, ipos: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn ListView_DeleteAllItems(h: root::HWND);
+    }
+    extern "C" {
+        pub fn ListView_GetSelectedCount(h: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_GetItemCount(h: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_GetSelectionMark(h: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_SetColumnWidth(
+            h: root::HWND,
+            colpos: ::std::os::raw::c_int,
+            wid: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn ListView_SetItemState(
+            h: root::HWND,
+            item: ::std::os::raw::c_int,
+            state: root::UINT,
+            statemask: root::UINT,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn ListView_RedrawItems(
+            h: root::HWND,
+            startitem: ::std::os::raw::c_int,
+            enditem: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn ListView_SetItemCount(h: root::HWND, cnt: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn ListView_EnsureVisible(h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL);
+    }
+    extern "C" {
+        pub fn ListView_GetSubItemRect(
+            h: root::HWND,
+            item: ::std::os::raw::c_int,
+            subitem: ::std::os::raw::c_int,
+            code: ::std::os::raw::c_int,
+            r: *mut root::RECT,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn ListView_SetImageList(
+            h: root::HWND,
+            imagelist: root::HIMAGELIST,
+            which: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn ListView_HitTest(
+            h: root::HWND,
+            pinf: *mut root::LVHITTESTINFO,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_SubItemHitTest(
+            h: root::HWND,
+            pinf: *mut root::LVHITTESTINFO,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_GetItemText(
+            hwnd: root::HWND,
+            item: ::std::os::raw::c_int,
+            subitem: ::std::os::raw::c_int,
+            text: *mut ::std::os::raw::c_char,
+            textmax: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn ListView_SortItems(hwnd: root::HWND, compf: root::PFNLVCOMPARE, parm: root::LPARAM);
+    }
+    extern "C" {
+        pub fn ListView_GetItemRect(
+            h: root::HWND,
+            item: ::std::os::raw::c_int,
+            r: *mut root::RECT,
+            code: ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn ListView_Scroll(
+            h: root::HWND,
+            xscroll: ::std::os::raw::c_int,
+            yscroll: ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn ListView_GetTopIndex(h: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_GetCountPerPage(h: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ListView_SetColumnOrderArray(
+            h: root::HWND,
+            cnt: ::std::os::raw::c_int,
+            arr: *mut ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn ListView_GetColumnOrderArray(
+            h: root::HWND,
+            cnt: ::std::os::raw::c_int,
+            arr: *mut ::std::os::raw::c_int,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn ListView_GetHeader(h: root::HWND) -> root::HWND;
+    }
+    extern "C" {
+        pub fn Header_GetItemCount(h: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn Header_GetItem(
+            h: root::HWND,
+            col: ::std::os::raw::c_int,
+            hi: *mut root::HDITEM,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn Header_SetItem(
+            h: root::HWND,
+            col: ::std::os::raw::c_int,
+            hi: *mut root::HDITEM,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_GetListViewHeaderHeight(h: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ImageList_CreateEx() -> root::HIMAGELIST;
+    }
+    extern "C" {
+        pub fn ImageList_Remove(list: root::HIMAGELIST, idx: ::std::os::raw::c_int) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn ImageList_ReplaceIcon(
+            list: root::HIMAGELIST,
+            offset: ::std::os::raw::c_int,
+            image: root::HICON,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ImageList_Add(
+            list: root::HIMAGELIST,
+            image: root::HBITMAP,
+            mask: root::HBITMAP,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn ImageList_Destroy(arg1: root::HIMAGELIST);
+    }
+    extern "C" {
+        pub fn TabCtrl_GetItemCount(hwnd: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn TabCtrl_DeleteItem(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn TabCtrl_InsertItem(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            item: *mut root::TCITEM,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn TabCtrl_SetCurSel(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn TabCtrl_GetCurSel(hwnd: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn TabCtrl_AdjustRect(
+            hwnd: root::HWND,
+            fLarger: root::BOOL,
+            r: *mut root::RECT,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn TreeView_InsertItem(
+            hwnd: root::HWND,
+            ins: *mut root::TV_INSERTSTRUCT,
+        ) -> root::HTREEITEM;
+    }
+    extern "C" {
+        pub fn TreeView_Expand(
+            hwnd: root::HWND,
+            item: root::HTREEITEM,
+            flag: root::UINT,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn TreeView_GetSelection(hwnd: root::HWND) -> root::HTREEITEM;
+    }
+    extern "C" {
+        pub fn TreeView_DeleteItem(hwnd: root::HWND, item: root::HTREEITEM);
+    }
+    extern "C" {
+        pub fn TreeView_DeleteAllItems(hwnd: root::HWND);
+    }
+    extern "C" {
+        pub fn TreeView_SelectItem(hwnd: root::HWND, item: root::HTREEITEM);
+    }
+    extern "C" {
+        pub fn TreeView_GetItem(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn TreeView_SetItem(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn TreeView_HitTest(hwnd: root::HWND, hti: *mut root::TVHITTESTINFO)
+        -> root::HTREEITEM;
+    }
+    extern "C" {
+        pub fn TreeView_SetIndent(hwnd: root::HWND, indent: ::std::os::raw::c_int) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn TreeView_GetChild(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM;
+    }
+    extern "C" {
+        pub fn TreeView_GetNextSibling(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM;
+    }
+    extern "C" {
+        pub fn TreeView_GetRoot(hwnd: root::HWND) -> root::HTREEITEM;
+    }
+    extern "C" {
+        pub fn TreeView_SetBkColor(hwnd: root::HWND, color: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn TreeView_SetTextColor(hwnd: root::HWND, color: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn ListView_SetBkColor(hwnd: root::HWND, color: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn ListView_SetTextBkColor(hwnd: root::HWND, color: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn ListView_SetTextColor(hwnd: root::HWND, color: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn ListView_SetGridColor(hwnd: root::HWND, color: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn ListView_SetSelColors(
+            hwnd: root::HWND,
+            colors: *mut ::std::os::raw::c_int,
+            ncolors: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_ModalWindowStart(hwnd: root::HWND) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn SWELL_ModalWindowRun(
+            ctx: *mut ::std::os::raw::c_void,
+            ret: *mut ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn SWELL_ModalWindowEnd(ctx: *mut ::std::os::raw::c_void);
+    }
+    extern "C" {
+        pub fn SWELL_CloseWindow(hwnd: root::HWND);
+    }
+    extern "C" {
+        pub fn CreatePopupMenu() -> root::HMENU;
+    }
+    extern "C" {
+        pub fn CreatePopupMenuEx(title: *const ::std::os::raw::c_char) -> root::HMENU;
+    }
+    extern "C" {
+        pub fn DestroyMenu(hMenu: root::HMENU);
+    }
+    extern "C" {
+        pub fn AddMenuItem(
+            hMenu: root::HMENU,
+            pos: ::std::os::raw::c_int,
+            name: *const ::std::os::raw::c_char,
+            tagid: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetSubMenu(hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU;
+    }
+    extern "C" {
+        pub fn GetMenuItemCount(hMenu: root::HMENU) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetMenuItemID(
+            hMenu: root::HMENU,
+            pos: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SetMenuItemModifier(
+            hMenu: root::HMENU,
+            idx: ::std::os::raw::c_int,
+            flag: ::std::os::raw::c_int,
+            code: ::std::os::raw::c_int,
+            mask: ::std::os::raw::c_uint,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn SetMenuItemText(
+            hMenu: root::HMENU,
+            idx: ::std::os::raw::c_int,
+            flag: ::std::os::raw::c_int,
+            text: *const ::std::os::raw::c_char,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn EnableMenuItem(
+            hMenu: root::HMENU,
+            idx: ::std::os::raw::c_int,
+            en: ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn DeleteMenu(
+            hMenu: root::HMENU,
+            idx: ::std::os::raw::c_int,
+            flag: ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn CheckMenuItem(
+            hMenu: root::HMENU,
+            idx: ::std::os::raw::c_int,
+            chk: ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn InsertMenuItem(
+            hMenu: root::HMENU,
+            pos: ::std::os::raw::c_int,
+            byPos: root::BOOL,
+            mi: *mut root::MENUITEMINFO,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_InsertMenu(
+            menu: root::HMENU,
+            pos: ::std::os::raw::c_int,
+            flag: ::std::os::raw::c_uint,
+            idx: root::UINT_PTR,
+            str: *const ::std::os::raw::c_char,
+        );
+    }
+    extern "C" {
+        pub fn GetMenuItemInfo(
+            hMenu: root::HMENU,
+            pos: ::std::os::raw::c_int,
+            byPos: root::BOOL,
+            mi: *mut root::MENUITEMINFO,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SetMenuItemInfo(
+            hMenu: root::HMENU,
+            pos: ::std::os::raw::c_int,
+            byPos: root::BOOL,
+            mi: *mut root::MENUITEMINFO,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn DrawMenuBar(arg1: root::HWND);
+    }
+    extern "C" {
+        pub fn SWELL_LoadMenu(
+            head: *mut root::SWELL_MenuResourceIndex,
+            resid: *const ::std::os::raw::c_char,
+        ) -> root::HMENU;
+    }
+    extern "C" {
+        pub fn TrackPopupMenu(
+            hMenu: root::HMENU,
+            flags: ::std::os::raw::c_int,
+            xpos: ::std::os::raw::c_int,
+            ypos: ::std::os::raw::c_int,
+            resvd: ::std::os::raw::c_int,
+            hwnd: root::HWND,
+            r: *const root::RECT,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_SetMenuDestination(menu: root::HMENU, hwnd: root::HWND);
+    }
+    extern "C" {
+        pub fn SWELL_DuplicateMenu(menu: root::HMENU) -> root::HMENU;
+    }
+    extern "C" {
+        pub fn SetMenu(hwnd: root::HWND, menu: root::HMENU) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn GetMenu(hwnd: root::HWND) -> root::HMENU;
+    }
+    extern "C" {
+        pub fn SWELL_GetDefaultWindowMenu() -> root::HMENU;
+    }
+    extern "C" {
+        pub fn SWELL_SetDefaultWindowMenu(arg1: root::HMENU);
+    }
+    extern "C" {
+        pub fn SWELL_GetDefaultModalWindowMenu() -> root::HMENU;
+    }
+    extern "C" {
+        pub fn SWELL_SetDefaultModalWindowMenu(arg1: root::HMENU);
+    }
+    extern "C" {
+        pub fn SWELL_GetCurrentMenu() -> root::HMENU;
+    }
+    extern "C" {
+        pub fn SWELL_SetCurrentMenu(arg1: root::HMENU);
+    }
+    extern "C" {
+        pub fn SWELL_DialogBox(
+            reshead: *mut root::SWELL_DialogResourceIndex,
+            resid: *const ::std::os::raw::c_char,
+            parent: root::HWND,
+            dlgproc: root::DLGPROC,
+            param: root::LPARAM,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_CreateDialog(
+            reshead: *mut root::SWELL_DialogResourceIndex,
+            resid: *const ::std::os::raw::c_char,
+            parent: root::HWND,
+            dlgproc: root::DLGPROC,
+            param: root::LPARAM,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_RegisterCustomControlCreator(proc_: root::SWELL_ControlCreatorProc);
+    }
+    extern "C" {
+        pub fn SWELL_UnregisterCustomControlCreator(proc_: root::SWELL_ControlCreatorProc);
+    }
+    extern "C" {
+        pub fn DefWindowProc(
+            hwnd: root::HWND,
+            msg: root::UINT,
+            wParam: root::WPARAM,
+            lParam: root::LPARAM,
+        ) -> root::LRESULT;
+    }
+    extern "C" {
+        pub fn EndDialog(arg1: root::HWND, arg2: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn SWELL_GetDefaultButtonID(
+            hwndDlg: root::HWND,
+            onlyIfEnabled: bool,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SendMessage(
+            arg1: root::HWND,
+            arg2: root::UINT,
+            arg3: root::WPARAM,
+            arg4: root::LPARAM,
+        ) -> root::LRESULT;
+    }
+    extern "C" {
+        pub fn SWELL_BroadcastMessage(arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM);
+    }
+    extern "C" {
+        pub fn PostMessage(
+            hwnd: root::HWND,
+            msg: root::UINT,
+            wParam: root::WPARAM,
+            lParam: root::LPARAM,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_MessageQueue_Flush();
+    }
+    extern "C" {
+        pub fn SWELL_MessageQueue_Clear(h: root::HWND);
+    }
+    extern "C" {
+        pub fn SWELL_KeyToASCII(
+            wParam: ::std::os::raw::c_int,
+            lParam: ::std::os::raw::c_int,
+            newflags: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetAsyncKeyState(key: ::std::os::raw::c_int) -> root::WORD;
+    }
+    extern "C" {
+        pub fn GetCursorPos(pt: *mut root::POINT);
+    }
+    extern "C" {
+        pub fn GetMessagePos() -> root::DWORD;
+    }
+    extern "C" {
+        pub fn SWELL_LoadCursor(idx: *const ::std::os::raw::c_char) -> root::HCURSOR;
+    }
+    extern "C" {
+        pub fn SWELL_SetCursor(curs: root::HCURSOR);
+    }
+    extern "C" {
+        pub fn SWELL_EnableRightClickEmulate(enable: root::BOOL);
+    }
+    extern "C" {
+        pub fn SWELL_GetCursor() -> root::HCURSOR;
+    }
+    extern "C" {
+        pub fn SWELL_GetLastSetCursor() -> root::HCURSOR;
+    }
+    extern "C" {
+        pub fn SWELL_IsCursorVisible() -> bool;
+    }
+    extern "C" {
+        pub fn SWELL_ShowCursor(bShow: root::BOOL) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_SetCursorPos(X: ::std::os::raw::c_int, Y: ::std::os::raw::c_int)
+        -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_GetViewPort(r: *mut root::RECT, sourcerect: *const root::RECT, wantWork: bool);
+    }
+    extern "C" {
+        pub fn OpenClipboard(hwndDlg: root::HWND) -> bool;
+    }
+    extern "C" {
+        pub fn CloseClipboard();
+    }
+    extern "C" {
+        pub fn GetClipboardData(type_: root::UINT) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn EmptyClipboard();
+    }
+    extern "C" {
+        pub fn SetClipboardData(type_: root::UINT, h: root::HANDLE);
+    }
+    extern "C" {
+        pub fn RegisterClipboardFormat(desc: *const ::std::os::raw::c_char) -> root::UINT;
+    }
+    extern "C" {
+        pub fn EnumClipboardFormats(lastfmt: root::UINT) -> root::UINT;
+    }
+    extern "C" {
+        pub fn GlobalAlloc(flags: ::std::os::raw::c_int, sz: ::std::os::raw::c_int)
+        -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn GlobalLock(h: root::HANDLE) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn GlobalSize(h: root::HANDLE) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GlobalUnlock(h: root::HANDLE);
+    }
+    extern "C" {
+        pub fn GlobalFree(h: root::HANDLE);
+    }
+    extern "C" {
+        pub fn CreateThread(
+            TA: *mut ::std::os::raw::c_void,
+            stackSize: root::DWORD,
+            ThreadProc: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::LPVOID) -> root::DWORD,
+            >,
+            parm: root::LPVOID,
+            cf: root::DWORD,
+            tidOut: *mut root::DWORD,
+        ) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn CreateEvent(
+            SA: *mut ::std::os::raw::c_void,
+            manualReset: root::BOOL,
+            initialSig: root::BOOL,
+            ignored: *const ::std::os::raw::c_char,
+        ) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn CreateEventAsSocket(
+            SA: *mut ::std::os::raw::c_void,
+            manualReset: root::BOOL,
+            initialSig: root::BOOL,
+            ignored: *const ::std::os::raw::c_char,
+        ) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn GetCurrentThreadId() -> root::DWORD;
+    }
+    extern "C" {
+        pub fn WaitForSingleObject(hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD;
+    }
+    extern "C" {
+        pub fn WaitForAnySocketObject(
+            numObjs: ::std::os::raw::c_int,
+            objs: *mut root::HANDLE,
+            msTO: root::DWORD,
+        ) -> root::DWORD;
+    }
+    extern "C" {
+        pub fn CloseHandle(hand: root::HANDLE) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SetThreadPriority(evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SetEvent(evt: root::HANDLE) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn ResetEvent(evt: root::HANDLE) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_CreateProcessFromPID(pid: ::std::os::raw::c_int) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn SWELL_CreateProcess(
+            exe: *const ::std::os::raw::c_char,
+            nparams: ::std::os::raw::c_int,
+            params: *mut *const ::std::os::raw::c_char,
+        ) -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn SWELL_GetProcessExitCode(hand: root::HANDLE) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn LoadLibraryGlobals(
+            fileName: *const ::std::os::raw::c_char,
+            symbolsAsGlobals: bool,
+        ) -> root::HINSTANCE;
+    }
+    extern "C" {
+        pub fn LoadLibrary(fileName: *const ::std::os::raw::c_char) -> root::HINSTANCE;
+    }
+    extern "C" {
+        pub fn GetProcAddress(
+            hInst: root::HINSTANCE,
+            procName: *const ::std::os::raw::c_char,
+        ) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn FreeLibrary(hInst: root::HINSTANCE) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_GetBundle(hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn SWELL_CreateMemContext(
+            hdc: root::HDC,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+        ) -> root::HDC;
+    }
+    extern "C" {
+        pub fn SWELL_DeleteGfxContext(arg1: root::HDC);
+    }
+    extern "C" {
+        pub fn SWELL_GetCtxGC(ctx: root::HDC) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn SWELL_GetCtxFrameBuffer(ctx: root::HDC) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn SWELL_PushClipRegion(ctx: root::HDC);
+    }
+    extern "C" {
+        pub fn SWELL_SetClipRegion(ctx: root::HDC, r: *const root::RECT);
+    }
+    extern "C" {
+        pub fn SWELL_PopClipRegion(ctx: root::HDC);
+    }
+    extern "C" {
+        pub fn CreateFontIndirect(arg1: *mut root::LOGFONT) -> root::HFONT;
+    }
+    extern "C" {
+        pub fn CreateFont(
+            lfHeight: ::std::os::raw::c_int,
+            lfWidth: ::std::os::raw::c_int,
+            lfEscapement: ::std::os::raw::c_int,
+            lfOrientation: ::std::os::raw::c_int,
+            lfWeight: ::std::os::raw::c_int,
+            lfItalic: ::std::os::raw::c_char,
+            lfUnderline: ::std::os::raw::c_char,
+            lfStrikeOut: ::std::os::raw::c_char,
+            lfCharSet: ::std::os::raw::c_char,
+            lfOutPrecision: ::std::os::raw::c_char,
+            lfClipPrecision: ::std::os::raw::c_char,
+            lfQuality: ::std::os::raw::c_char,
+            lfPitchAndFamily: ::std::os::raw::c_char,
+            lfFaceName: *const ::std::os::raw::c_char,
+        ) -> root::HFONT;
+    }
+    extern "C" {
+        pub fn CreatePen(
+            attr: ::std::os::raw::c_int,
+            wid: ::std::os::raw::c_int,
+            col: ::std::os::raw::c_int,
+        ) -> root::HPEN;
+    }
+    extern "C" {
+        pub fn CreateSolidBrush(col: ::std::os::raw::c_int) -> root::HBRUSH;
+    }
+    extern "C" {
+        pub fn CreatePenAlpha(
+            attr: ::std::os::raw::c_int,
+            wid: ::std::os::raw::c_int,
+            col: ::std::os::raw::c_int,
+            alpha: f32,
+        ) -> root::HPEN;
+    }
+    extern "C" {
+        pub fn CreateSolidBrushAlpha(col: ::std::os::raw::c_int, alpha: f32) -> root::HBRUSH;
+    }
+    extern "C" {
+        pub fn SelectObject(ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ;
+    }
+    extern "C" {
+        pub fn GetStockObject(wh: ::std::os::raw::c_int) -> root::HGDIOBJ;
+    }
+    extern "C" {
+        pub fn DeleteObject(arg1: root::HGDIOBJ);
+    }
+    extern "C" {
+        pub fn SWELL_FillRect(ctx: root::HDC, r: *const root::RECT, br: root::HBRUSH);
+    }
+    extern "C" {
+        pub fn Rectangle(
+            ctx: root::HDC,
+            l: ::std::os::raw::c_int,
+            t: ::std::os::raw::c_int,
+            r: ::std::os::raw::c_int,
+            b: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn Ellipse(
+            ctx: root::HDC,
+            l: ::std::os::raw::c_int,
+            t: ::std::os::raw::c_int,
+            r: ::std::os::raw::c_int,
+            b: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_Polygon(ctx: root::HDC, pts: *mut root::POINT, npts: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn MoveToEx(
+            ctx: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            op: *mut root::POINT,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_LineTo(ctx: root::HDC, x: ::std::os::raw::c_int, y: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn SWELL_SetPixel(
+            ctx: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            c: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn PolyBezierTo(ctx: root::HDC, pts: *mut root::POINT, np: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn SWELL_DrawText(
+            ctx: root::HDC,
+            buf: *const ::std::os::raw::c_char,
+            len: ::std::os::raw::c_int,
+            r: *mut root::RECT,
+            align: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SetTextColor(ctx: root::HDC, col: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn GetTextColor(ctx: root::HDC) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SetBkColor(ctx: root::HDC, col: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn SetBkMode(ctx: root::HDC, col: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn GetGlyphIndicesW(
+            ctx: root::HDC,
+            buf: *mut u32,
+            len: ::std::os::raw::c_int,
+            indices: *mut ::std::os::raw::c_ushort,
+            flags: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn RoundRect(
+            ctx: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            x2: ::std::os::raw::c_int,
+            y2: ::std::os::raw::c_int,
+            xrnd: ::std::os::raw::c_int,
+            yrnd: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn PolyPolyline(
+            ctx: root::HDC,
+            pts: *mut root::POINT,
+            cnts: *mut root::DWORD,
+            nseg: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn GetTextMetrics(ctx: root::HDC, tm: *mut root::TEXTMETRIC) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn GetTextFace(
+            ctx: root::HDC,
+            nCount: ::std::os::raw::c_int,
+            lpFaceName: root::LPTSTR,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn GetObject(
+            icon: root::HICON,
+            bmsz: ::std::os::raw::c_int,
+            _bm: *mut ::std::os::raw::c_void,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn CreateIconIndirect(iconinfo: *mut root::ICONINFO) -> root::HICON;
+    }
+    extern "C" {
+        pub fn LoadNamedImage(
+            name: *const ::std::os::raw::c_char,
+            alphaFromMask: bool,
+        ) -> root::HICON;
+    }
+    extern "C" {
+        pub fn DrawImageInRect(ctx: root::HDC, img: root::HICON, r: *const root::RECT);
+    }
+    extern "C" {
+        pub fn BitBlt(
+            hdcOut: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            hdcIn: root::HDC,
+            xin: ::std::os::raw::c_int,
+            yin: ::std::os::raw::c_int,
+            mode: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn StretchBlt(
+            hdcOut: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            hdcIn: root::HDC,
+            xin: ::std::os::raw::c_int,
+            yin: ::std::os::raw::c_int,
+            srcw: ::std::os::raw::c_int,
+            srch: ::std::os::raw::c_int,
+            mode: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn StretchBltFromMem(
+            hdcOut: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            bits: *const ::std::os::raw::c_void,
+            srcw: ::std::os::raw::c_int,
+            srch: ::std::os::raw::c_int,
+            srcspan: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_GetScaling256() -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_ExtendedAPI(
+            key: *const ::std::os::raw::c_char,
+            v: *mut ::std::os::raw::c_void,
+        ) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn GetSysColor(idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn CreateBitmap(
+            width: ::std::os::raw::c_int,
+            height: ::std::os::raw::c_int,
+            numplanes: ::std::os::raw::c_int,
+            bitsperpixel: ::std::os::raw::c_int,
+            bits: *mut ::std::os::raw::c_uchar,
+        ) -> root::HBITMAP;
+    }
+    extern "C" {
+        pub fn SetOpaque(h: root::HWND, isopaque: bool);
+    }
+    extern "C" {
+        pub fn SetAllowNoMiddleManRendering(h: root::HWND, allow: bool);
+    }
+    extern "C" {
+        pub fn BeginPaint(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC;
+    }
+    extern "C" {
+        pub fn EndPaint(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn GetDC(arg1: root::HWND) -> root::HDC;
+    }
+    extern "C" {
+        pub fn GetWindowDC(arg1: root::HWND) -> root::HDC;
+    }
+    extern "C" {
+        pub fn ReleaseDC(arg1: root::HWND, arg2: root::HDC);
+    }
+    extern "C" {
+        pub fn SWELL_FillDialogBackground(
+            hdc: root::HDC,
+            r: *const root::RECT,
+            level: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_CloneGDIObject(a: root::HGDIOBJ) -> root::HGDIOBJ;
+    }
+    extern "C" {
+        pub fn GetSystemMetrics(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn DragQueryPoint(arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn DragFinish(arg1: root::HDROP);
+    }
+    extern "C" {
+        pub fn DragQueryFile(
+            arg1: root::HDROP,
+            arg2: root::UINT,
+            arg3: *mut ::std::os::raw::c_char,
+            arg4: root::UINT,
+        ) -> root::UINT;
+    }
+    extern "C" {
+        pub fn SWELL_InitiateDragDrop(
+            arg1: root::HWND,
+            srcrect: *mut root::RECT,
+            srcfn: *const ::std::os::raw::c_char,
+            callback: ::std::option::Option<
+                unsafe extern "C" fn(droppath: *const ::std::os::raw::c_char),
+            >,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_InitiateDragDropOfFileList(
+            arg1: root::HWND,
+            srcrect: *mut root::RECT,
+            srclist: *mut *const ::std::os::raw::c_char,
+            srccount: ::std::os::raw::c_int,
+            icon: root::HICON,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_FinishDragDrop();
+    }
+    extern "C" {
+        pub fn SWELL_DrawFocusRect(
+            hwndPar: root::HWND,
+            rct: *mut root::RECT,
+            handle: *mut *mut ::std::os::raw::c_void,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_MakeSetCurParms(
+            xscale: f32,
+            yscale: f32,
+            xtrans: f32,
+            ytrans: f32,
+            parent: root::HWND,
+            doauto: bool,
+            dosizetofit: bool,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_MakeButton(
+            def: ::std::os::raw::c_int,
+            label: *const ::std::os::raw::c_char,
+            idx: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_MakeEditField(
+            idx: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_MakeLabel(
+            align: ::std::os::raw::c_int,
+            label: *const ::std::os::raw::c_char,
+            idx: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_MakeControl(
+            cname: *const ::std::os::raw::c_char,
+            idx: ::std::os::raw::c_int,
+            classname: *const ::std::os::raw::c_char,
+            style: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            exstyle: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_MakeCombo(
+            idx: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_MakeGroupBox(
+            name: *const ::std::os::raw::c_char,
+            idx: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            style: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_MakeCheckBox(
+            name: *const ::std::os::raw::c_char,
+            idx: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_MakeListBox(
+            idx: ::std::os::raw::c_int,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            styles: ::std::os::raw::c_int,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_Menu_AddMenuItem(
+            hMenu: root::HMENU,
+            name: *const ::std::os::raw::c_char,
+            idx: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_uint,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_GenerateMenuFromList(
+            hMenu: root::HMENU,
+            list: *const ::std::os::raw::c_void,
+            listsz: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_GenerateDialogFromList(
+            list: *const ::std::os::raw::c_void,
+            listsz: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn _controlfp(
+            flag: ::std::os::raw::c_uint,
+            mask: ::std::os::raw::c_uint,
+        ) -> ::std::os::raw::c_uint;
+    }
+    extern "C" {
+        pub fn SWELL_Internal_PostMessage_Init();
+    }
+    extern "C" {
+        pub fn SWELL_LoadCursorFromFile(fn_: *const ::std::os::raw::c_char) -> root::HCURSOR;
+    }
+    extern "C" {
+        pub fn SWELL_SetWindowWantRaiseAmt(h: root::HWND, amt: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn SWELL_GetWindowWantRaiseAmt(arg1: root::HWND) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_SetListViewFastClickMask(hList: root::HWND, mask: ::std::os::raw::c_int);
+    }
+    extern "C" {
+        pub fn GetTempPath(sz: ::std::os::raw::c_int, buf: *mut ::std::os::raw::c_char);
+    }
+    extern "C" {
+        pub fn SWELL_initargs(
+            argc: *mut ::std::os::raw::c_int,
+            argv: *mut *mut *mut ::std::os::raw::c_char,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_RunMessageLoop();
+    }
+    extern "C" {
+        pub fn SWELL_CreateXBridgeWindow(
+            viewpar: root::HWND,
+            wref: *mut *mut ::std::os::raw::c_void,
+            arg1: *mut root::RECT,
+        ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SWELL_GenerateGUID(g: *mut ::std::os::raw::c_void) -> bool;
+    }
+    extern "C" {
+        pub fn EnumChildWindows(
+            hwnd: root::HWND,
+            cwEnumFunc: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
+            >,
+            lParam: root::LPARAM,
+        ) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_IsGroupBox(arg1: root::HWND) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_IsButton(arg1: root::HWND) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_IsStaticText(arg1: root::HWND) -> root::BOOL;
+    }
+    extern "C" {
+        pub fn SWELL_GetDesiredControlSize(hwnd: root::HWND, r: *mut root::RECT);
+    }
+    extern "C" {
+        pub fn AddFontResourceEx(
+            str: root::LPCTSTR,
+            fl: root::DWORD,
+            pdv: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_Register_Cursor_Resource(
+            idx: *const ::std::os::raw::c_char,
+            name: *const ::std::os::raw::c_char,
+            hotspot_x: ::std::os::raw::c_int,
+            hotspot_y: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
+        pub fn SWELL_ChooseColor(
+            arg1: root::HWND,
+            arg2: *mut ::std::os::raw::c_int,
+            ncustom: ::std::os::raw::c_int,
+            custom: *mut ::std::os::raw::c_int,
+        ) -> bool;
+    }
+    extern "C" {
+        pub fn SWELL_ChooseFont(arg1: root::HWND, arg2: *mut root::LOGFONT) -> bool;
+    }
+    extern "C" {
+        pub fn IsWindowEnabled(arg1: root::HWND) -> bool;
+    }
+    extern "C" {
+        pub fn GetClassName(
+            arg1: root::HWND,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int;
+    }
+    extern "C" {
+        pub fn SWELL_SetClassName(arg1: root::HWND, arg2: *const ::std::os::raw::c_char);
     }
 }

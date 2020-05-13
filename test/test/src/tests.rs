@@ -128,6 +128,16 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
 fn swell() -> TestStep {
     step(AllVersions, "SWELL", |reaper, _| {
         if cfg!(target_os = "windows") {
+            let swell = Swell::default();
+            // TODO-low At some point we might be okay with interactive tests
+            // unsafe {
+            // swell.MessageBox(
+            //     std::ptr::null_mut(),
+            //     c_str!("Hello world from SWELL 范例文字äöüß").as_ptr(),
+            //     c_str!("reaper-rs SWELL").as_ptr(),
+            //     1,
+            // );
+            // }
             Ok(())
         } else {
             // Given
