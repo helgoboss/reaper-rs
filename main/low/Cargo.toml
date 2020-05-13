@@ -23,7 +23,7 @@ build = "build.rs"
 [features]
 default = []
 # Regenerates `bindings.rs` from C++ header files and right after that `reaper.rs` from `bindings.rs`
-generate = ["bindgen", "quote", "syn", "proc-macro2"]
+generate = ["bindgen", "quote", "syn", "proc-macro2", "phf"]
 
 [dependencies]
 c_str_macro = "1.0.2"
@@ -39,3 +39,4 @@ bindgen = { version = "0.52.0", optional = true }
 quote = { version = "1.0.2", optional = true }
 syn = { version = "1.0.14", features = ["full"], optional = true }
 proc-macro2 = { version = "1.0.8", optional = true }
+phf = { version = "0.8", features = ["macros"], optional = true }
