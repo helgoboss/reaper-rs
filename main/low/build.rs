@@ -1,5 +1,6 @@
 /// Executed whenever Cargo builds reaper-rs
 fn main() {
+    #[cfg(target_os = "linux")]
     #[cfg(feature = "generate")]
     codegen::generate_all();
     compile_glue_code();

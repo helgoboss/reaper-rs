@@ -327,15 +327,7 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
    cargo build
    ```
 
-Regenerate the low-level API (the resulting code should not be pushed, see [above](#low-level-api-code-generation)):
-
-1. [Download](https://releases.llvm.org/download.html) and install LLVM for Windows 64-bit :star:
-2. Build with the `generate` feature enabled
-   ```batch
-   cd main\low
-   cargo build --features generate
-   cargo fmt
-   ```
+Regenerating the low-level API from Windows is disabled for now.
 
 #### Linux
 
