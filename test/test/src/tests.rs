@@ -30,7 +30,6 @@ use reaper_medium::{
 
 use reaper_low::{raw, Swell, TypeSpecificReaperPluginContext};
 use std::os::raw::{c_int, c_void};
-use std::ptr::null_mut;
 use std::rc::Rc;
 
 /// Creates all integration test steps to be executed. The order matters!
