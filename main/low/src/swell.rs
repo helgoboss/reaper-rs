@@ -34,11 +34,13 @@ impl Swell {
         }
         #[cfg(target_os = "linux")]
         {
+            let mut loaded_count = 0;
             let get_func = plugin_context
                 .swell_function_provider()
                 .expect("SWELL function provider not available");
-            let pointers = unsafe {
+            let mut pointers = unsafe {
                 SwellFunctionPointers {
+                    loaded_count: 0,
                     lstrcpyn: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(lstrcpyn)).as_ptr(),
                     )),
@@ -1016,6 +1018,979 @@ impl Swell {
                     )),
                 }
             };
+            if pointers.lstrcpyn.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.MulDiv.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.Sleep.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetTickCount.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetFileTime.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WritePrivateProfileString.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetPrivateProfileString.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetPrivateProfileInt.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetPrivateProfileStruct.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WritePrivateProfileStruct.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WritePrivateProfileSection.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetPrivateProfileSection.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetModuleFileName.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_PtInRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ShellExecute.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.MessageBox.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.BrowseForFiles.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.BrowseForSaveFile.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.BrowseForDirectory.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.BrowseFile_SetTemplate.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetDlgItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ShowWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DestroyWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetGestureInfo.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_HideApp.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetDlgItemText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetDlgItemInt.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetDlgItemInt.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetDlgItemText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CheckDlgButton.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.IsDlgButtonChecked.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EnableWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetFocus.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetFocus.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetForegroundWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetForegroundWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetCapture.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetCapture.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ReleaseCapture.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.IsChild.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetParent.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetParent.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EnumWindows.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.FindWindowEx.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ClientToScreen.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ScreenToClient.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetWindowRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetWindowContentViewRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetClientRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WindowFromPoint.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WinOffsetRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WinSetRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WinUnionRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WinIntersectRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetWindowPos.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetWindowLevel.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.InvalidateRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.UpdateWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetWindowLong.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetWindowLong.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ScrollWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EnumPropsEx.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetProp.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetProp.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.RemoveProp.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.IsWindowVisible.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.IsWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetTimer.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.KillTimer.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetExtendedListViewStyleEx.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_InsertColumn.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_DeleteColumn.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetColumn.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetColumnWidth.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_InsertItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetItemText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetNextItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetItemState.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_DeleteItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_DeleteAllItems.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetSelectedCount.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetItemCount.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetSelectionMark.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetColumnWidth.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetItemState.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_RedrawItems.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetItemCount.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_EnsureVisible.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetSubItemRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetImageList.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_HitTest.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SubItemHitTest.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetItemText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SortItems.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetItemRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_Scroll.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetTopIndex.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetCountPerPage.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetColumnOrderArray.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetColumnOrderArray.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetHeader.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.Header_GetItemCount.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.Header_GetItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.Header_SetItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetListViewHeaderHeight.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ImageList_CreateEx.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ImageList_Remove.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ImageList_ReplaceIcon.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ImageList_Add.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ImageList_Destroy.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TabCtrl_GetItemCount.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TabCtrl_DeleteItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TabCtrl_InsertItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TabCtrl_SetCurSel.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TabCtrl_GetCurSel.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TabCtrl_AdjustRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_InsertItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_Expand.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_GetSelection.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_DeleteItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_DeleteAllItems.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_SelectItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_GetItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_SetItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_HitTest.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_SetIndent.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_GetChild.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_GetNextSibling.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_GetRoot.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_SetBkColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_SetTextColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetBkColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetTextBkColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetTextColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetGridColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_SetSelColors.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ModalWindowStart.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ModalWindowRun.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ModalWindowEnd.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CloseWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreatePopupMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreatePopupMenuEx.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DestroyMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.AddMenuItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetSubMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetMenuItemCount.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetMenuItemID.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetMenuItemModifier.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetMenuItemText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EnableMenuItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DeleteMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CheckMenuItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.InsertMenuItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_InsertMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetMenuItemInfo.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetMenuItemInfo.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DrawMenuBar.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_LoadMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TrackPopupMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetMenuDestination.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_DuplicateMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetDefaultWindowMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetDefaultWindowMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetDefaultModalWindowMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetDefaultModalWindowMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetCurrentMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetCurrentMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_DialogBox.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CreateDialog.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_RegisterCustomControlCreator.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_UnregisterCustomControlCreator.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DefWindowProc.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EndDialog.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetDefaultButtonID.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SendMessage.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_BroadcastMessage.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.PostMessage.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MessageQueue_Flush.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MessageQueue_Clear.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_KeyToASCII.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetAsyncKeyState.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetCursorPos.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetMessagePos.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_LoadCursor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetCursor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_EnableRightClickEmulate.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetCursor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetLastSetCursor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_IsCursorVisible.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ShowCursor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetCursorPos.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetViewPort.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.OpenClipboard.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CloseClipboard.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetClipboardData.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EmptyClipboard.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetClipboardData.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.RegisterClipboardFormat.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EnumClipboardFormats.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GlobalAlloc.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GlobalLock.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GlobalSize.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GlobalUnlock.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GlobalFree.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateThread.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateEvent.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateEventAsSocket.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetCurrentThreadId.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WaitForSingleObject.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.WaitForAnySocketObject.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CloseHandle.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetThreadPriority.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetEvent.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ResetEvent.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CreateProcessFromPID.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CreateProcess.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetProcessExitCode.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.LoadLibraryGlobals.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.LoadLibrary.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetProcAddress.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.FreeLibrary.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetBundle.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CreateMemContext.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_DeleteGfxContext.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetCtxGC.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetCtxFrameBuffer.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_PushClipRegion.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetClipRegion.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_PopClipRegion.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateFontIndirect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateFont.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreatePen.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateSolidBrush.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreatePenAlpha.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateSolidBrushAlpha.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SelectObject.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetStockObject.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DeleteObject.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_FillRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.Rectangle.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.Ellipse.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_Polygon.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.MoveToEx.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_LineTo.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetPixel.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.PolyBezierTo.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_DrawText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetTextColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetTextColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetBkColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetBkMode.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetGlyphIndicesW.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.RoundRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.PolyPolyline.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetTextMetrics.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetTextFace.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetObject.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateIconIndirect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.LoadNamedImage.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DrawImageInRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.BitBlt.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.StretchBlt.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.StretchBltFromMem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetScaling256.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ExtendedAPI.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetSysColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.CreateBitmap.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetOpaque.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SetAllowNoMiddleManRendering.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.BeginPaint.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EndPaint.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetDC.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetWindowDC.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ReleaseDC.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_FillDialogBackground.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CloneGDIObject.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetSystemMetrics.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DragQueryPoint.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DragFinish.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.DragQueryFile.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_InitiateDragDrop.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_InitiateDragDropOfFileList.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_FinishDragDrop.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_DrawFocusRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeSetCurParms.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeButton.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeEditField.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeLabel.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeControl.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeCombo.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeGroupBox.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeCheckBox.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MakeListBox.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_Menu_AddMenuItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GenerateMenuFromList.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GenerateDialogFromList.is_some() {
+                loaded_count += 1;
+            }
+            if pointers._controlfp.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_Internal_PostMessage_Init.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_LoadCursorFromFile.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetWindowWantRaiseAmt.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetWindowWantRaiseAmt.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetListViewFastClickMask.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetTempPath.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_initargs.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_RunMessageLoop.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CreateXBridgeWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GenerateGUID.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EnumChildWindows.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_IsGroupBox.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_IsButton.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_IsStaticText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetDesiredControlSize.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.AddFontResourceEx.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_Register_Cursor_Resource.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ChooseColor.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ChooseFont.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.IsWindowEnabled.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetClassName.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetClassName.is_some() {
+                loaded_count += 1;
+            }
+            pointers.loaded_count = loaded_count;
             Swell {
                 pointers,
                 plugin_context: Some(plugin_context),
@@ -5585,6 +6560,7 @@ impl Swell {
 #[doc = r" Container for the SWELL function pointers."]
 #[derive(Copy, Clone, Default)]
 pub struct SwellFunctionPointers {
+    pub(crate) loaded_count: u32,
     pub lstrcpyn: Option<
         unsafe extern "C" fn(
             dest: *mut ::std::os::raw::c_char,
@@ -6905,10 +7881,8 @@ pub struct SwellFunctionPointers {
     pub SWELL_SetClassName:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char)>,
 }
-impl std::fmt::Debug for SwellFunctionPointers {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SwellFunctionPointers").finish()
-    }
+impl SwellFunctionPointers {
+    pub(crate) const TOTAL_COUNT: u32 = 324u32;
 }
 #[cfg(target_os = "windows")]
 mod windows {

@@ -1762,15 +1762,15 @@ fn global_instances() -> TestStep {
         reaper_low::Reaper::make_available_globally(*medium.functions().low());
         reaper_low::Reaper::make_available_globally(*medium.functions().low());
         let low = reaper_low::Reaper::get();
+        println!("reaper_low::Reaper {:?}", &low);
         unsafe {
             low.ShowConsoleMsg(c_str!("- Hello from low-level API\n").as_ptr());
         }
         // SWELL
-        if cfg!(target_os = "linux") {
-            let swell = Swell::load(*medium.functions().low().plugin_context());
-            Swell::make_available_globally(swell);
-            let _ = Swell::get();
-        }
+        let swell = Swell::load(*medium.functions().low().plugin_context());
+        println!("reaper_low::Swell {:?}", &swell);
+        Swell::make_available_globally(swell);
+        let _ = Swell::get();
         // Medium-level REAPER
         reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());
         reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());

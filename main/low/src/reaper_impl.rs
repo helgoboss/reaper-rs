@@ -43,3 +43,12 @@ impl Reaper {
             .expect("plug-in context not available on demo instances")
     }
 }
+
+impl std::fmt::Debug for ReaperFunctionPointers {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ReaperFunctionPointers")
+            .field("loaded_count", &self.loaded_count)
+            .field("total_count", &Self::TOTAL_COUNT)
+            .finish()
+    }
+}

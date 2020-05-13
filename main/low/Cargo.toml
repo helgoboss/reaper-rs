@@ -22,7 +22,7 @@ build = "build.rs"
 
 [features]
 default = []
-# Regenerates `bindings.rs` from C++ header files and right after that `reaper.rs` from `bindings.rs`
+# Regenerates `bindings.rs` from C++ header files and right after that `reaper.rs` and `swell.rs` from `bindings.rs`
 generate = ["bindgen", "quote", "syn", "proc-macro2", "phf"]
 
 [dependencies]

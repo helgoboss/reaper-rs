@@ -97,6 +97,15 @@ impl Swell {
     }
 }
 
+impl std::fmt::Debug for SwellFunctionPointers {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SwellFunctionPointers")
+            .field("loaded_count", &self.loaded_count)
+            .field("total_count", &Self::TOTAL_COUNT)
+            .finish()
+    }
+}
+
 #[cfg(target_os = "windows")]
 mod windows {
     use crate::bindings::root;
