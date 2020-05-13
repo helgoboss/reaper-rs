@@ -4,6 +4,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+#![allow(unused_variables)]
 use crate::{bindings::root, Swell, SwellFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
@@ -46,28 +47,6 @@ impl Swell {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn CreateDialogParam(
-        &self,
-        _hinst: root::HINSTANCE,
-        resid: *const ::std::os::raw::c_char,
-        par: root::HWND,
-        dlgproc: root::DLGPROC,
-        param: root::LPARAM,
-    ) -> root::HWND {
-        self.SWELL_CreateDialog(
-            root::SWELL_curmodule_dialogresource_head,
-            resid,
-            par,
-            dlgproc,
-            param,
-        )
-    }
-
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid pointer.
-    #[cfg(target_os = "windows")]
     pub unsafe fn CreateDialogParam(
         &self,
         hinst: root::HINSTANCE,
@@ -76,7 +55,38 @@ impl Swell {
         dlgproc: root::DLGPROC,
         param: root::LPARAM,
     ) -> root::HWND {
-        windows::CreateDialogParamA(hinst, resid, par, dlgproc, param)
+        #[cfg(target_os = "linux")]
+        {
+            self.SWELL_CreateDialog(
+                root::SWELL_curmodule_dialogresource_head,
+                resid,
+                par,
+                dlgproc,
+                param,
+            )
+        }
+        #[cfg(target_os = "windows")]
+        {
+            windows::CreateDialogParamA(hinst, resid, par, dlgproc, param)
+        }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn SetWindowText(
+        &self,
+        hwnd: root::HWND,
+        text: *const ::std::os::raw::c_char,
+    ) -> root::BOOL {
+        #[cfg(target_os = "linux")]
+        {
+            self.SetDlgItemText(hwnd, 0, text)
+        }
+        #[cfg(target_os = "windows")]
+        {
+            windows::SetWindowText(hwnd, text)
+        }
     }
 }
 
@@ -92,5 +102,8 @@ mod windows {
             dlgproc: root::DLGPROC,
             param: root::LPARAM,
         ) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SetWindowText(hwnd: root::HWND, text: *const ::std::os::raw::c_char) -> root::BOOL;
     }
 }
