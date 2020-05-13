@@ -142,14 +142,14 @@ fn swell() -> TestStep {
                     .expect("SWELL function provider not available although Linux"),
             );
             // When
-            unsafe {
-                swell.MessageBox(
-                    null_mut(),
-                    c_str!("Hello world from SWELL").as_ptr(),
-                    c_str!("reaper-rs SWELL").as_ptr(),
-                    1,
-                );
-            }
+            assert!(swell.pointers().MessageBox.is_some());
+            // TODO-low At some point we might be okay with interactive tests
+            // swell.MessageBox(
+            //     null_mut(),
+            //     c_str!("Hello world from SWELL").as_ptr(),
+            //     c_str!("reaper-rs SWELL").as_ptr(),
+            //     1,
+            // );
             Ok(())
         }
     })
