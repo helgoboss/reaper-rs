@@ -18,59 +18,61 @@ fn compile_glue_code() {
 
 #[cfg(feature = "generate")]
 mod codegen {
-    /// Generates both low-level `bindings.rs` and `reaper.rs`
+    /// Generates `bindings.rs`, `reaper.rs` and `swell.rs`
     pub fn generate_all() {
-        generate_bindings();
-        generate_reaper();
+        phase_one::generate_bindings();
+        phase_two::generate_all();
     }
 
-    /// Generates the low-level `bindings.rs` file from REAPER C++ headers
-    fn generate_bindings() {
-        println!("cargo:rerun-if-changed=src/wrapper.hpp");
-        let bindings = bindgen::Builder::default()
-            .header("src/wrapper.hpp")
-            .opaque_type("timex")
-            .derive_eq(true)
-            .derive_partialeq(true)
-            .derive_hash(true)
-            .clang_arg("-xc++")
-            .enable_cxx_namespaces()
-            // If we activate layout tests, we would have to regenerate at each build because tests
-            // will fail on Linux if generated on Windows and vice versa.
-            .layout_tests(false)
-            // Tell cargo to invalidate the built crate whenever any of the
-            // included header files changed.
-            .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-            .raw_line("#![allow(clippy::all)]")
-            .raw_line("#![allow(non_upper_case_globals)]")
-            .raw_line("#![allow(non_camel_case_types)]")
-            .raw_line("#![allow(non_snake_case)]")
-            .raw_line("#![allow(dead_code)]")
-            .whitelist_var("reaper_functions::.*")
-            .whitelist_var("CSURF_EXT_.*")
-            .whitelist_var("REAPER_PLUGIN_VERSION")
-            .whitelist_var("UNDO_STATE_.*")
-            .whitelist_var("VK_.*")
-            .whitelist_var("DLL_PROCESS_ATTACH")
-            .whitelist_type("HINSTANCE")
-            .whitelist_type("reaper_plugin_info_t")
-            .whitelist_type("gaccel_register_t")
-            .whitelist_type("audio_hook_register_t")
-            .whitelist_type("KbdSectionInfo")
-            .whitelist_type("GUID")
-            // .whitelist_function("GetActiveWindow")
-            .whitelist_function("reaper_control_surface::.*")
-            .whitelist_function("reaper_midi::.*")
-            .generate()
-            .expect("Unable to generate bindings");
-        let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
-        bindings
-            .write_to_file(out_path.join("src/bindings.rs"))
-            .expect("Couldn't write bindings!");
+    mod phase_one {
+        /// Generates the `bindings.rs` file from REAPER C++ headers
+        pub fn generate_bindings() {
+            println!("cargo:rerun-if-changed=src/wrapper.hpp");
+            let bindings = bindgen::Builder::default()
+                .header("src/wrapper.hpp")
+                .opaque_type("timex")
+                .derive_eq(true)
+                .derive_partialeq(true)
+                .derive_hash(true)
+                .clang_arg("-xc++")
+                .enable_cxx_namespaces()
+                // If we activate layout tests, we would have to regenerate at each build because
+                // tests will fail on Linux if generated on Windows and vice versa.
+                .layout_tests(false)
+                // Tell cargo to invalidate the built crate whenever any of the
+                // included header files changed.
+                .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+                .raw_line("#![allow(clippy::all)]")
+                .raw_line("#![allow(non_upper_case_globals)]")
+                .raw_line("#![allow(non_camel_case_types)]")
+                .raw_line("#![allow(non_snake_case)]")
+                .raw_line("#![allow(dead_code)]")
+                .whitelist_var("reaper_functions::.*")
+                .whitelist_var("swell_functions::.*")
+                .whitelist_var("CSURF_EXT_.*")
+                .whitelist_var("REAPER_PLUGIN_VERSION")
+                .whitelist_var("UNDO_STATE_.*")
+                .whitelist_var("VK_.*")
+                .whitelist_var("DLL_PROCESS_ATTACH")
+                .whitelist_type("HINSTANCE")
+                .whitelist_type("reaper_plugin_info_t")
+                .whitelist_type("gaccel_register_t")
+                .whitelist_type("audio_hook_register_t")
+                .whitelist_type("KbdSectionInfo")
+                .whitelist_type("GUID")
+                // .whitelist_function("GetActiveWindow")
+                .whitelist_function("reaper_control_surface::.*")
+                .whitelist_function("reaper_midi::.*")
+                .generate()
+                .expect("Unable to generate bindings");
+            let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
+            bindings
+                .write_to_file(out_path.join("src/bindings.rs"))
+                .expect("Couldn't write bindings!");
+        }
     }
 
-    /// Generates the low-level `reaper.rs` file from the previously generated `bindings.rs`
-    fn generate_reaper() {
+    mod phase_two {
         use proc_macro2::Span;
         use std::fs::File;
         use std::io::Read;
@@ -83,34 +85,34 @@ mod codegen {
             TypeBareFn, VisPublic, Visibility,
         };
 
-        generate();
+        pub fn generate_all() {
+            let file = parse_file();
+            generate_reaper(&file);
+            generate_swell(&file);
+        }
 
-        /// Orchestrates the complete generation process
-        fn generate() {
-            let fn_ptrs = parse_reaper_fn_ptrs();
+        /// Generates the `reaper.rs` file from the previously generated `bindings.rs`
+        fn generate_reaper(file: &syn::File) {
+            let fn_ptrs = parse_fn_ptrs(file, "reaper_functions");
             let result = generate_reaper_token_stream(&fn_ptrs);
             std::fs::write("src/reaper.rs", result.to_string()).expect("Unable to write file");
         }
 
+        /// Generates the `swell.rs` file from the previously generated `bindings.rs`
+        fn generate_swell(file: &syn::File) {
+            let fn_ptrs = parse_fn_ptrs(file, "swell_functions");
+            let result = generate_swell_token_stream(&fn_ptrs);
+            std::fs::write("src/swell.rs", result.to_string()).expect("Unable to write file");
+        }
+
         /// Generates the token stream. All of this could also be done in a procedural macro but
         /// I prefer the code generation approach for now.
-        fn generate_reaper_token_stream(fn_ptrs: &Vec<ReaperFnPtr>) -> proc_macro2::TokenStream {
-            let names: Vec<_> = fn_ptrs.iter().map(|p| p.name.clone()).collect();
-            let fn_ptr_signatures: Vec<_> = fn_ptrs
-                .iter()
-                .map(|p| TypeBareFn {
-                    unsafety: if p.has_pointer_args() {
-                        p.signature.unsafety.clone()
-                    } else {
-                        None
-                    },
-                    ..p.signature.clone()
-                })
-                .collect();
-            let methods: Vec<_> = fn_ptrs
-                .iter()
-                .map(|p| generate_reaper_method(p.clone()))
-                .collect();
+        fn generate_reaper_token_stream(fn_ptrs: &Vec<FnPtr>) -> proc_macro2::TokenStream {
+            let Compartments {
+                names,
+                fn_ptr_signatures,
+                methods,
+            } = build_compartments(fn_ptrs);
             quote::quote! {
                 //! This file is automatically generated by executing `cargo build --features generate`.
                 //!
@@ -192,23 +194,119 @@ mod codegen {
             }
         }
 
-        /// Parses the names and signatures of the REAPER function pointers from `bindings.rs`
-        fn parse_reaper_fn_ptrs() -> Vec<ReaperFnPtr> {
+        /// Generates the token stream. All of this could also be done in a procedural macro but
+        /// I prefer the code generation approach for now.
+        fn generate_swell_token_stream(fn_ptrs: &Vec<FnPtr>) -> proc_macro2::TokenStream {
+            let Compartments {
+                names,
+                fn_ptr_signatures,
+                methods,
+            } = build_compartments(fn_ptrs);
+            quote::quote! {
+                //! This file is automatically generated by executing `cargo build --features generate`.
+                //!
+                //! **Make adjustments in `build.rs`, not in this file!**
+                #![allow(clippy::many_single_char_names)]
+                #![allow(clippy::too_many_arguments)]
+                #![allow(clippy::type_complexity)]
+                #![allow(non_upper_case_globals)]
+                #![allow(non_camel_case_types)]
+                #![allow(non_snake_case)]
+
+                use super::bindings::root;
+                use c_str_macro::c_str;
+
+                /// This is the low-level API access point to all SWELL functions.
+                ///
+                /// SWELL is the Simple Windows Emulation Layer and is exposed by REAPER for Linux
+                /// and Mac OS X.
+                ///
+                /// See [`Reaper`] for details how to use this struct (it's very similar).
+                ///
+                /// [`Reaper`]: struct.Reaper.html
+                #[derive(Copy, Clone, Debug, Default)]
+                pub struct Swell {
+                    pub(crate) pointers: SwellFunctionPointers,
+                }
+
+                impl Swell {
+                    /// Loads all available SWELL functions from the given SWELL function provider.
+                    ///
+                    /// Returns a `Swell` instance which allows you to call these functions.
+                    pub fn load(get_swell_func: crate::GetSwellFuncFn) -> Swell {
+                        let pointers = unsafe {
+                            SwellFunctionPointers {
+                                #(
+                                    #names: std::mem::transmute(get_swell_func(c_str!(stringify!(#names)).as_ptr())),
+                                )*
+                            }
+                        };
+                        Swell {
+                            pointers,
+                        }
+                    }
+
+                    #(
+                        #methods
+                    )*
+                }
+
+                /// Container for the SWELL function pointers.
+                #[derive(Copy, Clone, Default)]
+                pub struct SwellFunctionPointers {
+                    #(
+                        pub #names: Option<#fn_ptr_signatures>,
+                    )*
+                }
+
+                impl std::fmt::Debug for SwellFunctionPointers {
+                    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                        // TODO-low In future this could print "x of y functions loaded".
+                        f.debug_struct("SwellFunctionPointers")
+                         .finish()
+                    }
+                }
+            }
+        }
+
+        fn build_compartments(fn_ptrs: &Vec<FnPtr>) -> Compartments {
+            Compartments {
+                names: fn_ptrs.iter().map(|p| p.name.clone()).collect(),
+                fn_ptr_signatures: fn_ptrs
+                    .iter()
+                    .map(|p| TypeBareFn {
+                        unsafety: if p.has_pointer_args() {
+                            p.signature.unsafety.clone()
+                        } else {
+                            None
+                        },
+                        ..p.signature.clone()
+                    })
+                    .collect(),
+                methods: fn_ptrs.iter().map(|p| generate_method(p.clone())).collect(),
+            }
+        }
+
+        fn parse_file() -> syn::File {
             let mut bindings_file =
                 File::open("src/bindings.rs").expect("Unable to open bindings.rs");
             let mut src = String::new();
             bindings_file
                 .read_to_string(&mut src)
                 .expect("Unable to read file");
-            let bindings_tree = syn::parse_file(&src).expect("Unable to parse file");
-            filter_reaper_fn_ptr_items(&bindings_tree)
+            syn::parse_file(&src).expect("Unable to parse file")
+        }
+
+        /// Parses the names and signatures of the function pointers from `bindings.rs`.
+        fn parse_fn_ptrs(file: &syn::File, module_name: &str) -> Vec<FnPtr> {
+            filter_fn_ptr_items(file, module_name)
                 .into_iter()
-                .map(map_to_reaper_fn_ptr)
+                .map(map_to_fn_ptr)
                 .collect()
         }
 
-        /// Generates a method definition in the body of `impl Reaper`
-        fn generate_reaper_method(ptr: ReaperFnPtr) -> ImplItem {
+        /// Generates a method definition in the body of e.g. `impl Reaper`.
+        fn generate_method(ptr: FnPtr) -> ImplItem {
             let has_pointer_args = ptr.has_pointer_args();
             let attrs = if has_pointer_args {
                 vec![
@@ -287,19 +385,19 @@ mod codegen {
                     variadic: None,
                     output: ptr.signature.output.clone(),
                 },
-                block: generate_reaper_method_body(&ptr),
+                block: generate_method_body(&ptr),
             })
         }
 
-        /// Generates the body of a method in `impl Reaper`
-        fn generate_reaper_method_body(ptr: &ReaperFnPtr) -> Block {
+        /// Generates the body of a method in e.g. `impl Reaper`
+        fn generate_method_body(ptr: &FnPtr) -> Block {
             let name = &ptr.name;
             let fn_ptr_call = generate_fn_ptr_call(&ptr.signature);
             syn::parse_quote! {
                 {
                     match self.pointers.#name {
                         None => panic!(format!(
-                            "Attempt to use a REAPER function that has not been loaded: {}",
+                            "Attempt to use a function that has not been loaded: {}",
                             stringify!(#name)
                         )),
                         Some(f) => #fn_ptr_call,
@@ -356,9 +454,12 @@ mod codegen {
             })
         }
 
-        /// Extracts the items of the given `bindings.rs` syntax tree that represent REAPER function
-        /// pointers
-        fn filter_reaper_fn_ptr_items(bindings_tree: &syn::File) -> Vec<&ForeignItemStatic> {
+        /// Extracts the items of the given `bindings.rs` syntax tree and sub module of root that
+        /// contains function pointers.
+        fn filter_fn_ptr_items<'a>(
+            bindings_tree: &'a syn::File,
+            module_name: &str,
+        ) -> Vec<&'a ForeignItemStatic> {
             let (_, root_mod_items) = match bindings_tree.items.as_slice() {
                 [Item::Mod(ItemMod {
                     ident: id,
@@ -367,18 +468,18 @@ mod codegen {
                 })] if id == "root" => c,
                 _ => panic!("root mod not found"),
             };
-            let (_, reaper_functions_mod_items) = root_mod_items
+            let (_, fn_ptr_mod_items) = root_mod_items
                 .iter()
                 .find_map(|item| match item {
                     Item::Mod(ItemMod {
                         ident: id,
                         content: Some(c),
                         ..
-                    }) if id == "reaper_functions" => Some(c),
+                    }) if id == module_name => Some(c),
                     _ => None,
                 })
-                .expect("reaper_functions mod not found");
-            reaper_functions_mod_items
+                .expect("function pointer mod not found");
+            fn_ptr_mod_items
                 .iter()
                 .filter_map(|item| match item {
                     Item::ForeignMod(ItemForeignMod { items, .. }) => match items.as_slice() {
@@ -392,7 +493,7 @@ mod codegen {
 
         /// Converts a syntax tree item which represents a REAPER function pointer to our
         /// convenience struct `ReaperFnPtr`
-        fn map_to_reaper_fn_ptr(item: &ForeignItemStatic) -> ReaperFnPtr {
+        fn map_to_fn_ptr(item: &ForeignItemStatic) -> FnPtr {
             let option_segment = match &*item.ty {
                 Type::Path(p) => p
                     .path
@@ -412,20 +513,26 @@ mod codegen {
                 }
                 _ => panic!("Option type doesn't have angle bracket"),
             };
-            ReaperFnPtr {
+            FnPtr {
                 name: item.ident.clone(),
                 signature: bare_fn.clone(),
             }
         }
 
-        /// Contains the name and signature of a REAPER function pointer
+        struct Compartments {
+            pub names: Vec<Ident>,
+            pub fn_ptr_signatures: Vec<TypeBareFn>,
+            pub methods: Vec<ImplItem>,
+        }
+
+        /// Contains the name and signature of a relevant function pointer
         #[derive(Clone)]
-        struct ReaperFnPtr {
+        struct FnPtr {
             name: Ident,
             signature: TypeBareFn,
         }
 
-        impl ReaperFnPtr {
+        impl FnPtr {
             fn has_pointer_args(&self) -> bool {
                 self.signature.inputs.iter().any(|a| match a.ty {
                     Type::Ptr(_) => true,
