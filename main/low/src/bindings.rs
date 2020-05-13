@@ -253,6 +253,7 @@ pub mod root {
     pub type LPVOID = *mut ::std::os::raw::c_void;
     pub type LONG = ::std::os::raw::c_int;
     pub type SHORT = ::std::os::raw::c_short;
+    pub type LPSTR = *mut ::std::os::raw::c_char;
     pub type LPTSTR = *mut ::std::os::raw::c_char;
     pub type LPCTSTR = *const ::std::os::raw::c_char;
     pub type ULONGLONG = ::std::os::raw::c_ulonglong;

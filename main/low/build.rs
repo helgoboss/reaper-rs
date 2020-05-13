@@ -83,6 +83,7 @@ mod codegen {
                 .whitelist_type("audio_hook_register_t")
                 .whitelist_type("KbdSectionInfo")
                 .whitelist_type("GUID")
+                .whitelist_type("LPSTR")
                 .whitelist_function("reaper_control_surface::.*")
                 .whitelist_function("reaper_midi::.*")
                 .generate()

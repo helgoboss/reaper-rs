@@ -27,9 +27,9 @@ pub use super::bindings::root::{
 /// the same. E.g. `DWORD` ends up as `c_ulong` on Windows (= `u32` on Windows) and
 /// `c_uint` on Linux (= `u32` on Linux).
 pub use super::bindings::root::{
-    ACCEL, DLL_PROCESS_ATTACH, GUID, HINSTANCE, HWND, HWND__, LPARAM, LRESULT, SW_SHOW, UINT,
-    VK_CONTROL, VK_MENU, VK_SHIFT, WM_ACTIVATE, WM_ACTIVATEAPP, WM_CAPTURECHANGED, WM_CHAR,
-    WM_CLOSE, WM_COMMAND, WM_CONTEXTMENU, WM_COPYDATA, WM_CREATE, WM_DEADCHAR, WM_DESTROY,
+    ACCEL, DLL_PROCESS_ATTACH, GUID, HINSTANCE, HWND, HWND__, LPARAM, LPSTR, LRESULT, UINT,
+    ULONG_PTR, VK_CONTROL, VK_MENU, VK_SHIFT, WM_ACTIVATE, WM_ACTIVATEAPP, WM_CAPTURECHANGED,
+    WM_CHAR, WM_CLOSE, WM_COMMAND, WM_CONTEXTMENU, WM_COPYDATA, WM_CREATE, WM_DEADCHAR, WM_DESTROY,
     WM_DISPLAYCHANGE, WM_DRAWITEM, WM_DROPFILES, WM_ERASEBKGND, WM_GESTURE, WM_GETFONT,
     WM_GETMINMAXINFO, WM_GETOBJECT, WM_HSCROLL, WM_INITDIALOG, WM_INITMENUPOPUP, WM_KEYDOWN,
     WM_KEYFIRST, WM_KEYLAST, WM_KEYUP, WM_LBUTTONDBLCLK, WM_LBUTTONDOWN, WM_LBUTTONUP,
@@ -42,6 +42,29 @@ pub use super::bindings::root::{
     WM_SHOWWINDOW, WM_SIZE, WM_STYLECHANGED, WM_SYSCHAR, WM_SYSCOMMAND, WM_SYSDEADCHAR,
     WM_SYSKEYDOWN, WM_SYSKEYUP, WM_TIMER, WM_USER, WM_VSCROLL, WPARAM,
 };
+
+// The SW_ constants are different in SWELL. Search for "these differ" in SWELL source code for
+// explanation.
+#[cfg(target_os = "linux")]
+pub use crate::bindings::root::{
+    SW_HIDE, SW_NORMAL, SW_RESTORE, SW_SHOW, SW_SHOWDEFAULT, SW_SHOWMAXIMIZED, SW_SHOWMINIMIZED,
+    SW_SHOWNA, SW_SHOWNOACTIVATE, SW_SHOWNORMAL,
+};
+#[cfg(target_os = "windows")]
+mod windows_sw_constants {
+    pub const SW_HIDE: i32 = 0;
+    pub const SW_NORMAL: i32 = 1;
+    pub const SW_RESTORE: i32 = 9;
+    pub const SW_SHOW: i32 = 5;
+    pub const SW_SHOWDEFAULT: i32 = 10;
+    pub const SW_SHOWMAXIMIZED: i32 = 3;
+    pub const SW_SHOWMINIMIZED: i32 = 2;
+    pub const SW_SHOWNA: i32 = 8;
+    pub const SW_SHOWNOACTIVATE: i32 = 4;
+    pub const SW_SHOWNORMAL: i32 = 1;
+}
+#[cfg(target_os = "windows")]
+pub use windows_sw_constants::*;
 
 /// Function pointer type for hook commands.
 pub type HookCommandFn = extern "C" fn(command_id: c_int, flag: c_int) -> bool;
