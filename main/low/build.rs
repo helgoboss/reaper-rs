@@ -1,8 +1,10 @@
 /// Executed whenever Cargo builds reaper-rs
 fn main() {
     #[cfg(target_os = "linux")]
-    #[cfg(feature = "generate")]
-    codegen::generate_all();
+    #[cfg(feature = "generate-stage-1")]
+    codegen::stage_one::generate_bindings();
+    #[cfg(feature = "generate-stage-2")]
+    codegen::stage_two::generate_all();
     compile_glue_code();
 }
 
@@ -17,15 +19,11 @@ fn compile_glue_code() {
         .compile("glue");
 }
 
-#[cfg(feature = "generate")]
+#[cfg(any(feature = "generate-stage-1", feature = "generate-stage-2"))]
 mod codegen {
-    /// Generates `bindings.rs`, `reaper.rs` and `swell.rs`
-    pub fn generate_all() {
-        phase_one::generate_bindings();
-        phase_two::generate_all();
-    }
-
-    mod phase_one {
+    #[cfg(target_os = "linux")]
+    #[cfg(feature = "generate-stage-1")]
+    pub mod stage_one {
         use bindgen::callbacks::{IntKind, ParseCallbacks};
 
         #[derive(Debug)]
@@ -96,7 +94,8 @@ mod codegen {
         }
     }
 
-    mod phase_two {
+    #[cfg(feature = "generate-stage-2")]
+    pub mod stage_two {
         use proc_macro2::Span;
         use std::fs::File;
         use std::io::Read;
@@ -125,6 +124,7 @@ mod codegen {
             "ShowWindow" => "ShowWindow",
         };
 
+        /// Generates `reaper.rs` and `swell.rs` from the previously generated `bindings.rs`
         pub fn generate_all() {
             let file = parse_file("src/bindings.rs");
             generate_reaper(&file);

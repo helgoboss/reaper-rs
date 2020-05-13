@@ -22,8 +22,15 @@ build = "build.rs"
 
 [features]
 default = []
-# Regenerates `bindings.rs` from C++ header files and right after that `reaper.rs` and `swell.rs` from `bindings.rs`
-generate = ["bindgen", "quote", "syn", "proc-macro2", "phf"]
+# Regenerates `bindings.rs` from C++ header files and right after that `reaper.rs` and `swell.rs` from `bindings.rs`.
+generate = ["generate-stage-1", "generate-stage-2"]
+
+# Stage 1 runs on Linux only.
+# After stage 1 has runned, we should run stage 2 as well (because stage 2 depends on the results of stage 1).
+generate-stage-1 = ["generate-stage-2", "bindgen"]
+
+# Stage 2 can run separately.
+generate-stage-2 = ["quote", "syn", "proc-macro2", "phf"]
 
 [dependencies]
 c_str_macro = "1.0.2"
