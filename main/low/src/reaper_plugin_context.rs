@@ -160,7 +160,7 @@ impl ReaperPluginContext {
     ///
     /// On Windows, this returns `None`.
     pub fn swell_function_provider(&self) -> Option<GetSwellFuncFn> {
-        *self.get_swell_func_ptr
+        self.get_swell_func_ptr
     }
 
     /// Returns the type-specific plug-in context.
