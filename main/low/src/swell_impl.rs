@@ -5,7 +5,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
-use crate::{bindings::root, Swell, SwellFunctionPointers};
+use crate::{bindings::root, ReaperPluginContext, Swell, SwellFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
@@ -42,6 +42,13 @@ impl Swell {
     /// Gives access to the SWELL function pointers.
     pub fn pointers(&self) -> &SwellFunctionPointers {
         &self.pointers
+    }
+
+    /// Returns the plug-in context.
+    pub fn plugin_context(&self) -> &ReaperPluginContext {
+        self.plugin_context
+            .as_ref()
+            .expect("plug-in context not available on demo instances")
     }
 
     /// # Safety
@@ -85,7 +92,7 @@ impl Swell {
         }
         #[cfg(target_os = "windows")]
         {
-            windows::SetWindowText(hwnd, text)
+            windows::SetWindowTextA(hwnd, text)
         }
     }
 }
@@ -104,6 +111,6 @@ mod windows {
         ) -> root::HWND;
     }
     extern "C" {
-        pub fn SetWindowText(hwnd: root::HWND, text: *const ::std::os::raw::c_char) -> root::BOOL;
+        pub fn SetWindowTextA(hwnd: root::HWND, text: *const ::std::os::raw::c_char) -> root::BOOL;
     }
 }

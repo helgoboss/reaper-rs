@@ -164,7 +164,7 @@ mod codegen {
                 #![allow(non_camel_case_types)]
                 #![allow(non_snake_case)]
 
-                use super::{bindings::root, ReaperPluginContext};
+                use crate::{bindings::root, ReaperPluginContext};
                 use c_str_macro::c_str;
 
                 /// This is the low-level API access point to all REAPER functions.
@@ -276,8 +276,7 @@ mod codegen {
                 #![allow(non_camel_case_types)]
                 #![allow(non_snake_case)]
 
-                use super::bindings::root;
-                use c_str_macro::c_str;
+                use crate::{bindings::root, ReaperPluginContext};
 
                 /// This is the low-level API access point to all SWELL functions.
                 ///
@@ -290,22 +289,47 @@ mod codegen {
                 #[derive(Copy, Clone, Debug, Default)]
                 pub struct Swell {
                     pub(crate) pointers: SwellFunctionPointers,
+                    // The only reason why this can be None is that we want to support Default. We want Default
+                    // in order to be able to create rustdoc example code in higher-level APIs without needing a
+                    // proper plug-in context.
+                    pub(crate) plugin_context: Option<ReaperPluginContext>,
                 }
 
                 impl Swell {
-                    /// Loads all available SWELL functions from the given SWELL function provider.
+                    /// Loads all available SWELL functions from the given plug-in context.
                     ///
                     /// Returns a `Swell` instance which allows you to call these functions.
-                    pub fn load(get_swell_func: crate::GetSwellFuncFn) -> Swell {
-                        let pointers = unsafe {
-                            SwellFunctionPointers {
-                                #(
-                                    #names: std::mem::transmute(get_swell_func(c_str!(stringify!(#names)).as_ptr())),
-                                )*
+                    ///
+                    /// On Windows, this function will not load any function pointers because
+                    /// the methods in this struct delegate to the corresponding Windows functions.
+                    ///
+                    /// # Panics
+                    ///
+                    /// If this is Linux and the SWELL function provider is not available, this
+                    /// function panics.
+                    pub fn load(plugin_context: ReaperPluginContext) -> Swell {
+                        #[cfg(target_os = "windows")]
+                        {
+                            Swell {
+                                pointers: Default::default(),
+                                plugin_context: Some(plugin_context)
                             }
-                        };
-                        Swell {
-                            pointers,
+                        }
+                        #[cfg(target_os = "linux")]
+                        {
+                            let get_func = plugin_context.swell_function_provider()
+                                .expect("SWELL function provider not available");
+                            let pointers = unsafe {
+                                SwellFunctionPointers {
+                                    #(
+                                        #names: std::mem::transmute(get_func(c_str_macro::c_str!(stringify!(#names)).as_ptr())),
+                                    )*
+                                }
+                            };
+                            Swell {
+                                pointers,
+                                plugin_context: Some(plugin_context)
+                            }
                         }
                     }
 
