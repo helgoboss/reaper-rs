@@ -39,7 +39,7 @@ fn execute_next_step(
     let step = match steps.pop_front() {
         Some(step) => step,
         None => {
-            log("\n\n**Integration test was successful**\n\n");
+            log("\n**Integration test was successful**\n\n");
             on_finish(Ok(()));
             return;
         }
@@ -97,15 +97,15 @@ fn reaper_version_matches(reaper: &Reaper, step: &TestStep) -> bool {
 }
 
 fn log_skip(msg: &str) {
-    log(format!(" → **SKIPPED** ({})", msg));
+    log(format!("→ **SKIPPED** ({})", msg));
 }
 
 fn log_failure(msg: &str) {
-    log(format!(" → **FAILED**\n\n{}", msg));
+    log(format!("→ **FAILED**\n\n{}", msg));
 }
 
 fn log_step(step_index: usize, name: &str) {
-    log(format!("\n{}. {}", step_index + 1, name));
+    log(format!("{}. {}\n", step_index + 1, name));
 }
 
 fn log<'a>(msg: impl Into<ReaperStringArg<'a>>) {

@@ -125,10 +125,42 @@ impl AudioThreadOnly for RealTimeAudioThreadScope {}
 /// [`MainThreadOnly`]: trait.MainThreadOnly.html
 /// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html
 /// [`ReaperFunctions`]: struct.ReaperFunctions.html
-#[derive(Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct ReaperFunctions<UsageScope = MainThreadScope> {
     low: reaper_low::Reaper,
     p: PhantomData<UsageScope>,
+}
+
+// This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
+static mut INSTANCE: Option<ReaperFunctions<MainThreadScope>> = None;
+static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
+
+impl ReaperFunctions<MainThreadScope> {
+    /// Makes the given instance available globally.
+    ///
+    /// After this has been called, the instance can be queried globally using `get()`.
+    ///
+    /// This can be called once only. Subsequent calls won't have any effect!
+    pub fn make_available_globally(functions: ReaperFunctions<MainThreadScope>) {
+        unsafe {
+            INIT_INSTANCE.call_once(|| INSTANCE = Some(functions));
+        }
+    }
+
+    /// Gives access to the instance which you made available globally before.
+    ///
+    /// # Panics
+    ///
+    /// This panics if [`make_available_globally()`] has not been called before.
+    ///
+    /// [`make_available_globally()`]: fn.make_available_globally.html
+    pub fn get() -> &'static ReaperFunctions<MainThreadScope> {
+        unsafe {
+            INSTANCE
+                .as_ref()
+                .expect("call `make_available_globally()` before using `get()`")
+        }
+    }
 }
 
 impl<UsageScope> ReaperFunctions<UsageScope> {

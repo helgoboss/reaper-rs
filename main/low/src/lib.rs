@@ -60,6 +60,9 @@
 //!
 //! [medium-level]: https://docs.rs/reaper-medium
 //! [`Reaper`]: struct.Reaper.html
+#[macro_use]
+mod macros;
+
 mod bindings;
 
 pub mod raw;
@@ -87,5 +90,3 @@ pub use swell_impl::*;
 
 mod midi;
 pub use midi::*;
-
-mod macros;

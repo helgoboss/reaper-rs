@@ -36,7 +36,8 @@ use std::rc::Rc;
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     // In theory all steps could be declared inline. But that makes the IDE become terribly slow.
     let steps_a = vec![
-        basics(),
+        global_instances(),
+        strings(),
         plugin_context(),
         create_empty_project_in_new_tab(),
         add_track(),
@@ -1753,13 +1754,44 @@ fn create_empty_project_in_new_tab() -> TestStep {
     )
 }
 
-fn basics() -> TestStep {
-    step(AllVersions, "Basics", |reaper, _| {
+fn strings() -> TestStep {
+    step(AllVersions, "Strings", |reaper, _| {
         assert!(Guid::try_from(c_str!("{hey}")).is_err());
-        reaper.show_console_msg(c_str!("Test string types and encoding:\n"));
         reaper.show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
         reaper.show_console_msg("- &str: 范例文字äöüß\n");
         reaper.show_console_msg(String::from("- String: 范例文字äöüß"));
+        Ok(())
+    })
+}
+
+fn global_instances() -> TestStep {
+    step(AllVersions, "Global instances", |reaper, _| {
+        let medium = reaper.medium();
+        // Low-level REAPER
+        reaper_low::Reaper::make_available_globally(*medium.functions().low());
+        reaper_low::Reaper::make_available_globally(*medium.functions().low());
+        let low = reaper_low::Reaper::get();
+        unsafe {
+            low.ShowConsoleMsg(c_str!("- Hello from low-level API\n").as_ptr());
+        }
+        // SWELL
+        if cfg!(target_os = "linux") {
+            let swell = Swell::load(
+                medium
+                    .functions()
+                    .low()
+                    .plugin_context()
+                    .swell_function_provider()
+                    .expect("no SWELL although on Linux"),
+            );
+            Swell::make_available_globally(swell);
+            let _ = Swell::get();
+        }
+        // Medium-level REAPER
+        reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());
+        reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());
+        let medium_functions = reaper_medium::ReaperFunctions::get();
+        medium_functions.show_console_msg("- Hello from medium-level API\n");
         Ok(())
     })
 }
