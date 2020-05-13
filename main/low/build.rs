@@ -26,6 +26,26 @@ mod codegen {
     }
 
     mod phase_one {
+        use bindgen::callbacks::{IntKind, ParseCallbacks};
+
+        #[derive(Debug)]
+        struct CustomParseCallbacks;
+
+        impl ParseCallbacks for CustomParseCallbacks {
+            fn int_macro(&self, name: &str, _value: i64) -> Option<IntKind> {
+                if name.starts_with("CSURF_EXT_")
+                    || name.starts_with("VK_")
+                    || name.starts_with("SW_")
+                    || name == "REAPER_PLUGIN_VERSION"
+                {
+                    return Some(IntKind::I32);
+                }
+                // The following flags stay u32 although the APIs expect i32:
+                // - UNDO_STATE_* (used as bitmask, UNDO_STATE_ALL doesn't fit into i32)
+                None
+            }
+        }
+
         /// Generates the `bindings.rs` file from REAPER C++ headers
         pub fn generate_bindings() {
             println!("cargo:rerun-if-changed=src/wrapper.hpp");
@@ -43,6 +63,7 @@ mod codegen {
                 // Tell cargo to invalidate the built crate whenever any of the
                 // included header files changed.
                 .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+                .parse_callbacks(Box::new(CustomParseCallbacks))
                 .raw_line("#![allow(clippy::all)]")
                 .raw_line("#![allow(non_upper_case_globals)]")
                 .raw_line("#![allow(non_camel_case_types)]")
@@ -55,6 +76,8 @@ mod codegen {
                 .whitelist_var("REAPER_PLUGIN_VERSION")
                 .whitelist_var("UNDO_STATE_.*")
                 .whitelist_var("VK_.*")
+                .whitelist_var("SW_.*")
+                .whitelist_var("WM_.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_type("HINSTANCE")
                 .whitelist_type("reaper_plugin_info_t")

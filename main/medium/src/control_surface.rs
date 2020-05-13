@@ -347,7 +347,7 @@ pub enum ModKey {
     Menu,
     /// Custom modifier key according to
     /// [this list](https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
-    Custom(u32),
+    Custom(i32),
 }
 
 impl ModKey {
@@ -356,7 +356,6 @@ impl ModKey {
         if value < 0 {
             return Err(TryFromRawError::new("couldn't convert to mod key", value));
         };
-        let value = value as u32;
         use ModKey::*;
         let key = match value {
             raw::VK_SHIFT => Shift,
@@ -605,7 +604,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     ) -> i32 {
         let result = unsafe {
             // TODO-low Delegate all known CSURF_EXT_ constants
-            match call as u32 {
+            match call {
                 raw::CSURF_EXT_SETINPUTMONITOR => {
                     let recmon: i32 = deref_as(parm2).expect("recmon pointer is null");
                     self.delegate.ext_set_input_monitor(ExtSetInputMonitorArgs {
@@ -626,7 +625,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                         param_index: param_index as u32,
                         param_value: ReaperNormalizedFxParamValue::new(normalized_value),
                     };
-                    match call as u32 {
+                    match call {
                         raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_set_fx_param(args),
                         raw::CSURF_EXT_SETFXPARAM_RECFX => {
                             self.delegate.ext_set_fx_param_rec_fx(args)

@@ -27,7 +27,8 @@ pub use super::bindings::root::{
 /// the same. E.g. `DWORD` ends up as `c_ulong` on Windows (= `u32` on Windows) and
 /// `c_uint` on Linux (= `u32` on Linux).
 pub use super::bindings::root::{
-    ACCEL, DLL_PROCESS_ATTACH, GUID, HINSTANCE, HWND, HWND__, VK_CONTROL, VK_MENU, VK_SHIFT,
+    ACCEL, DLL_PROCESS_ATTACH, GUID, HINSTANCE, HWND, HWND__, SW_SHOW, VK_CONTROL, VK_MENU,
+    VK_SHIFT,
 };
 
 /// Function pointer type for hook commands.
