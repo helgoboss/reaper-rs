@@ -66,7 +66,7 @@ pub fn create_default_console_msg_formatter(
     move |panic_info, backtrace| {
         format!("
 
-Sorry, an error occurred in a REAPER extension. It seems that a crash has been prevented, but better save your project at this point, just to be sure.
+Sorry, an error occurred in a REAPER plug-in. It seems that a crash has been prevented. Better save your project at this point, preferably as a new file. It's recommended to restart REAPER before using the plug-in again. 
 
 Please report this error:
 
