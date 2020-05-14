@@ -70,13 +70,14 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         mod reaper_extension_plugin {
-            static mut SWELL_GET_FUNC: Option<
-                unsafe extern "C" fn(
-                    name: *const std::os::raw::c_char,
-                ) -> *mut std::os::raw::c_void,
-            > = None;
-            static INIT_SWELL_GET_FUNC: std::sync::Once = std::sync::Once::new();
+            /// Exposes the (hopefully) obtained handles.
+            pub fn static_context() -> reaper_low::StaticReaperExtensionPluginContext {
+                reaper_low::StaticReaperExtensionPluginContext {
+                    get_swell_func: unsafe { GET_SWELL_FUNC },
+                }
+            }
 
+            // Entry point for getting hold of the SWELL function provider.
             #[allow(non_snake_case)]
             #[no_mangle]
             extern "C" fn SWELL_dllMain(
@@ -89,18 +90,34 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
                 >,
             ) -> std::os::raw::c_int {
                 if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
-                    INIT_SWELL_GET_FUNC.call_once(|| {
-                        unsafe { SWELL_GET_FUNC = get_func };
+                    INIT_GET_SWELL_FUNC.call_once(|| {
+                        unsafe { GET_SWELL_FUNC = get_func };
                     });
                 }
+                // Give the C++ side of the plug-in the chance to initialize its SWELL function
+                // pointers as well.
+                #[cfg(not(target_os = "windows"))]
+                unsafe { SWELL_dllMain_called_from_rust(hinstance, reason, get_func); }
                 1
             }
-
-            pub fn static_context() -> reaper_low::StaticReaperExtensionPluginContext {
-                reaper_low::StaticReaperExtensionPluginContext {
-                    get_swell_func: unsafe { SWELL_GET_FUNC },
-                }
+            #[cfg(not(target_os = "windows"))]
+            extern "C" {
+                pub fn SWELL_dllMain_called_from_rust(
+                   hinstance: reaper_low::raw::HINSTANCE,
+                   reason: u32,
+                   get_func: Option<
+                       unsafe extern "C" fn(
+                           name: *const std::os::raw::c_char,
+                       ) -> *mut std::os::raw::c_void,
+                   >,
+                ) -> std::os::raw::c_int;
             }
+            static mut GET_SWELL_FUNC: Option<
+                unsafe extern "C" fn(
+                    name: *const std::os::raw::c_char,
+                ) -> *mut std::os::raw::c_void,
+            > = None;
+            static INIT_GET_SWELL_FUNC: std::sync::Once = std::sync::Once::new();
         }
 
         #[no_mangle]

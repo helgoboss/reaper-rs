@@ -128,30 +128,21 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
 
 fn swell() -> TestStep {
     step(AllVersions, "SWELL", |reaper, _| {
+        let swell = Swell::load(*reaper.medium().functions().low().plugin_context());
         if cfg!(target_os = "windows") {
+            assert!(swell.pointers().MessageBox.is_none());
             Ok(())
         } else {
-            // Given
-            let swell = Swell::load(
-                reaper
-                    .medium()
-                    .functions()
-                    .low()
-                    .plugin_context()
-                    .swell_function_provider()
-                    .expect("SWELL function provider not available although Linux"),
-            );
-            // When
             assert!(swell.pointers().MessageBox.is_some());
-            // TODO-low At some point we might be okay with interactive tests
-            // swell.MessageBox(
-            //     null_mut(),
-            //     c_str!("Hello world from SWELL").as_ptr(),
-            //     c_str!("reaper-rs SWELL").as_ptr(),
-            //     1,
-            // );
             Ok(())
         }
+        // TODO-low At some point we might be okay with interactive tests
+        // swell.MessageBox(
+        //     null_mut(),
+        //     c_str!("Hello world from SWELL").as_ptr(),
+        //     c_str!("reaper-rs SWELL").as_ptr(),
+        //     1,
+        // );
     })
 }
 
@@ -1771,22 +1762,15 @@ fn global_instances() -> TestStep {
         reaper_low::Reaper::make_available_globally(*medium.functions().low());
         reaper_low::Reaper::make_available_globally(*medium.functions().low());
         let low = reaper_low::Reaper::get();
+        println!("reaper_low::Reaper {:?}", &low);
         unsafe {
             low.ShowConsoleMsg(c_str!("- Hello from low-level API\n").as_ptr());
         }
         // SWELL
-        if cfg!(target_os = "linux") {
-            let swell = Swell::load(
-                medium
-                    .functions()
-                    .low()
-                    .plugin_context()
-                    .swell_function_provider()
-                    .expect("no SWELL although on Linux"),
-            );
-            Swell::make_available_globally(swell);
-            let _ = Swell::get();
-        }
+        let swell = Swell::load(*medium.functions().low().plugin_context());
+        println!("reaper_low::Swell {:?}", &swell);
+        Swell::make_available_globally(swell);
+        let _ = Swell::get();
         // Medium-level REAPER
         reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());
         reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());
