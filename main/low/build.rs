@@ -3,9 +3,26 @@ fn main() {
     #[cfg(target_os = "linux")]
     #[cfg(feature = "generate-stage-1")]
     codegen::stage_one::generate_bindings();
+
     #[cfg(feature = "generate-stage-2")]
-    codegen::stage_two::generate_all();
+    codegen::stage_two::generate_reaper_and_swell();
+
+    #[cfg(target_os = "linux")]
+    compile_swell_dialog_generator_support();
+
     compile_glue_code();
+}
+
+/// This makes SWELL dialogs via "swell-dlggen.h" possible (on C++ side only, via cc crate).
+/// See the C++ source file for a detailled explanation.
+#[cfg(target_os = "linux")]
+fn compile_swell_dialog_generator_support() {
+    cc::Build::new()
+        .cpp(true)
+        .warnings(false)
+        .define("SWELL_PROVIDED_BY_APP", None)
+        .file("src/swell_modstub_generic_mod.cpp")
+        .compile("swell");
 }
 
 /// Compiles C++ glue code. This is necessary to interact with those parts of the REAPER C++ API
@@ -126,7 +143,7 @@ mod codegen {
         };
 
         /// Generates `reaper.rs` and `swell.rs` from the previously generated `bindings.rs`
-        pub fn generate_all() {
+        pub fn generate_reaper_and_swell() {
             let file = parse_file("src/bindings.rs");
             generate_reaper(&file);
             generate_swell(&file);

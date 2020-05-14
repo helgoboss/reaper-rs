@@ -65,8 +65,7 @@ impl Swell {
         #[cfg(target_os = "linux")]
         {
             self.SWELL_CreateDialog(
-                // root::SWELL_curmodule_dialogresource_head only works with dialog gen
-                std::ptr::null_mut(),
+                root::SWELL_curmodule_dialogresource_head,
                 resid,
                 par,
                 dlgproc,
