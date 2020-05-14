@@ -6,7 +6,6 @@ use reaper_medium::{
     CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     OnAudioBufferArgs,
 };
-use std::panic::RefUnwindSafe;
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
 use vst::plugin::{HostCallback, Info, Plugin};
@@ -79,8 +78,6 @@ struct MyControlSurface {
     functions: reaper_medium::ReaperFunctions,
     receiver: Receiver<String>,
 }
-
-impl RefUnwindSafe for MyControlSurface {}
 
 impl MediumReaperControlSurface for MyControlSurface {
     fn run(&mut self) {
