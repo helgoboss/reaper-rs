@@ -6,7 +6,6 @@ use crate::raw;
 
 use std::fmt::Debug;
 use std::os::raw::c_void;
-use std::panic::RefUnwindSafe;
 use std::ptr::{null, null_mut, NonNull};
 
 /// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`.
@@ -43,7 +42,7 @@ use std::ptr::{null, null_mut, NonNull};
 /// avoid this situation by just deferring the event handling to the next main loop cycle.
 ///
 /// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
-pub trait IReaperControlSurface: RefUnwindSafe + Debug {
+pub trait IReaperControlSurface: Debug {
     fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
         null()
     }

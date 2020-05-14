@@ -11,7 +11,6 @@ use std::borrow::Cow;
 use std::ffi::CStr;
 use std::fmt::Debug;
 use std::os::raw::c_void;
-use std::panic::RefUnwindSafe;
 use std::ptr::null_mut;
 
 /// Consumers need to implement this trait in order to get notified about various REAPER events.
@@ -21,7 +20,7 @@ use std::ptr::null_mut;
 /// See [`plugin_register_add_csurf_inst`].
 ///
 /// [`plugin_register_add_csurf_inst`]: struct.Reaper.html#method.plugin_register_add_csurf_inst
-pub trait MediumReaperControlSurface: RefUnwindSafe + Debug {
+pub trait MediumReaperControlSurface: Debug {
     /// Should return the control surface type.
     ///
     /// Must be a simple unique string with only A-Z, 0-9, no spaces or other characters.

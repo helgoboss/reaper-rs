@@ -2,7 +2,7 @@ use super::raw::{reaper_plugin_info_t, HINSTANCE};
 use super::ReaperPluginContext;
 use crate::StaticReaperExtensionPluginContext;
 use std::error::Error;
-use std::panic::{catch_unwind, UnwindSafe};
+use std::panic::{catch_unwind, AssertUnwindSafe};
 
 /// This function catches panics before they reach REAPER.
 ///
@@ -14,8 +14,8 @@ use std::panic::{catch_unwind, UnwindSafe};
 /// Right now this doesn't do anything else than calling `catch_unwind()` but it might do more in
 /// future. Please note that logging is *not* supposed to be done here. It should be done in the
 /// panic hook instead.
-pub fn firewall<F: FnOnce() -> R + UnwindSafe, R>(f: F) -> Option<R> {
-    catch_unwind(f).ok()
+pub fn firewall<F: FnOnce() -> R, R>(f: F) -> Option<R> {
+    catch_unwind(AssertUnwindSafe(f)).ok()
 }
 
 /// This is a convenience function for bootstrapping extension plug-ins.
