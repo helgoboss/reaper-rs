@@ -34,7 +34,7 @@ generate-stage-2 = ["quote", "syn", "proc-macro2", "phf"]
 
 [dependencies]
 c_str_macro = "1.0.2"
-vst = "0.2.0"
+vst = { git = "https://github.com/helgoboss/vst-rs", branch = "feature/custom-support-variant" }
 derive_more = "0.99.5"
 
 [dev-dependencies]
