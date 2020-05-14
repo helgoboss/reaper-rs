@@ -69,19 +69,21 @@ macro_rules! reaper_vst_plugin {
                 // Give the C++ side of the plug-in the chance to initialize its SWELL function
                 // pointers as well.
                 #[cfg(not(target_os = "windows"))]
-                unsafe { SWELL_dllMain_called_from_rust(hinstance, reason, get_func); }
+                unsafe {
+                    SWELL_dllMain_called_from_rust(hinstance, reason, get_func);
+                }
                 1
             }
             #[cfg(not(target_os = "windows"))]
             extern "C" {
                 pub fn SWELL_dllMain_called_from_rust(
-                   hinstance: reaper_low::raw::HINSTANCE,
-                   reason: u32,
-                   get_func: Option<
-                       unsafe extern "C" fn(
-                           name: *const std::os::raw::c_char,
-                       ) -> *mut std::os::raw::c_void,
-                   >,
+                    hinstance: reaper_low::raw::HINSTANCE,
+                    reason: u32,
+                    get_func: Option<
+                        unsafe extern "C" fn(
+                            name: *const std::os::raw::c_char,
+                        ) -> *mut std::os::raw::c_void,
+                    >,
                 ) -> std::os::raw::c_int;
             }
             static mut GET_SWELL_FUNC: Option<
