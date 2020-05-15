@@ -400,6 +400,13 @@ impl Reaper {
             unsafe { REAPER_INSTANCE.borrow().is_none() },
             "There's a Reaper instance already"
         );
+        // TODO Making available this object globally is maybe not the best way. In most places,
+        //  only the functions are needed, not the extra stuff (subjects, channels etc.) which
+        //  requires interior mutability. Handle this.
+        // For now, we set up a medium-level Reaper instance and use this wherever possible, in
+        // order to get a feeling in which places we really need the full high-level Reaper
+        // instance.
+        reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
         let reaper = Reaper {
             medium: RefCell::new(medium),
             logger,
@@ -564,7 +571,7 @@ impl Reaper {
     }
 
     pub fn generate_guid(&self) -> Guid {
-        Guid::new(Reaper::get().medium().functions().gen_guid())
+        Guid::new(ReaperFunctions::get().gen_guid())
     }
 
     pub fn register_action(

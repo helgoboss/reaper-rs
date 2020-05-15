@@ -11,6 +11,10 @@ edition = "2018"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 publish = false
 
+[features]
+# Activates measuring of function execution times.
+reaper-meter = ["reaper-medium/reaper-meter"]
+
 [dependencies]
 c_str_macro = "1.0.2"
 once_cell = "1.3.1"

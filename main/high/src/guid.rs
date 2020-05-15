@@ -1,7 +1,7 @@
-use crate::Reaper;
 use reaper_low::raw::GUID;
 use std::convert;
 
+use reaper_medium::ReaperFunctions;
 use std::ffi::{CStr, CString};
 use std::fmt;
 use std::fmt::Formatter;
@@ -18,10 +18,7 @@ impl Guid {
     }
 
     pub fn to_string_with_braces(&self) -> String {
-        let c_string = Reaper::get()
-            .medium()
-            .functions()
-            .guid_to_string(&self.internal);
+        let c_string = ReaperFunctions::get().guid_to_string(&self.internal);
         c_string.into_string().unwrap()
     }
 
@@ -41,10 +38,7 @@ impl fmt::Debug for Guid {
 
 impl From<&Guid> for CString {
     fn from(guid: &Guid) -> Self {
-        Reaper::get()
-            .medium()
-            .functions()
-            .guid_to_string(&guid.internal)
+        ReaperFunctions::get().guid_to_string(&guid.internal)
     }
 }
 
@@ -52,9 +46,7 @@ impl convert::TryFrom<&CStr> for Guid {
     type Error = &'static str;
 
     fn try_from(value: &CStr) -> Result<Guid, Self::Error> {
-        Reaper::get()
-            .medium()
-            .functions()
+        ReaperFunctions::get()
             .string_to_guid(value)
             .map(Guid::new)
             .map_err(|_| "Invalid GUID")

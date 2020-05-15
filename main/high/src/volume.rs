@@ -1,5 +1,4 @@
-use crate::Reaper;
-use reaper_medium::{Db, ReaperVolumeValue, VolumeSliderValue};
+use reaper_medium::{Db, ReaperFunctions, ReaperVolumeValue, VolumeSliderValue};
 
 pub struct Volume {
     normalized_value: f64,
@@ -21,9 +20,7 @@ impl Volume {
     }
 
     pub fn from_db(db: Db) -> Volume {
-        Volume::from_normalized_value(
-            Reaper::get().medium().functions().db2slider(db).get() / 1000.0,
-        )
+        Volume::from_normalized_value(ReaperFunctions::get().db2slider(db).get() / 1000.0)
     }
 
     pub fn get_normalized_value(&self) -> f64 {
@@ -35,9 +32,6 @@ impl Volume {
     }
 
     pub fn get_db(&self) -> Db {
-        Reaper::get()
-            .medium()
-            .functions()
-            .slider2db(VolumeSliderValue::new(self.normalized_value * 1000.0))
+        ReaperFunctions::get().slider2db(VolumeSliderValue::new(self.normalized_value * 1000.0))
     }
 }
