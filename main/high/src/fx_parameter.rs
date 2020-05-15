@@ -1,6 +1,5 @@
 use crate::fx::Fx;
 
-
 use reaper_medium::{
     GetParameterStepSizesResult, MediaTrack, ReaperFunctions, ReaperNormalizedFxParamValue,
 };

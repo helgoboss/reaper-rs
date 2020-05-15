@@ -1,4 +1,3 @@
-
 use reaper_medium::{Db, ReaperFunctions, ReaperVolumeValue, VolumeSliderValue};
 
 pub struct Volume {

@@ -1,4 +1,4 @@
-use crate::{Action};
+use crate::Action;
 use reaper_medium::{CommandId, KbdSectionInfo, ReaperFunctions, SectionId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
