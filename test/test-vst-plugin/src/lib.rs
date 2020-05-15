@@ -105,7 +105,7 @@ impl TestVstPlugin {
             med.functions()
                 .show_console_msg("Registering control surface ...");
             med.plugin_register_add_csurf_inst(MyControlSurface {
-                functions: *med.functions(),
+                functions: med.functions().clone(),
                 receiver,
             })
             .expect("couldn't register control surface");

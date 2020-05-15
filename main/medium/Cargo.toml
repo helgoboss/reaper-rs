@@ -16,6 +16,8 @@ derive_more = "0.99.5"
 reaper-low = { version = "0.1.0", path = '../low' }
 helgoboss-midi = { version = "0.1.0" }
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
+metered = "0.3.0"
+serde = { version = "1.0" }
 
 [dev-dependencies]
 version-sync = "0.9"

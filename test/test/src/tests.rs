@@ -111,6 +111,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         get_project_tempo(),
         set_project_tempo(),
         swell(),
+        metrics(),
     ]
     .into_iter();
     let output_fx_steps = create_fx_steps("Output FX chain", || {
@@ -143,6 +144,16 @@ fn swell() -> TestStep {
         //     c_str!("reaper-rs SWELL").as_ptr(),
         //     1,
         // );
+    })
+}
+
+fn metrics() -> TestStep {
+    step(AllVersions, "Metrics", |reaper, _| {
+        println!(
+            "reaper_medium::Reaper metrics after integration test: {:#?}",
+            reaper.medium().functions()
+        );
+        Ok(())
     })
 }
 
@@ -1772,8 +1783,8 @@ fn global_instances() -> TestStep {
         Swell::make_available_globally(swell);
         let _ = Swell::get();
         // Medium-level REAPER
-        reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());
-        reaper_medium::ReaperFunctions::make_available_globally(*medium.functions());
+        reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
+        reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
         let medium_functions = reaper_medium::ReaperFunctions::get();
         medium_functions.show_console_msg("- Hello from medium-level API\n");
         Ok(())

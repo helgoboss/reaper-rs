@@ -1,4 +1,4 @@
-#![feature(fn_traits, clamp, backtrace)]
+#![feature(fn_traits, clamp, backtrace, test)]
 //! This crate contains the high-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
 //! **This API is not polished yet and will still undergo many changes!**
@@ -79,3 +79,19 @@ pub use action_character::*;
 mod undo_block;
 
 mod normalized_value;
+
+#[cfg(test)]
+mod tests {
+    extern crate test;
+    use test::Bencher;
+
+    #[bench]
+    fn thread_comparison_speed(b: &mut Bencher) {
+        let main_thread_id = std::thread::current().id();
+        b.iter(|| {
+            std::thread::spawn(|| 5);
+            let current_thread_id = test::black_box(std::thread::current().id());
+            assert_eq!(current_thread_id, main_thread_id);
+        });
+    }
+}
