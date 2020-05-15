@@ -152,7 +152,7 @@ pub struct ReaperFunctions<UsageScope = MainThreadScope> {
 impl<UsageScope> Clone for ReaperFunctions<UsageScope> {
     fn clone(&self) -> Self {
         Self {
-            low: *self.low,
+            low: self.low,
             p: Default::default(),
             #[cfg(feature = "reaper-meter")]
             metrics: Default::default(),
