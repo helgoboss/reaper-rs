@@ -1,3 +1,4 @@
+#[cfg(feature = "reaper-measure")]
 use metered::{metered, ResponseTime};
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
@@ -28,18 +29,22 @@ use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 
+/// Represents a privilege to execute functions which are safe to execute from any thread.
+pub trait AnyThread: private::Sealed {}
+
 /// Represents a privilege to execute functions which are only safe to execute from the main thread.
-pub trait MainThreadOnly: private::Sealed {}
+pub trait MainThreadOnly: AnyThread + private::Sealed {}
+
+/// Represents a privilege to execute functions which are only safe to execute from the real-time
+/// audio thread.
+pub trait AudioThreadOnly: AnyThread + private::Sealed {}
 
 /// A usage scope which unlocks all functions that are safe to execute from the main thread.
 #[derive(Copy, Clone, Debug, Default)]
 pub struct MainThreadScope(pub(crate) ());
 
 impl MainThreadOnly for MainThreadScope {}
-
-/// Represents a privilege to execute functions which are only safe to execute from the real-time
-/// audio thread.
-pub trait AudioThreadOnly: private::Sealed {}
+impl AnyThread for MainThreadScope {}
 
 /// A usage scope which unlocks all functions that are safe to execute from the real-time audio
 /// thread.
@@ -47,6 +52,7 @@ pub trait AudioThreadOnly: private::Sealed {}
 pub struct RealTimeAudioThreadScope(pub(crate) ());
 
 impl AudioThreadOnly for RealTimeAudioThreadScope {}
+impl AnyThread for RealTimeAudioThreadScope {}
 
 /// This is the main access point for most REAPER functions.
 ///
@@ -130,6 +136,7 @@ impl AudioThreadOnly for RealTimeAudioThreadScope {}
 pub struct ReaperFunctions<UsageScope = MainThreadScope> {
     low: reaper_low::Reaper,
     p: PhantomData<UsageScope>,
+    #[cfg(feature = "reaper-measure")]
     metrics: ReaperMetrics,
 }
 
@@ -138,6 +145,7 @@ impl<UsageScope> Clone for ReaperFunctions<UsageScope> {
         Self {
             low: self.low.clone(),
             p: Default::default(),
+            #[cfg(feature = "reaper-measure")]
             metrics: Default::default(),
         }
     }
@@ -175,19 +183,18 @@ impl ReaperFunctions<MainThreadScope> {
     }
 }
 
-#[metered(registry = ReaperMetrics)]
-#[measure([ResponseTime])]
+#[cfg_attr(feature = "reaper-measure", metered(registry = ReaperMetrics), measure([ResponseTime]))]
 impl<UsageScope> ReaperFunctions<UsageScope> {
     pub(crate) fn new(low: reaper_low::Reaper) -> ReaperFunctions<UsageScope> {
         ReaperFunctions {
             low,
             p: PhantomData,
+            #[cfg(feature = "reaper-measure")]
             metrics: Default::default(),
         }
     }
 
     /// Gives access to the low-level Reaper instance.
-    #[measure]
     pub fn low(&self) -> &reaper_low::Reaper {
         &self.low
     }
@@ -218,7 +225,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     //  provide a feature to turn it on/off or make it a debug_assert only or provide an additional
     //  unchecked version. In audio-thread functions it might be too much overhead though calling
     //  is_in_real_time_audio() each time, so maybe we should mark them as unsafe.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn enum_projects(
         &self,
         project_ref: ProjectRef,
@@ -272,7 +279,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// let track = reaper.functions().get_track(CurrentProject, 3).ok_or("No such track")?;
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_track(&self, project: ProjectContext, track_index: u32) -> Option<MediaTrack>
     where
         UsageScope: MainThreadOnly,
@@ -288,7 +295,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_track()`]: #method.get_track
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_unchecked(
         &self,
         project: ProjectContext,
@@ -317,12 +324,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// Returns `true` if the pointer is a valid object of the correct type in the given project.
     /// The project is ignored if the pointer itself is a project.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-audio", measure)]
     pub fn validate_ptr_2<'a>(
         &self,
         project: ProjectContext,
         pointer: impl Into<ReaperPointer<'a>>,
-    ) -> bool {
+    ) -> bool
+    where
+        UsageScope: AnyThread,
+    {
         let pointer = pointer.into();
         unsafe {
             self.low.ValidatePtr2(
@@ -336,7 +346,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Checks if the given pointer is still valid.
     ///
     /// Returns `true` if the pointer is a valid object of the correct type in the current project.
-    #[measure]
+    #[cfg_attr(feature = "measure", measure)]
     pub fn validate_ptr<'a>(&self, pointer: impl Into<ReaperPointer<'a>>) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -349,7 +359,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Redraws the arrange view and ruler.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn update_timeline(&self)
     where
         UsageScope: MainThreadOnly,
@@ -360,8 +370,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Shows a message to the user in the ReaScript console.
     ///
     /// This is also useful for debugging. Send "\n" for newline and "" to clear the console.
-    #[measure]
-    pub fn show_console_msg<'a>(&self, message: impl Into<ReaperStringArg<'a>>) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn show_console_msg<'a>(&self, message: impl Into<ReaperStringArg<'a>>)
+    where
+        UsageScope: MainThreadOnly,
+    {
         unsafe { self.low.ShowConsoleMsg(message.into().as_ptr()) }
     }
 
@@ -375,7 +388,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track or invalid new value.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info(
         &self,
         track: MediaTrack,
@@ -394,7 +407,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info_get_par_track(
         &self,
         track: MediaTrack,
@@ -414,7 +427,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info_get_project(
         &self,
         track: MediaTrack,
@@ -456,7 +469,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info_get_name<R>(
         &self,
         track: MediaTrack,
@@ -474,7 +487,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info_get_rec_mon(
         &self,
         track: MediaTrack,
@@ -492,7 +505,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info_get_rec_input(
         &self,
         track: MediaTrack,
@@ -515,7 +528,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info_get_track_number(
         &self,
         track: MediaTrack,
@@ -539,7 +552,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_media_track_info_get_guid(&self, track: MediaTrack) -> GUID
     where
         UsageScope: MainThreadOnly,
@@ -554,8 +567,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// anticipative FX thread.
     ///
     /// [`OnAudioBuffer`]: trait.MediumOnAudioBuffer.html#method.call
-    #[measure]
-    pub fn is_in_real_time_audio(&self) -> bool {
+    #[cfg_attr(feature = "reaper-measure-audio", measure)]
+    pub fn is_in_real_time_audio(&self) -> bool
+    where
+        UsageScope: AnyThread,
+    {
         self.low.IsInRealTimeAudio() != 0
     }
 
@@ -569,8 +585,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Panics if the given project is not valid anymore.
     ///
     /// [`named_command_lookup()`]: #method.named_command_lookup
-    #[measure]
-    pub fn main_on_command_ex(&self, command: CommandId, flag: i32, project: ProjectContext) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn main_on_command_ex(&self, command: CommandId, flag: i32, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.require_valid_project(project);
         unsafe { self.main_on_command_ex_unchecked(command, flag, project) }
     }
@@ -582,13 +601,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`main_on_command_ex()`]: #method.main_on_command_ex
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn main_on_command_ex_unchecked(
         &self,
         command_id: CommandId,
         flag: i32,
         project: ProjectContext,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low
             .Main_OnCommandEx(command_id.to_raw(), flag, project.to_raw());
     }
@@ -611,13 +632,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// }
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_set_surface_mute(
         &self,
         track: MediaTrack,
         mute: bool,
         notification_behavior: NotificationBehavior,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low
             .CSurf_SetSurfaceMute(track.as_ptr(), mute, notification_behavior.to_raw());
     }
@@ -627,19 +650,21 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_set_surface_solo(
         &self,
         track: MediaTrack,
         solo: bool,
         notification_behavior: NotificationBehavior,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low
             .CSurf_SetSurfaceSolo(track.as_ptr(), solo, notification_behavior.to_raw());
     }
 
     /// Generates a random GUID.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn gen_guid(&self) -> GUID
     where
         UsageScope: MainThreadOnly,
@@ -666,7 +691,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     //
     // In order to not need unsafe, we take the closure. For normal medium-level API usage, this is
     // the safe way to go.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn section_from_unique_id<R>(
         &self,
         section_id: SectionId,
@@ -694,7 +719,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     // that a section is always valid, e.g. if it's the main section. A higher-level API could
     // use this for such edge cases. If not the main section, a higher-level API
     // should check if the section still exists (via section index) before each usage.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn section_from_unique_id_unchecked(
         &self,
         section_id: SectionId,
@@ -717,7 +742,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// [`main_on_command_ex()`]: #method.main_on_command_ex
     // Kept return value type i32 because I have no idea what the return value is about.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn kbd_on_main_action_ex(
         &self,
         command_id: CommandId,
@@ -751,7 +776,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Returns the REAPER main window handle.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_main_hwnd(&self) -> Hwnd
     where
         UsageScope: MainThreadOnly,
@@ -763,7 +788,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// Named commands can be registered by extensions (e.g. `_SWS_ABOUT`), ReaScripts
     /// (e.g. `_113088d11ae641c193a2b7ede3041ad5`) or custom actions.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn named_command_lookup<'a>(
         &self,
         command_name: impl Into<ReaperStringArg<'a>>,
@@ -779,8 +804,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Clears the ReaScript console.
-    #[measure]
-    pub fn clear_console(&self) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn clear_console(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.ClearConsole();
     }
 
@@ -789,7 +817,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn count_tracks(&self, project: ProjectContext) -> u32
     where
         UsageScope: MainThreadOnly,
@@ -805,7 +833,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`count_tracks()`]: #method.count_tracks
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn count_tracks_unchecked(&self, project: ProjectContext) -> u32
     where
         UsageScope: MainThreadOnly,
@@ -814,8 +842,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Creates a new track at the given index.
-    #[measure]
-    pub fn insert_track_at_index(&self, index: u32, defaults_behavior: TrackDefaultsBehavior) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn insert_track_at_index(&self, index: u32, defaults_behavior: TrackDefaultsBehavior)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.InsertTrackAtIndex(
             index as i32,
             defaults_behavior == TrackDefaultsBehavior::AddDefaultEnvAndFx,
@@ -823,14 +854,20 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Returns the maximum number of MIDI input devices (usually 63).
-    #[measure]
-    pub fn get_max_midi_inputs(&self) -> u32 {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn get_max_midi_inputs(&self) -> u32
+    where
+        UsageScope: AnyThread,
+    {
         self.low.GetMaxMidiInputs() as u32
     }
 
     /// Returns the maximum number of MIDI output devices (usually 64).
-    #[measure]
-    pub fn get_max_midi_outputs(&self) -> u32 {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn get_max_midi_outputs(&self) -> u32
+    where
+        UsageScope: AnyThread,
+    {
         self.low.GetMaxMidiOutputs() as u32
     }
 
@@ -838,7 +875,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// With `buffer_size` you can tell REAPER how many bytes of the device name you want.
     /// If you are not interested in the device name at all, pass 0.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_midi_input_name(
         &self,
         device_id: MidiInputDeviceId,
@@ -876,7 +913,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// With `buffer_size` you can tell REAPER how many bytes of the device name you want.
     /// If you are not interested in the device name at all, pass 0.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_midi_output_name(
         &self,
         device_id: MidiOutputDeviceId,
@@ -941,7 +978,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_add_by_name_query<'a>(
         &self,
         track: MediaTrack,
@@ -971,7 +1008,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     ///
     /// [`track_fx_add_by_name_query()`]: #method.track_fx_add_by_name_query
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_add_by_name_add<'a>(
         &self,
         track: MediaTrack,
@@ -994,7 +1031,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_enabled(
         &self,
         track: MediaTrack,
@@ -1022,7 +1059,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_fx_name(
         &self,
         track: MediaTrack,
@@ -1052,7 +1089,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_instrument(&self, track: MediaTrack) -> Option<u32>
     where
         UsageScope: MainThreadOnly,
@@ -1069,13 +1106,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_set_enabled(
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
         is_enabled: bool,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low
             .TrackFX_SetEnabled(track.as_ptr(), fx_location.to_raw(), is_enabled);
     }
@@ -1085,7 +1124,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_num_params(
         &self,
         track: MediaTrack,
@@ -1102,7 +1141,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// This is usually only used from `project_config_extension_t`.
     // TODO-low `project_config_extension_t` is not yet ported
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_current_project_in_load_save(&self) -> Option<ReaProject>
     where
         UsageScope: MainThreadOnly,
@@ -1126,7 +1165,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_param_name(
         &self,
         track: MediaTrack,
@@ -1171,7 +1210,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_formatted_param_value(
         &self,
         track: MediaTrack,
@@ -1223,7 +1262,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     ///
     /// [`track_fx_get_formatted_param_value`]: #method.track_fx_get_formatted_param_value
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_format_param_value_normalized(
         &self,
         track: MediaTrack,
@@ -1263,7 +1302,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_set_param_normalized(
         &self,
         track: MediaTrack,
@@ -1292,7 +1331,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// Returns `Some` if an FX window has focus or was the last focused one and is still open.
     /// Returns `None` if no FX window has focus.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_focused_fx(&self) -> Option<GetFocusedFxResult>
     where
         UsageScope: MainThreadOnly,
@@ -1338,7 +1377,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// Returns `Some` if an FX parameter has been touched already and that FX is still existing.
     /// Returns `None` otherwise.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_last_touched_fx(&self) -> Option<GetLastTouchedFxResult>
     where
         UsageScope: MainThreadOnly,
@@ -1391,13 +1430,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_copy_to_track(
         &self,
         source: (MediaTrack, TrackFxLocation),
         destination: (MediaTrack, TrackFxLocation),
         transfer_behavior: TransferBehavior,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low.TrackFX_CopyToTrack(
             source.0.as_ptr(),
             source.1.to_raw(),
@@ -1416,7 +1457,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_delete(
         &self,
         track: MediaTrack,
@@ -1448,7 +1489,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     // Option makes more sense than Result here because this function is at the same time the
     // correct function to be used to determine *if* a parameter reports step sizes. So
     // "parameter doesn't report step sizes" is a valid result.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_parameter_step_sizes(
         &self,
         track: MediaTrack,
@@ -1491,7 +1532,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_param_ex(
         &self,
         track: MediaTrack,
@@ -1536,8 +1577,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// // ... modify something ...
     /// reaper.functions().undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
     /// ```
-    #[measure]
-    pub fn undo_begin_block_2(&self, project: ProjectContext) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn undo_begin_block_2(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.require_valid_project(project);
         unsafe { self.undo_begin_block_2_unchecked(project) };
     }
@@ -1549,8 +1593,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_begin_block_2()`]: #method.undo_begin_block_2
-    #[measure]
-    pub unsafe fn undo_begin_block_2_unchecked(&self, project: ProjectContext) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub unsafe fn undo_begin_block_2_unchecked(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.Undo_BeginBlock2(project.to_raw());
     }
 
@@ -1559,13 +1606,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn undo_end_block_2<'a>(
         &self,
         project: ProjectContext,
         description: impl Into<ReaperStringArg<'a>>,
         scope: UndoScope,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.require_valid_project(project);
         unsafe {
             self.undo_end_block_2_unchecked(project, description, scope);
@@ -1579,13 +1628,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_end_block_2()`]: #method.undo_end_block_2
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn undo_end_block_2_unchecked<'a>(
         &self,
         project: ProjectContext,
         description: impl Into<ReaperStringArg<'a>>,
         scope: UndoScope,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low.Undo_EndBlock2(
             project.to_raw(),
             description.into().as_ptr(),
@@ -1598,7 +1649,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn undo_can_undo_2<R>(
         &self,
         project: ProjectContext,
@@ -1618,7 +1669,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_can_undo_2()`]: #method.undo_can_undo_2
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn undo_can_undo_2_unchecked<R>(
         &self,
         project: ProjectContext,
@@ -1636,7 +1687,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn undo_can_redo_2<R>(
         &self,
         project: ProjectContext,
@@ -1656,7 +1707,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_can_redo_2()`]: #method.undo_can_redo_2
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn undo_can_redo_2_unchecked<R>(
         &self,
         project: ProjectContext,
@@ -1676,7 +1727,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn undo_do_undo_2(&self, project: ProjectContext) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -1692,7 +1743,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_do_undo_2()`]: #method.undo_do_undo_2
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn undo_do_undo_2_unchecked(&self, project: ProjectContext) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -1707,7 +1758,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn undo_do_redo_2(&self, project: ProjectContext) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -1723,7 +1774,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`undo_do_redo_2()`]: #method.undo_do_redo_2
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn undo_do_redo_2_unchecked(&self, project: ProjectContext) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -1739,8 +1790,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
-    pub fn mark_project_dirty(&self, project: ProjectContext) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn mark_project_dirty(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.require_valid_project(project);
         unsafe {
             self.mark_project_dirty_unchecked(project);
@@ -1754,8 +1808,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`mark_project_dirty()`]: #method.mark_project_dirty
-    #[measure]
-    pub unsafe fn mark_project_dirty_unchecked(&self, project: ProjectContext) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub unsafe fn mark_project_dirty_unchecked(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.MarkProjectDirty(project.to_raw());
     }
 
@@ -1770,7 +1827,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Panics if the given project is not valid anymore.
     ///
     /// [`mark_project_dirty()`]: #method.mark_project_dirty
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn is_project_dirty(&self, project: ProjectContext) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -1786,7 +1843,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`is_project_dirty()`]: #method.is_project_dirty
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn is_project_dirty_unchecked(&self, project: ProjectContext) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -1797,13 +1854,16 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Notifies all control surfaces that something in the track list has changed.
     ///
     /// Behavior not confirmed.
-    #[measure]
-    pub fn track_list_update_all_external_surfaces(&self) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn track_list_update_all_external_surfaces(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.TrackList_UpdateAllExternalSurfaces();
     }
 
     /// Returns the version of the REAPER application in which this plug-in is currently running.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_app_version(&self) -> ReaperVersion<'static>
     where
         UsageScope: MainThreadOnly,
@@ -1818,7 +1878,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_automation_mode(&self, track: MediaTrack) -> AutomationMode
     where
         UsageScope: MainThreadOnly,
@@ -1828,7 +1888,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Returns the global track automation override, if any.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride>
     where
         UsageScope: MainThreadOnly,
@@ -1849,7 +1909,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///
     /// REAPER can crash if you pass an invalid track.
     // TODO-low Test
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_envelope_by_chunk_name(
         &self,
         track: MediaTrack,
@@ -1874,7 +1934,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     ///
     /// [`get_track_envelope_by_chunk_name()`]: #method.get_track_envelope_by_chunk_name
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_envelope_by_name<'a>(
         &self,
         track: MediaTrack,
@@ -1894,7 +1954,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_media_track_info_value(
         &self,
         track: MediaTrack,
@@ -1912,7 +1972,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_count(&self, track: MediaTrack) -> u32
     where
         UsageScope: MainThreadOnly,
@@ -1927,7 +1987,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_rec_count(&self, track: MediaTrack) -> u32
     where
         UsageScope: MainThreadOnly,
@@ -1944,7 +2004,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_fx_guid(
         &self,
         track: MediaTrack,
@@ -1970,7 +2030,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_param_normalized(
         &self,
         track: MediaTrack,
@@ -1998,7 +2058,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_master_track(&self, project: ProjectContext) -> MediaTrack
     where
         UsageScope: MainThreadOnly,
@@ -2014,7 +2074,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_master_track()`]: #method.get_master_track
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_master_track_unchecked(&self, project: ProjectContext) -> MediaTrack
     where
         UsageScope: MainThreadOnly,
@@ -2024,7 +2084,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Converts the given GUID to a string (including braces).
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn guid_to_string(&self, guid: &GUID) -> CString
     where
         UsageScope: MainThreadOnly,
@@ -2036,7 +2096,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Returns the master tempo of the current project.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn master_get_tempo(&self) -> Bpm
     where
         UsageScope: MainThreadOnly,
@@ -2049,13 +2109,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
-    pub fn set_current_bpm(
-        &self,
-        project: ProjectContext,
-        tempo: Bpm,
-        undo_behavior: UndoBehavior,
-    ) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn set_current_bpm(&self, project: ProjectContext, tempo: Bpm, undo_behavior: UndoBehavior)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.require_valid_project(project);
         unsafe {
             self.set_current_bpm_unchecked(project, tempo, undo_behavior);
@@ -2069,13 +2127,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`set_current_bpm()`]: #method.set_current_bpm
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn set_current_bpm_unchecked(
         &self,
         project: ProjectContext,
         tempo: Bpm,
         undo_behavior: UndoBehavior,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low.SetCurrentBPM(
             project.to_raw(),
             tempo.get(),
@@ -2088,7 +2148,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn master_get_play_rate(&self, project: ProjectContext) -> PlaybackSpeedFactor
     where
         UsageScope: MainThreadOnly,
@@ -2104,7 +2164,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`master_get_play_rate()`]: #method.master_get_play_rate
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn master_get_play_rate_unchecked(
         &self,
         project: ProjectContext,
@@ -2117,7 +2177,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Sets the master play rate of the current project.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn csurf_on_play_rate_change(&self, play_rate: PlaybackSpeedFactor) {
         self.low.CSurf_OnPlayRateChange(play_rate.get());
     }
@@ -2125,7 +2185,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// Shows a message box to the user.
     ///
     /// Blocks the main thread.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn show_message_box<'a>(
         &self,
         message: impl Into<ReaperStringArg<'a>>,
@@ -2150,7 +2210,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Errors
     ///
     /// Returns an error if the given string is not a valid GUID string.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn string_to_guid<'a>(
         &self,
         guid_string: impl Into<ReaperStringArg<'a>>,
@@ -2175,7 +2235,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_on_input_monitoring_change_ex(
         &self,
         track: MediaTrack,
@@ -2201,7 +2261,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn set_media_track_info_value(
         &self,
         track: MediaTrack,
@@ -2225,8 +2285,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Stuffs a 3-byte MIDI message into a queue or send it to an external MIDI hardware.
-    #[measure]
-    pub fn stuff_midimessage(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub fn stuff_midimessage(&self, target: StuffMidiMessageTarget, message: impl ShortMessage)
+    where
+        UsageScope: MainThreadOnly,
+    {
         let bytes = message.to_bytes();
         self.low.StuffMIDIMessage(
             target.to_raw(),
@@ -2237,7 +2300,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Converts a decibel value into a volume slider value.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn db2slider(&self, value: Db) -> VolumeSliderValue
     where
         UsageScope: MainThreadOnly,
@@ -2246,7 +2309,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     }
 
     /// Converts a volume slider value into a decibel value.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn slider2db(&self, value: VolumeSliderValue) -> Db
     where
         UsageScope: MainThreadOnly,
@@ -2263,7 +2326,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_ui_vol_pan(
         &self,
         track: MediaTrack,
@@ -2292,13 +2355,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_set_surface_volume(
         &self,
         track: MediaTrack,
         volume: ReaperVolumeValue,
         notification_behavior: NotificationBehavior,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low.CSurf_SetSurfaceVolume(
             track.as_ptr(),
             volume.get(),
@@ -2314,7 +2379,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_on_volume_change_ex(
         &self,
         track: MediaTrack,
@@ -2338,13 +2403,15 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_set_surface_pan(
         &self,
         track: MediaTrack,
         pan: ReaperPanValue,
         notification_behavior: NotificationBehavior,
-    ) {
+    ) where
+        UsageScope: MainThreadOnly,
+    {
         self.low
             .CSurf_SetSurfacePan(track.as_ptr(), pan.get(), notification_behavior.to_raw());
     }
@@ -2356,7 +2423,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_on_pan_change_ex(
         &self,
         track: MediaTrack,
@@ -2380,7 +2447,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn count_selected_tracks_2(
         &self,
         project: ProjectContext,
@@ -2400,7 +2467,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`count_selected_tracks_2()`]: #method.count_selected_tracks_2
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn count_selected_tracks_2_unchecked(
         &self,
         project: ProjectContext,
@@ -2420,8 +2487,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
-    pub unsafe fn set_track_selected(&self, track: MediaTrack, is_selected: bool) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub unsafe fn set_track_selected(&self, track: MediaTrack, is_selected: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.SetTrackSelected(track.as_ptr(), is_selected);
     }
 
@@ -2430,7 +2500,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn get_selected_track_2(
         &self,
         project: ProjectContext,
@@ -2457,7 +2527,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_selected_track_2()`]: #method.get_selected_track_2
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_selected_track_2_unchecked(
         &self,
         project: ProjectContext,
@@ -2482,8 +2552,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
-    pub unsafe fn set_only_track_selected(&self, track: Option<MediaTrack>) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub unsafe fn set_only_track_selected(&self, track: Option<MediaTrack>)
+    where
+        UsageScope: MainThreadOnly,
+    {
         let ptr = match track {
             None => null_mut(),
             Some(t) => t.as_ptr(),
@@ -2496,8 +2569,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
-    pub unsafe fn delete_track(&self, track: MediaTrack) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub unsafe fn delete_track(&self, track: MediaTrack)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.DeleteTrack(track.as_ptr());
     }
 
@@ -2506,7 +2582,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_num_sends(&self, track: MediaTrack, category: TrackSendCategory) -> u32
     where
         UsageScope: MainThreadOnly,
@@ -2521,7 +2597,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track or invalid new value.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_set_track_send_info(
         &self,
         track: MediaTrack,
@@ -2552,7 +2628,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_send_info_desttrack(
         &self,
         track: MediaTrack,
@@ -2589,7 +2665,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_state_chunk(
         &self,
         track: MediaTrack,
@@ -2638,7 +2714,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// };
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn create_track_send(
         &self,
         track: MediaTrack,
@@ -2661,7 +2737,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_on_rec_arm_change_ex(
         &self,
         track: MediaTrack,
@@ -2687,7 +2763,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn set_track_state_chunk<'a>(
         &self,
         track: MediaTrack,
@@ -2715,8 +2791,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
-    pub unsafe fn track_fx_show(&self, track: MediaTrack, instruction: FxShowInstruction) {
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
+    pub unsafe fn track_fx_show(&self, track: MediaTrack, instruction: FxShowInstruction)
+    where
+        UsageScope: MainThreadOnly,
+    {
         self.low.TrackFX_Show(
             track.as_ptr(),
             instruction.location_to_raw(),
@@ -2729,7 +2808,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_floating_window(
         &self,
         track: MediaTrack,
@@ -2751,7 +2830,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_open(&self, track: MediaTrack, fx_location: TrackFxLocation) -> bool
     where
         UsageScope: MainThreadOnly,
@@ -2768,7 +2847,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_on_send_volume_change(
         &self,
         track: MediaTrack,
@@ -2794,7 +2873,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn csurf_on_send_pan_change(
         &self,
         track: MediaTrack,
@@ -2821,7 +2900,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid section.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn kbd_get_text_from_cmd<R>(
         &self,
         command_id: CommandId,
@@ -2851,7 +2930,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     // Option makes more sense than Result here because this function is at the same time the
     // correct function to be used to determine *if* an action reports on/off states. So
     // "action doesn't report on/off states" is a valid result.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_toggle_command_state_2(
         &self,
         section: SectionContext,
@@ -2874,7 +2953,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// The string will *not* start with `_` (e.g. it will return `SWS_ABOUT`).
     ///
     /// Returns `None` if the given command ID is a built-in action or if there's no such ID.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub fn reverse_named_command_lookup<R>(
         &self,
         command_id: CommandId,
@@ -2898,7 +2977,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// REAPER can crash if you pass an invalid track.
     // // send_idx>=0 for hw ouputs, >=nb_of_hw_ouputs for sends. See GetTrackReceiveUIVolPan.
     // Returns Err if send not existing
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn get_track_send_ui_vol_pan(
         &self,
         track: MediaTrack,
@@ -2935,7 +3014,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_preset_index(
         &self,
         track: MediaTrack,
@@ -2970,7 +3049,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_set_preset_by_index(
         &self,
         track: MediaTrack,
@@ -3017,7 +3096,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// };
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_navigate_presets(
         &self,
         track: MediaTrack,
@@ -3048,7 +3127,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-main", measure)]
     pub unsafe fn track_fx_get_preset(
         &self,
         track: MediaTrack,
@@ -3114,7 +3193,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// [audio hook]: struct.Reaper.html#method.audio_reg_hardware_hook_add
     /// [`is_in_real_time_audio()`]: #method.is_in_real_time_audio
     /// [`get_read_buf()`]: struct.MidiInput.html#method.get_read_buf
-    #[measure]
+    #[cfg_attr(feature = "reaper-measure-audio", measure)]
     pub fn get_midi_input<R>(
         &self,
         device_id: MidiInputDeviceId,
@@ -3130,7 +3209,10 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
         NonNull::new(ptr).map(|nnp| use_device(&MidiInput(nnp)))
     }
 
-    fn require_valid_project(&self, project: ProjectContext) {
+    fn require_valid_project(&self, project: ProjectContext)
+    where
+        UsageScope: AnyThread,
+    {
         if let ProjectContext::Proj(p) = project {
             assert!(
                 self.validate_ptr_2(CurrentProject, p),

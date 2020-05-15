@@ -10,14 +10,24 @@ keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
 edition = "2018"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 
+[features]
+# Activates metering of functions which can be safely executed in the main thread only.
+reaper-measure-main = ["reaper-measure"]
+
+# Activates metering of functions which can be safely executed in the real-time audio thread.
+reaper-measure-audio = ["reaper-measure"]
+
+# For internal use only. In itself doesn't activate any measuring. Just provides the necessary data structures.
+reaper-measure = ["metered", "serde"]
+
 [dependencies]
 c_str_macro = "1.0.2"
 derive_more = "0.99.5"
 reaper-low = { version = "0.1.0", path = '../low' }
 helgoboss-midi = { version = "0.1.0" }
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
-metered = "0.3.0"
-serde = { version = "1.0" }
+metered = { version = "0.3.0", optional = true }
+serde = { version = "1.0", optional = true }
 
 [dev-dependencies]
 version-sync = "0.9"
