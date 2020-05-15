@@ -12,11 +12,8 @@ categories = ["api-bindings", "multimedia", "multimedia::audio"]
 publish = false
 
 [features]
-# Activates metering of functions which can be safely executed in the main thread only.
-reaper-measure-main = ["reaper-medium/reaper-measure-main"]
-
-# Activates metering of functions which can be safely executed in the real-time audio thread.
-reaper-measure-audio = ["reaper-medium/reaper-measure-audio"]
+# Activates measuring of function execution times.
+reaper-meter = ["reaper-medium/reaper-meter"]
 
 [dependencies]
 c_str_macro = "1.0.2"
