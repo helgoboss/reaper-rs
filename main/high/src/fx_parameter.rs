@@ -1,7 +1,9 @@
 use crate::fx::Fx;
 use crate::Reaper;
 
-use reaper_medium::{GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue};
+use reaper_medium::{
+    GetParameterStepSizesResult, MediaTrack, ReaperFunctions, ReaperNormalizedFxParamValue,
+};
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
 
@@ -26,23 +28,18 @@ impl FxParameter {
 
     pub fn set_normalized_value(&self, normalized_value: ReaperNormalizedFxParamValue) {
         let _ = unsafe {
-            Reaper::get()
-                .medium()
-                .functions()
-                .track_fx_set_param_normalized(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
-                    self.index,
-                    normalized_value,
-                )
+            ReaperFunctions::get().track_fx_set_param_normalized(
+                self.get_track_raw(),
+                self.fx.get_query_index(),
+                self.index,
+                normalized_value,
+            )
         };
     }
 
     pub fn get_reaper_value(&self) -> ReaperNormalizedFxParamValue {
         unsafe {
-            Reaper::get()
-                .medium()
-                .functions()
+            ReaperFunctions::get()
                 .track_fx_get_param_normalized(
                     self.fx.get_track().get_raw(),
                     self.fx.get_query_index(),
@@ -58,7 +55,7 @@ impl FxParameter {
 
     pub fn get_name(&self) -> CString {
         unsafe {
-            Reaper::get().medium().functions().track_fx_get_param_name(
+            ReaperFunctions::get().track_fx_get_param_name(
                 self.get_track_raw(),
                 self.fx.get_query_index(),
                 self.index,
@@ -74,14 +71,11 @@ impl FxParameter {
 
     pub fn get_character(&self) -> FxParameterCharacter {
         let result = unsafe {
-            Reaper::get()
-                .medium()
-                .functions()
-                .track_fx_get_parameter_step_sizes(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
-                    self.index,
-                )
+            ReaperFunctions::get().track_fx_get_parameter_step_sizes(
+                self.get_track_raw(),
+                self.fx.get_query_index(),
+                self.index,
+            )
         };
         use GetParameterStepSizesResult::*;
         match result {
@@ -93,15 +87,12 @@ impl FxParameter {
 
     pub fn get_formatted_value(&self) -> CString {
         unsafe {
-            Reaper::get()
-                .medium()
-                .functions()
-                .track_fx_get_formatted_param_value(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
-                    self.index,
-                    256,
-                )
+            ReaperFunctions::get().track_fx_get_formatted_param_value(
+                self.get_track_raw(),
+                self.fx.get_query_index(),
+                self.index,
+                256,
+            )
         }
         .expect("Couldn't format FX param value")
     }
@@ -119,16 +110,13 @@ impl FxParameter {
         normalized_value: ReaperNormalizedFxParamValue,
     ) -> CString {
         unsafe {
-            Reaper::get()
-                .medium()
-                .functions()
-                .track_fx_format_param_value_normalized(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
-                    self.index,
-                    normalized_value,
-                    256,
-                )
+            ReaperFunctions::get().track_fx_format_param_value_normalized(
+                self.get_track_raw(),
+                self.fx.get_query_index(),
+                self.index,
+                normalized_value,
+                256,
+            )
         }
         .expect("Couldn't format normalized value")
     }
@@ -139,14 +127,11 @@ impl FxParameter {
     // of REAPER's return  values.
     pub fn get_step_size(&self) -> Option<f64> {
         let result = unsafe {
-            Reaper::get()
-                .medium()
-                .functions()
-                .track_fx_get_parameter_step_sizes(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
-                    self.index,
-                )
+            ReaperFunctions::get().track_fx_get_parameter_step_sizes(
+                self.get_track_raw(),
+                self.fx.get_query_index(),
+                self.index,
+            )
         }?;
         use GetParameterStepSizesResult::*;
         match result {
@@ -172,7 +157,7 @@ impl FxParameter {
     // Doesn't necessarily return normalized values
     pub fn get_value_range(&self) -> FxParameterValueRange {
         let result = unsafe {
-            Reaper::get().medium().functions().track_fx_get_param_ex(
+            ReaperFunctions::get().track_fx_get_param_ex(
                 self.get_track_raw(),
                 self.fx.get_query_index(),
                 self.index,

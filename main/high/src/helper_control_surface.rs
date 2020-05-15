@@ -8,11 +8,11 @@ use reaper_medium::{
     AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
-    MediaTrack, MediumReaperControlSurface, ReaProject, ReaperNormalizedFxParamValue,
-    ReaperPanValue, ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs, SetSurfacePanArgs,
-    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
-    SetTrackTitleArgs, TrackFxChainType, TrackRef, VersionDependentFxLocation,
-    VersionDependentTrackFxLocation,
+    MediaTrack, MediumReaperControlSurface, ReaProject, ReaperFunctions,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
+    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
+    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
+    VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
 
@@ -144,10 +144,7 @@ impl HelperControlSurface {
             return false;
         }
         let env = unsafe {
-            Reaper::get()
-                .medium()
-                .functions()
-                .get_track_envelope_by_name(track.get_raw(), parameter_name)
+            ReaperFunctions::get().get_track_envelope_by_name(track.get_raw(), parameter_name)
         };
         if env.is_none() {
             return false;
@@ -163,11 +160,7 @@ impl HelperControlSurface {
 
     fn remove_invalid_rea_projects(&self) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
-            if Reaper::get()
-                .medium()
-                .functions()
-                .validate_ptr_2(CurrentProject, *rea_project)
-            {
+            if ReaperFunctions::get().validate_ptr_2(CurrentProject, *rea_project) {
                 true
             } else {
                 Reaper::get()
@@ -199,8 +192,7 @@ impl HelperControlSurface {
             let media_track = t.get_raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let reaper = Reaper::get();
-                let medium = reaper.medium();
-                let func = medium.functions();
+                let func = ReaperFunctions::get();
                 let td = unsafe {
                     TrackData {
                         volume: ReaperVolumeValue::new(
@@ -370,19 +362,18 @@ impl HelperControlSurface {
 
     fn remove_invalid_media_tracks(&self, project: Project, track_datas: &mut TrackDataMap) {
         track_datas.retain(|media_track, data| {
-            let reaper = Reaper::get();
-            if reaper
-                .medium()
-                .functions()
-                .validate_ptr_2(Proj(project.get_raw()), *media_track)
-            {
+            if ReaperFunctions::get().validate_ptr_2(Proj(project.get_raw()), *media_track) {
                 true
             } else {
                 self.fx_chain_pair_by_media_track
                     .borrow_mut()
                     .remove(media_track);
                 let track = project.get_track_by_guid(&data.guid);
-                reaper.subjects.track_removed.borrow_mut().next(track);
+                Reaper::get()
+                    .subjects
+                    .track_removed
+                    .borrow_mut()
+                    .next(track);
                 false
             }
         });
@@ -390,28 +381,24 @@ impl HelperControlSurface {
 
     fn update_media_track_positions(&self, project: Project, track_datas: &mut TrackDataMap) {
         let mut tracks_have_been_reordered = false;
-        let reaper = Reaper::get();
         for (media_track, track_data) in track_datas.iter_mut() {
-            if !reaper
-                .medium()
-                .functions()
-                .validate_ptr_2(Proj(project.get_raw()), *media_track)
-            {
+            let functions = ReaperFunctions::get();
+            if !functions.validate_ptr_2(Proj(project.get_raw()), *media_track) {
                 continue;
             }
-            let new_number = unsafe {
-                reaper
-                    .medium()
-                    .functions()
-                    .get_set_media_track_info_get_track_number(*media_track)
-            };
+            let new_number =
+                unsafe { functions.get_set_media_track_info_get_track_number(*media_track) };
             if new_number != track_data.number {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;
             }
         }
         if tracks_have_been_reordered {
-            reaper.subjects.tracks_reordered.borrow_mut().next(project);
+            Reaper::get()
+                .subjects
+                .tracks_reordered
+                .borrow_mut()
+                .next(project);
         }
     }
 
@@ -721,10 +708,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
                 .next(Track::new(args.track, None));
         }
         let recinput = unsafe {
-            reaper
-                .medium()
-                .functions()
-                .get_media_track_info_value(args.track, RecInput) as i32
+            ReaperFunctions::get().get_media_track_info_value(args.track, RecInput) as i32
         };
         if td.recinput != recinput {
             td.recinput = recinput;
