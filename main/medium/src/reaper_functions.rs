@@ -122,11 +122,16 @@ impl AnyThread for RealTimeAudioThreadScope {}
 /// have to bring the trait into scope to see the functions. That's confusing. It also would provide
 /// less amount of safety.
 ///
-/// ## Why no fail-fast at runtime when getting threading wrong?
+/// ## Why no fail-fast at runtime when calling audio-thread-only functions from wrong thread?
 ///
-/// Another thing which could help would be to panic when a main-thread-only function is called in
-/// the real-time audio thread or vice versa. This would prevent "it works on my machine" scenarios.
-/// However, this is currently not being done because of possible performance implications.
+/// At the moment, there's a fail fast (panic) when attempting to execute main-thread-only functions
+/// from the wrong thread. This prevents "it works on my machine" scenarios. However, this is
+/// currently not being done the other way around (when executing real-time-audio-thread-only
+/// functions from the wrong thread) because of possible performance implications. Latter scenario
+/// should also be much more unlikely. Maybe we can introduce it in future in order to really avoid
+/// undefined behavior even for those methods (which the lack of `unsafe` suggests). Checking the
+/// thread ID is a very cheap operation (a few nano seconds), maybe even in the real-time audio
+/// thread.
 ///
 /// [`Reaper`]: struct.Reaper.html
 /// [`Reaper::functions()`]: struct.Reaper.html#method.functions
@@ -218,17 +223,6 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    // TODO-low Like many functions, this is not marked as unsafe - yet it is still unsafe in one
-    //  way: It must be called in the main thread, otherwise there will be undefined behavior. For
-    //  now, the strategy is to just document it and have the type system help a bit
-    //  (`ReaperFunctions<MainThread>`). However, there *is* a way to make it safe in the sense of
-    //  failing fast without running into undefined behavior: Assert at each function call that we
-    //  are in the main thread. The main thread ID could be easily obtained at construction time
-    //  of medium-level Reaper. So all it needs is acquiring the current thread and compare its ID
-    //  with the main thread ID (both presumably cheap). I think that would be fine. Maybe we should
-    //  provide a feature to turn it on/off or make it a debug_assert only or provide an additional
-    //  unchecked version. In audio-thread functions it might be too much overhead though calling
-    //  is_in_real_time_audio() each time, so maybe we should mark them as unsafe.
     #[measure]
     pub fn enum_projects(
         &self,
@@ -238,6 +232,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let idx = project_ref.to_raw();
         if buffer_size == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
@@ -288,6 +283,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.get_track_unchecked(project, track_index) }
     }
@@ -308,6 +304,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
         NonNull::new(ptr)
     }
@@ -355,6 +352,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let pointer = pointer.into();
         unsafe {
             self.low
@@ -368,6 +366,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.UpdateTimeline();
     }
 
@@ -379,6 +378,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         unsafe { self.low.ShowConsoleMsg(message.into().as_ptr()) }
     }
 
@@ -402,6 +402,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .GetSetMediaTrackInfo(track.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
     }
@@ -419,6 +420,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::ParTrack, null_mut())
             as *mut raw::MediaTrack;
         NonNull::new(ptr)
@@ -439,6 +441,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Project, null_mut())
             as *mut raw::ReaProject;
         NonNull::new(ptr)
@@ -482,6 +485,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Name, null_mut());
         create_passing_c_str(ptr as *const c_char).map(use_name)
     }
@@ -499,6 +503,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
         let irecmon = deref_as::<i32>(ptr).expect("irecmon pointer is null");
         InputMonitoringMode::try_from_raw(irecmon).expect("unknown input monitoring mode")
@@ -517,6 +522,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
         let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
         if rec_input_index < 0 {
@@ -540,6 +546,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         use TrackRef::*;
         match self.get_set_media_track_info(track, TrackAttributeKey::TrackNumber, null_mut())
             as i32
@@ -561,6 +568,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
         deref_as::<GUID>(ptr).expect("GUID pointer is null")
     }
@@ -594,6 +602,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.main_on_command_ex_unchecked(command, flag, project) }
     }
@@ -614,6 +623,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .Main_OnCommandEx(command_id.to_raw(), flag, project.to_raw());
     }
@@ -645,6 +655,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .CSurf_SetSurfaceMute(track.as_ptr(), mute, notification_behavior.to_raw());
     }
@@ -663,6 +674,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .CSurf_SetSurfaceSolo(track.as_ptr(), solo, notification_behavior.to_raw());
     }
@@ -673,6 +685,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut guid = MaybeUninit::uninit();
         unsafe {
             self.low.genGuid(guid.as_mut_ptr());
@@ -704,6 +717,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         if ptr.is_null() {
             return None;
@@ -731,6 +745,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.SectionFromUniqueID(section_id.to_raw());
         NonNull::new(ptr).map(KbdSectionInfo)
     }
@@ -757,6 +772,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         use ActionValueChange::*;
         let (val, valhw, relmode) = match value_change {
             AbsoluteLowRes(v) => (i32::from(v), -1, 0),
@@ -785,6 +801,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         require_non_null_panic(self.low.GetMainHwnd())
     }
 
@@ -800,6 +817,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let raw_id = unsafe { self.low.NamedCommandLookup(command_name.into().as_ptr()) as u32 };
         if raw_id == 0 {
             return None;
@@ -813,6 +831,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.ClearConsole();
     }
 
@@ -826,6 +845,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.count_tracks_unchecked(project) }
     }
@@ -842,6 +862,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.CountTracks(project.to_raw()) as u32
     }
 
@@ -851,6 +872,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.InsertTrackAtIndex(
             index as i32,
             defaults_behavior == TrackDefaultsBehavior::AddDefaultEnvAndFx,
@@ -888,6 +910,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         if buffer_size == 0 {
             let is_present =
                 unsafe { self.low.GetMIDIInputName(device_id.to_raw(), null_mut(), 0) };
@@ -926,6 +949,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         if buffer_size == 0 {
             let is_present = unsafe {
                 self.low
@@ -966,6 +990,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.TrackFX_AddByName(
             track.as_ptr(),
             fx_name.into().as_ptr(),
@@ -992,6 +1017,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, FxAddByNameBehavior::Query) {
             -1 => None,
             idx if idx >= 0 => Some(idx as u32),
@@ -1023,6 +1049,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, behavior.into()) {
             -1 => Err(ReaperFunctionError::new("FX couldn't be added")),
             idx if idx >= 0 => Ok(idx as u32),
@@ -1044,6 +1071,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .TrackFX_GetEnabled(track.as_ptr(), fx_location.to_raw())
     }
@@ -1073,6 +1101,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low
@@ -1098,6 +1127,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let index = self.low.TrackFX_GetInstrument(track.as_ptr());
         if index == -1 {
             return None;
@@ -1119,6 +1149,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .TrackFX_SetEnabled(track.as_ptr(), fx_location.to_raw(), is_enabled);
     }
@@ -1137,6 +1168,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .TrackFX_GetNumParams(track.as_ptr(), fx_location.to_raw()) as u32
     }
@@ -1150,6 +1182,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.GetCurrentProjectInLoadSave();
         NonNull::new(ptr)
     }
@@ -1180,6 +1213,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low.TrackFX_GetParamName(
@@ -1225,6 +1259,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low.TrackFX_GetFormattedParamValue(
@@ -1278,6 +1313,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         assert!(buffer_size > 0);
         let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low.TrackFX_FormatParamValueNormalized(
@@ -1317,6 +1353,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let successful = self.low.TrackFX_SetParamNormalized(
             track.as_ptr(),
             fx_location.to_raw(),
@@ -1340,6 +1377,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut tracknumber = MaybeUninit::uninit();
         let mut itemnumber = MaybeUninit::uninit();
         let mut fxnumber = MaybeUninit::uninit();
@@ -1386,6 +1424,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut tracknumber = MaybeUninit::uninit();
         let mut fxnumber = MaybeUninit::uninit();
         let mut paramnumber = MaybeUninit::uninit();
@@ -1443,6 +1482,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.TrackFX_CopyToTrack(
             source.0.as_ptr(),
             source.1.to_raw(),
@@ -1470,6 +1510,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let succesful = self
             .low
             .TrackFX_Delete(track.as_ptr(), fx_location.to_raw());
@@ -1503,6 +1544,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut step = MaybeUninit::uninit();
         let mut small_step = MaybeUninit::uninit();
         let mut large_step = MaybeUninit::uninit();
@@ -1546,6 +1588,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut min_val = MaybeUninit::uninit();
         let mut max_val = MaybeUninit::uninit();
         let mut mid_val = MaybeUninit::uninit();
@@ -1586,6 +1629,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.undo_begin_block_2_unchecked(project) };
     }
@@ -1602,6 +1646,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.Undo_BeginBlock2(project.to_raw());
     }
 
@@ -1619,6 +1664,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.undo_end_block_2_unchecked(project, description, scope);
@@ -1641,6 +1687,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.Undo_EndBlock2(
             project.to_raw(),
             description.into().as_ptr(),
@@ -1662,6 +1709,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.undo_can_undo_2_unchecked(project, use_description) }
     }
@@ -1682,6 +1730,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.Undo_CanUndo2(project.to_raw());
         create_passing_c_str(ptr).map(use_description)
     }
@@ -1700,6 +1749,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.undo_can_redo_2_unchecked(project, use_description) }
     }
@@ -1720,6 +1770,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.Undo_CanRedo2(project.to_raw());
         create_passing_c_str(ptr).map(use_description)
     }
@@ -1736,6 +1787,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.undo_do_undo_2_unchecked(project) }
     }
@@ -1752,6 +1804,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.Undo_DoUndo2(project.to_raw()) != 0
     }
 
@@ -1767,6 +1820,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.undo_do_redo_2_unchecked(project) }
     }
@@ -1783,6 +1837,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.Undo_DoRedo2(project.to_raw()) != 0
     }
 
@@ -1799,6 +1854,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.mark_project_dirty_unchecked(project);
@@ -1817,6 +1873,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.MarkProjectDirty(project.to_raw());
     }
 
@@ -1836,6 +1893,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.is_project_dirty_unchecked(project) }
     }
@@ -1852,6 +1910,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.IsProjectDirty(project.to_raw()) != 0
     }
 
@@ -1863,6 +1922,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.TrackList_UpdateAllExternalSurfaces();
     }
 
@@ -1872,6 +1932,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.GetAppVersion();
         let version_str = unsafe { CStr::from_ptr(ptr) };
         ReaperVersion::new(version_str)
@@ -1887,6 +1948,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let result = self.low.GetTrackAutomationMode(track.as_ptr());
         AutomationMode::try_from_raw(result).expect("unknown automation mode")
     }
@@ -1897,6 +1959,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         use GlobalAutomationModeOverride::*;
         match self.low.GetGlobalAutomationOverride() {
             -1 => None,
@@ -1922,6 +1985,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self
             .low
             .GetTrackEnvelopeByChunkName(track.as_ptr(), chunk_name.into_raw().as_ptr());
@@ -1947,6 +2011,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self
             .low
             .GetTrackEnvelopeByName(track.as_ptr(), env_name.into().as_ptr());
@@ -1967,6 +2032,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .GetMediaTrackInfo_Value(track.as_ptr(), attribute_key.into_raw().as_ptr())
     }
@@ -1981,6 +2047,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.TrackFX_GetCount(track.as_ptr()) as u32
     }
 
@@ -1996,6 +2063,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.TrackFX_GetRecCount(track.as_ptr()) as u32
     }
 
@@ -2017,6 +2085,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self
             .low
             .TrackFX_GetFXGUID(track.as_ptr(), fx_location.to_raw());
@@ -2044,6 +2113,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let raw_value = self.low.TrackFX_GetParamNormalized(
             track.as_ptr(),
             fx_location.to_raw(),
@@ -2067,6 +2137,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.get_master_track_unchecked(project) }
     }
@@ -2083,6 +2154,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.GetMasterTrack(project.to_raw());
         require_non_null_panic(ptr)
     }
@@ -2093,6 +2165,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let (guid_string, _) = with_string_buffer(64, |buffer, _| unsafe {
             self.low.guidToString(guid as *const GUID, buffer)
         });
@@ -2105,6 +2178,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         Bpm(self.low.Master_GetTempo())
     }
 
@@ -2118,6 +2192,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.set_current_bpm_unchecked(project, tempo, undo_behavior);
@@ -2140,6 +2215,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.SetCurrentBPM(
             project.to_raw(),
             tempo.get(),
@@ -2157,6 +2233,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.master_get_play_rate_unchecked(project) }
     }
@@ -2176,6 +2253,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let raw = self.low.Master_GetPlayRate(project.to_raw());
         PlaybackSpeedFactor(raw)
     }
@@ -2199,6 +2277,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let result = unsafe {
             self.low.ShowMessageBox(
                 message.into().as_ptr(),
@@ -2222,6 +2301,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut guid = MaybeUninit::uninit();
         unsafe {
             self.low
@@ -2249,6 +2329,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.CSurf_OnInputMonitorChangeEx(
             track.as_ptr(),
             mode.to_raw(),
@@ -2275,6 +2356,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let successful = self.low.SetMediaTrackInfo_Value(
             track.as_ptr(),
             attribute_key.into_raw().as_ptr(),
@@ -2294,6 +2376,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let bytes = message.to_bytes();
         self.low.StuffMIDIMessage(
             target.to_raw(),
@@ -2309,6 +2392,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         VolumeSliderValue(self.low.DB2SLIDER(value.get()))
     }
 
@@ -2318,6 +2402,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         Db(self.low.SLIDER2DB(value.get()))
     }
 
@@ -2338,6 +2423,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
         let successful =
@@ -2368,6 +2454,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.CSurf_SetSurfaceVolume(
             track.as_ptr(),
             volume.get(),
@@ -2393,6 +2480,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let raw = self.low.CSurf_OnVolumeChangeEx(
             track.as_ptr(),
             value_change.value(),
@@ -2416,6 +2504,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ) where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .CSurf_SetSurfacePan(track.as_ptr(), pan.get(), notification_behavior.to_raw());
     }
@@ -2437,6 +2526,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let raw = self.low.CSurf_OnPanChangeEx(
             track.as_ptr(),
             value_change.value(),
@@ -2460,6 +2550,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.count_selected_tracks_2_unchecked(project, master_track_behavior) }
     }
@@ -2480,6 +2571,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.CountSelectedTracks2(
             project.to_raw(),
             master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
@@ -2496,6 +2588,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.SetTrackSelected(track.as_ptr(), is_selected);
     }
 
@@ -2514,6 +2607,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.get_selected_track_2_unchecked(
@@ -2541,6 +2635,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.GetSelectedTrack2(
             project.to_raw(),
             selected_track_index as i32,
@@ -2561,6 +2656,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = match track {
             None => null_mut(),
             Some(t) => t.as_ptr(),
@@ -2578,6 +2674,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.DeleteTrack(track.as_ptr());
     }
 
@@ -2591,6 +2688,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.GetTrackNumSends(track.as_ptr(), category.to_raw()) as u32
     }
 
@@ -2613,6 +2711,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.GetSetTrackSendInfo(
             track.as_ptr(),
             category.to_raw(),
@@ -2642,6 +2741,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.get_set_track_send_info(
             track,
             direction.into(),
@@ -2679,6 +2779,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         assert!(buffer_size > 0);
         let (chunk_content, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low.GetTrackStateChunk(
@@ -2727,6 +2828,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let result = self.low.CreateTrackSend(track.as_ptr(), target.to_raw());
         if result < 0 {
             return Err(ReaperFunctionError::new("couldn't create track send"));
@@ -2751,6 +2853,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.CSurf_OnRecArmChangeEx(
             track.as_ptr(),
             mode.to_raw(),
@@ -2777,6 +2880,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let successful = self.low.SetTrackStateChunk(
             track.as_ptr(),
             chunk.into().as_ptr(),
@@ -2800,6 +2904,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low.TrackFX_Show(
             track.as_ptr(),
             instruction.location_to_raw(),
@@ -2821,6 +2926,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self
             .low
             .TrackFX_GetFloatingWindow(track.as_ptr(), fx_location.to_raw());
@@ -2839,6 +2945,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         self.low
             .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
     }
@@ -2861,6 +2968,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let raw = self.low.CSurf_OnSendVolumeChange(
             track.as_ptr(),
             send_index as i32,
@@ -2887,6 +2995,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let raw = self.low.CSurf_OnSendPanChange(
             track.as_ptr(),
             send_index as i32,
@@ -2914,6 +3023,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self
             .low
             .kbd_getTextFromCmd(command_id.get() as _, section.to_raw());
@@ -2943,6 +3053,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let result = self
             .low
             .GetToggleCommandState2(section.to_raw(), command_id.to_raw());
@@ -2966,6 +3077,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let ptr = self.low.ReverseNamedCommandLookup(command_id.to_raw());
         unsafe { create_passing_c_str(ptr) }.map(use_command_name)
     }
@@ -2990,6 +3102,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut volume = MaybeUninit::uninit();
         let mut pan = MaybeUninit::uninit();
         let successful = self.low.GetTrackSendUIVolPan(
@@ -3027,6 +3140,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let mut num_presets = MaybeUninit::uninit();
         let index = self.low.TrackFX_GetPresetIndex(
             track.as_ptr(),
@@ -3063,6 +3177,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let successful = self.low.TrackFX_SetPresetByIndex(
             track.as_ptr(),
             fx_location.to_raw(),
@@ -3110,6 +3225,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         let successful =
             self.low
                 .TrackFX_NavigatePresets(track.as_ptr(), fx_location.to_raw(), increment);
@@ -3141,6 +3257,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        self.require_main_thread();
         if buffer_size == 0 {
             let state_matches_preset =
                 self.low
@@ -3211,6 +3328,16 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
             return None;
         }
         NonNull::new(ptr).map(|nnp| use_device(&MidiInput(nnp)))
+    }
+
+    fn require_main_thread(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        assert!(
+            self.low.plugin_context().is_in_main_thread(),
+            "called main-thread-only function from wrong thread"
+        )
     }
 
     fn require_valid_project(&self, project: ProjectContext)

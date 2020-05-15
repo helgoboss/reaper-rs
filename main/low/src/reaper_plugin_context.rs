@@ -22,6 +22,7 @@ pub struct ReaperPluginContext {
     type_specific: TypeSpecificReaperPluginContext,
     h_instance: raw::HINSTANCE,
     get_swell_func_ptr: Option<GetSwellFuncFn>,
+    main_thread_id: std::thread::ThreadId,
 }
 
 /// Additional stuff available in the plug-in context specific to a certain plug-in type.
@@ -93,6 +94,7 @@ impl ReaperPluginContext {
             ),
             h_instance,
             get_swell_func_ptr: static_context.get_swell_func,
+            main_thread_id: std::thread::current().id(),
         })
     }
 
@@ -118,6 +120,7 @@ impl ReaperPluginContext {
             }),
             h_instance: static_context.h_instance,
             get_swell_func_ptr: static_context.get_swell_func,
+            main_thread_id: std::thread::current().id(),
         })
     }
 
@@ -166,6 +169,11 @@ impl ReaperPluginContext {
     /// Returns the type-specific plug-in context.
     pub fn type_specific(&self) -> &TypeSpecificReaperPluginContext {
         &self.type_specific
+    }
+
+    /// Returns whether we are currently in the main thread.
+    pub fn is_in_main_thread(&self) -> bool {
+        std::thread::current().id() == self.main_thread_id
     }
 }
 
