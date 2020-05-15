@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
-use crate::{ChunkRegion, Reaper, Track};
+use crate::{ChunkRegion, Track};
 use reaper_medium::{FxShowInstruction, Hwnd, ReaperFunctions, TrackFxLocation};
 use rxrust::prelude::PayloadCopy;
 

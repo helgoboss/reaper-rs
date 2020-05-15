@@ -1,6 +1,6 @@
 use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
-use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
+use crate::{get_fx_query_index, Chunk, ChunkRegion, Track, MAX_TRACK_CHUNK_SIZE};
 
 use reaper_medium::{
     AddFxBehavior, ChunkCacheHint, ReaperFunctions, TrackFxChainType, TransferBehavior,

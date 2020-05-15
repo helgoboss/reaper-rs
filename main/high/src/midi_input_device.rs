@@ -1,4 +1,4 @@
-use crate::Reaper;
+
 use reaper_medium::{MidiInputDeviceId, ReaperFunctions};
 use std::ffi::CString;
 

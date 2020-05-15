@@ -1,4 +1,4 @@
-use crate::{Pan, Reaper, Track, Volume};
+use crate::{Pan, Track, Volume};
 
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{MediaTrack, ReaperFunctions, TrackSendDirection};

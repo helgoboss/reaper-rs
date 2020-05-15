@@ -1,4 +1,4 @@
-use crate::Reaper;
+
 use slog::{error, o, Drain};
 use std::backtrace::Backtrace;
 
