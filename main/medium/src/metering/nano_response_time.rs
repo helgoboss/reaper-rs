@@ -15,7 +15,7 @@ impl Default for NanoResponseTime {
         // A HdrHistogram measuring latencies from 1ms to 5minutes
         // All recordings will be saturating, that is, a value higher than 60 seconds
         // will be replace by 60 seconds...
-        NanoResponseTime(SingleThreadedHdrHistogram::with_bound(60 * 1000_000_000))
+        NanoResponseTime(SingleThreadedHdrHistogram::with_bound(60 * 1_000_000_000))
     }
 }
 
