@@ -346,6 +346,9 @@ pub use reaper_functions::*;
 mod util;
 use util::*;
 
+#[cfg(feature = "reaper-meter")]
+mod metering;
+
 mod string_types;
 pub use string_types::*;
 

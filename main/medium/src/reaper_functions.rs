@@ -1,5 +1,7 @@
 #[cfg(feature = "reaper-meter")]
-use metered::{metered, ResponseTime};
+use crate::metering::NanoResponseTime;
+#[cfg(feature = "reaper-meter")]
+use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
 use reaper_macros::measure;
 use std::ffi::{CStr, CString};
@@ -185,7 +187,7 @@ impl ReaperFunctions<MainThreadScope> {
     }
 }
 
-#[cfg_attr(feature = "reaper-meter", metered(registry = ReaperMetrics), measure([ResponseTime]))]
+#[cfg_attr(feature = "reaper-meter", metered(registry = ReaperMetrics), measure([NanoResponseTime]))]
 impl<UsageScope> ReaperFunctions<UsageScope> {
     pub(crate) fn new(low: reaper_low::Reaper) -> ReaperFunctions<UsageScope> {
         ReaperFunctions {
