@@ -269,7 +269,7 @@ Contributions are very welcome! Especially to the medium-level API.
 
 ### Low-level API code generation
 
-`reaper-low` has several generated files, namely `bindings.rs` and `reaper.rs`.
+`reaper-low` has several generated files, namely `bindings.rs`, `reaper.rs` and `swell.rs`.
 These files are not generated with each build though. In order to decrease build time and improve
 IDE/debugging support, they are included in the Git repository like any other Rust source.
 
