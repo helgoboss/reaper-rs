@@ -28,6 +28,13 @@ pub mod root {
     pub const SW_SHOWMAXIMIZED: i32 = 2;
     pub const SW_SHOWDEFAULT: i32 = 2;
     pub const SW_RESTORE: i32 = 1;
+    pub const SWP_NOMOVE: i32 = 1;
+    pub const SWP_NOSIZE: i32 = 2;
+    pub const SWP_NOZORDER: i32 = 4;
+    pub const SWP_NOACTIVATE: i32 = 8;
+    pub const SWP_SHOWWINDOW: i32 = 16;
+    pub const SWP_FRAMECHANGED: i32 = 32;
+    pub const SWP_NOCOPYBITS: i32 = 0;
     pub const WM_CREATE: u32 = 1;
     pub const WM_DESTROY: u32 = 2;
     pub const WM_MOVE: u32 = 3;

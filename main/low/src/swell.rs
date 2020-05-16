@@ -6547,6 +6547,23 @@ impl Swell {
         unsafe { windows::DestroyWindow(hwnd) }
     }
     #[cfg(target_os = "windows")]
+    pub fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
+        unsafe { windows::GetParent(hwnd) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SetWindowPos(
+        &self,
+        hwnd: root::HWND,
+        unused: root::HWND,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        cx: ::std::os::raw::c_int,
+        cy: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::SetWindowPos(hwnd, unused, x, y, cx, cy, flags) }
+    }
+    #[cfg(target_os = "windows")]
     pub fn DefWindowProc(
         &self,
         hwnd: root::HWND,
@@ -6555,6 +6572,16 @@ impl Swell {
         lParam: root::LPARAM,
     ) -> root::LRESULT {
         unsafe { windows::DefWindowProcA(hwnd, msg, wParam, lParam) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn SendMessage(
+        &self,
+        arg1: root::HWND,
+        arg2: root::UINT,
+        arg3: root::WPARAM,
+        arg4: root::LPARAM,
+    ) -> root::LRESULT {
+        unsafe { windows::SendMessageA(arg1, arg2, arg3, arg4) }
     }
 }
 #[doc = r" Container for the SWELL function pointers."]
@@ -7897,11 +7924,33 @@ mod windows {
         pub fn DestroyWindow(hwnd: root::HWND);
     }
     extern "C" {
+        pub fn GetParent(hwnd: root::HWND) -> root::HWND;
+    }
+    extern "C" {
+        pub fn SetWindowPos(
+            hwnd: root::HWND,
+            unused: root::HWND,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            cx: ::std::os::raw::c_int,
+            cy: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        );
+    }
+    extern "C" {
         pub fn DefWindowProcA(
             hwnd: root::HWND,
             msg: root::UINT,
             wParam: root::WPARAM,
             lParam: root::LPARAM,
+        ) -> root::LRESULT;
+    }
+    extern "C" {
+        pub fn SendMessageA(
+            arg1: root::HWND,
+            arg2: root::UINT,
+            arg3: root::WPARAM,
+            arg4: root::LPARAM,
         ) -> root::LRESULT;
     }
 }

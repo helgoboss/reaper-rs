@@ -1,10 +1,10 @@
 /// Executed whenever Cargo builds reaper-rs
 fn main() {
     #[cfg(target_os = "linux")]
-    #[cfg(feature = "generate-stage-1")]
+    #[cfg(feature = "generate-stage-one")]
     codegen::stage_one::generate_bindings();
 
-    #[cfg(feature = "generate-stage-2")]
+    #[cfg(feature = "generate-stage-two")]
     codegen::stage_two::generate_reaper_and_swell();
 
     #[cfg(target_os = "linux")]
@@ -36,10 +36,10 @@ fn compile_glue_code() {
         .compile("glue");
 }
 
-#[cfg(any(feature = "generate-stage-1", feature = "generate-stage-2"))]
+#[cfg(any(feature = "generate-stage-one", feature = "generate-stage-two"))]
 mod codegen {
     #[cfg(target_os = "linux")]
-    #[cfg(feature = "generate-stage-1")]
+    #[cfg(feature = "generate-stage-one")]
     pub mod stage_one {
         use bindgen::callbacks::{IntKind, ParseCallbacks};
 
@@ -51,6 +51,7 @@ mod codegen {
                 if name.starts_with("CSURF_EXT_")
                     || name.starts_with("VK_")
                     || name.starts_with("SW_")
+                    || name.starts_with("SWP_")
                     || name == "REAPER_PLUGIN_VERSION"
                 {
                     return Some(IntKind::I32);
@@ -92,6 +93,7 @@ mod codegen {
                 .whitelist_var("UNDO_STATE_.*")
                 .whitelist_var("VK_.*")
                 .whitelist_var("SW_.*")
+                .whitelist_var("SWP_.*")
                 .whitelist_var("WM_.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_type("HINSTANCE")
@@ -112,7 +114,7 @@ mod codegen {
         }
     }
 
-    #[cfg(feature = "generate-stage-2")]
+    #[cfg(feature = "generate-stage-two")]
     pub mod stage_two {
         use proc_macro2::Span;
         use std::fs::File;
@@ -140,6 +142,9 @@ mod codegen {
             "DestroyWindow" => "DestroyWindow",
             "GetDlgItem" => "GetDlgItem",
             "ShowWindow" => "ShowWindow",
+            "SendMessage" => "SendMessageA",
+            "GetParent" => "GetParent",
+            "SetWindowPos" => "SetWindowPos",
         };
 
         /// Generates `reaper.rs` and `swell.rs` from the previously generated `bindings.rs`
