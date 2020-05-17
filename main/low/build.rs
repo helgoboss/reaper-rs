@@ -94,6 +94,7 @@ mod codegen {
                 .whitelist_var("VK_.*")
                 .whitelist_var("SW_.*")
                 .whitelist_var("SWP_.*")
+                .whitelist_var("CBN_.*")
                 .whitelist_var("WM_.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_type("HINSTANCE")
@@ -138,13 +139,90 @@ mod codegen {
         /// Please note that only *real* functions are allowed on the right side, not function
         /// macros.
         static SWELL_WINDOWS_MAPPING: phf::Map<&'static str, &'static str> = phf::phf_map! {
-            "DefWindowProc" => "DefWindowProcA",
+            // Same name
+            "BeginPaint" => "BeginPaint",
+            "CheckDlgButton" => "CheckDlgButton",
+            "CheckMenuItem" => "CheckMenuItem",
+            "ClientToScreen" => "ClientToScreen",
+            "CloseClipboard" => "CloseClipboard",
+            "CreateIconIndirect" => "CreateIconIndirect",
+            "CreatePopupMenu" => "CreatePopupMenu",
+            "DeleteMenu" => "DeleteMenu",
+            "DestroyMenu" => "DestroyMenu",
             "DestroyWindow" => "DestroyWindow",
+            "DrawMenuBar" => "DrawMenuBar",
+            "EmptyClipboard" => "EmptyClipboard",
+            "EnableMenuItem" => "EnableMenuItem",
+            "EnableWindow" => "EnableWindow",
+            "EndDialog" => "EndDialog",
+            "EndPaint" => "EndPaint",
+            "EnumChildWindows" => "EnumChildWindows",
+            "EnumClipboardFormats" => "EnumClipboardFormats",
+            "EnumWindows" => "EnumWindows",
+            "GetAsyncKeyState" => "GetAsyncKeyState",
+            "GetCapture" => "GetCapture",
+            "GetClientRect" => "GetClientRect",
+            "GetClipboardData" => "GetClipboardData",
+            "GetCursorPos" => "GetCursorPos",
+            "GetDC" => "GetDC",
             "GetDlgItem" => "GetDlgItem",
-            "ShowWindow" => "ShowWindow",
-            "SendMessage" => "SendMessageA",
+            "GetDlgItemInt" => "GetDlgItemInt",
+            "GetFocus" => "GetFocus",
+            "GetForegroundWindow" => "GetForegroundWindow",
+            "GetMenu" => "GetMenu",
+            "GetMenuItemCount" => "GetMenuItemCount",
+            "GetMenuItemID" => "GetMenuItemID",
+            "GetMessagePos" => "GetMessagePos",
             "GetParent" => "GetParent",
+            "GetSubMenu" => "GetSubMenu",
+            "GetSysColor" => "GetSysColor",
+            "GetSystemMetrics" => "GetSystemMetrics",
+            "GetWindow" => "GetWindow",
+            "GetWindowDC" => "GetWindowDC",
+            "GetWindowRect" => "GetWindowRect",
+            "InvalidateRect" => "InvalidateRect",
+            "IsChild" => "IsChild",
+            "IsDlgButtonChecked" => "IsDlgButtonChecked",
+            "IsWindow" => "IsWindow",
+            "IsWindowEnabled" => "IsWindowEnabled",
+            "IsWindowVisible" => "IsWindowVisible",
+            "KillTimer" => "KillTimer",
+            "OpenClipboard" => "OpenClipboard",
+            "ReleaseCapture" => "ReleaseCapture",
+            "ReleaseDC" => "ReleaseDC",
+            "ScreenToClient" => "ScreenToClient",
+            "ScrollWindow" => "ScrollWindow",
+            "SetCapture" => "SetCapture",
+            "SetClipboardData" => "SetClipboardData",
+            "SetDlgItemInt" => "SetDlgItemInt",
+            "SetFocus" => "SetFocus",
+            "SetForegroundWindow" => "SetForegroundWindow",
+            "SetMenu" => "SetMenu",
+            "SetParent" => "SetParent",
+            "SetTimer" => "SetTimer",
             "SetWindowPos" => "SetWindowPos",
+            "ShowWindow" => "ShowWindow",
+            "TrackPopupMenu" => "TrackPopupMenu",
+            "WindowFromPoint" => "WindowFromPoint",
+            // Those ending with A on Windows
+            "DefWindowProc" => "DefWindowProcA",
+            "EnumPropsEx" => "EnumPropsExA",
+            "FindWindowEx" => "FindWindowExA",
+            "GetClassName" => "GetClassNameA",
+            "GetDlgItemText" => "GetDlgItemTextA",
+            "GetMenuItemInfo" => "GetMenuItemInfoA",
+            "GetProp" => "GetPropA",
+            "GetWindowLong" => "GetWindowLongA",
+            "InsertMenuItem" => "InsertMenuItemA",
+            "MessageBox" => "MessageBoxA",
+            "PostMessage" => "PostMessageA",
+            "RegisterClipboardFormat" => "RegisterClipboardFormatA",
+            "RemoveProp" => "RemovePropA",
+            "SendMessage" => "SendMessageA",
+            "SetDlgItemText" => "SetDlgItemTextA",
+            "SetMenuItemInfo" => "SetMenuItemInfoA",
+            "SetProp" => "SetPropA",
+            "SetWindowLong" => "SetWindowLongA",
         };
 
         /// Generates `reaper.rs` and `swell.rs` from the previously generated `bindings.rs`
@@ -304,6 +382,7 @@ mod codegen {
                 #![allow(non_upper_case_globals)]
                 #![allow(non_camel_case_types)]
                 #![allow(non_snake_case)]
+                #![allow(unused_unsafe)]
 
                 use crate::{bindings::root, ReaperPluginContext};
 

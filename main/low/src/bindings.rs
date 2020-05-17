@@ -108,6 +108,10 @@ pub mod root {
     pub const WM_CAPTURECHANGED: u32 = 533;
     pub const WM_DROPFILES: u32 = 563;
     pub const WM_USER: u32 = 1024;
+    pub const CBN_SELCHANGE: u32 = 1;
+    pub const CBN_EDITCHANGE: u32 = 5;
+    pub const CBN_DROPDOWN: u32 = 7;
+    pub const CBN_CLOSEUP: u32 = 8;
     pub const VK_LBUTTON: i32 = 1;
     pub const VK_RBUTTON: i32 = 2;
     pub const VK_MBUTTON: i32 = 4;
