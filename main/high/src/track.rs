@@ -279,13 +279,15 @@ impl Track {
                     .get_media_track_info_value(self.get_raw(), RecArm)
             };
             #[allow(clippy::float_cmp)]
-            if recarm != 1.0 {
-                unsafe {
-                    Reaper::get().medium().csurf_on_rec_arm_change_ex(
-                        self.get_raw(),
-                        RecordArmMode::Armed,
-                        GangBehavior::DenyGang,
-                    );
+            {
+                if recarm != 1.0 {
+                    unsafe {
+                        Reaper::get().medium().csurf_on_rec_arm_change_ex(
+                            self.get_raw(),
+                            RecordArmMode::Armed,
+                            GangBehavior::DenyGang,
+                        );
+                    }
                 }
             }
         }
