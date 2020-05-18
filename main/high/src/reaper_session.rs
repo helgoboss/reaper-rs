@@ -9,8 +9,6 @@ use std::rc::Rc;
 use std::sync::mpsc::Sender;
 use std::sync::{mpsc, Arc, Weak};
 
-
-
 use rxrust::prelude::*;
 
 use crate::fx::Fx;
@@ -21,7 +19,8 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper, Track,
+    create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper,
+    Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
@@ -34,9 +33,9 @@ use reaper_medium::UndoScope::All;
 use reaper_medium::{
     CommandId, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumToggleAction, MessageBoxResult, MessageBoxType, MidiInputDeviceId, MidiOutputDeviceId,
-    OnAudioBufferArgs, ProjectRef, RealTimeAudioThreadScope, ReaperFunctions, ReaperStringArg,
-    ReaperVersion, SectionId, StuffMidiMessageTarget, ToggleActionResult, TrackRef,
+    MediumToggleAction, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef,
+    RealTimeAudioThreadScope, ReaperFunctions, ReaperStringArg, ReaperVersion,
+    StuffMidiMessageTarget, ToggleActionResult, TrackRef,
 };
 use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
@@ -934,15 +933,6 @@ impl ReaperSession {
         self.medium()
             .functions()
             .stuff_midi_message(target, message);
-    }
-
-    // TODO-move
-    pub(crate) fn current_thread_is_main_thread(&self) -> bool {
-        self.medium()
-            .functions()
-            .low()
-            .plugin_context()
-            .is_in_main_thread()
     }
 
     // TODO-move
