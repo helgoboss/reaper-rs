@@ -2372,7 +2372,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
 
     /// Stuffs a 3-byte MIDI message into a queue or send it to an external MIDI hardware.
     #[measure]
-    pub fn stuff_midimessage(&self, target: StuffMidiMessageTarget, message: impl ShortMessage)
+    pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage)
     where
         UsageScope: MainThreadOnly,
     {

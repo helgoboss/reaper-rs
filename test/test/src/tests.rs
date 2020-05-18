@@ -9,7 +9,7 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, ReaperSession, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, Pan, Reaper, ReaperSession, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -459,7 +459,7 @@ fn register_and_unregister_action() -> TestStep {
 fn main_section_functions() -> TestStep {
     step(AllVersions, "Main section functions", |reaper, _| {
         // Given
-        let section = reaper.get_main_section();
+        let section = Reaper::get().get_main_section();
         // When
         let actions = unsafe { section.get_actions() };
         // Then
@@ -572,7 +572,7 @@ fn unmute_track() -> TestStep {
 fn test_action_invoked_event() -> TestStep {
     step(AllVersions, "Test actionInvoked event", |reaper, step| {
         // Given
-        let action = reaper
+        let action = Reaper::get()
             .get_main_section()
             .get_action_by_command_id(CommandId::new(1582));
         // When
@@ -598,7 +598,7 @@ fn test_action_invoked_event() -> TestStep {
 fn invoke_action() -> TestStep {
     step(AllVersions, "Invoke action", |reaper, step| {
         // Given
-        let action = reaper
+        let action = Reaper::get()
             .get_main_section()
             .get_action_by_command_id(CommandId::new(6));
         let track = get_track(0)?;
@@ -629,13 +629,13 @@ fn query_action() -> TestStep {
         track.select_exclusively();
         assert!(!track.is_muted());
         // When
-        let toggle_action = reaper
+        let toggle_action = Reaper::get()
             .get_main_section()
             .get_action_by_command_id(CommandId::new(6));
-        let normal_action = reaper
+        let normal_action = Reaper::get()
             .get_main_section()
             .get_action_by_command_id(CommandId::new(41075));
-        let normal_action_by_index = reaper
+        let normal_action_by_index = Reaper::get()
             .get_main_section()
             .get_action_by_index(normal_action.get_index());
         // Then
@@ -653,7 +653,10 @@ fn query_action() -> TestStep {
             Some(c_str!("Track: Toggle mute for selected tracks").to_owned())
         );
         assert!(toggle_action.get_index() > 0);
-        assert_eq!(toggle_action.get_section(), reaper.get_main_section());
+        assert_eq!(
+            toggle_action.get_section(),
+            Reaper::get().get_main_section()
+        );
         assert_eq!(normal_action_by_index, normal_action);
         Ok(())
     })

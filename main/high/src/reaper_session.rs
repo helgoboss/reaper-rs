@@ -180,7 +180,6 @@ pub struct ReaperSession {
     // reference???  Look into that!!!
     command_by_id: RefCell<HashMap<CommandId, Command>>,
     pub(super) subjects: MainSubjects,
-    main_thread_id: ThreadId,
     undo_block_is_active: Cell<bool>,
     active_data: RefCell<Option<ActiveData>>,
 }
@@ -192,7 +191,6 @@ impl Default for ReaperSession {
             logger: create_std_logger(),
             command_by_id: Default::default(),
             subjects: Default::default(),
-            main_thread_id: std::thread::current().id(),
             undo_block_is_active: Default::default(),
             active_data: Default::default(),
         }
@@ -412,7 +410,6 @@ impl ReaperSession {
             logger,
             command_by_id: RefCell::new(HashMap::new()),
             subjects: MainSubjects::new(),
-            main_thread_id: thread::current().id(),
             undo_block_is_active: Cell::new(false),
             active_data: RefCell::new(None),
         };
@@ -529,6 +526,7 @@ impl ReaperSession {
         self.medium().functions().get_app_version()
     }
 
+    // TODO-move
     pub fn get_last_touched_fx_parameter(&self) -> Option<FxParameter> {
         // TODO-low Sucks: We have to assume it was a parameter in the current project
         //  Maybe we should rather rely on our own technique in ControlSurface here!
@@ -570,6 +568,7 @@ impl ReaperSession {
             })
     }
 
+    // TODO-move
     pub fn generate_guid(&self) -> Guid {
         Guid::new(Reaper::get().medium().gen_guid())
     }
@@ -613,17 +612,10 @@ impl ReaperSession {
         }
     }
 
-    pub fn get_max_midi_input_devices(&self) -> u32 {
-        self.medium().functions().get_max_midi_inputs()
-    }
-
-    pub fn get_max_midi_output_devices(&self) -> u32 {
-        self.medium().functions().get_max_midi_outputs()
-    }
-
     // It's correct that this method returns a non-optional. An id is supposed to uniquely identify
     // a device. A MidiInputDevice#isAvailable method returns if the device is actually existing
     // at runtime. That way we support (still) unloaded MidiInputDevices.
+    // TODO-move
     pub fn get_midi_input_device_by_id(&self, id: MidiInputDeviceId) -> MidiInputDevice {
         MidiInputDevice::new(id)
     }
@@ -631,24 +623,28 @@ impl ReaperSession {
     // It's correct that this method returns a non-optional. An id is supposed to uniquely identify
     // a device. A MidiOutputDevice#isAvailable method returns if the device is actually
     // existing at runtime. That way we support (still) unloaded MidiOutputDevices.
+    // TODO-move
     pub fn get_midi_output_device_by_id(&self, id: MidiOutputDeviceId) -> MidiOutputDevice {
         MidiOutputDevice::new(id)
     }
 
+    // TODO-move
     pub fn get_midi_input_devices(&self) -> impl Iterator<Item = MidiInputDevice> + '_ {
-        (0..self.get_max_midi_input_devices())
+        (0..self.medium().functions().get_max_midi_inputs())
             .map(move |i| self.get_midi_input_device_by_id(MidiInputDeviceId::new(i as u8)))
             // TODO-low I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
     }
 
+    // TODO-move
     pub fn get_midi_output_devices(&self) -> impl Iterator<Item = MidiOutputDevice> + '_ {
-        (0..self.get_max_midi_output_devices())
+        (0..self.medium().functions().get_max_midi_outputs())
             .map(move |i| self.get_midi_output_device_by_id(MidiOutputDeviceId::new(i as u8)))
             // TODO-low I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
     }
 
+    // TODO-move
     pub fn get_currently_loading_or_saving_project(&self) -> Option<Project> {
         let ptr = self
             .medium()
@@ -662,6 +658,7 @@ impl ReaperSession {
     // Action#isAvailable method could return if the action is actually existing at runtime.
     // That way we would support (still) unloaded Actions. TODO-low Don't automatically
     // interpret command name as commandId
+    // TODO-move
     pub fn get_action_by_command_name(&self, command_name: CString) -> Action {
         Action::command_name_based(command_name)
     }
@@ -709,27 +706,15 @@ impl ReaperSession {
     ///
     /// Look into [from_vec_unchecked](CString::from_vec_unchecked) or
     /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.
+    // TODO-move
     pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
         self.medium().functions().show_console_msg(msg);
     }
 
-    // type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret
-    // 1=OK,2=CANCEL,3=ABORT,4=RETRY,5=IGNORE,6=YES,7=NO
-    pub fn show_message_box(
-        &self,
-        msg: &CStr,
-        title: &CStr,
-        kind: MessageBoxType,
-    ) -> MessageBoxResult {
-        self.medium().functions().show_message_box(msg, title, kind)
-    }
-
-    pub fn get_main_section(&self) -> Section {
-        Section::new(SectionId::new(0))
-    }
-
+    // TODO-move
     pub fn create_empty_project_in_new_tab(&self) -> Project {
-        self.get_main_section()
+        Reaper::get()
+            .get_main_section()
             .get_action_by_command_id(CommandId::new(41929))
             .invoke_as_trigger(None);
         self.get_current_project()
@@ -772,6 +757,7 @@ impl ReaperSession {
 
     // Attention: Returns normal fx only, not input fx!
     // This is not reliable! After REAPER start no focused Fx can be found!
+    // TODO-move
     pub fn get_focused_fx(&self) -> Option<Fx> {
         self.medium().functions().get_focused_fx().and_then(|res| {
             use GetFocusedFxResult::*;
@@ -871,6 +857,7 @@ impl ReaperSession {
         self.subjects.action_invoked.borrow().clone()
     }
 
+    // TODO-move
     pub fn get_current_project(&self) -> Project {
         Project::new(
             self.medium()
@@ -881,10 +868,12 @@ impl ReaperSession {
         )
     }
 
+    // TODO-move
     pub fn get_main_window(&self) -> Hwnd {
         self.medium().functions().get_main_hwnd()
     }
 
+    // TODO-move
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
             .map(move |i| {
@@ -896,14 +885,17 @@ impl ReaperSession {
             .map(|r| Project::new(r.unwrap().project))
     }
 
+    // TODO-move
     pub fn get_project_count(&self) -> u32 {
         self.get_projects().count() as u32
     }
 
+    // TODO-move
     pub fn clear_console(&self) {
         self.medium().functions().clear_console();
     }
 
+    // TODO-move-later
     pub fn execute_later_in_main_thread(
         &self,
         waiting_time: Duration,
@@ -919,6 +911,7 @@ impl ReaperSession {
             .map_err(|_| ())
     }
 
+    // TODO-move
     pub fn execute_later_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
         let active_data = self.active_data.borrow();
         let sender = &active_data.as_ref().ok_or(())?.sender_to_main_thread;
@@ -927,6 +920,7 @@ impl ReaperSession {
             .map_err(|_| ())
     }
 
+    // TODO-move
     pub fn execute_asap_in_audio_thread(
         &self,
         op: impl FnOnce(&RealTimeReaper) + 'static,
@@ -936,18 +930,23 @@ impl ReaperSession {
         sender.send(Box::new(op)).map_err(|_| ())
     }
 
+    // TODO-move
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
-        self.medium().functions().stuff_midimessage(target, message);
+        self.medium()
+            .functions()
+            .stuff_midi_message(target, message);
     }
 
-    pub fn current_thread_is_main_thread(&self) -> bool {
-        thread::current().id() == self.main_thread_id
+    // TODO-move
+    pub(crate) fn current_thread_is_main_thread(&self) -> bool {
+        self.medium()
+            .functions()
+            .low()
+            .plugin_context()
+            .is_in_main_thread()
     }
 
-    pub fn get_main_thread_id(&self) -> ThreadId {
-        self.main_thread_id
-    }
-
+    // TODO-move
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride> {
         self.medium().functions().get_global_automation_override()
     }
@@ -1077,11 +1076,10 @@ struct HighLevelHookPostCommand {}
 
 impl MediumHookPostCommand for HighLevelHookPostCommand {
     fn call(command_id: CommandId, _flag: i32) {
-        let reaper = ReaperSession::get();
-        let action = reaper
+        let action = Reaper::get()
             .get_main_section()
             .get_action_by_command_id(command_id);
-        reaper
+        ReaperSession::get()
             .subjects
             .action_invoked
             .borrow_mut()

@@ -1,3 +1,6 @@
+use crate::Section;
+use reaper_medium::SectionId;
+
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Reaper> = None;
 static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
@@ -36,5 +39,9 @@ impl Reaper {
     /// Gives access to the medium-level Reaper instance.
     pub fn medium(&self) -> &reaper_medium::ReaperFunctions {
         &self.medium
+    }
+
+    pub fn get_main_section(&self) -> Section {
+        Section::new(SectionId::new(0))
     }
 }

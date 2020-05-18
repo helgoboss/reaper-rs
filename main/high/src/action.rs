@@ -242,7 +242,7 @@ impl Action {
             Some(id) => id,
         };
         self.runtime_data.replace(Some(RuntimeData {
-            section: ReaperSession::get().get_main_section(),
+            section: Reaper::get().get_main_section(),
             command_id,
             cached_index: None,
         }));
