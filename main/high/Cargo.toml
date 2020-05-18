@@ -20,7 +20,7 @@ c_str_macro = "1.0.2"
 once_cell = "1.3.1"
 reaper-medium = { path = '../medium' }
 reaper-low = { path = '../low' }
-rxrust = "0.8.3"
+rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
 helgoboss-midi = { version = "0.1.0" }
 regex = "1.3.4"
 slog = "2.5.2"

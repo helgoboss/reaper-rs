@@ -18,7 +18,6 @@ reaper-low = { path = "../../main/low" }
 reaper-test = { path = "../test" }
 reaper-macros = { path = "../../main/macros" }
 c_str_macro = "1.0.2"
-rxrust = "0.8.3"
 slog = "2.5.2"
 
 [dev-dependencies]

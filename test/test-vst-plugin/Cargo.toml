@@ -12,7 +12,6 @@ reaper-low = { path = "../../main/low" }
 reaper-test = { path = "../test" }
 c_str_macro = "1.0.2"
 vst = { git = "https://github.com/helgoboss/vst-rs", branch = "feature/custom-support-variant" }
-rxrust = "0.8.3"
 
 [lib]
 name = "reaper_test_vst_plugin"
