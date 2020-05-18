@@ -641,11 +641,10 @@ impl Track {
         };
         // No ReaProject* available. Try current project first (most likely in everyday REAPER
         // usage).
-        let reaper = ReaperSession::get();
+        let reaper = Reaper::get();
         let current_project = reaper.get_current_project();
         let is_valid_in_current_project = reaper
             .medium()
-            .reaper()
             .validate_ptr_2(Proj(current_project.get_raw()), media_track);
         if is_valid_in_current_project {
             return Some(current_project.get_raw());
@@ -658,7 +657,6 @@ impl Track {
             .find(|p| {
                 reaper
                     .medium()
-                    .reaper()
                     .validate_ptr_2(Proj(p.get_raw()), media_track)
             });
         other_project.map(|p| p.get_raw())

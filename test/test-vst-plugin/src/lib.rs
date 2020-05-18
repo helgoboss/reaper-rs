@@ -126,10 +126,12 @@ impl TestVstPlugin {
             )
             .unwrap();
             ReaperSession::setup_with_defaults(context, "info@helgoboss.org");
-            let reaper = ReaperSession::get();
-            reaper.activate();
-            reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
-            reaper.register_action(
+            let session = ReaperSession::get();
+            session.activate();
+            session
+                .reaper()
+                .show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
+            session.register_action(
                 c_str!("reaperRsVstIntegrationTests"),
                 c_str!("reaper-rs VST integration tests"),
                 || reaper_test::execute_integration_test(|_| ()),

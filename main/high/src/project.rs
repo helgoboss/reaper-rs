@@ -38,7 +38,7 @@ impl Project {
     pub fn get_index(self) -> u32 {
         self.complain_if_not_available();
         let rea_project = self.rea_project;
-        ReaperSession::get()
+        Reaper::get()
             .get_projects()
             .enumerate()
             .find(|(_, rp)| rp.rea_project == rea_project)
@@ -166,11 +166,13 @@ impl Project {
     where
         F: FnOnce() -> R,
     {
-        let reaper = ReaperSession::get();
-        if reaper.get_currently_loading_or_saving_project().is_some() {
+        if Reaper::get()
+            .get_currently_loading_or_saving_project()
+            .is_some()
+        {
             operation()
         } else {
-            let _undo_block = reaper.enter_undo_block_internal(self, label);
+            let _undo_block = ReaperSession::get().enter_undo_block_internal(self, label);
             operation()
         }
     }

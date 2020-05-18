@@ -6,7 +6,7 @@ mod tests;
 
 use crate::api::{TestStep, TestStepContext, VersionRestriction};
 use crate::tests::create_test_steps;
-use reaper_high::ReaperSession;
+use reaper_high::{Reaper, ReaperSession};
 use rxrust::prelude::*;
 
 use std::collections::VecDeque;
@@ -22,16 +22,14 @@ use std::panic::AssertUnwindSafe;
 /// Calls the given callback as soon as finished (either when the first test step failed
 /// or when all steps have executed successfully).
 pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) {
-    let reaper = ReaperSession::get();
-    reaper.clear_console();
+    Reaper::get().clear_console();
     log("# Testing reaper-rs\n");
     let steps = VecDeque::from_iter(create_test_steps());
     let step_count = steps.len();
-    execute_next_step(reaper.deref(), steps, step_count, on_finish);
+    execute_next_step(steps, step_count, on_finish);
 }
 
 fn execute_next_step(
-    reaper: &ReaperSession,
     mut steps: VecDeque<TestStep>,
     step_count: usize,
     on_finish: impl Fn(Result<(), &str>) + 'static,
@@ -45,29 +43,26 @@ fn execute_next_step(
         }
     };
     log_step(step_count - steps.len() - 1, &step.name);
-    if reaper_version_matches(reaper, &step) {
+    let session = ReaperSession::get();
+    if reaper_version_matches(&step) {
         let result = {
             let mut finished = LocalSubject::new();
             let context = TestStepContext {
                 finished: finished.clone(),
             };
             let step_name = step.name.clone();
-            let result =
-                std::panic::catch_unwind(AssertUnwindSafe(|| (step.operation)(reaper, context)))
-                    .unwrap_or_else(|_| Err(format!("Test [{}] panicked", step_name).into()));
+            let result = std::panic::catch_unwind(AssertUnwindSafe(|| {
+                (step.operation)(session.deref(), context)
+            }))
+            .unwrap_or_else(|_| Err(format!("Test [{}] panicked", step_name).into()));
             finished.complete();
             result
         };
         match result {
             Ok(()) => {
-                reaper
+                session
                     .execute_later_in_main_thread_asap(move || {
-                        execute_next_step(
-                            ReaperSession::get().deref(),
-                            steps,
-                            step_count,
-                            on_finish,
-                        )
+                        execute_next_step(steps, step_count, on_finish)
                     })
                     .expect("couldn't schedule next test step");
             }
@@ -84,20 +79,20 @@ fn execute_next_step(
             _ => unreachable!(),
         };
         log_skip(reason);
-        reaper
+        session
             .execute_later_in_main_thread_asap(move || {
-                execute_next_step(ReaperSession::get().deref(), steps, step_count, on_finish)
+                execute_next_step(steps, step_count, on_finish)
             })
             .expect("couldn't schedule next test step");
     }
 }
 
-fn reaper_version_matches(reaper: &ReaperSession, step: &TestStep) -> bool {
+fn reaper_version_matches(step: &TestStep) -> bool {
     use VersionRestriction::*;
     match &step.version_restriction {
         AllVersions => true,
-        Min(v) => reaper.get_version() >= *v,
-        Max(v) => reaper.get_version() <= *v,
+        Min(v) => Reaper::get().get_version() >= *v,
+        Max(v) => Reaper::get().get_version() <= *v,
     }
 }
 
@@ -114,5 +109,5 @@ fn log_step(step_index: usize, name: &str) {
 }
 
 fn log<'a>(msg: impl Into<ReaperStringArg<'a>>) {
-    ReaperSession::get().show_console_msg(msg)
+    Reaper::get().show_console_msg(msg)
 }

@@ -76,7 +76,7 @@ impl HelperControlSurface {
         task_sender: Sender<MainThreadTask>,
         task_receiver: Receiver<MainThreadTask>,
     ) -> HelperControlSurface {
-        let reaper = ReaperSession::get();
+        let reaper = Reaper::get();
         let version = reaper.get_version();
         let reaper_version_5_95 = ReaperVersion::new("5.95");
         let surface = HelperControlSurface {
@@ -120,7 +120,7 @@ impl HelperControlSurface {
     }
 
     fn find_track_data_map(&self) -> Option<RefMut<TrackDataMap>> {
-        let rea_project = ReaperSession::get().get_current_project().get_raw();
+        let rea_project = Reaper::get().get_current_project().get_raw();
         if !self.project_datas.borrow().contains_key(&rea_project) {
             return None;
         }
@@ -179,7 +179,7 @@ impl HelperControlSurface {
     }
 
     fn detect_track_set_changes(&self) {
-        let project = ReaperSession::get().get_current_project();
+        let project = Reaper::get().get_current_project();
         let mut project_datas = self.project_datas.borrow_mut();
         let track_datas = project_datas.entry(project.get_raw()).or_default();
         let old_track_count = track_datas.len() as u32;
@@ -196,7 +196,6 @@ impl HelperControlSurface {
         for t in project.get_tracks() {
             let media_track = t.get_raw();
             track_datas.entry(media_track).or_insert_with(|| {
-                let reaper = ReaperSession::get();
                 let func = Reaper::get().medium();
                 let td = unsafe {
                     TrackData {
@@ -214,7 +213,11 @@ impl HelperControlSurface {
                         guid: get_media_track_guid(media_track),
                     }
                 };
-                reaper.subjects.track_added.borrow_mut().next(t.clone());
+                ReaperSession::get()
+                    .subjects
+                    .track_added
+                    .borrow_mut()
+                    .next(t.clone());
                 self.detect_fx_changes_on_track(t, false, true, true);
                 td
             });
@@ -562,11 +565,10 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn set_track_list_change(&self) {
         // TODO-low Not multi-project compatible!
-        let reaper = ReaperSession::get();
-        let new_active_project = reaper.get_current_project();
+        let new_active_project = Reaper::get().get_current_project();
         if new_active_project != self.last_active_project.get() {
             self.last_active_project.replace(new_active_project);
-            reaper
+            ReaperSession::get()
                 .subjects
                 .project_switched
                 .borrow_mut()
