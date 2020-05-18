@@ -88,7 +88,7 @@ impl MediumReaperControlSurface for MyControlSurface {
     }
 }
 
-reaper.plugin_register_add_csurf_inst(MyControlSurface);
+session.plugin_register_add_csurf_inst(MyControlSurface);
 ```
 
 Audio hook:
@@ -107,7 +107,7 @@ impl MediumOnAudioBuffer for MyOnAudioBuffer {
     }
 }
 
-reaper.audio_reg_hardware_hook_add(MyOnAudioBuffer { counter: 0 });
+session.audio_reg_hardware_hook_add(MyOnAudioBuffer { counter: 0 });
 ```
 
 ### 3. High-level API
