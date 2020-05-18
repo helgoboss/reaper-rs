@@ -21,8 +21,8 @@ use reaper_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Sel
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, RecordArmMode, RecordingInput,
-    TrackRef, TrackSendCategory,
+    InputMonitoringMode, MediaTrack, ReaProject, RecordArmMode, RecordingInput, TrackRef,
+    TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -643,7 +643,7 @@ impl Track {
         let current_project = reaper.get_current_project();
         let is_valid_in_current_project = reaper
             .medium()
-            .functions()
+            .reaper()
             .validate_ptr_2(Proj(current_project.get_raw()), media_track);
         if is_valid_in_current_project {
             return Some(current_project.get_raw());
@@ -656,7 +656,7 @@ impl Track {
             .find(|p| {
                 reaper
                     .medium()
-                    .functions()
+                    .reaper()
                     .validate_ptr_2(Proj(p.get_raw()), media_track)
             });
         other_project.map(|p| p.get_raw())

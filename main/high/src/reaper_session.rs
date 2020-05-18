@@ -34,8 +34,8 @@ use reaper_medium::{
     CommandId, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
     MediumToggleAction, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef,
-    RealTimeAudioThreadScope, ReaperFunctions, ReaperStringArg, ReaperVersion,
-    StuffMidiMessageTarget, ToggleActionResult, TrackRef,
+    RealTimeAudioThreadScope, ReaperStringArg, ReaperVersion, StuffMidiMessageTarget,
+    ToggleActionResult, TrackRef,
 };
 use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
@@ -113,7 +113,7 @@ impl ReaperBuilder {
 }
 
 pub struct RealTimeReaper {
-    functions: ReaperFunctions<RealTimeAudioThreadScope>,
+    medium: reaper_medium::Reaper<RealTimeAudioThreadScope>,
     receiver: mpsc::Receiver<AudioThreadTaskOp>,
     #[allow(dead_code)]
     sender_to_main_thread: mpsc::Sender<MainThreadTask>,
@@ -142,8 +142,8 @@ impl MediumOnAudioBuffer for RealTimeReaper {
         if subject.subscribed_size() == 0 {
             return;
         }
-        for i in 0..self.functions.get_max_midi_inputs() {
-            self.functions
+        for i in 0..self.medium.get_max_midi_inputs() {
+            self.medium
                 .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
                     let evt_list = input.get_read_buf();
                     for evt in evt_list.enum_items(0) {
@@ -389,7 +389,7 @@ impl ReaperSession {
         // But at least we can make sure we are not in an audio thread. Whatever thread we are
         // in right now, this struct will memorize it as the main thread.
         assert!(
-            !medium.functions().is_in_real_time_audio(),
+            !medium.reaper().is_in_real_time_audio(),
             "Reaper::setup() must be called from main thread"
         );
         assert!(
@@ -402,7 +402,7 @@ impl ReaperSession {
         // For now, we set up a medium-level Reaper instance and use this wherever possible, in
         // order to get a feeling in which places we really need the full high-level Reaper
         // instance.
-        Reaper::make_available_globally(Reaper::new(medium.functions().clone()));
+        Reaper::make_available_globally(Reaper::new(medium.reaper().clone()));
         let reaper = ReaperSession {
             medium: RefCell::new(medium),
             logger,
@@ -430,7 +430,7 @@ impl ReaperSession {
         let reaper =
             ReaperSession::obtain_reaper_ref("Reaper::setup() must be called before Reaper::get()");
         assert!(
-            !reaper.medium().functions().is_in_real_time_audio(),
+            !reaper.medium().reaper().is_in_real_time_audio(),
             "Reaper::get() must be called from main thread"
         );
         reaper
@@ -440,7 +440,7 @@ impl ReaperSession {
         {
             let reaper = ReaperSession::obtain_reaper_ref("There's no Reaper instance to teardown");
             assert!(
-                !reaper.medium().functions().is_in_real_time_audio(),
+                !reaper.medium().reaper().is_in_real_time_audio(),
                 "Reaper::teardown() must be called from main thread"
             );
         }
@@ -459,7 +459,7 @@ impl ReaperSession {
     pub fn activate(&self) {
         let mut active_data = self.active_data.borrow_mut();
         assert!(active_data.is_none(), "Reaper is already active");
-        let real_time_functions = self.medium().create_real_time_functions();
+        let real_time_reaper = self.medium().create_real_time_reaper();
         let (sender_to_main_thread, main_thread_receiver) = mpsc::channel::<MainThreadTask>();
         let control_surface =
             HelperControlSurface::new(sender_to_main_thread.clone(), main_thread_receiver);
@@ -477,7 +477,7 @@ impl ReaperSession {
         // Audio hook
         let (sender_to_audio_thread, audio_thread_receiver) = mpsc::channel::<AudioThreadTaskOp>();
         let rt_reaper = RealTimeReaper {
-            functions: real_time_functions,
+            medium: real_time_reaper,
             receiver: audio_thread_receiver,
             sender_to_main_thread: sender_to_main_thread.clone(),
             subjects: RealTimeSubjects::new(),
@@ -521,7 +521,7 @@ impl ReaperSession {
     }
 
     pub fn get_version(&self) -> ReaperVersion {
-        self.medium().functions().get_app_version()
+        self.medium().reaper().get_app_version()
     }
 
     // TODO-move
@@ -531,7 +531,7 @@ impl ReaperSession {
         // fxQueryIndex is only a real query index since REAPER 5.95, before it didn't say if it's
         // input FX or normal one!
         self.medium()
-            .functions()
+            .reaper()
             .get_last_touched_fx()
             .and_then(|result| {
                 use GetLastTouchedFxResult::*;
@@ -628,7 +628,7 @@ impl ReaperSession {
 
     // TODO-move
     pub fn get_midi_input_devices(&self) -> impl Iterator<Item = MidiInputDevice> + '_ {
-        (0..self.medium().functions().get_max_midi_inputs())
+        (0..self.medium().reaper().get_max_midi_inputs())
             .map(move |i| self.get_midi_input_device_by_id(MidiInputDeviceId::new(i as u8)))
             // TODO-low I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
@@ -636,7 +636,7 @@ impl ReaperSession {
 
     // TODO-move
     pub fn get_midi_output_devices(&self) -> impl Iterator<Item = MidiOutputDevice> + '_ {
-        (0..self.medium().functions().get_max_midi_outputs())
+        (0..self.medium().reaper().get_max_midi_outputs())
             .map(move |i| self.get_midi_output_device_by_id(MidiOutputDeviceId::new(i as u8)))
             // TODO-low I think we should also return unavailable devices. Client can filter easily.
             .filter(|d| d.is_available())
@@ -644,10 +644,7 @@ impl ReaperSession {
 
     // TODO-move
     pub fn get_currently_loading_or_saving_project(&self) -> Option<Project> {
-        let ptr = self
-            .medium()
-            .functions()
-            .get_current_project_in_load_save()?;
+        let ptr = self.medium().reaper().get_current_project_in_load_save()?;
         Some(Project::new(ptr))
     }
 
@@ -706,7 +703,7 @@ impl ReaperSession {
     /// [from_bytes_with_nul_unchecked](CStr::from_bytes_with_nul_unchecked) respectively.
     // TODO-move
     pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
-        self.medium().functions().show_console_msg(msg);
+        self.medium().reaper().show_console_msg(msg);
     }
 
     // TODO-move
@@ -757,7 +754,7 @@ impl ReaperSession {
     // This is not reliable! After REAPER start no focused Fx can be found!
     // TODO-move
     pub fn get_focused_fx(&self) -> Option<Fx> {
-        self.medium().functions().get_focused_fx().and_then(|res| {
+        self.medium().reaper().get_focused_fx().and_then(|res| {
             use GetFocusedFxResult::*;
             match res {
                 TakeFx { .. } => None, // TODO-low implement
@@ -859,7 +856,7 @@ impl ReaperSession {
     pub fn get_current_project(&self) -> Project {
         Project::new(
             self.medium()
-                .functions()
+                .reaper()
                 .enum_projects(ProjectRef::Current, 0)
                 .unwrap()
                 .project,
@@ -868,17 +865,13 @@ impl ReaperSession {
 
     // TODO-move
     pub fn get_main_window(&self) -> Hwnd {
-        self.medium().functions().get_main_hwnd()
+        self.medium().reaper().get_main_hwnd()
     }
 
     // TODO-move
     pub fn get_projects(&self) -> impl Iterator<Item = Project> + '_ {
         (0..)
-            .map(move |i| {
-                self.medium()
-                    .functions()
-                    .enum_projects(ProjectRef::Tab(i), 0)
-            })
+            .map(move |i| self.medium().reaper().enum_projects(ProjectRef::Tab(i), 0))
             .take_while(|r| !r.is_none())
             .map(|r| Project::new(r.unwrap().project))
     }
@@ -890,7 +883,7 @@ impl ReaperSession {
 
     // TODO-move
     pub fn clear_console(&self) {
-        self.medium().functions().clear_console();
+        self.medium().reaper().clear_console();
     }
 
     // TODO-move-later
@@ -930,14 +923,12 @@ impl ReaperSession {
 
     // TODO-move
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage) {
-        self.medium()
-            .functions()
-            .stuff_midi_message(target, message);
+        self.medium().reaper().stuff_midi_message(target, message);
     }
 
     // TODO-move
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride> {
-        self.medium().functions().get_global_automation_override()
+        self.medium().reaper().get_global_automation_override()
     }
 
     pub fn undoable_action_is_running(&self) -> bool {
@@ -956,7 +947,7 @@ impl ReaperSession {
         }
         self.undo_block_is_active.replace(true);
         self.medium()
-            .functions()
+            .reaper()
             .undo_begin_block_2(Proj(project.get_raw()));
         Some(UndoBlock::new(project, label))
     }
@@ -967,7 +958,7 @@ impl ReaperSession {
             return;
         }
         self.medium()
-            .functions()
+            .reaper()
             .undo_end_block_2(Proj(project.get_raw()), label, All);
         self.undo_block_is_active.replace(false);
     }

@@ -5,8 +5,7 @@ use crate::{Reaper, ReaperSession, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    MasterTrackBehavior, ProjectRef, ReaProject, TrackDefaultsBehavior, TrackRef,
-    UndoBehavior,
+    MasterTrackBehavior, ProjectRef, ReaProject, TrackDefaultsBehavior, TrackRef, UndoBehavior,
 };
 use std::path::PathBuf;
 
@@ -148,10 +147,10 @@ impl Project {
     pub fn insert_track_at(self, index: u32) -> Track {
         self.complain_if_not_available();
         // TODO-low reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
-        let functions = Reaper::get().medium();
-        functions.insert_track_at_index(index, TrackDefaultsBehavior::OmitDefaultEnvAndFx);
-        functions.track_list_update_all_external_surfaces();
-        let media_track = functions.get_track(Proj(self.rea_project), index).unwrap();
+        let reaper = Reaper::get().medium();
+        reaper.insert_track_at_index(index, TrackDefaultsBehavior::OmitDefaultEnvAndFx);
+        reaper.track_list_update_all_external_surfaces();
+        let media_track = reaper.get_track(Proj(self.rea_project), index).unwrap();
         Track::new(media_track, Some(self.rea_project))
     }
 

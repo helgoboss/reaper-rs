@@ -183,7 +183,7 @@ impl Action {
         // val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
         let rd = self.load_if_necessary_or_complain();
         let action_command_id = rd.command_id;
-        let functions = Reaper::get().medium();
+        let reaper = Reaper::get().medium();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
             let cropped_relative_value =
@@ -191,10 +191,10 @@ impl Action {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
             unsafe {
-                functions.kbd_on_main_action_ex(
+                reaper.kbd_on_main_action_ex(
                     action_command_id,
                     ActionValueChange::Relative2(cropped_relative_value),
-                    Win(functions.get_main_hwnd()),
+                    Win(reaper.get_main_hwnd()),
                     match project {
                         None => CurrentProject,
                         Some(p) => Proj(p.get_raw()),
@@ -207,10 +207,10 @@ impl Action {
             let discrete_value =
                 unsafe { U7::new_unchecked((normalized_value * 127.0).round() as u8) };
             unsafe {
-                functions.kbd_on_main_action_ex(
+                reaper.kbd_on_main_action_ex(
                     action_command_id,
                     ActionValueChange::AbsoluteLowRes(discrete_value),
-                    Win(functions.get_main_hwnd()),
+                    Win(reaper.get_main_hwnd()),
                     match project {
                         None => CurrentProject,
                         Some(p) => Proj(p.get_raw()),

@@ -75,14 +75,14 @@ impl MediumHookPostCommand for MyHookPostCommand {
 
 #[derive(Debug)]
 struct MyControlSurface {
-    functions: reaper_medium::ReaperFunctions,
+    reaper: reaper_medium::Reaper,
     receiver: Receiver<String>,
 }
 
 impl MediumReaperControlSurface for MyControlSurface {
     fn run(&mut self) {
         for msg in self.receiver.try_iter() {
-            self.functions.show_console_msg(msg);
+            self.reaper.show_console_msg(msg);
         }
     }
 
@@ -102,14 +102,14 @@ impl TestVstPlugin {
         let mut med = reaper_medium::ReaperSession::new(low);
         {
             let (sender, receiver) = channel::<String>();
-            med.functions()
+            med.reaper()
                 .show_console_msg("Registering control surface ...");
             med.plugin_register_add_csurf_inst(MyControlSurface {
-                functions: med.functions().clone(),
+                reaper: med.reaper().clone(),
                 receiver,
             })
             .expect("couldn't register control surface");
-            med.functions().show_console_msg("Registering action ...");
+            med.reaper().show_console_msg("Registering action ...");
             med.plugin_register_add_hook_post_command::<MyHookPostCommand>()
                 .expect("couldn't register hook post command");
             med.audio_reg_hardware_hook_add(MyOnAudioBuffer { sender, counter: 0 })

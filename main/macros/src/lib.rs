@@ -19,7 +19,7 @@ use quote::quote;
 /// #[reaper_extension_plugin]
 /// fn plugin_main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
 ///     let session = ReaperSession::load(context);
-///     session.functions().show_console_msg("Hello world from reaper-rs medium-level API!");
+///     session.reaper().show_console_msg("Hello world from reaper-rs medium-level API!");
 ///     Ok(())
 /// }
 /// ```

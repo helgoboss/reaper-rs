@@ -62,7 +62,7 @@ impl AnyThread for RealTimeAudioThreadScope {}
 ///
 /// # Basics
 ///
-/// You can obtain an instance of this struct by calling [`ReaperSession::functions()`]. This
+/// You can obtain an instance of this struct by calling [`ReaperSession::reaper()`]. This
 /// unlocks all functions which are safe to execute in the main thread. If you want access to the
 /// functions which are safe to execute in the real-time audio thread, call
 /// [`ReaperSession::create_real_time_functions()`] instead. REAPER functions which are related to
@@ -90,7 +90,7 @@ impl AnyThread for RealTimeAudioThreadScope {}
 ///
 /// # Design
 ///
-/// ## What's the `<MainThreadScope>` in `ReaperFunctions<MainThreadScope>` about?
+/// ## What's the `<MainThreadScope>` in `Reaper<MainThreadScope>` about?
 ///
 /// In REAPER and probably many other DAWs there are at least two important threads:
 ///
@@ -108,10 +108,10 @@ impl AnyThread for RealTimeAudioThreadScope {}
 /// thread. Of course that would be the best. In an attempt to still let the compiler help you a
 /// bit, the traits [`MainThreadOnly`] and [`RealTimeAudioThreadOnly`] have been introduced. They
 /// are marker traits which are used as type bound on each method which is not thread-safe. So
-/// depending on the context we can expose an instance of [`ReaperFunctions`] which has only
+/// depending on the context we can expose an instance of [`Reaper`] which has only
 /// functions unlocked which are safe to be executed from e.g. the real-time audio thread. The
 /// compiler will complain if you attempt to call a real-time-audio-thread-only method on
-/// `ReaperFunctions<MainThreadScope>` and vice versa.
+/// `Reaper<MainThreadScope>` and vice versa.
 ///
 /// Of course that technique can't prevent anyone from acquiring a main-thread only instance and
 /// use it in the audio hook. But still, it adds some extra safety.
@@ -134,22 +134,22 @@ impl AnyThread for RealTimeAudioThreadScope {}
 /// thread.
 ///
 /// [`ReaperSession`]: struct.ReaperSession.html
-/// [`ReaperSession::functions()`]: struct.ReaperSession.html#method.functions
+/// [`ReaperSession::reaper()`]: struct.ReaperSession.html#method.reaper
 /// [`ReaperSession::create_real_time_functions()`]:
 /// struct.ReaperSession.html#method.create_real_time_functions [`low()`]: #method.low
 /// [low-level `Reaper`]: https://docs.rs/reaper-low
 /// [`MainThreadOnly`]: trait.MainThreadOnly.html
 /// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html
-/// [`ReaperFunctions`]: struct.ReaperFunctions.html
+/// [`Reaper`]: struct.Reaper.html
 #[derive(Debug, Default)]
-pub struct ReaperFunctions<UsageScope = MainThreadScope> {
+pub struct Reaper<UsageScope = MainThreadScope> {
     low: reaper_low::Reaper,
     p: PhantomData<UsageScope>,
     #[cfg(feature = "reaper-meter")]
     metrics: ReaperMetrics,
 }
 
-impl<UsageScope> Clone for ReaperFunctions<UsageScope> {
+impl<UsageScope> Clone for Reaper<UsageScope> {
     fn clone(&self) -> Self {
         Self {
             low: self.low,
@@ -161,18 +161,18 @@ impl<UsageScope> Clone for ReaperFunctions<UsageScope> {
 }
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
-static mut INSTANCE: Option<ReaperFunctions<MainThreadScope>> = None;
+static mut INSTANCE: Option<Reaper<MainThreadScope>> = None;
 static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
-impl ReaperFunctions<MainThreadScope> {
+impl Reaper<MainThreadScope> {
     /// Makes the given instance available globally.
     ///
     /// After this has been called, the instance can be queried globally using `get()`.
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
-    pub fn make_available_globally(functions: ReaperFunctions<MainThreadScope>) {
+    pub fn make_available_globally(reaper: Reaper<MainThreadScope>) {
         unsafe {
-            INIT_INSTANCE.call_once(|| INSTANCE = Some(functions));
+            INIT_INSTANCE.call_once(|| INSTANCE = Some(reaper));
         }
     }
 
@@ -183,7 +183,7 @@ impl ReaperFunctions<MainThreadScope> {
     /// This panics if [`make_available_globally()`] has not been called before.
     ///
     /// [`make_available_globally()`]: fn.make_available_globally.html
-    pub fn get() -> &'static ReaperFunctions<MainThreadScope> {
+    pub fn get() -> &'static Reaper<MainThreadScope> {
         unsafe {
             INSTANCE
                 .as_ref()
@@ -193,9 +193,9 @@ impl ReaperFunctions<MainThreadScope> {
 }
 
 #[cfg_attr(feature = "reaper-meter", metered(registry = ReaperMetrics), measure([NanoResponseTime]))]
-impl<UsageScope> ReaperFunctions<UsageScope> {
-    pub(crate) fn new(low: reaper_low::Reaper) -> ReaperFunctions<UsageScope> {
-        ReaperFunctions {
+impl<UsageScope> Reaper<UsageScope> {
+    pub(crate) fn new(low: reaper_low::Reaper) -> Reaper<UsageScope> {
+        Reaper {
             low,
             p: PhantomData,
             #[cfg(feature = "reaper-meter")]
@@ -219,7 +219,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::ProjectRef::Tab;
     ///
-    /// let result = session.functions().enum_projects(Tab(4), 256).ok_or("No such tab")?;
+    /// let result = session.reaper().enum_projects(Tab(4), 256).ok_or("No such tab")?;
     /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -275,7 +275,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::ProjectContext::CurrentProject;
     ///
-    /// let track = session.functions().get_track(CurrentProject, 3).ok_or("No such track")?;
+    /// let track = session.reaper().get_track(CurrentProject, 3).ok_or("No such track")?;
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     #[measure]
@@ -317,8 +317,8 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::ProjectContext::CurrentProject;
     ///
-    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("No track")?;
-    /// let track_is_valid = session.functions().validate_ptr_2(CurrentProject, track);
+    /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("No track")?;
+    /// let track_is_valid = session.reaper().validate_ptr_2(CurrentProject, track);
     /// assert!(track_is_valid);
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -458,9 +458,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// use std::ffi::CString;
     /// let session = reaper_medium::ReaperSession::default();
     ///
-    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("no track")?;
+    /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("no track")?;
     /// let track_name_c_string = unsafe {
-    ///     session.functions().get_set_media_track_info_get_name(
+    ///     session.reaper().get_set_media_track_info_get_name(
     ///         track,
     ///         |name| name.to_owned()
     ///     )
@@ -469,7 +469,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///     None => "Master track",
     ///     Some(name) => name.to_str()?
     /// };
-    /// session.functions().show_console_msg(format!("Track name is {}", track_name));
+    /// session.reaper().show_console_msg(format!("Track name is {}", track_name));
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     ///
@@ -640,9 +640,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
     ///
-    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// unsafe {
-    ///     session.functions().csurf_set_surface_mute(track, true, NotifyAll);
+    ///     session.reaper().csurf_set_surface_mute(track, true, NotifyAll);
     /// }
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -702,7 +702,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// use reaper_medium::SectionId;
     ///
     /// let action_count =
-    ///     session.functions().section_from_unique_id(SectionId::new(1), |s| s.action_list_cnt());
+    ///     session.reaper().section_from_unique_id(SectionId::new(1), |s| s.action_list_cnt());
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     //
@@ -1620,9 +1620,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, ProjectPart::*};
     ///
-    /// session.functions().undo_begin_block_2(CurrentProject);
+    /// session.reaper().undo_begin_block_2(CurrentProject);
     /// // ... modify something ...
-    /// session.functions().undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
+    /// session.reaper().undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
     /// ```
     #[measure]
     pub fn undo_begin_block_2(&self, project: ProjectContext)
@@ -2813,9 +2813,9 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
     ///
-    /// let src_track = session.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// let src_track = session.reaper().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// let send_index = unsafe {
-    ///     session.functions().create_track_send(src_track, HardwareOutput)?;
+    ///     session.reaper().create_track_send(src_track, HardwareOutput)?;
     /// };
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -3208,10 +3208,10 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// use reaper_medium::ProjectContext::CurrentProject;
     /// use reaper_medium::TrackFxLocation::NormalFxChain;
     ///
-    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// // Navigate 2 presets "up"
     /// unsafe {
-    ///     session.functions().track_fx_navigate_presets(track, NormalFxChain(0), -2)?
+    ///     session.reaper().track_fx_navigate_presets(track, NormalFxChain(0), -2)?
     /// };
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```

@@ -15,10 +15,10 @@
 //! # let session = reaper_medium::ReaperSession::default();
 //! use reaper_medium::ProjectContext::CurrentProject;
 //!
-//! let functions = session.functions();
-//! functions.show_console_msg("Hello world from reaper-rs medium-level API!");
-//! let track = functions.get_track(CurrentProject, 0).ok_or("no tracks")?;
-//! unsafe { functions.delete_track(track); }
+//! let reaper = session.reaper();
+//! reaper.show_console_msg("Hello world from reaper-rs medium-level API!");
+//! let track = reaper.get_track(CurrentProject, 0).ok_or("no tracks")?;
+//! unsafe { reaper.delete_track(track); }
 //! # Ok::<_, Box<dyn std::error::Error>>(())
 //! ```
 //!
@@ -44,7 +44,7 @@
 //! ## Use unsigned integers where appropriate
 //!
 //! We don't use signed integers when it's totally clear that a number can never be negative.
-//! Example: [`insert_track_at_index()`](struct.ReaperFunctions.html#method.insert_track_at_index)
+//! Example: [`insert_track_at_index()`](struct.Reaper.html#method.insert_track_at_index)
 //!
 //! ## Use enums where appropriate
 //!
@@ -53,37 +53,37 @@
 //!
 //! 1. If the original function uses an integer which represents a limited set of
 //!    options that can be easily named, we introduce an enum. Example:
-//! [`get_track_automation_mode()`](struct.ReaperFunctions.html#method.insert_track_at_index),
+//! [`get_track_automation_mode()`](struct.Reaper.html#method.insert_track_at_index),
 //! [`AutomationMode`](enum.AutomationMode.html)
 //!
 //! 2. If the original function uses a string and there's a clear set of predefined
 //!    options, we introduce an enum. Example:
-//! [`get_media_track_info_value()`](struct.ReaperFunctions.html#method.get_media_track_info_value),
+//! [`get_media_track_info_value()`](struct.Reaper.html#method.get_media_track_info_value),
 //! [`TrackAttributeKey`](enum.TrackAttributeKey.html)
 //!
 //! 3. If the original function uses a bool and the name of the function doesn't give that bool
 //!    meaning, introduce an enum. Example:
-//! [`set_current_bpm()`](struct.ReaperFunctions.html#method.set_current_bpm),
+//! [`set_current_bpm()`](struct.Reaper.html#method.set_current_bpm),
 //! [`UndoBehavior`](enum.UndoBehavior.html)
 //!
 //! 4. If the original function can have different mutually exclusive results, introduce an enum.
 //!    Example:
-//! [`get_last_touched_fx()`](struct.ReaperFunctions.html#method.get_last_touched_fx),
+//! [`get_last_touched_fx()`](struct.Reaper.html#method.get_last_touched_fx),
 //! [`GetLastTouchedFxResult`](enum.GetLastTouchedFxResult.html)
 //!
 //! 5. If the original function has several parameters of which only certain combinations are valid,
 //!    introduce an enum for combining those. Example:
-//! [`kbd_on_main_action_ex()`](struct.ReaperFunctions.html#method.kbd_on_main_action_ex),
+//! [`kbd_on_main_action_ex()`](struct.Reaper.html#method.kbd_on_main_action_ex),
 //! [`ActionValueChange`](enum.ActionValueChange.html)
 //!
 //! 6. If the original function takes a parameter which describes how another parameter is
 //!    interpreted, introduce an enum. Example:
-//! [`csurf_on_pan_change_ex()`](struct.ReaperFunctions.html#method.csurf_on_pan_change_ex),
+//! [`csurf_on_pan_change_ex()`](struct.Reaper.html#method.csurf_on_pan_change_ex),
 //! [`ValueChange`](enum.ValueChange.html)
 //!
 //! 7. If the original function takes an optional value and one cannot conclude from the function
 //!    name what a `None` would mean, introduce an enum. Example:
-//! [`count_tracks()`](struct.ReaperFunctions.html#method.count_tracks),
+//! [`count_tracks()`](struct.Reaper.html#method.count_tracks),
 //! [`ProjectContext`](enum.ProjectContext.html)
 //!
 //! The first design didn't have many enums. Then, with every enum introduced in the medium-level
@@ -93,14 +93,14 @@
 //! ## Adjust return types where appropriate
 //!
 //! 1. Use `bool` instead of `i32` as return value type for "yes or no" functions. Example:
-//!    [`is_in_real_time_audio()`](struct.ReaperFunctions.html#method.is_in_real_time_audio)
+//!    [`is_in_real_time_audio()`](struct.Reaper.html#method.is_in_real_time_audio)
 //! 2. Use return values instead of output parameters. Example:
-//!    [`gen_guid()`](struct.ReaperFunctions.html#method.gen_guid)
+//!    [`gen_guid()`](struct.Reaper.html#method.gen_guid)
 //! 3. If a function has multiple results, introduce and return a struct for aggregating them.
-//!    Example: [`get_focused_fx()`](struct.ReaperFunctions.html#method.get_focused_fx)
+//!    Example: [`get_focused_fx()`](struct.Reaper.html#method.get_focused_fx)
 //! 4. If a function can return a value which represents that something is not present,
 //!    return an `Option`. Example:
-//!    [`named_command_lookup()`](struct.ReaperFunctions.html#method.named_command_lookup)
+//!    [`named_command_lookup()`](struct.Reaper.html#method.named_command_lookup)
 //!
 //! ## Use newtypes where appropriate
 //!
@@ -120,26 +120,26 @@
 //! convenience functions can sometimes help with that, at least with making them a *bit* more
 //! safe to use.
 //! Examples:
-//! [`get_set_media_track_info()`](struct.ReaperFunctions.html#method.get_set_media_track_info),
+//! [`get_set_media_track_info()`](struct.Reaper.html#method.get_set_media_track_info),
 //! [`plugin_register_add_command_id()`](struct.ReaperSession.html#method.
 //! plugin_register_add_command_id)
 //!
 //! ## Make it easy to work with strings
 //!
 //! - String parameters are used as described in [`ReaperStringArg`](struct.ReaperStringArg.html).
-//!   Example: [`string_to_guid()`](struct.ReaperFunctions.html#method.string_to_guid)
+//!   Example: [`string_to_guid()`](struct.Reaper.html#method.string_to_guid)
 //! - Strings in return positions are dealt with in different ways:
 //!     - When returning an owned string, we return `CString` (because that's what comes closest to
 //!       the original REAPER API, see [`ReaperStringArg`](struct.ReaperStringArg.html)). Consumers
 //!       can easily convert them to regular Rust strings when needed. Example:
-//!       [`guid_to_string()`](struct.ReaperFunctions.html#method.guid_to_string)
+//!       [`guid_to_string()`](struct.Reaper.html#method.guid_to_string)
 //!     - When returning a string owned by REAPER and we know that string has a static lifetime, we
 //!       return a `&'static CStr`. Example:
-//!       [`get_app_version()`](struct.ReaperFunctions.html#method.get_app_version)
+//!       [`get_app_version()`](struct.Reaper.html#method.get_app_version)
 //!     - When returning a string owned by REAPER and we can't give it a proper lifetime annotation
 //!       (in most cases we can't), we grant the user only temporary access to that string by taking
 //!       a closure with a `&CStr` argument which is executed right away. Example:
-//!       [`undo_can_undo_2()`](struct.ReaperFunctions.html#method.undo_can_undo_2)
+//!       [`undo_can_undo_2()`](struct.Reaper.html#method.undo_can_undo_2)
 //! - Strings in enums are often `Cow<CStr>` because we want them to be flexible enough to carry
 //!   both owned and borrowed strings.
 //!
@@ -247,11 +247,11 @@
 //!   satisfied by consumers. Rationale: This represents incorrect API usage.
 //!     - Luckily, the need for precondition checks is mitigated by using lots of newtypes and
 //!       enums, which don't allow parameters to be out of range in the first place.
-//!   Example: [`track_fx_get_fx_name()`](struct.ReaperFunctions.html#method.track_fx_get_fx_name)
+//!   Example: [`track_fx_get_fx_name()`](struct.Reaper.html#method.track_fx_get_fx_name)
 //! - When a function takes pointers, we generally mark it as `unsafe`. Rationale: Pointers can
 //!   dangle (e.g. a pointer to a track dangles as soon as that track is removed). Passing a
 //!   dangling pointer to a REAPER function can and often will make REAPER crash. Example:
-//!   [`delete_track()`](struct.ReaperFunctions.html#method.delete_track)
+//!   [`delete_track()`](struct.Reaper.html#method.delete_track)
 //!     - That's a bit unfortunate, but unavoidable given the medium-level APIs design goal to stay
 //!       close to the original API. The `unsafe` is a hint to the consumer to be extra careful with
 //!       those functions.
@@ -259,7 +259,7 @@
 //!
 //!          1. Using obtained pointers right away instead of caching them (preferred)
 //!
-//!          2. Using [`validate_ptr_2()`](struct.ReaperFunctions.html#method.validate_ptr_2) to
+//!          2. Using [`validate_ptr_2()`](struct.Reaper.html#method.validate_ptr_2) to
 //!             check if the cached pointer is still valid.
 //!          
 //!          3. Using a
@@ -269,19 +269,18 @@
 //! accordingly.
 //! - There's one exception to this: If the parameters passed to the function in question are enough
 //!   to check whether the pointer is still valid, we do it, right in that function. If it's
-//!   invalid, we panic. We use
-//!   [`validate_ptr_2()`](struct.ReaperFunctions.html#method.validate_ptr_2) to check the pointer.
-//!   Sadly, for all but project pointers it needs a project context to be able to validate a
-//!   pointer. Otherwise we could apply this rule much more. Rationale: This allows us to remove the
-//!   `unsafe` (if there was no other reason for it). That's not ideal either but it's far better
-//!   than undefined behavior. Failing fast without crashing is one of the main design principles of
-//!   *reaper-rs*. Because checking the pointer is an "extra" thing that the medium-level API does,
-//!   we also offer an unsafe `_unchecked` variant of the same function, which doesn't do the check.
-//!   Example: [`count_tracks()`](struct.ReaperFunctions.html#method.count_tracks) and
-//!   [`count_tracks_unchecked()`](struct.ReaperFunctions.html#method.count_tracks_unchecked)
+//!   invalid, we panic. We use [`validate_ptr_2()`](struct.Reaper.html#method.validate_ptr_2) to
+//!   check the pointer. Sadly, for all but project pointers it needs a project context to be able
+//!   to validate a pointer. Otherwise we could apply this rule much more. Rationale: This allows us
+//!   to remove the `unsafe` (if there was no other reason for it). That's not ideal either but it's
+//!   far better than undefined behavior. Failing fast without crashing is one of the main design
+//!   principles of *reaper-rs*. Because checking the pointer is an "extra" thing that the
+//!   medium-level API does, we also offer an unsafe `_unchecked` variant of the same function,
+//!   which doesn't do the check. Example:
+//!   [`count_tracks()`](struct.Reaper.html#method.count_tracks) and
+//!   [`count_tracks_unchecked()`](struct.Reaper.html#method.count_tracks_unchecked)
 //! - If a REAPER function can return a value which represents that execution was not successful,
-//!   return a `Result`. Example:
-//!   [`string_to_guid()`](struct.ReaperFunctions.html#method.string_to_guid)
+//!   return a `Result`. Example: [`string_to_guid()`](struct.Reaper.html#method.string_to_guid)
 //!
 //! Verdict: Making the API completely safe to use can't be done in the medium-level API. But it can
 //! be done in the high-level API because it's not tied to the original REAPER flat function
