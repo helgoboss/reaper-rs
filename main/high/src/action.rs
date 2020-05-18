@@ -1,6 +1,6 @@
-use crate::{ActionCharacter, Project, Reaper, ReaperSession, Section};
+use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_medium::{ActionValueChange, CommandId, ReaperFunctions, SectionContext};
+use reaper_medium::{ActionValueChange, CommandId, SectionContext};
 
 use helgoboss_midi::U7;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};

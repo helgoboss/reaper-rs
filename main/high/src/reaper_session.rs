@@ -8,8 +8,8 @@ use std::ptr::NonNull;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
 use std::sync::{mpsc, Arc, Weak};
-use std::thread;
-use std::thread::ThreadId;
+
+
 
 use rxrust::prelude::*;
 
@@ -21,8 +21,7 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper,
-    Section, Track,
+    create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper, Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;

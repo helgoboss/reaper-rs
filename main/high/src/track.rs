@@ -21,7 +21,7 @@ use reaper_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Sel
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperFunctions, RecordArmMode, RecordingInput,
+    InputMonitoringMode, MediaTrack, ReaProject, RecordArmMode, RecordingInput,
     TrackRef, TrackSendCategory,
 };
 

@@ -457,7 +457,7 @@ fn register_and_unregister_action() -> TestStep {
 }
 
 fn main_section_functions() -> TestStep {
-    step(AllVersions, "Main section functions", |reaper, _| {
+    step(AllVersions, "Main section functions", |_reaper, _| {
         // Given
         let section = Reaper::get().get_main_section();
         // When
@@ -623,7 +623,7 @@ fn invoke_action() -> TestStep {
 }
 
 fn query_action() -> TestStep {
-    step(AllVersions, "Query action", |reaper, _| {
+    step(AllVersions, "Query action", |_reaper, _| {
         // Given
         let track = get_track(0)?;
         track.select_exclusively();

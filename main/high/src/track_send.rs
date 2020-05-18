@@ -1,7 +1,7 @@
 use crate::{Pan, Reaper, Track, Volume};
 
 use reaper_medium::ValueChange::Absolute;
-use reaper_medium::{MediaTrack, ReaperFunctions, TrackSendDirection};
+use reaper_medium::{MediaTrack, TrackSendDirection};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
 

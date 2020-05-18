@@ -3,7 +3,7 @@ use crate::guid::Guid;
 use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
 
 use reaper_medium::{
-    AddFxBehavior, ChunkCacheHint, ReaperFunctions, TrackFxChainType, TransferBehavior,
+    AddFxBehavior, ChunkCacheHint, TrackFxChainType, TransferBehavior,
 };
 use std::ffi::CStr;
 

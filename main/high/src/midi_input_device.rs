@@ -1,5 +1,5 @@
 use crate::Reaper;
-use reaper_medium::{MidiInputDeviceId, ReaperFunctions};
+use reaper_medium::{MidiInputDeviceId};
 use std::ffi::CString;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

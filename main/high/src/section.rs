@@ -1,5 +1,5 @@
 use crate::{Action, Reaper};
-use reaper_medium::{CommandId, KbdSectionInfo, ReaperFunctions, SectionId};
+use reaper_medium::{CommandId, KbdSectionInfo, SectionId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Section {

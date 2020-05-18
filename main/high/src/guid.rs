@@ -2,7 +2,7 @@ use reaper_low::raw::GUID;
 use std::convert;
 
 use crate::Reaper;
-use reaper_medium::ReaperFunctions;
+
 use std::ffi::{CStr, CString};
 use std::fmt;
 use std::fmt::Formatter;

@@ -5,7 +5,7 @@ use crate::{Reaper, ReaperSession, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    MasterTrackBehavior, ProjectRef, ReaProject, ReaperFunctions, TrackDefaultsBehavior, TrackRef,
+    MasterTrackBehavior, ProjectRef, ReaProject, TrackDefaultsBehavior, TrackRef,
     UndoBehavior,
 };
 use std::path::PathBuf;

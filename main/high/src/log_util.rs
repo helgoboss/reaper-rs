@@ -2,7 +2,7 @@ use slog::{error, o, Drain};
 use std::backtrace::Backtrace;
 
 use crate::Reaper;
-use reaper_medium::ReaperFunctions;
+
 use std::ffi::CString;
 use std::io;
 use std::panic::PanicInfo;
