@@ -2,7 +2,7 @@
 
 //! This crate contains the medium-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
-//! To get started, have a look at the [`Reaper`] struct.
+//! To get started, have a look at the [`ReaperSession`] struct.
 //!
 //! # General usage hints
 //!
@@ -12,10 +12,10 @@
 //! # Example
 //!
 //! ```no_run
-//! # let reaper = reaper_medium::Reaper::default();
+//! # let session = reaper_medium::ReaperSession::default();
 //! use reaper_medium::ProjectContext::CurrentProject;
 //!
-//! let functions = reaper.functions();
+//! let functions = session.functions();
 //! functions.show_console_msg("Hello world from reaper-rs medium-level API!");
 //! let track = functions.get_track(CurrentProject, 0).ok_or("no tracks")?;
 //! unsafe { functions.delete_track(track); }
@@ -121,7 +121,8 @@
 //! safe to use.
 //! Examples:
 //! [`get_set_media_track_info()`](struct.ReaperFunctions.html#method.get_set_media_track_info),
-//! [`plugin_register_add_command_id()`](struct.Reaper.html#method.plugin_register_add_command_id)
+//! [`plugin_register_add_command_id()`](struct.ReaperSession.html#method.
+//! plugin_register_add_command_id)
 //!
 //! ## Make it easy to work with strings
 //!
@@ -262,9 +263,10 @@
 //!             check if the cached pointer is still valid.
 //!          
 //!          3. Using a
-//!             [hidden control surface](struct.Reaper.html#method.plugin_register_add_csurf_inst)
-//!             to be informed whenever e.g. a `MediaTrack` is removed and invalidating the cached
-//!             pointer accordingly.
+//!             [hidden control
+//! surface](struct.ReaperSession.html#method.plugin_register_add_csurf_inst)             to be
+//! informed whenever e.g. a `MediaTrack` is removed and invalidating the cached             pointer
+//! accordingly.
 //! - There's one exception to this: If the parameters passed to the function in question are enough
 //!   to check whether the pointer is still valid, we do it, right in that function. If it's
 //!   invalid, we panic. We use
@@ -303,7 +305,7 @@
 //! even be considered as a serious Rust API, it's too raw and unsafe for Rust standards.
 //!
 //!
-//! [`Reaper`]: struct.Reaper.html
+//! [`ReaperSession`]: struct.ReaperSession.html
 
 mod misc_enums;
 pub use misc_enums::*;
@@ -337,8 +339,8 @@ pub use control_surface::*;
 mod midi;
 pub use midi::*;
 
-mod reaper;
-pub use reaper::*;
+mod reaper_session;
+pub use reaper_session::*;
 
 mod reaper_functions;
 pub use reaper_functions::*;

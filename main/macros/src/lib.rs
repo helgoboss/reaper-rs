@@ -14,12 +14,12 @@ use quote::quote;
 /// use std::error::Error;
 /// use reaper_macros::reaper_extension_plugin;
 /// use reaper_low::ReaperPluginContext;
-/// use reaper_medium::Reaper;
+/// use reaper_medium::ReaperSession;
 ///
 /// #[reaper_extension_plugin]
 /// fn plugin_main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
-///     let reaper = Reaper::load(context);
-///     reaper.functions().show_console_msg("Hello world from reaper-rs medium-level API!");
+///     let session = ReaperSession::load(context);
+///     session.functions().show_console_msg("Hello world from reaper-rs medium-level API!");
 ///     Ok(())
 /// }
 /// ```
@@ -34,8 +34,8 @@ use quote::quote;
 ///
 /// #[reaper_extension_plugin(email_address = "support@example.org")]
 /// fn plugin_main() -> Result<(), Box<dyn Error>> {
-///     let reaper = ReaperSession::get();
-///     reaper.show_console_msg("Hello world from reaper-rs high-level API!");
+///     let session = ReaperSession::get();
+///     session.show_console_msg("Hello world from reaper-rs high-level API!");
 ///     Ok(())
 /// }
 /// ```

@@ -17,7 +17,7 @@ reaper_vst_plugin!();
 #[derive(Default)]
 struct TestVstPlugin {
     host: HostCallback,
-    reaper: Option<reaper_medium::Reaper>,
+    reaper: Option<reaper_medium::ReaperSession>,
     reaper_guard: Option<Arc<ReaperGuard>>,
 }
 
@@ -99,7 +99,7 @@ impl TestVstPlugin {
             ReaperPluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context())
                 .unwrap();
         let low = reaper_low::Reaper::load(context);
-        let mut med = reaper_medium::Reaper::new(low);
+        let mut med = reaper_medium::ReaperSession::new(low);
         {
             let (sender, receiver) = channel::<String>();
             med.functions()

@@ -319,7 +319,7 @@ pub enum TrackAttributeKey<'a> {
     ///
     /// Call [`update_timeline`] after changing.
     ///
-    /// [`update_timeline`]: struct.Reaper.html#method.update_timeline
+    /// [`update_timeline`]: struct.ReaperSession.html#method.update_timeline
     FreeMode,
     /// Track timebase.
     ///

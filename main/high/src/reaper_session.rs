@@ -87,7 +87,7 @@ static mut REAPER_INSTANCE: RefCell<Option<ReaperSession>> = RefCell::new(None);
 static REAPER_GUARD: Lazy<Mutex<Weak<ReaperGuard>>> = Lazy::new(|| Mutex::new(Weak::new()));
 
 pub struct ReaperBuilder {
-    medium: reaper_medium::Reaper,
+    medium: reaper_medium::ReaperSession,
     logger: Option<slog::Logger>,
 }
 
@@ -96,7 +96,7 @@ impl ReaperBuilder {
         ReaperBuilder {
             medium: {
                 let low = reaper_low::Reaper::load(context);
-                reaper_medium::Reaper::new(low)
+                reaper_medium::ReaperSession::new(low)
             },
             logger: Default::default(),
         }
@@ -164,7 +164,7 @@ impl MediumOnAudioBuffer for RealTimeReaper {
 
 #[derive(Debug)]
 pub struct ReaperSession {
-    medium: RefCell<reaper_medium::Reaper>,
+    medium: RefCell<reaper_medium::ReaperSession>,
     logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO-low Adding an action in an action would panic because we have an immutable borrow of
@@ -384,7 +384,7 @@ impl ReaperSession {
         ));
     }
 
-    fn setup(medium: reaper_medium::Reaper, logger: slog::Logger) {
+    fn setup(medium: reaper_medium::ReaperSession, logger: slog::Logger) {
         // We can't check now if we are in main thread because we don't have the main thread ID yet.
         // But at least we can make sure we are not in an audio thread. Whatever thread we are
         // in right now, this struct will memorize it as the main thread.
@@ -512,11 +512,11 @@ impl ReaperSession {
         *active_data = None;
     }
 
-    pub fn medium(&self) -> Ref<reaper_medium::Reaper> {
+    pub fn medium(&self) -> Ref<reaper_medium::ReaperSession> {
         self.medium.borrow()
     }
 
-    pub fn medium_mut(&self) -> RefMut<reaper_medium::Reaper> {
+    pub fn medium_mut(&self) -> RefMut<reaper_medium::ReaperSession> {
         self.medium.borrow_mut()
     }
 

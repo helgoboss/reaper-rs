@@ -62,11 +62,11 @@ impl AnyThread for RealTimeAudioThreadScope {}
 ///
 /// # Basics
 ///
-/// You can obtain an instance of this struct by calling [`Reaper::functions()`]. This unlocks all
-/// functions which are safe to execute in the main thread. If you want access to the functions
-/// which are safe to execute in the real-time audio thread, call
-/// [`Reaper::create_real_time_functions()`] instead. REAPER functions which are related to
-/// registering/unregistering things are located in [`Reaper`].
+/// You can obtain an instance of this struct by calling [`ReaperSession::functions()`]. This
+/// unlocks all functions which are safe to execute in the main thread. If you want access to the
+/// functions which are safe to execute in the real-time audio thread, call
+/// [`ReaperSession::create_real_time_functions()`] instead. REAPER functions which are related to
+/// registering/unregistering things are located in [`ReaperSession`].
 ///
 /// Please note that this struct contains nothing but function pointers, so you are free to clone
 /// it, e.g. in order to make all functions accessible somewhere else. This is sometimes easier than
@@ -133,10 +133,10 @@ impl AnyThread for RealTimeAudioThreadScope {}
 /// thread ID is a very cheap operation (a few nano seconds), maybe even in the real-time audio
 /// thread.
 ///
-/// [`Reaper`]: struct.Reaper.html
-/// [`Reaper::functions()`]: struct.Reaper.html#method.functions
-/// [`Reaper::create_real_time_functions()`]: struct.Reaper.html#method.create_real_time_functions
-/// [`low()`]: #method.low
+/// [`ReaperSession`]: struct.ReaperSession.html
+/// [`ReaperSession::functions()`]: struct.ReaperSession.html#method.functions
+/// [`ReaperSession::create_real_time_functions()`]:
+/// struct.ReaperSession.html#method.create_real_time_functions [`low()`]: #method.low
 /// [low-level `Reaper`]: https://docs.rs/reaper-low
 /// [`MainThreadOnly`]: trait.MainThreadOnly.html
 /// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html
@@ -216,10 +216,10 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::ProjectRef::Tab;
     ///
-    /// let result = reaper.functions().enum_projects(Tab(4), 256).ok_or("No such tab")?;
+    /// let result = session.functions().enum_projects(Tab(4), 256).ok_or("No such tab")?;
     /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -272,10 +272,10 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::ProjectContext::CurrentProject;
     ///
-    /// let track = reaper.functions().get_track(CurrentProject, 3).ok_or("No such track")?;
+    /// let track = session.functions().get_track(CurrentProject, 3).ok_or("No such track")?;
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     #[measure]
@@ -314,11 +314,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::ProjectContext::CurrentProject;
     ///
-    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("No track")?;
-    /// let track_is_valid = reaper.functions().validate_ptr_2(CurrentProject, track);
+    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("No track")?;
+    /// let track_is_valid = session.functions().validate_ptr_2(CurrentProject, track);
     /// assert!(track_is_valid);
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -456,11 +456,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// ```no_run
     /// # use reaper_medium::ProjectContext::CurrentProject;
     /// use std::ffi::CString;
-    /// let reaper = reaper_medium::Reaper::default();
+    /// let session = reaper_medium::ReaperSession::default();
     ///
-    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no track")?;
+    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("no track")?;
     /// let track_name_c_string = unsafe {
-    ///     reaper.functions().get_set_media_track_info_get_name(
+    ///     session.functions().get_set_media_track_info_get_name(
     ///         track,
     ///         |name| name.to_owned()
     ///     )
@@ -469,7 +469,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     ///     None => "Master track",
     ///     Some(name) => name.to_str()?
     /// };
-    /// reaper.functions().show_console_msg(format!("Track name is {}", track_name));
+    /// session.functions().show_console_msg(format!("Track name is {}", track_name));
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     ///
@@ -637,12 +637,12 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
     ///
-    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// unsafe {
-    ///     reaper.functions().csurf_set_surface_mute(track, true, NotifyAll);
+    ///     session.functions().csurf_set_surface_mute(track, true, NotifyAll);
     /// }
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -698,11 +698,11 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::SectionId;
     ///
     /// let action_count =
-    ///     reaper.functions().section_from_unique_id(SectionId::new(1), |s| s.action_list_cnt());
+    ///     session.functions().section_from_unique_id(SectionId::new(1), |s| s.action_list_cnt());
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     //
@@ -1617,12 +1617,12 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{ProjectContext::CurrentProject, UndoScope::Scoped, ProjectPart::*};
     ///
-    /// reaper.functions().undo_begin_block_2(CurrentProject);
+    /// session.functions().undo_begin_block_2(CurrentProject);
     /// // ... modify something ...
-    /// reaper.functions().undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
+    /// session.functions().undo_end_block_2(CurrentProject, "Modify something", Scoped(Items | Fx));
     /// ```
     #[measure]
     pub fn undo_begin_block_2(&self, project: ProjectContext)
@@ -2810,12 +2810,12 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{ProjectContext::CurrentProject, SendTarget::HardwareOutput};
     ///
-    /// let src_track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// let src_track = session.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// let send_index = unsafe {
-    ///     reaper.functions().create_track_send(src_track, HardwareOutput)?;
+    ///     session.functions().create_track_send(src_track, HardwareOutput)?;
     /// };
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -3204,14 +3204,14 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// # Example
     ///
     /// ```no_run
-    /// # let reaper = reaper_medium::Reaper::default();
+    /// # let session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::ProjectContext::CurrentProject;
     /// use reaper_medium::TrackFxLocation::NormalFxChain;
     ///
-    /// let track = reaper.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// let track = session.functions().get_track(CurrentProject, 0).ok_or("no tracks")?;
     /// // Navigate 2 presets "up"
     /// unsafe {
-    ///     reaper.functions().track_fx_navigate_presets(track, NormalFxChain(0), -2)?
+    ///     session.functions().track_fx_navigate_presets(track, NormalFxChain(0), -2)?
     /// };
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -3311,7 +3311,7 @@ impl<UsageScope> ReaperFunctions<UsageScope> {
     /// to tap MIDI messages directly. Because of that we
     /// [take a closure and pass a reference](https://stackoverflow.com/questions/61106587).
     ///
-    /// [audio hook]: struct.Reaper.html#method.audio_reg_hardware_hook_add
+    /// [audio hook]: struct.ReaperSession.html#method.audio_reg_hardware_hook_add
     /// [`is_in_real_time_audio()`]: #method.is_in_real_time_audio
     /// [`get_read_buf()`]: struct.MidiInput.html#method.get_read_buf
     #[measure]
