@@ -1,6 +1,6 @@
 use c_str_macro::c_str;
 
-use reaper_high::{ActionKind, ReaperGuard, ReaperSession};
+use reaper_high::{ActionKind, Reaper, ReaperGuard, ReaperSession};
 use reaper_low::{reaper_vst_plugin, ReaperPluginContext};
 use reaper_medium::{
     CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
@@ -128,8 +128,7 @@ impl TestVstPlugin {
             ReaperSession::setup_with_defaults(context, "info@helgoboss.org");
             let session = ReaperSession::get();
             session.activate();
-            session
-                .reaper()
+            Reaper::get()
                 .show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
             session.register_action(
                 c_str!("reaperRsVstIntegrationTests"),

@@ -359,7 +359,8 @@ impl Drop for ReaperGuard {
 
 impl ReaperSession {
     pub fn guarded(initializer: impl FnOnce()) -> Arc<ReaperGuard> {
-        // TODO-medium Must also be accessed from main thread only.
+        // This is supposed to be called in the main thread. A check is not necessary, because this
+        // is protected by a mutex and it will fail in the initializer if called from wrong thread.
         let mut result = REAPER_GUARD.lock().unwrap();
         if let Some(rc) = result.upgrade() {
             return rc;
@@ -385,23 +386,17 @@ impl ReaperSession {
     }
 
     fn setup(medium: reaper_medium::ReaperSession, logger: slog::Logger) {
-        // We can't check now if we are in main thread because we don't have the main thread ID yet.
-        // But at least we can make sure we are not in an audio thread. Whatever thread we are
-        // in right now, this struct will memorize it as the main thread.
         assert!(
-            !medium.reaper().is_in_real_time_audio(),
+            medium.reaper().low().plugin_context().is_in_main_thread(),
             "Reaper::setup() must be called from main thread"
         );
         assert!(
             unsafe { REAPER_INSTANCE.borrow().is_none() },
             "There's a Reaper instance already"
         );
-        // TODO Making available this object globally is maybe not the best way. In most places,
-        //  only the functions are needed, not the extra stuff (subjects, channels etc.) which
-        //  requires interior mutability. Handle this.
-        // For now, we set up a medium-level Reaper instance and use this wherever possible, in
-        // order to get a feeling in which places we really need the full high-level Reaper
-        // instance.
+        // We set up an (easily copyable) high-level Reaper instance and use this wherever possible.
+        // ReaperSession is more complicated and should only be accessed if its functionality is
+        // needed.
         Reaper::make_available_globally(Reaper::new(medium.reaper().clone()));
         let reaper = ReaperSession {
             medium: RefCell::new(medium),
@@ -454,10 +449,6 @@ impl ReaperSession {
             None => panic!(error_msg_if_none),
             Some(r) => r,
         })
-    }
-
-    pub fn reaper(&self) -> &Reaper {
-        Reaper::get()
     }
 
     pub fn activate(&self) {
