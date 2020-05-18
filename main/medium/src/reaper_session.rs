@@ -13,8 +13,8 @@ use crate::{
     concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
     CommandId, DelegatingControlSurface, MainThreadScope, MediumAudioHookRegister,
     MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope, ReaperFunctionError,
-    ReaperFunctionResult, ReaperFunctions, ReaperStringArg, RegistrationObject,
+    MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope, Reaper,
+    ReaperFunctionError, ReaperFunctionResult, ReaperStringArg, RegistrationObject,
 };
 use reaper_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
@@ -24,14 +24,14 @@ use std::collections::{HashMap, HashSet};
 /// In order to use this struct, you first must obtain an instance of it by invoking [`new()`]
 /// or [`load()`].
 /// This struct itself is limited to REAPER functions for registering/unregistering certain things.
-/// You can access all the other functions by calling [`functions()`].
+/// You can access all the other functions by calling [`reaper()`].
 ///
 /// Please note that this struct will take care of unregistering everything (also audio hooks)
 /// automatically when it gets dropped (good RAII manners).
 ///
 /// # Design
 ///
-/// ## Why is there a separation into `Reaper` and `ReaperFunctions`?
+/// ## Why is there a separation into `ReaperSession` and `Reaper`?
 ///
 /// Functions for registering/unregistering things have been separated from the rest because they
 /// require more than just access to REAPER function pointers. They also need data structures to
@@ -48,18 +48,18 @@ use std::collections::{HashMap, HashSet};
 /// `Arc` (not an `Rc`, because we access it from multiple threads). That's not enough though for
 /// most real-world cases. We probably want to register/unregister things (in the main thread) not
 /// only in the beginning but also at a later time. That means we need mutable access. So we end up
-/// with `Arc<Mutex<Reaper>>`. However, why going through all that trouble and put up with possible
-/// performance issues if we can avoid it?
+/// with `Arc<Mutex<ReaperSession>>`. However, why going through all that trouble and put up with
+/// possible performance issues if we can avoid it?
 ///
 /// [`new()`]: #method.new
 /// [`load()`]: #method.load
-/// [`functions()`]: #method.functions
+/// [`reaper()`]: #method.reaper
 // TODO-medium Add some doc from https://www.reaper.fm/sdk/vst/vst_ext.php
 // TODO-medium Lift low-level ReaperPluginContext functions to medium-level style. Especially the
 //  VST host context stuff: https://www.reaper.fm/sdk/vst/vst_ext.php.
 #[derive(Debug, Default)]
-pub struct Reaper {
-    functions: ReaperFunctions<MainThreadScope>,
+pub struct ReaperSession {
+    reaper: Reaper<MainThreadScope>,
     gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
     audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, raw::audio_hook_register_t>,
     csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
@@ -67,13 +67,13 @@ pub struct Reaper {
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
 }
 
-impl Reaper {
+impl ReaperSession {
     /// Creates a new instance by getting hold of a [low-level `Reaper`] instance.
     ///
     /// [low-level `Reaper`]: https://docs.rs/reaper-low
-    pub fn new(low: reaper_low::Reaper) -> Reaper {
-        Reaper {
-            functions: ReaperFunctions::new(low),
+    pub fn new(low: reaper_low::Reaper) -> ReaperSession {
+        ReaperSession {
+            reaper: Reaper::new(low),
             gaccel_registers: Default::default(),
             audio_hook_registers: Default::default(),
             csurf_insts: Default::default(),
@@ -84,10 +84,10 @@ impl Reaper {
 
     /// Loads all available REAPER functions from the given plug-in context.
     ///
-    /// Returns a medium-level `Reaper` instance which allows you to call these functions.
-    pub fn load(context: ReaperPluginContext) -> Reaper {
+    /// Returns a medium-level `ReaperSession` instance which allows you to call these functions.
+    pub fn load(context: ReaperPluginContext) -> ReaperSession {
         let low = reaper_low::Reaper::load(context);
-        Reaper::new(low)
+        ReaperSession::new(low)
     }
 
     /// Gives access to all REAPER functions which can be safely executed in the main thread.
@@ -97,18 +97,18 @@ impl Reaper {
     /// If the REAPER functions are needed somewhere else, just clone them:
     ///
     /// ```no_run
-    /// # let mut reaper = reaper_medium::Reaper::default();
-    /// let standalone_functions = reaper.functions().clone();
+    /// # let mut session = reaper_medium::ReaperSession::default();
+    /// let standalone_reaper = session.reaper().clone();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    pub fn functions(&self) -> &ReaperFunctions<MainThreadScope> {
-        &self.functions
+    pub fn reaper(&self) -> &Reaper<MainThreadScope> {
+        &self.reaper
     }
 
     /// Creates a new container of REAPER functions with only those unlocked that can be safely
     /// executed in the real-time audio thread.
-    pub fn create_real_time_functions(&self) -> ReaperFunctions<RealTimeAudioThreadScope> {
-        ReaperFunctions::new(*self.functions.low())
+    pub fn create_real_time_reaper(&self) -> Reaper<RealTimeAudioThreadScope> {
+        Reaper::new(*self.reaper.low())
     }
 
     /// This is the primary function for plug-ins to register things.
@@ -145,7 +145,7 @@ impl Reaper {
             .insert(object.clone().into_owned());
         let infostruct = object.ptr_to_raw();
         let result = self
-            .functions
+            .reaper
             .low()
             .plugin_register(object.key_into_raw().as_ptr(), infostruct);
         if result == 0 {
@@ -169,7 +169,7 @@ impl Reaper {
         let infostruct = object.ptr_to_raw();
         let name_with_minus = concat_c_strs(c_str!("-"), object.clone().key_into_raw().as_ref());
         let result = self
-            .functions
+            .reaper
             .low()
             .plugin_register(name_with_minus.as_ptr(), infostruct);
         self.plugin_registrations.remove(&object.into_owned());
@@ -195,7 +195,7 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let mut reaper = reaper_medium::Reaper::default();
+    /// # let mut session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{MediumHookCommand, CommandId};
     ///
     /// // Usually you would use a dynamic command ID that you have obtained via
@@ -214,7 +214,7 @@ impl Reaper {
     ///         true
     ///     }
     /// }
-    /// reaper.plugin_register_add_hook_command::<MyHookCommand>();
+    /// session.plugin_register_add_hook_command::<MyHookCommand>();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     ///
@@ -381,7 +381,7 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let mut reaper = reaper_medium::Reaper::default();
+    /// # let mut session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::MediumReaperControlSurface;
     ///
     /// #[derive(Debug)]
@@ -392,7 +392,7 @@ impl Reaper {
     ///         println!("Tracks changed");
     ///     }
     /// }
-    /// reaper.plugin_register_add_csurf_inst(MyControlSurface);
+    /// session.plugin_register_add_csurf_inst(MyControlSurface);
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     ///
@@ -402,7 +402,7 @@ impl Reaper {
         control_surface: impl MediumReaperControlSurface + 'static,
     ) -> ReaperFunctionResult<NonNull<raw::IReaperControlSurface>> {
         let rust_control_surface =
-            DelegatingControlSurface::new(control_surface, &self.functions.get_app_version());
+            DelegatingControlSurface::new(control_surface, &self.reaper.get_app_version());
         // We need to box it twice in order to obtain a thin pointer for passing to C as callback
         // target
         let rust_control_surface: Box<Box<dyn IReaperControlSurface>> =
@@ -454,7 +454,7 @@ impl Reaper {
     ) -> ReaperFunctionResult<()> {
         self.audio_hook_registrations.insert(register);
         let result = self
-            .functions
+            .reaper
             .low()
             .Audio_RegHardwareHook(true, register.as_ptr());
         if result == 0 {
@@ -480,7 +480,7 @@ impl Reaper {
         &mut self,
         register: NonNull<audio_hook_register_t>,
     ) {
-        self.functions
+        self.reaper
             .low()
             .Audio_RegHardwareHook(false, register.as_ptr());
         self.audio_hook_registrations.remove(&register);
@@ -501,15 +501,15 @@ impl Reaper {
     /// # Example
     ///
     /// ```no_run
-    /// # let mut reaper = reaper_medium::Reaper::default();
+    /// # let mut session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{
     ///     MediumReaperControlSurface, MediumOnAudioBuffer, OnAudioBufferArgs,
-    ///     ReaperFunctions, RealTimeAudioThreadScope, MidiInputDeviceId
+    ///     Reaper, RealTimeAudioThreadScope, MidiInputDeviceId
     /// };
     ///
     /// struct MyOnAudioBuffer {
     ///     counter: u64,
-    ///     functions: ReaperFunctions<RealTimeAudioThreadScope>,
+    ///     reaper: Reaper<RealTimeAudioThreadScope>,
     /// }
     ///
     /// impl MediumOnAudioBuffer for MyOnAudioBuffer {
@@ -520,7 +520,7 @@ impl Reaper {
     ///         }
     ///         self.counter += 1;
     ///         // Read some MIDI events
-    ///         self.functions.get_midi_input(MidiInputDeviceId::new(0), |input| {
+    ///         self.reaper.get_midi_input(MidiInputDeviceId::new(0), |input| {
     ///             for event in input.get_read_buf().enum_items(0) {
     ///                 println!("Received MIDI event {:?}", event);
     ///             }   
@@ -528,9 +528,9 @@ impl Reaper {
     ///     }
     /// }
     ///
-    /// reaper.audio_reg_hardware_hook_add(MyOnAudioBuffer {
+    /// session.audio_reg_hardware_hook_add(MyOnAudioBuffer {
     ///     counter: 0,
-    ///     functions: reaper.create_real_time_functions()
+    ///     reaper: session.create_real_time_reaper()
     /// });
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
@@ -554,7 +554,7 @@ impl Reaper {
     }
 }
 
-impl Drop for Reaper {
+impl Drop for ReaperSession {
     fn drop(&mut self) {
         for handle in self.audio_hook_registrations.clone() {
             unsafe {

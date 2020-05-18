@@ -10,7 +10,7 @@ use std::ptr::{null_mut, NonNull};
 ///
 /// See [`audio_reg_hardware_hook_add()`].
 ///
-/// [`audio_reg_hardware_hook_add()`]: struct.Reaper.html#method.audio_reg_hardware_hook_add
+/// [`audio_reg_hardware_hook_add()`]: struct.ReaperSession.html#method.audio_reg_hardware_hook_add
 pub trait MediumOnAudioBuffer {
     /// The actual callback function.
     ///
@@ -114,7 +114,8 @@ impl MediumAudioHookRegister {
     /// Taking ownership of the user-defined piece of data releases the API consumer of the burden
     /// of maintaining a stable memory address and ensuring correct lifetime.
     ///
-    /// [`audio_reg_hardware_hook_add`]: struct.Reaper.html#method.audio_reg_hardware_hook_add
+    /// [`audio_reg_hardware_hook_add`]:
+    /// struct.ReaperSession.html#method.audio_reg_hardware_hook_add
     pub(crate) fn new<T: MediumOnAudioBuffer + 'static>(callback: T) -> MediumAudioHookRegister {
         let callback = Box::new(callback);
         MediumAudioHookRegister {

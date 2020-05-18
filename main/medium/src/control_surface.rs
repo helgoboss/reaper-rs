@@ -19,7 +19,8 @@ use std::ptr::null_mut;
 ///
 /// See [`plugin_register_add_csurf_inst`].
 ///
-/// [`plugin_register_add_csurf_inst`]: struct.Reaper.html#method.plugin_register_add_csurf_inst
+/// [`plugin_register_add_csurf_inst`]:
+/// struct.ReaperSession.html#method.plugin_register_add_csurf_inst
 pub trait MediumReaperControlSurface: Debug {
     /// Should return the control surface type.
     ///

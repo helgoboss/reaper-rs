@@ -35,7 +35,7 @@ impl MidiInput {
     /// thread and therefore has real-time requirements.
     ///
     /// [`MidiInput`]: struct.MidiInput.html
-    /// [`get_midi_input()`]: struct.ReaperFunctions.html#method.get_midi_input
+    /// [`get_midi_input()`]: struct.Reaper.html#method.get_midi_input
     pub fn get_read_buf(&self) -> MidiEventList<'_> {
         let raw_evt_list = unsafe { self.0.as_ref().GetReadBuf() };
         MidiEventList::new(unsafe { &*raw_evt_list })

@@ -2,9 +2,7 @@ use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
 use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
 
-use reaper_medium::{
-    AddFxBehavior, ChunkCacheHint, TrackFxChainType, TransferBehavior,
-};
+use reaper_medium::{AddFxBehavior, ChunkCacheHint, TrackFxChainType, TransferBehavior};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -19,21 +17,21 @@ impl FxChain {
     }
 
     pub fn get_fx_count(&self) -> u32 {
-        let functions = Reaper::get().medium();
+        let reaper = Reaper::get().medium();
         if self.is_input_fx {
-            unsafe { functions.track_fx_get_rec_count(self.track.get_raw()) as u32 }
+            unsafe { reaper.track_fx_get_rec_count(self.track.get_raw()) as u32 }
         } else {
-            unsafe { functions.track_fx_get_count(self.track.get_raw()) as u32 }
+            unsafe { reaper.track_fx_get_count(self.track.get_raw()) as u32 }
         }
     }
 
     // Moves within this FX chain
     pub fn move_fx(&self, fx: &Fx, new_index: u32) {
         assert_eq!(fx.get_chain(), *self);
-        let functions = Reaper::get().medium();
-        if functions.low().pointers().TrackFX_CopyToTrack.is_some() {
+        let reaper = Reaper::get().medium();
+        if reaper.low().pointers().TrackFX_CopyToTrack.is_some() {
             unsafe {
-                functions.track_fx_copy_to_track(
+                reaper.track_fx_copy_to_track(
                     (self.track.get_raw(), fx.get_query_index()),
                     (
                         self.track.get_raw(),
@@ -86,10 +84,10 @@ impl FxChain {
         if !fx.is_available() {
             return;
         }
-        let functions = Reaper::get().medium();
-        if functions.low().pointers().TrackFX_Delete.is_some() {
+        let reaper = Reaper::get().medium();
+        if reaper.low().pointers().TrackFX_Delete.is_some() {
             unsafe {
-                functions
+                reaper
                     .track_fx_delete(self.track.get_raw(), fx.get_query_index())
                     .expect("couldn't delete track FX")
             };

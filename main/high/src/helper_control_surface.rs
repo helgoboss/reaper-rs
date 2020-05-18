@@ -8,11 +8,11 @@ use reaper_medium::{
     AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
-    MediaTrack, MediumReaperControlSurface, ReaProject,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
-    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
-    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackRef,
-    VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    MediaTrack, MediumReaperControlSurface, ReaProject, ReaperNormalizedFxParamValue,
+    ReaperPanValue, ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs, SetSurfacePanArgs,
+    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
+    SetTrackTitleArgs, TrackFxChainType, TrackRef, VersionDependentFxLocation,
+    VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
 
@@ -394,12 +394,12 @@ impl HelperControlSurface {
     fn update_media_track_positions(&self, project: Project, track_datas: &mut TrackDataMap) {
         let mut tracks_have_been_reordered = false;
         for (media_track, track_data) in track_datas.iter_mut() {
-            let functions = Reaper::get().medium();
-            if !functions.validate_ptr_2(Proj(project.get_raw()), *media_track) {
+            let reaper = Reaper::get().medium();
+            if !reaper.validate_ptr_2(Proj(project.get_raw()), *media_track) {
                 continue;
             }
             let new_number =
-                unsafe { functions.get_set_media_track_info_get_track_number(*media_track) };
+                unsafe { reaper.get_set_media_track_info_get_track_number(*media_track) };
             if new_number != track_data.number {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;

@@ -129,7 +129,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
 
 fn swell() -> TestStep {
     step(AllVersions, "SWELL", |reaper, _| {
-        let swell = Swell::load(*reaper.medium().functions().low().plugin_context());
+        let swell = Swell::load(*reaper.medium().reaper().low().plugin_context());
         if cfg!(target_os = "windows") {
             assert!(swell.pointers().MessageBox.is_none());
             Ok(())
@@ -151,7 +151,7 @@ fn metrics() -> TestStep {
     step(AllVersions, "Metrics", |reaper, _| {
         println!(
             "reaper_medium::Reaper metrics after integration test: {:#?}",
-            reaper.medium().functions()
+            reaper.medium().reaper()
         );
         Ok(())
     })
@@ -586,7 +586,7 @@ fn test_action_invoked_event() -> TestStep {
         });
         reaper
             .medium()
-            .functions()
+            .reaper()
             .main_on_command_ex(action.get_command_id(), 0, CurrentProject);
         // Then
         assert_eq!(mock.get_invocation_count(), 1);
@@ -1358,26 +1358,26 @@ fn set_track_volume_extreme_values() -> TestStep {
             let track_2 = get_track(1)?;
             // When
             let track_1_result = unsafe {
-                reaper.medium().functions().csurf_on_volume_change_ex(
+                reaper.medium().reaper().csurf_on_volume_change_ex(
                     track_1.get_raw(),
                     ValueChange::Absolute(ReaperVolumeValue::new(1.0 / 0.0)),
                     GangBehavior::DenyGang,
                 );
                 reaper
                     .medium()
-                    .functions()
+                    .reaper()
                     .get_track_ui_vol_pan(track_1.get_raw())
                     .unwrap()
             };
             let track_2_result = unsafe {
-                reaper.medium().functions().csurf_on_volume_change_ex(
+                reaper.medium().reaper().csurf_on_volume_change_ex(
                     track_2.get_raw(),
                     ValueChange::Absolute(ReaperVolumeValue::new(f64::NAN)),
                     GangBehavior::DenyGang,
                 );
                 reaper
                     .medium()
-                    .functions()
+                    .reaper()
                     .get_track_ui_vol_pan(track_2.get_raw())
                     .unwrap()
             };
@@ -1773,23 +1773,23 @@ fn global_instances() -> TestStep {
     step(AllVersions, "Global instances", |reaper, _| {
         let medium = reaper.medium();
         // Low-level REAPER
-        reaper_low::Reaper::make_available_globally(*medium.functions().low());
-        reaper_low::Reaper::make_available_globally(*medium.functions().low());
+        reaper_low::Reaper::make_available_globally(*medium.reaper().low());
+        reaper_low::Reaper::make_available_globally(*medium.reaper().low());
         let low = reaper_low::Reaper::get();
         println!("reaper_low::Reaper {:?}", &low);
         unsafe {
             low.ShowConsoleMsg(c_str!("- Hello from low-level API\n").as_ptr());
         }
         // SWELL
-        let swell = Swell::load(*medium.functions().low().plugin_context());
+        let swell = Swell::load(*medium.reaper().low().plugin_context());
         println!("reaper_low::Swell {:?}", &swell);
         Swell::make_available_globally(swell);
         let _ = Swell::get();
         // Medium-level REAPER
-        reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
-        reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
-        let medium_functions = reaper_high::Reaper::get().medium();
-        medium_functions.show_console_msg("- Hello from medium-level API\n");
+        reaper_medium::Reaper::make_available_globally(medium.reaper().clone());
+        reaper_medium::Reaper::make_available_globally(medium.reaper().clone());
+        let medium_reaper = reaper_high::Reaper::get().medium();
+        medium_reaper.show_console_msg("- Hello from medium-level API\n");
         Ok(())
     })
 }
@@ -1799,7 +1799,7 @@ fn plugin_context() -> TestStep {
     step(AllVersions, "Plugin context", |reaper, _| {
         // Given
         let medium = reaper.medium();
-        let plugin_context = medium.functions().low().plugin_context();
+        let plugin_context = medium.reaper().low().plugin_context();
         // When
         // Then
         // GetFunc
@@ -1823,7 +1823,7 @@ fn plugin_context() -> TestStep {
             Extension(ctx) => {
                 assert!(!plugin_context.h_instance().is_null());
                 assert_eq!(ctx.caller_version(), raw::REAPER_PLUGIN_VERSION as c_int);
-                assert_eq!(ctx.hwnd_main(), medium.functions().get_main_hwnd());
+                assert_eq!(ctx.hwnd_main(), medium.reaper().get_main_hwnd());
                 unsafe {
                     let result = ctx.Register(
                         c_str!("command_id").as_ptr(),
@@ -1845,7 +1845,7 @@ fn plugin_context() -> TestStep {
                 //         ctx.host_callback(null_mut(), 0xdead_beef, 0xdead_f00d, 3, null_mut(),
                 // 0.0)             as *mut raw::ReaProject;
                 //     let project = NonNull::new(project).ok_or("project is null")?;
-                //     assert!(medium.functions().validate_ptr(project));
+                //     assert!(medium.reaper().validate_ptr(project));
                 // }
             }
         };

@@ -7,11 +7,11 @@ static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
 #[derive(Clone, Debug, Default)]
 pub struct Reaper {
-    medium: reaper_medium::ReaperFunctions,
+    medium: reaper_medium::Reaper,
 }
 
 impl Reaper {
-    pub(crate) fn new(medium: reaper_medium::ReaperFunctions) -> Reaper {
+    pub(crate) fn new(medium: reaper_medium::Reaper) -> Reaper {
         Reaper { medium }
     }
 
@@ -37,7 +37,7 @@ impl Reaper {
     }
 
     /// Gives access to the medium-level Reaper instance.
-    pub fn medium(&self) -> &reaper_medium::ReaperFunctions {
+    pub fn medium(&self) -> &reaper_medium::Reaper {
         &self.medium
     }
 

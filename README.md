@@ -72,10 +72,9 @@ Status:
 
 Basics: 
 ```rust,ignore
-let functions = reaper.functions();
-functions.show_console_msg("Hello world from reaper-rs medium-level API!");
-let track = functions.get_track(CurrentProject, 0).ok_or("no tracks")?;
-unsafe { functions.delete_track(track); }
+reaper.show_console_msg("Hello world from reaper-rs medium-level API!");
+let track = reaper.get_track(CurrentProject, 0).ok_or("no tracks")?;
+unsafe { reaper.delete_track(track); }
 ```
 
 Control surface: 
@@ -174,12 +173,12 @@ Then in your `lib.rs`:
 use std::error::Error;
 use reaper_macros::reaper_extension_plugin;
 use reaper_low::ReaperPluginContext;
-use reaper_medium::Reaper;
+use reaper_medium::ReaperSession;
 
 #[reaper_extension_plugin]
 fn plugin_main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
-    let reaper = Reaper::load(context);
-    reaper.functions().show_console_msg("Hello world from reaper-rs medium-level API!");
+    let session = ReaperSession::load(context);
+    session.reaper().show_console_msg("Hello world from reaper-rs medium-level API!");
     Ok(())
 }
 ```
@@ -213,7 +212,7 @@ Then in your `lib.rs`:
 ```rust
 use vst::plugin::{Info, Plugin, HostCallback};
 use reaper_low::{ReaperPluginContext, reaper_vst_plugin};
-use reaper_medium::Reaper;
+use reaper_medium::ReaperSession;
 
 reaper_vst_plugin!();
 
@@ -237,9 +236,9 @@ impl Plugin for MyReaperVstPlugin {
 
     fn init(&mut self) {
         if let Ok(context) = ReaperPluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context()) {
-            let reaper = Reaper::load(context);
-            reaper
-                .functions()
+            let session = ReaperSession::load(context);
+            session
+                .reaper()
                 .show_console_msg("Hello world from reaper-rs medium-level API!");
         }
     }

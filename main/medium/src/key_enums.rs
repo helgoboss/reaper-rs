@@ -6,7 +6,7 @@ use std::ffi::CStr;
 
 /// Track attribute key which you can pass to [`get_set_media_track_info()`].
 ///
-/// [`get_set_media_track_info()`]: struct.ReaperFunctions.html#method.get_set_media_track_info
+/// [`get_set_media_track_info()`]: struct.Reaper.html#method.get_set_media_track_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackAttributeKey<'a> {
     /// Parent track (read-only).
@@ -319,7 +319,7 @@ pub enum TrackAttributeKey<'a> {
     ///
     /// Call [`update_timeline`] after changing.
     ///
-    /// [`update_timeline`]: struct.Reaper.html#method.update_timeline
+    /// [`update_timeline`]: struct.ReaperSession.html#method.update_timeline
     FreeMode,
     /// Track timebase.
     ///
@@ -451,7 +451,7 @@ impl<'a> TrackAttributeKey<'a> {
 
 /// Track send attribute key which you can pass to [`get_set_track_send_info()`].
 ///
-/// [`get_set_track_send_info()`]: struct.ReaperFunctions.html#method.get_set_track_send_info
+/// [`get_set_track_send_info()`]: struct.Reaper.html#method.get_set_track_send_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackSendAttributeKey<'a> {
     /// Destination track (read-only).
