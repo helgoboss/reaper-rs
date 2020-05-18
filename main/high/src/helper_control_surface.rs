@@ -1,6 +1,6 @@
 use crate::fx::Fx;
 use crate::guid::Guid;
-use crate::{get_media_track_guid, MainThreadTask, Payload, Project, ReaperSession, Track};
+use crate::{get_media_track_guid, MainThreadTask, Payload, Project, Reaper, ReaperSession, Track};
 use c_str_macro::c_str;
 
 use reaper_medium::TrackAttributeKey::{Mute, Pan, RecArm, RecInput, Selected, Solo, Vol};
@@ -144,7 +144,9 @@ impl HelperControlSurface {
             return false;
         }
         let env = unsafe {
-            ReaperFunctions::get().get_track_envelope_by_name(track.get_raw(), parameter_name)
+            Reaper::get()
+                .medium()
+                .get_track_envelope_by_name(track.get_raw(), parameter_name)
         };
         if env.is_none() {
             return false;
@@ -160,7 +162,10 @@ impl HelperControlSurface {
 
     fn remove_invalid_rea_projects(&self) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
-            if ReaperFunctions::get().validate_ptr_2(CurrentProject, *rea_project) {
+            if Reaper::get()
+                .medium()
+                .validate_ptr_2(CurrentProject, *rea_project)
+            {
                 true
             } else {
                 ReaperSession::get()
@@ -192,7 +197,7 @@ impl HelperControlSurface {
             let media_track = t.get_raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let reaper = ReaperSession::get();
-                let func = ReaperFunctions::get();
+                let func = Reaper::get().medium();
                 let td = unsafe {
                     TrackData {
                         volume: ReaperVolumeValue::new(
@@ -366,7 +371,10 @@ impl HelperControlSurface {
 
     fn remove_invalid_media_tracks(&self, project: Project, track_datas: &mut TrackDataMap) {
         track_datas.retain(|media_track, data| {
-            if ReaperFunctions::get().validate_ptr_2(Proj(project.get_raw()), *media_track) {
+            if Reaper::get()
+                .medium()
+                .validate_ptr_2(Proj(project.get_raw()), *media_track)
+            {
                 true
             } else {
                 self.fx_chain_pair_by_media_track
@@ -386,7 +394,7 @@ impl HelperControlSurface {
     fn update_media_track_positions(&self, project: Project, track_datas: &mut TrackDataMap) {
         let mut tracks_have_been_reordered = false;
         for (media_track, track_data) in track_datas.iter_mut() {
-            let functions = ReaperFunctions::get();
+            let functions = Reaper::get().medium();
             if !functions.validate_ptr_2(Proj(project.get_raw()), *media_track) {
                 continue;
             }
@@ -712,7 +720,9 @@ impl MediumReaperControlSurface for HelperControlSurface {
                 .next(Track::new(args.track, None));
         }
         let recinput = unsafe {
-            ReaperFunctions::get().get_media_track_info_value(args.track, RecInput) as i32
+            Reaper::get()
+                .medium()
+                .get_media_track_info_value(args.track, RecInput) as i32
         };
         if td.recinput != recinput {
             td.recinput = recinput;

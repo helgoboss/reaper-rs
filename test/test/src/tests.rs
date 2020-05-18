@@ -1785,7 +1785,7 @@ fn global_instances() -> TestStep {
         // Medium-level REAPER
         reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
         reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
-        let medium_functions = reaper_medium::ReaperFunctions::get();
+        let medium_functions = reaper_high::Reaper::get().medium();
         medium_functions.show_console_msg("- Hello from medium-level API\n");
         Ok(())
     })

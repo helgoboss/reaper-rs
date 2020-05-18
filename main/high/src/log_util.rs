@@ -1,6 +1,7 @@
 use slog::{error, o, Drain};
 use std::backtrace::Backtrace;
 
+use crate::Reaper;
 use reaper_medium::ReaperFunctions;
 use std::ffi::CString;
 use std::io;
@@ -47,7 +48,7 @@ pub fn create_reaper_panic_hook(
                 //  immutable (this is not so easy because senders right now might not be available
                 //  if deactivate() was called. Maybe we shouldn't use deactivate or handle this
                 //  in another way.
-                ReaperFunctions::get().show_console_msg(c_msg.as_ref());
+                Reaper::get().medium().show_console_msg(c_msg.as_ref());
             }
         }
     })
@@ -112,7 +113,7 @@ impl std::io::Write for ReaperConsoleSink {
     fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
         let c_string = CString::new(buf)?;
         // TODO-medium If the panic happens in audio thread, this won't work!
-        ReaperFunctions::get().show_console_msg(c_string.as_ref());
+        Reaper::get().medium().show_console_msg(c_string.as_ref());
         Ok(buf.len())
     }
 

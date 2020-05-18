@@ -1,4 +1,4 @@
-use crate::{Pan, Track, Volume};
+use crate::{Pan, Reaper, Track, Volume};
 
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{MediaTrack, ReaperFunctions, TrackSendDirection};
@@ -82,7 +82,8 @@ impl TrackSend {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the
         // wrong value if an envelope is written.
         let result = unsafe {
-            ReaperFunctions::get()
+            Reaper::get()
+                .medium()
                 .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
         }
         .expect("Couldn't get send vol/pan");
@@ -91,7 +92,7 @@ impl TrackSend {
 
     pub fn set_volume(&self, volume: Volume) {
         unsafe {
-            ReaperFunctions::get().csurf_on_send_volume_change(
+            Reaper::get().medium().csurf_on_send_volume_change(
                 self.get_source_track().get_raw(),
                 self.get_index(),
                 Absolute(volume.get_reaper_value()),
@@ -101,7 +102,8 @@ impl TrackSend {
 
     pub fn get_pan(&self) -> Pan {
         let result = unsafe {
-            ReaperFunctions::get()
+            Reaper::get()
+                .medium()
                 .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
         }
         .expect("Couldn't get send vol/pan");
@@ -110,7 +112,7 @@ impl TrackSend {
 
     pub fn set_pan(&self, pan: Pan) {
         unsafe {
-            ReaperFunctions::get().csurf_on_send_pan_change(
+            Reaper::get().medium().csurf_on_send_pan_change(
                 self.get_source_track().get_raw(),
                 self.get_index(),
                 Absolute(pan.get_reaper_value()),
@@ -196,7 +198,7 @@ pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
 
 fn get_target_track_raw(source_track: &Track, send_index: u32) -> Option<MediaTrack> {
     unsafe {
-        ReaperFunctions::get().get_track_send_info_desttrack(
+        Reaper::get().medium().get_track_send_info_desttrack(
             source_track.get_raw(),
             TrackSendDirection::Send,
             send_index,

@@ -8,12 +8,11 @@ pub struct Reaper {
 }
 
 impl Reaper {
-    /// Makes the given instance available globally.
-    ///
-    /// After this has been called, the instance can be queried globally using `get()`.
-    ///
-    /// This can be called once only. Subsequent calls won't have any effect!
-    pub fn make_available_globally(reaper: Reaper) {
+    pub(crate) fn new(medium: reaper_medium::ReaperFunctions) -> Reaper {
+        Reaper { medium }
+    }
+
+    pub(crate) fn make_available_globally(reaper: Reaper) {
         unsafe {
             INIT_INSTANCE.call_once(|| INSTANCE = Some(reaper));
         }
@@ -32,5 +31,10 @@ impl Reaper {
                 .as_ref()
                 .expect("call `make_available_globally()` before using `get()`")
         }
+    }
+
+    /// Gives access to the medium-level Reaper instance.
+    pub fn medium(&self) -> &reaper_medium::ReaperFunctions {
+        &self.medium
     }
 }

@@ -21,8 +21,8 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Section,
-    Track,
+    create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper,
+    Section, Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
@@ -406,7 +406,7 @@ impl ReaperSession {
         // For now, we set up a medium-level Reaper instance and use this wherever possible, in
         // order to get a feeling in which places we really need the full high-level Reaper
         // instance.
-        reaper_medium::ReaperFunctions::make_available_globally(medium.functions().clone());
+        Reaper::make_available_globally(Reaper::new(medium.functions().clone()));
         let reaper = ReaperSession {
             medium: RefCell::new(medium),
             logger,
@@ -571,7 +571,7 @@ impl ReaperSession {
     }
 
     pub fn generate_guid(&self) -> Guid {
-        Guid::new(ReaperFunctions::get().gen_guid())
+        Guid::new(Reaper::get().medium().gen_guid())
     }
 
     pub fn register_action(

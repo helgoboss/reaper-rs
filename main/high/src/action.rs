@@ -1,4 +1,4 @@
-use crate::{ActionCharacter, Project, ReaperSession, Section};
+use crate::{ActionCharacter, Project, Reaper, ReaperSession, Section};
 use c_str_macro::c_str;
 use reaper_medium::{ActionValueChange, CommandId, ReaperFunctions, SectionContext};
 
@@ -86,7 +86,8 @@ impl Action {
     fn find_index(&self, runtime_data: &RuntimeData) -> Option<u32> {
         // TODO-low Use kbd_enumerateActions
         let section_id = runtime_data.section.id();
-        ReaperFunctions::get()
+        Reaper::get()
+            .medium()
             .section_from_unique_id(section_id, |s| {
                 (0..s.action_list_cnt())
                     .map(move |i| s.get_action_by_index(i).unwrap())
@@ -104,7 +105,7 @@ impl Action {
             let result = runtime_data
                 .section
                 .with_raw(|s| unsafe {
-                    ReaperFunctions::get().kbd_get_text_from_cmd(
+                    Reaper::get().medium().kbd_get_text_from_cmd(
                         runtime_data.command_id,
                         Sec(s),
                         |_| (),
@@ -119,7 +120,8 @@ impl Action {
     pub fn get_character(&self) -> ActionCharacter {
         let rd = self.load_if_necessary_or_complain();
         let state = unsafe {
-            ReaperFunctions::get()
+            Reaper::get()
+                .medium()
                 .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
         };
         match state {
@@ -131,7 +133,8 @@ impl Action {
     pub fn is_on(&self) -> bool {
         let rd = self.load_if_necessary_or_complain();
         let state = unsafe {
-            ReaperFunctions::get()
+            Reaper::get()
+                .medium()
                 .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
         };
         state == Some(true)
@@ -151,7 +154,8 @@ impl Action {
             .map(|cn| cn.as_c_str().to_owned())
             .or_else(|| {
                 let rd = self.runtime_data.borrow();
-                ReaperFunctions::get()
+                Reaper::get()
+                    .medium()
                     .reverse_named_command_lookup(rd.as_ref().unwrap().command_id, |s| s.into())
             })
     }
@@ -159,7 +163,7 @@ impl Action {
     pub fn get_name(&self) -> Option<CString> {
         let rd = self.load_if_necessary_or_complain();
         unsafe {
-            ReaperFunctions::get().kbd_get_text_from_cmd(
+            Reaper::get().medium().kbd_get_text_from_cmd(
                 rd.command_id,
                 SectionContext::Sec(&rd.section.get_raw()),
                 |s| s.into(),
@@ -179,7 +183,7 @@ impl Action {
         // val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
         let rd = self.load_if_necessary_or_complain();
         let action_command_id = rd.command_id;
-        let functions = ReaperFunctions::get();
+        let functions = Reaper::get().medium();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
             let cropped_relative_value =
@@ -230,11 +234,13 @@ impl Action {
     fn load_by_command_name(&self) -> bool {
         let fixed_command_name =
             Self::fix_command_name(self.command_name.as_ref().expect("Command name not set"));
-        let command_id =
-            match ReaperFunctions::get().named_command_lookup(fixed_command_name.as_ref()) {
-                None => return false,
-                Some(id) => id,
-            };
+        let command_id = match Reaper::get()
+            .medium()
+            .named_command_lookup(fixed_command_name.as_ref())
+        {
+            None => return false,
+            Some(id) => id,
+        };
         self.runtime_data.replace(Some(RuntimeData {
             section: ReaperSession::get().get_main_section(),
             command_id,
