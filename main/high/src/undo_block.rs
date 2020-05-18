@@ -1,4 +1,4 @@
-use crate::{Project, Reaper};
+use crate::{Project, ReaperSession};
 use std::ffi::CStr;
 
 // Constructor takes care of starting the undo block. Destructor takes care of ending the undo block
@@ -16,6 +16,6 @@ impl UndoBlock<'_> {
 
 impl Drop for UndoBlock<'_> {
     fn drop(&mut self) {
-        Reaper::get().leave_undo_block_internal(self.project, self.label);
+        ReaperSession::get().leave_undo_block_internal(self.project, self.label);
     }
 }

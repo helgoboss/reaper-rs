@@ -1,7 +1,7 @@
 use std::ffi::{CStr, CString};
 
 use crate::guid::Guid;
-use crate::{Reaper, Tempo, Track};
+use crate::{ReaperSession, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
@@ -38,7 +38,7 @@ impl Project {
     pub fn get_index(self) -> u32 {
         self.complain_if_not_available();
         let rea_project = self.rea_project;
-        Reaper::get()
+        ReaperSession::get()
             .get_projects()
             .enumerate()
             .find(|(_, rp)| rp.rea_project == rea_project)
@@ -154,7 +154,7 @@ impl Project {
     where
         F: FnOnce() -> R,
     {
-        let reaper = Reaper::get();
+        let reaper = ReaperSession::get();
         if reaper.get_currently_loading_or_saving_project().is_some() {
             operation()
         } else {

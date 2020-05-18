@@ -30,11 +30,11 @@ use quote::quote;
 /// ```no_run,ignore
 /// use std::error::Error;
 /// use reaper_macros::reaper_extension_plugin;
-/// use reaper_high::Reaper;
+/// use reaper_high::ReaperSession;
 ///
 /// #[reaper_extension_plugin(email_address = "support@example.org")]
 /// fn plugin_main() -> Result<(), Box<dyn Error>> {
-///     let reaper = Reaper::get();
+///     let reaper = ReaperSession::get();
 ///     reaper.show_console_msg("Hello world from reaper-rs high-level API!");
 ///     Ok(())
 /// }
@@ -149,7 +149,7 @@ fn generate_high_level_plugin_code(
     let tokens = quote! {
         #[::reaper_macros::reaper_extension_plugin]
         fn low_level_plugin_main(context: ::reaper_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
-            ::reaper_high::Reaper::setup_with_defaults(context, #email_address);
+            ::reaper_high::ReaperSession::setup_with_defaults(context, #email_address);
             #main_function_name()
         }
 

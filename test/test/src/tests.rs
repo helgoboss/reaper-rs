@@ -9,7 +9,7 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, Reaper, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, Pan, ReaperSession, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -1680,7 +1680,7 @@ fn fn_mut_action() -> TestStep {
             c_str!("reaper-rs counter"),
             move || {
                 let owned = format!("Hello from Rust number {}\0", i);
-                let reaper = Reaper::get();
+                let reaper = ReaperSession::get();
                 reaper.show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
                 i += 1;
             },
@@ -2812,7 +2812,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn get_track(index: u32) -> Result<Track, &'static str> {
-    Reaper::get()
+    ReaperSession::get()
         .get_current_project()
         .get_track_by_index(index)
         .ok_or("Track not found")

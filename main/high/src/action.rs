@@ -1,4 +1,4 @@
-use crate::{ActionCharacter, Project, Reaper, Section};
+use crate::{ActionCharacter, Project, ReaperSession, Section};
 use c_str_macro::c_str;
 use reaper_medium::{ActionValueChange, CommandId, ReaperFunctions, SectionContext};
 
@@ -236,7 +236,7 @@ impl Action {
                 Some(id) => id,
             };
         self.runtime_data.replace(Some(RuntimeData {
-            section: Reaper::get().get_main_section(),
+            section: ReaperSession::get().get_main_section(),
             command_id,
             cached_index: None,
         }));

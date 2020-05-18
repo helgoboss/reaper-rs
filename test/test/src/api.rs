@@ -1,4 +1,4 @@
-use reaper_high::Reaper;
+use reaper_high::ReaperSession;
 use reaper_medium::ReaperVersion;
 use rxrust::prelude::*;
 use std::borrow::Cow;
@@ -12,7 +12,7 @@ type TestStepResult = Result<(), Cow<'static, str>>;
 pub struct TestStep {
     pub name: Cow<'static, str>,
     pub version_restriction: VersionRestriction,
-    pub operation: Box<dyn FnOnce(&Reaper, TestStepContext) -> TestStepResult>,
+    pub operation: Box<dyn FnOnce(&ReaperSession, TestStepContext) -> TestStepResult>,
 }
 
 pub fn step<Op>(
@@ -21,7 +21,7 @@ pub fn step<Op>(
     operation: Op,
 ) -> TestStep
 where
-    Op: FnOnce(&Reaper, TestStepContext) -> TestStepResult + 'static,
+    Op: FnOnce(&ReaperSession, TestStepContext) -> TestStepResult + 'static,
 {
     TestStep {
         version_restriction,

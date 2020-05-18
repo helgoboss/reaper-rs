@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```no_run
-//! # let reaper = reaper_high::Reaper::default();
+//! # let reaper = reaper_high::ReaperSession::default();
 //! use rxrust::prelude::*;
 //!
 //! reaper.show_console_msg("Hello world from reaper-rs high-level API!");
@@ -22,6 +22,9 @@ mod regex_util;
 
 mod log_util;
 pub use log_util::*;
+
+mod reaper_session;
+pub use reaper_session::*;
 
 mod reaper;
 pub use reaper::*;

@@ -12,7 +12,7 @@ use crate::fx_chain::FxChain;
 use crate::guid::Guid;
 use crate::track_send::TrackSend;
 
-use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
+use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, ReaperSession, Volume};
 
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
@@ -578,7 +578,7 @@ impl Track {
         };
         // No ReaProject* available. Try current project first (most likely in everyday REAPER
         // usage).
-        let reaper = Reaper::get();
+        let reaper = ReaperSession::get();
         let current_project = reaper.get_current_project();
         let is_valid_in_current_project = reaper
             .medium()

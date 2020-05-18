@@ -6,7 +6,7 @@ mod tests;
 
 use crate::api::{TestStep, TestStepContext, VersionRestriction};
 use crate::tests::create_test_steps;
-use reaper_high::Reaper;
+use reaper_high::ReaperSession;
 use rxrust::prelude::*;
 
 use std::collections::VecDeque;
@@ -22,7 +22,7 @@ use std::panic::AssertUnwindSafe;
 /// Calls the given callback as soon as finished (either when the first test step failed
 /// or when all steps have executed successfully).
 pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) {
-    let reaper = Reaper::get();
+    let reaper = ReaperSession::get();
     reaper.clear_console();
     log("# Testing reaper-rs\n");
     let steps = VecDeque::from_iter(create_test_steps());
@@ -31,7 +31,7 @@ pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) 
 }
 
 fn execute_next_step(
-    reaper: &Reaper,
+    reaper: &ReaperSession,
     mut steps: VecDeque<TestStep>,
     step_count: usize,
     on_finish: impl Fn(Result<(), &str>) + 'static,
@@ -62,7 +62,12 @@ fn execute_next_step(
             Ok(()) => {
                 reaper
                     .execute_later_in_main_thread_asap(move || {
-                        execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
+                        execute_next_step(
+                            ReaperSession::get().deref(),
+                            steps,
+                            step_count,
+                            on_finish,
+                        )
                     })
                     .expect("couldn't schedule next test step");
             }
@@ -81,13 +86,13 @@ fn execute_next_step(
         log_skip(reason);
         reaper
             .execute_later_in_main_thread_asap(move || {
-                execute_next_step(Reaper::get().deref(), steps, step_count, on_finish)
+                execute_next_step(ReaperSession::get().deref(), steps, step_count, on_finish)
             })
             .expect("couldn't schedule next test step");
     }
 }
 
-fn reaper_version_matches(reaper: &Reaper, step: &TestStep) -> bool {
+fn reaper_version_matches(reaper: &ReaperSession, step: &TestStep) -> bool {
     use VersionRestriction::*;
     match &step.version_restriction {
         AllVersions => true,
@@ -109,5 +114,5 @@ fn log_step(step_index: usize, name: &str) {
 }
 
 fn log<'a>(msg: impl Into<ReaperStringArg<'a>>) {
-    Reaper::get().show_console_msg(msg)
+    ReaperSession::get().show_console_msg(msg)
 }
