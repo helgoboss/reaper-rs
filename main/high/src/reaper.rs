@@ -18,7 +18,7 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, Project, Track,
+    create_terminal_logger, Action, EventLoopExecutor, Project, Spawner, Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
@@ -26,6 +26,7 @@ use reaper_low::raw;
 
 use reaper_low::ReaperPluginContext;
 
+use crate::event_loop_executor::new_spawner_and_executor;
 use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
@@ -46,11 +47,17 @@ use std::time::{Duration, SystemTime};
 ///
 /// Shouldn't be too high because when `Reaper::deactivate()` is called, those tasks are
 /// going to pile up - and they will be discarded on the next activate.
-const MAX_MAIN_THREAD_TASKS: usize = 1000;
+const MAIN_THREAD_TASK_CHANNEL_CAPACITY: usize = 1000;
+
+/// How many tasks to process at a maximum in one main loop iteration.
+pub(crate) const MAIN_THREAD_TASK_BULK_SIZE: usize = 1;
 
 /// Capacity of the channel which is used to scheduled tasks for execution in the real-time audio
 /// thread.
-const MAX_AUDIO_THREAD_TASKS: usize = 500;
+const AUDIO_THREAD_TASK_CHANNEL_CAPACITY: usize = 500;
+
+/// How many tasks to process at a maximum in one real-time audio loop iteration.
+const AUDIO_THREAD_TASK_BULK_SIZE: usize = 1;
 
 /// We  make sure in each public function/method that it's called from the correct thread. Similar
 /// with other methods. We basically make this struct thread-safe by panicking whenever we are in
@@ -104,10 +111,14 @@ impl ReaperBuilder {
                     subjects: MainSubjects::new(),
                     undo_block_is_active: Cell::new(false),
                     main_thread_task_channel: crossbeam_channel::bounded::<MainThreadTask>(
-                        MAX_MAIN_THREAD_TASKS,
+                        MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                     ),
                     audio_thread_task_channel: crossbeam_channel::bounded::<AudioThreadTaskOp>(
-                        MAX_AUDIO_THREAD_TASKS,
+                        AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
+                    ),
+                    main_thread_future_couple: new_spawner_and_executor(
+                        MAIN_THREAD_TASK_CHANNEL_CAPACITY,
+                        MAIN_THREAD_TASK_BULK_SIZE,
                     ),
                     active_data: RefCell::new(None),
                 };
@@ -148,7 +159,11 @@ impl MediumOnAudioBuffer for HighOnAudioBuffer {
         }
         // Take only one task each time because we don't want to do to much in one go in the
         // real-time thread.
-        for task in self.audio_thread_task_receiver.try_iter().take(1) {
+        for task in self
+            .audio_thread_task_receiver
+            .try_iter()
+            .take(AUDIO_THREAD_TASK_BULK_SIZE)
+        {
             (task)(&self.reaper);
         }
         // Process MIDI
@@ -197,6 +212,7 @@ pub struct Reaper {
     undo_block_is_active: Cell<bool>,
     main_thread_task_channel: (Sender<MainThreadTask>, Receiver<MainThreadTask>),
     audio_thread_task_channel: (Sender<AudioThreadTaskOp>, Receiver<AudioThreadTaskOp>),
+    main_thread_future_couple: (Spawner, EventLoopExecutor),
     active_data: RefCell<Option<ActiveData>>,
 }
 
@@ -211,6 +227,7 @@ impl Default for Reaper {
             undo_block_is_active: Default::default(),
             main_thread_task_channel: crossbeam_channel::bounded::<MainThreadTask>(0),
             audio_thread_task_channel: crossbeam_channel::bounded::<AudioThreadTaskOp>(0),
+            main_thread_future_couple: new_spawner_and_executor(0, 0),
             active_data: Default::default(),
         }
     }
@@ -274,7 +291,7 @@ pub(super) struct MainSubjects {
     pub(super) master_tempo_touched: EventStreamSubject<()>,
     pub(super) master_playrate_changed: EventStreamSubject<bool>,
     pub(super) master_playrate_touched: EventStreamSubject<bool>,
-    pub(super) main_thread_idle: EventStreamSubject<bool>,
+    pub(super) main_thread_idle: EventStreamSubject<()>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Payload<Rc<Action>>>,
 }
@@ -418,6 +435,7 @@ impl Reaper {
         let control_surface = HelperControlSurface::new(
             self.main_thread_task_channel.0.clone(),
             self.main_thread_task_channel.1.clone(),
+            self.main_thread_future_couple.1.clone(),
         );
         let mut medium = self.medium_session();
         // Functions
@@ -536,6 +554,11 @@ impl Reaper {
                 .plugin_register_remove_gaccel(gaccel_handle);
             command_by_id.remove(&command_id);
         }
+    }
+
+    pub fn main_thread_idle(&self) -> impl LocalObservable<'static, Err = (), Item = ()> {
+        self.require_main_thread();
+        self.subjects.main_thread_idle.borrow().clone()
     }
 
     pub fn project_switched(&self) -> impl LocalObservable<'static, Err = (), Item = Project> {
@@ -667,6 +690,14 @@ impl Reaper {
     ) -> impl LocalObservable<'static, Err = (), Item = Payload<Rc<Action>>> {
         self.require_main_thread();
         self.subjects.action_invoked.borrow().clone()
+    }
+
+    pub fn spawn_in_main_thread(
+        &self,
+        future: impl std::future::Future<Output = ()> + 'static + Send,
+    ) {
+        let spawner = &self.main_thread_future_couple.0;
+        spawner.spawn(future);
     }
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
