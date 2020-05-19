@@ -1,6 +1,9 @@
 use crate::fx::Fx;
 use crate::guid::Guid;
-use crate::{get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track};
+use crate::{
+    get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track,
+    MAIN_THREAD_TASK_BULK_SIZE,
+};
 use c_str_macro::c_str;
 
 use reaper_medium::TrackAttributeKey::{Mute, Pan, RecArm, RecInput, Selected, Solo, Vol};
@@ -22,21 +25,20 @@ use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 
+use crate::event_loop_executor::EventLoopExecutor;
 use crossbeam_channel::{Receiver, Sender};
 use std::cmp::Ordering;
-
-const BULK_TASK_EXECUTION_COUNT: usize = 100;
 
 #[derive(Debug)]
 pub(super) struct HelperControlSurface {
     main_thread_task_sender: Sender<MainThreadTask>,
     main_thread_task_receiver: Receiver<MainThreadTask>,
+    main_thread_executor: EventLoopExecutor,
     last_active_project: Cell<Project>,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
     project_datas: RefCell<ProjectDataMap>,
     fx_chain_pair_by_media_track: RefCell<HashMap<MediaTrack, FxChainPair>>,
-
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
@@ -75,6 +77,7 @@ impl HelperControlSurface {
     pub(super) fn new(
         task_sender: Sender<MainThreadTask>,
         task_receiver: Receiver<MainThreadTask>,
+        executor: EventLoopExecutor,
     ) -> HelperControlSurface {
         let reaper = Reaper::get();
         let version = reaper.get_version();
@@ -82,6 +85,7 @@ impl HelperControlSurface {
         let surface = HelperControlSurface {
             main_thread_task_sender: task_sender,
             main_thread_task_receiver: task_receiver,
+            main_thread_executor: executor,
             last_active_project: Cell::new(reaper.get_current_project()),
             num_track_set_changes_left_to_be_propagated: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
@@ -537,12 +541,12 @@ impl MediumReaperControlSurface for HelperControlSurface {
             .subjects
             .main_thread_idle
             .borrow_mut()
-            .next(true);
+            .next(());
         // Process tasks in queue
         for task in self
             .main_thread_task_receiver
             .try_iter()
-            .take(BULK_TASK_EXECUTION_COUNT)
+            .take(MAIN_THREAD_TASK_BULK_SIZE)
         {
             match task.desired_execution_time {
                 None => (task.op)(),
@@ -557,6 +561,8 @@ impl MediumReaperControlSurface for HelperControlSurface {
                 }
             }
         }
+        // Execute futures
+        self.main_thread_executor.run();
     }
 
     fn set_track_list_change(&self) {

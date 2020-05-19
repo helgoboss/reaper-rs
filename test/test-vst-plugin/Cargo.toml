@@ -11,7 +11,9 @@ reaper-medium = { path = "../../main/medium" }
 reaper-low = { path = "../../main/low" }
 reaper-test = { path = "../test" }
 c_str_macro = "1.0.2"
+rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
 vst = { git = "https://github.com/helgoboss/vst-rs", branch = "feature/custom-support-variant" }
+futures-timer = "3.0.2"
 
 [lib]
 name = "reaper_test_vst_plugin"

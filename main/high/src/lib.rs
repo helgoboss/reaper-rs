@@ -23,6 +23,9 @@ mod regex_util;
 mod log_util;
 pub use log_util::*;
 
+mod event_loop_executor;
+use event_loop_executor::*;
+
 mod reaper;
 pub use reaper::*;
 
