@@ -192,7 +192,7 @@ impl Reaper<MainThreadScope> {
     }
 }
 
-#[cfg_attr(feature = "reaper-meter", metered(registry = ReaperMetrics), measure([NanoResponseTime]))]
+#[cfg_attr(feature = "reaper-meter", metered(registry = ReaperMetrics, visibility = pub), measure([NanoResponseTime]))]
 impl<UsageScope> Reaper<UsageScope> {
     pub(crate) fn new(low: reaper_low::Reaper) -> Reaper<UsageScope> {
         Reaper {
@@ -206,6 +206,12 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Gives access to the low-level Reaper instance.
     pub fn low(&self) -> &reaper_low::Reaper {
         &self.low
+    }
+
+    /// Gives access to the collected metrics.
+    #[cfg(feature = "reaper-meter")]
+    pub fn metrics(&self) -> &ReaperMetrics {
+        &self.metrics
     }
 
     /// Returns the requested project and optionally its file name.

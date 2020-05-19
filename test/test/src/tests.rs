@@ -9,7 +9,7 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, Reaper, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, Pan, Reaper, ReaperSession, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -1773,31 +1773,53 @@ fn strings() -> TestStep {
         assert!(Guid::try_from(c_str!("{hey}")).is_err());
         Reaper::get().show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
         Reaper::get().show_console_msg("- &str: 范例文字äöüß\n");
-        Reaper::get().show_console_msg(String::from("- String: 范例文字äöüß"));
+        Reaper::get().show_console_msg(String::from("- String: 范例文字äöüß\n"));
         Ok(())
     })
 }
 
 fn global_instances() -> TestStep {
-    step(AllVersions, "Global instances", |_session, _| {
-        let medium = Reaper::get().medium();
+    step(AllVersions, "Global instances", |session, _| {
+        // Sizes
+        use std::mem::size_of_val;
+        let medium_session = ReaperSession::get().medium();
+        let medium_reaper = Reaper::get().medium();
+        let metrics_size = size_of_val(medium_reaper.metrics());
+        Reaper::get().show_console_msg(format!(
+            "\
+            Struct sizes in byte:\n\
+            - reaper_high::ReaperSession: {high_session} ({high_session_no_metrics} without metrics)\n\
+            - reaper_high::Reaper: {high_reaper} ({high_reaper_no_metrics} without metrics)\n\
+            - reaper_medium::ReaperSession: {medium_session} ({medium_session_no_metrics} without metrics)\n\
+            - reaper_medium::Reaper: {medium_reaper} ({medium_reaper_no_metrics} without metrics)\n\
+            - reaper_low::Reaper: {low_reaper}\n\
+            ",
+            high_session = size_of_val(session),
+            high_session_no_metrics = size_of_val(session) - metrics_size,
+            high_reaper = size_of_val(Reaper::get()),
+            high_reaper_no_metrics = size_of_val(Reaper::get()) - metrics_size,
+            medium_session = size_of_val(medium_session.deref()),
+            medium_session_no_metrics = size_of_val(medium_session.deref()) - metrics_size,
+            medium_reaper = size_of_val(medium_reaper),
+            medium_reaper_no_metrics = size_of_val(medium_reaper) - metrics_size,
+            low_reaper = size_of_val(medium_reaper.low()),
+        ));
         // Low-level REAPER
-        reaper_low::Reaper::make_available_globally(*medium.low());
-        reaper_low::Reaper::make_available_globally(*medium.low());
+        reaper_low::Reaper::make_available_globally(*medium_reaper.low());
+        reaper_low::Reaper::make_available_globally(*medium_reaper.low());
         let low = reaper_low::Reaper::get();
         println!("reaper_low::Reaper {:?}", &low);
         unsafe {
             low.ShowConsoleMsg(c_str!("- Hello from low-level API\n").as_ptr());
         }
-        // SWELL
-        let swell = Swell::load(*medium.low().plugin_context());
+        // Low-level SWELL
+        let swell = Swell::load(*medium_reaper.low().plugin_context());
         println!("reaper_low::Swell {:?}", &swell);
         Swell::make_available_globally(swell);
         let _ = Swell::get();
         // Medium-level REAPER
-        reaper_medium::Reaper::make_available_globally(medium.clone());
-        reaper_medium::Reaper::make_available_globally(medium.clone());
-        let medium_reaper = reaper_high::Reaper::get().medium();
+        reaper_medium::Reaper::make_available_globally(medium_reaper.clone());
+        reaper_medium::Reaper::make_available_globally(medium_reaper.clone());
         medium_reaper.show_console_msg("- Hello from medium-level API\n");
         Ok(())
     })
