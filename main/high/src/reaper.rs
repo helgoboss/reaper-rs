@@ -50,7 +50,7 @@ use std::time::{Duration, SystemTime};
 const MAIN_THREAD_TASK_CHANNEL_CAPACITY: usize = 1000;
 
 /// How many tasks to process at a maximum in one main loop iteration.
-pub(crate) const MAIN_THREAD_TASK_BULK_SIZE: usize = 1;
+pub(crate) const MAIN_THREAD_TASK_BULK_SIZE: usize = 100;
 
 /// Capacity of the channel which is used to scheduled tasks for execution in the real-time audio
 /// thread.

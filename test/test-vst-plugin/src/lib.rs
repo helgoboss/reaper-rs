@@ -142,7 +142,7 @@ impl TestVstPlugin {
         self.reaper_guard = Some(guard);
         let mut counter = 0;
         Reaper::get().main_thread_idle().subscribe(move |_| {
-            if counter > 50 {
+            if counter > 10 {
                 return;
             }
             Reaper::get().show_console_msg(format!("Main thread counter: {}\n", counter));
@@ -154,20 +154,20 @@ impl TestVstPlugin {
 
 async fn future_main() {
     Reaper::get().show_console_msg("Hello from future!\n");
-    Delay::new(Duration::from_secs(3)).await;
     let result = calculate_something().await;
     Reaper::get().show_console_msg(format!("Calculated: {}\n", result));
-    Delay::new(Duration::from_secs(5)).await;
     let result = calculate_something_else().await;
     Reaper::get().show_console_msg(format!("Calculated something else: {}\n", result));
 }
 
 async fn calculate_something() -> i32 {
     Reaper::get().show_console_msg("Calculating something...\n");
+    Delay::new(Duration::from_secs(3)).await;
     5
 }
 
 async fn calculate_something_else() -> i32 {
     Reaper::get().show_console_msg("Calculating something else...\n");
+    Delay::new(Duration::from_secs(5)).await;
     10
 }
