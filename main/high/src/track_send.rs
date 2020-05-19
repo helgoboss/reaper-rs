@@ -83,7 +83,7 @@ impl TrackSend {
         // wrong value if an envelope is written.
         let result = unsafe {
             Reaper::get()
-                .medium()
+                .medium_reaper()
                 .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
         }
         .expect("Couldn't get send vol/pan");
@@ -92,7 +92,7 @@ impl TrackSend {
 
     pub fn set_volume(&self, volume: Volume) {
         unsafe {
-            Reaper::get().medium().csurf_on_send_volume_change(
+            Reaper::get().medium_reaper().csurf_on_send_volume_change(
                 self.get_source_track().get_raw(),
                 self.get_index(),
                 Absolute(volume.get_reaper_value()),
@@ -103,7 +103,7 @@ impl TrackSend {
     pub fn get_pan(&self) -> Pan {
         let result = unsafe {
             Reaper::get()
-                .medium()
+                .medium_reaper()
                 .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
         }
         .expect("Couldn't get send vol/pan");
@@ -112,7 +112,7 @@ impl TrackSend {
 
     pub fn set_pan(&self, pan: Pan) {
         unsafe {
-            Reaper::get().medium().csurf_on_send_pan_change(
+            Reaper::get().medium_reaper().csurf_on_send_pan_change(
                 self.get_source_track().get_raw(),
                 self.get_index(),
                 Absolute(pan.get_reaper_value()),
@@ -198,7 +198,7 @@ pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
 
 fn get_target_track_raw(source_track: &Track, send_index: u32) -> Option<MediaTrack> {
     unsafe {
-        Reaper::get().medium().get_track_send_info_desttrack(
+        Reaper::get().medium_reaper().get_track_send_info_desttrack(
             source_track.get_raw(),
             TrackSendDirection::Send,
             send_index,

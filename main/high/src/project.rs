@@ -1,7 +1,7 @@
 use std::ffi::{CStr, CString};
 
 use crate::guid::Guid;
-use crate::{Reaper, ReaperSession, Tempo, Track};
+use crate::{Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
@@ -29,7 +29,7 @@ impl Project {
 
     pub fn get_file_path(self) -> Option<PathBuf> {
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .enum_projects(ProjectRef::Tab(self.get_index()), 5000)
             .unwrap()
             .file_path
@@ -53,7 +53,7 @@ impl Project {
     pub fn get_track_by_index(self, idx: u32) -> Option<Track> {
         self.complain_if_not_available();
         let media_track = Reaper::get()
-            .medium()
+            .medium_reaper()
             .get_track(Proj(self.rea_project), idx)?;
         Some(Track::new(media_track, Some(self.rea_project)))
     }
@@ -78,7 +78,7 @@ impl Project {
         self.complain_if_not_available();
         (0..self.get_track_count()).map(move |i| {
             let media_track = Reaper::get()
-                .medium()
+                .medium_reaper()
                 .get_track(Proj(self.rea_project), i)
                 .unwrap();
             Track::new(media_track, Some(self.rea_project))
@@ -87,28 +87,29 @@ impl Project {
 
     pub fn is_available(self) -> bool {
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .validate_ptr_2(CurrentProject, self.rea_project)
     }
 
     pub fn get_selected_track_count(self, want_master: MasterTrackBehavior) -> u32 {
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .count_selected_tracks_2(Proj(self.rea_project), want_master) as u32
     }
 
     pub fn get_first_selected_track(self, want_master: MasterTrackBehavior) -> Option<Track> {
-        let media_track =
-            Reaper::get()
-                .medium()
-                .get_selected_track_2(Proj(self.rea_project), 0, want_master)?;
+        let media_track = Reaper::get().medium_reaper().get_selected_track_2(
+            Proj(self.rea_project),
+            0,
+            want_master,
+        )?;
         Some(Track::new(media_track, Some(self.rea_project)))
     }
 
     pub fn unselect_all_tracks(self) {
         // TODO-low No project context
         unsafe {
-            Reaper::get().medium().set_only_track_selected(None);
+            Reaper::get().medium_reaper().set_only_track_selected(None);
         }
     }
 
@@ -119,7 +120,7 @@ impl Project {
         self.complain_if_not_available();
         (0..self.get_selected_track_count(want_master)).map(move |i| {
             let media_track = Reaper::get()
-                .medium()
+                .medium_reaper()
                 .get_selected_track_2(Proj(self.rea_project), i, want_master)
                 .unwrap();
             Track::new(media_track, Some(self.rea_project))
@@ -128,7 +129,9 @@ impl Project {
 
     pub fn get_track_count(self) -> u32 {
         self.complain_if_not_available();
-        Reaper::get().medium().count_tracks(Proj(self.rea_project)) as u32
+        Reaper::get()
+            .medium_reaper()
+            .count_tracks(Proj(self.rea_project)) as u32
     }
 
     // TODO-low Introduce variant that doesn't notify ControlSurface
@@ -139,7 +142,7 @@ impl Project {
 
     pub fn remove_track(self, track: &Track) {
         unsafe {
-            Reaper::get().medium().delete_track(track.get_raw());
+            Reaper::get().medium_reaper().delete_track(track.get_raw());
         }
     }
 
@@ -147,7 +150,7 @@ impl Project {
     pub fn insert_track_at(self, index: u32) -> Track {
         self.complain_if_not_available();
         // TODO-low reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
-        let reaper = Reaper::get().medium();
+        let reaper = Reaper::get().medium_reaper();
         reaper.insert_track_at_index(index, TrackDefaultsBehavior::OmitDefaultEnvAndFx);
         reaper.track_list_update_all_external_surfaces();
         let media_track = reaper.get_track(Proj(self.rea_project), index).unwrap();
@@ -157,7 +160,7 @@ impl Project {
     pub fn get_master_track(self) -> Track {
         self.complain_if_not_available();
         let mt = Reaper::get()
-            .medium()
+            .medium_reaper()
             .get_master_track(Proj(self.rea_project));
         Track::new(mt, Some(self.rea_project))
     }
@@ -172,7 +175,7 @@ impl Project {
         {
             operation()
         } else {
-            let _undo_block = ReaperSession::get().enter_undo_block_internal(self, label);
+            let _undo_block = Reaper::get().enter_undo_block_internal(self, label);
             operation()
         }
     }
@@ -180,53 +183,55 @@ impl Project {
     pub fn undo(self) -> bool {
         self.complain_if_not_available();
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .undo_do_undo_2(Proj(self.rea_project))
     }
 
     pub fn redo(self) -> bool {
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .undo_do_redo_2(Proj(self.rea_project))
     }
 
     pub fn mark_as_dirty(self) {
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .mark_project_dirty(Proj(self.rea_project));
     }
 
     pub fn is_dirty(self) -> bool {
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .is_project_dirty(Proj(self.rea_project))
     }
 
     pub fn get_label_of_last_undoable_action(self) -> Option<CString> {
         self.complain_if_not_available();
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .undo_can_undo_2(Proj(self.rea_project), |s| s.into())
     }
 
     pub fn get_label_of_last_redoable_action(self) -> Option<CString> {
         self.complain_if_not_available();
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .undo_can_redo_2(Proj(self.rea_project), |s| s.into())
     }
 
     pub fn get_tempo(self) -> Tempo {
         // TODO This is not project-specific ... why?
-        let bpm = Reaper::get().medium().master_get_tempo();
+        let bpm = Reaper::get().medium_reaper().master_get_tempo();
         Tempo::from_bpm(bpm)
     }
 
     pub fn set_tempo(self, tempo: Tempo, undo_hint: UndoBehavior) {
         self.complain_if_not_available();
-        Reaper::get()
-            .medium()
-            .set_current_bpm(Proj(self.rea_project), tempo.get_bpm(), undo_hint);
+        Reaper::get().medium_reaper().set_current_bpm(
+            Proj(self.rea_project),
+            tempo.get_bpm(),
+            undo_hint,
+        );
     }
 
     fn complain_if_not_available(self) {

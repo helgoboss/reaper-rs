@@ -6,12 +6,11 @@
 //! # Example
 //!
 //! ```no_run
-//! # let session = reaper_high::ReaperSession::default();
 //! # let reaper = reaper_high::Reaper::get();
 //! use rxrust::prelude::*;
 //!
 //! reaper.show_console_msg("Hello world from reaper-rs high-level API!");
-//! session.track_removed().subscribe(|t| println!("Track {:?} removed", t));
+//! reaper.track_removed().subscribe(|t| println!("Track {:?} removed", t));
 //! let project = reaper.get_current_project();
 //! let track = project.get_track_by_index(0).ok_or("no tracks")?;
 //! project.remove_track(&track);
@@ -24,11 +23,11 @@ mod regex_util;
 mod log_util;
 pub use log_util::*;
 
-mod reaper_session;
-pub use reaper_session::*;
-
 mod reaper;
 pub use reaper::*;
+
+mod reaper_simple;
+pub use reaper_simple::*;
 
 mod project;
 pub use project::*;

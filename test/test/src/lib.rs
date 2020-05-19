@@ -6,7 +6,7 @@ mod tests;
 
 use crate::api::{TestStep, TestStepContext, VersionRestriction};
 use crate::tests::create_test_steps;
-use reaper_high::{Reaper, ReaperSession};
+use reaper_high::Reaper;
 use rxrust::prelude::*;
 
 use std::collections::VecDeque;
@@ -43,7 +43,7 @@ fn execute_next_step(
         }
     };
     log_step(step_count - steps.len() - 1, &step.name);
-    let session = ReaperSession::get();
+    let reaper = Reaper::get();
     if reaper_version_matches(&step) {
         let result = {
             let mut finished = LocalSubject::new();
@@ -52,7 +52,7 @@ fn execute_next_step(
             };
             let step_name = step.name.clone();
             let result = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                (step.operation)(session.deref(), context)
+                (step.operation)(reaper.deref(), context)
             }))
             .unwrap_or_else(|_| Err(format!("Test [{}] panicked", step_name).into()));
             finished.complete();
@@ -60,7 +60,7 @@ fn execute_next_step(
         };
         match result {
             Ok(()) => {
-                session
+                reaper
                     .do_later_in_main_thread_asap(move || {
                         execute_next_step(steps, step_count, on_finish)
                     })
@@ -79,7 +79,7 @@ fn execute_next_step(
             _ => unreachable!(),
         };
         log_skip(reason);
-        session
+        reaper
             .do_later_in_main_thread_asap(move || execute_next_step(steps, step_count, on_finish))
             .expect("couldn't schedule next test step");
     }
