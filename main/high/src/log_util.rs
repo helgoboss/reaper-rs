@@ -43,12 +43,11 @@ pub fn create_reaper_panic_hook(
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
             if let Ok(c_msg) = CString::new(msg) {
-                // TODO-high If the panic happens in audio thread, this won't work! We need to
-                //  expose thread-local senders to the main thread in a global way, preferably
-                //  immutable (this is not so easy because senders right now might not be available
-                //  if deactivate() was called. Maybe we shouldn't use deactivate or handle this
-                //  in another way.
-                Reaper::get().medium().show_console_msg(c_msg.as_ref());
+                let _ = Reaper::get().do_in_main_thread_asap(move || {
+                    Reaper::get()
+                        .medium_reaper()
+                        .show_console_msg(c_msg.as_ref());
+                });
             }
         }
     })
@@ -113,7 +112,9 @@ impl std::io::Write for ReaperConsoleSink {
     fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
         let c_string = CString::new(buf)?;
         // TODO-medium If the panic happens in audio thread, this won't work!
-        Reaper::get().medium().show_console_msg(c_string.as_ref());
+        Reaper::get()
+            .medium_reaper()
+            .show_console_msg(c_string.as_ref());
         Ok(buf.len())
     }
 

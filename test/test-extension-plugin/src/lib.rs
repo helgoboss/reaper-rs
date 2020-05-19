@@ -1,5 +1,5 @@
 use c_str_macro::c_str;
-use reaper_high::{ActionKind, ReaperSession};
+use reaper_high::{ActionKind, Reaper};
 
 use reaper_macros::reaper_extension_plugin;
 use std::error::Error;
@@ -8,9 +8,9 @@ use std::process;
 #[reaper_extension_plugin(email_address = "info@helgoboss.org")]
 fn main() -> Result<(), Box<dyn Error>> {
     println!("From REAPER: Launching reaper-rs reaper-test-extension-plugin...");
-    let reaper = ReaperSession::get();
-    reaper.activate();
-    reaper.show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
+    let session = Reaper::get();
+    session.activate();
+    Reaper::get().show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
     if std::env::var("RUN_REAPER_RS_INTEGRATION_TEST").is_ok() {
         println!("From REAPER: Entering reaper-rs integration test...");
         reaper_test::execute_integration_test(|result| {
@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         });
     }
-    reaper.register_action(
+    session.register_action(
         c_str!("reaperRsIntegrationTests"),
         c_str!("reaper-rs integration tests"),
         || reaper_test::execute_integration_test(|_| ()),

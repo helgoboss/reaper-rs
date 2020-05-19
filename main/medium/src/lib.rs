@@ -341,8 +341,8 @@ pub use midi::*;
 mod reaper_session;
 pub use reaper_session::*;
 
-mod reaper_functions;
-pub use reaper_functions::*;
+mod reaper;
+pub use reaper::*;
 
 mod util;
 use util::*;

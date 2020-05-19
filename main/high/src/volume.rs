@@ -21,7 +21,7 @@ impl Volume {
     }
 
     pub fn from_db(db: Db) -> Volume {
-        Volume::from_normalized_value(Reaper::get().medium().db2slider(db).get() / 1000.0)
+        Volume::from_normalized_value(Reaper::get().medium_reaper().db2slider(db).get() / 1000.0)
     }
 
     pub fn get_normalized_value(&self) -> f64 {
@@ -34,7 +34,7 @@ impl Volume {
 
     pub fn get_db(&self) -> Db {
         Reaper::get()
-            .medium()
+            .medium_reaper()
             .slider2db(VolumeSliderValue::new(self.normalized_value * 1000.0))
     }
 }

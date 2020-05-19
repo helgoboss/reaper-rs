@@ -17,7 +17,7 @@ impl FxChain {
     }
 
     pub fn get_fx_count(&self) -> u32 {
-        let reaper = Reaper::get().medium();
+        let reaper = Reaper::get().medium_reaper();
         if self.is_input_fx {
             unsafe { reaper.track_fx_get_rec_count(self.track.get_raw()) as u32 }
         } else {
@@ -28,7 +28,7 @@ impl FxChain {
     // Moves within this FX chain
     pub fn move_fx(&self, fx: &Fx, new_index: u32) {
         assert_eq!(fx.get_chain(), *self);
-        let reaper = Reaper::get().medium();
+        let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().TrackFX_CopyToTrack.is_some() {
             unsafe {
                 reaper.track_fx_copy_to_track(
@@ -84,7 +84,7 @@ impl FxChain {
         if !fx.is_available() {
             return;
         }
-        let reaper = Reaper::get().medium();
+        let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().TrackFX_Delete.is_some() {
             unsafe {
                 reaper
@@ -209,7 +209,7 @@ DOCKED 0
         }
         unsafe {
             Reaper::get()
-                .medium()
+                .medium_reaper()
                 .track_fx_get_instrument(self.track.get_raw())
         }
         .and_then(|fx_index| self.get_fx_by_index(fx_index))
@@ -217,7 +217,7 @@ DOCKED 0
 
     pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
         let fx_index = unsafe {
-            Reaper::get().medium().track_fx_add_by_name_add(
+            Reaper::get().medium_reaper().track_fx_add_by_name_add(
                 self.track.get_raw(),
                 original_fx_name,
                 if self.is_input_fx {
@@ -247,7 +247,7 @@ DOCKED 0
 
     pub fn get_first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
         let fx_index = unsafe {
-            Reaper::get().medium().track_fx_add_by_name_query(
+            Reaper::get().medium_reaper().track_fx_add_by_name_query(
                 self.track.get_raw(),
                 name,
                 if self.is_input_fx {

@@ -1,6 +1,6 @@
 use c_str_macro::c_str;
 
-use reaper_high::{ActionKind, ReaperGuard, ReaperSession};
+use reaper_high::{ActionKind, Reaper, ReaperGuard};
 use reaper_low::{reaper_vst_plugin, ReaperPluginContext};
 use reaper_medium::{
     CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
@@ -17,7 +17,7 @@ reaper_vst_plugin!();
 #[derive(Default)]
 struct TestVstPlugin {
     host: HostCallback,
-    reaper: Option<reaper_medium::ReaperSession>,
+    session: Option<reaper_medium::ReaperSession>,
     reaper_guard: Option<Arc<ReaperGuard>>,
 }
 
@@ -25,7 +25,7 @@ impl Plugin for TestVstPlugin {
     fn new(host: HostCallback) -> Self {
         Self {
             host,
-            reaper: None,
+            session: None,
             reaper_guard: None,
         }
     }
@@ -115,18 +115,18 @@ impl TestVstPlugin {
             med.audio_reg_hardware_hook_add(MyOnAudioBuffer { sender, counter: 0 })
                 .expect("couldn't register audio hook");
         }
-        self.reaper = Some(med);
+        self.session = Some(med);
     }
 
     fn use_high_level_reaper(&mut self) {
-        let guard = ReaperSession::guarded(|| {
+        let guard = Reaper::guarded(|| {
             let context = ReaperPluginContext::from_vst_plugin(
                 &self.host,
                 reaper_vst_plugin::static_context(),
             )
             .unwrap();
-            ReaperSession::setup_with_defaults(context, "info@helgoboss.org");
-            let reaper = ReaperSession::get();
+            Reaper::setup_with_defaults(context, "info@helgoboss.org");
+            let reaper = Reaper::get();
             reaper.activate();
             reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
             reaper.register_action(

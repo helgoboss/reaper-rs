@@ -215,6 +215,9 @@ impl ChunkRegion {
                 &r[self.start_pos..(self.start_pos + self.length)]
             })
         } else {
+            // For now I don't know how to simply create a Ref<"">
+            #[allow(clippy::unknown_clippy_lints)]
+            #[allow(clippy::reversed_empty_ranges)]
             Ref::map(self.parent_chunk.content.borrow(), |r| &r[0..0])
         }
     }
