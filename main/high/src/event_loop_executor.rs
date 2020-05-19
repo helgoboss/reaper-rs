@@ -8,7 +8,6 @@ use {
         future::Future,
         sync::{Arc, Mutex},
         task::{Context, Poll},
-        time::Duration,
     },
 };
 

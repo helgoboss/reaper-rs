@@ -146,7 +146,7 @@ impl TestVstPlugin {
                 return;
             }
             Reaper::get().show_console_msg(format!("Main thread counter: {}\n", counter));
-            counter = counter + 1;
+            counter += 1;
         });
         Reaper::get().spawn_in_main_thread(future_main());
     }
