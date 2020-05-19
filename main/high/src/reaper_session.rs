@@ -105,38 +105,46 @@ impl ReaperBuilder {
     }
 }
 
-pub struct RealTimeReaper {
+// TODO Maybe introduce also a RealTimeReaper and hold this instead of medium.
+//  Of course this is obsolete if we ditch the difference between ReaperSession and Reaper because
+//  it doesn't make so much sense in high-level REAPER.
+pub struct RealTimeReaperSession {
     medium: reaper_medium::Reaper<RealTimeAudioThreadScope>,
-    receiver: mpsc::Receiver<AudioThreadTaskOp>,
-    #[allow(dead_code)]
+    midi_message_received: LocalSubject<'static, MidiEvent<RawShortMessage>, ()>,
     sender_to_main_thread: mpsc::Sender<MainThreadTask>,
-    subjects: RealTimeSubjects,
 }
 
-impl RealTimeReaper {
+impl RealTimeReaperSession {
     pub fn midi_message_received(
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<RawShortMessage>> {
-        self.subjects.midi_message_received.borrow().clone()
+        self.midi_message_received.clone()
     }
 }
 
-impl MediumOnAudioBuffer for RealTimeReaper {
+struct HighOnAudioBuffer {
+    receiver: mpsc::Receiver<AudioThreadTaskOp>,
+    session: RealTimeReaperSession,
+}
+
+impl MediumOnAudioBuffer for HighOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
         if args.is_post {
             return;
         }
-        // TODO-medium call() must not be exposed!
+        // Take only one task each time because we don't want to do to much in one go in the
+        // real-time thread.
         for task in self.receiver.try_iter().take(1) {
-            (task)(self);
+            (task)(&self.session);
         }
         // Process MIDI
-        let mut subject = self.subjects.midi_message_received.borrow_mut();
+        let subject = &mut self.session.midi_message_received;
         if subject.subscribed_size() == 0 {
             return;
         }
-        for i in 0..self.medium.get_max_midi_inputs() {
-            self.medium
+        for i in 0..self.session.medium.get_max_midi_inputs() {
+            self.session
+                .medium
                 .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
                     let evt_list = input.get_read_buf();
                     for evt in evt_list.enum_items(0) {
@@ -205,21 +213,6 @@ pub struct MidiEvent<M> {
 impl<M> MidiEvent<M> {
     pub fn new(frame_offset: u32, msg: M) -> MidiEvent<M> {
         MidiEvent { frame_offset, msg }
-    }
-}
-
-struct RealTimeSubjects {
-    midi_message_received: EventStreamSubject<MidiEvent<RawShortMessage>>,
-}
-
-impl RealTimeSubjects {
-    fn new() -> RealTimeSubjects {
-        fn default<T>() -> EventStreamSubject<T> {
-            RefCell::new(LocalSubject::new())
-        }
-        RealTimeSubjects {
-            midi_message_received: default(),
-        }
     }
 }
 
@@ -419,11 +412,13 @@ impl ReaperSession {
             .expect("couldn't register hook post command");
         // Audio hook
         let (sender_to_audio_thread, audio_thread_receiver) = mpsc::channel::<AudioThreadTaskOp>();
-        let rt_reaper = RealTimeReaper {
-            medium: real_time_reaper,
+        let rt_reaper = HighOnAudioBuffer {
             receiver: audio_thread_receiver,
-            sender_to_main_thread: sender_to_main_thread.clone(),
-            subjects: RealTimeSubjects::new(),
+            session: RealTimeReaperSession {
+                medium: real_time_reaper,
+                midi_message_received: LocalSubject::new(),
+                sender_to_main_thread: sender_to_main_thread.clone(),
+            },
         };
         *active_data = Some(ActiveData {
             sender_to_main_thread,
@@ -665,7 +660,7 @@ impl ReaperSession {
     // TODO-high
     pub fn execute_asap_in_audio_thread(
         &self,
-        op: impl FnOnce(&RealTimeReaper) + 'static,
+        op: impl FnOnce(&RealTimeReaperSession) + 'static,
     ) -> Result<(), ()> {
         let active_data = self.active_data.borrow();
         let sender = &active_data.as_ref().ok_or(())?.sender_to_audio_thread;
@@ -845,7 +840,7 @@ impl MediumToggleAction for HighLevelToggleAction {
     }
 }
 
-type AudioThreadTaskOp = Box<dyn FnOnce(&RealTimeReaper) + 'static>;
+type AudioThreadTaskOp = Box<dyn FnOnce(&RealTimeReaperSession) + 'static>;
 
 type MainThreadTaskOp = Box<dyn FnOnce() + 'static>;
 
