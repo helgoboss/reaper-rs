@@ -96,7 +96,7 @@ Message: {panic_message}
 pub fn log_panic(logger: &slog::Logger, panic_info: &PanicInfo, backtrace: &Backtrace) {
     error!(logger, "Plugin panicked";
         "message" => extract_panic_message(panic_info),
-        "backtrace" => format!("{:?}", backtrace)
+        "backtrace" => format!("{}", backtrace)
     );
 }
 
