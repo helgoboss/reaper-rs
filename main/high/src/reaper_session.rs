@@ -6,8 +6,7 @@ use std::ffi::{CStr, CString};
 
 use std::ptr::NonNull;
 use std::rc::Rc;
-use std::sync::mpsc::Sender;
-use std::sync::{mpsc, Arc, Weak};
+use std::sync::{Arc, Weak};
 
 use rxrust::prelude::*;
 
@@ -28,6 +27,7 @@ use reaper_low::raw;
 
 use reaper_low::ReaperPluginContext;
 
+use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
@@ -40,6 +40,20 @@ use reaper_medium::{
 use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
+
+/// Capacity of the channel which is used to scheduled tasks for execution in the main thread.
+///
+/// Should probably be a bit more than MAX_AUDIO_THREAD_TASKS because the audio callback is
+/// usually executed more often and therefore can produce faster. Plus, the main thread also
+/// uses this very often to schedule tasks for a later execution in the main thread.
+///
+/// Shouldn't be too high because when `ReaperSession::deactivate()` is called, those tasks are
+/// going to pile up - and they will be discarded on the next activate.
+const MAX_MAIN_THREAD_TASKS: usize = 1000;
+
+/// Capacity of the channel which is used to scheduled tasks for execution in the real-time audio
+/// thread.
+const MAX_AUDIO_THREAD_TASKS: usize = 500;
 
 /// We  make sure in each public function/method that it's called from the correct thread. Similar
 /// with other methods. We basically make this struct thread-safe by panicking whenever we are in
@@ -93,6 +107,12 @@ impl ReaperBuilder {
                     command_by_id: RefCell::new(HashMap::new()),
                     subjects: MainSubjects::new(),
                     undo_block_is_active: Cell::new(false),
+                    main_thread_task_channel: crossbeam_channel::bounded::<MainThreadTask>(
+                        MAX_MAIN_THREAD_TASKS,
+                    ),
+                    audio_thread_task_channel: crossbeam_channel::bounded::<AudioThreadTaskOp>(
+                        MAX_AUDIO_THREAD_TASKS,
+                    ),
                     active_data: RefCell::new(None),
                 };
                 INSTANCE = Some(session)
@@ -111,7 +131,7 @@ impl ReaperBuilder {
 pub struct RealTimeReaperSession {
     medium: reaper_medium::Reaper<RealTimeAudioThreadScope>,
     midi_message_received: LocalSubject<'static, MidiEvent<RawShortMessage>, ()>,
-    sender_to_main_thread: mpsc::Sender<MainThreadTask>,
+    main_thread_task_sender: Sender<MainThreadTask>,
 }
 
 impl RealTimeReaperSession {
@@ -123,7 +143,7 @@ impl RealTimeReaperSession {
 }
 
 struct HighOnAudioBuffer {
-    receiver: mpsc::Receiver<AudioThreadTaskOp>,
+    audio_thread_task_receiver: Receiver<AudioThreadTaskOp>,
     session: RealTimeReaperSession,
 }
 
@@ -134,7 +154,7 @@ impl MediumOnAudioBuffer for HighOnAudioBuffer {
         }
         // Take only one task each time because we don't want to do to much in one go in the
         // real-time thread.
-        for task in self.receiver.try_iter().take(1) {
+        for task in self.audio_thread_task_receiver.try_iter().take(1) {
             (task)(&self.session);
         }
         // Process MIDI
@@ -180,6 +200,8 @@ pub struct ReaperSession {
     command_by_id: RefCell<HashMap<CommandId, Command>>,
     pub(super) subjects: MainSubjects,
     undo_block_is_active: Cell<bool>,
+    main_thread_task_channel: (Sender<MainThreadTask>, Receiver<MainThreadTask>),
+    audio_thread_task_channel: (Sender<AudioThreadTaskOp>, Receiver<AudioThreadTaskOp>),
     active_data: RefCell<Option<ActiveData>>,
 }
 
@@ -191,6 +213,8 @@ impl Default for ReaperSession {
             command_by_id: Default::default(),
             subjects: Default::default(),
             undo_block_is_active: Default::default(),
+            main_thread_task_channel: crossbeam_channel::bounded::<MainThreadTask>(0),
+            audio_thread_task_channel: crossbeam_channel::bounded::<AudioThreadTaskOp>(0),
             active_data: Default::default(),
         }
     }
@@ -198,8 +222,6 @@ impl Default for ReaperSession {
 
 #[derive(Debug)]
 struct ActiveData {
-    sender_to_main_thread: Sender<MainThreadTask>,
-    sender_to_audio_thread: Sender<AudioThreadTaskOp>,
     csurf_inst_handle: NonNull<raw::IReaperControlSurface>,
     audio_hook_register_handle: NonNull<raw::audio_hook_register_t>,
 }
@@ -395,10 +417,12 @@ impl ReaperSession {
         self.require_main_thread();
         let mut active_data = self.active_data.borrow_mut();
         assert!(active_data.is_none(), "Reaper is already active");
+        self.discard_pending_tasks();
         let real_time_reaper = self.medium().create_real_time_reaper();
-        let (sender_to_main_thread, main_thread_receiver) = mpsc::channel::<MainThreadTask>();
-        let control_surface =
-            HelperControlSurface::new(sender_to_main_thread.clone(), main_thread_receiver);
+        let control_surface = HelperControlSurface::new(
+            self.main_thread_task_channel.0.clone(),
+            self.main_thread_task_channel.1.clone(),
+        );
         let mut medium = self.medium_mut();
         // Functions
         medium
@@ -411,24 +435,21 @@ impl ReaperSession {
             .plugin_register_add_hook_post_command::<HighLevelHookPostCommand>()
             .expect("couldn't register hook post command");
         // Audio hook
-        let (sender_to_audio_thread, audio_thread_receiver) = mpsc::channel::<AudioThreadTaskOp>();
-        let rt_reaper = HighOnAudioBuffer {
-            receiver: audio_thread_receiver,
+        let audio_hook = HighOnAudioBuffer {
+            audio_thread_task_receiver: self.audio_thread_task_channel.1.clone(),
             session: RealTimeReaperSession {
                 medium: real_time_reaper,
                 midi_message_received: LocalSubject::new(),
-                sender_to_main_thread: sender_to_main_thread.clone(),
+                main_thread_task_sender: self.main_thread_task_channel.0.clone(),
             },
         };
         *active_data = Some(ActiveData {
-            sender_to_main_thread,
-            sender_to_audio_thread,
             csurf_inst_handle: {
                 medium
                     .plugin_register_add_csurf_inst(control_surface)
                     .unwrap()
             },
-            audio_hook_register_handle: { medium.audio_reg_hardware_hook_add(rt_reaper).unwrap() },
+            audio_hook_register_handle: { medium.audio_reg_hardware_hook_add(audio_hook).unwrap() },
         });
     }
 
@@ -449,6 +470,31 @@ impl ReaperSession {
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
         medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
         *active_data = None;
+    }
+
+    /// We don't want to execute tasks which accumulated during the "downtime" of ReaperSession.
+    /// So we just consume all without executing them.
+    fn discard_pending_tasks(&self) {
+        self.discard_main_thread_tasks();
+        self.discard_audio_thread_tasks();
+    }
+
+    fn discard_main_thread_tasks(&self) {
+        let task_count = self.main_thread_task_channel.1.try_iter().count();
+        if task_count > 0 {
+            slog::warn!(self.logger, "Discarded main thread tasks on reactivation";
+                "task_count" => task_count,
+            );
+        }
+    }
+
+    fn discard_audio_thread_tasks(&self) {
+        let task_count = self.audio_thread_task_channel.1.try_iter().count();
+        if task_count > 0 {
+            slog::warn!(self.logger, "Discarded audio thread tasks on reactivation";
+                "task_count" => task_count,
+            );
+        }
     }
 
     pub fn medium(&self) -> Ref<reaper_medium::ReaperSession> {
@@ -632,14 +678,14 @@ impl ReaperSession {
         self.subjects.action_invoked.borrow().clone()
     }
 
-    // TODO-high
-    pub fn execute_later_in_main_thread(
+    // Thread-safe. Returns an error if task queue if full (typically if ReaperSession has been
+    // deactivated).
+    pub fn execute_in_main_thread(
         &self,
         waiting_time: Duration,
         op: impl FnOnce() + 'static,
     ) -> Result<(), ()> {
-        let active_data = self.active_data.borrow();
-        let sender = &active_data.as_ref().ok_or(())?.sender_to_main_thread;
+        let sender = &self.main_thread_task_channel.0;
         sender
             .send(MainThreadTask::new(
                 Box::new(op),
@@ -648,22 +694,22 @@ impl ReaperSession {
             .map_err(|_| ())
     }
 
-    // TODO-high
-    pub fn execute_later_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
-        let active_data = self.active_data.borrow();
-        let sender = &active_data.as_ref().ok_or(())?.sender_to_main_thread;
+    // Thread-safe. Returns an error if task queue if full (typically if ReaperSession has been
+    // deactivated).
+    pub fn execute_asap_in_main_thread(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
+        let sender = &self.main_thread_task_channel.0;
         sender
             .send(MainThreadTask::new(Box::new(op), None))
             .map_err(|_| ())
     }
 
-    // TODO-high
+    // Thread-safe. Returns an error if task queue if full (typically if ReaperSession has been
+    // deactivated).
     pub fn execute_asap_in_audio_thread(
         &self,
         op: impl FnOnce(&RealTimeReaperSession) + 'static,
     ) -> Result<(), ()> {
-        let active_data = self.active_data.borrow();
-        let sender = &active_data.as_ref().ok_or(())?.sender_to_audio_thread;
+        let sender = &self.audio_thread_task_channel.0;
         sender.send(Box::new(op)).map_err(|_| ())
     }
 

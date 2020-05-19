@@ -22,15 +22,15 @@ use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 
+use crossbeam_channel::{Receiver, Sender};
 use std::cmp::Ordering;
-use std::sync::mpsc::{Receiver, Sender};
 
 const BULK_TASK_EXECUTION_COUNT: usize = 100;
 
 #[derive(Debug)]
 pub(super) struct HelperControlSurface {
-    task_sender: Sender<MainThreadTask>,
-    task_receiver: Receiver<MainThreadTask>,
+    main_thread_task_sender: Sender<MainThreadTask>,
+    main_thread_task_receiver: Receiver<MainThreadTask>,
     last_active_project: Cell<Project>,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
@@ -80,8 +80,8 @@ impl HelperControlSurface {
         let version = reaper.get_version();
         let reaper_version_5_95 = ReaperVersion::new("5.95");
         let surface = HelperControlSurface {
-            task_sender,
-            task_receiver,
+            main_thread_task_sender: task_sender,
+            main_thread_task_receiver: task_receiver,
             last_active_project: Cell::new(reaper.get_current_project()),
             num_track_set_changes_left_to_be_propagated: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
@@ -544,7 +544,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
             .next(true);
         // Process tasks in queue
         for task in self
-            .task_receiver
+            .main_thread_task_receiver
             .try_iter()
             .take(BULK_TASK_EXECUTION_COUNT)
         {
@@ -552,7 +552,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
                 None => (task.op)(),
                 Some(t) => {
                     if std::time::SystemTime::now() < t {
-                        self.task_sender
+                        self.main_thread_task_sender
                             .send(task)
                             .expect("couldn't reschedule main thread task");
                     } else {

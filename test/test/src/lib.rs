@@ -61,7 +61,7 @@ fn execute_next_step(
         match result {
             Ok(()) => {
                 session
-                    .execute_later_in_main_thread_asap(move || {
+                    .execute_asap_in_main_thread(move || {
                         execute_next_step(steps, step_count, on_finish)
                     })
                     .expect("couldn't schedule next test step");
@@ -80,9 +80,7 @@ fn execute_next_step(
         };
         log_skip(reason);
         session
-            .execute_later_in_main_thread_asap(move || {
-                execute_next_step(steps, step_count, on_finish)
-            })
+            .execute_asap_in_main_thread(move || execute_next_step(steps, step_count, on_finish))
             .expect("couldn't schedule next test step");
     }
 }
