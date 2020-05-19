@@ -678,9 +678,9 @@ impl ReaperSession {
         self.subjects.action_invoked.borrow().clone()
     }
 
-    // Thread-safe. Returns an error if task queue if full (typically if ReaperSession has been
+    // Thread-safe. Returns an error if task queue is full (typically if ReaperSession has been
     // deactivated).
-    pub fn execute_in_main_thread(
+    pub fn do_later_in_main_thread(
         &self,
         waiting_time: Duration,
         op: impl FnOnce() + 'static,
@@ -694,18 +694,29 @@ impl ReaperSession {
             .map_err(|_| ())
     }
 
-    // Thread-safe. Returns an error if task queue if full (typically if ReaperSession has been
+    // Thread-safe. Returns an error if task queue is full (typically if ReaperSession has been
     // deactivated).
-    pub fn execute_asap_in_main_thread(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
+    pub fn do_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
+        if Reaper::get().is_in_main_thread() {
+            op();
+            Ok(())
+        } else {
+            self.do_later_in_main_thread_asap(op)
+        }
+    }
+
+    // Thread-safe. Returns an error if task queue is full (typically if ReaperSession has been
+    // deactivated).
+    pub fn do_later_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
         let sender = &self.main_thread_task_channel.0;
         sender
             .send(MainThreadTask::new(Box::new(op), None))
             .map_err(|_| ())
     }
 
-    // Thread-safe. Returns an error if task queue if full (typically if ReaperSession has been
+    // Thread-safe. Returns an error if task queue is full (typically if ReaperSession has been
     // deactivated).
-    pub fn execute_asap_in_audio_thread(
+    pub fn do_later_in_real_time_audio_thread_asap(
         &self,
         op: impl FnOnce(&RealTimeReaperSession) + 'static,
     ) -> Result<(), ()> {

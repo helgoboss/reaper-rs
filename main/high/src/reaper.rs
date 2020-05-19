@@ -56,6 +56,10 @@ impl Reaper {
         &self.medium
     }
 
+    pub fn is_in_main_thread(&self) -> bool {
+        self.medium.low().plugin_context().is_in_main_thread()
+    }
+
     pub fn get_main_section(&self) -> Section {
         Section::new(SectionId::new(0))
     }

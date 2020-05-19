@@ -1,7 +1,7 @@
 use slog::{error, o, Drain};
 use std::backtrace::Backtrace;
 
-use crate::Reaper;
+use crate::{Reaper, ReaperSession};
 
 use std::ffi::CString;
 use std::io;
@@ -43,12 +43,9 @@ pub fn create_reaper_panic_hook(
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
             if let Ok(c_msg) = CString::new(msg) {
-                // TODO-high If the panic happens in audio thread, this won't work! We need to
-                //  expose thread-local senders to the main thread in a global way, preferably
-                //  immutable (this is not so easy because senders right now might not be available
-                //  if deactivate() was called. Maybe we shouldn't use deactivate or handle this
-                //  in another way.
-                Reaper::get().medium().show_console_msg(c_msg.as_ref());
+                ReaperSession::get().do_in_main_thread_asap(move || {
+                    Reaper::get().medium().show_console_msg(c_msg.as_ref());
+                });
             }
         }
     })

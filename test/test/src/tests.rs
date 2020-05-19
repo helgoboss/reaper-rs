@@ -293,7 +293,7 @@ fn stuff_midi_devices() -> TestStep {
         let msg = RawShortMessage::note_on(channel(0), key_number(64), u7(100));
         // When
         session
-            .execute_asap_in_audio_thread(|rt_reaper| {
+            .do_later_in_real_time_audio_thread_asap(|rt_reaper| {
                 rt_reaper
                     .midi_message_received()
                     // TODO-medium This is fishy. next() will be called from main thread although
