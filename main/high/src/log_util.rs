@@ -43,7 +43,7 @@ pub fn create_reaper_panic_hook(
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
             if let Ok(c_msg) = CString::new(msg) {
-                ReaperSession::get().do_in_main_thread_asap(move || {
+                let _ = ReaperSession::get().do_in_main_thread_asap(move || {
                     Reaper::get().medium().show_console_msg(c_msg.as_ref());
                 });
             }

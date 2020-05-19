@@ -2,7 +2,7 @@ use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use std::ffi::{CStr};
+use std::ffi::CStr;
 
 use std::ptr::NonNull;
 use std::rc::Rc;
@@ -18,8 +18,7 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, Project, Reaper,
-    Track,
+    create_terminal_logger, Action, Project, Reaper, Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
@@ -31,11 +30,9 @@ use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
-    CommandId, GetFocusedFxResult, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumToggleAction, MidiInputDeviceId, MidiOutputDeviceId, OnAudioBufferArgs, ProjectRef,
-    RealTimeAudioThreadScope, ReaperStringArg, ReaperVersion, StuffMidiMessageTarget,
-    ToggleActionResult, TrackRef,
+    CommandId, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
+    MediumToggleAction, MidiInputDeviceId, OnAudioBufferArgs, RealTimeAudioThreadScope,
+    ReaperStringArg, ToggleActionResult,
 };
 use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
@@ -131,6 +128,7 @@ impl ReaperBuilder {
 pub struct RealTimeReaperSession {
     medium: reaper_medium::Reaper<RealTimeAudioThreadScope>,
     midi_message_received: LocalSubject<'static, MidiEvent<RawShortMessage>, ()>,
+    #[allow(unused)]
     main_thread_task_sender: Sender<MainThreadTask>,
 }
 

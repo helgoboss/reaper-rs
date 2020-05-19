@@ -1551,20 +1551,24 @@ fn set_track_input_monitoring() -> TestStep {
 }
 
 fn query_track_input_monitoring() -> TestStep {
-    step(AllVersions, "Query track input monitoring", |_session, _| {
-        // Given
-        let track = get_track(0)?;
-        // When
-        let mode = track.get_input_monitoring_mode();
-        // Then
-        use InputMonitoringMode::*;
-        if Reaper::get().get_version() < ReaperVersion::new("6") {
-            assert_eq!(mode, Off);
-        } else {
-            assert_eq!(mode, Normal);
-        }
-        Ok(())
-    })
+    step(
+        AllVersions,
+        "Query track input monitoring",
+        |_session, _| {
+            // Given
+            let track = get_track(0)?;
+            // When
+            let mode = track.get_input_monitoring_mode();
+            // Then
+            use InputMonitoringMode::*;
+            if Reaper::get().get_version() < ReaperVersion::new("6") {
+                assert_eq!(mode, Off);
+            } else {
+                assert_eq!(mode, Normal);
+            }
+            Ok(())
+        },
+    )
 }
 
 fn set_track_name() -> TestStep {

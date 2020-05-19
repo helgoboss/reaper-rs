@@ -1,7 +1,4 @@
-use crate::{
-    Action, Fx, FxParameter, Guid, MidiInputDevice, MidiOutputDevice, Project,
-    Section,
-};
+use crate::{Action, Fx, FxParameter, Guid, MidiInputDevice, MidiOutputDevice, Project, Section};
 use helgoboss_midi::ShortMessage;
 use reaper_medium::{
     CommandId, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd, MidiInputDeviceId,
