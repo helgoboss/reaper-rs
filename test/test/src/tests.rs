@@ -9,7 +9,7 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, Reaper, ReaperSession, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, Pan, Reaper, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -128,7 +128,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
 }
 
 fn swell() -> TestStep {
-    step(AllVersions, "SWELL", |session, _| {
+    step(AllVersions, "SWELL", |_session, _| {
         let swell = Swell::load(*Reaper::get().medium().low().plugin_context());
         if cfg!(target_os = "windows") {
             assert!(swell.pointers().MessageBox.is_none());
@@ -148,7 +148,7 @@ fn swell() -> TestStep {
 }
 
 fn metrics() -> TestStep {
-    step(AllVersions, "Metrics", |session, _| {
+    step(AllVersions, "Metrics", |_session, _| {
         println!(
             "reaper_medium::Reaper metrics after integration test: {:#?}",
             Reaper::get().medium()
@@ -183,7 +183,7 @@ fn set_project_tempo() -> TestStep {
 }
 
 fn get_project_tempo() -> TestStep {
-    step(AllVersions, "Get project tempo", |session, _| {
+    step(AllVersions, "Get project tempo", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         // When
@@ -196,7 +196,7 @@ fn get_project_tempo() -> TestStep {
 }
 
 fn mark_project_as_dirty() -> TestStep {
-    step(AllVersions, "Mark project as dirty", |session, _| {
+    step(AllVersions, "Mark project as dirty", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         // When
@@ -209,7 +209,7 @@ fn mark_project_as_dirty() -> TestStep {
 }
 
 fn get_reaper_window() -> TestStep {
-    step(AllVersions, "Get REAPER window", |session, _| {
+    step(AllVersions, "Get REAPER window", |_session, _| {
         // Given
         // When
         Reaper::get().get_main_window();
@@ -219,7 +219,7 @@ fn get_reaper_window() -> TestStep {
 }
 
 fn redo() -> TestStep {
-    step(AllVersions, "Redo", |session, _| {
+    step(AllVersions, "Redo", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         let track = get_track(0)?;
@@ -238,7 +238,7 @@ fn redo() -> TestStep {
 }
 
 fn undo() -> TestStep {
-    step(AllVersions, "Undo", |session, _| {
+    step(AllVersions, "Undo", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         let track = get_track(0)?;
@@ -317,7 +317,7 @@ fn stuff_midi_devices() -> TestStep {
 }
 
 fn query_midi_output_devices() -> TestStep {
-    step(AllVersions, "Query MIDI output devices", |session, _| {
+    step(AllVersions, "Query MIDI output devices", |_session, _| {
         // Given
         // When
         Reaper::get().get_midi_output_devices().count();
@@ -327,7 +327,7 @@ fn query_midi_output_devices() -> TestStep {
 }
 
 fn query_midi_input_devices() -> TestStep {
-    step(AllVersions, "Query MIDI input devices", |session, _| {
+    step(AllVersions, "Query MIDI input devices", |_session, _| {
         // Given
         // When
         let _devs = Reaper::get().get_midi_input_devices().count();
@@ -469,7 +469,7 @@ fn main_section_functions() -> TestStep {
 }
 
 fn generate_guid() -> TestStep {
-    step(AllVersions, "Generate GUID", |session, _| {
+    step(AllVersions, "Generate GUID", |_session, _| {
         // Given
         // When
         let guid = Reaper::get().generate_guid();
@@ -717,7 +717,7 @@ fn set_track_send_volume() -> TestStep {
 }
 
 fn query_track_send() -> TestStep {
-    step(AllVersions, "Query track send", |session, _| {
+    step(AllVersions, "Query track send", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
@@ -742,7 +742,7 @@ fn query_track_send() -> TestStep {
 }
 
 fn add_track_send() -> TestStep {
-    step(AllVersions, "Add track send", |session, _| {
+    step(AllVersions, "Add track send", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         let track_1 = project.get_track_by_index(0).ok_or("Missing track 1")?;
@@ -785,7 +785,7 @@ fn query_track_send_count() -> TestStep {
 }
 
 fn query_track_automation_mode() -> TestStep {
-    step(AllVersions, "Query track automation mode", |session, _| {
+    step(AllVersions, "Query track automation mode", |_session, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1260,7 +1260,7 @@ fn select_track() -> TestStep {
 }
 
 fn query_track_selection_state() -> TestStep {
-    step(AllVersions, "Query track selection state", |session, _| {
+    step(AllVersions, "Query track selection state", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         let track = get_track(0)?;
@@ -1355,7 +1355,7 @@ fn set_track_volume_extreme_values() -> TestStep {
     step(
         AllVersions,
         "Set track volume extreme values",
-        |session, _| {
+        |_session, _| {
             // Given
             let track_1 = get_track(0)?;
             let track_2 = get_track(1)?;
@@ -1551,7 +1551,7 @@ fn set_track_input_monitoring() -> TestStep {
 }
 
 fn query_track_input_monitoring() -> TestStep {
-    step(AllVersions, "Query track input monitoring", |session, _| {
+    step(AllVersions, "Query track input monitoring", |_session, _| {
         // Given
         let track = get_track(0)?;
         // When
@@ -1603,7 +1603,7 @@ fn query_track_name() -> TestStep {
 }
 
 fn query_track_project() -> TestStep {
-    step(AllVersions, "Query track project", |session, _| {
+    step(AllVersions, "Query track project", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         let track = get_track(0)?;
@@ -1619,7 +1619,7 @@ fn query_non_existent_track_by_guid() -> TestStep {
     step(
         AllVersions,
         "Query non-existent track by GUID",
-        |session, _| {
+        |_session, _| {
             // Given
             let project = Reaper::get().get_current_project();
             // When
@@ -1633,7 +1633,7 @@ fn query_non_existent_track_by_guid() -> TestStep {
 }
 
 fn query_track_by_guid() -> TestStep {
-    step(AllVersions, "Query track by GUID", |session, _| {
+    step(AllVersions, "Query track by GUID", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         let first_track = get_track(0)?;
@@ -1653,7 +1653,7 @@ fn query_track_by_guid() -> TestStep {
 }
 
 fn query_all_tracks() -> TestStep {
-    step(AllVersions, "Query all tracks", |session, _| {
+    step(AllVersions, "Query all tracks", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         project.add_track();
@@ -1666,7 +1666,7 @@ fn query_all_tracks() -> TestStep {
 }
 
 fn query_master_track() -> TestStep {
-    step(AllVersions, "Query master track", |session, _| {
+    step(AllVersions, "Query master track", |_session, _| {
         // Given
         let project = Reaper::get().get_current_project();
         // When
@@ -1765,7 +1765,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
 }
 
 fn strings() -> TestStep {
-    step(AllVersions, "Strings", |session, _| {
+    step(AllVersions, "Strings", |_session, _| {
         assert!(Guid::try_from(c_str!("{hey}")).is_err());
         Reaper::get().show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
         Reaper::get().show_console_msg("- &str: 范例文字äöüß\n");
@@ -1775,7 +1775,7 @@ fn strings() -> TestStep {
 }
 
 fn global_instances() -> TestStep {
-    step(AllVersions, "Global instances", |session, _| {
+    step(AllVersions, "Global instances", |_session, _| {
         let medium = Reaper::get().medium();
         // Low-level REAPER
         reaper_low::Reaper::make_available_globally(*medium.low());
@@ -1801,7 +1801,7 @@ fn global_instances() -> TestStep {
 
 #[allow(overflowing_literals)]
 fn plugin_context() -> TestStep {
-    step(AllVersions, "Plugin context", |session, _| {
+    step(AllVersions, "Plugin context", |_session, _| {
         // Given
         let medium = Reaper::get().medium();
         let plugin_context = medium.low().plugin_context();
@@ -1921,7 +1921,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
     step(
         AllVersions,
         "Query track JS fx by index",
-        move |session, _| {
+        move |_session, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.get_track();
@@ -2083,7 +2083,7 @@ fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
     step(
         AllVersions,
         "Query fx floating window",
-        move |session, _| {
+        move |_session, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain
@@ -2515,7 +2515,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
     step(
         AllVersions,
         "Check track fx with 2 fx",
-        move |session, _| {
+        move |_session, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.get_track();
@@ -2708,7 +2708,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
     step(
         AllVersions,
         "Check track fx with 1 fx",
-        move |session, _| {
+        move |_session, _| {
             // Given
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.get_track();

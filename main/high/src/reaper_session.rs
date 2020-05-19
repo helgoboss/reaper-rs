@@ -2,7 +2,7 @@ use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr};
 
 use std::ptr::NonNull;
 use std::rc::Rc;
@@ -18,7 +18,7 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper,
+    create_terminal_logger, Action, Project, Reaper,
     Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
