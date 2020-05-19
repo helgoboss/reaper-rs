@@ -41,49 +41,19 @@ use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
 
-// Must ONLY ever be accessed from main thread
-/// Access to this variable is encapsulated in 3 functions:
-/// - Reaper::setup()
-/// - Reaper::get()
-/// - Reaper::teardown()
-///
-/// We  make sure that ...
-///
-/// 1. Reaper::setup() is only ever called from the main thread
-///    => Check when entering function
-/// 2. Reaper::get() is only ever called from one thread (main thread). Even the exposed
-///    Reaper reference is not mutable, the struct has members that have interior
-///    mutability, and that is done via RefCells.
-///    => Check when entering function
-///    => Provide a separate RealtimeReaper::get()
-/// 4. Reaper::teardown() is only ever called from the main thread
-///    => Check when entering function
-/// 5. Reaper::teardown() is not called while a get() reference is still active.
-///    => Wrap Option in a RefCell.
+/// We  make sure in each public function/method that it's called from the correct thread. Similar
+/// with other methods. We basically make this struct thread-safe by panicking whenever we are in
+/// the wrong thread.
 ///
 /// We could also go the easy way of using one Reaper instance wrapped in a Mutex. Downside: This is
 /// more guarantees than we need. Why should audio thread and main thread fight for access to one
-/// Reaper instance if there can be two instances and each one has their own? That sounds a lot like
-/// thread_local!, but this has the problem of being usable with a closure only.
-///
-/// This outer RefCell is just necessary for creating/destroying the instance safely, so most of the
-/// time it will be borrowed immutably. That's why all the inner RefCells are still necessary!
-// TODO-medium Main thread check is not accurate and sometimes happens a bit too late. Ideally we
-//  would just save the the thread ID  of the main thread as soon as entering the main entry point
-//  (can be done safely using  OnceCell). Then we could always access that main thread ID and
-//  compare.
-// TODO-medium In high level API, maybe make only function objects statically accessible. And
-//  probably only the main thread functions object. When getting it, check if in main thread. Expose
-//  a non static reference so it can only be used temporary. We shouldn't expose more than we need.
-//  Protecting the root static RefCell from being accessed from multiple threads is one thing, but
-//  all the inner RefCells ... that's horrible. And we can't prevent it because we want objects such
-//  as Tracks and Co. to be easily cloneable. So they can easily end up in the audio thread ... but
-//  wait. As long as nobody saves the reference to global Reaper instance, we should be safe. Maybe
-//  a  good first step would be to expose it non static. Or even thread-local with closure? But
-//  still, we shouldnt require more than necessary, so just exposing functions is good anyway.
-static mut REAPER_INSTANCE: RefCell<Option<ReaperSession>> = RefCell::new(None);
+/// Reaper instance. That results in performance loss.
+//
+// This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
+static mut INSTANCE: Option<ReaperSession> = None;
+static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
-// Here we don't mind having a boring mutex because this is not often accessed.
+// Here we don't mind having a heavy mutex because this is not often accessed.
 static REAPER_GUARD: Lazy<Mutex<Weak<ReaperGuard>>> = Lazy::new(|| Mutex::new(Weak::new()));
 
 pub struct ReaperBuilder {
@@ -92,7 +62,7 @@ pub struct ReaperBuilder {
 }
 
 impl ReaperBuilder {
-    fn with_all_functions_loaded(context: ReaperPluginContext) -> ReaperBuilder {
+    fn new(context: ReaperPluginContext) -> ReaperBuilder {
         ReaperBuilder {
             medium: {
                 let low = reaper_low::Reaper::load(context);
@@ -103,12 +73,35 @@ impl ReaperBuilder {
     }
 
     pub fn logger(mut self, logger: slog::Logger) -> ReaperBuilder {
+        self.require_main_thread();
         self.logger = Some(logger);
         self
     }
 
+    /// This has an effect only if there isn't an instance already.
     pub fn setup(self) {
-        ReaperSession::setup(self.medium, self.logger.unwrap_or_else(create_std_logger));
+        self.require_main_thread();
+        unsafe {
+            INIT_INSTANCE.call_once(|| {
+                let logger = self.logger.unwrap_or_else(create_std_logger);
+                // TODO Actually, one static variable carrying ReaperSession and Reaper would be
+                //  enough here.
+                Reaper::make_available_globally(Reaper::new(self.medium.reaper().clone()));
+                let session = ReaperSession {
+                    medium: RefCell::new(self.medium),
+                    logger,
+                    command_by_id: RefCell::new(HashMap::new()),
+                    subjects: MainSubjects::new(),
+                    undo_block_is_active: Cell::new(false),
+                    active_data: RefCell::new(None),
+                };
+                INSTANCE = Some(session)
+            });
+        }
+    }
+
+    fn require_main_thread(&self) {
+        require_main_thread(self.medium.reaper().low().plugin_context());
     }
 }
 
@@ -343,24 +336,21 @@ pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
 
 type EventStreamSubject<T> = RefCell<LocalSubject<'static, T, ()>>;
 
-impl Drop for ReaperSession {
-    fn drop(&mut self) {
-        self.deactivate();
-    }
-}
-
 pub struct ReaperGuard;
 
 impl Drop for ReaperGuard {
     fn drop(&mut self) {
-        ReaperSession::teardown()
+        ReaperSession::get().deactivate();
     }
 }
 
 impl ReaperSession {
+    /// The given initializer is executed only the first time this is called and when there's no
+    /// Arc sticking around anymore.
     pub fn guarded(initializer: impl FnOnce()) -> Arc<ReaperGuard> {
         // This is supposed to be called in the main thread. A check is not necessary, because this
-        // is protected by a mutex and it will fail in the initializer if called from wrong thread.
+        // is protected by a mutex and it will fail in the initializer and getter if called from
+        // wrong thread.
         let mut result = REAPER_GUARD.lock().unwrap();
         if let Some(rc) = result.upgrade() {
             return rc;
@@ -371,11 +361,15 @@ impl ReaperSession {
         arc
     }
 
+    /// Returns the builder for further configuration of the session to be constructed.
     pub fn load(context: ReaperPluginContext) -> ReaperBuilder {
-        ReaperBuilder::with_all_functions_loaded(context)
+        require_main_thread(&context);
+        ReaperBuilder::new(context)
     }
 
+    /// This has an effect only if there isn't an instance already.
     pub fn setup_with_defaults(context: ReaperPluginContext, email_address: &'static str) {
+        require_main_thread(&context);
         ReaperSession::load(context)
             .logger(create_terminal_logger())
             .setup();
@@ -385,32 +379,7 @@ impl ReaperSession {
         ));
     }
 
-    fn setup(medium: reaper_medium::ReaperSession, logger: slog::Logger) {
-        assert!(
-            medium.reaper().low().plugin_context().is_in_main_thread(),
-            "Reaper::setup() must be called from main thread"
-        );
-        assert!(
-            unsafe { REAPER_INSTANCE.borrow().is_none() },
-            "There's a Reaper instance already"
-        );
-        // We set up an (easily copyable) high-level Reaper instance and use this wherever possible.
-        // ReaperSession is more complicated and should only be accessed if its functionality is
-        // needed.
-        Reaper::make_available_globally(Reaper::new(medium.reaper().clone()));
-        let reaper = ReaperSession {
-            medium: RefCell::new(medium),
-            logger,
-            command_by_id: RefCell::new(HashMap::new()),
-            subjects: MainSubjects::new(),
-            undo_block_is_active: Cell::new(false),
-            active_data: RefCell::new(None),
-        };
-        unsafe {
-            REAPER_INSTANCE.replace(Some(reaper));
-        }
-    }
-
+    /// May be called from any thread.
     // Allowing global access to native REAPER functions at all times is valid in my opinion.
     // Because REAPER itself is not written in Rust and therefore cannot take part in Rust's compile
     // time guarantees anyway. We need to rely on REAPER at that point and also take care not to do
@@ -421,37 +390,16 @@ impl ReaperSession {
     // We express that in Rust by making `Reaper` class an immutable (in the sense of non-`&mut`)
     // singleton and allowing all REAPER functions to be called from an immutable context ...
     // although they can and often will lead to mutations within REAPER!
-    pub fn get() -> Ref<'static, ReaperSession> {
-        let reaper =
-            ReaperSession::obtain_reaper_ref("Reaper::setup() must be called before Reaper::get()");
-        assert!(
-            !reaper.medium().reaper().is_in_real_time_audio(),
-            "Reaper::get() must be called from main thread"
-        );
-        reaper
-    }
-
-    pub fn teardown() {
-        {
-            let reaper = ReaperSession::obtain_reaper_ref("There's no Reaper instance to teardown");
-            assert!(
-                !reaper.medium().reaper().is_in_real_time_audio(),
-                "Reaper::teardown() must be called from main thread"
-            );
-        }
+    pub fn get() -> &'static ReaperSession {
         unsafe {
-            REAPER_INSTANCE.replace(None);
+            INSTANCE
+                .as_ref()
+                .expect("Reaper::load().setup() must be called before Reaper::get()")
         }
-    }
-
-    fn obtain_reaper_ref(error_msg_if_none: &'static str) -> Ref<'static, ReaperSession> {
-        Ref::map(unsafe { REAPER_INSTANCE.borrow() }, |r| match r {
-            None => panic!(error_msg_if_none),
-            Some(r) => r,
-        })
     }
 
     pub fn activate(&self) {
+        self.require_main_thread();
         let mut active_data = self.active_data.borrow_mut();
         assert!(active_data.is_none(), "Reaper is already active");
         let real_time_reaper = self.medium().create_real_time_reaper();
@@ -490,6 +438,7 @@ impl ReaperSession {
     }
 
     pub fn deactivate(&self) {
+        self.require_main_thread();
         let mut active_data = self.active_data.borrow_mut();
         let ad = match active_data.as_ref() {
             None => panic!("Reaper is not active"),
@@ -508,10 +457,12 @@ impl ReaperSession {
     }
 
     pub fn medium(&self) -> Ref<reaper_medium::ReaperSession> {
+        self.require_main_thread();
         self.medium.borrow()
     }
 
     pub fn medium_mut(&self) -> RefMut<reaper_medium::ReaperSession> {
+        self.require_main_thread();
         self.medium.borrow_mut()
     }
 
@@ -522,6 +473,7 @@ impl ReaperSession {
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
+        self.require_main_thread();
         let mut medium = self.medium_mut();
         let command_id = medium.plugin_register_add_command_id(command_name).unwrap();
         let command = Command::new(Rc::new(RefCell::new(operation)), kind);
@@ -555,61 +507,74 @@ impl ReaperSession {
     }
 
     pub fn project_switched(&self) -> impl LocalObservable<'static, Err = (), Item = Project> {
+        self.require_main_thread();
         self.subjects.project_switched.borrow().clone()
     }
 
     pub fn fx_opened(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+        self.require_main_thread();
         self.subjects.fx_opened.borrow().clone()
     }
 
     pub fn fx_focused(
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = Payload<Option<Fx>>> {
+        self.require_main_thread();
         self.subjects.fx_focused.borrow().clone()
     }
 
     pub fn track_added(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_added.borrow().clone()
     }
 
     // Delivers a GUID-based track (to still be able to identify it even it is deleted)
     pub fn track_removed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_removed.borrow().clone()
     }
 
     pub fn track_name_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_name_changed.borrow().clone()
     }
 
     pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = ()> {
+        self.require_main_thread();
         self.subjects.master_tempo_changed.borrow().clone()
     }
 
     pub fn fx_added(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+        self.require_main_thread();
         self.subjects.fx_added.borrow().clone()
     }
 
     pub fn fx_enabled_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+        self.require_main_thread();
         self.subjects.fx_enabled_changed.borrow().clone()
     }
 
     pub fn fx_reordered(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.fx_reordered.borrow().clone()
     }
 
     pub fn fx_removed(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+        self.require_main_thread();
         self.subjects.fx_removed.borrow().clone()
     }
 
     pub fn fx_parameter_value_changed(
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = FxParameter> {
+        self.require_main_thread();
         self.subjects.fx_parameter_value_changed.borrow().clone()
     }
 
     pub fn track_input_monitoring_changed(
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects
             .track_input_monitoring_changed
             .borrow()
@@ -617,52 +582,62 @@ impl ReaperSession {
     }
 
     pub fn track_input_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_input_changed.borrow().clone()
     }
 
     pub fn track_volume_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_volume_changed.borrow().clone()
     }
 
     pub fn track_pan_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_pan_changed.borrow().clone()
     }
 
     pub fn track_selected_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_selected_changed.borrow().clone()
     }
 
     pub fn track_mute_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_mute_changed.borrow().clone()
     }
 
     pub fn track_solo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_solo_changed.borrow().clone()
     }
 
     pub fn track_arm_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+        self.require_main_thread();
         self.subjects.track_arm_changed.borrow().clone()
     }
 
     pub fn track_send_volume_changed(
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = TrackSend> {
+        self.require_main_thread();
         self.subjects.track_send_volume_changed.borrow().clone()
     }
 
     pub fn track_send_pan_changed(
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = TrackSend> {
+        self.require_main_thread();
         self.subjects.track_send_pan_changed.borrow().clone()
     }
 
     pub fn action_invoked(
         &self,
     ) -> impl LocalObservable<'static, Err = (), Item = Payload<Rc<Action>>> {
+        self.require_main_thread();
         self.subjects.action_invoked.borrow().clone()
     }
 
-    // TODO-move-later
+    // TODO-high
     pub fn execute_later_in_main_thread(
         &self,
         waiting_time: Duration,
@@ -678,7 +653,7 @@ impl ReaperSession {
             .map_err(|_| ())
     }
 
-    // TODO-move-later
+    // TODO-high
     pub fn execute_later_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
         let active_data = self.active_data.borrow();
         let sender = &active_data.as_ref().ok_or(())?.sender_to_main_thread;
@@ -687,7 +662,7 @@ impl ReaperSession {
             .map_err(|_| ())
     }
 
-    // TODO-move-later
+    // TODO-high
     pub fn execute_asap_in_audio_thread(
         &self,
         op: impl FnOnce(&RealTimeReaper) + 'static,
@@ -698,6 +673,7 @@ impl ReaperSession {
     }
 
     pub fn undoable_action_is_running(&self) -> bool {
+        self.require_main_thread();
         self.undo_block_is_active.get()
     }
 
@@ -708,6 +684,7 @@ impl ReaperSession {
         project: Project,
         label: &'a CStr,
     ) -> Option<UndoBlock<'a>> {
+        self.require_main_thread();
         if self.undo_block_is_active.get() {
             return None;
         }
@@ -720,6 +697,7 @@ impl ReaperSession {
 
     // Doesn't attempt to end a block if we are not in an undo block.
     pub(super) fn leave_undo_block_internal(&self, project: Project, label: &CStr) {
+        self.require_main_thread();
         if !self.undo_block_is_active.get() {
             return;
         }
@@ -728,7 +706,13 @@ impl ReaperSession {
             .undo_end_block_2(Proj(project.get_raw()), label, All);
         self.undo_block_is_active.replace(false);
     }
+
+    fn require_main_thread(&self) {
+        require_main_thread(Reaper::get().medium().low().plugin_context());
+    }
 }
+
+unsafe impl Sync for ReaperSession {}
 
 struct Command {
     /// Reasoning for that type (from inner to outer):
@@ -796,6 +780,7 @@ impl RegisteredAction {
     }
 
     pub fn unregister(&self) {
+        require_main_thread(Reaper::get().medium().low().plugin_context());
         ReaperSession::get().unregister_command(self.command_id, self.gaccel_handle);
     }
 }
@@ -879,4 +864,11 @@ impl MainThreadTask {
             op,
         }
     }
+}
+
+fn require_main_thread(context: &ReaperPluginContext) {
+    assert!(
+        context.is_in_main_thread(),
+        "this function must be called in the main thread"
+    );
 }

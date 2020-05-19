@@ -14,6 +14,12 @@ use std::ffi::CString;
 static mut INSTANCE: Option<Reaper> = None;
 static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
+/// For now we maintain the tradition from the medium-level API to have one top-level object which
+/// is easily cloneable. Although this is not so useful anymore in the high-level API because we
+/// use globals anyway. But then, it's consequent because Track and Co. is also cloneable, and it
+/// has a nice symmetry.
+/// TODO Still, think about it. The reason that ReaperSession is a static
+///  RefCell and therefore less approachable, is gone!
 #[derive(Clone, Debug, Default)]
 pub struct Reaper {
     medium: reaper_medium::Reaper,
