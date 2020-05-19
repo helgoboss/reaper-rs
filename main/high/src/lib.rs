@@ -6,11 +6,12 @@
 //! # Example
 //!
 //! ```no_run
-//! # let reaper = reaper_high::ReaperSession::default();
+//! # let session = reaper_high::ReaperSession::default();
+//! # let reaper = reaper_high::Reaper::get();
 //! use rxrust::prelude::*;
 //!
 //! reaper.show_console_msg("Hello world from reaper-rs high-level API!");
-//! reaper.track_removed().subscribe(|t| println!("Track {:?} removed", t));
+//! session.track_removed().subscribe(|t| println!("Track {:?} removed", t));
 //! let project = reaper.get_current_project();
 //! let track = project.get_track_by_index(0).ok_or("no tracks")?;
 //! project.remove_track(&track);

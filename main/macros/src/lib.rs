@@ -30,12 +30,11 @@ use quote::quote;
 /// ```no_run,ignore
 /// use std::error::Error;
 /// use reaper_macros::reaper_extension_plugin;
-/// use reaper_high::ReaperSession;
+/// use reaper_high::Reaper;
 ///
 /// #[reaper_extension_plugin(email_address = "support@example.org")]
 /// fn plugin_main() -> Result<(), Box<dyn Error>> {
-///     let session = ReaperSession::get();
-///     session.show_console_msg("Hello world from reaper-rs high-level API!");
+///     Reaper::get().show_console_msg("Hello world from reaper-rs high-level API!");
 ///     Ok(())
 /// }
 /// ```
