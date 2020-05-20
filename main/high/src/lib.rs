@@ -1,4 +1,4 @@
-#![feature(fn_traits, clamp, backtrace, test)]
+#![feature(fn_traits, clamp, backtrace, test, trait_alias)]
 //! This crate contains the high-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
 //! **This API is not polished yet and will still undergo many changes!**
@@ -83,6 +83,9 @@ pub use chunk::*;
 
 mod action_character;
 pub use action_character::*;
+
+mod types;
+pub use types::*;
 
 mod undo_block;
 

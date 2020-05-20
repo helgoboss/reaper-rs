@@ -1,3 +1,4 @@
+use crate::ReactiveEvent;
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -147,9 +148,7 @@ pub struct RealTimeReaper {
 }
 
 impl RealTimeReaper {
-    pub fn midi_message_received(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = MidiEvent<RawShortMessage>> {
+    pub fn midi_message_received(&self) -> impl ReactiveEvent<MidiEvent<RawShortMessage>> {
         self.midi_message_received.clone()
     }
 }
@@ -580,79 +579,73 @@ impl Reaper {
         }
     }
 
-    pub fn main_thread_idle(&self) -> impl LocalObservable<'static, Err = (), Item = ()> {
+    pub fn main_thread_idle(&self) -> impl ReactiveEvent<()> {
         self.require_main_thread();
         self.subjects.main_thread_idle.borrow().clone()
     }
 
-    pub fn project_switched(&self) -> impl LocalObservable<'static, Err = (), Item = Project> {
+    pub fn project_switched(&self) -> impl ReactiveEvent<Project> {
         self.require_main_thread();
         self.subjects.project_switched.borrow().clone()
     }
 
-    pub fn fx_opened(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+    pub fn fx_opened(&self) -> impl ReactiveEvent<Fx> {
         self.require_main_thread();
         self.subjects.fx_opened.borrow().clone()
     }
 
-    pub fn fx_focused(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = Payload<Option<Fx>>> {
+    pub fn fx_focused(&self) -> impl ReactiveEvent<Payload<Option<Fx>>> {
         self.require_main_thread();
         self.subjects.fx_focused.borrow().clone()
     }
 
-    pub fn track_added(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_added(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_added.borrow().clone()
     }
 
     // Delivers a GUID-based track (to still be able to identify it even it is deleted)
-    pub fn track_removed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_removed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_removed.borrow().clone()
     }
 
-    pub fn track_name_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_name_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_name_changed.borrow().clone()
     }
 
-    pub fn master_tempo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = ()> {
+    pub fn master_tempo_changed(&self) -> impl ReactiveEvent<()> {
         self.require_main_thread();
         self.subjects.master_tempo_changed.borrow().clone()
     }
 
-    pub fn fx_added(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+    pub fn fx_added(&self) -> impl ReactiveEvent<Fx> {
         self.require_main_thread();
         self.subjects.fx_added.borrow().clone()
     }
 
-    pub fn fx_enabled_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+    pub fn fx_enabled_changed(&self) -> impl ReactiveEvent<Fx> {
         self.require_main_thread();
         self.subjects.fx_enabled_changed.borrow().clone()
     }
 
-    pub fn fx_reordered(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn fx_reordered(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.fx_reordered.borrow().clone()
     }
 
-    pub fn fx_removed(&self) -> impl LocalObservable<'static, Err = (), Item = Fx> {
+    pub fn fx_removed(&self) -> impl ReactiveEvent<Fx> {
         self.require_main_thread();
         self.subjects.fx_removed.borrow().clone()
     }
 
-    pub fn fx_parameter_value_changed(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = FxParameter> {
+    pub fn fx_parameter_value_changed(&self) -> impl ReactiveEvent<FxParameter> {
         self.require_main_thread();
         self.subjects.fx_parameter_value_changed.borrow().clone()
     }
 
-    pub fn track_input_monitoring_changed(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_input_monitoring_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects
             .track_input_monitoring_changed
@@ -660,58 +653,52 @@ impl Reaper {
             .clone()
     }
 
-    pub fn track_input_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_input_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_input_changed.borrow().clone()
     }
 
-    pub fn track_volume_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_volume_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_volume_changed.borrow().clone()
     }
 
-    pub fn track_pan_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_pan_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_pan_changed.borrow().clone()
     }
 
-    pub fn track_selected_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_selected_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_selected_changed.borrow().clone()
     }
 
-    pub fn track_mute_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_mute_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_mute_changed.borrow().clone()
     }
 
-    pub fn track_solo_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_solo_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_solo_changed.borrow().clone()
     }
 
-    pub fn track_arm_changed(&self) -> impl LocalObservable<'static, Err = (), Item = Track> {
+    pub fn track_arm_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_arm_changed.borrow().clone()
     }
 
-    pub fn track_send_volume_changed(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = TrackSend> {
+    pub fn track_send_volume_changed(&self) -> impl ReactiveEvent<TrackSend> {
         self.require_main_thread();
         self.subjects.track_send_volume_changed.borrow().clone()
     }
 
-    pub fn track_send_pan_changed(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = TrackSend> {
+    pub fn track_send_pan_changed(&self) -> impl ReactiveEvent<TrackSend> {
         self.require_main_thread();
         self.subjects.track_send_pan_changed.borrow().clone()
     }
 
-    pub fn action_invoked(
-        &self,
-    ) -> impl LocalObservable<'static, Err = (), Item = Payload<Rc<Action>>> {
+    pub fn action_invoked(&self) -> impl ReactiveEvent<Payload<Rc<Action>>> {
         self.require_main_thread();
         self.subjects.action_invoked.borrow().clone()
     }
