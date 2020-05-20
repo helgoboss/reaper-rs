@@ -18,7 +18,7 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, EventLoopExecutor, Project, Spawner, Track,
+    create_terminal_logger, Action, Project, RunLoopExecutor, Spawner, Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
@@ -26,7 +26,8 @@ use reaper_low::raw;
 
 use reaper_low::ReaperPluginContext;
 
-use crate::event_loop_executor::new_spawner_and_executor;
+use crate::run_loop_executor::new_spawner_and_executor;
+use crate::run_loop_scheduler::{RunLoopScheduler, RxTask};
 use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
@@ -103,6 +104,10 @@ impl ReaperBuilder {
             INIT_INSTANCE.call_once(|| {
                 let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
+                let main_thread_rx_task_channel =
+                    crossbeam_channel::bounded::<RxTask>(MAIN_THREAD_TASK_CHANNEL_CAPACITY);
+                let main_thread_scheduler =
+                    RunLoopScheduler::new(main_thread_rx_task_channel.0.clone());
                 let reaper = Reaper {
                     medium_session: RefCell::new(self.medium),
                     medium_reaper,
@@ -116,6 +121,8 @@ impl ReaperBuilder {
                     audio_thread_task_channel: crossbeam_channel::bounded::<AudioThreadTaskOp>(
                         AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
                     ),
+                    main_thread_rx_task_channel,
+                    main_thread_scheduler,
                     main_thread_future_couple: new_spawner_and_executor(
                         MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                         MAIN_THREAD_TASK_BULK_SIZE,
@@ -212,12 +219,16 @@ pub struct Reaper {
     undo_block_is_active: Cell<bool>,
     main_thread_task_channel: (Sender<MainThreadTask>, Receiver<MainThreadTask>),
     audio_thread_task_channel: (Sender<AudioThreadTaskOp>, Receiver<AudioThreadTaskOp>),
-    main_thread_future_couple: (Spawner, EventLoopExecutor),
+    main_thread_rx_task_channel: (Sender<RxTask>, Receiver<RxTask>),
+    main_thread_scheduler: RunLoopScheduler,
+    main_thread_future_couple: (Spawner, RunLoopExecutor),
     active_data: RefCell<Option<ActiveData>>,
 }
 
 impl Default for Reaper {
     fn default() -> Self {
+        let main_thread_rx_task_channel = crossbeam_channel::bounded::<RxTask>(0);
+        let main_thread_scheduler = RunLoopScheduler::new(main_thread_rx_task_channel.0.clone());
         Reaper {
             medium_session: Default::default(),
             medium_reaper: Default::default(),
@@ -227,6 +238,8 @@ impl Default for Reaper {
             undo_block_is_active: Default::default(),
             main_thread_task_channel: crossbeam_channel::bounded::<MainThreadTask>(0),
             audio_thread_task_channel: crossbeam_channel::bounded::<AudioThreadTaskOp>(0),
+            main_thread_rx_task_channel,
+            main_thread_scheduler,
             main_thread_future_couple: new_spawner_and_executor(0, 0),
             active_data: Default::default(),
         }
@@ -435,6 +448,7 @@ impl Reaper {
         let control_surface = HelperControlSurface::new(
             self.main_thread_task_channel.0.clone(),
             self.main_thread_task_channel.1.clone(),
+            self.main_thread_rx_task_channel.1.clone(),
             self.main_thread_future_couple.1.clone(),
         );
         let mut medium = self.medium_session();
@@ -490,6 +504,7 @@ impl Reaper {
     /// So we just consume all without executing them.
     fn discard_pending_tasks(&self) {
         self.discard_main_thread_tasks();
+        self.discard_main_thread_rx_tasks();
         self.discard_audio_thread_tasks();
     }
 
@@ -497,6 +512,15 @@ impl Reaper {
         let task_count = self.main_thread_task_channel.1.try_iter().count();
         if task_count > 0 {
             slog::warn!(self.logger, "Discarded main thread tasks on reactivation";
+                "task_count" => task_count,
+            );
+        }
+    }
+
+    fn discard_main_thread_rx_tasks(&self) {
+        let task_count = self.main_thread_rx_task_channel.1.try_iter().count();
+        if task_count > 0 {
+            slog::warn!(self.logger, "Discarded main thread rx tasks on reactivation";
                 "task_count" => task_count,
             );
         }
@@ -692,6 +716,12 @@ impl Reaper {
         self.subjects.action_invoked.borrow().clone()
     }
 
+    /// Returns an rxRust scheduler for scheduling observables.
+    pub fn main_thread_scheduler(&self) -> &RunLoopScheduler {
+        &self.main_thread_scheduler
+    }
+
+    /// Spawns a future for execution in main thread.
     pub fn spawn_in_main_thread(
         &self,
         future: impl std::future::Future<Output = ()> + 'static + Send,

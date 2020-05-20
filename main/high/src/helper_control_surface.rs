@@ -25,15 +25,20 @@ use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 use std::ffi::CStr;
 
-use crate::event_loop_executor::EventLoopExecutor;
+use crate::run_loop_executor::RunLoopExecutor;
+use crate::run_loop_scheduler::RxTask;
 use crossbeam_channel::{Receiver, Sender};
 use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub(super) struct HelperControlSurface {
+    // These two are for very simple scheduling. Most light-weight.
     main_thread_task_sender: Sender<MainThreadTask>,
     main_thread_task_receiver: Receiver<MainThreadTask>,
-    main_thread_executor: EventLoopExecutor,
+    // This is for executing futures.
+    main_thread_executor: RunLoopExecutor,
+    // This is for scheduling rxRust observables.
+    main_thread_rx_task_receiver: Receiver<RxTask>,
     last_active_project: Cell<Project>,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
@@ -75,17 +80,19 @@ type TrackDataMap = HashMap<MediaTrack, TrackData>;
 
 impl HelperControlSurface {
     pub(super) fn new(
-        task_sender: Sender<MainThreadTask>,
-        task_receiver: Receiver<MainThreadTask>,
-        executor: EventLoopExecutor,
+        main_thread_task_sender: Sender<MainThreadTask>,
+        main_thread_task_receiver: Receiver<MainThreadTask>,
+        main_thread_rx_task_receiver: Receiver<RxTask>,
+        executor: RunLoopExecutor,
     ) -> HelperControlSurface {
         let reaper = Reaper::get();
         let version = reaper.get_version();
         let reaper_version_5_95 = ReaperVersion::new("5.95");
         let surface = HelperControlSurface {
-            main_thread_task_sender: task_sender,
-            main_thread_task_receiver: task_receiver,
+            main_thread_task_sender,
+            main_thread_task_receiver,
             main_thread_executor: executor,
+            main_thread_rx_task_receiver,
             last_active_project: Cell::new(reaper.get_current_project()),
             num_track_set_changes_left_to_be_propagated: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
@@ -542,7 +549,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
             .main_thread_idle
             .borrow_mut()
             .next(());
-        // Process tasks in queue
+        // Process plain main thread tasks in queue
         for task in self
             .main_thread_task_receiver
             .try_iter()
@@ -563,6 +570,14 @@ impl MediumReaperControlSurface for HelperControlSurface {
         }
         // Execute futures
         self.main_thread_executor.run();
+        // Execute observables
+        for task in self
+            .main_thread_rx_task_receiver
+            .try_iter()
+            .take(MAIN_THREAD_TASK_BULK_SIZE)
+        {
+            task();
+        }
     }
 
     fn set_track_list_change(&self) {
