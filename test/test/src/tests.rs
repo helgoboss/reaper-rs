@@ -15,7 +15,7 @@ use rxrust::prelude::*;
 
 use crate::api::{step, TestStep};
 
-use super::mock::observe_invocations;
+use super::invocation_mock::observe_invocations;
 use crate::api::VersionRestriction::AllVersions;
 use helgoboss_midi::test_util::{channel, key_number, u7};
 use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
@@ -177,7 +177,7 @@ fn set_project_tempo() -> TestStep {
         // Then
         assert_eq!(project.get_tempo().get_bpm(), Bpm::new(130.0));
         // TODO-low There should be only one event invocation
-        assert_eq!(mock.get_invocation_count(), 2);
+        assert_eq!(mock.invocation_count(), 2);
         Ok(())
     })
 }
@@ -281,8 +281,8 @@ fn use_undoable() -> TestStep {
             label,
             Some(c_str!("reaper-rs integration test operation").to_owned())
         );
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -361,8 +361,8 @@ fn insert_track_at() -> TestStep {
         assert_eq!(new_track.get_index(), Some(1));
         assert_eq!(new_track.get_name().as_c_str(), c_str!("Inserted track"));
         assert_eq!(track_2.get_index(), Some(2));
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), new_track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), new_track);
         Ok(())
     })
 }
@@ -382,7 +382,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
                     move || {
                         mock.invoke(43);
                     },
-                    toggleable(move || cloned_mock.get_invocation_count() % 2 == 1),
+                    toggleable(move || cloned_mock.invocation_count() % 2 == 1),
                 )
             });
             let action = Reaper::get().get_action_by_command_name(c_str!("reaperRsTest2").into());
@@ -390,11 +390,11 @@ fn register_and_unregister_toggle_action() -> TestStep {
             let _action_index = action.get_index();
             let _command_id = action.get_command_id();
             assert!(action.is_available());
-            assert_eq!(mock.get_invocation_count(), 0);
+            assert_eq!(mock.invocation_count(), 0);
             assert!(!action.is_on());
             action.invoke_as_trigger(None);
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), 43);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), 43);
             assert!(action.is_on());
             assert_eq!(action.get_character(), ActionCharacter::Toggle);
             assert!(action.get_command_id() > CommandId::new(1));
@@ -434,10 +434,10 @@ fn register_and_unregister_action() -> TestStep {
             let action = Reaper::get().get_action_by_command_name(c_str!("reaperRsTest").into());
             // Then
             assert!(action.is_available());
-            assert_eq!(mock.get_invocation_count(), 0);
+            assert_eq!(mock.invocation_count(), 0);
             action.invoke_as_trigger(None);
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), 42);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), 42);
             assert_eq!(action.get_character(), ActionCharacter::Trigger);
             assert!(action.get_command_id() > CommandId::new(1));
             assert_eq!(
@@ -495,8 +495,8 @@ fn unsolo_track() -> TestStep {
         track.unsolo();
         // Then
         assert!(!track.is_solo());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -517,8 +517,8 @@ fn solo_track() -> TestStep {
         track.solo();
         // Then
         assert!(track.is_solo());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -539,8 +539,8 @@ fn mute_track() -> TestStep {
         track.mute();
         // Then
         assert!(track.is_muted());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -564,7 +564,7 @@ fn unmute_track() -> TestStep {
         // For some reason REAPER doesn't call SetSurfaceMute on control surfaces when an action
         // caused the muting. So HelperControlSurface still thinks the track was unmuted and
         // therefore will not fire a change event!
-        assert_eq!(mock.get_invocation_count(), 0);
+        assert_eq!(mock.invocation_count(), 0);
         Ok(())
     })
 }
@@ -590,8 +590,8 @@ fn test_action_invoked_event() -> TestStep {
             CurrentProject,
         );
         // Then
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(*mock.get_last_arg(), action);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(*mock.last_arg(), action);
         Ok(())
     })
 }
@@ -618,7 +618,7 @@ fn invoke_action() -> TestStep {
         assert!(track.is_muted());
         // TODO Actually it would be nice if the actionInvoked event would be raised but it
         // isn't
-        assert_eq!(mock.get_invocation_count(), 0);
+        assert_eq!(mock.invocation_count(), 0);
         Ok(())
     })
 }
@@ -683,8 +683,8 @@ fn set_track_send_pan() -> TestStep {
         // Then
         assert_eq!(send.get_pan().get_reaper_value(), ReaperPanValue::new(-0.5));
         assert_eq!(send.get_pan().get_normalized_value(), 0.25);
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), send);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), send);
         Ok(())
     })
 }
@@ -712,8 +712,8 @@ fn set_track_send_volume() -> TestStep {
             -30.009_531_739_774_296,
             epsilon = 0.000_000_000_000_1
         ));
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), send);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), send);
         Ok(())
     })
 }
@@ -832,8 +832,8 @@ fn remove_track() -> TestStep {
         assert!(!track_1.is_available());
         assert_eq!(track_2.get_index(), Some(0));
         assert_eq!(track_2.get_guid(), track_2_guid);
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track_1);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track_1);
         Ok(())
     })
 }
@@ -877,7 +877,7 @@ fn select_track_exclusively() -> TestStep {
                 .count(),
             1
         );
-        assert_eq!(mock.get_invocation_count(), 3);
+        assert_eq!(mock.invocation_count(), 3);
         Ok(())
     })
 }
@@ -906,8 +906,8 @@ fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
             assert!(track.is_armed(true));
             assert!(track.is_armed(false));
             assert!(!track.has_auto_arm_enabled());
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), track);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), track);
             Ok(())
         },
     )
@@ -934,8 +934,8 @@ fn disarm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
             assert!(!track.is_armed(true));
             assert!(!track.is_armed(false));
             assert!(!track.has_auto_arm_enabled());
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), track);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), track);
             Ok(())
         },
     )
@@ -1015,8 +1015,8 @@ fn disarm_track_in_auto_arm_mode() -> TestStep {
             assert!(!track.is_armed(true));
             assert!(!track.is_armed(false));
             assert!(track.has_auto_arm_enabled());
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), track);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), track);
             Ok(())
         },
     )
@@ -1043,8 +1043,8 @@ fn arm_track_in_auto_arm_mode() -> TestStep {
         // parameter supportAutoArm
         assert!(track.is_armed(false));
         assert!(track.has_auto_arm_enabled());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -1084,8 +1084,8 @@ fn disarm_track_in_normal_mode() -> TestStep {
             assert!(!track.is_armed(true));
             assert!(!track.is_armed(false));
             assert!(!track.has_auto_arm_enabled());
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), track);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), track);
             Ok(())
         },
     )
@@ -1109,8 +1109,8 @@ fn arm_track_in_normal_mode() -> TestStep {
         assert!(track.is_armed(true));
         assert!(track.is_armed(false));
         assert!(!track.has_auto_arm_enabled());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -1174,8 +1174,8 @@ fn select_master_track() -> TestStep {
             1
         );
         // TODO REAPER doesn't notify us about master track selection currently
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg().get_index(), Some(2));
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg().get_index(), Some(2));
         Ok(())
     })
 }
@@ -1211,8 +1211,8 @@ fn unselect_track() -> TestStep {
                 .count(),
             1
         );
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -1251,8 +1251,8 @@ fn select_track() -> TestStep {
                 .count(),
             2
         );
-        assert_eq!(mock.get_invocation_count(), 2);
-        assert_eq!(mock.get_last_arg(), track2);
+        assert_eq!(mock.invocation_count(), 2);
+        assert_eq!(mock.last_arg(), track2);
         Ok(())
     })
 }
@@ -1292,8 +1292,8 @@ fn set_track_pan() -> TestStep {
         let pan = track.get_pan();
         assert_eq!(pan.get_reaper_value(), ReaperPanValue::new(-0.5));
         assert_eq!(pan.get_normalized_value(), 0.25);
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -1343,8 +1343,8 @@ fn set_track_volume() -> TestStep {
             0.250_000_000_000_034_97,
             epsilon = 0.000_000_000_000_1
         ));
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -1498,7 +1498,7 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
             assert_eq!(input.to_raw(), 6112);
             assert_eq!(RecordingInput::try_from_raw(6112), Ok(input));
             // TODO-high Search in project for 5198273 for a hacky way to solve this
-            assert_eq!(mock.get_invocation_count(), 0);
+            assert_eq!(mock.invocation_count(), 0);
             // assert_eq!(mock.get_last_arg(), track);
             Ok(())
         },
@@ -1538,8 +1538,8 @@ fn set_track_input_monitoring() -> TestStep {
             track.get_input_monitoring_mode(),
             InputMonitoringMode::NotWhenPlaying
         );
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -1582,8 +1582,8 @@ fn set_track_name() -> TestStep {
         track.set_name(c_str!("Foo Bla"));
         // Then
         assert_eq!(track.get_name(), c_str!("Foo Bla").to_owned());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
         Ok(())
     })
 }
@@ -1713,8 +1713,8 @@ fn add_track() -> TestStep {
         // Then
         assert_eq!(project.get_track_count(), 1);
         assert_eq!(new_track.get_index(), Some(0));
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), new_track);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), new_track);
         Ok(())
     })
 }
@@ -1755,8 +1755,8 @@ fn create_empty_project_in_new_tab() -> TestStep {
             assert_eq!(new_project.get_track_count(), 0);
             assert!(new_project.get_index() > 0);
             assert!(new_project.get_file_path().is_none());
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), new_project);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), new_project);
             Ok(())
         },
     )
@@ -2036,13 +2036,13 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             if Reaper::get().get_version() < ReaperVersion::new("6") {
                 // Mmh
                 if fx_chain.is_input_fx() {
-                    assert_eq!(mock.get_invocation_count(), 2);
+                    assert_eq!(mock.invocation_count(), 2);
                 } else {
-                    assert_eq!(mock.get_invocation_count(), 3);
+                    assert_eq!(mock.invocation_count(), 3);
                 }
             } else {
-                assert_eq!(mock.get_invocation_count(), 1);
-                assert_eq!(mock.get_last_arg(), fx);
+                assert_eq!(mock.invocation_count(), 1);
+                assert_eq!(mock.last_arg(), fx);
             }
             Ok(())
         },
@@ -2082,13 +2082,13 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             assert!(fx.window_is_open());
             // TODO-low Not correctly implemented right now. Should have focus!
             assert!(!fx.window_has_focus());
-            assert!(fx_opened_mock.get_invocation_count() >= 1);
+            assert!(fx_opened_mock.invocation_count() >= 1);
             if !fx_chain.is_input_fx() || Reaper::get().get_version() >= ReaperVersion::new("5.95")
             {
                 // In previous versions it wrongly reports as normal FX
-                assert_eq!(fx_opened_mock.get_last_arg(), fx);
+                assert_eq!(fx_opened_mock.last_arg(), fx);
             }
-            assert_eq!(fx_focused_mock.get_invocation_count(), 0);
+            assert_eq!(fx_focused_mock.invocation_count(), 0);
             // Should be > 0 but doesn't work
             assert!(Reaper::get().get_focused_fx().is_none()); // Should be Some but doesn't work
             Ok(())
@@ -2301,7 +2301,7 @@ WAK 0
         );
         // TODO Detect such a programmatic FX add as well (maybe by hooking into
         // HelperControlSurface::updateMediaTrackPositions)
-        assert_eq!(mock.get_invocation_count(), 0);
+        assert_eq!(mock.invocation_count(), 0);
         Ok(())
     })
 }
@@ -2329,8 +2329,8 @@ fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
         assert!(midi_fx.is_available());
         assert_eq!(midi_fx.get_index(), 0);
         midi_fx.invalidate_index();
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), synth_fx);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), synth_fx);
         Ok(())
     })
 }
@@ -2357,10 +2357,10 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(midi_fx.get_index(), 1);
         assert_eq!(synth_fx.get_index(), 0);
         if Reaper::get().get_version() < ReaperVersion::new("5.95") {
-            assert_eq!(mock.get_invocation_count(), 0);
+            assert_eq!(mock.invocation_count(), 0);
         } else {
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), fx_chain.get_track());
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), fx_chain.get_track());
         }
         Ok(())
     })
@@ -2399,13 +2399,13 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             });
             p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
             // Then
-            assert_eq!(mock.get_invocation_count(), 2);
+            assert_eq!(mock.invocation_count(), 2);
             if fx_chain.is_input_fx()
                 && Reaper::get().get_version() < ReaperVersion::new(c_str!("5.95"))
             {
-                assert_ne!(mock.get_last_arg(), p);
+                assert_ne!(mock.last_arg(), p);
             } else {
-                assert_eq!(mock.get_last_arg(), p);
+                assert_eq!(mock.last_arg(), p);
             }
             Ok(())
         },
@@ -2457,15 +2457,15 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             if Reaper::get().get_version() < ReaperVersion::new("6") {
                 if fx_chain.is_input_fx() {
                     // Mmh
-                    assert_eq!(mock.get_invocation_count(), 2);
+                    assert_eq!(mock.invocation_count(), 2);
                 } else {
-                    assert_eq!(mock.get_invocation_count(), 1);
+                    assert_eq!(mock.invocation_count(), 1);
                 }
             } else {
                 // TODO-low 1 invocation would be better than 2 (in v6 it gives us 2)
-                assert_eq!(mock.get_invocation_count(), 2);
+                assert_eq!(mock.invocation_count(), 2);
             }
-            assert_eq!(mock.get_last_arg(), p);
+            assert_eq!(mock.last_arg(), p);
             Ok(())
         },
     )
@@ -2689,8 +2689,8 @@ fn enable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
         fx_1.enable();
         // Then
         assert!(fx_1.is_enabled());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), fx_1);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), fx_1);
         Ok(())
     })
 }
@@ -2714,8 +2714,8 @@ fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
         fx_1.disable();
         // Then
         assert!(!fx_1.is_enabled());
-        assert_eq!(mock.get_invocation_count(), 1);
-        assert_eq!(mock.get_last_arg(), fx_1);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), fx_1);
         Ok(())
     })
 }
@@ -2848,8 +2848,8 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                 first_tag.get_content().deref(),
                 chain_chunk.get_content().deref()
             );
-            assert_eq!(mock.get_invocation_count(), 1);
-            assert_eq!(mock.get_last_arg(), fx);
+            assert_eq!(mock.invocation_count(), 1);
+            assert_eq!(mock.last_arg(), fx);
             Ok(())
         },
     )

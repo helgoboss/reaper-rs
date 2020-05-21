@@ -14,6 +14,10 @@ pub struct Project {
     rea_project: ReaProject,
 }
 
+// The pointer will never be dereferenced, so we can safely make it Send and Sync.
+unsafe impl Send for Project {}
+unsafe impl Sync for Project {}
+
 impl Project {
     pub fn new(rea_project: ReaProject) -> Project {
         Project { rea_project }

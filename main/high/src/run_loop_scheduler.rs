@@ -29,6 +29,7 @@ impl Scheduler for &RunLoopScheduler {
                 task(subscription, state);
             }
         });
+        // Delays are not really working right now: https://github.com/rxRust/rxRust/issues/106
         if let Some(delay) = delay {
             let sender = self.sender.clone();
             c_subscription.add(delay_task(delay, move || {
