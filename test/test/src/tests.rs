@@ -1870,6 +1870,7 @@ fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(fx_chain.fx_count(), 0);
         assert_eq!(fx_chain.fxs().count(), 0);
         assert!(fx_chain.fx_by_index(0).is_none());
+        assert!(!fx_chain.fx_by_index_untracked(0).is_available());
         assert!(fx_chain.first_fx().is_none());
         assert!(fx_chain.last_fx().is_none());
         let non_existing_guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
@@ -2301,6 +2302,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
         let fx_chain = get_fx_chain()?;
         let midi_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
         let synth_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find synth fx")?;
+        let fx_at_index_1 = fx_chain.fx_by_index_untracked(1);
         // When
         let (mock, _) = observe_invocations(|mock| {
             reaper
@@ -2313,7 +2315,20 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
         fx_chain.move_fx(&synth_fx, 0);
         // Then
         assert_eq!(midi_fx.index(), 1);
+        assert_eq!(
+            midi_fx.name().as_c_str(),
+            c_str!("VST: ReaControlMIDI (Cockos)")
+        );
         assert_eq!(synth_fx.index(), 0);
+        assert_eq!(
+            synth_fx.name().as_c_str(),
+            c_str!("VSTi: ReaSynth (Cockos)")
+        );
+        assert_eq!(fx_at_index_1.index(), 1);
+        assert_eq!(
+            fx_at_index_1.name().as_c_str(),
+            c_str!("VST: ReaControlMIDI (Cockos)")
+        );
         if Reaper::get().version() < ReaperVersion::new("5.95") {
             assert_eq!(mock.invocation_count(), 0);
         } else {
@@ -2752,6 +2767,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(fx_chain.first_fx(), fx);
             assert_eq!(fx_chain.last_fx(), fx);
             let fx = fx.unwrap();
+            assert_eq!(fx_chain.fx_by_index_untracked(0), fx);
             let guid = fx.guid();
             assert!(guid.is_some());
             let guid = guid.unwrap();

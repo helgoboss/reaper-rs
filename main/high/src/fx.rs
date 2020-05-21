@@ -40,7 +40,7 @@ impl PartialEq for Fx {
 
 impl Fx {
     // Main constructor. Use it if you have the GUID. index will be determined lazily.
-    pub fn from_guid_lazy_index(track: Track, guid: Guid, is_input_fx: bool) -> Fx {
+    pub(crate) fn from_guid_lazy_index(track: Track, guid: Guid, is_input_fx: bool) -> Fx {
         Fx {
             track,
             guid: Some(guid),
@@ -50,10 +50,25 @@ impl Fx {
     }
 
     // Use this constructor if you are sure about the GUID and index
-    pub fn from_guid_and_index(track: Track, guid: Guid, index: u32, is_input_fx: bool) -> Fx {
+    pub(crate) fn from_guid_and_index(
+        track: Track,
+        guid: Guid,
+        index: u32,
+        is_input_fx: bool,
+    ) -> Fx {
         Fx {
             track,
             guid: Some(guid),
+            is_input_fx,
+            index: Cell::new(Some(index)),
+        }
+    }
+
+    // Use this if you want to create a purely index-based FX without UUID tracking.
+    pub(crate) fn from_index_untracked(track: Track, index: u32, is_input_fx: bool) -> Fx {
+        Fx {
+            track,
+            guid: None,
             is_input_fx,
             index: Cell::new(Some(index)),
         }
@@ -317,11 +332,21 @@ impl Fx {
 
     pub fn is_available(&self) -> bool {
         if self.is_loaded_and_at_correct_index() {
-            true
+            if self.is_tracked() {
+                true
+            } else {
+                // "Loaded and at correct index" has not much of a meaning if there's no GUID
+                // tracking. We need to check the FX count.
+                self.index.get().expect("untracked FX always has index") < self.chain().fx_count()
+            }
         } else {
             // Not yet loaded or at wrong index
             self.load_by_guid()
         }
+    }
+
+    fn is_tracked(&self) -> bool {
+        self.guid.is_some()
     }
 
     pub fn preset_count(&self) -> u32 {

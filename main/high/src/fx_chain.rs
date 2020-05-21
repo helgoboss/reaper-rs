@@ -277,6 +277,12 @@ DOCKED 0
         ))
     }
 
+    // This returns a purely index-based FX that doesn't keep track of FX GUID, doesn't follow
+    // reorderings and so on.
+    pub fn fx_by_index_untracked(&self, index: u32) -> Fx {
+        Fx::from_index_untracked(self.track.clone(), index, self.is_input_fx)
+    }
+
     pub fn first_fx(&self) -> Option<Fx> {
         self.fx_by_index(0)
     }
