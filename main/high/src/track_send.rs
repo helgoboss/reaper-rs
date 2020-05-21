@@ -4,6 +4,7 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{MediaTrack, TrackSendDirection};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
+use std::ffi::CString;
 
 #[derive(Clone, Debug, Eq)]
 pub struct TrackSend {
@@ -97,6 +98,15 @@ impl TrackSend {
                 self.index(),
                 Absolute(volume.reaper_value()),
             );
+        }
+    }
+
+    pub fn name(&self) -> CString {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_track_send_name(self.source_track().raw(), self.index(), 256)
+                .expect("send doesn't exist")
         }
     }
 

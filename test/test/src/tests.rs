@@ -358,6 +358,7 @@ fn insert_track_at() -> TestStep {
         new_track.set_name(c_str!("Inserted track"));
         // Then
         assert_eq!(project.track_count(), 4);
+        assert_eq!(new_track.location(), TrackRef::NormalTrack(1));
         assert_eq!(new_track.index(), Some(1));
         assert_eq!(new_track.name().as_c_str(), c_str!("Inserted track"));
         assert_eq!(track_2.index(), Some(2));
@@ -728,6 +729,7 @@ fn query_track_send() -> TestStep {
         assert_eq!(send_to_track_2.source_track(), track_1);
         assert_eq!(send_to_track_3.source_track(), track_1);
         assert_eq!(send_to_track_2.target_track(), track_2);
+        assert_eq!(send_to_track_2.name(), c_str!("Track 2").into());
         assert_eq!(send_to_track_3.target_track(), track_3);
         assert_eq!(send_to_track_2.volume().db(), Db::ZERO_DB);
         assert_eq!(send_to_track_3.volume().db(), Db::ZERO_DB);
@@ -1651,6 +1653,7 @@ fn query_master_track() -> TestStep {
         // When
         let master_track = project.master_track();
         // Then
+        assert_eq!(master_track.location(), TrackRef::MasterTrack);
         assert!(master_track.is_master_track());
         Ok(())
     })

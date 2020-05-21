@@ -516,6 +516,7 @@ impl<'a> RegistrationObject<'a> {
 }
 
 /// Type and location of a certain track.
+/// TODO-medium Rename to TrackLocation?
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackRef {
     /// The master track of a project.

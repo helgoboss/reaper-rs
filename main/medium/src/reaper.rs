@@ -1121,6 +1121,48 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(name)
     }
 
+    /// Returns the name of the given track send.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the track send name you want.
+    ///
+    /// When choosing the send index, keep in mind that in the list of sends, the hardware output
+    /// sends (if any) come first.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the track send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure]
+    pub unsafe fn get_track_send_name(
+        &self,
+        track: MediaTrack,
+        send_index: u32,
+        buffer_size: u32,
+    ) -> ReaperFunctionResult<CString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        assert!(buffer_size > 0);
+        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+            self.low
+                .GetTrackSendName(track.as_ptr(), send_index as i32, buffer, max_size)
+        });
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't get send name (probably send doesn't exist)",
+            ));
+        }
+        Ok(name)
+    }
+
     /// Returns the index of the first track FX that is a virtual instrument.
     ///
     /// Doesn't look in the input FX chain.

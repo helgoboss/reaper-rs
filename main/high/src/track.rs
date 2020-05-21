@@ -230,17 +230,21 @@ impl Track {
         }
     }
 
-    pub fn index(&self) -> Option<u32> {
+    pub fn location(&self) -> TrackRef {
         self.load_and_check_if_necessary_or_complain();
         // TODO-low The following returns None if we query the number of a track in another project
         //  Try to find a working solution!
-        let result = unsafe {
+        unsafe {
             Reaper::get()
                 .medium_reaper()
                 .get_set_media_track_info_get_track_number(self.raw())
-        }?;
+                .unwrap()
+        }
+    }
+
+    pub fn index(&self) -> Option<u32> {
         use TrackRef::*;
-        match result {
+        match self.location() {
             MasterTrack => None,
             NormalTrack(idx) => Some(idx),
         }
