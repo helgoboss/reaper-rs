@@ -18,7 +18,7 @@ use crate::{
     MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
     NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectRef, ReaProject,
     ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperPointer, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode,
+    ReaperPointer, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode,
     RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
     TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
     TrackRef, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
@@ -1103,7 +1103,7 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         fx_location: TrackFxLocation,
         buffer_size: u32,
-    ) -> ReaperFunctionResult<CString>
+    ) -> ReaperFunctionResult<ReaperString>
     where
         UsageScope: MainThreadOnly,
     {
@@ -1118,7 +1118,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't get FX name (probably FX doesn't exist)",
             ));
         }
-        Ok(name)
+        Ok(ReaperString::new(name))
     }
 
     /// Returns the name of the given track send.
@@ -1145,7 +1145,7 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         send_index: u32,
         buffer_size: u32,
-    ) -> ReaperFunctionResult<CString>
+    ) -> ReaperFunctionResult<ReaperString>
     where
         UsageScope: MainThreadOnly,
     {
@@ -1160,7 +1160,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't get send name (probably send doesn't exist)",
             ));
         }
-        Ok(name)
+        Ok(ReaperString::new(name))
     }
 
     /// Returns the index of the first track FX that is a virtual instrument.
@@ -1257,7 +1257,7 @@ impl<UsageScope> Reaper<UsageScope> {
         fx_location: TrackFxLocation,
         param_index: u32,
         buffer_size: u32,
-    ) -> ReaperFunctionResult<CString>
+    ) -> ReaperFunctionResult<ReaperString>
     where
         UsageScope: MainThreadOnly,
     {
@@ -1277,7 +1277,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't get FX parameter name (probably FX or parameter doesn't exist)",
             ));
         }
-        Ok(name)
+        Ok(ReaperString::new(name))
     }
 
     /// Returns the current value of the given track FX parameter formatted as string.
@@ -1303,7 +1303,7 @@ impl<UsageScope> Reaper<UsageScope> {
         fx_location: TrackFxLocation,
         param_index: u32,
         buffer_size: u32,
-    ) -> ReaperFunctionResult<CString>
+    ) -> ReaperFunctionResult<ReaperString>
     where
         UsageScope: MainThreadOnly,
     {
@@ -1323,7 +1323,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't format current FX parameter value (probably FX or parameter doesn't exist)",
             ));
         }
-        Ok(name)
+        Ok(ReaperString::new(name))
     }
 
     /// Returns the given value formatted as string according to the given track FX parameter.
@@ -1357,7 +1357,7 @@ impl<UsageScope> Reaper<UsageScope> {
         param_index: u32,
         param_value: ReaperNormalizedFxParamValue,
         buffer_size: u32,
-    ) -> ReaperFunctionResult<CString>
+    ) -> ReaperFunctionResult<ReaperString>
     where
         UsageScope: MainThreadOnly,
     {
@@ -1378,7 +1378,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't format FX parameter value (FX maybe doesn't support Cockos extensions or FX or parameter doesn't exist)",
             ));
         }
-        Ok(name)
+        Ok(ReaperString::new(name))
     }
 
     /// Sets the value of the given track FX parameter.
@@ -2209,7 +2209,7 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Converts the given GUID to a string (including braces).
     #[measure]
-    pub fn guid_to_string(&self, guid: &GUID) -> CString
+    pub fn guid_to_string(&self, guid: &GUID) -> ReaperString
     where
         UsageScope: MainThreadOnly,
     {
@@ -2217,7 +2217,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let (guid_string, _) = with_string_buffer(64, |buffer, _| unsafe {
             self.low.guidToString(guid as *const GUID, buffer)
         });
-        guid_string
+        ReaperString::new(guid_string)
     }
 
     /// Returns the master tempo of the current project.
@@ -2823,7 +2823,7 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         buffer_size: u32,
         cache_hint: ChunkCacheHint,
-    ) -> ReaperFunctionResult<CString>
+    ) -> ReaperFunctionResult<ReaperString>
     where
         UsageScope: MainThreadOnly,
     {
@@ -2840,7 +2840,7 @@ impl<UsageScope> Reaper<UsageScope> {
         if !successful {
             return Err(ReaperFunctionError::new("couldn't get track chunk"));
         }
-        Ok(chunk_content)
+        Ok(ReaperString::new(chunk_content))
     }
 
     /// Creates a send, receive or hardware output for the given track.

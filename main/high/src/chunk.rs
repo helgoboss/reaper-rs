@@ -1,3 +1,4 @@
+use reaper_medium::ReaperString;
 use std::cell::{Ref, RefCell};
 use std::ffi::CString;
 use std::fmt::{Display, Formatter};
@@ -9,13 +10,9 @@ pub struct Chunk {
     content: Rc<RefCell<String>>,
 }
 
-impl From<CString> for Chunk {
-    fn from(value: CString) -> Self {
-        Chunk::new(
-            value
-                .into_string()
-                .expect("Chunk content contains illegal characters"),
-        )
+impl From<ReaperString> for Chunk {
+    fn from(value: ReaperString) -> Self {
+        Chunk::new(value.into_string())
     }
 }
 

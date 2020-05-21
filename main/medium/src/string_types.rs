@@ -50,6 +50,9 @@ use std::os::raw::c_char;
 /// creates static (UTF-8 encoded) `&CStr` literals, just as `"..."` creates static `&str` literals.
 /// Because those literals are embedded in the binary itself, no heap-space allocation or conversion
 /// is necessary at all. If you want, you can do the same with your literals.
+//
+// This type doesn't need to derive common traits because the consumer never interacts with it
+// directly.
 pub struct ReaperStringArg<'a>(Cow<'a, CStr>);
 
 impl<'a> ReaperStringArg<'a> {
@@ -58,7 +61,7 @@ impl<'a> ReaperStringArg<'a> {
         self.0.as_ptr()
     }
 
-    /// Consumes this string and spits out the contained cow. Used by code in this crate only.
+    /// Consumes this value and spits out the contained cow. Used by code in this crate only.
     pub(super) fn into_inner(self) -> Cow<'a, CStr> {
         self.0
     }
@@ -99,5 +102,80 @@ impl<'a> From<String> for ReaperStringArg<'a> {
                 .expect("Rust string too exotic for REAPER")
                 .into(),
         )
+    }
+}
+
+/// An owned string created by REAPER.
+///
+/// This type is used in return positions of _reaper-rs_ functions. It wraps a `CString` because
+/// REAPER creates C strings. The benefit over just returning `CString` is that this type provides
+/// convenience methods for converting to Rust strings directly. Whereas arbitrary `CString`s can
+/// have all kinds of encodings, we know that REAPER uses UTF-8, so this type can be optimistic and
+/// converts without returning a `Result`.
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+pub struct ReaperString(CString);
+
+impl ReaperString {
+    pub(crate) fn new(inner: CString) -> ReaperString {
+        ReaperString(inner)
+    }
+
+    /// Consumes this value and spits out the contained C string.
+    pub fn into_inner(self) -> CString {
+        self.0
+    }
+
+    /// Converts this to a Rust string slice.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the string is not properly UTF-8 encoded.
+    pub fn to_str(&self) -> &str {
+        self.0
+            .to_str()
+            .expect("REAPER string should be UTF-8 encoded")
+    }
+
+    /// Consumes this and converts it to an owned Rust string.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the string is not properly UTF-8 encoded.
+    pub fn into_string(self) -> String {
+        self.0
+            .into_string()
+            .expect("REAPER string should be UTF-8 encoded")
+    }
+}
+
+/// A borrowed string owned by REAPER.
+///
+/// _reaper-rs_ functions pass this type to consumer-provided closures.
+///
+/// See [`ReaperString`] for further details.
+///
+/// [`ReaperString`]: struct.ReaperString.html
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+pub struct ReaperStr<'a>(&'a CStr);
+
+impl<'a> ReaperStr<'a> {
+    pub(crate) fn new(inner: &'a CStr) -> ReaperStr<'a> {
+        ReaperStr(inner)
+    }
+
+    /// Spits out the contained borrowed C string.
+    pub fn into_inner(self) -> &'a CStr {
+        self.0
+    }
+
+    /// Converts this to a Rust string slice.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the string is not properly UTF-8 encoded.
+    pub fn to_str(&self) -> &str {
+        self.0
+            .to_str()
+            .expect("REAPER string should be UTF-8 encoded")
     }
 }

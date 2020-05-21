@@ -1,7 +1,9 @@
 use crate::fx::Fx;
 
 use crate::Reaper;
-use reaper_medium::{GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue};
+use reaper_medium::{
+    GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue, ReaperString,
+};
 use rxrust::prelude::PayloadCopy;
 use std::ffi::CString;
 
@@ -52,7 +54,7 @@ impl FxParameter {
         self.fx.is_available() && self.index < self.fx.parameter_count()
     }
 
-    pub fn name(&self) -> CString {
+    pub fn name(&self) -> ReaperString {
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_param_name(
                 self.track_raw(),
@@ -86,7 +88,7 @@ impl FxParameter {
         }
     }
 
-    pub fn formatted_value(&self) -> CString {
+    pub fn formatted_value(&self) -> ReaperString {
         unsafe {
             Reaper::get()
                 .medium_reaper()
@@ -111,7 +113,7 @@ impl FxParameter {
     pub fn format_normalized_value(
         &self,
         normalized_value: ReaperNormalizedFxParamValue,
-    ) -> CString {
+    ) -> ReaperString {
         unsafe {
             Reaper::get()
                 .medium_reaper()

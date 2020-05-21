@@ -7,7 +7,7 @@ use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, Reaper, Track};
-use reaper_medium::{FxShowInstruction, Hwnd, TrackFxLocation};
+use reaper_medium::{FxShowInstruction, Hwnd, ReaperString, TrackFxLocation};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
@@ -74,7 +74,7 @@ impl Fx {
         }
     }
 
-    pub fn name(&self) -> CString {
+    pub fn name(&self) -> ReaperString {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_fx_name(

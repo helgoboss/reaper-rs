@@ -129,17 +129,16 @@
 //! - String parameters are used as described in [`ReaperStringArg`](struct.ReaperStringArg.html).
 //!   Example: [`string_to_guid()`](struct.Reaper.html#method.string_to_guid)
 //! - Strings in return positions are dealt with in different ways:
-//!     - When returning an owned string, we return `CString` (because that's what comes closest to
-//!       the original REAPER API, see [`ReaperStringArg`](struct.ReaperStringArg.html)). Consumers
-//!       can easily convert them to regular Rust strings when needed. Example:
+//!     - When returning an owned string, we return [`ReaperString`](struct.ReaperString.html).
+//!       Consumers can easily convert them to regular Rust strings when needed. Example:
 //!       [`guid_to_string()`](struct.Reaper.html#method.guid_to_string)
 //!     - When returning a string owned by REAPER and we know that string has a static lifetime, we
-//!       return a `&'static CStr`. Example:
+//!       return a `&'static` [`ReaperStr`](struct.ReaperStr.html). Example:
 //!       [`get_app_version()`](struct.Reaper.html#method.get_app_version)
 //!     - When returning a string owned by REAPER and we can't give it a proper lifetime annotation
 //!       (in most cases we can't), we grant the user only temporary access to that string by taking
-//!       a closure with a `&CStr` argument which is executed right away. Example:
-//!       [`undo_can_undo_2()`](struct.Reaper.html#method.undo_can_undo_2)
+//!       a closure with a `&`[`ReaperStr`](struct.ReaperStr.html) argument which is executed right
+//!       away. Example: [`undo_can_undo_2()`](struct.Reaper.html#method.undo_can_undo_2)
 //! - Strings in enums are often `Cow<CStr>` because we want them to be flexible enough to carry
 //!   both owned and borrowed strings.
 //!

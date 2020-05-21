@@ -729,7 +729,7 @@ fn query_track_send() -> TestStep {
         assert_eq!(send_to_track_2.source_track(), track_1);
         assert_eq!(send_to_track_3.source_track(), track_1);
         assert_eq!(send_to_track_2.target_track(), track_2);
-        assert_eq!(send_to_track_2.name(), c_str!("Track 2").into());
+        assert_eq!(send_to_track_2.name().to_str(), "Track 2");
         assert_eq!(send_to_track_3.target_track(), track_3);
         assert_eq!(send_to_track_2.volume().db(), Db::ZERO_DB);
         assert_eq!(send_to_track_3.volume().db(), Db::ZERO_DB);
@@ -1942,7 +1942,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
                 }
             );
             assert!(fx.guid().is_some());
-            assert_eq!(fx.name().as_c_str(), c_str!("JS: phaser"));
+            assert_eq!(fx.name().into_inner().as_c_str(), c_str!("JS: phaser"));
             let fx_chunk = fx.chunk();
             assert!(fx_chunk.starts_with("BYPASS 0 0 0"));
             if Reaper::get().version() < ReaperVersion::new("6") {
@@ -2157,7 +2157,10 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
         let synth_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find synth fx")?;
         let synth_param_5 = synth_fx.parameter_by_index(5);
         synth_param_5.set_normalized_value(ReaperNormalizedFxParamValue::new(0.0));
-        assert_ne!(synth_param_5.formatted_value().as_c_str(), c_str!("-6.00"));
+        assert_ne!(
+            synth_param_5.formatted_value().into_inner().as_c_str(),
+            c_str!("-6.00")
+        );
         let fx_state_chunk = r#"eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
   776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
   AAAQAAAA"#;
@@ -2166,13 +2169,16 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
         // Then
         assert_eq!(synth_fx.index(), 1);
         assert_eq!(
-            synth_fx.name().as_c_str(),
+            synth_fx.name().into_inner().as_c_str(),
             c_str!("VSTi: ReaSynth (Cockos)")
         );
-        assert_eq!(synth_param_5.formatted_value().as_c_str(), c_str!("-6.00"));
+        assert_eq!(
+            synth_param_5.formatted_value().into_inner().as_c_str(),
+            c_str!("-6.00")
+        );
         assert_eq!(midi_fx.index(), 0);
         assert_eq!(
-            midi_fx.name().as_c_str(),
+            midi_fx.name().into_inner().as_c_str(),
             c_str!("VST: ReaControlMIDI (Cockos)")
         );
         Ok(())
@@ -2195,12 +2201,12 @@ fn set_fx_tag_chunk(get_fx_chain: GetFxChain) -> TestStep {
         // Then
         assert_eq!(midi_fx_2.index(), 1);
         assert_eq!(
-            midi_fx_2.name().as_c_str(),
+            midi_fx_2.name().into_inner().as_c_str(),
             c_str!("VSTi: ReaSynth (Cockos)")
         );
         assert_eq!(midi_fx_1.index(), 0);
         assert_eq!(
-            midi_fx_1.name().as_c_str(),
+            midi_fx_1.name().into_inner().as_c_str(),
             c_str!("VST: ReaControlMIDI (Cockos)")
         );
         Ok(())
@@ -2220,7 +2226,7 @@ fn set_fx_chunk(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(synth_fx.guid(), synth_fx_guid_before);
         assert!(synth_fx.is_available());
         assert_eq!(
-            synth_fx.name().as_c_str(),
+            synth_fx.name().into_inner().as_c_str(),
             c_str!("VST: ReaControlMIDI (Cockos)")
         );
         assert_eq!(midi_fx.index(), 0);
@@ -2259,7 +2265,11 @@ WAK 0
         let guid = Guid::try_from(c_str!("{5FF5FB09-9102-4CBA-A3FB-3467BA1BFE5D}"))?;
         assert_eq!(synth_fx.guid(), Some(guid));
         assert_eq!(
-            synth_fx.parameter_by_index(5).formatted_value().as_c_str(),
+            synth_fx
+                .parameter_by_index(5)
+                .formatted_value()
+                .into_inner()
+                .as_c_str(),
             c_str!("-6.00")
         );
         // TODO Detect such a programmatic FX add as well (maybe by hooking into
@@ -2316,17 +2326,17 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
         // Then
         assert_eq!(midi_fx.index(), 1);
         assert_eq!(
-            midi_fx.name().as_c_str(),
+            midi_fx.name().into_inner().as_c_str(),
             c_str!("VST: ReaControlMIDI (Cockos)")
         );
         assert_eq!(synth_fx.index(), 0);
         assert_eq!(
-            synth_fx.name().as_c_str(),
+            synth_fx.name().into_inner().as_c_str(),
             c_str!("VSTi: ReaSynth (Cockos)")
         );
         assert_eq!(fx_at_index_1.index(), 1);
         assert_eq!(
-            fx_at_index_1.name().as_c_str(),
+            fx_at_index_1.name().into_inner().as_c_str(),
             c_str!("VST: ReaControlMIDI (Cockos)")
         );
         if Reaper::get().version() < ReaperVersion::new("5.95") {
@@ -2413,7 +2423,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             } else {
                 assert_eq!(last_touched_fx_param, Some(p.clone()));
             }
-            assert_eq!(p.formatted_value().as_c_str(), c_str!("-4.44"));
+            assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("-4.44"));
             assert!(abs_diff_eq!(
                 p.normalized_value().get(),
                 0.300_000_011_920_928_96
@@ -2423,7 +2433,9 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                 0.300_000_011_920_928_96
             ));
             assert_eq!(
-                p.format_normalized_value(p.normalized_value()).as_c_str(),
+                p.format_normalized_value(p.normalized_value())
+                    .into_inner()
+                    .as_c_str(),
                 c_str!("-4.44 dB")
             );
             if Reaper::get().version() < ReaperVersion::new("6") {
@@ -2466,15 +2478,17 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         let p = fx.parameter_by_index(5);
         // Then
         assert!(p.is_available());
-        assert_eq!(p.name().as_c_str(), c_str!("Pitch Wheel"));
+        assert_eq!(p.name().into_inner().as_c_str(), c_str!("Pitch Wheel"));
         assert_eq!(p.index(), 5);
         assert_eq!(p.character(), FxParameterCharacter::Continuous);
         assert_eq!(p.clone(), p);
-        assert_eq!(p.formatted_value().as_c_str(), c_str!("0"));
+        assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("0"));
         assert_eq!(p.normalized_value(), ReaperNormalizedFxParamValue::new(0.5));
         assert_eq!(p.reaper_value(), ReaperNormalizedFxParamValue::new(0.5));
         assert_eq!(
-            p.format_normalized_value(p.normalized_value()).as_c_str(),
+            p.format_normalized_value(p.normalized_value())
+                .into_inner()
+                .as_c_str(),
             c_str!("0")
         );
         assert_eq!(p.fx(), fx);
@@ -2529,10 +2543,13 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert!(fx_1.guid().is_some());
             assert!(fx_2.guid().is_some());
             assert_eq!(
-                fx_1.name().as_c_str(),
+                fx_1.name().into_inner().as_c_str(),
                 c_str!("VST: ReaControlMIDI (Cockos)")
             );
-            assert_eq!(fx_2.name().as_c_str(), c_str!("VSTi: ReaSynth (Cockos)"));
+            assert_eq!(
+                fx_2.name().into_inner().as_c_str(),
+                c_str!("VSTi: ReaSynth (Cockos)")
+            );
             let chunk_1 = fx_1.chunk();
             assert!(chunk_1.starts_with("BYPASS 0 0 0"));
             if Reaper::get().version() < ReaperVersion::new("6") {
@@ -2699,7 +2716,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
             );
             assert!(fx_1.guid().is_some());
             assert_eq!(
-                fx_1.name().as_c_str(),
+                fx_1.name().into_inner().as_c_str(),
                 c_str!("VST: ReaControlMIDI (Cockos)")
             );
             let chunk = fx_1.chunk();

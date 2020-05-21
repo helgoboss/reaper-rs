@@ -20,7 +20,7 @@ impl Guid {
 
     pub fn to_string_with_braces(&self) -> String {
         let c_string = Reaper::get().medium_reaper().guid_to_string(&self.internal);
-        c_string.into_string().unwrap()
+        c_string.into_string()
     }
 
     pub fn to_string_without_braces(&self) -> String {
@@ -34,12 +34,6 @@ impl Guid {
 impl fmt::Debug for Guid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", self.to_string_with_braces())
-    }
-}
-
-impl From<&Guid> for CString {
-    fn from(guid: &Guid) -> Self {
-        Reaper::get().medium_reaper().guid_to_string(&guid.internal)
     }
 }
 
