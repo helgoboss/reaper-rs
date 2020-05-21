@@ -404,7 +404,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
             );
             assert_eq!(
                 action.name(),
-                Some(c_str!("reaper-rs test toggle action").to_owned())
+                c_str!("reaper-rs test toggle action").to_owned()
             );
             reg.unregister();
             assert!(!action.is_available());
@@ -445,10 +445,7 @@ fn register_and_unregister_action() -> TestStep {
                 Some(c_str!("reaperRsTest").to_owned())
             );
             assert!(!action.is_on());
-            assert_eq!(
-                action.name(),
-                Some(c_str!("reaper-rs test action").to_owned())
-            );
+            assert_eq!(action.name(), c_str!("reaper-rs test action").to_owned());
             reg.unregister();
             assert!(!action.is_available());
             Ok(())
@@ -649,7 +646,7 @@ fn query_action() -> TestStep {
         assert!(toggle_action.command_name().is_none());
         assert_eq!(
             toggle_action.name(),
-            Some(c_str!("Track: Toggle mute for selected tracks").to_owned())
+            c_str!("Track: Toggle mute for selected tracks").to_owned()
         );
         assert!(toggle_action.index() > 0);
         assert_eq!(toggle_action.section(), Reaper::get().main_section());

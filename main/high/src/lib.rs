@@ -11,8 +11,8 @@
 //!
 //! reaper.show_console_msg("Hello world from reaper-rs high-level API!");
 //! reaper.track_removed().subscribe(|t| println!("Track {:?} removed", t));
-//! let project = reaper.get_current_project();
-//! let track = project.get_track_by_index(0).ok_or("no tracks")?;
+//! let project = reaper.current_project();
+//! let track = project.track_by_index(0).ok_or("no tracks")?;
 //! project.remove_track(&track);
 //! # Ok::<_, Box<dyn std::error::Error>>(())
 //! ```

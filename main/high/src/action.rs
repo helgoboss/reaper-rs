@@ -160,14 +160,15 @@ impl Action {
             })
     }
 
-    pub fn name(&self) -> Option<CString> {
+    pub fn name(&self) -> CString {
         let rd = self.load_if_necessary_or_complain();
         unsafe {
-            Reaper::get().medium_reaper().kbd_get_text_from_cmd(
-                rd.command_id,
-                SectionContext::Sec(&rd.section.raw()),
-                |s| s.into(),
-            )
+            Reaper::get()
+                .medium_reaper()
+                .kbd_get_text_from_cmd(rd.command_id, SectionContext::Sec(&rd.section.raw()), |s| {
+                    s.into()
+                })
+                .expect("action not existing")
         }
     }
 
