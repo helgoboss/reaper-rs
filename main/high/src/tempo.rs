@@ -16,11 +16,11 @@ impl Tempo {
         Tempo(Bpm::new(Bpm::MIN.get() + normalized_value * BPM_SPAN))
     }
 
-    pub fn get_normalized_value(self) -> f64 {
+    pub fn normalized_value(self) -> f64 {
         (self.0.get() - Bpm::MIN.get()) / BPM_SPAN
     }
 
-    pub fn get_bpm(self) -> Bpm {
+    pub fn bpm(self) -> Bpm {
         self.0
     }
 }
@@ -34,8 +34,8 @@ mod tests {
         // Given
         let tempo = Tempo::from_bpm(Bpm::new(120.0));
         // Then
-        assert_eq!(tempo.get_bpm(), Bpm::new(120.0));
-        let normalized_value = tempo.get_normalized_value();
+        assert_eq!(tempo.bpm(), Bpm::new(120.0));
+        let normalized_value = tempo.normalized_value();
         assert!(0.1240 < normalized_value && normalized_value < 0.1241);
     }
 
@@ -44,6 +44,6 @@ mod tests {
         // Given
         let tempo = Tempo::from_normalized_value(0.5);
         // Then
-        assert_eq!(tempo.get_bpm(), Bpm::new(480.5));
+        assert_eq!(tempo.bpm(), Bpm::new(480.5));
     }
 }

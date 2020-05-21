@@ -24,18 +24,18 @@ impl Section {
     /// # Safety
     ///
     /// The lifetime of the returned section is unbounded.
-    pub unsafe fn get_raw(self) -> KbdSectionInfo {
+    pub unsafe fn raw(self) -> KbdSectionInfo {
         Reaper::get()
             .medium_reaper()
             .section_from_unique_id_unchecked(self.id)
             .unwrap()
     }
 
-    pub fn get_action_by_command_id(self, command_id: CommandId) -> Action {
+    pub fn action_by_command_id(self, command_id: CommandId) -> Action {
         Action::new(self, command_id, None)
     }
 
-    pub fn get_action_by_index(self, index: u32) -> Action {
+    pub fn action_by_index(self, index: u32) -> Action {
         self.with_raw(|s| {
             assert!(
                 index < s.action_list_cnt(),
@@ -47,14 +47,14 @@ impl Section {
         .unwrap()
     }
 
-    pub fn get_action_count(self) -> u32 {
+    pub fn action_count(self) -> u32 {
         self.with_raw(|s| s.action_list_cnt()).unwrap()
     }
 
     /// # Safety
     ///
     /// Unsafe because at the time when the iterator is evaluated, the section could be gone.
-    pub unsafe fn get_actions(self) -> impl Iterator<Item = Action> + 'static {
+    pub unsafe fn actions(self) -> impl Iterator<Item = Action> + 'static {
         let sec = Reaper::get()
             .medium_reaper()
             .section_from_unique_id_unchecked(self.id)

@@ -61,30 +61,30 @@ impl TrackSend {
         }
     }
 
-    pub fn get_source_track(&self) -> Track {
+    pub fn source_track(&self) -> Track {
         self.source_track.clone()
     }
 
-    pub fn get_target_track(&self) -> Track {
+    pub fn target_track(&self) -> Track {
         if self.is_index_based() {
-            get_target_track(&self.source_track, self.get_index())
+            get_target_track(&self.source_track, self.index())
         } else {
             self.target_track.clone().expect("No target track set")
         }
     }
 
-    pub fn get_index(&self) -> u32 {
+    pub fn index(&self) -> u32 {
         self.check_or_load_if_necessary_or_complain();
         self.index.get().expect("Index not set")
     }
 
-    pub fn get_volume(&self) -> Volume {
+    pub fn volume(&self) -> Volume {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the
         // wrong value if an envelope is written.
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
+                .get_track_send_ui_vol_pan(self.source_track().raw(), self.index())
         }
         .expect("Couldn't get send vol/pan");
         Volume::from_reaper_value(result.volume)
@@ -93,18 +93,18 @@ impl TrackSend {
     pub fn set_volume(&self, volume: Volume) {
         unsafe {
             Reaper::get().medium_reaper().csurf_on_send_volume_change(
-                self.get_source_track().get_raw(),
-                self.get_index(),
-                Absolute(volume.get_reaper_value()),
+                self.source_track().raw(),
+                self.index(),
+                Absolute(volume.reaper_value()),
             );
         }
     }
 
-    pub fn get_pan(&self) -> Pan {
+    pub fn pan(&self) -> Pan {
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_send_ui_vol_pan(self.get_source_track().get_raw(), self.get_index())
+                .get_track_send_ui_vol_pan(self.source_track().raw(), self.index())
         }
         .expect("Couldn't get send vol/pan");
         Pan::from_reaper_value(result.pan)
@@ -113,9 +113,9 @@ impl TrackSend {
     pub fn set_pan(&self, pan: Pan) {
         unsafe {
             Reaper::get().medium_reaper().csurf_on_send_pan_change(
-                self.get_source_track().get_raw(),
-                self.get_index(),
-                Absolute(pan.get_reaper_value()),
+                self.source_track().raw(),
+                self.index(),
+                Absolute(pan.reaper_value()),
             );
         }
     }
@@ -130,12 +130,12 @@ impl TrackSend {
         }
         match self
             .source_track
-            .get_sends()
-            .find(|s| s.get_target_track() == *target_track)
+            .sends()
+            .find(|s| s.target_track() == *target_track)
         {
             None => false,
             Some(found_track_send) => {
-                self.index.replace(Some(found_track_send.get_index()));
+                self.index.replace(Some(found_track_send.index()));
                 true
             }
         }
@@ -153,16 +153,16 @@ impl TrackSend {
 
     // Precondition: is target track based
     fn is_at_correct_index(&self) -> bool {
-        self.source_track.is_available() && self.get_target_track_by_index() == self.target_track
+        self.source_track.is_available() && self.target_track_by_index() == self.target_track
     }
 
     // Precondition: index set
-    fn get_target_track_by_index(&self) -> Option<Track> {
+    fn target_track_by_index(&self) -> Option<Track> {
         let target_media_track =
             get_target_track_raw(&self.source_track, self.index.get().expect("Index not set"))?;
         Some(Track::new(
             target_media_track,
-            Some(self.source_track.get_project().get_raw()),
+            Some(self.source_track.project().raw()),
         ))
     }
 
@@ -172,7 +172,7 @@ impl TrackSend {
 
     fn index_is_in_range(&self) -> bool {
         self.source_track.is_available()
-            && self.index.get().expect("No index") < self.source_track.get_send_count()
+            && self.index.get().expect("No index") < self.source_track.send_count()
     }
 
     fn check_or_load_if_necessary_or_complain(&self) {
@@ -192,14 +192,14 @@ impl TrackSend {
 pub(super) fn get_target_track(source_track: &Track, send_index: u32) -> Track {
     Track::new(
         get_target_track_raw(source_track, send_index).unwrap(),
-        Some(source_track.get_project().get_raw()),
+        Some(source_track.project().raw()),
     )
 }
 
 fn get_target_track_raw(source_track: &Track, send_index: u32) -> Option<MediaTrack> {
     unsafe {
         Reaper::get().medium_reaper().get_track_send_info_desttrack(
-            source_track.get_raw(),
+            source_track.raw(),
             TrackSendDirection::Send,
             send_index,
         )

@@ -19,29 +19,29 @@ impl FxParameter {
     }
 
     // Returns normalized value [0, 1] TODO WRONG!
-    pub fn get_normalized_value(&self) -> ReaperNormalizedFxParamValue {
+    pub fn normalized_value(&self) -> ReaperNormalizedFxParamValue {
         // TODO-low deal with nullptr MediaTrack (empty string)
-        self.get_reaper_value()
+        self.reaper_value()
     }
 
     pub fn set_normalized_value(&self, normalized_value: ReaperNormalizedFxParamValue) {
         let _ = unsafe {
             Reaper::get().medium_reaper().track_fx_set_param_normalized(
-                self.get_track_raw(),
-                self.fx.get_query_index(),
+                self.track_raw(),
+                self.fx.query_index(),
                 self.index,
                 normalized_value,
             )
         };
     }
 
-    pub fn get_reaper_value(&self) -> ReaperNormalizedFxParamValue {
+    pub fn reaper_value(&self) -> ReaperNormalizedFxParamValue {
         unsafe {
             Reaper::get()
                 .medium_reaper()
                 .track_fx_get_param_normalized(
-                    self.fx.get_track().get_raw(),
-                    self.fx.get_query_index(),
+                    self.fx.track().raw(),
+                    self.fx.query_index(),
                     self.index,
                 )
                 .unwrap()
@@ -49,14 +49,14 @@ impl FxParameter {
     }
 
     pub fn is_available(&self) -> bool {
-        self.fx.is_available() && self.index < self.fx.get_parameter_count()
+        self.fx.is_available() && self.index < self.fx.parameter_count()
     }
 
-    pub fn get_name(&self) -> CString {
+    pub fn name(&self) -> CString {
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_param_name(
-                self.get_track_raw(),
-                self.fx.get_query_index(),
+                self.track_raw(),
+                self.fx.query_index(),
                 self.index,
                 256,
             )
@@ -64,17 +64,17 @@ impl FxParameter {
         .expect("Couldn't get FX parameter name")
     }
 
-    fn get_track_raw(&self) -> MediaTrack {
-        self.fx.get_track().get_raw()
+    fn track_raw(&self) -> MediaTrack {
+        self.fx.track().raw()
     }
 
-    pub fn get_character(&self) -> FxParameterCharacter {
+    pub fn character(&self) -> FxParameterCharacter {
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
                 .track_fx_get_parameter_step_sizes(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
+                    self.track_raw(),
+                    self.fx.query_index(),
                     self.index,
                 )
         };
@@ -86,13 +86,13 @@ impl FxParameter {
         }
     }
 
-    pub fn get_formatted_value(&self) -> CString {
+    pub fn formatted_value(&self) -> CString {
         unsafe {
             Reaper::get()
                 .medium_reaper()
                 .track_fx_get_formatted_param_value(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
+                    self.track_raw(),
+                    self.fx.query_index(),
                     self.index,
                     256,
                 )
@@ -100,11 +100,11 @@ impl FxParameter {
         .expect("Couldn't format FX param value")
     }
 
-    pub fn get_fx(&self) -> Fx {
+    pub fn fx(&self) -> Fx {
         self.fx.clone()
     }
 
-    pub fn get_index(&self) -> u32 {
+    pub fn index(&self) -> u32 {
         self.index
     }
 
@@ -116,8 +116,8 @@ impl FxParameter {
             Reaper::get()
                 .medium_reaper()
                 .track_fx_format_param_value_normalized(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
+                    self.track_raw(),
+                    self.fx.query_index(),
                     self.index,
                     normalized_value,
                     256,
@@ -130,13 +130,13 @@ impl FxParameter {
     // Returns None if no step size (continuous character)
     // TODO-low This is a too opinionated function in that it already interprets and processes some
     // of REAPER's return  values.
-    pub fn get_step_size(&self) -> Option<f64> {
+    pub fn step_size(&self) -> Option<f64> {
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
                 .track_fx_get_parameter_step_sizes(
-                    self.get_track_raw(),
-                    self.fx.get_query_index(),
+                    self.track_raw(),
+                    self.fx.query_index(),
                     self.index,
                 )
         }?;
@@ -147,7 +147,7 @@ impl FxParameter {
                 small_step,
                 ..
             } => {
-                let range = self.get_value_range();
+                let range = self.value_range();
                 // We are primarily interested in the smallest step size that makes sense. We can
                 // always create multiples of it.
                 let span = (range.max_val - range.min_val).abs();
@@ -162,11 +162,11 @@ impl FxParameter {
     }
 
     // Doesn't necessarily return normalized values
-    pub fn get_value_range(&self) -> FxParameterValueRange {
+    pub fn value_range(&self) -> FxParameterValueRange {
         let result = unsafe {
             Reaper::get().medium_reaper().track_fx_get_param_ex(
-                self.get_track_raw(),
-                self.fx.get_query_index(),
+                self.track_raw(),
+                self.fx.query_index(),
                 self.index,
             )
         };

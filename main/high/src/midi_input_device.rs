@@ -12,11 +12,11 @@ impl MidiInputDevice {
         MidiInputDevice { id }
     }
 
-    pub fn get_id(self) -> MidiInputDeviceId {
+    pub fn id(self) -> MidiInputDeviceId {
         self.id
     }
 
-    pub fn get_name(self) -> CString {
+    pub fn name(self) -> CString {
         Reaper::get()
             .medium_reaper()
             .get_midi_input_name(self.id, 33)

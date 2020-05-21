@@ -24,15 +24,15 @@ impl Volume {
         Volume::from_normalized_value(Reaper::get().medium_reaper().db2slider(db).get() / 1000.0)
     }
 
-    pub fn get_normalized_value(&self) -> f64 {
+    pub fn normalized_value(&self) -> f64 {
         self.normalized_value
     }
 
-    pub fn get_reaper_value(&self) -> ReaperVolumeValue {
-        ReaperVolumeValue::new((self.get_db().get() * LN10_OVER_TWENTY).exp())
+    pub fn reaper_value(&self) -> ReaperVolumeValue {
+        ReaperVolumeValue::new((self.db().get() * LN10_OVER_TWENTY).exp())
     }
 
-    pub fn get_db(&self) -> Db {
+    pub fn db(&self) -> Db {
         Reaper::get()
             .medium_reaper()
             .slider2db(VolumeSliderValue::new(self.normalized_value * 1000.0))

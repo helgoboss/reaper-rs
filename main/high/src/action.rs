@@ -65,7 +65,7 @@ impl Action {
         }
     }
 
-    pub fn get_index(&self) -> u32 {
+    pub fn index(&self) -> u32 {
         if let Some(cached_index) = self.load_if_necessary_or_complain().cached_index {
             return cached_index;
         }
@@ -78,7 +78,7 @@ impl Action {
         index
     }
 
-    pub fn get_section(&self) -> Section {
+    pub fn section(&self) -> Section {
         let rd = self.load_if_necessary_or_complain();
         rd.section
     }
@@ -117,12 +117,12 @@ impl Action {
         self.load_by_command_name()
     }
 
-    pub fn get_character(&self) -> ActionCharacter {
+    pub fn character(&self) -> ActionCharacter {
         let rd = self.load_if_necessary_or_complain();
         let state = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
+                .get_toggle_command_state_2(Sec(&rd.section.raw()), rd.command_id)
         };
         match state {
             Some(_) => ActionCharacter::Toggle,
@@ -135,12 +135,12 @@ impl Action {
         let state = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_toggle_command_state_2(Sec(&rd.section.get_raw()), rd.command_id)
+                .get_toggle_command_state_2(Sec(&rd.section.raw()), rd.command_id)
         };
         state == Some(true)
     }
 
-    pub fn get_command_id(&self) -> CommandId {
+    pub fn command_id(&self) -> CommandId {
         let rd = self.load_if_necessary_or_complain();
         rd.command_id
     }
@@ -148,7 +148,7 @@ impl Action {
     // TODO-low Don't copy into string. Split into command-based action and command-id based action
     //  and then return Option<&CStr> for the first (with same lifetime like self) and
     //  ReaperStringPtr alternative for the second
-    pub fn get_command_name(&self) -> Option<CString> {
+    pub fn command_name(&self) -> Option<CString> {
         self.command_name
             .as_ref()
             .map(|cn| cn.as_c_str().to_owned())
@@ -160,12 +160,12 @@ impl Action {
             })
     }
 
-    pub fn get_name(&self) -> Option<CString> {
+    pub fn name(&self) -> Option<CString> {
         let rd = self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().kbd_get_text_from_cmd(
                 rd.command_id,
-                SectionContext::Sec(&rd.section.get_raw()),
+                SectionContext::Sec(&rd.section.raw()),
                 |s| s.into(),
             )
         }
@@ -197,7 +197,7 @@ impl Action {
                     Win(reaper.get_main_hwnd()),
                     match project {
                         None => CurrentProject,
-                        Some(p) => Proj(p.get_raw()),
+                        Some(p) => Proj(p.raw()),
                     },
                 );
             }
@@ -213,7 +213,7 @@ impl Action {
                     Win(reaper.get_main_hwnd()),
                     match project {
                         None => CurrentProject,
-                        Some(p) => Proj(p.get_raw()),
+                        Some(p) => Proj(p.raw()),
                     },
                 );
             }
@@ -242,7 +242,7 @@ impl Action {
             Some(id) => id,
         };
         self.runtime_data.replace(Some(RuntimeData {
-            section: Reaper::get().get_main_section(),
+            section: Reaper::get().main_section(),
             command_id,
             cached_index: None,
         }));

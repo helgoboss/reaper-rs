@@ -86,14 +86,14 @@ impl HelperControlSurface {
         executor: RunLoopExecutor,
     ) -> HelperControlSurface {
         let reaper = Reaper::get();
-        let version = reaper.get_version();
+        let version = reaper.version();
         let reaper_version_5_95 = ReaperVersion::new("5.95");
         let surface = HelperControlSurface {
             main_thread_task_sender,
             main_thread_task_receiver,
             main_thread_executor: executor,
             main_thread_rx_task_receiver,
-            last_active_project: Cell::new(reaper.get_current_project()),
+            last_active_project: Cell::new(reaper.current_project()),
             num_track_set_changes_left_to_be_propagated: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
             project_datas: Default::default(),
@@ -115,7 +115,7 @@ impl HelperControlSurface {
         surface
     }
 
-    fn get_state(&self) -> State {
+    fn state(&self) -> State {
         if self.num_track_set_changes_left_to_be_propagated.get() == 0 {
             State::Normal
         } else {
@@ -124,14 +124,14 @@ impl HelperControlSurface {
     }
 
     fn find_track_data_in_normal_state(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
-        if self.get_state() == State::PropagatingTrackSetChanges {
+        if self.state() == State::PropagatingTrackSetChanges {
             return None;
         }
         self.find_track_data(track)
     }
 
     fn find_track_data_map(&self) -> Option<RefMut<TrackDataMap>> {
-        let rea_project = Reaper::get().get_current_project().get_raw();
+        let rea_project = Reaper::get().current_project().raw();
         if !self.project_datas.borrow().contains_key(&rea_project) {
             return None;
         }
@@ -157,13 +157,13 @@ impl HelperControlSurface {
         let env = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_envelope_by_name(track.get_raw(), parameter_name)
+                .get_track_envelope_by_name(track.raw(), parameter_name)
         };
         if env.is_none() {
             return false;
         }
         use AutomationMode::*;
-        match track.get_effective_automation_mode() {
+        match track.effective_automation_mode() {
             // Is not automated
             None | Some(TrimRead) | Some(Write) => false,
             // Is automated
@@ -190,11 +190,11 @@ impl HelperControlSurface {
     }
 
     fn detect_track_set_changes(&self) {
-        let project = Reaper::get().get_current_project();
+        let project = Reaper::get().current_project();
         let mut project_datas = self.project_datas.borrow_mut();
-        let track_datas = project_datas.entry(project.get_raw()).or_default();
+        let track_datas = project_datas.entry(project.raw()).or_default();
         let old_track_count = track_datas.len() as u32;
-        let new_track_count = project.get_track_count();
+        let new_track_count = project.track_count();
         use Ordering::*;
         match new_track_count.cmp(&old_track_count) {
             Less => self.remove_invalid_media_tracks(project, track_datas),
@@ -204,8 +204,8 @@ impl HelperControlSurface {
     }
 
     fn add_missing_media_tracks(&self, project: Project, track_datas: &mut TrackDataMap) {
-        for t in project.get_tracks() {
-            let media_track = t.get_raw();
+        for t in project.tracks() {
+            let media_track = t.raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let func = Reaper::get().medium_reaper();
                 let td = unsafe {
@@ -246,7 +246,7 @@ impl HelperControlSurface {
             return;
         }
         let mut fx_chain_pairs = self.fx_chain_pair_by_media_track.borrow_mut();
-        let fx_chain_pair = fx_chain_pairs.entry(track.get_raw()).or_default();
+        let fx_chain_pair = fx_chain_pairs.entry(track.raw()).or_default();
         let added_or_removed_output_fx = if check_normal_fx_chain {
             self.detect_fx_changes_on_track_internal(
                 &track,
@@ -285,11 +285,11 @@ impl HelperControlSurface {
     ) -> bool {
         let old_fx_count = old_fx_guids.len() as u32;
         let fx_chain = if is_input_fx {
-            track.get_input_fx_chain()
+            track.input_fx_chain()
         } else {
-            track.get_normal_fx_chain()
+            track.normal_fx_chain()
         };
-        let new_fx_count = fx_chain.get_fx_count();
+        let new_fx_count = fx_chain.fx_count();
         use Ordering::*;
         match new_fx_count.cmp(&old_fx_count) {
             Less => {
@@ -324,18 +324,18 @@ impl HelperControlSurface {
         is_input_fx: bool,
         notify_listeners_about_changes: bool,
     ) {
-        let new_fx_guids = self.get_fx_guids_on_track(track, is_input_fx);
+        let new_fx_guids = self.fx_guids_on_track(track, is_input_fx);
         old_fx_guids.retain(|old_fx_guid| {
             if new_fx_guids.contains(old_fx_guid) {
                 true
             } else {
                 if notify_listeners_about_changes {
                     let fx_chain = if is_input_fx {
-                        track.get_input_fx_chain()
+                        track.input_fx_chain()
                     } else {
-                        track.get_normal_fx_chain()
+                        track.normal_fx_chain()
                     };
-                    let removed_fx = fx_chain.get_fx_by_guid(old_fx_guid);
+                    let removed_fx = fx_chain.fx_by_guid(old_fx_guid);
                     Reaper::get()
                         .subjects
                         .fx_removed
@@ -355,27 +355,27 @@ impl HelperControlSurface {
         notify_listeners_about_changes: bool,
     ) {
         let fx_chain = if is_input_fx {
-            track.get_input_fx_chain()
+            track.input_fx_chain()
         } else {
-            track.get_normal_fx_chain()
+            track.normal_fx_chain()
         };
-        for fx in fx_chain.get_fxs() {
-            let was_inserted = fx_guids.insert(fx.get_guid().expect("No FX GUID set"));
+        for fx in fx_chain.fxs() {
+            let was_inserted = fx_guids.insert(fx.guid().expect("No FX GUID set"));
             if was_inserted && notify_listeners_about_changes {
                 Reaper::get().subjects.fx_added.borrow_mut().next(fx);
             }
         }
     }
 
-    fn get_fx_guids_on_track(&self, track: &Track, is_input_fx: bool) -> HashSet<Guid> {
+    fn fx_guids_on_track(&self, track: &Track, is_input_fx: bool) -> HashSet<Guid> {
         let fx_chain = if is_input_fx {
-            track.get_input_fx_chain()
+            track.input_fx_chain()
         } else {
-            track.get_normal_fx_chain()
+            track.normal_fx_chain()
         };
         fx_chain
-            .get_fxs()
-            .map(|fx| fx.get_guid().expect("No FX GUID set"))
+            .fxs()
+            .map(|fx| fx.guid().expect("No FX GUID set"))
             .collect()
     }
 
@@ -383,14 +383,14 @@ impl HelperControlSurface {
         track_datas.retain(|media_track, data| {
             if Reaper::get()
                 .medium_reaper()
-                .validate_ptr_2(Proj(project.get_raw()), *media_track)
+                .validate_ptr_2(Proj(project.raw()), *media_track)
             {
                 true
             } else {
                 self.fx_chain_pair_by_media_track
                     .borrow_mut()
                     .remove(media_track);
-                let track = project.get_track_by_guid(&data.guid);
+                let track = project.track_by_guid(&data.guid);
                 Reaper::get()
                     .subjects
                     .track_removed
@@ -405,7 +405,7 @@ impl HelperControlSurface {
         let mut tracks_have_been_reordered = false;
         for (media_track, track_data) in track_datas.iter_mut() {
             let reaper = Reaper::get().medium_reaper();
-            if !reaper.validate_ptr_2(Proj(project.get_raw()), *media_track) {
+            if !reaper.validate_ptr_2(Proj(project.raw()), *media_track) {
                 continue;
             }
             let new_number =
@@ -438,12 +438,12 @@ impl HelperControlSurface {
             )
         };
         let fx_chain = if is_input_fx {
-            track.get_input_fx_chain()
+            track.input_fx_chain()
         } else {
-            track.get_normal_fx_chain()
+            track.normal_fx_chain()
         };
-        if let Some(fx) = fx_chain.get_fx_by_index(args.fx_index as u32) {
-            let fx_param = fx.get_parameter_by_index(args.param_index as u32);
+        if let Some(fx) = fx_chain.fx_by_index(args.fx_index as u32) {
+            let fx_param = fx.parameter_by_index(args.param_index as u32);
             let reaper = Reaper::get();
             reaper
                 .subjects
@@ -469,7 +469,7 @@ impl HelperControlSurface {
         normalized_value: Option<ReaperNormalizedFxParamValue>,
     ) -> bool {
         let pairs = self.fx_chain_pair_by_media_track.borrow();
-        let pair = match pairs.get(&track.get_raw()) {
+        let pair = match pairs.get(&track.raw()) {
             None => {
                 // Should not happen. In this case, an FX yet unknown to Realearn has sent a
                 // parameter change
@@ -494,12 +494,12 @@ impl HelperControlSurface {
                 Some(i) => i,
             };
             // Compare parameter values (a heuristic but so what, it's just for MIDI learn)
-            match track.get_normal_fx_chain().get_fx_by_index(fx_index) {
+            match track.normal_fx_chain().fx_by_index(fx_index) {
                 None => true,
                 Some(output_fx) => {
-                    let output_fx_param = output_fx.get_parameter_by_index(param_index);
+                    let output_fx_param = output_fx.parameter_by_index(param_index);
                     let is_probably_output_fx =
-                        Some(output_fx_param.get_reaper_value()) == normalized_value;
+                        Some(output_fx_param.reaper_value()) == normalized_value;
                     !is_probably_output_fx
                 }
             }
@@ -512,7 +512,7 @@ impl HelperControlSurface {
     //   input FX chain.
     // In this case a heuristic is applied to determine which chain it is. It gets more accurate
     // when paramIndex and paramValue are supplied.
-    fn get_fx_from_parm_fx_index(
+    fn fx_from_parm_fx_index(
         &self,
         track: &Track,
         parm_fx_index: VersionDependentTrackFxLocation,
@@ -524,13 +524,13 @@ impl HelperControlSurface {
             Old(index) => {
                 let is_input_fx = self.is_probably_input_fx(track, index, param_index, param_value);
                 let fx_chain = if is_input_fx {
-                    track.get_input_fx_chain()
+                    track.input_fx_chain()
                 } else {
-                    track.get_normal_fx_chain()
+                    track.normal_fx_chain()
                 };
-                fx_chain.get_fx_by_index(index)
+                fx_chain.fx_by_index(index)
             }
-            New(fx_ref) => track.get_fx_by_query_index(fx_ref.to_raw()),
+            New(fx_ref) => track.fx_by_query_index(fx_ref.to_raw()),
         }
     }
 
@@ -582,7 +582,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn set_track_list_change(&self) {
         // TODO-low Not multi-project compatible!
-        let new_active_project = Reaper::get().get_current_project();
+        let new_active_project = Reaper::get().current_project();
         if new_active_project != self.last_active_project.get() {
             self.last_active_project.replace(new_active_project);
             Reaper::get()
@@ -592,7 +592,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
                 .next(new_active_project);
         }
         self.num_track_set_changes_left_to_be_propagated
-            .replace(new_active_project.get_track_count() + 1);
+            .replace(new_active_project.track_count() + 1);
         self.remove_invalid_rea_projects();
         self.detect_track_set_changes();
     }
@@ -712,7 +712,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
     }
 
     fn set_track_title(&self, args: SetTrackTitleArgs) {
-        if self.get_state() == State::PropagatingTrackSetChanges {
+        if self.state() == State::PropagatingTrackSetChanges {
             self.decrease_num_track_set_changes_left_to_be_propagated();
             return;
         }
@@ -767,7 +767,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
     fn ext_set_fx_enabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
-        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fx_location, None, None) {
+        if let Some(fx) = self.fx_from_parm_fx_index(&track, args.fx_location, None, None) {
             Reaper::get()
                 .subjects
                 .fx_enabled_changed
@@ -779,7 +779,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
         let track = Track::new(args.track, None);
-        let track_send = track.get_index_based_send_by_index(args.send_index);
+        let track_send = track.index_based_send_by_index(args.send_index);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -799,7 +799,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
 
     fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
         let track = Track::new(args.track, None);
-        let track_send = track.get_index_based_send_by_index(args.send_index);
+        let track_send = track.index_based_send_by_index(args.send_index);
         let reaper = Reaper::get();
         reaper
             .subjects
@@ -836,7 +836,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
             TrackFx(track_fx_ref) => {
                 // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
                 let track = Track::new(fx_ref.track, None);
-                if let Some(fx) = self.get_fx_from_parm_fx_index(&track, track_fx_ref, None, None) {
+                if let Some(fx) = self.fx_from_parm_fx_index(&track, track_fx_ref, None, None) {
                     // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2
                     // and on chunk manipulations
                     self.detect_fx_changes_on_track(
@@ -859,7 +859,7 @@ impl MediumReaperControlSurface for HelperControlSurface {
     fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
-        if let Some(fx) = self.get_fx_from_parm_fx_index(&track, args.fx_location, None, None) {
+        if let Some(fx) = self.fx_from_parm_fx_index(&track, args.fx_location, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
             // chunk manipulations
             self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());

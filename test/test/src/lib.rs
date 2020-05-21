@@ -89,8 +89,8 @@ fn reaper_version_matches(step: &TestStep) -> bool {
     use VersionRestriction::*;
     match &step.version_restriction {
         AllVersions => true,
-        Min(v) => Reaper::get().get_version() >= *v,
-        Max(v) => Reaper::get().get_version() <= *v,
+        Min(v) => Reaper::get().version() >= *v,
+        Max(v) => Reaper::get().version() <= *v,
     }
 }
 

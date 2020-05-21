@@ -59,65 +59,63 @@ impl Fx {
         }
     }
 
-    pub fn get_name(&self) -> CString {
+    pub fn name(&self) -> CString {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_fx_name(
-                self.track.get_raw(),
-                self.get_query_index(),
+                self.track.raw(),
+                self.query_index(),
                 256,
             )
         }
         .expect("Couldn't get track name")
     }
 
-    pub fn get_chunk(&self) -> ChunkRegion {
+    pub fn chunk(&self) -> ChunkRegion {
         self.load_if_necessary_or_complain();
-        self.get_chain()
-            .get_chunk()
+        self.chain()
+            .chunk()
             .unwrap()
-            .find_line_starting_with(self.get_fx_id_line().as_str())
+            .find_line_starting_with(self.fx_id_line().as_str())
             .unwrap()
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
             .move_right_cursor_right_to_start_of_line_beginning_with("WAK 0")
             .move_right_cursor_right_to_end_of_current_line()
     }
 
-    fn get_fx_id_line(&self) -> String {
-        get_fx_id_line(&self.get_guid().expect("Couldn't get GUID"))
+    fn fx_id_line(&self) -> String {
+        get_fx_id_line(&self.guid().expect("Couldn't get GUID"))
     }
 
-    pub fn get_tag_chunk(&self) -> ChunkRegion {
+    pub fn tag_chunk(&self) -> ChunkRegion {
         self.load_if_necessary_or_complain();
-        self.get_chain()
-            .get_chunk()
+        self.chain()
+            .chunk()
             .unwrap()
-            .find_line_starting_with(self.get_fx_id_line().as_str())
+            .find_line_starting_with(self.fx_id_line().as_str())
             .unwrap()
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
             .find_first_tag(0)
             .unwrap()
     }
 
-    pub fn get_state_chunk(&self) -> ChunkRegion {
-        self.get_tag_chunk()
+    pub fn state_chunk(&self) -> ChunkRegion {
+        self.tag_chunk()
             .move_left_cursor_right_to_start_of_next_line()
             .move_right_cursor_left_to_end_of_previous_line()
     }
 
     // Attention: Currently implemented by parsing chunk
-    pub fn get_info(&self) -> FxInfo {
-        FxInfo::from_first_line_of_tag_chunk(&self.get_tag_chunk().get_first_line().get_content())
-            .unwrap()
+    pub fn info(&self) -> FxInfo {
+        FxInfo::from_first_line_of_tag_chunk(&self.tag_chunk().first_line().content()).unwrap()
     }
 
-    pub fn get_parameter_count(&self) -> u32 {
+    pub fn parameter_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_num_params(self.track.get_raw(), self.get_query_index())
-                as u32
+                .track_fx_get_num_params(self.track.raw(), self.query_index()) as u32
         }
     }
 
@@ -125,32 +123,32 @@ impl Fx {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_enabled(self.track.get_raw(), self.get_query_index())
+                .track_fx_get_enabled(self.track.raw(), self.query_index())
         }
     }
 
-    pub fn get_parameters(&self) -> impl Iterator<Item = FxParameter> + '_ {
+    pub fn parameters(&self) -> impl Iterator<Item = FxParameter> + '_ {
         self.load_if_necessary_or_complain();
-        (0..self.get_parameter_count()).map(move |i| self.get_parameter_by_index(i))
+        (0..self.parameter_count()).map(move |i| self.parameter_by_index(i))
     }
 
-    pub fn get_guid(&self) -> Option<Guid> {
+    pub fn guid(&self) -> Option<Guid> {
         self.guid
     }
 
-    pub fn get_parameter_by_index(&self, index: u32) -> FxParameter {
+    pub fn parameter_by_index(&self, index: u32) -> FxParameter {
         FxParameter::new(self.clone(), index)
     }
 
-    pub fn get_track(&self) -> Track {
+    pub fn track(&self) -> Track {
         self.track.clone()
     }
 
-    pub fn get_query_index(&self) -> TrackFxLocation {
-        get_fx_query_index(self.get_index(), self.is_input_fx)
+    pub fn query_index(&self) -> TrackFxLocation {
+        get_fx_query_index(self.index(), self.is_input_fx)
     }
 
-    pub fn get_index(&self) -> u32 {
+    pub fn index(&self) -> u32 {
         if !self.is_loaded_and_at_correct_index() {
             self.load_by_guid();
         }
@@ -175,30 +173,27 @@ impl Fx {
             None => true, // No GUID tracking
             Some(guid) => {
                 // Loaded but might be at wrong index
-                self.get_guid_by_index(index) == Some(guid)
+                self.guid_by_index(index) == Some(guid)
             }
         }
     }
 
     // Returns None if no FX at that index anymore
-    fn get_guid_by_index(&self, index: u32) -> Option<Guid> {
+    fn guid_by_index(&self, index: u32) -> Option<Guid> {
         get_fx_guid(&self.track, index, self.is_input_fx)
     }
 
     fn load_by_guid(&self) -> bool {
-        if !self.get_chain().is_available() {
+        if !self.chain().is_available() {
             return false;
         }
         let guid = match self.guid {
             None => return false, // No GUID tracking
             Some(guid) => guid,
         };
-        let found_fx = self
-            .get_chain()
-            .get_fxs()
-            .find(|fx| fx.get_guid() == Some(guid));
+        let found_fx = self.chain().fxs().find(|fx| fx.guid() == Some(guid));
         if let Some(fx) = found_fx {
-            self.index.replace(Some(fx.get_index()));
+            self.index.replace(Some(fx.index()));
             true
         } else {
             false
@@ -218,30 +213,30 @@ impl Fx {
     // care about lifetimes).
     pub fn set_chunk(&self, chunk_region: ChunkRegion) {
         // First replace GUID in chunk with the one of this FX
-        let mut parent_chunk = chunk_region.get_parent_chunk();
+        let mut parent_chunk = chunk_region.parent_chunk();
         if let Some(fx_id_line) = chunk_region.find_line_starting_with("FXID ") {
             // TODO-low Mmh. We assume here that this is a guid-based FX!?
-            let guid = self.get_guid().expect("FX doesn't have GUID");
+            let guid = self.guid().expect("FX doesn't have GUID");
             parent_chunk.replace_region(&fx_id_line, get_fx_id_line(&guid).as_str());
         }
         // Then set new chunk
-        self.replace_track_chunk_region(self.get_chunk(), chunk_region.get_content().deref());
+        self.replace_track_chunk_region(self.chunk(), chunk_region.content().deref());
     }
 
     pub fn set_tag_chunk(&self, chunk: &str) {
-        self.replace_track_chunk_region(self.get_tag_chunk(), chunk);
+        self.replace_track_chunk_region(self.tag_chunk(), chunk);
     }
 
     pub fn set_state_chunk(&self, chunk: &str) {
-        self.replace_track_chunk_region(self.get_state_chunk(), chunk);
+        self.replace_track_chunk_region(self.state_chunk(), chunk);
     }
 
-    pub fn get_floating_window(&self) -> Option<Hwnd> {
+    pub fn floating_window(&self) -> Option<Hwnd> {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_floating_window(self.track.get_raw(), self.get_query_index())
+                .track_fx_get_floating_window(self.track.raw(), self.query_index())
         }
     }
 
@@ -249,12 +244,12 @@ impl Fx {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_open(self.track.get_raw(), self.get_query_index())
+                .track_fx_get_open(self.track.raw(), self.query_index())
         }
     }
 
     pub fn window_has_focus(&self) -> bool {
-        match self.get_floating_window() {
+        match self.floating_window() {
             None => {
                 // FX is not open in floating window. In this case we consider it as focused if the
                 // FX chain of that track is open and the currently displayed FX in
@@ -275,32 +270,32 @@ impl Fx {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_show(
-                self.track.get_raw(),
-                FxShowInstruction::ShowFloatingWindow(self.get_query_index()),
+                self.track.raw(),
+                FxShowInstruction::ShowFloatingWindow(self.query_index()),
             );
         }
     }
 
     fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {
-        let mut old_chunk = old_chunk_region.get_parent_chunk();
+        let mut old_chunk = old_chunk_region.parent_chunk();
         old_chunk.replace_region(&old_chunk_region, new_content);
         std::mem::drop(old_chunk_region);
         self.track.set_chunk(old_chunk);
     }
 
-    pub fn get_chain(&self) -> FxChain {
+    pub fn chain(&self) -> FxChain {
         if self.is_input_fx {
-            self.track.get_input_fx_chain()
+            self.track.input_fx_chain()
         } else {
-            self.track.get_normal_fx_chain()
+            self.track.normal_fx_chain()
         }
     }
 
     pub fn enable(&self) {
         unsafe {
             Reaper::get().medium_reaper().track_fx_set_enabled(
-                self.track.get_raw(),
-                self.get_query_index(),
+                self.track.raw(),
+                self.query_index(),
                 true,
             );
         }
@@ -309,8 +304,8 @@ impl Fx {
     pub fn disable(&self) {
         unsafe {
             Reaper::get().medium_reaper().track_fx_set_enabled(
-                self.track.get_raw(),
-                self.get_query_index(),
+                self.track.raw(),
+                self.query_index(),
                 false,
             );
         }
@@ -329,13 +324,13 @@ impl Fx {
         }
     }
 
-    pub fn get_preset_count(&self) -> u32 {
+    pub fn preset_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
         // TODO-low Integrate into ReaPlus (current preset index?)
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_preset_index(self.track.get_raw(), self.get_query_index())
+                .track_fx_get_preset_index(self.track.raw(), self.query_index())
         }
         .expect("Couldn't get preset count")
         .count
@@ -345,20 +340,20 @@ impl Fx {
         self.load_if_necessary_or_complain();
         !unsafe {
             Reaper::get().medium_reaper().track_fx_get_preset(
-                self.track.get_raw(),
-                self.get_query_index(),
+                self.track.raw(),
+                self.query_index(),
                 0,
             )
         }
         .state_matches_preset
     }
 
-    pub fn get_preset_name(&self) -> Option<CString> {
+    pub fn preset_name(&self) -> Option<CString> {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_preset(
-                self.track.get_raw(),
-                self.get_query_index(),
+                self.track.raw(),
+                self.query_index(),
                 2000,
             )
         }
@@ -371,7 +366,7 @@ pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid>
     let internal = unsafe {
         Reaper::get()
             .medium_reaper()
-            .track_fx_get_fx_guid(track.get_raw(), query_index)
+            .track_fx_get_fx_guid(track.raw(), query_index)
     }
     .ok();
     internal.map(Guid::new)

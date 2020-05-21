@@ -14,11 +14,11 @@ impl Pan {
         Pan::from_normalized_value((reaper_value.get() + 1.0) / 2.0)
     }
 
-    pub fn get_normalized_value(&self) -> f64 {
+    pub fn normalized_value(&self) -> f64 {
         self.normalized_value
     }
 
-    pub fn get_reaper_value(&self) -> ReaperPanValue {
+    pub fn reaper_value(&self) -> ReaperPanValue {
         ReaperPanValue::new(self.normalized_value * 2.0 - 1.0)
     }
 }

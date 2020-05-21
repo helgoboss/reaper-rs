@@ -780,8 +780,7 @@ impl Reaper {
             return None;
         }
         self.undo_block_is_active.replace(true);
-        self.medium_reaper()
-            .undo_begin_block_2(Proj(project.get_raw()));
+        self.medium_reaper().undo_begin_block_2(Proj(project.raw()));
         Some(UndoBlock::new(project, label))
     }
 
@@ -792,7 +791,7 @@ impl Reaper {
             return;
         }
         self.medium_reaper()
-            .undo_end_block_2(Proj(project.get_raw()), label, All);
+            .undo_end_block_2(Proj(project.raw()), label, All);
         self.undo_block_is_active.replace(false);
     }
 
@@ -897,8 +896,8 @@ struct HighLevelHookPostCommand {}
 impl MediumHookPostCommand for HighLevelHookPostCommand {
     fn call(command_id: CommandId, _flag: i32) {
         let action = Reaper::get()
-            .get_main_section()
-            .get_action_by_command_id(command_id);
+            .main_section()
+            .action_by_command_id(command_id);
         Reaper::get()
             .subjects
             .action_invoked

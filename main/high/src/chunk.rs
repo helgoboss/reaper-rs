@@ -45,7 +45,7 @@ pub struct ChunkRegion {
 
 impl Display for ChunkRegion {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.get_content())
+        write!(f, "{}", self.content())
     }
 }
 
@@ -56,11 +56,11 @@ impl Chunk {
         }
     }
 
-    pub fn get_content(&self) -> Rc<RefCell<String>> {
+    pub fn content(&self) -> Rc<RefCell<String>> {
         self.content.clone()
     }
 
-    pub fn get_region(&self) -> ChunkRegion {
+    pub fn region(&self) -> ChunkRegion {
         ChunkRegion::new(self.clone(), 0, self.content.borrow().len())
     }
 
@@ -68,29 +68,29 @@ impl Chunk {
         self.require_valid_region(region);
         self.content
             .borrow_mut()
-            .insert_str(region.get_start_pos(), content);
+            .insert_str(region.start_pos(), content);
     }
 
     pub fn insert_after_region(&mut self, region: &ChunkRegion, content: &str) {
         self.require_valid_region(region);
         self.content
             .borrow_mut()
-            .insert_str(region.get_end_pos_plus_one(), content);
+            .insert_str(region.end_pos_plus_one(), content);
     }
 
     pub fn insert_before_region_as_block(&mut self, region: &ChunkRegion, content: &str) {
         self.insert_before_region(region, content);
         self.insert_new_lines_if_necessary_at(
-            region.get_start_pos(),
-            region.get_start_pos() + content.len(),
+            region.start_pos(),
+            region.start_pos() + content.len(),
         );
     }
 
     pub fn insert_after_region_as_block(&mut self, region: &ChunkRegion, content: &str) {
         self.insert_after_region(region, content);
         self.insert_new_lines_if_necessary_at(
-            region.get_end_pos_plus_one(),
-            region.get_end_pos_plus_one() + content.len(),
+            region.end_pos_plus_one(),
+            region.end_pos_plus_one() + content.len(),
         );
     }
 
@@ -145,31 +145,31 @@ impl ChunkRegion {
         }
     }
 
-    pub fn get_parent_chunk(&self) -> Chunk {
+    pub fn parent_chunk(&self) -> Chunk {
         self.parent_chunk.clone()
     }
 
-    pub fn get_first_line(&self) -> ChunkRegion {
+    pub fn first_line(&self) -> ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        self.get_content()
+        self.content()
             .find('\n')
             .map(|rel_pos| self.create_region_from_relative_start_pos(0, rel_pos))
             .unwrap_or_else(|| self.clone())
     }
 
-    pub fn get_last_line(&self) -> ChunkRegion {
+    pub fn last_line(&self) -> ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        self.get_content()
+        self.content()
             .rfind('\n')
             .map(|rel_pos_of_newline| {
                 let rel_pos_after_newline = rel_pos_of_newline + 1;
                 self.create_region_from_relative_start_pos(
                     rel_pos_after_newline,
-                    self.get_length() - rel_pos_after_newline,
+                    self.length() - rel_pos_after_newline,
                 )
             })
             .unwrap_or_else(|| self.clone())
@@ -192,7 +192,7 @@ impl ChunkRegion {
         if !self.is_valid() {
             return None;
         }
-        let content = self.get_content();
+        let content = self.content();
         if content.len() < needle.len() {
             return None;
         }
@@ -209,7 +209,7 @@ impl ChunkRegion {
         })
     }
 
-    pub fn get_content(&self) -> Ref<str> {
+    pub fn content(&self) -> Ref<str> {
         if self.is_valid() {
             Ref::map(self.parent_chunk.content.borrow(), |r| {
                 &r[self.start_pos..(self.start_pos + self.length)]
@@ -242,7 +242,7 @@ impl ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        let rel_pos = match self.get_content().find(needle) {
+        let rel_pos = match self.content().find(needle) {
             None => return self.create_invalid_region(),
             Some(p) => p,
         };
@@ -253,7 +253,7 @@ impl ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        let rel_start_pos_of_needle = match self.get_content().rfind(needle) {
+        let rel_start_pos_of_needle = match self.content().rfind(needle) {
             None => return self.create_invalid_region(),
             Some(p) => p,
         };
@@ -268,11 +268,11 @@ impl ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        let after = self.get_after();
+        let after = self.after();
         if !after.is_valid() {
             return self.clone();
         }
-        let after_content = after.get_content();
+        let after_content = after.content();
         match after_content.find(needle) {
             None => self.create_invalid_region(),
             Some(rel_pos) => self.move_right_cursor_right_by(rel_pos),
@@ -306,11 +306,11 @@ impl ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
-        let before = self.get_before();
+        let before = self.before();
         if !before.is_valid() {
             return self.create_invalid_region();
         }
-        let start_pos_of_needle = match before.get_content().rfind(needle) {
+        let start_pos_of_needle = match before.content().rfind(needle) {
             None => return self.create_invalid_region(),
             Some(p) => p,
         };
@@ -325,33 +325,33 @@ impl ChunkRegion {
             .move_right_cursor_right_by(1)
     }
 
-    pub fn get_before(&self) -> ChunkRegion {
+    pub fn before(&self) -> ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
         ChunkRegion::new(self.parent_chunk.clone(), 0, self.start_pos)
     }
 
-    pub fn get_after(&self) -> ChunkRegion {
+    pub fn after(&self) -> ChunkRegion {
         if !self.is_valid() {
             return self.clone();
         }
         ChunkRegion::new(
             self.parent_chunk.clone(),
-            self.get_end_pos_plus_one(),
-            self.parent_chunk.content.borrow().len() - self.get_end_pos_plus_one(),
+            self.end_pos_plus_one(),
+            self.parent_chunk.content.borrow().len() - self.end_pos_plus_one(),
         )
     }
 
-    pub fn get_end_pos_plus_one(&self) -> usize {
+    pub fn end_pos_plus_one(&self) -> usize {
         self.start_pos + self.length
     }
 
-    pub fn get_start_pos(&self) -> usize {
+    pub fn start_pos(&self) -> usize {
         self.start_pos
     }
 
-    pub fn get_length(&self) -> usize {
+    pub fn length(&self) -> usize {
         self.length
     }
 
@@ -383,7 +383,7 @@ impl ChunkRegion {
         if !self.is_valid() {
             return None;
         }
-        let content = self.get_content();
+        let content = self.content();
         if content[relative_search_start_pos..].starts_with('<') {
             self.parse_tag_starting_from(relative_search_start_pos)
         } else {
@@ -402,21 +402,21 @@ impl ChunkRegion {
         if !self.is_valid() {
             return false;
         }
-        self.get_content().starts_with(needle)
+        self.content().starts_with(needle)
     }
 
     pub fn ends_with(&self, needle: &str) -> bool {
         if !self.is_valid() {
             return false;
         }
-        self.get_content().ends_with(needle)
+        self.content().ends_with(needle)
     }
 
     pub fn contains(&self, needle: &str) -> bool {
         if !self.is_valid() {
             return false;
         }
-        self.get_content().contains(needle)
+        self.content().contains(needle)
     }
 
     // Precondition: isValid
@@ -426,7 +426,7 @@ impl ChunkRegion {
         one_of: &str,
         mut rel_start_pos: usize,
     ) -> Option<usize> {
-        let content = self.get_content();
+        let content = self.content();
         while rel_start_pos < content.len() {
             let needle_pos_relative_to_rel_start_pos = match content[rel_start_pos..].find(needle) {
                 None => return None, // Needle not found
@@ -458,7 +458,7 @@ impl ChunkRegion {
     fn parse_tag_starting_from(&self, rel_tag_opener_pos: usize) -> Option<ChunkRegion> {
         let mut rel_start_pos = rel_tag_opener_pos + 1;
         let mut open_levels_count = 1;
-        let content = self.get_content();
+        let content = self.content();
         while rel_start_pos < content.len() {
             let rel_tag_opener_or_closer_pos =
                 match self.find_followed_by_one_of("\n", "<>", rel_start_pos) {
