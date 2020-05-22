@@ -1,5 +1,5 @@
 //! This module defines various newtypes in order to achieve more type safety.
-use crate::ReaperStringArg;
+use crate::{ReaperStr, ReaperStringArg};
 use derive_more::*;
 use std::borrow::Cow;
 use std::ffi::CStr;
@@ -456,7 +456,7 @@ impl From<ReaperPanValue> for f64 {
 
 /// Represents a particular version of REAPER.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
-pub struct ReaperVersion<'a>(Cow<'a, CStr>);
+pub struct ReaperVersion<'a>(Cow<'a, ReaperStr>);
 
 impl<'a> ReaperVersion<'a> {
     /// Creates a REAPER version.
@@ -465,7 +465,7 @@ impl<'a> ReaperVersion<'a> {
     }
 
     /// Consumes this version and spits out the contained cow.
-    pub fn into_inner(self) -> Cow<'a, CStr> {
+    pub fn into_inner(self) -> Cow<'a, ReaperStr> {
         self.0
     }
 }

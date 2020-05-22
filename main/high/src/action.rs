@@ -1,6 +1,6 @@
 use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_medium::{ActionValueChange, CommandId, SectionContext};
+use reaper_medium::{ActionValueChange, CommandId, ReaperString, SectionContext};
 
 use helgoboss_midi::U7;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
@@ -156,17 +156,19 @@ impl Action {
                 let rd = self.runtime_data.borrow();
                 Reaper::get()
                     .medium_reaper()
-                    .reverse_named_command_lookup(rd.as_ref().unwrap().command_id, |s| s.into())
+                    .reverse_named_command_lookup(rd.as_ref().unwrap().command_id, |s| {
+                        s.as_c_str().to_owned()
+                    })
             })
     }
 
-    pub fn name(&self) -> CString {
+    pub fn name(&self) -> ReaperString {
         let rd = self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get()
                 .medium_reaper()
                 .kbd_get_text_from_cmd(rd.command_id, SectionContext::Sec(&rd.section.raw()), |s| {
-                    s.into()
+                    s.to_owned()
                 })
                 .expect("action not existing")
         }

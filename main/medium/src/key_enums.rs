@@ -1,4 +1,4 @@
-use crate::{concat_c_strs, ReaperStringArg};
+use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
 use c_str_macro::c_str;
 
 use std::borrow::Cow;
@@ -42,7 +42,7 @@ pub enum TrackAttributeKey<'a> {
     /// Use [`ext()`] to create this variant.
     ///
     /// [`ext()`]: #method.ext
-    Ext(Cow<'a, CStr>),
+    Ext(Cow<'a, ReaperStr>),
     /// 6-byte GUID, can query or update.
     ///
     /// `*mut GUID`
@@ -366,7 +366,7 @@ pub enum TrackAttributeKey<'a> {
     /// Use [`custom()`] to create this variant.
     ///
     /// [`custom()`]: #method.custom
-    Custom(Cow<'a, CStr>),
+    Custom(Cow<'a, ReaperStr>),
 }
 
 impl<'a> TrackAttributeKey<'a> {
@@ -384,66 +384,67 @@ impl<'a> TrackAttributeKey<'a> {
         TrackAttributeKey::Custom(key.into().into_inner())
     }
 
-    pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
         use TrackAttributeKey::*;
         match self {
-            FreeMode => c_str!("B_FREEMODE").into(),
-            HeightLock => c_str!("B_HEIGHTLOCK").into(),
-            MainSend => c_str!("B_MAINSEND").into(),
-            Mute => c_str!("B_MUTE").into(),
-            Phase => c_str!("B_PHASE").into(),
-            ShowInMixer => c_str!("B_SHOWINMIXER").into(),
-            ShowInTcp => c_str!("B_SHOWINTCP").into(),
-            BeatAttachMode => c_str!("C_BEATATTACHMODE").into(),
-            MainSendOffs => c_str!("C_MAINSEND_OFFS").into(),
-            DualPanL => c_str!("D_DUALPANL").into(),
-            DualPanR => c_str!("D_DUALPANR").into(),
-            Pan => c_str!("D_PAN").into(),
-            PanLaw => c_str!("D_PANLAW").into(),
-            PlayOffset => c_str!("D_PLAY_OFFSET").into(),
-            Vol => c_str!("D_VOL").into(),
-            Width => c_str!("D_WIDTH").into(),
-            McpFxSendScale => c_str!("F_MCP_FXSEND_SCALE").into(),
-            McpSendRgnScale => c_str!("F_MCP_SENDRGN_SCALE").into(),
-            Guid => c_str!("GUID").into(),
-            AutoMode => c_str!("I_AUTOMODE").into(),
-            CustomColor => c_str!("I_CUSTOMCOLOR").into(),
-            FolderCompact => c_str!("I_FOLDERCOMPACT").into(),
-            FolderDepth => c_str!("I_FOLDERDEPTH").into(),
-            FxEn => c_str!("I_FXEN").into(),
-            HeightOverride => c_str!("I_HEIGHTOVERRIDE").into(),
-            McpH => c_str!("I_MCPH").into(),
-            McpW => c_str!("I_MCPW").into(),
-            McpX => c_str!("I_MCPX").into(),
-            McpY => c_str!("I_MCPY").into(),
-            MidiHwOut => c_str!("I_MIDIHWOUT").into(),
-            Nchan => c_str!("I_NCHAN").into(),
-            PanMode => c_str!("I_PANMODE").into(),
-            PerfFlags => c_str!("I_PERFFLAGS").into(),
-            PlayOffsetFlag => c_str!("I_PLAY_OFFSET_FLAG").into(),
-            RecArm => c_str!("I_RECARM").into(),
-            RecInput => c_str!("I_RECINPUT").into(),
-            RecMode => c_str!("I_RECMODE").into(),
-            RecMon => c_str!("I_RECMON").into(),
-            RecMonItems => c_str!("I_RECMONITEMS").into(),
-            Selected => c_str!("I_SELECTED").into(),
-            Solo => c_str!("I_SOLO").into(),
-            TcpH => c_str!("I_TCPH").into(),
-            TcpY => c_str!("I_TCPY").into(),
-            WndH => c_str!("I_WNDH").into(),
-            TrackNumber => c_str!("IP_TRACKNUMBER").into(),
+            FreeMode => reaper_str!("B_FREEMODE").into(),
+            HeightLock => reaper_str!("B_HEIGHTLOCK").into(),
+            MainSend => reaper_str!("B_MAINSEND").into(),
+            Mute => reaper_str!("B_MUTE").into(),
+            Phase => reaper_str!("B_PHASE").into(),
+            ShowInMixer => reaper_str!("B_SHOWINMIXER").into(),
+            ShowInTcp => reaper_str!("B_SHOWINTCP").into(),
+            BeatAttachMode => reaper_str!("C_BEATATTACHMODE").into(),
+            MainSendOffs => reaper_str!("C_MAINSEND_OFFS").into(),
+            DualPanL => reaper_str!("D_DUALPANL").into(),
+            DualPanR => reaper_str!("D_DUALPANR").into(),
+            Pan => reaper_str!("D_PAN").into(),
+            PanLaw => reaper_str!("D_PANLAW").into(),
+            PlayOffset => reaper_str!("D_PLAY_OFFSET").into(),
+            Vol => reaper_str!("D_VOL").into(),
+            Width => reaper_str!("D_WIDTH").into(),
+            McpFxSendScale => reaper_str!("F_MCP_FXSEND_SCALE").into(),
+            McpSendRgnScale => reaper_str!("F_MCP_SENDRGN_SCALE").into(),
+            Guid => reaper_str!("GUID").into(),
+            AutoMode => reaper_str!("I_AUTOMODE").into(),
+            CustomColor => reaper_str!("I_CUSTOMCOLOR").into(),
+            FolderCompact => reaper_str!("I_FOLDERCOMPACT").into(),
+            FolderDepth => reaper_str!("I_FOLDERDEPTH").into(),
+            FxEn => reaper_str!("I_FXEN").into(),
+            HeightOverride => reaper_str!("I_HEIGHTOVERRIDE").into(),
+            McpH => reaper_str!("I_MCPH").into(),
+            McpW => reaper_str!("I_MCPW").into(),
+            McpX => reaper_str!("I_MCPX").into(),
+            McpY => reaper_str!("I_MCPY").into(),
+            MidiHwOut => reaper_str!("I_MIDIHWOUT").into(),
+            Nchan => reaper_str!("I_NCHAN").into(),
+            PanMode => reaper_str!("I_PANMODE").into(),
+            PerfFlags => reaper_str!("I_PERFFLAGS").into(),
+            PlayOffsetFlag => reaper_str!("I_PLAY_OFFSET_FLAG").into(),
+            RecArm => reaper_str!("I_RECARM").into(),
+            RecInput => reaper_str!("I_RECINPUT").into(),
+            RecMode => reaper_str!("I_RECMODE").into(),
+            RecMon => reaper_str!("I_RECMON").into(),
+            RecMonItems => reaper_str!("I_RECMONITEMS").into(),
+            Selected => reaper_str!("I_SELECTED").into(),
+            Solo => reaper_str!("I_SOLO").into(),
+            TcpH => reaper_str!("I_TCPH").into(),
+            TcpY => reaper_str!("I_TCPY").into(),
+            WndH => reaper_str!("I_WNDH").into(),
+            TrackNumber => reaper_str!("IP_TRACKNUMBER").into(),
             Env(env_chunk_name) => {
-                concat_c_strs(c_str!("P_ENV:<"), env_chunk_name.into_raw().as_ref()).into()
+                concat_reaper_strs(reaper_str!("P_ENV:<"), env_chunk_name.into_raw().as_ref())
+                    .into()
             }
             Ext(extension_specific_key) => {
-                concat_c_strs(c_str!("P_EXT:"), extension_specific_key.as_ref()).into()
+                concat_reaper_strs(reaper_str!("P_EXT:"), extension_specific_key.as_ref()).into()
             }
-            Icon => c_str!("P_ICON").into(),
-            McpLayout => c_str!("P_MCP_LAYOUT").into(),
-            Name => c_str!("P_NAME").into(),
-            ParTrack => c_str!("P_PARTRACK").into(),
-            Project => c_str!("P_PROJECT").into(),
-            TcpLayout => c_str!("P_TCP_LAYOUT").into(),
+            Icon => reaper_str!("P_ICON").into(),
+            McpLayout => reaper_str!("P_MCP_LAYOUT").into(),
+            Name => reaper_str!("P_NAME").into(),
+            ParTrack => reaper_str!("P_PARTRACK").into(),
+            Project => reaper_str!("P_PROJECT").into(),
+            TcpLayout => reaper_str!("P_TCP_LAYOUT").into(),
             Custom(key) => key,
         }
     }
@@ -477,7 +478,7 @@ pub enum TrackSendAttributeKey<'a> {
     /// Use [`ext()`] to create this variant.
     ///
     /// [`ext()`]: #method.ext
-    Ext(Cow<'a, CStr>),
+    Ext(Cow<'a, ReaperStr>),
     /// Muted.
     ///
     /// `*mut bool`
@@ -555,7 +556,7 @@ pub enum TrackSendAttributeKey<'a> {
     /// Use [`custom()`] to create this variant.
     ///
     /// [`custom()`]: #method.custom
-    Custom(Cow<'a, CStr>),
+    Custom(Cow<'a, ReaperStr>),
 }
 
 impl<'a> TrackSendAttributeKey<'a> {
@@ -573,26 +574,27 @@ impl<'a> TrackSendAttributeKey<'a> {
         TrackSendAttributeKey::Custom(key.into().into_inner())
     }
 
-    pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
         use TrackSendAttributeKey::*;
         match self {
-            Mono => c_str!("B_MONO").into(),
-            Mute => c_str!("B_MUTE").into(),
-            Phase => c_str!("B_PHASE").into(),
-            Pan => c_str!("D_PAN").into(),
-            PanLaw => c_str!("D_PANLAW").into(),
-            Vol => c_str!("D_VOL").into(),
-            AutoMode => c_str!("I_AUTOMODE").into(),
-            DstChan => c_str!("I_DSTCHAN").into(),
-            MidiFlags => c_str!("I_MIDIFLAGS").into(),
-            SendMode => c_str!("I_SENDMODE").into(),
-            SrcChan => c_str!("I_SRCCHAN").into(),
-            DestTrack => c_str!("P_DESTTRACK").into(),
-            SrcTrack => c_str!("P_SRCTRACK").into(),
+            Mono => reaper_str!("B_MONO").into(),
+            Mute => reaper_str!("B_MUTE").into(),
+            Phase => reaper_str!("B_PHASE").into(),
+            Pan => reaper_str!("D_PAN").into(),
+            PanLaw => reaper_str!("D_PANLAW").into(),
+            Vol => reaper_str!("D_VOL").into(),
+            AutoMode => reaper_str!("I_AUTOMODE").into(),
+            DstChan => reaper_str!("I_DSTCHAN").into(),
+            MidiFlags => reaper_str!("I_MIDIFLAGS").into(),
+            SendMode => reaper_str!("I_SENDMODE").into(),
+            SrcChan => reaper_str!("I_SRCCHAN").into(),
+            DestTrack => reaper_str!("P_DESTTRACK").into(),
+            SrcTrack => reaper_str!("P_SRCTRACK").into(),
             Env(env_chunk_name) => {
-                concat_c_strs(c_str!("P_ENV:<"), env_chunk_name.into_raw().as_ref()).into()
+                concat_reaper_strs(reaper_str!("P_ENV:<"), env_chunk_name.into_raw().as_ref())
+                    .into()
             }
-            Ext(key) => concat_c_strs(c_str!("P_EXT:"), key.as_ref()).into(),
+            Ext(key) => concat_reaper_strs(reaper_str!("P_EXT:"), key.as_ref()).into(),
             Custom(key) => key,
         }
     }
@@ -624,7 +626,7 @@ pub enum EnvChunkName<'a> {
     /// Use [`custom()`] to create this variant.
     ///
     /// [`custom()`]: #method.custom
-    Custom(Cow<'a, CStr>),
+    Custom(Cow<'a, ReaperStr>),
 }
 
 impl<'a> EnvChunkName<'a> {
@@ -635,17 +637,17 @@ impl<'a> EnvChunkName<'a> {
         EnvChunkName::Custom(name.into().into_inner())
     }
 
-    pub(crate) fn into_raw(self) -> Cow<'a, CStr> {
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
         use EnvChunkName::*;
         match self {
-            VolEnv => c_str!("VOLENV").into(),
-            PanEnv => c_str!("PANENV").into(),
-            VolEnv2 => c_str!("VOLENV2").into(),
-            PanEnv2 => c_str!("PANENV2").into(),
-            WidthEnv => c_str!("WIDTHENV").into(),
-            WidthEnv2 => c_str!("WIDTHENV2").into(),
-            VolEnv3 => c_str!("VOLENV3").into(),
-            MuteEnv => c_str!("MUTEENV").into(),
+            VolEnv => reaper_str!("VOLENV").into(),
+            PanEnv => reaper_str!("PANENV").into(),
+            VolEnv2 => reaper_str!("VOLENV2").into(),
+            PanEnv2 => reaper_str!("PANENV2").into(),
+            WidthEnv => reaper_str!("WIDTHENV").into(),
+            WidthEnv2 => reaper_str!("WIDTHENV2").into(),
+            VolEnv3 => reaper_str!("VOLENV3").into(),
+            MuteEnv => reaper_str!("MUTEENV").into(),
             Custom(name) => name,
         }
     }
@@ -658,24 +660,26 @@ mod tests {
     #[test]
     fn serialize_track_attribute_key() {
         use TrackAttributeKey::*;
-        assert_eq!(Mute.into_raw().as_ref(), c_str!("B_MUTE"));
+        assert_eq!(Mute.into_raw().as_ref(), reaper_str!("B_MUTE"));
         assert_eq!(
             Env(EnvChunkName::VolEnv).into_raw().as_ref(),
-            c_str!("P_ENV:<VOLENV")
+            reaper_str!("P_ENV:<VOLENV")
         );
         assert_eq!(
-            Env(EnvChunkName::Custom(c_str!("MYENV").into()))
+            Env(EnvChunkName::Custom(reaper_str!("MYENV").into()))
                 .into_raw()
                 .as_ref(),
-            c_str!("P_ENV:<MYENV")
+            reaper_str!("P_ENV:<MYENV")
         );
         assert_eq!(
             TrackAttributeKey::ext("SWS_FOO").into_raw().as_ref(),
-            c_str!("P_EXT:SWS_FOO")
+            reaper_str!("P_EXT:SWS_FOO")
         );
         assert_eq!(
-            TrackAttributeKey::custom(c_str!("BLA")).into_raw().as_ref(),
-            c_str!("BLA")
+            TrackAttributeKey::custom(reaper_str!("BLA"))
+                .into_raw()
+                .as_ref(),
+            reaper_str!("BLA")
         );
     }
 }

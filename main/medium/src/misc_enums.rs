@@ -1,5 +1,5 @@
 use crate::{
-    Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject, ReaperStringArg,
+    Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject, ReaperStr, ReaperStringArg,
     TryFromRawError,
 };
 use c_str_macro::c_str;
@@ -413,7 +413,7 @@ pub enum RegistrationObject<'a> {
     /// register with "command_id", parameter is a unique string with only A-Z, 0-9,
     /// returns command ID (or 0 if not supported/out of actions)
     /// </pre>
-    CommandId(Cow<'a, CStr>),
+    CommandId(Cow<'a, ReaperStr>),
     // CommandIdLookup(*mut c_void),
     /// An action description and shortcut.
     ///
@@ -438,7 +438,7 @@ pub enum RegistrationObject<'a> {
     /// Use [`custom()`] to create this variant.
     ///
     /// [`custom()`]: #method.custom
-    Custom(Cow<'a, CStr>, *mut c_void),
+    Custom(Cow<'a, ReaperStr>, *mut c_void),
 }
 
 impl<'a> RegistrationObject<'a> {
@@ -478,20 +478,21 @@ impl<'a> RegistrationObject<'a> {
         }
     }
 
-    pub(crate) fn key_into_raw(self) -> Cow<'a, CStr> {
+    pub(crate) fn key_into_raw(self) -> Cow<'a, ReaperStr> {
         use RegistrationObject::*;
         match self {
-            // Api(func_name, _) => concat_c_strs(c_str!("API_"), func_name.as_ref()).into(),
-            // ApiDef(func_name, _) => concat_c_strs(c_str!("APIdef_"), func_name.as_ref()).into(),
-            HookCommand(_) => c_str!("hookcommand").into(),
-            HookPostCommand(_) => c_str!("hookpostcommand").into(),
-            // HookCommand2(_) => c_str!("hookcommand2").into(),
-            ToggleAction(_) => c_str!("toggleaction").into(),
-            // ActionHelp(_) => c_str!("action_help").into(),
-            CommandId(_) => c_str!("command_id").into(),
-            // CommandIdLookup(_) => c_str!("command_id_lookup").into(),
-            Gaccel(_) => c_str!("gaccel").into(),
-            CsurfInst(_) => c_str!("csurf_inst").into(),
+            // Api(func_name, _) => concat_c_strs(reaper_str!("API_"), func_name.as_ref()).into(),
+            // ApiDef(func_name, _) => concat_c_strs(reaper_str!("APIdef_"),
+            // func_name.as_ref()).into(),
+            HookCommand(_) => reaper_str!("hookcommand").into(),
+            HookPostCommand(_) => reaper_str!("hookpostcommand").into(),
+            // HookCommand2(_) => reaper_str!("hookcommand2").into(),
+            ToggleAction(_) => reaper_str!("toggleaction").into(),
+            // ActionHelp(_) => reaper_str!("action_help").into(),
+            CommandId(_) => reaper_str!("command_id").into(),
+            // CommandIdLookup(_) => reaper_str!("command_id_lookup").into(),
+            Gaccel(_) => reaper_str!("gaccel").into(),
+            CsurfInst(_) => reaper_str!("csurf_inst").into(),
             Custom(key, _) => key,
         }
     }

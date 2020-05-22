@@ -1,4 +1,4 @@
-use crate::{CommandId, ReaperStringArg};
+use crate::{CommandId, ReaperStr, ReaperStringArg};
 use reaper_low::raw;
 use reaper_low::raw::gaccel_register_t;
 use std::borrow::Cow;
@@ -13,7 +13,7 @@ use std::os::raw::c_ushort;
 // ===========================================
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct MediumGaccelRegister {
-    owned_desc: Cow<'static, CStr>,
+    owned_desc: Cow<'static, ReaperStr>,
     inner: gaccel_register_t,
 }
 

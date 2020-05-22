@@ -1,5 +1,5 @@
 use super::{MediaItem, MediaItemTake, MediaTrack, ReaProject, TrackEnvelope};
-use crate::{concat_c_strs, ReaperStringArg};
+use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
 use c_str_macro::c_str;
 use reaper_low::raw;
 use std::borrow::Cow;
@@ -22,7 +22,7 @@ pub enum ReaperPointer<'a> {
     ///
     /// [`custom()`]: #method.custom
     Custom {
-        type_name: Cow<'a, CStr>,
+        type_name: Cow<'a, ReaperStr>,
         pointer: *mut c_void,
     },
 }
@@ -33,26 +33,29 @@ impl<'a> ReaperPointer<'a> {
     /// **Don't** include the trailing asterisk (`*`)! It will be added automatically.
     ///
     /// [`Custom`]: #variant.Custom
-    pub fn custom(pointer: *mut c_void, type_name: impl Into<ReaperStringArg<'a>>) -> Self {
-        Self::Custom {
+    pub fn custom(
+        pointer: *mut c_void,
+        type_name: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperPointer<'a> {
+        ReaperPointer::Custom {
             pointer,
             type_name: type_name.into().into_inner(),
         }
     }
 
-    pub(crate) fn key_into_raw(self) -> Cow<'a, CStr> {
+    pub(crate) fn key_into_raw(self) -> Cow<'a, ReaperStr> {
         use ReaperPointer::*;
         match self {
-            MediaTrack(_) => c_str!("MediaTrack*").into(),
-            ReaProject(_) => c_str!("ReaProject*").into(),
-            MediaItem(_) => c_str!("MediaItem*").into(),
-            MediaItemTake(_) => c_str!("MediaItem_Take*").into(),
-            TrackEnvelope(_) => c_str!("TrackEnvelope*").into(),
-            PcmSource(_) => c_str!("PCM_source*").into(),
+            MediaTrack(_) => reaper_str!("MediaTrack*").into(),
+            ReaProject(_) => reaper_str!("ReaProject*").into(),
+            MediaItem(_) => reaper_str!("MediaItem*").into(),
+            MediaItemTake(_) => reaper_str!("MediaItem_Take*").into(),
+            TrackEnvelope(_) => reaper_str!("TrackEnvelope*").into(),
+            PcmSource(_) => reaper_str!("PCM_source*").into(),
             Custom {
                 pointer: _,
                 type_name,
-            } => concat_c_strs(type_name.as_ref(), c_str!("*")).into(),
+            } => concat_reaper_strs(type_name.as_ref(), reaper_str!("*")).into(),
         }
     }
 

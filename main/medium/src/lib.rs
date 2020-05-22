@@ -133,7 +133,7 @@
 //!       Consumers can easily convert them to regular Rust strings when needed. Example:
 //!       [`guid_to_string()`](struct.Reaper.html#method.guid_to_string)
 //!     - When returning a string owned by REAPER and we know that string has a static lifetime, we
-//!       return a `&'static` [`ReaperStr`](struct.ReaperStr.html). Example:
+//!       return a `'static` reference. Example:
 //!       [`get_app_version()`](struct.Reaper.html#method.get_app_version)
 //!     - When returning a string owned by REAPER and we can't give it a proper lifetime annotation
 //!       (in most cases we can't), we grant the user only temporary access to that string by taking
@@ -304,6 +304,9 @@
 //!
 //!
 //! [`ReaperSession`]: struct.ReaperSession.html
+
+#[macro_use]
+mod macros;
 
 mod misc_enums;
 pub use misc_enums::*;

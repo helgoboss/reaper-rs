@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::borrow::{Borrow, Cow};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
@@ -9,7 +9,8 @@ use std::os::raw::c_char;
 ///
 /// # Design
 ///
-/// This is a wrapper around a `Cow<CStr>`.
+/// This is a wrapper around a `Cow<ReaperStr>`, where `ReaperStr` is essentially a `CStr` with
+/// UTF-8 guarantee.
 ///
 /// ## Why C strings and not regular Rust strings?
 ///
@@ -53,16 +54,16 @@ use std::os::raw::c_char;
 //
 // This type doesn't need to derive common traits because the consumer never interacts with it
 // directly.
-pub struct ReaperStringArg<'a>(Cow<'a, CStr>);
+pub struct ReaperStringArg<'a>(Cow<'a, ReaperStr>);
 
 impl<'a> ReaperStringArg<'a> {
     /// Returns a raw pointer to the string. Used by code in this crate only.
-    pub(super) fn as_ptr(&self) -> *const c_char {
-        self.0.as_ptr()
+    pub(crate) fn as_ptr(&self) -> *const c_char {
+        self.0.as_c_str().as_ptr()
     }
 
     /// Consumes this value and spits out the contained cow. Used by code in this crate only.
-    pub(super) fn into_inner(self) -> Cow<'a, CStr> {
+    pub(crate) fn into_inner(self) -> Cow<'a, ReaperStr> {
         self.0
     }
 }
@@ -73,6 +74,14 @@ impl<'a> ReaperStringArg<'a> {
 // we can still add that later.
 impl<'a> From<&'a CStr> for ReaperStringArg<'a> {
     fn from(s: &'a CStr) -> Self {
+        ReaperStringArg(ReaperStr::new(s).into())
+    }
+}
+
+// This is basically the same. Especially suited for passing strings returned by REAPER directly
+// back into REAPER functions.
+impl<'a> From<&'a ReaperStr> for ReaperStringArg<'a> {
+    fn from(s: &'a ReaperStr) -> Self {
         ReaperStringArg(s.into())
     }
 }
@@ -83,9 +92,7 @@ impl<'a> From<&'a str> for ReaperStringArg<'a> {
     fn from(s: &'a str) -> Self {
         // Requires copying
         ReaperStringArg(
-            CString::new(s)
-                .expect("Rust string too exotic for REAPER")
-                .into(),
+            ReaperString::new(CString::new(s).expect("Rust string too exotic for REAPER")).into(),
         )
     }
 }
@@ -98,26 +105,39 @@ impl<'a> From<String> for ReaperStringArg<'a> {
     fn from(s: String) -> Self {
         // Doesn't require copying because we own the string now
         ReaperStringArg(
-            CString::new(s)
-                .expect("Rust string too exotic for REAPER")
-                .into(),
+            ReaperString::new(CString::new(s).expect("Rust string too exotic for REAPER")).into(),
         )
     }
 }
 
 /// An owned string created by REAPER.
 ///
-/// This type is used in return positions of _reaper-rs_ functions. It wraps a `CString` because
-/// REAPER creates C strings. The benefit over just returning `CString` is that this type provides
-/// convenience methods for converting to Rust strings directly. Whereas arbitrary `CString`s can
-/// have all kinds of encodings, we know that REAPER uses UTF-8, so this type can be optimistic and
-/// converts without returning a `Result`.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+/// This is is essentially a `CString` with UTF-8 guarantee.
+///
+/// # Design
+///
+/// This type is used primarily in return positions of _reaper-rs_ functions. It wraps a `CString`
+/// because REAPER creates C strings. The benefit over just returning `CString` is that this type
+/// provides convenience methods for converting to Rust strings directly. Whereas arbitrary
+/// `CString`s can have all kinds of encodings, we know that REAPER uses UTF-8, so this type can be
+/// optimistic and converts without returning a `Result`.
+//
+// It's important that this string is guaranteed to be UTF-8. We achieve that by trusting REAPER
+// that it returns UTF-8 strings only and by letting consumers create such strings via Rust
+// strings only (which are UTF-8 encoded). So it's essential that we don't have a public conversion
+// from `CString` into `ReaperString`!!!
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ReaperString(CString);
 
 impl ReaperString {
+    // Don't make this public!
     pub(crate) fn new(inner: CString) -> ReaperString {
         ReaperString(inner)
+    }
+
+    /// Returns a raw pointer to the string. Used by code in this crate only.
+    pub(crate) fn as_ptr(&self) -> *const c_char {
+        self.0.as_ptr()
     }
 
     /// Consumes this value and spits out the contained C string.
@@ -125,7 +145,7 @@ impl ReaperString {
         self.0
     }
 
-    /// Converts this to a Rust string slice.
+    /// Converts this value to a Rust string slice.
     ///
     /// # Panics
     ///
@@ -136,7 +156,7 @@ impl ReaperString {
             .expect("REAPER string should be UTF-8 encoded")
     }
 
-    /// Consumes this and converts it to an owned Rust string.
+    /// Consumes this value and converts it to an owned Rust string.
     ///
     /// # Panics
     ///
@@ -148,6 +168,20 @@ impl ReaperString {
     }
 }
 
+// Necessary for `ToOwned` in other direction.
+impl Borrow<ReaperStr> for ReaperString {
+    fn borrow(&self) -> &ReaperStr {
+        ReaperStr::new(&self.0)
+    }
+}
+
+// This is important because we use `ReaperStr` often as cows (e.g. in enums).
+impl<'a> From<ReaperString> for Cow<'a, ReaperStr> {
+    fn from(value: ReaperString) -> Self {
+        Cow::Owned(value)
+    }
+}
+
 /// A borrowed string owned by REAPER.
 ///
 /// _reaper-rs_ functions pass this type to consumer-provided closures.
@@ -155,20 +189,35 @@ impl ReaperString {
 /// See [`ReaperString`] for further details.
 ///
 /// [`ReaperString`]: struct.ReaperString.html
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
-pub struct ReaperStr<'a>(&'a CStr);
+#[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct ReaperStr(CStr);
 
-impl<'a> ReaperStr<'a> {
-    pub(crate) fn new(inner: &'a CStr) -> ReaperStr<'a> {
-        ReaperStr(inner)
+// TODO-medium Test if this type can really be used only as reference.
+// TODO-medium Change other borrow-only types to be available as references only, too!
+impl ReaperStr {
+    // Don't make this public!
+    pub(crate) fn new(inner: &CStr) -> &ReaperStr {
+        unsafe { &*(inner as *const CStr as *const ReaperStr) }
     }
 
-    /// Spits out the contained borrowed C string.
-    pub fn into_inner(self) -> &'a CStr {
-        self.0
+    /// Returns a raw pointer to the string. Used by code in this crate only.
+    pub(crate) fn as_ptr(&self) -> *const c_char {
+        self.0.as_ptr()
     }
 
-    /// Converts this to a Rust string slice.
+    /// Converts a `ReaperStr` to an owned [`ReaperString`].
+    ///
+    /// [`ReaperString`]: struct.ReaperString.html
+    pub fn to_reaper_string(&self) -> ReaperString {
+        ReaperString::new(self.0.to_owned())
+    }
+
+    /// Yields the underlying `&CStr`.
+    pub fn as_c_str(&self) -> &CStr {
+        &self.0
+    }
+
+    /// Converts this value to a Rust string slice.
     ///
     /// # Panics
     ///
@@ -177,5 +226,22 @@ impl<'a> ReaperStr<'a> {
         self.0
             .to_str()
             .expect("REAPER string should be UTF-8 encoded")
+    }
+}
+
+// Important for high-level API in order to just turn a borrowed REAPER string into an owned one
+// without doing any conversions and still keeping up the UTF-8 guarantee.
+impl ToOwned for ReaperStr {
+    type Owned = ReaperString;
+
+    fn to_owned(&self) -> Self::Owned {
+        self.to_reaper_string()
+    }
+}
+
+// This is important because we use `ReaperStr` often as cows (e.g. in enums).
+impl<'a> From<&'a ReaperStr> for Cow<'a, ReaperStr> {
+    fn from(value: &'a ReaperStr) -> Self {
+        Cow::Borrowed(value)
     }
 }

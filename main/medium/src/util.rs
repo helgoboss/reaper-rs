@@ -1,5 +1,9 @@
-use std::ffi::{CStr, CString};
+use crate::{ReaperStr, ReaperString};
+use std::ffi::CString;
 
-pub(crate) fn concat_c_strs(first: &CStr, second: &CStr) -> CString {
-    CString::new([first.to_bytes(), second.to_bytes()].concat()).expect("impossible")
+pub(crate) fn concat_reaper_strs(first: &ReaperStr, second: &ReaperStr) -> ReaperString {
+    ReaperString::new(
+        CString::new([first.as_c_str().to_bytes(), second.as_c_str().to_bytes()].concat())
+            .expect("impossible"),
+    )
 }

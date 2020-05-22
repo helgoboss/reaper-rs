@@ -1,7 +1,7 @@
 use super::MediaTrack;
 use crate::{
     require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
     TrackFxChainType, TrackFxLocation, TryFromRawError,
 };
 
@@ -234,10 +234,11 @@ pub struct SetRepeatStateArgs {
     pub is_enabled: bool,
 }
 
+// TODO-medium Remove underscore from param names
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct SetTrackTitleArgs<'a> {
     pub track: MediaTrack,
-    pub name: &'a CStr,
+    pub name: &'a ReaperStr,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -562,7 +563,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const i8) {
         self.delegate.set_track_title(SetTrackTitleArgs {
             track: require_non_null_panic(trackid),
-            name: unsafe { CStr::from_ptr(title) },
+            name: ReaperStr::new(unsafe { CStr::from_ptr(title) }),
         })
     }
 

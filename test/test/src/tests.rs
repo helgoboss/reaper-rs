@@ -228,10 +228,10 @@ fn redo() -> TestStep {
         let label = project.label_of_last_undoable_action();
         // Then
         assert!(successful);
-        assert_eq!(track.name().as_c_str(), c_str!("Renamed"));
+        assert_eq!(track.name().ok_or("no track name")?.to_str(), "Renamed");
         assert_eq!(
-            label,
-            Some(c_str!("reaper-rs integration test operation").to_owned())
+            label.ok_or("no undo label")?.to_str(),
+            "reaper-rs integration test operation"
         );
         Ok(())
     })
@@ -247,10 +247,10 @@ fn undo() -> TestStep {
         let label = project.label_of_last_redoable_action();
         // Then
         assert!(successful);
-        assert_eq!(track.name().as_bytes().len(), 0);
+        assert_eq!(track.name().ok_or("no track name")?.to_str().len(), 0);
         assert_eq!(
-            label,
-            Some(c_str!("reaper-rs integration test operation").to_owned())
+            label.ok_or("no redo label")?.to_str(),
+            "reaper-rs integration test operation"
         );
         Ok(())
     })
@@ -276,10 +276,10 @@ fn use_undoable() -> TestStep {
         });
         let label = project.label_of_last_undoable_action();
         // Then
-        assert_eq!(track.name().as_c_str(), c_str!("Renamed"));
+        assert_eq!(track.name().ok_or("no track name")?.to_str(), "Renamed");
         assert_eq!(
-            label,
-            Some(c_str!("reaper-rs integration test operation").to_owned())
+            label.ok_or("no undo label")?.to_str(),
+            "reaper-rs integration test operation"
         );
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), track);
@@ -360,7 +360,10 @@ fn insert_track_at() -> TestStep {
         assert_eq!(project.track_count(), 4);
         assert_eq!(new_track.location(), TrackRef::NormalTrack(1));
         assert_eq!(new_track.index(), Some(1));
-        assert_eq!(new_track.name().as_c_str(), c_str!("Inserted track"));
+        assert_eq!(
+            new_track.name().ok_or("no track name")?.to_str(),
+            "Inserted track"
+        );
         assert_eq!(track_2.index(), Some(2));
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), new_track);
@@ -403,10 +406,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
                 action.command_name(),
                 Some(c_str!("reaperRsTest2").to_owned())
             );
-            assert_eq!(
-                action.name(),
-                c_str!("reaper-rs test toggle action").to_owned()
-            );
+            assert_eq!(action.name().to_str(), "reaper-rs test toggle action");
             reg.unregister();
             assert!(!action.is_available());
             Ok(())
@@ -446,7 +446,7 @@ fn register_and_unregister_action() -> TestStep {
                 Some(c_str!("reaperRsTest").to_owned())
             );
             assert!(!action.is_on());
-            assert_eq!(action.name(), c_str!("reaper-rs test action").to_owned());
+            assert_eq!(action.name().to_str(), "reaper-rs test action");
             reg.unregister();
             assert!(!action.is_available());
             Ok(())
@@ -646,8 +646,8 @@ fn query_action() -> TestStep {
         assert_eq!(toggle_action.command_id(), CommandId::new(6));
         assert!(toggle_action.command_name().is_none());
         assert_eq!(
-            toggle_action.name(),
-            c_str!("Track: Toggle mute for selected tracks").to_owned()
+            toggle_action.name().to_str(),
+            "Track: Toggle mute for selected tracks"
         );
         assert!(toggle_action.index() > 0);
         assert_eq!(toggle_action.section(), Reaper::get().main_section());
@@ -1567,7 +1567,7 @@ fn set_track_name() -> TestStep {
         });
         track.set_name(c_str!("Foo Bla"));
         // Then
-        assert_eq!(track.name(), c_str!("Foo Bla").to_owned());
+        assert_eq!(track.name().ok_or("no track name")?.to_str(), "Foo Bla");
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), track);
         Ok(())
@@ -1581,7 +1581,7 @@ fn query_track_name() -> TestStep {
         // When
         let track_name = track.name();
         // Then
-        assert_eq!(track_name.as_bytes().len(), 0);
+        assert_eq!(track_name.ok_or("no track name")?.to_str().len(), 0);
         Ok(())
     })
 }

@@ -10,11 +10,11 @@ use reaper_low::{
 use crate::infostruct_keeper::InfostructKeeper;
 
 use crate::{
-    concat_c_strs, delegating_hook_command, delegating_hook_post_command, delegating_toggle_action,
-    CommandId, DelegatingControlSurface, MainThreadScope, MediumAudioHookRegister,
-    MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope, Reaper,
-    ReaperFunctionError, ReaperFunctionResult, ReaperStringArg, RegistrationObject,
+    concat_reaper_strs, delegating_hook_command, delegating_hook_post_command,
+    delegating_toggle_action, CommandId, DelegatingControlSurface, MainThreadScope,
+    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
+    MediumOnAudioBuffer, MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope,
+    Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperStringArg, RegistrationObject,
 };
 use reaper_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
@@ -167,7 +167,8 @@ impl ReaperSession {
     /// [`plugin_register_add()`]: #method.plugin_register_add
     pub unsafe fn plugin_register_remove(&mut self, object: RegistrationObject) -> i32 {
         let infostruct = object.ptr_to_raw();
-        let name_with_minus = concat_c_strs(c_str!("-"), object.clone().key_into_raw().as_ref());
+        let name_with_minus =
+            concat_reaper_strs(reaper_str!("-"), object.clone().key_into_raw().as_ref());
         let result = self
             .reaper
             .low()

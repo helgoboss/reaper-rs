@@ -5,7 +5,8 @@ use crate::{Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    MasterTrackBehavior, ProjectRef, ReaProject, TrackDefaultsBehavior, TrackRef, UndoBehavior,
+    MasterTrackBehavior, ProjectRef, ReaProject, ReaperString, TrackDefaultsBehavior, TrackRef,
+    UndoBehavior,
 };
 use std::path::PathBuf;
 
@@ -209,18 +210,18 @@ impl Project {
             .is_project_dirty(Proj(self.rea_project))
     }
 
-    pub fn label_of_last_undoable_action(self) -> Option<CString> {
+    pub fn label_of_last_undoable_action(self) -> Option<ReaperString> {
         self.complain_if_not_available();
         Reaper::get()
             .medium_reaper()
-            .undo_can_undo_2(Proj(self.rea_project), |s| s.into())
+            .undo_can_undo_2(Proj(self.rea_project), |s| s.to_owned())
     }
 
-    pub fn label_of_last_redoable_action(self) -> Option<CString> {
+    pub fn label_of_last_redoable_action(self) -> Option<ReaperString> {
         self.complain_if_not_available();
         Reaper::get()
             .medium_reaper()
-            .undo_can_redo_2(Proj(self.rea_project), |s| s.into())
+            .undo_can_redo_2(Proj(self.rea_project), |s| s.to_owned())
     }
 
     pub fn tempo(self) -> Tempo {

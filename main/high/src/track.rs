@@ -21,8 +21,8 @@ use reaper_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Sel
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, RecordArmMode, RecordingInput, TrackRef,
-    TrackSendCategory,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, RecordArmMode, RecordingInput,
+    TrackRef, TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -86,14 +86,13 @@ impl Track {
     }
 
     // TODO-low Maybe return borrowed string instead!
-    pub fn name(&self) -> CString {
+    pub fn name(&self) -> Option<ReaperString> {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_set_media_track_info_get_name(self.raw(), |n| n.into())
+                .get_set_media_track_info_get_name(self.raw(), |n| n.to_owned())
         }
-        .unwrap_or_else(|| c_str!("<Master track>").to_owned())
     }
 
     pub fn input_monitoring_mode(&self) -> InputMonitoringMode {

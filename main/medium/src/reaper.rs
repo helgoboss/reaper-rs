@@ -18,8 +18,8 @@ use crate::{
     MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
     NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectRef, ReaProject,
     ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperPointer, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode,
-    RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
+    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
     TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
     TrackRef, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
@@ -486,7 +486,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_track_info_get_name<R>(
         &self,
         track: MediaTrack,
-        use_name: impl FnOnce(&CStr) -> R,
+        use_name: impl FnOnce(&ReaperStr) -> R,
     ) -> Option<R>
     where
         UsageScope: MainThreadOnly,
@@ -1752,7 +1752,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub fn undo_can_undo_2<R>(
         &self,
         project: ProjectContext,
-        use_description: impl FnOnce(&CStr) -> R,
+        use_description: impl FnOnce(&ReaperStr) -> R,
     ) -> Option<R>
     where
         UsageScope: MainThreadOnly,
@@ -1773,7 +1773,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn undo_can_undo_2_unchecked<R>(
         &self,
         project: ProjectContext,
-        use_description: impl FnOnce(&CStr) -> R,
+        use_description: impl FnOnce(&ReaperStr) -> R,
     ) -> Option<R>
     where
         UsageScope: MainThreadOnly,
@@ -1792,7 +1792,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub fn undo_can_redo_2<R>(
         &self,
         project: ProjectContext,
-        use_description: impl FnOnce(&CStr) -> R,
+        use_description: impl FnOnce(&ReaperStr) -> R,
     ) -> Option<R>
     where
         UsageScope: MainThreadOnly,
@@ -1813,7 +1813,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn undo_can_redo_2_unchecked<R>(
         &self,
         project: ProjectContext,
-        use_description: impl FnOnce(&CStr) -> R,
+        use_description: impl FnOnce(&ReaperStr) -> R,
     ) -> Option<R>
     where
         UsageScope: MainThreadOnly,
@@ -3066,7 +3066,7 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         command_id: CommandId,
         section: SectionContext,
-        use_action_name: impl FnOnce(&CStr) -> R,
+        use_action_name: impl FnOnce(&ReaperStr) -> R,
     ) -> Option<R>
     where
         UsageScope: MainThreadOnly,
@@ -3077,7 +3077,7 @@ impl<UsageScope> Reaper<UsageScope> {
             .kbd_getTextFromCmd(command_id.get() as _, section.to_raw());
         create_passing_c_str(ptr)
             // Removed action returns empty string for some reason. We want None in this case!
-            .filter(|s| !s.to_bytes().is_empty())
+            .filter(|s| !s.as_c_str().to_bytes().is_empty())
             .map(use_action_name)
     }
 
@@ -3120,7 +3120,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub fn reverse_named_command_lookup<R>(
         &self,
         command_id: CommandId,
-        use_command_name: impl FnOnce(&CStr) -> R,
+        use_command_name: impl FnOnce(&ReaperStr) -> R,
     ) -> Option<R>
     where
         UsageScope: MainThreadOnly,
@@ -3540,11 +3540,11 @@ unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
     deref(ptr as *const T)
 }
 
-unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a CStr> {
+unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a ReaperStr> {
     if ptr.is_null() {
         return None;
     }
-    Some(CStr::from_ptr(ptr))
+    Some(ReaperStr::new(CStr::from_ptr(ptr)))
 }
 
 fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
