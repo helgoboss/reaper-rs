@@ -196,9 +196,9 @@ impl<'a> From<ReaperString> for Cow<'a, ReaperStr> {
 #[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ReaperStr(CStr);
 
-// TODO-medium Change other borrow-only types to be available as references only, too!
 impl ReaperStr {
     // Don't make this public!
+    // This uses the same technique like `Path`.
     pub(crate) fn new(inner: &CStr) -> &ReaperStr {
         unsafe { &*(inner as *const CStr as *const ReaperStr) }
     }
