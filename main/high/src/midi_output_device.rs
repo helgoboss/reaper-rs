@@ -1,7 +1,6 @@
 use crate::Reaper;
 use reaper_medium::{MidiOutputDeviceId, ReaperString};
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiOutputDevice {
     id: MidiOutputDeviceId,

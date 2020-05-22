@@ -8,7 +8,7 @@ use helgoboss_midi::ShortMessage;
 use reaper_medium::{
     CommandId, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd, MidiInputDeviceId,
     MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
-    StuffMidiMessageTarget, TrackRef,
+    StuffMidiMessageTarget, TrackLocation,
 };
 use std::ffi::CString;
 
@@ -40,13 +40,13 @@ impl Reaper {
                 use GetLastTouchedFxResult::*;
                 match result {
                     TrackFx {
-                        track_ref,
+                        track_location,
                         fx_location,
                         param_index,
                     } => {
                         // Track exists in this project
-                        use TrackRef::*;
-                        let track = match track_ref {
+                        use TrackLocation::*;
+                        let track = match track_location {
                             MasterTrack => self.current_project().master_track(),
                             NormalTrack(idx) => {
                                 if idx >= self.current_project().track_count() {
@@ -78,13 +78,13 @@ impl Reaper {
             match res {
                 TakeFx { .. } => None, // TODO-low implement
                 TrackFx {
-                    track_ref,
+                    track_location,
                     fx_location,
                 } => {
                     // We don't know the project so we must check each project
                     self.projects()
                         .filter_map(|p| {
-                            let track = p.track_by_ref(track_ref)?;
+                            let track = p.track_by_ref(track_location)?;
                             let fx = track.fx_by_query_index(fx_location.to_raw())?;
                             if fx.window_has_focus() {
                                 Some(fx)

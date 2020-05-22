@@ -24,7 +24,7 @@ use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
     AutomationMode, Bpm, CommandId, Db, GangBehavior, InputMonitoringMode, MasterTrackBehavior,
     MidiInputDeviceId, MidiOutputDeviceId, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperVersion, ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackRef,
+    ReaperVersion, ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackLocation,
     UndoBehavior, ValueChange,
 };
 
@@ -358,7 +358,7 @@ fn insert_track_at() -> TestStep {
         new_track.set_name(c_str!("Inserted track"));
         // Then
         assert_eq!(project.track_count(), 4);
-        assert_eq!(new_track.location(), TrackRef::NormalTrack(1));
+        assert_eq!(new_track.location(), TrackLocation::NormalTrack(1));
         assert_eq!(new_track.index(), Some(1));
         assert_eq!(
             new_track.name().ok_or("no track name")?.to_str(),
@@ -794,10 +794,10 @@ fn remove_track() -> TestStep {
         let project = Reaper::get().current_project();
         let track_count_before = project.track_count();
         let track_1 = project
-            .track_by_ref(TrackRef::NormalTrack(0))
+            .track_by_ref(TrackLocation::NormalTrack(0))
             .ok_or("Missing track 1")?;
         let track_2 = project
-            .track_by_ref(TrackRef::NormalTrack(1))
+            .track_by_ref(TrackLocation::NormalTrack(1))
             .ok_or("Missing track 2")?;
         let track_2_guid = track_2.guid();
         assert!(track_1.is_available());
@@ -1653,7 +1653,7 @@ fn query_master_track() -> TestStep {
         // When
         let master_track = project.master_track();
         // Then
-        assert_eq!(master_track.location(), TrackRef::MasterTrack);
+        assert_eq!(master_track.location(), TrackLocation::MasterTrack);
         assert!(master_track.is_master_track());
         Ok(())
     })

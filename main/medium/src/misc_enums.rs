@@ -3,7 +3,6 @@ use crate::{
     TryFromRawError,
 };
 
-
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
@@ -516,9 +515,8 @@ impl<'a> RegistrationObject<'a> {
 }
 
 /// Type and location of a certain track.
-/// TODO-medium Rename to TrackLocation?
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum TrackRef {
+pub enum TrackLocation {
     /// The master track of a project.
     MasterTrack,
     /// Index of a normal track.

@@ -21,7 +21,7 @@ use crate::{
     ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
     RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
     TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackRef, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
+    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
@@ -545,12 +545,12 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_track_info_get_track_number(
         &self,
         track: MediaTrack,
-    ) -> Option<TrackRef>
+    ) -> Option<TrackLocation>
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        use TrackRef::*;
+        use TrackLocation::*;
         match self.get_set_media_track_info(track, TrackAttributeKey::TrackNumber, null_mut())
             as i32
         {
@@ -1439,7 +1439,7 @@ impl<UsageScope> Reaper<UsageScope> {
         match result {
             0 => None,
             1 => Some(TrackFx {
-                track_ref: convert_tracknumber_to_track_ref(tracknumber),
+                track_location: convert_tracknumber_to_track_location(tracknumber),
                 fx_location: TrackFxLocation::try_from_raw(fxnumber)
                     .expect("unknown track FX location"),
             }),
@@ -1490,7 +1490,7 @@ impl<UsageScope> Reaper<UsageScope> {
         use GetLastTouchedFxResult::*;
         if tracknumber_high_word == 0 {
             Some(TrackFx {
-                track_ref: convert_tracknumber_to_track_ref(tracknumber),
+                track_location: convert_tracknumber_to_track_location(tracknumber),
                 fx_location: TrackFxLocation::try_from_raw(fxnumber)
                     .expect("unknown track FX location"),
                 // Although the parameter is called paramnumber, it's zero-based (checked)
@@ -3473,7 +3473,7 @@ pub enum GetLastTouchedFxResult {
     /// The last touched FX is a track FX.
     TrackFx {
         /// Track on which the FX is located.
-        track_ref: TrackRef,
+        track_location: TrackLocation,
         /// Location of the FX on that track.
         fx_location: TrackFxLocation,
         /// Index of the last touched parameter.
@@ -3502,7 +3502,7 @@ pub enum GetFocusedFxResult {
     /// The (last) focused FX is a track FX.
     TrackFx {
         /// Track on which the FX is located.
-        track_ref: TrackRef,
+        track_location: TrackLocation,
         /// Location of the FX on that track.
         fx_location: TrackFxLocation,
     },
@@ -3544,11 +3544,11 @@ unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a ReaperStr> 
     Some(ReaperStr::from_ptr(ptr))
 }
 
-fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
+fn convert_tracknumber_to_track_location(tracknumber: u32) -> TrackLocation {
     if tracknumber == 0 {
-        TrackRef::MasterTrack
+        TrackLocation::MasterTrack
     } else {
-        TrackRef::NormalTrack(tracknumber - 1)
+        TrackLocation::NormalTrack(tracknumber - 1)
     }
 }
 

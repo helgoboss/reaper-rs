@@ -1,12 +1,12 @@
-use std::ffi::{CStr};
+use std::ffi::CStr;
 
 use crate::guid::Guid;
 use crate::{Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    MasterTrackBehavior, ProjectRef, ReaProject, ReaperString, TrackDefaultsBehavior, TrackRef,
-    UndoBehavior,
+    MasterTrackBehavior, ProjectRef, ReaProject, ReaperString, TrackDefaultsBehavior,
+    TrackLocation, UndoBehavior,
 };
 use std::path::PathBuf;
 
@@ -64,9 +64,9 @@ impl Project {
     }
 
     // TODO Probably an unnecessary method
-    pub fn track_by_ref(self, track_ref: TrackRef) -> Option<Track> {
-        use TrackRef::*;
-        match track_ref {
+    pub fn track_by_ref(self, track_location: TrackLocation) -> Option<Track> {
+        use TrackLocation::*;
+        match track_location {
             MasterTrack => Some(self.master_track()),
             NormalTrack(idx) => self.track_by_index(idx),
         }

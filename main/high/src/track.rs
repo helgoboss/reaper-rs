@@ -3,8 +3,6 @@ use std::cell::Cell;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_void;
 
-
-
 use rxrust::prelude::PayloadCopy;
 
 use crate::fx::{get_index_from_query_index, Fx};
@@ -22,7 +20,7 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, RecordArmMode, RecordingInput,
-    TrackRef, TrackSendCategory,
+    TrackLocation, TrackSendCategory,
 };
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
@@ -229,7 +227,7 @@ impl Track {
         }
     }
 
-    pub fn location(&self) -> TrackRef {
+    pub fn location(&self) -> TrackLocation {
         self.load_and_check_if_necessary_or_complain();
         // TODO-low The following returns None if we query the number of a track in another project
         //  Try to find a working solution!
@@ -242,7 +240,7 @@ impl Track {
     }
 
     pub fn index(&self) -> Option<u32> {
-        use TrackRef::*;
+        use TrackLocation::*;
         match self.location() {
             MasterTrack => None,
             NormalTrack(idx) => Some(idx),
@@ -707,7 +705,7 @@ impl Track {
                 .medium_reaper()
                 .get_set_media_track_info_get_track_number(self.raw())
         };
-        t == Some(TrackRef::MasterTrack)
+        t == Some(TrackLocation::MasterTrack)
     }
 
     pub fn project(&self) -> Project {

@@ -5,7 +5,6 @@ use reaper_medium::{MediaTrack, ReaperString, TrackSendDirection};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
 
-
 #[derive(Clone, Debug, Eq)]
 pub struct TrackSend {
     source_track: Track,

@@ -6,7 +6,6 @@ use reaper_medium::{
 };
 use rxrust::prelude::PayloadCopy;
 
-
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FxParameter {
     fx: Fx,

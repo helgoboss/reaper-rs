@@ -14,7 +14,7 @@ use reaper_medium::{
     MediaTrack, MediumReaperControlSurface, ReaProject, ReaperNormalizedFxParamValue,
     ReaperPanValue, ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs, SetSurfacePanArgs,
     SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
-    SetTrackTitleArgs, TrackFxChainType, TrackRef, VersionDependentFxLocation,
+    SetTrackTitleArgs, TrackFxChainType, TrackLocation, VersionDependentFxLocation,
     VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
@@ -63,7 +63,7 @@ struct TrackData {
     mute: bool,
     solo: bool,
     recarm: bool,
-    number: Option<TrackRef>,
+    number: Option<TrackLocation>,
     recmonitor: InputMonitoringMode,
     recinput: i32,
     guid: Guid,
