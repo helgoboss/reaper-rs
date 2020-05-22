@@ -2,7 +2,6 @@ use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
 use c_str_macro::c_str;
 
 use std::borrow::Cow;
-use std::ffi::CStr;
 
 /// Track attribute key which you can pass to [`get_set_media_track_info()`].
 ///

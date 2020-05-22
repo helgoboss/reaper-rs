@@ -140,6 +140,10 @@ impl ReaperString {
         self.0.as_ptr()
     }
 
+    pub(crate) fn is_empty(&self) -> bool {
+        self.0.to_bytes().is_empty()
+    }
+
     /// Consumes this value and spits out the contained C string.
     pub fn into_inner(self) -> CString {
         self.0
@@ -192,12 +196,16 @@ impl<'a> From<ReaperString> for Cow<'a, ReaperStr> {
 #[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ReaperStr(CStr);
 
-// TODO-medium Test if this type can really be used only as reference.
 // TODO-medium Change other borrow-only types to be available as references only, too!
 impl ReaperStr {
     // Don't make this public!
     pub(crate) fn new(inner: &CStr) -> &ReaperStr {
         unsafe { &*(inner as *const CStr as *const ReaperStr) }
+    }
+
+    // Don't make this public!
+    pub(crate) unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a ReaperStr {
+        ReaperStr::new(CStr::from_ptr(ptr))
     }
 
     /// Returns a raw pointer to the string. Used by code in this crate only.

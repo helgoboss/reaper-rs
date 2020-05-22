@@ -373,7 +373,7 @@ impl Fx {
         .state_matches_preset
     }
 
-    pub fn preset_name(&self) -> Option<CString> {
+    pub fn preset_name(&self) -> Option<ReaperString> {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_preset(

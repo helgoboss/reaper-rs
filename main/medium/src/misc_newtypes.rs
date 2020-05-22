@@ -2,7 +2,6 @@
 use crate::{ReaperStr, ReaperStringArg};
 use derive_more::*;
 use std::borrow::Cow;
-use std::ffi::CStr;
 
 /// A command ID.
 ///

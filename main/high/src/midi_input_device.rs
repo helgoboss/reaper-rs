@@ -1,5 +1,5 @@
 use crate::Reaper;
-use reaper_medium::MidiInputDeviceId;
+use reaper_medium::{MidiInputDeviceId, ReaperString};
 use std::ffi::CString;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -16,7 +16,7 @@ impl MidiInputDevice {
         self.id
     }
 
-    pub fn name(self) -> CString {
+    pub fn name(self) -> ReaperString {
         Reaper::get()
             .medium_reaper()
             .get_midi_input_name(self.id, 33)

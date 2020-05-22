@@ -253,15 +253,13 @@ impl<UsageScope> Reaper<UsageScope> {
                     self.low.EnumProjects(idx, buffer, max_size)
                 });
             let project = NonNull::new(ptr)?;
-            if owned_c_string.to_bytes().is_empty() {
+            if owned_c_string.is_empty() {
                 return Some(EnumProjectsResult {
                     project,
                     file_path: None,
                 });
             }
-            let owned_string = owned_c_string
-                .into_string()
-                .expect("project file path contains non-UTF8 characters");
+            let owned_string = owned_c_string.into_string();
             Some(EnumProjectsResult {
                 project,
                 file_path: Some(PathBuf::from(owned_string)),
@@ -461,7 +459,6 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// ```no_run
     /// # use reaper_medium::ProjectContext::CurrentProject;
-    /// use std::ffi::CString;
     /// let session = reaper_medium::ReaperSession::default();
     ///
     /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("no track")?;
@@ -929,7 +926,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 self.low
                     .GetMIDIInputName(device_id.to_raw(), buffer, max_size)
             });
-            if name.to_bytes().is_empty() {
+            if name.is_empty() {
                 return GetMidiDevNameResult {
                     is_present,
                     name: None,
@@ -970,7 +967,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 self.low
                     .GetMIDIOutputName(device_id.to_raw(), buffer, max_size)
             });
-            if name.to_bytes().is_empty() {
+            if name.is_empty() {
                 return GetMidiDevNameResult {
                     is_present,
                     name: None,
@@ -1118,7 +1115,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't get FX name (probably FX doesn't exist)",
             ));
         }
-        Ok(ReaperString::new(name))
+        Ok(name)
     }
 
     /// Returns the name of the given track send.
@@ -1160,7 +1157,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't get send name (probably send doesn't exist)",
             ));
         }
-        Ok(ReaperString::new(name))
+        Ok(name)
     }
 
     /// Returns the index of the first track FX that is a virtual instrument.
@@ -1277,7 +1274,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't get FX parameter name (probably FX or parameter doesn't exist)",
             ));
         }
-        Ok(ReaperString::new(name))
+        Ok(name)
     }
 
     /// Returns the current value of the given track FX parameter formatted as string.
@@ -1323,7 +1320,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't format current FX parameter value (probably FX or parameter doesn't exist)",
             ));
         }
-        Ok(ReaperString::new(name))
+        Ok(name)
     }
 
     /// Returns the given value formatted as string according to the given track FX parameter.
@@ -1378,7 +1375,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't format FX parameter value (FX maybe doesn't support Cockos extensions or FX or parameter doesn't exist)",
             ));
         }
-        Ok(ReaperString::new(name))
+        Ok(name)
     }
 
     /// Sets the value of the given track FX parameter.
@@ -1982,7 +1979,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetAppVersion();
-        let version_str = unsafe { CStr::from_ptr(ptr) };
+        let version_str = unsafe { ReaperStr::from_ptr(ptr) };
         ReaperVersion::new(version_str)
     }
 
@@ -2217,7 +2214,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let (guid_string, _) = with_string_buffer(64, |buffer, _| unsafe {
             self.low.guidToString(guid as *const GUID, buffer)
         });
-        ReaperString::new(guid_string)
+        guid_string
     }
 
     /// Returns the master tempo of the current project.
@@ -2840,7 +2837,7 @@ impl<UsageScope> Reaper<UsageScope> {
         if !successful {
             return Err(ReaperFunctionError::new("couldn't get track chunk"));
         }
-        Ok(ReaperString::new(chunk_content))
+        Ok(chunk_content)
     }
 
     /// Creates a send, receive or hardware output for the given track.
@@ -3324,7 +3321,7 @@ impl<UsageScope> Reaper<UsageScope> {
                         max_size,
                     )
                 });
-            if name.to_bytes().is_empty() {
+            if name.is_empty() {
                 return TrackFxGetPresetResult {
                     state_matches_preset,
                     name: None,
@@ -3441,7 +3438,7 @@ pub struct GetMidiDevNameResult {
     /// Whether the device is currently connected.
     pub is_present: bool,
     /// Name of the device (only if name requested).
-    pub name: Option<CString>,
+    pub name: Option<ReaperString>,
 }
 
 #[derive(Clone, PartialEq, Hash, Debug)]
@@ -3452,7 +3449,7 @@ pub struct TrackFxGetPresetResult {
     /// the user loaded the preset but moved the knobs afterwards).
     pub state_matches_preset: bool,
     /// Name of the preset.
-    pub name: Option<CString>,
+    pub name: Option<ReaperString>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -3544,7 +3541,7 @@ unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a ReaperStr> 
     if ptr.is_null() {
         return None;
     }
-    Some(ReaperStr::new(CStr::from_ptr(ptr)))
+    Some(ReaperStr::from_ptr(ptr))
 }
 
 fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
@@ -3558,12 +3555,12 @@ fn convert_tracknumber_to_track_ref(tracknumber: u32) -> TrackRef {
 fn with_string_buffer<T>(
     max_size: u32,
     fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
-) -> (CString, T) {
+) -> (ReaperString, T) {
     let vec: Vec<u8> = vec![1; max_size as usize];
     let c_string = unsafe { CString::from_vec_unchecked(vec) };
     let raw = c_string.into_raw();
     let result = fill_buffer(raw, max_size as i32);
-    let string = unsafe { CString::from_raw(raw) };
+    let string = unsafe { ReaperString::new(CString::from_raw(raw)) };
     (string, result)
 }
 

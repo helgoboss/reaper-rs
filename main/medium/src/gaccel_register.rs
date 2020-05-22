@@ -2,7 +2,6 @@ use crate::{CommandId, ReaperStr, ReaperStringArg};
 use reaper_low::raw;
 use reaper_low::raw::gaccel_register_t;
 use std::borrow::Cow;
-use std::ffi::CStr;
 use std::os::raw::c_ushort;
 
 /// A kind of action descriptor.

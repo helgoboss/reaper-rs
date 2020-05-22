@@ -139,8 +139,8 @@
 //!       (in most cases we can't), we grant the user only temporary access to that string by taking
 //!       a closure with a `&`[`ReaperStr`](struct.ReaperStr.html) argument which is executed right
 //!       away. Example: [`undo_can_undo_2()`](struct.Reaper.html#method.undo_can_undo_2)
-//! - Strings in enums are often `Cow<CStr>` because we want them to be flexible enough to carry
-//!   both owned and borrowed strings.
+//! - Strings in enums are often `Cow<ReaperStr>` because we want them to be flexible enough to
+//!   carry both owned and borrowed strings.
 //!
 //! ## Use pointer wrappers where appropriate
 //!

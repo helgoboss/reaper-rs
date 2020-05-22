@@ -8,7 +8,6 @@ use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
 use std::convert::TryInto;
-use std::ffi::CStr;
 use std::os::raw::c_void;
 use std::ptr::{null_mut, NonNull};
 

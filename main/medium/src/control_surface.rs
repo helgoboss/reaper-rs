@@ -8,7 +8,6 @@ use crate::{
 use reaper_low::raw;
 use std::borrow::Cow;
 
-use std::ffi::CStr;
 use std::fmt::Debug;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
@@ -27,7 +26,7 @@ pub trait MediumReaperControlSurface: Debug {
     /// Must be a simple unique string with only A-Z, 0-9, no spaces or other characters.
     ///
     /// Return `None` if this is a control surface behind the scenes.
-    fn get_type_string(&self) -> Option<Cow<'static, CStr>> {
+    fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
         None
     }
 
@@ -36,14 +35,14 @@ pub trait MediumReaperControlSurface: Debug {
     /// Should be a human readable description, can include instance-specific information.
     ///
     /// Return `None` if this is a control surface behind the scenes.
-    fn get_desc_string(&self) -> Option<Cow<'static, CStr>> {
+    fn get_desc_string(&self) -> Option<Cow<'static, ReaperStr>> {
         None
     }
 
     /// Should return a string of configuration data.
     ///
     /// Return `None` if this is a control surface behind the scenes.
-    fn get_config_string(&self) -> Option<Cow<'static, CStr>> {
+    fn get_config_string(&self) -> Option<Cow<'static, ReaperStr>> {
         None
     }
 
@@ -563,7 +562,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const i8) {
         self.delegate.set_track_title(SetTrackTitleArgs {
             track: require_non_null_panic(trackid),
-            name: ReaperStr::new(unsafe { CStr::from_ptr(title) }),
+            name: unsafe { ReaperStr::from_ptr(title) },
         })
     }
 
