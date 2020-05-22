@@ -134,17 +134,17 @@ impl<'a> VstPluginContext<'a> {
             .host_callback(effect, opcode, index, value, ptr, opt)
     }
 
-    /// Returns the REAPER project in which this VST plug-in is running.
+    /// Returns the REAPER project in which the given VST plug-in is running.
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_project(self, effect: NonNull<AEffect>) -> ReaProject {
         let ptr = self.request_context(effect, 3) as *mut raw::ReaProject;
-        NonNull::new(ptr).expect("should always run within a project")
+        NonNull::new(ptr).expect("a VST should always run in the context of a project")
     }
 
-    /// Returns the REAPER track on which this VST plug-in resides.
+    /// Returns the REAPER track on which the given VST plug-in resides.
     ///
     /// Returns `None` if the given plug-in is not running as track FX.
     ///
@@ -168,7 +168,9 @@ impl<'a> VstPluginContext<'a> {
         NonNull::new(ptr)
     }
 
-    /// Returns the channel count of the containing REAPER track.
+    /// Returns the channel count of the REAPER track which contains the given VST plug-in.
+    ///
+    /// Returns 0 if the given plug-in is not running as track FX.
     ///
     /// # Safety
     ///
@@ -182,7 +184,7 @@ impl<'a> VstPluginContext<'a> {
         self.host_callback(
             effect.as_ptr(),
             0xdead_beef,
-            0xdead_f00d,
+            0xdead_f00e,
             request,
             null_mut(),
             0.0,
