@@ -269,7 +269,7 @@ mod codegen {
                 #![allow(non_camel_case_types)]
                 #![allow(non_snake_case)]
 
-                use crate::{bindings::root, ReaperPluginContext};
+                use crate::{bindings::root, PluginContext};
 
                 /// This is the low-level API access point to all REAPER functions.
                 ///
@@ -294,14 +294,14 @@ mod codegen {
                     // The only reason why this can be None is that we want to support Default. We want Default
                     // in order to be able to create rustdoc example code in higher-level APIs without needing a
                     // proper plug-in context.
-                    pub(crate) plugin_context: Option<ReaperPluginContext>,
+                    pub(crate) plugin_context: Option<PluginContext>,
                 }
 
                 impl Reaper {
                     /// Loads all available REAPER functions from the given plug-in context.
                     ///
                     /// Returns a low-level `Reaper` instance which allows you to call these functions.
-                    pub fn load(plugin_context: ReaperPluginContext) -> Reaper {
+                    pub fn load(plugin_context: PluginContext) -> Reaper {
                         let mut loaded_count = 0;
                         let mut pointers = unsafe {
                             ReaperFunctionPointers {
@@ -387,7 +387,7 @@ mod codegen {
                 #![allow(non_snake_case)]
                 #![allow(unused_unsafe)]
 
-                use crate::{bindings::root, ReaperPluginContext};
+                use crate::{bindings::root, PluginContext};
 
                 /// This is the low-level API access point to all SWELL functions.
                 ///
@@ -403,7 +403,7 @@ mod codegen {
                     // The only reason why this can be None is that we want to support Default. We want Default
                     // in order to be able to create rustdoc example code in higher-level APIs without needing a
                     // proper plug-in context.
-                    pub(crate) plugin_context: Option<ReaperPluginContext>,
+                    pub(crate) plugin_context: Option<PluginContext>,
                 }
 
                 impl Swell {
@@ -418,7 +418,7 @@ mod codegen {
                     ///
                     /// If this is Linux and the SWELL function provider is not available, this
                     /// function panics.
-                    pub fn load(plugin_context: ReaperPluginContext) -> Swell {
+                    pub fn load(plugin_context: PluginContext) -> Swell {
                         #[cfg(target_os = "windows")]
                         {
                             Swell {

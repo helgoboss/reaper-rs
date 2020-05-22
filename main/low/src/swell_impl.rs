@@ -5,7 +5,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
-use crate::{bindings::root, ReaperPluginContext, Swell, SwellFunctionPointers};
+use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
@@ -45,7 +45,7 @@ impl Swell {
     }
 
     /// Returns the plug-in context.
-    pub fn plugin_context(&self) -> &ReaperPluginContext {
+    pub fn plugin_context(&self) -> &PluginContext {
         self.plugin_context
             .as_ref()
             .expect("plug-in context not available on demo instances")

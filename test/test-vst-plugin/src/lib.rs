@@ -2,7 +2,7 @@ use c_str_macro::c_str;
 
 use futures_timer::Delay;
 use reaper_high::{ActionKind, Reaper, ReaperGuard};
-use reaper_low::{reaper_vst_plugin, ReaperPluginContext};
+use reaper_low::{reaper_vst_plugin, PluginContext};
 use reaper_medium::{
     CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
     OnAudioBufferArgs,
@@ -99,7 +99,7 @@ impl TestVstPlugin {
     #[allow(dead_code)]
     fn use_medium_level_reaper(&mut self) {
         let context =
-            ReaperPluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context())
+            PluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context())
                 .unwrap();
         let low = reaper_low::Reaper::load(context);
         let mut med = reaper_medium::ReaperSession::new(low);
@@ -123,11 +123,9 @@ impl TestVstPlugin {
 
     fn use_high_level_reaper(&mut self) {
         let guard = Reaper::guarded(|| {
-            let context = ReaperPluginContext::from_vst_plugin(
-                &self.host,
-                reaper_vst_plugin::static_context(),
-            )
-            .unwrap();
+            let context =
+                PluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context())
+                    .unwrap();
             Reaper::setup_with_defaults(context, "info@helgoboss.org");
             let reaper = Reaper::get();
             reaper.activate();

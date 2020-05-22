@@ -25,7 +25,7 @@ use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
 use reaper_low::raw;
 
-use reaper_low::ReaperPluginContext;
+use reaper_low::PluginContext;
 
 use crate::run_loop_executor::new_spawner_and_executor;
 use crate::run_loop_scheduler::{RunLoopScheduler, RxTask};
@@ -82,7 +82,7 @@ pub struct ReaperBuilder {
 }
 
 impl ReaperBuilder {
-    fn new(context: ReaperPluginContext) -> ReaperBuilder {
+    fn new(context: PluginContext) -> ReaperBuilder {
         ReaperBuilder {
             medium: {
                 let low = reaper_low::Reaper::load(context);
@@ -402,13 +402,13 @@ impl Reaper {
     }
 
     /// Returns the builder for further configuration.
-    pub fn load(context: ReaperPluginContext) -> ReaperBuilder {
+    pub fn load(context: PluginContext) -> ReaperBuilder {
         require_main_thread(&context);
         ReaperBuilder::new(context)
     }
 
     /// This has an effect only if there isn't an instance already.
-    pub fn setup_with_defaults(context: ReaperPluginContext, email_address: &'static str) {
+    pub fn setup_with_defaults(context: PluginContext, email_address: &'static str) {
         require_main_thread(&context);
         Reaper::load(context)
             .logger(create_terminal_logger())
@@ -950,7 +950,7 @@ impl MainThreadTask {
     }
 }
 
-fn require_main_thread(context: &ReaperPluginContext) {
+fn require_main_thread(context: &PluginContext) {
     assert!(
         context.is_in_main_thread(),
         "this function must be called in the main thread"

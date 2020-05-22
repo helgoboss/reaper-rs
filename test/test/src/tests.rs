@@ -28,7 +28,7 @@ use reaper_medium::{
     UndoBehavior, ValueChange,
 };
 
-use reaper_low::{raw, Swell, TypeSpecificReaperPluginContext};
+use reaper_low::{raw, Swell, TypeSpecificPluginContext};
 use std::os::raw::{c_int, c_void};
 use std::rc::Rc;
 
@@ -1824,7 +1824,7 @@ fn plugin_context() -> TestStep {
             let swell_func = unsafe { swell_function_provider(c_str!("DefWindowProc").as_ptr()) };
             assert!(!swell_func.is_null());
         }
-        use TypeSpecificReaperPluginContext::*;
+        use TypeSpecificPluginContext::*;
         match plugin_context.type_specific() {
             Extension(ctx) => {
                 assert!(!plugin_context.h_instance().is_null());

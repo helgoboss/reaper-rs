@@ -172,11 +172,11 @@ Then in your `lib.rs`:
 ```rust
 use std::error::Error;
 use reaper_macros::reaper_extension_plugin;
-use reaper_low::ReaperPluginContext;
+use reaper_low::PluginContext;
 use reaper_medium::ReaperSession;
 
 #[reaper_extension_plugin]
-fn plugin_main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
+fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
     let session = ReaperSession::load(context);
     session.reaper().show_console_msg("Hello world from reaper-rs medium-level API!");
     Ok(())
@@ -211,7 +211,7 @@ Then in your `lib.rs`:
 
 ```rust
 use vst::plugin::{Info, Plugin, HostCallback};
-use reaper_low::{ReaperPluginContext, reaper_vst_plugin};
+use reaper_low::{PluginContext, reaper_vst_plugin};
 use reaper_medium::ReaperSession;
 
 reaper_vst_plugin!();
@@ -235,7 +235,7 @@ impl Plugin for MyReaperVstPlugin {
     }
 
     fn init(&mut self) {
-        if let Ok(context) = ReaperPluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context()) {
+        if let Ok(context) = PluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context()) {
             let session = ReaperSession::load(context);
             session
                 .reaper()

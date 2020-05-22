@@ -73,8 +73,8 @@ pub use control_surface::*;
 mod util;
 pub use util::*;
 
-mod reaper_plugin_context;
-pub use reaper_plugin_context::*;
+mod plugin_context;
+pub use plugin_context::*;
 
 mod reaper;
 pub use reaper::*;

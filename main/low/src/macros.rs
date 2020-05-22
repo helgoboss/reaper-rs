@@ -3,7 +3,7 @@
 /// This macro provides module entry points which gather some handles for creating
 /// a REAPER VST plug-in context. The gathered handles are exposed via the function
 /// `reaper_vst_plugin::static_context()` and are intended to be passed to
-/// [`ReaperPluginContext::from_extension_plugin()`].
+/// [`PluginContext::from_extension_plugin()`].
 ///
 /// # Example
 ///
@@ -15,16 +15,16 @@
 /// let static_context = reaper_vst_plugin::static_context();
 /// ```
 ///
-/// [`ReaperPluginContext::from_extension_plugin()`]:
-/// struct.ReaperPluginContext.html#method.from_extension_plugin
+/// [`PluginContext::from_extension_plugin()`]:
+/// struct.PluginContext.html#method.from_extension_plugin
 #[macro_export]
 macro_rules! reaper_vst_plugin {
     () => {
         mod reaper_vst_plugin {
             // TODO-low Code here is very similar to the one in reaper-macros. Factor out.
             /// Exposes the (hopefully) obtained handles.
-            pub fn static_context() -> reaper_low::StaticReaperVstPluginContext {
-                reaper_low::StaticReaperVstPluginContext {
+            pub fn static_context() -> reaper_low::StaticVstPluginContext {
+                reaper_low::StaticVstPluginContext {
                     h_instance: unsafe { HINSTANCE },
                     get_swell_func: unsafe { GET_SWELL_FUNC },
                 }

@@ -1,4 +1,4 @@
-use crate::{Reaper, ReaperFunctionPointers, ReaperPluginContext};
+use crate::{PluginContext, Reaper, ReaperFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Reaper> = None;
@@ -37,7 +37,7 @@ impl Reaper {
     }
 
     /// Returns the plug-in context.
-    pub fn plugin_context(&self) -> &ReaperPluginContext {
+    pub fn plugin_context(&self) -> &PluginContext {
         self.plugin_context
             .as_ref()
             .expect("plug-in context not available on demo instances")

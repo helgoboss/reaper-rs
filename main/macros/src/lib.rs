@@ -13,11 +13,11 @@ use quote::quote;
 /// ```no_run
 /// use std::error::Error;
 /// use reaper_macros::reaper_extension_plugin;
-/// use reaper_low::ReaperPluginContext;
+/// use reaper_low::PluginContext;
 /// use reaper_medium::ReaperSession;
 ///
 /// #[reaper_extension_plugin]
-/// fn plugin_main(context: ReaperPluginContext) -> Result<(), Box<dyn Error>> {
+/// fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
 ///     let session = ReaperSession::load(context);
 ///     session.reaper().show_console_msg("Hello world from reaper-rs medium-level API!");
 ///     Ok(())
@@ -77,8 +77,8 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let tokens = quote! {
         mod reaper_extension_plugin {
             /// Exposes the (hopefully) obtained handles.
-            pub fn static_context() -> reaper_low::StaticReaperExtensionPluginContext {
-                reaper_low::StaticReaperExtensionPluginContext {
+            pub fn static_context() -> reaper_low::StaticExtensionPluginContext {
+                reaper_low::StaticExtensionPluginContext {
                     get_swell_func: unsafe { GET_SWELL_FUNC },
                 }
             }
@@ -147,7 +147,7 @@ fn generate_high_level_plugin_code(
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[::reaper_macros::reaper_extension_plugin]
-        fn low_level_plugin_main(context: ::reaper_low::ReaperPluginContext) -> Result<(), Box<dyn std::error::Error>> {
+        fn low_level_plugin_main(context: ::reaper_low::PluginContext) -> Result<(), Box<dyn std::error::Error>> {
             ::reaper_high::Reaper::setup_with_defaults(context, #email_address);
             #main_function_name()
         }

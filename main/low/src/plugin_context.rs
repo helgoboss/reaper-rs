@@ -18,8 +18,8 @@ pub(crate) type GetSwellFuncFn = unsafe extern "C" fn(name: *const c_char) -> *m
 ///
 /// [`Reaper::load()`]: struct.Reaper.html#method.load
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct ReaperPluginContext {
-    type_specific: TypeSpecificReaperPluginContext,
+pub struct PluginContext {
+    type_specific: TypeSpecificPluginContext,
     h_instance: raw::HINSTANCE,
     get_swell_func_ptr: Option<GetSwellFuncFn>,
     main_thread_id: std::thread::ThreadId,
@@ -27,16 +27,16 @@ pub struct ReaperPluginContext {
 
 /// Additional stuff available in the plug-in context specific to a certain plug-in type.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum TypeSpecificReaperPluginContext {
+pub enum TypeSpecificPluginContext {
     /// This is an extension plug-in.
-    Extension(ReaperExtensionPluginContext),
+    Extension(ExtensionPluginContext),
     /// This is a VST plug-in.
-    Vst(ReaperVstPluginContext),
+    Vst(VstPluginContext),
 }
 
 /// Additional data available in the context of extension plug-ins.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct ReaperExtensionPluginContext {
+pub struct ExtensionPluginContext {
     caller_version: c_int,
     hwnd_main: NonNull<raw::HWND__>,
     register: RegisterFn,
@@ -45,11 +45,11 @@ pub struct ReaperExtensionPluginContext {
 
 /// Additional data available in the context of VST plug-ins.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct ReaperVstPluginContext {
+pub struct VstPluginContext {
     host_callback: HostCallbackProc,
 }
 
-impl ReaperPluginContext {
+impl PluginContext {
     /// Creates a plug-in context from an extension entry point plug-in info.
     ///
     /// It requires a module handle and the pointer to a [`reaper_plugin_info_t`] struct. REAPER
@@ -72,8 +72,8 @@ impl ReaperPluginContext {
     pub unsafe fn from_extension_plugin(
         h_instance: raw::HINSTANCE,
         rec: raw::reaper_plugin_info_t,
-        static_context: StaticReaperExtensionPluginContext,
-    ) -> Result<ReaperPluginContext, ContextFromExtensionPluginError> {
+        static_context: StaticExtensionPluginContext,
+    ) -> Result<PluginContext, ContextFromExtensionPluginError> {
         use ContextFromExtensionPluginError::*;
         if rec.caller_version != raw::REAPER_PLUGIN_VERSION as c_int {
             return Err(CallerVersionIncompatible);
@@ -82,16 +82,14 @@ impl ReaperPluginContext {
         let register = rec
             .Register
             .expect("plug-in info doesn't container Register function pointer");
-        Ok(ReaperPluginContext {
-            type_specific: TypeSpecificReaperPluginContext::Extension(
-                ReaperExtensionPluginContext {
-                    caller_version: rec.caller_version,
-                    hwnd_main: NonNull::new(rec.hwnd_main)
-                        .expect("plug-in info doesn't contain main window handle"),
-                    register,
-                    get_func,
-                },
-            ),
+        Ok(PluginContext {
+            type_specific: TypeSpecificPluginContext::Extension(ExtensionPluginContext {
+                caller_version: rec.caller_version,
+                hwnd_main: NonNull::new(rec.hwnd_main)
+                    .expect("plug-in info doesn't contain main window handle"),
+                register,
+                get_func,
+            }),
             h_instance,
             get_swell_func_ptr: static_context.get_swell_func,
             main_thread_id: std::thread::current().id(),
@@ -110,14 +108,12 @@ impl ReaperPluginContext {
     /// [`new()`]: https://docs.rs/vst/0.2.0/vst/plugin/trait.Plugin.html#method.new
     pub fn from_vst_plugin(
         host: &HostCallback,
-        static_context: StaticReaperVstPluginContext,
-    ) -> Result<ReaperPluginContext, ContextFromVstPluginError> {
+        static_context: StaticVstPluginContext,
+    ) -> Result<PluginContext, ContextFromVstPluginError> {
         use ContextFromVstPluginError::*;
         let host_callback = host.raw_callback().ok_or(HostCallbackNotAvailable)?;
-        Ok(ReaperPluginContext {
-            type_specific: TypeSpecificReaperPluginContext::Vst(ReaperVstPluginContext {
-                host_callback,
-            }),
+        Ok(PluginContext {
+            type_specific: TypeSpecificPluginContext::Vst(VstPluginContext { host_callback }),
             h_instance: static_context.h_instance,
             get_swell_func_ptr: static_context.get_swell_func,
             main_thread_id: std::thread::current().id(),
@@ -131,7 +127,7 @@ impl ReaperPluginContext {
     /// REAPER can crash if you pass an invalid pointer.
     #[allow(overflowing_literals)]
     pub unsafe fn GetFunc(&self, name: *const c_char) -> *mut c_void {
-        use TypeSpecificReaperPluginContext::*;
+        use TypeSpecificPluginContext::*;
         match &self.type_specific {
             Extension(context) => (context.get_func)(name),
             Vst(context) => {
@@ -167,7 +163,7 @@ impl ReaperPluginContext {
     }
 
     /// Returns the type-specific plug-in context.
-    pub fn type_specific(&self) -> &TypeSpecificReaperPluginContext {
+    pub fn type_specific(&self) -> &TypeSpecificPluginContext {
         &self.type_specific
     }
 
@@ -177,7 +173,7 @@ impl ReaperPluginContext {
     }
 }
 
-impl ReaperExtensionPluginContext {
+impl ExtensionPluginContext {
     /// Returns the caller version from `reaper_plugin_info_t`.
     pub fn caller_version(&self) -> c_int {
         self.caller_version
@@ -204,7 +200,7 @@ impl ReaperExtensionPluginContext {
     }
 }
 
-impl ReaperVstPluginContext {
+impl VstPluginContext {
     /// Generic host callback function for communicating with REAPER from the VST plug-in.
     ///
     /// This is just a pass-through to the VST host callback.
@@ -256,7 +252,7 @@ impl std::error::Error for ContextFromVstPluginError {}
 ///
 /// [`reaper_vst_plugin`]: macro.reaper_vst_plugin.html
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct StaticReaperVstPluginContext {
+pub struct StaticVstPluginContext {
     /// `HINSTANCE` representing the handle of the module (DLL) containing the plug-in.
     ///
     /// Windows only.
@@ -267,9 +263,9 @@ pub struct StaticReaperVstPluginContext {
     pub get_swell_func: Option<GetSwellFuncFn>,
 }
 
-impl Default for StaticReaperVstPluginContext {
+impl Default for StaticVstPluginContext {
     fn default() -> Self {
-        StaticReaperVstPluginContext {
+        StaticVstPluginContext {
             h_instance: null_mut(),
             get_swell_func: None,
         }
@@ -279,16 +275,16 @@ impl Default for StaticReaperVstPluginContext {
 /// Contains those parts of the REAPER extension plug-in context which must be obtained in static
 /// scope.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct StaticReaperExtensionPluginContext {
+pub struct StaticExtensionPluginContext {
     /// Function which returns SWELL function by its name.
     ///
     /// Linux only.
     pub get_swell_func: Option<GetSwellFuncFn>,
 }
 
-impl Default for StaticReaperExtensionPluginContext {
+impl Default for StaticExtensionPluginContext {
     fn default() -> Self {
-        StaticReaperExtensionPluginContext {
+        StaticExtensionPluginContext {
             get_swell_func: None,
         }
     }

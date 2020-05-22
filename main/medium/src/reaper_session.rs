@@ -1,8 +1,7 @@
 use std::ptr::NonNull;
 
 use reaper_low::{
-    add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface,
-    ReaperPluginContext,
+    add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface, PluginContext,
 };
 
 use crate::infostruct_keeper::InfostructKeeper;
@@ -53,7 +52,7 @@ use std::collections::{HashMap, HashSet};
 /// [`load()`]: #method.load
 /// [`reaper()`]: #method.reaper
 // TODO-medium Add some doc from https://www.reaper.fm/sdk/vst/vst_ext.php
-// TODO-medium Lift low-level ReaperPluginContext functions to medium-level style. Especially the
+// TODO-medium Lift low-level PluginContext functions to medium-level style. Especially the
 //  VST host context stuff: https://www.reaper.fm/sdk/vst/vst_ext.php.
 #[derive(Debug, Default)]
 pub struct ReaperSession {
@@ -83,7 +82,7 @@ impl ReaperSession {
     /// Loads all available REAPER functions from the given plug-in context.
     ///
     /// Returns a medium-level `ReaperSession` instance which allows you to call these functions.
-    pub fn load(context: ReaperPluginContext) -> ReaperSession {
+    pub fn load(context: PluginContext) -> ReaperSession {
         let low = reaper_low::Reaper::load(context);
         ReaperSession::new(low)
     }
