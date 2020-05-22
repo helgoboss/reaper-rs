@@ -4,13 +4,13 @@
 use crate::raw;
 use derive_more::Display;
 use std::os::raw::{c_char, c_int, c_void};
-use std::ptr::{null_mut, NonNull};
+use std::ptr::null_mut;
 use vst::api::{AEffect, HostCallbackProc};
 use vst::plugin::HostCallback;
 
-type GetFuncFn = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
-type RegisterFn = unsafe extern "C" fn(name: *const c_char, infostruct: *mut c_void) -> c_int;
-pub(crate) type GetSwellFuncFn = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
+type GetFunc = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
+type Register = unsafe extern "C" fn(name: *const c_char, infostruct: *mut c_void) -> c_int;
+pub(crate) type GetSwellFunc = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
 
 /// This represents the context which is needed to access REAPER functions from plug-ins.
 ///
@@ -21,7 +21,7 @@ pub(crate) type GetSwellFuncFn = unsafe extern "C" fn(name: *const c_char) -> *m
 pub struct PluginContext {
     type_specific: TypeSpecificPluginContext,
     h_instance: raw::HINSTANCE,
-    get_swell_func_ptr: Option<GetSwellFuncFn>,
+    get_swell_func_ptr: Option<GetSwellFunc>,
     main_thread_id: std::thread::ThreadId,
 }
 
@@ -38,9 +38,9 @@ pub enum TypeSpecificPluginContext {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct ExtensionPluginContext {
     caller_version: c_int,
-    hwnd_main: NonNull<raw::HWND__>,
-    register: RegisterFn,
-    get_func: GetFuncFn,
+    hwnd_main: raw::HWND,
+    register: Register,
+    get_func: GetFunc,
 }
 
 /// Additional data available in the context of VST plug-ins.
@@ -85,8 +85,7 @@ impl PluginContext {
         Ok(PluginContext {
             type_specific: TypeSpecificPluginContext::Extension(ExtensionPluginContext {
                 caller_version: rec.caller_version,
-                hwnd_main: NonNull::new(rec.hwnd_main)
-                    .expect("plug-in info doesn't contain main window handle"),
+                hwnd_main: rec.hwnd_main,
                 register,
                 get_func,
             }),
@@ -158,7 +157,7 @@ impl PluginContext {
     /// its name.
     ///
     /// On Windows, this returns `None`.
-    pub fn swell_function_provider(&self) -> Option<GetSwellFuncFn> {
+    pub fn swell_function_provider(&self) -> Option<GetSwellFunc> {
         self.get_swell_func_ptr
     }
 
@@ -180,7 +179,7 @@ impl ExtensionPluginContext {
     }
 
     /// Returns the main window from `reaper_plugin_info_t`.
-    pub fn hwnd_main(&self) -> NonNull<raw::HWND__> {
+    pub fn hwnd_main(&self) -> raw::HWND {
         self.hwnd_main
     }
 
@@ -260,7 +259,7 @@ pub struct StaticVstPluginContext {
     /// Function which returns a SWELL function by its name.
     ///
     /// Linux only.
-    pub get_swell_func: Option<GetSwellFuncFn>,
+    pub get_swell_func: Option<GetSwellFunc>,
 }
 
 impl Default for StaticVstPluginContext {
@@ -279,7 +278,7 @@ pub struct StaticExtensionPluginContext {
     /// Function which returns SWELL function by its name.
     ///
     /// Linux only.
-    pub get_swell_func: Option<GetSwellFuncFn>,
+    pub get_swell_func: Option<GetSwellFunc>,
 }
 
 impl Default for StaticExtensionPluginContext {

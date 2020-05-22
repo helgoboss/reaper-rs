@@ -16,13 +16,14 @@ use crate::{
     CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
     GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
     MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
-    NotificationBehavior, PlaybackSpeedFactor, ProjectContext, ProjectRef, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
-    RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, StuffMidiMessageTarget,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    NotificationBehavior, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef,
+    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
+    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -212,6 +213,11 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Gives access to the low-level Reaper instance.
     pub fn low(&self) -> &reaper_low::Reaper {
         &self.low
+    }
+
+    /// Returns the plug-in context.
+    pub fn plugin_context(&self) -> PluginContext<UsageScope> {
+        PluginContext::new(self.low.plugin_context())
     }
 
     /// Gives access to the collected metrics.

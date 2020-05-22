@@ -5,6 +5,7 @@ use crate::CommandId;
 
 use reaper_low::raw;
 
+use std::os::raw::c_void;
 use std::ptr::NonNull;
 
 // Case 1: Internals exposed: no | vtable: no
@@ -20,8 +21,10 @@ pub type MediaItem = NonNull<raw::MediaItem>;
 pub type MediaItemTake = NonNull<raw::MediaItem_Take>;
 /// Pointer to an envelope on a track.
 pub type TrackEnvelope = NonNull<raw::TrackEnvelope>;
-/// Pointer to a window.
+/// Pointer to a window (window handle).
 pub type Hwnd = NonNull<raw::HWND__>;
+/// Pointer to a module/instance (module/instance handle).
+pub type Hinstance = NonNull<c_void>;
 
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
