@@ -4,7 +4,7 @@ use crate::metering::NanoResponseTime;
 use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
 use reaper_macros::measure;
-use std::ffi::{CString};
+use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
@@ -462,15 +462,15 @@ impl<UsageScope> Reaper<UsageScope> {
     /// let session = reaper_medium::ReaperSession::default();
     ///
     /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("no track")?;
-    /// let track_name_c_string = unsafe {
+    /// let track_name = unsafe {
     ///     session.reaper().get_set_media_track_info_get_name(
     ///         track,
     ///         |name| name.to_owned()
     ///     )
     /// };
-    /// let track_name = match &track_name_c_string {
+    /// let track_name = match &track_name {
     ///     None => "Master track",
-    ///     Some(name) => name.to_str()?
+    ///     Some(name) => name.to_str()
     /// };
     /// session.reaper().show_console_msg(format!("Track name is {}", track_name));
     /// # Ok::<_, Box<dyn std::error::Error>>(())
@@ -1979,7 +1979,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetAppVersion();
-        let version_str = unsafe { ReaperStr::from_ptr(ptr) };
+        let version_str = ReaperStr::from_ptr(ptr);
         ReaperVersion::new(version_str)
     }
 

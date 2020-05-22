@@ -562,7 +562,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const i8) {
         self.delegate.set_track_title(SetTrackTitleArgs {
             track: require_non_null_panic(trackid),
-            name: unsafe { ReaperStr::from_ptr(title) },
+            name: ReaperStr::from_ptr(title),
         })
     }
 

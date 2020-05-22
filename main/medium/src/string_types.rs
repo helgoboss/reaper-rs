@@ -203,9 +203,11 @@ impl ReaperStr {
         unsafe { &*(inner as *const CStr as *const ReaperStr) }
     }
 
-    // Don't make this public!
-    pub(crate) unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a ReaperStr {
-        ReaperStr::new(CStr::from_ptr(ptr))
+    // Don't make this public! Not only because we don't want consumers to create strings directly.
+    // Also because this should be unsafe but is currently not because of unused_unsafe warnings
+    // if used by local reaper_str! macro.
+    pub(crate) fn from_ptr<'a>(ptr: *const c_char) -> &'a ReaperStr {
+        ReaperStr::new(unsafe { CStr::from_ptr(ptr) })
     }
 
     /// Returns a raw pointer to the string. Used by code in this crate only.
