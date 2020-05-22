@@ -11,20 +11,20 @@ use std::os::raw::c_ushort;
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
-pub struct MediumGaccelRegister {
+pub struct OwnedGaccelRegister {
     owned_desc: Cow<'static, ReaperStr>,
     inner: gaccel_register_t,
 }
 
-impl MediumGaccelRegister {
+impl OwnedGaccelRegister {
     /// Creates an action descriptor without key binding.
     pub fn without_key_binding(
         cmd: CommandId,
         desc: impl Into<ReaperStringArg<'static>>,
-    ) -> MediumGaccelRegister {
+    ) -> OwnedGaccelRegister {
         let desc = desc.into().into_inner();
         let desc_ptr = desc.as_ptr();
-        MediumGaccelRegister {
+        OwnedGaccelRegister {
             owned_desc: desc,
             inner: raw::gaccel_register_t {
                 accel: raw::ACCEL {
@@ -39,7 +39,7 @@ impl MediumGaccelRegister {
     }
 }
 
-impl AsRef<raw::gaccel_register_t> for MediumGaccelRegister {
+impl AsRef<raw::gaccel_register_t> for OwnedGaccelRegister {
     fn as_ref(&self) -> &gaccel_register_t {
         &self.inner
     }

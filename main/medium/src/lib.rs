@@ -191,7 +191,7 @@
 //!   the rest of the medium-level API does).
 //! - If the consumer needs to be able to create such a struct: Provide an idiomatic Rust factory
 //!   function. If that's not enough because the raw struct is not completely owned, write an owned
-//!   version of that struct, prefixed with `Medium`. Ideally it should wrap the raw struct.
+//!   version of that struct, prefixed with `Owned`. Ideally it should wrap the raw struct.
 //!
 //! #### Explanation
 //!
@@ -206,9 +206,9 @@
 //!   [`KbdSectionInfo`](struct.KbdSectionInfo.html) & `MediumKdbSectionInfo` (not yet existing)
 //! - [`raw::audio_hook_register_t`](../reaper_low/raw/struct.audio_hook_register_t.html) →
 //!   [`AudioHookRegister`](struct.AudioHookRegister.html) &
-//!   [`MediumAudioHookRegister`](struct.MediumAudioHookRegister.html)
+//!   [`OwnedAudioHookRegister`](struct.OwnedAudioHookRegister.html)
 //! - [`raw::gaccel_register_t`](../reaper_low/raw/struct.gaccel_register_t.html) → `GaccelRegister`
-//!   (not yet existing) & [`MediumGaccelRegister`](struct.MediumGaccelRegister.html)
+//!   (not yet existing) & [`OwnedGaccelRegister`](struct.OwnedGaccelRegister.html)
 //!
 //! ### Case 3: Internals not exposed | vtable
 //!
@@ -221,14 +221,13 @@
 //!   Rust. It's intended for the communication from Rust to REAPER. This needs appropriate
 //!   companion C code in the low-level API.
 //! - If the consumer needs to be able to provide such a type (for communication from REAPER to
-//!   Rust): Create a new trait prefixed with `Medium` which can be implemented by the consumer.
-//!   This also needs appropriate companion C code in the low-level API.
+//!   Rust): Create a new trait which can be implemented by the consumer. This also needs
+//!   appropriate companion C code in the low-level API.
 //!
 //! #### Examples
 //!
 //! - [`raw::IReaperControlSurface`](../reaper_low/raw/struct.IReaperControlSurface.html) →
-//!   `ReaperControlSurface` (not yet existing) &
-//!   [`MediumReaperControlSurface`](struct.MediumReaperControlSurface.html)
+//!   `ReaperControlSurface` (not yet existing) & [`ControlSurface`](struct.ControlSurface.html)
 //! - [`raw::midi_Input`](../reaper_low/raw/struct.midi_Input.html) →
 //!   [`MidiInput`](struct.MidiInput.html) &
 //! - [`raw::MIDI_eventlist`](../reaper_low/raw/struct.MIDI_eventlist.html) →

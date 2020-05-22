@@ -372,7 +372,7 @@ pub enum RegistrationObject<'a> {
     /// recursion if doing so! > in fact, any use of this hook should benefit from a simple
     /// reentrancy test...
     /// </pre>
-    HookCommand(raw::HookCommandFn),
+    HookCommand(raw::HookCommand),
     /// A hook post command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
@@ -383,7 +383,7 @@ pub enum RegistrationObject<'a> {
     ///  NON_API: void postCommand(int command, int flag);
     ///           register("hookpostcommand",postCommand);
     /// </pre>
-    HookPostCommand(raw::HookPostCommandFn),
+    HookPostCommand(raw::HookPostCommand),
     // HookCommand2(*mut c_void),
     /// A toggle action.
     ///
@@ -401,7 +401,7 @@ pub enum RegistrationObject<'a> {
     ///   0=action belongs to this extension and is currently set to "off"
     ///   1=action belongs to this extension and is currently set to "on"
     /// </pre>
-    ToggleAction(raw::ToggleActionFn),
+    ToggleAction(raw::ToggleAction),
     // ActionHelp(*mut c_void),
     /// A command ID for the given command name.
     ///

@@ -33,9 +33,9 @@ use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
-    CommandId, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand, MediumOnAudioBuffer,
-    MediumToggleAction, MidiInputDeviceId, OnAudioBufferArgs, RealTimeAudioThreadScope,
-    ReaperStringArg, ToggleActionResult,
+    CommandId, HookCommand, HookPostCommand, MidiInputDeviceId, OnAudioBuffer, OnAudioBufferArgs,
+    OwnedGaccelRegister, RealTimeAudioThreadScope, ReaperStringArg, ToggleAction,
+    ToggleActionResult,
 };
 use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
@@ -158,7 +158,7 @@ struct HighOnAudioBuffer {
     reaper: RealTimeReaper,
 }
 
-impl MediumOnAudioBuffer for HighOnAudioBuffer {
+impl OnAudioBuffer for HighOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
         if args.is_post {
             return;
@@ -554,7 +554,7 @@ impl Reaper {
             p.insert(command);
         }
         let address = medium
-            .plugin_register_add_gaccel(MediumGaccelRegister::without_key_binding(
+            .plugin_register_add_gaccel(OwnedGaccelRegister::without_key_binding(
                 command_id,
                 description,
             ))
@@ -877,7 +877,7 @@ impl RegisteredAction {
 // Only for main section
 struct HighLevelHookCommand {}
 
-impl MediumHookCommand for HighLevelHookCommand {
+impl HookCommand for HighLevelHookCommand {
     fn call(command_id: CommandId, _flag: i32) -> bool {
         // TODO-low Pass on flag
         let operation = match Reaper::get().command_by_id.borrow().get(&command_id) {
@@ -893,7 +893,7 @@ impl MediumHookCommand for HighLevelHookCommand {
 // Only for main section
 struct HighLevelHookPostCommand {}
 
-impl MediumHookPostCommand for HighLevelHookPostCommand {
+impl HookPostCommand for HighLevelHookPostCommand {
     fn call(command_id: CommandId, _flag: i32) {
         let action = Reaper::get()
             .main_section()
@@ -910,7 +910,7 @@ impl MediumHookPostCommand for HighLevelHookPostCommand {
 // Only for main section
 struct HighLevelToggleAction {}
 
-impl MediumToggleAction for HighLevelToggleAction {
+impl ToggleAction for HighLevelToggleAction {
     fn call(command_id: CommandId) -> ToggleActionResult {
         if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
             match &command.kind {

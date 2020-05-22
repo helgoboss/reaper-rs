@@ -100,10 +100,10 @@ mod windows_constants {
 pub use windows_constants::*;
 
 /// Function pointer type for hook commands.
-pub type HookCommandFn = extern "C" fn(command_id: c_int, flag: c_int) -> bool;
+pub type HookCommand = extern "C" fn(command_id: c_int, flag: c_int) -> bool;
 
 /// Function pointer type for toggle actions.
-pub type ToggleActionFn = extern "C" fn(command_id: c_int) -> c_int;
+pub type ToggleAction = extern "C" fn(command_id: c_int) -> c_int;
 
 /// Function pointer type for hook post commands.
-pub type HookPostCommandFn = extern "C" fn(command_id: c_int, flag: c_int);
+pub type HookPostCommand = extern "C" fn(command_id: c_int, flag: c_int);

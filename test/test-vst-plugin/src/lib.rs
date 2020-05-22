@@ -3,10 +3,7 @@ use c_str_macro::c_str;
 use futures_timer::Delay;
 use reaper_high::{ActionKind, Reaper, ReaperGuard};
 use reaper_low::{reaper_vst_plugin, PluginContext};
-use reaper_medium::{
-    CommandId, MediumHookPostCommand, MediumOnAudioBuffer, MediumReaperControlSurface,
-    OnAudioBufferArgs,
-};
+use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
 use rxrust::prelude::*;
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
@@ -52,7 +49,7 @@ struct MyOnAudioBuffer {
     counter: u64,
 }
 
-impl MediumOnAudioBuffer for MyOnAudioBuffer {
+impl OnAudioBuffer for MyOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
         if self.counter % 100 == 0 {
             self.sender
@@ -70,7 +67,7 @@ impl MediumOnAudioBuffer for MyOnAudioBuffer {
 
 struct MyHookPostCommand;
 
-impl MediumHookPostCommand for MyHookPostCommand {
+impl HookPostCommand for MyHookPostCommand {
     fn call(command_id: CommandId, _flag: i32) {
         println!("Command {:?} executed", command_id)
     }
@@ -82,7 +79,7 @@ struct MyControlSurface {
     receiver: Receiver<String>,
 }
 
-impl MediumReaperControlSurface for MyControlSurface {
+impl ControlSurface for MyControlSurface {
     fn run(&mut self) {
         for msg in self.receiver.try_iter() {
             self.reaper.show_console_msg(msg);

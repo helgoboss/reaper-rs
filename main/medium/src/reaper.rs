@@ -590,7 +590,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// *Real-time* means somewhere between [`OnAudioBuffer`] calls, not in some worker or
     /// anticipative FX thread.
     ///
-    /// [`OnAudioBuffer`]: trait.MediumOnAudioBuffer.html#method.call
+    /// [`OnAudioBuffer`]: trait.OnAudioBuffer.html#method.call
     #[measure(MultiThreadNanos)]
     pub fn is_in_real_time_audio(&self) -> bool
     where

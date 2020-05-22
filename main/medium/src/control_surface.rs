@@ -20,7 +20,7 @@ use std::ptr::null_mut;
 ///
 /// [`plugin_register_add_csurf_inst`]:
 /// struct.ReaperSession.html#method.plugin_register_add_csurf_inst
-pub trait MediumReaperControlSurface: Debug {
+pub trait ControlSurface: Debug {
     /// Should return the control surface type.
     ///
     /// Must be a simple unique string with only A-Z, 0-9, no spaces or other characters.
@@ -442,7 +442,7 @@ pub enum VersionDependentTrackFxLocation {
 
 #[derive(Debug)]
 pub(crate) struct DelegatingControlSurface {
-    delegate: Box<dyn MediumReaperControlSurface>,
+    delegate: Box<dyn ControlSurface>,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
@@ -450,7 +450,7 @@ pub(crate) struct DelegatingControlSurface {
 
 impl DelegatingControlSurface {
     pub fn new(
-        delegate: impl MediumReaperControlSurface + 'static,
+        delegate: impl ControlSurface + 'static,
         reaper_version: &ReaperVersion,
     ) -> DelegatingControlSurface {
         let reaper_version_5_95: ReaperVersion = ReaperVersion::new("5.95");

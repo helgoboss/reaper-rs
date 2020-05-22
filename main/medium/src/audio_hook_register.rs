@@ -11,7 +11,7 @@ use std::ptr::{null_mut, NonNull};
 /// See [`audio_reg_hardware_hook_add()`].
 ///
 /// [`audio_reg_hardware_hook_add()`]: struct.ReaperSession.html#method.audio_reg_hardware_hook_add
-pub trait MediumOnAudioBuffer {
+pub trait OnAudioBuffer {
     /// The actual callback function.
     ///
     /// It's called twice per frame, first with `is_post` being `false`, then `true`.
@@ -61,7 +61,7 @@ impl AudioHookRegister {
     }
 }
 
-pub(crate) extern "C" fn delegating_on_audio_buffer<T: MediumOnAudioBuffer>(
+pub(crate) extern "C" fn delegating_on_audio_buffer<T: OnAudioBuffer>(
     is_post: bool,
     len: c_int,
     srate: f64,
@@ -94,7 +94,7 @@ fn decode_user_data<'a, U>(data: *mut c_void) -> &'a mut U {
 }
 
 #[derive(Debug)]
-pub(crate) struct MediumAudioHookRegister {
+pub(crate) struct OwnedAudioHookRegister {
     inner: raw::audio_hook_register_t,
     // Boxed because we need stable memory address in order to pass this to REAPER. `dyn  Any`
     // because we don't want this struct to be generic. It must be possible to keep instances of
@@ -104,7 +104,7 @@ pub(crate) struct MediumAudioHookRegister {
     owned_user_data_2: Option<Box<dyn Any>>,
 }
 
-impl MediumAudioHookRegister {
+impl OwnedAudioHookRegister {
     /// Creates an audio hook register.
     ///
     /// See [`audio_reg_hardware_hook_add`].
@@ -116,9 +116,9 @@ impl MediumAudioHookRegister {
     ///
     /// [`audio_reg_hardware_hook_add`]:
     /// struct.ReaperSession.html#method.audio_reg_hardware_hook_add
-    pub(crate) fn new<T: MediumOnAudioBuffer + 'static>(callback: T) -> MediumAudioHookRegister {
+    pub(crate) fn new<T: OnAudioBuffer + 'static>(callback: T) -> OwnedAudioHookRegister {
         let callback = Box::new(callback);
-        MediumAudioHookRegister {
+        OwnedAudioHookRegister {
             inner: audio_hook_register_t {
                 OnAudioBuffer: Some(delegating_on_audio_buffer::<T>),
                 // boxed_callback_struct is not a fat pointer. Even if it would be, thanks to
@@ -137,7 +137,7 @@ impl MediumAudioHookRegister {
     }
 }
 
-impl AsRef<raw::audio_hook_register_t> for MediumAudioHookRegister {
+impl AsRef<raw::audio_hook_register_t> for OwnedAudioHookRegister {
     fn as_ref(&self) -> &audio_hook_register_t {
         &self.inner
     }

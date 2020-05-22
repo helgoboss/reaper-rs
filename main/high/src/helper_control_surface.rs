@@ -8,14 +8,13 @@ use c_str_macro::c_str;
 
 use reaper_medium::TrackAttributeKey::{Mute, Pan, RecArm, RecInput, Selected, Solo, Vol};
 use reaper_medium::{
-    AutomationMode, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
-    ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
-    ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, InputMonitoringMode,
-    MediaTrack, MediumReaperControlSurface, ReaProject, ReaperNormalizedFxParamValue,
-    ReaperPanValue, ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs, SetSurfacePanArgs,
-    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
-    SetTrackTitleArgs, TrackFxChainType, TrackLocation, VersionDependentFxLocation,
-    VersionDependentTrackFxLocation,
+    AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
+    ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
+    ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperNormalizedFxParamValue, ReaperPanValue,
+    ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
+    SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
+    TrackFxChainType, TrackLocation, VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
 
@@ -541,7 +540,7 @@ impl HelperControlSurface {
     }
 }
 
-impl MediumReaperControlSurface for HelperControlSurface {
+impl ControlSurface for HelperControlSurface {
     fn run(&mut self) {
         // Invoke custom idle code
         Reaper::get()

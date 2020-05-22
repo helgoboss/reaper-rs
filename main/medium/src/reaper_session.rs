@@ -8,10 +8,10 @@ use crate::infostruct_keeper::InfostructKeeper;
 
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_post_command,
-    delegating_toggle_action, CommandId, DelegatingControlSurface, MainThreadScope,
-    MediumAudioHookRegister, MediumGaccelRegister, MediumHookCommand, MediumHookPostCommand,
-    MediumOnAudioBuffer, MediumReaperControlSurface, MediumToggleAction, RealTimeAudioThreadScope,
-    Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperStringArg, RegistrationObject,
+    delegating_toggle_action, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
+    HookPostCommand, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister,
+    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperStringArg,
+    RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
@@ -57,8 +57,8 @@ use std::collections::{HashMap, HashSet};
 #[derive(Debug, Default)]
 pub struct ReaperSession {
     reaper: Reaper<MainThreadScope>,
-    gaccel_registers: InfostructKeeper<MediumGaccelRegister, raw::gaccel_register_t>,
-    audio_hook_registers: InfostructKeeper<MediumAudioHookRegister, raw::audio_hook_register_t>,
+    gaccel_registers: InfostructKeeper<OwnedGaccelRegister, raw::gaccel_register_t>,
+    audio_hook_registers: InfostructKeeper<OwnedAudioHookRegister, raw::audio_hook_register_t>,
     csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
     plugin_registrations: HashSet<RegistrationObject<'static>>,
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
@@ -194,7 +194,7 @@ impl ReaperSession {
     ///
     /// ```no_run
     /// # let mut session = reaper_medium::ReaperSession::default();
-    /// use reaper_medium::{MediumHookCommand, CommandId};
+    /// use reaper_medium::{HookCommand, CommandId};
     ///
     /// // Usually you would use a dynamic command ID that you have obtained via
     /// // `plugin_register_add_command_id()`. Unfortunately that command ID must be exposed as
@@ -203,7 +203,7 @@ impl ReaperSession {
     ///
     /// struct MyHookCommand;
     ///
-    /// impl MediumHookCommand for MyHookCommand {
+    /// impl HookCommand for MyHookCommand {
     ///     fn call(command_id: CommandId, _flag: i32) -> bool {
     ///         if command_id != MY_COMMAND_ID {
     ///             return false;
@@ -222,9 +222,7 @@ impl ReaperSession {
     /// only, not a function pointer. That allows us to lift the API to medium-level style.
     /// The alternative would have been to expect a function pointer, but then consumers would have
     /// to deal with raw types.
-    pub fn plugin_register_add_hook_command<T: MediumHookCommand>(
-        &mut self,
-    ) -> ReaperFunctionResult<()> {
+    pub fn plugin_register_add_hook_command<T: HookCommand>(&mut self) -> ReaperFunctionResult<()> {
         unsafe {
             self.plugin_register_add(RegistrationObject::HookCommand(
                 delegating_hook_command::<T>,
@@ -234,7 +232,7 @@ impl ReaperSession {
     }
 
     /// Unregisters a hook command.
-    pub fn plugin_register_remove_hook_command<T: MediumHookCommand>(&mut self) {
+    pub fn plugin_register_remove_hook_command<T: HookCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookCommand(
                 delegating_hook_command::<T>,
@@ -252,7 +250,7 @@ impl ReaperSession {
     /// # Errors
     ///
     /// Returns an error if the registration failed.
-    pub fn plugin_register_add_toggle_action<T: MediumToggleAction>(
+    pub fn plugin_register_add_toggle_action<T: ToggleAction>(
         &mut self,
     ) -> ReaperFunctionResult<()> {
         unsafe {
@@ -264,7 +262,7 @@ impl ReaperSession {
     }
 
     /// Unregisters a toggle action.
-    pub fn plugin_register_remove_toggle_action<T: MediumToggleAction>(&mut self) {
+    pub fn plugin_register_remove_toggle_action<T: ToggleAction>(&mut self) {
         unsafe {
             self.plugin_register_remove(RegistrationObject::ToggleAction(
                 delegating_toggle_action::<T>,
@@ -282,7 +280,7 @@ impl ReaperSession {
     /// # Errors
     ///
     /// Returns an error if the registration failed.
-    pub fn plugin_register_add_hook_post_command<T: MediumHookPostCommand>(
+    pub fn plugin_register_add_hook_post_command<T: HookPostCommand>(
         &mut self,
     ) -> ReaperFunctionResult<()> {
         unsafe {
@@ -294,7 +292,7 @@ impl ReaperSession {
     }
 
     /// Unregisters a hook post command.
-    pub fn plugin_register_remove_hook_post_command<T: MediumHookPostCommand>(&mut self) {
+    pub fn plugin_register_remove_hook_post_command<T: HookPostCommand>(&mut self) {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookPostCommand(
                 delegating_hook_post_command::<T>,
@@ -352,7 +350,7 @@ impl ReaperSession {
     /// [`plugin_register_remove_gaccel()`]: #method.plugin_register_remove_gaccel
     pub fn plugin_register_add_gaccel(
         &mut self,
-        register: MediumGaccelRegister,
+        register: OwnedGaccelRegister,
     ) -> ReaperFunctionResult<NonNull<raw::gaccel_register_t>> {
         let handle = self.gaccel_registers.keep(register);
         unsafe { self.plugin_register_add(RegistrationObject::Gaccel(handle))? };
@@ -380,12 +378,12 @@ impl ReaperSession {
     ///
     /// ```no_run
     /// # let mut session = reaper_medium::ReaperSession::default();
-    /// use reaper_medium::MediumReaperControlSurface;
+    /// use reaper_medium::ControlSurface;
     ///
     /// #[derive(Debug)]
     /// struct MyControlSurface;
     ///
-    /// impl MediumReaperControlSurface for MyControlSurface {
+    /// impl ControlSurface for MyControlSurface {
     ///     fn set_track_list_change(&self) {
     ///         println!("Tracks changed");
     ///     }
@@ -397,7 +395,7 @@ impl ReaperSession {
     /// [`plugin_register_remove_csurf_inst()`]: #method.plugin_register_remove_csurf_inst
     pub fn plugin_register_add_csurf_inst(
         &mut self,
-        control_surface: impl MediumReaperControlSurface + 'static,
+        control_surface: impl ControlSurface + 'static,
     ) -> ReaperFunctionResult<NonNull<raw::IReaperControlSurface>> {
         let rust_control_surface =
             DelegatingControlSurface::new(control_surface, &self.reaper.get_app_version());
@@ -501,7 +499,7 @@ impl ReaperSession {
     /// ```no_run
     /// # let mut session = reaper_medium::ReaperSession::default();
     /// use reaper_medium::{
-    ///     MediumReaperControlSurface, MediumOnAudioBuffer, OnAudioBufferArgs,
+    ///     ControlSurface, OnAudioBuffer, OnAudioBufferArgs,
     ///     Reaper, RealTimeAudioThreadScope, MidiInputDeviceId
     /// };
     ///
@@ -510,7 +508,7 @@ impl ReaperSession {
     ///     reaper: Reaper<RealTimeAudioThreadScope>,
     /// }
     ///
-    /// impl MediumOnAudioBuffer for MyOnAudioBuffer {
+    /// impl OnAudioBuffer for MyOnAudioBuffer {
     ///     fn call(&mut self, args: OnAudioBufferArgs) {
     ///         // Mutate some own state (safe because we are the owner)
     ///         if self.counter % 100 == 0 {
@@ -534,13 +532,13 @@ impl ReaperSession {
     /// ```
     ///
     /// [`audio_reg_hardware_hook_remove()`]: #method.audio_reg_hardware_hook_remove
-    pub fn audio_reg_hardware_hook_add<T: MediumOnAudioBuffer + 'static>(
+    pub fn audio_reg_hardware_hook_add<T: OnAudioBuffer + 'static>(
         &mut self,
         callback: T,
     ) -> ReaperFunctionResult<NonNull<audio_hook_register_t>> {
         let handle = self
             .audio_hook_registers
-            .keep(MediumAudioHookRegister::new(callback));
+            .keep(OwnedAudioHookRegister::new(callback));
         unsafe { self.audio_reg_hardware_hook_add_unchecked(handle)? };
         Ok(handle)
     }

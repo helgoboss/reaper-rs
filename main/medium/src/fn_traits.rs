@@ -4,7 +4,7 @@ use std::os::raw::c_int;
 
 /// Consumers need to implement this trait in order to define what should happen when a certain
 /// action is invoked.
-pub trait MediumHookCommand {
+pub trait HookCommand {
     /// The actual callback function called by REAPER whenever an action was triggered to run.
     ///
     /// Must return `true` to indicate that the given command has been processed.
@@ -16,7 +16,7 @@ pub trait MediumHookCommand {
     fn call(command_id: CommandId, flag: i32) -> bool;
 }
 
-pub(crate) extern "C" fn delegating_hook_command<T: MediumHookCommand>(
+pub(crate) extern "C" fn delegating_hook_command<T: HookCommand>(
     command_id: c_int,
     flag: c_int,
 ) -> bool {
@@ -25,7 +25,7 @@ pub(crate) extern "C" fn delegating_hook_command<T: MediumHookCommand>(
 
 /// Consumers need to implement this trait in order to let REAPER know if a toggleable action is
 /// currently *on* or *off*.
-pub trait MediumToggleAction {
+pub trait ToggleAction {
     /// The actual callback function called by REAPER to check if an action registered by an
     /// extension has an *on* or *off* state.
     fn call(command_id: CommandId) -> ToggleActionResult;
@@ -40,9 +40,7 @@ pub enum ToggleActionResult {
     On,
 }
 
-pub(crate) extern "C" fn delegating_toggle_action<T: MediumToggleAction>(
-    command_id: c_int,
-) -> c_int {
+pub(crate) extern "C" fn delegating_toggle_action<T: ToggleAction>(command_id: c_int) -> c_int {
     firewall(|| {
         use ToggleActionResult::*;
         match T::call(CommandId(command_id as _)) {
@@ -56,12 +54,12 @@ pub(crate) extern "C" fn delegating_toggle_action<T: MediumToggleAction>(
 
 /// Consumers need to implement this trait in order to get notified after an action of the main
 /// section has run.
-pub trait MediumHookPostCommand {
+pub trait HookPostCommand {
     // The actual callback called after an action of the main section has been performed.
     fn call(command_id: CommandId, flag: i32);
 }
 
-pub(crate) extern "C" fn delegating_hook_post_command<T: MediumHookPostCommand>(
+pub(crate) extern "C" fn delegating_hook_post_command<T: HookPostCommand>(
     command_id: c_int,
     flag: c_int,
 ) {

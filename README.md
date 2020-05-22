@@ -82,7 +82,7 @@ Control surface:
 #[derive(Debug)]
 struct MyControlSurface;
 
-impl MediumReaperControlSurface for MyControlSurface {
+impl ControlSurface for MyControlSurface {
     fn set_track_list_change(&self) {
         println!("Tracks changed");
     }
@@ -98,7 +98,7 @@ struct MyOnAudioBuffer {
     counter: u64
 }
 
-impl MediumOnAudioBuffer for MyOnAudioBuffer {
+impl OnAudioBuffer for MyOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
         if self.counter % 100 == 0 {
             println!("Audio hook callback counter: {}\n", self.counter);
