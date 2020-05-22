@@ -62,49 +62,73 @@ pub trait MediumReaperControlSurface: Debug {
     fn set_track_list_change(&self) {}
 
     /// Called when the volume of a track has changed.
-    fn set_surface_volume(&self, _args: SetSurfaceVolumeArgs) {}
+    fn set_surface_volume(&self, args: SetSurfaceVolumeArgs) {
+        let _ = args;
+    }
 
     /// Called when the pan of a track has changed.
-    fn set_surface_pan(&self, _args: SetSurfacePanArgs) {}
+    fn set_surface_pan(&self, args: SetSurfacePanArgs) {
+        let _ = args;
+    }
 
     /// Called when a track has been muted or unmuted.
-    fn set_surface_mute(&self, _args: SetSurfaceMuteArgs) {}
+    fn set_surface_mute(&self, args: SetSurfaceMuteArgs) {
+        let _ = args;
+    }
 
     /// Called when a track has been selected or unselected.
-    fn set_surface_selected(&self, _args: SetSurfaceSelectedArgs) {}
+    fn set_surface_selected(&self, args: SetSurfaceSelectedArgs) {
+        let _ = args;
+    }
 
     /// Called when a track has been soloed or unsoloed.
     ///
     /// If it's the master track, it means "any solo".
-    fn set_surface_solo(&self, _args: SetSurfaceSoloArgs) {}
+    fn set_surface_solo(&self, args: SetSurfaceSoloArgs) {
+        let _ = args;
+    }
 
     /// Called when a track has been armed or unarmed for recording.
-    fn set_surface_rec_arm(&self, _args: SetSurfaceRecArmArgs) {}
+    fn set_surface_rec_arm(&self, args: SetSurfaceRecArmArgs) {
+        let _ = args;
+    }
 
     /// Called when the transport state has changed (playing, paused, recording).
-    fn set_play_state(&self, _args: SetPlayStateArgs) {}
+    fn set_play_state(&self, args: SetPlayStateArgs) {
+        let _ = args;
+    }
 
     /// Called when repeat has been enabled or disabled.
-    fn set_repeat_state(&self, _args: SetRepeatStateArgs) {}
+    fn set_repeat_state(&self, args: SetRepeatStateArgs) {
+        let _ = args;
+    }
 
     /// Called when a track name has changed.
-    fn set_track_title(&self, _args: SetTrackTitleArgs) {}
+    fn set_track_title(&self, args: SetTrackTitleArgs) {
+        let _ = args;
+    }
 
-    fn get_touch_state(&self, _args: GetTouchStateArgs) -> bool {
+    fn get_touch_state(&self, args: GetTouchStateArgs) -> bool {
+        let _ = args;
         false
     }
 
     /// Called when the automation mode of the current track has changed.
-    fn set_auto_mode(&self, _args: SetAutoModeArgs) {}
+    fn set_auto_mode(&self, args: SetAutoModeArgs) {
+        let _ = args;
+    }
 
     /// Should flush the control states.
     fn reset_cached_vol_pan_states(&self) {}
 
     /// Called when a track has been selected.
-    fn on_track_selection(&self, _args: OnTrackSelectionArgs) {}
+    fn on_track_selection(&self, args: OnTrackSelectionArgs) {
+        let _ = args;
+    }
 
     /// Should return whether the given modifier key is currently pressed on the surface.
-    fn is_key_down(&self, _args: IsKeyDownArgs) -> bool {
+    fn is_key_down(&self, args: IsKeyDownArgs) -> bool {
+        let _ = args;
         false
     }
 
@@ -120,12 +144,14 @@ pub trait MediumReaperControlSurface: Debug {
     /// Implementing this is unsafe because you need to deal with raw pointers.
     ///
     /// [`args.call`]: struct.ExtendedArgs.html#structfield.call
-    unsafe fn extended(&self, _args: ExtendedArgs) -> i32 {
+    unsafe fn extended(&self, args: ExtendedArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when the input monitoring mode of a track has has changed.
-    fn ext_set_input_monitor(&self, _args: ExtSetInputMonitorArgs) -> i32 {
+    fn ext_set_input_monitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
+        let _ = args;
         0
     }
 
@@ -133,54 +159,64 @@ pub trait MediumReaperControlSurface: Debug {
     ///
     /// For REAPER < 5.95 this is also called for an FX in the input FX chain. In this case there's
     /// no way to know whether the given FX index refers to the normal or input FX chain.
-    fn ext_set_fx_param(&self, _args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param(&self, args: ExtSetFxParamArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when a parameter of an FX in the input FX chain has changed its value.
     ///
     /// Only called for REAPER >= 5.95.
-    fn ext_set_fx_param_rec_fx(&self, _args: ExtSetFxParamArgs) -> i32 {
+    fn ext_set_fx_param_rec_fx(&self, args: ExtSetFxParamArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when a an FX has been enabled or disabled.
-    fn ext_set_fx_enabled(&self, _args: ExtSetFxEnabledArgs) -> i32 {
+    fn ext_set_fx_enabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when the volume of a track send has changed.
-    fn ext_set_send_volume(&self, _args: ExtSetSendVolumeArgs) -> i32 {
+    fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when the pan of a track send has changed.
-    fn ext_set_send_pan(&self, _args: ExtSetSendPanArgs) -> i32 {
+    fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when a certain FX has gained focus.
-    fn ext_set_focused_fx(&self, _args: ExtSetFocusedFxArgs) -> i32 {
+    fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when a certain FX has been touched.
-    fn ext_set_last_touched_fx(&self, _args: ExtSetLastTouchedFxArgs) -> i32 {
+    fn ext_set_last_touched_fx(&self, args: ExtSetLastTouchedFxArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when the user interface of a certain FX has been opened.
-    fn ext_set_fx_open(&self, _args: ExtSetFxOpenArgs) -> i32 {
+    fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when an FX has been added, removed or when it changed its position in the chain.
-    fn ext_set_fx_change(&self, _args: ExtSetFxChangeArgs) -> i32 {
+    fn ext_set_fx_change(&self, args: ExtSetFxChangeArgs) -> i32 {
+        let _ = args;
         0
     }
 
     /// Called when the master tempo or play rate has changed.
-    fn ext_set_bpm_and_play_rate(&self, _args: ExtSetBpmAndPlayRateArgs) -> i32 {
+    fn ext_set_bpm_and_play_rate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
+        let _ = args;
         0
     }
 }
@@ -233,7 +269,6 @@ pub struct SetRepeatStateArgs {
     pub is_enabled: bool,
 }
 
-// TODO-medium Remove underscore from param names
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct SetTrackTitleArgs<'a> {
     pub track: MediaTrack,
