@@ -3,7 +3,7 @@ use std::convert;
 
 use crate::Reaper;
 
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr};
 use std::fmt;
 use std::fmt::Formatter;
 use std::str;

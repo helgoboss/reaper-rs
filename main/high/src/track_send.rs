@@ -4,7 +4,7 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{MediaTrack, ReaperString, TrackSendDirection};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
-use std::ffi::CString;
+
 
 #[derive(Clone, Debug, Eq)]
 pub struct TrackSend {

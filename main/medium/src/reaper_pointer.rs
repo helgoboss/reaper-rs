@@ -1,6 +1,6 @@
 use super::{MediaItem, MediaItemTake, MediaTrack, ReaProject, TrackEnvelope};
 use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
-use c_str_macro::c_str;
+
 use reaper_low::raw;
 use std::borrow::Cow;
 use std::os::raw::c_void;

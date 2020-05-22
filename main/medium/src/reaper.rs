@@ -4,7 +4,7 @@ use crate::metering::NanoResponseTime;
 use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
 use reaper_macros::measure;
-use std::ffi::{CStr, CString};
+use std::ffi::{CString};
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 

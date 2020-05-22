@@ -5,7 +5,7 @@ use reaper_medium::{
     GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue, ReaperString,
 };
 use rxrust::prelude::PayloadCopy;
-use std::ffi::CString;
+
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FxParameter {
