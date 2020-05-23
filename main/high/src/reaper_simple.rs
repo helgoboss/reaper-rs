@@ -2,7 +2,8 @@
 //! just access to `reaper_medium::Reaper` - without all the advanced stuff like subjects,
 //! channels etc. Although they end up in the same struct, this gives a little bit of structure.
 use crate::{
-    Action, Fx, FxParameter, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper, Section,
+    Action, Fx, FxChain, FxParameter, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper,
+    Section,
 };
 use helgoboss_midi::ShortMessage;
 use reaper_medium::{
@@ -27,6 +28,10 @@ impl Reaper {
 
     pub fn main_section(&self) -> Section {
         Section::new(SectionId::new(0))
+    }
+
+    pub fn monitoring_fx_chain(&self) -> FxChain {
+        FxChain::from_monitoring()
     }
 
     pub fn last_touched_fx_parameter(&self) -> Option<FxParameter> {

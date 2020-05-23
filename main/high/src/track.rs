@@ -691,11 +691,11 @@ impl Track {
     }
 
     pub fn normal_fx_chain(&self) -> FxChain {
-        FxChain::new(self.clone(), false)
+        FxChain::from_track(self.clone(), false)
     }
 
     pub fn input_fx_chain(&self) -> FxChain {
-        FxChain::new(self.clone(), true)
+        FxChain::from_track(self.clone(), true)
     }
 
     pub fn is_master_track(&self) -> bool {

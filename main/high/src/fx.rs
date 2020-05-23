@@ -6,27 +6,25 @@ use std::path::PathBuf;
 use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
-use crate::{ChunkRegion, Reaper, Track};
+use crate::{ChunkRegion, Project, Reaper, Track};
 use reaper_medium::{FxShowInstruction, Hwnd, ReaperString, TrackFxLocation};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
-    // TODO-low Save chain instead of track
-    track: Track,
+    chain: FxChain,
     // Primary identifier, but only for tracked, GUID-based FX instances. Otherwise empty.
     guid: Option<Guid>,
     // For GUID-based FX instances this is the secondary identifier, can become invalid on FX
     // reorderings. For just index-based FX instances this is the primary identifier.
     index: Cell<Option<u32>>,
-    is_input_fx: bool,
 }
 
 impl PayloadCopy for Fx {}
 
 impl PartialEq for Fx {
     fn eq(&self, other: &Self) -> bool {
-        if self.track != other.track || self.is_input_fx != other.is_input_fx {
+        if self.chain != other.chain {
             return false;
         }
         if let (Some(self_guid), Some(other_guid)) = (self.guid, other.guid) {
@@ -42,9 +40,8 @@ impl Fx {
     // Main constructor. Use it if you have the GUID. index will be determined lazily.
     pub(crate) fn from_guid_lazy_index(track: Track, guid: Guid, is_input_fx: bool) -> Fx {
         Fx {
-            track,
+            chain: FxChain::from_track(track, is_input_fx),
             guid: Some(guid),
-            is_input_fx,
             index: Cell::new(None),
         }
     }
@@ -57,9 +54,8 @@ impl Fx {
         is_input_fx: bool,
     ) -> Fx {
         Fx {
-            track,
+            chain: FxChain::from_track(track, is_input_fx),
             guid: Some(guid),
-            is_input_fx,
             index: Cell::new(Some(index)),
         }
     }
@@ -67,18 +63,21 @@ impl Fx {
     // Use this if you want to create a purely index-based FX without UUID tracking.
     pub(crate) fn from_index_untracked(track: Track, index: u32, is_input_fx: bool) -> Fx {
         Fx {
-            track,
+            chain: FxChain::from_track(track, is_input_fx),
             guid: None,
-            is_input_fx,
             index: Cell::new(Some(index)),
         }
+    }
+
+    pub fn project(&self) -> Option<Project> {
+        Some(self.track().project())
     }
 
     pub fn name(&self) -> ReaperString {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_fx_name(
-                self.track.raw(),
+                self.track().raw(),
                 self.query_index(),
                 256,
             )
@@ -130,7 +129,7 @@ impl Fx {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_num_params(self.track.raw(), self.query_index()) as u32
+                .track_fx_get_num_params(self.track().raw(), self.query_index()) as u32
         }
     }
 
@@ -138,7 +137,7 @@ impl Fx {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_enabled(self.track.raw(), self.query_index())
+                .track_fx_get_enabled(self.track().raw(), self.query_index())
         }
     }
 
@@ -155,12 +154,12 @@ impl Fx {
         FxParameter::new(self.clone(), index)
     }
 
-    pub fn track(&self) -> Track {
-        self.track.clone()
+    pub fn track(&self) -> &Track {
+        self.chain.track()
     }
 
     pub fn query_index(&self) -> TrackFxLocation {
-        get_fx_query_index(self.index(), self.is_input_fx)
+        get_fx_query_index(self.index(), self.is_input_fx())
     }
 
     pub fn index(&self) -> u32 {
@@ -181,7 +180,7 @@ impl Fx {
             None => return false, // Not loaded
             Some(index) => index,
         };
-        if !self.track.is_available() {
+        if !self.track().is_available() {
             return false;
         }
         match self.guid {
@@ -195,7 +194,7 @@ impl Fx {
 
     // Returns None if no FX at that index anymore
     fn guid_by_index(&self, index: u32) -> Option<Guid> {
-        get_fx_guid(&self.track, index, self.is_input_fx)
+        get_fx_guid(&self.track(), index, self.is_input_fx())
     }
 
     fn load_by_guid(&self) -> bool {
@@ -251,7 +250,7 @@ impl Fx {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_floating_window(self.track.raw(), self.query_index())
+                .track_fx_get_floating_window(self.track().raw(), self.query_index())
         }
     }
 
@@ -259,7 +258,7 @@ impl Fx {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_open(self.track.raw(), self.query_index())
+                .track_fx_get_open(self.track().raw(), self.query_index())
         }
     }
 
@@ -285,7 +284,7 @@ impl Fx {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_show(
-                self.track.raw(),
+                self.track().raw(),
                 FxShowInstruction::ShowFloatingWindow(self.query_index()),
             );
         }
@@ -295,21 +294,17 @@ impl Fx {
         let mut old_chunk = old_chunk_region.parent_chunk();
         old_chunk.replace_region(&old_chunk_region, new_content);
         std::mem::drop(old_chunk_region);
-        self.track.set_chunk(old_chunk);
+        self.track().set_chunk(old_chunk);
     }
 
-    pub fn chain(&self) -> FxChain {
-        if self.is_input_fx {
-            self.track.input_fx_chain()
-        } else {
-            self.track.normal_fx_chain()
-        }
+    pub fn chain(&self) -> &FxChain {
+        &self.chain
     }
 
     pub fn enable(&self) {
         unsafe {
             Reaper::get().medium_reaper().track_fx_set_enabled(
-                self.track.raw(),
+                self.track().raw(),
                 self.query_index(),
                 true,
             );
@@ -319,7 +314,7 @@ impl Fx {
     pub fn disable(&self) {
         unsafe {
             Reaper::get().medium_reaper().track_fx_set_enabled(
-                self.track.raw(),
+                self.track().raw(),
                 self.query_index(),
                 false,
             );
@@ -327,7 +322,7 @@ impl Fx {
     }
 
     pub fn is_input_fx(&self) -> bool {
-        self.is_input_fx
+        self.chain.is_input_fx()
     }
 
     pub fn is_available(&self) -> bool {
@@ -355,7 +350,7 @@ impl Fx {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_preset_index(self.track.raw(), self.query_index())
+                .track_fx_get_preset_index(self.track().raw(), self.query_index())
         }
         .expect("Couldn't get preset count")
         .count
@@ -365,7 +360,7 @@ impl Fx {
         self.load_if_necessary_or_complain();
         !unsafe {
             Reaper::get().medium_reaper().track_fx_get_preset(
-                self.track.raw(),
+                self.track().raw(),
                 self.query_index(),
                 0,
             )
@@ -377,7 +372,7 @@ impl Fx {
         self.load_if_necessary_or_complain();
         unsafe {
             Reaper::get().medium_reaper().track_fx_get_preset(
-                self.track.raw(),
+                self.track().raw(),
                 self.query_index(),
                 2000,
             )

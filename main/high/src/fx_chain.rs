@@ -1,41 +1,65 @@
 use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
-use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Track, MAX_TRACK_CHUNK_SIZE};
+use crate::{get_fx_query_index, Chunk, ChunkRegion, Reaper, Take, Track, MAX_TRACK_CHUNK_SIZE};
 
 use reaper_medium::{AddFxBehavior, ChunkCacheHint, TrackFxChainType, TransferBehavior};
 use std::ffi::CStr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
+pub enum FxChainContext {
+    Monitoring,
+    Track { track: Track, is_input_fx: bool },
+    Take(Take),
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FxChain {
-    track: Track,
-    is_input_fx: bool,
+    context: FxChainContext,
 }
 
 impl FxChain {
-    pub(super) fn new(track: Track, is_input_fx: bool) -> FxChain {
-        FxChain { track, is_input_fx }
+    pub(crate) fn from_track(track: Track, is_input_fx: bool) -> FxChain {
+        FxChain {
+            context: FxChainContext::Track { track, is_input_fx },
+        }
+    }
+
+    pub(crate) fn from_take(take: Take) -> FxChain {
+        FxChain {
+            context: FxChainContext::Take(take),
+        }
+    }
+
+    pub(crate) fn from_monitoring() -> FxChain {
+        FxChain {
+            context: FxChainContext::Monitoring,
+        }
+    }
+
+    pub fn context(&self) -> &FxChainContext {
+        &self.context
     }
 
     pub fn fx_count(&self) -> u32 {
         let reaper = Reaper::get().medium_reaper();
-        if self.is_input_fx {
-            unsafe { reaper.track_fx_get_rec_count(self.track.raw()) as u32 }
+        if self.is_input_fx() {
+            unsafe { reaper.track_fx_get_rec_count(self.track().raw()) as u32 }
         } else {
-            unsafe { reaper.track_fx_get_count(self.track.raw()) as u32 }
+            unsafe { reaper.track_fx_get_count(self.track().raw()) as u32 }
         }
     }
 
     // Moves within this FX chain
     pub fn move_fx(&self, fx: &Fx, new_index: u32) {
-        assert_eq!(fx.chain(), *self);
+        assert_eq!(fx.chain(), self);
         let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().TrackFX_CopyToTrack.is_some() {
             unsafe {
                 reaper.track_fx_copy_to_track(
-                    (self.track.raw(), fx.query_index()),
+                    (self.track().raw(), fx.query_index()),
                     (
-                        self.track.raw(),
-                        get_fx_query_index(new_index, self.is_input_fx),
+                        self.track().raw(),
+                        get_fx_query_index(new_index, self.is_input_fx()),
                     ),
                     TransferBehavior::Move,
                 );
@@ -75,12 +99,12 @@ impl FxChain {
                 };
                 original_fx_chunk_region.parent_chunk()
             };
-            self.track.set_chunk(new_chunk)
+            self.track().set_chunk(new_chunk)
         }
     }
 
     pub fn remove_fx(&self, fx: &Fx) {
-        assert_eq!(fx.chain(), *self);
+        assert_eq!(fx.chain(), self);
         if !fx.is_available() {
             return;
         }
@@ -88,7 +112,7 @@ impl FxChain {
         if reaper.low().pointers().TrackFX_Delete.is_some() {
             unsafe {
                 reaper
-                    .track_fx_delete(self.track.raw(), fx.query_index())
+                    .track_fx_delete(self.track().raw(), fx.query_index())
                     .expect("couldn't delete track FX")
             };
         } else {
@@ -99,13 +123,13 @@ impl FxChain {
                     .delete_region(&fx_chunk_region);
                 fx_chunk_region.parent_chunk()
             };
-            self.track.set_chunk(new_chunk);
+            self.track().set_chunk(new_chunk);
         }
     }
 
     pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
         let mut track_chunk = self
-            .track
+            .track()
             .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
@@ -132,7 +156,7 @@ DOCKED 0
                 );
             }
         }
-        self.track.set_chunk(track_chunk);
+        self.track().set_chunk(track_chunk);
         self.last_fx()
     }
 
@@ -140,10 +164,11 @@ DOCKED 0
     pub fn fxs(&self) -> impl Iterator<Item = Fx> + '_ {
         (0..self.fx_count()).map(move |i| {
             Fx::from_guid_and_index(
-                self.track.clone(),
-                get_fx_guid(&self.track, i, self.is_input_fx).expect("Couldn't determine FX GUID"),
+                self.track().clone(),
+                get_fx_guid(&self.track(), i, self.is_input_fx())
+                    .expect("Couldn't determine FX GUID"),
                 i,
-                self.is_input_fx,
+                self.is_input_fx(),
             )
         })
     }
@@ -151,26 +176,26 @@ DOCKED 0
     // This returns a non-optional in order to support not-yet-loaded FX. GUID is a perfectly stable
     // identifier of an FX!
     pub fn fx_by_guid(&self, guid: &Guid) -> Fx {
-        Fx::from_guid_lazy_index(self.track.clone(), *guid, self.is_input_fx)
+        Fx::from_guid_lazy_index(self.track().clone(), *guid, self.is_input_fx())
     }
 
     // Like fxByGuid but if you already know the index
     pub fn fx_by_guid_and_index(&self, guid: &Guid, index: u32) -> Fx {
-        Fx::from_guid_and_index(self.track.clone(), *guid, index, self.is_input_fx)
+        Fx::from_guid_and_index(self.track().clone(), *guid, index, self.is_input_fx())
     }
 
     // In Track this returns Chunk, here it returns ChunkRegion. Because REAPER always returns
     // the chunk of the complete track, not just of the FX chain.
     pub fn chunk(&self) -> Option<ChunkRegion> {
         self.find_chunk_region(
-            self.track
+            self.track()
                 .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode),
         )
     }
 
     pub fn set_chunk(&self, chunk: &str) {
         let mut track_chunk = self
-            .track
+            .track()
             .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
@@ -183,7 +208,7 @@ DOCKED 0
                 track_chunk.insert_after_region_as_block(&track_chunk.region().first_line(), chunk);
             }
         }
-        self.track.set_chunk(track_chunk);
+        self.track().set_chunk(track_chunk);
     }
 
     fn find_chunk_region(&self, track_chunk: Chunk) -> Option<ChunkRegion> {
@@ -193,7 +218,7 @@ DOCKED 0
     }
 
     fn chunk_tag_name(&self) -> &'static str {
-        if self.is_input_fx {
+        if self.is_input_fx() {
             "FXCHAIN_REC"
         } else {
             "FXCHAIN"
@@ -201,13 +226,13 @@ DOCKED 0
     }
 
     pub fn first_instrument_fx(&self) -> Option<Fx> {
-        if self.is_input_fx {
+        if self.is_input_fx() {
             return None;
         }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .track_fx_get_instrument(self.track.raw())
+                .track_fx_get_instrument(self.track().raw())
         }
         .and_then(|fx_index| self.fx_by_index(fx_index))
     }
@@ -215,9 +240,9 @@ DOCKED 0
     pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
         let fx_index = unsafe {
             Reaper::get().medium_reaper().track_fx_add_by_name_add(
-                self.track.raw(),
+                self.track().raw(),
                 original_fx_name,
-                if self.is_input_fx {
+                if self.is_input_fx() {
                     TrackFxChainType::InputFxChain
                 } else {
                     TrackFxChainType::NormalFxChain
@@ -227,27 +252,33 @@ DOCKED 0
         }
         .ok()?;
         Some(Fx::from_guid_and_index(
-            self.track.clone(),
-            get_fx_guid(&self.track, fx_index, self.is_input_fx).expect("Couldn't get GUID"),
+            self.track().clone(),
+            get_fx_guid(&self.track(), fx_index, self.is_input_fx()).expect("Couldn't get GUID"),
             fx_index,
-            self.is_input_fx,
+            self.is_input_fx(),
         ))
     }
 
-    pub fn track(&self) -> Track {
-        self.track.clone()
+    pub fn track(&self) -> &Track {
+        match &self.context {
+            FxChainContext::Track { track, .. } => track,
+            _ => panic!("not yet supported"),
+        }
     }
 
     pub fn is_input_fx(&self) -> bool {
-        self.is_input_fx
+        match &self.context {
+            FxChainContext::Track { is_input_fx, .. } => *is_input_fx,
+            _ => panic!("not yet supported"),
+        }
     }
 
     pub fn first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
         let fx_index = unsafe {
             Reaper::get().medium_reaper().track_fx_add_by_name_query(
-                self.track.raw(),
+                self.track().raw(),
                 name,
-                if self.is_input_fx {
+                if self.is_input_fx() {
                     TrackFxChainType::InputFxChain
                 } else {
                     TrackFxChainType::NormalFxChain
@@ -255,10 +286,10 @@ DOCKED 0
             )
         }?;
         Some(Fx::from_guid_and_index(
-            self.track.clone(),
-            get_fx_guid(&self.track, fx_index, self.is_input_fx).expect("Couldn't get GUID"),
+            self.track().clone(),
+            get_fx_guid(&self.track(), fx_index, self.is_input_fx()).expect("Couldn't get GUID"),
             fx_index,
-            self.is_input_fx,
+            self.is_input_fx(),
         ))
     }
 
@@ -270,17 +301,18 @@ DOCKED 0
             return None;
         }
         Some(Fx::from_guid_and_index(
-            self.track.clone(),
-            get_fx_guid(&self.track, index, self.is_input_fx).expect("Couldn't determine FX GUID"),
+            self.track().clone(),
+            get_fx_guid(&self.track(), index, self.is_input_fx())
+                .expect("Couldn't determine FX GUID"),
             index,
-            self.is_input_fx,
+            self.is_input_fx(),
         ))
     }
 
     // This returns a purely index-based FX that doesn't keep track of FX GUID, doesn't follow
     // reorderings and so on.
     pub fn fx_by_index_untracked(&self, index: u32) -> Fx {
-        Fx::from_index_untracked(self.track.clone(), index, self.is_input_fx)
+        Fx::from_index_untracked(self.track().clone(), index, self.is_input_fx())
     }
 
     pub fn first_fx(&self) -> Option<Fx> {
@@ -296,6 +328,6 @@ DOCKED 0
     }
 
     pub fn is_available(&self) -> bool {
-        self.track.is_available()
+        self.track().is_available()
     }
 }

@@ -1967,7 +1967,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             assert!(!state_chunk.contains(">"));
             assert_eq!(fx.track(), track);
             assert_eq!(fx.is_input_fx(), fx_chain.is_input_fx());
-            assert_eq!(fx.chain(), fx_chain);
+            assert_eq!(fx.chain(), &fx_chain);
             assert_eq!(fx.parameter_count(), 7);
             assert_eq!(fx.parameters().count(), 7);
             let param1 = fx.parameter_by_index(0);
@@ -2352,7 +2352,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(mock.invocation_count(), 0);
         } else {
             assert_eq!(mock.invocation_count(), 1);
-            assert_eq!(mock.last_arg(), fx_chain.track());
+            assert_eq!(mock.last_arg(), *fx_chain.track());
         }
         Ok(())
     })
@@ -2600,8 +2600,8 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(fx_2.track(), track);
             assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx_2.is_input_fx(), fx_chain.is_input_fx());
-            assert_eq!(fx_1.chain(), fx_chain);
-            assert_eq!(fx_2.chain(), fx_chain);
+            assert_eq!(fx_1.chain(), &fx_chain);
+            assert_eq!(fx_2.chain(), &fx_chain);
             assert_eq!(fx_1.parameter_count(), 17);
             assert_eq!(fx_2.parameter_count(), 15);
             assert_eq!(fx_1.parameters().count(), 17);
@@ -2757,7 +2757,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
 
             assert_eq!(fx_1.track(), track);
             assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
-            assert_eq!(fx_1.chain(), fx_chain);
+            assert_eq!(fx_1.chain(), &fx_chain);
             assert_eq!(fx_1.parameter_count(), 17);
             assert_eq!(fx_1.parameters().count(), 17);
             assert!(fx_1.parameter_by_index(15).is_available());
