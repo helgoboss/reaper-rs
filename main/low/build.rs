@@ -48,6 +48,8 @@ mod codegen {
 
         impl ParseCallbacks for CustomParseCallbacks {
             fn int_macro(&self, name: &str, _value: i64) -> Option<IntKind> {
+                // TODO-medium Check if this is really sane. Maybe we shouldn't let us drive by
+                //  convenience here but rather if there can only be positive numbers or not.
                 if name.starts_with("CSURF_EXT_")
                     || name.starts_with("VK_")
                     || name.starts_with("SW_")
@@ -99,6 +101,8 @@ mod codegen {
                 .whitelist_var("CB_.*")
                 .whitelist_var("CBN_.*")
                 .whitelist_var("WM_.*")
+                .whitelist_var("SIF_.*")
+                .whitelist_var("SB_.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_type("HINSTANCE")
                 .whitelist_type("reaper_plugin_info_t")
@@ -107,6 +111,7 @@ mod codegen {
                 .whitelist_type("KbdSectionInfo")
                 .whitelist_type("GUID")
                 .whitelist_type("LPSTR")
+                .whitelist_type("SCROLLINFO")
                 .whitelist_function("reaper_control_surface::.*")
                 .whitelist_function("reaper_midi::.*")
                 .generate()

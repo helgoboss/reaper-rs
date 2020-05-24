@@ -134,6 +134,31 @@ pub mod root {
     pub const CBN_DROPDOWN: u32 = 7;
     pub const CBN_CLOSEUP: u32 = 8;
     pub const CB_ERR: i32 = -1;
+    pub const SB_HORZ: u32 = 0;
+    pub const SB_VERT: u32 = 1;
+    pub const SB_CTL: u32 = 2;
+    pub const SB_BOTH: u32 = 3;
+    pub const SB_LINEUP: u32 = 0;
+    pub const SB_LINELEFT: u32 = 0;
+    pub const SB_LINEDOWN: u32 = 1;
+    pub const SB_LINERIGHT: u32 = 1;
+    pub const SB_PAGEUP: u32 = 2;
+    pub const SB_PAGELEFT: u32 = 2;
+    pub const SB_PAGEDOWN: u32 = 3;
+    pub const SB_PAGERIGHT: u32 = 3;
+    pub const SB_THUMBPOSITION: u32 = 4;
+    pub const SB_THUMBTRACK: u32 = 5;
+    pub const SB_TOP: u32 = 6;
+    pub const SB_LEFT: u32 = 6;
+    pub const SB_BOTTOM: u32 = 7;
+    pub const SB_RIGHT: u32 = 7;
+    pub const SB_ENDSCROLL: u32 = 8;
+    pub const SIF_RANGE: u32 = 1;
+    pub const SIF_PAGE: u32 = 2;
+    pub const SIF_POS: u32 = 4;
+    pub const SIF_DISABLENOSCROLL: u32 = 8;
+    pub const SIF_TRACKPOS: u32 = 16;
+    pub const SIF_ALL: u32 = 23;
     pub const VK_LBUTTON: i32 = 1;
     pub const VK_RBUTTON: i32 = 2;
     pub const VK_MBUTTON: i32 = 4;
@@ -546,6 +571,17 @@ pub mod root {
         pub hdc: root::HDC,
         pub fErase: root::BOOL,
         pub rcPaint: root::RECT,
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct SCROLLINFO {
+        pub cbSize: root::UINT,
+        pub fMask: root::UINT,
+        pub nMin: ::std::os::raw::c_int,
+        pub nMax: ::std::os::raw::c_int,
+        pub nPage: root::UINT,
+        pub nPos: ::std::os::raw::c_int,
+        pub nTrackPos: ::std::os::raw::c_int,
     }
     pub type DLGPROC = ::std::option::Option<
         unsafe extern "C" fn(
