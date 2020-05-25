@@ -103,6 +103,7 @@ mod codegen {
                 .whitelist_var("WM_.*")
                 .whitelist_var("SIF_.*")
                 .whitelist_var("SB_.*")
+                .whitelist_var("EN_.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_type("HINSTANCE")
                 .whitelist_type("reaper_plugin_info_t")

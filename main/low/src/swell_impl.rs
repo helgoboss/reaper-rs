@@ -6,6 +6,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
+use std::os::raw::c_int;
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
@@ -95,6 +96,25 @@ impl Swell {
             windows::SetWindowTextA(hwnd, text)
         }
     }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetWindowText(
+        &self,
+        hwnd: root::HWND,
+        lpString: root::LPSTR,
+        nMaxCount: c_int,
+    ) -> c_int {
+        #[cfg(target_os = "linux")]
+        {
+            self.GetDlgItemText(hwnd, 0, lpString, nMaxCount)
+        }
+        #[cfg(target_os = "windows")]
+        {
+            windows::GetWindowTextA(hwnd, lpString, nMaxCount)
+        }
+    }
 }
 
 impl std::fmt::Debug for SwellFunctionPointers {
@@ -109,6 +129,7 @@ impl std::fmt::Debug for SwellFunctionPointers {
 #[cfg(target_os = "windows")]
 mod windows {
     use crate::bindings::root;
+    use std::os::raw::c_int;
 
     extern "C" {
         pub fn CreateDialogParamA(
@@ -119,7 +140,12 @@ mod windows {
             param: root::LPARAM,
         ) -> root::HWND;
     }
+
     extern "C" {
         pub fn SetWindowTextA(hwnd: root::HWND, text: *const ::std::os::raw::c_char) -> root::BOOL;
+    }
+
+    extern "C" {
+        pub fn GetWindowTextA(hwnd: root::HWND, lpString: root::LPSTR, nMaxCount: c_int) -> c_int;
     }
 }

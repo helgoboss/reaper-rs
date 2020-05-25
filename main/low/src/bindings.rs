@@ -56,6 +56,9 @@ pub mod root {
     pub const SWP_SHOWWINDOW: i32 = 16;
     pub const SWP_FRAMECHANGED: i32 = 32;
     pub const SWP_NOCOPYBITS: i32 = 0;
+    pub const EN_SETFOCUS: u32 = 256;
+    pub const EN_KILLFOCUS: u32 = 512;
+    pub const EN_CHANGE: u32 = 768;
     pub const WM_CREATE: u32 = 1;
     pub const WM_DESTROY: u32 = 2;
     pub const WM_MOVE: u32 = 3;
@@ -312,7 +315,6 @@ pub mod root {
     pub type HRESULT = ::std::os::raw::c_int;
     pub type LONG = ::std::os::raw::c_int;
     pub type SHORT = ::std::os::raw::c_short;
-    pub type LPINT = *mut ::std::os::raw::c_int;
     pub type LPSTR = *mut ::std::os::raw::c_char;
     pub type LPTSTR = *mut ::std::os::raw::c_char;
     pub type LPCTSTR = *const ::std::os::raw::c_char;
@@ -8186,42 +8188,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}_ZN16reaper_functions22CoolSB_IsThumbTrackingE"]
-            pub static mut CoolSB_IsThumbTracking:
-                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::BOOL>;
-        }
-        extern "C" {
-            #[link_name = "\u{1}_ZN16reaper_functions26CoolSB_IsCoolScrollEnabledE"]
-            pub static mut CoolSB_IsCoolScrollEnabled:
-                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::BOOL>;
-        }
-        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions20CoolSB_GetScrollInfoE"]
             pub static mut CoolSB_GetScrollInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
                     fnBar: ::std::os::raw::c_int,
                     lpsi: root::LPSCROLLINFO,
-                ) -> root::BOOL,
-            >;
-        }
-        extern "C" {
-            #[link_name = "\u{1}_ZN16reaper_functions19CoolSB_GetScrollPosE"]
-            pub static mut CoolSB_GetScrollPos: ::std::option::Option<
-                unsafe extern "C" fn(
-                    hwnd: root::HWND,
-                    nBar: ::std::os::raw::c_int,
-                ) -> ::std::os::raw::c_int,
-            >;
-        }
-        extern "C" {
-            #[link_name = "\u{1}_ZN16reaper_functions21CoolSB_GetScrollRangeE"]
-            pub static mut CoolSB_GetScrollRange: ::std::option::Option<
-                unsafe extern "C" fn(
-                    hwnd: root::HWND,
-                    nBar: ::std::os::raw::c_int,
-                    lpMinPos: root::LPINT,
-                    lpMaxPos: root::LPINT,
                 ) -> root::BOOL,
             >;
         }
@@ -8280,14 +8252,6 @@ pub mod root {
             pub static mut CoolSB_SetThemeIndex: ::std::option::Option<
                 unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL,
             >;
-        }
-        extern "C" {
-            #[link_name = "\u{1}_ZN16reaper_functions15CoolSB_SetScaleE"]
-            pub static mut CoolSB_SetScale: ::std::option::Option<unsafe extern "C" fn(scale: f32)>;
-        }
-        extern "C" {
-            #[link_name = "\u{1}_ZN16reaper_functions25CoolSB_OnColorThemeChangeE"]
-            pub static mut CoolSB_OnColorThemeChange: ::std::option::Option<unsafe extern "C" fn()>;
         }
     }
     pub mod swell_functions {

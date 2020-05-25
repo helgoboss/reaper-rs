@@ -3153,26 +3153,9 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(CoolSB_SetMinThumbSize)).as_ptr()),
                 ),
-                CoolSB_IsThumbTracking: std::mem::transmute(
-                    plugin_context
-                        .GetFunc(c_str_macro::c_str!(stringify!(CoolSB_IsThumbTracking)).as_ptr()),
-                ),
-                CoolSB_IsCoolScrollEnabled: std::mem::transmute(
-                    plugin_context.GetFunc(
-                        c_str_macro::c_str!(stringify!(CoolSB_IsCoolScrollEnabled)).as_ptr(),
-                    ),
-                ),
                 CoolSB_GetScrollInfo: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(CoolSB_GetScrollInfo)).as_ptr()),
-                ),
-                CoolSB_GetScrollPos: std::mem::transmute(
-                    plugin_context
-                        .GetFunc(c_str_macro::c_str!(stringify!(CoolSB_GetScrollPos)).as_ptr()),
-                ),
-                CoolSB_GetScrollRange: std::mem::transmute(
-                    plugin_context
-                        .GetFunc(c_str_macro::c_str!(stringify!(CoolSB_GetScrollRange)).as_ptr()),
                 ),
                 CoolSB_SetScrollInfo: std::mem::transmute(
                     plugin_context
@@ -3197,15 +3180,6 @@ impl Reaper {
                 CoolSB_SetThemeIndex: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(CoolSB_SetThemeIndex)).as_ptr()),
-                ),
-                CoolSB_SetScale: std::mem::transmute(
-                    plugin_context
-                        .GetFunc(c_str_macro::c_str!(stringify!(CoolSB_SetScale)).as_ptr()),
-                ),
-                CoolSB_OnColorThemeChange: std::mem::transmute(
-                    plugin_context.GetFunc(
-                        c_str_macro::c_str!(stringify!(CoolSB_OnColorThemeChange)).as_ptr(),
-                    ),
                 ),
             }
         };
@@ -5624,19 +5598,7 @@ impl Reaper {
         if pointers.CoolSB_SetMinThumbSize.is_some() {
             loaded_count += 1;
         }
-        if pointers.CoolSB_IsThumbTracking.is_some() {
-            loaded_count += 1;
-        }
-        if pointers.CoolSB_IsCoolScrollEnabled.is_some() {
-            loaded_count += 1;
-        }
         if pointers.CoolSB_GetScrollInfo.is_some() {
-            loaded_count += 1;
-        }
-        if pointers.CoolSB_GetScrollPos.is_some() {
-            loaded_count += 1;
-        }
-        if pointers.CoolSB_GetScrollRange.is_some() {
             loaded_count += 1;
         }
         if pointers.CoolSB_SetScrollInfo.is_some() {
@@ -5655,12 +5617,6 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.CoolSB_SetThemeIndex.is_some() {
-            loaded_count += 1;
-        }
-        if pointers.CoolSB_SetScale.is_some() {
-            loaded_count += 1;
-        }
-        if pointers.CoolSB_OnColorThemeChange.is_some() {
             loaded_count += 1;
         }
         pointers.loaded_count = loaded_count;
@@ -18528,24 +18484,6 @@ impl Reaper {
             Some(f) => f(hwnd, wBar, size),
         }
     }
-    pub fn CoolSB_IsThumbTracking(&self, hwnd: root::HWND) -> root::BOOL {
-        match self.pointers.CoolSB_IsThumbTracking {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(CoolSB_IsThumbTracking)
-            )),
-            Some(f) => f(hwnd),
-        }
-    }
-    pub fn CoolSB_IsCoolScrollEnabled(&self, hwnd: root::HWND) -> root::BOOL {
-        match self.pointers.CoolSB_IsCoolScrollEnabled {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(CoolSB_IsCoolScrollEnabled)
-            )),
-            Some(f) => f(hwnd),
-        }
-    }
     pub fn CoolSB_GetScrollInfo(
         &self,
         hwnd: root::HWND,
@@ -18558,34 +18496,6 @@ impl Reaper {
                 stringify!(CoolSB_GetScrollInfo)
             )),
             Some(f) => f(hwnd, fnBar, lpsi),
-        }
-    }
-    pub fn CoolSB_GetScrollPos(
-        &self,
-        hwnd: root::HWND,
-        nBar: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int {
-        match self.pointers.CoolSB_GetScrollPos {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(CoolSB_GetScrollPos)
-            )),
-            Some(f) => f(hwnd, nBar),
-        }
-    }
-    pub fn CoolSB_GetScrollRange(
-        &self,
-        hwnd: root::HWND,
-        nBar: ::std::os::raw::c_int,
-        lpMinPos: root::LPINT,
-        lpMaxPos: root::LPINT,
-    ) -> root::BOOL {
-        match self.pointers.CoolSB_GetScrollRange {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(CoolSB_GetScrollRange)
-            )),
-            Some(f) => f(hwnd, nBar, lpMinPos, lpMaxPos),
         }
     }
     pub fn CoolSB_SetScrollInfo(
@@ -18664,24 +18574,6 @@ impl Reaper {
                 stringify!(CoolSB_SetThemeIndex)
             )),
             Some(f) => f(hwnd, idx),
-        }
-    }
-    pub fn CoolSB_SetScale(&self, scale: f32) {
-        match self.pointers.CoolSB_SetScale {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(CoolSB_SetScale)
-            )),
-            Some(f) => f(scale),
-        }
-    }
-    pub fn CoolSB_OnColorThemeChange(&self) {
-        match self.pointers.CoolSB_OnColorThemeChange {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(CoolSB_OnColorThemeChange)
-            )),
-            Some(f) => f(),
         }
     }
 }
@@ -23052,24 +22944,11 @@ pub struct ReaperFunctionPointers {
     pub UninitializeCoolSB: Option<extern "C" fn(hwnd: root::HWND) -> root::HRESULT>,
     pub CoolSB_SetMinThumbSize:
         Option<extern "C" fn(hwnd: root::HWND, wBar: root::UINT, size: root::UINT) -> root::BOOL>,
-    pub CoolSB_IsThumbTracking: Option<extern "C" fn(hwnd: root::HWND) -> root::BOOL>,
-    pub CoolSB_IsCoolScrollEnabled: Option<extern "C" fn(hwnd: root::HWND) -> root::BOOL>,
     pub CoolSB_GetScrollInfo: Option<
         extern "C" fn(
             hwnd: root::HWND,
             fnBar: ::std::os::raw::c_int,
             lpsi: root::LPSCROLLINFO,
-        ) -> root::BOOL,
-    >,
-    pub CoolSB_GetScrollPos: Option<
-        extern "C" fn(hwnd: root::HWND, nBar: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
-    >,
-    pub CoolSB_GetScrollRange: Option<
-        extern "C" fn(
-            hwnd: root::HWND,
-            nBar: ::std::os::raw::c_int,
-            lpMinPos: root::LPINT,
-            lpMaxPos: root::LPINT,
         ) -> root::BOOL,
     >,
     pub CoolSB_SetScrollInfo: Option<
@@ -23108,9 +22987,7 @@ pub struct ReaperFunctionPointers {
         Option<extern "C" fn(hwnd: root::HWND, active: root::BOOL) -> root::BOOL>,
     pub CoolSB_SetThemeIndex:
         Option<extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL>,
-    pub CoolSB_SetScale: Option<extern "C" fn(scale: f32)>,
-    pub CoolSB_OnColorThemeChange: Option<extern "C" fn()>,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 818u32;
+    pub(crate) const TOTAL_COUNT: u32 = 812u32;
 }
