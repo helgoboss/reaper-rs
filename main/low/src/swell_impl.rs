@@ -105,7 +105,7 @@ impl Swell {
         hwnd: root::HWND,
         lpString: root::LPSTR,
         nMaxCount: c_int,
-    ) -> c_int {
+    ) -> root::BOOL {
         #[cfg(target_os = "linux")]
         {
             self.GetDlgItemText(hwnd, 0, lpString, nMaxCount)
@@ -146,6 +146,10 @@ mod windows {
     }
 
     extern "C" {
-        pub fn GetWindowTextA(hwnd: root::HWND, lpString: root::LPSTR, nMaxCount: c_int) -> c_int;
+        pub fn GetWindowTextA(
+            hwnd: root::HWND,
+            lpString: root::LPSTR,
+            nMaxCount: c_int,
+        ) -> root::BOOL;
     }
 }

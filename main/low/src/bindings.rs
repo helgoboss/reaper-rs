@@ -11,6 +11,13 @@ pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
     pub const DLL_PROCESS_ATTACH: u32 = 1;
+    pub const IDOK: u32 = 1;
+    pub const IDCANCEL: u32 = 2;
+    pub const IDABORT: u32 = 3;
+    pub const IDRETRY: u32 = 4;
+    pub const IDIGNORE: u32 = 5;
+    pub const IDYES: u32 = 6;
+    pub const IDNO: u32 = 7;
     pub const WM_CTLCOLORMSGBOX: u32 = 306;
     pub const WM_CTLCOLOREDIT: u32 = 307;
     pub const WM_CTLCOLORLISTBOX: u32 = 308;
