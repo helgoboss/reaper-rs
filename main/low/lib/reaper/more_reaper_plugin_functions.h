@@ -1,4 +1,4 @@
-// This file contains function some definitions which for some reason are not generated via REAPER action.
+// This file contains some function definitions which for some reason are not generated via REAPER action.
 // Source: https://www.reaper.fm/sdk/plugin/reaper_plugin_functions.h
 
 // if you wish to access MIDI inputs/outputs that are opened via Prefs/MIDI, you may do so, but ONLY if in the audio thread,

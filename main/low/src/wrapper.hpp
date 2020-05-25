@@ -9,6 +9,7 @@
 namespace reaper_functions {
   #include "../lib/reaper/reaper_plugin_functions.h"
   #include "../lib/reaper/more_reaper_plugin_functions.h"
+  #include "../lib/reaper/coolscroll_reaper_plugin_functions.h"
 }
 
 // Make all SWELL functions visible under dedicated namespace, so we can easily include them with bindgen.
