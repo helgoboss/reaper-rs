@@ -51,6 +51,13 @@ pub use super::bindings::root::{
     WM_SYSKEYDOWN, WM_SYSKEYUP, WM_TIMER, WM_USER, WM_VSCROLL, WPARAM,
 };
 
+// Some constants which are calculated from other constants are not picked up by bindgen.
+pub const TBM_GETPOS: u32 = WM_USER;
+pub const TBM_SETTIC: u32 = WM_USER + 4;
+pub const TBM_SETPOS: u32 = WM_USER + 5;
+pub const TBM_SETRANGE: u32 = WM_USER + 6;
+pub const TBM_SETSEL: u32 = WM_USER + 10;
+
 // Some constants are different in SWELL. Search for "these differ" in SWELL source code for
 // explanation.
 #[cfg(target_os = "linux")]
