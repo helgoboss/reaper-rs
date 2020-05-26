@@ -75,6 +75,9 @@ pub use midi_output_device::*;
 mod volume;
 pub use volume::*;
 
+mod play_rate;
+pub use play_rate::*;
+
 mod pan;
 pub use pan::*;
 

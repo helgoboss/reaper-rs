@@ -16,14 +16,14 @@ use crate::{
     CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
     GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
     MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
-    NotificationBehavior, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    NormalizedPlayRate, NotificationBehavior, PlaybackSpeedFactor, PluginContext, ProjectContext,
+    ProjectRef, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString,
+    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -2281,6 +2281,34 @@ impl<UsageScope> Reaper<UsageScope> {
             tempo.get(),
             undo_behavior == UndoBehavior::AddUndoPoint,
         );
+    }
+
+    /// Converts the given playback speed factor to a normalized play rate.
+    #[measure(SingleThreadNanos)]
+    pub fn master_normalize_play_rate_normalize(
+        &self,
+        value: PlaybackSpeedFactor,
+    ) -> NormalizedPlayRate
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let result = self.low.Master_NormalizePlayRate(value.get(), false);
+        NormalizedPlayRate::new(result)
+    }
+
+    /// Converts the given normalized play rate to a playback speed factor.
+    #[measure(SingleThreadNanos)]
+    pub fn master_normalize_play_rate_denormalize(
+        &self,
+        value: NormalizedPlayRate,
+    ) -> PlaybackSpeedFactor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let result = self.low.Master_NormalizePlayRate(value.get(), true);
+        PlaybackSpeedFactor::new(result)
     }
 
     /// Returns the master play rate of the given project.

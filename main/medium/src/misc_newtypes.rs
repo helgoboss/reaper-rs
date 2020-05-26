@@ -192,13 +192,16 @@ impl Bpm {
 pub struct PlaybackSpeedFactor(pub(crate) f64);
 
 impl PlaybackSpeedFactor {
-    /// The minimum possible value (a quarter of the normal play speed).
+    /// The minimum possible value (a quarter of the normal playback speed).
     pub const MIN: PlaybackSpeedFactor = PlaybackSpeedFactor(0.25);
 
-    /// The maximum possible value (four times the normal play speed).
+    /// The normal playback speed.
+    pub const NORMAL: PlaybackSpeedFactor = PlaybackSpeedFactor(1.00);
+
+    /// The maximum possible value (four times the normal playback speed).
     pub const MAX: PlaybackSpeedFactor = PlaybackSpeedFactor(4.0);
 
-    /// Creates a playback speed value.
+    /// Creates a playback speed factor.
     ///
     /// # Panics
     ///
@@ -207,6 +210,38 @@ impl PlaybackSpeedFactor {
     pub fn new(value: f64) -> PlaybackSpeedFactor {
         assert!(PlaybackSpeedFactor::MIN.get() <= value && value <= PlaybackSpeedFactor::MAX.get());
         PlaybackSpeedFactor(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+/// This represents a play rate measured as value between 0 and 1.
+///
+/// This corresponds to the position on the project play rate slider.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+pub struct NormalizedPlayRate(pub(crate) f64);
+
+impl NormalizedPlayRate {
+    /// The minimum possible value (a quarter of the normal play speed).
+    pub const MIN: NormalizedPlayRate = NormalizedPlayRate(0.0);
+
+    /// The normal playback speed.
+    pub const NORMAL: NormalizedPlayRate = NormalizedPlayRate(0.2);
+
+    /// The maximum possible value (four times the normal play speed).
+    pub const MAX: NormalizedPlayRate = NormalizedPlayRate(1.0);
+
+    /// Creates a normalized play rate.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is not within `(0.00..=1.00)`.
+    pub fn new(value: f64) -> NormalizedPlayRate {
+        assert!(NormalizedPlayRate::MIN.get() <= value && value <= NormalizedPlayRate::MAX.get());
+        NormalizedPlayRate(value)
     }
 
     /// Returns the wrapped value.

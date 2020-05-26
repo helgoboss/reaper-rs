@@ -23,9 +23,9 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
     AutomationMode, Bpm, CommandId, Db, GangBehavior, InputMonitoringMode, MasterTrackBehavior,
-    MidiInputDeviceId, MidiOutputDeviceId, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperVersion, ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackLocation,
-    UndoBehavior, ValueChange,
+    MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate, PlaybackSpeedFactor,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue, RecordingInput,
+    StuffMidiMessageTarget, TrackLocation, UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -109,6 +109,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         redo(),
         get_reaper_window(),
         mark_project_as_dirty(),
+        get_project_play_rate(),
         get_project_tempo(),
         set_project_tempo(),
         swell(),
@@ -192,6 +193,22 @@ fn get_project_tempo() -> TestStep {
         // Then
         assert_eq!(tempo.bpm(), Bpm::new(120.0));
         assert!(abs_diff_eq!(tempo.normalized_value(), 119.0 / 959.0));
+        Ok(())
+    })
+}
+
+fn get_project_play_rate() -> TestStep {
+    step(AllVersions, "Get project play rate", |_session, _| {
+        // Given
+        let project = Reaper::get().current_project();
+        // When
+        let play_rate = project.play_rate();
+        // Then
+        assert_eq!(
+            play_rate.playback_speed_factor(),
+            PlaybackSpeedFactor::NORMAL
+        );
+        assert_eq!(play_rate.normalized_value(), NormalizedPlayRate::NORMAL);
         Ok(())
     })
 }

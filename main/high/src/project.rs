@@ -1,7 +1,7 @@
 use std::ffi::CStr;
 
 use crate::guid::Guid;
-use crate::{Reaper, Tempo, Track};
+use crate::{PlayRate, Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
@@ -228,6 +228,13 @@ impl Project {
         // TODO This is not project-specific ... why?
         let bpm = Reaper::get().medium_reaper().master_get_tempo();
         Tempo::from_bpm(bpm)
+    }
+
+    pub fn play_rate(self) -> PlayRate {
+        let factor = Reaper::get()
+            .medium_reaper()
+            .master_get_play_rate(Proj(self.raw()));
+        PlayRate::from_playback_speed_factor(factor)
     }
 
     pub fn set_tempo(self, tempo: Tempo, undo_hint: UndoBehavior) {
