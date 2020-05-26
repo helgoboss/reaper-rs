@@ -1,5 +1,6 @@
 use crate::Reaper;
 use reaper_medium::{Db, ReaperVolumeValue, VolumeSliderValue};
+use std::fmt;
 
 pub struct Volume {
     normalized_value: f64,
@@ -36,5 +37,15 @@ impl Volume {
         Reaper::get()
             .medium_reaper()
             .slider2db(VolumeSliderValue::new(self.normalized_value * 1000.0))
+    }
+}
+
+impl fmt::Display for Volume {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let vol_string = Reaper::get()
+            .medium_reaper()
+            .mk_vol_str(self.reaper_value())
+            .into_string();
+        write!(f, "{}", vol_string)
     }
 }

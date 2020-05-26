@@ -3390,6 +3390,32 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr).map(|nnp| use_device(&MidiInput(nnp)))
     }
 
+    /// Formats the given pan value.
+    #[measure(SingleThreadNanos)]
+    pub fn mk_pan_str(&self, value: ReaperPanValue) -> ReaperString
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (pan_string, _) = with_string_buffer(64, |buffer, _| unsafe {
+            self.low.mkpanstr(buffer, value.get());
+        });
+        pan_string
+    }
+
+    /// Formats the given volume value.
+    #[measure(SingleThreadNanos)]
+    pub fn mk_vol_str(&self, value: ReaperVolumeValue) -> ReaperString
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (volume_string, _) = with_string_buffer(64, |buffer, _| unsafe {
+            self.low.mkvolstr(buffer, value.get());
+        });
+        volume_string
+    }
+
     fn require_main_thread(&self)
     where
         UsageScope: MainThreadOnly,

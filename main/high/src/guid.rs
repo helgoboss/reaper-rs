@@ -19,8 +19,10 @@ impl Guid {
     }
 
     pub fn to_string_with_braces(&self) -> String {
-        let c_string = Reaper::get().medium_reaper().guid_to_string(&self.internal);
-        c_string.into_string()
+        Reaper::get()
+            .medium_reaper()
+            .guid_to_string(&self.internal)
+            .into_string()
     }
 
     pub fn to_string_without_braces(&self) -> String {

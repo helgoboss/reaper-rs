@@ -1279,6 +1279,7 @@ fn set_track_pan() -> TestStep {
         let pan = track.pan();
         assert_eq!(pan.reaper_value(), ReaperPanValue::new(-0.5));
         assert_eq!(pan.normalized_value(), 0.25);
+        assert_eq!(pan.to_string().as_str(), "50%L");
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), track);
         Ok(())
@@ -1294,6 +1295,7 @@ fn query_track_pan() -> TestStep {
         // Then
         assert_eq!(pan.reaper_value(), ReaperPanValue::CENTER);
         assert_eq!(pan.normalized_value(), 0.5);
+        assert_eq!(pan.to_string().as_str(), "center");
         Ok(())
     })
 }
@@ -1330,6 +1332,7 @@ fn set_track_volume() -> TestStep {
             0.250_000_000_000_034_97,
             epsilon = 0.000_000_000_000_1
         ));
+        assert_eq!(volume.to_string().as_str(), "-30.0dB");
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), track);
         Ok(())
@@ -1376,12 +1379,14 @@ fn set_track_volume_extreme_values() -> TestStep {
                 track_1_volume.reaper_value(),
                 ReaperVolumeValue::new(1.0 / 0.0)
             );
+            assert_eq!(track_1_volume.to_string().as_str(), "+1.#dB");
 
             assert!(track_2_result.volume.get().is_nan());
             let track_2_volume = Volume::from_reaper_value(track_2_result.volume);
             assert!(track_2_volume.db().get().is_nan());
             assert!(track_2_volume.normalized_value().is_nan());
             assert!(track_2_volume.reaper_value().get().is_nan());
+            assert_eq!(track_2_volume.to_string().as_str(), "1.#RdB");
             Ok(())
         },
     )
@@ -1396,6 +1401,7 @@ fn query_track_volume() -> TestStep {
         // Then
         assert_eq!(volume.reaper_value(), ReaperVolumeValue::ZERO_DB);
         assert_eq!(volume.db(), Db::ZERO_DB);
+        assert_eq!(volume.to_string().as_str(), "0.00dB");
         assert!(abs_diff_eq!(volume.normalized_value(), 0.716));
         Ok(())
     })

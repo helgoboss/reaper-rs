@@ -1,4 +1,6 @@
+use crate::Reaper;
 use reaper_medium::ReaperPanValue;
+use std::fmt;
 
 pub struct Pan {
     normalized_value: f64,
@@ -20,5 +22,15 @@ impl Pan {
 
     pub fn reaper_value(&self) -> ReaperPanValue {
         ReaperPanValue::new(self.normalized_value * 2.0 - 1.0)
+    }
+}
+
+impl fmt::Display for Pan {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let pan_string = Reaper::get()
+            .medium_reaper()
+            .mk_pan_str(self.reaper_value())
+            .into_string();
+        write!(f, "{}", pan_string)
     }
 }
