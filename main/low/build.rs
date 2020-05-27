@@ -104,6 +104,7 @@ mod codegen {
                 .whitelist_var("SIF_.*")
                 .whitelist_var("SB_.*")
                 .whitelist_var("EN_.*")
+                .whitelist_var("TB_.*")
                 .whitelist_var("TBM_.*")
                 .whitelist_var("ID.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
