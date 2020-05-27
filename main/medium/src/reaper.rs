@@ -3240,9 +3240,14 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't get FX preset index (maybe FX doesn't exist)",
             ));
         }
+        let num_presets = num_presets.assume_init();
         Ok(TrackFxGetPresetIndexResult {
-            index: index as u32,
-            count: num_presets.assume_init() as u32,
+            index: if index == num_presets {
+                None
+            } else {
+                Some(index as u32)
+            },
+            count: num_presets as u32,
         })
     }
 
@@ -3523,8 +3528,8 @@ pub struct TrackFxGetPresetResult {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct TrackFxGetPresetIndexResult {
-    /// Preset index.
-    pub index: u32,
+    /// Preset index or `None` if no preset selected.
+    pub index: Option<u32>,
     /// Total number of presets available.
     pub count: u32,
 }
