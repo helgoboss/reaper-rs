@@ -67,6 +67,11 @@ impl KbdSectionInfo {
         let raw_kbd_cmd = array.get(index as usize)?;
         Some(KbdCmd(raw_kbd_cmd))
     }
+
+    /// Returns the raw pointer.
+    pub fn raw(&self) -> NonNull<raw::KbdSectionInfo> {
+        self.0
+    }
 }
 
 /// Borrowed action.
