@@ -12,7 +12,7 @@ impl Volume {
     // TODO Attention! Because of the fact that REAPER allows exceeding the soft maximum of 12 dB,
     //  the VolumeSliderValue can go beyond 1000, which means that this "normalized value" can go
     //  beyond 1.0! Maybe we should call that value range SoftNormalizedValue.
-    pub fn from_normalized_value(normalized_value: f64) -> Volume {
+    pub fn from_soft_normalized_value(normalized_value: f64) -> Volume {
         assert!(0.0 <= normalized_value || normalized_value.is_nan());
         Volume { normalized_value }
     }
@@ -22,10 +22,12 @@ impl Volume {
     }
 
     pub fn from_db(db: Db) -> Volume {
-        Volume::from_normalized_value(Reaper::get().medium_reaper().db2slider(db).get() / 1000.0)
+        Volume::from_soft_normalized_value(
+            Reaper::get().medium_reaper().db2slider(db).get() / 1000.0,
+        )
     }
 
-    pub fn normalized_value(&self) -> f64 {
+    pub fn soft_normalized_value(&self) -> f64 {
         self.normalized_value
     }
 

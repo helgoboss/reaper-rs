@@ -716,7 +716,7 @@ fn set_track_send_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        send.set_volume(Volume::from_normalized_value(0.25));
+        send.set_volume(Volume::from_soft_normalized_value(0.25));
         // Then
         assert!(abs_diff_eq!(
             send.volume().db().get(),
@@ -1330,7 +1330,7 @@ fn set_track_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_volume(Volume::from_normalized_value(0.25));
+        track.set_volume(Volume::from_soft_normalized_value(0.25));
         // Then
         let volume = track.volume();
         assert!(abs_diff_eq!(
@@ -1345,7 +1345,7 @@ fn set_track_volume() -> TestStep {
             epsilon = 0.000_000_000_000_1
         ));
         assert!(abs_diff_eq!(
-            volume.normalized_value(),
+            volume.soft_normalized_value(),
             0.250_000_000_000_034_97,
             epsilon = 0.000_000_000_000_1
         ));
@@ -1391,7 +1391,7 @@ fn set_track_volume_extreme_values() -> TestStep {
             assert_eq!(track_1_result.volume, ReaperVolumeValue::new(1.0 / 0.0));
             let track_1_volume = Volume::from_reaper_value(track_1_result.volume);
             assert_eq!(track_1_volume.db(), Db::new(1.0 / 0.0));
-            assert_eq!(track_1_volume.normalized_value(), 1.0 / 0.0);
+            assert_eq!(track_1_volume.soft_normalized_value(), 1.0 / 0.0);
             assert_eq!(
                 track_1_volume.reaper_value(),
                 ReaperVolumeValue::new(1.0 / 0.0)
@@ -1404,7 +1404,7 @@ fn set_track_volume_extreme_values() -> TestStep {
             assert!(track_2_result.volume.get().is_nan());
             let track_2_volume = Volume::from_reaper_value(track_2_result.volume);
             assert!(track_2_volume.db().get().is_nan());
-            assert!(track_2_volume.normalized_value().is_nan());
+            assert!(track_2_volume.soft_normalized_value().is_nan());
             assert!(track_2_volume.reaper_value().get().is_nan());
             #[cfg(target_family = "windows")]
             assert_eq!(track_2_volume.to_string().as_str(), "1.#RdB");
@@ -1425,7 +1425,7 @@ fn query_track_volume() -> TestStep {
         assert_eq!(volume.reaper_value(), ReaperVolumeValue::ZERO_DB);
         assert_eq!(volume.db(), Db::ZERO_DB);
         assert_eq!(volume.to_string().as_str(), "0.00dB");
-        assert!(abs_diff_eq!(volume.normalized_value(), 0.716));
+        assert!(abs_diff_eq!(volume.soft_normalized_value(), 0.716));
         Ok(())
     })
 }
@@ -2501,6 +2501,7 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
         // When
         // Then
         assert_eq!(fx.preset_count(), 0);
+        assert!(fx.preset_index().is_none());
         assert!(fx.preset_name().is_none());
         assert!(fx.preset_is_dirty());
         Ok(())

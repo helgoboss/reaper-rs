@@ -346,7 +346,6 @@ impl Fx {
 
     pub fn preset_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
-        // TODO-low Integrate into ReaPlus (current preset index?)
         unsafe {
             Reaper::get()
                 .medium_reaper()
@@ -354,6 +353,17 @@ impl Fx {
         }
         .expect("Couldn't get preset count")
         .count
+    }
+
+    pub fn preset_index(&self) -> Option<u32> {
+        self.load_if_necessary_or_complain();
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .track_fx_get_preset_index(self.track().raw(), self.query_index())
+        }
+        .expect("Couldn't get preset count")
+        .index
     }
 
     pub fn preset_is_dirty(&self) -> bool {
