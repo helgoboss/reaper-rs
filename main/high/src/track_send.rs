@@ -4,6 +4,7 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{MediaTrack, ReaperString, TrackSendDirection};
 use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
+use std::fmt;
 
 #[derive(Clone, Debug, Eq)]
 pub struct TrackSend {
@@ -195,6 +196,12 @@ impl TrackSend {
                 panic!("Target track based send not loadable")
             }
         }
+    }
+}
+
+impl fmt::Display for TrackSend {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name().to_str())
     }
 }
 
