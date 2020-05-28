@@ -3423,6 +3423,19 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr).map(|nnp| use_device(&MidiInput(nnp)))
     }
 
+    /// Parses the given string as pan value.
+    ///
+    /// When in doubt, it returns 0.0 (center).
+    #[measure(SingleThreadNanos)]
+    pub fn parse_pan_str<'a>(&self, pan_string: impl Into<ReaperStringArg<'a>>) -> ReaperPanValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw_pan = unsafe { self.low.parsepanstr(pan_string.into().as_ptr()) };
+        ReaperPanValue::new(raw_pan)
+    }
+
     /// Formats the given pan value.
     #[measure(SingleThreadNanos)]
     pub fn mk_pan_str(&self, value: ReaperPanValue) -> ReaperString

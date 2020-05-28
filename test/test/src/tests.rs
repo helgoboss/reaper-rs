@@ -1299,6 +1299,8 @@ fn set_track_pan() -> TestStep {
         assert_eq!(pan.to_string().as_str(), "50%L");
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), track);
+        let parsed_pan: Pan = "20%L".parse()?;
+        assert!(abs_diff_eq!(parsed_pan.reaper_value().get(), -0.2));
         Ok(())
     })
 }
