@@ -37,3 +37,22 @@ impl<R: Copy> TryFromRawError<R> {
 }
 
 impl<R: Copy + Display + Debug> std::error::Error for TryFromRawError<R> {}
+
+/// An error which can occur when converting from a type with a greater value range to one with a
+/// smaller one.
+///
+/// This error is caused by *reaper-rs*, not by REAPER itself.
+#[derive(Debug, Clone, Eq, PartialEq, Display)]
+#[display(fmt = "conversion from value [{}] failed: {}", value, message)]
+pub struct TryFromGreaterError<V> {
+    message: &'static str,
+    value: V,
+}
+
+impl<V: Copy> TryFromGreaterError<V> {
+    pub(crate) fn new(message: &'static str, value: V) -> TryFromGreaterError<V> {
+        TryFromGreaterError { message, value }
+    }
+}
+
+impl<R: Copy + Display + Debug> std::error::Error for TryFromGreaterError<R> {}

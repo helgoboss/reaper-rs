@@ -1,7 +1,8 @@
 //! This module defines various newtypes in order to achieve more type safety.
-use crate::{ReaperStr, ReaperStringArg};
+use crate::{ReaperStr, ReaperStringArg, TryFromGreaterError};
 use derive_more::*;
 use std::borrow::Cow;
+use std::convert::TryFrom;
 
 /// A command ID.
 ///
@@ -143,19 +144,34 @@ impl ReaperNormalizedFxParamValue {
     /// The minimum possible value (0.0).
     pub const MIN: ReaperNormalizedFxParamValue = ReaperNormalizedFxParamValue(0.0);
 
+    fn is_valid(value: f64) -> bool {
+        ReaperNormalizedFxParamValue::MIN.get() <= value
+    }
+
     /// Creates a REAPER-normalized FX parameter value.
     ///
     /// # Panics
     ///
     /// This function panics if the given value is negative.
     pub fn new(value: f64) -> ReaperNormalizedFxParamValue {
-        assert!(ReaperNormalizedFxParamValue::MIN.get() <= value);
+        assert!(Self::is_valid(value));
         ReaperNormalizedFxParamValue(value)
     }
 
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for ReaperNormalizedFxParamValue {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new("value must be positive", value));
+        }
+        Ok(ReaperNormalizedFxParamValue(value))
     }
 }
 
@@ -170,6 +186,10 @@ impl Bpm {
     /// The maximum possible value (960.0 bpm).
     pub const MAX: Bpm = Bpm(960.0);
 
+    fn is_valid(value: f64) -> bool {
+        Bpm::MIN.get() <= value && value <= Bpm::MAX.get()
+    }
+
     /// Creates a BPM value.
     ///
     /// # Panics
@@ -177,13 +197,27 @@ impl Bpm {
     /// This function panics if the given value is not within the BPM range supported by REAPER
     /// `(1.0..=960.0)`.
     pub fn new(value: f64) -> Bpm {
-        assert!(Bpm::MIN.get() <= value && value <= Bpm::MAX.get());
+        assert!(Self::is_valid(value));
         Bpm(value)
     }
 
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for Bpm {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be between 1.0 and 960.0",
+                value,
+            ));
+        }
+        Ok(Bpm(value))
     }
 }
 
@@ -201,6 +235,10 @@ impl PlaybackSpeedFactor {
     /// The maximum possible value (four times the normal playback speed).
     pub const MAX: PlaybackSpeedFactor = PlaybackSpeedFactor(4.0);
 
+    fn is_valid(value: f64) -> bool {
+        PlaybackSpeedFactor::MIN.get() <= value && value <= PlaybackSpeedFactor::MAX.get()
+    }
+
     /// Creates a playback speed factor.
     ///
     /// # Panics
@@ -208,13 +246,27 @@ impl PlaybackSpeedFactor {
     /// This function panics if the given value is not within the playback speed range supported by
     /// REAPER `(0.25..=4.00)`.
     pub fn new(value: f64) -> PlaybackSpeedFactor {
-        assert!(PlaybackSpeedFactor::MIN.get() <= value && value <= PlaybackSpeedFactor::MAX.get());
+        assert!(Self::is_valid(value));
         PlaybackSpeedFactor(value)
     }
 
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for PlaybackSpeedFactor {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be between 0.25 and 4.00",
+                value,
+            ));
+        }
+        Ok(PlaybackSpeedFactor(value))
     }
 }
 
@@ -234,13 +286,17 @@ impl NormalizedPlayRate {
     /// The maximum possible value (four times the normal play speed).
     pub const MAX: NormalizedPlayRate = NormalizedPlayRate(1.0);
 
+    fn is_valid(value: f64) -> bool {
+        NormalizedPlayRate::MIN.get() <= value && value <= NormalizedPlayRate::MAX.get()
+    }
+
     /// Creates a normalized play rate.
     ///
     /// # Panics
     ///
     /// This function panics if the given value is not within `(0.00..=1.00)`.
     pub fn new(value: f64) -> NormalizedPlayRate {
-        assert!(NormalizedPlayRate::MIN.get() <= value && value <= NormalizedPlayRate::MAX.get());
+        assert!(Self::is_valid(value));
         NormalizedPlayRate(value)
     }
 
@@ -250,18 +306,36 @@ impl NormalizedPlayRate {
     }
 }
 
+impl TryFrom<f64> for NormalizedPlayRate {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be between 0.0 and 1.0",
+                value,
+            ));
+        }
+        Ok(NormalizedPlayRate(value))
+    }
+}
+
 /// This represents a frequency measured in hertz (how often something happens per second).
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 pub struct Hz(pub(crate) f64);
 
 impl Hz {
+    fn is_valid(value: f64) -> bool {
+        0.0 < value
+    }
+
     /// Creates a hertz value.
     ///
     /// # Panics
     ///
     /// This function panics if the given value zero or negative.
     pub fn new(value: f64) -> Hz {
-        assert!(0.0 < value);
+        assert!(Self::is_valid(value));
         Hz(value)
     }
 
@@ -277,6 +351,20 @@ impl Hz {
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for Hz {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be greater than 0.0",
+                value,
+            ));
+        }
+        Ok(Hz(value))
     }
 }
 
@@ -312,6 +400,10 @@ impl Db {
     /// The "soft maximum" volume (12.0 dB).
     pub const TWELVE_DB: Db = Db(12.0);
 
+    fn is_valid(value: f64) -> bool {
+        Db::MIN.get() <= value || value.is_nan()
+    }
+
     /// Creates a decibel value.
     ///
     /// # Panics
@@ -319,13 +411,27 @@ impl Db {
     /// This function panics if the given value is not within the decibel range supported by REAPER
     /// `(-1000.0..)`.
     pub fn new(value: f64) -> Db {
-        assert!(Db::MIN.get() <= value || value.is_nan());
+        assert!(Self::is_valid(value));
         Db(value)
     }
 
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for Db {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be greater than or equal to -1000.0",
+                value,
+            ));
+        }
+        Ok(Db(value))
     }
 }
 
@@ -361,6 +467,10 @@ impl VolumeSliderValue {
     /// The "soft maximum" volume (1000.0 = 12.0 dB).
     pub const TWELVE_DB: VolumeSliderValue = VolumeSliderValue(1000.0);
 
+    fn is_valid(value: f64) -> bool {
+        VolumeSliderValue::MIN.get() <= value || value.is_nan()
+    }
+
     /// Creates a volume slider value.
     ///
     /// # Panics
@@ -368,13 +478,24 @@ impl VolumeSliderValue {
     /// This function panics if the given value is not within the range supported by REAPER
     /// `(0.0..)`.
     pub fn new(value: f64) -> VolumeSliderValue {
-        assert!(VolumeSliderValue::MIN.get() <= value || value.is_nan());
+        assert!(Self::is_valid(value));
         VolumeSliderValue(value)
     }
 
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for VolumeSliderValue {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new("value must be positive", value));
+        }
+        Ok(VolumeSliderValue(value))
     }
 }
 
@@ -414,6 +535,10 @@ impl ReaperVolumeValue {
     /// The "soft maximum" volume (3.981071705535 = 12.0 dB).
     pub const TWELVE_DB: ReaperVolumeValue = ReaperVolumeValue(3.981_071_705_535);
 
+    fn is_valid(value: f64) -> bool {
+        ReaperVolumeValue::MIN.get() <= value || value.is_nan()
+    }
+
     /// Creates a REAPER volume value.
     ///
     /// # Panics
@@ -421,13 +546,24 @@ impl ReaperVolumeValue {
     /// This function panics if the given value is not within the range supported by REAPER
     /// `(0.0..)`.
     pub fn new(value: f64) -> ReaperVolumeValue {
-        assert!(ReaperVolumeValue::MIN.get() <= value || value.is_nan());
+        assert!(Self::is_valid(value));
         ReaperVolumeValue(value)
     }
 
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for ReaperVolumeValue {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new("value must be positive", value));
+        }
+        Ok(ReaperVolumeValue(value))
     }
 }
 
@@ -463,6 +599,10 @@ impl ReaperPanValue {
     /// [`RIGHT`]: #associatedconstant.RIGHT
     pub const MAX: ReaperPanValue = ReaperPanValue::RIGHT;
 
+    fn is_valid(value: f64) -> bool {
+        ReaperPanValue::MIN.get() <= value && value <= ReaperPanValue::MAX.get()
+    }
+
     /// Creates a pan value.
     ///
     /// # Panics
@@ -470,13 +610,27 @@ impl ReaperPanValue {
     /// This function panics if the given value is not within the range supported by REAPER
     /// `(-1.0..=1.0)`.
     pub fn new(value: f64) -> ReaperPanValue {
-        assert!(ReaperPanValue::MIN.get() <= value && value <= ReaperPanValue::MAX.get());
+        assert!(Self::is_valid(value));
         ReaperPanValue(value)
     }
 
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl TryFrom<f64> for ReaperPanValue {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be between -1.0 and 1.0",
+                value,
+            ));
+        }
+        Ok(ReaperPanValue(value))
     }
 }
 
