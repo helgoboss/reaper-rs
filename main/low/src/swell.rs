@@ -7046,6 +7046,22 @@ impl Swell {
         unsafe { windows::EnumClipboardFormats(lastfmt) }
     }
     #[cfg(target_os = "windows")]
+    pub fn GlobalAlloc(
+        &self,
+        flags: ::std::os::raw::c_int,
+        sz: ::std::os::raw::c_int,
+    ) -> root::HANDLE {
+        unsafe { windows::GlobalAlloc(flags, sz) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
+        unsafe { windows::GlobalLock(h) }
+    }
+    #[cfg(target_os = "windows")]
+    pub fn GlobalUnlock(&self, h: root::HANDLE) {
+        unsafe { windows::GlobalUnlock(h) }
+    }
+    #[cfg(target_os = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -8785,6 +8801,16 @@ mod windows {
     }
     extern "C" {
         pub fn EnumClipboardFormats(lastfmt: root::UINT) -> root::UINT;
+    }
+    extern "C" {
+        pub fn GlobalAlloc(flags: ::std::os::raw::c_int, sz: ::std::os::raw::c_int)
+        -> root::HANDLE;
+    }
+    extern "C" {
+        pub fn GlobalLock(h: root::HANDLE) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        pub fn GlobalUnlock(h: root::HANDLE);
     }
     extern "C" {
         pub fn CreateIconIndirect(iconinfo: *mut root::ICONINFO) -> root::HICON;

@@ -106,6 +106,8 @@ mod codegen {
                 .whitelist_var("EN_.*")
                 .whitelist_var("TB_.*")
                 .whitelist_var("TBM_.*")
+                .whitelist_var("CF_.*")
+                .whitelist_var("GMEM_.*")
                 .whitelist_var("ID.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_type("HINSTANCE")
@@ -151,6 +153,8 @@ mod codegen {
         /// Please note that only *real* functions are allowed on the right side, not function
         /// macros.
         static SWELL_WINDOWS_MAPPING: phf::Map<&'static str, &'static str> = phf::phf_map! {
+            // # winuser.h
+
             // Same name
             "BeginPaint" => "BeginPaint",
             "CheckDlgButton" => "CheckDlgButton",
@@ -235,6 +239,11 @@ mod codegen {
             "SetMenuItemInfo" => "SetMenuItemInfoA",
             "SetProp" => "SetPropA",
             "SetWindowLong" => "SetWindowLongA",
+
+            // # winbase.h
+            "GlobalAlloc" => "GlobalAlloc",
+            "GlobalLock" => "GlobalLock",
+            "GlobalUnlock" => "GlobalUnlock",
         };
 
         /// Generates `reaper.rs` and `swell.rs` from the previously generated `bindings.rs`

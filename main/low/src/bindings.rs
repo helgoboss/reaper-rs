@@ -240,6 +240,13 @@ pub mod root {
     pub const VK_F24: i32 = 135;
     pub const VK_NUMLOCK: i32 = 144;
     pub const VK_SCROLL: i32 = 145;
+    pub const GMEM_ZEROINIT: u32 = 1;
+    pub const GMEM_FIXED: u32 = 0;
+    pub const GMEM_MOVEABLE: u32 = 0;
+    pub const GMEM_DDESHARE: u32 = 0;
+    pub const GMEM_DISCARDABLE: u32 = 0;
+    pub const GMEM_SHARE: u32 = 0;
+    pub const GMEM_LOWER: u32 = 0;
     pub const REAPER_PLUGIN_VERSION: i32 = 526;
     pub const CSURF_EXT_RESET: i32 = 131071;
     pub const CSURF_EXT_SETINPUTMONITOR: i32 = 65537;

@@ -6,6 +6,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
+use c_str_macro::c_str;
 use std::os::raw::c_int;
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
@@ -114,6 +115,17 @@ impl Swell {
         {
             windows::GetWindowTextA(hwnd, lpString, nMaxCount)
         }
+    }
+
+    /// On Windows this is a constant but in SWELL this is a macro which translates to a function
+    /// call.
+    pub fn CF_TEXT(&self) -> root::UINT {
+        #[cfg(target_os = "linux")]
+        {
+            unsafe { self.RegisterClipboardFormat(c_str!("SWELL__CF_TEXT").as_ptr()) }
+        }
+        #[cfg(target_os = "windows")]
+        1
     }
 }
 
