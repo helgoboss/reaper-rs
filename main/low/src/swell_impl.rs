@@ -6,7 +6,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
-use c_str_macro::c_str;
 use std::os::raw::c_int;
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).

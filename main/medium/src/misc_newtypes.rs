@@ -1,6 +1,8 @@
 //! This module defines various newtypes in order to achieve more type safety.
 use crate::{ReaperStr, ReaperStringArg, TryFromGreaterError};
 use derive_more::*;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::convert::TryFrom;
 
@@ -138,6 +140,11 @@ impl MidiOutputDeviceId {
 /// interval 0.0..=1.0! It can be very well > 1.0 (e.g. the *Wet* param of *ReaPitch*). All this
 /// type guarantees is that the value is > 0.0.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct ReaperNormalizedFxParamValue(pub(crate) f64);
 
 impl ReaperNormalizedFxParamValue {
@@ -177,6 +184,11 @@ impl TryFrom<f64> for ReaperNormalizedFxParamValue {
 
 /// This represents a tempo measured in beats per minute.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct Bpm(pub(crate) f64);
 
 impl Bpm {
@@ -223,6 +235,11 @@ impl TryFrom<f64> for Bpm {
 
 /// This represents a play rate measured as factor of the normal play speed.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct PlaybackSpeedFactor(pub(crate) f64);
 
 impl PlaybackSpeedFactor {
@@ -274,6 +291,11 @@ impl TryFrom<f64> for PlaybackSpeedFactor {
 ///
 /// This corresponds to the position on the project play rate slider.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct NormalizedPlayRate(pub(crate) f64);
 
 impl NormalizedPlayRate {
@@ -322,6 +344,11 @@ impl TryFrom<f64> for NormalizedPlayRate {
 
 /// This represents a frequency measured in hertz (how often something happens per second).
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct Hz(pub(crate) f64);
 
 impl Hz {
@@ -370,6 +397,11 @@ impl TryFrom<f64> for Hz {
 
 /// This represents a volume measured in decibel.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct Db(pub(crate) f64);
 
 impl Db {
@@ -437,6 +469,11 @@ impl TryFrom<f64> for Db {
 
 /// This represents a volume measured as fader position.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct VolumeSliderValue(pub(crate) f64);
 
 impl VolumeSliderValue {
@@ -501,6 +538,11 @@ impl TryFrom<f64> for VolumeSliderValue {
 
 /// This represents a volume measured in REAPER's native volume unit.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct ReaperVolumeValue(pub(crate) f64);
 
 impl ReaperVolumeValue {
@@ -577,6 +619,11 @@ impl From<ReaperVolumeValue> for f64 {
 
 /// This represents a pan measured in REAPER's native pan unit.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
 pub struct ReaperPanValue(pub(crate) f64);
 
 impl ReaperPanValue {
