@@ -1,7 +1,10 @@
 use crate::Reaper;
 use reaper_medium::{MidiOutputDeviceId, ReaperString};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(transparent))]
 pub struct MidiOutputDevice {
     id: MidiOutputDeviceId,
 }
