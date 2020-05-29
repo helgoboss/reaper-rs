@@ -21,6 +21,11 @@ use std::convert::TryFrom;
 /// [^command]: A command is a function that will be executed when a particular action is requested
 /// to be run.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "u32")
+)]
 // c_ulong is u64 on Linux, but on Windows u32. We don't want the consumer to deal with those
 // toolchain differences and therefore choose u32. Rationale: The REAPER header files represent
 // command IDs usually as c_int, which is basically always i32. Also makes sense ... why would
@@ -28,13 +33,17 @@ use std::convert::TryFrom;
 pub struct CommandId(pub(crate) u32);
 
 impl CommandId {
+    fn is_valid(value: u32) -> bool {
+        value != 0
+    }
+
     /// Creates a command ID.
     ///
     /// # Panics
     ///
     /// This function panics if the given value is 0 (which is not a valid command ID).
     pub fn new(value: u32) -> CommandId {
-        assert_ne!(value, 0, "0 is not a valid command ID");
+        assert!(Self::is_valid(value), "0 is not a valid command ID");
         CommandId(value)
     }
 
@@ -58,12 +67,27 @@ impl CommandId {
     }
 }
 
+impl TryFrom<u32> for CommandId {
+    type Error = TryFromGreaterError<u32>;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "0 is not a valid command ID",
+                value,
+            ));
+        }
+        Ok(CommandId(value))
+    }
+}
+
 /// A section ID.
 ///
 /// This uniquely identifies a [`section`].
 ///
 /// [`section`]: struct.KbdSectionInfo.html
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SectionId(pub(crate) u32);
 
 impl SectionId {
@@ -87,16 +111,25 @@ impl SectionId {
 ///
 /// This uniquely identifies a MIDI input device according to the REAPER MIDI device preferences.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "u8")
+)]
 pub struct MidiInputDeviceId(pub(crate) u8);
 
 impl MidiInputDeviceId {
+    fn is_valid(value: u8) -> bool {
+        value < 63
+    }
+
     /// Creates the MIDI input device ID.
     ///
     /// # Panics
     ///
     /// This function panics if the given value is not a valid ID (must be <= 62).
     pub fn new(value: u8) -> MidiInputDeviceId {
-        assert!(value < 63, "MIDI input device IDs must be <= 62");
+        assert!(Self::is_valid(value), "MIDI input device IDs must be <= 62");
         MidiInputDeviceId(value)
     }
 
@@ -111,10 +144,25 @@ impl MidiInputDeviceId {
     }
 }
 
+impl TryFrom<u8> for MidiInputDeviceId {
+    type Error = TryFromGreaterError<u8>;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "MIDI input device IDs must be <= 62",
+                value,
+            ));
+        }
+        Ok(MidiInputDeviceId(value))
+    }
+}
+
 /// A MIDI output device ID.
 ///
 /// This uniquely identifies a MIDI output device according to the REAPER MIDI device preferences.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MidiOutputDeviceId(pub(crate) u8);
 
 impl MidiOutputDeviceId {
