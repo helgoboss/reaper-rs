@@ -7,6 +7,7 @@ use std::ffi::CStr;
 use std::fmt;
 use std::fmt::Formatter;
 use std::str;
+use std::str::FromStr;
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Guid {
@@ -16,6 +17,18 @@ pub struct Guid {
 impl Guid {
     pub fn new(internal: GUID) -> Guid {
         Guid { internal }
+    }
+
+    pub fn from_string_with_braces(text: &str) -> Result<Guid, &'static str> {
+        Reaper::get()
+            .medium_reaper()
+            .string_to_guid(text)
+            .map(Guid::new)
+            .map_err(|_| "invalid GUID")
+    }
+
+    pub fn from_string_without_braces(text: &str) -> Result<Guid, &'static str> {
+        Self::from_string_with_braces(format!("{{{}}}", text).as_str())
     }
 
     pub fn to_string_with_braces(&self) -> String {
@@ -39,14 +52,14 @@ impl fmt::Debug for Guid {
     }
 }
 
-impl convert::TryFrom<&CStr> for Guid {
-    type Error = &'static str;
+impl FromStr for Guid {
+    type Err = &'static str;
 
-    fn try_from(value: &CStr) -> Result<Guid, Self::Error> {
-        Reaper::get()
-            .medium_reaper()
-            .string_to_guid(value)
-            .map(Guid::new)
-            .map_err(|_| "Invalid GUID")
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.starts_with('{') {
+            Guid::from_string_with_braces(s)
+        } else {
+            Guid::from_string_without_braces(s)
+        }
     }
 }

@@ -1639,7 +1639,7 @@ fn query_non_existent_track_by_guid() -> TestStep {
             // Given
             let project = Reaper::get().current_project();
             // When
-            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            let guid = Guid::from_string_with_braces("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}")?;
             let found_track = project.track_by_guid(&guid);
             // Then
             assert!(!found_track.is_available());
@@ -1780,7 +1780,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
 
 fn strings() -> TestStep {
     step(AllVersions, "Strings", |_session, _| {
-        assert!(Guid::try_from(c_str!("{hey}")).is_err());
+        assert!(Guid::from_string_with_braces("{hey}").is_err());
         Reaper::get().show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
         Reaper::get().show_console_msg("- &str: 范例文字äöüß\n");
         Reaper::get().show_console_msg(String::from("- String: 范例文字äöüß\n"));
@@ -1913,7 +1913,8 @@ fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
         assert!(!fx_chain.fx_by_index_untracked(0).is_available());
         assert!(fx_chain.first_fx().is_none());
         assert!(fx_chain.last_fx().is_none());
-        let non_existing_guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+        let non_existing_guid =
+            Guid::from_string_without_braces("E64BB283-FB17-4702-ACFA-2DDB7E38F14F")?;
         assert!(!fx_chain.fx_by_guid(&non_existing_guid).is_available());
         assert!(
             !fx_chain
@@ -2047,7 +2048,7 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(fx_chain.last_fx(), Some(fx.clone()));
             let fx_guid = fx.guid().ok_or("No GUID")?;
             assert!(fx_chain.fx_by_guid(&fx_guid).is_available());
-            let guid = Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+            let guid: Guid = "{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}".parse()?;
             assert!(!fx_chain.fx_by_guid_and_index(&guid, 0).is_available());
             assert!(
                 fx_chain
@@ -2302,7 +2303,7 @@ WAK 0
         // Then
         let synth_fx = synth_fx.ok_or("Didn't return FX")?;
         assert_eq!(synth_fx.index(), 1);
-        let guid = Guid::try_from(c_str!("{5FF5FB09-9102-4CBA-A3FB-3467BA1BFE5D}"))?;
+        let guid = Guid::from_string_with_braces("{5FF5FB09-9102-4CBA-A3FB-3467BA1BFE5D}")?;
         assert_eq!(synth_fx.guid(), Some(guid));
         assert_eq!(
             synth_fx
@@ -2838,7 +2839,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             // If this doesn't work, then the index hasn't automatically corrected itself
             assert!(fx_chain.fx_by_guid_and_index(&guid, 1).is_available());
             let non_existing_guid =
-                Guid::try_from(c_str!("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}"))?;
+                Guid::from_string_with_braces("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}")?;
             assert!(
                 !fx_chain
                     .fx_by_guid_and_index(&non_existing_guid, 0)
