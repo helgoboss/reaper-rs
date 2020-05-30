@@ -83,7 +83,8 @@ impl Track {
         }
     }
 
-    // TODO-low Maybe return borrowed string instead!
+    // TODO-low It's really annoying to always have to unwrap an option even if we know this is not
+    //  a master track. Maybe we should have different types: Track, MasterTrack, NormalTrack
     pub fn name(&self) -> Option<ReaperString> {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
