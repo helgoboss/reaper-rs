@@ -121,7 +121,7 @@ impl Swell {
     pub fn CF_TEXT(&self) -> root::UINT {
         #[cfg(target_os = "linux")]
         {
-            unsafe { self.RegisterClipboardFormat(c_str!("SWELL__CF_TEXT").as_ptr()) }
+            unsafe { self.RegisterClipboardFormat(c_str_macro::c_str!("SWELL__CF_TEXT").as_ptr()) }
         }
         #[cfg(target_os = "windows")]
         1
