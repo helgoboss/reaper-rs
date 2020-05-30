@@ -1,9 +1,7 @@
 use reaper_low::raw::GUID;
-use std::convert;
 
 use crate::Reaper;
 
-use std::ffi::CStr;
 use std::fmt;
 use std::fmt::Formatter;
 use std::str;

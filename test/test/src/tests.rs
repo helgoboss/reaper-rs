@@ -1,6 +1,5 @@
 #![allow(clippy::float_cmp)]
 use approx::*;
-use std::convert::TryFrom;
 use std::ffi::CStr;
 use std::iter;
 use std::ops::Deref;

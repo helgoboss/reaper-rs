@@ -7,7 +7,9 @@ use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, Project, Reaper, Track};
-use reaper_medium::{FxShowInstruction, Hwnd, ReaperString, TrackFxLocation};
+use reaper_medium::{
+    FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg, TrackFxLocation,
+};
 use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
@@ -138,6 +140,23 @@ impl Fx {
             Reaper::get()
                 .medium_reaper()
                 .track_fx_get_enabled(self.track().raw(), self.query_index())
+        }
+    }
+
+    pub fn get_named_config_param<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+    ) -> Result<Vec<u8>, ReaperFunctionError> {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .track_fx_get_named_config_parm(
+                    self.track().raw(),
+                    self.query_index(),
+                    name,
+                    buffer_size,
+                )
         }
     }
 

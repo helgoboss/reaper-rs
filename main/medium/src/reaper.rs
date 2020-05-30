@@ -1668,6 +1668,50 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
+    /// Gets a plug-in specific named configuration value.
+    ///
+    /// With `buffer_size` you can tell REAPER and the FX how many bytes of the value you want.
+    ///
+    /// Named parameters are a vendor-specific VST extension from Cockos (see
+    /// http://reaper.fm/sdk/vst/vst_ext.php).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the given FX doesn't have this named parameter or doesn't support named
+    /// parameters.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn track_fx_get_named_config_parm<'a>(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+        param_name: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+    ) -> ReaperFunctionResult<Vec<u8>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (buffer, successful) = with_buffer(buffer_size, |buffer, max_size| {
+            self.low.TrackFX_GetNamedConfigParm(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                param_name.into().as_ptr(),
+                buffer,
+                max_size,
+            )
+        });
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't get named parameter value",
+            ));
+        }
+        Ok(buffer)
+    }
+
     /// Starts a new undo block.
     ///
     /// # Panics
@@ -3649,6 +3693,13 @@ fn with_string_buffer<T>(
     let result = fill_buffer(raw, max_size as i32);
     let string = unsafe { ReaperString::new(CString::from_raw(raw)) };
     (string, result)
+}
+
+fn with_buffer<T>(max_size: u32, fill_buffer: impl FnOnce(*mut c_char, i32) -> T) -> (Vec<u8>, T) {
+    let mut vec: Vec<u8> = vec![0; max_size as usize];
+    let raw = vec.as_mut_ptr() as *mut c_char;
+    let result = fill_buffer(raw, max_size as i32);
+    (vec, result)
 }
 
 const ZERO_GUID: GUID = GUID {
