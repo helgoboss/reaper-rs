@@ -16,18 +16,18 @@ language. It does so by providing raw Rust bindings for the
 
 _reaper-rs_ consists of 4 production crates:
 
-- [reaper-macros](https://crates.io/crates/reaper-macros)
-- [reaper-low](https://crates.io/crates/reaper-low)
-- [reaper-medium](https://crates.io/crates/reaper-medium)
+- [reaper-macros](https://docs.rs/reaper-macros)
+- [reaper-low](https://docs.rs/reaper-low)
+- [reaper-medium](https://docs.rs/reaper-medium)
 - `reaper-high` (not yet published)
 
-[reaper-macros](https://crates.io/crates/reaper-macros) provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
+[reaper-macros](https://docs.rs/reaper-macros) provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
 
 The remaining crates represent the 3 different APIs of _reaper-rs_.
 
 ### 1. Low-level API
 
-[![Latest Version](https://img.shields.io/crates/v/reaper-low.svg)](https://crates.io/crates/reaper-low)
+[![Latest Version](https://img.shields.io/crates/v/reaper-low.svg)](https://docs.rs/reaper-low)
 [![documentation](https://docs.rs/reaper-low/badge.svg)](https://docs.rs/reaper-low)
 
 This API contains the raw bindings, nothing more. It's unsafe to a large extent and not intended to be used
@@ -54,7 +54,7 @@ unsafe {
 
 ### 2. Medium-level API
 
-[![Latest Version](https://img.shields.io/crates/v/reaper-medium.svg)](https://crates.io/crates/reaper-medium)
+[![Latest Version](https://img.shields.io/crates/v/reaper-medium.svg)](https://docs.rs/reaper-medium)
 [![documentation](https://docs.rs/reaper-medium/badge.svg)](https://docs.rs/reaper-medium)
 
 This API builds on top of the low-level API. It exposes the original REAPER C++ API functions almost
@@ -190,7 +190,7 @@ macros, have a look into the macro implementation. No magic there.
 ### REAPER VST plug-in
 
 A REAPER VST plug-in is nothing else than a normal VST plug-in which gets access to functions from the REAPER C++ API.
-Luckily, there is a Rust crate for creating VST plug-ins already: [vst-rs](https://crates.io/crates/vst).
+Luckily, there is a Rust crate for creating VST plug-ins already: [vst-rs](https://docs.rs/vst).
 So all you need to do is write a VST plug-in via _vst-rs_ and gain access to the REAPER functions by letting
 _reaper-rs_ access the `HostCallback` function.
 
