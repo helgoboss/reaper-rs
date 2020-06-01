@@ -62,8 +62,8 @@ impl TrackSend {
         }
     }
 
-    pub fn source_track(&self) -> Track {
-        self.source_track.clone()
+    pub fn source_track(&self) -> &Track {
+        &self.source_track
     }
 
     pub fn target_track(&self) -> Track {

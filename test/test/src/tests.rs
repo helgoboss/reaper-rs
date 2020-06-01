@@ -743,8 +743,8 @@ fn query_track_send() -> TestStep {
         assert!(send_to_track_3.is_available());
         assert_eq!(send_to_track_2.index(), 0);
         assert_eq!(send_to_track_3.index(), 1);
-        assert_eq!(send_to_track_2.source_track(), track_1);
-        assert_eq!(send_to_track_3.source_track(), track_1);
+        assert_eq!(send_to_track_2.source_track(), &track_1);
+        assert_eq!(send_to_track_3.source_track(), &track_1);
         assert_eq!(send_to_track_2.target_track(), track_2);
         assert_eq!(send_to_track_2.name().to_str(), "Track 2");
         assert_eq!(send_to_track_3.target_track(), track_3);
