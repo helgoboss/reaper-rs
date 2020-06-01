@@ -100,6 +100,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     .into_iter();
     let steps_b = vec![
         insert_track_at(),
+        scroll_mixer(),
         query_midi_input_devices(),
         query_midi_output_devices(),
         stuff_midi_devices(),
@@ -384,6 +385,18 @@ fn query_midi_input_devices() -> TestStep {
         // TODO There might be no MIDI input devices
         //            assert_ne!(devs.count(), 0);
         //            assert!(dev_0.is_available());
+        Ok(())
+    })
+}
+
+fn scroll_mixer() -> TestStep {
+    step(AllVersions, "Scroll mixer", |_, _| {
+        // Given
+        let project = Reaper::get().current_project();
+        let track = project.track_by_index(3).ok_or("Missing track 2")?;
+        // When
+        track.scroll_mixer();
+        // Then
         Ok(())
     })
 }

@@ -228,6 +228,13 @@ impl Track {
         }
     }
 
+    pub fn scroll_mixer(&self) {
+        self.load_if_necessary_or_complain();
+        unsafe {
+            Reaper::get().medium_reaper().set_mixer_scroll(self.raw());
+        }
+    }
+
     pub fn location(&self) -> TrackLocation {
         self.load_and_check_if_necessary_or_complain();
         // TODO-low The following returns None if we query the number of a track in another project
