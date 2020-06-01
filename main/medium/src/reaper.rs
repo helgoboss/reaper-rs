@@ -2267,9 +2267,8 @@ impl<UsageScope> Reaper<UsageScope> {
     #[measure(SingleThreadNanos)]
     pub fn guid_to_string(&self, guid: &GUID) -> ReaperString
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let (guid_string, _) = with_string_buffer(64, |buffer, _| unsafe {
             self.low.guidToString(guid as *const GUID, buffer)
         });
