@@ -101,8 +101,8 @@ impl FxParameter {
         .expect("Couldn't format FX param value")
     }
 
-    pub fn fx(&self) -> Fx {
-        self.fx.clone()
+    pub fn fx(&self) -> &Fx {
+        &self.fx
     }
 
     pub fn index(&self) -> u32 {

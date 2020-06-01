@@ -2532,7 +2532,7 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
                 .as_c_str(),
             c_str!("0")
         );
-        assert_eq!(p.fx(), fx);
+        assert_eq!(p.fx(), &fx);
         assert!(p.step_size().is_none());
         assert_eq!(
             p.value_range(),
