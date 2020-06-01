@@ -906,13 +906,13 @@ impl ControlSurface for HelperControlSurface {
                 .subjects
                 .master_playrate_changed
                 .borrow_mut()
-                .next(true);
+                .next(());
             // FIXME What about playrate automation?
             reaper
                 .subjects
                 .master_playrate_touched
                 .borrow_mut()
-                .next(true);
+                .next(());
         }
         1
     }

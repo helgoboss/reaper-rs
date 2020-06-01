@@ -8,7 +8,7 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, Reaper, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, Pan, PlayRate, Reaper, Tempo, Track, Volume,
 };
 use rxrust::prelude::*;
 
@@ -109,6 +109,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         get_reaper_window(),
         mark_project_as_dirty(),
         get_project_play_rate(),
+        set_project_play_rate(),
         get_project_tempo(),
         set_project_tempo(),
         swell(),
@@ -179,6 +180,36 @@ fn set_project_tempo() -> TestStep {
         assert_eq!(project.tempo().bpm(), Bpm::new(130.0));
         // TODO-low There should be only one event invocation
         assert_eq!(mock.invocation_count(), 2);
+        Ok(())
+    })
+}
+
+fn set_project_play_rate() -> TestStep {
+    step(AllVersions, "Set project play rate", |reaper, step| {
+        // Given
+        let project = Reaper::get().current_project();
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            reaper
+                .master_playrate_changed()
+                .take_until(step.finished)
+                .subscribe(move |_| {
+                    mock.invoke(());
+                });
+        });
+        project.set_play_rate(PlayRate::from_playback_speed_factor(
+            PlaybackSpeedFactor::MAX,
+        ));
+        // Then
+        assert_eq!(
+            project.play_rate().playback_speed_factor(),
+            PlaybackSpeedFactor::new(4.0)
+        );
+        assert_eq!(
+            project.play_rate().normalized_value(),
+            NormalizedPlayRate::MAX
+        );
+        assert_eq!(mock.invocation_count(), 1);
         Ok(())
     })
 }

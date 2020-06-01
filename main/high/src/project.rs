@@ -237,6 +237,12 @@ impl Project {
         PlayRate::from_playback_speed_factor(factor)
     }
 
+    pub fn set_play_rate(self, play_rate: PlayRate) {
+        Reaper::get()
+            .medium_reaper()
+            .csurf_on_play_rate_change(play_rate.playback_speed_factor());
+    }
+
     pub fn set_tempo(self, tempo: Tempo, undo_hint: UndoBehavior) {
         self.complain_if_not_available();
         Reaper::get().medium_reaper().set_current_bpm(

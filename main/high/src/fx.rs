@@ -8,7 +8,8 @@ use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, Project, Reaper, Track};
 use reaper_medium::{
-    FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg, TrackFxLocation,
+    FxPresetRef, FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg,
+    TrackFxLocation,
 };
 use rxrust::prelude::PayloadCopy;
 
@@ -383,6 +384,17 @@ impl Fx {
         }
         .expect("Couldn't get preset count")
         .index
+    }
+
+    pub fn activate_preset(&self, preset: FxPresetRef) {
+        self.load_if_necessary_or_complain();
+        unsafe {
+            let _ = Reaper::get().medium_reaper().track_fx_set_preset_by_index(
+                self.track().raw(),
+                self.query_index(),
+                preset,
+            );
+        }
     }
 
     pub fn preset_is_dirty(&self) -> bool {
