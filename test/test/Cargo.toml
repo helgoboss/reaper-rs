@@ -13,5 +13,5 @@ reaper-low = { path = "../../main/low" }
 c_str_macro = "1.0.2"
 rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
 slog = "2.5.2"
-helgoboss-midi = { version = "0.1.0" }
+helgoboss-midi = { git = "https://github.com/helgoboss/helgoboss-midi", branch = "master" }
 approx = "0.3.2"

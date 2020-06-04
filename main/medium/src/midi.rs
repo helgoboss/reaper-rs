@@ -83,6 +83,7 @@ impl<'a> MidiEvent<'a> {
     /// Returns the frame offset.
     ///
     /// Unit: 1/1024000 of a second, *not* sample frames!
+    // TODO-medium Introduce newtype
     pub fn frame_offset(self) -> u32 {
         self.0.frame_offset as u32
     }

@@ -19,7 +19,7 @@ c_str_macro = "1.0.2"
 derive_more = "0.99.5"
 reaper-low = { version = "0.1.0", path = "../low" }
 reaper-macros = { path = "../macros" }
-helgoboss-midi = { version = "0.1.0" }
+helgoboss-midi = { git = "https://github.com/helgoboss/helgoboss-midi", branch = "master" }
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
 vst = { git = "https://github.com/helgoboss/vst-rs", branch = "feature/custom-support-variant" }
 metered = { version = "0.3.0", optional = true }

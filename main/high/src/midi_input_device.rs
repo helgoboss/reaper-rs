@@ -1,5 +1,5 @@
 use crate::Reaper;
-use reaper_medium::{MidiInputDeviceId, ReaperString};
+use reaper_medium::{MidiInput, MidiInputDeviceId, ReaperString};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -24,6 +24,13 @@ impl MidiInputDevice {
             .get_midi_input_name(self.id, 33)
             .name
             .unwrap()
+    }
+
+    // Must be called from real-time audio thread only!
+    pub fn with_midi_input<R>(self, use_device: impl FnOnce(&MidiInput) -> R) -> Option<R> {
+        Reaper::get()
+            .medium_real_time_reaper
+            .get_midi_input(self.id, use_device)
     }
 
     // For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if

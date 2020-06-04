@@ -105,6 +105,7 @@ impl ReaperBuilder {
             INIT_INSTANCE.call_once(|| {
                 let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
+                let medium_real_time_reaper = self.medium.create_real_time_reaper();
                 let main_thread_rx_task_channel =
                     crossbeam_channel::bounded::<RxTask>(MAIN_THREAD_TASK_CHANNEL_CAPACITY);
                 let main_thread_scheduler =
@@ -112,6 +113,7 @@ impl ReaperBuilder {
                 let reaper = Reaper {
                     medium_session: RefCell::new(self.medium),
                     medium_reaper,
+                    medium_real_time_reaper,
                     logger,
                     command_by_id: RefCell::new(HashMap::new()),
                     subjects: MainSubjects::new(),
@@ -202,6 +204,7 @@ impl OnAudioBuffer for HighOnAudioBuffer {
 pub struct Reaper {
     medium_session: RefCell<reaper_medium::ReaperSession>,
     pub(crate) medium_reaper: reaper_medium::Reaper,
+    pub(crate) medium_real_time_reaper: reaper_medium::Reaper<RealTimeAudioThreadScope>,
     logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO-low Adding an action in an action would panic because we have an immutable borrow of
@@ -231,6 +234,7 @@ impl Default for Reaper {
         Reaper {
             medium_session: Default::default(),
             medium_reaper: Default::default(),
+            medium_real_time_reaper: Default::default(),
             logger: create_std_logger(),
             command_by_id: Default::default(),
             subjects: Default::default(),
