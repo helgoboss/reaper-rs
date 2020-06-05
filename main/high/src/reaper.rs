@@ -619,9 +619,19 @@ impl Reaper {
         self.subjects.master_tempo_changed.borrow().clone()
     }
 
+    pub fn master_tempo_touched(&self) -> impl ReactiveEvent<()> {
+        self.require_main_thread();
+        self.subjects.master_tempo_touched.borrow().clone()
+    }
+
     pub fn master_playrate_changed(&self) -> impl ReactiveEvent<()> {
         self.require_main_thread();
         self.subjects.master_playrate_changed.borrow().clone()
+    }
+
+    pub fn master_playrate_touched(&self) -> impl ReactiveEvent<()> {
+        self.require_main_thread();
+        self.subjects.master_playrate_touched.borrow().clone()
     }
 
     pub fn fx_added(&self) -> impl ReactiveEvent<Fx> {
@@ -649,6 +659,11 @@ impl Reaper {
         self.subjects.fx_parameter_value_changed.borrow().clone()
     }
 
+    pub fn fx_parameter_touched(&self) -> impl ReactiveEvent<FxParameter> {
+        self.require_main_thread();
+        self.subjects.fx_parameter_touched.borrow().clone()
+    }
+
     pub fn track_input_monitoring_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects
@@ -667,9 +682,19 @@ impl Reaper {
         self.subjects.track_volume_changed.borrow().clone()
     }
 
+    pub fn track_volume_touched(&self) -> impl ReactiveEvent<Track> {
+        self.require_main_thread();
+        self.subjects.track_volume_touched.borrow().clone()
+    }
+
     pub fn track_pan_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_pan_changed.borrow().clone()
+    }
+
+    pub fn track_pan_touched(&self) -> impl ReactiveEvent<Track> {
+        self.require_main_thread();
+        self.subjects.track_pan_touched.borrow().clone()
     }
 
     pub fn track_selected_changed(&self) -> impl ReactiveEvent<Track> {
@@ -680,6 +705,11 @@ impl Reaper {
     pub fn track_mute_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_mute_changed.borrow().clone()
+    }
+
+    pub fn track_mute_touched(&self) -> impl ReactiveEvent<Track> {
+        self.require_main_thread();
+        self.subjects.track_mute_touched.borrow().clone()
     }
 
     pub fn track_solo_changed(&self) -> impl ReactiveEvent<Track> {
@@ -697,9 +727,19 @@ impl Reaper {
         self.subjects.track_send_volume_changed.borrow().clone()
     }
 
+    pub fn track_send_volume_touched(&self) -> impl ReactiveEvent<TrackSend> {
+        self.require_main_thread();
+        self.subjects.track_send_volume_touched.borrow().clone()
+    }
+
     pub fn track_send_pan_changed(&self) -> impl ReactiveEvent<TrackSend> {
         self.require_main_thread();
         self.subjects.track_send_pan_changed.borrow().clone()
+    }
+
+    pub fn track_send_pan_touched(&self) -> impl ReactiveEvent<TrackSend> {
+        self.require_main_thread();
+        self.subjects.track_send_pan_touched.borrow().clone()
     }
 
     pub fn action_invoked(&self) -> impl ReactiveEvent<Rc<Action>> {
