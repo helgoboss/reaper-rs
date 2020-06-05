@@ -2,7 +2,6 @@ use crate::{Pan, Reaper, Track, Volume};
 
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{MediaTrack, ReaperString, TrackSendDirection};
-use rxrust::prelude::PayloadCopy;
 use std::cell::Cell;
 use std::fmt;
 
@@ -12,8 +11,6 @@ pub struct TrackSend {
     target_track: Option<Track>,
     index: Cell<Option<u32>>,
 }
-
-impl PayloadCopy for TrackSend {}
 
 impl PartialEq for TrackSend {
     fn eq(&self, other: &Self) -> bool {

@@ -640,7 +640,7 @@ fn test_action_invoked_event() -> TestStep {
                 .action_invoked()
                 .take_until(step.finished)
                 .subscribe(move |t| {
-                    mock.invoke(t.0);
+                    mock.invoke(t);
                 });
         });
         Reaper::get()

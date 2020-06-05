@@ -1,8 +1,7 @@
 use crate::fx::Fx;
 use crate::guid::Guid;
 use crate::{
-    get_media_track_guid, MainThreadTask, Payload, Project, Reaper, Track,
-    MAIN_THREAD_TASK_BULK_SIZE,
+    get_media_track_guid, MainThreadTask, Project, Reaper, Track, MAIN_THREAD_TASK_BULK_SIZE,
 };
 use c_str_macro::c_str;
 
@@ -821,7 +820,7 @@ impl ControlSurface for HelperControlSurface {
         let fx_ref = match args.fx_location {
             None => {
                 // Clear focused FX
-                reaper.subjects.fx_focused.borrow_mut().next(Payload(None));
+                reaper.subjects.fx_focused.borrow_mut().next(None);
                 return 0;
             }
             Some(r) => r,
@@ -844,11 +843,7 @@ impl ControlSurface for HelperControlSurface {
                         !fx.is_input_fx(),
                         fx.is_input_fx(),
                     );
-                    reaper
-                        .subjects
-                        .fx_focused
-                        .borrow_mut()
-                        .next(Payload(Some(fx)));
+                    reaper.subjects.fx_focused.borrow_mut().next(Some(fx));
                 }
                 1
             }

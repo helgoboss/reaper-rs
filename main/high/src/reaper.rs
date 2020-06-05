@@ -299,7 +299,7 @@ pub(super) struct MainSubjects {
     pub(super) fx_enabled_changed: EventStreamSubject<Fx>,
     pub(super) fx_opened: EventStreamSubject<Fx>,
     pub(super) fx_closed: EventStreamSubject<Fx>,
-    pub(super) fx_focused: EventStreamSubject<Payload<Option<Fx>>>,
+    pub(super) fx_focused: EventStreamSubject<Option<Fx>>,
     pub(super) fx_reordered: EventStreamSubject<Track>,
     pub(super) fx_parameter_value_changed: EventStreamSubject<FxParameter>,
     pub(super) fx_parameter_touched: EventStreamSubject<FxParameter>,
@@ -309,7 +309,7 @@ pub(super) struct MainSubjects {
     pub(super) master_playrate_touched: EventStreamSubject<()>,
     pub(super) main_thread_idle: EventStreamSubject<()>,
     pub(super) project_closed: EventStreamSubject<Project>,
-    pub(super) action_invoked: EventStreamSubject<Payload<Rc<Action>>>,
+    pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
 }
 
 impl Debug for MainSubjects {
@@ -317,11 +317,6 @@ impl Debug for MainSubjects {
         f.debug_struct("MainSubjects").finish()
     }
 }
-
-#[derive(Clone)]
-pub struct Payload<T>(pub T);
-
-impl<T: Clone> PayloadCopy for Payload<T> {}
 
 impl MainSubjects {
     fn new() -> MainSubjects {
@@ -598,7 +593,7 @@ impl Reaper {
         self.subjects.fx_opened.borrow().clone()
     }
 
-    pub fn fx_focused(&self) -> impl ReactiveEvent<Payload<Option<Fx>>> {
+    pub fn fx_focused(&self) -> impl ReactiveEvent<Option<Fx>> {
         self.require_main_thread();
         self.subjects.fx_focused.borrow().clone()
     }
@@ -707,7 +702,7 @@ impl Reaper {
         self.subjects.track_send_pan_changed.borrow().clone()
     }
 
-    pub fn action_invoked(&self) -> impl ReactiveEvent<Payload<Rc<Action>>> {
+    pub fn action_invoked(&self) -> impl ReactiveEvent<Rc<Action>> {
         self.require_main_thread();
         self.subjects.action_invoked.borrow().clone()
     }
@@ -911,7 +906,7 @@ impl HookPostCommand for HighLevelHookPostCommand {
             .subjects
             .action_invoked
             .borrow_mut()
-            .next(Payload(Rc::new(action)));
+            .next(Rc::new(action));
     }
 }
 

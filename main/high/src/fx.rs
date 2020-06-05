@@ -11,7 +11,6 @@ use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg,
     TrackFxLocation,
 };
-use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -22,8 +21,6 @@ pub struct Fx {
     // reorderings. For just index-based FX instances this is the primary identifier.
     index: Cell<Option<u32>>,
 }
-
-impl PayloadCopy for Fx {}
 
 impl PartialEq for Fx {
     fn eq(&self, other: &Self) -> bool {

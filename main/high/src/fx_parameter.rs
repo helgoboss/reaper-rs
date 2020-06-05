@@ -4,15 +4,12 @@ use crate::Reaper;
 use reaper_medium::{
     GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue, ReaperString,
 };
-use rxrust::prelude::PayloadCopy;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FxParameter {
     fx: Fx,
     index: u32,
 }
-
-impl PayloadCopy for FxParameter {}
 
 impl FxParameter {
     pub(super) fn new(fx: Fx, index: u32) -> FxParameter {

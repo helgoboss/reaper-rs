@@ -3,8 +3,6 @@ use std::cell::Cell;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_void;
 
-use rxrust::prelude::PayloadCopy;
-
 use crate::fx::{get_index_from_query_index, Fx};
 use crate::fx_chain::FxChain;
 use crate::guid::Guid;
@@ -40,8 +38,6 @@ pub struct Track {
     // TODO-low This is not super cheap to copy. Do we really need to initialize this eagerly?
     guid: Guid,
 }
-
-impl PayloadCopy for Track {}
 
 impl Track {
     /// mediaTrack must not be null
