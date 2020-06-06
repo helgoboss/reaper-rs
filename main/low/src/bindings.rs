@@ -10687,5 +10687,14 @@ pub mod root {
             pub fn midi_Input_GetReadBuf(self_: *mut root::midi_Input)
             -> *mut root::MIDI_eventlist;
         }
+        extern "C" {
+            pub fn midi_Output_Send(
+                self_: *mut root::midi_Output,
+                status: ::std::os::raw::c_uchar,
+                d1: ::std::os::raw::c_uchar,
+                d2: ::std::os::raw::c_uchar,
+                frame_offset: ::std::os::raw::c_int,
+            );
+        }
     }
 }

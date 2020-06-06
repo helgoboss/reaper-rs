@@ -8,4 +8,5 @@
 namespace reaper_midi {
   extern "C" MIDI_event_t* MIDI_eventlist_EnumItems(MIDI_eventlist* self, int* bpos);
   extern "C" MIDI_eventlist* midi_Input_GetReadBuf(midi_Input* self);
+  extern "C" void midi_Output_Send(midi_Output* self, unsigned char status, unsigned char d1, unsigned char d2, int frame_offset);
 }
