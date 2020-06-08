@@ -5,6 +5,7 @@ use reaper_high::{ActionKind, Reaper, ReaperGuard};
 use reaper_low::{reaper_vst_plugin, PluginContext};
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
 use rxrust::prelude::*;
+use slog::debug;
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
 use std::time::Duration;
@@ -126,7 +127,10 @@ impl TestVstPlugin {
             Reaper::setup_with_defaults(context, "info@helgoboss.org");
             let reaper = Reaper::get();
             reaper.activate();
-            reaper.show_console_msg(c_str!("Loaded reaper-rs integration test VST plugin\n"));
+            debug!(
+                reaper.logger(),
+                "Loaded reaper-rs integration test VST plugin"
+            );
             reaper.register_action(
                 c_str!("reaperRsVstIntegrationTests"),
                 c_str!("reaper-rs VST integration tests"),

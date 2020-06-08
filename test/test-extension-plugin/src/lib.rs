@@ -2,16 +2,20 @@ use c_str_macro::c_str;
 use reaper_high::{ActionKind, Reaper};
 
 use reaper_macros::reaper_extension_plugin;
+use slog::debug;
 use std::error::Error;
 use std::process;
 
 #[reaper_extension_plugin(email_address = "info@helgoboss.org")]
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("From REAPER: Launching reaper-rs reaper-test-extension-plugin...");
-    let session = Reaper::get();
-    session.activate();
-    Reaper::get().show_console_msg(c_str!("Loaded reaper-rs integration test plugin\n"));
-    if std::env::var("RUN_REAPER_RS_INTEGRATION_TEST").is_ok() {
+    let run_integration_test = std::env::var("RUN_REAPER_RS_INTEGRATION_TEST").is_ok();
+    if run_integration_test {
+        println!("From REAPER: Launching reaper-rs reaper-test-extension-plugin...");
+    }
+    let reaper = Reaper::get();
+    reaper.activate();
+    debug!(reaper.logger(), "Loaded reaper-rs integration test plugin");
+    if run_integration_test {
         println!("From REAPER: Entering reaper-rs integration test...");
         reaper_test::execute_integration_test(|result| {
             match result {
@@ -28,7 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         });
     }
-    session.register_action(
+    reaper.register_action(
         c_str!("reaperRsIntegrationTests"),
         c_str!("reaper-rs integration tests"),
         || reaper_test::execute_integration_test(|_| ()),
