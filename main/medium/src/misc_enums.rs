@@ -1,6 +1,6 @@
 use crate::{
-    Hwnd, KbdSectionInfo, MediaTrack, MidiOutputDeviceId, ReaProject, ReaperStr, ReaperStringArg,
-    TryFromRawError,
+    Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId, ReaProject, ReaperStr,
+    ReaperStringArg, TryFromRawError,
 };
 
 use helgoboss_midi::{U14, U7};
@@ -706,6 +706,26 @@ impl WindowContext {
         match self {
             Win(h) => h.as_ptr(),
             NoWindow => null_mut(),
+        }
+    }
+}
+
+/// Decides when a MIDI message will be sent.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum SendMidiTime {
+    /// MIDI message will be sent instantly.
+    Instantly,
+    /// MIDI messages will be sent at the given frame offset.
+    AtFrameOffset(MidiFrameOffset),
+}
+
+impl SendMidiTime {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use SendMidiTime::*;
+        match self {
+            Instantly => -1,
+            AtFrameOffset(o) => o.to_raw(),
         }
     }
 }

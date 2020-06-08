@@ -15,11 +15,11 @@ use crate::{
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint,
     CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
     GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
-    MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutputDeviceId,
-    NormalizedPlayRate, NotificationBehavior, PlaybackSpeedFactor, PluginContext, ProjectContext,
-    ProjectRef, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString,
-    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput,
+    MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior, PlaybackSpeedFactor,
+    PluginContext, ProjectContext, ProjectRef, ReaProject, ReaperFunctionError,
+    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput,
     SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
     TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
@@ -2520,6 +2520,7 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Stuffs a 3-byte MIDI message into a queue or send it to an external MIDI hardware.
+    // TODO-medium Add example
     #[measure(SingleThreadNanos)]
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage)
     where
@@ -3482,6 +3483,35 @@ impl<UsageScope> Reaper<UsageScope> {
             return None;
         }
         NonNull::new(ptr).map(|nnp| use_device(&MidiInput(nnp)))
+    }
+
+    /// Grants temporary access to an already open MIDI output device.
+    ///
+    /// Returns `None` if the device doesn't exist, is not connected or is not already opened. The
+    /// device must be enabled in REAPER's MIDI preferences.
+    ///
+    /// This function is typically called in the [audio hook]. But it's also okay to call it in a
+    /// VST plug-in as long as [`is_in_real_time_audio()`] returns `true`.
+    ///
+    /// See [audio hook] for an example.
+    ///
+    /// [audio hook]: struct.ReaperSession.html#method.audio_reg_hardware_hook_add
+    /// [`is_in_real_time_audio()`]: #method.is_in_real_time_audio
+    /// [`get_read_buf()`]: struct.MidiInput.html#method.get_read_buf
+    #[measure(SingleThreadNanos)]
+    pub fn get_midi_output<R>(
+        &self,
+        device_id: MidiOutputDeviceId,
+        use_device: impl FnOnce(&MidiOutput) -> R,
+    ) -> Option<R>
+    where
+        UsageScope: AudioThreadOnly,
+    {
+        let ptr = self.low.GetMidiOutput(device_id.to_raw());
+        if ptr.is_null() {
+            return None;
+        }
+        NonNull::new(ptr).map(|nnp| use_device(&MidiOutput(nnp)))
     }
 
     /// Parses the given string as pan value.

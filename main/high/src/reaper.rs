@@ -33,9 +33,9 @@ use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
-    CommandId, HookCommand, HookPostCommand, MidiInputDeviceId, OnAudioBuffer, OnAudioBufferArgs,
-    OwnedGaccelRegister, RealTimeAudioThreadScope, ReaperStringArg, ToggleAction,
-    ToggleActionResult,
+    CommandId, HookCommand, HookPostCommand, MidiFrameOffset, MidiInputDeviceId, OnAudioBuffer,
+    OnAudioBufferArgs, OwnedGaccelRegister, RealTimeAudioThreadScope, ReaperStringArg,
+    ToggleAction, ToggleActionResult,
 };
 use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
@@ -257,12 +257,12 @@ struct ActiveData {
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub struct MidiEvent<M> {
-    frame_offset: u32,
+    frame_offset: MidiFrameOffset,
     msg: M,
 }
 
 impl<M> MidiEvent<M> {
-    pub fn new(frame_offset: u32, msg: M) -> MidiEvent<M> {
+    pub fn new(frame_offset: MidiFrameOffset, msg: M) -> MidiEvent<M> {
         MidiEvent { frame_offset, msg }
     }
 }
@@ -435,6 +435,10 @@ impl Reaper {
                 .as_ref()
                 .expect("Reaper::load().setup() must be called before Reaper::get()")
         }
+    }
+
+    pub fn logger(&self) -> &slog::Logger {
+        &self.logger
     }
 
     pub fn activate(&self) {

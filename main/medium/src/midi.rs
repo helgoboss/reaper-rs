@@ -1,6 +1,7 @@
 use helgoboss_midi::{ShortMessage, U7};
 use reaper_low::raw;
 
+use crate::{MidiFrameOffset, SendMidiTime};
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
@@ -81,11 +82,8 @@ impl<'a> MidiEvent<'a> {
     }
 
     /// Returns the frame offset.
-    ///
-    /// Unit: 1/1024000 of a second, *not* sample frames!
-    // TODO-medium Introduce newtype
-    pub fn frame_offset(self) -> u32 {
-        self.0.frame_offset as u32
+    pub fn frame_offset(self) -> MidiFrameOffset {
+        MidiFrameOffset::new(self.0.frame_offset as u32)
     }
 
     /// Returns the actual message.
@@ -130,5 +128,33 @@ impl<'a> ShortMessage for MidiMessage<'a> {
 
     fn data_byte_2(&self) -> U7 {
         unsafe { U7::new_unchecked(self.0.midi_message[2]) }
+    }
+}
+
+/// Pointer to a MIDI output device.
+//
+// Case 3: Internals exposed: no | vtable: yes
+// ===========================================
+//
+// It's important that this type is not cloneable! Otherwise consumers could easily let it escape
+// its intended usage scope (audio hook), which would lead to undefined behavior.
+//
+// Internals exposed: no | vtable: yes (Rust => REAPER)
+#[derive(Eq, PartialEq, Hash, Debug)]
+pub struct MidiOutput(pub(crate) NonNull<raw::midi_Output>);
+
+impl MidiOutput {
+    /// Returns the list of MIDI events which are currently in the buffer.
+    ///
+    /// This must only be called in the real-time audio thread! See [`get_midi_output()`].
+    ///
+    /// [`get_midi_output()`]: struct.Reaper.html#method.get_midi_output
+    pub fn send(&self, message: impl ShortMessage, time: SendMidiTime) {
+        let bytes = message.to_bytes();
+        unsafe {
+            self.0
+                .as_ref()
+                .Send(bytes.0, bytes.1.get(), bytes.2.get(), time.to_raw())
+        };
     }
 }

@@ -1,5 +1,5 @@
 use crate::Reaper;
-use reaper_medium::{MidiOutputDeviceId, ReaperString};
+use reaper_medium::{MidiOutput, MidiOutputDeviceId, ReaperString};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -42,5 +42,12 @@ impl MidiOutputDevice {
             .medium_reaper()
             .get_midi_output_name(self.id, 1)
             .is_present
+    }
+
+    // Must be called from real-time audio thread only!
+    pub fn with_midi_output<R>(self, use_device: impl FnOnce(&MidiOutput) -> R) -> Option<R> {
+        Reaper::get()
+            .medium_real_time_reaper
+            .get_midi_output(self.id, use_device)
     }
 }

@@ -752,3 +752,27 @@ impl<'a> ReaperVersion<'a> {
         self.0
     }
 }
+
+/// A MIDI frame offset.
+///
+/// This is a 1/1024000 of a second, *not* a sample frame!
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct MidiFrameOffset(pub(crate) u32);
+
+impl MidiFrameOffset {
+    /// Creates a MIDI frame offset.
+    pub fn new(value: u32) -> MidiFrameOffset {
+        MidiFrameOffset(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> u32 {
+        self.0
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        self.0 as i32
+    }
+}
