@@ -1,5 +1,6 @@
 use std::borrow::{Borrow, Cow};
 use std::ffi::{CStr, CString};
+use std::ops::Deref;
 use std::os::raw::c_char;
 
 /// A string parameter.
@@ -62,8 +63,8 @@ impl<'a> ReaperStringArg<'a> {
         self.0.as_c_str().as_ptr()
     }
 
-    /// Consumes this value and spits out the contained cow. Used by code in this crate only.
-    pub(crate) fn into_inner(self) -> Cow<'a, ReaperStr> {
+    /// Consumes this value and spits out the contained cow.
+    pub fn into_inner(self) -> Cow<'a, ReaperStr> {
         self.0
     }
 }
@@ -72,6 +73,8 @@ impl<'a> ReaperStringArg<'a> {
 // offer a conversion from `CString` (owned) because it could confuse consumers. They might start to
 // think that string arguments are always consumed, which is not the case. If there's much demand,
 // we can still add that later.
+// TODO-high This can result in non-UTF-8 ReaperString! Try to remove it. This conversion should be
+//  crate-only.
 impl<'a> From<&'a CStr> for ReaperStringArg<'a> {
     fn from(s: &'a CStr) -> Self {
         ReaperStringArg(ReaperStr::new(s).into())
@@ -130,6 +133,15 @@ impl<'a> From<String> for ReaperStringArg<'a> {
 pub struct ReaperString(CString);
 
 impl ReaperString {
+    /// Creates a REAPER string wrapping the given `CString`.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given `CString` is encoded in UTF-8.
+    pub unsafe fn new_unchecked(inner: CString) -> ReaperString {
+        ReaperString(inner)
+    }
+
     // Don't make this public!
     pub(crate) fn new(inner: CString) -> ReaperString {
         ReaperString(inner)
@@ -175,6 +187,17 @@ impl ReaperString {
 // Necessary for `ToOwned` in other direction.
 impl Borrow<ReaperStr> for ReaperString {
     fn borrow(&self) -> &ReaperStr {
+        ReaperStr::new(&self.0)
+    }
+}
+
+// For being able to pass a ReaperString even if ReaperStr is expected.
+//
+// Analogously to CString -> CStr.
+impl Deref for ReaperString {
+    type Target = ReaperStr;
+
+    fn deref(&self) -> &Self::Target {
         ReaperStr::new(&self.0)
     }
 }
