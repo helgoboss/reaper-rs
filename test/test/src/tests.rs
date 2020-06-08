@@ -450,7 +450,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
                     toggleable(move || cloned_mock.invocation_count() % 2 == 1),
                 )
             });
-            let action = Reaper::get().action_by_command_name(c_str!("reaperRsTest2").into());
+            let action = Reaper::get().action_by_command_name("reaperRsTest2");
             // Then
             let _action_index = action.index();
             let _command_id = action.command_id();
@@ -463,10 +463,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
             assert!(action.is_on());
             assert_eq!(action.character(), ActionCharacter::Toggle);
             assert!(action.command_id() > CommandId::new(1));
-            assert_eq!(
-                action.command_name(),
-                Some(c_str!("reaperRsTest2").to_owned())
-            );
+            assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest2");
             assert_eq!(action.name().to_str(), "reaper-rs test toggle action");
             reg.unregister();
             assert!(!action.is_available());
@@ -493,7 +490,7 @@ fn register_and_unregister_action() -> TestStep {
                     ActionKind::NotToggleable,
                 )
             });
-            let action = Reaper::get().action_by_command_name(c_str!("reaperRsTest").into());
+            let action = Reaper::get().action_by_command_name("reaperRsTest");
             // Then
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
@@ -502,10 +499,7 @@ fn register_and_unregister_action() -> TestStep {
             assert_eq!(mock.last_arg(), 42);
             assert_eq!(action.character(), ActionCharacter::Trigger);
             assert!(action.command_id() > CommandId::new(1));
-            assert_eq!(
-                action.command_name(),
-                Some(c_str!("reaperRsTest").to_owned())
-            );
+            assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest");
             assert!(!action.is_on());
             assert_eq!(action.name().to_str(), "reaper-rs test action");
             reg.unregister();

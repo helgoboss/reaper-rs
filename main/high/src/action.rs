@@ -1,6 +1,6 @@
 use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_medium::{ActionValueChange, CommandId, ReaperString, SectionContext};
+use reaper_medium::{ActionValueChange, CommandId, ReaperStr, ReaperString, SectionContext};
 
 use helgoboss_midi::U7;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
@@ -9,7 +9,7 @@ use reaper_medium::WindowContext::Win;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 
 #[derive(Debug, Copy, Clone)]
 struct RuntimeData {
@@ -29,7 +29,7 @@ pub struct Action {
     // Used to represent custom actions that are not available (they don't have a commandId) or for
     // which is not yet known if they are available. Globally unique, not within one section.
     // TODO-low But currently only mainSection supported. How support other sections?
-    command_name: Option<CString>,
+    command_name: Option<ReaperString>,
 }
 
 impl PartialEq for Action {
@@ -47,7 +47,7 @@ impl PartialEq for Action {
 }
 
 impl Action {
-    pub(super) fn command_name_based(command_name: CString) -> Action {
+    pub(super) fn command_name_based(command_name: ReaperString) -> Action {
         Action {
             command_name: Some(command_name),
             runtime_data: RefCell::new(None),
@@ -148,18 +148,15 @@ impl Action {
     // TODO-low Don't copy into string. Split into command-based action and command-id based action
     //  and then return Option<&CStr> for the first (with same lifetime like self) and
     //  ReaperStringPtr alternative for the second
-    pub fn command_name(&self) -> Option<CString> {
-        self.command_name
-            .as_ref()
-            .map(|cn| cn.as_c_str().to_owned())
-            .or_else(|| {
-                let rd = self.runtime_data.borrow();
-                Reaper::get()
-                    .medium_reaper()
-                    .reverse_named_command_lookup(rd.as_ref().unwrap().command_id, |s| {
-                        s.as_c_str().to_owned()
-                    })
-            })
+    pub fn command_name(&self) -> Option<ReaperString> {
+        self.command_name.clone().or_else(|| {
+            let rd = self.runtime_data.borrow();
+            Reaper::get()
+                .medium_reaper()
+                .reverse_named_command_lookup(rd.as_ref().unwrap().command_id, |s| {
+                    s.to_reaper_string()
+                })
+        })
     }
 
     pub fn name(&self) -> ReaperString {
@@ -252,8 +249,8 @@ impl Action {
         true
     }
 
-    fn fix_command_name(command_name: &CStr) -> Cow<CStr> {
-        let bytes = command_name.to_bytes();
+    fn fix_command_name(command_name: &ReaperStr) -> Cow<ReaperStr> {
+        let bytes = command_name.as_c_str().to_bytes();
         if !bytes.len() == 0 && bytes[0] == b'_' {
             // Command already contains underscore. Great.
             return Cow::from(command_name);
@@ -264,11 +261,11 @@ impl Action {
         // Doesn't contain underscore but should contain one because it's a custom action or an
         // explicitly named command.
         let with_underscore = CString::new([c_str!("_").to_bytes(), bytes].concat()).unwrap();
-        Cow::from(with_underscore)
+        Cow::from(unsafe { ReaperString::new_unchecked(with_underscore) })
     }
 }
 
-fn contains_digits_only(command_name: &CStr) -> bool {
+fn contains_digits_only(command_name: &ReaperStr) -> bool {
     let digit_regex = regex!("[^0-9]");
-    digit_regex.find(command_name.to_str().unwrap()).is_none()
+    digit_regex.find(command_name.to_str()).is_none()
 }

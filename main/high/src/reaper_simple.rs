@@ -11,7 +11,6 @@ use reaper_medium::{
     MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
     StuffMidiMessageTarget, TrackLocation,
 };
-use std::ffi::CString;
 
 impl Reaper {
     /// Gives access to the medium-level Reaper instance.
@@ -188,8 +187,11 @@ impl Reaper {
     // That way we would support (still) unloaded Actions. TODO-low Don't automatically
     // interpret command name as commandId
 
-    pub fn action_by_command_name(&self, command_name: CString) -> Action {
-        Action::command_name_based(command_name)
+    pub fn action_by_command_name<'a>(
+        &self,
+        command_name: impl Into<ReaperStringArg<'a>>,
+    ) -> Action {
+        Action::command_name_based(command_name.into().into_inner().to_reaper_string())
     }
 
     /// # Examples
