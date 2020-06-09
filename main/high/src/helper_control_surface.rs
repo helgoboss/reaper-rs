@@ -853,7 +853,11 @@ impl ControlSurface for HelperControlSurface {
     fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
-        if let Some(fx) = self.fx_from_parm_fx_index(&track, args.fx_location, None, None) {
+        let fx_location = match args.fx_location {
+            None => return 1,
+            Some(l) => l,
+        };
+        if let Some(fx) = self.fx_from_parm_fx_index(&track, fx_location, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
             // chunk manipulations
             self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());

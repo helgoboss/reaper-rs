@@ -52,8 +52,7 @@ use std::collections::{HashMap, HashSet};
 /// [`load()`]: #method.load
 /// [`reaper()`]: #method.reaper
 // TODO-medium Add some doc from https://www.reaper.fm/sdk/vst/vst_ext.php
-// TODO-medium Lift low-level PluginContext functions to medium-level style. Especially the
-//  VST host context stuff: https://www.reaper.fm/sdk/vst/vst_ext.php.
+// TODO-medium Add REAPER 6.11 vst ext for finding owning FX index (plugin context)
 #[derive(Debug, Default)]
 pub struct ReaperSession {
     reaper: Reaper<MainThreadScope>,

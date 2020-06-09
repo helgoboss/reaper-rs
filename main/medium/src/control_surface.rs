@@ -353,7 +353,9 @@ pub struct ExtSetLastTouchedFxArgs {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct ExtSetFxOpenArgs {
     pub track: MediaTrack,
-    pub fx_location: VersionDependentTrackFxLocation,
+    // It can happen that the location is not reported. Happened to me when the affected FX was
+    // floating.
+    pub fx_location: Option<VersionDependentTrackFxLocation>,
     pub is_open: bool,
 }
 
@@ -476,7 +478,8 @@ impl DelegatingControlSurface {
             track: require_non_null_panic(media_track_ptr as *mut raw::MediaTrack),
             fx_location: if media_item_ptr.is_null() {
                 VersionDependentFxLocation::TrackFx(
-                    self.get_as_version_dependent_track_fx_ref(fx_index_ptr),
+                    self.get_as_version_dependent_track_fx_ref(fx_index_ptr)
+                        .expect("weird FX index"),
                 )
             } else {
                 VersionDependentFxLocation::TakeFx {
@@ -492,15 +495,14 @@ impl DelegatingControlSurface {
     unsafe fn get_as_version_dependent_track_fx_ref(
         &self,
         ptr: *mut c_void,
-    ) -> VersionDependentTrackFxLocation {
+    ) -> Result<VersionDependentTrackFxLocation, TryFromRawError<i32>> {
         let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
-        if self.supports_detection_of_input_fx {
-            VersionDependentTrackFxLocation::New(
-                TrackFxLocation::try_from_raw(fx_index).expect("weird FX index"),
-            )
+        let location = if self.supports_detection_of_input_fx {
+            VersionDependentTrackFxLocation::New(TrackFxLocation::try_from_raw(fx_index)?)
         } else {
             VersionDependentTrackFxLocation::Old(fx_index as u32)
-        }
+        };
+        Ok(location)
     }
 }
 
@@ -681,7 +683,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                 }
                 raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_set_fx_open(ExtSetFxOpenArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                    fx_location: self.get_as_version_dependent_track_fx_ref(parm2),
+                    fx_location: self.get_as_version_dependent_track_fx_ref(parm2).ok(),
                     is_open: interpret_as_bool(parm3),
                 }),
                 raw::CSURF_EXT_SETFXENABLED => {
@@ -691,7 +693,9 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                     } else {
                         self.delegate.ext_set_fx_enabled(ExtSetFxEnabledArgs {
                             track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                            fx_location: self.get_as_version_dependent_track_fx_ref(parm2),
+                            fx_location: self
+                                .get_as_version_dependent_track_fx_ref(parm2)
+                                .expect("weird FX index"),
                             is_enabled: interpret_as_bool(parm3),
                         })
                     }
