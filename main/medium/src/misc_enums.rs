@@ -1,6 +1,6 @@
 use crate::{
-    Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId, ReaProject, ReaperStr,
-    ReaperStringArg, TryFromRawError,
+    CommandId, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId, ReaProject,
+    ReaperStr, ReaperStringArg, TryFromRawError,
 };
 
 use helgoboss_midi::{U14, U7};
@@ -707,6 +707,56 @@ impl WindowContext {
             Win(h) => h.as_ptr(),
             NoWindow => null_mut(),
         }
+    }
+}
+
+/// Defines which action will be preselected when prompting for an action.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum InitialAction {
+    /// No action will be preselected.
+    NoneSelected,
+    /// Action with the given command ID will be preselected.
+    Selected(CommandId),
+}
+
+impl InitialAction {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use InitialAction::*;
+        match self {
+            NoneSelected => 0,
+            Selected(id) => id.to_raw(),
+        }
+    }
+}
+
+/// Possible result when prompting for an action.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum PromptForActionResult {
+    /// Action window is no longer available.
+    ActionWindowGone,
+    /// No action is selected.
+    NoneSelected,
+    /// Action with the given command ID is selected.
+    Selected(CommandId),
+}
+
+impl PromptForActionResult {
+    /// Converts an integer as returned by the low-level API to this result.
+    pub fn try_from_raw(v: i32) -> Result<PromptForActionResult, TryFromRawError<i32>> {
+        use PromptForActionResult::*;
+        let result = match v {
+            0 => NoneSelected,
+            id if id > 0 => Selected(CommandId::new(id as u32)),
+            -1 => ActionWindowGone,
+            _ => {
+                return Err(TryFromRawError::new(
+                    "invalid prompt-for-action result value",
+                    v,
+                ));
+            }
+        };
+        Ok(result)
     }
 }
 

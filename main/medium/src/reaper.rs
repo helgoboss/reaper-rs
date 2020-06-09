@@ -14,16 +14,17 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint,
     CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
-    GlobalAutomationModeOverride, Hwnd, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior,
-    MediaTrack, MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior, PlaybackSpeedFactor,
-    PluginContext, ProjectContext, ProjectRef, ReaProject, ReaperFunctionError,
-    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput,
-    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
-    UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    GlobalAutomationModeOverride, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
+    MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior,
+    PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef, PromptForActionResult,
+    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
+    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -811,6 +812,44 @@ impl<UsageScope> Reaper<UsageScope> {
             window.to_raw(),
             project.to_raw(),
         )
+    }
+
+    /// Opens an action picker window for prompting the user to select an action.
+    #[measure(SingleThreadNanos)]
+    pub fn prompt_for_action_create(&self, initial: InitialAction, section_id: SectionId)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .PromptForAction(1, initial.to_raw(), section_id.to_raw());
+    }
+
+    /// Polls an action picker session which has been previously created via
+    /// [`prompt_for_action_create()`].
+    ///
+    /// [`prompt_for_action_create()`]: #method.prompt_for_action_create
+    #[measure(SingleThreadNanos)]
+    pub fn prompt_for_action_poll(&self, section_id: SectionId) -> PromptForActionResult
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let result = self.low.PromptForAction(0, 0, section_id.to_raw());
+        PromptForActionResult::try_from_raw(result).expect("unexpected return value")
+    }
+
+    /// Finishes an action picker session which has been previously created via
+    /// [`prompt_for_action_create()`].
+    ///
+    /// [`prompt_for_action_create()`]: #method.prompt_for_action_create
+    #[measure(SingleThreadNanos)]
+    pub fn prompt_for_action_finish(&self, section_id: SectionId)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.PromptForAction(-1, 0, section_id.to_raw());
     }
 
     /// Returns the REAPER main window handle.
