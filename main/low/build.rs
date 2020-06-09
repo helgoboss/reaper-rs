@@ -62,6 +62,10 @@ mod codegen {
                 // - UNDO_STATE_* (used as bitmask, UNDO_STATE_ALL doesn't fit into i32)
                 None
             }
+
+            fn include_file(&self, filename: &str) {
+                bindgen::CargoCallbacks.include_file(filename);
+            }
         }
 
         /// Generates the `bindings.rs` file from REAPER C++ headers
@@ -80,7 +84,6 @@ mod codegen {
                 .layout_tests(false)
                 // Tell cargo to invalidate the built crate whenever any of the
                 // included header files changed.
-                .parse_callbacks(Box::new(bindgen::CargoCallbacks))
                 .parse_callbacks(Box::new(CustomParseCallbacks))
                 .raw_line("#![allow(clippy::all)]")
                 .raw_line("#![allow(non_upper_case_globals)]")
