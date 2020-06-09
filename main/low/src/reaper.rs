@@ -479,6 +479,10 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(DeleteProjectMarkerByIndex)).as_ptr(),
                     ),
                 ),
+                DeleteTakeMarker: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(DeleteTakeMarker)).as_ptr()),
+                ),
                 DeleteTakeStretchMarkers: std::mem::transmute(
                     plugin_context.GetFunc(
                         c_str_macro::c_str!(stringify!(DeleteTakeStretchMarkers)).as_ptr(),
@@ -997,6 +1001,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetNumMIDIOutputs)).as_ptr()),
                 ),
+                GetNumTakeMarkers: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(GetNumTakeMarkers)).as_ptr()),
+                ),
                 GetNumTracks: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetNumTracks)).as_ptr()),
                 ),
@@ -1275,6 +1283,9 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetTakeEnvelopeByName)).as_ptr()),
                 ),
+                GetTakeMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetTakeMarker)).as_ptr()),
+                ),
                 GetTakeName: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetTakeName)).as_ptr()),
                 ),
@@ -1302,6 +1313,9 @@ impl Reaper {
                 GetTempoTimeSigMarker: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetTempoTimeSigMarker)).as_ptr()),
+                ),
+                GetThemeColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetThemeColor)).as_ptr()),
                 ),
                 GetToggleCommandState: std::mem::transmute(
                     plugin_context
@@ -1796,6 +1810,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(LICE_SimpleFill)).as_ptr()),
                 ),
+                LocalizeString: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(LocalizeString)).as_ptr()),
+                ),
                 Loop_OnArrow: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(Loop_OnArrow)).as_ptr()),
                 ),
@@ -2246,6 +2264,10 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(projectconfig_var_getoffs)).as_ptr(),
                     ),
                 ),
+                PromptForAction: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(PromptForAction)).as_ptr()),
+                ),
                 realloc_cmd_ptr: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(realloc_cmd_ptr)).as_ptr()),
@@ -2487,6 +2509,9 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(SetRenderLastError)).as_ptr()),
                 ),
+                SetTakeMarker: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(SetTakeMarker)).as_ptr()),
+                ),
                 SetTakeStretchMarker: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(SetTakeStretchMarker)).as_ptr()),
@@ -2499,6 +2524,9 @@ impl Reaper {
                 SetTempoTimeSigMarker: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(SetTempoTimeSigMarker)).as_ptr()),
+                ),
+                SetThemeColor: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(SetThemeColor)).as_ptr()),
                 ),
                 SetToggleCommandState: std::mem::transmute(
                     plugin_context
@@ -3528,6 +3556,9 @@ impl Reaper {
         if pointers.DeleteProjectMarkerByIndex.is_some() {
             loaded_count += 1;
         }
+        if pointers.DeleteTakeMarker.is_some() {
+            loaded_count += 1;
+        }
         if pointers.DeleteTakeStretchMarkers.is_some() {
             loaded_count += 1;
         }
@@ -3924,6 +3955,9 @@ impl Reaper {
         if pointers.GetNumMIDIOutputs.is_some() {
             loaded_count += 1;
         }
+        if pointers.GetNumTakeMarkers.is_some() {
+            loaded_count += 1;
+        }
         if pointers.GetNumTracks.is_some() {
             loaded_count += 1;
         }
@@ -4131,6 +4165,9 @@ impl Reaper {
         if pointers.GetTakeEnvelopeByName.is_some() {
             loaded_count += 1;
         }
+        if pointers.GetTakeMarker.is_some() {
+            loaded_count += 1;
+        }
         if pointers.GetTakeName.is_some() {
             loaded_count += 1;
         }
@@ -4150,6 +4187,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetTempoTimeSigMarker.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GetThemeColor.is_some() {
             loaded_count += 1;
         }
         if pointers.GetToggleCommandState.is_some() {
@@ -4551,6 +4591,9 @@ impl Reaper {
         if pointers.LICE_SimpleFill.is_some() {
             loaded_count += 1;
         }
+        if pointers.LocalizeString.is_some() {
+            loaded_count += 1;
+        }
         if pointers.Loop_OnArrow.is_some() {
             loaded_count += 1;
         }
@@ -4902,6 +4945,9 @@ impl Reaper {
         if pointers.projectconfig_var_getoffs.is_some() {
             loaded_count += 1;
         }
+        if pointers.PromptForAction.is_some() {
+            loaded_count += 1;
+        }
         if pointers.realloc_cmd_ptr.is_some() {
             loaded_count += 1;
         }
@@ -5085,6 +5131,9 @@ impl Reaper {
         if pointers.SetRenderLastError.is_some() {
             loaded_count += 1;
         }
+        if pointers.SetTakeMarker.is_some() {
+            loaded_count += 1;
+        }
         if pointers.SetTakeStretchMarker.is_some() {
             loaded_count += 1;
         }
@@ -5092,6 +5141,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.SetTempoTimeSigMarker.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetThemeColor.is_some() {
             loaded_count += 1;
         }
         if pointers.SetToggleCommandState.is_some() {
@@ -7278,6 +7330,22 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DeleteTakeMarker(
+        &self,
+        take: *mut root::MediaItem_Take,
+        idx: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.DeleteTakeMarker {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(DeleteTakeMarker)
+            )),
+            Some(f) => f(take, idx),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DeleteTakeStretchMarkers(
         &self,
         take: *mut root::MediaItem_Take,
@@ -9284,6 +9352,21 @@ impl Reaper {
             Some(f) => f(),
         }
     }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetNumTakeMarkers(
+        &self,
+        take: *mut root::MediaItem_Take,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.GetNumTakeMarkers {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetNumTakeMarkers)
+            )),
+            Some(f) => f(take),
+        }
+    }
     pub fn GetNumTracks(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumTracks {
             None => panic!(format!(
@@ -10393,6 +10476,25 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetTakeMarker(
+        &self,
+        take: *mut root::MediaItem_Take,
+        idx: ::std::os::raw::c_int,
+        nameOut: *mut ::std::os::raw::c_char,
+        nameOut_sz: ::std::os::raw::c_int,
+        colorOutOptional: *mut ::std::os::raw::c_int,
+    ) -> f64 {
+        match self.pointers.GetTakeMarker {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetTakeMarker)
+            )),
+            Some(f) => f(take, idx, nameOut, nameOut_sz, colorOutOptional),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTakeName(
         &self,
         take: *mut root::MediaItem_Take,
@@ -10524,6 +10626,22 @@ impl Reaper {
                 timesig_denomOut,
                 lineartempoOut,
             ),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetThemeColor(
+        &self,
+        ini_key: *const ::std::os::raw::c_char,
+        flagsOptional: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.GetThemeColor {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetThemeColor)
+            )),
+            Some(f) => f(ini_key, flagsOptional),
         }
     }
     pub fn GetToggleCommandState(
@@ -12857,6 +12975,23 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn LocalizeString(
+        &self,
+        src_string: *const ::std::os::raw::c_char,
+        section: *const ::std::os::raw::c_char,
+        flagsOptional: ::std::os::raw::c_int,
+    ) -> *const ::std::os::raw::c_char {
+        match self.pointers.LocalizeString {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(LocalizeString)
+            )),
+            Some(f) => f(src_string, section, flagsOptional),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Loop_OnArrow(
         &self,
         project: *mut root::ReaProject,
@@ -14731,6 +14866,20 @@ impl Reaper {
             Some(f) => f(name, szOut),
         }
     }
+    pub fn PromptForAction(
+        &self,
+        session_mode: ::std::os::raw::c_int,
+        init_id: ::std::os::raw::c_int,
+        section_id: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.PromptForAction {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(PromptForAction)
+            )),
+            Some(f) => f(session_mode, init_id, section_id),
+        }
+    }
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -15674,6 +15823,25 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTakeMarker(
+        &self,
+        take: *mut root::MediaItem_Take,
+        idx: ::std::os::raw::c_int,
+        nameIn: *const ::std::os::raw::c_char,
+        srcposInOptional: *mut f64,
+        colorInOptional: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SetTakeMarker {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTakeMarker)
+            )),
+            Some(f) => f(take, idx, nameIn, srcposInOptional, colorInOptional),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetTakeStretchMarker(
         &self,
         take: *mut root::MediaItem_Take,
@@ -15737,6 +15905,23 @@ impl Reaper {
                 timesig_denom,
                 lineartempo,
             ),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetThemeColor(
+        &self,
+        ini_key: *const ::std::os::raw::c_char,
+        color: ::std::os::raw::c_int,
+        flagsOptional: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SetThemeColor {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetThemeColor)
+            )),
+            Some(f) => f(ini_key, color, flagsOptional),
         }
     }
     pub fn SetToggleCommandState(
@@ -19072,6 +19257,9 @@ pub struct ReaperFunctionPointers {
             markrgnidx: ::std::os::raw::c_int,
         ) -> bool,
     >,
+    pub DeleteTakeMarker: Option<
+        unsafe extern "C" fn(take: *mut root::MediaItem_Take, idx: ::std::os::raw::c_int) -> bool,
+    >,
     pub DeleteTakeStretchMarkers: Option<
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
@@ -19683,6 +19871,8 @@ pub struct ReaperFunctionPointers {
     pub GetNumAudioOutputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetNumMIDIInputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetNumMIDIOutputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetNumTakeMarkers:
+        Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int>,
     pub GetNumTracks: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetOS: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetOutputChannelName:
@@ -20079,6 +20269,15 @@ pub struct ReaperFunctionPointers {
             envname: *const ::std::os::raw::c_char,
         ) -> *mut root::TrackEnvelope,
     >,
+    pub GetTakeMarker: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            idx: ::std::os::raw::c_int,
+            nameOut: *mut ::std::os::raw::c_char,
+            nameOut_sz: ::std::os::raw::c_int,
+            colorOutOptional: *mut ::std::os::raw::c_int,
+        ) -> f64,
+    >,
     pub GetTakeName: Option<
         unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> *const ::std::os::raw::c_char,
     >,
@@ -20126,6 +20325,12 @@ pub struct ReaperFunctionPointers {
             timesig_denomOut: *mut ::std::os::raw::c_int,
             lineartempoOut: *mut bool,
         ) -> bool,
+    >,
+    pub GetThemeColor: Option<
+        unsafe extern "C" fn(
+            ini_key: *const ::std::os::raw::c_char,
+            flagsOptional: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub GetToggleCommandState:
         Option<extern "C" fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
@@ -21063,6 +21268,13 @@ pub struct ReaperFunctionPointers {
             keepmask: root::reaper_functions::LICE_pixel,
         ),
     >,
+    pub LocalizeString: Option<
+        unsafe extern "C" fn(
+            src_string: *const ::std::os::raw::c_char,
+            section: *const ::std::os::raw::c_char,
+            flagsOptional: ::std::os::raw::c_int,
+        ) -> *const ::std::os::raw::c_char,
+    >,
     pub Loop_OnArrow: Option<
         unsafe extern "C" fn(
             project: *mut root::ReaProject,
@@ -21643,6 +21855,13 @@ pub struct ReaperFunctionPointers {
             szOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
+    pub PromptForAction: Option<
+        extern "C" fn(
+            session_mode: ::std::os::raw::c_int,
+            init_id: ::std::os::raw::c_int,
+            section_id: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub realloc_cmd_ptr: Option<
         unsafe extern "C" fn(
             ptr: *mut *mut ::std::os::raw::c_char,
@@ -21945,6 +22164,15 @@ pub struct ReaperFunctionPointers {
         ),
     >,
     pub SetRenderLastError: Option<unsafe extern "C" fn(errorstr: *const ::std::os::raw::c_char)>,
+    pub SetTakeMarker: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            idx: ::std::os::raw::c_int,
+            nameIn: *const ::std::os::raw::c_char,
+            srcposInOptional: *mut f64,
+            colorInOptional: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub SetTakeStretchMarker: Option<
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
@@ -21972,6 +22200,13 @@ pub struct ReaperFunctionPointers {
             timesig_denom: ::std::os::raw::c_int,
             lineartempo: bool,
         ) -> bool,
+    >,
+    pub SetThemeColor: Option<
+        unsafe extern "C" fn(
+            ini_key: *const ::std::os::raw::c_char,
+            color: ::std::os::raw::c_int,
+            flagsOptional: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub SetToggleCommandState: Option<
         extern "C" fn(
@@ -22989,5 +23224,5 @@ pub struct ReaperFunctionPointers {
         Option<extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL>,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 812u32;
+    pub(crate) const TOTAL_COUNT: u32 = 820u32;
 }

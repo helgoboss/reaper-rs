@@ -1881,6 +1881,15 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions16DeleteTakeMarkerE"]
+            pub static mut DeleteTakeMarker: ::std::option::Option<
+                unsafe extern "C" fn(
+                    take: *mut root::MediaItem_Take,
+                    idx: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions24DeleteTakeStretchMarkersE"]
             pub static mut DeleteTakeStretchMarkers: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -2963,6 +2972,12 @@ pub mod root {
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions17GetNumTakeMarkersE"]
+            pub static mut GetNumTakeMarkers: ::std::option::Option<
+                unsafe extern "C" fn(take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions12GetNumTracksE"]
             pub static mut GetNumTracks:
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
@@ -3593,6 +3608,18 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions13GetTakeMarkerE"]
+            pub static mut GetTakeMarker: ::std::option::Option<
+                unsafe extern "C" fn(
+                    take: *mut root::MediaItem_Take,
+                    idx: ::std::os::raw::c_int,
+                    nameOut: *mut ::std::os::raw::c_char,
+                    nameOut_sz: ::std::os::raw::c_int,
+                    colorOutOptional: *mut ::std::os::raw::c_int,
+                ) -> f64,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions11GetTakeNameE"]
             pub static mut GetTakeName: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -3665,6 +3692,15 @@ pub mod root {
                     timesig_denomOut: *mut ::std::os::raw::c_int,
                     lineartempoOut: *mut bool,
                 ) -> bool,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions13GetThemeColorE"]
+            pub static mut GetThemeColor: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ini_key: *const ::std::os::raw::c_char,
+                    flagsOptional: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -5049,6 +5085,16 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions14LocalizeStringE"]
+            pub static mut LocalizeString: ::std::option::Option<
+                unsafe extern "C" fn(
+                    src_string: *const ::std::os::raw::c_char,
+                    section: *const ::std::os::raw::c_char,
+                    flagsOptional: ::std::os::raw::c_int,
+                ) -> *const ::std::os::raw::c_char,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions12Loop_OnArrowE"]
             pub static mut Loop_OnArrow: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -6059,6 +6105,16 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions15PromptForActionE"]
+            pub static mut PromptForAction: ::std::option::Option<
+                unsafe extern "C" fn(
+                    session_mode: ::std::os::raw::c_int,
+                    init_id: ::std::os::raw::c_int,
+                    section_id: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions15realloc_cmd_ptrE"]
             pub static mut realloc_cmd_ptr: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -6594,6 +6650,18 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions13SetTakeMarkerE"]
+            pub static mut SetTakeMarker: ::std::option::Option<
+                unsafe extern "C" fn(
+                    take: *mut root::MediaItem_Take,
+                    idx: ::std::os::raw::c_int,
+                    nameIn: *const ::std::os::raw::c_char,
+                    srcposInOptional: *mut f64,
+                    colorInOptional: *mut ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions20SetTakeStretchMarkerE"]
             pub static mut SetTakeStretchMarker: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -6628,6 +6696,16 @@ pub mod root {
                     timesig_denom: ::std::os::raw::c_int,
                     lineartempo: bool,
                 ) -> bool,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions13SetThemeColorE"]
+            pub static mut SetThemeColor: ::std::option::Option<
+                unsafe extern "C" fn(
+                    ini_key: *const ::std::os::raw::c_char,
+                    color: ::std::os::raw::c_int,
+                    flagsOptional: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
