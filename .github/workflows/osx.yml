@@ -1,8 +1,17 @@
-name: OS X debugging
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+name: CI macOS
+
 jobs:
-  build:
-    runs-on: macos-10.15
+  check:
+    name: Check
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -12,5 +21,48 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v2
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+
+  test:
+    name: Test Suite
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -- --nocapture
+      - uses: actions/upload-artifact@v2
+        with:
+          name: plug-ins
+          path: target/debug/*.dylib
+
+  clippy:
+    name: Clippy
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - run: rustup component add clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings

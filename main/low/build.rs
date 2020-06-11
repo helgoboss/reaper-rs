@@ -17,12 +17,21 @@ fn main() {
 /// See the C++ source file for a detailled explanation.
 #[cfg(target_family = "unix")]
 fn compile_swell_dialog_generator_support() {
+    #[cfg(not(target_os = "macos"))]
+    let modstub_file = "src/swell-modstub-generic-custom.cpp";
+
+    #[cfg(target_os = "macos")]
+    let modstub_file = "src/swell-modstub-custom.mm";
+
     cc::Build::new()
         .cpp(true)
         .warnings(false)
         .define("SWELL_PROVIDED_BY_APP", None)
-        .file("src/swell_modstub_generic_mod.cpp")
+        .file(modstub_file)
         .compile("swell");
+
+    #[cfg(target_os = "macos")]
+    println!("cargo:rustc-link-lib=framework=AppKit");
 }
 
 /// Compiles C++ glue code. This is necessary to interact with those parts of the REAPER C++ API
@@ -71,7 +80,7 @@ mod codegen {
         /// Generates the `bindings.rs` file from REAPER C++ headers
         pub fn generate_bindings() {
             println!("cargo:rerun-if-changed=src/wrapper.hpp");
-            let bindings = bindgen::Builder::default()
+            let builder = bindgen::Builder::default()
                 .header("src/wrapper.hpp")
                 .opaque_type("timex")
                 .derive_eq(true)
@@ -122,9 +131,10 @@ mod codegen {
                 .whitelist_type("LPSTR")
                 .whitelist_type("SCROLLINFO")
                 .whitelist_function("reaper_control_surface::.*")
-                .whitelist_function("reaper_midi::.*")
-                .generate()
-                .expect("Unable to generate bindings");
+                .whitelist_function("reaper_midi::.*");
+            #[cfg(target_os = "macos")]
+            let builder = builder.clang_arg("-stdlib=libc++");
+            let bindings = builder.generate().expect("Unable to generate bindings");
             let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
             bindings
                 .write_to_file(out_path.join("src/bindings.rs"))
