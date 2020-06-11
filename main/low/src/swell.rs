@@ -25,14 +25,14 @@ impl Swell {
     #[doc = r" If this is Linux and the SWELL function provider is not available, this"]
     #[doc = r" function panics."]
     pub fn load(plugin_context: PluginContext) -> Swell {
-        #[cfg(target_os = "windows")]
+        #[cfg(target_family = "windows")]
         {
             Swell {
                 pointers: Default::default(),
                 plugin_context: Some(plugin_context),
             }
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(target_family = "unix")]
         {
             let mut loaded_count = 0;
             let get_func = plugin_context
@@ -1997,7 +1997,7 @@ impl Swell {
             }
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2015,7 +2015,7 @@ impl Swell {
             Some(f) => f(dest, src, l),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn MulDiv(
         &self,
         arg1: ::std::os::raw::c_int,
@@ -2030,7 +2030,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn Sleep(&self, ms: ::std::os::raw::c_int) {
         match self.pointers.Sleep {
             None => panic!(format!(
@@ -2040,7 +2040,7 @@ impl Swell {
             Some(f) => f(ms),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetTickCount(&self) -> root::DWORD {
         match self.pointers.GetTickCount {
             None => panic!(format!(
@@ -2050,7 +2050,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2069,7 +2069,7 @@ impl Swell {
             Some(f) => f(filedes, lpCreationTime, lpLastAccessTime, lpLastWriteTime),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2088,7 +2088,7 @@ impl Swell {
             Some(f) => f(appname, keyname, val, fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2109,7 +2109,7 @@ impl Swell {
             Some(f) => f(appname, keyname, def, ret, retsize, fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2128,7 +2128,7 @@ impl Swell {
             Some(f) => f(appname, keyname, def, fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2148,7 +2148,7 @@ impl Swell {
             Some(f) => f(appname, keyname, buf, bufsz, fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2168,7 +2168,7 @@ impl Swell {
             Some(f) => f(appname, keyname, buf, bufsz, fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2186,7 +2186,7 @@ impl Swell {
             Some(f) => f(appname, strings, fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2205,7 +2205,7 @@ impl Swell {
             Some(f) => f(appname, strout, strout_len, fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2223,7 +2223,7 @@ impl Swell {
             Some(f) => f(hInst, fn_, nSize),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2236,7 +2236,7 @@ impl Swell {
             Some(f) => f(r, p),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2257,7 +2257,7 @@ impl Swell {
             Some(f) => f(hwndDlg, action, content1, content2, content3, blah),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2276,7 +2276,7 @@ impl Swell {
             Some(f) => f(hwndParent, text, caption, type_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2296,7 +2296,7 @@ impl Swell {
             Some(f) => f(text, initialdir, initialfile, allowmul, extlist),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2317,7 +2317,7 @@ impl Swell {
             Some(f) => f(text, initialdir, initialfile, extlist, fn_, fnsize),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2336,7 +2336,7 @@ impl Swell {
             Some(f) => f(text, initialdir, fn_, fnsize),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2354,7 +2354,7 @@ impl Swell {
             Some(f) => f(dlgid, dlgProc, reshead),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetDlgItem {
             None => panic!(format!(
@@ -2364,7 +2364,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.ShowWindow {
             None => panic!(format!(
@@ -2374,7 +2374,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DestroyWindow(&self, hwnd: root::HWND) {
         match self.pointers.DestroyWindow {
             None => panic!(format!(
@@ -2384,7 +2384,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2401,7 +2401,7 @@ impl Swell {
             Some(f) => f(lParam, gi),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_HideApp(&self) {
         match self.pointers.SWELL_HideApp {
             None => panic!(format!(
@@ -2411,7 +2411,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2429,7 +2429,7 @@ impl Swell {
             Some(f) => f(arg1, idx, text),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetDlgItemInt(
         &self,
         arg1: root::HWND,
@@ -2445,7 +2445,7 @@ impl Swell {
             Some(f) => f(arg1, idx, val, issigned),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2464,7 +2464,7 @@ impl Swell {
             Some(f) => f(arg1, idx, translated, issigned),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2483,7 +2483,7 @@ impl Swell {
             Some(f) => f(arg1, idx, text, textlen),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CheckDlgButton(
         &self,
         hwnd: root::HWND,
@@ -2498,7 +2498,7 @@ impl Swell {
             Some(f) => f(hwnd, idx, check),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn IsDlgButtonChecked(
         &self,
         hwnd: root::HWND,
@@ -2512,7 +2512,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
         match self.pointers.EnableWindow {
             None => panic!(format!(
@@ -2522,7 +2522,7 @@ impl Swell {
             Some(f) => f(hwnd, enable),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetFocus(&self, hwnd: root::HWND) {
         match self.pointers.SetFocus {
             None => panic!(format!(
@@ -2532,7 +2532,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetFocus(&self) -> root::HWND {
         match self.pointers.GetFocus {
             None => panic!(format!(
@@ -2542,7 +2542,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetForegroundWindow(&self, hwnd: root::HWND) {
         match self.pointers.SetForegroundWindow {
             None => panic!(format!(
@@ -2552,7 +2552,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetForegroundWindow(&self) -> root::HWND {
         match self.pointers.GetForegroundWindow {
             None => panic!(format!(
@@ -2562,7 +2562,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.SetCapture {
             None => panic!(format!(
@@ -2572,7 +2572,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetCapture(&self) -> root::HWND {
         match self.pointers.GetCapture {
             None => panic!(format!(
@@ -2582,7 +2582,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ReleaseCapture(&self) {
         match self.pointers.ReleaseCapture {
             None => panic!(format!(
@@ -2592,7 +2592,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn IsChild(&self, hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.IsChild {
             None => panic!(format!(
@@ -2602,7 +2602,7 @@ impl Swell {
             Some(f) => f(hwndParent, hwndChild),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.GetParent {
             None => panic!(format!(
@@ -2612,7 +2612,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
         match self.pointers.SetParent {
             None => panic!(format!(
@@ -2622,7 +2622,7 @@ impl Swell {
             Some(f) => f(hwnd, newPar),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetWindow {
             None => panic!(format!(
@@ -2632,7 +2632,7 @@ impl Swell {
             Some(f) => f(hwnd, what),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EnumWindows(
         &self,
         proc_: ::std::option::Option<
@@ -2648,7 +2648,7 @@ impl Swell {
             Some(f) => f(proc_, lp),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2667,7 +2667,7 @@ impl Swell {
             Some(f) => f(par, lastw, classname, title),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2680,7 +2680,7 @@ impl Swell {
             Some(f) => f(hwnd, p),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2693,7 +2693,7 @@ impl Swell {
             Some(f) => f(hwnd, p),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2706,7 +2706,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2719,7 +2719,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2732,7 +2732,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
         match self.pointers.WindowFromPoint {
             None => panic!(format!(
@@ -2742,7 +2742,7 @@ impl Swell {
             Some(f) => f(p),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn WinOffsetRect(
         &self,
         lprc: root::LPRECT,
@@ -2757,7 +2757,7 @@ impl Swell {
             Some(f) => f(lprc, dx, dy),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn WinSetRect(
         &self,
         lprc: root::LPRECT,
@@ -2774,7 +2774,7 @@ impl Swell {
             Some(f) => f(lprc, xLeft, yTop, xRight, yBottom),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2792,7 +2792,7 @@ impl Swell {
             Some(f) => f(out, in1, in2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2810,7 +2810,7 @@ impl Swell {
             Some(f) => f(out, in1, in2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetWindowPos(
         &self,
         hwnd: root::HWND,
@@ -2829,7 +2829,7 @@ impl Swell {
             Some(f) => f(hwnd, unused, x, y, cx, cy, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetWindowLevel(
         &self,
         hwnd: root::HWND,
@@ -2843,7 +2843,7 @@ impl Swell {
             Some(f) => f(hwnd, newlevel),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2861,7 +2861,7 @@ impl Swell {
             Some(f) => f(hwnd, r, eraseBk),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn UpdateWindow(&self, hwnd: root::HWND) {
         match self.pointers.UpdateWindow {
             None => panic!(format!(
@@ -2871,7 +2871,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetWindowLong(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR {
         match self.pointers.GetWindowLong {
             None => panic!(format!(
@@ -2881,7 +2881,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetWindowLong(
         &self,
         hwnd: root::HWND,
@@ -2896,7 +2896,7 @@ impl Swell {
             Some(f) => f(hwnd, idx, val),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2916,7 +2916,7 @@ impl Swell {
             Some(f) => f(hwnd, xamt, yamt, lpRect, lpClipRect),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EnumPropsEx(
         &self,
         arg1: root::HWND,
@@ -2931,7 +2931,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2948,7 +2948,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2966,7 +2966,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -2983,7 +2983,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindowVisible {
             None => panic!(format!(
@@ -2993,7 +2993,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn IsWindow(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindow {
             None => panic!(format!(
@@ -3003,7 +3003,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetTimer(
         &self,
         hwnd: root::HWND,
@@ -3019,7 +3019,7 @@ impl Swell {
             Some(f) => f(hwnd, timerid, rate, tProc),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
         match self.pointers.KillTimer {
             None => panic!(format!(
@@ -3029,7 +3029,7 @@ impl Swell {
             Some(f) => f(hwnd, timerid),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetExtendedListViewStyleEx(
         &self,
         h: root::HWND,
@@ -3044,7 +3044,7 @@ impl Swell {
             Some(f) => f(h, mask, style),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3062,7 +3062,7 @@ impl Swell {
             Some(f) => f(h, pos, lvc),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_DeleteColumn(&self, h: root::HWND, pos: ::std::os::raw::c_int) -> bool {
         match self.pointers.ListView_DeleteColumn {
             None => panic!(format!(
@@ -3072,7 +3072,7 @@ impl Swell {
             Some(f) => f(h, pos),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3090,7 +3090,7 @@ impl Swell {
             Some(f) => f(h, pos, lvc),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetColumnWidth(
         &self,
         h: root::HWND,
@@ -3104,7 +3104,7 @@ impl Swell {
             Some(f) => f(h, pos),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3121,7 +3121,7 @@ impl Swell {
             Some(f) => f(h, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3140,7 +3140,7 @@ impl Swell {
             Some(f) => f(h, ipos, cpos, txt),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3153,7 +3153,7 @@ impl Swell {
             Some(f) => f(h, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetNextItem(
         &self,
         h: root::HWND,
@@ -3168,7 +3168,7 @@ impl Swell {
             Some(f) => f(h, istart, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3181,7 +3181,7 @@ impl Swell {
             Some(f) => f(h, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetItemState(
         &self,
         h: root::HWND,
@@ -3196,7 +3196,7 @@ impl Swell {
             Some(f) => f(h, ipos, mask),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_DeleteItem(&self, h: root::HWND, ipos: ::std::os::raw::c_int) {
         match self.pointers.ListView_DeleteItem {
             None => panic!(format!(
@@ -3206,7 +3206,7 @@ impl Swell {
             Some(f) => f(h, ipos),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_DeleteAllItems(&self, h: root::HWND) {
         match self.pointers.ListView_DeleteAllItems {
             None => panic!(format!(
@@ -3216,7 +3216,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetSelectedCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectedCount {
             None => panic!(format!(
@@ -3226,7 +3226,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetItemCount {
             None => panic!(format!(
@@ -3236,7 +3236,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetSelectionMark(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectionMark {
             None => panic!(format!(
@@ -3246,7 +3246,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetColumnWidth(
         &self,
         h: root::HWND,
@@ -3261,7 +3261,7 @@ impl Swell {
             Some(f) => f(h, colpos, wid),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetItemState(
         &self,
         h: root::HWND,
@@ -3277,7 +3277,7 @@ impl Swell {
             Some(f) => f(h, item, state, statemask),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_RedrawItems(
         &self,
         h: root::HWND,
@@ -3292,7 +3292,7 @@ impl Swell {
             Some(f) => f(h, startitem, enditem),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetItemCount(&self, h: root::HWND, cnt: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetItemCount {
             None => panic!(format!(
@@ -3302,7 +3302,7 @@ impl Swell {
             Some(f) => f(h, cnt),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_EnsureVisible(&self, h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL) {
         match self.pointers.ListView_EnsureVisible {
             None => panic!(format!(
@@ -3312,7 +3312,7 @@ impl Swell {
             Some(f) => f(h, i, pok),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3332,7 +3332,7 @@ impl Swell {
             Some(f) => f(h, item, subitem, code, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetImageList(
         &self,
         h: root::HWND,
@@ -3347,7 +3347,7 @@ impl Swell {
             Some(f) => f(h, imagelist, which),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3364,7 +3364,7 @@ impl Swell {
             Some(f) => f(h, pinf),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3381,7 +3381,7 @@ impl Swell {
             Some(f) => f(h, pinf),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3401,7 +3401,7 @@ impl Swell {
             Some(f) => f(hwnd, item, subitem, text, textmax),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SortItems(
         &self,
         hwnd: root::HWND,
@@ -3416,7 +3416,7 @@ impl Swell {
             Some(f) => f(hwnd, compf, parm),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3435,7 +3435,7 @@ impl Swell {
             Some(f) => f(h, item, r, code),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_Scroll(
         &self,
         h: root::HWND,
@@ -3450,7 +3450,7 @@ impl Swell {
             Some(f) => f(h, xscroll, yscroll),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetTopIndex(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetTopIndex {
             None => panic!(format!(
@@ -3460,7 +3460,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetCountPerPage(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetCountPerPage {
             None => panic!(format!(
@@ -3470,7 +3470,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3488,7 +3488,7 @@ impl Swell {
             Some(f) => f(h, cnt, arr),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3506,7 +3506,7 @@ impl Swell {
             Some(f) => f(h, cnt, arr),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_GetHeader(&self, h: root::HWND) -> root::HWND {
         match self.pointers.ListView_GetHeader {
             None => panic!(format!(
@@ -3516,7 +3516,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn Header_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.Header_GetItemCount {
             None => panic!(format!(
@@ -3526,7 +3526,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3544,7 +3544,7 @@ impl Swell {
             Some(f) => f(h, col, hi),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3562,7 +3562,7 @@ impl Swell {
             Some(f) => f(h, col, hi),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetListViewHeaderHeight(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetListViewHeaderHeight {
             None => panic!(format!(
@@ -3572,7 +3572,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ImageList_CreateEx(&self) -> root::HIMAGELIST {
         match self.pointers.ImageList_CreateEx {
             None => panic!(format!(
@@ -3582,7 +3582,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ImageList_Remove(
         &self,
         list: root::HIMAGELIST,
@@ -3596,7 +3596,7 @@ impl Swell {
             Some(f) => f(list, idx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ImageList_ReplaceIcon(
         &self,
         list: root::HIMAGELIST,
@@ -3611,7 +3611,7 @@ impl Swell {
             Some(f) => f(list, offset, image),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ImageList_Add(
         &self,
         list: root::HIMAGELIST,
@@ -3626,7 +3626,7 @@ impl Swell {
             Some(f) => f(list, image, mask),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ImageList_Destroy(&self, arg1: root::HIMAGELIST) {
         match self.pointers.ImageList_Destroy {
             None => panic!(format!(
@@ -3636,7 +3636,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TabCtrl_GetItemCount(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetItemCount {
             None => panic!(format!(
@@ -3646,7 +3646,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TabCtrl_DeleteItem(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL {
         match self.pointers.TabCtrl_DeleteItem {
             None => panic!(format!(
@@ -3656,7 +3656,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3674,7 +3674,7 @@ impl Swell {
             Some(f) => f(hwnd, idx, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TabCtrl_SetCurSel(
         &self,
         hwnd: root::HWND,
@@ -3688,7 +3688,7 @@ impl Swell {
             Some(f) => f(hwnd, idx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TabCtrl_GetCurSel(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetCurSel {
             None => panic!(format!(
@@ -3698,7 +3698,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3716,7 +3716,7 @@ impl Swell {
             Some(f) => f(hwnd, fLarger, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3733,7 +3733,7 @@ impl Swell {
             Some(f) => f(hwnd, ins),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_Expand(
         &self,
         hwnd: root::HWND,
@@ -3748,7 +3748,7 @@ impl Swell {
             Some(f) => f(hwnd, item, flag),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_GetSelection(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetSelection {
             None => panic!(format!(
@@ -3758,7 +3758,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_DeleteItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_DeleteItem {
             None => panic!(format!(
@@ -3768,7 +3768,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_DeleteAllItems(&self, hwnd: root::HWND) {
         match self.pointers.TreeView_DeleteAllItems {
             None => panic!(format!(
@@ -3778,7 +3778,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_SelectItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_SelectItem {
             None => panic!(format!(
@@ -3788,7 +3788,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_GetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_GetItem {
             None => panic!(format!(
@@ -3798,7 +3798,7 @@ impl Swell {
             Some(f) => f(hwnd, pitem),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_SetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_SetItem {
             None => panic!(format!(
@@ -3808,7 +3808,7 @@ impl Swell {
             Some(f) => f(hwnd, pitem),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3825,7 +3825,7 @@ impl Swell {
             Some(f) => f(hwnd, hti),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_SetIndent(
         &self,
         hwnd: root::HWND,
@@ -3839,7 +3839,7 @@ impl Swell {
             Some(f) => f(hwnd, indent),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_GetChild(&self, hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM {
         match self.pointers.TreeView_GetChild {
             None => panic!(format!(
@@ -3849,7 +3849,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_GetNextSibling(
         &self,
         hwnd: root::HWND,
@@ -3863,7 +3863,7 @@ impl Swell {
             Some(f) => f(hwnd, item),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_GetRoot(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetRoot {
             None => panic!(format!(
@@ -3873,7 +3873,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetBkColor {
             None => panic!(format!(
@@ -3883,7 +3883,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn TreeView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetTextColor {
             None => panic!(format!(
@@ -3893,7 +3893,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetBkColor {
             None => panic!(format!(
@@ -3903,7 +3903,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetTextBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextBkColor {
             None => panic!(format!(
@@ -3913,7 +3913,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextColor {
             None => panic!(format!(
@@ -3923,7 +3923,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ListView_SetGridColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetGridColor {
             None => panic!(format!(
@@ -3933,7 +3933,7 @@ impl Swell {
             Some(f) => f(hwnd, color),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3951,7 +3951,7 @@ impl Swell {
             Some(f) => f(hwnd, colors, ncolors),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_ModalWindowStart(&self, hwnd: root::HWND) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_ModalWindowStart {
             None => panic!(format!(
@@ -3961,7 +3961,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3978,7 +3978,7 @@ impl Swell {
             Some(f) => f(ctx, ret),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -3991,7 +3991,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_CloseWindow(&self, hwnd: root::HWND) {
         match self.pointers.SWELL_CloseWindow {
             None => panic!(format!(
@@ -4001,7 +4001,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CreatePopupMenu(&self) -> root::HMENU {
         match self.pointers.CreatePopupMenu {
             None => panic!(format!(
@@ -4011,7 +4011,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4024,7 +4024,7 @@ impl Swell {
             Some(f) => f(title),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DestroyMenu(&self, hMenu: root::HMENU) {
         match self.pointers.DestroyMenu {
             None => panic!(format!(
@@ -4034,7 +4034,7 @@ impl Swell {
             Some(f) => f(hMenu),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4053,7 +4053,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, name, tagid),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
         match self.pointers.GetSubMenu {
             None => panic!(format!(
@@ -4063,7 +4063,7 @@ impl Swell {
             Some(f) => f(hMenu, pos),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
         match self.pointers.GetMenuItemCount {
             None => panic!(format!(
@@ -4073,7 +4073,7 @@ impl Swell {
             Some(f) => f(hMenu),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetMenuItemID(
         &self,
         hMenu: root::HMENU,
@@ -4087,7 +4087,7 @@ impl Swell {
             Some(f) => f(hMenu, pos),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetMenuItemModifier(
         &self,
         hMenu: root::HMENU,
@@ -4104,7 +4104,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, flag, code, mask),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4123,7 +4123,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, flag, text),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EnableMenuItem(
         &self,
         hMenu: root::HMENU,
@@ -4138,7 +4138,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, en),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DeleteMenu(
         &self,
         hMenu: root::HMENU,
@@ -4153,7 +4153,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, flag),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CheckMenuItem(
         &self,
         hMenu: root::HMENU,
@@ -4168,7 +4168,7 @@ impl Swell {
             Some(f) => f(hMenu, idx, chk),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4187,7 +4187,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4207,7 +4207,7 @@ impl Swell {
             Some(f) => f(menu, pos, flag, idx, str),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4226,7 +4226,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4245,7 +4245,7 @@ impl Swell {
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DrawMenuBar(&self, arg1: root::HWND) {
         match self.pointers.DrawMenuBar {
             None => panic!(format!(
@@ -4255,7 +4255,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4272,7 +4272,7 @@ impl Swell {
             Some(f) => f(head, resid),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4294,7 +4294,7 @@ impl Swell {
             Some(f) => f(hMenu, flags, xpos, ypos, resvd, hwnd, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetMenuDestination(&self, menu: root::HMENU, hwnd: root::HWND) {
         match self.pointers.SWELL_SetMenuDestination {
             None => panic!(format!(
@@ -4304,7 +4304,7 @@ impl Swell {
             Some(f) => f(menu, hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_DuplicateMenu(&self, menu: root::HMENU) -> root::HMENU {
         match self.pointers.SWELL_DuplicateMenu {
             None => panic!(format!(
@@ -4314,7 +4314,7 @@ impl Swell {
             Some(f) => f(menu),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
         match self.pointers.SetMenu {
             None => panic!(format!(
@@ -4324,7 +4324,7 @@ impl Swell {
             Some(f) => f(hwnd, menu),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
         match self.pointers.GetMenu {
             None => panic!(format!(
@@ -4334,7 +4334,7 @@ impl Swell {
             Some(f) => f(hwnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetDefaultWindowMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetDefaultWindowMenu {
             None => panic!(format!(
@@ -4344,7 +4344,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetDefaultWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultWindowMenu {
             None => panic!(format!(
@@ -4354,7 +4354,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetDefaultModalWindowMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetDefaultModalWindowMenu {
             None => panic!(format!(
@@ -4364,7 +4364,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetDefaultModalWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultModalWindowMenu {
             None => panic!(format!(
@@ -4374,7 +4374,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetCurrentMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetCurrentMenu {
             None => panic!(format!(
@@ -4384,7 +4384,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetCurrentMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetCurrentMenu {
             None => panic!(format!(
@@ -4394,7 +4394,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4414,7 +4414,7 @@ impl Swell {
             Some(f) => f(reshead, resid, parent, dlgproc, param),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4434,7 +4434,7 @@ impl Swell {
             Some(f) => f(reshead, resid, parent, dlgproc, param),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_RegisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
         match self.pointers.SWELL_RegisterCustomControlCreator {
             None => panic!(format!(
@@ -4444,7 +4444,7 @@ impl Swell {
             Some(f) => f(proc_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_UnregisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
         match self.pointers.SWELL_UnregisterCustomControlCreator {
             None => panic!(format!(
@@ -4454,7 +4454,7 @@ impl Swell {
             Some(f) => f(proc_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DefWindowProc(
         &self,
         hwnd: root::HWND,
@@ -4470,7 +4470,7 @@ impl Swell {
             Some(f) => f(hwnd, msg, wParam, lParam),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.EndDialog {
             None => panic!(format!(
@@ -4480,7 +4480,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetDefaultButtonID(
         &self,
         hwndDlg: root::HWND,
@@ -4494,7 +4494,7 @@ impl Swell {
             Some(f) => f(hwndDlg, onlyIfEnabled),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SendMessage(
         &self,
         arg1: root::HWND,
@@ -4510,7 +4510,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3, arg4),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_BroadcastMessage(&self, arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM) {
         match self.pointers.SWELL_BroadcastMessage {
             None => panic!(format!(
@@ -4520,7 +4520,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn PostMessage(
         &self,
         hwnd: root::HWND,
@@ -4536,7 +4536,7 @@ impl Swell {
             Some(f) => f(hwnd, msg, wParam, lParam),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_MessageQueue_Flush(&self) {
         match self.pointers.SWELL_MessageQueue_Flush {
             None => panic!(format!(
@@ -4546,7 +4546,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_MessageQueue_Clear(&self, h: root::HWND) {
         match self.pointers.SWELL_MessageQueue_Clear {
             None => panic!(format!(
@@ -4556,7 +4556,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4574,7 +4574,7 @@ impl Swell {
             Some(f) => f(wParam, lParam, newflags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetAsyncKeyState(&self, key: ::std::os::raw::c_int) -> root::WORD {
         match self.pointers.GetAsyncKeyState {
             None => panic!(format!(
@@ -4584,7 +4584,7 @@ impl Swell {
             Some(f) => f(key),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4597,7 +4597,7 @@ impl Swell {
             Some(f) => f(pt),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetMessagePos(&self) -> root::DWORD {
         match self.pointers.GetMessagePos {
             None => panic!(format!(
@@ -4607,7 +4607,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4620,7 +4620,7 @@ impl Swell {
             Some(f) => f(idx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetCursor(&self, curs: root::HCURSOR) {
         match self.pointers.SWELL_SetCursor {
             None => panic!(format!(
@@ -4630,7 +4630,7 @@ impl Swell {
             Some(f) => f(curs),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_EnableRightClickEmulate(&self, enable: root::BOOL) {
         match self.pointers.SWELL_EnableRightClickEmulate {
             None => panic!(format!(
@@ -4640,7 +4640,7 @@ impl Swell {
             Some(f) => f(enable),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetCursor(&self) -> root::HCURSOR {
         match self.pointers.SWELL_GetCursor {
             None => panic!(format!(
@@ -4650,7 +4650,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetLastSetCursor(&self) -> root::HCURSOR {
         match self.pointers.SWELL_GetLastSetCursor {
             None => panic!(format!(
@@ -4660,7 +4660,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_IsCursorVisible(&self) -> bool {
         match self.pointers.SWELL_IsCursorVisible {
             None => panic!(format!(
@@ -4670,7 +4670,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_ShowCursor(&self, bShow: root::BOOL) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_ShowCursor {
             None => panic!(format!(
@@ -4680,7 +4680,7 @@ impl Swell {
             Some(f) => f(bShow),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetCursorPos(
         &self,
         X: ::std::os::raw::c_int,
@@ -4694,7 +4694,7 @@ impl Swell {
             Some(f) => f(X, Y),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4712,7 +4712,7 @@ impl Swell {
             Some(f) => f(r, sourcerect, wantWork),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
         match self.pointers.OpenClipboard {
             None => panic!(format!(
@@ -4722,7 +4722,7 @@ impl Swell {
             Some(f) => f(hwndDlg),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CloseClipboard(&self) {
         match self.pointers.CloseClipboard {
             None => panic!(format!(
@@ -4732,7 +4732,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
         match self.pointers.GetClipboardData {
             None => panic!(format!(
@@ -4742,7 +4742,7 @@ impl Swell {
             Some(f) => f(type_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EmptyClipboard(&self) {
         match self.pointers.EmptyClipboard {
             None => panic!(format!(
@@ -4752,7 +4752,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
         match self.pointers.SetClipboardData {
             None => panic!(format!(
@@ -4762,7 +4762,7 @@ impl Swell {
             Some(f) => f(type_, h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4778,7 +4778,7 @@ impl Swell {
             Some(f) => f(desc),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
         match self.pointers.EnumClipboardFormats {
             None => panic!(format!(
@@ -4788,7 +4788,7 @@ impl Swell {
             Some(f) => f(lastfmt),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GlobalAlloc(
         &self,
         flags: ::std::os::raw::c_int,
@@ -4802,7 +4802,7 @@ impl Swell {
             Some(f) => f(flags, sz),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
         match self.pointers.GlobalLock {
             None => panic!(format!(
@@ -4812,7 +4812,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GlobalSize(&self, h: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.GlobalSize {
             None => panic!(format!(
@@ -4822,7 +4822,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GlobalUnlock(&self, h: root::HANDLE) {
         match self.pointers.GlobalUnlock {
             None => panic!(format!(
@@ -4832,7 +4832,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GlobalFree(&self, h: root::HANDLE) {
         match self.pointers.GlobalFree {
             None => panic!(format!(
@@ -4842,7 +4842,7 @@ impl Swell {
             Some(f) => f(h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4863,7 +4863,7 @@ impl Swell {
             Some(f) => f(TA, stackSize, ThreadProc, parm, cf, tidOut),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4882,7 +4882,7 @@ impl Swell {
             Some(f) => f(SA, manualReset, initialSig, ignored),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4901,7 +4901,7 @@ impl Swell {
             Some(f) => f(SA, manualReset, initialSig, ignored),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetCurrentThreadId(&self) -> root::DWORD {
         match self.pointers.GetCurrentThreadId {
             None => panic!(format!(
@@ -4911,7 +4911,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn WaitForSingleObject(&self, hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD {
         match self.pointers.WaitForSingleObject {
             None => panic!(format!(
@@ -4921,7 +4921,7 @@ impl Swell {
             Some(f) => f(hand, msTO),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -4939,7 +4939,7 @@ impl Swell {
             Some(f) => f(numObjs, objs, msTO),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CloseHandle(&self, hand: root::HANDLE) -> root::BOOL {
         match self.pointers.CloseHandle {
             None => panic!(format!(
@@ -4949,7 +4949,7 @@ impl Swell {
             Some(f) => f(hand),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetThreadPriority(&self, evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL {
         match self.pointers.SetThreadPriority {
             None => panic!(format!(
@@ -4959,7 +4959,7 @@ impl Swell {
             Some(f) => f(evt, prio),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.SetEvent {
             None => panic!(format!(
@@ -4969,7 +4969,7 @@ impl Swell {
             Some(f) => f(evt),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ResetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.ResetEvent {
             None => panic!(format!(
@@ -4979,7 +4979,7 @@ impl Swell {
             Some(f) => f(evt),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_CreateProcessFromPID(&self, pid: ::std::os::raw::c_int) -> root::HANDLE {
         match self.pointers.SWELL_CreateProcessFromPID {
             None => panic!(format!(
@@ -4989,7 +4989,7 @@ impl Swell {
             Some(f) => f(pid),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5007,7 +5007,7 @@ impl Swell {
             Some(f) => f(exe, nparams, params),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetProcessExitCode(&self, hand: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetProcessExitCode {
             None => panic!(format!(
@@ -5017,7 +5017,7 @@ impl Swell {
             Some(f) => f(hand),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5034,7 +5034,7 @@ impl Swell {
             Some(f) => f(fileName, symbolsAsGlobals),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5047,7 +5047,7 @@ impl Swell {
             Some(f) => f(fileName),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5064,7 +5064,7 @@ impl Swell {
             Some(f) => f(hInst, procName),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn FreeLibrary(&self, hInst: root::HINSTANCE) -> root::BOOL {
         match self.pointers.FreeLibrary {
             None => panic!(format!(
@@ -5074,7 +5074,7 @@ impl Swell {
             Some(f) => f(hInst),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetBundle(&self, hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetBundle {
             None => panic!(format!(
@@ -5084,7 +5084,7 @@ impl Swell {
             Some(f) => f(hInst),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_CreateMemContext(
         &self,
         hdc: root::HDC,
@@ -5099,7 +5099,7 @@ impl Swell {
             Some(f) => f(hdc, w, h),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_DeleteGfxContext(&self, arg1: root::HDC) {
         match self.pointers.SWELL_DeleteGfxContext {
             None => panic!(format!(
@@ -5109,7 +5109,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetCtxGC(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxGC {
             None => panic!(format!(
@@ -5119,7 +5119,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetCtxFrameBuffer(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxFrameBuffer {
             None => panic!(format!(
@@ -5129,7 +5129,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_PushClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PushClipRegion {
             None => panic!(format!(
@@ -5139,7 +5139,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5152,7 +5152,7 @@ impl Swell {
             Some(f) => f(ctx, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_PopClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PopClipRegion {
             None => panic!(format!(
@@ -5162,7 +5162,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5175,7 +5175,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5219,7 +5219,7 @@ impl Swell {
             ),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CreatePen(
         &self,
         attr: ::std::os::raw::c_int,
@@ -5234,7 +5234,7 @@ impl Swell {
             Some(f) => f(attr, wid, col),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CreateSolidBrush(&self, col: ::std::os::raw::c_int) -> root::HBRUSH {
         match self.pointers.CreateSolidBrush {
             None => panic!(format!(
@@ -5244,7 +5244,7 @@ impl Swell {
             Some(f) => f(col),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CreatePenAlpha(
         &self,
         attr: ::std::os::raw::c_int,
@@ -5260,7 +5260,7 @@ impl Swell {
             Some(f) => f(attr, wid, col, alpha),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn CreateSolidBrushAlpha(&self, col: ::std::os::raw::c_int, alpha: f32) -> root::HBRUSH {
         match self.pointers.CreateSolidBrushAlpha {
             None => panic!(format!(
@@ -5270,7 +5270,7 @@ impl Swell {
             Some(f) => f(col, alpha),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SelectObject(&self, ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SelectObject {
             None => panic!(format!(
@@ -5280,7 +5280,7 @@ impl Swell {
             Some(f) => f(ctx, pen),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetStockObject(&self, wh: ::std::os::raw::c_int) -> root::HGDIOBJ {
         match self.pointers.GetStockObject {
             None => panic!(format!(
@@ -5290,7 +5290,7 @@ impl Swell {
             Some(f) => f(wh),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DeleteObject(&self, arg1: root::HGDIOBJ) {
         match self.pointers.DeleteObject {
             None => panic!(format!(
@@ -5300,7 +5300,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5313,7 +5313,7 @@ impl Swell {
             Some(f) => f(ctx, r, br),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn Rectangle(
         &self,
         ctx: root::HDC,
@@ -5330,7 +5330,7 @@ impl Swell {
             Some(f) => f(ctx, l, t, r, b),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn Ellipse(
         &self,
         ctx: root::HDC,
@@ -5347,7 +5347,7 @@ impl Swell {
             Some(f) => f(ctx, l, t, r, b),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5365,7 +5365,7 @@ impl Swell {
             Some(f) => f(ctx, pts, npts),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5384,7 +5384,7 @@ impl Swell {
             Some(f) => f(ctx, x, y, op),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_LineTo(&self, ctx: root::HDC, x: ::std::os::raw::c_int, y: ::std::os::raw::c_int) {
         match self.pointers.SWELL_LineTo {
             None => panic!(format!(
@@ -5394,7 +5394,7 @@ impl Swell {
             Some(f) => f(ctx, x, y),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetPixel(
         &self,
         ctx: root::HDC,
@@ -5410,7 +5410,7 @@ impl Swell {
             Some(f) => f(ctx, x, y, c),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5428,7 +5428,7 @@ impl Swell {
             Some(f) => f(ctx, pts, np),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5448,7 +5448,7 @@ impl Swell {
             Some(f) => f(ctx, buf, len, r, align),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetTextColor {
             None => panic!(format!(
@@ -5458,7 +5458,7 @@ impl Swell {
             Some(f) => f(ctx, col),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetTextColor(&self, ctx: root::HDC) -> ::std::os::raw::c_int {
         match self.pointers.GetTextColor {
             None => panic!(format!(
@@ -5468,7 +5468,7 @@ impl Swell {
             Some(f) => f(ctx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetBkColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkColor {
             None => panic!(format!(
@@ -5478,7 +5478,7 @@ impl Swell {
             Some(f) => f(ctx, col),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetBkMode(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkMode {
             None => panic!(format!(
@@ -5488,7 +5488,7 @@ impl Swell {
             Some(f) => f(ctx, col),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5508,7 +5508,7 @@ impl Swell {
             Some(f) => f(ctx, buf, len, indices, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn RoundRect(
         &self,
         ctx: root::HDC,
@@ -5527,7 +5527,7 @@ impl Swell {
             Some(f) => f(ctx, x, y, x2, y2, xrnd, yrnd),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5546,7 +5546,7 @@ impl Swell {
             Some(f) => f(ctx, pts, cnts, nseg),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5559,7 +5559,7 @@ impl Swell {
             Some(f) => f(ctx, tm),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetTextFace(
         &self,
         ctx: root::HDC,
@@ -5574,7 +5574,7 @@ impl Swell {
             Some(f) => f(ctx, nCount, lpFaceName),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5592,7 +5592,7 @@ impl Swell {
             Some(f) => f(icon, bmsz, _bm),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5605,7 +5605,7 @@ impl Swell {
             Some(f) => f(iconinfo),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5622,7 +5622,7 @@ impl Swell {
             Some(f) => f(name, alphaFromMask),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5635,7 +5635,7 @@ impl Swell {
             Some(f) => f(ctx, img, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn BitBlt(
         &self,
         hdcOut: root::HDC,
@@ -5656,7 +5656,7 @@ impl Swell {
             Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, mode),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn StretchBlt(
         &self,
         hdcOut: root::HDC,
@@ -5679,7 +5679,7 @@ impl Swell {
             Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, srcw, srch, mode),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5703,7 +5703,7 @@ impl Swell {
             Some(f) => f(hdcOut, x, y, w, h, bits, srcw, srch, srcspan),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetScaling256(&self) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetScaling256 {
             None => panic!(format!(
@@ -5713,7 +5713,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5730,7 +5730,7 @@ impl Swell {
             Some(f) => f(key, v),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetSysColor(&self, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSysColor {
             None => panic!(format!(
@@ -5740,7 +5740,7 @@ impl Swell {
             Some(f) => f(idx),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5760,7 +5760,7 @@ impl Swell {
             Some(f) => f(width, height, numplanes, bitsperpixel, bits),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetOpaque(&self, h: root::HWND, isopaque: bool) {
         match self.pointers.SetOpaque {
             None => panic!(format!(
@@ -5770,7 +5770,7 @@ impl Swell {
             Some(f) => f(h, isopaque),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SetAllowNoMiddleManRendering(&self, h: root::HWND, allow: bool) {
         match self.pointers.SetAllowNoMiddleManRendering {
             None => panic!(format!(
@@ -5780,7 +5780,7 @@ impl Swell {
             Some(f) => f(h, allow),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5793,7 +5793,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5806,7 +5806,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetDC {
             None => panic!(format!(
@@ -5816,7 +5816,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetWindowDC {
             None => panic!(format!(
@@ -5826,7 +5826,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
         match self.pointers.ReleaseDC {
             None => panic!(format!(
@@ -5836,7 +5836,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5854,7 +5854,7 @@ impl Swell {
             Some(f) => f(hdc, r, level),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_CloneGDIObject(&self, a: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SWELL_CloneGDIObject {
             None => panic!(format!(
@@ -5864,7 +5864,7 @@ impl Swell {
             Some(f) => f(a),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn GetSystemMetrics(&self, arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSystemMetrics {
             None => panic!(format!(
@@ -5874,7 +5874,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DragQueryPoint(&self, arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL {
         match self.pointers.DragQueryPoint {
             None => panic!(format!(
@@ -5884,7 +5884,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn DragFinish(&self, arg1: root::HDROP) {
         match self.pointers.DragFinish {
             None => panic!(format!(
@@ -5894,7 +5894,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5913,7 +5913,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3, arg4),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5934,7 +5934,7 @@ impl Swell {
             Some(f) => f(arg1, srcrect, srcfn, callback),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5954,7 +5954,7 @@ impl Swell {
             Some(f) => f(arg1, srcrect, srclist, srccount, icon),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_FinishDragDrop(&self) {
         match self.pointers.SWELL_FinishDragDrop {
             None => panic!(format!(
@@ -5964,7 +5964,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -5982,7 +5982,7 @@ impl Swell {
             Some(f) => f(hwndPar, rct, handle),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_MakeSetCurParms(
         &self,
         xscale: f32,
@@ -6001,7 +6001,7 @@ impl Swell {
             Some(f) => f(xscale, yscale, xtrans, ytrans, parent, doauto, dosizetofit),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6024,7 +6024,7 @@ impl Swell {
             Some(f) => f(def, label, idx, x, y, w, h, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_MakeEditField(
         &self,
         idx: ::std::os::raw::c_int,
@@ -6042,7 +6042,7 @@ impl Swell {
             Some(f) => f(idx, x, y, w, h, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6065,7 +6065,7 @@ impl Swell {
             Some(f) => f(align, label, idx, x, y, w, h, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6089,7 +6089,7 @@ impl Swell {
             Some(f) => f(cname, idx, classname, style, x, y, w, h, exstyle),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_MakeCombo(
         &self,
         idx: ::std::os::raw::c_int,
@@ -6107,7 +6107,7 @@ impl Swell {
             Some(f) => f(idx, x, y, w, h, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6129,7 +6129,7 @@ impl Swell {
             Some(f) => f(name, idx, x, y, w, h, style),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6151,7 +6151,7 @@ impl Swell {
             Some(f) => f(name, idx, x, y, w, h, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_MakeListBox(
         &self,
         idx: ::std::os::raw::c_int,
@@ -6169,7 +6169,7 @@ impl Swell {
             Some(f) => f(idx, x, y, w, h, styles),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6188,7 +6188,7 @@ impl Swell {
             Some(f) => f(hMenu, name, idx, flags),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6206,7 +6206,7 @@ impl Swell {
             Some(f) => f(hMenu, list, listsz),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6223,7 +6223,7 @@ impl Swell {
             Some(f) => f(list, listsz),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn _controlfp(
         &self,
         flag: ::std::os::raw::c_uint,
@@ -6237,7 +6237,7 @@ impl Swell {
             Some(f) => f(flag, mask),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_Internal_PostMessage_Init(&self) {
         match self.pointers.SWELL_Internal_PostMessage_Init {
             None => panic!(format!(
@@ -6247,7 +6247,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6263,7 +6263,7 @@ impl Swell {
             Some(f) => f(fn_),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetWindowWantRaiseAmt(&self, h: root::HWND, amt: ::std::os::raw::c_int) {
         match self.pointers.SWELL_SetWindowWantRaiseAmt {
             None => panic!(format!(
@@ -6273,7 +6273,7 @@ impl Swell {
             Some(f) => f(h, amt),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_GetWindowWantRaiseAmt(&self, arg1: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetWindowWantRaiseAmt {
             None => panic!(format!(
@@ -6283,7 +6283,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_SetListViewFastClickMask(&self, hList: root::HWND, mask: ::std::os::raw::c_int) {
         match self.pointers.SWELL_SetListViewFastClickMask {
             None => panic!(format!(
@@ -6293,7 +6293,7 @@ impl Swell {
             Some(f) => f(hList, mask),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6306,7 +6306,7 @@ impl Swell {
             Some(f) => f(sz, buf),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6323,7 +6323,7 @@ impl Swell {
             Some(f) => f(argc, argv),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_RunMessageLoop(&self) {
         match self.pointers.SWELL_RunMessageLoop {
             None => panic!(format!(
@@ -6333,7 +6333,7 @@ impl Swell {
             Some(f) => f(),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6351,7 +6351,7 @@ impl Swell {
             Some(f) => f(viewpar, wref, arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6364,7 +6364,7 @@ impl Swell {
             Some(f) => f(g),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn EnumChildWindows(
         &self,
         hwnd: root::HWND,
@@ -6381,7 +6381,7 @@ impl Swell {
             Some(f) => f(hwnd, cwEnumFunc, lParam),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_IsGroupBox(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsGroupBox {
             None => panic!(format!(
@@ -6391,7 +6391,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_IsButton(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsButton {
             None => panic!(format!(
@@ -6401,7 +6401,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn SWELL_IsStaticText(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsStaticText {
             None => panic!(format!(
@@ -6411,7 +6411,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6424,7 +6424,7 @@ impl Swell {
             Some(f) => f(hwnd, r),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6442,7 +6442,7 @@ impl Swell {
             Some(f) => f(str, fl, pdv),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6461,7 +6461,7 @@ impl Swell {
             Some(f) => f(idx, name, hotspot_x, hotspot_y),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6480,7 +6480,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, ncustom, custom),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6493,7 +6493,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     pub fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
         match self.pointers.IsWindowEnabled {
             None => panic!(format!(
@@ -6503,7 +6503,7 @@ impl Swell {
             Some(f) => f(arg1),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6521,7 +6521,7 @@ impl Swell {
             Some(f) => f(arg1, arg2, arg3),
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6534,7 +6534,7 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6547,19 +6547,19 @@ impl Swell {
     ) -> ::std::os::raw::c_int {
         unsafe { windows::MessageBoxA(hwndParent, text, caption, type_) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
         unsafe { windows::GetDlgItem(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         unsafe { windows::ShowWindow(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn DestroyWindow(&self, hwnd: root::HWND) {
         unsafe { windows::DestroyWindow(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6571,7 +6571,7 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::SetDlgItemTextA(arg1, idx, text) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetDlgItemInt(
         &self,
         arg1: root::HWND,
@@ -6581,7 +6581,7 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::SetDlgItemInt(arg1, idx, val, issigned) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6594,7 +6594,7 @@ impl Swell {
     ) -> ::std::os::raw::c_int {
         unsafe { windows::GetDlgItemInt(arg1, idx, translated, issigned) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6607,7 +6607,7 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::GetDlgItemTextA(arg1, idx, text, textlen) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn CheckDlgButton(
         &self,
         hwnd: root::HWND,
@@ -6616,7 +6616,7 @@ impl Swell {
     ) {
         unsafe { windows::CheckDlgButton(hwnd, idx, check) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn IsDlgButtonChecked(
         &self,
         hwnd: root::HWND,
@@ -6624,55 +6624,55 @@ impl Swell {
     ) -> ::std::os::raw::c_int {
         unsafe { windows::IsDlgButtonChecked(hwnd, idx) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
         unsafe { windows::EnableWindow(hwnd, enable) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetFocus(&self, hwnd: root::HWND) {
         unsafe { windows::SetFocus(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetFocus(&self) -> root::HWND {
         unsafe { windows::GetFocus() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetForegroundWindow(&self, hwnd: root::HWND) {
         unsafe { windows::SetForegroundWindow(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetForegroundWindow(&self) -> root::HWND {
         unsafe { windows::GetForegroundWindow() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
         unsafe { windows::SetCapture(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetCapture(&self) -> root::HWND {
         unsafe { windows::GetCapture() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn ReleaseCapture(&self) {
         unsafe { windows::ReleaseCapture() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn IsChild(&self, hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int {
         unsafe { windows::IsChild(hwndParent, hwndChild) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
         unsafe { windows::GetParent(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
         unsafe { windows::SetParent(hwnd, newPar) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
         unsafe { windows::GetWindow(hwnd, what) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EnumWindows(
         &self,
         proc_: ::std::option::Option<
@@ -6682,7 +6682,7 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::EnumWindows(proc_, lp) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6695,39 +6695,39 @@ impl Swell {
     ) -> root::HWND {
         unsafe { windows::FindWindowExA(par, lastw, classname, title) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ClientToScreen(&self, hwnd: root::HWND, p: *mut root::POINT) {
         unsafe { windows::ClientToScreen(hwnd, p) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ScreenToClient(&self, hwnd: root::HWND, p: *mut root::POINT) {
         unsafe { windows::ScreenToClient(hwnd, p) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetWindowRect(&self, hwnd: root::HWND, r: *mut root::RECT) -> bool {
         unsafe { windows::GetWindowRect(hwnd, r) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetClientRect(&self, hwnd: root::HWND, r: *mut root::RECT) {
         unsafe { windows::GetClientRect(hwnd, r) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
         unsafe { windows::WindowFromPoint(p) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetWindowPos(
         &self,
         hwnd: root::HWND,
@@ -6740,7 +6740,7 @@ impl Swell {
     ) {
         unsafe { windows::SetWindowPos(hwnd, unused, x, y, cx, cy, flags) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6752,11 +6752,11 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::InvalidateRect(hwnd, r, eraseBk) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetWindowLong(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR {
         unsafe { windows::GetWindowLongA(hwnd, idx) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetWindowLong(
         &self,
         hwnd: root::HWND,
@@ -6765,7 +6765,7 @@ impl Swell {
     ) -> root::LONG_PTR {
         unsafe { windows::SetWindowLongA(hwnd, idx, val) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6779,7 +6779,7 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::ScrollWindow(hwnd, xamt, yamt, lpRect, lpClipRect) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EnumPropsEx(
         &self,
         arg1: root::HWND,
@@ -6788,7 +6788,7 @@ impl Swell {
     ) -> ::std::os::raw::c_int {
         unsafe { windows::EnumPropsExA(arg1, arg2, arg3) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6799,7 +6799,7 @@ impl Swell {
     ) -> root::HANDLE {
         unsafe { windows::GetPropA(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6811,7 +6811,7 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::SetPropA(arg1, arg2, arg3) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6822,15 +6822,15 @@ impl Swell {
     ) -> root::HANDLE {
         unsafe { windows::RemovePropA(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
         unsafe { windows::IsWindowVisible(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn IsWindow(&self, hwnd: root::HWND) -> bool {
         unsafe { windows::IsWindow(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetTimer(
         &self,
         hwnd: root::HWND,
@@ -6840,27 +6840,27 @@ impl Swell {
     ) -> root::UINT_PTR {
         unsafe { windows::SetTimer(hwnd, timerid, rate, tProc) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
         unsafe { windows::KillTimer(hwnd, timerid) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn CreatePopupMenu(&self) -> root::HMENU {
         unsafe { windows::CreatePopupMenu() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn DestroyMenu(&self, hMenu: root::HMENU) {
         unsafe { windows::DestroyMenu(hMenu) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
         unsafe { windows::GetSubMenu(hMenu, pos) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
         unsafe { windows::GetMenuItemCount(hMenu) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetMenuItemID(
         &self,
         hMenu: root::HMENU,
@@ -6868,7 +6868,7 @@ impl Swell {
     ) -> ::std::os::raw::c_int {
         unsafe { windows::GetMenuItemID(hMenu, pos) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EnableMenuItem(
         &self,
         hMenu: root::HMENU,
@@ -6877,7 +6877,7 @@ impl Swell {
     ) -> bool {
         unsafe { windows::EnableMenuItem(hMenu, idx, en) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn DeleteMenu(
         &self,
         hMenu: root::HMENU,
@@ -6886,7 +6886,7 @@ impl Swell {
     ) -> bool {
         unsafe { windows::DeleteMenu(hMenu, idx, flag) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn CheckMenuItem(
         &self,
         hMenu: root::HMENU,
@@ -6895,7 +6895,7 @@ impl Swell {
     ) -> bool {
         unsafe { windows::CheckMenuItem(hMenu, idx, chk) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6908,7 +6908,7 @@ impl Swell {
     ) {
         unsafe { windows::InsertMenuItemA(hMenu, pos, byPos, mi) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6921,7 +6921,7 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::GetMenuItemInfoA(hMenu, pos, byPos, mi) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6934,11 +6934,11 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::SetMenuItemInfoA(hMenu, pos, byPos, mi) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn DrawMenuBar(&self, arg1: root::HWND) {
         unsafe { windows::DrawMenuBar(arg1) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6954,15 +6954,15 @@ impl Swell {
     ) -> ::std::os::raw::c_int {
         unsafe { windows::TrackPopupMenu(hMenu, flags, xpos, ypos, resvd, hwnd, r) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
         unsafe { windows::SetMenu(hwnd, menu) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
         unsafe { windows::GetMenu(hwnd) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn DefWindowProc(
         &self,
         hwnd: root::HWND,
@@ -6972,11 +6972,11 @@ impl Swell {
     ) -> root::LRESULT {
         unsafe { windows::DefWindowProcA(hwnd, msg, wParam, lParam) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         unsafe { windows::EndDialog(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SendMessage(
         &self,
         arg1: root::HWND,
@@ -6986,7 +6986,7 @@ impl Swell {
     ) -> root::LRESULT {
         unsafe { windows::SendMessageA(arg1, arg2, arg3, arg4) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn PostMessage(
         &self,
         hwnd: root::HWND,
@@ -6996,42 +6996,42 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::PostMessageA(hwnd, msg, wParam, lParam) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetAsyncKeyState(&self, key: ::std::os::raw::c_int) -> root::WORD {
         unsafe { windows::GetAsyncKeyState(key) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetCursorPos(&self, pt: *mut root::POINT) {
         unsafe { windows::GetCursorPos(pt) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetMessagePos(&self) -> root::DWORD {
         unsafe { windows::GetMessagePos() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
         unsafe { windows::OpenClipboard(hwndDlg) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn CloseClipboard(&self) {
         unsafe { windows::CloseClipboard() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
         unsafe { windows::GetClipboardData(type_) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EmptyClipboard(&self) {
         unsafe { windows::EmptyClipboard() }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
         unsafe { windows::SetClipboardData(type_, h) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -7041,11 +7041,11 @@ impl Swell {
     ) -> root::UINT {
         unsafe { windows::RegisterClipboardFormatA(desc) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
         unsafe { windows::EnumClipboardFormats(lastfmt) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GlobalAlloc(
         &self,
         flags: ::std::os::raw::c_int,
@@ -7053,56 +7053,56 @@ impl Swell {
     ) -> root::HANDLE {
         unsafe { windows::GlobalAlloc(flags, sz) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
         unsafe { windows::GlobalLock(h) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GlobalUnlock(&self, h: root::HANDLE) {
         unsafe { windows::GlobalUnlock(h) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CreateIconIndirect(&self, iconinfo: *mut root::ICONINFO) -> root::HICON {
         unsafe { windows::CreateIconIndirect(iconinfo) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetSysColor(&self, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         unsafe { windows::GetSysColor(idx) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn BeginPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC {
         unsafe { windows::BeginPaint(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn EndPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::BOOL {
         unsafe { windows::EndPaint(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetDC(&self, arg1: root::HWND) -> root::HDC {
         unsafe { windows::GetDC(arg1) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
         unsafe { windows::GetWindowDC(arg1) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
         unsafe { windows::ReleaseDC(arg1, arg2) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn GetSystemMetrics(&self, arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         unsafe { windows::GetSystemMetrics(arg1) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn EnumChildWindows(
         &self,
         hwnd: root::HWND,
@@ -7113,11 +7113,11 @@ impl Swell {
     ) -> root::BOOL {
         unsafe { windows::EnumChildWindows(hwnd, cwEnumFunc, lParam) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     pub fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
         unsafe { windows::IsWindowEnabled(arg1) }
     }
-    #[cfg(target_os = "windows")]
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -8457,7 +8457,7 @@ pub struct SwellFunctionPointers {
 impl SwellFunctionPointers {
     pub(crate) const TOTAL_COUNT: u32 = 324u32;
 }
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 mod windows {
     use crate::bindings::root;
     extern "C" {
