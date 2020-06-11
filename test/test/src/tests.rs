@@ -133,7 +133,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
 fn swell() -> TestStep {
     step(AllVersions, "SWELL", |_session, _| {
         let swell = Swell::load(*Reaper::get().medium_reaper().low().plugin_context());
-        if cfg!(target_os = "windows") {
+        if cfg!(target_family = "windows") {
             assert!(swell.pointers().MessageBox.is_none());
             Ok(())
         } else {
@@ -1879,7 +1879,7 @@ fn low_plugin_context() -> TestStep {
         // Then
         // GetSwellFunc
         let swell_function_provider = plugin_context.swell_function_provider();
-        if cfg!(target_os = "windows") {
+        if cfg!(target_family = "windows") {
             assert!(swell_function_provider.is_none());
         } else {
             let swell_function_provider =
@@ -1923,7 +1923,7 @@ fn medium_plugin_context() -> TestStep {
                 assert_eq!(ctx.hwnd_main(), medium.get_main_hwnd());
             }
             Vst(_ctx) => {
-                if cfg!(target_os = "windows") {
+                if cfg!(target_family = "windows") {
                     assert!(plugin_context.h_instance().is_some());
                 } else {
                     assert!(plugin_context.h_instance().is_none());

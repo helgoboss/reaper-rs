@@ -1,13 +1,13 @@
 /// Executed whenever Cargo builds reaper-rs
 fn main() {
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[cfg(feature = "generate-stage-one")]
     codegen::stage_one::generate_bindings();
 
     #[cfg(feature = "generate-stage-two")]
     codegen::stage_two::generate_reaper_and_swell();
 
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     compile_swell_dialog_generator_support();
 
     compile_glue_code();
@@ -15,7 +15,7 @@ fn main() {
 
 /// This makes SWELL dialogs via "swell-dlggen.h" possible (on C++ side only, via cc crate).
 /// See the C++ source file for a detailled explanation.
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 fn compile_swell_dialog_generator_support() {
     cc::Build::new()
         .cpp(true)
@@ -38,7 +38,7 @@ fn compile_glue_code() {
 
 #[cfg(any(feature = "generate-stage-one", feature = "generate-stage-two"))]
 mod codegen {
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[cfg(feature = "generate-stage-one")]
     pub mod stage_one {
         use bindgen::callbacks::{IntKind, ParseCallbacks};
@@ -440,14 +440,14 @@ mod codegen {
                     /// If this is Linux and the SWELL function provider is not available, this
                     /// function panics.
                     pub fn load(plugin_context: PluginContext) -> Swell {
-                        #[cfg(target_os = "windows")]
+                        #[cfg(target_family = "windows")]
                         {
                             Swell {
                                 pointers: Default::default(),
                                 plugin_context: Some(plugin_context)
                             }
                         }
-                        #[cfg(target_os = "linux")]
+                        #[cfg(target_family = "unix")]
                         {
                             let mut loaded_count = 0;
                             let get_func = plugin_context.swell_function_provider()
@@ -474,12 +474,12 @@ mod codegen {
                     }
 
                     #(
-                        #[cfg(target_os = "linux")]
+                        #[cfg(target_family = "unix")]
                         #methods
                     )*
 
                     #(
-                        #[cfg(target_os = "windows")]
+                        #[cfg(target_family = "windows")]
                         #windows_methods
                     )*
                 }
@@ -497,7 +497,7 @@ mod codegen {
                     pub(crate) const TOTAL_COUNT: u32 = #total_fn_ptr_count;
                 }
 
-                #[cfg(target_os = "windows")]
+                #[cfg(target_family = "windows")]
                 mod windows {
                     use crate::bindings::root;
 

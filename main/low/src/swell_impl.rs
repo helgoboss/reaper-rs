@@ -63,7 +63,7 @@ impl Swell {
         dlgproc: root::DLGPROC,
         param: root::LPARAM,
     ) -> root::HWND {
-        #[cfg(target_os = "linux")]
+        #[cfg(target_family = "unix")]
         {
             self.SWELL_CreateDialog(
                 root::SWELL_curmodule_dialogresource_head,
@@ -73,7 +73,7 @@ impl Swell {
                 param,
             )
         }
-        #[cfg(target_os = "windows")]
+        #[cfg(target_family = "windows")]
         {
             windows::CreateDialogParamA(hinst, resid, par, dlgproc, param)
         }
@@ -87,11 +87,11 @@ impl Swell {
         hwnd: root::HWND,
         text: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
-        #[cfg(target_os = "linux")]
+        #[cfg(target_family = "unix")]
         {
             self.SetDlgItemText(hwnd, 0, text)
         }
-        #[cfg(target_os = "windows")]
+        #[cfg(target_family = "windows")]
         {
             windows::SetWindowTextA(hwnd, text)
         }
@@ -106,11 +106,11 @@ impl Swell {
         lpString: root::LPSTR,
         nMaxCount: c_int,
     ) -> root::BOOL {
-        #[cfg(target_os = "linux")]
+        #[cfg(target_family = "unix")]
         {
             self.GetDlgItemText(hwnd, 0, lpString, nMaxCount)
         }
-        #[cfg(target_os = "windows")]
+        #[cfg(target_family = "windows")]
         {
             windows::GetWindowTextA(hwnd, lpString, nMaxCount)
         }
@@ -119,11 +119,11 @@ impl Swell {
     /// On Windows this is a constant but in SWELL this is a macro which translates to a function
     /// call.
     pub fn CF_TEXT(&self) -> root::UINT {
-        #[cfg(target_os = "linux")]
+        #[cfg(target_family = "unix")]
         {
             unsafe { self.RegisterClipboardFormat(c_str_macro::c_str!("SWELL__CF_TEXT").as_ptr()) }
         }
-        #[cfg(target_os = "windows")]
+        #[cfg(target_family = "windows")]
         1
     }
 }
@@ -137,7 +137,7 @@ impl std::fmt::Debug for SwellFunctionPointers {
     }
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 mod windows {
     use crate::bindings::root;
     use std::os::raw::c_int;

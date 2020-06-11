@@ -31,7 +31,7 @@ macro_rules! reaper_vst_plugin {
             }
 
             /// Entry point for getting hold of the module handle (HINSTANCE).
-            #[cfg(target_os = "windows")]
+            #[cfg(target_family = "windows")]
             #[allow(non_snake_case)]
             #[no_mangle]
             extern "C" fn DllMain(
@@ -68,13 +68,13 @@ macro_rules! reaper_vst_plugin {
                 }
                 // Give the C++ side of the plug-in the chance to initialize its SWELL function
                 // pointers as well.
-                #[cfg(not(target_os = "windows"))]
+                #[cfg(target_family = "unix")]
                 unsafe {
                     SWELL_dllMain_called_from_rust(hinstance, reason, get_func);
                 }
                 1
             }
-            #[cfg(not(target_os = "windows"))]
+            #[cfg(target_family = "unix")]
             extern "C" {
                 pub fn SWELL_dllMain_called_from_rust(
                     hinstance: reaper_low::raw::HINSTANCE,

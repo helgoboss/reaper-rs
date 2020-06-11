@@ -102,11 +102,11 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
                 }
                 // Give the C++ side of the plug-in the chance to initialize its SWELL function
                 // pointers as well.
-                #[cfg(not(target_os = "windows"))]
+                #[cfg(target_family = "unix")]
                 unsafe { SWELL_dllMain_called_from_rust(hinstance, reason, get_func); }
                 1
             }
-            #[cfg(not(target_os = "windows"))]
+            #[cfg(target_family = "unix")]
             extern "C" {
                 pub fn SWELL_dllMain_called_from_rust(
                    hinstance: reaper_low::raw::HINSTANCE,
