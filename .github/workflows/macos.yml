@@ -42,8 +42,6 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-#      - name: Setup tmate session
-#        uses: mxschmitt/action-tmate@v2
       - uses: actions-rs/cargo@v1
         with:
           command: test
@@ -52,6 +50,8 @@ jobs:
         with:
           name: test-plug-ins
           path: target/debug/*.dylib
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v2
 
   clippy:
     name: Clippy
