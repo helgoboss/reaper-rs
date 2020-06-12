@@ -56,7 +56,7 @@ public:
 
     // reaper-rs addition
     // Let Rust know about the SWELL function provider.
-    register_swell_called_from_cpp(SWELLAPI_GetFunc);
+    register_swell_called_from_cpp((void*) SWELLAPI_GetFunc);
       
     int x;
     for (x = 0; x < sizeof(api_tab)/sizeof(api_tab[0]); x ++)
