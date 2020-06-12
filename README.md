@@ -13,6 +13,8 @@ _reaper-rs_ allows programmers to write plug-ins for the [REAPER](https://www.re
 (digital audio workstation) in the [Rust](https://www.rust-lang.org/) programming
 language. It does so by providing raw Rust bindings for the
 [REAPER C++ API](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
+It also exposes the SWELL API ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)), which is provided by
+REAPER on Linux and macOS and allows creating cross-platform user interfaces with a subset of the Win32 API.
 
 ## Basics
 
@@ -185,9 +187,9 @@ fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
 }
 ```
 
-The macro doesn't do much more than exposing an `extern "C" ReaperPluginEntry()` function which calls
-`reaper_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use
-macros, have a look into the macro implementation. No magic there.
+The macro primarily exposes an `extern "C" ReaperPluginEntry()` function which calls
+`reaper_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use that
+macro, have a look at the macro implementation. No magic there.
 
 ### REAPER VST plug-in
 
@@ -275,18 +277,16 @@ These files are not generated with each build though. In order to decrease build
 IDE/debugging support, they are included in the Git repository like any other Rust source.
 
 You can generate these files on demand (see build section), e.g. after you have adjusted
-`reaper_plugin_functions.h`. Depending on the operating system on which you generate the
-files, `bindings.rs` can look quite differently (whereas `reaper.rs` should end up the
-same). The reason is that `reaper_plugin.h` includes `windows.h` on Windows only.
-On Linux and macOS, it uses `swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement.
+`reaper_plugin_functions.h`. Right now this is enabled for Linux and macOS only. If we would generate the files on
+Windows, `bindings.rs` would look quite differently (whereas `reaper.rs` should end up the
+same). The reason is that `reaper_plugin.h` includes `windows.h` on Windows, whereas on Linux and macOS, it uses 
+`swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement.
 
 Most parts of `bindings.rs` are used to generate `reaper.rs` and otherwise ignored, but a few
 structs, types and constants are published as part of the `raw` module. In order to have
 deterministic builds, for now the convention is to only commit files generated on Linux.
 Rationale: `swell.h` is a sort of subset of `windows.h`, so if things work
 with the subset, they also should work for the superset. The inverse isn't true.
-It's not clear yet whether this strategy is 100% correct, but for now it seems about right. 
-Besides, having the files generated on Linux is good for CI.
 
 ### Build
 
@@ -360,7 +360,7 @@ Make the test plug-ins available in REAPER:
    ```sh
    mkdir -p $HOME/.config/REAPER/UserPlugins/FX
    ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_extension_plugin.so $HOME/.config/REAPER/UserPlugins/reaper_test_extension_plugin.so
-   ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_vst_plugin.so $HOME/.config/REAPER/UserPlugins/FX/reaper_test_extension_plugin.so
+   ln -s $HOME/Downloads/reaper-rs/target/debug/libreaper_test_vst_plugin.so $HOME/.config/REAPER/UserPlugins/FX/reaper_test_vst_plugin.so
    ```
 
 Regenerate the low-level API:
@@ -373,7 +373,23 @@ cargo fmt
 
 #### macOS
 
-_To be done_
+The following instructions include Rust setup. However, it's very well possible that some native toolchain setup
+instructions are missing, because I don't have a bare macOS installation at my disposal. The Rust installation script
+should provide you with the necessary instructions if something is missing. 
+
+```sh
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
+source $HOME/.cargo/env
+# Using nightly is not necessary if you want to build just the low-level or medium-level API!
+rustup default nightly
+
+# Clone reaper-rs
+cd Downloads
+git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git
+cd reaper-rs
+cargo build
+```
 
 ### Test
 
@@ -391,8 +407,8 @@ Running the integration test is not only a good way to find _reaper-rs_ regressi
 subtle changes in the REAPER C++ API itself. Currently, the test assertions are very strict in order to reveal even
 the slightest deviations.
 
-On Linux, the REAPER integration test will be run automatically as Cargo integration test `run_reaper_integration_test`
-when invoking `cargo test` (downloads, unpacks and executes REAPER). This test is part of 
+On Linux and macOS, the REAPER integration test will be run automatically as Cargo integration test
+`run_reaper_integration_test` when invoking `cargo test` (downloads, unpacks and executes REAPER). This test is part of 
 `reaper-test-extension-plugin`. It can be disabled by building that crate with `--no-default-features`.
 
 `reaper-test` activates the performance measurement features of `reaper-medium` and `reaper-high`. At the end of an
