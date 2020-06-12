@@ -31,6 +31,10 @@ static struct
 
 static int dummyFunc() { return 0; }
 
+// reaper-rs change
+// This is implemented in Rust and called by the customized SwellAPPInitializer.
+extern "C" int SWELL_dllMain(HINSTANCE hInst, DWORD callMode, LPVOID _GetFunc);
+
 class SwellAPPInitializer
 {
 public:
@@ -49,6 +53,10 @@ public:
       NSLog(@"SWELL API provider returned incorrect version\n");
       SWELLAPI_GetFunc=0;
     }
+
+    // reaper-rs addition
+    // Let Rust know about the SWELL function provider.
+    SWELL_dllMain(NULL, 1, SWELLAPI_GetFunc);
       
     int x;
     for (x = 0; x < sizeof(api_tab)/sizeof(api_tab[0]); x ++)
@@ -67,9 +75,3 @@ public:
 };
 
 SwellAPPInitializer m_swell_appAPIinit;
-
-extern "C" __attribute__ ((visibility ("default"))) int SWELL_dllMain(HINSTANCE hInst, DWORD callMode, LPVOID _GetFunc)
-{
-  // this returning 1 allows DllMain to be called, if available
-  return 1;
-}

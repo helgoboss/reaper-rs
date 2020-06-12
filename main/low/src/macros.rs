@@ -67,14 +67,16 @@ macro_rules! reaper_vst_plugin {
                     });
                 }
                 // Give the C++ side of the plug-in the chance to initialize its SWELL function
-                // pointers as well.
-                #[cfg(target_family = "unix")]
+                // pointers as well. This is only needed on Linux. On Windows we don't have SWELL
+                // and on macOS the mechanism is different (SwellAPPInitializer calls this function,
+                // so Objective-C side already has access to the SWELL function pointers).
+                #[cfg(target_os = "linux")]
                 unsafe {
                     SWELL_dllMain_called_from_rust(hinstance, reason, get_func);
                 }
                 1
             }
-            #[cfg(target_family = "unix")]
+            #[cfg(target_os = "linux")]
             extern "C" {
                 pub fn SWELL_dllMain_called_from_rust(
                     hinstance: reaper_low::raw::HINSTANCE,
