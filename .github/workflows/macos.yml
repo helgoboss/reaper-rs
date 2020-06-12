@@ -44,8 +44,8 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v2
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v2
       - name: cargo test
         uses: actions-rs/cargo@v1
         with:

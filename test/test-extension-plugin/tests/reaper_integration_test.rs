@@ -193,7 +193,7 @@ fn mount_dmg(file_path: &Path) -> Result<()> {
         .spawn()?;
     let stdin = child.stdin.as_mut().ok_or("Failed to open stdin")?;
     // Get rid of displayed license by simulating q and y key presses
-    stdin.write_all("qyyyyyyyyyyyyyyyyyyyyyyy".as_bytes())?;
+    stdin.write_all("q\nq\ny\ny\ny\ny\n".as_bytes())?;
     let status = child.wait()?;
     if !status.success() {
         return Err("mount not successful".into());
