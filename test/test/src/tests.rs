@@ -2637,9 +2637,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
                 assert!(chunk_1.ends_with("\nWAK 0 0"));
             }
             let tag_chunk_1 = fx_1.tag_chunk();
-            assert!(
-                tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#)
-            );
+            assert!(tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrol"#));
             assert!(tag_chunk_1.ends_with("\n>"));
             let state_chunk_1 = fx_1.state_chunk();
             assert!(!state_chunk_1.contains("<"));
@@ -2658,13 +2656,13 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
                 fx_1_file_name
                     .to_str()
                     .expect("FX 1 file name is not valid unicode"),
-                "reacontrolmidi.dll" | "reacontrolmidi.vst.so"
+                "reacontrolmidi.dll" | "reacontrolmidi.vst.so" | "reacontrolMIDI.vst.dylib"
             ));
             assert!(matches!(
                 fx_2_file_name
                     .to_str()
                     .expect("FX 1 file name is not valid unicode"),
-                "reasynth.dll" | "reasynth.vst.so"
+                "reasynth.dll" | "reasynth.vst.so" | "reasynth.vst.dylib"
             ));
             assert_eq!(fx_1.track(), track);
             assert_eq!(fx_2.track(), track);
@@ -2806,7 +2804,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
                 assert!(chunk.ends_with("\nWAK 0 0"));
             }
             let tag_chunk = fx_1.tag_chunk();
-            assert!(tag_chunk.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrolmidi"#));
+            assert!(tag_chunk.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrol"#));
             assert!(tag_chunk.ends_with("\n>"));
             let state_chunk = fx_1.state_chunk();
             assert!(!state_chunk.contains("<"));
@@ -2818,7 +2816,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
                 file_name
                     .to_str()
                     .expect("FX 1 file name is not valid unicode"),
-                "reacontrolmidi.dll" | "reacontrolmidi.vst.so"
+                "reacontrolmidi.dll" | "reacontrolmidi.vst.so" | "reacontrolMIDI.vst.dylib"
             ));
             assert_eq!(fx_1_info.type_expression, "VST");
             assert_eq!(fx_1_info.sub_type_expression, "VST");

@@ -17,12 +17,6 @@ fn run_reaper_integration_test() {
         println!("REAPER integration tests currently not supported on Windows");
         return;
     }
-    if cfg!(target_os = "macos") {
-        println!(
-            "REAPER integration tests are supported on macOS but REAPER gets stuck on a headless system"
-        );
-        return;
-    }
     let target_dir_path = std::env::current_dir().unwrap().join("../../target");
     let reaper_download_dir_path = target_dir_path.join("reaper");
     let result = if cfg!(target_os = "macos") {
@@ -71,8 +65,8 @@ fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
     println!("Starting REAPER ({:?})...", &reaper_executable);
     let mut child = Command::new(reaper_executable)
         .env("RUN_REAPER_RS_INTEGRATION_TEST", "true")
-        .arg("-splashlog")
-        .arg("splash.log")
+        // .arg("-splashlog")
+        // .arg("splash.log")
         .spawn()?;
     let exit_status = child.wait_timeout(Duration::from_secs(120))?;
     let exit_status = match exit_status {
@@ -198,7 +192,8 @@ fn mount_dmg(file_path: &Path) -> Result<()> {
         .stdin(Stdio::piped())
         .spawn()?;
     let stdin = child.stdin.as_mut().ok_or("Failed to open stdin")?;
-    stdin.write_all("y".as_bytes())?;
+    // Get rid of displayed license by simulating q and y key presses
+    stdin.write_all("qyyyyyyyyyyyyyyyyyyyyyyy".as_bytes())?;
     let status = child.wait()?;
     if !status.success() {
         return Err("mount not successful".into());
