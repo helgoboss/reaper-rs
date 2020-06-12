@@ -61,7 +61,7 @@ pub const TBM_SETSEL: u32 = WM_USER + 10;
 
 // Some constants are different in SWELL. Search for "these differ" in SWELL source code for
 // explanation.
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 pub use crate::bindings::root::{
     // SWP
     SWP_FRAMECHANGED,
@@ -84,7 +84,7 @@ pub use crate::bindings::root::{
     SW_SHOWNORMAL,
 };
 
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 mod windows_constants {
     // SW
     pub const SW_HIDE: i32 = 0;
@@ -108,7 +108,7 @@ mod windows_constants {
     pub const SWP_SHOWWINDOW: i32 = 0x0040;
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 pub use windows_constants::*;
 
 /// Function pointer type for hook commands.

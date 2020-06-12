@@ -25,6 +25,7 @@ reqwest = { version = "0.10", features = ["blocking"] }
 tar = "0.4.26"
 xz2 = "0.1"
 wait-timeout = "0.1.5"
+fs_extra = "1.1.0"
 
 [lib]
 name = "reaper_test_extension_plugin"

@@ -6,14 +6,14 @@
 // all those function pointers.
 //
 // The difference to "swell-modstub-generic.cpp" is that in our case the entry point function is named
-// "SWELL_dllMain_called_from_rust" and not "SWELL_dllMain". We do that because *reaper-rs* already defines an entry
-// point named "SWELL_dllMain" in the macros "reaper_extension_plugin!" and "reaper_vst_plugin!". Why? Because
-// *reaper-rs* is interested in the SWELL function as well. It has its own mechanism of exposing the SWELL function
-// pointers provided by REAPER (the `Swell` struct). When REAPER calls the SWELL entry point function ("SWELL_dllMain"),
-// *reaper-rs* does 2 things:
+// "register_swell_function_provider_called_from_rust" and not "SWELL_dllMain". We do that because *reaper-rs* already
+// defines an entry point named "SWELL_dllMain" in the macros "reaper_extension_plugin!" and "reaper_vst_plugin!". Why?
+// Because *reaper-rs* is interested in the SWELL function as well. It has its own mechanism of exposing the SWELL
+// function pointers provided by REAPER (the `Swell` struct). When REAPER calls the SWELL entry point function
+// ("SWELL_dllMain"), *reaper-rs* does 2 things:
 //
-// 1. It delegates to the "SWELL_dllMain_called_from_rust" implemented in this C++ source file (so the C++ SWELL
-//    function pointers will be initialized).
+// 1. It delegates to the "register_swell_function_provider_called_from_rust" implemented in this C++ source file (so
+//    the C++ SWELL function pointers will be initialized).
 // 2. It gets hold of the SWELL function provider pointer (for its own purposes).
 //
 // Why would we want the global C++ SWELL function pointers to be initialized in the first place? After all we said that
@@ -71,14 +71,8 @@ static int doinit(void *(*GetFunc)(const char *name)) {
     return errcnt;
 }
 
+// reaper-rs change.
 // This will be called by Rust (the important difference).
-extern "C" __attribute__ ((visibility ("default"))) int
-SWELL_dllMain_called_from_rust(HINSTANCE hInst, DWORD callMode, LPVOID _GetFunc) {
-    if (callMode == DLL_PROCESS_ATTACH) {
-        if (!_GetFunc) return 0;
-        doinit((void *(*)(const char *)) _GetFunc);
-    }
-
-    // this returning 1 allows DllMain to be called, if available
-    return 1;
+extern "C" __attribute__ ((visibility ("default"))) void register_swell_function_provider_called_from_rust(LPVOID _GetFunc) {
+    doinit((void *(*)(const char *)) _GetFunc);
 }

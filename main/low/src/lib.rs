@@ -85,6 +85,9 @@ pub use reaper_impl::*;
 mod swell;
 pub use swell::*;
 
+mod static_context;
+pub use static_context::*;
+
 mod swell_impl;
 pub use swell_impl::*;
 

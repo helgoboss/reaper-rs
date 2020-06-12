@@ -1,13 +1,13 @@
 /// Executed whenever Cargo builds reaper-rs
 fn main() {
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[cfg(feature = "generate-stage-one")]
     codegen::stage_one::generate_bindings();
 
     #[cfg(feature = "generate-stage-two")]
     codegen::stage_two::generate_reaper_and_swell();
 
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     compile_swell_dialog_generator_support();
 
     compile_glue_code();
@@ -15,21 +15,41 @@ fn main() {
 
 /// This makes SWELL dialogs via "swell-dlggen.h" possible (on C++ side only, via cc crate).
 /// See the C++ source file for a detailled explanation.
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 fn compile_swell_dialog_generator_support() {
+    let modstub_file = if cfg!(target_os = "macos") {
+        "src/swell-modstub-custom.mm"
+    } else {
+        "src/swell-modstub-generic-custom.cpp"
+    };
+    let stdlib = if cfg!(target_os = "macos") {
+        Some("c++")
+    } else {
+        None
+    };
     cc::Build::new()
         .cpp(true)
+        .cpp_set_stdlib(stdlib)
         .warnings(false)
         .define("SWELL_PROVIDED_BY_APP", None)
-        .file("src/swell_modstub_generic_mod.cpp")
+        .file(modstub_file)
         .compile("swell");
+
+    #[cfg(target_os = "macos")]
+    println!("cargo:rustc-link-lib=framework=AppKit");
 }
 
 /// Compiles C++ glue code. This is necessary to interact with those parts of the REAPER C++ API
 /// that use pure virtual interface classes and therefore the C++ ABI.
 fn compile_glue_code() {
+    let stdlib = if cfg!(target_os = "macos") {
+        Some("c++")
+    } else {
+        None
+    };
     cc::Build::new()
         .cpp(true)
+        .cpp_set_stdlib(stdlib)
         .warnings(false)
         .file("src/control_surface.cpp")
         .file("src/midi.cpp")
@@ -38,7 +58,7 @@ fn compile_glue_code() {
 
 #[cfg(any(feature = "generate-stage-one", feature = "generate-stage-two"))]
 mod codegen {
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     #[cfg(feature = "generate-stage-one")]
     pub mod stage_one {
         use bindgen::callbacks::{IntKind, ParseCallbacks};
@@ -71,7 +91,7 @@ mod codegen {
         /// Generates the `bindings.rs` file from REAPER C++ headers
         pub fn generate_bindings() {
             println!("cargo:rerun-if-changed=src/wrapper.hpp");
-            let bindings = bindgen::Builder::default()
+            let builder = bindgen::Builder::default()
                 .header("src/wrapper.hpp")
                 .opaque_type("timex")
                 .derive_eq(true)
@@ -122,9 +142,10 @@ mod codegen {
                 .whitelist_type("LPSTR")
                 .whitelist_type("SCROLLINFO")
                 .whitelist_function("reaper_control_surface::.*")
-                .whitelist_function("reaper_midi::.*")
-                .generate()
-                .expect("Unable to generate bindings");
+                .whitelist_function("reaper_midi::.*");
+            #[cfg(target_os = "macos")]
+            let builder = builder.clang_arg("-stdlib=libc++");
+            let bindings = builder.generate().expect("Unable to generate bindings");
             let out_path = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
             bindings
                 .write_to_file(out_path.join("src/bindings.rs"))
@@ -440,14 +461,14 @@ mod codegen {
                     /// If this is Linux and the SWELL function provider is not available, this
                     /// function panics.
                     pub fn load(plugin_context: PluginContext) -> Swell {
-                        #[cfg(target_os = "windows")]
+                        #[cfg(target_family = "windows")]
                         {
                             Swell {
                                 pointers: Default::default(),
                                 plugin_context: Some(plugin_context)
                             }
                         }
-                        #[cfg(target_os = "linux")]
+                        #[cfg(target_family = "unix")]
                         {
                             let mut loaded_count = 0;
                             let get_func = plugin_context.swell_function_provider()
@@ -474,12 +495,12 @@ mod codegen {
                     }
 
                     #(
-                        #[cfg(target_os = "linux")]
+                        #[cfg(target_family = "unix")]
                         #methods
                     )*
 
                     #(
-                        #[cfg(target_os = "windows")]
+                        #[cfg(target_family = "windows")]
                         #windows_methods
                     )*
                 }
@@ -497,7 +518,7 @@ mod codegen {
                     pub(crate) const TOTAL_COUNT: u32 = #total_fn_ptr_count;
                 }
 
-                #[cfg(target_os = "windows")]
+                #[cfg(target_family = "windows")]
                 mod windows {
                     use crate::bindings::root;
 
