@@ -40,12 +40,12 @@ jobs:
           profile: minimal
           toolchain: nightly-2020-05-15
           override: true
-#      - name: Setup tmate session
-#        uses: mxschmitt/action-tmate@v2
       - name: cargo build
         uses: actions-rs/cargo@v1
         with:
           command: build
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v2
       - name: cargo test
         uses: actions-rs/cargo@v1
         with:
