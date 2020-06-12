@@ -23,14 +23,15 @@ fn compile_swell_dialog_generator_support() {
     #[cfg(target_os = "macos")]
     let modstub_file = "src/swell-modstub-custom.mm";
 
-    let build = cc::Build::new()
+    let mut build = cc::Build::new();
+    build
         .cpp(true)
         .warnings(false)
         .define("SWELL_PROVIDED_BY_APP", None)
         .file(modstub_file);
 
     #[cfg(target_os = "macos")]
-    let build = build.cpp_set_stdlib("c++");
+    build.cpp_set_stdlib("c++");
 
     build.compile("swell");
 
