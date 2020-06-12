@@ -2670,10 +2670,10 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(fx_2.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx_1.chain(), &fx_chain);
             assert_eq!(fx_2.chain(), &fx_chain);
-            assert_eq!(fx_1.parameter_count(), 17);
-            assert_eq!(fx_2.parameter_count(), 15);
-            assert_eq!(fx_1.parameters().count(), 17);
-            assert_eq!(fx_2.parameters().count(), 15);
+            assert!(fx_1.parameter_count() >= 17);
+            assert!(fx_2.parameter_count() >= 15);
+            assert!(fx_1.parameters().count() >= 17);
+            assert!(fx_2.parameters().count() >= 15);
             assert!(fx_1.parameter_by_index(15).is_available());
             assert!(!fx_1.parameter_by_index(17).is_available());
             assert!(
