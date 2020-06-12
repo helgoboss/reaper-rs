@@ -23,12 +23,16 @@ fn compile_swell_dialog_generator_support() {
     #[cfg(target_os = "macos")]
     let modstub_file = "src/swell-modstub-custom.mm";
 
-    cc::Build::new()
+    let build = cc::Build::new()
         .cpp(true)
         .warnings(false)
         .define("SWELL_PROVIDED_BY_APP", None)
-        .file(modstub_file)
-        .compile("swell");
+        .file(modstub_file);
+
+    #[cfg(target_os = "macos")]
+    let build = build.cpp_set_stdlib("c++");
+
+    build.compile("swell");
 
     #[cfg(target_os = "macos")]
     println!("cargo:rustc-link-lib=framework=AppKit");
