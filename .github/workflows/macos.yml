@@ -42,13 +42,15 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v2
       - uses: actions-rs/cargo@v1
         with:
           command: test
           args: -- --nocapture
       - uses: actions/upload-artifact@v2
         with:
-          name: plug-ins
+          name: test-plug-ins
           path: target/debug/*.dylib
 
   clippy:

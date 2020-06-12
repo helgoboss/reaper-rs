@@ -39,9 +39,8 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          working-directory: main/low
           command: build
-          args: --features generate
+          args: --manifest-path main/low/Cargo.toml --features generate
 
   test:
     name: Test Suite
@@ -62,6 +61,10 @@ jobs:
         with:
           command: test
           args: -- --nocapture
+      - uses: actions/upload-artifact@v2
+        with:
+          name: test-plug-ins
+          path: target/debug/*.so
 
   fmt:
     name: Rustfmt
