@@ -6,7 +6,7 @@ on:
     branches:
       - master
 
-name: CI macOS
+name: macOS
 
 jobs:
   check:

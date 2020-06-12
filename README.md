@@ -2,7 +2,9 @@
 
 [Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
 
-[![Continuous integration](https://github.com/helgoboss/reaper-rs/workflows/Continuous%20integration/badge.svg)](https://github.com/helgoboss/reaper-rs/actions)
+[![Continuous integration](https://github.com/helgoboss/reaper-rs/workflows/Windows/badge.svg)](https://github.com/helgoboss/reaper-rs/actions)
+[![Continuous integration](https://github.com/helgoboss/reaper-rs/workflows/macOS/badge.svg)](https://github.com/helgoboss/reaper-rs/actions)
+[![Continuous integration](https://github.com/helgoboss/reaper-rs/workflows/Linux/badge.svg)](https://github.com/helgoboss/reaper-rs/actions)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/helgoboss/reaper-rs/master/LICENSE)
 
 ## Introduction
