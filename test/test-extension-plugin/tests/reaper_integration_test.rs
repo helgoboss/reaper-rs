@@ -1,5 +1,4 @@
 #![cfg(feature = "run-reaper-integration-test")]
-#![cfg(target_family = "unix")]
 use fs_extra::dir::CopyOptions;
 use std::error::Error;
 use std::fs::File;
@@ -14,6 +13,10 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 #[test]
 fn run_reaper_integration_test() {
+    if cfg!(target_family = "windows") {
+        println!("REAPER integration tests currently not supported on Windows");
+        return;
+    }
     let target_dir_path = std::env::current_dir().unwrap().join("../../target");
     let reaper_download_dir_path = target_dir_path.join("reaper");
     let result = if cfg!(target_os = "macos") {
@@ -105,7 +108,7 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     }
     println!("Unpacking REAPER tarball...");
     unpack_tar_xz(&reaper_tarball_path, &reaper_download_dir_path)?;
-    activate_reaper_portable_mode(&reaper_home_path);
+    activate_reaper_portable_mode(&reaper_home_path)?;
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
@@ -138,17 +141,18 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
             depth: 0,
         },
     )?;
-    activate_reaper_portable_mode(&reaper_home_path);
+    activate_reaper_portable_mode(&reaper_home_path)?;
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
 
-fn activate_reaper_portable_mode(reaper_home_path: &Path) {
+fn activate_reaper_portable_mode(reaper_home_path: &Path) -> Result<()> {
     println!("Activating REAPER portable mode...");
     fs::OpenOptions::new()
         .create(true)
         .write(true)
         .open(reaper_home_path.join("reaper.ini"))?;
+    Ok(())
 }
 
 fn download(url: &str, dest_file_path: &Path) -> Result<()> {
@@ -178,9 +182,7 @@ fn mount_dmg(file_path: &Path) -> Result<()> {
         .stdin(Stdio::piped())
         .spawn()?;
     let stdin = child.stdin.as_mut().ok_or("Failed to open stdin")?;
-    stdin
-        .write_all("y".as_bytes())
-        .ok_or("Failed to write to stdin")?;
+    stdin.write_all("y".as_bytes())?;
     let status = child.wait()?;
     if !status.success() {
         return Err("mount not successful".into());
