@@ -19,7 +19,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2020-05-15
           override: true
       - uses: actions-rs/cargo@v1
         with:
@@ -35,7 +35,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2020-05-15
           override: true
       - uses: actions-rs/cargo@v1
         with:
@@ -71,7 +71,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2020-05-15
           override: true
       - run: rustup component add clippy
       - uses: actions-rs/cargo@v1

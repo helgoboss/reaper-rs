@@ -276,7 +276,7 @@ You can generate these files on demand (see build section), e.g. after you have 
 `reaper_plugin_functions.h`. Depending on the operating system on which you generate the
 files, `bindings.rs` can look quite differently (whereas `reaper.rs` should end up the
 same). The reason is that `reaper_plugin.h` includes `windows.h` on Windows only.
-On Linux and Mac OS X, it uses `swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement.
+On Linux and macOS, it uses `swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement.
 
 Most parts of `bindings.rs` are used to generate `reaper.rs` and otherwise ignored, but a few
 structs, types and constants are published as part of the `raw` module. In order to have
@@ -369,7 +369,7 @@ cargo build --features generate
 cargo fmt
 ```
 
-#### Mac OS X
+#### macOS
 
 _To be done_
 
