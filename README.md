@@ -13,8 +13,9 @@ _reaper-rs_ allows programmers to write plug-ins for the [REAPER](https://www.re
 (digital audio workstation) in the [Rust](https://www.rust-lang.org/) programming
 language. It does so by providing raw Rust bindings for the
 [REAPER C++ API](https://www.reaper.fm/sdk/plugin/plugin.php) and more convenient APIs on top of that.
-It also exposes the SWELL API ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)), which is provided by
-REAPER on Linux and macOS and allows creating cross-platform user interfaces with a subset of the Win32 API.
+It also exposes the [SWELL C++ API](https://www.cockos.com/wdl/), which is provided by
+REAPER on Linux and macOS in order to enable developers to create cross-platform user interfaces with a subset of the
+Win32 API.
 
 ## Basics
 
