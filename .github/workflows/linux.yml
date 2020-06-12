@@ -25,6 +25,24 @@ jobs:
         with:
           command: check
 
+  generate:
+    name: Generate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2020-05-15
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          working-directory: main/low
+          command: build
+          args: --features generate
+
   test:
     name: Test Suite
     runs-on: ubuntu-latest
