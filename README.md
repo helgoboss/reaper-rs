@@ -213,7 +213,7 @@ Then in your `lib.rs`:
 
 ```rust
 use vst::plugin::{Info, Plugin, HostCallback};
-use reaper_low::{PluginContext, reaper_vst_plugin};
+use reaper_low::{PluginContext, reaper_vst_plugin, static_vst_plugin_context};
 use reaper_medium::ReaperSession;
 
 reaper_vst_plugin!();
@@ -237,7 +237,7 @@ impl Plugin for MyReaperVstPlugin {
     }
 
     fn init(&mut self) {
-        if let Ok(context) = PluginContext::from_vst_plugin(&self.host, reaper_vst_plugin::static_context()) {
+        if let Ok(context) = PluginContext::from_vst_plugin(&self.host, static_vst_plugin_context()) {
             let session = ReaperSession::load(context);
             session
                 .reaper()

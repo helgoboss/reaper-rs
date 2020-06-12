@@ -138,7 +138,7 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     println!("Unpacking REAPER dmg...");
     mount_dmg(&reaper_dmg_path)?;
     println!("Copying from mount...");
-    fs::create_dir_all(&reaper_home_path);
+    fs::create_dir_all(&reaper_home_path)?;
     fs_extra::dir::copy(
         "/Volumes/REAPER_INSTALL_64/REAPER64.app",
         &reaper_home_path,
@@ -151,7 +151,7 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
         },
     )?;
     activate_reaper_portable_mode(&reaper_home_path)?;
-    remove_rewire_plugin_macos_bundle(&reaper_home_path);
+    remove_rewire_plugin_macos_bundle(&reaper_home_path)?;
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }

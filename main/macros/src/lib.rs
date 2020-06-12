@@ -75,62 +75,33 @@ pub fn measure(_: TokenStream, input: TokenStream) -> TokenStream {
 fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
-        mod reaper_extension_plugin {
-            /// Exposes the (hopefully) obtained handles.
-            pub fn static_context() -> reaper_low::StaticExtensionPluginContext {
-                reaper_low::StaticExtensionPluginContext {
-                    get_swell_func: unsafe { GET_SWELL_FUNC },
-                }
-            }
-
-            // Entry point for getting hold of the SWELL function provider.
-            #[allow(non_snake_case)]
-            #[no_mangle]
-            extern "C" fn SWELL_dllMain(
-                hinstance: reaper_low::raw::HINSTANCE,
-                reason: u32,
-                get_func: Option<
-                    unsafe extern "C" fn(
-                        name: *const std::os::raw::c_char,
-                    ) -> *mut std::os::raw::c_void,
-                >,
-            ) -> std::os::raw::c_int {
-                if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
-                    INIT_GET_SWELL_FUNC.call_once(|| {
-                        unsafe { GET_SWELL_FUNC = get_func };
-                    });
-                }
-                // Give the C++ side of the plug-in the chance to initialize its SWELL function
-                // pointers as well. This is only needed on Linux. On Windows we don't have SWELL
-                // and on macOS the mechanism is different (SwellAPPInitializer calls this function,
-                // so Objective-C side already has access to the SWELL function pointers).
-                #[cfg(target_os = "linux")]
-                unsafe { SWELL_dllMain_called_from_rust(hinstance, reason, get_func); }
-                1
-            }
-            #[cfg(target_os = "linux")]
-            extern "C" {
-                pub fn SWELL_dllMain_called_from_rust(
-                   hinstance: reaper_low::raw::HINSTANCE,
-                   reason: u32,
-                   get_func: Option<
-                       unsafe extern "C" fn(
-                           name: *const std::os::raw::c_char,
-                       ) -> *mut std::os::raw::c_void,
-                   >,
-                ) -> std::os::raw::c_int;
-            }
-            static mut GET_SWELL_FUNC: Option<
+        /// Linux entry point for getting hold of the SWELL function provider.
+        ///
+        /// This is called by REAPER for Linux at startup time.
+        #[cfg(target_os = "linux")]
+        #[allow(non_snake_case)]
+        #[no_mangle]
+        extern "C" fn SWELL_dllMain(
+            hinstance: reaper_low::raw::HINSTANCE,
+            reason: u32,
+            get_func: Option<
                 unsafe extern "C" fn(
                     name: *const std::os::raw::c_char,
                 ) -> *mut std::os::raw::c_void,
-            > = None;
-            static INIT_GET_SWELL_FUNC: std::sync::Once = std::sync::Once::new();
+            >,
+        ) -> std::os::raw::c_int {
+            if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
+                reaper_low::register_swell_function_provider(get_func);
+            }
+            1
         }
 
+        /// Entry point for the REAPER extension plug-in.
+        ///
+        /// This is called by REAPER at startup time.
         #[no_mangle]
         unsafe extern "C" fn ReaperPluginEntry(h_instance: ::reaper_low::raw::HINSTANCE, rec: *mut ::reaper_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
-            let static_context = reaper_extension_plugin::static_context();
+            let static_context = reaper_low::static_extension_plugin_context();
             ::reaper_low::bootstrap_extension_plugin(h_instance, rec, static_context, #main_function_name)
         }
 
