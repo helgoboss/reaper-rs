@@ -56,7 +56,7 @@ public:
 
     // reaper-rs addition
     // Let Rust know about the SWELL function provider.
-    SWELL_dllMain(NULL, 1, SWELLAPI_GetFunc);
+    SWELL_dllMain(NULL, 1, (void*) SWELLAPI_GetFunc);
       
     int x;
     for (x = 0; x < sizeof(api_tab)/sizeof(api_tab[0]); x ++)
