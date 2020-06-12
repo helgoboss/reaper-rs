@@ -39,6 +39,8 @@ jobs:
           profile: minimal
           toolchain: nightly-2020-05-15
           override: true
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v2
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -50,8 +52,6 @@ jobs:
         with:
           name: test-plug-ins
           path: target/debug/*.dylib
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v2
 
   clippy:
     name: Clippy

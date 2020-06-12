@@ -33,7 +33,7 @@ static int dummyFunc() { return 0; }
 
 // reaper-rs change
 // This is implemented in Rust and called by the customized SwellAPPInitializer.
-extern "C" __attribute__ ((visibility ("default"))) int SWELL_dllMain(HINSTANCE hInst, DWORD callMode, LPVOID _GetFunc);
+extern "C" int SWELL_dllMain(HINSTANCE hInst, DWORD callMode, LPVOID _GetFunc);
 
 class SwellAPPInitializer
 {
