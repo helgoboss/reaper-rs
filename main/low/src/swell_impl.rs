@@ -6,7 +6,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
-use std::os::raw::c_int;
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
@@ -75,7 +74,7 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         {
-            windows::CreateDialogParamA(hinst, resid, par, dlgproc, param)
+            windows::CreateDialogParamW(hinst, resid as _, par, dlgproc, param)
         }
     }
 
@@ -93,10 +92,14 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         {
-            windows::SetWindowTextA(hwnd, text)
+            windows::SetWindowTextW(hwnd, utf8_to_16(text).as_ptr())
         }
     }
 
+    /// Attention: Whereas the Windows original returns a length, this just returns success.
+    ///
+    /// In order to avoid surprises, on Windows it will behave like this, too.
+    ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
@@ -104,7 +107,7 @@ impl Swell {
         &self,
         hwnd: root::HWND,
         lpString: root::LPSTR,
-        nMaxCount: c_int,
+        nMaxCount: std::os::raw::c_int,
     ) -> root::BOOL {
         #[cfg(target_family = "unix")]
         {
@@ -112,7 +115,9 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         {
-            windows::GetWindowTextA(hwnd, lpString, nMaxCount)
+            with_utf16_to_8(lpString, nMaxCount, |buffer, max_size| {
+                windows::GetWindowTextW(hwnd, buffer, max_size)
+            })
         }
     }
 
@@ -143,9 +148,9 @@ mod windows {
     use std::os::raw::c_int;
 
     extern "C" {
-        pub fn CreateDialogParamA(
+        pub fn CreateDialogParamW(
             hinst: root::HINSTANCE,
-            resid: *const ::std::os::raw::c_char,
+            resid: *const u16,
             par: root::HWND,
             dlgproc: root::DLGPROC,
             param: root::LPARAM,
@@ -153,14 +158,67 @@ mod windows {
     }
 
     extern "C" {
-        pub fn SetWindowTextA(hwnd: root::HWND, text: *const ::std::os::raw::c_char) -> root::BOOL;
+        pub fn SetWindowTextW(hwnd: root::HWND, text: *const u16) -> root::BOOL;
     }
 
     extern "C" {
-        pub fn GetWindowTextA(
-            hwnd: root::HWND,
-            lpString: root::LPSTR,
-            nMaxCount: c_int,
-        ) -> root::BOOL;
+        pub fn GetWindowTextW(hwnd: root::HWND, lpString: *mut u16, nMaxCount: c_int) -> c_int;
     }
+}
+
+/// Converts the given UTF-8 C-style string (nul terminator) to an UTF-16 C-style string.
+///
+/// # Safety
+///
+/// You must ensure that the given string points to an UTF-8 encoded C-style string.
+#[cfg(target_family = "windows")]
+pub(crate) unsafe fn utf8_to_16(raw_utf8: *const std::os::raw::c_char) -> Vec<u16> {
+    use std::ffi::{CStr, OsStr};
+    use std::iter::once;
+    // Assumes that the given pointer points to a C-style string.
+    let utf8_c_str = CStr::from_ptr(raw_utf8);
+    // Interpret that string as UTF-8-encoded. Fall back to replacement characters if not.
+    let str = utf8_c_str.to_string_lossy();
+    // Now reencode it as UTF-16.
+    use std::os::windows::ffi::OsStrExt;
+    OsStr::new(str.as_ref())
+        .encode_wide()
+        .chain(once(0))
+        .collect()
+}
+
+/// Creates a UTF-16 buffer (to be filled by the given function) and writes it as UTF-8 to the given
+/// target buffer.
+///
+/// `max_size` must include nul terminator. The given function must return the actual string length
+/// *without* nul terminator.
+#[cfg(target_family = "windows")]
+pub(crate) unsafe fn with_utf16_to_8(
+    utf8_target_buffer: *mut std::os::raw::c_char,
+    requested_max_size: std::os::raw::c_int,
+    fill_utf16_source_buffer: impl FnOnce(*mut u16, i32) -> i32,
+) -> root::BOOL {
+    // TODO-medium Maybe use this vec initialization also in with_buffer
+    let mut utf16_vec: Vec<u16> = Vec::with_capacity(requested_max_size as usize);
+    // Returns length *without* nul terminator.
+    let len = fill_utf16_source_buffer(utf16_vec.as_mut_ptr(), requested_max_size);
+    if len == 0 {
+        return 0;
+    }
+    utf16_vec.set_len(len as usize);
+    // nul terminator will not be part of the string because len doesn't include it!
+    let string = String::from_utf16_lossy(&utf16_vec);
+    let c_string = match std::ffi::CString::new(string) {
+        Ok(s) => s,
+        Err(_) => {
+            // String contained 0 byte. This would end a C-style string abruptly.
+            return 0;
+        }
+    };
+    let source_bytes = c_string.as_bytes_with_nul();
+    let target_bytes =
+        std::slice::from_raw_parts_mut(utf8_target_buffer, requested_max_size as usize);
+    let source_bytes_signed = &*(source_bytes as *const [u8] as *const [i8]);
+    target_bytes[..source_bytes.len()].copy_from_slice(source_bytes_signed);
+    1
 }
