@@ -5,7 +5,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
-use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
+use crate::{bindings::root, raw, PluginContext, Swell, SwellFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
@@ -125,6 +125,33 @@ impl Swell {
             with_utf16_to_8(lpString, nMaxCount, |buffer, max_size| {
                 winapi::um::winuser::GetWindowTextW(hwnd as _, buffer, max_size)
             })
+        }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    // TODO-medium Make all auto-generated SWELL functions unsafe.
+    #[cfg(target_family = "windows")]
+    pub unsafe fn SendMessage(
+        &self,
+        arg1: root::HWND,
+        arg2: root::UINT,
+        arg3: root::WPARAM,
+        arg4: root::LPARAM,
+    ) -> root::LRESULT {
+        match arg2 {
+            raw::CB_INSERTSTRING | raw::CB_ADDSTRING => winapi::um::winuser::SendMessageW(
+                arg1 as _,
+                arg2,
+                arg3,
+                if arg4 == 0 {
+                    0
+                } else {
+                    utf8_to_16(arg4 as _).as_ptr() as _
+                },
+            ),
+            _ => winapi::um::winuser::SendMessageW(arg1 as _, arg2, arg3, arg4),
         }
     }
 

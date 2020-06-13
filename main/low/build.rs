@@ -258,7 +258,6 @@ mod codegen {
             "PostMessage" => "PostMessageA",
             "RegisterClipboardFormat" => "RegisterClipboardFormatA",
             "RemoveProp" => "RemovePropA",
-            "SendMessage" => "SendMessageA",
             "SetDlgItemText" => "SetDlgItemTextA",
             "SetMenuItemInfo" => "SetMenuItemInfoA",
             "SetProp" => "SetPropA",
