@@ -74,6 +74,7 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         {
+            #[allow(clippy::cast_ptr_alignment)]
             windows::CreateDialogParamW(hinst, resid as _, par, dlgproc, param)
         }
     }
