@@ -73,9 +73,15 @@ impl Swell {
             )
         }
         #[cfg(target_family = "windows")]
+        #[allow(clippy::cast_ptr_alignment)]
         {
-            #[allow(clippy::cast_ptr_alignment)]
-            windows::CreateDialogParamW(hinst, resid as _, par, dlgproc, param)
+            winapi::um::winuser::CreateDialogParamW(
+                hinst as _,
+                resid as _,
+                par as _,
+                std::mem::transmute(dlgproc),
+                param,
+            ) as _
         }
     }
 
@@ -93,7 +99,7 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         {
-            windows::SetWindowTextW(hwnd, utf8_to_16(text).as_ptr())
+            winapi::um::winuser::SetWindowTextW(hwnd as _, utf8_to_16(text).as_ptr()) as _
         }
     }
 
@@ -117,7 +123,7 @@ impl Swell {
         #[cfg(target_family = "windows")]
         {
             with_utf16_to_8(lpString, nMaxCount, |buffer, max_size| {
-                windows::GetWindowTextW(hwnd, buffer, max_size)
+                winapi::um::winuser::GetWindowTextW(hwnd as _, buffer, max_size)
             })
         }
     }
@@ -140,30 +146,6 @@ impl std::fmt::Debug for SwellFunctionPointers {
             .field("loaded_count", &self.loaded_count)
             .field("total_count", &Self::TOTAL_COUNT)
             .finish()
-    }
-}
-
-#[cfg(target_family = "windows")]
-mod windows {
-    use crate::bindings::root;
-    use std::os::raw::c_int;
-
-    extern "C" {
-        pub fn CreateDialogParamW(
-            hinst: root::HINSTANCE,
-            resid: *const u16,
-            par: root::HWND,
-            dlgproc: root::DLGPROC,
-            param: root::LPARAM,
-        ) -> root::HWND;
-    }
-
-    extern "C" {
-        pub fn SetWindowTextW(hwnd: root::HWND, text: *const u16) -> root::BOOL;
-    }
-
-    extern "C" {
-        pub fn GetWindowTextW(hwnd: root::HWND, lpString: *mut u16, nMaxCount: c_int) -> c_int;
     }
 }
 

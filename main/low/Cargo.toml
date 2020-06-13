@@ -37,6 +37,9 @@ c_str_macro = "1.0.2"
 vst = { git = "https://github.com/helgoboss/vst-rs", branch = "feature/custom-support-variant" }
 derive_more = "0.99.5"
 
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winuser"] }
+
 [dev-dependencies]
 version-sync = "0.9"
 
