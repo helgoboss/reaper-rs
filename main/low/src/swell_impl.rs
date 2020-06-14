@@ -5,13 +5,14 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
-use crate::{bindings::root, raw, PluginContext, Swell, SwellFunctionPointers};
+use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
 static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
-// This impl block contains mainly functions which exist in SWELL as macros only.
+/// This impl block contains functions which exist in SWELL as macros and therefore are not picked
+/// up by `bindgen`.
 impl Swell {
     /// Makes the given instance available globally.
     ///
@@ -75,6 +76,10 @@ impl Swell {
         #[cfg(target_family = "windows")]
         #[allow(clippy::cast_ptr_alignment)]
         {
+            // TODO-medium Test on 32-bit Windows and see if calling conventions matters.
+            //  If yes, we should change all auto-generated Windows-facing fns to extern "system".
+            //  If it matters even for callbacks, we must change them as well and then we can maybe
+            //  remove the transmute() calls here.
             winapi::um::winuser::CreateDialogParamW(
                 hinst as _,
                 resid as _,
@@ -122,37 +127,75 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         {
-            with_utf16_to_8(lpString, nMaxCount, |buffer, max_size| {
-                winapi::um::winuser::GetWindowTextW(hwnd as _, buffer, max_size)
-            })
+            let len = with_utf16_to_8(lpString, nMaxCount, |buffer, max_size| {
+                winapi::um::winuser::GetWindowTextW(hwnd as _, buffer, max_size) as _
+            });
+            // Just return whether successful in order to conform to SWELL.
+            if len == 0 { 0 } else { 1 }
+        }
+    }
+}
+
+/// This impl block contains functions which delegate to native win32 functions but need some
+/// character encoding conversion.
+///
+/// SWELL uses UTF-8-encoded strings as byte arrays (`*const i8`), exactly like REAPER itself.
+/// Windows uses UTF-16-encoded strings as u16 arrays (`*const u16`). It's very convenient that we
+/// can use UTF-8 throughout: Rust, REAPER, SWELL ... just Windows was missing.
+#[cfg(target_family = "windows")]
+impl Swell {
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    // TODO-medium Make all auto-generated SWELL functions unsafe.
+    pub unsafe fn SendMessage(
+        &self,
+        hwnd: root::HWND,
+        msg: root::UINT,
+        wParam: root::WPARAM,
+        lParam: root::LPARAM,
+    ) -> root::LRESULT {
+        if lparam_is_string(msg) {
+            winapi::um::winuser::SendMessageW(
+                hwnd as _,
+                msg,
+                wParam,
+                if lParam == 0 {
+                    0
+                } else {
+                    utf8_to_16(lParam as _).as_ptr() as _
+                },
+            )
+        } else {
+            winapi::um::winuser::SendMessageW(hwnd as _, msg, wParam, lParam)
         }
     }
 
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    // TODO-medium Make all auto-generated SWELL functions unsafe.
-    #[cfg(target_family = "windows")]
-    pub unsafe fn SendMessage(
+    pub unsafe fn PostMessage(
         &self,
-        arg1: root::HWND,
-        arg2: root::UINT,
-        arg3: root::WPARAM,
-        arg4: root::LPARAM,
-    ) -> root::LRESULT {
-        match arg2 {
-            raw::CB_INSERTSTRING | raw::CB_ADDSTRING => winapi::um::winuser::SendMessageW(
-                arg1 as _,
-                arg2,
-                arg3,
-                if arg4 == 0 {
+        hwnd: root::HWND,
+        msg: root::UINT,
+        wParam: root::WPARAM,
+        lParam: root::LPARAM,
+    ) -> root::BOOL {
+        let result = if lparam_is_string(msg) {
+            winapi::um::winuser::PostMessageW(
+                hwnd as _,
+                msg,
+                wParam,
+                if lParam == 0 {
                     0
                 } else {
-                    utf8_to_16(arg4 as _).as_ptr() as _
+                    utf8_to_16(lParam as _).as_ptr() as _
                 },
-            ),
-            _ => winapi::um::winuser::SendMessageW(arg1 as _, arg2, arg3, arg4),
-        }
+            )
+        } else {
+            winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam)
+        };
+        result as _
     }
 
     /// On Windows this is a constant but in SWELL this is a macro which translates to a function
@@ -206,8 +249,8 @@ pub(crate) unsafe fn utf8_to_16(raw_utf8: *const std::os::raw::c_char) -> Vec<u1
 pub(crate) unsafe fn with_utf16_to_8(
     utf8_target_buffer: *mut std::os::raw::c_char,
     requested_max_size: std::os::raw::c_int,
-    fill_utf16_source_buffer: impl FnOnce(*mut u16, i32) -> i32,
-) -> root::BOOL {
+    fill_utf16_source_buffer: impl FnOnce(*mut u16, std::os::raw::c_int) -> usize,
+) -> usize {
     // TODO-medium Maybe use this vec initialization also in with_buffer
     let mut utf16_vec: Vec<u16> = Vec::with_capacity(requested_max_size as usize);
     // Returns length *without* nul terminator.
@@ -215,7 +258,7 @@ pub(crate) unsafe fn with_utf16_to_8(
     if len == 0 {
         return 0;
     }
-    utf16_vec.set_len(len as usize);
+    utf16_vec.set_len(len);
     // nul terminator will not be part of the string because len doesn't include it!
     let string = String::from_utf16_lossy(&utf16_vec);
     let c_string = match std::ffi::CString::new(string) {
@@ -230,5 +273,13 @@ pub(crate) unsafe fn with_utf16_to_8(
         std::slice::from_raw_parts_mut(utf8_target_buffer, requested_max_size as usize);
     let source_bytes_signed = &*(source_bytes as *const [u8] as *const [i8]);
     target_bytes[..source_bytes.len()].copy_from_slice(source_bytes_signed);
-    1
+    len
+}
+
+// For all messages which contain a string payload, convert the string's encoding.
+#[cfg(target_family = "windows")]
+fn lparam_is_string(msg: root::UINT) -> bool {
+    use crate::raw;
+    // There are probably more than just those two. Add as soon as needed.
+    matches!(msg, raw::CB_INSERTSTRING | raw::CB_ADDSTRING)
 }

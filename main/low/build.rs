@@ -169,105 +169,92 @@ mod codegen {
 
         /// Functions which exist both in SWELL and in the Windows API.
         ///
-        /// It's important that the signatures match.
+        /// For all the functions in this set, the generator will create `Swell` methods which are
+        /// enabled on Windows only and just delegate to the Windows-native counterparts. This is
+        /// convenient because then you just write your UI code using the `Swell` struct and it
+        /// will work on Windows as well. It works because SWELL has been designed to imitate the
+        /// Windows API exactly (well, more or less).
         ///
-        /// In some cases they might have a different name, e.g. Windows functions in which
-        /// the character encoding matters, have a suffix. That's why this is a map:
-        /// On the left side the SWELL function name, on the right side the one for Windows.
-        /// Please note that only *real* functions are allowed on the right side, not function
-        /// macros.
-        static SWELL_WINDOWS_MAPPING: phf::Map<&'static str, &'static str> = phf::phf_map! {
+        /// This set doesn't include functions which have parameters where the character encoding
+        /// matters. On Windows, they have either an `A` (ANSI encoding) or a `W` suffix (wide =
+        /// UTF-16 encoding). Previously, we just delegated to the `A` functions
+        /// here, but of course this didn't work at all with non-ANSI characters. However, simply
+        /// delegating to the `W` functions was also not an option because first, the signature
+        /// is different (`W` functions take strings as `*const u16` instead of `*const i8` because
+        /// they are encoded as UTF-16). This is now implemented manually in `SwellImpl`.
+        static WIN32_FUNCTIONS: phf::Set<&'static str> = phf::phf_set![
             // # winuser.h
 
             // Same name
-            "BeginPaint" => "BeginPaint",
-            "CheckDlgButton" => "CheckDlgButton",
-            "CheckMenuItem" => "CheckMenuItem",
-            "ClientToScreen" => "ClientToScreen",
-            "CloseClipboard" => "CloseClipboard",
-            "CreateIconIndirect" => "CreateIconIndirect",
-            "CreatePopupMenu" => "CreatePopupMenu",
-            "DeleteMenu" => "DeleteMenu",
-            "DestroyMenu" => "DestroyMenu",
-            "DestroyWindow" => "DestroyWindow",
-            "DrawMenuBar" => "DrawMenuBar",
-            "EmptyClipboard" => "EmptyClipboard",
-            "EnableMenuItem" => "EnableMenuItem",
-            "EnableWindow" => "EnableWindow",
-            "EndDialog" => "EndDialog",
-            "EndPaint" => "EndPaint",
-            "EnumChildWindows" => "EnumChildWindows",
-            "EnumClipboardFormats" => "EnumClipboardFormats",
-            "EnumWindows" => "EnumWindows",
-            "GetAsyncKeyState" => "GetAsyncKeyState",
-            "GetCapture" => "GetCapture",
-            "GetClientRect" => "GetClientRect",
-            "GetClipboardData" => "GetClipboardData",
-            "GetCursorPos" => "GetCursorPos",
-            "GetDC" => "GetDC",
-            "GetDlgItem" => "GetDlgItem",
-            "GetDlgItemInt" => "GetDlgItemInt",
-            "GetFocus" => "GetFocus",
-            "GetForegroundWindow" => "GetForegroundWindow",
-            "GetMenu" => "GetMenu",
-            "GetMenuItemCount" => "GetMenuItemCount",
-            "GetMenuItemID" => "GetMenuItemID",
-            "GetMessagePos" => "GetMessagePos",
-            "GetParent" => "GetParent",
-            "GetSubMenu" => "GetSubMenu",
-            "GetSysColor" => "GetSysColor",
-            "GetSystemMetrics" => "GetSystemMetrics",
-            "GetWindow" => "GetWindow",
-            "GetWindowDC" => "GetWindowDC",
-            "GetWindowRect" => "GetWindowRect",
-            "InvalidateRect" => "InvalidateRect",
-            "IsChild" => "IsChild",
-            "IsDlgButtonChecked" => "IsDlgButtonChecked",
-            "IsWindow" => "IsWindow",
-            "IsWindowEnabled" => "IsWindowEnabled",
-            "IsWindowVisible" => "IsWindowVisible",
-            "KillTimer" => "KillTimer",
-            "OpenClipboard" => "OpenClipboard",
-            "ReleaseCapture" => "ReleaseCapture",
-            "ReleaseDC" => "ReleaseDC",
-            "ScreenToClient" => "ScreenToClient",
-            "ScrollWindow" => "ScrollWindow",
-            "SetCapture" => "SetCapture",
-            "SetClipboardData" => "SetClipboardData",
-            "SetDlgItemInt" => "SetDlgItemInt",
-            "SetFocus" => "SetFocus",
-            "SetForegroundWindow" => "SetForegroundWindow",
-            "SetMenu" => "SetMenu",
-            "SetParent" => "SetParent",
-            "SetTimer" => "SetTimer",
-            "SetWindowPos" => "SetWindowPos",
-            "ShowWindow" => "ShowWindow",
-            "TrackPopupMenu" => "TrackPopupMenu",
-            "WindowFromPoint" => "WindowFromPoint",
-            // Those ending with A on Windows
-            "DefWindowProc" => "DefWindowProcA",
-            "EnumPropsEx" => "EnumPropsExA",
-            "FindWindowEx" => "FindWindowExA",
-            "GetClassName" => "GetClassNameA",
-            "GetDlgItemText" => "GetDlgItemTextA",
-            "GetMenuItemInfo" => "GetMenuItemInfoA",
-            "GetProp" => "GetPropA",
-            "GetWindowLong" => "GetWindowLongA",
-            "InsertMenuItem" => "InsertMenuItemA",
-            "MessageBox" => "MessageBoxA",
-            "PostMessage" => "PostMessageA",
-            "RegisterClipboardFormat" => "RegisterClipboardFormatA",
-            "RemoveProp" => "RemovePropA",
-            "SetDlgItemText" => "SetDlgItemTextA",
-            "SetMenuItemInfo" => "SetMenuItemInfoA",
-            "SetProp" => "SetPropA",
-            "SetWindowLong" => "SetWindowLongA",
-
+            "BeginPaint",
+            "CheckDlgButton",
+            "CheckMenuItem",
+            "ClientToScreen",
+            "CloseClipboard",
+            "CreateIconIndirect",
+            "CreatePopupMenu",
+            "DeleteMenu",
+            "DestroyMenu",
+            "DestroyWindow",
+            "DrawMenuBar",
+            "EmptyClipboard",
+            "EnableMenuItem",
+            "EnableWindow",
+            "EndDialog",
+            "EndPaint",
+            "EnumChildWindows",
+            "EnumClipboardFormats",
+            "EnumWindows",
+            "GetAsyncKeyState",
+            "GetCapture",
+            "GetClientRect",
+            "GetClipboardData",
+            "GetCursorPos",
+            "GetDC",
+            "GetDlgItem",
+            "GetDlgItemInt",
+            "GetFocus",
+            "GetForegroundWindow",
+            "GetMenu",
+            "GetMenuItemCount",
+            "GetMenuItemID",
+            "GetMessagePos",
+            "GetParent",
+            "GetSubMenu",
+            "GetSysColor",
+            "GetSystemMetrics",
+            "GetWindow",
+            "GetWindowDC",
+            "GetWindowRect",
+            "InvalidateRect",
+            "IsChild",
+            "IsDlgButtonChecked",
+            "IsWindow",
+            "IsWindowEnabled",
+            "IsWindowVisible",
+            "KillTimer",
+            "OpenClipboard",
+            "ReleaseCapture",
+            "ReleaseDC",
+            "ScreenToClient",
+            "ScrollWindow",
+            "SetCapture",
+            "SetClipboardData",
+            "SetDlgItemInt",
+            "SetFocus",
+            "SetForegroundWindow",
+            "SetMenu",
+            "SetParent",
+            "SetTimer",
+            "SetWindowPos",
+            "ShowWindow",
+            "TrackPopupMenu",
+            "WindowFromPoint",
             // # winbase.h
-            "GlobalAlloc" => "GlobalAlloc",
-            "GlobalLock" => "GlobalLock",
-            "GlobalUnlock" => "GlobalUnlock",
-        };
+            "GlobalAlloc",
+            "GlobalLock",
+            "GlobalUnlock",
+        ];
 
         /// Generates `reaper.rs` and `swell.rs` from the previously generated `bindings.rs`
         pub fn generate_reaper_and_swell() {
@@ -395,23 +382,21 @@ mod codegen {
             let windows_functions: Vec<_> = fn_ptrs
                 .iter()
                 .filter_map(|p| {
-                    let win_name = SWELL_WINDOWS_MAPPING.get(p.name.to_string().as_str())?;
-                    Some(generate_function(
-                        &p,
-                        Ident::new(*win_name, Span::call_site()),
-                    ))
+                    if !WIN32_FUNCTIONS.contains(p.name.to_string().as_str()) {
+                        return None;
+                    }
+                    Some(generate_function(&p, p.name.clone()))
                 })
                 .collect();
             let windows_methods: Vec<_> = fn_ptrs
                 .iter()
                 .filter_map(|p| {
-                    let win_name = SWELL_WINDOWS_MAPPING.get(p.name.to_string().as_str())?;
+                    if !WIN32_FUNCTIONS.contains(p.name.to_string().as_str()) {
+                        return None;
+                    }
                     Some(generate_method(
                         &p,
-                        generate_swell_windows_method_body(
-                            &p,
-                            Ident::new(*win_name, Span::call_site()),
-                        ),
+                        generate_swell_windows_method_body(&p, p.name.clone()),
                     ))
                 })
                 .collect();
