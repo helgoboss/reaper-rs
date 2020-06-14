@@ -6535,19 +6535,6 @@ impl Swell {
         }
     }
     #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn MessageBox(
-        &self,
-        hwndParent: root::HWND,
-        text: *const ::std::os::raw::c_char,
-        caption: *const ::std::os::raw::c_char,
-        type_: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int {
-        unsafe { windows::MessageBoxA(hwndParent, text, caption, type_) }
-    }
-    #[cfg(target_family = "windows")]
     pub fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
         unsafe { windows::GetDlgItem(arg1, arg2) }
     }
@@ -6558,18 +6545,6 @@ impl Swell {
     #[cfg(target_family = "windows")]
     pub fn DestroyWindow(&self, hwnd: root::HWND) {
         unsafe { windows::DestroyWindow(hwnd) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn SetDlgItemText(
-        &self,
-        arg1: root::HWND,
-        idx: ::std::os::raw::c_int,
-        text: *const ::std::os::raw::c_char,
-    ) -> root::BOOL {
-        unsafe { windows::SetDlgItemTextA(arg1, idx, text) }
     }
     #[cfg(target_family = "windows")]
     pub fn SetDlgItemInt(
@@ -6593,19 +6568,6 @@ impl Swell {
         issigned: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         unsafe { windows::GetDlgItemInt(arg1, idx, translated, issigned) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn GetDlgItemText(
-        &self,
-        arg1: root::HWND,
-        idx: ::std::os::raw::c_int,
-        text: *mut ::std::os::raw::c_char,
-        textlen: ::std::os::raw::c_int,
-    ) -> root::BOOL {
-        unsafe { windows::GetDlgItemTextA(arg1, idx, text, textlen) }
     }
     #[cfg(target_family = "windows")]
     pub fn CheckDlgButton(
@@ -6686,19 +6648,6 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn FindWindowEx(
-        &self,
-        par: root::HWND,
-        lastw: root::HWND,
-        classname: *const ::std::os::raw::c_char,
-        title: *const ::std::os::raw::c_char,
-    ) -> root::HWND {
-        unsafe { windows::FindWindowExA(par, lastw, classname, title) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ClientToScreen(&self, hwnd: root::HWND, p: *mut root::POINT) {
         unsafe { windows::ClientToScreen(hwnd, p) }
     }
@@ -6753,19 +6702,6 @@ impl Swell {
         unsafe { windows::InvalidateRect(hwnd, r, eraseBk) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetWindowLong(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR {
-        unsafe { windows::GetWindowLongA(hwnd, idx) }
-    }
-    #[cfg(target_family = "windows")]
-    pub fn SetWindowLong(
-        &self,
-        hwnd: root::HWND,
-        idx: ::std::os::raw::c_int,
-        val: root::LONG_PTR,
-    ) -> root::LONG_PTR {
-        unsafe { windows::SetWindowLongA(hwnd, idx, val) }
-    }
-    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -6778,49 +6714,6 @@ impl Swell {
         lpClipRect: *const root::RECT,
     ) -> root::BOOL {
         unsafe { windows::ScrollWindow(hwnd, xamt, yamt, lpRect, lpClipRect) }
-    }
-    #[cfg(target_family = "windows")]
-    pub fn EnumPropsEx(
-        &self,
-        arg1: root::HWND,
-        arg2: root::PROPENUMPROCEX,
-        arg3: root::LPARAM,
-    ) -> ::std::os::raw::c_int {
-        unsafe { windows::EnumPropsExA(arg1, arg2, arg3) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn GetProp(
-        &self,
-        arg1: root::HWND,
-        arg2: *const ::std::os::raw::c_char,
-    ) -> root::HANDLE {
-        unsafe { windows::GetPropA(arg1, arg2) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn SetProp(
-        &self,
-        arg1: root::HWND,
-        arg2: *const ::std::os::raw::c_char,
-        arg3: root::HANDLE,
-    ) -> root::BOOL {
-        unsafe { windows::SetPropA(arg1, arg2, arg3) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn RemoveProp(
-        &self,
-        arg1: root::HWND,
-        arg2: *const ::std::os::raw::c_char,
-    ) -> root::HANDLE {
-        unsafe { windows::RemovePropA(arg1, arg2) }
     }
     #[cfg(target_family = "windows")]
     pub fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
@@ -6896,45 +6789,6 @@ impl Swell {
         unsafe { windows::CheckMenuItem(hMenu, idx, chk) }
     }
     #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn InsertMenuItem(
-        &self,
-        hMenu: root::HMENU,
-        pos: ::std::os::raw::c_int,
-        byPos: root::BOOL,
-        mi: *mut root::MENUITEMINFO,
-    ) {
-        unsafe { windows::InsertMenuItemA(hMenu, pos, byPos, mi) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn GetMenuItemInfo(
-        &self,
-        hMenu: root::HMENU,
-        pos: ::std::os::raw::c_int,
-        byPos: root::BOOL,
-        mi: *mut root::MENUITEMINFO,
-    ) -> root::BOOL {
-        unsafe { windows::GetMenuItemInfoA(hMenu, pos, byPos, mi) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn SetMenuItemInfo(
-        &self,
-        hMenu: root::HMENU,
-        pos: ::std::os::raw::c_int,
-        byPos: root::BOOL,
-        mi: *mut root::MENUITEMINFO,
-    ) -> root::BOOL {
-        unsafe { windows::SetMenuItemInfoA(hMenu, pos, byPos, mi) }
-    }
-    #[cfg(target_family = "windows")]
     pub fn DrawMenuBar(&self, arg1: root::HWND) {
         unsafe { windows::DrawMenuBar(arg1) }
     }
@@ -6963,38 +6817,8 @@ impl Swell {
         unsafe { windows::GetMenu(hwnd) }
     }
     #[cfg(target_family = "windows")]
-    pub fn DefWindowProc(
-        &self,
-        hwnd: root::HWND,
-        msg: root::UINT,
-        wParam: root::WPARAM,
-        lParam: root::LPARAM,
-    ) -> root::LRESULT {
-        unsafe { windows::DefWindowProcA(hwnd, msg, wParam, lParam) }
-    }
-    #[cfg(target_family = "windows")]
     pub fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         unsafe { windows::EndDialog(arg1, arg2) }
-    }
-    #[cfg(target_family = "windows")]
-    pub fn SendMessage(
-        &self,
-        arg1: root::HWND,
-        arg2: root::UINT,
-        arg3: root::WPARAM,
-        arg4: root::LPARAM,
-    ) -> root::LRESULT {
-        unsafe { windows::SendMessageA(arg1, arg2, arg3, arg4) }
-    }
-    #[cfg(target_family = "windows")]
-    pub fn PostMessage(
-        &self,
-        hwnd: root::HWND,
-        msg: root::UINT,
-        wParam: root::WPARAM,
-        lParam: root::LPARAM,
-    ) -> root::BOOL {
-        unsafe { windows::PostMessageA(hwnd, msg, wParam, lParam) }
     }
     #[cfg(target_family = "windows")]
     pub fn GetAsyncKeyState(&self, key: ::std::os::raw::c_int) -> root::WORD {
@@ -7030,16 +6854,6 @@ impl Swell {
     #[cfg(target_family = "windows")]
     pub fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
         unsafe { windows::SetClipboardData(type_, h) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn RegisterClipboardFormat(
-        &self,
-        desc: *const ::std::os::raw::c_char,
-    ) -> root::UINT {
-        unsafe { windows::RegisterClipboardFormatA(desc) }
     }
     #[cfg(target_family = "windows")]
     pub fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
@@ -7116,18 +6930,6 @@ impl Swell {
     #[cfg(target_family = "windows")]
     pub fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
         unsafe { windows::IsWindowEnabled(arg1) }
-    }
-    #[cfg(target_family = "windows")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn GetClassName(
-        &self,
-        arg1: root::HWND,
-        arg2: *mut ::std::os::raw::c_char,
-        arg3: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int {
-        unsafe { windows::GetClassNameA(arg1, arg2, arg3) }
     }
 }
 #[doc = r" Container for the SWELL function pointers."]
@@ -8461,14 +8263,6 @@ impl SwellFunctionPointers {
 mod windows {
     use crate::bindings::root;
     extern "C" {
-        pub fn MessageBoxA(
-            hwndParent: root::HWND,
-            text: *const ::std::os::raw::c_char,
-            caption: *const ::std::os::raw::c_char,
-            type_: ::std::os::raw::c_int,
-        ) -> ::std::os::raw::c_int;
-    }
-    extern "C" {
         pub fn GetDlgItem(arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND;
     }
     extern "C" {
@@ -8476,13 +8270,6 @@ mod windows {
     }
     extern "C" {
         pub fn DestroyWindow(hwnd: root::HWND);
-    }
-    extern "C" {
-        pub fn SetDlgItemTextA(
-            arg1: root::HWND,
-            idx: ::std::os::raw::c_int,
-            text: *const ::std::os::raw::c_char,
-        ) -> root::BOOL;
     }
     extern "C" {
         pub fn SetDlgItemInt(
@@ -8499,14 +8286,6 @@ mod windows {
             translated: *mut root::BOOL,
             issigned: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int;
-    }
-    extern "C" {
-        pub fn GetDlgItemTextA(
-            arg1: root::HWND,
-            idx: ::std::os::raw::c_int,
-            text: *mut ::std::os::raw::c_char,
-            textlen: ::std::os::raw::c_int,
-        ) -> root::BOOL;
     }
     extern "C" {
         pub fn CheckDlgButton(
@@ -8566,14 +8345,6 @@ mod windows {
         ) -> root::BOOL;
     }
     extern "C" {
-        pub fn FindWindowExA(
-            par: root::HWND,
-            lastw: root::HWND,
-            classname: *const ::std::os::raw::c_char,
-            title: *const ::std::os::raw::c_char,
-        ) -> root::HWND;
-    }
-    extern "C" {
         pub fn ClientToScreen(hwnd: root::HWND, p: *mut root::POINT);
     }
     extern "C" {
@@ -8607,16 +8378,6 @@ mod windows {
         ) -> root::BOOL;
     }
     extern "C" {
-        pub fn GetWindowLongA(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR;
-    }
-    extern "C" {
-        pub fn SetWindowLongA(
-            hwnd: root::HWND,
-            idx: ::std::os::raw::c_int,
-            val: root::LONG_PTR,
-        ) -> root::LONG_PTR;
-    }
-    extern "C" {
         pub fn ScrollWindow(
             hwnd: root::HWND,
             xamt: ::std::os::raw::c_int,
@@ -8624,26 +8385,6 @@ mod windows {
             lpRect: *const root::RECT,
             lpClipRect: *const root::RECT,
         ) -> root::BOOL;
-    }
-    extern "C" {
-        pub fn EnumPropsExA(
-            arg1: root::HWND,
-            arg2: root::PROPENUMPROCEX,
-            arg3: root::LPARAM,
-        ) -> ::std::os::raw::c_int;
-    }
-    extern "C" {
-        pub fn GetPropA(arg1: root::HWND, arg2: *const ::std::os::raw::c_char) -> root::HANDLE;
-    }
-    extern "C" {
-        pub fn SetPropA(
-            arg1: root::HWND,
-            arg2: *const ::std::os::raw::c_char,
-            arg3: root::HANDLE,
-        ) -> root::BOOL;
-    }
-    extern "C" {
-        pub fn RemovePropA(arg1: root::HWND, arg2: *const ::std::os::raw::c_char) -> root::HANDLE;
     }
     extern "C" {
         pub fn IsWindowVisible(hwnd: root::HWND) -> bool;
@@ -8702,30 +8443,6 @@ mod windows {
         ) -> bool;
     }
     extern "C" {
-        pub fn InsertMenuItemA(
-            hMenu: root::HMENU,
-            pos: ::std::os::raw::c_int,
-            byPos: root::BOOL,
-            mi: *mut root::MENUITEMINFO,
-        );
-    }
-    extern "C" {
-        pub fn GetMenuItemInfoA(
-            hMenu: root::HMENU,
-            pos: ::std::os::raw::c_int,
-            byPos: root::BOOL,
-            mi: *mut root::MENUITEMINFO,
-        ) -> root::BOOL;
-    }
-    extern "C" {
-        pub fn SetMenuItemInfoA(
-            hMenu: root::HMENU,
-            pos: ::std::os::raw::c_int,
-            byPos: root::BOOL,
-            mi: *mut root::MENUITEMINFO,
-        ) -> root::BOOL;
-    }
-    extern "C" {
         pub fn DrawMenuBar(arg1: root::HWND);
     }
     extern "C" {
@@ -8746,31 +8463,7 @@ mod windows {
         pub fn GetMenu(hwnd: root::HWND) -> root::HMENU;
     }
     extern "C" {
-        pub fn DefWindowProcA(
-            hwnd: root::HWND,
-            msg: root::UINT,
-            wParam: root::WPARAM,
-            lParam: root::LPARAM,
-        ) -> root::LRESULT;
-    }
-    extern "C" {
         pub fn EndDialog(arg1: root::HWND, arg2: ::std::os::raw::c_int);
-    }
-    extern "C" {
-        pub fn SendMessageA(
-            arg1: root::HWND,
-            arg2: root::UINT,
-            arg3: root::WPARAM,
-            arg4: root::LPARAM,
-        ) -> root::LRESULT;
-    }
-    extern "C" {
-        pub fn PostMessageA(
-            hwnd: root::HWND,
-            msg: root::UINT,
-            wParam: root::WPARAM,
-            lParam: root::LPARAM,
-        ) -> root::BOOL;
     }
     extern "C" {
         pub fn GetAsyncKeyState(key: ::std::os::raw::c_int) -> root::WORD;
@@ -8795,9 +8488,6 @@ mod windows {
     }
     extern "C" {
         pub fn SetClipboardData(type_: root::UINT, h: root::HANDLE);
-    }
-    extern "C" {
-        pub fn RegisterClipboardFormatA(desc: *const ::std::os::raw::c_char) -> root::UINT;
     }
     extern "C" {
         pub fn EnumClipboardFormats(lastfmt: root::UINT) -> root::UINT;
@@ -8847,12 +8537,5 @@ mod windows {
     }
     extern "C" {
         pub fn IsWindowEnabled(arg1: root::HWND) -> bool;
-    }
-    extern "C" {
-        pub fn GetClassNameA(
-            arg1: root::HWND,
-            arg2: *mut ::std::os::raw::c_char,
-            arg3: ::std::os::raw::c_int,
-        ) -> ::std::os::raw::c_int;
     }
 }
