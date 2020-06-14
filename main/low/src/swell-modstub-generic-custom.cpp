@@ -74,5 +74,7 @@ static int doinit(void *(*GetFunc)(const char *name)) {
 // reaper-rs change.
 // This will be called by Rust (the important difference).
 extern "C" __attribute__ ((visibility ("default"))) void register_swell_function_provider_called_from_rust(LPVOID _GetFunc) {
-    doinit((void *(*)(const char *)) _GetFunc);
+    if (_GetFunc) {  
+        doinit((void *(*)(const char *)) _GetFunc);
+    } 
 }
