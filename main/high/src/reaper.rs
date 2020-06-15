@@ -137,7 +137,7 @@ impl ReaperBuilder {
         }
     }
 
-    fn require_main_thread(&self) {
+    pub fn require_main_thread(&self) {
         require_main_thread(self.medium.reaper().low().plugin_context());
     }
 }
