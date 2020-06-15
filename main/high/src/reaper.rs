@@ -384,6 +384,8 @@ impl Drop for ReaperGuard {
     }
 }
 
+static GUARD_INITIALIZER: std::sync::Once = std::sync::Once::new();
+
 impl Reaper {
     /// The given initializer is executed only the first time this is called.
     ///
@@ -399,7 +401,7 @@ impl Reaper {
             return rc;
         }
         // There's no active instance.
-        INIT_INSTANCE.call_once(|| {
+        GUARD_INITIALIZER.call_once(|| {
             // If this is called, there was never an active instance in this session. Initialize!
             initializer();
         });
