@@ -34,8 +34,8 @@ use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
     CommandId, HookCommand, HookPostCommand, MidiFrameOffset, MidiInputDeviceId, OnAudioBuffer,
-    OnAudioBufferArgs, OwnedGaccelRegister, RealTimeAudioThreadScope, ReaperStringArg,
-    ToggleAction, ToggleActionResult,
+    OnAudioBufferArgs, OwnedGaccelRegister, RealTimeAudioThreadScope, ReaperString,
+    ReaperStringArg, ToggleAction, ToggleActionResult,
 };
 use std::fmt::{Debug, Formatter};
 use std::sync::Mutex;
@@ -253,6 +253,7 @@ impl Default for Reaper {
 struct ActiveData {
     csurf_inst_handle: NonNull<raw::IReaperControlSurface>,
     audio_hook_register_handle: NonNull<raw::audio_hook_register_t>,
+    gaccel_registers: HashMap<CommandId, NonNull<raw::gaccel_register_t>>,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
@@ -474,6 +475,20 @@ impl Reaper {
             },
         };
         *active_data = Some(ActiveData {
+            gaccel_registers: self
+                .command_by_id
+                .borrow()
+                .iter()
+                .map(|(id, command)| {
+                    let handle = medium
+                        .plugin_register_add_gaccel(OwnedGaccelRegister::without_key_binding(
+                            *id,
+                            command.description.clone(),
+                        ))
+                        .unwrap();
+                    (*id, handle)
+                })
+                .collect(),
             csurf_inst_handle: {
                 medium
                     .plugin_register_add_csurf_inst(control_surface)
@@ -495,6 +510,10 @@ impl Reaper {
         medium.audio_reg_hardware_hook_remove(ad.audio_hook_register_handle);
         // Remove control surface
         medium.plugin_register_remove_csurf_inst(ad.csurf_inst_handle);
+        // Unregister actions
+        for gaccel_handle in ad.gaccel_registers.values() {
+            medium.plugin_register_remove_gaccel(*gaccel_handle);
+        }
         // Remove functions
         medium.plugin_register_remove_hook_post_command::<HighLevelHookPostCommand>();
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
@@ -552,33 +571,47 @@ impl Reaper {
         self.require_main_thread();
         let mut medium = self.medium_session();
         let command_id = medium.plugin_register_add_command_id(command_name).unwrap();
-        let command = Command::new(Rc::new(RefCell::new(operation)), kind);
+        let description = description.into().into_inner();
+        let command = Command::new(
+            Rc::new(RefCell::new(operation)),
+            kind,
+            description.to_reaper_string(),
+        );
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             p.insert(command);
         }
+        let registered_action = RegisteredAction::new(command_id);
+        // Immediately register if active
+        let mut active_data = self.active_data.borrow_mut();
+        let active_data = match active_data.as_mut() {
+            None => return registered_action,
+            Some(ad) => ad,
+        };
         let address = medium
             .plugin_register_add_gaccel(OwnedGaccelRegister::without_key_binding(
                 command_id,
-                description,
+                description.into_owned(),
             ))
             .unwrap();
-        RegisteredAction::new(command_id, address)
+        active_data.gaccel_registers.insert(command_id, address);
+        registered_action
     }
 
-    fn unregister_command(
-        &self,
-        command_id: CommandId,
-        gaccel_handle: NonNull<raw::gaccel_register_t>,
-    ) {
+    fn unregister_action(&self, command_id: CommandId) {
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
         // if it's not in the map anymore, REAPER won't be able to find it.
-        let mut command_by_id = self.command_by_id.borrow_mut();
-        if let Some(_command) = command_by_id.get_mut(&command_id) {
+        self.command_by_id.borrow_mut().remove(&command_id);
+        // Unregister if active
+        let mut active_data = self.active_data.borrow_mut();
+        let active_data = match active_data.as_mut() {
+            None => return,
+            Some(ad) => ad,
+        };
+        if let Some(gaccel_handle) = active_data.gaccel_registers.get(&command_id) {
             self.medium_session()
-                .plugin_register_remove_gaccel(gaccel_handle);
-            command_by_id.remove(&command_id);
+                .plugin_register_remove_gaccel(*gaccel_handle);
         }
     }
 
@@ -883,6 +916,7 @@ struct Command {
     ///   we wouldn't need `Rc` (for shared references), we would have to take `Box` instead.
     operation: Rc<RefCell<dyn FnMut()>>,
     kind: ActionKind,
+    description: ReaperString,
 }
 
 impl Debug for Command {
@@ -892,32 +926,32 @@ impl Debug for Command {
 }
 
 impl Command {
-    fn new(operation: Rc<RefCell<dyn FnMut()>>, kind: ActionKind) -> Command {
-        Command { operation, kind }
+    fn new(
+        operation: Rc<RefCell<dyn FnMut()>>,
+        kind: ActionKind,
+        description: ReaperString,
+    ) -> Command {
+        Command {
+            operation,
+            kind,
+            description,
+        }
     }
 }
 
 pub struct RegisteredAction {
     // For identifying the registered command (= the functions to be executed)
     command_id: CommandId,
-    // For identifying the registered action (= description, related keyboard shortcuts etc.)
-    gaccel_handle: NonNull<raw::gaccel_register_t>,
 }
 
 impl RegisteredAction {
-    fn new(
-        command_id: CommandId,
-        gaccel_handle: NonNull<raw::gaccel_register_t>,
-    ) -> RegisteredAction {
-        RegisteredAction {
-            command_id,
-            gaccel_handle,
-        }
+    fn new(command_id: CommandId) -> RegisteredAction {
+        RegisteredAction { command_id }
     }
 
     pub fn unregister(&self) {
         require_main_thread(Reaper::get().medium_reaper().low().plugin_context());
-        Reaper::get().unregister_command(self.command_id, self.gaccel_handle);
+        Reaper::get().unregister_action(self.command_id);
     }
 }
 

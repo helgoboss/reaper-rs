@@ -69,10 +69,7 @@ impl<'a> ReaperStringArg<'a> {
     }
 }
 
-// This is the most important conversion because it's the ideal case (zero-cost). For now we don't
-// offer a conversion from `CString` (owned) because it could confuse consumers. They might start to
-// think that string arguments are always consumed, which is not the case. If there's much demand,
-// we can still add that later.
+// This is the most important conversion because it's the ideal case (zero-cost).
 // TODO-high This can result in non-UTF-8 ReaperString! Try to remove it. This conversion should be
 //  crate-only.
 impl<'a> From<&'a CStr> for ReaperStringArg<'a> {
@@ -85,6 +82,15 @@ impl<'a> From<&'a CStr> for ReaperStringArg<'a> {
 // back into REAPER functions.
 impl<'a> From<&'a ReaperStr> for ReaperStringArg<'a> {
     fn from(s: &'a ReaperStr) -> Self {
+        ReaperStringArg(s.into())
+    }
+}
+
+// Sometimes a function needs an owned string because it wants to store it somewhere. The resulting
+// inner `Cow` is owned, no string copy occurs. The function can then use `into_owned()` to get
+// hold of the `ReaperString`.
+impl From<ReaperString> for ReaperStringArg<'static> {
+    fn from(s: ReaperString) -> Self {
         ReaperStringArg(s.into())
     }
 }
@@ -159,6 +165,11 @@ impl ReaperString {
     /// Consumes this value and spits out the contained C string.
     pub fn into_inner(self) -> CString {
         self.0
+    }
+
+    /// Converts to a slice.
+    pub fn as_reaper_str(&self) -> &ReaperStr {
+        self
     }
 
     /// Converts this value to a Rust string slice.
