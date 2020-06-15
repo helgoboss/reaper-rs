@@ -385,17 +385,25 @@ impl Drop for ReaperGuard {
 }
 
 impl Reaper {
-    /// The given initializer is executed only the first time this is called and when there's no
-    /// Arc sticking around anymore.
+    /// The given initializer is executed only the first time this is called.
+    ///
+    /// `activate()` is called whenever first first instance pops up. `deactivate()` is called
+    /// whenver the last instance goes away.
     pub fn guarded(initializer: impl FnOnce()) -> Arc<ReaperGuard> {
         // This is supposed to be called in the main thread. A check is not necessary, because this
         // is protected by a mutex and it will fail in the initializer and getter if called from
         // wrong thread.
         let mut result = REAPER_GUARD.lock().unwrap();
         if let Some(rc) = result.upgrade() {
+            // There's at least one active instance. No need to reactivate.
             return rc;
         }
-        initializer();
+        // There's no active instance.
+        INIT_INSTANCE.call_once(|| {
+            // If this is called, there was never an active instance in this session. Initialize!
+            initializer();
+        });
+        Reaper::get().activate();
         let arc = Arc::new(ReaperGuard);
         *result = Arc::downgrade(&arc);
         arc
@@ -563,7 +571,7 @@ impl Reaper {
 
     pub fn register_action(
         &self,
-        command_name: &CStr,
+        command_name: impl Into<ReaperStringArg<'static>>,
         description: impl Into<ReaperStringArg<'static>>,
         operation: impl FnMut() + 'static,
         kind: ActionKind,
