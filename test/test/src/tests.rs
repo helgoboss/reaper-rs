@@ -2425,7 +2425,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(mock.invocation_count(), 0);
         } else {
             assert_eq!(mock.invocation_count(), 1);
-            assert_eq!(mock.last_arg(), fx_chain.track().ok_or("no track")?);
+            assert_eq!(mock.last_arg(), *fx_chain.track().ok_or("no track")?);
         }
         Ok(())
     })

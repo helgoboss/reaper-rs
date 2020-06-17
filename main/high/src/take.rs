@@ -15,7 +15,7 @@ impl Take {
         FxChain::from_take(*self)
     }
 
-    pub fn track(&self) -> Track {
+    pub fn track(&self) -> &Track {
         todo!()
     }
 }

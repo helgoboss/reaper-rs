@@ -304,9 +304,9 @@ DOCKED 0
         ))
     }
 
-    pub fn track(&self) -> Option<Track> {
+    pub fn track(&self) -> Option<&Track> {
         match &self.context {
-            FxChainContext::Track { track, .. } => Some(track.clone()),
+            FxChainContext::Track { track, .. } => Some(track),
             // TODO-low This is dangerous. Some chunk functions which call track assume this is
             //  a track FX when this returns a track. Clean them up!
             FxChainContext::Take(take) => Some(take.track()),

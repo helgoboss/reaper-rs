@@ -184,7 +184,7 @@ impl Fx {
         FxParameter::new(self.clone(), index)
     }
 
-    pub fn track(&self) -> Option<Track> {
+    pub fn track(&self) -> Option<&Track> {
         self.chain.track()
     }
 
