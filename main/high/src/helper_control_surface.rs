@@ -27,6 +27,7 @@ use crate::run_loop_executor::RunLoopExecutor;
 use crate::run_loop_scheduler::RxTask;
 use crossbeam_channel::{Receiver, Sender};
 use std::cmp::Ordering;
+use std::iter::once;
 
 #[derive(Debug)]
 pub(super) struct HelperControlSurface {
@@ -192,7 +193,8 @@ impl HelperControlSurface {
         let mut project_datas = self.project_datas.borrow_mut();
         let track_datas = project_datas.entry(project.raw()).or_default();
         let old_track_count = track_datas.len() as u32;
-        let new_track_count = project.track_count();
+        // +1 for master track
+        let new_track_count = project.track_count() + 1;
         use Ordering::*;
         match new_track_count.cmp(&old_track_count) {
             Less => self.remove_invalid_media_tracks(project, track_datas),
@@ -202,7 +204,7 @@ impl HelperControlSurface {
     }
 
     fn add_missing_media_tracks(&self, project: Project, track_datas: &mut TrackDataMap) {
-        for t in project.tracks() {
+        for t in once(project.master_track()).chain(project.tracks()) {
             let media_track = t.raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let func = Reaper::get().medium_reaper();

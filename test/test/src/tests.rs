@@ -552,7 +552,8 @@ fn unsolo_track() -> TestStep {
         track.unsolo();
         // Then
         assert!(!track.is_solo());
-        assert_eq!(mock.invocation_count(), 1);
+        // Started to be 2 when making master track notification work
+        assert_eq!(mock.invocation_count(), 2);
         assert_eq!(mock.last_arg(), track);
         Ok(())
     })
@@ -574,7 +575,8 @@ fn solo_track() -> TestStep {
         track.solo();
         // Then
         assert!(track.is_solo());
-        assert_eq!(mock.invocation_count(), 1);
+        // Started to be 2 when making master track notification work
+        assert_eq!(mock.invocation_count(), 2);
         assert_eq!(mock.last_arg(), track);
         Ok(())
     })
@@ -890,6 +892,8 @@ fn select_track_exclusively() -> TestStep {
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
         let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
+        let master_track = project.master_track();
+        assert!(master_track.is_selected());
         track_1.unselect();
         track_2.select();
         track_3.select();
@@ -907,6 +911,7 @@ fn select_track_exclusively() -> TestStep {
         assert!(track_1.is_selected());
         assert!(!track_2.is_selected());
         assert!(!track_3.is_selected());
+        assert!(!master_track.is_selected());
         assert_eq!(
             project.selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
             1
@@ -922,7 +927,8 @@ fn select_track_exclusively() -> TestStep {
                 .count(),
             1
         );
-        assert_eq!(mock.invocation_count(), 3);
+        // 4 because master track is unselected, too
+        assert_eq!(mock.invocation_count(), 4);
         Ok(())
     })
 }
@@ -1218,9 +1224,8 @@ fn select_master_track() -> TestStep {
                 .count(),
             1
         );
-        // TODO REAPER doesn't notify us about master track selection currently
-        assert_eq!(mock.invocation_count(), 1);
-        assert_eq!(mock.last_arg().index(), Some(2));
+        assert_eq!(mock.invocation_count(), 2);
+        assert_eq!(mock.last_arg().index(), None);
         Ok(())
     })
 }
