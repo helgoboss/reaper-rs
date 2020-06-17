@@ -120,9 +120,16 @@ impl FxChain {
                 };
                 original_fx_chunk_region.parent_chunk()
             };
-            self.track()
+            self.track_fx_track()
                 .expect("working on track FX only")
                 .set_chunk(new_chunk)
+        }
+    }
+
+    fn track_fx_track(&self) -> Option<&Track> {
+        match self.context() {
+            FxChainContext::Track { track, .. } => Some(track),
+            _ => None,
         }
     }
 
@@ -152,7 +159,7 @@ impl FxChain {
                     .delete_region(&fx_chunk_region);
                 fx_chunk_region.parent_chunk()
             };
-            self.track()
+            self.track_fx_track()
                 .expect("working on track FX only")
                 .set_chunk(new_chunk);
         }
@@ -160,7 +167,7 @@ impl FxChain {
 
     pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
         let mut track_chunk = self
-            .track()
+            .track_fx_track()
             .expect("working on track FX only")
             .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
@@ -188,7 +195,7 @@ DOCKED 0
                 );
             }
         }
-        self.track()
+        self.track_fx_track()
             .expect("working on track FX only")
             .set_chunk(track_chunk);
         self.last_fx()
@@ -220,7 +227,7 @@ DOCKED 0
     // the chunk of the complete track, not just of the FX chain.
     pub fn chunk(&self) -> Option<ChunkRegion> {
         self.find_chunk_region(
-            self.track()
+            self.track_fx_track()
                 .expect("working on track FX only")
                 .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode),
         )
@@ -228,7 +235,7 @@ DOCKED 0
 
     pub fn set_chunk(&self, chunk: &str) {
         let mut track_chunk = self
-            .track()
+            .track_fx_track()
             .expect("works on track FX only")
             .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
         let chain_tag = self.find_chunk_region(track_chunk.clone());
@@ -242,7 +249,7 @@ DOCKED 0
                 track_chunk.insert_after_region_as_block(&track_chunk.region().first_line(), chunk);
             }
         }
-        self.track()
+        self.track_fx_track()
             .expect("works on track FX only")
             .set_chunk(track_chunk);
     }
@@ -264,14 +271,15 @@ DOCKED 0
     pub fn first_instrument_fx(&self) -> Option<Fx> {
         match self.context() {
             FxChainContext::Take(_) => todo!(),
-            _ => {
-                if self.is_input_fx() {
+            FxChainContext::Monitoring => None,
+            FxChainContext::Track { track, is_input_fx } => {
+                if *is_input_fx {
                     return None;
                 }
                 let fx_index = unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_instrument(self.track().expect("impossible").raw())
+                        .track_fx_get_instrument(track.raw())
                 };
                 fx_index.and_then(|i| self.fx_by_index(i))
             }
@@ -285,7 +293,7 @@ DOCKED 0
                 Reaper::get()
                     .medium_reaper()
                     .track_fx_add_by_name_add(
-                        self.track().expect("impossible").raw(),
+                        self.track_or_master_track().raw(),
                         original_fx_name,
                         if self.is_input_fx() {
                             TrackFxChainType::InputFxChain
@@ -302,6 +310,18 @@ DOCKED 0
             get_fx_guid(self, fx_index).expect("Couldn't get GUID"),
             fx_index,
         ))
+    }
+
+    /// For internal use only.
+    ///
+    /// We don't want to expose that monitoring FX is reachable via master track of current project
+    /// - although it has nothing to do with the current project.
+    fn track_or_master_track(&self) -> Track {
+        match self.context() {
+            FxChainContext::Monitoring => Reaper::get().current_project().master_track(),
+            FxChainContext::Track { track, .. } => track.clone(),
+            FxChainContext::Take(take) => take.track().clone(),
+        }
     }
 
     pub fn track(&self) -> Option<&Track> {
@@ -324,15 +344,22 @@ DOCKED 0
     pub fn first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
         let fx_index = match self.context() {
             FxChainContext::Take(_) => todo!(),
-            _ => unsafe {
+            FxChainContext::Track { track, .. } => unsafe {
                 Reaper::get().medium_reaper().track_fx_add_by_name_query(
-                    self.track().expect("impossible").raw(),
+                    track.raw(),
                     name,
                     if self.is_input_fx() {
                         TrackFxChainType::InputFxChain
                     } else {
                         TrackFxChainType::NormalFxChain
                     },
+                )?
+            },
+            FxChainContext::Monitoring => unsafe {
+                Reaper::get().medium_reaper().track_fx_add_by_name_query(
+                    Reaper::get().current_project().master_track().raw(),
+                    name,
+                    TrackFxChainType::InputFxChain,
                 )?
             },
         };
@@ -378,7 +405,8 @@ DOCKED 0
     pub fn is_available(&self) -> bool {
         match self.context() {
             FxChainContext::Take(_) => todo!(),
-            _ => self.track().expect("impossible").is_available(),
+            FxChainContext::Monitoring => true,
+            FxChainContext::Track { track, .. } => track.is_available(),
         }
     }
 }
