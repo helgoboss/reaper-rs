@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
-use crate::{ChunkRegion, Project, Reaper, Track};
+use crate::{ChunkRegion, FxChainContext, Project, Reaper, Track};
 use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg,
     TrackFxLocation,
@@ -38,51 +38,51 @@ impl PartialEq for Fx {
 
 impl Fx {
     // Main constructor. Use it if you have the GUID. index will be determined lazily.
-    pub(crate) fn from_guid_lazy_index(track: Track, guid: Guid, is_input_fx: bool) -> Fx {
+    pub(crate) fn from_guid_lazy_index(chain: FxChain, guid: Guid) -> Fx {
         Fx {
-            chain: FxChain::from_track(track, is_input_fx),
+            chain,
             guid: Some(guid),
             index: Cell::new(None),
         }
     }
 
     // Use this constructor if you are sure about the GUID and index
-    pub(crate) fn from_guid_and_index(
-        track: Track,
-        guid: Guid,
-        index: u32,
-        is_input_fx: bool,
-    ) -> Fx {
+    pub(crate) fn from_guid_and_index(chain: FxChain, guid: Guid, index: u32) -> Fx {
         Fx {
-            chain: FxChain::from_track(track, is_input_fx),
+            chain,
             guid: Some(guid),
             index: Cell::new(Some(index)),
         }
     }
 
     // Use this if you want to create a purely index-based FX without UUID tracking.
-    pub(crate) fn from_index_untracked(track: Track, index: u32, is_input_fx: bool) -> Fx {
+    pub(crate) fn from_index_untracked(chain: FxChain, index: u32) -> Fx {
         Fx {
-            chain: FxChain::from_track(track, is_input_fx),
+            chain,
             guid: None,
             index: Cell::new(Some(index)),
         }
     }
 
     pub fn project(&self) -> Option<Project> {
-        Some(self.track().project())
+        self.chain.project()
     }
 
     pub fn name(&self) -> ReaperString {
         self.load_if_necessary_or_complain();
-        unsafe {
-            Reaper::get().medium_reaper().track_fx_get_fx_name(
-                self.track().raw(),
-                self.query_index(),
-                256,
-            )
+        let buffer_size = 256;
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_fx_name(track.raw(), location, buffer_size)
+                        .expect("Couldn't get track name")
+                }
+            }
         }
-        .expect("Couldn't get track name")
     }
 
     pub fn chunk(&self) -> ChunkRegion {
@@ -126,18 +126,30 @@ impl Fx {
 
     pub fn parameter_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_num_params(self.track().raw(), self.query_index()) as u32
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_num_params(track.raw(), location)
+                }
+            }
         }
     }
 
     pub fn is_enabled(&self) -> bool {
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_enabled(self.track().raw(), self.query_index())
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_enabled(track.raw(), location)
+                }
+            }
         }
     }
 
@@ -146,15 +158,16 @@ impl Fx {
         name: impl Into<ReaperStringArg<'a>>,
         buffer_size: u32,
     ) -> Result<Vec<u8>, ReaperFunctionError> {
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_named_config_parm(
-                    self.track().raw(),
-                    self.query_index(),
-                    name,
-                    buffer_size,
-                )
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_named_config_parm(track.raw(), location, name, buffer_size)
+                }
+            }
         }
     }
 
@@ -171,12 +184,17 @@ impl Fx {
         FxParameter::new(self.clone(), index)
     }
 
-    pub fn track(&self) -> &Track {
+    pub fn track(&self) -> Option<Track> {
         self.chain.track()
     }
 
     pub fn query_index(&self) -> TrackFxLocation {
-        get_fx_query_index(self.index(), self.is_input_fx())
+        get_track_fx_location(self.index(), self.is_input_fx())
+    }
+
+    /// Panics if this is a take FX.
+    pub(crate) fn track_and_location(&self) -> (Track, TrackFxLocation) {
+        get_track_and_location(&self.chain, self.index())
     }
 
     pub fn index(&self) -> u32 {
@@ -197,7 +215,7 @@ impl Fx {
             None => return false, // Not loaded
             Some(index) => index,
         };
-        if !self.track().is_available() {
+        if !self.chain().is_available() {
             return false;
         }
         match self.guid {
@@ -211,7 +229,7 @@ impl Fx {
 
     // Returns None if no FX at that index anymore
     fn guid_by_index(&self, index: u32) -> Option<Guid> {
-        get_fx_guid(&self.track(), index, self.is_input_fx())
+        get_fx_guid(self.chain(), index)
     }
 
     fn load_by_guid(&self) -> bool {
@@ -242,6 +260,7 @@ impl Fx {
     // just a &str,  we would need to copy to achieve that ownership. We might need to
     // reconsider the ownership  requirement of ChunkRegions as a whole (but then we need to
     // care about lifetimes).
+    // TODO-low Supports track FX only
     pub fn set_chunk(&self, chunk_region: ChunkRegion) {
         // First replace GUID in chunk with the one of this FX
         let mut parent_chunk = chunk_region.parent_chunk();
@@ -254,28 +273,42 @@ impl Fx {
         self.replace_track_chunk_region(self.chunk(), chunk_region.content().deref());
     }
 
+    // TODO-low Supports track FX only
     pub fn set_tag_chunk(&self, chunk: &str) {
         self.replace_track_chunk_region(self.tag_chunk(), chunk);
     }
 
+    // TODO-low Supports track FX only
     pub fn set_state_chunk(&self, chunk: &str) {
         self.replace_track_chunk_region(self.state_chunk(), chunk);
     }
 
     pub fn floating_window(&self) -> Option<Hwnd> {
         self.load_if_necessary_or_complain();
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_floating_window(self.track().raw(), self.query_index())
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_floating_window(track.raw(), location)
+                }
+            }
         }
     }
 
     pub fn window_is_open(&self) -> bool {
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_open(self.track().raw(), self.query_index())
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_open(track.raw(), location)
+                }
+            }
         }
     }
 
@@ -299,19 +332,28 @@ impl Fx {
 
     pub fn show_in_floating_window(&self) {
         self.load_if_necessary_or_complain();
-        unsafe {
-            Reaper::get().medium_reaper().track_fx_show(
-                self.track().raw(),
-                FxShowInstruction::ShowFloatingWindow(self.query_index()),
-            );
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_show(
+                        track.raw(),
+                        FxShowInstruction::ShowFloatingWindow(location),
+                    );
+                }
+            }
         }
     }
 
+    // TODO-low Supports track FX only
     fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {
         let mut old_chunk = old_chunk_region.parent_chunk();
         old_chunk.replace_region(&old_chunk_region, new_content);
         std::mem::drop(old_chunk_region);
-        self.track().set_chunk(old_chunk);
+        self.track()
+            .expect("only track FX supported")
+            .set_chunk(old_chunk);
     }
 
     pub fn chain(&self) -> &FxChain {
@@ -319,22 +361,26 @@ impl Fx {
     }
 
     pub fn enable(&self) {
-        unsafe {
-            Reaper::get().medium_reaper().track_fx_set_enabled(
-                self.track().raw(),
-                self.query_index(),
-                true,
-            );
-        }
+        self.set_enabled(true);
     }
 
     pub fn disable(&self) {
-        unsafe {
-            Reaper::get().medium_reaper().track_fx_set_enabled(
-                self.track().raw(),
-                self.query_index(),
-                false,
-            );
+        self.set_enabled(false);
+    }
+
+    fn set_enabled(&self, enabled: bool) {
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_set_enabled(
+                        track.raw(),
+                        location,
+                        enabled,
+                    );
+                }
+            }
         }
     }
 
@@ -363,71 +409,118 @@ impl Fx {
 
     pub fn preset_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_preset_index(self.track().raw(), self.query_index())
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_preset_index(track.raw(), location)
+                        .expect("Couldn't get preset count")
+                        .count
+                }
+            }
         }
-        .expect("Couldn't get preset count")
-        .count
     }
 
     pub fn preset_index(&self) -> Option<u32> {
         self.load_if_necessary_or_complain();
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_preset_index(self.track().raw(), self.query_index())
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_preset_index(track.raw(), location)
+                        .expect("Couldn't get preset count")
+                        .index
+                }
+            }
         }
-        .expect("Couldn't get preset count")
-        .index
     }
 
     pub fn activate_preset(&self, preset: FxPresetRef) {
         self.load_if_necessary_or_complain();
-        unsafe {
-            let _ = Reaper::get().medium_reaper().track_fx_set_preset_by_index(
-                self.track().raw(),
-                self.query_index(),
-                preset,
-            );
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    let _ = Reaper::get().medium_reaper().track_fx_set_preset_by_index(
+                        track.raw(),
+                        location,
+                        preset,
+                    );
+                }
+            }
         }
     }
 
     pub fn preset_is_dirty(&self) -> bool {
         self.load_if_necessary_or_complain();
-        !unsafe {
-            Reaper::get().medium_reaper().track_fx_get_preset(
-                self.track().raw(),
-                self.query_index(),
-                0,
-            )
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                let result = unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_preset(track.raw(), location, 0)
+                };
+                !result.state_matches_preset
+            }
         }
-        .state_matches_preset
     }
 
     pub fn preset_name(&self) -> Option<ReaperString> {
         self.load_if_necessary_or_complain();
-        unsafe {
-            Reaper::get().medium_reaper().track_fx_get_preset(
-                self.track().raw(),
-                self.query_index(),
-                2000,
-            )
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_preset(track.raw(), location, 2000)
+                        .name
+                }
+            }
         }
-        .name
     }
 }
 
-pub fn get_fx_guid(track: &Track, index: u32, is_input_fx: bool) -> Option<Guid> {
-    let query_index = get_fx_query_index(index, is_input_fx);
-    let internal = unsafe {
-        Reaper::get()
-            .medium_reaper()
-            .track_fx_get_fx_guid(track.raw(), query_index)
+/// Panics if a take FX chain is passed.
+fn get_track_and_location(chain: &FxChain, index: u32) -> (Track, TrackFxLocation) {
+    match chain.context() {
+        FxChainContext::Monitoring => {
+            let track = Reaper::get().current_project().master_track();
+            let location = TrackFxLocation::InputFxChain(index);
+            (track, location)
+        }
+        FxChainContext::Track { track, is_input_fx } => {
+            let location = get_track_fx_location(index, *is_input_fx);
+            (track.clone(), location)
+        }
+        FxChainContext::Take(_) => panic!("not possible for take FX"),
     }
-    .ok();
-    internal.map(Guid::new)
+}
+
+pub fn get_fx_guid(chain: &FxChain, index: u32) -> Option<Guid> {
+    let raw_guid = match chain.context() {
+        FxChainContext::Take(_) => todo!(),
+        _ => {
+            let (track, location) = get_track_and_location(chain, index);
+            unsafe {
+                Reaper::get()
+                    .medium_reaper()
+                    .track_fx_get_fx_guid(track.raw(), location)
+                    .ok()
+            }
+        }
+    };
+    raw_guid.map(Guid::new)
 }
 
 pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
@@ -438,7 +531,7 @@ pub fn get_index_from_query_index(query_index: i32) -> (u32, bool) {
     }
 }
 
-pub fn get_fx_query_index(index: u32, is_input_fx: bool) -> TrackFxLocation {
+pub fn get_track_fx_location(index: u32, is_input_fx: bool) -> TrackFxLocation {
     use TrackFxLocation::*;
     if is_input_fx {
         InputFxChain(index)

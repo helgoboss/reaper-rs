@@ -1,4 +1,4 @@
-use crate::FxChain;
+use crate::{FxChain, Track};
 use reaper_medium::MediaItemTake;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -13,5 +13,9 @@ impl Take {
 
     pub fn fx_chain(&self) -> FxChain {
         FxChain::from_take(*self)
+    }
+
+    pub fn track(&self) -> Track {
+        todo!()
     }
 }

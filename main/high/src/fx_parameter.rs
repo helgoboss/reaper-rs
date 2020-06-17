@@ -1,9 +1,7 @@
 use crate::fx::Fx;
 
-use crate::Reaper;
-use reaper_medium::{
-    GetParameterStepSizesResult, MediaTrack, ReaperNormalizedFxParamValue, ReaperString,
-};
+use crate::{FxChain, FxChainContext, Reaper};
+use reaper_medium::{GetParameterStepSizesResult, ReaperNormalizedFxParamValue, ReaperString};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FxParameter {
@@ -23,27 +21,39 @@ impl FxParameter {
     }
 
     pub fn set_normalized_value(&self, normalized_value: ReaperNormalizedFxParamValue) {
-        let _ = unsafe {
-            Reaper::get().medium_reaper().track_fx_set_param_normalized(
-                self.track_raw(),
-                self.fx.query_index(),
-                self.index,
-                normalized_value,
-            )
+        let _ = match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_set_param_normalized(
+                        track.raw(),
+                        location,
+                        self.index,
+                        normalized_value,
+                    )
+                }
+            }
         };
     }
 
     pub fn reaper_value(&self) -> ReaperNormalizedFxParamValue {
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_param_normalized(
-                    self.fx.track().raw(),
-                    self.fx.query_index(),
-                    self.index,
-                )
-                .unwrap()
+        match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_param_normalized(track.raw(), location, self.index)
+                        .unwrap()
+                }
+            }
         }
+    }
+
+    fn chain(&self) -> &FxChain {
+        self.fx().chain()
     }
 
     pub fn is_available(&self) -> bool {
@@ -51,30 +61,31 @@ impl FxParameter {
     }
 
     pub fn name(&self) -> ReaperString {
-        unsafe {
-            Reaper::get().medium_reaper().track_fx_get_param_name(
-                self.track_raw(),
-                self.fx.query_index(),
-                self.index,
-                256,
-            )
+        match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_param_name(track.raw(), location, self.index, 256)
+                        .expect("Couldn't get FX parameter name")
+                }
+            }
         }
-        .expect("Couldn't get FX parameter name")
-    }
-
-    fn track_raw(&self) -> MediaTrack {
-        self.fx.track().raw()
     }
 
     pub fn character(&self) -> FxParameterCharacter {
-        let result = unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_parameter_step_sizes(
-                    self.track_raw(),
-                    self.fx.query_index(),
-                    self.index,
-                )
+        let result = match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_parameter_step_sizes(track.raw(), location, self.index)
+                }
+            }
         };
         use GetParameterStepSizesResult::*;
         match result {
@@ -85,17 +96,18 @@ impl FxParameter {
     }
 
     pub fn formatted_value(&self) -> ReaperString {
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_formatted_param_value(
-                    self.track_raw(),
-                    self.fx.query_index(),
-                    self.index,
-                    256,
-                )
+        match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_formatted_param_value(track.raw(), location, self.index, 256)
+                        .expect("Couldn't format FX param value")
+                }
+            }
         }
-        .expect("Couldn't format FX param value")
     }
 
     pub fn fx(&self) -> &Fx {
@@ -110,18 +122,24 @@ impl FxParameter {
         &self,
         normalized_value: ReaperNormalizedFxParamValue,
     ) -> ReaperString {
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_format_param_value_normalized(
-                    self.track_raw(),
-                    self.fx.query_index(),
-                    self.index,
-                    normalized_value,
-                    256,
-                )
+        match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_format_param_value_normalized(
+                            track.raw(),
+                            location,
+                            self.index,
+                            normalized_value,
+                            256,
+                        )
+                        .expect("Couldn't format normalized value")
+                }
+            }
         }
-        .expect("Couldn't format normalized value")
     }
 
     // Returns a normalized value
@@ -129,15 +147,17 @@ impl FxParameter {
     // TODO-low This is a too opinionated function in that it already interprets and processes some
     // of REAPER's return  values.
     pub fn step_size(&self) -> Option<f64> {
-        let result = unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_get_parameter_step_sizes(
-                    self.track_raw(),
-                    self.fx.query_index(),
-                    self.index,
-                )
-        }?;
+        let result = match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_parameter_step_sizes(track.raw(), location, self.index)?
+                }
+            }
+        };
         use GetParameterStepSizesResult::*;
         match result {
             Normal {
@@ -161,12 +181,18 @@ impl FxParameter {
 
     // Doesn't necessarily return normalized values
     pub fn value_range(&self) -> FxParameterValueRange {
-        let result = unsafe {
-            Reaper::get().medium_reaper().track_fx_get_param_ex(
-                self.track_raw(),
-                self.fx.query_index(),
-                self.index,
-            )
+        let result = match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_get_param_ex(
+                        track.raw(),
+                        location,
+                        self.index,
+                    )
+                }
+            }
         };
         FxParameterValueRange {
             min_val: result.min_value,

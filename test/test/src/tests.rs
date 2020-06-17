@@ -2183,7 +2183,7 @@ fn set_fx_chain_chunk(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Set fx chain chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let track = fx_chain.track();
+        let track = fx_chain.track().ok_or("no track")?;
         let other_fx_chain = if fx_chain.is_input_fx() {
             track.normal_fx_chain()
         } else {
@@ -2425,7 +2425,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(mock.invocation_count(), 0);
         } else {
             assert_eq!(mock.invocation_count(), 1);
-            assert_eq!(mock.last_arg(), *fx_chain.track());
+            assert_eq!(mock.last_arg(), fx_chain.track().ok_or("no track")?);
         }
         Ok(())
     })
@@ -2441,10 +2441,11 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find fx")?;
             let p = fx.parameter_by_index(0);
             p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
+            let track = fx.track().ok_or("no track")?;
             let other_fx_chain = if fx_chain.is_input_fx() {
-                fx.track().normal_fx_chain()
+                track.normal_fx_chain()
             } else {
-                fx.track().input_fx_chain()
+                track.input_fx_chain()
             };
             let fx_on_other_fx_chain = other_fx_chain
                 .add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"))
@@ -2596,7 +2597,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         move |_session, _| {
             // Given
             let fx_chain = get_fx_chain()?;
-            let track = fx_chain.track();
+            let track = fx_chain.track().ok_or("no track")?;
             // When
             let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
             let fx_2 = fx_chain
@@ -2668,8 +2669,8 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
                     .expect("FX 1 file name is not valid unicode"),
                 "reasynth.dll" | "reasynth.vst.so" | "reasynth.vst.dylib"
             ));
-            assert_eq!(fx_1.track(), track);
-            assert_eq!(fx_2.track(), track);
+            assert_eq!(fx_1.track().ok_or("no track")?, track);
+            assert_eq!(fx_2.track().ok_or("no track")?, track);
             assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx_2.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx_1.chain(), &fx_chain);
