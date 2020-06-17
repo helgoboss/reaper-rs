@@ -184,6 +184,9 @@ impl Fx {
         FxParameter::new(self.clone(), index)
     }
 
+    /// Will return None if monitoring FX.
+    ///
+    /// In some scenarios it makes sense to fall back to the master track of the current project.
     pub fn track(&self) -> Option<&Track> {
         self.chain.track()
     }
