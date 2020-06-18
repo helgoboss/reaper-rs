@@ -39,8 +39,6 @@ pub(super) struct HelperControlSurface {
     main_thread_executor: RunLoopExecutor,
     // This is for scheduling rxRust observables.
     main_thread_rx_task_receiver: Receiver<RxTask>,
-    // For change tracking
-    initial_scan_done: bool,
     last_active_project: Cell<Project>,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
@@ -90,12 +88,11 @@ impl HelperControlSurface {
         let reaper = Reaper::get();
         let version = reaper.version();
         let reaper_version_5_95 = ReaperVersion::new("5.95");
-        HelperControlSurface {
+        let surface = HelperControlSurface {
             main_thread_task_sender,
             main_thread_task_receiver,
             main_thread_executor: executor,
             main_thread_rx_task_receiver,
-            initial_scan_done: false,
             last_active_project: Cell::new(reaper.current_project()),
             num_track_set_changes_left_to_be_propagated: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
@@ -105,7 +102,17 @@ impl HelperControlSurface {
             supports_detection_of_input_fx: version >= reaper_version_5_95,
             // since pre2 to be accurate but so what
             supports_detection_of_input_fx_in_set_fx_change: version >= reaper_version_5_95,
-        }
+        };
+        // REAPER doesn't seem to call this automatically when the surface is registered. In our
+        // case it's important to call this not at the first change of something (e.g. arm
+        // button pressed) but immediately. Because it captures the initial project/track/FX
+        // state. If we don't do this immediately, then it happens that change events (e.g.
+        // track arm changed) are not reported because the initial state was unknown.
+        // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more lazily
+        // on activate?  But before activate we can do almost nothing because
+        // execute_on_main_thread doesn't work.
+        surface.set_track_list_change();
+        surface
     }
 
     fn state(&self) -> State {
@@ -537,19 +544,6 @@ impl HelperControlSurface {
 
 impl ControlSurface for HelperControlSurface {
     fn run(&mut self) {
-        // Do initial scan if not done already
-        if !self.initial_scan_done {
-            // REAPER doesn't seem to call this automatically when the surface is registered. In our
-            // case it's important to call this not at the first change of something (e.g. arm
-            // button pressed) but immediately. Because it captures the initial project/track/FX
-            // state. If we don't do this immediately, then it happens that change events (e.g.
-            // track arm changed) are not reported because the initial state was unknown.
-            // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more
-            // lazily on activate?  But before activate we can do almost nothing because
-            // execute_on_main_thread doesn't work.
-            self.set_track_list_change();
-            self.initial_scan_done = true;
-        }
         // Invoke custom idle code
         Reaper::get()
             .subjects
