@@ -304,6 +304,7 @@ pub(super) struct MainSubjects {
     pub(super) fx_reordered: EventStreamSubject<Track>,
     pub(super) fx_parameter_value_changed: EventStreamSubject<FxParameter>,
     pub(super) fx_parameter_touched: EventStreamSubject<FxParameter>,
+    pub(super) fx_preset_changed: EventStreamSubject<Fx>,
     pub(super) master_tempo_changed: EventStreamSubject<()>,
     pub(super) master_tempo_touched: EventStreamSubject<()>,
     pub(super) master_playrate_changed: EventStreamSubject<()>,
@@ -354,6 +355,7 @@ impl MainSubjects {
             fx_reordered: default(),
             fx_parameter_value_changed: default(),
             fx_parameter_touched: default(),
+            fx_preset_changed: default(),
             master_tempo_changed: default(),
             master_tempo_touched: default(),
             master_playrate_changed: default(),
@@ -709,6 +711,11 @@ impl Reaper {
     pub fn fx_parameter_touched(&self) -> impl ReactiveEvent<FxParameter> {
         self.require_main_thread();
         self.subjects.fx_parameter_touched.borrow().clone()
+    }
+
+    pub fn fx_preset_changed(&self) -> impl ReactiveEvent<Fx> {
+        self.require_main_thread();
+        self.subjects.fx_preset_changed.borrow().clone()
     }
 
     pub fn track_input_monitoring_changed(&self) -> impl ReactiveEvent<Track> {

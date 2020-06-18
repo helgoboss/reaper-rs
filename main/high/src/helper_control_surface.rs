@@ -10,10 +10,11 @@ use reaper_medium::{
     AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperVersion, ReaperVolumeValue, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
-    SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
-    TrackFxChainType, TrackLocation, VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    ExtTrackFxPresetChangedArgs, InputMonitoringMode, MediaTrack, ReaProject,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
+    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
+    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackLocation,
+    VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
 
@@ -921,6 +922,19 @@ impl ControlSurface for HelperControlSurface {
                 .borrow_mut()
                 .next(());
         }
+        1
+    }
+
+    fn ext_track_fx_preset_changed(&self, args: ExtTrackFxPresetChangedArgs) -> i32 {
+        let track = Track::new(args.track, None);
+        let fx = track
+            .fx_by_query_index(args.fx_location.to_raw())
+            .expect("preset changed but FX not found");
+        Reaper::get()
+            .subjects
+            .fx_preset_changed
+            .borrow_mut()
+            .next(fx);
         1
     }
 }

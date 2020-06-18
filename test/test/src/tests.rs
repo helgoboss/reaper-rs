@@ -21,10 +21,11 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
-    AutomationMode, Bpm, CommandId, Db, GangBehavior, InputMonitoringMode, MasterTrackBehavior,
-    MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate, PlaybackSpeedFactor,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue, RecordingInput,
-    StuffMidiMessageTarget, TrackLocation, UndoBehavior, ValueChange,
+    AutomationMode, Bpm, CommandId, Db, FxPresetRef, GangBehavior, InputMonitoringMode,
+    MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate,
+    PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
+    ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackLocation, UndoBehavior,
+    ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -1998,7 +1999,8 @@ fn create_fx_steps(
         query_fx_floating_window(get_fx_chain.clone()),
         show_fx_in_floating_window(get_fx_chain.clone()),
         add_track_js_fx_by_original_name(get_fx_chain.clone()),
-        query_track_js_fx_by_index(get_fx_chain),
+        query_track_js_fx_by_index(get_fx_chain.clone()),
+        change_fx_preset(get_fx_chain),
     ];
     steps.into_iter().map(move |s| TestStep {
         name: format!("{} - {}", prefix, s.name).into(),
@@ -2554,6 +2556,30 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
         assert!(fx.preset_index().is_none());
         assert!(fx.preset_name().is_none());
         assert!(fx.preset_is_dirty());
+        Ok(())
+    })
+}
+
+fn change_fx_preset(get_fx_chain: GetFxChain) -> TestStep {
+    step(AllVersions, "Change FX preset", move |reaper, step| {
+        // Given
+        let fx_chain = get_fx_chain()?;
+        let fx = fx_chain
+            .add_fx_by_original_name(c_str!("ReaEq (Cockos)"))
+            .ok_or("Couldn't add ReaEq")?;
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            reaper
+                .fx_preset_changed()
+                .take_until(step.finished)
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        fx.activate_preset(FxPresetRef::Preset(2));
+        // Then
+        // Should notify since REAPER v6.12+dev0617 ... but maybe not if set programmatically?
+        assert_eq!(mock.invocation_count(), 0);
         Ok(())
     })
 }

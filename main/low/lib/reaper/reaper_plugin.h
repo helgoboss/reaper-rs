@@ -1120,6 +1120,7 @@ public:
 #define CSURF_EXT_SETFXOPEN 0x00010012 // parm1=(MediaTrack*)track, parm2=(int*)fxidx, parm3=0 if UI closed, !0 if open
 #define CSURF_EXT_SETFXCHANGE 0x00010013 // parm1=(MediaTrack*)track, whenever FX are added, deleted, or change order
 #define CSURF_EXT_SETPROJECTMARKERCHANGE 0x00010014 // whenever project markers are changed
+#define CSURF_EXT_TRACKFX_PRESET_CHANGED 0x00010015 // parm1=(MediaTrack*)track, parm2=(int*)fxidx
 #define CSURF_EXT_SETFXPARAM_RECFX 0x00010018 // Like CSURF_EXT_SETFXPARAM but on input FX chain
 #define CSURF_EXT_SUPPORTS_EXTENDED_TOUCH 0x00080001 // returns nonzero if GetTouchState can take isPan=2 for width, etc
 

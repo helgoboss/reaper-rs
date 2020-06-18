@@ -219,6 +219,14 @@ pub trait ControlSurface: Debug {
         let _ = args;
         0
     }
+
+    /// Called when a preset of a track FX has been selected.
+    ///
+    /// Since REAPER v6.12+dev0617
+    fn ext_track_fx_preset_changed(&self, args: ExtTrackFxPresetChangedArgs) -> i32 {
+        let _ = args;
+        0
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -365,6 +373,12 @@ pub struct ExtSetFxChangeArgs {
     /// In REAPER < 5.95 this is `None` because we can't know if the change happened in the normal
     /// or input FX chain.
     pub fx_chain_type: Option<TrackFxChainType>,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct ExtTrackFxPresetChangedArgs {
+    pub track: MediaTrack,
+    pub fx_location: TrackFxLocation,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -736,6 +750,13 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                             play_rate: deref_as(parm2),
                         })
                 }
+                raw::CSURF_EXT_TRACKFX_PRESET_CHANGED => {
+                    self.delegate
+                        .ext_track_fx_preset_changed(ExtTrackFxPresetChangedArgs {
+                            track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                            fx_location: get_as_track_fx_location(parm2).expect("invalid FX index"),
+                        })
+                }
                 _ => 0,
             }
         };
@@ -764,4 +785,11 @@ unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
 
 unsafe fn interpret_as_bool(ptr: *mut c_void) -> bool {
     !ptr.is_null()
+}
+
+unsafe fn get_as_track_fx_location(
+    ptr: *mut c_void,
+) -> Result<TrackFxLocation, TryFromRawError<i32>> {
+    let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
+    TrackFxLocation::try_from_raw(fx_index)
 }
