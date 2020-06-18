@@ -385,7 +385,7 @@ mod codegen {
                     if !WIN32_FUNCTIONS.contains(p.name.to_string().as_str()) {
                         return None;
                     }
-                    Some(generate_function(&p, p.name.clone()))
+                    Some(generate_function(&p, p.name.clone(), "system"))
                 })
                 .collect();
             let windows_methods: Vec<_> = fn_ptrs
@@ -582,15 +582,15 @@ mod codegen {
             })
         }
 
-        /// Generates a "extern C" free function definition
-        fn generate_function(ptr: &FnPtr, name: Ident) -> Item {
+        /// Generates a "extern C" or "extern system" free function definition
+        fn generate_function(ptr: &FnPtr, name: Ident, extern_type: &str) -> Item {
             Item::ForeignMod(ItemForeignMod {
                 attrs: vec![],
                 abi: Abi {
                     extern_token: Extern {
                         span: Span::call_site(),
                     },
-                    name: Some(syn::LitStr::new("C", Span::call_site())),
+                    name: Some(syn::LitStr::new(extern_type, Span::call_site())),
                 },
                 brace_token: syn::token::Brace {
                     span: Span::call_site(),

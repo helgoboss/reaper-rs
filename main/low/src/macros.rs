@@ -28,7 +28,7 @@ macro_rules! reaper_vst_plugin {
             #[cfg(target_family = "windows")]
             #[allow(non_snake_case)]
             #[no_mangle]
-            extern "C" fn DllMain(
+            extern "system" fn DllMain(
                 hinstance: reaper_low::raw::HINSTANCE,
                 reason: u32,
                 _: *const u8,
