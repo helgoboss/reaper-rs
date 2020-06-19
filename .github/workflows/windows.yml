@@ -44,15 +44,15 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: test-plug-ins
+          path: target/debug/*.dll
       - name: cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: -- --nocapture
-      - uses: actions/upload-artifact@v2
-        with:
-          name: test-plug-ins
-          path: target/debug/*.dll
 
   clippy:
     name: Clippy

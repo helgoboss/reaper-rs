@@ -225,6 +225,8 @@ impl HelperControlSurface {
                         guid: get_media_track_guid(media_track),
                     }
                 };
+                // TODO-low Use try_borrow_mut(). Then this just doesn't do anything if this event
+                //  is currently thrown already. Right now it would panic, which is unreasonable.
                 Reaper::get()
                     .subjects
                     .track_added

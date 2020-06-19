@@ -758,6 +758,8 @@ impl Reaper {
 
     pub fn track_mute_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
+        // TODO-medium Use try_borrow() and emit a helpful error message, e.g.
+        //  "Don't subscribe to an event x while this event is raised! Defer the subscription."
         self.subjects.track_mute_changed.borrow().clone()
     }
 
