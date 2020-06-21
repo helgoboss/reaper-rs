@@ -11,8 +11,7 @@ use rxrust::prelude::*;
 
 use std::collections::VecDeque;
 
-use reaper_medium::ReaperStringArg;
-
+use slog::info;
 use std::iter::FromIterator;
 use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
@@ -106,6 +105,9 @@ fn log_step(step_index: usize, name: &str) {
     log(format!("{}. {}\n", step_index + 1, name));
 }
 
-fn log<'a>(msg: impl Into<ReaperStringArg<'a>>) {
-    Reaper::get().show_console_msg(msg)
+fn log(msg: impl Into<String>) {
+    let msg = msg.into();
+    let reaper = Reaper::get();
+    info!(reaper.logger(), "{}", &msg);
+    reaper.show_console_msg(msg)
 }
