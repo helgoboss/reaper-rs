@@ -503,9 +503,9 @@ fn register_and_unregister_action() -> TestStep {
             assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest");
             assert!(!action.is_on());
             assert_eq!(action.name().to_str(), "reaper-rs test action");
-            reaper.deactivate();
+            reaper.go_to_sleep()?;
             assert!(!action.is_available());
-            reaper.activate();
+            reaper.wake_up()?;
             assert!(action.is_available());
             reg.unregister();
             assert!(!action.is_available());

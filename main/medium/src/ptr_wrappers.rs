@@ -8,6 +8,59 @@ use reaper_low::raw;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
 
+/// Handle which is returned from some session functions that register something.
+///
+/// This handle can be used to explicitly unregister the registered object and regain ownership of
+/// the struct which has been passed in originally.
+#[derive(Eq, PartialEq, Hash, Debug)]
+pub struct RegistrationHandle<T> {
+    /// (Thin) pointer for restoring the value stored in the session as its original type.
+    ///
+    /// In theory the stored trait object itself (`Box<dyn ...>`>) plus the generic parameter `T`
+    /// would provide enough information to restore the value as its original type. But a trait
+    /// object is stored as fat pointer and there's currently no stable way to cast a fat pointer
+    /// back to a thin pointer, even we know the concrete type. That's why we also store the thin
+    /// pointer here, which we have access to before casting to a trait object.
+    medium_ptr: NonNull<T>,
+    /// (Thin) pointer for unregistering the thing that has been passed to REAPER.
+    reaper_ptr: NonNull<c_void>,
+}
+
+impl<T> Clone for RegistrationHandle<T> {
+    fn clone(&self) -> Self {
+        Self {
+            medium_ptr: self.medium_ptr,
+            reaper_ptr: self.reaper_ptr,
+        }
+    }
+}
+
+impl<T> Copy for RegistrationHandle<T> {}
+
+impl<T> RegistrationHandle<T> {
+    pub(crate) fn new(
+        medium_ptr: NonNull<T>,
+        reaper_ptr: NonNull<c_void>,
+    ) -> RegistrationHandle<T> {
+        RegistrationHandle {
+            medium_ptr,
+            reaper_ptr,
+        }
+    }
+
+    /// Restores the value as its original type and makes it owned by putting it into a box.
+    ///
+    /// Make sure you have leaked the other box after having taken it out from its storage.
+    /// Otherwise there will be a double drop.
+    pub(crate) unsafe fn restore_original(&self) -> Box<T> {
+        Box::from_raw(self.medium_ptr.as_ptr())
+    }
+
+    pub(crate) fn reaper_ptr(&self) -> NonNull<c_void> {
+        self.reaper_ptr
+    }
+}
+
 // Case 1: Internals exposed: no | vtable: no
 // ==========================================
 

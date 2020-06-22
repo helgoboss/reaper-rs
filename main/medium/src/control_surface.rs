@@ -466,17 +466,21 @@ pub(crate) struct DelegatingControlSurface {
 
 impl DelegatingControlSurface {
     pub fn new(
-        delegate: impl ControlSurface + 'static,
+        delegate: Box<dyn ControlSurface>,
         reaper_version: &ReaperVersion,
     ) -> DelegatingControlSurface {
         let reaper_version_5_95: ReaperVersion = ReaperVersion::new("5.95");
         DelegatingControlSurface {
-            delegate: Box::new(delegate),
+            delegate,
             // since pre1,
             supports_detection_of_input_fx: reaper_version >= &reaper_version_5_95,
             // since pre2 to be accurate but so what
             supports_detection_of_input_fx_in_set_fx_change: reaper_version >= &reaper_version_5_95,
         }
+    }
+
+    pub fn delegate(self) -> Box<dyn ControlSurface> {
+        self.delegate
     }
 
     unsafe fn get_as_qualified_fx_ref(

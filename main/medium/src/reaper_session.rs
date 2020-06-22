@@ -11,10 +11,11 @@ use crate::{
     delegating_toggle_action, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
     HookPostCommand, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister,
     RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperStringArg,
-    RegistrationObject, ToggleAction,
+    RegistrationHandle, RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 use std::collections::{HashMap, HashSet};
+use std::os::raw::c_void;
 
 /// This is the main hub for accessing medium-level API functions.
 ///
@@ -56,10 +57,19 @@ use std::collections::{HashMap, HashSet};
 #[derive(Debug, Default)]
 pub struct ReaperSession {
     reaper: Reaper<MainThreadScope>,
+    // The following
     gaccel_registers: InfostructKeeper<OwnedGaccelRegister, raw::gaccel_register_t>,
+    /// Provides a safe place in memory for each registered audio hook. While in here, the audio
+    /// hook is considered to be owned by REAPER, meaning that REAPER is supposed to have
+    /// exclusive access to it.
     audio_hook_registers: InfostructKeeper<OwnedAudioHookRegister, raw::audio_hook_register_t>,
-    csurf_insts: HashMap<NonNull<raw::IReaperControlSurface>, Box<Box<dyn IReaperControlSurface>>>,
+    /// Provides a safe place in memory for each registered control surface. While in here, the
+    /// control surface is considered to be owned by REAPER, meaning that REAPER is supposed to
+    /// have exclusive access to it.
+    csurf_insts: HashMap<NonNull<c_void>, Box<Box<dyn IReaperControlSurface>>>,
+    /// Keep track of plug-in registrations so they can be unregistered automatically on drop.
     plugin_registrations: HashSet<RegistrationObject<'static>>,
+    /// Keep track of audio hook registrations so they can be unregistered automatically on drop.
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
 }
 
@@ -387,41 +397,97 @@ impl ReaperSession {
     ///         println!("Tracks changed");
     ///     }
     /// }
-    /// session.plugin_register_add_csurf_inst(MyControlSurface);
+    /// session.plugin_register_add_csurf_inst(Box::new(MyControlSurface));
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     ///
     /// [`plugin_register_remove_csurf_inst()`]: #method.plugin_register_remove_csurf_inst
-    pub fn plugin_register_add_csurf_inst(
+    pub fn plugin_register_add_csurf_inst<T>(
         &mut self,
-        control_surface: impl ControlSurface + 'static,
-    ) -> ReaperFunctionResult<NonNull<raw::IReaperControlSurface>> {
-        let rust_control_surface =
-            DelegatingControlSurface::new(control_surface, &self.reaper.get_app_version());
-        // We need to box it twice in order to obtain a thin pointer for passing to C as callback
-        // target
-        let rust_control_surface: Box<Box<dyn IReaperControlSurface>> =
-            Box::new(Box::new(rust_control_surface));
-        let cpp_control_surface =
-            unsafe { add_cpp_control_surface(rust_control_surface.as_ref().into()) };
+        control_surface: Box<T>,
+    ) -> ReaperFunctionResult<RegistrationHandle<T>>
+    where
+        T: ControlSurface + 'static,
+    {
+        // Create thin pointer of control_surface before making it a trait object (for being able to
+        // restore the original control_surface later).
+        let control_surface_thin_ptr: NonNull<T> = control_surface.as_ref().into();
+        // Create low-level Rust control surface which delegates to the medium-level one.
+        let low_cs = DelegatingControlSurface::new(control_surface, &self.reaper.get_app_version());
+        // Create the C++ counterpart surface (we need to box the Rust side twice in order to obtain
+        // a thin pointer for passing it to C++ as callback target).
+        let double_boxed_low_cs: Box<Box<dyn IReaperControlSurface>> = Box::new(Box::new(low_cs));
+        let cpp_cs = unsafe { add_cpp_control_surface(double_boxed_low_cs.as_ref().into()) };
+        // Store the low-level Rust control surface in memory. Although we keep it here,
+        // conceptually it's owned by REAPER, so we should not access it while being registered.
+        let handle = RegistrationHandle::new(control_surface_thin_ptr, cpp_cs.cast());
         self.csurf_insts
-            .insert(cpp_control_surface, rust_control_surface);
-        unsafe { self.plugin_register_add(RegistrationObject::CsurfInst(cpp_control_surface))? };
-        Ok(cpp_control_surface)
+            .insert(handle.reaper_ptr(), double_boxed_low_cs);
+        // Register the C++ control surface at REAPER
+        unsafe { self.plugin_register_add(RegistrationObject::CsurfInst(cpp_cs))? };
+        // Return a handle which the consumer can use to unregister
+        Ok(handle)
     }
 
-    /// Unregisters a hidden control surface.
-    pub fn plugin_register_remove_csurf_inst(
+    /// Unregisters a hidden control surface and hands ownership back to you.
+    ///
+    /// If the control surface is not registered, this function just returns `None`.
+    ///
+    /// This only needs to be called if you explicitly want the control surface to "stop" while
+    /// your plug-in is still running. You don't need to call this for cleaning up because this
+    /// struct takes care of unregistering everything safely when it gets dropped.
+    ///
+    /// # Safety
+    ///
+    /// As soon as the returned control surface goes out of scope, it is removed from memory.
+    /// If you don't intend to keep the return value around longer, you should be absolutely sure
+    /// that your control surface is not currently executing any function. Because both this
+    /// function and any control surface function can only be called by the main thread, this
+    /// effectively means you must make sure that this removal function is not called by a
+    /// control surface method itself. That would be like pulling the rug out from under your
+    /// feet!
+    ///
+    /// This scenario is not hypothetical: The control surface `run()` method is very suitable for
+    /// processing arbitrary tasks which it receives via a channel. Let's say one of these arbitrary
+    /// tasks calls this removal function. It's guaranteed that REAPER will not call the `run()`
+    /// function anymore after that, yes. But, the `run()` function itself might not be finished
+    /// yet and pull another task from the receiver ... oops. The receiver is not there anymore
+    /// because it was owned by the control surface and therefore removed from memory as well.
+    /// This will lead to a crash.
+    ///
+    /// Ideally, REAPER would _really_ own this control surface, including managing its lifetime.
+    /// Then REAPER would remove it as soon as the `run()` function returns. But this is not how
+    /// the REAPER API works. We must manage the control surface lifetime for REAPER.
+    #[must_use]
+    pub unsafe fn plugin_register_remove_csurf_inst<T>(
         &mut self,
-        handle: NonNull<raw::IReaperControlSurface>,
-    ) {
-        unsafe {
-            self.plugin_register_remove(RegistrationObject::CsurfInst(handle));
-        }
-        self.csurf_insts.remove(&handle);
-        unsafe {
-            remove_cpp_control_surface(handle);
-        }
+        handle: RegistrationHandle<T>,
+    ) -> Option<Box<T>>
+    where
+        T: ControlSurface,
+    {
+        // Take the low-level Rust control surface out of its storage.
+        let double_boxed_low_cs = self.csurf_insts.remove(&handle.reaper_ptr())?;
+        // Unregister the C++ control surface from REAPER
+        let cpp_cs_ptr = handle.reaper_ptr().cast();
+        self.plugin_register_remove(RegistrationObject::CsurfInst(cpp_cs_ptr));
+        // Remove the C++ counterpart surface
+        remove_cpp_control_surface(cpp_cs_ptr);
+        // Reconstruct the initial value for handing ownership back to the consumer
+        let low_cs = double_boxed_low_cs
+            .into_any()
+            .downcast::<DelegatingControlSurface>()
+            .ok()?;
+        let dyn_control_surface = low_cs.delegate();
+        // We are not interested in the fat pointer (Box<dyn ControlSurface>) anymore.
+        // By calling leak(), we make the pointer go away but prevent Rust from
+        // dropping its content.
+        Box::leak(dyn_control_surface);
+        // Here we pick up the content again and treat it as a Box - but this
+        // time not a trait object box (Box<dyn ControlSurface> = fat pointer) but a
+        // normal box (Box<T> = thin pointer) ... original type restored.
+        let control_surface = handle.restore_original();
+        Some(control_surface)
     }
 
     /// Like [`audio_reg_hardware_hook_add`] but doesn't manage memory for you.

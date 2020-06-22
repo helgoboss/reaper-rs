@@ -31,7 +31,7 @@ use std::cmp::Ordering;
 use std::iter::once;
 
 #[derive(Debug)]
-pub(super) struct HelperControlSurface {
+pub(crate) struct HelperControlSurface {
     // These two are for very simple scheduling. Most light-weight.
     main_thread_task_sender: Sender<MainThreadTask>,
     main_thread_task_receiver: Receiver<MainThreadTask>,
@@ -79,21 +79,21 @@ type ProjectDataMap = HashMap<ReaProject, TrackDataMap>;
 type TrackDataMap = HashMap<MediaTrack, TrackData>;
 
 impl HelperControlSurface {
-    pub(super) fn new(
+    pub fn new(
+        version: ReaperVersion<'static>,
+        last_active_project: Project,
         main_thread_task_sender: Sender<MainThreadTask>,
         main_thread_task_receiver: Receiver<MainThreadTask>,
         main_thread_rx_task_receiver: Receiver<RxTask>,
         executor: RunLoopExecutor,
     ) -> HelperControlSurface {
-        let reaper = Reaper::get();
-        let version = reaper.version();
         let reaper_version_5_95 = ReaperVersion::new("5.95");
-        let surface = HelperControlSurface {
+        HelperControlSurface {
             main_thread_task_sender,
             main_thread_task_receiver,
             main_thread_executor: executor,
             main_thread_rx_task_receiver,
-            last_active_project: Cell::new(reaper.current_project()),
+            last_active_project: Cell::new(last_active_project),
             num_track_set_changes_left_to_be_propagated: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
             project_datas: Default::default(),
@@ -102,7 +102,10 @@ impl HelperControlSurface {
             supports_detection_of_input_fx: version >= reaper_version_5_95,
             // since pre2 to be accurate but so what
             supports_detection_of_input_fx_in_set_fx_change: version >= reaper_version_5_95,
-        };
+        }
+    }
+
+    pub fn init(&self) {
         // REAPER doesn't seem to call this automatically when the surface is registered. In our
         // case it's important to call this not at the first change of something (e.g. arm
         // button pressed) but immediately. Because it captures the initial project/track/FX
@@ -111,8 +114,30 @@ impl HelperControlSurface {
         // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more lazily
         // on activate?  But before activate we can do almost nothing because
         // execute_on_main_thread doesn't work.
-        surface.set_track_list_change();
-        surface
+        self.set_track_list_change();
+    }
+
+    pub fn discard_tasks(&self) {
+        self.discard_main_thread_tasks();
+        self.discard_main_thread_rx_tasks();
+    }
+
+    fn discard_main_thread_tasks(&self) {
+        let task_count = self.main_thread_task_receiver.try_iter().count();
+        if task_count > 0 {
+            slog::warn!(Reaper::get().logger(), "Discarded main thread tasks on reactivation";
+                "task_count" => task_count,
+            );
+        }
+    }
+
+    fn discard_main_thread_rx_tasks(&self) {
+        let task_count = self.main_thread_rx_task_receiver.try_iter().count();
+        if task_count > 0 {
+            slog::warn!(Reaper::get().logger(), "Discarded main thread rx tasks on reactivation";
+                "task_count" => task_count,
+            );
+        }
     }
 
     fn state(&self) -> State {

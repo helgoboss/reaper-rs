@@ -104,10 +104,10 @@ impl TestVstPlugin {
             let (sender, receiver) = channel::<String>();
             med.reaper()
                 .show_console_msg("Registering control surface ...");
-            med.plugin_register_add_csurf_inst(MyControlSurface {
+            med.plugin_register_add_csurf_inst(Box::new(MyControlSurface {
                 reaper: med.reaper().clone(),
                 receiver,
-            })
+            }))
             .expect("couldn't register control surface");
             med.reaper().show_console_msg("Registering action ...");
             med.plugin_register_add_hook_post_command::<MyHookPostCommand>()
@@ -124,7 +124,7 @@ impl TestVstPlugin {
                 PluginContext::from_vst_plugin(&self.host, static_vst_plugin_context()).unwrap();
             Reaper::setup_with_defaults(context, "info@helgoboss.org");
             let reaper = Reaper::get();
-            reaper.activate();
+            reaper.wake_up().unwrap();
             debug!(
                 reaper.logger(),
                 "Loaded reaper-rs integration test VST plugin"
