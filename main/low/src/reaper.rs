@@ -23175,19 +23175,20 @@ pub struct ReaperFunctionPointers {
     >,
     pub GetMidiInput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
     pub GetMidiOutput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
-    pub InitializeCoolSB: Option<extern "C" fn(hwnd: root::HWND) -> root::BOOL>,
-    pub UninitializeCoolSB: Option<extern "C" fn(hwnd: root::HWND) -> root::HRESULT>,
-    pub CoolSB_SetMinThumbSize:
-        Option<extern "C" fn(hwnd: root::HWND, wBar: root::UINT, size: root::UINT) -> root::BOOL>,
+    pub InitializeCoolSB: Option<extern "system" fn(hwnd: root::HWND) -> root::BOOL>,
+    pub UninitializeCoolSB: Option<extern "system" fn(hwnd: root::HWND) -> root::HRESULT>,
+    pub CoolSB_SetMinThumbSize: Option<
+        extern "system" fn(hwnd: root::HWND, wBar: root::UINT, size: root::UINT) -> root::BOOL,
+    >,
     pub CoolSB_GetScrollInfo: Option<
-        extern "C" fn(
+        extern "system" fn(
             hwnd: root::HWND,
             fnBar: ::std::os::raw::c_int,
             lpsi: root::LPSCROLLINFO,
         ) -> root::BOOL,
     >,
     pub CoolSB_SetScrollInfo: Option<
-        extern "C" fn(
+        extern "system" fn(
             hwnd: root::HWND,
             fnBar: ::std::os::raw::c_int,
             lpsi: root::LPSCROLLINFO,
@@ -23195,7 +23196,7 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub CoolSB_SetScrollPos: Option<
-        extern "C" fn(
+        extern "system" fn(
             hwnd: root::HWND,
             nBar: ::std::os::raw::c_int,
             nPos: ::std::os::raw::c_int,
@@ -23203,7 +23204,7 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub CoolSB_SetScrollRange: Option<
-        extern "C" fn(
+        extern "system" fn(
             hwnd: root::HWND,
             nBar: ::std::os::raw::c_int,
             nMinPos: ::std::os::raw::c_int,
@@ -23212,16 +23213,16 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub CoolSB_ShowScrollBar: Option<
-        extern "C" fn(
+        extern "system" fn(
             hwnd: root::HWND,
             wBar: ::std::os::raw::c_int,
             fShow: root::BOOL,
         ) -> root::BOOL,
     >,
     pub CoolSB_SetResizingThumb:
-        Option<extern "C" fn(hwnd: root::HWND, active: root::BOOL) -> root::BOOL>,
+        Option<extern "system" fn(hwnd: root::HWND, active: root::BOOL) -> root::BOOL>,
     pub CoolSB_SetThemeIndex:
-        Option<extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL>,
+        Option<extern "system" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL>,
 }
 impl ReaperFunctionPointers {
     pub(crate) const TOTAL_COUNT: u32 = 820u32;

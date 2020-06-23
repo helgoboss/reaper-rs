@@ -167,6 +167,23 @@ mod codegen {
             Receiver, Signature, Type, TypeBareFn, VisPublic, Visibility,
         };
 
+        /// For these functions exposed by REAPER the function pointers need to use
+        /// `extern "system` instead of `extern "C"`, probably because they are forwarded
+        /// directly to Win32 calls. This uses the "stdcall" calling convention when talking to
+        /// REAPER 32-bit on Windows. If we don't do this: Crash.  
+        static EXTERN_SYSTEM_ABI_FUNCTIONS: phf::Set<&'static str> = phf::phf_set![
+            "InitializeCoolSB",
+            "UninitializeCoolSB",
+            "CoolSB_SetMinThumbSize",
+            "CoolSB_GetScrollInfo",
+            "CoolSB_SetScrollInfo",
+            "CoolSB_SetScrollPos",
+            "CoolSB_SetScrollRange",
+            "CoolSB_ShowScrollBar",
+            "CoolSB_SetResizingThumb",
+            "CoolSB_SetThemeIndex",
+        ];
+
         /// Functions which exist both in SWELL and in the Windows API.
         ///
         /// For all the functions in this set, the generator will create `Swell` methods which are
@@ -385,6 +402,8 @@ mod codegen {
                     if !WIN32_FUNCTIONS.contains(p.name.to_string().as_str()) {
                         return None;
                     }
+                    // It's important to use `extern "system"` here, otherwise the linker will
+                    // complain about missing externals on Windows 32-bit.
                     Some(generate_function(&p, p.name.clone(), "system"))
                 })
                 .collect();
@@ -513,18 +532,33 @@ mod codegen {
             }
         }
 
+        /// This also modifies some unsafety and ABI fields.
         fn build_compartments(fn_ptrs: &Vec<FnPtr>) -> Compartments {
             Compartments {
                 names: fn_ptrs.iter().map(|p| p.name.clone()).collect(),
                 fn_ptr_signatures: fn_ptrs
                     .iter()
-                    .map(|p| TypeBareFn {
-                        unsafety: if p.has_pointer_args() {
-                            p.signature.unsafety.clone()
-                        } else {
-                            None
-                        },
-                        ..p.signature.clone()
+                    .map(|p| {
+                        let abi =
+                            if EXTERN_SYSTEM_ABI_FUNCTIONS.contains(p.name.to_string().as_str()) {
+                                "system"
+                            } else {
+                                "C"
+                            };
+                        TypeBareFn {
+                            abi: Some(Abi {
+                                extern_token: Extern {
+                                    span: Span::call_site(),
+                                },
+                                name: Some(syn::LitStr::new(abi, Span::call_site())),
+                            }),
+                            unsafety: if p.has_pointer_args() {
+                                p.signature.unsafety.clone()
+                            } else {
+                                None
+                            },
+                            ..p.signature.clone()
+                        }
                     })
                     .collect(),
                 methods: fn_ptrs
