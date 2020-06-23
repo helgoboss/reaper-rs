@@ -466,7 +466,7 @@ impl ReaperSession {
     where
         T: ControlSurface,
     {
-        // Take the low-level Rust control surface out of its storage.
+        // Take the low-level Rust control surface out of its storage
         let double_boxed_low_cs = self.csurf_insts.remove(&handle.reaper_ptr())?;
         // Unregister the C++ control surface from REAPER
         let cpp_cs_ptr = handle.reaper_ptr().cast();
@@ -478,7 +478,7 @@ impl ReaperSession {
             .into_any()
             .downcast::<DelegatingControlSurface>()
             .ok()?;
-        let dyn_control_surface = low_cs.delegate();
+        let dyn_control_surface = low_cs.into_delegate();
         // We are not interested in the fat pointer (Box<dyn ControlSurface>) anymore.
         // By calling leak(), we make the pointer go away but prevent Rust from
         // dropping its content.
@@ -589,29 +589,68 @@ impl ReaperSession {
     ///     }
     /// }
     ///
-    /// session.audio_reg_hardware_hook_add(MyOnAudioBuffer {
+    /// session.audio_reg_hardware_hook_add(Box::new(MyOnAudioBuffer {
     ///     counter: 0,
     ///     reaper: session.create_real_time_reaper()
-    /// });
+    /// }));
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
     ///
     /// [`audio_reg_hardware_hook_remove()`]: #method.audio_reg_hardware_hook_remove
-    pub fn audio_reg_hardware_hook_add<T: OnAudioBuffer + 'static>(
+    pub fn audio_reg_hardware_hook_add<T>(
         &mut self,
-        callback: T,
-    ) -> ReaperFunctionResult<NonNull<audio_hook_register_t>> {
-        let handle = self
-            .audio_hook_registers
-            .keep(OwnedAudioHookRegister::new(callback));
-        unsafe { self.audio_reg_hardware_hook_add_unchecked(handle)? };
+        callback: Box<T>,
+    ) -> ReaperFunctionResult<RegistrationHandle<T>>
+    where
+        T: OnAudioBuffer + 'static,
+    {
+        // Create thin pointer of callback before making it a trait object (for being able to
+        // restore the original callback later).
+        let callback_thin_ptr: NonNull<T> = callback.as_ref().into();
+        // Create owned audio hook register and make it own the callback (as user data)
+        let register = OwnedAudioHookRegister::new(callback);
+        // Store it in memory.  Although we keep it here, conceptually it's owned by REAPER, so we
+        // should not access it while being registered.
+        let reaper_ptr = self.audio_hook_registers.keep(register);
+        // Register the low-level audio hook register at REAPER
+        unsafe { self.audio_reg_hardware_hook_add_unchecked(reaper_ptr)? };
+        // Return a handle which the consumer can use to unregister
+        let handle = RegistrationHandle::new(callback_thin_ptr, reaper_ptr.cast());
         Ok(handle)
     }
 
-    /// Unregisters an audio hook register.
-    pub fn audio_reg_hardware_hook_remove(&mut self, handle: NonNull<audio_hook_register_t>) {
-        unsafe { self.audio_reg_hardware_hook_remove_unchecked(handle) };
-        let _ = self.audio_hook_registers.release(handle);
+    /// Unregisters an audio hook register and hands ownership back to you.
+    ///
+    /// If the audio hook register is not registered, this function just returns `None`.
+    ///
+    /// This only needs to be called if you explicitly want the audio hook to "stop" while your
+    /// plug-in is still running. You don't need to call this for cleaning up because this
+    /// struct takes care of unregistering everything safely when it gets dropped.
+    pub fn audio_reg_hardware_hook_remove<T>(
+        &mut self,
+        handle: RegistrationHandle<T>,
+    ) -> Option<Box<T>>
+    where
+        T: OnAudioBuffer,
+    {
+        // Unregister the low-level audio hook register from REAPER
+        let reaper_ptr = handle.reaper_ptr().cast();
+        unsafe { self.audio_reg_hardware_hook_remove_unchecked(reaper_ptr) };
+        // Take the owned audio hook register out of its storage
+        let owned_audio_hook_register = self
+            .audio_hook_registers
+            .release(handle.reaper_ptr().cast())?;
+        // Reconstruct the initial value for handing ownership back to the consumer
+        let dyn_callback = owned_audio_hook_register.into_callback();
+        // We are not interested in the fat pointer (Box<dyn OnAudioBuffer>) anymore.
+        // By calling leak(), we make the pointer go away but prevent Rust from
+        // dropping its content.
+        Box::leak(dyn_callback);
+        // Here we pick up the content again and treat it as a Box - but this
+        // time not a trait object box (Box<dyn OnAudioBuffer> = fat pointer) but a
+        // normal box (Box<T> = thin pointer) ... original type restored.
+        let callback = unsafe { handle.restore_original() };
+        Some(callback)
     }
 }
 

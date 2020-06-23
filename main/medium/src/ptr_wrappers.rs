@@ -5,6 +5,9 @@ use crate::CommandId;
 
 use reaper_low::raw;
 
+use serde::export::Formatter;
+use std::fmt;
+use std::fmt::Debug;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
 
@@ -12,7 +15,7 @@ use std::ptr::NonNull;
 ///
 /// This handle can be used to explicitly unregister the registered object and regain ownership of
 /// the struct which has been passed in originally.
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Hash)]
 pub struct RegistrationHandle<T> {
     /// (Thin) pointer for restoring the value stored in the session as its original type.
     ///
@@ -24,6 +27,15 @@ pub struct RegistrationHandle<T> {
     medium_ptr: NonNull<T>,
     /// (Thin) pointer for unregistering the thing that has been passed to REAPER.
     reaper_ptr: NonNull<c_void>,
+}
+
+impl<T> Debug for RegistrationHandle<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RegistrationHandle")
+            .field("medium_ptr", &self.medium_ptr)
+            .field("reaper_ptr", &self.reaper_ptr)
+            .finish()
+    }
 }
 
 impl<T> Clone for RegistrationHandle<T> {

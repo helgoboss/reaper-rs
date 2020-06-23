@@ -479,7 +479,7 @@ impl DelegatingControlSurface {
         }
     }
 
-    pub fn delegate(self) -> Box<dyn ControlSurface> {
+    pub fn into_delegate(self) -> Box<dyn ControlSurface> {
         self.delegate
     }
 

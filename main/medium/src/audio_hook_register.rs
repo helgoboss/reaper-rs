@@ -1,8 +1,10 @@
 use crate::Hz;
 use reaper_low::raw::audio_hook_register_t;
 use reaper_low::{firewall, raw};
-use std::any::Any;
 
+use serde::export::Formatter;
+use std::fmt;
+use std::fmt::Debug;
 use std::os::raw::{c_int, c_void};
 use std::ptr::{null_mut, NonNull};
 
@@ -93,15 +95,21 @@ fn decode_user_data<'a, U>(data: *mut c_void) -> &'a mut U {
     unsafe { &mut *data }
 }
 
-#[derive(Debug)]
 pub(crate) struct OwnedAudioHookRegister {
     inner: raw::audio_hook_register_t,
-    // Boxed because we need stable memory address in order to pass this to REAPER. `dyn  Any`
-    // because we don't want this struct to be generic. It must be possible to keep instances of
-    // this struct in a collection which carries different types of user data (because the consumer
-    // might want to register multiple different audio hooks).
-    owned_user_data_1: Option<Box<dyn Any>>,
-    owned_user_data_2: Option<Box<dyn Any>>,
+    callback: Box<dyn OnAudioBuffer>,
+}
+
+impl Debug for OwnedAudioHookRegister {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        // Besides OnAudioBuffer not generally implementing Debug, it would also be a bit dangerous.
+        // Debug-printing the REAPER session could cause race conditions when the debug formatting
+        // accesses audio hook state.
+        f.debug_struct("OwnedAudioHookRegister")
+            .field("inner", &self.inner)
+            .field("callback", &"<omitted>")
+            .finish()
+    }
 }
 
 impl OwnedAudioHookRegister {
@@ -116,8 +124,10 @@ impl OwnedAudioHookRegister {
     ///
     /// [`audio_reg_hardware_hook_add`]:
     /// struct.ReaperSession.html#method.audio_reg_hardware_hook_add
-    pub(crate) fn new<T: OnAudioBuffer + 'static>(callback: T) -> OwnedAudioHookRegister {
-        let callback = Box::new(callback);
+    pub fn new<T>(callback: Box<T>) -> OwnedAudioHookRegister
+    where
+        T: OnAudioBuffer + 'static,
+    {
         OwnedAudioHookRegister {
             inner: audio_hook_register_t {
                 OnAudioBuffer: Some(delegating_on_audio_buffer::<T>),
@@ -131,9 +141,12 @@ impl OwnedAudioHookRegister {
                 output_nch: 0,
                 GetBuffer: None,
             },
-            owned_user_data_1: Some(callback),
-            owned_user_data_2: None,
+            callback,
         }
+    }
+
+    pub fn into_callback(self) -> Box<dyn OnAudioBuffer> {
+        self.callback
     }
 }
 

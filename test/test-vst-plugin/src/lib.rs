@@ -112,7 +112,7 @@ impl TestVstPlugin {
             med.reaper().show_console_msg("Registering action ...");
             med.plugin_register_add_hook_post_command::<MyHookPostCommand>()
                 .expect("couldn't register hook post command");
-            med.audio_reg_hardware_hook_add(MyOnAudioBuffer { sender, counter: 0 })
+            med.audio_reg_hardware_hook_add(Box::new(MyOnAudioBuffer { sender, counter: 0 }))
                 .expect("couldn't register audio hook");
         }
         self.session = Some(med);

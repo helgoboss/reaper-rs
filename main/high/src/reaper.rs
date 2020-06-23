@@ -37,6 +37,7 @@ use reaper_medium::{
     OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef, RealTimeAudioThreadScope, ReaperString,
     ReaperStringArg, RegistrationHandle, ToggleAction, ToggleActionResult,
 };
+use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::sync::Mutex;
@@ -113,9 +114,11 @@ impl ReaperBuilder {
                     MAIN_THREAD_TASK_BULK_SIZE,
                 );
                 let main_thread_scheduler = RunLoopScheduler::new(mt_rx_sender.clone());
+                let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
+                    AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
+                );
                 let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
-                let medium_real_time_reaper = self.medium.create_real_time_reaper();
                 let current_project = Project::new(
                     medium_reaper
                         .enum_projects(ProjectRef::Current, 0)
@@ -123,18 +126,17 @@ impl ReaperBuilder {
                         .project,
                 );
                 let version = medium_reaper.get_app_version();
+                let medium_real_time_reaper = self.medium.create_real_time_reaper();
                 let reaper = Reaper {
                     medium_session: RefCell::new(self.medium),
                     medium_reaper,
-                    medium_real_time_reaper,
+                    medium_real_time_reaper: medium_real_time_reaper.clone(),
                     logger,
                     command_by_id: RefCell::new(HashMap::new()),
                     subjects: MainSubjects::new(),
                     undo_block_is_active: Cell::new(false),
                     main_thread_task_sender: mt_sender.clone(),
-                    audio_thread_task_channel: crossbeam_channel::bounded::<AudioThreadTaskOp>(
-                        AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
-                    ),
+                    audio_thread_task_sender: at_sender,
                     main_thread_rx_task_sender: mt_rx_sender,
                     main_thread_scheduler,
                     main_thread_future_spawner: spawner,
@@ -142,11 +144,19 @@ impl ReaperBuilder {
                         csurf_inst: Box::new(HelperControlSurface::new(
                             version,
                             current_project,
-                            mt_sender,
+                            mt_sender.clone(),
                             mt_receiver,
                             mt_rx_receiver,
                             executor,
                         )),
+                        audio_hook: Box::new(HighOnAudioBuffer {
+                            task_receiver: at_receiver,
+                            reaper: RealTimeReaper {
+                                medium_reaper: medium_real_time_reaper,
+                                midi_message_received: LocalSubject::new(),
+                                main_thread_task_sender: mt_sender,
+                            },
+                        }),
                     }))),
                 };
                 INSTANCE = Some(reaper)
@@ -173,8 +183,19 @@ impl RealTimeReaper {
 }
 
 struct HighOnAudioBuffer {
-    audio_thread_task_receiver: Receiver<AudioThreadTaskOp>,
+    task_receiver: Receiver<AudioThreadTaskOp>,
     reaper: RealTimeReaper,
+}
+
+impl HighOnAudioBuffer {
+    pub fn discard_tasks(&self) {
+        let task_count = self.task_receiver.try_iter().count();
+        if task_count > 0 {
+            slog::warn!(Reaper::get().logger(), "Discarded audio thread tasks on reactivation";
+                "task_count" => task_count,
+            );
+        }
+    }
 }
 
 impl OnAudioBuffer for HighOnAudioBuffer {
@@ -185,7 +206,7 @@ impl OnAudioBuffer for HighOnAudioBuffer {
         // Take only one task each time because we don't want to do to much in one go in the
         // real-time thread.
         for task in self
-            .audio_thread_task_receiver
+            .task_receiver
             .try_iter()
             .take(AUDIO_THREAD_TASK_BULK_SIZE)
         {
@@ -237,7 +258,7 @@ pub struct Reaper {
     pub(crate) subjects: MainSubjects,
     undo_block_is_active: Cell<bool>,
     main_thread_task_sender: Sender<MainThreadTask>,
-    audio_thread_task_channel: (Sender<AudioThreadTaskOp>, Receiver<AudioThreadTaskOp>),
+    audio_thread_task_sender: Sender<AudioThreadTaskOp>,
     main_thread_rx_task_sender: Sender<RxTask>,
     main_thread_scheduler: RunLoopScheduler,
     main_thread_future_spawner: Spawner,
@@ -250,15 +271,24 @@ enum SessionStatus {
     Awake(AwakeState),
 }
 
-#[derive(Debug)]
 struct SleepingState {
     csurf_inst: Box<HelperControlSurface>,
+    audio_hook: Box<HighOnAudioBuffer>,
+}
+
+impl Debug for SleepingState {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SleepingState")
+            .field("csurf_inst", &self.csurf_inst)
+            .field("audio_hook", &"<omitted>")
+            .finish()
+    }
 }
 
 #[derive(Debug)]
 struct AwakeState {
     csurf_inst_handle: RegistrationHandle<HelperControlSurface>,
-    audio_hook_register_handle: NonNull<raw::audio_hook_register_t>,
+    audio_hook_register_handle: RegistrationHandle<HighOnAudioBuffer>,
     gaccel_registers: HashMap<CommandId, NonNull<raw::gaccel_register_t>>,
 }
 
@@ -475,11 +505,9 @@ impl Reaper {
         // So we just consume all without executing them.
         sleeping_state.csurf_inst.init();
         sleeping_state.csurf_inst.discard_tasks();
-        self.discard_audio_thread_tasks();
-        // Continue
-        let real_time_reaper = self.medium_session().create_real_time_reaper();
-        let mut medium = self.medium_session();
+        sleeping_state.audio_hook.discard_tasks();
         // Functions
+        let mut medium = self.medium_session();
         medium
             .plugin_register_add_hook_command::<HighLevelHookCommand>()
             .map_err(|_| "couldn't register hook command")?;
@@ -489,15 +517,6 @@ impl Reaper {
         medium
             .plugin_register_add_hook_post_command::<HighLevelHookPostCommand>()
             .map_err(|_| "couldn't register hook post command")?;
-        // Audio hook
-        let audio_hook = HighOnAudioBuffer {
-            audio_thread_task_receiver: self.audio_thread_task_channel.1.clone(),
-            reaper: RealTimeReaper {
-                medium_reaper: real_time_reaper,
-                midi_message_received: LocalSubject::new(),
-                main_thread_task_sender: self.main_thread_task_sender.clone(),
-            },
-        };
         *session_status = SessionStatus::Awake(AwakeState {
             gaccel_registers: self
                 .command_by_id
@@ -520,7 +539,7 @@ impl Reaper {
             },
             audio_hook_register_handle: {
                 medium
-                    .audio_reg_hardware_hook_add(audio_hook)
+                    .audio_reg_hardware_hook_add(sleeping_state.audio_hook)
                     .map_err(|_| "Audio hook registration failed")?
             },
         });
@@ -536,7 +555,9 @@ impl Reaper {
         };
         let mut medium = self.medium_session();
         // Remove audio hook
-        medium.audio_reg_hardware_hook_remove(awake_state.audio_hook_register_handle);
+        let audio_hook = medium
+            .audio_reg_hardware_hook_remove(awake_state.audio_hook_register_handle)
+            .ok_or("audio hook was not registered")?;
         // Remove control surface
         let csurf_inst = unsafe {
             medium
@@ -551,17 +572,11 @@ impl Reaper {
         medium.plugin_register_remove_hook_post_command::<HighLevelHookPostCommand>();
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
         medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
-        *session_status = SessionStatus::Sleeping(Some(SleepingState { csurf_inst }));
+        *session_status = SessionStatus::Sleeping(Some(SleepingState {
+            csurf_inst,
+            audio_hook,
+        }));
         Ok(())
-    }
-
-    fn discard_audio_thread_tasks(&self) {
-        let task_count = self.audio_thread_task_channel.1.try_iter().count();
-        if task_count > 0 {
-            slog::warn!(self.logger, "Discarded audio thread tasks on reactivation";
-                "task_count" => task_count,
-            );
-        }
     }
 
     pub fn medium_session(&self) -> RefMut<reaper_medium::ReaperSession> {
@@ -855,7 +870,7 @@ impl Reaper {
         &self,
         op: impl FnOnce(&RealTimeReaper) + 'static,
     ) -> Result<(), ()> {
-        let sender = &self.audio_thread_task_channel.0;
+        let sender = &self.audio_thread_task_sender;
         sender.send(Box::new(op)).map_err(|_| ())
     }
 
