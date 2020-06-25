@@ -251,7 +251,6 @@ pub(crate) unsafe fn with_utf16_to_8(
     requested_max_size: std::os::raw::c_int,
     fill_utf16_source_buffer: impl FnOnce(*mut u16, std::os::raw::c_int) -> usize,
 ) -> usize {
-    // TODO-medium Maybe use this vec initialization also in with_buffer
     let mut utf16_vec: Vec<u16> = Vec::with_capacity(requested_max_size as usize);
     // Returns length *without* nul terminator.
     let len = fill_utf16_source_buffer(utf16_vec.as_mut_ptr(), requested_max_size);

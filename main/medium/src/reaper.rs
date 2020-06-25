@@ -3780,7 +3780,8 @@ fn with_string_buffer<T>(
     max_size: u32,
     fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
 ) -> (ReaperString, T) {
-    let vec: Vec<u8> = vec![1; max_size as usize];
+    // Using with_capacity() here wouldn't be correct because it leaves the vector length at zero.
+    let vec: Vec<u8> = vec![0; max_size as usize];
     let c_string = unsafe { CString::from_vec_unchecked(vec) };
     let raw = c_string.into_raw();
     let result = fill_buffer(raw, max_size as i32);
