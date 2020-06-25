@@ -2355,7 +2355,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetDlgItem {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2365,7 +2368,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.ShowWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2375,7 +2381,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DestroyWindow(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DestroyWindow(&self, hwnd: root::HWND) {
         match self.pointers.DestroyWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2430,7 +2439,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetDlgItemInt(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetDlgItemInt(
         &self,
         arg1: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -2484,7 +2496,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn CheckDlgButton(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CheckDlgButton(
         &self,
         hwnd: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -2499,7 +2514,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn IsDlgButtonChecked(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsDlgButtonChecked(
         &self,
         hwnd: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -2513,7 +2531,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
         match self.pointers.EnableWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2523,7 +2544,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetFocus(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetFocus(&self, hwnd: root::HWND) {
         match self.pointers.SetFocus {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2543,7 +2567,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetForegroundWindow(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetForegroundWindow(&self, hwnd: root::HWND) {
         match self.pointers.SetForegroundWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2563,7 +2590,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.SetCapture {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2593,7 +2623,14 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn IsChild(&self, hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsChild(
+        &self,
+        hwndParent: root::HWND,
+        hwndChild: root::HWND,
+    ) -> ::std::os::raw::c_int {
         match self.pointers.IsChild {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2603,7 +2640,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.GetParent {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2613,7 +2653,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
         match self.pointers.SetParent {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2623,7 +2666,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2633,7 +2679,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn EnumWindows(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumWindows(
         &self,
         proc_: ::std::option::Option<
             unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
@@ -2733,7 +2782,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
         match self.pointers.WindowFromPoint {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2743,7 +2795,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn WinOffsetRect(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn WinOffsetRect(
         &self,
         lprc: root::LPRECT,
         dx: ::std::os::raw::c_int,
@@ -2758,7 +2813,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn WinSetRect(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn WinSetRect(
         &self,
         lprc: root::LPRECT,
         xLeft: ::std::os::raw::c_int,
@@ -2811,7 +2869,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetWindowPos(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetWindowPos(
         &self,
         hwnd: root::HWND,
         unused: root::HWND,
@@ -2830,7 +2891,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetWindowLevel(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetWindowLevel(
         &self,
         hwnd: root::HWND,
         newlevel: ::std::os::raw::c_int,
@@ -2862,7 +2926,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn UpdateWindow(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn UpdateWindow(&self, hwnd: root::HWND) {
         match self.pointers.UpdateWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2872,7 +2939,14 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetWindowLong(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetWindowLong(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> root::LONG_PTR {
         match self.pointers.GetWindowLong {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2882,7 +2956,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetWindowLong(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetWindowLong(
         &self,
         hwnd: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -2917,7 +2994,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn EnumPropsEx(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumPropsEx(
         &self,
         arg1: root::HWND,
         arg2: root::PROPENUMPROCEX,
@@ -2984,7 +3064,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindowVisible {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -2994,7 +3077,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn IsWindow(&self, hwnd: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsWindow(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3004,7 +3090,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetTimer(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTimer(
         &self,
         hwnd: root::HWND,
         timerid: root::UINT_PTR,
@@ -3020,7 +3109,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
         match self.pointers.KillTimer {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3030,7 +3122,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetExtendedListViewStyleEx(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetExtendedListViewStyleEx(
         &self,
         h: root::HWND,
         mask: ::std::os::raw::c_int,
@@ -3063,7 +3158,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_DeleteColumn(&self, h: root::HWND, pos: ::std::os::raw::c_int) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_DeleteColumn(&self, h: root::HWND, pos: ::std::os::raw::c_int) -> bool {
         match self.pointers.ListView_DeleteColumn {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3091,7 +3189,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetColumnWidth(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetColumnWidth(
         &self,
         h: root::HWND,
         pos: ::std::os::raw::c_int,
@@ -3154,7 +3255,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetNextItem(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetNextItem(
         &self,
         h: root::HWND,
         istart: ::std::os::raw::c_int,
@@ -3182,7 +3286,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetItemState(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetItemState(
         &self,
         h: root::HWND,
         ipos: ::std::os::raw::c_int,
@@ -3197,7 +3304,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_DeleteItem(&self, h: root::HWND, ipos: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_DeleteItem(&self, h: root::HWND, ipos: ::std::os::raw::c_int) {
         match self.pointers.ListView_DeleteItem {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3207,7 +3317,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_DeleteAllItems(&self, h: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_DeleteAllItems(&self, h: root::HWND) {
         match self.pointers.ListView_DeleteAllItems {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3217,7 +3330,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetSelectedCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetSelectedCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectedCount {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3227,7 +3343,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetItemCount {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3237,7 +3356,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetSelectionMark(&self, h: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetSelectionMark(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectionMark {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3247,7 +3369,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetColumnWidth(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetColumnWidth(
         &self,
         h: root::HWND,
         colpos: ::std::os::raw::c_int,
@@ -3262,7 +3387,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetItemState(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetItemState(
         &self,
         h: root::HWND,
         item: ::std::os::raw::c_int,
@@ -3278,7 +3406,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_RedrawItems(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_RedrawItems(
         &self,
         h: root::HWND,
         startitem: ::std::os::raw::c_int,
@@ -3293,7 +3424,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetItemCount(&self, h: root::HWND, cnt: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetItemCount(&self, h: root::HWND, cnt: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetItemCount {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3303,7 +3437,15 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_EnsureVisible(&self, h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_EnsureVisible(
+        &self,
+        h: root::HWND,
+        i: ::std::os::raw::c_int,
+        pok: root::BOOL,
+    ) {
         match self.pointers.ListView_EnsureVisible {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3333,7 +3475,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetImageList(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetImageList(
         &self,
         h: root::HWND,
         imagelist: root::HIMAGELIST,
@@ -3402,7 +3547,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SortItems(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SortItems(
         &self,
         hwnd: root::HWND,
         compf: root::PFNLVCOMPARE,
@@ -3436,7 +3584,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_Scroll(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_Scroll(
         &self,
         h: root::HWND,
         xscroll: ::std::os::raw::c_int,
@@ -3451,7 +3602,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetTopIndex(&self, h: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetTopIndex(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetTopIndex {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3461,7 +3615,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetCountPerPage(&self, h: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetCountPerPage(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetCountPerPage {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3507,7 +3664,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_GetHeader(&self, h: root::HWND) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetHeader(&self, h: root::HWND) -> root::HWND {
         match self.pointers.ListView_GetHeader {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3517,7 +3677,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn Header_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn Header_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.Header_GetItemCount {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3563,7 +3726,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_GetListViewHeaderHeight(&self, h: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetListViewHeaderHeight(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetListViewHeaderHeight {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3583,7 +3749,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ImageList_Remove(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ImageList_Remove(
         &self,
         list: root::HIMAGELIST,
         idx: ::std::os::raw::c_int,
@@ -3597,7 +3766,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ImageList_ReplaceIcon(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ImageList_ReplaceIcon(
         &self,
         list: root::HIMAGELIST,
         offset: ::std::os::raw::c_int,
@@ -3612,7 +3784,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ImageList_Add(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ImageList_Add(
         &self,
         list: root::HIMAGELIST,
         image: root::HBITMAP,
@@ -3627,7 +3802,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ImageList_Destroy(&self, arg1: root::HIMAGELIST) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ImageList_Destroy(&self, arg1: root::HIMAGELIST) {
         match self.pointers.ImageList_Destroy {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3637,7 +3815,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TabCtrl_GetItemCount(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TabCtrl_GetItemCount(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetItemCount {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3647,7 +3828,14 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TabCtrl_DeleteItem(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TabCtrl_DeleteItem(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> root::BOOL {
         match self.pointers.TabCtrl_DeleteItem {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3675,7 +3863,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TabCtrl_SetCurSel(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TabCtrl_SetCurSel(
         &self,
         hwnd: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -3689,7 +3880,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TabCtrl_GetCurSel(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TabCtrl_GetCurSel(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetCurSel {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3734,7 +3928,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_Expand(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_Expand(
         &self,
         hwnd: root::HWND,
         item: root::HTREEITEM,
@@ -3749,7 +3946,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_GetSelection(&self, hwnd: root::HWND) -> root::HTREEITEM {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_GetSelection(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetSelection {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3759,7 +3959,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_DeleteItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_DeleteItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_DeleteItem {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3769,7 +3972,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_DeleteAllItems(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_DeleteAllItems(&self, hwnd: root::HWND) {
         match self.pointers.TreeView_DeleteAllItems {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3779,7 +3985,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_SelectItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_SelectItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_SelectItem {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3789,7 +3998,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_GetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_GetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_GetItem {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3799,7 +4011,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_SetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_SetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_SetItem {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3826,7 +4041,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_SetIndent(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_SetIndent(
         &self,
         hwnd: root::HWND,
         indent: ::std::os::raw::c_int,
@@ -3840,7 +4058,14 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_GetChild(&self, hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_GetChild(
+        &self,
+        hwnd: root::HWND,
+        item: root::HTREEITEM,
+    ) -> root::HTREEITEM {
         match self.pointers.TreeView_GetChild {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3850,7 +4075,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_GetNextSibling(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_GetNextSibling(
         &self,
         hwnd: root::HWND,
         item: root::HTREEITEM,
@@ -3864,7 +4092,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_GetRoot(&self, hwnd: root::HWND) -> root::HTREEITEM {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_GetRoot(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetRoot {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3874,7 +4105,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetBkColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3884,7 +4118,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn TreeView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetTextColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3894,7 +4131,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetBkColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3904,7 +4144,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetTextBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetTextBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextBkColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3914,7 +4157,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3924,7 +4170,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ListView_SetGridColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_SetGridColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetGridColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3952,7 +4201,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_ModalWindowStart(&self, hwnd: root::HWND) -> *mut ::std::os::raw::c_void {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_ModalWindowStart(&self, hwnd: root::HWND) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_ModalWindowStart {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -3992,7 +4244,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_CloseWindow(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CloseWindow(&self, hwnd: root::HWND) {
         match self.pointers.SWELL_CloseWindow {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4025,7 +4280,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DestroyMenu(&self, hMenu: root::HMENU) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DestroyMenu(&self, hMenu: root::HMENU) {
         match self.pointers.DestroyMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4054,7 +4312,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
         match self.pointers.GetSubMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4064,7 +4325,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
         match self.pointers.GetMenuItemCount {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4074,7 +4338,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetMenuItemID(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMenuItemID(
         &self,
         hMenu: root::HMENU,
         pos: ::std::os::raw::c_int,
@@ -4088,7 +4355,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetMenuItemModifier(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetMenuItemModifier(
         &self,
         hMenu: root::HMENU,
         idx: ::std::os::raw::c_int,
@@ -4124,7 +4394,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn EnableMenuItem(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnableMenuItem(
         &self,
         hMenu: root::HMENU,
         idx: ::std::os::raw::c_int,
@@ -4139,7 +4412,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DeleteMenu(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DeleteMenu(
         &self,
         hMenu: root::HMENU,
         idx: ::std::os::raw::c_int,
@@ -4154,7 +4430,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn CheckMenuItem(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CheckMenuItem(
         &self,
         hMenu: root::HMENU,
         idx: ::std::os::raw::c_int,
@@ -4246,7 +4525,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DrawMenuBar(&self, arg1: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DrawMenuBar(&self, arg1: root::HWND) {
         match self.pointers.DrawMenuBar {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4295,7 +4577,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetMenuDestination(&self, menu: root::HMENU, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetMenuDestination(&self, menu: root::HMENU, hwnd: root::HWND) {
         match self.pointers.SWELL_SetMenuDestination {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4305,7 +4590,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_DuplicateMenu(&self, menu: root::HMENU) -> root::HMENU {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_DuplicateMenu(&self, menu: root::HMENU) -> root::HMENU {
         match self.pointers.SWELL_DuplicateMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4315,7 +4603,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
         match self.pointers.SetMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4325,7 +4616,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
         match self.pointers.GetMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4345,7 +4639,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetDefaultWindowMenu(&self, arg1: root::HMENU) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetDefaultWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultWindowMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4365,7 +4662,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetDefaultModalWindowMenu(&self, arg1: root::HMENU) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetDefaultModalWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultModalWindowMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4385,7 +4685,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetCurrentMenu(&self, arg1: root::HMENU) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetCurrentMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetCurrentMenu {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4435,7 +4738,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_RegisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_RegisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
         match self.pointers.SWELL_RegisterCustomControlCreator {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4445,7 +4751,13 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_UnregisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_UnregisterCustomControlCreator(
+        &self,
+        proc_: root::SWELL_ControlCreatorProc,
+    ) {
         match self.pointers.SWELL_UnregisterCustomControlCreator {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4455,7 +4767,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DefWindowProc(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DefWindowProc(
         &self,
         hwnd: root::HWND,
         msg: root::UINT,
@@ -4471,7 +4786,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.EndDialog {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4481,7 +4799,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_GetDefaultButtonID(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetDefaultButtonID(
         &self,
         hwndDlg: root::HWND,
         onlyIfEnabled: bool,
@@ -4495,7 +4816,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SendMessage(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SendMessage(
         &self,
         arg1: root::HWND,
         arg2: root::UINT,
@@ -4511,7 +4835,15 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_BroadcastMessage(&self, arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_BroadcastMessage(
+        &self,
+        arg1: root::UINT,
+        arg2: root::WPARAM,
+        arg3: root::LPARAM,
+    ) {
         match self.pointers.SWELL_BroadcastMessage {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4521,7 +4853,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn PostMessage(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn PostMessage(
         &self,
         hwnd: root::HWND,
         msg: root::UINT,
@@ -4547,7 +4882,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_MessageQueue_Clear(&self, h: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_MessageQueue_Clear(&self, h: root::HWND) {
         match self.pointers.SWELL_MessageQueue_Clear {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4621,7 +4959,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetCursor(&self, curs: root::HCURSOR) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetCursor(&self, curs: root::HCURSOR) {
         match self.pointers.SWELL_SetCursor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4631,7 +4972,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_EnableRightClickEmulate(&self, enable: root::BOOL) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_EnableRightClickEmulate(&self, enable: root::BOOL) {
         match self.pointers.SWELL_EnableRightClickEmulate {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4671,7 +5015,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_ShowCursor(&self, bShow: root::BOOL) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_ShowCursor(&self, bShow: root::BOOL) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_ShowCursor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4713,7 +5060,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
         match self.pointers.OpenClipboard {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4733,7 +5083,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
         match self.pointers.GetClipboardData {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4753,7 +5106,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
         match self.pointers.SetClipboardData {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4779,7 +5135,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
         match self.pointers.EnumClipboardFormats {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4803,7 +5162,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
         match self.pointers.GlobalLock {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4813,7 +5175,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GlobalSize(&self, h: root::HANDLE) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GlobalSize(&self, h: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.GlobalSize {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4823,7 +5188,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GlobalUnlock(&self, h: root::HANDLE) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GlobalUnlock(&self, h: root::HANDLE) {
         match self.pointers.GlobalUnlock {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4833,7 +5201,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GlobalFree(&self, h: root::HANDLE) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GlobalFree(&self, h: root::HANDLE) {
         match self.pointers.GlobalFree {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4912,7 +5283,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn WaitForSingleObject(&self, hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn WaitForSingleObject(&self, hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD {
         match self.pointers.WaitForSingleObject {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4940,7 +5314,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn CloseHandle(&self, hand: root::HANDLE) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CloseHandle(&self, hand: root::HANDLE) -> root::BOOL {
         match self.pointers.CloseHandle {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4950,7 +5327,14 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetThreadPriority(&self, evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetThreadPriority(
+        &self,
+        evt: root::HANDLE,
+        prio: ::std::os::raw::c_int,
+    ) -> root::BOOL {
         match self.pointers.SetThreadPriority {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4960,7 +5344,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetEvent(&self, evt: root::HANDLE) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.SetEvent {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -4970,7 +5357,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ResetEvent(&self, evt: root::HANDLE) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ResetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.ResetEvent {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5008,7 +5398,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_GetProcessExitCode(&self, hand: root::HANDLE) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetProcessExitCode(&self, hand: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetProcessExitCode {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5065,7 +5458,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn FreeLibrary(&self, hInst: root::HINSTANCE) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn FreeLibrary(&self, hInst: root::HINSTANCE) -> root::BOOL {
         match self.pointers.FreeLibrary {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5075,7 +5471,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_GetBundle(&self, hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetBundle(&self, hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetBundle {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5085,7 +5484,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_CreateMemContext(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CreateMemContext(
         &self,
         hdc: root::HDC,
         w: ::std::os::raw::c_int,
@@ -5100,7 +5502,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_DeleteGfxContext(&self, arg1: root::HDC) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_DeleteGfxContext(&self, arg1: root::HDC) {
         match self.pointers.SWELL_DeleteGfxContext {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5110,7 +5515,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_GetCtxGC(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetCtxGC(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxGC {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5120,7 +5528,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_GetCtxFrameBuffer(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetCtxFrameBuffer(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxFrameBuffer {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5130,7 +5541,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_PushClipRegion(&self, ctx: root::HDC) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_PushClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PushClipRegion {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5153,7 +5567,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_PopClipRegion(&self, ctx: root::HDC) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_PopClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PopClipRegion {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5271,7 +5688,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SelectObject(&self, ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SelectObject(&self, ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SelectObject {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5291,7 +5711,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DeleteObject(&self, arg1: root::HGDIOBJ) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DeleteObject(&self, arg1: root::HGDIOBJ) {
         match self.pointers.DeleteObject {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5314,7 +5737,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn Rectangle(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn Rectangle(
         &self,
         ctx: root::HDC,
         l: ::std::os::raw::c_int,
@@ -5331,7 +5757,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn Ellipse(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn Ellipse(
         &self,
         ctx: root::HDC,
         l: ::std::os::raw::c_int,
@@ -5385,7 +5814,15 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_LineTo(&self, ctx: root::HDC, x: ::std::os::raw::c_int, y: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_LineTo(
+        &self,
+        ctx: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+    ) {
         match self.pointers.SWELL_LineTo {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5395,7 +5832,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetPixel(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetPixel(
         &self,
         ctx: root::HDC,
         x: ::std::os::raw::c_int,
@@ -5449,7 +5889,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetTextColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5459,7 +5902,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetTextColor(&self, ctx: root::HDC) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetTextColor(&self, ctx: root::HDC) -> ::std::os::raw::c_int {
         match self.pointers.GetTextColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5469,7 +5915,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetBkColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetBkColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkColor {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5479,7 +5928,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetBkMode(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetBkMode(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkMode {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5509,7 +5961,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn RoundRect(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn RoundRect(
         &self,
         ctx: root::HDC,
         x: ::std::os::raw::c_int,
@@ -5560,7 +6015,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetTextFace(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetTextFace(
         &self,
         ctx: root::HDC,
         nCount: ::std::os::raw::c_int,
@@ -5636,7 +6094,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn BitBlt(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn BitBlt(
         &self,
         hdcOut: root::HDC,
         x: ::std::os::raw::c_int,
@@ -5657,7 +6118,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn StretchBlt(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn StretchBlt(
         &self,
         hdcOut: root::HDC,
         x: ::std::os::raw::c_int,
@@ -5761,7 +6225,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetOpaque(&self, h: root::HWND, isopaque: bool) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetOpaque(&self, h: root::HWND, isopaque: bool) {
         match self.pointers.SetOpaque {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5771,7 +6238,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SetAllowNoMiddleManRendering(&self, h: root::HWND, allow: bool) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetAllowNoMiddleManRendering(&self, h: root::HWND, allow: bool) {
         match self.pointers.SetAllowNoMiddleManRendering {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5807,7 +6277,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetDC(&self, arg1: root::HWND) -> root::HDC {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetDC {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5817,7 +6290,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetWindowDC {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5827,7 +6303,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
         match self.pointers.ReleaseDC {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5855,7 +6334,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_CloneGDIObject(&self, a: root::HGDIOBJ) -> root::HGDIOBJ {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CloneGDIObject(&self, a: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SWELL_CloneGDIObject {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5875,7 +6357,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DragQueryPoint(&self, arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DragQueryPoint(&self, arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL {
         match self.pointers.DragQueryPoint {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5885,7 +6370,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn DragFinish(&self, arg1: root::HDROP) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DragFinish(&self, arg1: root::HDROP) {
         match self.pointers.DragFinish {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -5983,7 +6471,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_MakeSetCurParms(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_MakeSetCurParms(
         &self,
         xscale: f32,
         yscale: f32,
@@ -6264,7 +6755,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetWindowWantRaiseAmt(&self, h: root::HWND, amt: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetWindowWantRaiseAmt(&self, h: root::HWND, amt: ::std::os::raw::c_int) {
         match self.pointers.SWELL_SetWindowWantRaiseAmt {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -6274,7 +6768,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_GetWindowWantRaiseAmt(&self, arg1: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetWindowWantRaiseAmt(&self, arg1: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetWindowWantRaiseAmt {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -6284,7 +6781,14 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_SetListViewFastClickMask(&self, hList: root::HWND, mask: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetListViewFastClickMask(
+        &self,
+        hList: root::HWND,
+        mask: ::std::os::raw::c_int,
+    ) {
         match self.pointers.SWELL_SetListViewFastClickMask {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -6365,7 +6869,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn EnumChildWindows(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumChildWindows(
         &self,
         hwnd: root::HWND,
         cwEnumFunc: ::std::option::Option<
@@ -6382,7 +6889,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_IsGroupBox(&self, arg1: root::HWND) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_IsGroupBox(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsGroupBox {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -6392,7 +6902,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_IsButton(&self, arg1: root::HWND) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_IsButton(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsButton {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -6402,7 +6915,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_IsStaticText(&self, arg1: root::HWND) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_IsStaticText(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsStaticText {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -6494,7 +7010,10 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
         match self.pointers.IsWindowEnabled {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -6535,19 +7054,31 @@ impl Swell {
         }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
         unsafe { windows::GetDlgItem(arg1, arg2) }
     }
     #[cfg(target_family = "windows")]
-    pub fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         unsafe { windows::ShowWindow(arg1, arg2) }
     }
     #[cfg(target_family = "windows")]
-    pub fn DestroyWindow(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DestroyWindow(&self, hwnd: root::HWND) {
         unsafe { windows::DestroyWindow(hwnd) }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetDlgItemInt(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetDlgItemInt(
         &self,
         arg1: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -6570,7 +7101,10 @@ impl Swell {
         unsafe { windows::GetDlgItemInt(arg1, idx, translated, issigned) }
     }
     #[cfg(target_family = "windows")]
-    pub fn CheckDlgButton(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CheckDlgButton(
         &self,
         hwnd: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -6579,7 +7113,10 @@ impl Swell {
         unsafe { windows::CheckDlgButton(hwnd, idx, check) }
     }
     #[cfg(target_family = "windows")]
-    pub fn IsDlgButtonChecked(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsDlgButtonChecked(
         &self,
         hwnd: root::HWND,
         idx: ::std::os::raw::c_int,
@@ -6587,11 +7124,17 @@ impl Swell {
         unsafe { windows::IsDlgButtonChecked(hwnd, idx) }
     }
     #[cfg(target_family = "windows")]
-    pub fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
         unsafe { windows::EnableWindow(hwnd, enable) }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetFocus(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetFocus(&self, hwnd: root::HWND) {
         unsafe { windows::SetFocus(hwnd) }
     }
     #[cfg(target_family = "windows")]
@@ -6599,7 +7142,10 @@ impl Swell {
         unsafe { windows::GetFocus() }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetForegroundWindow(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetForegroundWindow(&self, hwnd: root::HWND) {
         unsafe { windows::SetForegroundWindow(hwnd) }
     }
     #[cfg(target_family = "windows")]
@@ -6607,7 +7153,10 @@ impl Swell {
         unsafe { windows::GetForegroundWindow() }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
         unsafe { windows::SetCapture(hwnd) }
     }
     #[cfg(target_family = "windows")]
@@ -6619,23 +7168,42 @@ impl Swell {
         unsafe { windows::ReleaseCapture() }
     }
     #[cfg(target_family = "windows")]
-    pub fn IsChild(&self, hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsChild(
+        &self,
+        hwndParent: root::HWND,
+        hwndChild: root::HWND,
+    ) -> ::std::os::raw::c_int {
         unsafe { windows::IsChild(hwndParent, hwndChild) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
         unsafe { windows::GetParent(hwnd) }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
         unsafe { windows::SetParent(hwnd, newPar) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
         unsafe { windows::GetWindow(hwnd, what) }
     }
     #[cfg(target_family = "windows")]
-    pub fn EnumWindows(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumWindows(
         &self,
         proc_: ::std::option::Option<
             unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
@@ -6673,11 +7241,17 @@ impl Swell {
         unsafe { windows::GetClientRect(hwnd, r) }
     }
     #[cfg(target_family = "windows")]
-    pub fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
         unsafe { windows::WindowFromPoint(p) }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetWindowPos(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetWindowPos(
         &self,
         hwnd: root::HWND,
         unused: root::HWND,
@@ -6716,15 +7290,24 @@ impl Swell {
         unsafe { windows::ScrollWindow(hwnd, xamt, yamt, lpRect, lpClipRect) }
     }
     #[cfg(target_family = "windows")]
-    pub fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
         unsafe { windows::IsWindowVisible(hwnd) }
     }
     #[cfg(target_family = "windows")]
-    pub fn IsWindow(&self, hwnd: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsWindow(&self, hwnd: root::HWND) -> bool {
         unsafe { windows::IsWindow(hwnd) }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetTimer(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTimer(
         &self,
         hwnd: root::HWND,
         timerid: root::UINT_PTR,
@@ -6734,7 +7317,10 @@ impl Swell {
         unsafe { windows::SetTimer(hwnd, timerid, rate, tProc) }
     }
     #[cfg(target_family = "windows")]
-    pub fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
         unsafe { windows::KillTimer(hwnd, timerid) }
     }
     #[cfg(target_family = "windows")]
@@ -6742,19 +7328,31 @@ impl Swell {
         unsafe { windows::CreatePopupMenu() }
     }
     #[cfg(target_family = "windows")]
-    pub fn DestroyMenu(&self, hMenu: root::HMENU) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DestroyMenu(&self, hMenu: root::HMENU) {
         unsafe { windows::DestroyMenu(hMenu) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
         unsafe { windows::GetSubMenu(hMenu, pos) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
         unsafe { windows::GetMenuItemCount(hMenu) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetMenuItemID(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMenuItemID(
         &self,
         hMenu: root::HMENU,
         pos: ::std::os::raw::c_int,
@@ -6762,7 +7360,10 @@ impl Swell {
         unsafe { windows::GetMenuItemID(hMenu, pos) }
     }
     #[cfg(target_family = "windows")]
-    pub fn EnableMenuItem(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnableMenuItem(
         &self,
         hMenu: root::HMENU,
         idx: ::std::os::raw::c_int,
@@ -6771,7 +7372,10 @@ impl Swell {
         unsafe { windows::EnableMenuItem(hMenu, idx, en) }
     }
     #[cfg(target_family = "windows")]
-    pub fn DeleteMenu(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DeleteMenu(
         &self,
         hMenu: root::HMENU,
         idx: ::std::os::raw::c_int,
@@ -6780,7 +7384,10 @@ impl Swell {
         unsafe { windows::DeleteMenu(hMenu, idx, flag) }
     }
     #[cfg(target_family = "windows")]
-    pub fn CheckMenuItem(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CheckMenuItem(
         &self,
         hMenu: root::HMENU,
         idx: ::std::os::raw::c_int,
@@ -6789,7 +7396,10 @@ impl Swell {
         unsafe { windows::CheckMenuItem(hMenu, idx, chk) }
     }
     #[cfg(target_family = "windows")]
-    pub fn DrawMenuBar(&self, arg1: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DrawMenuBar(&self, arg1: root::HWND) {
         unsafe { windows::DrawMenuBar(arg1) }
     }
     #[cfg(target_family = "windows")]
@@ -6809,15 +7419,24 @@ impl Swell {
         unsafe { windows::TrackPopupMenu(hMenu, flags, xpos, ypos, resvd, hwnd, r) }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
         unsafe { windows::SetMenu(hwnd, menu) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
         unsafe { windows::GetMenu(hwnd) }
     }
     #[cfg(target_family = "windows")]
-    pub fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         unsafe { windows::EndDialog(arg1, arg2) }
     }
     #[cfg(target_family = "windows")]
@@ -6836,7 +7455,10 @@ impl Swell {
         unsafe { windows::GetMessagePos() }
     }
     #[cfg(target_family = "windows")]
-    pub fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
         unsafe { windows::OpenClipboard(hwndDlg) }
     }
     #[cfg(target_family = "windows")]
@@ -6844,7 +7466,10 @@ impl Swell {
         unsafe { windows::CloseClipboard() }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
         unsafe { windows::GetClipboardData(type_) }
     }
     #[cfg(target_family = "windows")]
@@ -6852,11 +7477,17 @@ impl Swell {
         unsafe { windows::EmptyClipboard() }
     }
     #[cfg(target_family = "windows")]
-    pub fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
         unsafe { windows::SetClipboardData(type_, h) }
     }
     #[cfg(target_family = "windows")]
-    pub fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
         unsafe { windows::EnumClipboardFormats(lastfmt) }
     }
     #[cfg(target_family = "windows")]
@@ -6868,11 +7499,17 @@ impl Swell {
         unsafe { windows::GlobalAlloc(flags, sz) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
         unsafe { windows::GlobalLock(h) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GlobalUnlock(&self, h: root::HANDLE) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GlobalUnlock(&self, h: root::HANDLE) {
         unsafe { windows::GlobalUnlock(h) }
     }
     #[cfg(target_family = "windows")]
@@ -6901,15 +7538,24 @@ impl Swell {
         unsafe { windows::EndPaint(arg1, arg2) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetDC(&self, arg1: root::HWND) -> root::HDC {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetDC(&self, arg1: root::HWND) -> root::HDC {
         unsafe { windows::GetDC(arg1) }
     }
     #[cfg(target_family = "windows")]
-    pub fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
         unsafe { windows::GetWindowDC(arg1) }
     }
     #[cfg(target_family = "windows")]
-    pub fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
         unsafe { windows::ReleaseDC(arg1, arg2) }
     }
     #[cfg(target_family = "windows")]
@@ -6917,7 +7563,10 @@ impl Swell {
         unsafe { windows::GetSystemMetrics(arg1) }
     }
     #[cfg(target_family = "windows")]
-    pub fn EnumChildWindows(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumChildWindows(
         &self,
         hwnd: root::HWND,
         cwEnumFunc: ::std::option::Option<
@@ -6928,7 +7577,10 @@ impl Swell {
         unsafe { windows::EnumChildWindows(hwnd, cwEnumFunc, lParam) }
     }
     #[cfg(target_family = "windows")]
-    pub fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
         unsafe { windows::IsWindowEnabled(arg1) }
     }
 }
@@ -7081,9 +7733,9 @@ pub struct SwellFunctionPointers {
         ),
     >,
     pub GetDlgItem:
-        Option<extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND>,
-    pub ShowWindow: Option<extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int)>,
-    pub DestroyWindow: Option<extern "C" fn(hwnd: root::HWND)>,
+        Option<unsafe extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND>,
+    pub ShowWindow: Option<unsafe extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int)>,
+    pub DestroyWindow: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub SWELL_GetGestureInfo: Option<
         unsafe extern "C" fn(lParam: root::LPARAM, gi: *mut root::GESTUREINFO) -> root::BOOL,
     >,
@@ -7096,7 +7748,7 @@ pub struct SwellFunctionPointers {
         ) -> root::BOOL,
     >,
     pub SetDlgItemInt: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             arg1: root::HWND,
             idx: ::std::os::raw::c_int,
             val: ::std::os::raw::c_int,
@@ -7120,28 +7772,35 @@ pub struct SwellFunctionPointers {
         ) -> root::BOOL,
     >,
     pub CheckDlgButton: Option<
-        extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int, check: ::std::os::raw::c_int),
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            check: ::std::os::raw::c_int,
+        ),
     >,
     pub IsDlgButtonChecked: Option<
-        extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
     >,
-    pub EnableWindow: Option<extern "C" fn(hwnd: root::HWND, enable: ::std::os::raw::c_int)>,
-    pub SetFocus: Option<extern "C" fn(hwnd: root::HWND)>,
+    pub EnableWindow: Option<unsafe extern "C" fn(hwnd: root::HWND, enable: ::std::os::raw::c_int)>,
+    pub SetFocus: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub GetFocus: Option<extern "C" fn() -> root::HWND>,
-    pub SetForegroundWindow: Option<extern "C" fn(hwnd: root::HWND)>,
+    pub SetForegroundWindow: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub GetForegroundWindow: Option<extern "C" fn() -> root::HWND>,
-    pub SetCapture: Option<extern "C" fn(hwnd: root::HWND) -> root::HWND>,
+    pub SetCapture: Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HWND>,
     pub GetCapture: Option<extern "C" fn() -> root::HWND>,
     pub ReleaseCapture: Option<extern "C" fn()>,
     pub IsChild: Option<
-        extern "C" fn(hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            hwndParent: root::HWND,
+            hwndChild: root::HWND,
+        ) -> ::std::os::raw::c_int,
     >,
-    pub GetParent: Option<extern "C" fn(hwnd: root::HWND) -> root::HWND>,
-    pub SetParent: Option<extern "C" fn(hwnd: root::HWND, newPar: root::HWND) -> root::HWND>,
+    pub GetParent: Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HWND>,
+    pub SetParent: Option<unsafe extern "C" fn(hwnd: root::HWND, newPar: root::HWND) -> root::HWND>,
     pub GetWindow:
-        Option<extern "C" fn(hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND>,
     pub EnumWindows: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             proc_: ::std::option::Option<
                 unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
             >,
@@ -7162,16 +7821,16 @@ pub struct SwellFunctionPointers {
     pub GetWindowContentViewRect:
         Option<unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT)>,
     pub GetClientRect: Option<unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT)>,
-    pub WindowFromPoint: Option<extern "C" fn(p: root::POINT) -> root::HWND>,
+    pub WindowFromPoint: Option<unsafe extern "C" fn(p: root::POINT) -> root::HWND>,
     pub WinOffsetRect: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             lprc: root::LPRECT,
             dx: ::std::os::raw::c_int,
             dy: ::std::os::raw::c_int,
         ) -> root::BOOL,
     >,
     pub WinSetRect: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             lprc: root::LPRECT,
             xLeft: ::std::os::raw::c_int,
             yTop: ::std::os::raw::c_int,
@@ -7190,7 +7849,7 @@ pub struct SwellFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub SetWindowPos: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             unused: root::HWND,
             x: ::std::os::raw::c_int,
@@ -7201,7 +7860,10 @@ pub struct SwellFunctionPointers {
         ),
     >,
     pub SWELL_SetWindowLevel: Option<
-        extern "C" fn(hwnd: root::HWND, newlevel: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            newlevel: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub InvalidateRect: Option<
         unsafe extern "C" fn(
@@ -7210,11 +7872,12 @@ pub struct SwellFunctionPointers {
             eraseBk: ::std::os::raw::c_int,
         ) -> root::BOOL,
     >,
-    pub UpdateWindow: Option<extern "C" fn(hwnd: root::HWND)>,
-    pub GetWindowLong:
-        Option<extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR>,
+    pub UpdateWindow: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
+    pub GetWindowLong: Option<
+        unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::LONG_PTR,
+    >,
     pub SetWindowLong: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             idx: ::std::os::raw::c_int,
             val: root::LONG_PTR,
@@ -7230,7 +7893,7 @@ pub struct SwellFunctionPointers {
         ) -> root::BOOL,
     >,
     pub EnumPropsEx: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             arg1: root::HWND,
             arg2: root::PROPENUMPROCEX,
             arg3: root::LPARAM,
@@ -7249,30 +7912,36 @@ pub struct SwellFunctionPointers {
     pub RemoveProp: Option<
         unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char) -> root::HANDLE,
     >,
-    pub IsWindowVisible: Option<extern "C" fn(hwnd: root::HWND) -> bool>,
-    pub IsWindow: Option<extern "C" fn(hwnd: root::HWND) -> bool>,
+    pub IsWindowVisible: Option<unsafe extern "C" fn(hwnd: root::HWND) -> bool>,
+    pub IsWindow: Option<unsafe extern "C" fn(hwnd: root::HWND) -> bool>,
     pub SetTimer: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             timerid: root::UINT_PTR,
             rate: root::UINT,
             tProc: root::TIMERPROC,
         ) -> root::UINT_PTR,
     >,
-    pub KillTimer: Option<extern "C" fn(hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL>,
+    pub KillTimer:
+        Option<unsafe extern "C" fn(hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL>,
     pub ListView_SetExtendedListViewStyleEx: Option<
-        extern "C" fn(h: root::HWND, mask: ::std::os::raw::c_int, style: ::std::os::raw::c_int),
+        unsafe extern "C" fn(
+            h: root::HWND,
+            mask: ::std::os::raw::c_int,
+            style: ::std::os::raw::c_int,
+        ),
     >,
     pub ListView_InsertColumn: Option<
         unsafe extern "C" fn(h: root::HWND, pos: ::std::os::raw::c_int, lvc: *const root::LVCOLUMN),
     >,
     pub ListView_DeleteColumn:
-        Option<extern "C" fn(h: root::HWND, pos: ::std::os::raw::c_int) -> bool>,
+        Option<unsafe extern "C" fn(h: root::HWND, pos: ::std::os::raw::c_int) -> bool>,
     pub ListView_SetColumn: Option<
         unsafe extern "C" fn(h: root::HWND, pos: ::std::os::raw::c_int, lvc: *const root::LVCOLUMN),
     >,
-    pub ListView_GetColumnWidth:
-        Option<extern "C" fn(h: root::HWND, pos: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
+    pub ListView_GetColumnWidth: Option<
+        unsafe extern "C" fn(h: root::HWND, pos: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+    >,
     pub ListView_InsertItem: Option<
         unsafe extern "C" fn(h: root::HWND, item: *const root::LVITEM) -> ::std::os::raw::c_int,
     >,
@@ -7287,7 +7956,7 @@ pub struct SwellFunctionPointers {
     pub ListView_SetItem:
         Option<unsafe extern "C" fn(h: root::HWND, item: *mut root::LVITEM) -> bool>,
     pub ListView_GetNextItem: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             h: root::HWND,
             istart: ::std::os::raw::c_int,
             flags: ::std::os::raw::c_int,
@@ -7296,22 +7965,29 @@ pub struct SwellFunctionPointers {
     pub ListView_GetItem:
         Option<unsafe extern "C" fn(h: root::HWND, item: *mut root::LVITEM) -> bool>,
     pub ListView_GetItemState: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             h: root::HWND,
             ipos: ::std::os::raw::c_int,
             mask: root::UINT,
         ) -> ::std::os::raw::c_int,
     >,
-    pub ListView_DeleteItem: Option<extern "C" fn(h: root::HWND, ipos: ::std::os::raw::c_int)>,
-    pub ListView_DeleteAllItems: Option<extern "C" fn(h: root::HWND)>,
-    pub ListView_GetSelectedCount: Option<extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
-    pub ListView_GetItemCount: Option<extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
-    pub ListView_GetSelectionMark: Option<extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+    pub ListView_DeleteItem:
+        Option<unsafe extern "C" fn(h: root::HWND, ipos: ::std::os::raw::c_int)>,
+    pub ListView_DeleteAllItems: Option<unsafe extern "C" fn(h: root::HWND)>,
+    pub ListView_GetSelectedCount:
+        Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+    pub ListView_GetItemCount: Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+    pub ListView_GetSelectionMark:
+        Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
     pub ListView_SetColumnWidth: Option<
-        extern "C" fn(h: root::HWND, colpos: ::std::os::raw::c_int, wid: ::std::os::raw::c_int),
+        unsafe extern "C" fn(
+            h: root::HWND,
+            colpos: ::std::os::raw::c_int,
+            wid: ::std::os::raw::c_int,
+        ),
     >,
     pub ListView_SetItemState: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             h: root::HWND,
             item: ::std::os::raw::c_int,
             state: root::UINT,
@@ -7319,15 +7995,16 @@ pub struct SwellFunctionPointers {
         ) -> bool,
     >,
     pub ListView_RedrawItems: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             h: root::HWND,
             startitem: ::std::os::raw::c_int,
             enditem: ::std::os::raw::c_int,
         ),
     >,
-    pub ListView_SetItemCount: Option<extern "C" fn(h: root::HWND, cnt: ::std::os::raw::c_int)>,
+    pub ListView_SetItemCount:
+        Option<unsafe extern "C" fn(h: root::HWND, cnt: ::std::os::raw::c_int)>,
     pub ListView_EnsureVisible:
-        Option<extern "C" fn(h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL)>,
+        Option<unsafe extern "C" fn(h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL)>,
     pub ListView_GetSubItemRect: Option<
         unsafe extern "C" fn(
             h: root::HWND,
@@ -7338,7 +8015,11 @@ pub struct SwellFunctionPointers {
         ) -> bool,
     >,
     pub ListView_SetImageList: Option<
-        extern "C" fn(h: root::HWND, imagelist: root::HIMAGELIST, which: ::std::os::raw::c_int),
+        unsafe extern "C" fn(
+            h: root::HWND,
+            imagelist: root::HIMAGELIST,
+            which: ::std::os::raw::c_int,
+        ),
     >,
     pub ListView_HitTest: Option<
         unsafe extern "C" fn(
@@ -7361,8 +8042,9 @@ pub struct SwellFunctionPointers {
             textmax: ::std::os::raw::c_int,
         ),
     >,
-    pub ListView_SortItems:
-        Option<extern "C" fn(hwnd: root::HWND, compf: root::PFNLVCOMPARE, parm: root::LPARAM)>,
+    pub ListView_SortItems: Option<
+        unsafe extern "C" fn(hwnd: root::HWND, compf: root::PFNLVCOMPARE, parm: root::LPARAM),
+    >,
     pub ListView_GetItemRect: Option<
         unsafe extern "C" fn(
             h: root::HWND,
@@ -7372,14 +8054,15 @@ pub struct SwellFunctionPointers {
         ) -> bool,
     >,
     pub ListView_Scroll: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             h: root::HWND,
             xscroll: ::std::os::raw::c_int,
             yscroll: ::std::os::raw::c_int,
         ) -> bool,
     >,
-    pub ListView_GetTopIndex: Option<extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
-    pub ListView_GetCountPerPage: Option<extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+    pub ListView_GetTopIndex: Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+    pub ListView_GetCountPerPage:
+        Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
     pub ListView_SetColumnOrderArray: Option<
         unsafe extern "C" fn(
             h: root::HWND,
@@ -7394,8 +8077,8 @@ pub struct SwellFunctionPointers {
             arr: *mut ::std::os::raw::c_int,
         ) -> root::BOOL,
     >,
-    pub ListView_GetHeader: Option<extern "C" fn(h: root::HWND) -> root::HWND>,
-    pub Header_GetItemCount: Option<extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+    pub ListView_GetHeader: Option<unsafe extern "C" fn(h: root::HWND) -> root::HWND>,
+    pub Header_GetItemCount: Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
     pub Header_GetItem: Option<
         unsafe extern "C" fn(
             h: root::HWND,
@@ -7411,28 +8094,30 @@ pub struct SwellFunctionPointers {
         ) -> root::BOOL,
     >,
     pub SWELL_GetListViewHeaderHeight:
-        Option<extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
     pub ImageList_CreateEx: Option<extern "C" fn() -> root::HIMAGELIST>,
-    pub ImageList_Remove:
-        Option<extern "C" fn(list: root::HIMAGELIST, idx: ::std::os::raw::c_int) -> root::BOOL>,
+    pub ImageList_Remove: Option<
+        unsafe extern "C" fn(list: root::HIMAGELIST, idx: ::std::os::raw::c_int) -> root::BOOL,
+    >,
     pub ImageList_ReplaceIcon: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             list: root::HIMAGELIST,
             offset: ::std::os::raw::c_int,
             image: root::HICON,
         ) -> ::std::os::raw::c_int,
     >,
     pub ImageList_Add: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             list: root::HIMAGELIST,
             image: root::HBITMAP,
             mask: root::HBITMAP,
         ) -> ::std::os::raw::c_int,
     >,
-    pub ImageList_Destroy: Option<extern "C" fn(arg1: root::HIMAGELIST)>,
-    pub TabCtrl_GetItemCount: Option<extern "C" fn(hwnd: root::HWND) -> ::std::os::raw::c_int>,
+    pub ImageList_Destroy: Option<unsafe extern "C" fn(arg1: root::HIMAGELIST)>,
+    pub TabCtrl_GetItemCount:
+        Option<unsafe extern "C" fn(hwnd: root::HWND) -> ::std::os::raw::c_int>,
     pub TabCtrl_DeleteItem:
-        Option<extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL>,
     pub TabCtrl_InsertItem: Option<
         unsafe extern "C" fn(
             hwnd: root::HWND,
@@ -7441,9 +8126,9 @@ pub struct SwellFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub TabCtrl_SetCurSel: Option<
-        extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
     >,
-    pub TabCtrl_GetCurSel: Option<extern "C" fn(hwnd: root::HWND) -> ::std::os::raw::c_int>,
+    pub TabCtrl_GetCurSel: Option<unsafe extern "C" fn(hwnd: root::HWND) -> ::std::os::raw::c_int>,
     pub TabCtrl_AdjustRect: Option<
         unsafe extern "C" fn(
             hwnd: root::HWND,
@@ -7455,36 +8140,42 @@ pub struct SwellFunctionPointers {
         unsafe extern "C" fn(hwnd: root::HWND, ins: *mut root::TV_INSERTSTRUCT) -> root::HTREEITEM,
     >,
     pub TreeView_Expand: Option<
-        extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM, flag: root::UINT) -> root::BOOL,
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            item: root::HTREEITEM,
+            flag: root::UINT,
+        ) -> root::BOOL,
     >,
-    pub TreeView_GetSelection: Option<extern "C" fn(hwnd: root::HWND) -> root::HTREEITEM>,
-    pub TreeView_DeleteItem: Option<extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM)>,
-    pub TreeView_DeleteAllItems: Option<extern "C" fn(hwnd: root::HWND)>,
-    pub TreeView_SelectItem: Option<extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM)>,
+    pub TreeView_GetSelection: Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HTREEITEM>,
+    pub TreeView_DeleteItem: Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM)>,
+    pub TreeView_DeleteAllItems: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
+    pub TreeView_SelectItem: Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM)>,
     pub TreeView_GetItem:
-        Option<extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL>,
     pub TreeView_SetItem:
-        Option<extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL>,
     pub TreeView_HitTest: Option<
         unsafe extern "C" fn(hwnd: root::HWND, hti: *mut root::TVHITTESTINFO) -> root::HTREEITEM,
     >,
     pub TreeView_SetIndent:
-        Option<extern "C" fn(hwnd: root::HWND, indent: ::std::os::raw::c_int) -> root::BOOL>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, indent: ::std::os::raw::c_int) -> root::BOOL>,
     pub TreeView_GetChild:
-        Option<extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM>,
     pub TreeView_GetNextSibling:
-        Option<extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM>,
-    pub TreeView_GetRoot: Option<extern "C" fn(hwnd: root::HWND) -> root::HTREEITEM>,
-    pub TreeView_SetBkColor: Option<extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM>,
+    pub TreeView_GetRoot: Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HTREEITEM>,
+    pub TreeView_SetBkColor:
+        Option<unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
     pub TreeView_SetTextColor:
-        Option<extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
-    pub ListView_SetBkColor: Option<extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
+    pub ListView_SetBkColor:
+        Option<unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
     pub ListView_SetTextBkColor:
-        Option<extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
     pub ListView_SetTextColor:
-        Option<extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
     pub ListView_SetGridColor:
-        Option<extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND, color: ::std::os::raw::c_int)>,
     pub ListView_SetSelColors: Option<
         unsafe extern "C" fn(
             hwnd: root::HWND,
@@ -7493,7 +8184,7 @@ pub struct SwellFunctionPointers {
         ),
     >,
     pub SWELL_ModalWindowStart:
-        Option<extern "C" fn(hwnd: root::HWND) -> *mut ::std::os::raw::c_void>,
+        Option<unsafe extern "C" fn(hwnd: root::HWND) -> *mut ::std::os::raw::c_void>,
     pub SWELL_ModalWindowRun: Option<
         unsafe extern "C" fn(
             ctx: *mut ::std::os::raw::c_void,
@@ -7501,11 +8192,11 @@ pub struct SwellFunctionPointers {
         ) -> bool,
     >,
     pub SWELL_ModalWindowEnd: Option<unsafe extern "C" fn(ctx: *mut ::std::os::raw::c_void)>,
-    pub SWELL_CloseWindow: Option<extern "C" fn(hwnd: root::HWND)>,
+    pub SWELL_CloseWindow: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub CreatePopupMenu: Option<extern "C" fn() -> root::HMENU>,
     pub CreatePopupMenuEx:
         Option<unsafe extern "C" fn(title: *const ::std::os::raw::c_char) -> root::HMENU>,
-    pub DestroyMenu: Option<extern "C" fn(hMenu: root::HMENU)>,
+    pub DestroyMenu: Option<unsafe extern "C" fn(hMenu: root::HMENU)>,
     pub AddMenuItem: Option<
         unsafe extern "C" fn(
             hMenu: root::HMENU,
@@ -7515,13 +8206,16 @@ pub struct SwellFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub GetSubMenu:
-        Option<extern "C" fn(hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU>,
-    pub GetMenuItemCount: Option<extern "C" fn(hMenu: root::HMENU) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU>,
+    pub GetMenuItemCount: Option<unsafe extern "C" fn(hMenu: root::HMENU) -> ::std::os::raw::c_int>,
     pub GetMenuItemID: Option<
-        extern "C" fn(hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            hMenu: root::HMENU,
+            pos: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub SetMenuItemModifier: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hMenu: root::HMENU,
             idx: ::std::os::raw::c_int,
             flag: ::std::os::raw::c_int,
@@ -7538,21 +8232,21 @@ pub struct SwellFunctionPointers {
         ) -> bool,
     >,
     pub EnableMenuItem: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hMenu: root::HMENU,
             idx: ::std::os::raw::c_int,
             en: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub DeleteMenu: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hMenu: root::HMENU,
             idx: ::std::os::raw::c_int,
             flag: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub CheckMenuItem: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hMenu: root::HMENU,
             idx: ::std::os::raw::c_int,
             chk: ::std::os::raw::c_int,
@@ -7591,7 +8285,7 @@ pub struct SwellFunctionPointers {
             mi: *mut root::MENUITEMINFO,
         ) -> root::BOOL,
     >,
-    pub DrawMenuBar: Option<extern "C" fn(arg1: root::HWND)>,
+    pub DrawMenuBar: Option<unsafe extern "C" fn(arg1: root::HWND)>,
     pub SWELL_LoadMenu: Option<
         unsafe extern "C" fn(
             head: *mut root::SWELL_MenuResourceIndex,
@@ -7609,16 +8303,16 @@ pub struct SwellFunctionPointers {
             r: *const root::RECT,
         ) -> ::std::os::raw::c_int,
     >,
-    pub SWELL_SetMenuDestination: Option<extern "C" fn(menu: root::HMENU, hwnd: root::HWND)>,
-    pub SWELL_DuplicateMenu: Option<extern "C" fn(menu: root::HMENU) -> root::HMENU>,
-    pub SetMenu: Option<extern "C" fn(hwnd: root::HWND, menu: root::HMENU) -> root::BOOL>,
-    pub GetMenu: Option<extern "C" fn(hwnd: root::HWND) -> root::HMENU>,
+    pub SWELL_SetMenuDestination: Option<unsafe extern "C" fn(menu: root::HMENU, hwnd: root::HWND)>,
+    pub SWELL_DuplicateMenu: Option<unsafe extern "C" fn(menu: root::HMENU) -> root::HMENU>,
+    pub SetMenu: Option<unsafe extern "C" fn(hwnd: root::HWND, menu: root::HMENU) -> root::BOOL>,
+    pub GetMenu: Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::HMENU>,
     pub SWELL_GetDefaultWindowMenu: Option<extern "C" fn() -> root::HMENU>,
-    pub SWELL_SetDefaultWindowMenu: Option<extern "C" fn(arg1: root::HMENU)>,
+    pub SWELL_SetDefaultWindowMenu: Option<unsafe extern "C" fn(arg1: root::HMENU)>,
     pub SWELL_GetDefaultModalWindowMenu: Option<extern "C" fn() -> root::HMENU>,
-    pub SWELL_SetDefaultModalWindowMenu: Option<extern "C" fn(arg1: root::HMENU)>,
+    pub SWELL_SetDefaultModalWindowMenu: Option<unsafe extern "C" fn(arg1: root::HMENU)>,
     pub SWELL_GetCurrentMenu: Option<extern "C" fn() -> root::HMENU>,
-    pub SWELL_SetCurrentMenu: Option<extern "C" fn(arg1: root::HMENU)>,
+    pub SWELL_SetCurrentMenu: Option<unsafe extern "C" fn(arg1: root::HMENU)>,
     pub SWELL_DialogBox: Option<
         unsafe extern "C" fn(
             reshead: *mut root::SWELL_DialogResourceIndex,
@@ -7638,22 +8332,23 @@ pub struct SwellFunctionPointers {
         ) -> root::HWND,
     >,
     pub SWELL_RegisterCustomControlCreator:
-        Option<extern "C" fn(proc_: root::SWELL_ControlCreatorProc)>,
+        Option<unsafe extern "C" fn(proc_: root::SWELL_ControlCreatorProc)>,
     pub SWELL_UnregisterCustomControlCreator:
-        Option<extern "C" fn(proc_: root::SWELL_ControlCreatorProc)>,
+        Option<unsafe extern "C" fn(proc_: root::SWELL_ControlCreatorProc)>,
     pub DefWindowProc: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             msg: root::UINT,
             wParam: root::WPARAM,
             lParam: root::LPARAM,
         ) -> root::LRESULT,
     >,
-    pub EndDialog: Option<extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int)>,
-    pub SWELL_GetDefaultButtonID:
-        Option<extern "C" fn(hwndDlg: root::HWND, onlyIfEnabled: bool) -> ::std::os::raw::c_int>,
+    pub EndDialog: Option<unsafe extern "C" fn(arg1: root::HWND, arg2: ::std::os::raw::c_int)>,
+    pub SWELL_GetDefaultButtonID: Option<
+        unsafe extern "C" fn(hwndDlg: root::HWND, onlyIfEnabled: bool) -> ::std::os::raw::c_int,
+    >,
     pub SendMessage: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             arg1: root::HWND,
             arg2: root::UINT,
             arg3: root::WPARAM,
@@ -7661,9 +8356,9 @@ pub struct SwellFunctionPointers {
         ) -> root::LRESULT,
     >,
     pub SWELL_BroadcastMessage:
-        Option<extern "C" fn(arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM)>,
+        Option<unsafe extern "C" fn(arg1: root::UINT, arg2: root::WPARAM, arg3: root::LPARAM)>,
     pub PostMessage: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             msg: root::UINT,
             wParam: root::WPARAM,
@@ -7671,7 +8366,7 @@ pub struct SwellFunctionPointers {
         ) -> root::BOOL,
     >,
     pub SWELL_MessageQueue_Flush: Option<extern "C" fn()>,
-    pub SWELL_MessageQueue_Clear: Option<extern "C" fn(h: root::HWND)>,
+    pub SWELL_MessageQueue_Clear: Option<unsafe extern "C" fn(h: root::HWND)>,
     pub SWELL_KeyToASCII: Option<
         unsafe extern "C" fn(
             wParam: ::std::os::raw::c_int,
@@ -7684,32 +8379,32 @@ pub struct SwellFunctionPointers {
     pub GetMessagePos: Option<extern "C" fn() -> root::DWORD>,
     pub SWELL_LoadCursor:
         Option<unsafe extern "C" fn(idx: *const ::std::os::raw::c_char) -> root::HCURSOR>,
-    pub SWELL_SetCursor: Option<extern "C" fn(curs: root::HCURSOR)>,
-    pub SWELL_EnableRightClickEmulate: Option<extern "C" fn(enable: root::BOOL)>,
+    pub SWELL_SetCursor: Option<unsafe extern "C" fn(curs: root::HCURSOR)>,
+    pub SWELL_EnableRightClickEmulate: Option<unsafe extern "C" fn(enable: root::BOOL)>,
     pub SWELL_GetCursor: Option<extern "C" fn() -> root::HCURSOR>,
     pub SWELL_GetLastSetCursor: Option<extern "C" fn() -> root::HCURSOR>,
     pub SWELL_IsCursorVisible: Option<extern "C" fn() -> bool>,
-    pub SWELL_ShowCursor: Option<extern "C" fn(bShow: root::BOOL) -> ::std::os::raw::c_int>,
+    pub SWELL_ShowCursor: Option<unsafe extern "C" fn(bShow: root::BOOL) -> ::std::os::raw::c_int>,
     pub SWELL_SetCursorPos:
         Option<extern "C" fn(X: ::std::os::raw::c_int, Y: ::std::os::raw::c_int) -> root::BOOL>,
     pub SWELL_GetViewPort: Option<
         unsafe extern "C" fn(r: *mut root::RECT, sourcerect: *const root::RECT, wantWork: bool),
     >,
-    pub OpenClipboard: Option<extern "C" fn(hwndDlg: root::HWND) -> bool>,
+    pub OpenClipboard: Option<unsafe extern "C" fn(hwndDlg: root::HWND) -> bool>,
     pub CloseClipboard: Option<extern "C" fn()>,
-    pub GetClipboardData: Option<extern "C" fn(type_: root::UINT) -> root::HANDLE>,
+    pub GetClipboardData: Option<unsafe extern "C" fn(type_: root::UINT) -> root::HANDLE>,
     pub EmptyClipboard: Option<extern "C" fn()>,
-    pub SetClipboardData: Option<extern "C" fn(type_: root::UINT, h: root::HANDLE)>,
+    pub SetClipboardData: Option<unsafe extern "C" fn(type_: root::UINT, h: root::HANDLE)>,
     pub RegisterClipboardFormat:
         Option<unsafe extern "C" fn(desc: *const ::std::os::raw::c_char) -> root::UINT>,
-    pub EnumClipboardFormats: Option<extern "C" fn(lastfmt: root::UINT) -> root::UINT>,
+    pub EnumClipboardFormats: Option<unsafe extern "C" fn(lastfmt: root::UINT) -> root::UINT>,
     pub GlobalAlloc: Option<
         extern "C" fn(flags: ::std::os::raw::c_int, sz: ::std::os::raw::c_int) -> root::HANDLE,
     >,
-    pub GlobalLock: Option<extern "C" fn(h: root::HANDLE) -> *mut ::std::os::raw::c_void>,
-    pub GlobalSize: Option<extern "C" fn(h: root::HANDLE) -> ::std::os::raw::c_int>,
-    pub GlobalUnlock: Option<extern "C" fn(h: root::HANDLE)>,
-    pub GlobalFree: Option<extern "C" fn(h: root::HANDLE)>,
+    pub GlobalLock: Option<unsafe extern "C" fn(h: root::HANDLE) -> *mut ::std::os::raw::c_void>,
+    pub GlobalSize: Option<unsafe extern "C" fn(h: root::HANDLE) -> ::std::os::raw::c_int>,
+    pub GlobalUnlock: Option<unsafe extern "C" fn(h: root::HANDLE)>,
+    pub GlobalFree: Option<unsafe extern "C" fn(h: root::HANDLE)>,
     pub CreateThread: Option<
         unsafe extern "C" fn(
             TA: *mut ::std::os::raw::c_void,
@@ -7740,7 +8435,7 @@ pub struct SwellFunctionPointers {
     >,
     pub GetCurrentThreadId: Option<extern "C" fn() -> root::DWORD>,
     pub WaitForSingleObject:
-        Option<extern "C" fn(hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD>,
+        Option<unsafe extern "C" fn(hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD>,
     pub WaitForAnySocketObject: Option<
         unsafe extern "C" fn(
             numObjs: ::std::os::raw::c_int,
@@ -7748,11 +8443,11 @@ pub struct SwellFunctionPointers {
             msTO: root::DWORD,
         ) -> root::DWORD,
     >,
-    pub CloseHandle: Option<extern "C" fn(hand: root::HANDLE) -> root::BOOL>,
+    pub CloseHandle: Option<unsafe extern "C" fn(hand: root::HANDLE) -> root::BOOL>,
     pub SetThreadPriority:
-        Option<extern "C" fn(evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL>,
-    pub SetEvent: Option<extern "C" fn(evt: root::HANDLE) -> root::BOOL>,
-    pub ResetEvent: Option<extern "C" fn(evt: root::HANDLE) -> root::BOOL>,
+        Option<unsafe extern "C" fn(evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL>,
+    pub SetEvent: Option<unsafe extern "C" fn(evt: root::HANDLE) -> root::BOOL>,
+    pub ResetEvent: Option<unsafe extern "C" fn(evt: root::HANDLE) -> root::BOOL>,
     pub SWELL_CreateProcessFromPID:
         Option<extern "C" fn(pid: ::std::os::raw::c_int) -> root::HANDLE>,
     pub SWELL_CreateProcess: Option<
@@ -7763,7 +8458,7 @@ pub struct SwellFunctionPointers {
         ) -> root::HANDLE,
     >,
     pub SWELL_GetProcessExitCode:
-        Option<extern "C" fn(hand: root::HANDLE) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(hand: root::HANDLE) -> ::std::os::raw::c_int>,
     pub LoadLibraryGlobals: Option<
         unsafe extern "C" fn(
             fileName: *const ::std::os::raw::c_char,
@@ -7778,23 +8473,23 @@ pub struct SwellFunctionPointers {
             procName: *const ::std::os::raw::c_char,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    pub FreeLibrary: Option<extern "C" fn(hInst: root::HINSTANCE) -> root::BOOL>,
+    pub FreeLibrary: Option<unsafe extern "C" fn(hInst: root::HINSTANCE) -> root::BOOL>,
     pub SWELL_GetBundle:
-        Option<extern "C" fn(hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void>,
+        Option<unsafe extern "C" fn(hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void>,
     pub SWELL_CreateMemContext: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hdc: root::HDC,
             w: ::std::os::raw::c_int,
             h: ::std::os::raw::c_int,
         ) -> root::HDC,
     >,
-    pub SWELL_DeleteGfxContext: Option<extern "C" fn(arg1: root::HDC)>,
-    pub SWELL_GetCtxGC: Option<extern "C" fn(ctx: root::HDC) -> *mut ::std::os::raw::c_void>,
+    pub SWELL_DeleteGfxContext: Option<unsafe extern "C" fn(arg1: root::HDC)>,
+    pub SWELL_GetCtxGC: Option<unsafe extern "C" fn(ctx: root::HDC) -> *mut ::std::os::raw::c_void>,
     pub SWELL_GetCtxFrameBuffer:
-        Option<extern "C" fn(ctx: root::HDC) -> *mut ::std::os::raw::c_void>,
-    pub SWELL_PushClipRegion: Option<extern "C" fn(ctx: root::HDC)>,
+        Option<unsafe extern "C" fn(ctx: root::HDC) -> *mut ::std::os::raw::c_void>,
+    pub SWELL_PushClipRegion: Option<unsafe extern "C" fn(ctx: root::HDC)>,
     pub SWELL_SetClipRegion: Option<unsafe extern "C" fn(ctx: root::HDC, r: *const root::RECT)>,
-    pub SWELL_PopClipRegion: Option<extern "C" fn(ctx: root::HDC)>,
+    pub SWELL_PopClipRegion: Option<unsafe extern "C" fn(ctx: root::HDC)>,
     pub CreateFontIndirect: Option<unsafe extern "C" fn(arg1: *mut root::LOGFONT) -> root::HFONT>,
     pub CreateFont: Option<
         unsafe extern "C" fn(
@@ -7832,13 +8527,14 @@ pub struct SwellFunctionPointers {
     >,
     pub CreateSolidBrushAlpha:
         Option<extern "C" fn(col: ::std::os::raw::c_int, alpha: f32) -> root::HBRUSH>,
-    pub SelectObject: Option<extern "C" fn(ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ>,
+    pub SelectObject:
+        Option<unsafe extern "C" fn(ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ>,
     pub GetStockObject: Option<extern "C" fn(wh: ::std::os::raw::c_int) -> root::HGDIOBJ>,
-    pub DeleteObject: Option<extern "C" fn(arg1: root::HGDIOBJ)>,
+    pub DeleteObject: Option<unsafe extern "C" fn(arg1: root::HGDIOBJ)>,
     pub SWELL_FillRect:
         Option<unsafe extern "C" fn(ctx: root::HDC, r: *const root::RECT, br: root::HBRUSH)>,
     pub Rectangle: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             ctx: root::HDC,
             l: ::std::os::raw::c_int,
             t: ::std::os::raw::c_int,
@@ -7847,7 +8543,7 @@ pub struct SwellFunctionPointers {
         ),
     >,
     pub Ellipse: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             ctx: root::HDC,
             l: ::std::os::raw::c_int,
             t: ::std::os::raw::c_int,
@@ -7866,10 +8562,11 @@ pub struct SwellFunctionPointers {
             op: *mut root::POINT,
         ),
     >,
-    pub SWELL_LineTo:
-        Option<extern "C" fn(ctx: root::HDC, x: ::std::os::raw::c_int, y: ::std::os::raw::c_int)>,
+    pub SWELL_LineTo: Option<
+        unsafe extern "C" fn(ctx: root::HDC, x: ::std::os::raw::c_int, y: ::std::os::raw::c_int),
+    >,
     pub SWELL_SetPixel: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             ctx: root::HDC,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -7888,10 +8585,10 @@ pub struct SwellFunctionPointers {
             align: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    pub SetTextColor: Option<extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int)>,
-    pub GetTextColor: Option<extern "C" fn(ctx: root::HDC) -> ::std::os::raw::c_int>,
-    pub SetBkColor: Option<extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int)>,
-    pub SetBkMode: Option<extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int)>,
+    pub SetTextColor: Option<unsafe extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int)>,
+    pub GetTextColor: Option<unsafe extern "C" fn(ctx: root::HDC) -> ::std::os::raw::c_int>,
+    pub SetBkColor: Option<unsafe extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int)>,
+    pub SetBkMode: Option<unsafe extern "C" fn(ctx: root::HDC, col: ::std::os::raw::c_int)>,
     pub GetGlyphIndicesW: Option<
         unsafe extern "C" fn(
             ctx: root::HDC,
@@ -7902,7 +8599,7 @@ pub struct SwellFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub RoundRect: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             ctx: root::HDC,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -7923,7 +8620,7 @@ pub struct SwellFunctionPointers {
     pub GetTextMetrics:
         Option<unsafe extern "C" fn(ctx: root::HDC, tm: *mut root::TEXTMETRIC) -> root::BOOL>,
     pub GetTextFace: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             ctx: root::HDC,
             nCount: ::std::os::raw::c_int,
             lpFaceName: root::LPTSTR,
@@ -7947,7 +8644,7 @@ pub struct SwellFunctionPointers {
     pub DrawImageInRect:
         Option<unsafe extern "C" fn(ctx: root::HDC, img: root::HICON, r: *const root::RECT)>,
     pub BitBlt: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hdcOut: root::HDC,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -7960,7 +8657,7 @@ pub struct SwellFunctionPointers {
         ),
     >,
     pub StretchBlt: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hdcOut: root::HDC,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -8004,23 +8701,24 @@ pub struct SwellFunctionPointers {
             bits: *mut ::std::os::raw::c_uchar,
         ) -> root::HBITMAP,
     >,
-    pub SetOpaque: Option<extern "C" fn(h: root::HWND, isopaque: bool)>,
-    pub SetAllowNoMiddleManRendering: Option<extern "C" fn(h: root::HWND, allow: bool)>,
+    pub SetOpaque: Option<unsafe extern "C" fn(h: root::HWND, isopaque: bool)>,
+    pub SetAllowNoMiddleManRendering: Option<unsafe extern "C" fn(h: root::HWND, allow: bool)>,
     pub BeginPaint:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC>,
     pub EndPaint:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::BOOL>,
-    pub GetDC: Option<extern "C" fn(arg1: root::HWND) -> root::HDC>,
-    pub GetWindowDC: Option<extern "C" fn(arg1: root::HWND) -> root::HDC>,
-    pub ReleaseDC: Option<extern "C" fn(arg1: root::HWND, arg2: root::HDC)>,
+    pub GetDC: Option<unsafe extern "C" fn(arg1: root::HWND) -> root::HDC>,
+    pub GetWindowDC: Option<unsafe extern "C" fn(arg1: root::HWND) -> root::HDC>,
+    pub ReleaseDC: Option<unsafe extern "C" fn(arg1: root::HWND, arg2: root::HDC)>,
     pub SWELL_FillDialogBackground: Option<
         unsafe extern "C" fn(hdc: root::HDC, r: *const root::RECT, level: ::std::os::raw::c_int),
     >,
-    pub SWELL_CloneGDIObject: Option<extern "C" fn(a: root::HGDIOBJ) -> root::HGDIOBJ>,
+    pub SWELL_CloneGDIObject: Option<unsafe extern "C" fn(a: root::HGDIOBJ) -> root::HGDIOBJ>,
     pub GetSystemMetrics:
         Option<extern "C" fn(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
-    pub DragQueryPoint: Option<extern "C" fn(arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL>,
-    pub DragFinish: Option<extern "C" fn(arg1: root::HDROP)>,
+    pub DragQueryPoint:
+        Option<unsafe extern "C" fn(arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL>,
+    pub DragFinish: Option<unsafe extern "C" fn(arg1: root::HDROP)>,
     pub DragQueryFile: Option<
         unsafe extern "C" fn(
             arg1: root::HDROP,
@@ -8057,7 +8755,7 @@ pub struct SwellFunctionPointers {
         ),
     >,
     pub SWELL_MakeSetCurParms: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             xscale: f32,
             yscale: f32,
             xtrans: f32,
@@ -8184,11 +8882,11 @@ pub struct SwellFunctionPointers {
     pub SWELL_LoadCursorFromFile:
         Option<unsafe extern "C" fn(fn_: *const ::std::os::raw::c_char) -> root::HCURSOR>,
     pub SWELL_SetWindowWantRaiseAmt:
-        Option<extern "C" fn(h: root::HWND, amt: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(h: root::HWND, amt: ::std::os::raw::c_int)>,
     pub SWELL_GetWindowWantRaiseAmt:
-        Option<extern "C" fn(arg1: root::HWND) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(arg1: root::HWND) -> ::std::os::raw::c_int>,
     pub SWELL_SetListViewFastClickMask:
-        Option<extern "C" fn(hList: root::HWND, mask: ::std::os::raw::c_int)>,
+        Option<unsafe extern "C" fn(hList: root::HWND, mask: ::std::os::raw::c_int)>,
     pub GetTempPath:
         Option<unsafe extern "C" fn(sz: ::std::os::raw::c_int, buf: *mut ::std::os::raw::c_char)>,
     pub SWELL_initargs: Option<
@@ -8207,7 +8905,7 @@ pub struct SwellFunctionPointers {
     >,
     pub SWELL_GenerateGUID: Option<unsafe extern "C" fn(g: *mut ::std::os::raw::c_void) -> bool>,
     pub EnumChildWindows: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             cwEnumFunc: ::std::option::Option<
                 unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
@@ -8215,9 +8913,9 @@ pub struct SwellFunctionPointers {
             lParam: root::LPARAM,
         ) -> root::BOOL,
     >,
-    pub SWELL_IsGroupBox: Option<extern "C" fn(arg1: root::HWND) -> root::BOOL>,
-    pub SWELL_IsButton: Option<extern "C" fn(arg1: root::HWND) -> root::BOOL>,
-    pub SWELL_IsStaticText: Option<extern "C" fn(arg1: root::HWND) -> root::BOOL>,
+    pub SWELL_IsGroupBox: Option<unsafe extern "C" fn(arg1: root::HWND) -> root::BOOL>,
+    pub SWELL_IsButton: Option<unsafe extern "C" fn(arg1: root::HWND) -> root::BOOL>,
+    pub SWELL_IsStaticText: Option<unsafe extern "C" fn(arg1: root::HWND) -> root::BOOL>,
     pub SWELL_GetDesiredControlSize:
         Option<unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT)>,
     pub AddFontResourceEx: Option<
@@ -8245,7 +8943,7 @@ pub struct SwellFunctionPointers {
     >,
     pub SWELL_ChooseFont:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::LOGFONT) -> bool>,
-    pub IsWindowEnabled: Option<extern "C" fn(arg1: root::HWND) -> bool>,
+    pub IsWindowEnabled: Option<unsafe extern "C" fn(arg1: root::HWND) -> bool>,
     pub GetClassName: Option<
         unsafe extern "C" fn(
             arg1: root::HWND,

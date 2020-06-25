@@ -147,7 +147,6 @@ impl Swell {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    // TODO-medium Make all auto-generated SWELL functions unsafe.
     pub unsafe fn SendMessage(
         &self,
         hwnd: root::HWND,

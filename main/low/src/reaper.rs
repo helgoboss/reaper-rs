@@ -7490,7 +7490,10 @@ impl Reaper {
             Some(f) => f(hwnd, isFloatingDockerOut),
         }
     }
-    pub fn DockWindowActivate(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DockWindowActivate(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowActivate {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -7544,7 +7547,10 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub fn DockWindowRefreshForHWND(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DockWindowRefreshForHWND(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowRefreshForHWND {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -7553,7 +7559,10 @@ impl Reaper {
             Some(f) => f(hwnd),
         }
     }
-    pub fn DockWindowRemove(&self, hwnd: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DockWindowRemove(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowRemove {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -14005,7 +14014,10 @@ impl Reaper {
             Some(f) => f(),
         }
     }
-    pub fn MIDIEditor_GetMode(&self, midieditor: root::HWND) -> ::std::os::raw::c_int {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn MIDIEditor_GetMode(&self, midieditor: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.MIDIEditor_GetMode {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -14048,7 +14060,10 @@ impl Reaper {
             Some(f) => f(midieditor, setting_desc, buf, buf_sz),
         }
     }
-    pub fn MIDIEditor_GetTake(&self, midieditor: root::HWND) -> *mut root::MediaItem_Take {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn MIDIEditor_GetTake(&self, midieditor: root::HWND) -> *mut root::MediaItem_Take {
         match self.pointers.MIDIEditor_GetTake {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -14070,7 +14085,10 @@ impl Reaper {
             Some(f) => f(command_id, islistviewcommand),
         }
     }
-    pub fn MIDIEditor_OnCommand(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn MIDIEditor_OnCommand(
         &self,
         midieditor: root::HWND,
         command_id: ::std::os::raw::c_int,
@@ -14670,7 +14688,10 @@ impl Reaper {
             Some(f) => f(fn_, srate, nch),
         }
     }
-    pub fn PitchShiftSubModeMenu(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn PitchShiftSubModeMenu(
         &self,
         hwnd: root::HWND,
         x: ::std::os::raw::c_int,
@@ -15181,7 +15202,10 @@ impl Reaper {
             Some(f) => f(param),
         }
     }
-    pub fn screenset_updateLastFocus(&self, prevWin: root::HWND) {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn screenset_updateLastFocus(&self, prevWin: root::HWND) {
         match self.pointers.screenset_updateLastFocus {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -18637,7 +18661,10 @@ impl Reaper {
             Some(f) => f(idx),
         }
     }
-    pub fn InitializeCoolSB(&self, hwnd: root::HWND) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn InitializeCoolSB(&self, hwnd: root::HWND) -> root::BOOL {
         match self.pointers.InitializeCoolSB {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -18646,7 +18673,10 @@ impl Reaper {
             Some(f) => f(hwnd),
         }
     }
-    pub fn UninitializeCoolSB(&self, hwnd: root::HWND) -> root::HRESULT {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn UninitializeCoolSB(&self, hwnd: root::HWND) -> root::HRESULT {
         match self.pointers.UninitializeCoolSB {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -18655,7 +18685,10 @@ impl Reaper {
             Some(f) => f(hwnd),
         }
     }
-    pub fn CoolSB_SetMinThumbSize(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_SetMinThumbSize(
         &self,
         hwnd: root::HWND,
         wBar: root::UINT,
@@ -18669,7 +18702,10 @@ impl Reaper {
             Some(f) => f(hwnd, wBar, size),
         }
     }
-    pub fn CoolSB_GetScrollInfo(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_GetScrollInfo(
         &self,
         hwnd: root::HWND,
         fnBar: ::std::os::raw::c_int,
@@ -18683,7 +18719,10 @@ impl Reaper {
             Some(f) => f(hwnd, fnBar, lpsi),
         }
     }
-    pub fn CoolSB_SetScrollInfo(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_SetScrollInfo(
         &self,
         hwnd: root::HWND,
         fnBar: ::std::os::raw::c_int,
@@ -18698,7 +18737,10 @@ impl Reaper {
             Some(f) => f(hwnd, fnBar, lpsi, fRedraw),
         }
     }
-    pub fn CoolSB_SetScrollPos(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_SetScrollPos(
         &self,
         hwnd: root::HWND,
         nBar: ::std::os::raw::c_int,
@@ -18713,7 +18755,10 @@ impl Reaper {
             Some(f) => f(hwnd, nBar, nPos, fRedraw),
         }
     }
-    pub fn CoolSB_SetScrollRange(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_SetScrollRange(
         &self,
         hwnd: root::HWND,
         nBar: ::std::os::raw::c_int,
@@ -18729,7 +18774,10 @@ impl Reaper {
             Some(f) => f(hwnd, nBar, nMinPos, nMaxPos, fRedraw),
         }
     }
-    pub fn CoolSB_ShowScrollBar(
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_ShowScrollBar(
         &self,
         hwnd: root::HWND,
         wBar: ::std::os::raw::c_int,
@@ -18743,7 +18791,14 @@ impl Reaper {
             Some(f) => f(hwnd, wBar, fShow),
         }
     }
-    pub fn CoolSB_SetResizingThumb(&self, hwnd: root::HWND, active: root::BOOL) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_SetResizingThumb(
+        &self,
+        hwnd: root::HWND,
+        active: root::BOOL,
+    ) -> root::BOOL {
         match self.pointers.CoolSB_SetResizingThumb {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -18752,7 +18807,14 @@ impl Reaper {
             Some(f) => f(hwnd, active),
         }
     }
-    pub fn CoolSB_SetThemeIndex(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL {
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CoolSB_SetThemeIndex(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> root::BOOL {
         match self.pointers.CoolSB_SetThemeIndex {
             None => panic!(format!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -19302,7 +19364,7 @@ pub struct ReaperFunctionPointers {
             isFloatingDockerOut: *mut bool,
         ) -> ::std::os::raw::c_int,
     >,
-    pub DockWindowActivate: Option<extern "C" fn(hwnd: root::HWND)>,
+    pub DockWindowActivate: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub DockWindowAdd: Option<
         unsafe extern "C" fn(
             hwnd: root::HWND,
@@ -19320,8 +19382,8 @@ pub struct ReaperFunctionPointers {
         ),
     >,
     pub DockWindowRefresh: Option<extern "C" fn()>,
-    pub DockWindowRefreshForHWND: Option<extern "C" fn(hwnd: root::HWND)>,
-    pub DockWindowRemove: Option<extern "C" fn(hwnd: root::HWND)>,
+    pub DockWindowRefreshForHWND: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
+    pub DockWindowRemove: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub DuplicateCustomizableMenu: Option<
         unsafe extern "C" fn(
             srcmenu: *mut ::std::os::raw::c_void,
@@ -21601,7 +21663,8 @@ pub struct ReaperFunctionPointers {
     >,
     pub MIDI_Sort: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
     pub MIDIEditor_GetActive: Option<extern "C" fn() -> root::HWND>,
-    pub MIDIEditor_GetMode: Option<extern "C" fn(midieditor: root::HWND) -> ::std::os::raw::c_int>,
+    pub MIDIEditor_GetMode:
+        Option<unsafe extern "C" fn(midieditor: root::HWND) -> ::std::os::raw::c_int>,
     pub MIDIEditor_GetSetting_int: Option<
         unsafe extern "C" fn(
             midieditor: root::HWND,
@@ -21617,11 +21680,12 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub MIDIEditor_GetTake:
-        Option<extern "C" fn(midieditor: root::HWND) -> *mut root::MediaItem_Take>,
+        Option<unsafe extern "C" fn(midieditor: root::HWND) -> *mut root::MediaItem_Take>,
     pub MIDIEditor_LastFocused_OnCommand:
         Option<extern "C" fn(command_id: ::std::os::raw::c_int, islistviewcommand: bool) -> bool>,
-    pub MIDIEditor_OnCommand:
-        Option<extern "C" fn(midieditor: root::HWND, command_id: ::std::os::raw::c_int) -> bool>,
+    pub MIDIEditor_OnCommand: Option<
+        unsafe extern "C" fn(midieditor: root::HWND, command_id: ::std::os::raw::c_int) -> bool,
+    >,
     pub MIDIEditor_SetSetting_int: Option<
         unsafe extern "C" fn(
             midieditor: root::HWND,
@@ -21794,7 +21858,7 @@ pub struct ReaperFunctionPointers {
         ) -> *mut root::REAPER_PeakGet_Interface,
     >,
     pub PitchShiftSubModeMenu: Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             hwnd: root::HWND,
             x: ::std::os::raw::c_int,
             y: ::std::os::raw::c_int,
@@ -21953,7 +22017,7 @@ pub struct ReaperFunctionPointers {
     pub screenset_unregister: Option<unsafe extern "C" fn(id: *mut ::std::os::raw::c_char)>,
     pub screenset_unregisterByParam:
         Option<unsafe extern "C" fn(param: *mut ::std::os::raw::c_void)>,
-    pub screenset_updateLastFocus: Option<extern "C" fn(prevWin: root::HWND)>,
+    pub screenset_updateLastFocus: Option<unsafe extern "C" fn(prevWin: root::HWND)>,
     pub SectionFromUniqueID:
         Option<extern "C" fn(uniqueID: ::std::os::raw::c_int) -> *mut root::KbdSectionInfo>,
     pub SelectAllMediaItems:
@@ -23175,20 +23239,24 @@ pub struct ReaperFunctionPointers {
     >,
     pub GetMidiInput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
     pub GetMidiOutput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
-    pub InitializeCoolSB: Option<extern "system" fn(hwnd: root::HWND) -> root::BOOL>,
-    pub UninitializeCoolSB: Option<extern "system" fn(hwnd: root::HWND) -> root::HRESULT>,
+    pub InitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::BOOL>,
+    pub UninitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::HRESULT>,
     pub CoolSB_SetMinThumbSize: Option<
-        extern "system" fn(hwnd: root::HWND, wBar: root::UINT, size: root::UINT) -> root::BOOL,
+        unsafe extern "system" fn(
+            hwnd: root::HWND,
+            wBar: root::UINT,
+            size: root::UINT,
+        ) -> root::BOOL,
     >,
     pub CoolSB_GetScrollInfo: Option<
-        extern "system" fn(
+        unsafe extern "system" fn(
             hwnd: root::HWND,
             fnBar: ::std::os::raw::c_int,
             lpsi: root::LPSCROLLINFO,
         ) -> root::BOOL,
     >,
     pub CoolSB_SetScrollInfo: Option<
-        extern "system" fn(
+        unsafe extern "system" fn(
             hwnd: root::HWND,
             fnBar: ::std::os::raw::c_int,
             lpsi: root::LPSCROLLINFO,
@@ -23196,7 +23264,7 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub CoolSB_SetScrollPos: Option<
-        extern "system" fn(
+        unsafe extern "system" fn(
             hwnd: root::HWND,
             nBar: ::std::os::raw::c_int,
             nPos: ::std::os::raw::c_int,
@@ -23204,7 +23272,7 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub CoolSB_SetScrollRange: Option<
-        extern "system" fn(
+        unsafe extern "system" fn(
             hwnd: root::HWND,
             nBar: ::std::os::raw::c_int,
             nMinPos: ::std::os::raw::c_int,
@@ -23213,16 +23281,17 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub CoolSB_ShowScrollBar: Option<
-        extern "system" fn(
+        unsafe extern "system" fn(
             hwnd: root::HWND,
             wBar: ::std::os::raw::c_int,
             fShow: root::BOOL,
         ) -> root::BOOL,
     >,
     pub CoolSB_SetResizingThumb:
-        Option<extern "system" fn(hwnd: root::HWND, active: root::BOOL) -> root::BOOL>,
-    pub CoolSB_SetThemeIndex:
-        Option<extern "system" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL>,
+        Option<unsafe extern "system" fn(hwnd: root::HWND, active: root::BOOL) -> root::BOOL>,
+    pub CoolSB_SetThemeIndex: Option<
+        unsafe extern "system" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> root::BOOL,
+    >,
 }
 impl ReaperFunctionPointers {
     pub(crate) const TOTAL_COUNT: u32 = 820u32;
