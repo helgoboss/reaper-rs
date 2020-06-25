@@ -3,7 +3,6 @@ use std::backtrace::Backtrace;
 
 use crate::Reaper;
 
-
 use std::io;
 use std::panic::PanicInfo;
 

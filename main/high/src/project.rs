@@ -1,5 +1,3 @@
-
-
 use crate::guid::Guid;
 use crate::{PlayRate, Reaper, Tempo, Track};
 

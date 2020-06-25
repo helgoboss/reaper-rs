@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use std::ffi::{CStr};
+use std::ffi::CStr;
 use std::os::raw::c_void;
 
 use crate::fx::{get_index_from_query_index, Fx};

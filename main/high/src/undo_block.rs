@@ -1,7 +1,6 @@
 use crate::{Project, Reaper};
 use reaper_medium::ReaperStr;
 
-
 // Constructor takes care of starting the undo block. Destructor takes care of ending the undo block
 // (RAII).
 pub(super) struct UndoBlock<'a> {

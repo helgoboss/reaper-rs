@@ -1,6 +1,4 @@
-
 use reaper_high::{ActionKind, Reaper};
-
 
 use reaper_macros::reaper_extension_plugin;
 use slog::debug;

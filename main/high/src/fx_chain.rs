@@ -8,7 +8,6 @@ use reaper_medium::{
     AddFxBehavior, ChunkCacheHint, ReaperStringArg, TrackFxChainType, TransferBehavior,
 };
 
-
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum FxChainContext {
     Monitoring,

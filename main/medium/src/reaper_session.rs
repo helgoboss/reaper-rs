@@ -10,8 +10,8 @@ use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_post_command,
     delegating_toggle_action, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
     HookPostCommand, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister,
-    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult,
-    ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
+    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperString,
+    ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 

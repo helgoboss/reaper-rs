@@ -4,7 +4,6 @@ use crate::{
     get_media_track_guid, MainThreadTask, Project, Reaper, Track, MAIN_THREAD_TASK_BULK_SIZE,
 };
 
-
 use reaper_medium::TrackAttributeKey::{Mute, Pan, RecArm, RecInput, Selected, Solo, Vol};
 use reaper_medium::{
     reaper_str, AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
@@ -22,7 +21,6 @@ use std::cell::{Cell, RefCell, RefMut};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
-
 
 use crate::run_loop_executor::RunLoopExecutor;
 use crate::run_loop_scheduler::RxTask;

@@ -1,5 +1,3 @@
-
-
 use futures_timer::Delay;
 use reaper_high::{ActionKind, Reaper, ReaperGuard};
 use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, PluginContext};
