@@ -3,7 +3,7 @@ use std::backtrace::Backtrace;
 
 use crate::Reaper;
 
-use std::ffi::CString;
+
 use std::io;
 use std::panic::PanicInfo;
 
@@ -42,13 +42,9 @@ pub fn create_reaper_panic_hook(
         log_panic(&logger, panic_info, &backtrace);
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
-            if let Ok(c_msg) = CString::new(msg) {
-                let _ = Reaper::get().do_in_main_thread_asap(move || {
-                    Reaper::get()
-                        .medium_reaper()
-                        .show_console_msg(c_msg.as_ref());
-                });
-            }
+            let _ = Reaper::get().do_in_main_thread_asap(move || {
+                Reaper::get().medium_reaper().show_console_msg(msg);
+            });
         }
     })
 }
@@ -110,11 +106,10 @@ impl ReaperConsoleSink {
 
 impl std::io::Write for ReaperConsoleSink {
     fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
-        let c_string = CString::new(buf)?;
+        let str_slice =
+            std::str::from_utf8(buf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
         // TODO-medium If the panic happens in audio thread, this won't work!
-        Reaper::get()
-            .medium_reaper()
-            .show_console_msg(c_string.as_ref());
+        Reaper::get().medium_reaper().show_console_msg(str_slice);
         Ok(buf.len())
     }
 

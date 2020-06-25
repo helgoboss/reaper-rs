@@ -1,6 +1,7 @@
 use reaper_medium::ReaperString;
 use std::cell::{Ref, RefCell};
-use std::ffi::CString;
+use std::convert::TryFrom;
+
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
@@ -22,13 +23,13 @@ impl Display for Chunk {
     }
 }
 
-impl From<Chunk> for CString {
-    fn from(value: Chunk) -> Self {
-        // TODO-low Is this too expensive? Check if we can rely on the chunk to be okay and use an
-        //  unsafe conversion.
+impl TryFrom<Chunk> for String {
+    type Error = &'static str;
+
+    fn try_from(value: Chunk) -> Result<Self, Self::Error> {
         let freed_prisoner = Rc::try_unwrap(value.content)
-            .expect("Can't convert Chunk to CString when there are still other references");
-        CString::new(freed_prisoner.into_inner()).expect("Chunk contained 0-bytes")
+            .map_err(|_| "Can't convert Chunk to CString when there are still other references")?;
+        Ok(freed_prisoner.into_inner())
     }
 }
 

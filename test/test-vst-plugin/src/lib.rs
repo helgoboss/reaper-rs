@@ -1,4 +1,4 @@
-use c_str_macro::c_str;
+
 
 use futures_timer::Delay;
 use reaper_high::{ActionKind, Reaper, ReaperGuard};
@@ -130,8 +130,8 @@ impl TestVstPlugin {
                 "Loaded reaper-rs integration test VST plugin"
             );
             reaper.register_action(
-                c_str!("reaperRsVstIntegrationTests"),
-                c_str!("reaper-rs VST integration tests"),
+                "reaperRsVstIntegrationTests",
+                "reaper-rs VST integration tests",
                 || reaper_test::execute_integration_test(|_| ()),
                 ActionKind::NotToggleable,
             );

@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr};
 use std::os::raw::c_void;
 
 use crate::fx::{get_index_from_query_index, Fx};
@@ -20,6 +20,7 @@ use reaper_medium::{
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, RecordArmMode, RecordingInput,
     TrackLocation, TrackSendCategory,
 };
+use std::convert::TryInto;
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
@@ -447,11 +448,11 @@ impl Track {
 
     // TODO-low Report possible error
     pub fn set_chunk(&self, chunk: Chunk) {
-        let c_string: CString = chunk.into();
+        let string: String = chunk.try_into().expect("unfortunate");
         let _ = unsafe {
             Reaper::get().medium_reaper().set_track_state_chunk(
                 self.raw(),
-                c_string.as_c_str(),
+                string,
                 ChunkCacheHint::UndoMode,
             )
         };

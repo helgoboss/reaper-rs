@@ -1,15 +1,16 @@
 use crate::{Project, Reaper};
-use std::ffi::CStr;
+use reaper_medium::ReaperStr;
+
 
 // Constructor takes care of starting the undo block. Destructor takes care of ending the undo block
 // (RAII).
 pub(super) struct UndoBlock<'a> {
-    label: &'a CStr,
+    label: &'a ReaperStr,
     project: Project,
 }
 
 impl UndoBlock<'_> {
-    pub(super) fn new(project: Project, label: &CStr) -> UndoBlock {
+    pub(crate) fn new(project: Project, label: &ReaperStr) -> UndoBlock {
         UndoBlock { label, project }
     }
 }

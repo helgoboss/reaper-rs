@@ -7,7 +7,7 @@ use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
 use std::convert::TryInto;
-use std::os::raw::c_void;
+use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
 /// Determines the behavior when adding an FX.
@@ -411,7 +411,7 @@ pub enum RegistrationObject<'a> {
     /// register with "command_id", parameter is a unique string with only A-Z, 0-9,
     /// returns command ID (or 0 if not supported/out of actions)
     /// </pre>
-    CommandId(Cow<'a, ReaperStr>),
+    CommandId(*const c_char),
     // CommandIdLookup(*mut c_void),
     /// An action description and shortcut.
     ///
@@ -468,7 +468,7 @@ impl<'a> RegistrationObject<'a> {
             // HookCommand2(func) => HookCommand2(func),
             ToggleAction(func) => ToggleAction(func),
             // ActionHelp(info_struct) => ActionHelp(info_struct),
-            CommandId(command_name) => CommandId(command_name.into_owned().into()),
+            CommandId(command_name) => CommandId(command_name),
             // CommandIdLookup(info_struct) => CommandIdLookup(info_struct),
             Gaccel(reg) => Gaccel(reg),
             CsurfInst(inst) => CsurfInst(inst),
@@ -505,7 +505,7 @@ impl<'a> RegistrationObject<'a> {
             // HookCommand2(func) => *func as *mut c_void,
             ToggleAction(func) => *func as *mut c_void,
             // ActionHelp(info_struct) => *info_struct,
-            CommandId(command_name) => command_name.as_ptr() as *mut c_void,
+            CommandId(command_name) => *command_name as *mut c_void,
             // CommandIdLookup(info_struct) => *info_struct,
             Gaccel(reg) => reg.as_ptr() as *mut c_void,
             CsurfInst(inst) => inst.as_ptr() as *mut c_void,

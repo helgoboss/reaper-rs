@@ -1,6 +1,6 @@
 #![allow(clippy::float_cmp)]
 use approx::*;
-use std::ffi::CStr;
+
 use std::iter;
 use std::ops::Deref;
 
@@ -21,7 +21,7 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
-    AutomationMode, Bpm, CommandId, Db, FxPresetRef, GangBehavior, InputMonitoringMode,
+    reaper_str, AutomationMode, Bpm, CommandId, Db, FxPresetRef, GangBehavior, InputMonitoringMode,
     MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate,
     PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
     ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackLocation, UndoBehavior,
@@ -321,7 +321,7 @@ fn use_undoable() -> TestStep {
                 });
         });
         let track_mirror = track.clone();
-        project.undoable(c_str!("reaper-rs integration test operation"), move || {
+        project.undoable("reaper-rs integration test operation", move || {
             track_mirror.set_name(c_str!("Renamed"));
         });
         let label = project.label_of_last_undoable_action();
@@ -443,8 +443,8 @@ fn register_and_unregister_toggle_action() -> TestStep {
             let (mock, reg) = observe_invocations(|mock| {
                 let cloned_mock = mock.clone();
                 reaper.register_action(
-                    c_str!("reaperRsTest2"),
-                    c_str!("reaper-rs test toggle action"),
+                    "reaperRsTest2",
+                    "reaper-rs test toggle action",
                     move || {
                         mock.invoke(43);
                     },
@@ -483,8 +483,8 @@ fn register_and_unregister_action() -> TestStep {
             // TODO Rename RegisteredAction to ActionRegistration or something like that
             let (mock, reg) = observe_invocations(|mock| {
                 reaper.register_action(
-                    c_str!("reaperRsTest"),
-                    c_str!("reaper-rs test action"),
+                    "reaperRsTest",
+                    "reaper-rs test action",
                     move || {
                         mock.invoke(42);
                     },
@@ -1745,12 +1745,10 @@ fn fn_mut_action() -> TestStep {
         return Ok(());
         let mut i = 0;
         let _action1 = _session.register_action(
-            c_str!("reaperRsCounter"),
-            c_str!("reaper-rs counter"),
+            "reaperRsCounter",
+            "reaper-rs counter",
             move || {
-                let owned = format!("Hello from Rust number {}\0", i);
-                Reaper::get()
-                    .show_console_msg(CStr::from_bytes_with_nul(owned.as_bytes()).unwrap());
+                Reaper::get().show_console_msg(format!("Hello from Rust number {}\0", i));
                 i += 1;
             },
             ActionKind::NotToggleable,
@@ -1828,7 +1826,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
 fn strings() -> TestStep {
     step(AllVersions, "Strings", |_session, _| {
         assert!(Guid::from_string_with_braces("{hey}").is_err());
-        Reaper::get().show_console_msg(c_str!("- &CStr: 范例文字äöüß\n"));
+        Reaper::get().show_console_msg(reaper_str!("- &ReaperStr: 范例文字äöüß\n"));
         Reaper::get().show_console_msg("- &str: 范例文字äöüß\n");
         Reaper::get().show_console_msg(String::from("- String: 范例文字äöüß\n"));
         Ok(())
@@ -1968,7 +1966,7 @@ fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
                 .fx_by_guid_and_index(&non_existing_guid, 0)
                 .is_available()
         );
-        assert!(fx_chain.first_fx_by_name(c_str!("bla")).is_none());
+        assert!(fx_chain.first_fx_by_name("bla").is_none());
         assert!(fx_chain.chunk().is_none());
         Ok(())
     })
@@ -2088,7 +2086,7 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                         mock.invoke(fx);
                     });
             });
-            let fx = fx_chain.add_fx_by_original_name(c_str!("phaser"));
+            let fx = fx_chain.add_fx_by_original_name("phaser");
             // Then
             let fx = fx.ok_or("No FX added")?;
             assert_eq!(fx_chain.fx_count(), 3);
@@ -2100,11 +2098,11 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             assert!(!fx_chain.fx_by_guid_and_index(&guid, 0).is_available());
             assert!(
                 fx_chain
-                    .first_fx_by_name(c_str!("ReaControlMIDI (Cockos)"))
+                    .first_fx_by_name("ReaControlMIDI (Cockos)")
                     .is_some()
             );
             assert_eq!(
-                fx_chain.first_fx_by_name(c_str!("phaser")),
+                fx_chain.first_fx_by_name(reaper_str!("phaser")),
                 Some(fx.clone())
             );
             if Reaper::get().version() < ReaperVersion::new("6") {
@@ -2455,7 +2453,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
                 track.input_fx_chain()
             };
             let fx_on_other_fx_chain = other_fx_chain
-                .add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"))
+                .add_fx_by_original_name("ReaControlMIDI (Cockos)")
                 .expect("Couldn't find FX on other FX chain");
             let p_on_other_fx_chain = fx_on_other_fx_chain.parameter_by_index(0);
             // First set parameter on other FX chain to same value (confuses heuristic if
@@ -2473,9 +2471,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
             // Then
             assert_eq!(mock.invocation_count(), 2);
-            if fx_chain.is_input_fx()
-                && Reaper::get().version() < ReaperVersion::new(c_str!("5.95"))
-            {
+            if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
                 assert_ne!(mock.last_arg(), p);
             } else {
                 assert_eq!(mock.last_arg(), p);
@@ -2506,9 +2502,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.3));
             // Then
             let last_touched_fx_param = Reaper::get().last_touched_fx_parameter();
-            if fx_chain.is_input_fx()
-                && Reaper::get().version() < ReaperVersion::new(c_str!("5.95"))
-            {
+            if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
                 assert!(last_touched_fx_param.is_none());
             } else {
                 assert_eq!(last_touched_fx_param, Some(p.clone()));
@@ -2565,7 +2559,7 @@ fn change_fx_preset(get_fx_chain: GetFxChain) -> TestStep {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx = fx_chain
-            .add_fx_by_original_name(c_str!("ReaEq (Cockos)"))
+            .add_fx_by_original_name("ReaEq (Cockos)")
             .ok_or("Couldn't add ReaEq")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
@@ -2632,7 +2626,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             // When
             let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
             let fx_2 = fx_chain
-                .add_fx_by_original_name(c_str!("ReaSynth (Cockos)"))
+                .add_fx_by_original_name("ReaSynth (Cockos)")
                 .ok_or("Couldn't add ReaSynth")?;
             // Then
             assert!(fx_1.is_available());
@@ -2888,7 +2882,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                         mock.invoke(t);
                     });
             });
-            let fx = fx_chain.add_fx_by_original_name(c_str!("ReaControlMIDI (Cockos)"));
+            let fx = fx_chain.add_fx_by_original_name("ReaControlMIDI (Cockos)");
             // Then
             assert!(fx.is_some());
             assert_eq!(fx_chain.fx_count(), 1);
@@ -2917,7 +2911,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                     .is_available()
             );
             assert_eq!(
-                fx_chain.first_fx_by_name(c_str!("ReaControlMIDI (Cockos)")),
+                fx_chain.first_fx_by_name("ReaControlMIDI (Cockos)"),
                 Some(fx.clone())
             );
             let chain_chunk = fx_chain.chunk();

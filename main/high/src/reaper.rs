@@ -3,7 +3,7 @@ use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use std::ffi::CStr;
+
 
 use std::ptr::NonNull;
 use std::rc::Rc;
@@ -34,8 +34,8 @@ use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
     CommandId, HookCommand, HookPostCommand, MidiFrameOffset, MidiInputDeviceId, OnAudioBuffer,
-    OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef, RealTimeAudioThreadScope, ReaperString,
-    ReaperStringArg, RegistrationHandle, ToggleAction, ToggleActionResult,
+    OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef, RealTimeAudioThreadScope, ReaperStr,
+    ReaperString, ReaperStringArg, RegistrationHandle, ToggleAction, ToggleActionResult,
 };
 use std::fmt;
 use std::fmt::{Debug, Formatter};
@@ -884,7 +884,7 @@ impl Reaper {
     pub(super) fn enter_undo_block_internal<'a>(
         &self,
         project: Project,
-        label: &'a CStr,
+        label: &'a ReaperStr,
     ) -> Option<UndoBlock<'a>> {
         self.require_main_thread();
         if self.undo_block_is_active.get() {
@@ -896,7 +896,7 @@ impl Reaper {
     }
 
     // Doesn't attempt to end a block if we are not in an undo block.
-    pub(super) fn leave_undo_block_internal(&self, project: Project, label: &CStr) {
+    pub(super) fn leave_undo_block_internal(&self, project: Project, label: &ReaperStr) {
         self.require_main_thread();
         if !self.undo_block_is_active.get() {
             return;

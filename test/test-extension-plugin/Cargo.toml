@@ -14,6 +14,7 @@ run-reaper-integration-test = []
 
 [dependencies]
 reaper-high = { path = "../../main/high" }
+reaper-medium = { path = "../../main/medium" }
 reaper-low = { path = "../../main/low" }
 reaper-test = { path = "../test" }
 reaper-macros = { path = "../../main/macros" }

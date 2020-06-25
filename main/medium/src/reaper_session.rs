@@ -10,10 +10,11 @@ use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_post_command,
     delegating_toggle_action, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
     HookPostCommand, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister,
-    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperStringArg,
-    RegistrationHandle, RegistrationObject, ToggleAction,
+    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult,
+    ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
+
 use std::collections::{HashMap, HashSet};
 use std::os::raw::c_void;
 
@@ -57,15 +58,25 @@ use std::os::raw::c_void;
 #[derive(Debug, Default)]
 pub struct ReaperSession {
     reaper: Reaper<MainThreadScope>,
-    // The following
+    /// Provides a safe place in memory for registered actions.
     gaccel_registers: InfostructKeeper<OwnedGaccelRegister, raw::gaccel_register_t>,
-    /// Provides a safe place in memory for each registered audio hook. While in here, the audio
-    /// hook is considered to be owned by REAPER, meaning that REAPER is supposed to have
-    /// exclusive access to it.
+    /// Provides a safe place in memory for command names used in command ID registrations.
+    //
+    // We don't need to box the string because it's content is something which is on the heap
+    // already and doesn't change its address when moved.
+    //
+    // TODO-low Currently we don't offer a possibility to unregister reserved command IDs. Unsure
+    //  if REAPER itself has a way to do that.
+    command_names: HashSet<ReaperString>,
+    /// Provides a safe place in memory for each registered audio hook.
+    ///
+    /// While in here, the audio hook is considered to be owned by REAPER, meaning that REAPER is
+    /// supposed to have exclusive access to it.
     audio_hook_registers: InfostructKeeper<OwnedAudioHookRegister, raw::audio_hook_register_t>,
-    /// Provides a safe place in memory for each registered control surface. While in here, the
-    /// control surface is considered to be owned by REAPER, meaning that REAPER is supposed to
-    /// have exclusive access to it.
+    /// Provides a safe place in memory for each registered control surface.
+    ///
+    /// While in here, the control surface is considered to be owned by REAPER, meaning that REAPER
+    /// is supposed to have exclusive access to it.
     csurf_insts: HashMap<NonNull<c_void>, Box<Box<dyn IReaperControlSurface>>>,
     /// Keep track of plug-in registrations so they can be unregistered automatically on drop.
     plugin_registrations: HashSet<RegistrationObject<'static>>,
@@ -81,6 +92,7 @@ impl ReaperSession {
         ReaperSession {
             reaper: Reaper::new(low),
             gaccel_registers: Default::default(),
+            command_names: Default::default(),
             audio_hook_registers: Default::default(),
             csurf_insts: Default::default(),
             plugin_registrations: Default::default(),
@@ -324,11 +336,10 @@ impl ReaperSession {
         &mut self,
         command_name: impl Into<ReaperStringArg<'a>>,
     ) -> ReaperFunctionResult<CommandId> {
-        let raw_id = unsafe {
-            self.plugin_register_add(RegistrationObject::CommandId(
-                command_name.into().into_inner(),
-            ))?
-        };
+        let owned = command_name.into().into_inner().to_reaper_string();
+        let ptr = owned.as_ptr();
+        self.command_names.insert(owned);
+        let raw_id = unsafe { self.plugin_register_add(RegistrationObject::CommandId(ptr))? };
         Ok(CommandId(raw_id as _))
     }
 

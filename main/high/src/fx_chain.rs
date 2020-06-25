@@ -4,8 +4,10 @@ use crate::{
     get_track_fx_location, Chunk, ChunkRegion, Project, Reaper, Take, Track, MAX_TRACK_CHUNK_SIZE,
 };
 
-use reaper_medium::{AddFxBehavior, ChunkCacheHint, TrackFxChainType, TransferBehavior};
-use std::ffi::CStr;
+use reaper_medium::{
+    AddFxBehavior, ChunkCacheHint, ReaperStringArg, TrackFxChainType, TransferBehavior,
+};
+
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum FxChainContext {
@@ -286,7 +288,10 @@ DOCKED 0
         }
     }
 
-    pub fn add_fx_by_original_name(&self, original_fx_name: &CStr) -> Option<Fx> {
+    pub fn add_fx_by_original_name<'a>(
+        &self,
+        original_fx_name: impl Into<ReaperStringArg<'a>>,
+    ) -> Option<Fx> {
         let fx_index = match self.context() {
             FxChainContext::Take(_) => todo!(),
             _ => unsafe {
@@ -341,7 +346,7 @@ DOCKED 0
         }
     }
 
-    pub fn first_fx_by_name(&self, name: &CStr) -> Option<Fx> {
+    pub fn first_fx_by_name<'a>(&self, name: impl Into<ReaperStringArg<'a>>) -> Option<Fx> {
         let fx_index = match self.context() {
             FxChainContext::Take(_) => todo!(),
             FxChainContext::Track { track, .. } => unsafe {

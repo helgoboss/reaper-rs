@@ -64,22 +64,20 @@ impl<'a> ReaperStringArg<'a> {
     }
 
     /// Consumes this value and spits out the contained cow.
+    ///
+    /// If you decide to use `my_param: impl Into<ReaperStringArg<'a>>` somewhere in your own REAPER
+    /// plug-in or library code in order to benefit from the same safe conversions that
+    /// _reaper-rs_ offers, this method is for you. Once you have the `ReaperStringArg` by calling
+    /// `my_param.into()`, there's no getting around calling this method first to obtain the inner
+    /// cow, which you can then use to convert it to any string type that you desire. There are
+    /// no convenience methods because `ReaperStringArg` is really just something very intermediate,
+    /// solely intended for automatic conversion.
     pub fn into_inner(self) -> Cow<'a, ReaperStr> {
         self.0
     }
 }
 
-// This is the most important conversion because it's the ideal case (zero-cost).
-// TODO-high This can result in non-UTF-8 ReaperString! Try to remove it. This conversion should be
-//  crate-only.
-impl<'a> From<&'a CStr> for ReaperStringArg<'a> {
-    fn from(s: &'a CStr) -> Self {
-        ReaperStringArg(ReaperStr::new(s).into())
-    }
-}
-
-// This is basically the same. Especially suited for passing strings returned by REAPER directly
-// back into REAPER functions.
+// Especially suited for passing strings returned by REAPER directly back into REAPER functions.
 impl<'a> From<&'a ReaperStr> for ReaperStringArg<'a> {
     fn from(s: &'a ReaperStr) -> Self {
         ReaperStringArg(s.into())
@@ -95,8 +93,8 @@ impl From<ReaperString> for ReaperStringArg<'static> {
     }
 }
 
-// This is the second most important conversion because we want consumers to be able to just pass a
-// normal string literal.
+// This is the most important conversion because we want consumers to be able to just pass a normal
+// string literal.
 impl<'a> From<&'a str> for ReaperStringArg<'a> {
     fn from(s: &'a str) -> Self {
         // Requires copying
@@ -132,9 +130,9 @@ impl<'a> From<String> for ReaperStringArg<'a> {
 /// optimistic and converts without returning a `Result`.
 //
 // It's important that this string is guaranteed to be UTF-8. We achieve that by trusting REAPER
-// that it returns UTF-8 strings only and by letting consumers create such strings via Rust
-// strings only (which are UTF-8 encoded). So it's essential that we don't have a public conversion
-// from `CString` into `ReaperString`!!!
+// that it returns UTF-8 strings and by letting consumers create such strings via Rust
+// strings only (which are UTF-8 encoded) or via `reaper_str!` macro. So it's essential that we
+// don't have a safe public conversion from `CString` into `ReaperString`!!!
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ReaperString(CString);
 
@@ -231,17 +229,19 @@ impl<'a> From<ReaperString> for Cow<'a, ReaperStr> {
 pub struct ReaperStr(CStr);
 
 impl ReaperStr {
-    // Don't make this public!
+    // Don't make this public, it's unsafe!
     // This uses the same technique like `Path`.
     pub(crate) fn new(inner: &CStr) -> &ReaperStr {
         unsafe { &*(inner as *const CStr as *const ReaperStr) }
     }
 
-    // Don't make this public! Not only because we don't want consumers to create strings directly.
-    // Also because this should be unsafe but is currently not because of unused_unsafe warnings
-    // if used by local reaper_str! macro.
-    pub(crate) fn from_ptr<'a>(ptr: *const c_char) -> &'a ReaperStr {
-        ReaperStr::new(unsafe { CStr::from_ptr(ptr) })
+    /// Wraps a raw C string with a safe Reaper string wrapper.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given pointer refers to a valid UTF-8 encoded C string.
+    pub unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a ReaperStr {
+        ReaperStr::new(CStr::from_ptr(ptr))
     }
 
     /// Returns a raw pointer to the string. Used by code in this crate only.

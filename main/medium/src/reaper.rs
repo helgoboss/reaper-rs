@@ -2081,7 +2081,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetAppVersion();
-        let version_str = ReaperStr::from_ptr(ptr);
+        let version_str = unsafe { ReaperStr::from_ptr(ptr) };
         ReaperVersion::new(version_str)
     }
 

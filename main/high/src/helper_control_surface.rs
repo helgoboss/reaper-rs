@@ -3,15 +3,15 @@ use crate::guid::Guid;
 use crate::{
     get_media_track_guid, MainThreadTask, Project, Reaper, Track, MAIN_THREAD_TASK_BULK_SIZE,
 };
-use c_str_macro::c_str;
+
 
 use reaper_medium::TrackAttributeKey::{Mute, Pan, RecArm, RecInput, Selected, Solo, Vol};
 use reaper_medium::{
-    AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
+    reaper_str, AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
     ExtTrackFxPresetChangedArgs, InputMonitoringMode, MediaTrack, ReaProject,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
     SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
     SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackLocation,
     VersionDependentFxLocation, VersionDependentTrackFxLocation,
@@ -22,7 +22,7 @@ use std::cell::{Cell, RefCell, RefMut};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
-use std::ffi::CStr;
+
 
 use crate::run_loop_executor::RunLoopExecutor;
 use crate::run_loop_scheduler::RxTask;
@@ -175,7 +175,7 @@ impl HelperControlSurface {
         }))
     }
 
-    fn track_parameter_is_automated(&self, track: &Track, parameter_name: &CStr) -> bool {
+    fn track_parameter_is_automated(&self, track: &Track, parameter_name: &ReaperStr) -> bool {
         if !track.is_available() {
             return false;
         }
@@ -641,7 +641,7 @@ impl ControlSurface for HelperControlSurface {
             .track_pan_changed
             .borrow_mut()
             .next(track.clone());
-        if !self.track_parameter_is_automated(&track, c_str!("Pan")) {
+        if !self.track_parameter_is_automated(&track, reaper_str!("Pan")) {
             reaper.subjects.track_pan_touched.borrow_mut().next(track);
         }
     }
@@ -662,7 +662,7 @@ impl ControlSurface for HelperControlSurface {
             .track_volume_changed
             .borrow_mut()
             .next(track.clone());
-        if !self.track_parameter_is_automated(&track, c_str!("Volume")) {
+        if !self.track_parameter_is_automated(&track, reaper_str!("Volume")) {
             reaper
                 .subjects
                 .track_volume_touched
@@ -685,7 +685,7 @@ impl ControlSurface for HelperControlSurface {
                 .track_mute_changed
                 .borrow_mut()
                 .next(track.clone());
-            if !self.track_parameter_is_automated(&track, c_str!("Mute")) {
+            if !self.track_parameter_is_automated(&track, reaper_str!("Mute")) {
                 reaper.subjects.track_mute_touched.borrow_mut().next(track);
             }
         }
@@ -815,7 +815,7 @@ impl ControlSurface for HelperControlSurface {
             .borrow_mut()
             .next(track_send.clone());
         // Send volume touch event only if not automated
-        if !self.track_parameter_is_automated(&track, c_str!("Send Volume")) {
+        if !self.track_parameter_is_automated(&track, reaper_str!("Send Volume")) {
             reaper
                 .subjects
                 .track_send_volume_touched
@@ -835,7 +835,7 @@ impl ControlSurface for HelperControlSurface {
             .borrow_mut()
             .next(track_send.clone());
         // Send volume touch event only if not automated
-        if !self.track_parameter_is_automated(&track, c_str!("Send Pan")) {
+        if !self.track_parameter_is_automated(&track, reaper_str!("Send Pan")) {
             reaper
                 .subjects
                 .track_send_pan_touched

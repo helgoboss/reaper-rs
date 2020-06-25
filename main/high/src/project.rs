@@ -1,12 +1,12 @@
-use std::ffi::CStr;
+
 
 use crate::guid::Guid;
 use crate::{PlayRate, Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    MasterTrackBehavior, ProjectRef, ReaProject, ReaperString, TrackDefaultsBehavior,
-    TrackLocation, UndoBehavior,
+    MasterTrackBehavior, ProjectRef, ReaProject, ReaperString, ReaperStringArg,
+    TrackDefaultsBehavior, TrackLocation, UndoBehavior,
 };
 use std::path::PathBuf;
 
@@ -170,7 +170,7 @@ impl Project {
         Track::new(mt, Some(self.rea_project))
     }
 
-    pub fn undoable<F, R>(self, label: &CStr, operation: F) -> R
+    pub fn undoable<'a, F, R>(self, label: impl Into<ReaperStringArg<'a>>, operation: F) -> R
     where
         F: FnOnce() -> R,
     {
@@ -180,7 +180,8 @@ impl Project {
         {
             operation()
         } else {
-            let _undo_block = Reaper::get().enter_undo_block_internal(self, label);
+            let label = label.into().into_inner();
+            let _undo_block = Reaper::get().enter_undo_block_internal(self, label.as_ref());
             operation()
         }
     }

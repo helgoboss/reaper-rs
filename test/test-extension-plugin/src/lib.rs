@@ -1,5 +1,6 @@
-use c_str_macro::c_str;
+
 use reaper_high::{ActionKind, Reaper};
+
 
 use reaper_macros::reaper_extension_plugin;
 use slog::debug;
@@ -33,8 +34,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         });
     }
     reaper.register_action(
-        c_str!("reaperRsIntegrationTests"),
-        c_str!("reaper-rs integration tests"),
+        "reaperRsIntegrationTests",
+        "reaper-rs integration tests",
         || reaper_test::execute_integration_test(|_| ()),
         ActionKind::NotToggleable,
     );
