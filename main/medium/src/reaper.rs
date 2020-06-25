@@ -67,7 +67,7 @@ impl AnyThread for RealTimeAudioThreadScope {}
 /// You can obtain an instance of this struct by calling [`ReaperSession::reaper()`]. This
 /// unlocks all functions which are safe to execute in the main thread. If you want access to the
 /// functions which are safe to execute in the real-time audio thread, call
-/// [`ReaperSession::create_real_time_functions()`] instead. REAPER functions which are related to
+/// [`ReaperSession::create_real_time_reaper()`] instead. REAPER functions which are related to
 /// registering/unregistering things are located in [`ReaperSession`].
 ///
 /// Please note that this struct contains nothing but function pointers, so you are free to clone
@@ -137,8 +137,9 @@ impl AnyThread for RealTimeAudioThreadScope {}
 ///
 /// [`ReaperSession`]: struct.ReaperSession.html
 /// [`ReaperSession::reaper()`]: struct.ReaperSession.html#method.reaper
-/// [`ReaperSession::create_real_time_functions()`]:
-/// struct.ReaperSession.html#method.create_real_time_functions [`low()`]: #method.low
+/// [`ReaperSession::create_real_time_reaper()`]:
+/// struct.ReaperSession.html#method.create_real_time_reaper
+/// [`low()`]: #method.low
 /// [low-level `Reaper`]: https://docs.rs/reaper-low
 /// [`MainThreadOnly`]: trait.MainThreadOnly.html
 /// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html

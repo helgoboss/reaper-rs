@@ -5,7 +5,6 @@ use crate::CommandId;
 
 use reaper_low::raw;
 
-use serde::export::Formatter;
 use std::fmt;
 use std::fmt::Debug;
 use std::os::raw::c_void;
@@ -30,7 +29,7 @@ pub struct RegistrationHandle<T> {
 }
 
 impl<T> Debug for RegistrationHandle<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("RegistrationHandle")
             .field("medium_ptr", &self.medium_ptr)
             .field("reaper_ptr", &self.reaper_ptr)

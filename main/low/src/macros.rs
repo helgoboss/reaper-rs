@@ -3,20 +3,20 @@
 /// This macro provides module entry points which gather some handles for creating
 /// a REAPER VST plug-in context. The gathered handles are exposed via the function
 /// [`static_vst_plugin_context()`] and are intended to be passed to
-/// [`PluginContext::from_extension_plugin()`].
+/// [`PluginContext::from_vst_plugin()`].
 ///
 /// # Example
 ///
 /// ```
-/// use reaper_low::{reaper_vst_plugin, static_vst_plugin_context};
+/// use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, StaticVstPluginContext};
 ///
 /// reaper_vst_plugin!();
 ///
-/// let static_context = static_vst_plugin_context;
+/// let static_context: StaticVstPluginContext = static_vst_plugin_context();
 /// ```
 ///
-/// [`PluginContext::from_extension_plugin()`]:
-/// struct.PluginContext.html#method.from_extension_plugin
+/// [`PluginContext::from_vst_plugin()`]:
+/// struct.PluginContext.html#method.from_vst_plugin
 /// [`static_vst_plugin_context()`]: fn.static_vst_plugin_context.html
 #[macro_export]
 macro_rules! reaper_vst_plugin {

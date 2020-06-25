@@ -1,4 +1,5 @@
 #![doc(html_root_url = "https://docs.rs/reaper-medium/0.1.0")]
+#![deny(intra_doc_link_resolution_failure)]
 
 //! This crate contains the medium-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
@@ -121,8 +122,7 @@
 //! safe to use.
 //! Examples:
 //! [`get_set_media_track_info()`](struct.Reaper.html#method.get_set_media_track_info),
-//! [`plugin_register_add_command_id()`](struct.ReaperSession.html#method.
-//! plugin_register_add_command_id)
+//! [`plugin_register_add_command_id()`](struct.ReaperSession.html#method.plugin_register_add_command_id)
 //!
 //! ## Make it easy to work with strings
 //!

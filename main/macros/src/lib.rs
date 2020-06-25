@@ -1,4 +1,5 @@
 #![doc(html_root_url = "https://docs.rs/reaper-macros/0.1.0")]
+#![deny(intra_doc_link_resolution_failure)]
 
 //! This crate is part of [reaper-rs](https://github.com/helgoboss/reaper-rs) and contains a
 //! [simple attribute macro](attr.reaper_extension_plugin.html) to simplify bootstrapping REAPER

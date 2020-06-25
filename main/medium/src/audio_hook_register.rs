@@ -2,7 +2,6 @@ use crate::Hz;
 use reaper_low::raw::audio_hook_register_t;
 use reaper_low::{firewall, raw};
 
-use serde::export::Formatter;
 use std::fmt;
 use std::fmt::Debug;
 use std::os::raw::{c_int, c_void};
@@ -101,7 +100,7 @@ pub(crate) struct OwnedAudioHookRegister {
 }
 
 impl Debug for OwnedAudioHookRegister {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Besides OnAudioBuffer not generally implementing Debug, it would also be a bit dangerous.
         // Debug-printing the REAPER session could cause race conditions when the debug formatting
         // accesses audio hook state.

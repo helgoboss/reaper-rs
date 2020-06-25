@@ -180,6 +180,10 @@ impl<'a> VstPluginContext<'a> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
+    ///
+    /// [`TrackFxLocation`]: enum.TrackFxLocation.html
+    /// [`NormalFxChain`]: enum.TrackFxLocation.html#variant.NormalFxChain
+    /// [`InputFxChain`]: enum.TrackFxLocation.html#variant.InputFxChain
     pub unsafe fn request_containing_fx_location(
         self,
         effect: NonNull<AEffect>,
