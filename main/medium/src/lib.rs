@@ -122,7 +122,7 @@
 //! safe to use.
 //! Examples:
 //! [`get_set_media_track_info()`](struct.Reaper.html#method.get_set_media_track_info),
-//! [`plugin_register_add_command_id()`](struct.ReaperSession.html#method.plugin_register_add_command_id)
+//! [`plugin_register_add_command_id()`]
 //!
 //! ## Make it easy to work with strings
 //!
@@ -303,6 +303,8 @@
 //!
 //!
 //! [`ReaperSession`]: struct.ReaperSession.html
+//! [`plugin_register_add_command_id()`]:
+//! struct.ReaperSession.html#method.plugin_register_add_command_id
 
 #[macro_use]
 mod macros;
