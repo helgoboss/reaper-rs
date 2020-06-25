@@ -100,13 +100,13 @@ mod windows_constants {
     pub const SW_SHOWNORMAL: i32 = 1;
 
     // SWP
-    pub const SWP_FRAMECHANGED: i32 = 0x0020;
-    pub const SWP_NOACTIVATE: i32 = 0x0010;
-    pub const SWP_NOCOPYBITS: i32 = 0x0100;
-    pub const SWP_NOMOVE: i32 = 0x0002;
-    pub const SWP_NOSIZE: i32 = 0x0001;
-    pub const SWP_NOZORDER: i32 = 0x0004;
-    pub const SWP_SHOWWINDOW: i32 = 0x0040;
+    pub const SWP_FRAMECHANGED: u32 = 0x0020;
+    pub const SWP_NOACTIVATE: u32 = 0x0010;
+    pub const SWP_NOCOPYBITS: u32 = 0x0100;
+    pub const SWP_NOMOVE: u32 = 0x0002;
+    pub const SWP_NOSIZE: u32 = 0x0001;
+    pub const SWP_NOZORDER: u32 = 0x0004;
+    pub const SWP_SHOWWINDOW: u32 = 0x0040;
 }
 
 #[cfg(target_family = "windows")]

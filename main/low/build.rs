@@ -68,16 +68,23 @@ mod codegen {
 
         impl ParseCallbacks for CustomParseCallbacks {
             fn int_macro(&self, name: &str, _value: i64) -> Option<IntKind> {
-                // TODO-medium Check if this is really sane. Maybe we shouldn't let us drive by
-                //  convenience here but rather if there can only be positive numbers or not.
+                // Signed because directly associated with IReaperControlSurface::Extended()
+                // `call` parameter, which is signed.
                 if name.starts_with("CSURF_EXT_")
-                    || name.starts_with("VK_")
+                    // Signed because ShowWindow() expects signed. winapi-rs conforms.
                     || name.starts_with("SW_")
-                    || name.starts_with("SWP_")
+                    // Signed because reaper_plugin_info_t::caller_version is signed.
                     || name == "REAPER_PLUGIN_VERSION"
                 {
                     return Some(IntKind::I32);
                 }
+                // The following constants were interpreted as signed integers before but I changed
+                // them to unsigned:
+                // - VK_: Although declared as signed in winapi-rs, I think it should be unsigned
+                //   because MapVirtualKey function takes an unsigned integer and none of the VK_
+                //   constants are defined as negative integer.
+                // - SWP_: Unsigned because SetWindowPos() expects unsigned. winapi-rs conforms.
+                //
                 // The following flags stay u32 although the APIs expect i32:
                 // - UNDO_STATE_* (used as bitmask, UNDO_STATE_ALL doesn't fit into i32)
                 None

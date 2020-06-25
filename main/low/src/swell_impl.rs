@@ -76,10 +76,10 @@ impl Swell {
         #[cfg(target_family = "windows")]
         #[allow(clippy::cast_ptr_alignment)]
         {
-            // TODO-medium Test on 32-bit Windows and see if calling conventions matters.
-            //  If yes, we should change all auto-generated Windows-facing fns to extern "system".
-            //  If it matters even for callbacks, we must change them as well and then we can maybe
-            //  remove the transmute() calls here.
+            // TODO-low winapi-rs is expecting the dlgproc function pointer to be `extern "system"`.
+            //  What we have is `extern "C"`. This caught cause issues on Windows i686 (32-bit)
+            //  builds. However, in practice it didn't show any issues (tested with ReaLearn). So
+            //  probably not that  important.
             winapi::um::winuser::CreateDialogParamW(
                 hinst as _,
                 resid as _,

@@ -408,7 +408,7 @@ impl ModKey {
             return Err(TryFromRawError::new("couldn't convert to mod key", value));
         };
         use ModKey::*;
-        let key = match value {
+        let key = match value as u32 {
             raw::VK_SHIFT => Shift,
             raw::VK_CONTROL => Control,
             raw::VK_MENU => Menu,
