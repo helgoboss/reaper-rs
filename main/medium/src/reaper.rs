@@ -2563,7 +2563,16 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Stuffs a 3-byte MIDI message into a queue or send it to an external MIDI hardware.
-    // TODO-medium Add example
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let session = reaper_medium::ReaperSession::default();
+    /// use helgoboss_midi::test_util::note_on;
+    /// use reaper_medium::StuffMidiMessageTarget::VirtualMidiKeyboardQueue;
+    ///
+    /// session.reaper().stuff_midi_message(VirtualMidiKeyboardQueue, note_on(0, 64, 100));
+    /// ```
     #[measure(SingleThreadNanos)]
     pub fn stuff_midi_message(&self, target: StuffMidiMessageTarget, message: impl ShortMessage)
     where
