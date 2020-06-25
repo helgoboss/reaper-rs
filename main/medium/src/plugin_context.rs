@@ -1,6 +1,6 @@
 use crate::{
     AnyThread, Hinstance, Hwnd, MainThreadOnly, MediaItemTake, MediaTrack, ReaProject,
-    ReaperStringArg,
+    ReaperStringArg, TrackFxLocation,
 };
 use reaper_low::raw;
 use std::marker::PhantomData;
@@ -166,6 +166,31 @@ impl<'a> VstPluginContext<'a> {
     pub unsafe fn request_containing_take(self, effect: NonNull<AEffect>) -> Option<MediaItemTake> {
         let ptr = self.request_context(effect, 2) as *mut raw::MediaItem_Take;
         NonNull::new(ptr)
+    }
+
+    /// Returns the location in the FX chain at which the given VST plug-in currently resides.
+    ///
+    /// Supported since REAPER v6.11. Returns `None` if not supported.
+    ///
+    /// Don't let the fact that this returns a [`TrackFxLocation`] confuse you. It also works for
+    /// take and monitoring FX. If this is a take FX, it will return the index as variant
+    /// [`NormalFxChain`]. If this is a monitoring FX, it will return the index as variant
+    /// [`InputFxChain`].
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn request_containing_fx_location(
+        self,
+        effect: NonNull<AEffect>,
+    ) -> Option<TrackFxLocation> {
+        let result = self.request_context(effect, 6) as i32;
+        if result <= 0 {
+            // Not supported
+            return None;
+        }
+        let raw_index = result - 1;
+        TrackFxLocation::try_from_raw(raw_index).ok()
     }
 
     /// Returns the channel count of the REAPER track which contains the given VST plug-in.
