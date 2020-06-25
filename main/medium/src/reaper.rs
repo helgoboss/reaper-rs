@@ -705,7 +705,8 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let mut guid = MaybeUninit::uninit();
+        // We zero this just for being safe
+        let mut guid = MaybeUninit::zeroed();
         unsafe {
             self.low.genGuid(guid.as_mut_ptr());
         }
@@ -1644,10 +1645,13 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let mut step = MaybeUninit::uninit();
-        let mut small_step = MaybeUninit::uninit();
-        let mut large_step = MaybeUninit::uninit();
-        let mut is_toggle = MaybeUninit::uninit();
+        // It's important to zero these variables (could also do that without MaybeUninit) because
+        // if REAPER returns true, that doesn't always mean that it initialized all of the variables
+        // correctly. Learned this the hard way with some super random results coming up.
+        let mut step = MaybeUninit::zeroed();
+        let mut small_step = MaybeUninit::zeroed();
+        let mut large_step = MaybeUninit::zeroed();
+        let mut is_toggle = MaybeUninit::zeroed();
         let successful = self.low.TrackFX_GetParameterStepSizes(
             track.as_ptr(),
             fx_location.to_raw(),
@@ -2613,8 +2617,9 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let mut volume = MaybeUninit::uninit();
-        let mut pan = MaybeUninit::uninit();
+        // We zero them just for being safe.
+        let mut volume = MaybeUninit::zeroed();
+        let mut pan = MaybeUninit::zeroed();
         let successful =
             self.low
                 .GetTrackUIVolPan(track.as_ptr(), volume.as_mut_ptr(), pan.as_mut_ptr());
@@ -3292,8 +3297,9 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let mut volume = MaybeUninit::uninit();
-        let mut pan = MaybeUninit::uninit();
+        // We zero them just for being safe
+        let mut volume = MaybeUninit::zeroed();
+        let mut pan = MaybeUninit::zeroed();
         let successful = self.low.GetTrackSendUIVolPan(
             track.as_ptr(),
             send_index as i32,
@@ -3330,7 +3336,8 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let mut num_presets = MaybeUninit::uninit();
+        // We zero this just for being safe
+        let mut num_presets = MaybeUninit::zeroed();
         let index = self.low.TrackFX_GetPresetIndex(
             track.as_ptr(),
             fx_location.to_raw(),
