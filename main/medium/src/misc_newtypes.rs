@@ -129,7 +129,10 @@ impl MidiInputDeviceId {
     ///
     /// This function panics if the given value is not a valid ID (must be <= 62).
     pub fn new(value: u8) -> MidiInputDeviceId {
-        assert!(Self::is_valid(value), "MIDI input device IDs must be <= 62");
+        assert!(
+            Self::is_valid(value),
+            format!("MIDI input device IDs must be <= 62, got {}", value)
+        );
         MidiInputDeviceId(value)
     }
 
@@ -209,7 +212,10 @@ impl ReaperNormalizedFxParamValue {
     ///
     /// This function panics if the given value is negative.
     pub fn new(value: f64) -> ReaperNormalizedFxParamValue {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         ReaperNormalizedFxParamValue(value)
     }
 
@@ -257,7 +263,10 @@ impl Bpm {
     /// This function panics if the given value is not within the BPM range supported by REAPER
     /// `(1.0..=960.0)`.
     pub fn new(value: f64) -> Bpm {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         Bpm(value)
     }
 
@@ -311,7 +320,10 @@ impl PlaybackSpeedFactor {
     /// This function panics if the given value is not within the playback speed range supported by
     /// REAPER `(0.25..=4.00)`.
     pub fn new(value: f64) -> PlaybackSpeedFactor {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         PlaybackSpeedFactor(value)
     }
 
@@ -366,7 +378,10 @@ impl NormalizedPlayRate {
     ///
     /// This function panics if the given value is not within `(0.00..=1.00)`.
     pub fn new(value: f64) -> NormalizedPlayRate {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         NormalizedPlayRate(value)
     }
 
@@ -410,7 +425,10 @@ impl Hz {
     ///
     /// This function panics if the given value zero or negative.
     pub fn new(value: f64) -> Hz {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         Hz(value)
     }
 
@@ -491,7 +509,10 @@ impl Db {
     /// This function panics if the given value is not within the decibel range supported by REAPER
     /// `(-1000.0..)`.
     pub fn new(value: f64) -> Db {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         Db(value)
     }
 
@@ -563,7 +584,10 @@ impl VolumeSliderValue {
     /// This function panics if the given value is not within the range supported by REAPER
     /// `(0.0..)`.
     pub fn new(value: f64) -> VolumeSliderValue {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         VolumeSliderValue(value)
     }
 
@@ -636,7 +660,10 @@ impl ReaperVolumeValue {
     /// This function panics if the given value is not within the range supported by REAPER
     /// `(0.0..)`.
     pub fn new(value: f64) -> ReaperVolumeValue {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         ReaperVolumeValue(value)
     }
 
@@ -705,7 +732,10 @@ impl ReaperPanValue {
     /// This function panics if the given value is not within the range supported by REAPER
     /// `(-1.0..=1.0)`.
     pub fn new(value: f64) -> ReaperPanValue {
-        assert!(Self::is_valid(value));
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid value", value)
+        );
         ReaperPanValue(value)
     }
 
