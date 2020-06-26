@@ -35,6 +35,7 @@ use reaper_medium::{
     OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef, RealTimeAudioThreadScope, ReaperStr,
     ReaperString, ReaperStringArg, RegistrationHandle, ToggleAction, ToggleActionResult,
 };
+use slog::debug;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
@@ -416,6 +417,10 @@ pub struct ReaperGuard;
 
 impl Drop for ReaperGuard {
     fn drop(&mut self) {
+        debug!(
+            Reaper::get().logger(),
+            "REAPER guard dropped. Making _reaper-rs_ sleep..."
+        );
         let _ = Reaper::get().go_to_sleep();
     }
 }
@@ -489,6 +494,7 @@ impl Reaper {
     }
 
     pub fn wake_up(&self) -> Result<(), &'static str> {
+        debug!(self.logger(), "Waking up...");
         self.require_main_thread();
         let mut session_status = self.session_status.borrow_mut();
         let sleeping_state = match session_status.deref_mut() {
@@ -541,10 +547,12 @@ impl Reaper {
                     .map_err(|_| "Audio hook registration failed")?
             },
         });
+        debug!(self.logger(), "Woke up");
         Ok(())
     }
 
     pub fn go_to_sleep(&self) -> Result<(), &'static str> {
+        debug!(self.logger(), "Going to sleep...");
         self.require_main_thread();
         let mut session_status = self.session_status.borrow_mut();
         let awake_state = match session_status.deref() {
@@ -574,6 +582,7 @@ impl Reaper {
             csurf_inst,
             audio_hook,
         }));
+        debug!(self.logger(), "Sleeping");
         Ok(())
     }
 
