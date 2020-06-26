@@ -68,9 +68,30 @@ struct TrackData {
     recmonitor: InputMonitoringMode,
     recinput: i32,
     guid: Guid,
+    send_volumes: HashMap<u32, ReaperVolumeValue>,
+    send_pans: HashMap<u32, ReaperPanValue>,
     fx_chain_pair: FxChainPair,
 }
 
+impl TrackData {
+    /// Returns true if it has changed.
+    fn update_send_volume(&mut self, index: u32, v: ReaperVolumeValue) -> bool {
+        match self.send_volumes.insert(index, v) {
+            None => true,
+            Some(prev) => v != prev,
+        }
+    }
+
+    /// Returns true if it has changed.
+    fn update_send_pan(&mut self, index: u32, v: ReaperPanValue) -> bool {
+        match self.send_pans.insert(index, v) {
+            None => true,
+            Some(prev) => v != prev,
+        }
+    }
+}
+
+/// For detection of added or removed FX.
 #[derive(Debug, Default)]
 struct FxChainPair {
     input_fx_guids: HashSet<Guid>,
@@ -249,6 +270,8 @@ impl HelperControlSurface {
                         recmonitor: func.get_set_media_track_info_get_rec_mon(media_track),
                         recinput: func.get_media_track_info_value(media_track, RecInput) as i32,
                         guid: get_media_track_guid(media_track),
+                        send_volumes: Default::default(),
+                        send_pans: Default::default(),
                         fx_chain_pair: Default::default(),
                     }
                 };
@@ -804,6 +827,13 @@ impl ControlSurface for HelperControlSurface {
     }
 
     fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
+            None => return 1,
+            Some(td) => td,
+        };
+        if !td.update_send_volume(args.send_index, args.volume) {
+            return 1;
+        }
         let track = Track::new(args.track, None);
         let track_send = track.index_based_send_by_index(args.send_index);
         let reaper = Reaper::get();
@@ -824,6 +854,13 @@ impl ControlSurface for HelperControlSurface {
     }
 
     fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
+            None => return 1,
+            Some(td) => td,
+        };
+        if !td.update_send_pan(args.send_index, args.pan) {
+            return 1;
+        }
         let track = Track::new(args.track, None);
         let track_send = track.index_based_send_by_index(args.send_index);
         let reaper = Reaper::get();
