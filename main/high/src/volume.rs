@@ -18,7 +18,15 @@ impl Volume {
     }
 
     pub fn from_reaper_value(reaper_value: ReaperVolumeValue) -> Volume {
-        Volume::from_db(Db::new(reaper_value.get().ln() / LN10_OVER_TWENTY))
+        let raw_db = reaper_value.get().ln() / LN10_OVER_TWENTY;
+        let db = if raw_db == f64::NEG_INFINITY {
+            // REAPER doesn't represent negative infinity as f64::NEG_INFINITY, so we must replace
+            // this with REAPER's negative infinity.
+            Db::MINUS_INF
+        } else {
+            Db::new(raw_db)
+        };
+        Volume::from_db(db)
     }
 
     pub fn from_db(db: Db) -> Volume {
