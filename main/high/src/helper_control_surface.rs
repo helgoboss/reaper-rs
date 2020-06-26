@@ -41,7 +41,6 @@ pub(crate) struct HelperControlSurface {
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
     project_datas: RefCell<ProjectDataMap>,
-    fx_chain_pair_by_media_track: RefCell<HashMap<MediaTrack, FxChainPair>>,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
@@ -53,6 +52,10 @@ enum State {
     PropagatingTrackSetChanges,
 }
 
+/// Keeps current track values for detecting real value changes.
+///
+/// When REAPER reads automation, the callbacks are fired like crazy, even if the value
+/// has not changed.
 #[derive(Debug)]
 struct TrackData {
     volume: ReaperVolumeValue,
@@ -65,6 +68,7 @@ struct TrackData {
     recmonitor: InputMonitoringMode,
     recinput: i32,
     guid: Guid,
+    fx_chain_pair: FxChainPair,
 }
 
 #[derive(Debug, Default)]
@@ -95,7 +99,6 @@ impl HelperControlSurface {
             num_track_set_changes_left_to_be_propagated: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
             project_datas: Default::default(),
-            fx_chain_pair_by_media_track: Default::default(),
             // since pre1,
             supports_detection_of_input_fx: version >= reaper_version_5_95,
             // since pre2 to be accurate but so what
@@ -232,7 +235,7 @@ impl HelperControlSurface {
             let media_track = t.raw();
             track_datas.entry(media_track).or_insert_with(|| {
                 let func = Reaper::get().medium_reaper();
-                let td = unsafe {
+                let mut td = unsafe {
                     TrackData {
                         volume: ReaperVolumeValue::new(
                             func.get_media_track_info_value(media_track, Vol),
@@ -246,6 +249,7 @@ impl HelperControlSurface {
                         recmonitor: func.get_set_media_track_info_get_rec_mon(media_track),
                         recinput: func.get_media_track_info_value(media_track, RecInput) as i32,
                         guid: get_media_track_guid(media_track),
+                        fx_chain_pair: Default::default(),
                     }
                 };
                 // TODO-low Use try_borrow_mut(). Then this just doesn't do anything if this event
@@ -255,7 +259,7 @@ impl HelperControlSurface {
                     .track_added
                     .borrow_mut()
                     .next(t.clone());
-                self.detect_fx_changes_on_track(t, false, true, true);
+                self.detect_fx_changes_on_track(&mut td.fx_chain_pair, t, false, true, true);
                 td
             });
         }
@@ -263,6 +267,7 @@ impl HelperControlSurface {
 
     fn detect_fx_changes_on_track(
         &self,
+        fx_chain_pair: &mut FxChainPair,
         track: Track,
         notify_listeners_about_changes: bool,
         check_normal_fx_chain: bool,
@@ -271,8 +276,6 @@ impl HelperControlSurface {
         if !track.is_available() {
             return;
         }
-        let mut fx_chain_pairs = self.fx_chain_pair_by_media_track.borrow_mut();
-        let fx_chain_pair = fx_chain_pairs.entry(track.raw()).or_default();
         let added_or_removed_output_fx = if check_normal_fx_chain {
             self.detect_fx_changes_on_track_internal(
                 &track,
@@ -413,9 +416,6 @@ impl HelperControlSurface {
             {
                 true
             } else {
-                self.fx_chain_pair_by_media_track
-                    .borrow_mut()
-                    .remove(media_track);
                 let track = project.track_by_guid(&data.guid);
                 Reaper::get()
                     .subjects
@@ -471,6 +471,7 @@ impl HelperControlSurface {
         if let Some(fx) = fx_chain.fx_by_index(args.fx_index as u32) {
             let fx_param = fx.parameter_by_index(args.param_index as u32);
             let reaper = Reaper::get();
+            // TODO-change
             reaper
                 .subjects
                 .fx_parameter_value_changed
@@ -494,17 +495,16 @@ impl HelperControlSurface {
         param_index: Option<u32>,
         normalized_value: Option<ReaperNormalizedFxParamValue>,
     ) -> bool {
-        let pairs = self.fx_chain_pair_by_media_track.borrow();
-        let pair = match pairs.get(&track.raw()) {
+        let td = match self.find_track_data(track.raw()) {
             None => {
                 // Should not happen. In this case, an FX yet unknown to Realearn has sent a
                 // parameter change
                 return false;
             }
-            Some(pair) => pair,
+            Some(d) => d,
         };
-        let could_be_input_fx = (fx_index as usize) < pair.input_fx_guids.len();
-        let could_be_output_fx = (fx_index as usize) < pair.output_fx_guids.len();
+        let could_be_input_fx = (fx_index as usize) < td.fx_chain_pair.input_fx_guids.len();
+        let could_be_output_fx = (fx_index as usize) < td.fx_chain_pair.output_fx_guids.len();
         if !could_be_input_fx && !could_be_output_fx {
             false
         } else if could_be_input_fx && !could_be_output_fx {
@@ -865,13 +865,16 @@ impl ControlSurface for HelperControlSurface {
                 if let Some(fx) = self.fx_from_parm_fx_index(&track, track_fx_ref, None, None) {
                     // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2
                     // and on chunk manipulations
-                    self.detect_fx_changes_on_track(
-                        track,
-                        true,
-                        !fx.is_input_fx(),
-                        fx.is_input_fx(),
-                    );
-                    reaper.subjects.fx_focused.borrow_mut().next(Some(fx));
+                    if let Some(mut td) = self.find_track_data(track.raw()) {
+                        self.detect_fx_changes_on_track(
+                            &mut td.fx_chain_pair,
+                            track,
+                            true,
+                            !fx.is_input_fx(),
+                            fx.is_input_fx(),
+                        );
+                        reaper.subjects.fx_focused.borrow_mut().next(Some(fx));
+                    }
                 }
                 1
             }
@@ -888,27 +891,43 @@ impl ControlSurface for HelperControlSurface {
         if let Some(fx) = self.fx_from_parm_fx_index(&track, fx_location, None, None) {
             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2 and on
             // chunk manipulations
-            self.detect_fx_changes_on_track(track, true, !fx.is_input_fx(), fx.is_input_fx());
-            let reaper = Reaper::get();
-            let subject = if args.is_open {
-                &reaper.subjects.fx_opened
-            } else {
-                &reaper.subjects.fx_closed
-            };
-            subject.borrow_mut().next(fx);
+            if let Some(mut td) = self.find_track_data(track.raw()) {
+                self.detect_fx_changes_on_track(
+                    &mut td.fx_chain_pair,
+                    track,
+                    true,
+                    !fx.is_input_fx(),
+                    fx.is_input_fx(),
+                );
+                let reaper = Reaper::get();
+                let subject = if args.is_open {
+                    &reaper.subjects.fx_opened
+                } else {
+                    &reaper.subjects.fx_closed
+                };
+                subject.borrow_mut().next(fx);
+            }
         }
         1
     }
 
     fn ext_set_fx_change(&self, args: ExtSetFxChangeArgs) -> i32 {
         let track = Track::new(args.track, None);
-        match args.fx_chain_type {
-            Some(t) => {
-                let is_input_fx = t == TrackFxChainType::InputFxChain;
-                self.detect_fx_changes_on_track(track, true, !is_input_fx, is_input_fx);
-            }
-            None => {
-                self.detect_fx_changes_on_track(track, true, true, true);
+        if let Some(mut td) = self.find_track_data(track.raw()) {
+            match args.fx_chain_type {
+                Some(t) => {
+                    let is_input_fx = t == TrackFxChainType::InputFxChain;
+                    self.detect_fx_changes_on_track(
+                        &mut td.fx_chain_pair,
+                        track,
+                        true,
+                        !is_input_fx,
+                        is_input_fx,
+                    );
+                }
+                None => {
+                    self.detect_fx_changes_on_track(&mut td.fx_chain_pair, track, true, true, true);
+                }
             }
         }
         1
