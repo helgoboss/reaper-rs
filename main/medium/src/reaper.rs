@@ -1669,8 +1669,15 @@ impl<UsageScope> Reaper<UsageScope> {
         if is_toggle {
             Some(GetParameterStepSizesResult::Toggle)
         } else {
+            let normal_step = step.assume_init();
+            if normal_step.is_infinite() {
+                // There seems to be a bug (at least in REAPER 6.12) which makes JS FX "Bypass" and
+                // "Wet" parameters return an infinite step size. This can't be correct, therefore
+                // we fix it here.
+                return None;
+            }
             Some(GetParameterStepSizesResult::Normal {
-                normal_step: step.assume_init(),
+                normal_step,
                 small_step: make_some_if_greater_than_zero(small_step.assume_init()),
                 large_step: make_some_if_greater_than_zero(large_step.assume_init()),
             })
@@ -3636,7 +3643,11 @@ impl<UsageScope> Reaper<UsageScope> {
 pub enum GetParameterStepSizesResult {
     /// Normal (non-toggleable) parameter.
     ///
-    /// Each of the decimal numbers are > 0.
+    /// Each of the decimal numbers are > 0. They relate to the value range reported by
+    /// [`track_fx_get_param_ex()`], so don't just interpret them as normalized values (step sizes
+    /// within the unit interval).
+    ///
+    /// [`track_fx_get_param_ex()`]: struct.Reaper.html#method.track_fx_get_param_ex
     Normal {
         normal_step: f64,
         small_step: Option<f64>,

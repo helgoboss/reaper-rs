@@ -166,6 +166,8 @@ impl FxParameter {
                 small_step,
                 ..
             } => {
+                // The reported step sizes relate to the reported value range, which is not always
+                // the unit interval! Easy to test with JS FX.
                 let range = self.value_range();
                 // We are primarily interested in the smallest step size that makes sense. We can
                 // always create multiples of it.
