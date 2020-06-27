@@ -2243,7 +2243,9 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
         let midi_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
         let synth_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find synth fx")?;
         let synth_param_5 = synth_fx.parameter_by_index(5);
-        synth_param_5.set_normalized_value(ReaperNormalizedFxParamValue::new(0.0));
+        synth_param_5
+            .set_reaper_value(ReaperNormalizedFxParamValue::new(0.0))
+            .map_err(|_| "couldn't set parameter value")?;
         assert_ne!(
             synth_param_5.formatted_value().into_inner().as_c_str(),
             c_str!("-6.00")
@@ -2445,7 +2447,8 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find fx")?;
             let p = fx.parameter_by_index(0);
-            p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
+            p.set_reaper_value(ReaperNormalizedFxParamValue::new(0.5))
+                .map_err(|_| "couldn't set parameter value")?;
             let track = fx.track().ok_or("no track")?;
             let other_fx_chain = if fx_chain.is_input_fx() {
                 track.normal_fx_chain()
@@ -2458,7 +2461,9 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             let p_on_other_fx_chain = fx_on_other_fx_chain.parameter_by_index(0);
             // First set parameter on other FX chain to same value (confuses heuristic if
             // fxChain is input FX chain)
-            p_on_other_fx_chain.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
+            p_on_other_fx_chain
+                .set_reaper_value(ReaperNormalizedFxParamValue::new(0.5))
+                .map_err(|_| "couldn't set parameter value")?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 reaper
@@ -2468,7 +2473,8 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
                         mock.invoke(p);
                     });
             });
-            p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.5));
+            p.set_reaper_value(ReaperNormalizedFxParamValue::new(0.5))
+                .map_err(|_| "couldn't set parameter value")?;
             // Then
             assert_eq!(mock.invocation_count(), 2);
             if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
@@ -2499,7 +2505,8 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                         mock.invoke(p);
                     });
             });
-            p.set_normalized_value(ReaperNormalizedFxParamValue::new(0.3));
+            p.set_reaper_value(ReaperNormalizedFxParamValue::new(0.3))
+                .map_err(|_| "couldn't set parameter value")?;
             // Then
             let last_touched_fx_param = Reaper::get().last_touched_fx_parameter();
             if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
@@ -2509,15 +2516,19 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             }
             assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("-4.44"));
             assert!(abs_diff_eq!(
-                p.normalized_value().get(),
+                p.reaper_value()
+                    .map_err(|_| "couldn't get param value")?
+                    .get(),
                 0.300_000_011_920_928_96
             ));
             assert!(abs_diff_eq!(
-                p.reaper_value().get(),
+                p.reaper_value()
+                    .map_err(|_| "couldn't get param value")?
+                    .get(),
                 0.300_000_011_920_928_96
             ));
             assert_eq!(
-                p.format_normalized_value(p.normalized_value())
+                p.format_reaper_value(p.reaper_value().map_err(|_| "couldn't get param value")?)
                     .map_err(|_| "Cockos plug-ins should be able to do that")?
                     .into_inner()
                     .as_c_str(),
@@ -2593,10 +2604,17 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(p.character(), FxParameterCharacter::Continuous);
         assert_eq!(p.clone(), p);
         assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("0"));
-        assert_eq!(p.normalized_value(), ReaperNormalizedFxParamValue::new(0.5));
-        assert_eq!(p.reaper_value(), ReaperNormalizedFxParamValue::new(0.5));
         assert_eq!(
-            p.format_normalized_value(p.normalized_value())
+            p.reaper_value().map_err(|_| "couldn't get param value")?,
+            ReaperNormalizedFxParamValue::new(0.5)
+        );
+        assert_eq!(
+            p.normalized_value()
+                .map_err(|_| "couldn't get param value")?,
+            0.5
+        );
+        assert_eq!(
+            p.format_reaper_value(p.reaper_value().map_err(|_| "couldn't get param value")?)
                 .map_err(|_| "Cockos plug-ins should be able to do that")?
                 .into_inner()
                 .as_c_str(),

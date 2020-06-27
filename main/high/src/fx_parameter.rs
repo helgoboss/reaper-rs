@@ -16,14 +16,62 @@ impl FxParameter {
         FxParameter { fx, index }
     }
 
-    // Returns normalized value [0, 1] TODO WRONG!
-    pub fn normalized_value(&self) -> ReaperNormalizedFxParamValue {
-        // TODO-low deal with nullptr MediaTrack (empty string)
-        self.reaper_value()
+    /// Returns a real normalized value (0..=1), taking the parameter's value range into account.
+    pub fn normalized_value(&self) -> Result<f64, ReaperFunctionError> {
+        let reaper_value = self.reaper_value()?;
+        Ok(self.convert_reaper_to_normalized_value(reaper_value))
     }
 
-    pub fn set_normalized_value(&self, normalized_value: ReaperNormalizedFxParamValue) {
-        let _ = match self.chain().context() {
+    /// Converts a REAPER value to a real normalized value (0..=1)
+    ///
+    /// Takes the parameter's value range into account.
+    pub fn convert_reaper_to_normalized_value(
+        &self,
+        reaper_value: ReaperNormalizedFxParamValue,
+    ) -> f64 {
+        // Examples a (-4) and b (7.5)
+        // a) -8..8
+        // b) 5..10
+        let value_range = self.value_range();
+        // a) 16
+        // b) 5
+        let span = value_range.max_val - value_range.min_val;
+        // a) (-4 + 8) / 16 = 4 / 16 = 0.25
+        // b) (7.5 - 5) / 5 = 2.5 / 5 = 0.5
+        (reaper_value.get() - value_range.min_val) / span
+    }
+
+    /// Sets the parameter to the given real normalized value (0..=1), taking the parameter's value
+    /// range into account.
+    pub fn set_normalized_value(&self, normalized_value: f64) -> Result<(), ReaperFunctionError> {
+        let reaper_value = self.convert_normalized_to_reaper_value(normalized_value);
+        self.set_reaper_value(reaper_value)
+    }
+
+    /// Converts a real normalized value (0..=1) to a REAPER value.
+    ///
+    /// Takes the parameter's value range into account.
+    pub fn convert_normalized_to_reaper_value(
+        &self,
+        normalized_value: f64,
+    ) -> ReaperNormalizedFxParamValue {
+        // Examples a (0.25) and b (0.5)
+        // a) -8..8
+        // b) 5..10
+        let value_range = self.value_range();
+        // a) 16
+        // b) 5
+        let span = value_range.max_val - value_range.min_val;
+        // a) (0.25 * 16) - 8 = 4 - 8 = -4
+        // b) (0.5 * 5) + 5 = 2.5 + 5 = 7.5
+        ReaperNormalizedFxParamValue::new((normalized_value * span) + value_range.min_val)
+    }
+
+    pub fn set_reaper_value(
+        &self,
+        reaper_value: ReaperNormalizedFxParamValue,
+    ) -> Result<(), ReaperFunctionError> {
+        match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.fx().track_and_location();
@@ -32,23 +80,24 @@ impl FxParameter {
                         track.raw(),
                         location,
                         self.index,
-                        normalized_value,
+                        reaper_value,
                     )
                 }
             }
-        };
+        }
     }
 
-    pub fn reaper_value(&self) -> ReaperNormalizedFxParamValue {
+    pub fn reaper_value(&self) -> Result<ReaperNormalizedFxParamValue, ReaperFunctionError> {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.fx().track_and_location();
                 unsafe {
-                    Reaper::get()
-                        .medium_reaper()
-                        .track_fx_get_param_normalized(track.raw(), location, self.index)
-                        .unwrap()
+                    Reaper::get().medium_reaper().track_fx_get_param_normalized(
+                        track.raw(),
+                        location,
+                        self.index,
+                    )
                 }
             }
         }
@@ -122,7 +171,15 @@ impl FxParameter {
 
     pub fn format_normalized_value(
         &self,
-        normalized_value: ReaperNormalizedFxParamValue,
+        normalized_value: f64,
+    ) -> Result<ReaperString, ReaperFunctionError> {
+        let reaper_value = self.convert_normalized_to_reaper_value(normalized_value);
+        self.format_reaper_value(reaper_value)
+    }
+
+    pub fn format_reaper_value(
+        &self,
+        reaper_value: ReaperNormalizedFxParamValue,
     ) -> Result<ReaperString, ReaperFunctionError> {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
@@ -135,7 +192,7 @@ impl FxParameter {
                             track.raw(),
                             location,
                             self.index,
-                            normalized_value,
+                            reaper_value,
                             256,
                         )
                 }

@@ -606,12 +606,16 @@ impl HelperControlSurface {
                 Some(i) => i,
             };
             // Compare parameter values (a heuristic but so what, it's just for MIDI learn)
+            let normalized_value = match normalized_value {
+                None => return true,
+                Some(v) => v,
+            };
             match track.normal_fx_chain().fx_by_index(fx_index) {
                 None => true,
                 Some(output_fx) => {
                     let output_fx_param = output_fx.parameter_by_index(param_index);
                     let is_probably_output_fx =
-                        Some(output_fx_param.reaper_value()) == normalized_value;
+                        output_fx_param.reaper_value().contains(&normalized_value);
                     !is_probably_output_fx
                 }
             }
