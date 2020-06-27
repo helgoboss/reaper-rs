@@ -2518,6 +2518,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
             ));
             assert_eq!(
                 p.format_normalized_value(p.normalized_value())
+                    .map_err(|_| "Cockos plug-ins should be able to do that")?
                     .into_inner()
                     .as_c_str(),
                 c_str!("-4.44 dB")
@@ -2596,6 +2597,7 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(p.reaper_value(), ReaperNormalizedFxParamValue::new(0.5));
         assert_eq!(
             p.format_normalized_value(p.normalized_value())
+                .map_err(|_| "Cockos plug-ins should be able to do that")?
                 .into_inner()
                 .as_c_str(),
             c_str!("0")

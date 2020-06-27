@@ -1,7 +1,9 @@
 use crate::fx::Fx;
 
 use crate::{FxChain, FxChainContext, Reaper};
-use reaper_medium::{GetParameterStepSizesResult, ReaperNormalizedFxParamValue, ReaperString};
+use reaper_medium::{
+    GetParameterStepSizesResult, ReaperFunctionError, ReaperNormalizedFxParamValue, ReaperString,
+};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FxParameter {
@@ -121,7 +123,7 @@ impl FxParameter {
     pub fn format_normalized_value(
         &self,
         normalized_value: ReaperNormalizedFxParamValue,
-    ) -> ReaperString {
+    ) -> Result<ReaperString, ReaperFunctionError> {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -136,7 +138,6 @@ impl FxParameter {
                             normalized_value,
                             256,
                         )
-                        .expect("Couldn't format normalized value")
                 }
             }
         }
