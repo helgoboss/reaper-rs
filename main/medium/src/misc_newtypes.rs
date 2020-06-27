@@ -188,8 +188,15 @@ impl MidiOutputDeviceId {
 /// This represents a particular value of an FX parameter in "REAPER-normalized" form.
 ///
 /// Please note that this value is **not** normalized in the classical sense of being in the unit
-/// interval 0.0..=1.0! It can be very well > 1.0 (e.g. the *Wet* param of *ReaPitch*). All this
-/// type guarantees is that the value is > 0.0.
+/// interval 0.0..=1.0! While it mostly is, there are situation where it can be > 1.0. All this type
+/// guarantees is that the value is > 0.0.
+///
+/// Examples of FX parameters which can exceed 1.0:
+/// - *ReaPitch* has a *Wet* parameter which has a "reasonable" maximum at 6 dB which corresponds to
+///   the REAPER-normalized value 1.0. But this reasonable maximum can be exceeded, in which case it
+///   can almost reach 2.0.
+/// - *TAL Flanger* has a *Sync Speed* parameter which reports the min/max range as 0.0..=1.0 but
+///   returns values between 0.0 and 8.0. It reports the range incorrectly.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(
     feature = "serde",

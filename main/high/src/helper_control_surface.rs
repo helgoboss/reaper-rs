@@ -614,8 +614,9 @@ impl HelperControlSurface {
                 None => true,
                 Some(output_fx) => {
                     let output_fx_param = output_fx.parameter_by_index(param_index);
-                    let is_probably_output_fx =
-                        output_fx_param.reaper_value().contains(&normalized_value);
+                    let is_probably_output_fx = output_fx_param
+                        .reaper_normalized_value()
+                        .contains(&normalized_value);
                     !is_probably_output_fx
                 }
             }
