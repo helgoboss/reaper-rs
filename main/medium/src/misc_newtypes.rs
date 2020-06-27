@@ -210,7 +210,8 @@ impl ReaperNormalizedFxParamValue {
     pub const MIN: ReaperNormalizedFxParamValue = ReaperNormalizedFxParamValue(0.0);
 
     fn is_valid(value: f64) -> bool {
-        ReaperNormalizedFxParamValue::MIN.get() <= value
+        // The NaN value is e.g. reported by JS FX "MIDI Note-On Delay" parameter "Poo".
+        ReaperNormalizedFxParamValue::MIN.get() <= value || value.is_nan()
     }
 
     /// Creates a REAPER-normalized FX parameter value.
