@@ -187,7 +187,11 @@ struct HighOnAudioBuffer {
 }
 
 impl HighOnAudioBuffer {
-    pub fn discard_tasks(&self) {
+    pub fn reset(&self) {
+        self.discard_tasks();
+    }
+
+    fn discard_tasks(&self) {
         let task_count = self.task_receiver.try_iter().count();
         if task_count > 0 {
             slog::warn!(Reaper::get().logger(), "Discarded audio thread tasks on reactivation";
@@ -507,9 +511,8 @@ impl Reaper {
         };
         // We don't want to execute tasks which accumulated during the "downtime" of Reaper.
         // So we just consume all without executing them.
-        sleeping_state.csurf_inst.init();
-        sleeping_state.csurf_inst.discard_tasks();
-        sleeping_state.audio_hook.discard_tasks();
+        sleeping_state.csurf_inst.reset();
+        sleeping_state.audio_hook.reset();
         // Functions
         let mut medium = self.medium_session();
         medium

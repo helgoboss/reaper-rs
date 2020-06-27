@@ -70,7 +70,15 @@ struct TrackData {
     guid: Guid,
     send_volumes: HashMap<u32, ReaperVolumeValue>,
     send_pans: HashMap<u32, ReaperPanValue>,
+    fx_param_values: HashMap<TrackFxKey, ReaperNormalizedFxParamValue>,
     fx_chain_pair: FxChainPair,
+}
+
+#[derive(Eq, PartialEq, Hash, Debug)]
+struct TrackFxKey {
+    is_input_fx: bool,
+    fx_index: u32,
+    param_index: u32,
 }
 
 impl TrackData {
@@ -85,6 +93,25 @@ impl TrackData {
     /// Returns true if it has changed.
     fn update_send_pan(&mut self, index: u32, v: ReaperPanValue) -> bool {
         match self.send_pans.insert(index, v) {
+            None => true,
+            Some(prev) => v != prev,
+        }
+    }
+
+    /// Returns true if it has changed.
+    fn update_fx_param_value(
+        &mut self,
+        is_input_fx: bool,
+        fx_index: u32,
+        param_index: u32,
+        v: ReaperNormalizedFxParamValue,
+    ) -> bool {
+        let key = TrackFxKey {
+            is_input_fx,
+            fx_index,
+            param_index,
+        };
+        match self.fx_param_values.insert(key, v) {
             None => true,
             Some(prev) => v != prev,
         }
@@ -127,7 +154,7 @@ impl HelperControlSurface {
         }
     }
 
-    pub fn init(&self) {
+    pub fn reset(&self) {
         // REAPER doesn't seem to call this automatically when the surface is registered. In our
         // case it's important to call this not at the first change of something (e.g. arm
         // button pressed) but immediately. Because it captures the initial project/track/FX
@@ -136,12 +163,36 @@ impl HelperControlSurface {
         // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more lazily
         // on activate?  But before activate we can do almost nothing because
         // execute_on_main_thread doesn't work.
-        self.set_track_list_change();
+        self.react_to_track_list_change(Reaper::get().current_project());
+        self.discard_tasks();
     }
 
-    pub fn discard_tasks(&self) {
+    fn react_to_track_list_change(&self, new_active_project: Project) {
+        if new_active_project != self.last_active_project.get() {
+            self.last_active_project.replace(new_active_project);
+            Reaper::get()
+                .subjects
+                .project_switched
+                .borrow_mut()
+                .next(new_active_project);
+        }
+        self.remove_invalid_rea_projects();
+        self.detect_track_set_changes();
+    }
+
+    fn discard_tasks(&self) {
         self.discard_main_thread_tasks();
         self.discard_main_thread_rx_tasks();
+        self.discard_future_tasks();
+    }
+
+    fn discard_future_tasks(&self) {
+        let task_count = self.main_thread_executor.discard_tasks();
+        if task_count > 0 {
+            slog::warn!(Reaper::get().logger(), "Discarded future tasks on reactivation";
+                "task_count" => task_count,
+            );
+        }
     }
 
     fn discard_main_thread_tasks(&self) {
@@ -272,6 +323,7 @@ impl HelperControlSurface {
                         guid: get_media_track_guid(media_track),
                         send_volumes: Default::default(),
                         send_pans: Default::default(),
+                        fx_param_values: Default::default(),
                         fx_chain_pair: Default::default(),
                     }
                 };
@@ -486,6 +538,18 @@ impl HelperControlSurface {
                 Some(args.param_value),
             )
         };
+        let mut td = match self.find_track_data_in_normal_state(args.track) {
+            None => return,
+            Some(td) => td,
+        };
+        if !td.update_fx_param_value(
+            is_input_fx,
+            args.fx_index,
+            args.param_index,
+            args.param_value,
+        ) {
+            return;
+        }
         let fx_chain = if is_input_fx {
             track.input_fx_chain()
         } else {
@@ -494,7 +558,6 @@ impl HelperControlSurface {
         if let Some(fx) = fx_chain.fx_by_index(args.fx_index as u32) {
             let fx_param = fx.parameter_by_index(args.param_index as u32);
             let reaper = Reaper::get();
-            // TODO-change
             reaper
                 .subjects
                 .fx_parameter_value_changed
@@ -632,18 +695,9 @@ impl ControlSurface for HelperControlSurface {
     fn set_track_list_change(&self) {
         // TODO-low Not multi-project compatible!
         let new_active_project = Reaper::get().current_project();
-        if new_active_project != self.last_active_project.get() {
-            self.last_active_project.replace(new_active_project);
-            Reaper::get()
-                .subjects
-                .project_switched
-                .borrow_mut()
-                .next(new_active_project);
-        }
         self.num_track_set_changes_left_to_be_propagated
             .replace(new_active_project.track_count() + 1);
-        self.remove_invalid_rea_projects();
-        self.detect_track_set_changes();
+        self.react_to_track_list_change(new_active_project);
     }
 
     fn set_surface_pan(&self, args: SetSurfacePanArgs) {

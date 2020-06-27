@@ -75,6 +75,11 @@ impl ArcWake for Task {
 }
 
 impl RunLoopExecutor {
+    /// Returns number of discarded tasks.
+    pub fn discard_tasks(&self) -> usize {
+        self.ready_queue.try_iter().count()
+    }
+
     pub fn run(&self) {
         for task in self.ready_queue.try_iter().take(self.bulk_size) {
             // Take the future, and if it has not yet completed (is still Some),
