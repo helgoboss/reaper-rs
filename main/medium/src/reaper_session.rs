@@ -10,13 +10,14 @@ use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_post_command,
     delegating_toggle_action, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
     HookPostCommand, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister,
-    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperString,
-    ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
+    PluginRegistration, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
+    ReaperFunctionResult, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
+    ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
 use std::collections::{HashMap, HashSet};
-use std::os::raw::c_void;
+use std::os::raw::{c_char, c_void};
 
 /// This is the main hub for accessing medium-level API functions.
 ///
@@ -62,10 +63,9 @@ pub struct ReaperSession {
     //
     // We don't need to box the string because it's content is something which is on the heap
     // already and doesn't change its address when moved.
-    //
-    // TODO-low Currently we don't offer a possibility to unregister reserved command IDs. Unsure
-    //  if REAPER itself has a way to do that.
     command_names: HashSet<ReaperString>,
+    /// Provides a safe place in memory for API definition string structs.
+    api_defs: Vec<Vec<c_char>>,
     /// Provides a safe place in memory for each registered audio hook.
     ///
     /// While in here, the audio hook is considered to be owned by REAPER, meaning that REAPER is
@@ -76,8 +76,11 @@ pub struct ReaperSession {
     /// While in here, the control surface is considered to be owned by REAPER, meaning that REAPER
     /// is supposed to have exclusive access to it.
     csurf_insts: HashMap<NonNull<c_void>, Box<Box<dyn IReaperControlSurface>>>,
-    /// Keep track of plug-in registrations so they can be unregistered automatically on drop.
-    plugin_registrations: HashSet<RegistrationObject<'static>>,
+    /// Provides a safe place in memory for plug-in registration keys (e.g. "API_myfunction").
+    ///
+    /// Also used for keeping track of registrations so they can be unregistered automatically on
+    /// drop.
+    plugin_registrations: HashSet<PluginRegistration>,
     /// Keep track of audio hook registrations so they can be unregistered automatically on drop.
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
 }
@@ -91,6 +94,7 @@ impl ReaperSession {
             reaper: Reaper::new(low),
             gaccel_registers: Default::default(),
             command_names: Default::default(),
+            api_defs: Default::default(),
             audio_hook_registers: Default::default(),
             csurf_insts: Default::default(),
             plugin_registrations: Default::default(),
@@ -157,13 +161,11 @@ impl ReaperSession {
         &mut self,
         object: RegistrationObject,
     ) -> ReaperFunctionResult<i32> {
-        self.plugin_registrations
-            .insert(object.clone().into_owned());
-        let infostruct = object.ptr_to_raw();
-        let result = self
-            .reaper
-            .low()
-            .plugin_register(object.key_into_raw().as_ptr(), infostruct);
+        let reg = object.into_raw();
+        let key_ptr = reg.key.as_ptr();
+        let value = reg.value;
+        self.plugin_registrations.insert(reg);
+        let result = self.reaper.low().plugin_register(key_ptr, value);
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't register thing"));
         }
@@ -182,14 +184,16 @@ impl ReaperSession {
     ///
     /// [`plugin_register_add()`]: #method.plugin_register_add
     pub unsafe fn plugin_register_remove(&mut self, object: RegistrationObject) -> i32 {
-        let infostruct = object.ptr_to_raw();
-        let name_with_minus =
-            concat_reaper_strs(reaper_str!("-"), object.clone().key_into_raw().as_ref());
+        self.plugin_register_remove_internal(object.into_raw())
+    }
+
+    unsafe fn plugin_register_remove_internal(&mut self, reg: PluginRegistration) -> i32 {
+        let name_with_minus = concat_reaper_strs(reaper_str!("-"), reg.key.as_ref());
         let result = self
             .reaper
             .low()
-            .plugin_register(name_with_minus.as_ptr(), infostruct);
-        self.plugin_registrations.remove(&object.into_owned());
+            .plugin_register(name_with_minus.as_ptr(), reg.value);
+        self.plugin_registrations.remove(&reg);
         result
     }
 
@@ -330,6 +334,8 @@ impl ReaperSession {
     /// # Errors
     ///
     /// Returns an error if the registration failed (e.g. because not supported or out of actions).
+    //
+    // TODO-low Add function for removing command ID
     pub fn plugin_register_add_command_id<'a>(
         &mut self,
         command_name: impl Into<ReaperStringArg<'a>>,
@@ -339,6 +345,49 @@ impl ReaperSession {
         self.command_names.insert(owned);
         let raw_id = unsafe { self.plugin_register_add(RegistrationObject::CommandId(ptr))? };
         Ok(CommandId(raw_id as _))
+    }
+
+    /// **This is still unstable!**
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given function pointer is valid.
+    // TODO-high Better API (maybe a builder). Also because current one is prone to breaking
+    //  changes.
+    // TODO-high Doc
+    // TODO-low Add function for removal
+    pub unsafe fn plugin_register_add_api_and_def<'a>(
+        &mut self,
+        function_name: impl Into<ReaperStringArg<'a>>,
+        function_ptr: *mut c_void,
+        return_type: impl Into<ReaperStringArg<'a>>,
+        argument_types: impl Into<ReaperStringArg<'a>>,
+        argument_names: impl Into<ReaperStringArg<'a>>,
+        help: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperFunctionResult<()> {
+        // Register function
+        let function_name = function_name.into().into_inner();
+        self.plugin_register_add(RegistrationObject::Api(
+            function_name.as_ref().into(),
+            function_ptr,
+        ))?;
+        // Register function definition
+        fn to_c_chars<'a>(text: &'a ReaperStringArg) -> impl Iterator<Item = c_char> + 'a {
+            text.as_reaper_str()
+                .as_c_str()
+                .to_bytes_with_nul()
+                .iter()
+                .map(|c| *c as c_char)
+        }
+        let null_separated_fields: Vec<c_char> = to_c_chars(&return_type.into())
+            .chain(to_c_chars(&argument_types.into()))
+            .chain(to_c_chars(&argument_names.into()))
+            .chain(to_c_chars(&help.into()))
+            .collect();
+        let ptr = null_separated_fields.as_ptr();
+        self.api_defs.push(null_separated_fields);
+        self.plugin_register_add(RegistrationObject::ApiDef(function_name, ptr))?;
+        Ok(())
     }
 
     /// Registers a an action into the main section.
@@ -672,7 +721,7 @@ impl Drop for ReaperSession {
         }
         for reg in self.plugin_registrations.clone() {
             unsafe {
-                self.plugin_register_remove(reg);
+                self.plugin_register_remove_internal(reg);
             }
         }
     }

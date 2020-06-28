@@ -3,6 +3,7 @@ use crate::{
     ReaperStr, ReaperStringArg, TryFromRawError,
 };
 
+use crate::util::concat_reaper_strs;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
@@ -356,8 +357,31 @@ pub enum ActionValueChange {
 // TODO-low "Unlock" all uncommented variants as soon as appropriate types are clear
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum RegistrationObject<'a> {
-    // Api(Cow<'a, CStr>, *mut c_void),
-    // ApiDef(Cow<'a, CStr>, *mut c_void),
+    /// A function that you want to expose to other extensions or plug-ins.
+    ///
+    /// Extract from `reaper_plugin_functions.h`:
+    ///
+    /// <pre>
+    /// if you have a function called myfunction(..) that you want to expose to other extensions or
+    /// plug-ins, use register("API_myfunction",funcaddress), and "-API_myfunction" to remove.
+    /// Other extensions then use GetFunc("myfunction") to get the function pointer.
+    /// REAPER will also export the function address to ReaScript, so your extension could supply
+    /// a Python module that provides a wrapper called RPR_myfunction(..).
+    /// </pre>
+    Api(Cow<'a, ReaperStr>, *mut c_void),
+    /// A function definition that describes a function registered via [`Api`].
+    ///
+    /// Extract from `reaper_plugin_functions.h`:
+    ///
+    /// <pre>
+    /// register("APIdef_myfunction",defstring) will include your function declaration and help
+    /// in the auto-generated REAPER API header and ReaScript documentation.
+    /// defstring is four null-separated fields: return type, argument types, argument names, and
+    /// help. Example: double myfunction(char* str, int flag) would have
+    /// defstring="double\0char*,int\0str,flag\0help text for myfunction"
+    /// </pre>
+    /// [`Api`]: #variant.Api
+    ApiDef(Cow<'a, ReaperStr>, *const c_char),
     /// A hook command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
@@ -440,13 +464,25 @@ pub enum RegistrationObject<'a> {
 }
 
 impl<'a> RegistrationObject<'a> {
-    // pub fn api(func_name: impl Into<ReaperStringArg<'a>>, func: *mut c_void) -> Self {
-    //     Self::Api(func_name.into().into_inner(), func)
-    // }
-    //
-    // pub fn api_def(func_name: impl Into<ReaperStringArg<'a>>, func_def: *mut c_void) -> Self {
-    //     Self::ApiDef(func_name.into().into_inner(), func_def)
-    // }
+    /// Convenience function for creating an [`Api`] registration object.
+    ///
+    /// [`Api`]: #variant.Api
+    pub fn api(
+        func_name: impl Into<ReaperStringArg<'a>>,
+        func: *mut c_void,
+    ) -> RegistrationObject<'a> {
+        RegistrationObject::Api(func_name.into().into_inner(), func)
+    }
+
+    /// Convenience function for creating an [`ApiDef`] registration object.
+    ///
+    /// [`ApiDef`]: #variant.ApiDef
+    pub fn api_def(
+        func_name: impl Into<ReaperStringArg<'a>>,
+        func_def: *const c_char,
+    ) -> RegistrationObject<'a> {
+        RegistrationObject::ApiDef(func_name.into().into_inner(), func_def)
+    }
 
     /// Convenience function for creating a [`Custom`] registration object.
     ///
@@ -458,60 +494,61 @@ impl<'a> RegistrationObject<'a> {
         RegistrationObject::Custom(key.into().into_inner(), info_struct)
     }
 
-    pub(crate) fn into_owned(self) -> RegistrationObject<'static> {
+    /// Returns the values which need to be passed to `plugin_register()`.
+    pub(crate) fn into_raw(self) -> PluginRegistration {
         use RegistrationObject::*;
         match self {
-            // Api(func_name, func) => Api(func_name.into_owned().into(), func),
-            // ApiDef(func_name, func_def) => ApiDef(func_name.into_owned().into(), func_def),
-            HookCommand(func) => HookCommand(func),
-            HookPostCommand(func) => HookPostCommand(func),
-            // HookCommand2(func) => HookCommand2(func),
-            ToggleAction(func) => ToggleAction(func),
-            // ActionHelp(info_struct) => ActionHelp(info_struct),
-            CommandId(command_name) => CommandId(command_name),
-            // CommandIdLookup(info_struct) => CommandIdLookup(info_struct),
-            Gaccel(reg) => Gaccel(reg),
-            CsurfInst(inst) => CsurfInst(inst),
-            Custom(key, info_struct) => Custom(key.into_owned().into(), info_struct),
+            Api(func_name, func) => PluginRegistration {
+                key: concat_reaper_strs(reaper_str!("API_"), func_name.as_ref()).into(),
+                value: func,
+            },
+            ApiDef(func_name, func_def) => PluginRegistration {
+                key: concat_reaper_strs(reaper_str!("APIdef_"), func_name.as_ref()).into(),
+                value: func_def as _,
+            },
+            HookCommand(func) => PluginRegistration {
+                key: reaper_str!("hookcommand").into(),
+                value: func as _,
+            },
+            HookPostCommand(func) => PluginRegistration {
+                key: reaper_str!("hookpostcommand").into(),
+                value: func as _,
+            },
+            ToggleAction(func) => PluginRegistration {
+                key: reaper_str!("toggleaction").into(),
+                value: func as _,
+            },
+            CommandId(command_name) => PluginRegistration {
+                key: reaper_str!("command_id").into(),
+                value: command_name as _,
+            },
+            Gaccel(reg) => PluginRegistration {
+                key: reaper_str!("gaccel").into(),
+                value: reg.as_ptr() as _,
+            },
+            CsurfInst(inst) => PluginRegistration {
+                key: reaper_str!("csurf_inst").into(),
+                value: inst.as_ptr() as _,
+            },
+            Custom(key, value) => PluginRegistration {
+                key: key.into_owned().into(),
+                value,
+            },
         }
     }
+}
 
-    pub(crate) fn key_into_raw(self) -> Cow<'a, ReaperStr> {
-        use RegistrationObject::*;
-        match self {
-            // Api(func_name, _) => concat_c_strs(reaper_str!("API_"), func_name.as_ref()).into(),
-            // ApiDef(func_name, _) => concat_c_strs(reaper_str!("APIdef_"),
-            // func_name.as_ref()).into(),
-            HookCommand(_) => reaper_str!("hookcommand").into(),
-            HookPostCommand(_) => reaper_str!("hookpostcommand").into(),
-            // HookCommand2(_) => reaper_str!("hookcommand2").into(),
-            ToggleAction(_) => reaper_str!("toggleaction").into(),
-            // ActionHelp(_) => reaper_str!("action_help").into(),
-            CommandId(_) => reaper_str!("command_id").into(),
-            // CommandIdLookup(_) => reaper_str!("command_id_lookup").into(),
-            Gaccel(_) => reaper_str!("gaccel").into(),
-            CsurfInst(_) => reaper_str!("csurf_inst").into(),
-            Custom(key, _) => key,
-        }
-    }
-
-    pub(crate) fn ptr_to_raw(&self) -> *mut c_void {
-        use RegistrationObject::*;
-        match self {
-            // Api(_, func) => *func,
-            // ApiDef(_, func_def) => *func_def,
-            HookCommand(func) => *func as *mut c_void,
-            HookPostCommand(func) => *func as *mut c_void,
-            // HookCommand2(func) => *func as *mut c_void,
-            ToggleAction(func) => *func as *mut c_void,
-            // ActionHelp(info_struct) => *info_struct,
-            CommandId(command_name) => *command_name as *mut c_void,
-            // CommandIdLookup(info_struct) => *info_struct,
-            Gaccel(reg) => reg.as_ptr() as *mut c_void,
-            CsurfInst(inst) => inst.as_ptr() as *mut c_void,
-            Custom(_, info_struct) => *info_struct,
-        }
-    }
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub(crate) struct PluginRegistration {
+    /// Please note that this is an owned string, not just a pointer. This owned string needs
+    /// to be kept around. During the time of the registration it must not be removed from memory.
+    /// In most cases this is no problem because keys like "hookcommand" are just static REAPER
+    /// strings and never disappear. But "API_myfunction" is not static because it's a string which
+    /// is assembled at runtime (in this function).
+    pub(crate) key: Cow<'static, ReaperStr>,
+    /// The data where this points to needs to be kept somewhere. It must not be removed from
+    /// memory during the time of the registration.
+    pub(crate) value: *mut c_void,
 }
 
 /// Type and location of a certain track.

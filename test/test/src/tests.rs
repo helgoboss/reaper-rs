@@ -37,6 +37,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     // In theory all steps could be declared inline. But that makes the IDE become terribly slow.
     let steps_a = vec![
         global_instances(),
+        register_api_functions(),
         strings(),
         low_plugin_context(),
         medium_plugin_context(),
@@ -1837,7 +1838,7 @@ fn global_instances() -> TestStep {
     step(AllVersions, "Global instances", |_, _| {
         // Sizes
         use std::mem::size_of_val;
-        let medium_session = Reaper::get().medium_reaper();
+        let medium_session = Reaper::get().medium_session();
         let medium_reaper = Reaper::get().medium_reaper();
         let metrics_size = size_of_val(medium_reaper.metrics());
         Reaper::get().show_console_msg(format!(
@@ -1875,6 +1876,41 @@ fn global_instances() -> TestStep {
         medium_reaper.show_console_msg("- Hello from medium-level API\n");
         Ok(())
     })
+}
+
+fn register_api_functions() -> TestStep {
+    step(AllVersions, "Register API functions", |reaper, _| {
+        // Given
+        let mut session = reaper.medium_session();
+        // When
+        unsafe {
+            session
+                .plugin_register_add_api_and_def(
+                    "ReaperRs_HeyThere",
+                    hey_there as _,
+                    "void",
+                    "",
+                    "",
+                    "Just says hey there.",
+                )
+                .map_err(|_| "couldn't register API function")?;
+        }
+        // Then
+        let ptr = session
+            .reaper()
+            .plugin_context()
+            .get_func("ReaperRs_HeyThere");
+        assert!(!ptr.is_null());
+        let restored_function: Option<extern "C" fn()> = unsafe { std::mem::transmute(ptr) };
+        let restored_function =
+            restored_function.ok_or("couldn't restore API function from ptr")?;
+        restored_function();
+        Ok(())
+    })
+}
+
+extern "C" fn hey_there() {
+    Reaper::get().show_console_msg("Hey there!\n");
 }
 
 #[allow(overflowing_literals)]

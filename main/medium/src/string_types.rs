@@ -63,6 +63,11 @@ impl<'a> ReaperStringArg<'a> {
         self.0.as_c_str().as_ptr()
     }
 
+    /// Returns this argument as ReaperStr slice.
+    pub(crate) fn as_reaper_str(&self) -> &ReaperStr {
+        self.0.as_ref()
+    }
+
     /// Consumes this value and spits out the contained cow.
     ///
     /// If you decide to use `my_param: impl Into<ReaperStringArg<'a>>` somewhere in your own REAPER
