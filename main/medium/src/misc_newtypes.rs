@@ -210,7 +210,10 @@ impl ReaperNormalizedFxParamValue {
     pub const MIN: ReaperNormalizedFxParamValue = ReaperNormalizedFxParamValue(0.0);
 
     fn is_valid(value: f64) -> bool {
-        // The NaN value is e.g. reported by JS FX "MIDI Note-On Delay" parameter "Poo".
+        // Because of a bug in REAPER SetParamNormalized (<= 6.12), it's possible that certain JS FX
+        // parameter values end up as NaN, in Lua console displayed as "-1.#IND".
+        // E.g. happened to JS FX "MIDI Note-On Delay" parameter "Poo". Instead of panicking, we
+        // should accept it. Bug has been reported.
         ReaperNormalizedFxParamValue::MIN.get() <= value || value.is_nan()
     }
 
