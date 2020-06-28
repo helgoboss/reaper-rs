@@ -29,7 +29,8 @@ use reaper_medium::{
 };
 
 use reaper_low::{raw, Swell};
-use std::os::raw::c_void;
+use std::os::raw::{c_int, c_void};
+use std::ptr::null_mut;
 use std::rc::Rc;
 
 /// Creates all integration test steps to be executed. The order matters!
@@ -1888,11 +1889,14 @@ fn register_api_functions() -> TestStep {
                 .plugin_register_add_api_and_def(
                     "ReaperRs_HeyThere",
                     hey_there as _,
+                    hey_there_vararg,
                     "void",
                     "",
                     "",
                     "Just says hey there.",
                 )
+                // TODO-low This will fail on second test run. Unregister after usage as soon
+                //  as possible!
                 .map_err(|_| "couldn't register API function")?;
         }
         // Then
@@ -1911,6 +1915,11 @@ fn register_api_functions() -> TestStep {
 
 extern "C" fn hey_there() {
     Reaper::get().show_console_msg("Hey there!\n");
+}
+
+unsafe extern "C" fn hey_there_vararg(_arglist: *mut *mut c_void, _numparms: c_int) -> *mut c_void {
+    hey_there();
+    null_mut()
 }
 
 #[allow(overflowing_literals)]

@@ -1,6 +1,6 @@
 //! Exposes important raw types, functions and constants from the C++ REAPER API.
 
-use std::os::raw::c_int;
+use std::os::raw::{c_int, c_void};
 
 /// Structs, types and constants defined by REAPER.
 pub use super::bindings::root::{
@@ -120,3 +120,6 @@ pub type ToggleAction = extern "C" fn(command_id: c_int) -> c_int;
 
 /// Function pointer type for hook post commands.
 pub type HookPostCommand = extern "C" fn(command_id: c_int, flag: c_int);
+
+/// Function pointer type for exposing custom API functions to ReaScript.
+pub type ApiVararg = unsafe extern "C" fn(*mut *mut c_void, c_int) -> *mut c_void;

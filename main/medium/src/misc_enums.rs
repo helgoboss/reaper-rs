@@ -382,6 +382,9 @@ pub enum RegistrationObject<'a> {
     /// </pre>
     /// [`Api`]: #variant.Api
     ApiDef(Cow<'a, ReaperStr>, *const c_char),
+    /// A var-arg function for exposing a function to ReaScript.
+    // TODO-medium Documentation
+    ApiVararg(Cow<'a, ReaperStr>, raw::ApiVararg),
     /// A hook command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
@@ -484,6 +487,16 @@ impl<'a> RegistrationObject<'a> {
         RegistrationObject::ApiDef(func_name.into().into_inner(), func_def)
     }
 
+    /// Convenience function for creating an [`ApiVararg`] registration object.
+    ///
+    /// [`ApiVararg`]: #variant.ApiVararg
+    pub fn api_vararg(
+        func_name: impl Into<ReaperStringArg<'a>>,
+        func: raw::ApiVararg,
+    ) -> RegistrationObject<'a> {
+        RegistrationObject::ApiVararg(func_name.into().into_inner(), func)
+    }
+
     /// Convenience function for creating a [`Custom`] registration object.
     ///
     /// [`Custom`]: #variant.Custom
@@ -505,6 +518,10 @@ impl<'a> RegistrationObject<'a> {
             ApiDef(func_name, func_def) => PluginRegistration {
                 key: concat_reaper_strs(reaper_str!("APIdef_"), func_name.as_ref()).into(),
                 value: func_def as _,
+            },
+            ApiVararg(func_name, func) => PluginRegistration {
+                key: concat_reaper_strs(reaper_str!("APIvararg_"), func_name.as_ref()).into(),
+                value: func as _,
             },
             HookCommand(func) => PluginRegistration {
                 key: reaper_str!("hookcommand").into(),

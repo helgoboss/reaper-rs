@@ -356,10 +356,12 @@ impl ReaperSession {
     //  changes.
     // TODO-high Doc
     // TODO-low Add function for removal
+    #[allow(clippy::too_many_arguments)]
     pub unsafe fn plugin_register_add_api_and_def<'a>(
         &mut self,
         function_name: impl Into<ReaperStringArg<'a>>,
         function_ptr: *mut c_void,
+        vararg_function_ptr: raw::ApiVararg,
         return_type: impl Into<ReaperStringArg<'a>>,
         argument_types: impl Into<ReaperStringArg<'a>>,
         argument_names: impl Into<ReaperStringArg<'a>>,
@@ -386,7 +388,15 @@ impl ReaperSession {
             .collect();
         let ptr = null_separated_fields.as_ptr();
         self.api_defs.push(null_separated_fields);
-        self.plugin_register_add(RegistrationObject::ApiDef(function_name, ptr))?;
+        self.plugin_register_add(RegistrationObject::ApiDef(
+            function_name.as_ref().into(),
+            ptr,
+        ))?;
+        // Make available to ReaScript
+        self.plugin_register_add(RegistrationObject::ApiVararg(
+            function_name,
+            vararg_function_ptr,
+        ))?;
         Ok(())
     }
 
