@@ -1,8 +1,8 @@
 use slog::{error, o, Drain};
-use std::backtrace::Backtrace;
 
 use crate::Reaper;
 
+use backtrace::Backtrace;
 use std::io;
 use std::panic::PanicInfo;
 
@@ -37,7 +37,7 @@ pub fn create_reaper_panic_hook(
     >,
 ) -> Box<dyn Fn(&PanicInfo<'_>) + 'static + Sync + Send> {
     Box::new(move |panic_info| {
-        let backtrace = Backtrace::force_capture();
+        let backtrace = Backtrace::new();
         log_panic(&logger, panic_info, &backtrace);
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
@@ -77,7 +77,7 @@ Thank you for your support!
 --- cut ---
 Message: {panic_message}
 
-{backtrace}\
+{backtrace:#?}\
 --- cut ---
 
 ",
@@ -91,7 +91,7 @@ Message: {panic_message}
 pub fn log_panic(logger: &slog::Logger, panic_info: &PanicInfo, backtrace: &Backtrace) {
     error!(logger, "Plugin panicked";
         "message" => extract_panic_message(panic_info),
-        "backtrace" => format!("{}", backtrace)
+        "backtrace" => format!("{:#?}", backtrace)
     );
 }
 

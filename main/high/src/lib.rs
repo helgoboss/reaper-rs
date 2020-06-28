@@ -1,4 +1,4 @@
-#![feature(fn_traits, clamp, backtrace, test, trait_alias, option_result_contains)]
+#![feature(fn_traits, clamp, test, trait_alias, option_result_contains)]
 #![deny(intra_doc_link_resolution_failure)]
 //! This crate contains the high-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!
