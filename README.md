@@ -1,11 +1,19 @@
 # reaper-rs
 
-[Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
-
 [![Continuous integration](https://github.com/helgoboss/reaper-rs/workflows/Windows/badge.svg)](https://github.com/helgoboss/reaper-rs/actions)
 [![Continuous integration](https://github.com/helgoboss/reaper-rs/workflows/macOS/badge.svg)](https://github.com/helgoboss/reaper-rs/actions)
 [![Continuous integration](https://github.com/helgoboss/reaper-rs/workflows/Linux/badge.svg)](https://github.com/helgoboss/reaper-rs/actions)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/helgoboss/reaper-rs/master/LICENSE)
+
+[Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Basics](#basics)
+- [Usage](#usage)
+- [Contribution](#contribution)
+- [Background](#background)
 
 ## Introduction
 
@@ -252,7 +260,7 @@ impl Plugin for MyReaperVstPlugin {
 vst::plugin_main!(MyReaperVstPlugin);
 ```
 
-## Contribute
+## Contribution
 
 Contributions are very welcome! Especially to the medium-level API.
 
@@ -322,10 +330,10 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
 4. Clone the _reaper-rs_ Git repository
    ```batch
    git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git`
+   cd reaper-rs
    ```
 5. Build _reaper-rs_
    ```batch
-   cd reaper-rs
    cargo build
    ```
 
@@ -351,6 +359,8 @@ rustup default nightly-2020-05-15-x86_64-unknown-linux-gnu
 cd Downloads
 git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git
 cd reaper-rs
+
+# Build reaper-rs
 cargo build
 ```
 
@@ -389,6 +399,8 @@ rustup default nightly-2020-05-15-x86_64-apple-darwin
 cd Downloads
 git clone --recurse-submodules https://github.com/helgoboss/reaper-rs.git
 cd reaper-rs
+
+# Build reaper-rs
 cargo build
 ```
 
@@ -415,7 +427,7 @@ On Linux and macOS, the REAPER integration test will be run automatically as Car
 `reaper-test` activates the performance measurement features of `reaper-medium` and `reaper-high`. At the end of an
 integration test run, it prints detailed response time statistics to standard output. 
 
-## Project background
+## Background
 
 _reaper-rs_ has been born as part of an effort to port the REAPER VST plug-in
 [ReaLearn](https://www.helgoboss.org/projects/realearn/) to Rust and publish it as open-source project. The high-level
