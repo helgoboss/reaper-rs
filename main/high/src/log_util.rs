@@ -1,29 +1,40 @@
-use slog::{error, o, Drain};
-
-use crate::Reaper;
+use std::io;
+use std::io::{LineWriter, Stdout};
+use std::panic::PanicInfo;
 
 use backtrace::Backtrace;
-use std::io;
-use std::panic::PanicInfo;
+use slog::{error, o, Drain, Fuse};
+use slog_term::{FullFormat, PlainSyncDecorator};
+
+use crate::Reaper;
 
 pub fn create_std_logger() -> slog::Logger {
     slog::Logger::root(slog_stdlog::StdLog.fuse(), o!())
 }
 
 pub fn create_reaper_console_logger() -> slog::Logger {
-    let sink = io::LineWriter::new(ReaperConsoleSink::new());
-    let plain = slog_term::PlainSyncDecorator::new(sink);
-    let drain = slog_term::FullFormat::new(plain).build().fuse();
-    slog::Logger::root(drain, o!())
+    slog::Logger::root(create_reaper_console_drain(), o!())
 }
 
 // TODO-low Async logging: https://github.com/gabime/spdlog/wiki/6.-Asynchronous-logging
-// TODO-low Log to file in user home instead of to console
+// TODO-low Log to file in user home instead of or in addition to console (for the latter we just
+//  need to create a struct that contains both drains and implements the Drain trait by delegating
+//  to both).
 pub fn create_terminal_logger() -> slog::Logger {
+    slog::Logger::root(create_stdout_drain(), o!())
+}
+
+fn create_stdout_drain() -> Fuse<FullFormat<PlainSyncDecorator<Stdout>>> {
     let sink = io::stdout();
     let plain = slog_term::PlainSyncDecorator::new(sink);
-    let drain = slog_term::FullFormat::new(plain).build().fuse();
-    slog::Logger::root(drain, o!())
+    slog_term::FullFormat::new(plain).build().fuse()
+}
+
+fn create_reaper_console_drain()
+-> Fuse<FullFormat<PlainSyncDecorator<LineWriter<ReaperConsoleSink>>>> {
+    let sink = io::LineWriter::new(ReaperConsoleSink::new());
+    let plain = slog_term::PlainSyncDecorator::new(sink);
+    slog_term::FullFormat::new(plain).build().fuse()
 }
 
 /// Creates a panic hook which logs the error both to the logging system and optionally to REAPER
