@@ -64,6 +64,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         set_track_volume_extreme_values(),
         query_track_pan(),
         set_track_pan(),
+        disable_all_track_fx(),
+        enable_all_track_fx(),
         query_track_selection_state(),
         select_track(),
         unselect_track(),
@@ -1350,6 +1352,30 @@ fn set_track_pan() -> TestStep {
         assert_eq!(mock.last_arg(), track);
         let parsed_pan: Pan = "20%L".parse()?;
         assert!(abs_diff_eq!(parsed_pan.reaper_value().get(), -0.2));
+        Ok(())
+    })
+}
+
+fn disable_all_track_fx() -> TestStep {
+    step(AllVersions, "Disable all track FX", |_, _| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        track.disable_fx();
+        // Then
+        assert!(!track.fx_is_enabled());
+        Ok(())
+    })
+}
+
+fn enable_all_track_fx() -> TestStep {
+    step(AllVersions, "Enable all track FX", |_, _| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        track.enable_fx();
+        // Then
+        assert!(track.fx_is_enabled());
         Ok(())
     })
 }

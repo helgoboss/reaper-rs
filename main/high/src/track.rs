@@ -18,7 +18,7 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, RecordArmMode, RecordingInput,
-    TrackLocation, TrackSendCategory,
+    TrackAttributeKey, TrackLocation, TrackSendCategory,
 };
 use std::convert::TryInto;
 
@@ -424,6 +424,35 @@ impl Track {
             Reaper::get()
                 .medium_reaper()
                 .csurf_set_surface_solo(self.raw(), false, NotifyAll);
+        }
+    }
+
+    pub fn fx_is_enabled(&self) -> bool {
+        self.load_and_check_if_necessary_or_complain();
+        let result = unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_track_info_value(self.raw(), TrackAttributeKey::FxEn)
+        };
+        result > 0.0
+    }
+
+    pub fn enable_fx(&self) {
+        self.set_fx_is_enabled(true);
+    }
+
+    pub fn disable_fx(&self) {
+        self.set_fx_is_enabled(false);
+    }
+
+    fn set_fx_is_enabled(&self, enabled: bool) {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            let _ = Reaper::get().medium_reaper.set_media_track_info_value(
+                self.raw(),
+                TrackAttributeKey::FxEn,
+                if enabled { 1.0 } else { 0.0 },
+            );
         }
     }
 
