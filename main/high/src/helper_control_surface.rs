@@ -11,9 +11,10 @@ use reaper_medium::{
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
     ExtTrackFxPresetChangedArgs, InputMonitoringMode, MediaTrack, ReaProject,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
-    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
-    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs, TrackFxChainType, TrackLocation,
-    VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
+    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
+    SetTrackTitleArgs, TrackFxChainType, TrackLocation, VersionDependentFxLocation,
+    VersionDependentTrackFxLocation,
 };
 use rxrust::prelude::*;
 
@@ -1070,5 +1071,21 @@ impl ControlSurface for HelperControlSurface {
             .borrow_mut()
             .next(fx);
         1
+    }
+
+    fn set_play_state(&self, _: SetPlayStateArgs) {
+        Reaper::get()
+            .subjects
+            .play_state_changed
+            .borrow_mut()
+            .next(());
+    }
+
+    fn set_repeat_state(&self, _: SetRepeatStateArgs) {
+        Reaper::get()
+            .subjects
+            .repeat_state_changed
+            .borrow_mut()
+            .next(());
     }
 }

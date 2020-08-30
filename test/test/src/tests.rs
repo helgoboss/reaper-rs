@@ -43,6 +43,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         low_plugin_context(),
         medium_plugin_context(),
         create_empty_project_in_new_tab(),
+        play_pause_stop_record(),
+        change_repeat_state(),
         add_track(),
         fn_mut_action(),
         query_master_track(),
@@ -1785,6 +1787,103 @@ fn fn_mut_action() -> TestStep {
     })
 }
 
+fn play_pause_stop_record() -> TestStep {
+    step(AllVersions, "Play/pause/stop/record", |reaper, step| {
+        // Given
+        let project = Reaper::get().current_project();
+        // When
+        // Then
+        let (mock, _) = observe_invocations(|mock| {
+            reaper
+                .play_state_changed()
+                .take_until(step.finished)
+                .subscribe(move |_| {
+                    mock.invoke(());
+                });
+        });
+        assert!(!project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(project.is_stopped());
+        assert_eq!(mock.invocation_count(), 0);
+        project.play();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 1);
+        project.play();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 2);
+        project.pause();
+        assert!(!project.is_playing());
+        assert!(project.is_paused());
+        assert!(!project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 3);
+        project.pause();
+        assert!(!project.is_playing());
+        assert!(project.is_paused());
+        assert!(!project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 3);
+        project.play();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 4);
+        project.stop();
+        assert!(!project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(project.is_stopped());
+        assert_eq!(mock.invocation_count(), 6);
+        reaper.record_in_current_project();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 7);
+        project.stop();
+        assert!(!project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(project.is_stopped());
+        assert_eq!(mock.invocation_count(), 9);
+        Ok(())
+    })
+}
+
+fn change_repeat_state() -> TestStep {
+    step(AllVersions, "Repeat", |reaper, step| {
+        // Given
+        let project = Reaper::get().current_project();
+        // When
+        // Then
+        let (mock, _) = observe_invocations(|mock| {
+            reaper
+                .repeat_state_changed()
+                .take_until(step.finished)
+                .subscribe(move |_| {
+                    mock.invoke(());
+                });
+        });
+        assert!(!project.repeat_is_enabled());
+        assert_eq!(mock.invocation_count(), 0);
+        project.enable_repeat();
+        assert!(project.repeat_is_enabled());
+        assert_eq!(mock.invocation_count(), 1);
+        project.disable_repeat();
+        assert!(!project.repeat_is_enabled());
+        assert_eq!(mock.invocation_count(), 2);
+        Ok(())
+    })
+}
+
 fn add_track() -> TestStep {
     step(AllVersions, "Add track", |reaper, step| {
         // Given
@@ -1950,7 +2049,7 @@ unsafe extern "C" fn hey_there_vararg(_arglist: *mut *mut c_void, _numparms: c_i
 
 #[allow(overflowing_literals)]
 fn low_plugin_context() -> TestStep {
-    step(AllVersions, "Plugin context", |_session, _| {
+    step(AllVersions, "Low plugin context", |_session, _| {
         // Given
         let medium = Reaper::get().medium_reaper();
         let plugin_context = medium.low().plugin_context();
@@ -1983,7 +2082,7 @@ fn low_plugin_context() -> TestStep {
 
 #[allow(overflowing_literals)]
 fn medium_plugin_context() -> TestStep {
-    step(AllVersions, "Plugin context", |_session, _| {
+    step(AllVersions, "Medium plugin context", |_session, _| {
         // Given
         let medium = Reaper::get().medium_reaper();
         let plugin_context = medium.plugin_context();

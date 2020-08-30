@@ -348,6 +348,8 @@ pub(super) struct MainSubjects {
     pub(super) master_tempo_touched: EventStreamSubject<()>,
     pub(super) master_playrate_changed: EventStreamSubject<()>,
     pub(super) master_playrate_touched: EventStreamSubject<()>,
+    pub(super) play_state_changed: EventStreamSubject<()>,
+    pub(super) repeat_state_changed: EventStreamSubject<()>,
     pub(super) main_thread_idle: EventStreamSubject<()>,
     pub(super) project_closed: EventStreamSubject<Project>,
     pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
@@ -399,6 +401,8 @@ impl MainSubjects {
             master_tempo_touched: default(),
             master_playrate_changed: default(),
             master_playrate_touched: default(),
+            play_state_changed: default(),
+            repeat_state_changed: default(),
             main_thread_idle: default(),
             project_closed: default(),
             action_invoked: default(),
@@ -702,6 +706,16 @@ impl Reaper {
     pub fn master_playrate_touched(&self) -> impl ReactiveEvent<()> {
         self.require_main_thread();
         self.subjects.master_playrate_touched.borrow().clone()
+    }
+
+    pub fn play_state_changed(&self) -> impl ReactiveEvent<()> {
+        self.require_main_thread();
+        self.subjects.play_state_changed.borrow().clone()
+    }
+
+    pub fn repeat_state_changed(&self) -> impl ReactiveEvent<()> {
+        self.require_main_thread();
+        self.subjects.repeat_state_changed.borrow().clone()
     }
 
     pub fn fx_added(&self) -> impl ReactiveEvent<Fx> {

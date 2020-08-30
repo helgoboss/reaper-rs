@@ -3,7 +3,7 @@ use crate::{PlayRate, Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    MasterTrackBehavior, ProjectRef, ReaProject, ReaperString, ReaperStringArg,
+    MasterTrackBehavior, PlayState, ProjectRef, ReaProject, ReaperString, ReaperStringArg,
     TrackDefaultsBehavior, TrackLocation, UndoBehavior,
 };
 use std::path::PathBuf;
@@ -249,6 +249,71 @@ impl Project {
             tempo.bpm(),
             undo_hint,
         );
+    }
+
+    pub fn is_playing(self) -> bool {
+        self.play_state().is_playing
+    }
+
+    pub fn play(self) {
+        Reaper::get()
+            .medium_reaper()
+            .on_play_button_ex(Proj(self.rea_project));
+    }
+
+    pub fn is_paused(self) -> bool {
+        self.play_state().is_paused
+    }
+
+    /// Doesn't toggle!
+    pub fn pause(self) {
+        if self.is_paused() {
+            return;
+        }
+        Reaper::get()
+            .medium_reaper()
+            .on_pause_button_ex(Proj(self.rea_project));
+    }
+
+    pub fn is_stopped(self) -> bool {
+        let state = self.play_state();
+        !state.is_playing && !state.is_paused
+    }
+
+    pub fn stop(self) {
+        Reaper::get()
+            .medium_reaper()
+            .on_stop_button_ex(Proj(self.rea_project));
+    }
+
+    pub fn is_recording(self) -> bool {
+        self.play_state().is_recording
+    }
+
+    pub fn repeat_is_enabled(self) -> bool {
+        Reaper::get()
+            .medium_reaper()
+            .get_set_repeat_ex_get(Proj(self.rea_project))
+    }
+
+    pub fn enable_repeat(self) {
+        self.set_repeat_is_enabled(true);
+    }
+
+    pub fn disable_repeat(self) {
+        self.set_repeat_is_enabled(false);
+    }
+
+    pub fn play_state(self) -> PlayState {
+        Reaper::get()
+            .medium_reaper()
+            .get_play_state_ex(Proj(self.rea_project))
+    }
+
+    fn set_repeat_is_enabled(self, repeat: bool) {
+        Reaper::get()
+            .medium_reaper()
+            .get_set_repeat_ex_set(Proj(self.rea_project), repeat);
     }
 
     fn complain_if_not_available(self) {

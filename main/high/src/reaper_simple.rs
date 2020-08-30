@@ -243,10 +243,13 @@ impl Reaper {
     }
 
     pub fn create_empty_project_in_new_tab(&self) -> Project {
-        Reaper::get()
-            .main_section()
+        self.main_section()
             .action_by_command_id(CommandId::new(41929))
             .invoke_as_trigger(None);
         self.current_project()
+    }
+
+    pub fn record_in_current_project(&self) {
+        self.medium_reaper().csurf_on_record();
     }
 }

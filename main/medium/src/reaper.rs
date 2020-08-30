@@ -607,6 +607,271 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.IsInRealTimeAudio() != 0
     }
 
+    /// Starts playing.
+    #[measure(SingleThreadNanos)]
+    pub fn csurf_on_play(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CSurf_OnPlay();
+    }
+
+    /// Stops playing.
+    #[measure(SingleThreadNanos)]
+    pub fn csurf_on_stop(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CSurf_OnStop();
+    }
+
+    /// Pauses playing.
+    #[measure(SingleThreadNanos)]
+    pub fn csurf_on_pause(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CSurf_OnPause();
+    }
+
+    /// Starts recording.
+    #[measure(SingleThreadNanos)]
+    pub fn csurf_on_record(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CSurf_OnRecord();
+    }
+
+    /// Enables or disables repeat.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid control surface.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # let session = reaper_medium::ReaperSession::default();
+    /// use reaper_medium::{NotificationBehavior::NotifyAll, ProjectContext::CurrentProject};
+    ///
+    /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("no tracks")?;
+    /// unsafe {
+    ///     session.reaper().csurf_set_repeat_state(true, NotifyAll);
+    /// }
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn csurf_set_repeat_state(
+        &self,
+        repeat_state: bool,
+        notification_behavior: NotificationBehavior,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .CSurf_SetRepeatState(repeat_state, notification_behavior.to_raw());
+    }
+
+    /// Directly simulates a play button hit.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(SingleThreadNanos)]
+    pub fn on_play_button_ex(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.on_play_button_ex_unchecked(project) }
+    }
+
+    /// Like [`on_play_button_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`on_play_button_ex()`]: #method.on_play_button_ex
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn on_play_button_ex_unchecked(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.OnPlayButtonEx(project.to_raw());
+    }
+
+    /// Directly simulates a stop button hit.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(SingleThreadNanos)]
+    pub fn on_stop_button_ex(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.on_stop_button_ex_unchecked(project) }
+    }
+
+    /// Like [`on_stop_button_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`on_stop_button_ex()`]: #method.on_stop_button_ex
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn on_stop_button_ex_unchecked(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.OnStopButtonEx(project.to_raw());
+    }
+
+    /// Directly simulates a pause button hit.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(SingleThreadNanos)]
+    pub fn on_pause_button_ex(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.on_pause_button_ex_unchecked(project) }
+    }
+
+    /// Like [`on_pause_button_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`on_pause_button_ex()`]: #method.on_pause_button_ex
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn on_pause_button_ex_unchecked(&self, project: ProjectContext)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.OnPauseButtonEx(project.to_raw());
+    }
+
+    /// Queries the current play state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(SingleThreadNanos)]
+    pub fn get_play_state_ex(&self, project: ProjectContext) -> PlayState
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.get_play_state_ex_unchecked(project) }
+    }
+
+    /// Like [`get_play_state_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_play_state_ex()`]: #method.get_play_state_ex
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn get_play_state_ex_unchecked(&self, project: ProjectContext) -> PlayState
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let result = self.low.GetPlayStateEx(project.to_raw()) as u32;
+        PlayState {
+            is_playing: result & 1 > 0,
+            is_paused: result & 2 > 0,
+            is_recording: result & 4 > 0,
+        }
+    }
+
+    /// Queries the current repeat state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(SingleThreadNanos)]
+    pub fn get_set_repeat_ex_get(&self, project: ProjectContext) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.get_set_repeat_ex_get_unchecked(project) }
+    }
+
+    /// Like [`get_set_repeat_ex_get()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_set_repeat_ex_get()`]: #method.get_set_repeat_ex_get
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn get_set_repeat_ex_get_unchecked(&self, project: ProjectContext) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.GetSetRepeatEx(project.to_raw(), -1) > 0
+    }
+
+    /// Sets the repeat state.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(SingleThreadNanos)]
+    pub fn get_set_repeat_ex_set(&self, project: ProjectContext, repeat: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe {
+            self.get_set_repeat_ex_set_unchecked(project, repeat);
+        }
+    }
+
+    /// Like [`get_set_repeat_ex_set()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_set_repeat_ex_set()`]: #method.get_set_repeat_ex_set
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn get_set_repeat_ex_set_unchecked(&self, project: ProjectContext, repeat: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .GetSetRepeatEx(project.to_raw(), if repeat { 1 } else { 0 });
+    }
+
     /// Performs an action belonging to the main section.
     ///
     /// To perform non-native actions (ReaScripts, custom or extension plugin actions) safely, see
@@ -652,7 +917,7 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// REAPER can crash if you pass an invalid track or an invalid control surface.
     ///
     /// # Example
     ///
@@ -684,7 +949,7 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// REAPER can crash if you pass an invalid track or an invalid control surface.
     #[measure(SingleThreadNanos)]
     pub unsafe fn csurf_set_surface_solo(
         &self,
@@ -2654,7 +2919,7 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// REAPER can crash if you pass an invalid track or an invalid control surface.
     #[measure(SingleThreadNanos)]
     pub unsafe fn csurf_set_surface_volume(
         &self,
@@ -2704,7 +2969,7 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// REAPER can crash if you pass an invalid track or an invalid control surface.
     #[measure(SingleThreadNanos)]
     pub unsafe fn csurf_set_surface_pan(
         &self,
@@ -3702,6 +3967,16 @@ pub struct TrackFxGetPresetIndexResult {
     pub index: Option<u32>,
     /// Total number of presets available.
     pub count: u32,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct PlayState {
+    /// Is playing.
+    pub is_playing: bool,
+    /// Is paused.
+    pub is_paused: bool,
+    /// Is recording.
+    pub is_recording: bool,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
