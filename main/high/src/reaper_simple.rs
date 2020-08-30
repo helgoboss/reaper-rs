@@ -249,7 +249,17 @@ impl Reaper {
         self.current_project()
     }
 
-    pub fn record_in_current_project(&self) {
+    pub fn enable_record_in_current_project(&self) {
+        if self.current_project().is_recording() {
+            return;
+        }
+        self.medium_reaper().csurf_on_record();
+    }
+
+    pub fn disable_record_in_current_project(&self) {
+        if !self.current_project().is_recording() {
+            return;
+        }
         self.medium_reaper().csurf_on_record();
     }
 }

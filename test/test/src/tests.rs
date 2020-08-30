@@ -1842,18 +1842,42 @@ fn play_pause_stop_record() -> TestStep {
         assert!(!project.is_recording());
         assert!(project.is_stopped());
         assert_eq!(mock.invocation_count(), 6);
-        reaper.record_in_current_project();
+        reaper.enable_record_in_current_project();
         assert!(project.is_playing());
         assert!(!project.is_paused());
         assert!(project.is_recording());
         assert!(!project.is_stopped());
         assert_eq!(mock.invocation_count(), 7);
+        reaper.enable_record_in_current_project();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 7);
+        reaper.disable_record_in_current_project();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 8);
+        reaper.disable_record_in_current_project();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(!project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 8);
+        reaper.enable_record_in_current_project();
+        assert!(project.is_playing());
+        assert!(!project.is_paused());
+        assert!(project.is_recording());
+        assert!(!project.is_stopped());
+        assert_eq!(mock.invocation_count(), 9);
         project.stop();
         assert!(!project.is_playing());
         assert!(!project.is_paused());
         assert!(!project.is_recording());
         assert!(project.is_stopped());
-        assert_eq!(mock.invocation_count(), 9);
+        assert_eq!(mock.invocation_count(), 11);
         Ok(())
     })
 }
