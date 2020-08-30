@@ -142,6 +142,7 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
             buffer_size: 0,
             copy_inside: false,
             depth: 0,
+            ..Default::default()
         },
     )?;
     activate_reaper_portable_mode(&reaper_home_path)?;
