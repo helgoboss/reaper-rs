@@ -40,6 +40,14 @@
                 }
             ],
             "externalConsole": false
-        }
+        },
+        {
+            "name": "(macOS) Launch",
+            "type": "lldb",
+            "request": "launch",
+            "program": "/Users/xcodeclub/Downloads/reaper-rs/target/reaper/reaper_macos_x86_64/REAPER64.app/Contents/MacOS/REAPER",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
     ]
 }
