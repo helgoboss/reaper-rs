@@ -189,6 +189,15 @@ impl Track {
         }
     }
 
+    pub fn folder_depth_change(&self) -> i32 {
+        let result = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_media_track_info_value(self.raw(), TrackAttributeKey::FolderDepth)
+        };
+        result as _
+    }
+
     pub fn volume(&self) -> Volume {
         // It's important that we don't query D_VOL because that returns the wrong value in case an
         // envelope is written

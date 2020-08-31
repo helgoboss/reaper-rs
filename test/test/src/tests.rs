@@ -87,6 +87,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         select_track_exclusively(),
         remove_track(),
         query_track_automation_mode(),
+        query_track_misc(),
         query_track_send_count(),
         add_track_send(),
         query_track_send(),
@@ -852,6 +853,17 @@ fn query_track_automation_mode() -> TestStep {
         assert_eq!(automation_mode, AutomationMode::TrimRead);
         assert_eq!(global_automation_override, None);
         assert_eq!(effective_automation_mode, Some(AutomationMode::TrimRead));
+        Ok(())
+    })
+}
+
+fn query_track_misc() -> TestStep {
+    step(AllVersions, "Query track misc", |_, _| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        // Then
+        assert_eq!(track.folder_depth_change(), 0);
         Ok(())
     })
 }
