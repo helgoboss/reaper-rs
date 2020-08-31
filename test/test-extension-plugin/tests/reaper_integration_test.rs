@@ -110,7 +110,7 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     }
     println!("Unpacking REAPER tarball...");
     unpack_tar_xz(&reaper_tarball_path, &reaper_download_dir_path)?;
-    activate_reaper_portable_mode(&reaper_home_path)?;
+    write_reaper_config(&reaper_home_path)?;
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
@@ -145,18 +145,28 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
             ..Default::default()
         },
     )?;
-    activate_reaper_portable_mode(&reaper_home_path)?;
+    write_reaper_config(&reaper_home_path)?;
     remove_rewire_plugin_macos_bundle(&reaper_home_path)?;
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
 
-fn activate_reaper_portable_mode(reaper_home_path: &Path) -> Result<()> {
-    println!("Activating REAPER portable mode...");
-    fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .open(reaper_home_path.join("reaper.ini"))?;
+fn write_reaper_config(reaper_home_path: &Path) -> Result<()> {
+    println!("Writing REAPER configuration...");
+    let content = r#"
+[audioconfig]
+; For dummy audio on Windows
+mode=4
+
+[REAPER]
+; For dummy audio on Linux
+linux_audio_mode=2
+; For <none> audio on macOS
+coreaudiobs=512
+coreaudioindevnew=<none>
+coreaudiooutdevnew=<none>
+"#;
+    fs::write(reaper_home_path.join("reaper.ini"), content)?;
     Ok(())
 }
 
