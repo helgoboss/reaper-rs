@@ -316,21 +316,7 @@ impl Fx {
     }
 
     pub fn window_has_focus(&self) -> bool {
-        match self.floating_window() {
-            None => {
-                // FX is not open in floating window. In this case we consider it as focused if the
-                // FX chain of that track is open and the currently displayed FX in
-                // the FX chain is this FX.
-                self.window_is_open()
-            }
-            Some(_hwnd) => {
-                // FX is open in floating window
-                // TODO-high FIXME I think we need GetActiveWindow in order to solve this
-                // let active_window = unsafe { GetActiveWindow() };
-                // active_window == hwnd.as_ptr()
-                false
-            }
-        }
+        Reaper::get().focused_fx().contains(self)
     }
 
     pub fn show_in_floating_window(&self) {

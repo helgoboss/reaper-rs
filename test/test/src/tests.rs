@@ -2356,7 +2356,7 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             // Then
             assert!(fx.floating_window().is_some());
             assert!(fx.window_is_open());
-            // TODO-low Not correctly implemented right now. Should have focus!
+            // TODO-low Not correctly implemented right now? Should maybe have focus!
             assert!(!fx.window_has_focus());
             assert!(fx_opened_mock.invocation_count() >= 1);
             if !fx_chain.is_input_fx() || Reaper::get().version() >= ReaperVersion::new("5.95") {
