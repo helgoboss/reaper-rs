@@ -2384,10 +2384,7 @@ fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             assert!(fx.floating_window().is_none());
             assert!(!fx.window_is_open());
             assert!(!fx.window_has_focus());
-            // TODO-low Not sure why there's this difference.
-            if cfg!(target_os = "macos") {
-                assert!(Reaper::get().focused_fx().is_some());
-            } else {
+            if cfg!(target_os = "windows") {
                 assert!(Reaper::get().focused_fx().is_none());
             };
             Ok(())
