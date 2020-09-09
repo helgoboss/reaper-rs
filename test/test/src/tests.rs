@@ -2364,8 +2364,10 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
                 assert_eq!(fx_opened_mock.last_arg(), fx);
             }
             assert_eq!(fx_focused_mock.invocation_count(), 0);
-            // Should be > 0 but doesn't work
-            assert!(Reaper::get().focused_fx().is_none()); // Should be Some but doesn't work
+            if cfg!(target_os = "windows") {
+                // Should be > 0 but doesn't work
+                assert!(Reaper::get().focused_fx().is_none()); // Should be Some but doesn't work
+            }
             Ok(())
         },
     )
