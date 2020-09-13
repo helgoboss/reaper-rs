@@ -78,7 +78,17 @@ impl FxParameter {
     }
 
     pub fn character(&self) -> FxParameterCharacter {
-        let result = match self.chain().context() {
+        let result = self.step_sizes();
+        use GetParameterStepSizesResult::*;
+        match result {
+            None => FxParameterCharacter::Continuous,
+            Some(Toggle) => FxParameterCharacter::Toggle,
+            Some(Normal { .. }) => FxParameterCharacter::Discrete,
+        }
+    }
+
+    pub fn step_sizes(&self) -> Option<GetParameterStepSizesResult> {
+        match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.fx().track_and_location();
@@ -88,12 +98,6 @@ impl FxParameter {
                         .track_fx_get_parameter_step_sizes(track.raw(), location, self.index)
                 }
             }
-        };
-        use GetParameterStepSizesResult::*;
-        match result {
-            None => FxParameterCharacter::Continuous,
-            Some(Toggle) => FxParameterCharacter::Toggle,
-            Some(Normal { .. }) => FxParameterCharacter::Discrete,
         }
     }
 
@@ -148,17 +152,7 @@ impl FxParameter {
     // TODO-low This is a too opinionated function in that it already interprets and processes some
     // of REAPER's return  values.
     pub fn step_size(&self) -> Option<f64> {
-        let result = match self.chain().context() {
-            FxChainContext::Take(_) => todo!(),
-            _ => {
-                let (track, location) = self.fx().track_and_location();
-                unsafe {
-                    Reaper::get()
-                        .medium_reaper()
-                        .track_fx_get_parameter_step_sizes(track.raw(), location, self.index)?
-                }
-            }
-        };
+        let result = self.step_sizes()?;
         use GetParameterStepSizesResult::*;
         match result {
             Normal {
