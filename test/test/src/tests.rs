@@ -42,6 +42,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         strings(),
         low_plugin_context(),
         medium_plugin_context(),
+        general(),
         create_empty_project_in_new_tab(),
         play_pause_stop_record(),
         change_repeat_state(),
@@ -1939,6 +1940,24 @@ fn add_track() -> TestStep {
         assert_eq!(new_track.index(), Some(0));
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), new_track);
+        Ok(())
+    })
+}
+
+fn general() -> TestStep {
+    step(AllVersions, "General", |reaper, _| {
+        // Given
+        // When
+        let resource_path = reaper.resource_path();
+        // Then
+        assert!(resource_path.is_dir());
+        assert!(
+            resource_path
+                .to_str()
+                .ok_or("invalid resource path")?
+                .to_lowercase()
+                .contains("reaper")
+        );
         Ok(())
     })
 }

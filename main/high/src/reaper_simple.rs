@@ -11,6 +11,7 @@ use reaper_medium::{
     MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
     StuffMidiMessageTarget, TrackLocation,
 };
+use std::path::PathBuf;
 
 impl Reaper {
     /// Gives access to the medium-level Reaper instance.
@@ -73,9 +74,12 @@ impl Reaper {
             })
     }
 
+    pub fn resource_path(&self) -> PathBuf {
+        self.medium_reaper.get_resource_path(|p| p.to_owned())
+    }
+
     // Attention: Returns normal fx only, not input fx!
     // This is not reliable! After REAPER start no focused Fx can be found!
-
     pub fn focused_fx(&self) -> Option<Fx> {
         self.medium_reaper().get_focused_fx().and_then(|res| {
             use reaper_medium::GetFocusedFxResult::*;

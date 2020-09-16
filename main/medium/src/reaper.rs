@@ -33,7 +33,7 @@ use reaper_low::raw::GUID;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Represents a privilege to execute functions which are safe to execute from any thread.
 pub trait AnyThread: private::Sealed {}
@@ -3506,6 +3506,23 @@ impl<UsageScope> Reaper<UsageScope> {
             // Removed action returns empty string for some reason. We want None in this case!
             .filter(|s| !s.as_c_str().to_bytes().is_empty())
             .map(use_action_name)
+    }
+
+    /// Grants temporary access to the REAPER resource path.
+    ///
+    /// This is the path to the directory where INI files are stored and other things in
+    /// subdirectories.
+    #[measure(SingleThreadNanos)]
+    pub fn get_resource_path<R>(&self, use_resource_path: impl FnOnce(&Path) -> R) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetResourcePath();
+        let reaper_str =
+            unsafe { create_passing_c_str(ptr).expect("should always return resource path") };
+        let path = Path::new(reaper_str.to_str());
+        use_resource_path(path)
     }
 
     /// Returns the current on/off state of a toggleable action.
