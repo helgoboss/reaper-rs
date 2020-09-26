@@ -3270,6 +3270,49 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(chunk_content)
     }
 
+    /// Prompts the user for string values.
+    ///
+    /// If a caption begins with `*`, for example `*password`, the edit field will not display the
+    /// input text. The maximum number of fields is 16. Values are returned as a comma-separated
+    /// string.
+    ///
+    /// You can supply special extra information via additional caption fields:
+    /// - `extrawidth=XXX` to increase text field width
+    /// - `separator=X` to use a different separator for returned fields
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the resulting CSV you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    #[measure(SingleThreadNanos)]
+    pub fn get_user_inputs<'a>(
+        &self,
+        title: impl Into<ReaperStringArg<'a>>,
+        num_inputs: u32,
+        captions_csv: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+    ) -> Option<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        assert!(buffer_size > 0);
+        let (csv, successful) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+            self.low.GetUserInputs(
+                title.into().as_ptr(),
+                num_inputs as _,
+                captions_csv.into().as_ptr(),
+                buffer,
+                max_size,
+            )
+        });
+        if !successful {
+            return None;
+        }
+        Some(csv)
+    }
+
     /// Creates a send, receive or hardware output for the given track.
     ///
     /// Returns the index of the created send or receive.
