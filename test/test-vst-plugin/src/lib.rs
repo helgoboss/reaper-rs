@@ -1,5 +1,5 @@
 use futures_timer::Delay;
-use reaper_high::{ActionKind, Reaper, ReaperGuard};
+use reaper_high::{create_terminal_logger, ActionKind, Reaper, ReaperGuard};
 use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, PluginContext};
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
 use rxrust::prelude::*;
@@ -120,7 +120,7 @@ impl TestVstPlugin {
         let guard = Reaper::guarded(|| {
             let context =
                 PluginContext::from_vst_plugin(&self.host, static_vst_plugin_context()).unwrap();
-            Reaper::setup_with_defaults(context, "info@helgoboss.org");
+            Reaper::setup_with_defaults(context, create_terminal_logger(), "info@helgoboss.org");
             let reaper = Reaper::get();
             reaper.wake_up().unwrap();
             debug!(

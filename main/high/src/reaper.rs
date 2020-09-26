@@ -16,8 +16,8 @@ use crate::track_send::TrackSend;
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
-    create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger,
-    create_terminal_logger, Action, Project, Spawner, Track,
+    create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger, Action,
+    Project, Spawner, Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
@@ -35,7 +35,7 @@ use reaper_medium::{
     OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef, RealTimeAudioThreadScope, ReaperStr,
     ReaperString, ReaperStringArg, RegistrationHandle, ToggleAction, ToggleActionResult,
 };
-use slog::debug;
+use slog::{debug, Logger};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
@@ -467,13 +467,15 @@ impl Reaper {
     }
 
     /// This has an effect only if there isn't an instance already.
-    pub fn setup_with_defaults(context: PluginContext, email_address: &'static str) {
+    pub fn setup_with_defaults(
+        context: PluginContext,
+        logger: Logger,
+        email_address: &'static str,
+    ) {
         require_main_thread(&context);
-        Reaper::load(context)
-            .logger(create_terminal_logger())
-            .setup();
+        Reaper::load(context).logger(logger.clone()).setup();
         std::panic::set_hook(create_reaper_panic_hook(
-            create_terminal_logger(),
+            logger,
             Some(create_default_console_msg_formatter(email_address)),
         ));
     }

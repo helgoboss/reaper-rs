@@ -122,7 +122,7 @@ fn generate_high_level_plugin_code(
     let tokens = quote! {
         #[::reaper_macros::reaper_extension_plugin]
         fn low_level_plugin_main(context: ::reaper_low::PluginContext) -> Result<(), Box<dyn std::error::Error>> {
-            ::reaper_high::Reaper::setup_with_defaults(context, #email_address);
+            ::reaper_high::Reaper::setup_with_defaults(context, ::reaper_high::create_terminal_logger(), #email_address);
             #main_function_name()
         }
 
