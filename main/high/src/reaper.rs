@@ -883,7 +883,7 @@ impl Reaper {
     }
 
     // TODO-medium Proper errors
-    pub async fn main_thread_future<R: 'static + Debug>(
+    pub async fn main_thread_future<R: 'static>(
         &self,
         op: impl FnOnce() -> R + 'static,
     ) -> Result<R, ()> {
@@ -892,7 +892,7 @@ impl Reaper {
         } else {
             let (tx, rx) = oneshot::channel();
             self.do_later_in_main_thread_asap(move || {
-                tx.send(op()).expect("couldn't send");
+                tx.send(op()).ok().expect("couldn't send");
             })?;
             rx.await.map_err(|_| ())
         }
