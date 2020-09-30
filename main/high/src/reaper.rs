@@ -28,6 +28,7 @@ use reaper_low::PluginContext;
 use crate::run_loop_executor::new_spawner_and_executor;
 use crate::run_loop_scheduler::{RunLoopScheduler, RxTask};
 use crossbeam_channel::{Receiver, Sender};
+use futures::channel::oneshot;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
@@ -878,6 +879,22 @@ impl Reaper {
             Ok(())
         } else {
             self.do_later_in_main_thread_asap(op)
+        }
+    }
+
+    // TODO-medium Proper errors
+    pub async fn main_thread_future<R: 'static + Debug>(
+        &self,
+        op: impl FnOnce() -> R + 'static,
+    ) -> Result<R, ()> {
+        if Reaper::get().is_in_main_thread() {
+            Ok(op())
+        } else {
+            let (tx, rx) = oneshot::channel();
+            self.do_later_in_main_thread_asap(move || {
+                tx.send(op()).expect("couldn't send");
+            })?;
+            rx.await.map_err(|_| ())
         }
     }
 
