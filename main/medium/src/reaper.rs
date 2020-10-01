@@ -3291,6 +3291,7 @@ impl<UsageScope> Reaper<UsageScope> {
         title: impl Into<ReaperStringArg<'a>>,
         num_inputs: u32,
         captions_csv: impl Into<ReaperStringArg<'a>>,
+        initial_csv: impl Into<ReaperStringArg<'a>>,
         buffer_size: u32,
     ) -> Option<ReaperString>
     where
@@ -3298,15 +3299,16 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         assert!(buffer_size > 0);
-        let (csv, successful) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
-            self.low.GetUserInputs(
-                title.into().as_ptr(),
-                num_inputs as _,
-                captions_csv.into().as_ptr(),
-                buffer,
-                max_size,
-            )
-        });
+        let (csv, successful) =
+            with_string_buffer_prefilled(initial_csv, buffer_size, |buffer, max_size| unsafe {
+                self.low.GetUserInputs(
+                    title.into().as_ptr(),
+                    num_inputs as _,
+                    captions_csv.into().as_ptr(),
+                    buffer,
+                    max_size,
+                )
+            });
         if !successful {
             return None;
         }
@@ -4137,6 +4139,24 @@ fn with_string_buffer<T>(
 ) -> (ReaperString, T) {
     // Using with_capacity() here wouldn't be correct because it leaves the vector length at zero.
     let vec: Vec<u8> = vec![0; max_size as usize];
+    with_string_buffer_internal(vec, max_size, fill_buffer)
+}
+
+fn with_string_buffer_prefilled<'a, T>(
+    prefill: impl Into<ReaperStringArg<'a>>,
+    max_size: u32,
+    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
+) -> (ReaperString, T) {
+    let mut vec = Vec::from(prefill.into().as_reaper_str().as_c_str().to_bytes());
+    vec.resize(max_size as usize, 0);
+    with_string_buffer_internal(vec, max_size, fill_buffer)
+}
+
+fn with_string_buffer_internal<T>(
+    vec: Vec<u8>,
+    max_size: u32,
+    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
+) -> (ReaperString, T) {
     let c_string = unsafe { CString::from_vec_unchecked(vec) };
     let raw = c_string.into_raw();
     let result = fill_buffer(raw, max_size as i32);
