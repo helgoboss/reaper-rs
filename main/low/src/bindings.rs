@@ -75,6 +75,17 @@ pub mod root {
     pub const TPM_VERTICAL: u32 = 64;
     pub const TPM_NONOTIFY: u32 = 128;
     pub const TPM_RETURNCMD: u32 = 256;
+    pub const MF_ENABLED: u32 = 0;
+    pub const MF_GRAYED: u32 = 1;
+    pub const MF_DISABLED: u32 = 2;
+    pub const MF_STRING: u32 = 0;|
+    pub const MF_BITMAP: u32 = 4;
+    pub const MF_UNCHECKED: u32 = 0;
+    pub const MF_CHECKED: u32 = 8;
+    pub const MF_POPUP: u32 = 16;
+    pub const MF_BYCOMMAND: u32 = 0;
+    pub const MF_BYPOSITION: u32 = 1024;
+    pub const MF_SEPARATOR: u32 = 2048;
     pub const EN_SETFOCUS: u32 = 256;
     pub const EN_KILLFOCUS: u32 = 512;
     pub const EN_CHANGE: u32 = 768;
