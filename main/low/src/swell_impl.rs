@@ -93,6 +93,25 @@ impl Swell {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn LoadMenu(
+        &self,
+        hinst: root::HINSTANCE,
+        resid: *const ::std::os::raw::c_char,
+    ) -> root::HMENU {
+        #[cfg(target_family = "unix")]
+        {
+            self.SWELL_LoadMenu(root::SWELL_curmodule_menuresource_head, resid)
+        }
+        #[cfg(target_family = "windows")]
+        #[allow(clippy::cast_ptr_alignment)]
+        {
+            winapi::um::winuser::LoadMenuW(hinst as _, resid as _) as _
+        }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn SetWindowText(
         &self,
         hwnd: root::HWND,

@@ -136,6 +136,7 @@ mod codegen {
                 .whitelist_var("EN_.*")
                 .whitelist_var("TB_.*")
                 .whitelist_var("TBM_.*")
+                .whitelist_var("TPM_.*")
                 .whitelist_var("CF_.*")
                 .whitelist_var("GMEM_.*")
                 .whitelist_var("ID.*")
