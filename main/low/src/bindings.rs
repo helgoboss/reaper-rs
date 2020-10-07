@@ -78,7 +78,7 @@ pub mod root {
     pub const MF_ENABLED: u32 = 0;
     pub const MF_GRAYED: u32 = 1;
     pub const MF_DISABLED: u32 = 2;
-    pub const MF_STRING: u32 = 0;|
+    pub const MF_STRING: u32 = 0;
     pub const MF_BITMAP: u32 = 4;
     pub const MF_UNCHECKED: u32 = 0;
     pub const MF_CHECKED: u32 = 8;
