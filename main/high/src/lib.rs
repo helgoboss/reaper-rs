@@ -25,7 +25,8 @@ mod log_util;
 pub use log_util::*;
 
 mod run_loop_executor;
-use run_loop_executor::*;
+
+mod local_run_loop_executor;
 
 mod run_loop_scheduler;
 

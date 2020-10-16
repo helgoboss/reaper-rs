@@ -1,8 +1,12 @@
-//! Provides an executor for executing futures on a custom run loop.
+//! Provides an executor for executing futures on a custom run loop. Single-threaded.
+// TODO-low If spawning futures turns out to be very useful, we should remove code duplication
+//  with run_loop_executor and try to implement this stuff without Arc and Mutex (the waker stuff
+//  gets hairy though)!
 use crossbeam_channel::{Receiver, Sender};
+use futures::future::LocalBoxFuture;
 use {
     futures::{
-        future::{BoxFuture, FutureExt},
+        future::FutureExt,
         task::{waker_ref, ArcWake},
     },
     std::{
@@ -34,7 +38,7 @@ struct Task {
     /// enough to know that `future` is only mutated from one thread,
     /// so we need use the `Mutex` to prove thread-safety.
     // TODO-low A production executor would not need this, and could use `UnsafeCell` instead.
-    future: Mutex<Option<BoxFuture<'static, ()>>>,
+    future: Mutex<Option<LocalBoxFuture<'static, ()>>>,
 
     /// Handle to place the task itself back onto the task queue.
     task_sender: Sender<Arc<Task>>,
@@ -52,8 +56,8 @@ pub fn new_spawner_and_executor(capacity: usize, bulk_size: usize) -> (Spawner, 
 }
 
 impl Spawner {
-    pub fn spawn(&self, future: impl Future<Output = ()> + 'static + Send) {
-        let future = future.boxed();
+    pub fn spawn(&self, future: impl Future<Output = ()> + 'static) {
+        let future = future.boxed_local();
         let task = Arc::new(Task {
             future: Mutex::new(Some(future)),
             task_sender: self.task_sender.clone(),
@@ -73,6 +77,9 @@ impl ArcWake for Task {
             .expect("too many tasks queued");
     }
 }
+
+unsafe impl Send for Task {}
+unsafe impl Sync for Task {}
 
 impl RunLoopExecutor {
     /// Returns number of discarded tasks.

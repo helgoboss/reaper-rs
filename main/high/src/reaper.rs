@@ -1,4 +1,4 @@
-use crate::ReactiveEvent;
+use crate::{local_run_loop_executor, run_loop_executor, ReactiveEvent};
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -17,7 +17,7 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
     create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger, Action,
-    Project, Spawner, Track,
+    Project, Track,
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
@@ -25,7 +25,6 @@ use reaper_low::raw;
 
 use reaper_low::PluginContext;
 
-use crate::run_loop_executor::new_spawner_and_executor;
 use crate::run_loop_scheduler::{RunLoopScheduler, RxTask};
 use crossbeam_channel::{Receiver, Sender};
 use futures::channel::oneshot;
@@ -109,10 +108,15 @@ impl ReaperBuilder {
                     crossbeam_channel::bounded::<MainThreadTask>(MAIN_THREAD_TASK_CHANNEL_CAPACITY);
                 let (mt_rx_sender, mt_rx_receiver) =
                     crossbeam_channel::bounded::<RxTask>(MAIN_THREAD_TASK_CHANNEL_CAPACITY);
-                let (spawner, executor) = new_spawner_and_executor(
+                let (spawner, executor) = run_loop_executor::new_spawner_and_executor(
                     MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                     MAIN_THREAD_TASK_BULK_SIZE,
                 );
+                let (local_spawner, local_executor) =
+                    local_run_loop_executor::new_spawner_and_executor(
+                        MAIN_THREAD_TASK_CHANNEL_CAPACITY,
+                        MAIN_THREAD_TASK_BULK_SIZE,
+                    );
                 let main_thread_scheduler = RunLoopScheduler::new(mt_rx_sender.clone());
                 let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
                     AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
@@ -140,6 +144,7 @@ impl ReaperBuilder {
                     main_thread_rx_task_sender: mt_rx_sender,
                     main_thread_scheduler,
                     main_thread_future_spawner: spawner,
+                    local_main_thread_future_spawner: local_spawner,
                     session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {
                         csurf_inst: Box::new(HelperControlSurface::new(
                             version,
@@ -148,6 +153,7 @@ impl ReaperBuilder {
                             mt_receiver,
                             mt_rx_receiver,
                             executor,
+                            local_executor,
                         )),
                         audio_hook: Box::new(HighOnAudioBuffer {
                             task_receiver: at_receiver,
@@ -265,7 +271,8 @@ pub struct Reaper {
     audio_thread_task_sender: Sender<AudioThreadTaskOp>,
     main_thread_rx_task_sender: Sender<RxTask>,
     main_thread_scheduler: RunLoopScheduler,
-    main_thread_future_spawner: Spawner,
+    main_thread_future_spawner: crate::run_loop_executor::Spawner,
+    local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
     session_status: RefCell<SessionStatus>,
 }
 
@@ -852,6 +859,18 @@ impl Reaper {
         future: impl std::future::Future<Output = ()> + 'static + Send,
     ) {
         let spawner = &self.main_thread_future_spawner;
+        spawner.spawn(future);
+    }
+
+    /// Spawns a future for execution in main thread.
+    ///
+    /// Panics if not in main thread. The difference to `spawn_in_main_thread()` is that `Send` is
+    /// not required. Perfect for capturing `Rc`s.
+    pub fn spawn_in_main_thread_from_main_thread(
+        &self,
+        future: impl std::future::Future<Output = ()> + 'static,
+    ) {
+        let spawner = &self.local_main_thread_future_spawner;
         spawner.spawn(future);
     }
 

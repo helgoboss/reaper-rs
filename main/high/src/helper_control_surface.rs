@@ -1,7 +1,8 @@
 use crate::fx::Fx;
 use crate::guid::Guid;
 use crate::{
-    get_media_track_guid, MainThreadTask, Project, Reaper, Track, MAIN_THREAD_TASK_BULK_SIZE,
+    get_media_track_guid, local_run_loop_executor, run_loop_executor, MainThreadTask, Project,
+    Reaper, Track, MAIN_THREAD_TASK_BULK_SIZE,
 };
 
 use reaper_medium::TrackAttributeKey::{Mute, Pan, RecArm, RecInput, Selected, Solo, Vol};
@@ -23,7 +24,6 @@ use std::cell::{Cell, RefCell, RefMut};
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use std::collections::{HashMap, HashSet};
 
-use crate::run_loop_executor::RunLoopExecutor;
 use crate::run_loop_scheduler::RxTask;
 use crossbeam_channel::{Receiver, Sender};
 use std::cmp::Ordering;
@@ -35,8 +35,10 @@ pub(crate) struct HelperControlSurface {
     main_thread_task_sender: Sender<MainThreadTask>,
     main_thread_task_receiver: Receiver<MainThreadTask>,
     // This is for executing futures.
-    main_thread_executor: RunLoopExecutor,
+    main_thread_executor: run_loop_executor::RunLoopExecutor,
+    local_main_thread_executor: local_run_loop_executor::RunLoopExecutor,
     // This is for scheduling rxRust observables.
+    // TODO-medium Remove, I ran into deadlocks with this thing.
     main_thread_rx_task_receiver: Receiver<RxTask>,
     last_active_project: Cell<Project>,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
@@ -136,13 +138,15 @@ impl HelperControlSurface {
         main_thread_task_sender: Sender<MainThreadTask>,
         main_thread_task_receiver: Receiver<MainThreadTask>,
         main_thread_rx_task_receiver: Receiver<RxTask>,
-        executor: RunLoopExecutor,
+        executor: run_loop_executor::RunLoopExecutor,
+        local_executor: local_run_loop_executor::RunLoopExecutor,
     ) -> HelperControlSurface {
         let reaper_version_5_95 = ReaperVersion::new("5.95");
         HelperControlSurface {
             main_thread_task_sender,
             main_thread_task_receiver,
             main_thread_executor: executor,
+            local_main_thread_executor: local_executor,
             main_thread_rx_task_receiver,
             last_active_project: Cell::new(last_active_project),
             num_track_set_changes_left_to_be_propagated: Default::default(),
@@ -188,10 +192,12 @@ impl HelperControlSurface {
     }
 
     fn discard_future_tasks(&self) {
-        let task_count = self.main_thread_executor.discard_tasks();
-        if task_count > 0 {
+        let shared_task_count = self.main_thread_executor.discard_tasks();
+        let local_task_count = self.local_main_thread_executor.discard_tasks();
+        let total_task_count = shared_task_count + local_task_count;
+        if total_task_count > 0 {
             slog::warn!(Reaper::get().logger(), "Discarded future tasks on reactivation";
-                "task_count" => task_count,
+                "task_count" => total_task_count,
             );
         }
     }
@@ -688,6 +694,7 @@ impl ControlSurface for HelperControlSurface {
         }
         // Execute futures
         self.main_thread_executor.run();
+        self.local_main_thread_executor.run();
         // Execute observables
         for task in self
             .main_thread_rx_task_receiver
