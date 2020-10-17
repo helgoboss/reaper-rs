@@ -870,6 +870,7 @@ impl Reaper {
         &self,
         future: impl std::future::Future<Output = ()> + 'static,
     ) {
+        self.require_main_thread();
         let spawner = &self.local_main_thread_future_spawner;
         spawner.spawn(future);
     }
@@ -877,6 +878,26 @@ impl Reaper {
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
     // deactivated).
     pub fn do_later_in_main_thread(
+        &self,
+        waiting_time: Duration,
+        op: impl FnOnce() + Send + 'static,
+    ) -> Result<(), ()> {
+        unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
+    }
+
+    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
+    // deactivated).
+    pub fn do_later_in_main_thread_from_main_thread(
+        &self,
+        waiting_time: Duration,
+        op: impl FnOnce() + 'static,
+    ) -> Result<(), ()> {
+        self.require_main_thread();
+        unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
+    }
+
+    /// Unsafe because doesn't require send (which should be required in the general case).
+    unsafe fn do_later_in_main_thread_internal(
         &self,
         waiting_time: Duration,
         op: impl FnOnce() + 'static,
@@ -892,19 +913,37 @@ impl Reaper {
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
     // deactivated).
-    pub fn do_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
+    pub fn do_in_main_thread_asap(&self, op: impl FnOnce() + Send + 'static) -> Result<(), ()> {
+        unsafe { self.do_in_main_thread_asap_internal(op) }
+    }
+
+    /// Panics if not in main thread. The difference to `do_in_main_thread_asap()` is that `Send` is
+    /// not required. Perfect for capturing `Rc`s.
+    pub fn do_in_main_thread_from_main_thread_asap(
+        &self,
+        op: impl FnOnce() + 'static,
+    ) -> Result<(), ()> {
+        self.require_main_thread();
+        unsafe { self.do_in_main_thread_asap_internal(op) }
+    }
+
+    /// Unsafe because doesn't require send (which should be required in the general case).
+    unsafe fn do_in_main_thread_asap_internal(
+        &self,
+        op: impl FnOnce() + 'static,
+    ) -> Result<(), ()> {
         if Reaper::get().is_in_main_thread() {
             op();
             Ok(())
         } else {
-            self.do_later_in_main_thread_asap(op)
+            self.do_later_in_main_thread_asap_internal(op)
         }
     }
 
     // TODO-medium Proper errors
-    pub async fn main_thread_future<R: 'static>(
+    pub async fn main_thread_future<R: 'static + Send>(
         &self,
-        op: impl FnOnce() -> R + 'static,
+        op: impl FnOnce() -> R + 'static + Send,
     ) -> Result<R, ()> {
         if Reaper::get().is_in_main_thread() {
             Ok(op())
@@ -919,7 +958,28 @@ impl Reaper {
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
     // deactivated).
-    pub fn do_later_in_main_thread_asap(&self, op: impl FnOnce() + 'static) -> Result<(), ()> {
+    pub fn do_later_in_main_thread_asap(
+        &self,
+        op: impl FnOnce() + Send + 'static,
+    ) -> Result<(), ()> {
+        unsafe { self.do_later_in_main_thread_asap_internal(op) }
+    }
+
+    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
+    // deactivated).
+    pub fn do_later_in_main_thread_from_main_thread_asap(
+        &self,
+        op: impl FnOnce() + 'static,
+    ) -> Result<(), ()> {
+        self.require_main_thread();
+        unsafe { self.do_later_in_main_thread_asap_internal(op) }
+    }
+
+    /// Unsafe because doesn't require send (which should be required in the general case).
+    unsafe fn do_later_in_main_thread_asap_internal(
+        &self,
+        op: impl FnOnce() + 'static,
+    ) -> Result<(), ()> {
         let sender = &self.main_thread_task_sender;
         sender
             .send(MainThreadTask::new(Box::new(op), None))
@@ -930,7 +990,7 @@ impl Reaper {
     // deactivated).
     pub fn do_later_in_real_time_audio_thread_asap(
         &self,
-        op: impl FnOnce(&RealTimeReaper) + 'static,
+        op: impl FnOnce(&RealTimeReaper) + Send + 'static,
     ) -> Result<(), ()> {
         let sender = &self.audio_thread_task_sender;
         sender.send(Box::new(op)).map_err(|_| ())

@@ -346,28 +346,28 @@ fn use_undoable() -> TestStep {
 }
 
 fn stuff_midi_devices() -> TestStep {
-    step(AllVersions, "Stuff MIDI messages", |reaper, step| {
+    step(AllVersions, "Stuff MIDI messages", |_, _| {
         // Given
         let msg = RawShortMessage::note_on(channel(0), key_number(64), u7(100));
         // When
-        reaper
-            .do_later_in_real_time_audio_thread_asap(|rt_reaper| {
-                rt_reaper
-                    .midi_message_received()
-                    // TODO-medium This is fishy. next() will be called from main thread although
-                    //  the rest happens in audio thread. I think we need to use shared subjects.
-                    .take_until(step.finished)
-                    .subscribe(move |_evt| {
-                        println!("MIDI event arrived");
-                        // Right now not invoked because MIDI message arrives async.
-                        // TODO As soon as we have an Observable which is not generic on Observer,
-                        // introduce  steps which return an
-                        // Observable<TestStepResult, ()> in order to test
-                        //  asynchronously that stuffed MIDI messages arrived via
-                        // midi_message_received().
-                    });
-            })
-            .map_err(|_| "couldn't schedule for execution in audio thread")?;
+        // reaper
+        //     .do_later_in_real_time_audio_thread_asap(|rt_reaper| {
+        //         rt_reaper
+        //             .midi_message_received()
+        //             // TODO-medium This is fishy. next() will be called from main thread although
+        //             //  the rest happens in audio thread. I think we need to use shared subjects.
+        //             .take_until(step.finished)
+        //             .subscribe(move |_evt| {
+        //                 println!("MIDI event arrived");
+        //                 // Right now not invoked because MIDI message arrives async.
+        //                 // TODO As soon as we have an Observable which is not generic on
+        // Observer,                 // introduce  steps which return an
+        //                 // Observable<TestStepResult, ()> in order to test
+        //                 //  asynchronously that stuffed MIDI messages arrived via
+        //                 // midi_message_received().
+        //             });
+        //     })
+        //     .map_err(|_| "couldn't schedule for execution in audio thread")?;
         Reaper::get().stuff_midi_message(StuffMidiMessageTarget::VirtualMidiKeyboardQueue, msg);
         // Then
         Ok(())
