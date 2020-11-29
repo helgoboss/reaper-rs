@@ -22,18 +22,16 @@ fn compile_swell_dialog_generator_support() {
     } else {
         "src/swell-modstub-generic-custom.cpp"
     };
-    let stdlib = if cfg!(target_os = "macos") {
-        Some("c++")
-    } else {
-        None
-    };
-    cc::Build::new()
+    let mut build = cc::Build::new();
+    build
         .cpp(true)
-        .cpp_set_stdlib(stdlib)
         .warnings(false)
         .define("SWELL_PROVIDED_BY_APP", None)
-        .file(modstub_file)
-        .compile("swell");
+        .file(modstub_file);
+    if cfg!(target_os = "macos") {
+        build.cpp_set_stdlib("c++");
+    }
+    build.compile("swell");
 
     #[cfg(target_os = "macos")]
     println!("cargo:rustc-link-lib=framework=AppKit");
@@ -42,18 +40,16 @@ fn compile_swell_dialog_generator_support() {
 /// Compiles C++ glue code. This is necessary to interact with those parts of the REAPER C++ API
 /// that use pure virtual interface classes and therefore the C++ ABI.
 fn compile_glue_code() {
-    let stdlib = if cfg!(target_os = "macos") {
-        Some("c++")
-    } else {
-        None
-    };
-    cc::Build::new()
+    let mut build = cc::Build::new();
+    build
         .cpp(true)
-        .cpp_set_stdlib(stdlib)
         .warnings(false)
         .file("src/control_surface.cpp")
-        .file("src/midi.cpp")
-        .compile("glue");
+        .file("src/midi.cpp");
+    if cfg!(target_os = "macos") {
+        build.cpp_set_stdlib("c++");
+    }
+    build.compile("glue");
 }
 
 #[cfg(any(feature = "generate-stage-one", feature = "generate-stage-two"))]
