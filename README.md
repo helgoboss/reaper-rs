@@ -11,7 +11,7 @@
 
 Here's the snippet:
 
-```toml
+```toml,ignore
 reaper-medium = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
 reaper-low = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
 reaper-macros = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
