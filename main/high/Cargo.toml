@@ -31,3 +31,6 @@ num_enum = "0.4.2"
 futures = "0.3"
 serde = { version = "1.0", features = ["derive"], optional = true }
 backtrace = "0.3"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["psapi", "processthreadsapi"] }

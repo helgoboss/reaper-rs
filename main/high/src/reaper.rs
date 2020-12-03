@@ -1,4 +1,4 @@
-use crate::{local_run_loop_executor, run_loop_executor, ReactiveEvent};
+use crate::{local_run_loop_executor, run_loop_executor, CrashInfo, ReactiveEvent};
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -475,16 +475,12 @@ impl Reaper {
     }
 
     /// This has an effect only if there isn't an instance already.
-    pub fn setup_with_defaults(
-        context: PluginContext,
-        logger: Logger,
-        email_address: &'static str,
-    ) {
+    pub fn setup_with_defaults(context: PluginContext, logger: Logger, crash_info: CrashInfo) {
         require_main_thread(&context);
         Reaper::load(context).logger(logger.clone()).setup();
         std::panic::set_hook(create_reaper_panic_hook(
             logger,
-            Some(create_default_console_msg_formatter(email_address)),
+            Some(create_default_console_msg_formatter(crash_info)),
         ));
     }
 

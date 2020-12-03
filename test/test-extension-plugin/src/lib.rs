@@ -5,7 +5,10 @@ use slog::debug;
 use std::error::Error;
 use std::process;
 
-#[reaper_extension_plugin(email_address = "info@helgoboss.org")]
+#[reaper_extension_plugin(
+    name = "reaper-rs test extension plug-in",
+    support_email_address = "info@helgoboss.org"
+)]
 fn main() -> Result<(), Box<dyn Error>> {
     let run_integration_test = std::env::var("RUN_REAPER_RS_INTEGRATION_TEST").is_ok();
     if run_integration_test {

@@ -33,7 +33,10 @@ use quote::quote;
 /// use reaper_macros::reaper_extension_plugin;
 /// use reaper_high::Reaper;
 ///
-/// #[reaper_extension_plugin(email_address = "support@example.org")]
+/// #[reaper_extension_plugin(
+///     name = "Example",
+///     support_email_address = "support@example.org"
+/// )]
 /// fn plugin_main() -> Result<(), Box<dyn Error>> {
 ///     Reaper::get().show_console_msg("Hello world from reaper-rs high-level API!");
 ///     Ok(())
@@ -115,14 +118,23 @@ fn generate_high_level_plugin_code(
     args: ReaperExtensionPluginMacroArgs,
     main_function: syn::ItemFn,
 ) -> TokenStream {
-    let email_address = args
-        .email_address
-        .expect("E-mail address for error reports missing");
+    let plugin_name = args
+        .name
+        .unwrap_or_else(|| env!("CARGO_PKG_NAME").to_string());
+    let plugin_version = env!("CARGO_PKG_VERSION").to_string();
+    let support_email_address = args
+        .support_email_address
+        .expect("support_email_address missing");
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[::reaper_macros::reaper_extension_plugin]
         fn low_level_plugin_main(context: ::reaper_low::PluginContext) -> Result<(), Box<dyn std::error::Error>> {
-            ::reaper_high::Reaper::setup_with_defaults(context, ::reaper_high::create_terminal_logger(), #email_address);
+            let crash_info = ::reaper_high::CrashInfo {
+                plugin_name: #plugin_name.to_string(),
+                plugin_version: #plugin_version.to_string(),
+                support_email_address: #support_email_address.to_string(),
+            };
+            ::reaper_high::Reaper::setup_with_defaults(context, ::reaper_high::create_terminal_logger(), crash_info);
             #main_function_name()
         }
 
@@ -137,10 +149,14 @@ fn generate_high_level_plugin_code(
 #[derive(Default, Debug, FromMeta)]
 #[darling(default)]
 struct ReaperExtensionPluginMacroArgs {
+    /// Plug-in name which will appear in error reports.
+    ///
+    /// Only used for high-level plug-ins. Optional, defaults to package name.
+    name: Option<String>,
     /// Support e-mail address which will appear in error reports.
     ///
-    /// Necessary for high-level plug-ins only.
-    email_address: Option<String>,
+    /// Necessary for high-level plug-in.
+    support_email_address: Option<String>,
 }
 
 #[cfg(doctest)]

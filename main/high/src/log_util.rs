@@ -70,30 +70,60 @@ pub fn extract_panic_message(panic_info: &PanicInfo) -> String {
     }
 }
 
+pub struct CrashInfo {
+    pub plugin_name: String,
+    pub plugin_version: String,
+    pub support_email_address: String,
+}
+
 pub fn create_default_console_msg_formatter(
-    email_address: &'static str,
+    crash_info: CrashInfo,
 ) -> impl Fn(&PanicInfo, &Backtrace) -> String {
     move |panic_info, backtrace| {
+        let module_info = determine_module_info();
+        let (module_base_address_label, module_size_label) = match module_info {
+            None => (hyphen(), hyphen()),
+            Some(mi) => (
+                format_as_hex(mi.base_address),
+                mi.size.map(format_as_hex).unwrap_or_else(hyphen),
+            ),
+        };
         format!("
 
-Sorry, an error occurred in a REAPER plug-in. It seems that a crash has been prevented. Better save your project at this point, preferably as a new file. It's recommended to restart REAPER before using the plug-in again. 
+===== ATTENTION =====
 
-Please report this error:
+Sorry, an unknown error occurred in REAPER plug-in {plugin_name}. REAPER should continue to work but {plugin_name} might show unexpected behavior until restarting REAPER. If you feel like saving your project file at this point, better save it as a new file because this error could have messed up the plug-in state. 
 
-1. Copy the following error information.
-2. Paste the error information into an email and send it via email to {email_address}, along with the RPP file, your REAPER.ini file and some instructions how to reproduce the issue.
+In any case, please report this error:
+
+1. Prepare an e-mail containing:
+    - The error information further below (IMPORTANT)
+    - Some instructions on how to reproduce the error (IMPORTANT)
+2. If possible, attach the following files: 
+    - Your REAPER project file (.rpp)
+    - Your REAPER configuration file (reaper.ini)
+3. Send it to {email_address}
 
 Thank you for your support!
 
 --- cut ---
+Module name:         {plugin_name}
+Module version:      {plugin_version}
+Module base address: {module_base_address_label}
+Module size:         {module_size_label}
+
 Message: {panic_message}
 
 {backtrace:#?}\
 --- cut ---
 
 ",
+                plugin_name = crash_info.plugin_name,
+                plugin_version = crash_info.plugin_version,
+                module_base_address_label = module_base_address_label,
+                module_size_label = module_size_label,
                 backtrace = backtrace,
-                email_address = email_address,
+                email_address = crash_info.support_email_address,
                 panic_message = extract_panic_message(panic_info)
         )
     }
@@ -126,4 +156,65 @@ impl std::io::Write for ReaperConsoleSink {
     fn flush(&mut self) -> Result<(), std::io::Error> {
         Ok(())
     }
+}
+
+pub(crate) struct ModuleInfo {
+    pub base_address: usize,
+    pub size: Option<usize>,
+}
+
+pub(crate) fn determine_module_info() -> Option<ModuleInfo> {
+    #[cfg(target_family = "windows")]
+    {
+        let hinstance = Reaper::get()
+            .medium_reaper()
+            .plugin_context()
+            .h_instance()?;
+        let info = ModuleInfo {
+            base_address: hinstance.as_ptr() as usize,
+            size: determine_module_size(hinstance),
+        };
+        Some(info)
+    }
+    #[cfg(not(target_family = "windows"))]
+    {
+        None
+    }
+}
+
+#[cfg(target_family = "windows")]
+fn determine_module_size(hinstance: reaper_medium::Hinstance) -> Option<usize> {
+    let size = unsafe {
+        use winapi::um::processthreadsapi;
+        use winapi::um::psapi;
+        let process = processthreadsapi::GetCurrentProcess();
+        if process.is_null() {
+            return None;
+        }
+        use std::ptr::null_mut;
+        let mut mi = psapi::MODULEINFO {
+            lpBaseOfDll: null_mut(),
+            SizeOfImage: 0,
+            EntryPoint: null_mut(),
+        };
+        let success = psapi::GetModuleInformation(
+            process,
+            hinstance.as_ptr() as _,
+            &mut mi as *mut _ as _,
+            std::mem::size_of::<psapi::MODULEINFO>() as _,
+        );
+        if success == 0 {
+            return None;
+        }
+        mi.SizeOfImage as _
+    };
+    Some(size)
+}
+
+fn format_as_hex(number: usize) -> String {
+    format!("0x{:x}", number)
+}
+
+fn hyphen() -> String {
+    "-".to_string()
 }
