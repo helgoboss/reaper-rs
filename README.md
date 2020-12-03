@@ -7,6 +7,16 @@
 
 [Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
 
+**Important note:** If you want to use _reaper-rs_ for your own project, please use the master branch for the time being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often but I don't publish to crates.io at the moment, so my crates there are a bit outdated. Rationale: As long as I'm the only consumer of this library, this process is easier for me. I tend to keep `reaper-low` and `reaper-medium` mostly stable, so no worries about that :)
+
+Here's the snippet:
+
+```ignore
+reaper-medium = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
+reaper-low = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
+reaper-macros = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
+```
+
 ## Table of Contents
 
 - [Introduction](#introduction)
@@ -159,7 +169,7 @@ perfectly suited to add some functions to REAPER which should be available globa
 A REAPER VST plug-in is loaded as track, take or monitoring FX as part of a particular REAPER project,
 just like any instrument or effect plug-in out there. That also means it can be instantiated multiple
 times. Examples are [Playtime](https://www.helgoboss.org/projects/playtime/) (written in C++) and
-[ReaLearn](https://www.helgoboss.org/projects/realearn/) (written in C++ but being ported to Rust).
+[ReaLearn](https://www.helgoboss.org/projects/realearn/) (successfully ported to Rust).
 
 In both cases you need to make a library crate of type `cdylib`.
 
@@ -429,7 +439,7 @@ integration test run, it prints detailed response time statistics to standard ou
 
 ## Background
 
-_reaper-rs_ has been born as part of an effort to port the REAPER VST plug-in
+_reaper-rs_ has been born as part of the effort of porting the REAPER VST plug-in
 [ReaLearn](https://www.helgoboss.org/projects/realearn/) to Rust and publish it as open-source project. The high-level
 API is heavily inspired by ReaPlus, a C++ facade for the native REAPER C++ API, which is a basic
 building block of the original ReaLearn.
