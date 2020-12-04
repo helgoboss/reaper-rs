@@ -225,7 +225,7 @@ impl ReaperNormalizedFxParamValue {
     pub fn new(value: f64) -> ReaperNormalizedFxParamValue {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid ReaperNormalizedFxParamValue", value)
         );
         ReaperNormalizedFxParamValue(value)
     }
@@ -276,7 +276,7 @@ impl Bpm {
     pub fn new(value: f64) -> Bpm {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid Bpm value", value)
         );
         Bpm(value)
     }
@@ -333,7 +333,7 @@ impl PlaybackSpeedFactor {
     pub fn new(value: f64) -> PlaybackSpeedFactor {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid PlaybackSpeedFactor", value)
         );
         PlaybackSpeedFactor(value)
     }
@@ -391,7 +391,7 @@ impl NormalizedPlayRate {
     pub fn new(value: f64) -> NormalizedPlayRate {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid NormalizedPlayRate", value)
         );
         NormalizedPlayRate(value)
     }
@@ -438,7 +438,7 @@ impl Hz {
     pub fn new(value: f64) -> Hz {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid Hz value", value)
         );
         Hz(value)
     }
@@ -522,7 +522,7 @@ impl Db {
     pub fn new(value: f64) -> Db {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid Db value", value)
         );
         Db(value)
     }
@@ -597,7 +597,7 @@ impl VolumeSliderValue {
     pub fn new(value: f64) -> VolumeSliderValue {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid VolumeSliderValue", value)
         );
         VolumeSliderValue(value)
     }
@@ -673,7 +673,7 @@ impl ReaperVolumeValue {
     pub fn new(value: f64) -> ReaperVolumeValue {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid ReaperVolumeValue", value)
         );
         ReaperVolumeValue(value)
     }
@@ -745,7 +745,7 @@ impl ReaperPanValue {
     pub fn new(value: f64) -> ReaperPanValue {
         assert!(
             Self::is_valid(value),
-            format!("{} is not a valid value", value)
+            format!("{} is not a valid ReaperPanValue", value)
         );
         ReaperPanValue(value)
     }
