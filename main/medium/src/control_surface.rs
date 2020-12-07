@@ -8,6 +8,7 @@ use crate::{
 use reaper_low::raw;
 use std::borrow::Cow;
 
+use std::convert::TryInto;
 use std::fmt::Debug;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
@@ -671,21 +672,32 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                 raw::CSURF_EXT_SETFXPARAM | raw::CSURF_EXT_SETFXPARAM_RECFX => {
                     let fxidx_and_paramidx: i32 =
                         deref_as(parm2).expect("fx/param index pointer is null");
-                    let normalized_value: f64 = deref_as(parm3).expect("value pointer is null");
-                    let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
-                    let param_index = fxidx_and_paramidx & 0xffff;
-                    let args = ExtSetFxParamArgs {
-                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                        fx_index: fx_index as u32,
-                        param_index: param_index as u32,
-                        param_value: ReaperNormalizedFxParamValue::new(normalized_value),
-                    };
-                    match call {
-                        raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_set_fx_param(args),
-                        raw::CSURF_EXT_SETFXPARAM_RECFX => {
-                            self.delegate.ext_set_fx_param_rec_fx(args)
+                    let value: f64 = deref_as(parm3).expect("value pointer is null");
+                    if let Ok(newtype_value) = value.try_into() {
+                        let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
+                        let param_index = fxidx_and_paramidx & 0xffff;
+                        let args = ExtSetFxParamArgs {
+                            track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                            fx_index: fx_index as u32,
+                            param_index: param_index as u32,
+                            param_value: newtype_value,
+                        };
+                        match call {
+                            raw::CSURF_EXT_SETFXPARAM => self.delegate.ext_set_fx_param(args),
+                            raw::CSURF_EXT_SETFXPARAM_RECFX => {
+                                self.delegate.ext_set_fx_param_rec_fx(args)
+                            }
+                            _ => unreachable!(),
                         }
-                        _ => unreachable!(),
+                    } else {
+                        // TODO-high This is just a workaround for #53 where users have observed
+                        // that the value can be -1, which I thought was not possible. Does it mean
+                        // that the parameter value is unknown? Or do devs have to prepare even for
+                        // other negative values? The answers to this question will decide about
+                        // if a signature change is necessary and if yes, how it will look. I'm
+                        // waiting for Justin's reply. Until then, just don't process such messages
+                        // in order to not spam users with error messages.
+                        0
                     }
                 }
                 raw::CSURF_EXT_SETFOCUSEDFX => {
