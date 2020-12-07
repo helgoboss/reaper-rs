@@ -216,6 +216,28 @@ impl Swell {
         }
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn MessageBox(
+        &self,
+        hwndParent: root::HWND,
+        text: *const ::std::os::raw::c_char,
+        caption: *const ::std::os::raw::c_char,
+        type_: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        let text_utf16 = utf8_to_16(text);
+        let caption_utf16 = utf8_to_16(caption);
+        let result = winapi::um::winuser::MessageBoxW(
+            hwndParent as _,
+            text_utf16.as_ptr() as _,
+            caption_utf16.as_ptr() as _,
+            type_ as _,
+        );
+        std::mem::drop(text_utf16);
+        result as _
+    }
+
     /// On Windows this is a constant but in SWELL this is a macro which translates to a function
     /// call.
     pub fn CF_TEXT(&self) -> root::UINT {
