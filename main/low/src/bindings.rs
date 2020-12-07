@@ -11,6 +11,14 @@ pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
     pub const DLL_PROCESS_ATTACH: u32 = 1;
+    pub const MB_OK: u32 = 0;
+    pub const MB_OKCANCEL: u32 = 1;
+    pub const MB_YESNOCANCEL: u32 = 3;
+    pub const MB_YESNO: u32 = 4;
+    pub const MB_RETRYCANCEL: u32 = 5;
+    pub const MB_ICONERROR: u32 = 0;
+    pub const MB_ICONSTOP: u32 = 0;
+    pub const MB_ICONINFORMATION: u32 = 0;
     pub const IDOK: u32 = 1;
     pub const IDCANCEL: u32 = 2;
     pub const IDABORT: u32 = 3;
@@ -310,16 +318,8 @@ pub mod root {
     }
     pub type __pthread_list_t = root::__pthread_internal_list;
     #[repr(C)]
-    #[derive(Copy, Clone)]
-    pub union pthread_mutex_t {
-        pub __data: root::pthread_mutex_t___pthread_mutex_s,
-        pub __size: [::std::os::raw::c_char; 40usize],
-        pub __align: ::std::os::raw::c_long,
-        _bindgen_union_align: [u64; 5usize],
-    }
-    #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct pthread_mutex_t___pthread_mutex_s {
+    pub struct __pthread_mutex_s {
         pub __lock: ::std::os::raw::c_int,
         pub __count: ::std::os::raw::c_uint,
         pub __owner: ::std::os::raw::c_int,
@@ -328,6 +328,14 @@ pub mod root {
         pub __spins: ::std::os::raw::c_short,
         pub __elision: ::std::os::raw::c_short,
         pub __list: root::__pthread_list_t,
+    }
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub union pthread_mutex_t {
+        pub __data: root::__pthread_mutex_s,
+        pub __size: [::std::os::raw::c_char; 40usize],
+        pub __align: ::std::os::raw::c_long,
+        _bindgen_union_align: [u64; 5usize],
     }
     pub mod std {
         #[allow(unused_imports)]
@@ -719,12 +727,6 @@ pub mod root {
     pub struct ProjectStateContext {
         pub vtable_: *const ProjectStateContext__bindgen_vtable,
     }
-    extern "C" {
-        #[link_name = "\u{1}_ZN19ProjectStateContextD1Ev"]
-        pub fn ProjectStateContext_ProjectStateContext_destructor(
-            this: *mut root::ProjectStateContext,
-        );
-    }
     #[doc = " MIDI event definition and abstract list"]
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -739,10 +741,6 @@ pub mod root {
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct MIDI_eventlist {
         pub vtable_: *const MIDI_eventlist__bindgen_vtable,
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN14MIDI_eventlistD1Ev"]
-        pub fn MIDI_eventlist_MIDI_eventlist_destructor(this: *mut root::MIDI_eventlist);
     }
     #[doc = " PCM source API"]
     #[repr(C)]
@@ -793,74 +791,12 @@ pub mod root {
     pub struct PCM_source {
         pub vtable_: *const PCM_source__bindgen_vtable,
     }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_sourceD1Ev"]
-        pub fn PCM_source_PCM_source_destructor(this: *mut root::PCM_source);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source12SetAvailableEb"]
-        pub fn PCM_source_SetAvailable(this: *mut ::std::os::raw::c_void, avail: bool);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source11GetFileNameEv"]
-        pub fn PCM_source_GetFileName(
-            this: *mut ::std::os::raw::c_void,
-        ) -> *const ::std::os::raw::c_char;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source9GetSourceEv"]
-        pub fn PCM_source_GetSource(this: *mut ::std::os::raw::c_void) -> *mut root::PCM_source;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source9SetSourceEPS_"]
-        pub fn PCM_source_SetSource(this: *mut ::std::os::raw::c_void, src: *mut root::PCM_source);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source14GetLengthBeatsEv"]
-        pub fn PCM_source_GetLengthBeats(this: *mut ::std::os::raw::c_void) -> f64;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source16GetBitsPerSampleEv"]
-        pub fn PCM_source_GetBitsPerSample(
-            this: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source20GetPreferredPositionEv"]
-        pub fn PCM_source_GetPreferredPosition(this: *mut ::std::os::raw::c_void) -> f64;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10PCM_source8ExtendedEiPvS0_S0_"]
-        pub fn PCM_source_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
-    }
     #[repr(C)]
     pub struct ISimpleMediaDecoder__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct ISimpleMediaDecoder {
         pub vtable_: *const ISimpleMediaDecoder__bindgen_vtable,
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN19ISimpleMediaDecoderD1Ev"]
-        pub fn ISimpleMediaDecoder_ISimpleMediaDecoder_destructor(
-            this: *mut root::ISimpleMediaDecoder,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN19ISimpleMediaDecoder8ExtendedEiPvS0_S0_"]
-        pub fn ISimpleMediaDecoder_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
     }
     #[repr(C)]
     pub struct PCM_sink__bindgen_vtable(::std::os::raw::c_void);
@@ -869,59 +805,6 @@ pub mod root {
     pub struct PCM_sink {
         pub vtable_: *const PCM_sink__bindgen_vtable,
         pub m_st: f64,
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sinkC2Ev"]
-        pub fn PCM_sink_PCM_sink(this: *mut root::PCM_sink);
-    }
-    impl PCM_sink {
-        #[inline]
-        pub unsafe fn new() -> Self {
-            let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-            PCM_sink_PCM_sink(__bindgen_tmp.as_mut_ptr());
-            __bindgen_tmp.assume_init()
-        }
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sinkD1Ev"]
-        pub fn PCM_sink_PCM_sink_destructor(this: *mut root::PCM_sink);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sink12GetStartTimeEv"]
-        pub fn PCM_sink_GetStartTime(this: *mut ::std::os::raw::c_void) -> f64;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sink12SetStartTimeEd"]
-        pub fn PCM_sink_SetStartTime(this: *mut ::std::os::raw::c_void, st: f64);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sink8WantMIDIEv"]
-        pub fn PCM_sink_WantMIDI(this: *mut ::std::os::raw::c_void) -> bool;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sink18GetLastSecondPeaksEiPd"]
-        pub fn PCM_sink_GetLastSecondPeaks(
-            this: *mut ::std::os::raw::c_void,
-            sz: ::std::os::raw::c_int,
-            buf: *mut root::ReaSample,
-        ) -> ::std::os::raw::c_int;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sink11GetPeakInfoEP25PCM_source_peaktransfer_t"]
-        pub fn PCM_sink_GetPeakInfo(
-            this: *mut ::std::os::raw::c_void,
-            block: *mut root::PCM_source_peaktransfer_t,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN8PCM_sink8ExtendedEiPvS0_S0_"]
-        pub fn PCM_sink_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
     }
     #[repr(C)]
     pub struct REAPER_Resample_Interface__bindgen_vtable(::std::os::raw::c_void);
@@ -934,42 +817,12 @@ pub mod root {
     pub struct REAPER_Resample_Interface {
         pub vtable_: *const REAPER_Resample_Interface__bindgen_vtable,
     }
-    extern "C" {
-        #[link_name = "\u{1}_ZN25REAPER_Resample_InterfaceD1Ev"]
-        pub fn REAPER_Resample_Interface_REAPER_Resample_Interface_destructor(
-            this: *mut root::REAPER_Resample_Interface,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN25REAPER_Resample_Interface8ExtendedEiPvS0_S0_"]
-        pub fn REAPER_Resample_Interface_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
-    }
     #[repr(C)]
     pub struct IReaperPitchShift__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct IReaperPitchShift {
         pub vtable_: *const IReaperPitchShift__bindgen_vtable,
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN17IReaperPitchShiftD1Ev"]
-        pub fn IReaperPitchShift_IReaperPitchShift_destructor(this: *mut root::IReaperPitchShift);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN17IReaperPitchShift8ExtendedEiPvS0_S0_"]
-        pub fn IReaperPitchShift_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
     }
     #[repr(C)]
     pub struct REAPER_PeakGet_Interface__bindgen_vtable(::std::os::raw::c_void);
@@ -983,44 +836,12 @@ pub mod root {
     pub struct REAPER_PeakGet_Interface {
         pub vtable_: *const REAPER_PeakGet_Interface__bindgen_vtable,
     }
-    extern "C" {
-        #[link_name = "\u{1}_ZN24REAPER_PeakGet_InterfaceD1Ev"]
-        pub fn REAPER_PeakGet_Interface_REAPER_PeakGet_Interface_destructor(
-            this: *mut root::REAPER_PeakGet_Interface,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN24REAPER_PeakGet_Interface8ExtendedEiPvS0_S0_"]
-        pub fn REAPER_PeakGet_Interface_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
-    }
     #[repr(C)]
     pub struct REAPER_PeakBuild_Interface__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct REAPER_PeakBuild_Interface {
         pub vtable_: *const REAPER_PeakBuild_Interface__bindgen_vtable,
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN26REAPER_PeakBuild_InterfaceD1Ev"]
-        pub fn REAPER_PeakBuild_Interface_REAPER_PeakBuild_Interface_destructor(
-            this: *mut root::REAPER_PeakBuild_Interface,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN26REAPER_PeakBuild_Interface8ExtendedEiPvS0_S0_"]
-        pub fn REAPER_PeakBuild_Interface_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -1113,48 +934,12 @@ pub mod root {
     pub struct midi_Output {
         pub vtable_: *const midi_Output__bindgen_vtable,
     }
-    extern "C" {
-        #[link_name = "\u{1}_ZN11midi_OutputD1Ev"]
-        pub fn midi_Output_midi_Output_destructor(this: *mut root::midi_Output);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN11midi_Output10BeginBlockEv"]
-        pub fn midi_Output_BeginBlock(this: *mut ::std::os::raw::c_void);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN11midi_Output8EndBlockEidd"]
-        pub fn midi_Output_EndBlock(
-            this: *mut ::std::os::raw::c_void,
-            length: ::std::os::raw::c_int,
-            srate: f64,
-            curtempo: f64,
-        );
-    }
     #[repr(C)]
     pub struct midi_Input__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct midi_Input {
         pub vtable_: *const midi_Input__bindgen_vtable,
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10midi_InputD1Ev"]
-        pub fn midi_Input_midi_Input_destructor(this: *mut root::midi_Input);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10midi_Input18RunPreNoteTrackingEi"]
-        pub fn midi_Input_RunPreNoteTracking(
-            this: *mut ::std::os::raw::c_void,
-            isAccum: ::std::os::raw::c_int,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN10midi_Input15SwapBufsPreciseEjd"]
-        pub fn midi_Input_SwapBufsPrecise(
-            this: *mut ::std::os::raw::c_void,
-            coarsetimestamp: ::std::os::raw::c_uint,
-            precisetimestamp: f64,
-        );
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
@@ -1187,148 +972,6 @@ pub mod root {
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct IReaperControlSurface {
         pub vtable_: *const IReaperControlSurface__bindgen_vtable,
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurfaceC2Ev"]
-        pub fn IReaperControlSurface_IReaperControlSurface(this: *mut root::IReaperControlSurface);
-    }
-    impl IReaperControlSurface {
-        #[inline]
-        pub unsafe fn new() -> Self {
-            let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-            IReaperControlSurface_IReaperControlSurface(__bindgen_tmp.as_mut_ptr());
-            __bindgen_tmp.assume_init()
-        }
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurfaceD1Ev"]
-        pub fn IReaperControlSurface_IReaperControlSurface_destructor(
-            this: *mut root::IReaperControlSurface,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface12CloseNoResetEv"]
-        pub fn IReaperControlSurface_CloseNoReset(this: *mut ::std::os::raw::c_void);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface3RunEv"]
-        pub fn IReaperControlSurface_Run(this: *mut ::std::os::raw::c_void);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface18SetTrackListChangeEv"]
-        pub fn IReaperControlSurface_SetTrackListChange(this: *mut ::std::os::raw::c_void);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface16SetSurfaceVolumeEP10MediaTrackd"]
-        pub fn IReaperControlSurface_SetSurfaceVolume(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            volume: f64,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface13SetSurfacePanEP10MediaTrackd"]
-        pub fn IReaperControlSurface_SetSurfacePan(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            pan: f64,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface14SetSurfaceMuteEP10MediaTrackb"]
-        pub fn IReaperControlSurface_SetSurfaceMute(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            mute: bool,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface18SetSurfaceSelectedEP10MediaTrackb"]
-        pub fn IReaperControlSurface_SetSurfaceSelected(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            selected: bool,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface14SetSurfaceSoloEP10MediaTrackb"]
-        pub fn IReaperControlSurface_SetSurfaceSolo(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            solo: bool,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface16SetSurfaceRecArmEP10MediaTrackb"]
-        pub fn IReaperControlSurface_SetSurfaceRecArm(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            recarm: bool,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface12SetPlayStateEbbb"]
-        pub fn IReaperControlSurface_SetPlayState(
-            this: *mut ::std::os::raw::c_void,
-            play: bool,
-            pause: bool,
-            rec: bool,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface14SetRepeatStateEb"]
-        pub fn IReaperControlSurface_SetRepeatState(this: *mut ::std::os::raw::c_void, rep: bool);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface13SetTrackTitleEP10MediaTrackPKc"]
-        pub fn IReaperControlSurface_SetTrackTitle(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            title: *const ::std::os::raw::c_char,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface13GetTouchStateEP10MediaTracki"]
-        pub fn IReaperControlSurface_GetTouchState(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-            isPan: ::std::os::raw::c_int,
-        ) -> bool;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface11SetAutoModeEi"]
-        pub fn IReaperControlSurface_SetAutoMode(
-            this: *mut ::std::os::raw::c_void,
-            mode: ::std::os::raw::c_int,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface23ResetCachedVolPanStatesEv"]
-        pub fn IReaperControlSurface_ResetCachedVolPanStates(this: *mut ::std::os::raw::c_void);
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface16OnTrackSelectionEP10MediaTrack"]
-        pub fn IReaperControlSurface_OnTrackSelection(
-            this: *mut ::std::os::raw::c_void,
-            trackid: *mut root::MediaTrack,
-        );
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface9IsKeyDownEi"]
-        pub fn IReaperControlSurface_IsKeyDown(
-            this: *mut ::std::os::raw::c_void,
-            key: ::std::os::raw::c_int,
-        ) -> bool;
-    }
-    extern "C" {
-        #[link_name = "\u{1}_ZN21IReaperControlSurface8ExtendedEiPvS0_S0_"]
-        pub fn IReaperControlSurface_Extended(
-            this: *mut ::std::os::raw::c_void,
-            call: ::std::os::raw::c_int,
-            parm1: *mut ::std::os::raw::c_void,
-            parm2: *mut ::std::os::raw::c_void,
-            parm3: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int;
     }
     pub mod reaper_functions {
         #[allow(unused_imports)]

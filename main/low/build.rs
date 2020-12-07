@@ -125,6 +125,7 @@ mod codegen {
                 .whitelist_var("SW_.*")
                 .whitelist_var("SWP_.*")
                 .whitelist_var("CB_.*")
+                .whitelist_var("MB_.*")
                 .whitelist_var("CBN_.*")
                 .whitelist_var("WM_.*")
                 .whitelist_var("SIF_.*")
