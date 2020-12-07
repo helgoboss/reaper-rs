@@ -123,7 +123,10 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         {
-            winapi::um::winuser::SetWindowTextW(hwnd as _, utf8_to_16(text).as_ptr()) as _
+            let utf16_string = utf8_to_16(text);
+            let result = winapi::um::winuser::SetWindowTextW(hwnd as _, utf16_string.as_ptr());
+            std::mem::drop(utf16_string);
+            result as _
         }
     }
 
@@ -173,17 +176,16 @@ impl Swell {
         wParam: root::WPARAM,
         lParam: root::LPARAM,
     ) -> root::LRESULT {
-        if lparam_is_string(msg) {
-            winapi::um::winuser::SendMessageW(
+        if lParam != 0 && lparam_is_string(msg) {
+            let utf16_string = utf8_to_16(lParam as _);
+            let result = winapi::um::winuser::SendMessageW(
                 hwnd as _,
                 msg,
                 wParam,
-                if lParam == 0 {
-                    0
-                } else {
-                    utf8_to_16(lParam as _).as_ptr() as _
-                },
-            )
+                utf16_string.as_ptr() as _,
+            );
+            std::mem::drop(utf16_string);
+            result
         } else {
             winapi::um::winuser::SendMessageW(hwnd as _, msg, wParam, lParam)
         }
@@ -199,21 +201,19 @@ impl Swell {
         wParam: root::WPARAM,
         lParam: root::LPARAM,
     ) -> root::BOOL {
-        let result = if lparam_is_string(msg) {
-            winapi::um::winuser::PostMessageW(
+        if lParam != 0 && lparam_is_string(msg) {
+            let utf16_string = utf8_to_16(lParam as _);
+            let result = winapi::um::winuser::PostMessageW(
                 hwnd as _,
                 msg,
                 wParam,
-                if lParam == 0 {
-                    0
-                } else {
-                    utf8_to_16(lParam as _).as_ptr() as _
-                },
-            )
+                utf16_string.as_ptr() as _,
+            );
+            std::mem::drop(utf16_string);
+            result as _
         } else {
-            winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam)
-        };
-        result as _
+            winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam) as _
+        }
     }
 
     /// On Windows this is a constant but in SWELL this is a macro which translates to a function
