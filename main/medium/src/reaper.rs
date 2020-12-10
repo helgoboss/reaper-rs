@@ -1988,7 +1988,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// With `buffer_size` you can tell REAPER and the FX how many bytes of the value you want.
     ///
     /// Named parameters are a vendor-specific VST extension from Cockos (see
-    /// http://reaper.fm/sdk/vst/vst_ext.php).
+    /// <http://reaper.fm/sdk/vst/vst_ext.php>).
     ///
     /// # Errors
     ///

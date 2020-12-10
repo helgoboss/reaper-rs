@@ -235,8 +235,8 @@ impl Reaper {
     /// this should be done only in situations when you are very constrained, e.g. in audio thread
     /// (which is forbidden to call most of the REAPER functions anyway).
     ///
-    /// Look into [from_vec_unchecked](std::ffi::c_str::CString::from_vec_unchecked) or
-    /// [from_bytes_with_nul_unchecked](std::ffi::c_str::CStr::from_bytes_with_nul_unchecked)
+    /// Look into [from_vec_unchecked](std::ffi::CString::from_vec_unchecked) or
+    /// [from_bytes_with_nul_unchecked](std::ffi::CStr::from_bytes_with_nul_unchecked)
     /// respectively.
     pub fn show_console_msg<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
         self.medium_reaper().show_console_msg(msg);
