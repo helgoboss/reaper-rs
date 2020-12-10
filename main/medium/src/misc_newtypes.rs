@@ -187,46 +187,38 @@ impl MidiOutputDeviceId {
 
 /// This represents a particular value of an FX parameter in "REAPER-normalized" form.
 ///
-/// Please note that this value is **not** normalized in the classical sense of being in the unit
-/// interval 0.0..=1.0! While it mostly is, there are situation where it can be > 1.0. All this type
-/// guarantees is that the value is > 0.0.
+/// Please note that this value is **not** always normalized in the classical sense of being in the
+/// unit interval 0.0..=1.0! Mostly it is and this is definitely the frame of reference. But there
+/// are situations where it can be > 1.0. Turns out, it can even be a negative value! The meaning
+/// depends on the particular FX.
 ///
-/// Examples of FX parameters which can exceed 1.0:
+/// Examples of FX parameters which can take values that are not in the unit interval:
 /// - *ReaPitch* has a *Wet* parameter which has a "reasonable" maximum at 6 dB which corresponds to
 ///   the REAPER-normalized value 1.0. But this reasonable maximum can be exceeded, in which case it
 ///   can almost reach 2.0.
 /// - *TAL Flanger* has a *Sync Speed* parameter which reports the min/max range as 0.0..=1.0 but
 ///   returns values between 0.0 and 8.0. It reports the range incorrectly.
+/// - *Xfer Records LFO Tool* has an envelope point control that reports a value that is slightly
+///   below zero when dragged all down. That's probably a bug.
+/// - Because of a bug in REAPER <= 6.12 `SetParamNormalized`, it's possible that certain JS FX
+///   parameter values end up as NaN, in Lua console displayed as "-1.#IND". E.g. happened to JS FX
+///   "MIDI Note-On Delay" parameter "Poo". Bug has been reported.
+///
+/// Justin said that  0.0..=1.0 is the normal VST parameter range but that some ReaPlugs extend that
+/// range when it's convenient (e.g. increasing the range from the initial version of the plug-in
+/// or using values greater than 1.0 for volume when using gain etc.). He pointed out that
+/// developers should prepare for anything.
+///
+/// We don't try to "fix" exotic values in medium-level API (e.g. setting negative values to zero
+/// automatically) because there might be plug-ins which assign meaning to these special values and
+/// then it would be a shame if we can't set or get them.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Serialize, Deserialize),
-    serde(try_from = "f64")
-)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(from = "f64"))]
 pub struct ReaperNormalizedFxParamValue(pub(crate) f64);
 
 impl ReaperNormalizedFxParamValue {
-    /// The minimum possible value (0.0).
-    pub const MIN: ReaperNormalizedFxParamValue = ReaperNormalizedFxParamValue(0.0);
-
-    fn is_valid(value: f64) -> bool {
-        // Because of a bug in REAPER SetParamNormalized (<= 6.12), it's possible that certain JS FX
-        // parameter values end up as NaN, in Lua console displayed as "-1.#IND".
-        // E.g. happened to JS FX "MIDI Note-On Delay" parameter "Poo". Instead of panicking, we
-        // should accept it. Bug has been reported.
-        ReaperNormalizedFxParamValue::MIN.get() <= value || value.is_nan()
-    }
-
     /// Creates a REAPER-normalized FX parameter value.
-    ///
-    /// # Panics
-    ///
-    /// This function panics if the given value is negative.
     pub fn new(value: f64) -> ReaperNormalizedFxParamValue {
-        assert!(
-            Self::is_valid(value),
-            format!("{} is not a valid ReaperNormalizedFxParamValue", value)
-        );
         ReaperNormalizedFxParamValue(value)
     }
 
@@ -236,14 +228,9 @@ impl ReaperNormalizedFxParamValue {
     }
 }
 
-impl TryFrom<f64> for ReaperNormalizedFxParamValue {
-    type Error = TryFromGreaterError<f64>;
-
-    fn try_from(value: f64) -> Result<Self, Self::Error> {
-        if !Self::is_valid(value) {
-            return Err(TryFromGreaterError::new("value must be positive", value));
-        }
-        Ok(ReaperNormalizedFxParamValue(value))
+impl From<f64> for ReaperNormalizedFxParamValue {
+    fn from(value: f64) -> Self {
+        ReaperNormalizedFxParamValue(value)
     }
 }
 
