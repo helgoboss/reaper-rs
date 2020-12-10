@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("From REAPER: Launching reaper-rs reaper-test-extension-plugin...");
     }
     let reaper = Reaper::get();
-    reaper.wake_up().unwrap();
+    reaper.wake_up()?;
     debug!(reaper.logger(), "Loaded reaper-rs integration test plugin");
     if run_integration_test {
         println!("From REAPER: Entering reaper-rs integration test...");

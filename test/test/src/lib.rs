@@ -12,7 +12,6 @@ use rxrust::prelude::*;
 use std::collections::VecDeque;
 
 use slog::info;
-use std::iter::FromIterator;
 use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
 
@@ -23,7 +22,7 @@ use std::panic::AssertUnwindSafe;
 pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) {
     Reaper::get().clear_console();
     log("# Testing reaper-rs\n");
-    let steps = VecDeque::from_iter(create_test_steps());
+    let steps: VecDeque<_> = create_test_steps().collect();
     let step_count = steps.len();
     execute_next_step(steps, step_count, on_finish);
 }

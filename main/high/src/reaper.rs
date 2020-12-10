@@ -877,7 +877,7 @@ impl Reaper {
         &self,
         waiting_time: Duration,
         op: impl FnOnce() + Send + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
     }
 
@@ -887,7 +887,7 @@ impl Reaper {
         &self,
         waiting_time: Duration,
         op: impl FnOnce() + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         self.require_main_thread();
         unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
     }
@@ -897,19 +897,22 @@ impl Reaper {
         &self,
         waiting_time: Duration,
         op: impl FnOnce() + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         let sender = &self.main_thread_task_sender;
         sender
             .send(MainThreadTask::new(
                 Box::new(op),
                 Some(SystemTime::now() + waiting_time),
             ))
-            .map_err(|_| ())
+            .map_err(|_| "channel disconnected")
     }
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
     // deactivated).
-    pub fn do_in_main_thread_asap(&self, op: impl FnOnce() + Send + 'static) -> Result<(), ()> {
+    pub fn do_in_main_thread_asap(
+        &self,
+        op: impl FnOnce() + Send + 'static,
+    ) -> Result<(), &'static str> {
         unsafe { self.do_in_main_thread_asap_internal(op) }
     }
 
@@ -918,7 +921,7 @@ impl Reaper {
     pub fn do_in_main_thread_from_main_thread_asap(
         &self,
         op: impl FnOnce() + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         self.require_main_thread();
         unsafe { self.do_in_main_thread_asap_internal(op) }
     }
@@ -927,7 +930,7 @@ impl Reaper {
     unsafe fn do_in_main_thread_asap_internal(
         &self,
         op: impl FnOnce() + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         if Reaper::get().is_in_main_thread() {
             op();
             Ok(())
@@ -940,7 +943,7 @@ impl Reaper {
     pub async fn main_thread_future<R: 'static + Send>(
         &self,
         op: impl FnOnce() -> R + 'static + Send,
-    ) -> Result<R, ()> {
+    ) -> Result<R, &'static str> {
         if Reaper::get().is_in_main_thread() {
             Ok(op())
         } else {
@@ -948,7 +951,8 @@ impl Reaper {
             self.do_later_in_main_thread_asap(move || {
                 tx.send(op()).ok().expect("couldn't send");
             })?;
-            rx.await.map_err(|_| ())
+            rx.await
+                .map_err(|_| "error when awaiting main thread future")
         }
     }
 
@@ -957,7 +961,7 @@ impl Reaper {
     pub fn do_later_in_main_thread_asap(
         &self,
         op: impl FnOnce() + Send + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         unsafe { self.do_later_in_main_thread_asap_internal(op) }
     }
 
@@ -966,7 +970,7 @@ impl Reaper {
     pub fn do_later_in_main_thread_from_main_thread_asap(
         &self,
         op: impl FnOnce() + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         self.require_main_thread();
         unsafe { self.do_later_in_main_thread_asap_internal(op) }
     }
@@ -975,11 +979,11 @@ impl Reaper {
     unsafe fn do_later_in_main_thread_asap_internal(
         &self,
         op: impl FnOnce() + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         let sender = &self.main_thread_task_sender;
         sender
             .send(MainThreadTask::new(Box::new(op), None))
-            .map_err(|_| ())
+            .map_err(|_| "channel disconnected")
     }
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
@@ -987,9 +991,11 @@ impl Reaper {
     pub fn do_later_in_real_time_audio_thread_asap(
         &self,
         op: impl FnOnce(&RealTimeReaper) + Send + 'static,
-    ) -> Result<(), ()> {
+    ) -> Result<(), &'static str> {
         let sender = &self.audio_thread_task_sender;
-        sender.send(Box::new(op)).map_err(|_| ())
+        sender
+            .send(Box::new(op))
+            .map_err(|_| "channel was disconnected")
     }
 
     pub fn undoable_action_is_running(&self) -> bool {

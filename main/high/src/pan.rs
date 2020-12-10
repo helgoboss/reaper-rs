@@ -9,7 +9,7 @@ pub struct Pan {
 
 impl Pan {
     pub fn from_normalized_value(normalized_value: f64) -> Pan {
-        assert!(0.0 <= normalized_value && normalized_value <= 1.0);
+        assert!((0.0..=1.0).contains(&normalized_value));
         Pan { normalized_value }
     }
 

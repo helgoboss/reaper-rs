@@ -268,12 +268,10 @@ impl HelperControlSurface {
             return false;
         }
         use AutomationMode::*;
-        match track.effective_automation_mode() {
-            // Is not automated
-            None | Some(TrimRead) | Some(Write) => false,
-            // Is automated
-            _ => true,
-        }
+        !matches!(
+            track.effective_automation_mode(),
+            None | Some(TrimRead) | Some(Write)
+        )
     }
 
     fn remove_invalid_rea_projects(&self) {
