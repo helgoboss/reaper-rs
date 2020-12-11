@@ -171,6 +171,24 @@ impl Fx {
         }
     }
 
+    pub fn set_named_config_param<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+        buffer: &[u8],
+    ) -> Result<(), ReaperFunctionError> {
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_set_named_config_parm(track.raw(), location, name, buffer)
+                }
+            }
+        }
+    }
+
     pub fn parameters(&self) -> impl Iterator<Item = FxParameter> + '_ {
         self.load_if_necessary_or_complain();
         (0..self.parameter_count()).map(move |i| self.parameter_by_index(i))
