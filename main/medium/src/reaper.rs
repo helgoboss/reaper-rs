@@ -510,6 +510,36 @@ impl<UsageScope> Reaper<UsageScope> {
         create_passing_c_str(ptr as *const c_char).map(use_name)
     }
 
+    /// Convenience function which sets the track's name (`P_NAME`).
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use reaper_medium::ProjectContext::CurrentProject;
+    /// let session = reaper_medium::ReaperSession::default();
+    ///
+    /// let track = session.reaper().get_track(CurrentProject, 0).ok_or("no track")?;
+    /// unsafe {
+    ///     session.reaper().get_set_media_track_info_set_name(track, "Guitar");
+    /// }
+    /// # Ok::<_, Box<dyn std::error::Error>>(())
+    /// ```
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn get_set_media_track_info_set_name<'a>(
+        &self,
+        track: MediaTrack,
+        message: impl Into<ReaperStringArg<'a>>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_track_info(track, TrackAttributeKey::Name, message.into().as_ptr() as _);
+    }
+
     /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
     ///
     /// # Safety
