@@ -2027,6 +2027,45 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(buffer)
     }
 
+    /// Sets a plug-in specific named configuration value.
+    ///
+    /// Named parameters are a vendor-specific VST extension from Cockos (see
+    /// <http://reaper.fm/sdk/vst/vst_ext.php>).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the given FX doesn't have this named parameter or doesn't support named
+    /// parameters.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(SingleThreadNanos)]
+    pub unsafe fn track_fx_set_named_config_parm<'a>(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+        param_name: impl Into<ReaperStringArg<'a>>,
+        buffer: &[u8],
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.TrackFX_SetNamedConfigParm(
+            track.as_ptr(),
+            fx_location.to_raw(),
+            param_name.into().as_ptr(),
+            buffer.as_ptr() as _,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't set named parameter value",
+            ));
+        }
+        Ok(())
+    }
+
     /// Starts a new undo block.
     ///
     /// # Panics
