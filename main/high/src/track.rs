@@ -1,8 +1,5 @@
 use std::cell::Cell;
 
-use std::ffi::CStr;
-use std::os::raw::c_void;
-
 use crate::fx::{get_index_from_query_index, Fx};
 use crate::fx_chain::FxChain;
 use crate::guid::Guid;
@@ -13,12 +10,12 @@ use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::SendTarget::OtherTrack;
-use reaper_medium::TrackAttributeKey::{Mute, Name, RecArm, RecInput, RecMon, Selected, Solo};
+use reaper_medium::TrackAttributeKey::{Mute, RecArm, RecInput, RecMon, Selected, Solo};
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, RecordArmMode, RecordingInput,
-    TrackAttributeKey, TrackLocation, TrackSendCategory,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
+    RecordingInput, TrackAttributeKey, TrackLocation, TrackSendCategory,
 };
 use std::convert::TryInto;
 
@@ -69,14 +66,12 @@ impl Track {
         }
     }
 
-    pub fn set_name(&self, name: &CStr) {
+    pub fn set_name<'a>(&self, name: impl Into<ReaperStringArg<'a>>) {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
-            Reaper::get().medium_reaper().get_set_media_track_info(
-                self.raw(),
-                Name,
-                name.as_ptr() as *mut c_void,
-            );
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_track_info_set_name(self.raw(), name);
         }
     }
 

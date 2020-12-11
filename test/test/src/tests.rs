@@ -330,7 +330,7 @@ fn use_undoable() -> TestStep {
         });
         let track_mirror = track.clone();
         project.undoable("reaper-rs integration test operation", move || {
-            track_mirror.set_name(c_str!("Renamed"));
+            track_mirror.set_name("Renamed");
         });
         let label = project.label_of_last_undoable_action();
         // Then
@@ -425,7 +425,7 @@ fn insert_track_at() -> TestStep {
                 });
         });
         let new_track = project.insert_track_at(1);
-        new_track.set_name(c_str!("Inserted track"));
+        new_track.set_name("Inserted track");
         // Then
         assert_eq!(project.track_count(), 4);
         assert_eq!(new_track.location(), TrackLocation::NormalTrack(1));
@@ -1687,7 +1687,7 @@ fn set_track_name() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_name(c_str!("Foo Bla"));
+        track.set_name("Foo Bla");
         // Then
         assert_eq!(track.name().ok_or("no track name")?.to_str(), "Foo Bla");
         assert_eq!(mock.invocation_count(), 1);
