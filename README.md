@@ -430,6 +430,9 @@ Running the integration test is not only a good way to find _reaper-rs_ regressi
 subtle changes in the REAPER C++ API itself. Currently, the test assertions are very strict in order to reveal even
 the slightest deviations.
 
+**Attention:** The test should be executed using a fresh `reaper.ini`. Some assertions assume that REAPER
+preferences are set to their defaults. Executing the test with modified preferences can lead to wrong test results! 
+
 On Linux and macOS, the REAPER integration test will be run automatically as Cargo integration test
 `run_reaper_integration_test` when invoking `cargo test` (downloads, unpacks and executes REAPER). This test is part of 
 `reaper-test-extension-plugin`. It can be disabled by building that crate with `--no-default-features`.
