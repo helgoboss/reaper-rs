@@ -689,6 +689,11 @@ impl Reaper {
         self.subjects.track_removed.borrow().clone()
     }
 
+    pub fn tracks_reordered(&self) -> impl ReactiveEvent<Project> {
+        self.require_main_thread();
+        self.subjects.tracks_reordered.borrow().clone()
+    }
+
     pub fn track_name_changed(&self) -> impl ReactiveEvent<Track> {
         self.require_main_thread();
         self.subjects.track_name_changed.borrow().clone()
