@@ -112,6 +112,52 @@ impl Swell {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn FillRect(&self, ctx: root::HDC, r: *const root::RECT, br: root::HBRUSH) {
+        #[cfg(target_family = "unix")]
+        {
+            self.SWELL_FillRect(ctx, r, br);
+        }
+        #[cfg(target_family = "windows")]
+        #[allow(clippy::cast_ptr_alignment)]
+        {
+            winapi::um::winuser::FillRect(ctx as _, r as _, br as _);
+        }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn DrawText(
+        &self,
+        ctx: root::HDC,
+        buf: *const ::std::os::raw::c_char,
+        len: ::std::os::raw::c_int,
+        r: *mut root::RECT,
+        align: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        #[cfg(target_family = "unix")]
+        {
+            self.SWELL_DrawText(ctx, buf, len, r, align)
+        }
+        #[cfg(target_family = "windows")]
+        #[allow(clippy::cast_ptr_alignment)]
+        {
+            let utf16_string = utf8_to_16(buf);
+            let result = winapi::um::winuser::DrawTextW(
+                ctx as _,
+                utf16_string.as_ptr(),
+                len,
+                r as _,
+                align as _,
+            );
+            std::mem::drop(utf16_string);
+            result
+        }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn SetWindowText(
         &self,
         hwnd: root::HWND,

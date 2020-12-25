@@ -136,7 +136,11 @@ mod codegen {
                 .whitelist_var("TBM_.*")
                 .whitelist_var("TPM_.*")
                 .whitelist_var("CF_.*")
+                .whitelist_var("DT_.*")
                 .whitelist_var("GMEM_.*")
+                .whitelist_var("COLOR_.*")
+                .whitelist_var("SRCCOPY")
+                .whitelist_var("SRCCOPY_USEALPHACHAN")
                 .whitelist_var("ID.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_type("HINSTANCE")
@@ -207,8 +211,6 @@ mod codegen {
         /// they are encoded as UTF-16). This is now implemented manually in `SwellImpl`.
         static WIN32_SWELL_FUNCTIONS: phf::Set<&'static str> = phf::phf_set![
             // # winuser.h
-
-            // Same name
             "BeginPaint",
             "CheckDlgButton",
             "CheckMenuItem",
@@ -273,6 +275,9 @@ mod codegen {
             "ShowWindow",
             "TrackPopupMenu",
             "WindowFromPoint",
+            // # wingdi.h
+            "BitBlt",
+            "StretchBlt",
             // # winbase.h
             "GlobalAlloc",
             "GlobalLock",

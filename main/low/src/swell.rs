@@ -7530,6 +7530,44 @@ impl Swell {
         unsafe { windows::CreateIconIndirect(iconinfo) }
     }
     #[cfg(target_family = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn BitBlt(
+        &self,
+        hdcOut: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        hdcIn: root::HDC,
+        xin: ::std::os::raw::c_int,
+        yin: ::std::os::raw::c_int,
+        mode: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::BitBlt(hdcOut, x, y, w, h, hdcIn, xin, yin, mode) }
+    }
+    #[cfg(target_family = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn StretchBlt(
+        &self,
+        hdcOut: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        w: ::std::os::raw::c_int,
+        h: ::std::os::raw::c_int,
+        hdcIn: root::HDC,
+        xin: ::std::os::raw::c_int,
+        yin: ::std::os::raw::c_int,
+        srcw: ::std::os::raw::c_int,
+        srch: ::std::os::raw::c_int,
+        mode: ::std::os::raw::c_int,
+    ) {
+        unsafe { windows::StretchBlt(hdcOut, x, y, w, h, hdcIn, xin, yin, srcw, srch, mode) }
+    }
+    #[cfg(target_family = "windows")]
     pub fn GetSysColor(&self, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         unsafe { windows::GetSysColor(idx) }
     }
@@ -9212,6 +9250,34 @@ mod windows {
     }
     extern "system" {
         pub fn CreateIconIndirect(iconinfo: *mut root::ICONINFO) -> root::HICON;
+    }
+    extern "system" {
+        pub fn BitBlt(
+            hdcOut: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            hdcIn: root::HDC,
+            xin: ::std::os::raw::c_int,
+            yin: ::std::os::raw::c_int,
+            mode: ::std::os::raw::c_int,
+        );
+    }
+    extern "system" {
+        pub fn StretchBlt(
+            hdcOut: root::HDC,
+            x: ::std::os::raw::c_int,
+            y: ::std::os::raw::c_int,
+            w: ::std::os::raw::c_int,
+            h: ::std::os::raw::c_int,
+            hdcIn: root::HDC,
+            xin: ::std::os::raw::c_int,
+            yin: ::std::os::raw::c_int,
+            srcw: ::std::os::raw::c_int,
+            srch: ::std::os::raw::c_int,
+            mode: ::std::os::raw::c_int,
+        );
     }
     extern "system" {
         pub fn GetSysColor(idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
