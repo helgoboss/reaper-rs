@@ -1089,18 +1089,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        use ActionValueChange::*;
-        let (val, valhw, relmode) = match value_change {
-            AbsoluteLowRes(v) => (i32::from(v), -1, 0),
-            AbsoluteHighRes(v) => (
-                ((u32::from(v) >> 7) & 0x7f) as i32,
-                (u32::from(v) & 0x7f) as i32,
-                0,
-            ),
-            Relative1(v) => (i32::from(v), -1, 1),
-            Relative2(v) => (i32::from(v), -1, 2),
-            Relative3(v) => (i32::from(v), -1, 3),
-        };
+        let (val, valhw, relmode) = value_change.to_raw();
         self.low.KBD_OnMainActionEx(
             command_id.to_raw(),
             val,

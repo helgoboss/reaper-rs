@@ -353,6 +353,58 @@ pub enum ActionValueChange {
     Relative3(U7),
 }
 
+impl ActionValueChange {
+    /// Converts this value to the (val, valhw, relmode) triple expected by the low-level API.
+    pub(crate) fn to_raw(self) -> (i32, i32, i32) {
+        use ActionValueChange::*;
+        match self {
+            AbsoluteLowRes(v) => (i32::from(v), -1, 0),
+            AbsoluteHighRes(v) => (
+                ((u32::from(v) >> 7) & 0x7f) as i32,
+                (u32::from(v) & 0x7f) as i32,
+                0,
+            ),
+            Relative1(v) => (i32::from(v), -1, 1),
+            Relative2(v) => (i32::from(v), -1, 2),
+            Relative3(v) => (i32::from(v), -1, 3),
+        }
+    }
+
+    /// Converts the given low-level API values to this action value change if possible.
+    pub(crate) fn try_from_raw(
+        raw: (i32, i32, i32),
+    ) -> Result<ActionValueChange, TryFromRawError<(i32, i32, i32)>> {
+        let (val, valhw, relmode) = raw;
+        let val: U7 = val
+            .try_into()
+            .map_err(|_| TryFromRawError::new("val must be 7-bit", raw))?;
+        use ActionValueChange::*;
+        let change = match (valhw, relmode) {
+            (-1, 0) | (-1, 1) | (-1, 2) | (-1, 3) => match relmode {
+                0 => AbsoluteLowRes(val),
+                1 => Relative1(val),
+                2 => Relative2(val),
+                3 => Relative3(val),
+                _ => unreachable!(),
+            },
+            (valhw, 0) if valhw >= 0 => {
+                let valhw: U7 = valhw
+                    .try_into()
+                    .map_err(|_| TryFromRawError::new("valhw must be 7-bit", raw))?;
+                let combined = (valhw.get() << 7) | val.get();
+                AbsoluteHighRes(combined.into())
+            }
+            _ => {
+                return Err(TryFromRawError::new(
+                    "invalid valhw/relmode combination",
+                    raw,
+                ));
+            }
+        };
+        Ok(change)
+    }
+}
+
 /// A thing that you can register at REAPER.
 // TODO-low "Unlock" all uncommented variants as soon as appropriate types are clear
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -400,6 +452,21 @@ pub enum RegistrationObject<'a> {
     /// reentrancy test...
     /// </pre>
     HookCommand(raw::HookCommand),
+    /// A hook command that supports MIDI CC/mousewheel actions.
+    ///
+    /// Extract from `reaper_plugin_functions.h`:
+    ///
+    /// <pre>
+    /// you can also register "hookcommand2", which you pass a callback:
+    ///  NON_API: bool onAction(KbdSectionInfo *sec, int command, int val, int valhw, int relmode,
+    /// HWND hwnd);           register("hookcommand2",onAction);
+    /// which returns TRUE to eat (process) the command.
+    /// val/valhw are used for actions learned with MIDI/OSC.
+    /// val = [0..127] and valhw = -1 for MIDI CC,
+    /// valhw >=0 for MIDI pitch or OSC with value = (valhw|val<<7)/16383.0,
+    /// relmode absolute(0) or 1/2/3 for relative adjust modes
+    /// </pre>
+    HookCommand2(raw::HookCommand2),
     /// A hook post command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
@@ -525,6 +592,10 @@ impl<'a> RegistrationObject<'a> {
             },
             HookCommand(func) => PluginRegistration {
                 key: reaper_str!("hookcommand").into(),
+                value: func as _,
+            },
+            HookCommand2(func) => PluginRegistration {
+                key: reaper_str!("hookcommand2").into(),
                 value: func as _,
             },
             HookPostCommand(func) => PluginRegistration {
@@ -739,6 +810,14 @@ impl<'a> SectionContext<'a> {
             Sec(i) => i.0.as_ptr(),
         }
     }
+
+    pub(crate) fn from_medium(value: Option<&KbdSectionInfo>) -> SectionContext {
+        use SectionContext::*;
+        match value {
+            None => MainSection,
+            Some(info) => Sec(&info),
+        }
+    }
 }
 
 /// Allows one to pass a window handle to the action function.
@@ -760,6 +839,15 @@ impl WindowContext {
         match self {
             Win(h) => h.as_ptr(),
             NoWindow => null_mut(),
+        }
+    }
+
+    /// Converts this raw pointer as returned from the low-level API to a window context.
+    pub(crate) fn from_raw(raw: raw::HWND) -> WindowContext {
+        use WindowContext::*;
+        match NonNull::new(raw) {
+            None => NoWindow,
+            Some(hwnd) => Win(hwnd),
         }
     }
 }

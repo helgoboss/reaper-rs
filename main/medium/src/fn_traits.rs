@@ -1,11 +1,12 @@
-use crate::CommandId;
-use reaper_low::firewall;
+use crate::{ActionValueChange, CommandId, KbdSectionInfo, SectionContext, WindowContext};
+use reaper_low::{firewall, raw};
 use std::os::raw::c_int;
+use std::ptr::NonNull;
 
 /// Consumers need to implement this trait in order to define what should happen when a certain
 /// action is invoked.
 pub trait HookCommand {
-    /// The actual callback function called by REAPER whenever an action was triggered to run.
+    /// The actual callback function invoked by REAPER whenever an action was triggered to run.
     ///
     /// Must return `true` to indicate that the given command has been processed.
     ///
@@ -21,6 +22,44 @@ pub(crate) extern "C" fn delegating_hook_command<T: HookCommand>(
     flag: c_int,
 ) -> bool {
     firewall(|| T::call(CommandId(command_id as _), flag)).unwrap_or(false)
+}
+
+/// Consumers need to implement this trait in order to define what should happen when a certain
+/// MIDI CC/mousewheel action is invoked.
+pub trait HookCommand2 {
+    /// The actual callback function invoked by REAPER whenever an action was triggered to run.
+    ///
+    /// Must return `true` to indicate that the given command has been processed.
+    fn call(
+        section: SectionContext,
+        command_id: CommandId,
+        value_change: ActionValueChange,
+        window: WindowContext,
+    ) -> bool;
+}
+
+pub(crate) extern "C" fn delegating_hook_command_2<T: HookCommand2>(
+    sec: *mut raw::KbdSectionInfo,
+    command_id: c_int,
+    val: c_int,
+    valhw: c_int,
+    relmode: c_int,
+    hwnd: raw::HWND,
+) -> bool {
+    firewall(|| {
+        let kbd_section_info = NonNull::new(sec).map(KbdSectionInfo);
+        let section_context = SectionContext::from_medium(kbd_section_info.as_ref());
+        let value_change =
+            ActionValueChange::try_from_raw((val, valhw, relmode)).expect("unexpected values");
+        let window_context = WindowContext::from_raw(hwnd);
+        T::call(
+            section_context,
+            CommandId(command_id as _),
+            value_change,
+            window_context,
+        )
+    })
+    .unwrap_or(false)
 }
 
 /// Consumers need to implement this trait in order to let REAPER know if a toggleable action is

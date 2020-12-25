@@ -7,12 +7,12 @@ use reaper_low::{
 use crate::infostruct_keeper::InfostructKeeper;
 
 use crate::{
-    concat_reaper_strs, delegating_hook_command, delegating_hook_post_command,
-    delegating_toggle_action, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
-    HookPostCommand, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister,
-    PluginRegistration, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
-    ReaperFunctionResult, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
-    ToggleAction,
+    concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
+    delegating_hook_post_command, delegating_toggle_action, CommandId, ControlSurface,
+    DelegatingControlSurface, HookCommand, HookCommand2, HookPostCommand, MainThreadScope,
+    OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister, PluginRegistration,
+    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperString,
+    ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -140,8 +140,8 @@ impl ReaperSession {
     /// the safe convenience functions instead. They all start with `plugin_register_add_`.
     ///
     /// The meaning of the return value depends very much on the actual thing being registered. In
-    /// most cases it just returns 1. In any case it's not 0, *reaper-rs* translates this into an
-    /// error.
+    /// most cases it just returns 1. In any case, if it's not 0, *reaper-rs* translates this into
+    /// an error.
     ///
     /// Also see [`plugin_register_remove()`].
     ///
@@ -259,6 +259,34 @@ impl ReaperSession {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookCommand(
                 delegating_hook_command::<T>,
+            ));
+        }
+    }
+
+    /// Registers a hook command that supports MIDI CC/mousewheel actions.
+    ///
+    /// See [`plugin_register_add_hook_command`](#method.plugin_register_add_hook_command) for
+    /// understanding how to use this function (it has a very similar design).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_hook_command_2<T: HookCommand2>(
+        &mut self,
+    ) -> ReaperFunctionResult<()> {
+        unsafe {
+            self.plugin_register_add(RegistrationObject::HookCommand2(
+                delegating_hook_command_2::<T>,
+            ))?;
+        }
+        Ok(())
+    }
+
+    /// Unregisters a hook command that supports MIDI CC/mousewheel actions.
+    pub fn plugin_register_remove_hook_command_2<T: HookCommand2>(&mut self) {
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::HookCommand2(
+                delegating_hook_command_2::<T>,
             ));
         }
     }
