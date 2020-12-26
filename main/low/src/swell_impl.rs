@@ -284,6 +284,68 @@ impl Swell {
         result as _
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn SetMenuItemInfo(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        byPos: root::BOOL,
+        mi: *mut root::MENUITEMINFO,
+    ) -> root::BOOL {
+        let mi = *mi;
+        let mut utf16_string = utf8_to_16(mi.dwTypeData);
+        let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
+        utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
+        let result = winapi::um::winuser::SetMenuItemInfoW(
+            hMenu as _,
+            pos as _,
+            byPos as _,
+            &utf16_mi as *const _,
+        );
+        std::mem::drop(utf16_string);
+        result as _
+    }
+
+    /// **Attention:** This doesn't yet support `dwTypeData` (always `null` currently).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetMenuItemInfo(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        byPos: root::BOOL,
+        mi: *mut root::MENUITEMINFO,
+    ) -> root::BOOL {
+        let mut mi = *mi;
+        if !mi.dwTypeData.is_null() {
+            todo!("Getting string information from menu item is not yet implemented.")
+        }
+        let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
+        let result = winapi::um::winuser::GetMenuItemInfoW(
+            hMenu as _,
+            pos as _,
+            byPos as _,
+            &mut utf16_mi as _,
+        );
+        mi.cbSize = utf16_mi.cbSize;
+        mi.fMask = utf16_mi.fMask;
+        mi.fType = utf16_mi.fType;
+        mi.fState = utf16_mi.fState;
+        mi.wID = utf16_mi.wID;
+        mi.hSubMenu = utf16_mi.hSubMenu as _;
+        mi.hbmpChecked = utf16_mi.hbmpChecked as _;
+        mi.hbmpUnchecked = utf16_mi.hbmpUnchecked as _;
+        mi.dwItemData = utf16_mi.dwItemData;
+        mi.dwTypeData = std::ptr::null_mut();
+        mi.cch = utf16_mi.cch as _;
+        mi.hbmpItem = utf16_mi.hbmpItem as _;
+        result as _
+    }
+
     /// On Windows this is a constant but in SWELL this is a macro which translates to a function
     /// call.
     pub fn CF_TEXT(&self) -> root::UINT {
@@ -361,10 +423,29 @@ pub(crate) unsafe fn with_utf16_to_8(
     len
 }
 
-// For all messages which contain a string payload, convert the string's encoding.
+/// For all messages which contain a string payload, convert the string's encoding.
 #[cfg(target_family = "windows")]
 fn lparam_is_string(msg: root::UINT) -> bool {
     use crate::raw;
     // There are probably more than just those two. Add as soon as needed.
     matches!(msg, raw::CB_INSERTSTRING | raw::CB_ADDSTRING)
+}
+
+/// Converts everything except `dwTypeData` (needs special treatment).
+#[cfg(target_family = "windows")]
+fn utf8_to_16_menu_item_info(mi: &root::MENUITEMINFO) -> winapi::um::winuser::MENUITEMINFOW {
+    winapi::um::winuser::MENUITEMINFOW {
+        cbSize: std::mem::size_of::<winapi::um::winuser::MENUITEMINFOW>() as _,
+        fMask: mi.fMask,
+        fType: mi.fType,
+        fState: mi.fState,
+        wID: mi.wID,
+        hSubMenu: mi.hSubMenu as _,
+        hbmpChecked: mi.hbmpChecked as _,
+        hbmpUnchecked: mi.hbmpUnchecked as _,
+        dwItemData: mi.dwItemData,
+        dwTypeData: std::ptr::null_mut(),
+        cch: mi.cch as _,
+        hbmpItem: mi.hbmpItem as _,
+    }
 }

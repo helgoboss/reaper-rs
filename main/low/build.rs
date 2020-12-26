@@ -131,6 +131,7 @@ mod codegen {
                 .whitelist_var("SIF_.*")
                 .whitelist_var("SB_.*")
                 .whitelist_var("EN_.*")
+                .whitelist_var("MIIM_.*")
                 .whitelist_var("MF_.*")
                 .whitelist_var("TB_.*")
                 .whitelist_var("TBM_.*")

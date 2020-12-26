@@ -83,6 +83,12 @@ pub mod root {
     pub const TPM_VERTICAL: u32 = 64;
     pub const TPM_NONOTIFY: u32 = 128;
     pub const TPM_RETURNCMD: u32 = 256;
+    pub const MIIM_ID: u32 = 1;
+    pub const MIIM_STATE: u32 = 2;
+    pub const MIIM_TYPE: u32 = 4;
+    pub const MIIM_SUBMENU: u32 = 8;
+    pub const MIIM_DATA: u32 = 16;
+    pub const MIIM_BITMAP: u32 = 128;
     pub const MF_ENABLED: u32 = 0;
     pub const MF_GRAYED: u32 = 1;
     pub const MF_DISABLED: u32 = 2;
