@@ -1,23 +1,5 @@
-
-
-
-
-
 use crossbeam_channel::{Receiver, Sender};
 use rxrust::prelude::*;
-
-
-use reaper_medium::{
-    reaper_str, AutomationMode, ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
-    ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
-    ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    ExtTrackFxPresetChangedArgs, InputMonitoringMode, MediaTrack, ReaProject,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
-    SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
-    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
-    SetTrackTitleArgs, TrackFxChainType, TrackLocation, VersionDependentFxLocation,
-    VersionDependentTrackFxLocation,
-};
 
 use crate::run_loop_scheduler::RxTask;
 use crate::{
@@ -25,6 +7,7 @@ use crate::{
     ControlSurfaceEvent, ControlSurfaceMiddleware, MainSubjects, MainThreadTask, Project, Reaper,
     MAIN_THREAD_TASK_BULK_SIZE,
 };
+use reaper_medium::ReaperVersion;
 
 #[derive(Debug)]
 pub(crate) struct HelperMiddleware {
@@ -42,6 +25,7 @@ pub(crate) struct HelperMiddleware {
 }
 
 impl HelperMiddleware {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         version: ReaperVersion<'static>,
         last_active_project: Project,

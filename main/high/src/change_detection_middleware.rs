@@ -1,7 +1,6 @@
-
 use crate::{
-    get_media_track_guid, ControlSurfaceEvent, ControlSurfaceMiddleware, Fx, FxChain, FxParameter,
-    Guid, Project, Reaper, Track, TrackSend,
+    get_media_track_guid, ControlSurfaceEvent, Fx, FxParameter, Guid, Project, Reaper, Track,
+    TrackSend,
 };
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::TrackAttributeKey::RecInput;

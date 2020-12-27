@@ -2,10 +2,9 @@ use reaper_medium::{
     ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, ExtTrackFxPresetChangedArgs,
-    ExtendedArgs, GetTouchStateArgs, IsKeyDownArgs, OnTrackSelectionArgs, ReaperStr,
-    SetAutoModeArgs, SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
-    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
-    SetTrackTitleArgs,
+    OnTrackSelectionArgs, SetAutoModeArgs, SetPlayStateArgs, SetRepeatStateArgs,
+    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
+    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
 };
 
 use std::fmt::Debug;
