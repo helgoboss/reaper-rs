@@ -1,4 +1,6 @@
-use crate::{local_run_loop_executor, run_loop_executor, CrashInfo, ReactiveEvent};
+use crate::{
+    local_run_loop_executor, run_loop_executor, CrashInfo, MiddlewareControlSurface, ReactiveEvent,
+};
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -11,7 +13,7 @@ use rxrust::prelude::*;
 
 use crate::fx::Fx;
 use crate::fx_parameter::FxParameter;
-use crate::helper_control_surface::HelperControlSurface;
+use crate::helper_control_surface::HelperMiddleware;
 use crate::track_send::TrackSend;
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
@@ -131,13 +133,14 @@ impl ReaperBuilder {
                 );
                 let version = medium_reaper.get_app_version();
                 let medium_real_time_reaper = self.medium.create_real_time_reaper();
+                let subjects = MainSubjects::new();
                 let reaper = Reaper {
                     medium_session: RefCell::new(self.medium),
                     medium_reaper,
                     medium_real_time_reaper: medium_real_time_reaper.clone(),
                     logger,
                     command_by_id: RefCell::new(HashMap::new()),
-                    subjects: MainSubjects::new(),
+                    subjects: subjects.clone(),
                     undo_block_is_active: Cell::new(false),
                     main_thread_task_sender: mt_sender.clone(),
                     audio_thread_task_sender: at_sender,
@@ -146,7 +149,7 @@ impl ReaperBuilder {
                     main_thread_future_spawner: spawner,
                     local_main_thread_future_spawner: local_spawner,
                     session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {
-                        csurf_inst: Box::new(HelperControlSurface::new(
+                        csurf_inst: Box::new(MiddlewareControlSurface::new(HelperMiddleware::new(
                             version,
                             current_project,
                             mt_sender.clone(),
@@ -154,7 +157,8 @@ impl ReaperBuilder {
                             mt_rx_receiver,
                             executor,
                             local_executor,
-                        )),
+                            subjects,
+                        ))),
                         audio_hook: Box::new(HighOnAudioBuffer {
                             task_receiver: at_receiver,
                             reaper: RealTimeReaper {
@@ -283,7 +287,7 @@ enum SessionStatus {
 }
 
 struct SleepingState {
-    csurf_inst: Box<HelperControlSurface>,
+    csurf_inst: Box<MiddlewareControlSurface<HelperMiddleware>>,
     audio_hook: Box<HighOnAudioBuffer>,
 }
 
@@ -298,7 +302,7 @@ impl Debug for SleepingState {
 
 #[derive(Debug)]
 struct AwakeState {
-    csurf_inst_handle: RegistrationHandle<HelperControlSurface>,
+    csurf_inst_handle: RegistrationHandle<MiddlewareControlSurface<HelperMiddleware>>,
     audio_hook_register_handle: RegistrationHandle<HighOnAudioBuffer>,
     gaccel_registers: HashMap<CommandId, NonNull<raw::gaccel_register_t>>,
 }
@@ -315,8 +319,8 @@ impl<M> MidiEvent<M> {
     }
 }
 
-#[derive(Default)]
-pub(super) struct MainSubjects {
+#[derive(Clone, Default)]
+pub(crate) struct MainSubjects {
     // This is a RefCell. So calling next() while another next() is still running will panic.
     // I guess it's good that way because this is very generic code, panicking or not panicking
     // depending on the user's code. And getting a panic is good for becoming aware of the problem
@@ -521,7 +525,7 @@ impl Reaper {
         };
         // We don't want to execute tasks which accumulated during the "downtime" of Reaper.
         // So we just consume all without executing them.
-        sleeping_state.csurf_inst.reset();
+        sleeping_state.csurf_inst.middleware().reset();
         sleeping_state.audio_hook.reset();
         // Functions
         let mut medium = self.medium_session();

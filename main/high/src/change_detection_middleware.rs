@@ -16,7 +16,6 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
 pub struct ChangeDetectionMiddleware {
-    reaper: &'static Reaper,
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     last_active_project: Cell<Project>,
     project_datas: RefCell<ProjectDataMap>,
@@ -88,8 +87,6 @@ impl TrackData {
     }
 }
 
-pub trait ChangeHandler = FnMut(ChangeEvent) + Copy;
-
 /// For detection of added or removed FX.
 #[derive(Debug, Default)]
 struct FxChainPair {
@@ -113,12 +110,10 @@ enum State {
 impl ChangeDetectionMiddleware {
     pub fn new(
         version: ReaperVersion<'static>,
-        reaper: &'static Reaper,
         last_active_project: Project,
     ) -> ChangeDetectionMiddleware {
         let reaper_version_5_95 = ReaperVersion::new("5.95");
         ChangeDetectionMiddleware {
-            reaper,
             num_track_set_changes_left_to_be_propagated: Default::default(),
             last_active_project: Cell::new(last_active_project),
             project_datas: Default::default(),
@@ -130,7 +125,7 @@ impl ChangeDetectionMiddleware {
         }
     }
 
-    pub fn reset(&self, mut handle_change: impl ChangeHandler) {
+    pub fn reset(&self, mut handle_change: impl FnMut(ChangeEvent) + Copy) {
         // REAPER doesn't seem to call this automatically when the surface is registered. In our
         // case it's important to call this not at the first change of something (e.g. arm
         // button pressed) but immediately. Because it captures the initial project/track/FX
@@ -139,10 +134,14 @@ impl ChangeDetectionMiddleware {
         // TODO-low This executes a bunch of REAPER functions right on start. Maybe do more lazily
         // on activate?  But before activate we can do almost nothing because
         // execute_on_main_thread doesn't work.
-        self.react_to_track_list_change(self.reaper.current_project(), handle_change);
+        self.react_to_track_list_change(Reaper::get().current_project(), handle_change);
     }
 
-    pub fn process(&self, event: ControlSurfaceEvent, mut handle_change: impl ChangeHandler) {
+    pub fn process(
+        &self,
+        event: ControlSurfaceEvent,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
+    ) {
         use ControlSurfaceEvent::*;
         match event {
             SetTrackListChange => self.set_track_list_change(handle_change),
@@ -242,7 +241,7 @@ impl ChangeDetectionMiddleware {
                     handle_change(ChangeEvent::TrackInputMonitoringChanged(track));
                 }
                 let recinput = unsafe {
-                    self.reaper
+                    Reaper::get()
                         .medium_reaper()
                         .get_media_track_info_value(args.track, RecInput) as i32
                 };
@@ -562,7 +561,7 @@ impl ChangeDetectionMiddleware {
         &self,
         args: ExtSetFxParamArgs,
         is_input_fx_if_supported: bool,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
         let track = Track::new(args.track, None);
@@ -603,9 +602,9 @@ impl ChangeDetectionMiddleware {
         }
     }
 
-    fn set_track_list_change(&self, mut handle_change: impl ChangeHandler) {
+    fn set_track_list_change(&self, mut handle_change: impl FnMut(ChangeEvent) + Copy) {
         // TODO-low Not multi-project compatible!
-        let new_active_project = self.reaper.current_project();
+        let new_active_project = Reaper::get().current_project();
         self.num_track_set_changes_left_to_be_propagated
             .replace(new_active_project.track_count() + 1);
         self.react_to_track_list_change(new_active_project, handle_change);
@@ -614,7 +613,7 @@ impl ChangeDetectionMiddleware {
     fn react_to_track_list_change(
         &self,
         new_active_project: Project,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         if new_active_project != self.last_active_project.get() {
             self.last_active_project.replace(new_active_project);
@@ -624,10 +623,9 @@ impl ChangeDetectionMiddleware {
         self.detect_track_set_changes(handle_change);
     }
 
-    fn remove_invalid_rea_projects(&self, mut handle_change: impl ChangeHandler) {
+    fn remove_invalid_rea_projects(&self, mut handle_change: impl FnMut(ChangeEvent) + Copy) {
         self.project_datas.borrow_mut().retain(|rea_project, _| {
-            if self
-                .reaper
+            if Reaper::get()
                 .medium_reaper()
                 .validate_ptr_2(CurrentProject, *rea_project)
             {
@@ -639,8 +637,8 @@ impl ChangeDetectionMiddleware {
         });
     }
 
-    fn detect_track_set_changes(&self, mut handle_change: impl ChangeHandler) {
-        let project = self.reaper.current_project();
+    fn detect_track_set_changes(&self, mut handle_change: impl FnMut(ChangeEvent) + Copy) {
+        let project = Reaper::get().current_project();
         let mut project_datas = self.project_datas.borrow_mut();
         let track_datas = project_datas.entry(project.raw()).or_default();
         let old_track_count = track_datas.len() as u32;
@@ -658,11 +656,10 @@ impl ChangeDetectionMiddleware {
         &self,
         project: Project,
         track_datas: &mut TrackDataMap,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         track_datas.retain(|media_track, data| {
-            if self
-                .reaper
+            if Reaper::get()
                 .medium_reaper()
                 .validate_ptr_2(Proj(project.raw()), *media_track)
             {
@@ -679,12 +676,12 @@ impl ChangeDetectionMiddleware {
         &self,
         project: Project,
         track_datas: &mut TrackDataMap,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         for t in std::iter::once(project.master_track()).chain(project.tracks()) {
             let media_track = t.raw();
             track_datas.entry(media_track).or_insert_with(|| {
-                let func = self.reaper.medium_reaper();
+                let func = Reaper::get().medium_reaper();
                 let mut td = unsafe {
                     use TrackAttributeKey::*;
                     TrackData {
@@ -729,7 +726,7 @@ impl ChangeDetectionMiddleware {
         notify_listeners_about_changes: bool,
         check_normal_fx_chain: bool,
         check_input_fx_chain: bool,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         if !track.is_available() {
             return;
@@ -771,7 +768,7 @@ impl ChangeDetectionMiddleware {
         old_fx_guids: &mut HashSet<Guid>,
         is_input_fx: bool,
         notify_listeners_about_changes: bool,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) -> bool {
         let old_fx_count = old_fx_guids.len() as u32;
         let fx_chain = if is_input_fx {
@@ -815,7 +812,7 @@ impl ChangeDetectionMiddleware {
         old_fx_guids: &mut HashSet<Guid>,
         is_input_fx: bool,
         notify_listeners_about_changes: bool,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         let new_fx_guids = self.fx_guids_on_track(track, is_input_fx);
         old_fx_guids.retain(|old_fx_guid| {
@@ -854,7 +851,7 @@ impl ChangeDetectionMiddleware {
         fx_guids: &mut HashSet<Guid>,
         is_input_fx: bool,
         notify_listeners_about_changes: bool,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         let fx_chain = if is_input_fx {
             track.input_fx_chain()
@@ -873,11 +870,11 @@ impl ChangeDetectionMiddleware {
         &self,
         project: Project,
         track_datas: &mut TrackDataMap,
-        mut handle_change: impl ChangeHandler,
+        mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         let mut tracks_have_been_reordered = false;
         for (media_track, track_data) in track_datas.iter_mut() {
-            let reaper = self.reaper.medium_reaper();
+            let reaper = Reaper::get().medium_reaper();
             if !reaper.validate_ptr_2(Proj(project.raw()), *media_track) {
                 continue;
             }
@@ -932,40 +929,4 @@ pub enum ChangeEvent {
     PlayStateChanged,
     RepeatStateChanged,
     ProjectClosed(Project),
-}
-
-mod test {
-    use crate::{
-        ChangeDetectionMiddleware, ControlSurfaceEvent, ControlSurfaceMiddleware,
-        MiddlewareControlSurface, Reaper,
-    };
-    use reaper_medium::ReaperVersion;
-
-    #[derive(Debug)]
-    struct CombinationMiddleware {
-        change_detection_middleware: ChangeDetectionMiddleware,
-    }
-
-    impl ControlSurfaceMiddleware for CombinationMiddleware {
-        fn run(&mut self) {
-            unimplemented!()
-        }
-
-        fn handle_event(&self, event: ControlSurfaceEvent) {
-            self.change_detection_middleware.process(event, |evt| {});
-            println!("{:?}", event);
-        }
-    }
-
-    fn main() {
-        let reaper = Reaper::get();
-        let combination_middleware = CombinationMiddleware {
-            change_detection_middleware: ChangeDetectionMiddleware::new(
-                ReaperVersion::new("6.0.0"),
-                reaper,
-                reaper.current_project(),
-            ),
-        };
-        let control_surface = MiddlewareControlSurface::new(combination_middleware);
-    }
 }

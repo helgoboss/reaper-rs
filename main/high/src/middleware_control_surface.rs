@@ -26,9 +26,17 @@ impl<H: ControlSurfaceMiddleware + Debug> MiddlewareControlSurface<H> {
     pub fn new(middleware: H) -> MiddlewareControlSurface<H> {
         MiddlewareControlSurface { middleware }
     }
+
+    pub fn middleware(&self) -> &H {
+        &self.middleware
+    }
 }
 
 impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSurface<H> {
+    fn run(&mut self) {
+        self.middleware.run();
+    }
+
     fn close_no_reset(&self) {
         self.middleware
             .handle_event(ControlSurfaceEvent::CloseNoReset);
