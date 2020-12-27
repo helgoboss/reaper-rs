@@ -102,6 +102,12 @@ mod undo_block;
 
 mod normalized_value;
 
+mod middleware_control_surface;
+pub use middleware_control_surface::*;
+
+mod change_detection_middleware;
+pub use change_detection_middleware::*;
+
 #[cfg(test)]
 mod tests {
     extern crate test;

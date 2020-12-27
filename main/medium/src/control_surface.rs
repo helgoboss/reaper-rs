@@ -137,7 +137,7 @@ pub trait ControlSurface: Debug {
     ///
     /// *reaper-rs* calls this method only if you didn't process the event already in one of the
     /// `ext_` methods. The meaning of the return value depends on the particular event type
-    /// ([`args.call`]). In any case returning 0 means that the event has not been handled.
+    /// ([`args.call`]). In any case, returning 0 means that the event has not been handled.
     ///
     /// # Safety
     ///
