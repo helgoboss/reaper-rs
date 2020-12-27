@@ -7,7 +7,7 @@ use reaper_medium::{
     SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
     SetTrackTitleArgs,
 };
-use std::borrow::Cow;
+
 use std::fmt::Debug;
 
 /// This control surface "redirects" each callback method with event character into an enum value,

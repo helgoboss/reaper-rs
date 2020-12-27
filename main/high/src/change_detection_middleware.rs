@@ -1,4 +1,4 @@
-use super::MiddlewareControlSurface;
+
 use crate::{
     get_media_track_guid, ControlSurfaceEvent, ControlSurfaceMiddleware, Fx, FxChain, FxParameter,
     Guid, Project, Reaper, Track, TrackSend,
@@ -125,7 +125,7 @@ impl ChangeDetectionMiddleware {
         }
     }
 
-    pub fn reset(&self, mut handle_change: impl FnMut(ChangeEvent) + Copy) {
+    pub fn reset(&self, handle_change: impl FnMut(ChangeEvent) + Copy) {
         // REAPER doesn't seem to call this automatically when the surface is registered. In our
         // case it's important to call this not at the first change of something (e.g. arm
         // button pressed) but immediately. Because it captures the initial project/track/FX
@@ -410,10 +410,10 @@ impl ChangeDetectionMiddleware {
                     .expect("preset changed but FX not found");
                 handle_change(ChangeEvent::FxPresetChanged(fx));
             }
-            SetPlayState(args) => {
+            SetPlayState(_args) => {
                 handle_change(ChangeEvent::PlayStateChanged);
             }
-            SetRepeatState(args) => {
+            SetRepeatState(_args) => {
                 handle_change(ChangeEvent::RepeatStateChanged);
             }
             _ => {}
@@ -602,7 +602,7 @@ impl ChangeDetectionMiddleware {
         }
     }
 
-    fn set_track_list_change(&self, mut handle_change: impl FnMut(ChangeEvent) + Copy) {
+    fn set_track_list_change(&self, handle_change: impl FnMut(ChangeEvent) + Copy) {
         // TODO-low Not multi-project compatible!
         let new_active_project = Reaper::get().current_project();
         self.num_track_set_changes_left_to_be_propagated
@@ -637,7 +637,7 @@ impl ChangeDetectionMiddleware {
         });
     }
 
-    fn detect_track_set_changes(&self, mut handle_change: impl FnMut(ChangeEvent) + Copy) {
+    fn detect_track_set_changes(&self, handle_change: impl FnMut(ChangeEvent) + Copy) {
         let project = Reaper::get().current_project();
         let mut project_datas = self.project_datas.borrow_mut();
         let track_datas = project_datas.entry(project.raw()).or_default();
@@ -768,7 +768,7 @@ impl ChangeDetectionMiddleware {
         old_fx_guids: &mut HashSet<Guid>,
         is_input_fx: bool,
         notify_listeners_about_changes: bool,
-        mut handle_change: impl FnMut(ChangeEvent) + Copy,
+        handle_change: impl FnMut(ChangeEvent) + Copy,
     ) -> bool {
         let old_fx_count = old_fx_guids.len() as u32;
         let fx_chain = if is_input_fx {
