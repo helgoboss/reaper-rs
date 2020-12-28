@@ -1,4 +1,6 @@
-use crate::{ActionValueChange, CommandId, KbdSectionInfo, SectionContext, WindowContext};
+use crate::{
+    ActionValueChange, CommandId, KbdSectionInfo, ReaProject, SectionContext, WindowContext,
+};
 use reaper_low::{firewall, raw};
 use std::os::raw::c_int;
 use std::ptr::NonNull;
@@ -91,8 +93,8 @@ pub(crate) extern "C" fn delegating_toggle_action<T: ToggleAction>(command_id: c
     .unwrap_or(-1)
 }
 
-/// Consumers need to implement this trait in order to get notified after an action of the main
-/// section has run.
+/// Consumers need to implement this trait in order to get notified after a normal action of the
+/// main section has run.
 pub trait HookPostCommand {
     // The actual callback called after an action of the main section has been performed.
     fn call(command_id: CommandId, flag: i32);
@@ -104,5 +106,43 @@ pub(crate) extern "C" fn delegating_hook_post_command<T: HookPostCommand>(
 ) {
     firewall(|| {
         T::call(CommandId(command_id as _), flag);
+    });
+}
+
+/// Consumers need to implement this trait in order to get notified after a MIDI CC/mousewheel
+/// action has run.
+pub trait HookPostCommand2 {
+    // The actual callback called after an action of the main section has been performed.
+    fn call(
+        section: SectionContext,
+        command_id: CommandId,
+        value_change: ActionValueChange,
+        window: WindowContext,
+        project: ReaProject,
+    );
+}
+
+pub(crate) extern "C" fn delegating_hook_post_command_2<T: HookPostCommand2>(
+    section: *mut raw::KbdSectionInfo,
+    action_command_id: c_int,
+    val: c_int,
+    valhw: c_int,
+    relmode: c_int,
+    hwnd: raw::HWND,
+    proj: *mut raw::ReaProject,
+) {
+    firewall(|| {
+        let kbd_section_info = NonNull::new(section).map(KbdSectionInfo);
+        let section_context = SectionContext::from_medium(kbd_section_info.as_ref());
+        let value_change =
+            ActionValueChange::try_from_raw((val, valhw, relmode)).expect("unexpected values");
+        let window_context = WindowContext::from_raw(hwnd);
+        T::call(
+            section_context,
+            CommandId(action_command_id as _),
+            value_change,
+            window_context,
+            NonNull::new(proj).expect("no project given"),
+        );
     });
 }

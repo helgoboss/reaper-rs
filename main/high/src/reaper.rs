@@ -33,9 +33,10 @@ use futures::channel::oneshot;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
-    CommandId, HookCommand, HookPostCommand, MidiFrameOffset, MidiInputDeviceId, OnAudioBuffer,
-    OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef, RealTimeAudioThreadScope, ReaperStr,
-    ReaperString, ReaperStringArg, RegistrationHandle, ToggleAction, ToggleActionResult,
+    ActionValueChange, CommandId, HookCommand, HookPostCommand, HookPostCommand2, MidiFrameOffset,
+    MidiInputDeviceId, OnAudioBuffer, OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef,
+    ReaProject, RealTimeAudioThreadScope, ReaperStr, ReaperString, ReaperStringArg,
+    RegistrationHandle, SectionContext, ToggleAction, ToggleActionResult, WindowContext,
 };
 use slog::{debug, Logger};
 use std::fmt;
@@ -538,6 +539,9 @@ impl Reaper {
         medium
             .plugin_register_add_hook_post_command::<HighLevelHookPostCommand>()
             .map_err(|_| "couldn't register hook post command")?;
+        medium
+            .plugin_register_add_hook_post_command_2::<HighLevelHookPostCommand2>()
+            .map_err(|_| "couldn't register hook post command 2")?;
         *session_status = SessionStatus::Awake(AwakeState {
             gaccel_registers: self
                 .command_by_id
@@ -592,6 +596,7 @@ impl Reaper {
             medium.plugin_register_remove_gaccel(*gaccel_handle);
         }
         // Remove functions
+        medium.plugin_register_remove_hook_post_command_2::<HighLevelHookPostCommand2>();
         medium.plugin_register_remove_hook_post_command::<HighLevelHookPostCommand>();
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
         medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
@@ -1140,6 +1145,32 @@ struct HighLevelHookPostCommand {}
 
 impl HookPostCommand for HighLevelHookPostCommand {
     fn call(command_id: CommandId, _flag: i32) {
+        let action = Reaper::get()
+            .main_section()
+            .action_by_command_id(command_id);
+        Reaper::get()
+            .subjects
+            .action_invoked
+            .borrow_mut()
+            .next(Rc::new(action));
+    }
+}
+
+// Called by REAPER directly (using a delegate function)!
+// Processes main section only.
+struct HighLevelHookPostCommand2 {}
+
+impl HookPostCommand2 for HighLevelHookPostCommand2 {
+    fn call(
+        section: SectionContext,
+        command_id: CommandId,
+        value_change: ActionValueChange,
+        window: WindowContext,
+        project: ReaProject,
+    ) {
+        if section != SectionContext::MainSection {
+            return;
+        }
         let action = Reaper::get()
             .main_section()
             .action_by_command_id(command_id);

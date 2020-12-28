@@ -8,11 +8,12 @@ use crate::infostruct_keeper::InfostructKeeper;
 
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
-    delegating_hook_post_command, delegating_toggle_action, CommandId, ControlSurface,
-    DelegatingControlSurface, HookCommand, HookCommand2, HookPostCommand, MainThreadScope,
-    OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister, PluginRegistration,
-    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperString,
-    ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
+    delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
+    CommandId, ControlSurface, DelegatingControlSurface, HookCommand, HookCommand2,
+    HookPostCommand, HookPostCommand2, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister,
+    OwnedGaccelRegister, PluginRegistration, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
+    ReaperFunctionResult, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
+    ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -323,7 +324,8 @@ impl ReaperSession {
 
     /// Registers a hook post command.
     ///
-    /// REAPER calls hook post commands whenever an action of the main section has been performed.
+    /// REAPER calls hook post commands whenever a normal action of the main section has been
+    /// performed.
     ///
     /// See [`plugin_register_add_hook_command()`](#method.plugin_register_add_hook_command) for an
     /// example.
@@ -347,6 +349,36 @@ impl ReaperSession {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookPostCommand(
                 delegating_hook_post_command::<T>,
+            ));
+        }
+    }
+
+    /// Registers a hook post command 2.
+    ///
+    /// REAPER calls hook post commands 2 whenever a MIDI CC/mousewheel action has been performed.
+    ///
+    /// See [`plugin_register_add_hook_command()`](#method.plugin_register_add_hook_command) for an
+    /// example.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_hook_post_command_2<T: HookPostCommand2>(
+        &mut self,
+    ) -> ReaperFunctionResult<()> {
+        unsafe {
+            self.plugin_register_add(RegistrationObject::HookPostCommand2(
+                delegating_hook_post_command_2::<T>,
+            ))?
+        };
+        Ok(())
+    }
+
+    /// Unregisters a hook post command 2.
+    pub fn plugin_register_remove_hook_post_command_2<T: HookPostCommand2>(&mut self) {
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::HookPostCommand2(
+                delegating_hook_post_command_2::<T>,
             ));
         }
     }

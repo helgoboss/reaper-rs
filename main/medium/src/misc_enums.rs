@@ -478,7 +478,8 @@ pub enum RegistrationObject<'a> {
     ///           register("hookpostcommand",postCommand);
     /// </pre>
     HookPostCommand(raw::HookPostCommand),
-    // HookCommand2(*mut c_void),
+    /// A hook post command 2.
+    HookPostCommand2(raw::HookPostCommand2),
     /// A toggle action.
     ///
     /// Extract from `reaper_plugin.h`:
@@ -600,6 +601,10 @@ impl<'a> RegistrationObject<'a> {
             },
             HookPostCommand(func) => PluginRegistration {
                 key: reaper_str!("hookpostcommand").into(),
+                value: func as _,
+            },
+            HookPostCommand2(func) => PluginRegistration {
+                key: reaper_str!("hookpostcommand2").into(),
                 value: func as _,
             },
             ToggleAction(func) => PluginRegistration {
@@ -807,6 +812,8 @@ impl<'a> SectionContext<'a> {
         use SectionContext::*;
         match self {
             MainSection => null_mut(),
+            // If the unique ID of the given section is zero, then this also corresponds to the
+            // main section.
             Sec(i) => i.0.as_ptr(),
         }
     }
@@ -815,7 +822,13 @@ impl<'a> SectionContext<'a> {
         use SectionContext::*;
         match value {
             None => MainSection,
-            Some(info) => Sec(&info),
+            Some(info) => {
+                if info.unique_id().get() == 0 {
+                    MainSection
+                } else {
+                    Sec(&info)
+                }
+            }
         }
     }
 }

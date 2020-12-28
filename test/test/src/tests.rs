@@ -682,9 +682,7 @@ fn invoke_action() -> TestStep {
         // Then
         assert!(action.is_on());
         assert!(track.is_muted());
-        // TODO Actually it would be nice if the actionInvoked event would be raised but it
-        // isn't
-        assert_eq!(mock.invocation_count(), 0);
+        assert_eq!(mock.invocation_count(), 1);
         Ok(())
     })
 }

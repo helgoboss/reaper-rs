@@ -1,7 +1,7 @@
 //! This module makes low-level structs available in the medium-level API if necessary. This is done
 //! using different strategies, depending on the characteristics of the struct. Sometimes it's just
 //! a type alias, sometimes a wrapper.  
-use crate::CommandId;
+use crate::{CommandId, SectionId};
 
 use reaper_low::raw;
 
@@ -118,6 +118,12 @@ impl KbdSectionInfo {
     /// Returns the number of actions in this section.
     pub fn action_list_cnt(&self) -> u32 {
         unsafe { self.0.as_ref() }.action_list_cnt as u32
+    }
+
+    /// Returns the unique ID of this section.
+    pub fn unique_id(&self) -> SectionId {
+        let raw = unsafe { self.0.as_ref().uniqueID };
+        SectionId::new(raw as _)
     }
 
     /// Returns the action at the specified index.

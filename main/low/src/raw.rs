@@ -139,8 +139,19 @@ pub type HookCommand2 = extern "C" fn(
 /// Function pointer type for toggle actions.
 pub type ToggleAction = extern "C" fn(command_id: c_int) -> c_int;
 
-/// Function pointer type for hook post commands.
+/// Function pointer type for getting notified about invocation of hook command.
 pub type HookPostCommand = extern "C" fn(command_id: c_int, flag: c_int);
+
+/// Function pointer type for getting notified about invocation of hook command 2.
+pub type HookPostCommand2 = extern "C" fn(
+    section: *mut KbdSectionInfo,
+    action_command_id: c_int,
+    val: c_int,
+    valhw: c_int,
+    relmode: c_int,
+    hwnd: HWND,
+    proj: *mut ReaProject,
+);
 
 /// Function pointer type for exposing custom API functions to ReaScript.
 pub type ApiVararg = unsafe extern "C" fn(*mut *mut c_void, c_int) -> *mut c_void;
