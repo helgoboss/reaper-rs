@@ -465,11 +465,11 @@ fn register_and_unregister_toggle_action() -> TestStep {
             let _command_id = action.command_id();
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
-            assert!(!action.is_on());
+            assert_eq!(action.is_on(), Some(false));
             action.invoke_as_trigger(None);
             assert_eq!(mock.invocation_count(), 1);
             assert_eq!(mock.last_arg(), 43);
-            assert!(action.is_on());
+            assert_eq!(action.is_on(), Some(true));
             assert_eq!(action.character(), ActionCharacter::Toggle);
             assert!(action.command_id() > CommandId::new(1));
             assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest2");
@@ -509,7 +509,7 @@ fn register_and_unregister_action() -> TestStep {
             assert_eq!(action.character(), ActionCharacter::Trigger);
             assert!(action.command_id() > CommandId::new(1));
             assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest");
-            assert!(!action.is_on());
+            assert_eq!(action.is_on(), None);
             assert_eq!(action.name().to_str(), "reaper-rs test action");
             reaper.go_to_sleep()?;
             assert!(!action.is_available());
@@ -680,9 +680,13 @@ fn invoke_action() -> TestStep {
         });
         action.invoke_as_trigger(None);
         // Then
-        assert!(action.is_on());
+        assert_eq!(action.is_on(), Some(true));
         assert!(track.is_muted());
         assert_eq!(mock.invocation_count(), 1);
+        let normalized_value = action
+            .normalized_value()
+            .ok_or("action should be able to report normalized value")?;
+        assert!(abs_diff_eq!(normalized_value, 1.0));
         Ok(())
     })
 }
@@ -708,8 +712,8 @@ fn query_action() -> TestStep {
         assert!(normal_action.is_available());
         assert_eq!(toggle_action.character(), ActionCharacter::Toggle);
         assert_eq!(normal_action.character(), ActionCharacter::Trigger);
-        assert!(!toggle_action.is_on());
-        assert!(!normal_action.is_on());
+        assert_eq!(toggle_action.is_on(), Some(false));
+        assert_eq!(normal_action.is_on(), None);
         assert_eq!(toggle_action.clone(), toggle_action);
         assert_eq!(toggle_action.command_id(), CommandId::new(6));
         assert!(toggle_action.command_name().is_none());

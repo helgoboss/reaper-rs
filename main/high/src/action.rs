@@ -2,7 +2,7 @@ use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
 use reaper_medium::{ActionValueChange, CommandId, ReaperStr, ReaperString, SectionContext};
 
-use helgoboss_midi::U7;
+use helgoboss_midi::{U14, U7};
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::SectionContext::Sec;
 use reaper_medium::WindowContext::Win;
@@ -130,14 +130,28 @@ impl Action {
         }
     }
 
-    pub fn is_on(&self) -> bool {
+    /// reaper-rs listens to MIDI CC/mousewheel action invocations since REAPER 6.19+dev1226
+    /// and tracks their latest *absolute* value invocations if there are any. This returns the
+    /// latest absolute value *if there is any*. Only works for main section.
+    pub fn normalized_value(&self) -> Option<f64> {
         let rd = self.load_if_necessary_or_complain();
-        let state = unsafe {
+        let last_change = Reaper::get().find_last_action_value_change(rd.command_id)?;
+        use ActionValueChange::*;
+        let normalized_value = match last_change {
+            AbsoluteLowRes(v) => v.get() as f64 / U7::MAX.get() as f64,
+            AbsoluteHighRes(v) => v.get() as f64 / U14::MAX.get() as f64,
+            _ => return None,
+        };
+        Some(normalized_value)
+    }
+
+    pub fn is_on(&self) -> Option<bool> {
+        let rd = self.load_if_necessary_or_complain();
+        unsafe {
             Reaper::get()
                 .medium_reaper()
                 .get_toggle_command_state_2(Sec(&rd.section.raw()), rd.command_id)
-        };
-        state == Some(true)
+        }
     }
 
     pub fn command_id(&self) -> CommandId {

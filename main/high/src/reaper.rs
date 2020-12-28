@@ -141,6 +141,7 @@ impl ReaperBuilder {
                     medium_real_time_reaper: medium_real_time_reaper.clone(),
                     logger,
                     command_by_id: RefCell::new(HashMap::new()),
+                    action_value_change_history: RefCell::new(Default::default()),
                     subjects: subjects.clone(),
                     undo_block_is_active: Cell::new(false),
                     main_thread_task_sender: mt_sender.clone(),
@@ -270,6 +271,7 @@ pub struct Reaper {
     // Or is it  possible to give up the map borrow after obtaining the command/operation
     // reference???  Look into that!!!
     command_by_id: RefCell<HashMap<CommandId, Command>>,
+    action_value_change_history: RefCell<HashMap<CommandId, ActionValueChange>>,
     pub(crate) subjects: MainSubjects,
     undo_block_is_active: Cell<bool>,
     main_thread_task_sender: Sender<MainThreadTask>,
@@ -665,6 +667,16 @@ impl Reaper {
             self.medium_session()
                 .plugin_register_remove_gaccel(*gaccel_handle);
         }
+    }
+
+    pub(crate) fn find_last_action_value_change(
+        &self,
+        command_id: CommandId,
+    ) -> Option<ActionValueChange> {
+        self.action_value_change_history
+            .borrow()
+            .get(&command_id)
+            .copied()
     }
 
     pub fn main_thread_idle(&self) -> impl ReactiveEvent<()> {
@@ -1171,10 +1183,13 @@ impl HookPostCommand2 for HighLevelHookPostCommand2 {
         if section != SectionContext::MainSection {
             return;
         }
-        let action = Reaper::get()
-            .main_section()
-            .action_by_command_id(command_id);
-        Reaper::get()
+        let reaper = Reaper::get();
+        reaper
+            .action_value_change_history
+            .borrow_mut()
+            .insert(command_id, value_change);
+        let action = reaper.main_section().action_by_command_id(command_id);
+        reaper
             .subjects
             .action_invoked
             .borrow_mut()
