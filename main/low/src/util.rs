@@ -50,3 +50,39 @@ pub unsafe fn bootstrap_extension_plugin(
     })
     .unwrap_or(0)
 }
+
+/// This function executes all registered plug-in destroy hooks.
+///
+/// It's supposed to be called when the extension plug-in is unloaded. This is taken care of
+/// automatically by macros in the `reaper-macros` crate.
+///
+/// Extension plug-in unloading happens when exiting REAPER but can also happen when the plug-in
+/// can't be loaded completely. Then it's important to clean up static variables.
+///
+/// If we don't do this and `ReaperPluginEntry` returns 0 (triggers plug-in unload) at
+/// a time when some static variables (e.g. high-level Reaper) are already
+/// initialized and hooks are registered, we get an access violation because they
+/// are not automatically freed on unload and destructors (drop functions) are not run!
+///
+/// # Safety
+///
+/// Must only be called in main thread.
+pub unsafe fn execute_plugin_destroy_hooks() {
+    for f in PLUGIN_DESTROY_HOOKS.drain(..) {
+        f();
+    }
+}
+
+/// Registers a function that will be executed when the plug-in module gets unloaded.
+///
+/// This is supposed to be used from the *reaper-rs* low-level API but also higher-level APIs
+/// whenever they register static variables that require manual cleanup on plug-in unload.
+///
+/// # Safety
+///
+/// Must only be called in main thread.
+pub unsafe fn register_plugin_destroy_hook(f: fn()) {
+    PLUGIN_DESTROY_HOOKS.push(f);
+}
+
+static mut PLUGIN_DESTROY_HOOKS: Vec<fn()> = Vec::new();

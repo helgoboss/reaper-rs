@@ -22,9 +22,12 @@
 macro_rules! reaper_vst_plugin {
     () => {
         mod reaper_vst_plugin {
-            /// Windows entry point for getting hold of the module handle (HINSTANCE).
+            /// Windows entry and exit point for getting hold of the module handle (HINSTANCE) and
+            /// clean-up.
             ///
-            /// This is called by REAPER for Windows at startup time.
+            /// Called by REAPER for Windows once at startup time with DLL_PROCESS_ATTACH and once
+            /// at exit time or manual unload time (if plug-in initialization failed) with
+            /// DLL_PROCESS_DETACH.
             #[cfg(target_family = "windows")]
             #[allow(non_snake_case)]
             #[no_mangle]
@@ -35,13 +38,20 @@ macro_rules! reaper_vst_plugin {
             ) -> u32 {
                 if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
                     reaper_low::register_hinstance(hinstance);
+                } else if (reason == reaper_low::raw::DLL_PROCESS_DETACH) {
+                    unsafe {
+                        reaper_low::execute_plugin_destroy_hooks();
+                    }
                 }
                 1
             }
 
-            /// Linux entry point for getting hold of the SWELL function provider.
+            /// Linux entry and exit point for getting hold of the SWELL function provider and
+            /// clean-up.
             ///
-            /// This is called by REAPER for Linux at startup time.
+            /// Called by REAPER for Linux once at startup time with DLL_PROCESS_ATTACH and once
+            /// at exit time or manual unload time (if plug-in initialization failed) with
+            /// DLL_PROCESS_DETACH.
             #[cfg(target_os = "linux")]
             #[allow(non_snake_case)]
             #[no_mangle]
@@ -54,7 +64,13 @@ macro_rules! reaper_vst_plugin {
                     ) -> *mut std::os::raw::c_void,
                 >,
             ) -> std::os::raw::c_int {
-                reaper_low::register_swell_function_provider(get_func);
+                if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
+                    reaper_low::register_swell_function_provider(get_func);
+                } else if (reason == reaper_low::raw::DLL_PROCESS_DETACH) {
+                    unsafe {
+                        reaper_low::execute_plugin_destroy_hooks();
+                    }
+                }
                 1
             }
         }

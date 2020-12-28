@@ -23,7 +23,7 @@ use crate::{
 };
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
-use reaper_low::raw;
+use reaper_low::{raw, register_plugin_destroy_hook};
 
 use reaper_low::PluginContext;
 
@@ -171,7 +171,8 @@ impl ReaperBuilder {
                         }),
                     }))),
                 };
-                INSTANCE = Some(reaper)
+                INSTANCE = Some(reaper);
+                register_plugin_destroy_hook(|| INSTANCE = None);
             });
         }
     }
@@ -1177,8 +1178,8 @@ impl HookPostCommand2 for HighLevelHookPostCommand2 {
         section: SectionContext,
         command_id: CommandId,
         value_change: ActionValueChange,
-        window: WindowContext,
-        project: ReaProject,
+        _: WindowContext,
+        _: ReaProject,
     ) {
         if section != SectionContext::MainSection {
             return;

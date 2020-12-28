@@ -1,4 +1,4 @@
-use crate::{PluginContext, Reaper, ReaperFunctionPointers};
+use crate::{register_plugin_destroy_hook, PluginContext, Reaper, ReaperFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Reaper> = None;
@@ -12,7 +12,10 @@ impl Reaper {
     /// This can be called once only. Subsequent calls won't have any effect!
     pub fn make_available_globally(functions: Reaper) {
         unsafe {
-            INIT_INSTANCE.call_once(|| INSTANCE = Some(functions));
+            INIT_INSTANCE.call_once(|| {
+                INSTANCE = Some(functions);
+                register_plugin_destroy_hook(|| INSTANCE = None);
+            });
         }
     }
 

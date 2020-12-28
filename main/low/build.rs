@@ -144,6 +144,7 @@ mod codegen {
                 .whitelist_var("SRCCOPY_USEALPHACHAN")
                 .whitelist_var("ID.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
+                .whitelist_var("DLL_PROCESS_DETACH")
                 .whitelist_type("HINSTANCE")
                 .whitelist_type("reaper_plugin_info_t")
                 .whitelist_type("gaccel_register_t")

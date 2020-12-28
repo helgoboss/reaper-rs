@@ -8,7 +8,7 @@ use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
-use reaper_low::raw;
+use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
@@ -175,7 +175,10 @@ impl Reaper<MainThreadScope> {
     /// This can be called once only. Subsequent calls won't have any effect!
     pub fn make_available_globally(reaper: Reaper<MainThreadScope>) {
         unsafe {
-            INIT_INSTANCE.call_once(|| INSTANCE = Some(reaper));
+            INIT_INSTANCE.call_once(|| {
+                INSTANCE = Some(reaper);
+                register_plugin_destroy_hook(|| INSTANCE = None);
+            });
         }
     }
 

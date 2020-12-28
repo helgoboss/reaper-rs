@@ -10,6 +10,7 @@
 pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
+    pub const DLL_PROCESS_DETACH: u32 = 0;
     pub const DLL_PROCESS_ATTACH: u32 = 1;
     pub const MB_OK: u32 = 0;
     pub const MB_OKCANCEL: u32 = 1;

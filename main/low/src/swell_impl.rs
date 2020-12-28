@@ -5,7 +5,9 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
-use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
+use crate::{
+    bindings::root, register_plugin_destroy_hook, PluginContext, Swell, SwellFunctionPointers,
+};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
@@ -21,7 +23,10 @@ impl Swell {
     /// This can be called once only. Subsequent calls won't have any effect!
     pub fn make_available_globally(functions: Swell) {
         unsafe {
-            INIT_INSTANCE.call_once(|| INSTANCE = Some(functions));
+            INIT_INSTANCE.call_once(|| {
+                INSTANCE = Some(functions);
+                register_plugin_destroy_hook(|| INSTANCE = None);
+            });
         }
     }
 

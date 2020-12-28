@@ -1,4 +1,7 @@
-use crate::{raw, GetSwellFunc, StaticExtensionPluginContext, StaticVstPluginContext};
+use crate::{
+    raw, register_plugin_destroy_hook, GetSwellFunc, StaticExtensionPluginContext,
+    StaticVstPluginContext,
+};
 
 /// Exposes the (hopefully) obtained static extension plug-in context.
 ///
@@ -27,8 +30,9 @@ pub fn static_vst_plugin_context() -> StaticVstPluginContext {
 /// [`static_extension_plugin_context()`]: fn.static_extension_plugin_context.html
 pub fn register_swell_function_provider(get_func: Option<GetSwellFunc>) {
     // Save provider in static variable.
-    swell::INIT_GET_SWELL_FUNC.call_once(|| {
-        unsafe { swell::GET_SWELL_FUNC = get_func };
+    swell::INIT_GET_SWELL_FUNC.call_once(|| unsafe {
+        swell::GET_SWELL_FUNC = get_func;
+        register_plugin_destroy_hook(|| swell::GET_SWELL_FUNC = None);
     });
     // On Linux Rust will get informed first about the SWELL function provider, so we need to pass
     // it on to the C++ side.
@@ -46,8 +50,9 @@ pub fn register_swell_function_provider(get_func: Option<GetSwellFunc>) {
 /// [`static_vst_plugin_context()`]: fn.static_vst_plugin_context.html
 pub fn register_hinstance(hinstance: raw::HINSTANCE) {
     // Save handle in static variable.
-    hinstance::INIT_HINSTANCE.call_once(|| {
-        unsafe { hinstance::HINSTANCE = hinstance };
+    hinstance::INIT_HINSTANCE.call_once(|| unsafe {
+        hinstance::HINSTANCE = hinstance;
+        register_plugin_destroy_hook(|| hinstance::HINSTANCE = std::ptr::null_mut());
     });
 }
 
