@@ -682,11 +682,22 @@ fn invoke_action() -> TestStep {
         // Then
         assert_eq!(action.is_on(), Some(true));
         assert!(track.is_muted());
-        assert_eq!(mock.invocation_count(), 1);
-        let normalized_value = action
-            .normalized_value()
-            .ok_or("action should be able to report normalized value")?;
-        assert!(abs_diff_eq!(normalized_value, 1.0));
+        let reaper_version = reaper.version();
+        if reaper_version >= ReaperVersion::new("6.20")
+            || reaper_version
+                .into_inner()
+                .to_str()
+                .starts_with("6.19+dev1226")
+        {
+            assert_eq!(mock.invocation_count(), 1);
+            let normalized_value = action
+                .normalized_value()
+                .ok_or("action should be able to report normalized value")?;
+            assert!(abs_diff_eq!(normalized_value, 1.0));
+        } else {
+            assert_eq!(mock.invocation_count(), 0);
+            assert!(action.normalized_value().is_none());
+        }
         Ok(())
     })
 }

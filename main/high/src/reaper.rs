@@ -542,9 +542,8 @@ impl Reaper {
         medium
             .plugin_register_add_hook_post_command::<HighLevelHookPostCommand>()
             .map_err(|_| "couldn't register hook post command")?;
-        medium
-            .plugin_register_add_hook_post_command_2::<HighLevelHookPostCommand2>()
-            .map_err(|_| "couldn't register hook post command 2")?;
+        // This only works since Reaper 6.19+dev1226, so we must allow it to fail.
+        let _ = medium.plugin_register_add_hook_post_command_2::<HighLevelHookPostCommand2>();
         *session_status = SessionStatus::Awake(AwakeState {
             gaccel_registers: self
                 .command_by_id
