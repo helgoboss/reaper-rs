@@ -29,7 +29,7 @@ pub(crate) struct HelperMiddleware {
     helper_middleware_task_receiver: Receiver<HelperTask>,
     change_detector: ChangeDetector,
     subjects: MainSubjects,
-    #[cfg(feature = "reaper-meter")]
+    #[cfg(feature = "control-surface-meter")]
     performance_monitor: crate::ControlSurfacePerformanceMonitor,
 }
 
@@ -57,7 +57,7 @@ impl HelperMiddleware {
             helper_middleware_task_receiver: helper_task_receiver,
             change_detector: ChangeDetector::new(version, last_active_project),
             subjects,
-            #[cfg(feature = "reaper-meter")]
+            #[cfg(feature = "control-surface-meter")]
             performance_monitor: crate::ControlSurfacePerformanceMonitor::new(
                 logger,
                 Duration::from_secs(30),
@@ -145,7 +145,7 @@ impl ControlSurfaceMiddleware for HelperMiddleware {
         }
     }
 
-    #[cfg(feature = "reaper-meter")]
+    #[cfg(feature = "control-surface-meter")]
     fn handle_metrics(&mut self, metrics: &reaper_medium::ControlSurfaceMetrics) {
         self.performance_monitor.handle_metrics(metrics);
         // As long as the middleware task receiver doesn't get other kinds of tasks, we can do it

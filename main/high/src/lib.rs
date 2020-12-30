@@ -108,9 +108,9 @@ pub use middleware_control_surface::*;
 mod change_detector;
 pub use change_detector::*;
 
-#[cfg(feature = "reaper-meter")]
+#[cfg(feature = "control-surface-meter")]
 mod control_surface_performance_monitor;
-#[cfg(feature = "reaper-meter")]
+#[cfg(feature = "control-surface-meter")]
 pub use control_surface_performance_monitor::*;
 
 #[cfg(test)]

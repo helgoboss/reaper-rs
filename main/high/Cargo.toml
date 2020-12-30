@@ -14,6 +14,8 @@ publish = false
 [features]
 # Activates measuring of function execution times.
 reaper-meter = ["reaper-medium/reaper-meter", "serde", "serde_yaml"]
+# Activates measuring of control surface method execution times.
+control-surface-meter = ["reaper-medium/control-surface-meter", "serde", "serde_yaml"]
 
 [dependencies]
 c_str_macro = "1.0.2"

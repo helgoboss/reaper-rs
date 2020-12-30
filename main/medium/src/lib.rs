@@ -350,7 +350,7 @@ pub use reaper::*;
 mod util;
 use util::*;
 
-#[cfg(feature = "reaper-meter")]
+#[cfg(any(feature = "reaper-meter", feature = "control-surface-meter"))]
 #[doc(hidden)]
 pub mod metering;
 

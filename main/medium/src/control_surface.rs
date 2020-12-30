@@ -1,15 +1,15 @@
 #![allow(non_snake_case)]
 use super::MediaTrack;
-#[cfg(feature = "reaper-meter")]
+#[cfg(feature = "control-surface-meter")]
 use crate::metering::ResponseTimeSingleThreaded;
 use crate::{
     require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
     TrackFxChainType, TrackFxLocation, TryFromRawError,
 };
-#[cfg(feature = "reaper-meter")]
+#[cfg(feature = "control-surface-meter")]
 use metered::metered;
-#[cfg(not(feature = "reaper-meter"))]
+#[cfg(not(feature = "control-surface-meter"))]
 use reaper_macros::measure;
 
 use reaper_low::raw;
@@ -238,7 +238,7 @@ pub trait ControlSurface: Debug {
 
     /// Called regularly in order to give the control surface a chance to evaluate its own
     /// performance metrics.
-    #[cfg(feature = "reaper-meter")]
+    #[cfg(feature = "control-surface-meter")]
     fn handle_metrics(&mut self, metrics: &ControlSurfaceMetrics) {
         let _ = metrics;
     }
@@ -477,7 +477,7 @@ pub(crate) struct DelegatingControlSurface {
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
-    #[cfg(feature = "reaper-meter")]
+    #[cfg(feature = "control-surface-meter")]
     metrics: ControlSurfaceMetrics,
 }
 
@@ -493,7 +493,7 @@ impl DelegatingControlSurface {
             supports_detection_of_input_fx: reaper_version >= &reaper_version_5_95,
             // since pre2 to be accurate but so what
             supports_detection_of_input_fx_in_set_fx_change: reaper_version >= &reaper_version_5_95,
-            #[cfg(feature = "reaper-meter")]
+            #[cfg(feature = "control-surface-meter")]
             metrics: Default::default(),
         }
     }
@@ -543,7 +543,7 @@ impl DelegatingControlSurface {
     }
 }
 
-#[cfg_attr(feature = "reaper-meter", metered(registry = ControlSurfaceMetrics, visibility = pub))]
+#[cfg_attr(feature = "control-surface-meter", metered(registry = ControlSurfaceMetrics, visibility = pub))]
 impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     #[measure(ResponseTimeSingleThreaded)]
     fn GetTypeString(&self) -> *const i8 {
@@ -576,7 +576,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
 
     fn Run(&mut self) {
         self.delegate.run();
-        #[cfg(feature = "reaper-meter")]
+        #[cfg(feature = "control-surface-meter")]
         {
             self.delegate.handle_metrics(&self.metrics);
         }
@@ -846,11 +846,11 @@ fn is_critical_default(response_time: &ResponseTimeSingleThreaded) -> bool {
     response_time.borrow().max() > 10000
 }
 
-#[cfg(feature = "reaper-meter")]
+#[cfg(feature = "control-surface-meter")]
 pub type ControlSurfaceResponseTimeDescriptors =
     [ResponseTimeDescriptor<ControlSurfaceMetrics>; 20];
 
-#[cfg(feature = "reaper-meter")]
+#[cfg(feature = "control-surface-meter")]
 #[doc(hidden)]
 impl ControlSurfaceMetrics {
     pub fn response_time_descriptors() -> ControlSurfaceResponseTimeDescriptors {

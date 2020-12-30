@@ -21,7 +21,7 @@ pub trait ControlSurfaceMiddleware {
 
     fn handle_event(&self, event: ControlSurfaceEvent);
 
-    #[cfg(feature = "reaper-meter")]
+    #[cfg(feature = "control-surface-meter")]
     fn handle_metrics(&mut self, metrics: &reaper_medium::ControlSurfaceMetrics) {
         let _ = metrics;
     }
@@ -42,7 +42,7 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
         self.middleware.run();
     }
 
-    #[cfg(feature = "reaper-meter")]
+    #[cfg(feature = "control-surface-meter")]
     fn handle_metrics(&mut self, metrics: &reaper_medium::ControlSurfaceMetrics) {
         self.middleware.handle_metrics(metrics);
     }

@@ -7,8 +7,8 @@ publish = false
 
 
 [dependencies]
-reaper-high = { path = "../../main/high", features = ["reaper-meter", "serde"] }
-reaper-medium = { path = "../../main/medium", features = ["reaper-meter"] }
+reaper-high = { path = "../../main/high", features = ["reaper-meter", "control-surface-meter"] }
+reaper-medium = { path = "../../main/medium", features = ["reaper-meter", "control-surface-meter"] }
 reaper-low = { path = "../../main/low" }
 c_str_macro = "1.0.2"
 rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }

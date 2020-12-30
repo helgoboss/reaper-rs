@@ -11,8 +11,10 @@ edition = "2018"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 
 [features]
-# Activates measuring of function execution times.
+# Activates measuring of REAPER function execution times.
 reaper-meter = ["metered", "serde"]
+# Activates measuring of control surface method execution times.
+control-surface-meter = ["metered", "serde"]
 
 [dependencies]
 c_str_macro = "1.0.2"
