@@ -18,7 +18,13 @@ pub struct MiddlewareControlSurface<M: ControlSurfaceMiddleware + Debug> {
 
 pub trait ControlSurfaceMiddleware {
     fn run(&mut self);
+
     fn handle_event(&self, event: ControlSurfaceEvent);
+
+    #[cfg(feature = "reaper-meter")]
+    fn handle_metrics(&mut self, metrics: &reaper_medium::ControlSurfaceMetrics) {
+        let _ = metrics;
+    }
 }
 
 impl<H: ControlSurfaceMiddleware + Debug> MiddlewareControlSurface<H> {
@@ -34,6 +40,11 @@ impl<H: ControlSurfaceMiddleware + Debug> MiddlewareControlSurface<H> {
 impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSurface<H> {
     fn run(&mut self) {
         self.middleware.run();
+    }
+
+    #[cfg(feature = "reaper-meter")]
+    fn handle_metrics(&mut self, metrics: &reaper_medium::ControlSurfaceMetrics) {
+        self.middleware.handle_metrics(metrics);
     }
 
     fn close_no_reset(&self) {

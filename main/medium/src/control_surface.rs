@@ -1,13 +1,21 @@
+#![allow(non_snake_case)]
 use super::MediaTrack;
+#[cfg(feature = "reaper-meter")]
+use crate::metering::ResponseTimeSingleThreaded;
 use crate::{
     require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
     TrackFxChainType, TrackFxLocation, TryFromRawError,
 };
+#[cfg(feature = "reaper-meter")]
+use metered::metered;
+#[cfg(not(feature = "reaper-meter"))]
+use reaper_macros::measure;
 
 use reaper_low::raw;
 use std::borrow::Cow;
 
+use crate::metering::{MetricDescriptor, ResponseTimeDescriptor};
 use std::fmt::Debug;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
@@ -226,6 +234,13 @@ pub trait ControlSurface: Debug {
     fn ext_track_fx_preset_changed(&self, args: ExtTrackFxPresetChangedArgs) -> i32 {
         let _ = args;
         0
+    }
+
+    /// Called regularly in order to give the control surface a chance to evaluate its own
+    /// performance metrics.
+    #[cfg(feature = "reaper-meter")]
+    fn handle_metrics(&mut self, metrics: &ControlSurfaceMetrics) {
+        let _ = metrics;
     }
 }
 
@@ -462,6 +477,8 @@ pub(crate) struct DelegatingControlSurface {
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
+    #[cfg(feature = "reaper-meter")]
+    metrics: ControlSurfaceMetrics,
 }
 
 impl DelegatingControlSurface {
@@ -476,6 +493,8 @@ impl DelegatingControlSurface {
             supports_detection_of_input_fx: reaper_version >= &reaper_version_5_95,
             // since pre2 to be accurate but so what
             supports_detection_of_input_fx_in_set_fx_change: reaper_version >= &reaper_version_5_95,
+            #[cfg(feature = "reaper-meter")]
+            metrics: Default::default(),
         }
     }
 
@@ -524,8 +543,9 @@ impl DelegatingControlSurface {
     }
 }
 
-#[allow(non_snake_case)]
+#[cfg_attr(feature = "reaper-meter", metered(registry = ControlSurfaceMetrics, visibility = pub))]
 impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
+    #[measure(ResponseTimeSingleThreaded)]
     fn GetTypeString(&self) -> *const i8 {
         self.delegate
             .get_type_string()
@@ -533,6 +553,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
             .unwrap_or(null_mut())
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn GetDescString(&self) -> *const i8 {
         self.delegate
             .get_desc_string()
@@ -540,6 +561,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
             .unwrap_or(null_mut())
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn GetConfigString(&self) -> *const i8 {
         self.delegate
             .get_config_string()
@@ -547,18 +569,25 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
             .unwrap_or(null_mut())
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn CloseNoReset(&self) {
         self.delegate.close_no_reset()
     }
 
     fn Run(&mut self) {
-        self.delegate.run()
+        self.delegate.run();
+        #[cfg(feature = "reaper-meter")]
+        {
+            self.delegate.handle_metrics(&self.metrics);
+        }
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetTrackListChange(&self) {
         self.delegate.set_track_list_change()
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetSurfaceVolume(&self, trackid: *mut raw::MediaTrack, volume: f64) {
         self.delegate.set_surface_volume(SetSurfaceVolumeArgs {
             track: require_non_null_panic(trackid),
@@ -566,6 +595,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetSurfacePan(&self, trackid: *mut raw::MediaTrack, pan: f64) {
         self.delegate.set_surface_pan(SetSurfacePanArgs {
             track: require_non_null_panic(trackid),
@@ -573,6 +603,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetSurfaceMute(&self, trackid: *mut raw::MediaTrack, mute: bool) {
         self.delegate.set_surface_mute(SetSurfaceMuteArgs {
             track: require_non_null_panic(trackid),
@@ -580,6 +611,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetSurfaceSelected(&self, trackid: *mut raw::MediaTrack, selected: bool) {
         self.delegate.set_surface_selected(SetSurfaceSelectedArgs {
             track: require_non_null_panic(trackid),
@@ -587,6 +619,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetSurfaceSolo(&self, trackid: *mut raw::MediaTrack, solo: bool) {
         self.delegate.set_surface_solo(SetSurfaceSoloArgs {
             track: require_non_null_panic(trackid),
@@ -594,6 +627,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetSurfaceRecArm(&self, trackid: *mut raw::MediaTrack, recarm: bool) {
         self.delegate.set_surface_rec_arm(SetSurfaceRecArmArgs {
             track: require_non_null_panic(trackid),
@@ -601,6 +635,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetPlayState(&self, play: bool, pause: bool, rec: bool) {
         self.delegate.set_play_state(SetPlayStateArgs {
             is_playing: play,
@@ -609,11 +644,13 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetRepeatState(&self, rep: bool) {
         self.delegate
             .set_repeat_state(SetRepeatStateArgs { is_enabled: rep })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const i8) {
         self.delegate.set_track_title(SetTrackTitleArgs {
             track: require_non_null_panic(trackid),
@@ -621,6 +658,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn GetTouchState(&self, trackid: *mut raw::MediaTrack, isPan: i32) -> bool {
         self.delegate.get_touch_state(GetTouchStateArgs {
             track: require_non_null_panic(trackid),
@@ -628,28 +666,33 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn SetAutoMode(&self, mode: i32) {
         self.delegate.set_auto_mode(SetAutoModeArgs {
             mode: AutomationMode::try_from_raw(mode).expect("unknown automation mode"),
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn ResetCachedVolPanStates(&self) {
         self.delegate.reset_cached_vol_pan_states()
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn OnTrackSelection(&self, trackid: *mut raw::MediaTrack) {
         self.delegate.on_track_selection(OnTrackSelectionArgs {
             track: require_non_null_panic(trackid),
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn IsKeyDown(&self, key: i32) -> bool {
         self.delegate.is_key_down(IsKeyDownArgs {
             key: ModKey::try_from_raw(key).expect("unknown key code"),
         })
     }
 
+    #[measure(ResponseTimeSingleThreaded)]
     fn Extended(
         &self,
         call: i32,
@@ -797,4 +840,121 @@ unsafe fn get_as_track_fx_location(
 ) -> Result<TrackFxLocation, TryFromRawError<i32>> {
     let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
     TrackFxLocation::try_from_raw(fx_index)
+}
+
+fn is_critical_default(response_time: &ResponseTimeSingleThreaded) -> bool {
+    response_time.borrow().max() > 10000
+}
+
+#[cfg(feature = "reaper-meter")]
+pub type ControlSurfaceResponseTimeDescriptors =
+    [ResponseTimeDescriptor<ControlSurfaceMetrics>; 20];
+
+#[cfg(feature = "reaper-meter")]
+#[doc(hidden)]
+impl ControlSurfaceMetrics {
+    pub fn response_time_descriptors() -> ControlSurfaceResponseTimeDescriptors {
+        [
+            MetricDescriptor::new(
+                "GetTypeString",
+                |m| &m.GetTypeString.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "GetDescString",
+                |m| &m.GetDescString.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "GetConfigString",
+                |m| &m.GetConfigString.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "CloseNoReset",
+                |m| &m.CloseNoReset.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetTrackListChange",
+                |m| &m.SetTrackListChange.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetSurfaceVolume",
+                |m| &m.SetSurfaceVolume.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetSurfacePan",
+                |m| &m.SetSurfacePan.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetSurfaceMute",
+                |m| &m.SetSurfaceMute.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetSurfaceSelected",
+                |m| &m.SetSurfaceSelected.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetSurfaceSolo",
+                |m| &m.SetSurfaceSolo.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetSurfaceRecArm",
+                |m| &m.SetSurfaceRecArm.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetPlayState",
+                |m| &m.SetPlayState.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetRepeatState",
+                |m| &m.SetRepeatState.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetTrackTitle",
+                |m| &m.SetTrackTitle.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "GetTouchState",
+                |m| &m.GetTouchState.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "SetAutoMode",
+                |m| &m.SetAutoMode.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "ResetCachedVolPanStates",
+                |m| &m.ResetCachedVolPanStates.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "OnTrackSelection",
+                |m| &m.OnTrackSelection.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "IsKeyDown",
+                |m| &m.IsKeyDown.response_time_single_threaded,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "Extended",
+                |m| &m.Extended.response_time_single_threaded,
+                is_critical_default,
+            ),
+        ]
+    }
 }

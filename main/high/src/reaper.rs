@@ -13,7 +13,7 @@ use rxrust::prelude::*;
 
 use crate::fx::Fx;
 use crate::fx_parameter::FxParameter;
-use crate::helper_control_surface::HelperMiddleware;
+use crate::helper_middleware::{HelperMiddleware, HelperTask};
 use crate::track_send::TrackSend;
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
@@ -38,7 +38,7 @@ use reaper_medium::{
     ReaProject, RealTimeAudioThreadScope, ReaperStr, ReaperString, ReaperStringArg,
     RegistrationHandle, SectionContext, ToggleAction, ToggleActionResult, WindowContext,
 };
-use slog::{debug, Logger};
+use slog::{debug, o, Logger};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
@@ -124,6 +124,7 @@ impl ReaperBuilder {
                 let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
                     AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
                 );
+                let (helper_task_sender, helper_task_receiver) = crossbeam_channel::unbounded();
                 let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
                 let current_project = Project::new(
@@ -139,7 +140,7 @@ impl ReaperBuilder {
                     medium_session: RefCell::new(self.medium),
                     medium_reaper,
                     medium_real_time_reaper: medium_real_time_reaper.clone(),
-                    logger,
+                    logger: logger.clone(),
                     command_by_id: RefCell::new(HashMap::new()),
                     action_value_change_history: RefCell::new(Default::default()),
                     subjects: subjects.clone(),
@@ -147,16 +148,19 @@ impl ReaperBuilder {
                     main_thread_task_sender: mt_sender.clone(),
                     audio_thread_task_sender: at_sender,
                     main_thread_rx_task_sender: mt_rx_sender,
+                    helper_task_sender,
                     main_thread_scheduler,
                     main_thread_future_spawner: spawner,
                     local_main_thread_future_spawner: local_spawner,
                     session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {
                         csurf_inst: Box::new(MiddlewareControlSurface::new(HelperMiddleware::new(
+                            logger.new(o!("struct" => "HelperMiddleware")),
                             version,
                             current_project,
                             mt_sender.clone(),
                             mt_receiver,
                             mt_rx_receiver,
+                            helper_task_receiver,
                             executor,
                             local_executor,
                             subjects,
@@ -278,6 +282,7 @@ pub struct Reaper {
     main_thread_task_sender: Sender<MainThreadTask>,
     audio_thread_task_sender: Sender<AudioThreadTaskOp>,
     main_thread_rx_task_sender: Sender<RxTask>,
+    helper_task_sender: Sender<HelperTask>,
     main_thread_scheduler: RunLoopScheduler,
     main_thread_future_spawner: crate::run_loop_executor::Spawner,
     local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
@@ -868,6 +873,11 @@ impl Reaper {
     pub fn action_invoked(&self) -> impl ReactiveEvent<Rc<Action>> {
         self.require_main_thread();
         self.subjects.action_invoked.borrow().clone()
+    }
+
+    /// Only has an effect when compiled with the necessary feature.
+    pub fn log_helper_metrics(&self) {
+        let _ = self.helper_task_sender.send(HelperTask::LogMetrics);
     }
 
     /// Returns an rxRust scheduler for scheduling observables.

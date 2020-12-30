@@ -57,7 +57,7 @@ pub use fx::*;
 mod fx_parameter;
 pub use fx_parameter::*;
 
-mod helper_control_surface;
+mod helper_middleware;
 
 mod section;
 pub use section::*;
@@ -105,8 +105,13 @@ mod normalized_value;
 mod middleware_control_surface;
 pub use middleware_control_surface::*;
 
-mod change_detection_middleware;
-pub use change_detection_middleware::*;
+mod change_detector;
+pub use change_detector::*;
+
+#[cfg(feature = "reaper-meter")]
+mod control_surface_performance_monitor;
+#[cfg(feature = "reaper-meter")]
+pub use control_surface_performance_monitor::*;
 
 #[cfg(test)]
 mod tests {

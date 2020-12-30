@@ -3,14 +3,20 @@ use rxrust::prelude::*;
 
 use crate::run_loop_scheduler::RxTask;
 use crate::{
-    local_run_loop_executor, run_loop_executor, ChangeDetectionMiddleware, ChangeEvent,
-    ControlSurfaceEvent, ControlSurfaceMiddleware, MainSubjects, MainThreadTask, Project, Reaper,
+    local_run_loop_executor, run_loop_executor, ChangeDetector, ChangeEvent, ControlSurfaceEvent,
+    ControlSurfaceMiddleware, MainSubjects, MainThreadTask, Project, Reaper,
     MAIN_THREAD_TASK_BULK_SIZE,
 };
 use reaper_medium::ReaperVersion;
+use winapi::_core::time::Duration;
+
+pub(crate) enum HelperTask {
+    LogMetrics,
+}
 
 #[derive(Debug)]
 pub(crate) struct HelperMiddleware {
+    logger: slog::Logger,
     // These two are for very simple scheduling. Most light-weight.
     main_thread_task_sender: Sender<MainThreadTask>,
     main_thread_task_receiver: Receiver<MainThreadTask>,
@@ -20,33 +26,42 @@ pub(crate) struct HelperMiddleware {
     // This is for scheduling rxRust observables.
     // TODO-medium Remove, I ran into deadlocks with this thing.
     main_thread_rx_task_receiver: Receiver<RxTask>,
-    change_detection_middleware: ChangeDetectionMiddleware,
+    helper_middleware_task_receiver: Receiver<HelperTask>,
+    change_detector: ChangeDetector,
     subjects: MainSubjects,
+    #[cfg(feature = "reaper-meter")]
+    performance_monitor: crate::ControlSurfacePerformanceMonitor,
 }
 
 impl HelperMiddleware {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
+        logger: slog::Logger,
         version: ReaperVersion<'static>,
         last_active_project: Project,
         main_thread_task_sender: Sender<MainThreadTask>,
         main_thread_task_receiver: Receiver<MainThreadTask>,
         main_thread_rx_task_receiver: Receiver<RxTask>,
+        helper_task_receiver: Receiver<HelperTask>,
         executor: run_loop_executor::RunLoopExecutor,
         local_executor: local_run_loop_executor::RunLoopExecutor,
         subjects: MainSubjects,
     ) -> HelperMiddleware {
         HelperMiddleware {
+            logger: logger.clone(),
             main_thread_task_sender,
             main_thread_task_receiver,
             main_thread_executor: executor,
             local_main_thread_executor: local_executor,
             main_thread_rx_task_receiver,
-            change_detection_middleware: ChangeDetectionMiddleware::new(
-                version,
-                last_active_project,
-            ),
+            helper_middleware_task_receiver: helper_task_receiver,
+            change_detector: ChangeDetector::new(version, last_active_project),
             subjects,
+            #[cfg(feature = "reaper-meter")]
+            performance_monitor: crate::ControlSurfacePerformanceMonitor::new(
+                logger,
+                Duration::from_secs(30),
+            ),
         }
     }
 
@@ -65,7 +80,7 @@ impl HelperMiddleware {
         let local_task_count = self.local_main_thread_executor.discard_tasks();
         let total_task_count = shared_task_count + local_task_count;
         if total_task_count > 0 {
-            slog::warn!(Reaper::get().logger(), "Discarded future tasks on reactivation";
+            slog::warn!(self.logger, "Discarded future tasks on reactivation";
                 "task_count" => total_task_count,
             );
         }
@@ -74,7 +89,7 @@ impl HelperMiddleware {
     fn discard_main_thread_tasks(&self) {
         let task_count = self.main_thread_task_receiver.try_iter().count();
         if task_count > 0 {
-            slog::warn!(Reaper::get().logger(), "Discarded main thread tasks on reactivation";
+            slog::warn!(self.logger, "Discarded main thread tasks on reactivation";
                 "task_count" => task_count,
             );
         }
@@ -83,7 +98,7 @@ impl HelperMiddleware {
     fn discard_main_thread_rx_tasks(&self) {
         let task_count = self.main_thread_rx_task_receiver.try_iter().count();
         if task_count > 0 {
-            slog::warn!(Reaper::get().logger(), "Discarded main thread rx tasks on reactivation";
+            slog::warn!(self.logger, "Discarded main thread rx tasks on reactivation";
                 "task_count" => task_count,
             );
         }
@@ -130,8 +145,21 @@ impl ControlSurfaceMiddleware for HelperMiddleware {
         }
     }
 
+    #[cfg(feature = "reaper-meter")]
+    fn handle_metrics(&mut self, metrics: &reaper_medium::ControlSurfaceMetrics) {
+        self.performance_monitor.handle_metrics(metrics);
+        // As long as the middleware task receiver doesn't get other kinds of tasks, we can do it
+        // here - which has the advantage that we have the metrics at hand already.
+        if let Ok(task) = self.helper_middleware_task_receiver.try_recv() {
+            use HelperTask::*;
+            match task {
+                LogMetrics => self.performance_monitor.log_metrics(metrics),
+            }
+        }
+    }
+
     fn handle_event(&self, event: ControlSurfaceEvent) {
-        self.change_detection_middleware.process(event, |event| {
+        self.change_detector.process(event, |event| {
             use ChangeEvent::*;
             match event {
                 ProjectSwitched(p) => self.subjects.project_switched.borrow_mut().next(p),

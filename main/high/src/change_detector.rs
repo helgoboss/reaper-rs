@@ -14,7 +14,7 @@ use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
-pub struct ChangeDetectionMiddleware {
+pub struct ChangeDetector {
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     last_active_project: Cell<Project>,
     project_datas: RefCell<ProjectDataMap>,
@@ -106,13 +106,10 @@ enum State {
     PropagatingTrackSetChanges,
 }
 
-impl ChangeDetectionMiddleware {
-    pub fn new(
-        version: ReaperVersion<'static>,
-        last_active_project: Project,
-    ) -> ChangeDetectionMiddleware {
+impl ChangeDetector {
+    pub fn new(version: ReaperVersion<'static>, last_active_project: Project) -> ChangeDetector {
         let reaper_version_5_95 = ReaperVersion::new("5.95");
-        ChangeDetectionMiddleware {
+        ChangeDetector {
             num_track_set_changes_left_to_be_propagated: Default::default(),
             last_active_project: Cell::new(last_active_project),
             project_datas: Default::default(),

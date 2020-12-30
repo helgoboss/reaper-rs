@@ -13,7 +13,7 @@ publish = false
 
 [features]
 # Activates measuring of function execution times.
-reaper-meter = ["reaper-medium/reaper-meter"]
+reaper-meter = ["reaper-medium/reaper-meter", "serde", "serde_yaml"]
 
 [dependencies]
 c_str_macro = "1.0.2"
@@ -30,6 +30,7 @@ slog-term = "2.5.0"
 num_enum = "0.4.2"
 futures = "0.3"
 serde = { version = "1.0", features = ["derive"], optional = true }
+serde_yaml = { version = "0.8", optional = true }
 backtrace = "0.3"
 
 [target.'cfg(windows)'.dependencies]
