@@ -165,7 +165,6 @@ impl<UsageScope> Clone for Reaper<UsageScope> {
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Reaper<MainThreadScope>> = None;
-static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
 impl Reaper<MainThreadScope> {
     /// Makes the given instance available globally.
@@ -174,6 +173,7 @@ impl Reaper<MainThreadScope> {
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
     pub fn make_available_globally(reaper: Reaper<MainThreadScope>) {
+        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
         unsafe {
             INIT_INSTANCE.call_once(|| {
                 INSTANCE = Some(reaper);

@@ -2,7 +2,6 @@ use crate::{register_plugin_destroy_hook, PluginContext, Reaper, ReaperFunctionP
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Reaper> = None;
-static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
 impl Reaper {
     /// Makes the given instance available globally.
@@ -11,6 +10,7 @@ impl Reaper {
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
     pub fn make_available_globally(functions: Reaper) {
+        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
         unsafe {
             INIT_INSTANCE.call_once(|| {
                 INSTANCE = Some(functions);

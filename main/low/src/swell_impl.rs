@@ -11,7 +11,6 @@ use crate::{
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Swell> = None;
-static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
 /// This impl block contains functions which exist in SWELL as macros and therefore are not picked
 /// up by `bindgen`.
@@ -22,6 +21,7 @@ impl Swell {
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
     pub fn make_available_globally(functions: Swell) {
+        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
         unsafe {
             INIT_INSTANCE.call_once(|| {
                 INSTANCE = Some(functions);
