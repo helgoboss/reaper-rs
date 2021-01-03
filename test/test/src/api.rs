@@ -1,6 +1,6 @@
 use reaper_high::Reaper;
 use reaper_medium::ReaperVersion;
-use reaper_rx::{ActionRx, ControlSurfaceRx, MainRx};
+use reaper_rx::{ActionRx, ActionRxProvider, ControlSurfaceRx, MainRx};
 use rxrust::prelude::*;
 use std::borrow::Cow;
 
@@ -52,10 +52,6 @@ unsafe impl Sync for Test {}
 unsafe impl Send for Test {}
 
 impl Test {
-    pub fn action_rx() -> &'static ActionRx {
-        Test::get().main_rx.action()
-    }
-
     pub fn control_surface_rx() -> &'static ControlSurfaceRx {
         Test::get().main_rx.control_surface()
     }
@@ -63,6 +59,12 @@ impl Test {
     fn get() -> &'static Test {
         Reaper::get().require_main_thread();
         &TEST
+    }
+}
+
+impl ActionRxProvider for Test {
+    fn action_rx() -> &'static ActionRx {
+        Test::get().main_rx.action()
     }
 }
 

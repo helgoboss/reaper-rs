@@ -29,6 +29,7 @@ use reaper_medium::{
 };
 
 use reaper_low::{raw, Swell};
+use reaper_rx::ActionRxProvider;
 use std::os::raw::{c_int, c_void};
 use std::ptr::null_mut;
 use std::rc::Rc;

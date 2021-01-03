@@ -14,10 +14,7 @@ use rxrust::prelude::*;
 use std::collections::VecDeque;
 
 use reaper_medium::RegistrationHandle;
-use reaper_rx::{
-    ActionRx, ActionRxHookPostCommand, ActionRxHookPostCommand2, ActionRxProvider,
-    ControlSurfaceRxDriver,
-};
+use reaper_rx::{ActionRxHookPostCommand, ActionRxHookPostCommand2, ControlSurfaceRxDriver};
 use slog::info;
 use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
@@ -66,20 +63,14 @@ struct RxSetup {
         RegistrationHandle<MiddlewareControlSurface<TestControlSurfaceMiddleware>>,
 }
 
-impl ActionRxProvider for RxSetup {
-    fn action_rx() -> &'static ActionRx {
-        Test::action_rx()
-    }
-}
-
 impl RxSetup {
     fn setup() -> RxSetup {
         let mut session = Reaper::get().medium_session();
         session
-            .plugin_register_add_hook_post_command::<ActionRxHookPostCommand<Self>>()
+            .plugin_register_add_hook_post_command::<ActionRxHookPostCommand<Test>>()
             .unwrap();
         session
-            .plugin_register_add_hook_post_command_2::<ActionRxHookPostCommand2<Self>>()
+            .plugin_register_add_hook_post_command_2::<ActionRxHookPostCommand2<Test>>()
             .unwrap();
         RxSetup {
             control_surface_reg_handle: {
@@ -96,8 +87,8 @@ impl RxSetup {
         unsafe {
             let _ = session.plugin_register_remove_csurf_inst(self.control_surface_reg_handle);
         }
-        session.plugin_register_remove_hook_post_command_2::<ActionRxHookPostCommand2<Self>>();
-        session.plugin_register_remove_hook_post_command::<ActionRxHookPostCommand<Self>>();
+        session.plugin_register_remove_hook_post_command_2::<ActionRxHookPostCommand2<Test>>();
+        session.plugin_register_remove_hook_post_command::<ActionRxHookPostCommand<Test>>();
     }
 }
 

@@ -55,19 +55,20 @@ const AUDIO_THREAD_TASK_CHANNEL_CAPACITY: usize = 500;
 /// How many tasks to process at a maximum in one real-time audio loop iteration.
 const AUDIO_THREAD_TASK_BULK_SIZE: usize = 1;
 
-/// We  make sure in each public function/method that it's called from the correct thread. Similar
-/// with other methods. We basically make this struct thread-safe by panicking whenever we are in
-/// the wrong thread.
+/// We  make sure in **each** public function/method that it's called from the correct thread.
+/// Similar with other methods. We basically make this struct thread-safe by panicking whenever we
+/// are in the wrong thread.
 ///
 /// We could also go the easy way of using one Reaper instance wrapped in a Mutex. Downside: This is
 /// more guarantees than we need. Why should audio thread and main thread fight for access to one
-/// Reaper instance. That results in performance loss.
+/// Reaper instance. That results in performance loss and possible deadlocks.
 //
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Reaper> = None;
-static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
 
-// Here we don't mind having a heavy mutex because this is not often accessed.
+/// This value can be set more than once and we don't necessarily have REAPER API access at our
+/// disposal when accessing it, that's why we can't use `call_once` in combination with thread check
+/// in order to get safe access. Let's use a Mutex instead.
 static REAPER_GUARD: Lazy<Mutex<Weak<ReaperGuard>>> = Lazy::new(|| Mutex::new(Weak::new()));
 
 pub struct ReaperBuilder {
@@ -94,6 +95,7 @@ impl ReaperBuilder {
 
     /// This has an effect only if there isn't an instance already.
     pub fn setup(self) {
+        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
         self.require_main_thread();
         unsafe {
             INIT_INSTANCE.call_once(|| {
@@ -261,7 +263,9 @@ pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
     Toggleable(Box::new(is_on))
 }
 
-pub struct ReaperGuard;
+pub struct ReaperGuard {
+    go_to_sleep: Option<Box<dyn FnOnce() + Sync + Send>>,
+}
 
 impl Drop for ReaperGuard {
     fn drop(&mut self) {
@@ -269,6 +273,7 @@ impl Drop for ReaperGuard {
             Reaper::get().logger(),
             "REAPER guard dropped. Making _reaper-rs_ sleep..."
         );
+        (self.go_to_sleep.take().unwrap())();
         let _ = Reaper::get().go_to_sleep();
     }
 }
@@ -278,16 +283,19 @@ static GUARD_INITIALIZER: std::sync::Once = std::sync::Once::new();
 impl Reaper {
     /// The given initializer is executed only the first time this is called.
     ///
-    /// `activate()` is called whenever first first instance pops up. `deactivate()` is called
-    /// whenver the last instance goes away.
-    pub fn guarded(initializer: impl FnOnce()) -> Arc<ReaperGuard> {
+    /// `wake_up()` is called whenever first first instance pops up. `go_to_sleep()` is called
+    /// whenever the last instance goes away.
+    pub fn guarded<S: FnOnce() + Sync + Send + 'static>(
+        initializer: impl FnOnce(),
+        wake_up: impl FnOnce() -> S,
+    ) -> Arc<ReaperGuard> {
         // This is supposed to be called in the main thread. A check is not necessary, because this
         // is protected by a mutex and it will fail in the initializer and getter if called from
         // wrong thread.
-        let mut result = REAPER_GUARD.lock().unwrap();
-        if let Some(rc) = result.upgrade() {
+        let mut guard = REAPER_GUARD.lock().unwrap();
+        if let Some(arc) = guard.upgrade() {
             // There's at least one active instance. No need to reactivate.
-            return rc;
+            return arc;
         }
         // There's no active instance.
         GUARD_INITIALIZER.call_once(|| {
@@ -295,8 +303,11 @@ impl Reaper {
             initializer();
         });
         let _ = Reaper::get().wake_up();
-        let arc = Arc::new(ReaperGuard);
-        *result = Arc::downgrade(&arc);
+        let go_to_sleep = wake_up();
+        let arc = Arc::new(ReaperGuard {
+            go_to_sleep: Some(Box::new(go_to_sleep)),
+        });
+        *guard = Arc::downgrade(&arc);
         arc
     }
 

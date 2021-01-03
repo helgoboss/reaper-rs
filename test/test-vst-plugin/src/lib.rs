@@ -117,31 +117,35 @@ impl TestVstPlugin {
     }
 
     fn use_high_level_reaper(&mut self) {
-        let guard = Reaper::guarded(|| {
-            let context =
-                PluginContext::from_vst_plugin(&self.host, static_vst_plugin_context()).unwrap();
-            Reaper::setup_with_defaults(
-                context,
-                create_terminal_logger(),
-                CrashInfo {
-                    plugin_name: "reaper-rs test VST plug-in".to_string(),
-                    plugin_version: env!("CARGO_PKG_VERSION").to_string(),
-                    support_email_address: "info@helgoboss.org".to_string(),
-                },
-            );
-            let reaper = Reaper::get();
-            reaper.wake_up().unwrap();
-            debug!(
-                reaper.logger(),
-                "Loaded reaper-rs integration test VST plugin"
-            );
-            reaper.register_action(
-                "reaperRsVstIntegrationTests",
-                "reaper-rs VST integration tests",
-                || reaper_test::execute_integration_test(|_| ()),
-                ActionKind::NotToggleable,
-            );
-        });
+        let guard = Reaper::guarded(
+            || {
+                let context =
+                    PluginContext::from_vst_plugin(&self.host, static_vst_plugin_context())
+                        .unwrap();
+                Reaper::setup_with_defaults(
+                    context,
+                    create_terminal_logger(),
+                    CrashInfo {
+                        plugin_name: "reaper-rs test VST plug-in".to_string(),
+                        plugin_version: env!("CARGO_PKG_VERSION").to_string(),
+                        support_email_address: "info@helgoboss.org".to_string(),
+                    },
+                );
+                let reaper = Reaper::get();
+                reaper.wake_up().unwrap();
+                debug!(
+                    reaper.logger(),
+                    "Loaded reaper-rs integration test VST plugin"
+                );
+                reaper.register_action(
+                    "reaperRsVstIntegrationTests",
+                    "reaper-rs VST integration tests",
+                    || reaper_test::execute_integration_test(|_| ()),
+                    ActionKind::NotToggleable,
+                );
+            },
+            || || {},
+        );
         self.reaper_guard = Some(guard);
         // Some Rx stuff
         #[derive(Debug)]
