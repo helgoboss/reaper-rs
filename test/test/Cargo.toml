@@ -7,6 +7,7 @@ publish = false
 
 
 [dependencies]
+reaper-rx = { path = "../../main/rx" }
 reaper-high = { path = "../../main/high", features = ["reaper-meter", "control-surface-meter"] }
 reaper-medium = { path = "../../main/medium", features = ["reaper-meter", "control-surface-meter"] }
 reaper-low = { path = "../../main/low" }
@@ -15,3 +16,4 @@ rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
 slog = "2.5.2"
 helgoboss-midi = "0.1.2"
 approx = "0.3.2"
+once_cell = "1.5.2"

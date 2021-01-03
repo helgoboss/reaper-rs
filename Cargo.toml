@@ -3,6 +3,7 @@ members = [
     "main/low",
     "main/medium",
     "main/high",
+    "main/rx",
     "main/macros",
     "test/test",
     "test/test-extension-plugin",

@@ -7,7 +7,11 @@
 
 [Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
 
-**Important note:** If you want to use _reaper-rs_ for your own project, please use the master branch for the time being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often but I don't publish to crates.io at the moment, so my crates there are a bit outdated. Rationale: As long as I'm the only consumer of this library, this process is easier for me. I tend to keep `reaper-low` and `reaper-medium` mostly stable, so no worries about that :)
+**Important note:** If you want to use _reaper-rs_ for your own project, please use the master branch for the time 
+being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often but I don't publish to 
+crates.io at the moment, so my crates there are a bit outdated. Rationale: As long as I'm the only consumer of this 
+library, this process is easier for me. I tend to keep `reaper-low` and `reaper-medium` mostly stable, so no worries 
+about that :)
 
 Here's the snippet:
 
@@ -37,16 +41,19 @@ Win32 API.
 
 ## Basics
 
-_reaper-rs_ consists of 4 production crates:
+_reaper-rs_ consists of the following production crates:
 
 - [reaper-macros](https://docs.rs/reaper-macros)
 - [reaper-low](https://docs.rs/reaper-low)
 - [reaper-medium](https://docs.rs/reaper-medium)
 - `reaper-high` (not yet published)
+- `reaper-rx` (not yet published)
 
-[reaper-macros](https://docs.rs/reaper-macros) provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
+`reaper-macros` provides a simple attribute macro to simplify bootstrapping REAPER extension plug-ins.
 
-The remaining crates represent the 3 different APIs of _reaper-rs_.
+`reaper-low`, `reaper-medium` and `reaper-high` represent the 3 different APIs of _reaper-rs_
+
+The remaining crates are add-ons for the high-level API.
 
 ### 1. Low-level API
 
@@ -136,8 +143,8 @@ session.audio_reg_hardware_hook_add(MyOnAudioBuffer { counter: 0 });
 ### 3. High-level API
 
 This API builds on top of the medium-level API. It makes a break with the "flat functions" nature of the original
-REAPER C++ API and replaces it with an API that uses reactive and object-oriented paradigms. This break makes it
-possible to provide an intuitive API which can be used completely without `unsafe`.
+REAPER C++ API and replaces it with an API that uses object-oriented paradigms. This break makes it possible to provide
+an intuitive API which can be used completely without `unsafe`.
 
 Status:
 
@@ -149,10 +156,19 @@ Example:
 
 ```rust,ignore
 reaper.show_console_msg("Hello world from reaper-rs high-level API!");
-reaper.track_removed().subscribe(|t| println!("Track {:?} removed", t));
 let project = reaper.current_project();
 let track = project.track_by_index(0).ok_or("no tracks")?;
 project.remove_track(&track);
+```
+
+#### Reactive extensions
+
+`reaper-rx` adds reactive programming via [rxRust](https://github.com/rxRust/rxRust) to the mix.
+
+Example:
+
+```rust,ignore
+rx.track_removed().subscribe(|t| println!("Track {:?} removed", t));
 ```
 
 ## Usage
@@ -284,6 +300,7 @@ Contributions are very welcome! Especially to the medium-level API.
 | `/main/low`                   | Low-level API (`reaper-low`)                            |
 | `/main/macros`                | Macros (`reaper-macros`)                                |
 | `/main/medium`                | Medium-level API (`reaper-medium`)                      |
+| `/main/rx`                    | rxRust integration for high-level API (`reaper-rx`)     |
 | `/test`                       | Integration test code                                   |
 | `/test/test`                  | Integration test logic (`reaper-test`)                  |
 | `/test/test-extension-plugin` | Test extension plug-in (`reaper-test-extension-plugin`) |
@@ -332,7 +349,7 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
    - [Download](https://www.rust-lang.org/tools/install) and execute `rustup-init.exe`
    - Accept the defaults
    - Set the correct toolchain default (_nightly_ toolchain is not necessary if you only want to build
-     `reaper-low` and `reaper-medium`) :star:
+     `reaper-low`, `reaper-medium` and `reaper-high`) :star:
      ```batch
      rustup default nightly-2020-12-10-x86_64-pc-windows-msvc
      ```
@@ -362,7 +379,7 @@ sudo apt install curl git build-essential pkg-config libssl-dev liblzma-dev llvm
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
 source $HOME/.cargo/env
-# Using nightly is not necessary if you want to build just the low-level or medium-level API!
+# Using nightly is not necessary if you want to build just the low-level, medium-level or high-level API!
 rustup default nightly-2020-12-10-x86_64-unknown-linux-gnu
 
 # Clone reaper-rs
@@ -402,7 +419,7 @@ should provide you with the necessary instructions if something is missing.
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
 source $HOME/.cargo/env
-# Using nightly is not necessary if you want to build just the low-level or medium-level API!
+# Using nightly is not necessary if you want to build just the low-level, medium-level or high-level API!
 rustup default nightly-2020-12-10-x86_64-apple-darwin
 
 # Clone reaper-rs

@@ -4,13 +4,20 @@ mod api;
 mod invocation_mock;
 mod tests;
 
-use crate::api::{TestStep, TestStepContext, VersionRestriction};
+use crate::api::{Test, TestStep, TestStepContext, VersionRestriction};
 use crate::tests::create_test_steps;
-use reaper_high::Reaper;
+use reaper_high::{
+    ChangeDetector, ControlSurfaceEvent, ControlSurfaceMiddleware, MiddlewareControlSurface, Reaper,
+};
 use rxrust::prelude::*;
 
 use std::collections::VecDeque;
 
+use reaper_medium::RegistrationHandle;
+use reaper_rx::{
+    ActionRx, ActionRxHookPostCommand, ActionRxHookPostCommand2, ActionRxProvider,
+    ControlSurfaceRxDriver,
+};
 use slog::info;
 use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
@@ -24,7 +31,74 @@ pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) 
     log("# Testing reaper-rs\n");
     let steps: VecDeque<_> = create_test_steps().collect();
     let step_count = steps.len();
-    execute_next_step(steps, step_count, on_finish);
+    let rx_setup = RxSetup::setup();
+    execute_next_step(steps, step_count, move |result| {
+        rx_setup.teardown();
+        on_finish(result);
+    });
+}
+
+#[derive(Debug)]
+struct TestControlSurfaceMiddleware {
+    change_detector: ChangeDetector,
+    rx_driver: ControlSurfaceRxDriver,
+}
+
+impl TestControlSurfaceMiddleware {
+    fn new() -> Self {
+        Self {
+            change_detector: ChangeDetector::new(),
+            rx_driver: ControlSurfaceRxDriver::new(Test::control_surface_rx().clone()),
+        }
+    }
+}
+
+impl ControlSurfaceMiddleware for TestControlSurfaceMiddleware {
+    fn handle_event(&self, event: ControlSurfaceEvent) {
+        self.change_detector.process(event, |e| {
+            self.rx_driver.handle_change(e);
+        });
+    }
+}
+
+struct RxSetup {
+    control_surface_reg_handle:
+        RegistrationHandle<MiddlewareControlSurface<TestControlSurfaceMiddleware>>,
+}
+
+impl ActionRxProvider for RxSetup {
+    fn action_rx() -> &'static ActionRx {
+        Test::action_rx()
+    }
+}
+
+impl RxSetup {
+    fn setup() -> RxSetup {
+        let mut session = Reaper::get().medium_session();
+        session
+            .plugin_register_add_hook_post_command::<ActionRxHookPostCommand<Self>>()
+            .unwrap();
+        session
+            .plugin_register_add_hook_post_command_2::<ActionRxHookPostCommand2<Self>>()
+            .unwrap();
+        RxSetup {
+            control_surface_reg_handle: {
+                let surface = MiddlewareControlSurface::new(TestControlSurfaceMiddleware::new());
+                session
+                    .plugin_register_add_csurf_inst(Box::new(surface))
+                    .expect("couldn't register test control surface")
+            },
+        }
+    }
+
+    fn teardown(&self) {
+        let mut session = Reaper::get().medium_session();
+        unsafe {
+            let _ = session.plugin_register_remove_csurf_inst(self.control_surface_reg_handle);
+        }
+        session.plugin_register_remove_hook_post_command_2::<ActionRxHookPostCommand2<Self>>();
+        session.plugin_register_remove_hook_post_command::<ActionRxHookPostCommand<Self>>();
+    }
 }
 
 fn execute_next_step(

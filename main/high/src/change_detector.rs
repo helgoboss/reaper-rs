@@ -1,3 +1,4 @@
+use crate::option_util::OptionExt;
 use crate::{
     get_media_track_guid, ControlSurfaceEvent, Fx, FxParameter, Guid, Project, Reaper, Track,
     TrackSend,
@@ -106,8 +107,10 @@ enum State {
     PropagatingTrackSetChanges,
 }
 
-impl ChangeDetector {
-    pub fn new(version: ReaperVersion<'static>, last_active_project: Project) -> ChangeDetector {
+impl Default for ChangeDetector {
+    fn default() -> Self {
+        let version = Reaper::get().version();
+        let last_active_project = Reaper::get().current_project();
         let reaper_version_5_95 = ReaperVersion::new("5.95");
         ChangeDetector {
             num_track_set_changes_left_to_be_propagated: Default::default(),
@@ -119,6 +122,12 @@ impl ChangeDetector {
             // since pre2 to be accurate but so what
             supports_detection_of_input_fx_in_set_fx_change: version >= reaper_version_5_95,
         }
+    }
+}
+
+impl ChangeDetector {
+    pub fn new() -> ChangeDetector {
+        Default::default()
     }
 
     pub fn reset(&self, handle_change: impl FnMut(ChangeEvent) + Copy) {
@@ -544,9 +553,10 @@ impl ChangeDetector {
                 None => true,
                 Some(output_fx) => {
                     let output_fx_param = output_fx.parameter_by_index(param_index);
-                    let is_probably_output_fx = output_fx_param
-                        .reaper_normalized_value()
-                        .contains(&normalized_value);
+                    let is_probably_output_fx = OptionExt::contains(
+                        &output_fx_param.reaper_normalized_value().ok(),
+                        &normalized_value,
+                    );
                     !is_probably_output_fx
                 }
             }

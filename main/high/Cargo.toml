@@ -23,7 +23,6 @@ once_cell = "1.3.1"
 crossbeam-channel = "0.4"
 reaper-medium = { path = '../medium' }
 reaper-low = { path = '../low' }
-rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
 helgoboss-midi = "0.1.2"
 regex = "1.3.4"
 slog = "2.5.2"

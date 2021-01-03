@@ -12,7 +12,7 @@ use reaper_high::{
 };
 use rxrust::prelude::*;
 
-use crate::api::{step, TestStep};
+use crate::api::{step, Test, TestStep};
 
 use super::invocation_mock::observe_invocations;
 use crate::api::VersionRestriction::AllVersions;
@@ -174,12 +174,12 @@ fn metrics() -> TestStep {
 }
 
 fn set_project_tempo() -> TestStep {
-    step(AllVersions, "Set project tempo", |reaper, step| {
+    step(AllVersions, "Set project tempo", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .master_tempo_changed()
                 .take_until(step.finished)
                 .subscribe(move |_| {
@@ -199,12 +199,12 @@ fn set_project_tempo() -> TestStep {
 }
 
 fn set_project_play_rate() -> TestStep {
-    step(AllVersions, "Set project play rate", |reaper, step| {
+    step(AllVersions, "Set project play rate", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .master_playrate_changed()
                 .take_until(step.finished)
                 .subscribe(move |_| {
@@ -319,13 +319,13 @@ fn undo() -> TestStep {
 }
 
 fn use_undoable() -> TestStep {
-    step(AllVersions, "Use undoable", |reaper, step| {
+    step(AllVersions, "Use undoable", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_name_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -415,13 +415,13 @@ fn scroll_mixer() -> TestStep {
 }
 
 fn insert_track_at() -> TestStep {
-    step(AllVersions, "Insert track at", |reaper, step| {
+    step(AllVersions, "Insert track at", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_added()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -550,12 +550,12 @@ fn generate_guid() -> TestStep {
 }
 
 fn unsolo_track() -> TestStep {
-    step(AllVersions, "Unsolo track", |reaper, step| {
+    step(AllVersions, "Unsolo track", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_solo_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -573,12 +573,12 @@ fn unsolo_track() -> TestStep {
 }
 
 fn solo_track() -> TestStep {
-    step(AllVersions, "Solo track", |reaper, step| {
+    step(AllVersions, "Solo track", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_solo_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -596,12 +596,12 @@ fn solo_track() -> TestStep {
 }
 
 fn mute_track() -> TestStep {
-    step(AllVersions, "Mute track", |reaper, step| {
+    step(AllVersions, "Mute track", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_mute_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -618,12 +618,12 @@ fn mute_track() -> TestStep {
 }
 
 fn unmute_track() -> TestStep {
-    step(AllVersions, "Unmute track", |reaper, step| {
+    step(AllVersions, "Unmute track", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_mute_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -642,14 +642,14 @@ fn unmute_track() -> TestStep {
 }
 
 fn test_action_invoked_event() -> TestStep {
-    step(AllVersions, "Test actionInvoked event", |reaper, step| {
+    step(AllVersions, "Test actionInvoked event", |_, step| {
         // Given
         let action = Reaper::get()
             .main_section()
             .action_by_command_id(CommandId::new(1582));
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::action_rx()
                 .action_invoked()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -675,7 +675,7 @@ fn invoke_action() -> TestStep {
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::action_rx()
                 .action_invoked()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -744,7 +744,7 @@ fn query_action() -> TestStep {
 }
 
 fn set_track_send_pan() -> TestStep {
-    step(AllVersions, "Set track send pan", |reaper, step| {
+    step(AllVersions, "Set track send pan", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
@@ -752,7 +752,7 @@ fn set_track_send_pan() -> TestStep {
         let send = track_1.send_by_target_track(track_3);
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_send_pan_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -770,7 +770,7 @@ fn set_track_send_pan() -> TestStep {
 }
 
 fn set_track_send_volume() -> TestStep {
-    step(AllVersions, "Set track send volume", |reaper, step| {
+    step(AllVersions, "Set track send volume", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
@@ -778,7 +778,7 @@ fn set_track_send_volume() -> TestStep {
         let send = track_1.send_by_target_track(track_3);
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_send_volume_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -887,7 +887,7 @@ fn query_track_misc() -> TestStep {
 }
 
 fn remove_track() -> TestStep {
-    step(AllVersions, "Remove track", |reaper, step| {
+    step(AllVersions, "Remove track", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track_count_before = project.track_count();
@@ -903,7 +903,7 @@ fn remove_track() -> TestStep {
         assert!(track_2.is_available());
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_removed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -923,7 +923,7 @@ fn remove_track() -> TestStep {
 }
 
 fn select_track_exclusively() -> TestStep {
-    step(AllVersions, "Select track exclusively", |reaper, step| {
+    step(AllVersions, "Select track exclusively", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
@@ -936,7 +936,7 @@ fn select_track_exclusively() -> TestStep {
         track_3.select();
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_selected_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -974,7 +974,7 @@ fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
     step(
         AllVersions,
         "Arm track in auto-arm mode (ignoring auto-arm)",
-        |reaper, step| {
+        |_, step| {
             // Given
             let track = get_track(0)?;
             track.enable_auto_arm();
@@ -982,7 +982,7 @@ fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
             assert!(!track.is_armed(true));
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper
+                Test::control_surface_rx()
                     .track_arm_changed()
                     .take_until(step.finished)
                     .subscribe(move |t| {
@@ -1005,12 +1005,12 @@ fn disarm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
     step(
         AllVersions,
         "Disarm track in auto-arm mode (ignoring auto-arm)",
-        |reaper, step| {
+        |_, step| {
             // Given
             let track = get_track(0)?;
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper
+                Test::control_surface_rx()
                     .track_arm_changed()
                     .take_until(step.finished)
                     .subscribe(move |t| {
@@ -1083,40 +1083,36 @@ fn disable_track_auto_arm_mode() -> TestStep {
 }
 
 fn disarm_track_in_auto_arm_mode() -> TestStep {
-    step(
-        AllVersions,
-        "Disarm track in auto-arm mode",
-        |reaper, step| {
-            // Given
-            let track = get_track(0)?;
-            // When
-            let (mock, _) = observe_invocations(|mock| {
-                reaper
-                    .track_arm_changed()
-                    .take_until(step.finished)
-                    .subscribe(move |t| {
-                        mock.invoke(t);
-                    });
-            });
-            track.disarm(true);
-            // Then
-            assert!(!track.is_armed(true));
-            assert!(!track.is_armed(false));
-            assert!(track.has_auto_arm_enabled());
-            assert_eq!(mock.invocation_count(), 1);
-            assert_eq!(mock.last_arg(), track);
-            Ok(())
-        },
-    )
-}
-
-fn arm_track_in_auto_arm_mode() -> TestStep {
-    step(AllVersions, "Arm track in auto-arm mode", |reaper, step| {
+    step(AllVersions, "Disarm track in auto-arm mode", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
+                .track_arm_changed()
+                .take_until(step.finished)
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        track.disarm(true);
+        // Then
+        assert!(!track.is_armed(true));
+        assert!(!track.is_armed(false));
+        assert!(track.has_auto_arm_enabled());
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
+        Ok(())
+    })
+}
+
+fn arm_track_in_auto_arm_mode() -> TestStep {
+    step(AllVersions, "Arm track in auto-arm mode", |_, step| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
                 .track_arm_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1152,40 +1148,36 @@ fn enable_track_in_auto_arm_mode() -> TestStep {
 }
 
 fn disarm_track_in_normal_mode() -> TestStep {
-    step(
-        AllVersions,
-        "Disarm track in normal mode",
-        |reaper, step| {
-            // Given
-            let track = get_track(0)?;
-            // When
-            let (mock, _) = observe_invocations(|mock| {
-                reaper
-                    .track_arm_changed()
-                    .take_until(step.finished)
-                    .subscribe(move |t| {
-                        mock.invoke(t);
-                    });
-            });
-            track.disarm(true);
-            // Then
-            assert!(!track.is_armed(true));
-            assert!(!track.is_armed(false));
-            assert!(!track.has_auto_arm_enabled());
-            assert_eq!(mock.invocation_count(), 1);
-            assert_eq!(mock.last_arg(), track);
-            Ok(())
-        },
-    )
-}
-
-fn arm_track_in_normal_mode() -> TestStep {
-    step(AllVersions, "Arm track in normal mode", |reaper, step| {
+    step(AllVersions, "Disarm track in normal mode", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
+                .track_arm_changed()
+                .take_until(step.finished)
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        track.disarm(true);
+        // Then
+        assert!(!track.is_armed(true));
+        assert!(!track.is_armed(false));
+        assert!(!track.has_auto_arm_enabled());
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
+        Ok(())
+    })
+}
+
+fn arm_track_in_normal_mode() -> TestStep {
+    step(AllVersions, "Arm track in normal mode", |_, step| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
                 .track_arm_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1230,13 +1222,13 @@ fn query_track_auto_arm_mode() -> TestStep {
 }
 
 fn select_master_track() -> TestStep {
-    step(AllVersions, "Select master track", |reaper, step| {
+    step(AllVersions, "Select master track", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let master_track = project.master_track();
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_selected_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1268,13 +1260,13 @@ fn select_master_track() -> TestStep {
 }
 
 fn unselect_track() -> TestStep {
-    step(AllVersions, "Unselect track", |reaper, step| {
+    step(AllVersions, "Unselect track", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_selected_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1305,14 +1297,14 @@ fn unselect_track() -> TestStep {
 }
 
 fn select_track() -> TestStep {
-    step(AllVersions, "Select track", |reaper, step| {
+    step(AllVersions, "Select track", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         let track = get_track(0)?;
         let track2 = project.track_by_index(2).ok_or("No track at index 2")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_selected_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1362,12 +1354,12 @@ fn query_track_selection_state() -> TestStep {
 }
 
 fn set_track_pan() -> TestStep {
-    step(AllVersions, "Set track pan", |reaper, step| {
+    step(AllVersions, "Set track pan", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_pan_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1427,12 +1419,12 @@ fn query_track_pan() -> TestStep {
 }
 
 fn set_track_volume() -> TestStep {
-    step(AllVersions, "Set track volume", |reaper, step| {
+    step(AllVersions, "Set track volume", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_volume_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1599,7 +1591,7 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
     step(
         AllVersions,
         "Set track recording input MIDI all/all",
-        |reaper, step| {
+        |_, step| {
             // Given
             let track = get_track(0)?;
             let given_input = Some(RecordingInput::Midi {
@@ -1608,7 +1600,7 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
             });
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper
+                Test::control_surface_rx()
                     .track_input_changed()
                     .take_until(step.finished)
                     .subscribe(move |t| {
@@ -1645,12 +1637,12 @@ fn query_track_recording_input() -> TestStep {
 }
 
 fn set_track_input_monitoring() -> TestStep {
-    step(AllVersions, "Set track input monitoring", |reaper, step| {
+    step(AllVersions, "Set track input monitoring", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_input_monitoring_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1691,13 +1683,13 @@ fn query_track_input_monitoring() -> TestStep {
 }
 
 fn set_track_name() -> TestStep {
-    step(AllVersions, "Set track name", |reaper, step| {
+    step(AllVersions, "Set track name", |_, step| {
         // Given
         let track = get_track(0)?;
         // When
         // TODO Factor this state pattern out
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_name_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1824,7 +1816,7 @@ fn play_pause_stop_record() -> TestStep {
         // When
         // Then
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .play_state_changed()
                 .take_until(step.finished)
                 .subscribe(move |_| {
@@ -1913,13 +1905,13 @@ fn play_pause_stop_record() -> TestStep {
 }
 
 fn change_repeat_state() -> TestStep {
-    step(AllVersions, "Repeat", |reaper, step| {
+    step(AllVersions, "Repeat", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         // When
         // Then
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .repeat_state_changed()
                 .take_until(step.finished)
                 .subscribe(move |_| {
@@ -1939,12 +1931,12 @@ fn change_repeat_state() -> TestStep {
 }
 
 fn add_track() -> TestStep {
-    step(AllVersions, "Add track", |reaper, step| {
+    step(AllVersions, "Add track", |_, step| {
         // Given
         let project = Reaper::get().current_project();
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .track_added()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -1980,46 +1972,42 @@ fn general() -> TestStep {
 }
 
 fn create_empty_project_in_new_tab() -> TestStep {
-    step(
-        AllVersions,
-        "Create empty project in new tab",
-        |reaper, step| {
-            // Given
-            let current_project_before = Reaper::get().current_project();
-            let project_count_before = Reaper::get().project_count();
-            // When
-            let (mock, _) = observe_invocations(|mock| {
-                reaper
-                    .project_switched()
-                    .take_until(step.finished)
-                    .subscribe(move |p| {
-                        mock.invoke(p);
-                    });
-            });
-            let new_project = Reaper::get().create_empty_project_in_new_tab();
-            // Then
-            assert_eq!(current_project_before, current_project_before);
-            assert_eq!(Reaper::get().project_count(), project_count_before + 1);
-            assert_eq!(
-                Reaper::get().projects().count() as u32,
-                project_count_before + 1
-            );
-            assert_ne!(Reaper::get().current_project(), current_project_before);
-            assert_eq!(Reaper::get().current_project(), new_project);
-            assert_ne!(Reaper::get().projects().next(), Some(new_project));
-            //
-            // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() ==
-            // newProject);
-            // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
-            // projectCountBefore + 1);
-            assert_eq!(new_project.track_count(), 0);
-            assert!(new_project.index() > 0);
-            assert!(new_project.file_path().is_none());
-            assert_eq!(mock.invocation_count(), 1);
-            assert_eq!(mock.last_arg(), new_project);
-            Ok(())
-        },
-    )
+    step(AllVersions, "Create empty project in new tab", |_, step| {
+        // Given
+        let current_project_before = Reaper::get().current_project();
+        let project_count_before = Reaper::get().project_count();
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .project_switched()
+                .take_until(step.finished)
+                .subscribe(move |p| {
+                    mock.invoke(p);
+                });
+        });
+        let new_project = Reaper::get().create_empty_project_in_new_tab();
+        // Then
+        assert_eq!(current_project_before, current_project_before);
+        assert_eq!(Reaper::get().project_count(), project_count_before + 1);
+        assert_eq!(
+            Reaper::get().projects().count() as u32,
+            project_count_before + 1
+        );
+        assert_ne!(Reaper::get().current_project(), current_project_before);
+        assert_eq!(Reaper::get().current_project(), new_project);
+        assert_ne!(Reaper::get().projects().next(), Some(new_project));
+        //
+        // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().first() ==
+        // newProject);
+        // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
+        // projectCountBefore + 1);
+        assert_eq!(new_project.track_count(), 0);
+        assert!(new_project.index() > 0);
+        assert!(new_project.file_path().is_none());
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), new_project);
+        Ok(())
+    })
 }
 
 fn strings() -> TestStep {
@@ -2316,12 +2304,12 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
     step(
         AllVersions,
         "Add track JS fx by original name",
-        move |reaper, step| {
+        move |_, step| {
             // Given
             let fx_chain = get_fx_chain()?;
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper
+                Test::control_surface_rx()
                     .fx_added()
                     .take_until(step.finished.clone())
                     .subscribe(move |fx| {
@@ -2364,49 +2352,45 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
-    step(
-        AllVersions,
-        "Show fx in floating window",
-        move |reaper, step| {
-            // Given
-            let fx_chain = get_fx_chain()?;
-            let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
-            // When
-            let (fx_opened_mock, _) = observe_invocations(|mock| {
-                reaper
-                    .fx_opened()
-                    .take_until(step.finished.clone())
-                    .subscribe(move |fx| {
-                        mock.invoke(fx);
-                    });
-            });
-            let (fx_focused_mock, _) = observe_invocations(|mock| {
-                reaper
-                    .fx_focused()
-                    .take_until(step.finished)
-                    .subscribe(move |fx| {
-                        mock.invoke(fx);
-                    });
-            });
-            fx.show_in_floating_window();
-            // Then
-            assert!(fx.floating_window().is_some());
-            assert!(fx.window_is_open());
-            // TODO-low Not correctly implemented right now? Should maybe have focus!
-            assert!(!fx.window_has_focus());
-            assert!(fx_opened_mock.invocation_count() >= 1);
-            if !fx_chain.is_input_fx() || Reaper::get().version() >= ReaperVersion::new("5.95") {
-                // In previous versions it wrongly reports as normal FX
-                assert_eq!(fx_opened_mock.last_arg(), fx);
-            }
-            assert_eq!(fx_focused_mock.invocation_count(), 0);
-            if cfg!(target_os = "windows") {
-                // Should be > 0 but doesn't work
-                assert!(Reaper::get().focused_fx().is_none()); // Should be Some but doesn't work
-            }
-            Ok(())
-        },
-    )
+    step(AllVersions, "Show fx in floating window", move |_, step| {
+        // Given
+        let fx_chain = get_fx_chain()?;
+        let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+        // When
+        let (fx_opened_mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .fx_opened()
+                .take_until(step.finished.clone())
+                .subscribe(move |fx| {
+                    mock.invoke(fx);
+                });
+        });
+        let (fx_focused_mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .fx_focused()
+                .take_until(step.finished)
+                .subscribe(move |fx| {
+                    mock.invoke(fx);
+                });
+        });
+        fx.show_in_floating_window();
+        // Then
+        assert!(fx.floating_window().is_some());
+        assert!(fx.window_is_open());
+        // TODO-low Not correctly implemented right now? Should maybe have focus!
+        assert!(!fx.window_has_focus());
+        assert!(fx_opened_mock.invocation_count() >= 1);
+        if !fx_chain.is_input_fx() || Reaper::get().version() >= ReaperVersion::new("5.95") {
+            // In previous versions it wrongly reports as normal FX
+            assert_eq!(fx_opened_mock.last_arg(), fx);
+        }
+        assert_eq!(fx_focused_mock.invocation_count(), 0);
+        if cfg!(target_os = "windows") {
+            // Should be > 0 but doesn't work
+            assert!(Reaper::get().focused_fx().is_none()); // Should be Some but doesn't work
+        }
+        Ok(())
+    })
 }
 
 fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
@@ -2571,7 +2555,7 @@ fn set_fx_chunk(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn add_fx_by_chunk(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Add FX by chunk", move |reaper, step| {
+    step(AllVersions, "Add FX by chunk", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx_chunk = r#"BYPASS 0 0 0
@@ -2586,7 +2570,7 @@ WAK 0
 "#;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .fx_added()
                 .take_until(step.finished)
                 .subscribe(move |fx| {
@@ -2615,14 +2599,14 @@ WAK 0
 }
 
 fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Remove FX", move |reaper, step| {
+    step(AllVersions, "Remove FX", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let synth_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find synth fx")?;
         let midi_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find MIDI fx")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .fx_removed()
                 .take_until(step.finished)
                 .subscribe(move |p| {
@@ -2642,7 +2626,7 @@ fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Move FX", move |reaper, step| {
+    step(AllVersions, "Move FX", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let midi_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
@@ -2650,7 +2634,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
         let fx_at_index_1 = fx_chain.fx_by_index_untracked(1);
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .fx_reordered()
                 .take_until(step.finished)
                 .subscribe(move |p| {
@@ -2688,7 +2672,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
     step(
         AllVersions,
         "fxParameterValueChanged with heuristic fail in REAPER < 5.95",
-        move |reaper, step| {
+        move |_, step| {
             // Given
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find fx")?;
@@ -2712,7 +2696,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
                 .map_err(|_| "couldn't set parameter value")?;
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper
+                Test::control_surface_rx()
                     .fx_parameter_value_changed()
                     .take_until(step.finished)
                     .subscribe(move |p| {
@@ -2734,70 +2718,66 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
 }
 
 fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
-    step(
-        AllVersions,
-        "Set fx parameter value",
-        move |reaper, step| {
-            // Given
-            let fx_chain = get_fx_chain()?;
-            let fx = fx_chain.fx_by_index(1).ok_or("Couldn't find fx")?;
-            let p = fx.parameter_by_index(5);
-            // When
-            let (mock, _) = observe_invocations(|mock| {
-                reaper
-                    .fx_parameter_value_changed()
-                    .take_until(step.finished)
-                    .subscribe(move |p| {
-                        mock.invoke(p);
-                    });
-            });
-            p.set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.3))
-                .map_err(|_| "couldn't set parameter value")?;
-            // Then
-            let last_touched_fx_param = Reaper::get().last_touched_fx_parameter();
-            if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
-                assert!(last_touched_fx_param.is_none());
-            } else {
-                assert_eq!(last_touched_fx_param, Some(p.clone()));
-            }
-            assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("-4.44"));
-            assert!(abs_diff_eq!(
+    step(AllVersions, "Set fx parameter value", move |_, step| {
+        // Given
+        let fx_chain = get_fx_chain()?;
+        let fx = fx_chain.fx_by_index(1).ok_or("Couldn't find fx")?;
+        let p = fx.parameter_by_index(5);
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .fx_parameter_value_changed()
+                .take_until(step.finished)
+                .subscribe(move |p| {
+                    mock.invoke(p);
+                });
+        });
+        p.set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.3))
+            .map_err(|_| "couldn't set parameter value")?;
+        // Then
+        let last_touched_fx_param = Reaper::get().last_touched_fx_parameter();
+        if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
+            assert!(last_touched_fx_param.is_none());
+        } else {
+            assert_eq!(last_touched_fx_param, Some(p.clone()));
+        }
+        assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("-4.44"));
+        assert!(abs_diff_eq!(
+            p.reaper_normalized_value()
+                .map_err(|_| "couldn't get param value")?
+                .get(),
+            0.300_000_011_920_928_96
+        ));
+        assert!(abs_diff_eq!(
+            p.reaper_normalized_value()
+                .map_err(|_| "couldn't get param value")?
+                .get(),
+            0.300_000_011_920_928_96
+        ));
+        assert_eq!(
+            p.format_reaper_normalized_value(
                 p.reaper_normalized_value()
                     .map_err(|_| "couldn't get param value")?
-                    .get(),
-                0.300_000_011_920_928_96
-            ));
-            assert!(abs_diff_eq!(
-                p.reaper_normalized_value()
-                    .map_err(|_| "couldn't get param value")?
-                    .get(),
-                0.300_000_011_920_928_96
-            ));
-            assert_eq!(
-                p.format_reaper_normalized_value(
-                    p.reaper_normalized_value()
-                        .map_err(|_| "couldn't get param value")?
-                )
-                .map_err(|_| "Cockos plug-ins should be able to do that")?
-                .into_inner()
-                .as_c_str(),
-                c_str!("-4.44 dB")
-            );
-            if Reaper::get().version() < ReaperVersion::new("6") {
-                if fx_chain.is_input_fx() {
-                    // Mmh
-                    assert_eq!(mock.invocation_count(), 2);
-                } else {
-                    assert_eq!(mock.invocation_count(), 1);
-                }
-            } else {
-                // TODO-low 1 invocation would be better than 2 (in v6 it gives us 2)
+            )
+            .map_err(|_| "Cockos plug-ins should be able to do that")?
+            .into_inner()
+            .as_c_str(),
+            c_str!("-4.44 dB")
+        );
+        if Reaper::get().version() < ReaperVersion::new("6") {
+            if fx_chain.is_input_fx() {
+                // Mmh
                 assert_eq!(mock.invocation_count(), 2);
+            } else {
+                assert_eq!(mock.invocation_count(), 1);
             }
-            assert_eq!(mock.last_arg(), p);
-            Ok(())
-        },
-    )
+        } else {
+            // TODO-low 1 invocation would be better than 2 (in v6 it gives us 2)
+            assert_eq!(mock.invocation_count(), 2);
+        }
+        assert_eq!(mock.last_arg(), p);
+        Ok(())
+    })
 }
 
 fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
@@ -2816,7 +2796,7 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn change_fx_preset(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Change FX preset", move |reaper, step| {
+    step(AllVersions, "Change FX preset", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx = fx_chain
@@ -2824,7 +2804,7 @@ fn change_fx_preset(get_fx_chain: GetFxChain) -> TestStep {
             .ok_or("Couldn't add ReaEq")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .fx_preset_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -3022,13 +3002,13 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn enable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Enable track fx", move |reaper, step| {
+    step(AllVersions, "Enable track fx", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .fx_enabled_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -3045,13 +3025,13 @@ fn enable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
 }
 
 fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
-    step(AllVersions, "Disable track fx", move |reaper, step| {
+    step(AllVersions, "Disable track fx", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
         let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
-            reaper
+            Test::control_surface_rx()
                 .fx_enabled_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
@@ -3138,12 +3118,12 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
     step(
         AllVersions,
         "Add track fx by original name",
-        move |reaper, step| {
+        move |_, step| {
             // Given
             let fx_chain = get_fx_chain()?;
             // When
             let (mock, _) = observe_invocations(|mock| {
-                reaper
+                Test::control_surface_rx()
                     .fx_added()
                     .take_until(step.finished)
                     .subscribe(move |t| {

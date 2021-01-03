@@ -1,6 +1,4 @@
-use crate::{
-    local_run_loop_executor, run_loop_executor, CrashInfo, MiddlewareControlSurface, ReactiveEvent,
-};
+use crate::{local_run_loop_executor, run_loop_executor, CrashInfo, MiddlewareControlSurface};
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -9,34 +7,26 @@ use std::ptr::NonNull;
 use std::rc::Rc;
 use std::sync::{Arc, Weak};
 
-use rxrust::prelude::*;
-
-use crate::fx::Fx;
-use crate::fx_parameter::FxParameter;
 use crate::helper_middleware::{HelperMiddleware, HelperTask};
-use crate::track_send::TrackSend;
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
-    create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger, Action,
-    Project, Track,
+    create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger, Project,
 };
-use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
 use once_cell::sync::Lazy;
 use reaper_low::{raw, register_plugin_destroy_hook};
 
 use reaper_low::PluginContext;
 
-use crate::run_loop_scheduler::{RunLoopScheduler, RxTask};
 use crossbeam_channel::{Receiver, Sender};
 use futures::channel::oneshot;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
-    ActionValueChange, CommandId, HookCommand, HookPostCommand, HookPostCommand2, MidiFrameOffset,
-    MidiInputDeviceId, OnAudioBuffer, OnAudioBufferArgs, OwnedGaccelRegister, ProjectRef,
-    ReaProject, RealTimeAudioThreadScope, ReaperStr, ReaperString, ReaperStringArg,
-    RegistrationHandle, SectionContext, ToggleAction, ToggleActionResult, WindowContext,
+    ActionValueChange, CommandId, HookCommand, HookPostCommand2, OnAudioBuffer, OnAudioBufferArgs,
+    OwnedGaccelRegister, ReaProject, RealTimeAudioThreadScope, ReaperStr, ReaperString,
+    ReaperStringArg, RegistrationHandle, SectionContext, ToggleAction, ToggleActionResult,
+    WindowContext,
 };
 use slog::{debug, o, Logger};
 use std::fmt;
@@ -109,8 +99,6 @@ impl ReaperBuilder {
             INIT_INSTANCE.call_once(|| {
                 let (mt_sender, mt_receiver) =
                     crossbeam_channel::bounded::<MainThreadTask>(MAIN_THREAD_TASK_CHANNEL_CAPACITY);
-                let (mt_rx_sender, mt_rx_receiver) =
-                    crossbeam_channel::bounded::<RxTask>(MAIN_THREAD_TASK_CHANNEL_CAPACITY);
                 let (spawner, executor) = run_loop_executor::new_spawner_and_executor(
                     MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                     MAIN_THREAD_TASK_BULK_SIZE,
@@ -120,56 +108,38 @@ impl ReaperBuilder {
                         MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                         MAIN_THREAD_TASK_BULK_SIZE,
                     );
-                let main_thread_scheduler = RunLoopScheduler::new(mt_rx_sender.clone());
                 let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
                     AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
                 );
                 let (helper_task_sender, helper_task_receiver) = crossbeam_channel::unbounded();
                 let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
-                let current_project = Project::new(
-                    medium_reaper
-                        .enum_projects(ProjectRef::Current, 0)
-                        .unwrap()
-                        .project,
-                );
-                let version = medium_reaper.get_app_version();
                 let medium_real_time_reaper = self.medium.create_real_time_reaper();
-                let subjects = MainSubjects::new();
                 let reaper = Reaper {
                     medium_session: RefCell::new(self.medium),
                     medium_reaper,
-                    medium_real_time_reaper: medium_real_time_reaper.clone(),
+                    medium_real_time_reaper,
                     logger: logger.clone(),
                     command_by_id: RefCell::new(HashMap::new()),
                     action_value_change_history: RefCell::new(Default::default()),
-                    subjects: subjects.clone(),
                     undo_block_is_active: Cell::new(false),
                     main_thread_task_sender: mt_sender.clone(),
                     audio_thread_task_sender: at_sender,
-                    main_thread_rx_task_sender: mt_rx_sender,
                     helper_task_sender,
-                    main_thread_scheduler,
                     main_thread_future_spawner: spawner,
                     local_main_thread_future_spawner: local_spawner,
                     session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {
                         csurf_inst: Box::new(MiddlewareControlSurface::new(HelperMiddleware::new(
                             logger.new(o!("struct" => "HelperMiddleware")),
-                            version,
-                            current_project,
                             mt_sender.clone(),
                             mt_receiver,
-                            mt_rx_receiver,
                             helper_task_receiver,
                             executor,
                             local_executor,
-                            subjects,
                         ))),
                         audio_hook: Box::new(HighOnAudioBuffer {
                             task_receiver: at_receiver,
                             reaper: RealTimeReaper {
-                                medium_reaper: medium_real_time_reaper,
-                                midi_message_received: LocalSubject::new(),
                                 main_thread_task_sender: mt_sender,
                             },
                         }),
@@ -187,16 +157,8 @@ impl ReaperBuilder {
 }
 
 pub struct RealTimeReaper {
-    medium_reaper: reaper_medium::Reaper<RealTimeAudioThreadScope>,
-    midi_message_received: LocalSubject<'static, MidiEvent<RawShortMessage>, ()>,
     #[allow(unused)]
     main_thread_task_sender: Sender<MainThreadTask>,
-}
-
-impl RealTimeReaper {
-    pub fn midi_message_received(&self) -> impl ReactiveEvent<MidiEvent<RawShortMessage>> {
-        self.midi_message_received.clone()
-    }
 }
 
 struct HighOnAudioBuffer {
@@ -233,29 +195,6 @@ impl OnAudioBuffer for HighOnAudioBuffer {
         {
             (task)(&self.reaper);
         }
-        // Process MIDI
-        let subject = &mut self.reaper.midi_message_received;
-        if subject.subscribed_size() == 0 {
-            return;
-        }
-        for i in 0..self.reaper.medium_reaper.get_max_midi_inputs() {
-            self.reaper
-                .medium_reaper
-                .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
-                    let evt_list = input.get_read_buf();
-                    for evt in evt_list.enum_items(0) {
-                        let msg = evt.message();
-                        if msg.r#type() == ShortMessageType::ActiveSensing {
-                            // TODO-low We should forward active sensing. Can be filtered out
-                            // later.
-                            continue;
-                        }
-                        let owned_msg: RawShortMessage = msg.to_other();
-                        let owned_evt = MidiEvent::new(evt.frame_offset(), owned_msg);
-                        subject.next(owned_evt);
-                    }
-                });
-        }
     }
 }
 
@@ -277,13 +216,10 @@ pub struct Reaper {
     // reference???  Look into that!!!
     command_by_id: RefCell<HashMap<CommandId, Command>>,
     action_value_change_history: RefCell<HashMap<CommandId, ActionValueChange>>,
-    pub(crate) subjects: MainSubjects,
     undo_block_is_active: Cell<bool>,
     main_thread_task_sender: Sender<MainThreadTask>,
     audio_thread_task_sender: Sender<AudioThreadTaskOp>,
-    main_thread_rx_task_sender: Sender<RxTask>,
     helper_task_sender: Sender<HelperTask>,
-    main_thread_scheduler: RunLoopScheduler,
     main_thread_future_spawner: crate::run_loop_executor::Spawner,
     local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
     session_status: RefCell<SessionStatus>,
@@ -316,121 +252,6 @@ struct AwakeState {
     gaccel_registers: HashMap<CommandId, NonNull<raw::gaccel_register_t>>,
 }
 
-#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
-pub struct MidiEvent<M> {
-    frame_offset: MidiFrameOffset,
-    msg: M,
-}
-
-impl<M> MidiEvent<M> {
-    pub fn new(frame_offset: MidiFrameOffset, msg: M) -> MidiEvent<M> {
-        MidiEvent { frame_offset, msg }
-    }
-}
-
-#[derive(Clone, Default)]
-pub(crate) struct MainSubjects {
-    // This is a RefCell. So calling next() while another next() is still running will panic.
-    // I guess it's good that way because this is very generic code, panicking or not panicking
-    // depending on the user's code. And getting a panic is good for becoming aware of the problem
-    // instead of running into undefined behavior. The developer can always choose to defer to
-    // the next `ControlSurface::run()` invocation (execute things in next main loop cycle).
-    pub(super) project_switched: EventStreamSubject<Project>,
-    pub(super) track_volume_changed: EventStreamSubject<Track>,
-    pub(super) track_volume_touched: EventStreamSubject<Track>,
-    pub(super) track_pan_changed: EventStreamSubject<Track>,
-    pub(super) track_pan_touched: EventStreamSubject<Track>,
-    pub(super) track_send_volume_changed: EventStreamSubject<TrackSend>,
-    pub(super) track_send_volume_touched: EventStreamSubject<TrackSend>,
-    pub(super) track_send_pan_changed: EventStreamSubject<TrackSend>,
-    pub(super) track_send_pan_touched: EventStreamSubject<TrackSend>,
-    pub(super) track_added: EventStreamSubject<Track>,
-    pub(super) track_removed: EventStreamSubject<Track>,
-    pub(super) tracks_reordered: EventStreamSubject<Project>,
-    pub(super) track_name_changed: EventStreamSubject<Track>,
-    pub(super) track_input_changed: EventStreamSubject<Track>,
-    pub(super) track_input_monitoring_changed: EventStreamSubject<Track>,
-    pub(super) track_arm_changed: EventStreamSubject<Track>,
-    pub(super) track_mute_changed: EventStreamSubject<Track>,
-    pub(super) track_mute_touched: EventStreamSubject<Track>,
-    pub(super) track_solo_changed: EventStreamSubject<Track>,
-    pub(super) track_selected_changed: EventStreamSubject<Track>,
-    pub(super) fx_added: EventStreamSubject<Fx>,
-    pub(super) fx_removed: EventStreamSubject<Fx>,
-    pub(super) fx_enabled_changed: EventStreamSubject<Fx>,
-    pub(super) fx_opened: EventStreamSubject<Fx>,
-    pub(super) fx_closed: EventStreamSubject<Fx>,
-    pub(super) fx_focused: EventStreamSubject<Option<Fx>>,
-    pub(super) fx_reordered: EventStreamSubject<Track>,
-    pub(super) fx_parameter_value_changed: EventStreamSubject<FxParameter>,
-    pub(super) fx_parameter_touched: EventStreamSubject<FxParameter>,
-    pub(super) fx_preset_changed: EventStreamSubject<Fx>,
-    pub(super) master_tempo_changed: EventStreamSubject<()>,
-    pub(super) master_tempo_touched: EventStreamSubject<()>,
-    pub(super) master_playrate_changed: EventStreamSubject<()>,
-    pub(super) master_playrate_touched: EventStreamSubject<()>,
-    pub(super) play_state_changed: EventStreamSubject<()>,
-    pub(super) repeat_state_changed: EventStreamSubject<()>,
-    pub(super) main_thread_idle: EventStreamSubject<()>,
-    pub(super) project_closed: EventStreamSubject<Project>,
-    pub(super) action_invoked: EventStreamSubject<Rc<Action>>,
-}
-
-impl Debug for MainSubjects {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MainSubjects").finish()
-    }
-}
-
-impl MainSubjects {
-    fn new() -> MainSubjects {
-        fn default<T>() -> EventStreamSubject<T> {
-            RefCell::new(LocalSubject::new())
-        }
-        MainSubjects {
-            project_switched: default(),
-            track_volume_changed: default(),
-            track_volume_touched: default(),
-            track_pan_changed: default(),
-            track_pan_touched: default(),
-            track_send_volume_changed: default(),
-            track_send_volume_touched: default(),
-            track_send_pan_changed: default(),
-            track_send_pan_touched: default(),
-            track_added: default(),
-            track_removed: default(),
-            tracks_reordered: default(),
-            track_name_changed: default(),
-            track_input_changed: default(),
-            track_input_monitoring_changed: default(),
-            track_arm_changed: default(),
-            track_mute_changed: default(),
-            track_mute_touched: default(),
-            track_solo_changed: default(),
-            track_selected_changed: default(),
-            fx_added: default(),
-            fx_removed: default(),
-            fx_enabled_changed: default(),
-            fx_opened: default(),
-            fx_closed: default(),
-            fx_focused: default(),
-            fx_reordered: default(),
-            fx_parameter_value_changed: default(),
-            fx_parameter_touched: default(),
-            fx_preset_changed: default(),
-            master_tempo_changed: default(),
-            master_tempo_touched: default(),
-            master_playrate_changed: default(),
-            master_playrate_touched: default(),
-            play_state_changed: default(),
-            repeat_state_changed: default(),
-            main_thread_idle: default(),
-            project_closed: default(),
-            action_invoked: default(),
-        }
-    }
-}
-
 pub enum ActionKind {
     NotToggleable,
     Toggleable(Box<dyn Fn() -> bool>),
@@ -439,8 +260,6 @@ pub enum ActionKind {
 pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
     Toggleable(Box::new(is_on))
 }
-
-type EventStreamSubject<T> = RefCell<LocalSubject<'static, T, ()>>;
 
 pub struct ReaperGuard;
 
@@ -544,9 +363,6 @@ impl Reaper {
         medium
             .plugin_register_add_toggle_action::<HighLevelToggleAction>()
             .map_err(|_| "couldn't register toggle command")?;
-        medium
-            .plugin_register_add_hook_post_command::<HighLevelHookPostCommand>()
-            .map_err(|_| "couldn't register hook post command")?;
         // This only works since Reaper 6.19+dev1226, so we must allow it to fail.
         let _ = medium.plugin_register_add_hook_post_command_2::<HighLevelHookPostCommand2>();
         *session_status = SessionStatus::Awake(AwakeState {
@@ -604,7 +420,6 @@ impl Reaper {
         }
         // Remove functions
         medium.plugin_register_remove_hook_post_command_2::<HighLevelHookPostCommand2>();
-        medium.plugin_register_remove_hook_post_command::<HighLevelHookPostCommand>();
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
         medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
         *session_status = SessionStatus::Sleeping(Some(SleepingState {
@@ -684,205 +499,9 @@ impl Reaper {
             .copied()
     }
 
-    pub fn main_thread_idle(&self) -> impl ReactiveEvent<()> {
-        self.require_main_thread();
-        self.subjects.main_thread_idle.borrow().clone()
-    }
-
-    pub fn project_switched(&self) -> impl ReactiveEvent<Project> {
-        self.require_main_thread();
-        self.subjects.project_switched.borrow().clone()
-    }
-
-    pub fn fx_opened(&self) -> impl ReactiveEvent<Fx> {
-        self.require_main_thread();
-        self.subjects.fx_opened.borrow().clone()
-    }
-
-    pub fn fx_focused(&self) -> impl ReactiveEvent<Option<Fx>> {
-        self.require_main_thread();
-        self.subjects.fx_focused.borrow().clone()
-    }
-
-    pub fn track_added(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_added.borrow().clone()
-    }
-
-    // Delivers a GUID-based track (to still be able to identify it even it is deleted)
-    pub fn track_removed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_removed.borrow().clone()
-    }
-
-    pub fn tracks_reordered(&self) -> impl ReactiveEvent<Project> {
-        self.require_main_thread();
-        self.subjects.tracks_reordered.borrow().clone()
-    }
-
-    pub fn track_name_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_name_changed.borrow().clone()
-    }
-
-    pub fn master_tempo_changed(&self) -> impl ReactiveEvent<()> {
-        self.require_main_thread();
-        self.subjects.master_tempo_changed.borrow().clone()
-    }
-
-    pub fn master_tempo_touched(&self) -> impl ReactiveEvent<()> {
-        self.require_main_thread();
-        self.subjects.master_tempo_touched.borrow().clone()
-    }
-
-    pub fn master_playrate_changed(&self) -> impl ReactiveEvent<()> {
-        self.require_main_thread();
-        self.subjects.master_playrate_changed.borrow().clone()
-    }
-
-    pub fn master_playrate_touched(&self) -> impl ReactiveEvent<()> {
-        self.require_main_thread();
-        self.subjects.master_playrate_touched.borrow().clone()
-    }
-
-    pub fn play_state_changed(&self) -> impl ReactiveEvent<()> {
-        self.require_main_thread();
-        self.subjects.play_state_changed.borrow().clone()
-    }
-
-    pub fn repeat_state_changed(&self) -> impl ReactiveEvent<()> {
-        self.require_main_thread();
-        self.subjects.repeat_state_changed.borrow().clone()
-    }
-
-    pub fn fx_added(&self) -> impl ReactiveEvent<Fx> {
-        self.require_main_thread();
-        self.subjects.fx_added.borrow().clone()
-    }
-
-    pub fn fx_enabled_changed(&self) -> impl ReactiveEvent<Fx> {
-        self.require_main_thread();
-        self.subjects.fx_enabled_changed.borrow().clone()
-    }
-
-    pub fn fx_reordered(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.fx_reordered.borrow().clone()
-    }
-
-    pub fn fx_removed(&self) -> impl ReactiveEvent<Fx> {
-        self.require_main_thread();
-        self.subjects.fx_removed.borrow().clone()
-    }
-
-    pub fn fx_parameter_value_changed(&self) -> impl ReactiveEvent<FxParameter> {
-        self.require_main_thread();
-        self.subjects.fx_parameter_value_changed.borrow().clone()
-    }
-
-    pub fn fx_parameter_touched(&self) -> impl ReactiveEvent<FxParameter> {
-        self.require_main_thread();
-        self.subjects.fx_parameter_touched.borrow().clone()
-    }
-
-    pub fn fx_preset_changed(&self) -> impl ReactiveEvent<Fx> {
-        self.require_main_thread();
-        self.subjects.fx_preset_changed.borrow().clone()
-    }
-
-    pub fn track_input_monitoring_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects
-            .track_input_monitoring_changed
-            .borrow()
-            .clone()
-    }
-
-    pub fn track_input_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_input_changed.borrow().clone()
-    }
-
-    pub fn track_volume_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_volume_changed.borrow().clone()
-    }
-
-    pub fn track_volume_touched(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_volume_touched.borrow().clone()
-    }
-
-    pub fn track_pan_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_pan_changed.borrow().clone()
-    }
-
-    pub fn track_pan_touched(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_pan_touched.borrow().clone()
-    }
-
-    pub fn track_selected_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_selected_changed.borrow().clone()
-    }
-
-    pub fn track_mute_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        // TODO-medium Use try_borrow() and emit a helpful error message, e.g.
-        //  "Don't subscribe to an event x while this event is raised! Defer the subscription."
-        self.subjects.track_mute_changed.borrow().clone()
-    }
-
-    pub fn track_mute_touched(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_mute_touched.borrow().clone()
-    }
-
-    pub fn track_solo_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_solo_changed.borrow().clone()
-    }
-
-    pub fn track_arm_changed(&self) -> impl ReactiveEvent<Track> {
-        self.require_main_thread();
-        self.subjects.track_arm_changed.borrow().clone()
-    }
-
-    pub fn track_send_volume_changed(&self) -> impl ReactiveEvent<TrackSend> {
-        self.require_main_thread();
-        self.subjects.track_send_volume_changed.borrow().clone()
-    }
-
-    pub fn track_send_volume_touched(&self) -> impl ReactiveEvent<TrackSend> {
-        self.require_main_thread();
-        self.subjects.track_send_volume_touched.borrow().clone()
-    }
-
-    pub fn track_send_pan_changed(&self) -> impl ReactiveEvent<TrackSend> {
-        self.require_main_thread();
-        self.subjects.track_send_pan_changed.borrow().clone()
-    }
-
-    pub fn track_send_pan_touched(&self) -> impl ReactiveEvent<TrackSend> {
-        self.require_main_thread();
-        self.subjects.track_send_pan_touched.borrow().clone()
-    }
-
-    pub fn action_invoked(&self) -> impl ReactiveEvent<Rc<Action>> {
-        self.require_main_thread();
-        self.subjects.action_invoked.borrow().clone()
-    }
-
     /// Only has an effect when compiled with the necessary feature.
     pub fn log_helper_metrics(&self) {
         let _ = self.helper_task_sender.send(HelperTask::LogMetrics);
-    }
-
-    /// Returns an rxRust scheduler for scheduling observables.
-    pub fn main_thread_scheduler(&self) -> &RunLoopScheduler {
-        &self.main_thread_scheduler
     }
 
     /// Spawns a future for execution in main thread.
@@ -1156,25 +775,9 @@ impl HookCommand for HighLevelHookCommand {
             Some(command) => command.operation.clone(),
             None => return false,
         };
-        (*operation).borrow_mut().call_mut(());
+        let mut operation = operation.borrow_mut();
+        operation();
         true
-    }
-}
-
-// Called by REAPER directly (using a delegate function)!
-// Only for main section
-struct HighLevelHookPostCommand {}
-
-impl HookPostCommand for HighLevelHookPostCommand {
-    fn call(command_id: CommandId, _flag: i32) {
-        let action = Reaper::get()
-            .main_section()
-            .action_by_command_id(command_id);
-        Reaper::get()
-            .subjects
-            .action_invoked
-            .borrow_mut()
-            .next(Rc::new(action));
     }
 }
 
@@ -1198,12 +801,6 @@ impl HookPostCommand2 for HighLevelHookPostCommand2 {
             .action_value_change_history
             .borrow_mut()
             .insert(command_id, value_change);
-        let action = reaper.main_section().action_by_command_id(command_id);
-        reaper
-            .subjects
-            .action_invoked
-            .borrow_mut()
-            .next(Rc::new(action));
     }
 }
 

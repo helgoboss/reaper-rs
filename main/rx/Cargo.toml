@@ -1,0 +1,20 @@
+[package]
+name = "reaper-rx"
+version = "0.1.0"
+authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
+license = "MIT"
+description = "rxRust integration for the reaper-rs high-level API"
+repository = "https://github.com/helgoboss/reaper-rs"
+readme = "../../README.md"
+keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
+edition = "2018"
+categories = ["api-bindings", "multimedia", "multimedia::audio"]
+publish = false
+
+[dependencies]
+reaper-high = { path = '../high' }
+reaper-medium = { path = '../medium' }
+helgoboss-midi = "0.1.2"
+rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
+crossbeam-channel = "0.4"
+slog = "2.5.2"

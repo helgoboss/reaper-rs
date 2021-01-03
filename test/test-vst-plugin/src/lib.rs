@@ -2,6 +2,7 @@ use futures_timer::Delay;
 use reaper_high::{create_terminal_logger, ActionKind, CrashInfo, Reaper, ReaperGuard};
 use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, PluginContext};
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
+use reaper_rx::{ControlSurfaceRx, ControlSurfaceRxDriver};
 use rxrust::prelude::*;
 use slog::debug;
 use std::sync::mpsc::{channel, Receiver};
@@ -72,24 +73,6 @@ impl HookPostCommand for MyHookPostCommand {
     }
 }
 
-#[derive(Debug)]
-struct MyControlSurface {
-    reaper: reaper_medium::Reaper,
-    receiver: Receiver<String>,
-}
-
-impl ControlSurface for MyControlSurface {
-    fn run(&mut self) {
-        for msg in self.receiver.try_iter() {
-            self.reaper.show_console_msg(msg);
-        }
-    }
-
-    fn set_track_list_change(&self) {
-        println!("Track list changed!")
-    }
-}
-
 impl TestVstPlugin {
     // Exists for demonstration purposes and quick tests
     #[allow(dead_code)]
@@ -102,6 +85,23 @@ impl TestVstPlugin {
             let (sender, receiver) = channel::<String>();
             med.reaper()
                 .show_console_msg("Registering control surface ...");
+            #[derive(Debug)]
+            struct MyControlSurface {
+                reaper: reaper_medium::Reaper,
+                receiver: Receiver<String>,
+            }
+
+            impl ControlSurface for MyControlSurface {
+                fn run(&mut self) {
+                    for msg in self.receiver.try_iter() {
+                        self.reaper.show_console_msg(msg);
+                    }
+                }
+
+                fn set_track_list_change(&self) {
+                    println!("Track list changed!")
+                }
+            }
             med.plugin_register_add_csurf_inst(Box::new(MyControlSurface {
                 reaper: med.reaper().clone(),
                 receiver,
@@ -143,15 +143,41 @@ impl TestVstPlugin {
             );
         });
         self.reaper_guard = Some(guard);
+        // Some Rx stuff
+        #[derive(Debug)]
+        struct CustomControlSurface {
+            rx_driver: ControlSurfaceRxDriver,
+        }
+        impl ControlSurface for CustomControlSurface {
+            fn run(&mut self) {
+                self.rx_driver.run();
+            }
+        }
+        impl CustomControlSurface {
+            fn new(rx: ControlSurfaceRx) -> Self {
+                Self {
+                    rx_driver: ControlSurfaceRxDriver::new(rx),
+                }
+            }
+        }
         let mut counter = 0;
-        Reaper::get().main_thread_idle().subscribe(move |_| {
+        let control_surface_rx = ControlSurfaceRx::new();
+        let control_surface = CustomControlSurface::new(control_surface_rx.clone());
+        let reaper = Reaper::get();
+        // TODO-medium This should be unregistered when VST plug-in removed.
+        reaper
+            .medium_session()
+            .plugin_register_add_csurf_inst(Box::new(control_surface))
+            .unwrap();
+        control_surface_rx.main_thread_idle().subscribe(move |_| {
             if counter > 10 {
                 return;
             }
             Reaper::get().show_console_msg(format!("Main thread counter: {}\n", counter));
             counter += 1;
         });
-        Reaper::get().spawn_in_main_thread(future_main());
+        // Some future stuff
+        reaper.spawn_in_main_thread(future_main());
     }
 }
 
