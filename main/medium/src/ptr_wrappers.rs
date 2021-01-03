@@ -28,6 +28,12 @@ pub struct RegistrationHandle<T> {
     reaper_ptr: NonNull<c_void>,
 }
 
+// We might run into situations when it's necessary to promise Rust that passing handles to other
+// threads is okay. And it is because methods which dereference the pointers are either unsafe or
+// do a main thread check first.
+unsafe impl<T> Send for RegistrationHandle<T> {}
+unsafe impl<T> Sync for RegistrationHandle<T> {}
+
 impl<T> Debug for RegistrationHandle<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("RegistrationHandle")
