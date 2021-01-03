@@ -161,6 +161,10 @@ fn swell() -> TestStep {
 
 fn metrics() -> TestStep {
     step(AllVersions, "Metrics", |_session, _| {
+        // TODO-low Check if the following is still executed as part of build-time integration test
+        //  (maybe not because it's async).
+        Reaper::get().log_helper_metrics();
+        // TODO-low Log as yaml (and only the metrics - put it behind feature gate)
         println!(
             "reaper_medium::Reaper metrics after integration test: {:#?}",
             Reaper::get().medium_reaper()

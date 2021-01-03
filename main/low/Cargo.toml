@@ -22,6 +22,7 @@ build = "build.rs"
 
 [features]
 default = []
+
 # Regenerates `bindings.rs` from C++ header files and right after that `reaper.rs` and `swell.rs` from `bindings.rs`.
 generate = ["generate-stage-one", "generate-stage-two"]
 
