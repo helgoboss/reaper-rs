@@ -80,9 +80,7 @@ impl RxSetup {
         session
             .plugin_register_add_hook_post_command::<ActionRxHookPostCommand<Test>>()
             .unwrap();
-        session
-            .plugin_register_add_hook_post_command_2::<ActionRxHookPostCommand2<Test>>()
-            .unwrap();
+        let _ = session.plugin_register_add_hook_post_command_2::<ActionRxHookPostCommand2<Test>>();
         RxSetup {
             control_surface_reg_handle: {
                 let surface = MiddlewareControlSurface::new(TestControlSurfaceMiddleware::new());
