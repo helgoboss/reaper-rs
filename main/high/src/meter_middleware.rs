@@ -51,6 +51,7 @@ pub struct MeterMiddlewareMetrics {
 impl MeterMiddlewareMetrics {
     pub fn response_time_descriptors() -> ControlSurfaceResponseTimeDescriptors {
         [
+            MetricDescriptor::new("run", |m| &m.run, is_critical_default),
             MetricDescriptor::new("close_no_reset", |m| &m.close_no_reset, is_critical_default),
             MetricDescriptor::new(
                 "set_track_list_change",
@@ -298,7 +299,7 @@ impl<R, M> MetricDescriptor<R, M> {
     }
 }
 
-type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 26];
+type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 27];
 
 fn is_critical_default(response_time: &CustomResponseTime) -> bool {
     response_time.borrow().max() > 10000
