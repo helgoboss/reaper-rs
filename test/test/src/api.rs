@@ -1,4 +1,5 @@
-use reaper_high::Reaper;
+use crossbeam_channel::{Receiver, Sender};
+use reaper_high::{MainThreadTask, Reaper, TaskSupport, DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY};
 use reaper_medium::ReaperVersion;
 use reaper_rx::{ActionRx, ActionRxProvider, ControlSurfaceRx, MainRx};
 use rxrust::prelude::*;
@@ -42,9 +43,24 @@ pub enum VersionRestriction {
     Max(ReaperVersion<'static>),
 }
 
-#[derive(Default)]
 pub(crate) struct Test {
     main_rx: MainRx,
+    task_support: TaskSupport,
+    pub(crate) task_sender: Sender<MainThreadTask>,
+    pub(crate) task_receiver: Receiver<MainThreadTask>,
+}
+
+impl Default for Test {
+    fn default() -> Self {
+        let (sender, receiver) =
+            crossbeam_channel::bounded(DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY);
+        Self {
+            main_rx: Default::default(),
+            task_support: TaskSupport::new(sender.clone()),
+            task_sender: sender,
+            task_receiver: receiver,
+        }
+    }
 }
 
 /// Okay because static getter checks thread.
@@ -56,7 +72,11 @@ impl Test {
         Test::get().main_rx.control_surface()
     }
 
-    fn get() -> &'static Test {
+    pub fn task_support() -> &'static TaskSupport {
+        &Test::get().task_support
+    }
+
+    pub(crate) fn get() -> &'static Test {
         Reaper::get().require_main_thread();
         &TEST
     }

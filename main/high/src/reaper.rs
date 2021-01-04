@@ -43,7 +43,7 @@ use std::time::{Duration, SystemTime};
 ///
 /// Shouldn't be too high because when `Reaper::deactivate()` is called, those tasks are
 /// going to pile up - and they will be discarded on the next activate.
-const MAIN_THREAD_TASK_CHANNEL_CAPACITY: usize = 1000;
+pub const DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY: usize = 1000;
 
 /// How many tasks to process at a maximum in one main loop iteration.
 pub(crate) const MAIN_THREAD_TASK_BULK_SIZE: usize = 100;
@@ -99,15 +99,13 @@ impl ReaperBuilder {
         self.require_main_thread();
         unsafe {
             INIT_INSTANCE.call_once(|| {
-                let (mt_sender, mt_receiver) =
-                    crossbeam_channel::bounded::<MainThreadTask>(MAIN_THREAD_TASK_CHANNEL_CAPACITY);
                 let (spawner, executor) = run_loop_executor::new_spawner_and_executor(
-                    MAIN_THREAD_TASK_CHANNEL_CAPACITY,
+                    DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                     MAIN_THREAD_TASK_BULK_SIZE,
                 );
                 let (local_spawner, local_executor) =
                     local_run_loop_executor::new_spawner_and_executor(
-                        MAIN_THREAD_TASK_CHANNEL_CAPACITY,
+                        DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                         MAIN_THREAD_TASK_BULK_SIZE,
                     );
                 let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
@@ -124,23 +122,18 @@ impl ReaperBuilder {
                     command_by_id: RefCell::new(HashMap::new()),
                     action_value_change_history: RefCell::new(Default::default()),
                     undo_block_is_active: Cell::new(false),
-                    main_thread_task_sender: mt_sender.clone(),
                     audio_thread_task_sender: at_sender,
                     main_thread_future_spawner: spawner,
                     local_main_thread_future_spawner: local_spawner,
                     session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {
                         csurf_inst: Box::new(MiddlewareControlSurface::new(HelperMiddleware::new(
                             logger.new(o!("struct" => "HelperMiddleware")),
-                            mt_sender.clone(),
-                            mt_receiver,
                             executor,
                             local_executor,
                         ))),
                         audio_hook: Box::new(HighOnAudioBuffer {
                             task_receiver: at_receiver,
-                            reaper: RealTimeReaper {
-                                main_thread_task_sender: mt_sender,
-                            },
+                            reaper: RealTimeReaper {},
                         }),
                     }))),
                 };
@@ -155,10 +148,7 @@ impl ReaperBuilder {
     }
 }
 
-pub struct RealTimeReaper {
-    #[allow(unused)]
-    main_thread_task_sender: Sender<MainThreadTask>,
-}
+pub struct RealTimeReaper {}
 
 struct HighOnAudioBuffer {
     task_receiver: Receiver<AudioThreadTaskOp>,
@@ -216,7 +206,6 @@ pub struct Reaper {
     command_by_id: RefCell<HashMap<CommandId, Command>>,
     action_value_change_history: RefCell<HashMap<CommandId, ActionValueChange>>,
     undo_block_is_active: Cell<bool>,
-    main_thread_task_sender: Sender<MainThreadTask>,
     audio_thread_task_sender: Sender<AudioThreadTaskOp>,
     main_thread_future_spawner: crate::run_loop_executor::Spawner,
     local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
@@ -530,121 +519,6 @@ impl Reaper {
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
     // deactivated).
-    pub fn do_later_in_main_thread(
-        &self,
-        waiting_time: Duration,
-        op: impl FnOnce() + Send + 'static,
-    ) -> Result<(), &'static str> {
-        unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
-    }
-
-    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
-    // deactivated).
-    pub fn do_later_in_main_thread_from_main_thread(
-        &self,
-        waiting_time: Duration,
-        op: impl FnOnce() + 'static,
-    ) -> Result<(), &'static str> {
-        self.require_main_thread();
-        unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
-    }
-
-    /// Unsafe because doesn't require send (which should be required in the general case).
-    unsafe fn do_later_in_main_thread_internal(
-        &self,
-        waiting_time: Duration,
-        op: impl FnOnce() + 'static,
-    ) -> Result<(), &'static str> {
-        let sender = &self.main_thread_task_sender;
-        sender
-            .send(MainThreadTask::new(
-                Box::new(op),
-                Some(SystemTime::now() + waiting_time),
-            ))
-            .map_err(|_| "channel disconnected")
-    }
-
-    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
-    // deactivated).
-    pub fn do_in_main_thread_asap(
-        &self,
-        op: impl FnOnce() + Send + 'static,
-    ) -> Result<(), &'static str> {
-        unsafe { self.do_in_main_thread_asap_internal(op) }
-    }
-
-    /// Panics if not in main thread. The difference to `do_in_main_thread_asap()` is that `Send` is
-    /// not required. Perfect for capturing `Rc`s.
-    pub fn do_in_main_thread_from_main_thread_asap(
-        &self,
-        op: impl FnOnce() + 'static,
-    ) -> Result<(), &'static str> {
-        self.require_main_thread();
-        unsafe { self.do_in_main_thread_asap_internal(op) }
-    }
-
-    /// Unsafe because doesn't require send (which should be required in the general case).
-    unsafe fn do_in_main_thread_asap_internal(
-        &self,
-        op: impl FnOnce() + 'static,
-    ) -> Result<(), &'static str> {
-        if Reaper::get().is_in_main_thread() {
-            op();
-            Ok(())
-        } else {
-            self.do_later_in_main_thread_asap_internal(op)
-        }
-    }
-
-    // TODO-medium Proper errors
-    pub async fn main_thread_future<R: 'static + Send>(
-        &self,
-        op: impl FnOnce() -> R + 'static + Send,
-    ) -> Result<R, &'static str> {
-        if Reaper::get().is_in_main_thread() {
-            Ok(op())
-        } else {
-            let (tx, rx) = oneshot::channel();
-            self.do_later_in_main_thread_asap(move || {
-                tx.send(op()).ok().expect("couldn't send");
-            })?;
-            rx.await
-                .map_err(|_| "error when awaiting main thread future")
-        }
-    }
-
-    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
-    // deactivated).
-    pub fn do_later_in_main_thread_asap(
-        &self,
-        op: impl FnOnce() + Send + 'static,
-    ) -> Result<(), &'static str> {
-        unsafe { self.do_later_in_main_thread_asap_internal(op) }
-    }
-
-    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
-    // deactivated).
-    pub fn do_later_in_main_thread_from_main_thread_asap(
-        &self,
-        op: impl FnOnce() + 'static,
-    ) -> Result<(), &'static str> {
-        self.require_main_thread();
-        unsafe { self.do_later_in_main_thread_asap_internal(op) }
-    }
-
-    /// Unsafe because doesn't require send (which should be required in the general case).
-    unsafe fn do_later_in_main_thread_asap_internal(
-        &self,
-        op: impl FnOnce() + 'static,
-    ) -> Result<(), &'static str> {
-        let sender = &self.main_thread_task_sender;
-        sender
-            .send(MainThreadTask::new(Box::new(op), None))
-            .map_err(|_| "channel disconnected")
-    }
-
-    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
-    // deactivated).
     pub fn do_later_in_real_time_audio_thread_asap(
         &self,
         op: impl FnOnce(&RealTimeReaper) + Send + 'static,
@@ -692,6 +566,7 @@ impl Reaper {
     }
 }
 
+// TODO-medium Think about the consequences.
 unsafe impl Sync for Reaper {}
 
 struct Command {
@@ -830,25 +705,6 @@ impl ToggleAction for HighLevelToggleAction {
 }
 
 type AudioThreadTaskOp = Box<dyn FnOnce(&RealTimeReaper) + 'static>;
-
-type MainThreadTaskOp = Box<dyn FnOnce() + 'static>;
-
-pub(super) struct MainThreadTask {
-    pub desired_execution_time: Option<std::time::SystemTime>,
-    pub op: MainThreadTaskOp,
-}
-
-impl MainThreadTask {
-    pub fn new(
-        op: MainThreadTaskOp,
-        desired_execution_time: Option<std::time::SystemTime>,
-    ) -> MainThreadTask {
-        MainThreadTask {
-            desired_execution_time,
-            op,
-        }
-    }
-}
 
 fn require_main_thread(context: &PluginContext) {
     assert!(

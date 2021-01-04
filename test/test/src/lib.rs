@@ -7,7 +7,7 @@ mod tests;
 use crate::api::{Test, TestStep, TestStepContext, VersionRestriction};
 use crate::tests::create_test_steps;
 use reaper_high::{
-    ChangeDetectionMiddleware, ControlSurfaceEvent, ControlSurfaceMiddleware,
+    ChangeDetectionMiddleware, ControlSurfaceEvent, ControlSurfaceMiddleware, MainTaskMiddleware,
     MiddlewareControlSurface, Reaper,
 };
 use rxrust::prelude::*;
@@ -38,23 +38,33 @@ pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) 
 
 #[derive(Debug)]
 struct TestControlSurfaceMiddleware {
-    change_detector: ChangeDetectionMiddleware,
-    rx_driver: ControlSurfaceRxMiddleware,
+    change_detection_middleware: ChangeDetectionMiddleware,
+    rx_middleware: ControlSurfaceRxMiddleware,
+    main_task_middleware: MainTaskMiddleware,
 }
 
 impl TestControlSurfaceMiddleware {
     fn new() -> Self {
         Self {
-            change_detector: ChangeDetectionMiddleware::new(),
-            rx_driver: ControlSurfaceRxMiddleware::new(Test::control_surface_rx().clone()),
+            change_detection_middleware: ChangeDetectionMiddleware::new(),
+            rx_middleware: ControlSurfaceRxMiddleware::new(Test::control_surface_rx().clone()),
+            main_task_middleware: MainTaskMiddleware::new(
+                Reaper::get().logger().clone(),
+                Test::get().task_sender.clone(),
+                Test::get().task_receiver.clone(),
+            ),
         }
     }
 }
 
 impl ControlSurfaceMiddleware for TestControlSurfaceMiddleware {
+    fn run(&mut self) {
+        self.main_task_middleware.run();
+    }
+
     fn handle_event(&self, event: ControlSurfaceEvent) {
-        self.change_detector.process(event, |e| {
-            self.rx_driver.handle_change(e);
+        self.change_detection_middleware.process(event, |e| {
+            self.rx_middleware.handle_change(e);
         });
     }
 }
@@ -124,7 +134,7 @@ fn execute_next_step(
         };
         match result {
             Ok(()) => {
-                reaper
+                Test::task_support()
                     .do_later_in_main_thread_from_main_thread_asap(move || {
                         execute_next_step(steps, step_count, on_finish)
                     })
@@ -143,7 +153,7 @@ fn execute_next_step(
             _ => unreachable!(),
         };
         log_skip(reason);
-        reaper
+        Test::task_support()
             .do_later_in_main_thread_from_main_thread_asap(move || {
                 execute_next_step(steps, step_count, on_finish)
             })

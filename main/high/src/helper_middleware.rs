@@ -8,9 +8,6 @@ use crate::{
 #[derive(Debug)]
 pub(crate) struct HelperMiddleware {
     logger: slog::Logger,
-    // These two are for very simple scheduling. Most light-weight.
-    main_thread_task_sender: Sender<MainThreadTask>,
-    main_thread_task_receiver: Receiver<MainThreadTask>,
     // This is for executing futures.
     main_thread_executor: run_loop_executor::RunLoopExecutor,
     local_main_thread_executor: local_run_loop_executor::RunLoopExecutor,
@@ -19,15 +16,11 @@ pub(crate) struct HelperMiddleware {
 impl HelperMiddleware {
     pub fn new(
         logger: slog::Logger,
-        main_thread_task_sender: Sender<MainThreadTask>,
-        main_thread_task_receiver: Receiver<MainThreadTask>,
         executor: run_loop_executor::RunLoopExecutor,
         local_executor: local_run_loop_executor::RunLoopExecutor,
     ) -> HelperMiddleware {
         HelperMiddleware {
             logger: logger.clone(),
-            main_thread_task_sender,
-            main_thread_task_receiver,
             main_thread_executor: executor,
             local_main_thread_executor: local_executor,
         }
@@ -38,7 +31,6 @@ impl HelperMiddleware {
     }
 
     fn discard_tasks(&self) {
-        self.discard_main_thread_tasks();
         self.discard_future_tasks();
     }
 
@@ -52,39 +44,10 @@ impl HelperMiddleware {
             );
         }
     }
-
-    fn discard_main_thread_tasks(&self) {
-        let task_count = self.main_thread_task_receiver.try_iter().count();
-        if task_count > 0 {
-            slog::warn!(self.logger, "Discarded main thread tasks on reactivation";
-                "task_count" => task_count,
-            );
-        }
-    }
 }
 
 impl ControlSurfaceMiddleware for HelperMiddleware {
     fn run(&mut self) {
-        // Process plain main thread tasks in queue
-        for task in self
-            .main_thread_task_receiver
-            .try_iter()
-            .take(MAIN_THREAD_TASK_BULK_SIZE)
-        {
-            match task.desired_execution_time {
-                None => (task.op)(),
-                Some(t) => {
-                    if std::time::SystemTime::now() < t {
-                        self.main_thread_task_sender
-                            .send(task)
-                            .expect("couldn't reschedule main thread task");
-                    } else {
-                        (task.op)()
-                    }
-                }
-            }
-        }
-        // Execute futures
         self.main_thread_executor.run();
         self.local_main_thread_executor.run();
     }

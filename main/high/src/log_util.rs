@@ -52,9 +52,13 @@ pub fn create_reaper_panic_hook(
         log_panic(&logger, panic_info, &backtrace);
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
-            let _ = Reaper::get().do_in_main_thread_asap(move || {
-                Reaper::get().medium_reaper().show_console_msg(msg);
-            });
+            // TODO-high Previously we also logged here when not in main thread by deferring to main
+            //  thread (do_in_main_thread_asap). We need to take some defer function to support that
+            //  again.
+            let reaper = Reaper::get();
+            if reaper.is_in_main_thread() {
+                reaper.medium_reaper().show_console_msg(msg);
+            }
         }
     })
 }

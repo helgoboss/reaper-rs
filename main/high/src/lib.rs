@@ -31,6 +31,12 @@ mod local_run_loop_executor;
 mod reaper;
 pub use reaper::*;
 
+mod main_task_middleware;
+pub use main_task_middleware::*;
+
+mod main_future_middleware;
+pub use main_future_middleware::*;
+
 mod reaper_simple;
 pub use reaper_simple::*;
 
