@@ -1,11 +1,4 @@
-use crossbeam_channel::{Receiver, Sender};
-
-use crate::{
-    local_run_loop_executor, run_loop_executor, ControlSurfaceMiddleware, Reaper,
-    DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
-};
-use futures::channel::oneshot;
-use std::time::{Duration, SystemTime};
+use crate::{local_run_loop_executor, run_loop_executor, Reaper};
 
 pub struct FutureSupport {
     main_thread_future_spawner: crate::run_loop_executor::Spawner,

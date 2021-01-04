@@ -1,4 +1,4 @@
-use crate::{local_run_loop_executor, run_loop_executor, CrashInfo, MiddlewareControlSurface};
+use crate::CrashInfo;
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -18,7 +18,6 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use reaper_low::PluginContext;
 
 use crossbeam_channel::{Receiver, Sender};
-use futures::channel::oneshot;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
@@ -27,12 +26,11 @@ use reaper_medium::{
     ReaperStringArg, RegistrationHandle, SectionContext, ToggleAction, ToggleActionResult,
     WindowContext,
 };
-use slog::{debug, o, Logger};
+use slog::{debug, Logger};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::sync::Mutex;
-use std::time::{Duration, SystemTime};
 
 /// Capacity of the channel which is used to scheduled tasks for execution in the main thread.
 ///

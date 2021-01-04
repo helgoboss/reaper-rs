@@ -4,7 +4,6 @@ use reaper_high::{
     ReaperGuard, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE, DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
 };
 use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, PluginContext};
-use reaper_medium::ReaperPointer::Custom;
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
 use reaper_rx::{ControlSurfaceRx, ControlSurfaceRxMiddleware};
 use rxrust::prelude::*;
