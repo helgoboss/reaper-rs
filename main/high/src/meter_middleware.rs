@@ -11,14 +11,14 @@ use std::fmt;
 type CustomResponseTime = ResponseTime<RefCell<HdrHistogram>, StdInstantMicros>;
 
 #[derive(Debug)]
-pub struct MeterControlSurfaceMiddleware {
+pub struct MeterMiddleware {
     logger: Logger,
-    metrics: ControlSurfaceMiddlewareMetrics,
+    metrics: MeterMiddlewareMetrics,
     descriptors: ControlSurfaceResponseTimeDescriptors,
 }
 
 #[derive(Debug, Default, Serialize)]
-pub struct ControlSurfaceMiddlewareMetrics {
+pub struct MeterMiddlewareMetrics {
     run: CustomResponseTime,
     close_no_reset: CustomResponseTime,
     set_track_list_change: CustomResponseTime,
@@ -48,7 +48,7 @@ pub struct ControlSurfaceMiddlewareMetrics {
     ext_track_fx_preset_changed: CustomResponseTime,
 }
 
-impl ControlSurfaceMiddlewareMetrics {
+impl MeterMiddlewareMetrics {
     pub fn response_time_descriptors() -> ControlSurfaceResponseTimeDescriptors {
         [
             MetricDescriptor::new("close_no_reset", |m| &m.close_no_reset, is_critical_default),
@@ -173,16 +173,16 @@ impl ControlSurfaceMiddlewareMetrics {
     }
 }
 
-impl MeterControlSurfaceMiddleware {
-    pub fn new(logger: Logger) -> MeterControlSurfaceMiddleware {
-        MeterControlSurfaceMiddleware {
+impl MeterMiddleware {
+    pub fn new(logger: Logger) -> MeterMiddleware {
+        MeterMiddleware {
             logger,
             metrics: Default::default(),
-            descriptors: ControlSurfaceMiddlewareMetrics::response_time_descriptors(),
+            descriptors: MeterMiddlewareMetrics::response_time_descriptors(),
         }
     }
 
-    pub fn metrics(&self) -> &ControlSurfaceMiddlewareMetrics {
+    pub fn metrics(&self) -> &MeterMiddlewareMetrics {
         &self.metrics
     }
 
@@ -239,10 +239,7 @@ impl MeterControlSurfaceMiddleware {
         slog::info!(self.logger, "{}", format_pretty(&self.metrics));
     }
 
-    fn warn_if_critical(
-        &self,
-        descriptor: &ResponseTimeDescriptor<ControlSurfaceMiddlewareMetrics>,
-    ) {
+    fn warn_if_critical(&self, descriptor: &ResponseTimeDescriptor<MeterMiddlewareMetrics>) {
         let response_time = descriptor.get_metric(&self.metrics);
         if descriptor.is_critical(response_time) {
             slog::warn!(
@@ -301,8 +298,7 @@ impl<R, M> MetricDescriptor<R, M> {
     }
 }
 
-type ControlSurfaceResponseTimeDescriptors =
-    [ResponseTimeDescriptor<ControlSurfaceMiddlewareMetrics>; 26];
+type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 26];
 
 fn is_critical_default(response_time: &CustomResponseTime) -> bool {
     response_time.borrow().max() > 10000

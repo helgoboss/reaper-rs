@@ -7,14 +7,15 @@ mod tests;
 use crate::api::{Test, TestStep, TestStepContext, VersionRestriction};
 use crate::tests::create_test_steps;
 use reaper_high::{
-    ChangeDetector, ControlSurfaceEvent, ControlSurfaceMiddleware, MiddlewareControlSurface, Reaper,
+    ChangeDetectionMiddleware, ControlSurfaceEvent, ControlSurfaceMiddleware,
+    MiddlewareControlSurface, Reaper,
 };
 use rxrust::prelude::*;
 
 use std::collections::VecDeque;
 
 use reaper_medium::RegistrationHandle;
-use reaper_rx::{ActionRxHookPostCommand, ActionRxHookPostCommand2, ControlSurfaceRxDriver};
+use reaper_rx::{ActionRxHookPostCommand, ActionRxHookPostCommand2, ControlSurfaceRxMiddleware};
 use slog::info;
 use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
@@ -37,15 +38,15 @@ pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) 
 
 #[derive(Debug)]
 struct TestControlSurfaceMiddleware {
-    change_detector: ChangeDetector,
-    rx_driver: ControlSurfaceRxDriver,
+    change_detector: ChangeDetectionMiddleware,
+    rx_driver: ControlSurfaceRxMiddleware,
 }
 
 impl TestControlSurfaceMiddleware {
     fn new() -> Self {
         Self {
-            change_detector: ChangeDetector::new(),
-            rx_driver: ControlSurfaceRxDriver::new(Test::control_surface_rx().clone()),
+            change_detector: ChangeDetectionMiddleware::new(),
+            rx_driver: ControlSurfaceRxMiddleware::new(Test::control_surface_rx().clone()),
         }
     }
 }

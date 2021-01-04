@@ -1,7 +1,7 @@
 use crate::run_loop_scheduler::RxTask;
 use crossbeam_channel::Receiver;
 
-pub struct SchedulingDriver {
+pub struct SchedulingMiddleware {
     logger: slog::Logger,
     // This is for scheduling rxRust observables.
     // TODO-medium Remove, I ran into deadlocks with this thing.
@@ -9,13 +9,13 @@ pub struct SchedulingDriver {
     bulk_size: usize,
 }
 
-impl SchedulingDriver {
+impl SchedulingMiddleware {
     pub fn new(
         logger: slog::Logger,
         main_thread_rx_task_receiver: Receiver<RxTask>,
         bulk_size: usize,
-    ) -> SchedulingDriver {
-        SchedulingDriver {
+    ) -> SchedulingMiddleware {
+        SchedulingMiddleware {
             logger,
             main_thread_rx_task_receiver,
             bulk_size,

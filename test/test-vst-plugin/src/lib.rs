@@ -2,7 +2,7 @@ use futures_timer::Delay;
 use reaper_high::{create_terminal_logger, ActionKind, CrashInfo, Reaper, ReaperGuard};
 use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, PluginContext};
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
-use reaper_rx::{ControlSurfaceRx, ControlSurfaceRxDriver};
+use reaper_rx::{ControlSurfaceRx, ControlSurfaceRxMiddleware};
 use rxrust::prelude::*;
 use slog::debug;
 use std::sync::mpsc::{channel, Receiver};
@@ -150,7 +150,7 @@ impl TestVstPlugin {
         // Some Rx stuff
         #[derive(Debug)]
         struct CustomControlSurface {
-            rx_driver: ControlSurfaceRxDriver,
+            rx_driver: ControlSurfaceRxMiddleware,
         }
         impl ControlSurface for CustomControlSurface {
             fn run(&mut self) {
@@ -160,7 +160,7 @@ impl TestVstPlugin {
         impl CustomControlSurface {
             fn new(rx: ControlSurfaceRx) -> Self {
                 Self {
-                    rx_driver: ControlSurfaceRxDriver::new(rx),
+                    rx_driver: ControlSurfaceRxMiddleware::new(rx),
                 }
             }
         }

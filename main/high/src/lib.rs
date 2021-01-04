@@ -91,9 +91,9 @@ mod action_character;
 pub use action_character::*;
 
 #[cfg(feature = "serde")]
-mod metering;
+mod meter_middleware;
 #[cfg(feature = "serde")]
-pub use metering::*;
+pub use meter_middleware::*;
 
 mod undo_block;
 
@@ -102,7 +102,7 @@ mod normalized_value;
 mod middleware_control_surface;
 pub use middleware_control_surface::*;
 
-mod change_detector;
-pub use change_detector::*;
+mod change_detection_middleware;
+pub use change_detection_middleware::*;
 
 mod option_util;

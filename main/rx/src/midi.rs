@@ -5,7 +5,7 @@ use reaper_medium::{
 };
 use rxrust::prelude::*;
 
-pub struct MidiRxDriver {
+pub struct MidiRxMiddleware {
     medium_reaper: reaper_medium::Reaper<RealTimeAudioThreadScope>,
     rx: MidiRx,
 }
@@ -15,7 +15,7 @@ pub struct MidiRx {
     midi_message_received: LocalSubject<'static, MidiEvent<RawShortMessage>, ()>,
 }
 
-impl MidiRxDriver {
+impl MidiRxMiddleware {
     pub fn on_audio_buffer(&mut self, args: OnAudioBufferArgs) {
         if args.is_post {
             return;

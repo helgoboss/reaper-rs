@@ -5,13 +5,13 @@ use std::cell::RefCell;
 use std::fmt;
 
 #[derive(Debug)]
-pub struct ControlSurfaceRxDriver {
+pub struct ControlSurfaceRxMiddleware {
     rx: ControlSurfaceRx,
 }
 
-impl ControlSurfaceRxDriver {
-    pub fn new(rx: ControlSurfaceRx) -> ControlSurfaceRxDriver {
-        ControlSurfaceRxDriver { rx }
+impl ControlSurfaceRxMiddleware {
+    pub fn new(rx: ControlSurfaceRx) -> ControlSurfaceRxMiddleware {
+        ControlSurfaceRxMiddleware { rx }
     }
 
     pub fn run(&self) {
