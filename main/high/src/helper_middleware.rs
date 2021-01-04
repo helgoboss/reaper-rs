@@ -4,11 +4,6 @@ use crate::{
     local_run_loop_executor, run_loop_executor, ControlSurfaceMiddleware, MainThreadTask,
     MAIN_THREAD_TASK_BULK_SIZE,
 };
-use winapi::_core::time::Duration;
-
-pub(crate) enum HelperTask {
-    LogMetrics,
-}
 
 #[derive(Debug)]
 pub(crate) struct HelperMiddleware {
@@ -19,9 +14,6 @@ pub(crate) struct HelperMiddleware {
     // This is for executing futures.
     main_thread_executor: run_loop_executor::RunLoopExecutor,
     local_main_thread_executor: local_run_loop_executor::RunLoopExecutor,
-    helper_middleware_task_receiver: Receiver<HelperTask>,
-    #[cfg(feature = "control-surface-meter")]
-    performance_monitor: crate::ControlSurfacePerformanceMonitor,
 }
 
 impl HelperMiddleware {
@@ -29,7 +21,6 @@ impl HelperMiddleware {
         logger: slog::Logger,
         main_thread_task_sender: Sender<MainThreadTask>,
         main_thread_task_receiver: Receiver<MainThreadTask>,
-        helper_task_receiver: Receiver<HelperTask>,
         executor: run_loop_executor::RunLoopExecutor,
         local_executor: local_run_loop_executor::RunLoopExecutor,
     ) -> HelperMiddleware {
@@ -39,12 +30,6 @@ impl HelperMiddleware {
             main_thread_task_receiver,
             main_thread_executor: executor,
             local_main_thread_executor: local_executor,
-            helper_middleware_task_receiver: helper_task_receiver,
-            #[cfg(feature = "control-surface-meter")]
-            performance_monitor: crate::ControlSurfacePerformanceMonitor::new(
-                logger,
-                Duration::from_secs(30),
-            ),
         }
     }
 
@@ -102,18 +87,5 @@ impl ControlSurfaceMiddleware for HelperMiddleware {
         // Execute futures
         self.main_thread_executor.run();
         self.local_main_thread_executor.run();
-    }
-
-    #[cfg(feature = "control-surface-meter")]
-    fn handle_metrics(&mut self, metrics: &reaper_medium::ControlSurfaceMetrics) {
-        self.performance_monitor.handle_metrics(metrics);
-        // As long as the middleware task receiver doesn't get other kinds of tasks, we can do it
-        // here - which has the advantage that we have the metrics at hand already.
-        if let Ok(task) = self.helper_middleware_task_receiver.try_recv() {
-            use HelperTask::*;
-            match task {
-                LogMetrics => self.performance_monitor.log_metrics(metrics),
-            }
-        }
     }
 }

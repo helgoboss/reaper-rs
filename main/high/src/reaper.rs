@@ -7,7 +7,7 @@ use std::ptr::NonNull;
 use std::rc::Rc;
 use std::sync::{Arc, Weak};
 
-use crate::helper_middleware::{HelperMiddleware, HelperTask};
+use crate::helper_middleware::HelperMiddleware;
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
@@ -113,7 +113,6 @@ impl ReaperBuilder {
                 let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
                     AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
                 );
-                let (helper_task_sender, helper_task_receiver) = crossbeam_channel::unbounded();
                 let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
                 let medium_real_time_reaper = self.medium.create_real_time_reaper();
@@ -127,7 +126,6 @@ impl ReaperBuilder {
                     undo_block_is_active: Cell::new(false),
                     main_thread_task_sender: mt_sender.clone(),
                     audio_thread_task_sender: at_sender,
-                    helper_task_sender,
                     main_thread_future_spawner: spawner,
                     local_main_thread_future_spawner: local_spawner,
                     session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {
@@ -135,7 +133,6 @@ impl ReaperBuilder {
                             logger.new(o!("struct" => "HelperMiddleware")),
                             mt_sender.clone(),
                             mt_receiver,
-                            helper_task_receiver,
                             executor,
                             local_executor,
                         ))),
@@ -221,7 +218,6 @@ pub struct Reaper {
     undo_block_is_active: Cell<bool>,
     main_thread_task_sender: Sender<MainThreadTask>,
     audio_thread_task_sender: Sender<AudioThreadTaskOp>,
-    helper_task_sender: Sender<HelperTask>,
     main_thread_future_spawner: crate::run_loop_executor::Spawner,
     local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
     session_status: RefCell<SessionStatus>,
@@ -508,11 +504,6 @@ impl Reaper {
             .borrow()
             .get(&command_id)
             .copied()
-    }
-
-    /// Only has an effect when compiled with the necessary feature.
-    pub fn log_helper_metrics(&self) {
-        let _ = self.helper_task_sender.send(HelperTask::LogMetrics);
     }
 
     /// Spawns a future for execution in main thread.
