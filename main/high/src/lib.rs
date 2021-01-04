@@ -90,6 +90,11 @@ pub use chunk::*;
 mod action_character;
 pub use action_character::*;
 
+#[cfg(feature = "serde")]
+mod metering;
+#[cfg(feature = "serde")]
+pub use metering::*;
+
 mod undo_block;
 
 mod normalized_value;

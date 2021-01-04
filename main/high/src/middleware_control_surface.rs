@@ -37,6 +37,10 @@ impl<H: ControlSurfaceMiddleware + Debug> MiddlewareControlSurface<H> {
     pub fn middleware(&self) -> &H {
         &self.middleware
     }
+
+    pub fn middleware_mut(&mut self) -> &mut H {
+        &mut self.middleware
+    }
 }
 
 impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSurface<H> {
