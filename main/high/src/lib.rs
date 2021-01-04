@@ -28,6 +28,8 @@ pub mod run_loop_executor;
 
 pub mod local_run_loop_executor;
 
+mod helper_control_surface;
+
 mod reaper;
 pub use reaper::*;
 

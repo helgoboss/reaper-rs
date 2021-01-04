@@ -17,6 +17,7 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 
 use reaper_low::PluginContext;
 
+use crate::helper_control_surface::{HelperControlSurface, HelperTask};
 use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
@@ -99,6 +100,9 @@ impl ReaperBuilder {
                 let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
                     AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
                 );
+                // At the moment this is just for logging to console when audio thread panics so
+                // we don't need it to be big.
+                let (helper_task_sender, helper_task_receiver) = crossbeam_channel::bounded(10);
                 let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
                 let medium_real_time_reaper = self.medium.create_real_time_reaper();
@@ -117,9 +121,18 @@ impl ReaperBuilder {
                             reaper: RealTimeReaper {},
                         }),
                     }))),
+                    helper_task_sender,
                 };
                 INSTANCE = Some(reaper);
                 register_plugin_destroy_hook(|| INSTANCE = None);
+                // We register a tiny control surface permanently just for the most essential stuff.
+                // It will be unregistered automatically using reaper-medium's Drop implementation.
+                let helper_control_surface = HelperControlSurface::new(helper_task_receiver);
+                Reaper::get()
+                    .medium_session
+                    .borrow_mut()
+                    .plugin_register_add_csurf_inst(Box::new(helper_control_surface))
+                    .unwrap();
             });
         }
     }
@@ -189,6 +202,7 @@ pub struct Reaper {
     undo_block_is_active: Cell<bool>,
     audio_thread_task_sender: Sender<AudioThreadTaskOp>,
     session_status: RefCell<SessionStatus>,
+    helper_task_sender: crossbeam_channel::Sender<HelperTask>,
 }
 
 #[derive(Debug)]
@@ -390,6 +404,16 @@ impl Reaper {
     pub fn medium_session(&self) -> RefMut<reaper_medium::ReaperSession> {
         self.require_main_thread();
         self.medium_session.borrow_mut()
+    }
+
+    pub(crate) fn show_console_msg_thread_safe<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
+        if self.is_in_main_thread() {
+            self.show_console_msg(msg);
+        } else {
+            let _ = self.helper_task_sender.try_send(HelperTask::ShowConsoleMsg(
+                msg.into().into_inner().to_reaper_string().into_string(),
+            ));
+        }
     }
 
     pub fn register_action(
