@@ -7,7 +7,6 @@ use std::ptr::NonNull;
 use std::rc::Rc;
 use std::sync::{Arc, Weak};
 
-use crate::helper_middleware::HelperMiddleware;
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{
@@ -46,7 +45,7 @@ use std::time::{Duration, SystemTime};
 pub const DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY: usize = 1000;
 
 /// How many tasks to process at a maximum in one main loop iteration.
-pub(crate) const MAIN_THREAD_TASK_BULK_SIZE: usize = 100;
+pub const DEFAULT_MAIN_THREAD_TASK_BULK_SIZE: usize = 100;
 
 /// Capacity of the channel which is used to scheduled tasks for execution in the real-time audio
 /// thread.
@@ -99,15 +98,6 @@ impl ReaperBuilder {
         self.require_main_thread();
         unsafe {
             INIT_INSTANCE.call_once(|| {
-                let (spawner, executor) = run_loop_executor::new_spawner_and_executor(
-                    DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
-                    MAIN_THREAD_TASK_BULK_SIZE,
-                );
-                let (local_spawner, local_executor) =
-                    local_run_loop_executor::new_spawner_and_executor(
-                        DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
-                        MAIN_THREAD_TASK_BULK_SIZE,
-                    );
                 let (at_sender, at_receiver) = crossbeam_channel::bounded::<AudioThreadTaskOp>(
                     AUDIO_THREAD_TASK_CHANNEL_CAPACITY,
                 );
@@ -123,14 +113,7 @@ impl ReaperBuilder {
                     action_value_change_history: RefCell::new(Default::default()),
                     undo_block_is_active: Cell::new(false),
                     audio_thread_task_sender: at_sender,
-                    main_thread_future_spawner: spawner,
-                    local_main_thread_future_spawner: local_spawner,
                     session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {
-                        csurf_inst: Box::new(MiddlewareControlSurface::new(HelperMiddleware::new(
-                            logger.new(o!("struct" => "HelperMiddleware")),
-                            executor,
-                            local_executor,
-                        ))),
                         audio_hook: Box::new(HighOnAudioBuffer {
                             task_receiver: at_receiver,
                             reaper: RealTimeReaper {},
@@ -207,8 +190,6 @@ pub struct Reaper {
     action_value_change_history: RefCell<HashMap<CommandId, ActionValueChange>>,
     undo_block_is_active: Cell<bool>,
     audio_thread_task_sender: Sender<AudioThreadTaskOp>,
-    main_thread_future_spawner: crate::run_loop_executor::Spawner,
-    local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
     session_status: RefCell<SessionStatus>,
 }
 
@@ -219,14 +200,12 @@ enum SessionStatus {
 }
 
 struct SleepingState {
-    csurf_inst: Box<MiddlewareControlSurface<HelperMiddleware>>,
     audio_hook: Box<HighOnAudioBuffer>,
 }
 
 impl Debug for SleepingState {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("SleepingState")
-            .field("csurf_inst", &self.csurf_inst)
             .field("audio_hook", &"<omitted>")
             .finish()
     }
@@ -234,7 +213,6 @@ impl Debug for SleepingState {
 
 #[derive(Debug)]
 struct AwakeState {
-    csurf_inst_handle: RegistrationHandle<MiddlewareControlSurface<HelperMiddleware>>,
     audio_hook_register_handle: RegistrationHandle<HighOnAudioBuffer>,
     gaccel_registers: HashMap<CommandId, NonNull<raw::gaccel_register_t>>,
 }
@@ -349,7 +327,6 @@ impl Reaper {
         };
         // We don't want to execute tasks which accumulated during the "downtime" of Reaper.
         // So we just consume all without executing them.
-        sleeping_state.csurf_inst.middleware().reset();
         sleeping_state.audio_hook.reset();
         // Functions
         let mut medium = self.medium_session();
@@ -376,11 +353,6 @@ impl Reaper {
                     (*id, handle)
                 })
                 .collect(),
-            csurf_inst_handle: {
-                medium
-                    .plugin_register_add_csurf_inst(sleeping_state.csurf_inst)
-                    .map_err(|_| "Control surface registration failed")?
-            },
             audio_hook_register_handle: {
                 medium
                     .audio_reg_hardware_hook_add(sleeping_state.audio_hook)
@@ -404,12 +376,6 @@ impl Reaper {
         let audio_hook = medium
             .audio_reg_hardware_hook_remove(awake_state.audio_hook_register_handle)
             .ok_or("audio hook was not registered")?;
-        // Remove control surface
-        let csurf_inst = unsafe {
-            medium
-                .plugin_register_remove_csurf_inst(awake_state.csurf_inst_handle)
-                .ok_or("control surface was not registered")?
-        };
         // Unregister actions
         for gaccel_handle in awake_state.gaccel_registers.values() {
             medium.plugin_register_remove_gaccel(*gaccel_handle);
@@ -418,10 +384,7 @@ impl Reaper {
         medium.plugin_register_remove_hook_post_command_2::<HighLevelHookPostCommand2>();
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
         medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
-        *session_status = SessionStatus::Sleeping(Some(SleepingState {
-            csurf_inst,
-            audio_hook,
-        }));
+        *session_status = SessionStatus::Sleeping(Some(SleepingState { audio_hook }));
         debug!(self.logger(), "Sleeping");
         Ok(())
     }
@@ -493,28 +456,6 @@ impl Reaper {
             .borrow()
             .get(&command_id)
             .copied()
-    }
-
-    /// Spawns a future for execution in main thread.
-    pub fn spawn_in_main_thread(
-        &self,
-        future: impl std::future::Future<Output = ()> + 'static + Send,
-    ) {
-        let spawner = &self.main_thread_future_spawner;
-        spawner.spawn(future);
-    }
-
-    /// Spawns a future for execution in main thread.
-    ///
-    /// Panics if not in main thread. The difference to `spawn_in_main_thread()` is that `Send` is
-    /// not required. Perfect for capturing `Rc`s.
-    pub fn spawn_in_main_thread_from_main_thread(
-        &self,
-        future: impl std::future::Future<Output = ()> + 'static,
-    ) {
-        self.require_main_thread();
-        let spawner = &self.local_main_thread_future_spawner;
-        spawner.spawn(future);
     }
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
