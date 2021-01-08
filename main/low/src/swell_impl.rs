@@ -313,6 +313,29 @@ impl Swell {
         result as _
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn InsertMenuItem(
+        &self,
+        hMenu: root::HMENU,
+        pos: ::std::os::raw::c_int,
+        byPos: root::BOOL,
+        mi: *mut root::MENUITEMINFO,
+    ) {
+        let mi = *mi;
+        let mut utf16_string = utf8_to_16(mi.dwTypeData);
+        let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
+        utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
+        let result = winapi::um::winuser::InsertMenuItemW(
+            hMenu as _,
+            pos as _,
+            byPos as _,
+            &utf16_mi as *const _,
+        );
+        std::mem::drop(utf16_string);
+    }
+
     /// **Attention:** This doesn't yet support `dwTypeData` (always `null` currently).
     ///
     /// # Safety
@@ -436,6 +459,7 @@ fn lparam_is_string(msg: root::UINT) -> bool {
     matches!(msg, raw::CB_INSERTSTRING | raw::CB_ADDSTRING)
 }
 
+/// cbSize doesn't matter.
 /// Converts everything except `dwTypeData` (needs special treatment).
 #[cfg(target_family = "windows")]
 fn utf8_to_16_menu_item_info(mi: &root::MENUITEMINFO) -> winapi::um::winuser::MENUITEMINFOW {
