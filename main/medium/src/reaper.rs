@@ -803,12 +803,11 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeSingleThreaded)]
+    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_play_state_ex(&self, project: ProjectContext) -> PlayState
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.get_play_state_ex_unchecked(project) }
     }
@@ -820,12 +819,11 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_play_state_ex()`]: #method.get_play_state_ex
-    #[measure(ResponseTimeSingleThreaded)]
+    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn get_play_state_ex_unchecked(&self, project: ProjectContext) -> PlayState
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let result = self.low.GetPlayStateEx(project.to_raw()) as u32;
         PlayState {
             is_playing: result & 1 > 0,
