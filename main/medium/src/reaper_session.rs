@@ -754,6 +754,10 @@ impl ReaperSession {
     /// This only needs to be called if you explicitly want the audio hook to "stop" while your
     /// plug-in is still running. You don't need to call this for cleaning up because this
     /// struct takes care of unregistering everything safely when it gets dropped.
+    ///
+    /// REAPER guarantees via proper synchronization that after this method returns, the callback
+    /// is not in the process of being called and also will not be called anymore. However, it is
+    /// *not* guaranteed that the last callback invocation has `is_post == true`.
     pub fn audio_reg_hardware_hook_remove<T>(
         &mut self,
         handle: RegistrationHandle<T>,
