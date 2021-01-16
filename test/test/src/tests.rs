@@ -686,10 +686,7 @@ fn invoke_action() -> TestStep {
         assert!(track.is_muted());
         let reaper_version = reaper.version();
         if reaper_version >= ReaperVersion::new("6.20")
-            || reaper_version
-                .into_inner()
-                .to_str()
-                .starts_with("6.19+dev1226")
+            || reaper_version.into_inner().to_str().starts_with("6.19+dev")
         {
             assert_eq!(mock.invocation_count(), 1);
             let normalized_value = action
@@ -2785,8 +2782,8 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
         let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
         // When
         // Then
-        assert_eq!(fx.preset_count(), 0);
-        assert!(fx.preset_index().is_none());
+        assert_eq!(fx.preset_count(), Ok(0));
+        assert_eq!(fx.preset_index(), Ok(None));
         assert!(fx.preset_name().is_none());
         assert!(fx.preset_is_dirty());
         Ok(())

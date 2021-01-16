@@ -415,36 +415,34 @@ impl Fx {
         self.guid.is_some()
     }
 
-    pub fn preset_count(&self) -> u32 {
+    pub fn preset_count(&self) -> Result<u32, ReaperFunctionError> {
         self.load_if_necessary_or_complain();
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.track_and_location();
-                unsafe {
+                let res = unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_preset_index(track.raw(), location)
-                        .expect("Couldn't get preset count")
-                        .count
-                }
+                        .track_fx_get_preset_index(track.raw(), location)?
+                };
+                Ok(res.count)
             }
         }
     }
 
-    pub fn preset_index(&self) -> Option<u32> {
+    pub fn preset_index(&self) -> Result<Option<u32>, ReaperFunctionError> {
         self.load_if_necessary_or_complain();
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.track_and_location();
-                unsafe {
+                let res = unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_preset_index(track.raw(), location)
-                        .expect("Couldn't get preset count")
-                        .index
-                }
+                        .track_fx_get_preset_index(track.raw(), location)?
+                };
+                Ok(res.index)
             }
         }
     }
