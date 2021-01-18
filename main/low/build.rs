@@ -145,6 +145,8 @@ mod codegen {
                 .whitelist_var("ID.*")
                 .whitelist_var("DLL_PROCESS_ATTACH")
                 .whitelist_var("DLL_PROCESS_DETACH")
+                .whitelist_var("TRANSPARENT")
+                .whitelist_var("OPAQUE")
                 .whitelist_type("HINSTANCE")
                 .whitelist_type("reaper_plugin_info_t")
                 .whitelist_type("gaccel_register_t")
@@ -280,6 +282,10 @@ mod codegen {
             // # wingdi.h
             "BitBlt",
             "StretchBlt",
+            "CreateSolidBrush",
+            "SetTextColor",
+            "SetBkMode",
+            "SetBkColor",
             // # winbase.h
             "GlobalAlloc",
             "GlobalLock",

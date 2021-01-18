@@ -7523,6 +7523,31 @@ impl Swell {
         unsafe { windows::GlobalUnlock(h) }
     }
     #[cfg(target_family = "windows")]
+    pub fn CreateSolidBrush(&self, col: ::std::os::raw::c_int) -> root::HBRUSH {
+        unsafe { windows::CreateSolidBrush(col) }
+    }
+    #[cfg(target_family = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+        unsafe { windows::SetTextColor(ctx, col) }
+    }
+    #[cfg(target_family = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetBkColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+        unsafe { windows::SetBkColor(ctx, col) }
+    }
+    #[cfg(target_family = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetBkMode(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
+        unsafe { windows::SetBkMode(ctx, col) }
+    }
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -9247,6 +9272,18 @@ mod windows {
     }
     extern "system" {
         pub fn GlobalUnlock(h: root::HANDLE);
+    }
+    extern "system" {
+        pub fn CreateSolidBrush(col: ::std::os::raw::c_int) -> root::HBRUSH;
+    }
+    extern "system" {
+        pub fn SetTextColor(ctx: root::HDC, col: ::std::os::raw::c_int);
+    }
+    extern "system" {
+        pub fn SetBkColor(ctx: root::HDC, col: ::std::os::raw::c_int);
+    }
+    extern "system" {
+        pub fn SetBkMode(ctx: root::HDC, col: ::std::os::raw::c_int);
     }
     extern "system" {
         pub fn CreateIconIndirect(iconinfo: *mut root::ICONINFO) -> root::HICON;

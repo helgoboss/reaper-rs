@@ -207,6 +207,18 @@ impl Swell {
             if len == 0 { 0 } else { 1 }
         }
     }
+
+    pub fn RGB(r: u8, g: u8, b: u8) -> root::DWORD {
+        #[cfg(target_family = "unix")]
+        {
+            // SWELL says: "the byte ordering of RGB() etc is different than on win32"
+            ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
+        }
+        #[cfg(target_family = "windows")]
+        {
+            (r as u32) | ((g as u32) << 8) | ((b as u32) << 16)
+        }
+    }
 }
 
 /// This impl block contains functions which delegate to native win32 functions but need some

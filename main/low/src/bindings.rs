@@ -302,6 +302,8 @@ pub mod root {
     pub const DT_CALCRECT: u32 = 1024;
     pub const DT_NOPREFIX: u32 = 2048;
     pub const DT_END_ELLIPSIS: u32 = 32768;
+    pub const TRANSPARENT: u32 = 0;
+    pub const OPAQUE: u32 = 1;
     pub const GMEM_ZEROINIT: u32 = 1;
     pub const GMEM_FIXED: u32 = 0;
     pub const GMEM_MOVEABLE: u32 = 0;
