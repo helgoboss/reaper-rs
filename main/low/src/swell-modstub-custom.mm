@@ -71,6 +71,10 @@ public:
   }
   ~SwellAPPInitializer()
   {
+    // reaper-rs addition
+    // Clean-up via calling `execute_plugin_destroy_hooks()` in Rust is neither necessary nor desired on macOS because
+    // the module will just not completely unload if it's a VST plug-in. The statics won't be dropped. There' also no
+    // "Allow complete unload of VST plug-ins" option in REAPER for macOS.
   }
 };
 

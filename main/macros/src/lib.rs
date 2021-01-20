@@ -100,11 +100,17 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
             1
         }
 
-        /// Linux entry and exit point for getting hold of the SWELL function provider and clean-up.
+        /// Linux entry and exit point for getting hold of the SWELL function provider.
+        ///
+        /// See `reaper_vst_plugin!` macro why clean-up is neither necessary nor desired  on Linux
+        /// at the moment.
         ///
         /// Called by REAPER for Linux once at startup time with DLL_PROCESS_ATTACH and once
         /// at exit time or manual unload time (if plug-in initialization failed) with
         /// DLL_PROCESS_DETACH.
+        ///
+        /// In case anybody wonders where's the SWELL entry point for macOS:
+        /// `swell-modstub-custom.mm`.
         #[cfg(target_os = "linux")]
         #[allow(non_snake_case)]
         #[no_mangle]
@@ -119,10 +125,6 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
         ) -> std::os::raw::c_int {
             if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
                 reaper_low::register_swell_function_provider(get_func);
-            } else if (reason == reaper_low::raw::DLL_PROCESS_DETACH) {
-                unsafe {
-                    reaper_low::execute_plugin_destroy_hooks();
-                }
             }
             1
         }
