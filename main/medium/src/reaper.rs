@@ -2839,19 +2839,20 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Scrolls the mixer so that the given track is the leftmost visible track.
     ///
     /// Returns the leftmost visible track after scrolling, which may be different from the given
-    /// track if there are not enough tracks to its right.
+    /// track if there are not enough tracks to its right. Not exactly sure what it's supposed to
+    /// mean if this returns `None`, but it happens at times.
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
     #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn set_mixer_scroll(&self, track: MediaTrack) -> MediaTrack
+    pub unsafe fn set_mixer_scroll(&self, track: MediaTrack) -> Option<MediaTrack>
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
         let ptr = self.low.SetMixerScroll(track.as_ptr());
-        require_non_null_panic(ptr)
+        NonNull::new(ptr)
     }
 
     /// Sets a track attribute as numerical value.
