@@ -1,4 +1,3 @@
-use crate::option_util::OptionExt;
 use crate::{
     get_media_track_guid, ControlSurfaceEvent, Fx, FxParameter, Guid, Project, Reaper, Track,
     TrackSend,
@@ -553,10 +552,8 @@ impl ChangeDetectionMiddleware {
                 None => true,
                 Some(output_fx) => {
                     let output_fx_param = output_fx.parameter_by_index(param_index);
-                    let is_probably_output_fx = OptionExt::contains(
-                        &output_fx_param.reaper_normalized_value().ok(),
-                        &normalized_value,
-                    );
+                    let is_probably_output_fx =
+                        output_fx_param.reaper_normalized_value() == normalized_value;
                     !is_probably_output_fx
                 }
             }

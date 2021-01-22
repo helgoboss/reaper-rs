@@ -2738,25 +2738,18 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
         }
         assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("-4.44"));
         assert!(abs_diff_eq!(
-            p.reaper_normalized_value()
-                .map_err(|_| "couldn't get param value")?
-                .get(),
+            p.reaper_normalized_value().get(),
             0.300_000_011_920_928_96
         ));
         assert!(abs_diff_eq!(
-            p.reaper_normalized_value()
-                .map_err(|_| "couldn't get param value")?
-                .get(),
+            p.reaper_normalized_value().get(),
             0.300_000_011_920_928_96
         ));
         assert_eq!(
-            p.format_reaper_normalized_value(
-                p.reaper_normalized_value()
-                    .map_err(|_| "couldn't get param value")?
-            )
-            .map_err(|_| "Cockos plug-ins should be able to do that")?
-            .into_inner()
-            .as_c_str(),
+            p.format_reaper_normalized_value(p.reaper_normalized_value())
+                .map_err(|_| "Cockos plug-ins should be able to do that")?
+                .into_inner()
+                .as_c_str(),
             c_str!("-4.44 dB")
         );
         if Reaper::get().version() < ReaperVersion::new("6") {
@@ -2829,18 +2822,14 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(p.clone(), p);
         assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("0"));
         assert_eq!(
-            p.reaper_normalized_value()
-                .map_err(|_| "couldn't get param value")?,
+            p.reaper_normalized_value(),
             ReaperNormalizedFxParamValue::new(0.5)
         );
         assert_eq!(
-            p.format_reaper_normalized_value(
-                p.reaper_normalized_value()
-                    .map_err(|_| "couldn't get param value")?
-            )
-            .map_err(|_| "Cockos plug-ins should be able to do that")?
-            .into_inner()
-            .as_c_str(),
+            p.format_reaper_normalized_value(p.reaper_normalized_value())
+                .map_err(|_| "Cockos plug-ins should be able to do that")?
+                .into_inner()
+                .as_c_str(),
             c_str!("0")
         );
         assert_eq!(p.fx(), &fx);

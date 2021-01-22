@@ -36,9 +36,7 @@ impl FxParameter {
         }
     }
 
-    pub fn reaper_normalized_value(
-        &self,
-    ) -> Result<ReaperNormalizedFxParamValue, ReaperFunctionError> {
+    pub fn reaper_normalized_value(&self) -> ReaperNormalizedFxParamValue {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {

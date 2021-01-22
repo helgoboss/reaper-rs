@@ -2568,20 +2568,22 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Returns the current value of the given track FX in REAPER-normalized form.
     ///
-    /// # Errors
-    ///
-    /// Returns an error if the FX or parameter doesn't exist.
-    ///
+    /// If the returned value is lower than zero, it can mean two things. Either there was an error,
+    /// e.g. the FX or parameter doesn't exist, or the parameter can take exotic values. There's no
+    /// way to distinguish between both cases. See [`ReaperNormalizedFxParamValue`] for details.
+    ///  
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
+    ///
+    /// [`ReaperNormalizedFxParamValue`]: struct.ReaperNormalizedFxParamValue.html
     #[measure(ResponseTimeSingleThreaded)]
     pub unsafe fn track_fx_get_param_normalized(
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
         param_index: u32,
-    ) -> ReaperFunctionResult<ReaperNormalizedFxParamValue>
+    ) -> ReaperNormalizedFxParamValue
     where
         UsageScope: MainThreadOnly,
     {
@@ -2591,12 +2593,7 @@ impl<UsageScope> Reaper<UsageScope> {
             fx_location.to_raw(),
             param_index as i32,
         );
-        if raw_value < 0.0 {
-            return Err(ReaperFunctionError::new(
-                "couldn't get current FX parameter value (probably FX or parameter doesn't exist)",
-            ));
-        }
-        Ok(ReaperNormalizedFxParamValue::new(raw_value))
+        ReaperNormalizedFxParamValue::new(raw_value)
     }
 
     /// Returns the master track of the given project.
