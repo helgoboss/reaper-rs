@@ -90,11 +90,27 @@ impl FxParameter {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.fx().track_and_location();
-                unsafe {
+                let result = unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_parameter_step_sizes(track.raw(), location, self.index)
+                        .track_fx_get_parameter_step_sizes(track.raw(), location, self.index)?
+                };
+                // Try to fix some invalid results (which are most likely invalid because of messy
+                // plug-ins, not because of REAPER itself)
+                if let GetParameterStepSizesResult::Normal { normal_step, .. } = result {
+                    if normal_step.is_infinite() {
+                        // There was a bug (REAPER <= 6.12) which makes JS FX "Bypass" and "Wet"
+                        // parameters return an infinite step size. This
+                        // isn't correct, therefore we fix it here.
+                        return None;
+                    }
+                    if normal_step == 0.0 {
+                        // Some plug-ins report a parameter as discrete but then report a step size
+                        // of zero, which is of course pointless.
+                        return None;
+                    }
                 }
+                Some(result)
             }
         }
     }
