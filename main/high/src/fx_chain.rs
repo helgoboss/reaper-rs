@@ -341,6 +341,9 @@ DOCKED 0
     pub fn is_input_fx(&self) -> bool {
         match &self.context {
             FxChainContext::Track { is_input_fx, .. } => *is_input_fx,
+            // In REAPER, monitoring FX chain is usually referred to as input FX of the master
+            // track, so it's just consequent to report it as input FX.
+            FxChainContext::Monitoring => true,
             _ => false,
         }
     }
