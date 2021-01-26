@@ -10,6 +10,15 @@ use reaper_medium::{
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum FxChainContext {
+    // TODO-medium Deal with the following PartialEq issue.
+    //  The combination "Master track + input FX chain" by convention represents the
+    //  monitoring FX chain in REAPER. It's a bit unfortunate that we have 2 representations
+    //  of the same thing: A special monitoring FX enum variant and this convention.
+    //  E.g. it leads to the result that both representations are not equal from a reaper-rs
+    //  perspective. We should enforce the enum variant whenever possible because the
+    //  convention is somehow flawed. E.g. what if we have 2 master tracks of different
+    //  projects? 2 FX chains won't equal if they both are master tracks and is_input_fx = true
+    //  but master tracks from different projects!
     Monitoring,
     Track { track: Track, is_input_fx: bool },
     Take(Take),
