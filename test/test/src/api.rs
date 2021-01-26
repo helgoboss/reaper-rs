@@ -4,12 +4,13 @@ use reaper_medium::ReaperVersion;
 use reaper_rx::{ActionRx, ActionRxProvider, ControlSurfaceRx, MainRx};
 use rxrust::prelude::*;
 use std::borrow::Cow;
+use std::error::Error;
 
 type TestStepFinished = LocalSubject<'static, (), ()>;
 pub struct TestStepContext {
     pub finished: TestStepFinished,
 }
-type TestStepResult = Result<(), Cow<'static, str>>;
+type TestStepResult = Result<(), Box<dyn Error>>;
 
 pub struct TestStep {
     pub name: Cow<'static, str>,

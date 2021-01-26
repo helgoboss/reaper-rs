@@ -14,22 +14,23 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint,
     CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
-    GlobalAutomationModeOverride, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
-    MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior,
-    PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef, PromptForActionResult,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    GlobalAutomationModeOverride, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag,
+    InsertMediaMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
+    NormalizedPlayRate, NotificationBehavior, PlaybackSpeedFactor, PluginContext, ProjectContext,
+    ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString,
+    ReaperStringArg, ReaperVersion, ReaperVolumeValue, RecordArmMode, RecordingInput,
+    SectionContext, SectionId, SendTarget, StuffMidiMessageTarget, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
 
+use enumflags2::BitFlags;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
@@ -186,7 +187,7 @@ impl Reaper<MainThreadScope> {
     ///
     /// # Panics
     ///
-    /// This panics if [`make_available_globally()`] has not been called before.
+    /// Panics if [`make_available_globally()`] has not been called before.
     ///
     /// [`make_available_globally()`]: fn.make_available_globally.html
     pub fn get() -> &'static Reaper<MainThreadScope> {
@@ -3985,6 +3986,31 @@ impl<UsageScope> Reaper<UsageScope> {
             self.low.mkvolstr(buffer, value.get());
         });
         volume_string
+    }
+
+    /// Inserts the given file as new media item.
+    ///
+    /// # Errors
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn insert_media(
+        &self,
+        file: impl AsRef<Path>,
+        mode: InsertMediaMode,
+        flags: BitFlags<InsertMediaFlag>,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let path_str_c = CString::new(file.as_ref().to_string_lossy().as_bytes()).unwrap();
+        let result = unsafe {
+            self.low
+                .InsertMedia(path_str_c.as_ptr(), mode.to_raw(flags))
+        };
+        if result == 0 {
+            return Err(ReaperFunctionError::new("couldn't insert media"));
+        }
+        Ok(())
     }
 
     fn require_main_thread(&self)

@@ -1,8 +1,8 @@
 #![allow(clippy::float_cmp)]
 use approx::*;
 
-use std::iter;
 use std::ops::Deref;
+use std::{fs, iter};
 
 use c_str_macro::c_str;
 
@@ -22,14 +22,15 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
     reaper_str, AutomationMode, Bpm, CommandId, Db, FxPresetRef, GangBehavior, InputMonitoringMode,
-    MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate,
-    PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
-    ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackLocation, UndoBehavior,
-    ValueChange,
+    InsertMediaFlag, InsertMediaMode, MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId,
+    NormalizedPlayRate, PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue,
+    ReaperVersion, ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackLocation,
+    UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
 use reaper_rx::ActionRxProvider;
+use std::io::Write;
 use std::os::raw::{c_int, c_void};
 use std::ptr::null_mut;
 use std::rc::Rc;
@@ -123,6 +124,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         set_project_play_rate(),
         get_project_tempo(),
         set_project_tempo(),
+        insert_media(),
         swell(),
         metrics(),
     ]
@@ -192,6 +194,27 @@ fn set_project_tempo() -> TestStep {
         assert_eq!(project.tempo().bpm(), Bpm::new(130.0));
         // TODO-low There should be only one event invocation
         assert_eq!(mock.invocation_count(), 2);
+        Ok(())
+    })
+}
+
+fn insert_media() -> TestStep {
+    step(AllVersions, "Insert media", |reaper, _| {
+        // Given
+        let media_file_bytes = include_bytes!("media/test.mid");
+        let temp_dir = tempfile::tempdir()?;
+        let media_file_path = temp_dir.path().join("test-öäß.mid");
+        let mut file = fs::File::create(&media_file_path)?;
+        file.write_all(media_file_bytes)?;
+        // When
+        use InsertMediaFlag::*;
+        let result = reaper.medium_reaper().insert_media(
+            &media_file_path,
+            InsertMediaMode::AddToCurrentTrack,
+            DontPreservePitchWhenMatchingTempo | TryToMatchTempo1X,
+        );
+        // Then
+        assert!(result.is_ok());
         Ok(())
     })
 }

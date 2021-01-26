@@ -138,7 +138,8 @@ fn execute_next_step(
                     })
                     .expect("couldn't schedule next test step");
             }
-            Err(msg) => {
+            Err(error) => {
+                let msg = error.to_string();
                 log_failure(&msg);
                 on_finish(Err(&msg));
             }
