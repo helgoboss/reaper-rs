@@ -165,15 +165,11 @@ impl Reaper {
     pub fn midi_input_devices(&self) -> impl Iterator<Item = MidiInputDevice> + '_ {
         (0..self.medium_reaper().get_max_midi_inputs())
             .map(move |i| self.midi_input_device_by_id(MidiInputDeviceId::new(i as u8)))
-            // TODO-low I think we should also return unavailable devices. Client can filter easily.
-            .filter(|d| d.is_available())
     }
 
     pub fn midi_output_devices(&self) -> impl Iterator<Item = MidiOutputDevice> + '_ {
         (0..self.medium_reaper().get_max_midi_outputs())
             .map(move |i| self.midi_output_device_by_id(MidiOutputDeviceId::new(i as u8)))
-            // TODO-low I think we should also return unavailable devices. Client can filter easily.
-            .filter(|d| d.is_available())
     }
 
     pub fn currently_loading_or_saving_project(&self) -> Option<Project> {
