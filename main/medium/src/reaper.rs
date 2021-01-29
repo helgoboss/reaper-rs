@@ -3907,16 +3907,14 @@ impl<UsageScope> Reaper<UsageScope> {
     pub fn get_midi_input<R>(
         &self,
         device_id: MidiInputDeviceId,
-        use_device: impl FnOnce(&MidiInput) -> R,
-    ) -> Option<R>
+        use_device: impl FnOnce(Option<&MidiInput>) -> R,
+    ) -> R
     where
         UsageScope: AudioThreadOnly,
     {
         let ptr = self.low.GetMidiInput(device_id.to_raw());
-        if ptr.is_null() {
-            return None;
-        }
-        NonNull::new(ptr).map(|nnp| use_device(&MidiInput(nnp)))
+        let arg = NonNull::new(ptr).map(MidiInput);
+        use_device(arg.as_ref())
     }
 
     /// Grants temporary access to an already open MIDI output device.
@@ -3936,16 +3934,14 @@ impl<UsageScope> Reaper<UsageScope> {
     pub fn get_midi_output<R>(
         &self,
         device_id: MidiOutputDeviceId,
-        use_device: impl FnOnce(&MidiOutput) -> R,
-    ) -> Option<R>
+        use_device: impl FnOnce(Option<&MidiOutput>) -> R,
+    ) -> R
     where
         UsageScope: AudioThreadOnly,
     {
         let ptr = self.low.GetMidiOutput(device_id.to_raw());
-        if ptr.is_null() {
-            return None;
-        }
-        NonNull::new(ptr).map(|nnp| use_device(&MidiOutput(nnp)))
+        let arg = NonNull::new(ptr).map(MidiOutput);
+        use_device(arg.as_ref())
     }
 
     /// Parses the given string as pan value.

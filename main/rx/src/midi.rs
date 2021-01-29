@@ -27,6 +27,11 @@ impl MidiRxMiddleware {
         for i in 0..self.medium_reaper.get_max_midi_inputs() {
             self.medium_reaper
                 .get_midi_input(MidiInputDeviceId::new(i as u8), |input| {
+                    let input = if let Some(i) = input {
+                        i
+                    } else {
+                        return;
+                    };
                     let evt_list = input.get_read_buf();
                     for evt in evt_list.enum_items(0) {
                         let msg = evt.message();
