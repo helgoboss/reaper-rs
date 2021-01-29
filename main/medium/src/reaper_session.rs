@@ -709,10 +709,11 @@ impl ReaperSession {
     ///         }
     ///         self.counter += 1;
     ///         // Read some MIDI events
-    ///         self.reaper.get_midi_input(MidiInputDeviceId::new(0), |input| {
-    ///             for event in input.get_read_buf().enum_items(0) {
+    ///         self.reaper.get_midi_input(MidiInputDeviceId::new(0), |input| -> Option<()> {
+    ///             for event in input?.get_read_buf().enum_items(0) {
     ///                 println!("Received MIDI event {:?}", event);
-    ///             }   
+    ///             }
+    ///             Some(())
     ///         });
     ///     }
     /// }
