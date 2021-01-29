@@ -894,6 +894,7 @@ impl ChangeDetectionMiddleware {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum ChangeEvent {
     ProjectSwitched(Project),
     TrackVolumeChanged(Track),

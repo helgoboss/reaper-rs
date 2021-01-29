@@ -26,8 +26,8 @@ impl MidiOutputDevice {
             .unwrap()
     }
 
-    // For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if
-    // the device ever existed, even if it's disconnected now.
+    /// For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if
+    /// the device ever existed, even if it's disconnected now.
     pub fn is_available(self) -> bool {
         let result = Reaper::get()
             .medium_reaper()
@@ -35,7 +35,7 @@ impl MidiOutputDevice {
         result.is_present || result.name.is_some()
     }
 
-    // Only returns true if the device is connected (= present)
+    /// Only returns true if the device is connected (= present)
     pub fn is_connected(self) -> bool {
         // In REAPER 5.94 GetMIDIOutputName doesn't accept nullptr as name buffer on OS X
         Reaper::get()
@@ -44,7 +44,14 @@ impl MidiOutputDevice {
             .is_present
     }
 
-    // Must be called from real-time audio thread only!
+    /// Returns true if the device is enabled and connected.
+    pub fn is_open(self) -> bool {
+        Reaper::get()
+            .medium_reaper()
+            .get_midi_output_is_open(self.id)
+    }
+
+    /// Must be called from real-time audio thread only!
     pub fn with_midi_output<R>(self, use_device: impl FnOnce(Option<&MidiOutput>) -> R) -> R {
         Reaper::get()
             .medium_real_time_reaper

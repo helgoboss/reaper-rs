@@ -3880,11 +3880,12 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Grants temporary access to an already open MIDI input device.
     ///
-    /// Returns `None` if the device doesn't exist, is not connected or is not already opened. The
-    /// device must be enabled in REAPER's MIDI preferences.
+    /// Passes `None` to the given function if the device doesn't exist, is not connected or is not
+    /// already opened. The device must be enabled in REAPER's MIDI preferences.
     ///
     /// This function is typically called in the [audio hook]. But it's also okay to call it in a
-    /// VST plug-in as long as [`is_in_real_time_audio()`] returns `true`.
+    /// VST plug-in as long as [`is_in_real_time_audio()`] returns `true`. If you are in the main
+    /// thread and want to check if the device is open, use [`get_midi_input_is_open()`].
     ///
     /// See [audio hook] for an example.
     ///
@@ -3903,6 +3904,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// [audio hook]: struct.ReaperSession.html#method.audio_reg_hardware_hook_add
     /// [`is_in_real_time_audio()`]: #method.is_in_real_time_audio
     /// [`get_read_buf()`]: struct.MidiInput.html#method.get_read_buf
+    /// [`get_midi_input_is_open()`]: #method.get_midi_input_is_open
     #[measure(ResponseTimeSingleThreaded)]
     pub fn get_midi_input<R>(
         &self,
@@ -3917,19 +3919,30 @@ impl<UsageScope> Reaper<UsageScope> {
         use_device(arg.as_ref())
     }
 
+    /// Returns if the given device is open (enabled in REAPER's MIDI preferences).
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn get_midi_input_is_open(&self, device_id: MidiInputDeviceId) -> bool
+    where
+        UsageScope: AnyThread,
+    {
+        !self.low.GetMidiInput(device_id.to_raw()).is_null()
+    }
+
     /// Grants temporary access to an already open MIDI output device.
     ///
-    /// Returns `None` if the device doesn't exist, is not connected or is not already opened. The
-    /// device must be enabled in REAPER's MIDI preferences.
+    /// Passes `None` to the given function if the device doesn't exist, is not connected or is not
+    /// already opened. The device must be enabled in REAPER's MIDI preferences.
     ///
     /// This function is typically called in the [audio hook]. But it's also okay to call it in a
-    /// VST plug-in as long as [`is_in_real_time_audio()`] returns `true`.
+    /// VST plug-in as long as [`is_in_real_time_audio()`] returns `true`. If you are in the main
+    /// thread and want to check if the device is open, use [`get_midi_output_is_open()`].
     ///
     /// See [audio hook] for an example.
     ///
     /// [audio hook]: struct.ReaperSession.html#method.audio_reg_hardware_hook_add
     /// [`is_in_real_time_audio()`]: #method.is_in_real_time_audio
     /// [`get_read_buf()`]: struct.MidiInput.html#method.get_read_buf
+    /// [`get_midi_output_is_open()`]: #method.get_midi_output_is_open
     #[measure(ResponseTimeSingleThreaded)]
     pub fn get_midi_output<R>(
         &self,
@@ -3942,6 +3955,15 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self.low.GetMidiOutput(device_id.to_raw());
         let arg = NonNull::new(ptr).map(MidiOutput);
         use_device(arg.as_ref())
+    }
+
+    /// Returns if the given device is open (enabled in REAPER's MIDI preferences).
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn get_midi_output_is_open(&self, device_id: MidiOutputDeviceId) -> bool
+    where
+        UsageScope: AnyThread,
+    {
+        !self.low.GetMidiOutput(device_id.to_raw()).is_null()
     }
 
     /// Parses the given string as pan value.

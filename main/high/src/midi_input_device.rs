@@ -26,15 +26,15 @@ impl MidiInputDevice {
             .unwrap()
     }
 
-    // Must be called from real-time audio thread only!
+    /// Must be called from real-time audio thread only!
     pub fn with_midi_input<R>(self, use_device: impl FnOnce(Option<&MidiInput>) -> R) -> R {
         Reaper::get()
             .medium_real_time_reaper
             .get_midi_input(self.id, use_device)
     }
 
-    // For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if
-    // the device ever existed, even if it's disconnected now.
+    /// For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if
+    /// the device ever existed, even if it's disconnected now.
     pub fn is_available(self) -> bool {
         let result = Reaper::get()
             .medium_reaper()
@@ -42,7 +42,14 @@ impl MidiInputDevice {
         result.is_present || result.name.is_some()
     }
 
-    // Only returns true if the device is connected (= present)
+    /// Returns true if the device is enabled and connected.
+    pub fn is_open(self) -> bool {
+        Reaper::get()
+            .medium_reaper()
+            .get_midi_input_is_open(self.id)
+    }
+
+    /// Only returns true if the device is connected (= present)
     pub fn is_connected(self) -> bool {
         // In REAPER 5.94 GetMIDIInputName doesn't accept nullptr as name buffer on OS X
         Reaper::get()
