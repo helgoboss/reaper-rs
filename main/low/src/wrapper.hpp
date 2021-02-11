@@ -22,6 +22,9 @@ namespace reaper_functions {
 #define SWELL_PROVIDED_BY_APP
 namespace swell_functions {
 #include "../lib/WDL/WDL/swell/swell-functions.h"
+
+  // We pick macOS-specific functions by hand.
+  extern "C" bool (*SWELL_osx_is_dark_mode)(int mode);
 }
 
 // Make C++ glue code functions visible to bindgen. They will be used in the real application.

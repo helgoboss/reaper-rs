@@ -10683,6 +10683,10 @@ pub mod root {
                 unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char),
             >;
         }
+        extern "C" {
+            pub static mut SWELL_osx_is_dark_mode:
+                ::std::option::Option<unsafe extern "C" fn(mode: ::std::os::raw::c_int) -> bool>;
+        }
     }
     pub mod reaper_control_surface {
         #[allow(unused_imports)]

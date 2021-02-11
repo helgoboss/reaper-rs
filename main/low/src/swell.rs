@@ -1026,6 +1026,9 @@ impl Swell {
                     SWELL_SetClassName: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_SetClassName)).as_ptr(),
                     )),
+                    SWELL_osx_is_dark_mode: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_osx_is_dark_mode)).as_ptr(),
+                    )),
                 }
             };
             if pointers.lstrcpyn.is_some() {
@@ -1998,6 +2001,9 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.SWELL_SetClassName.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_osx_is_dark_mode.is_some() {
                 loaded_count += 1;
             }
             pointers.loaded_count = loaded_count;
@@ -7063,6 +7069,16 @@ impl Swell {
             Some(f) => f(arg1, arg2),
         }
     }
+    #[cfg(target_family = "unix")]
+    pub fn SWELL_osx_is_dark_mode(&self, mode: ::std::os::raw::c_int) -> bool {
+        match self.pointers.SWELL_osx_is_dark_mode {
+            None => panic!(format!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_osx_is_dark_mode)
+            )),
+            Some(f) => f(mode),
+        }
+    }
     #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
@@ -9026,9 +9042,10 @@ pub struct SwellFunctionPointers {
     >,
     pub SWELL_SetClassName:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char)>,
+    pub SWELL_osx_is_dark_mode: Option<extern "C" fn(mode: ::std::os::raw::c_int) -> bool>,
 }
 impl SwellFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 324u32;
+    pub(crate) const TOTAL_COUNT: u32 = 325u32;
 }
 #[cfg(target_family = "windows")]
 mod windows {
