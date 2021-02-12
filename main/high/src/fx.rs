@@ -546,24 +546,23 @@ pub fn get_track_fx_location(index: u32, is_input_fx: bool) -> TrackFxLocation {
     }
 }
 
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct FxInfo {
-    /// e.g. ReaSynth, currently empty if JS
+    /// e.g. "ReaSynth (Cockos)", currently empty if JS
     pub effect_name: String,
-    /// e.g. VST or JS
+    /// e.g. "VST" or "JS"
     pub type_expression: String,
-    /// e.g. VSTi, currently empty if JS
+    /// e.g. "VSTi", currently empty if JS
     pub sub_type_expression: String,
-    /// e.g. Cockos, currently empty if JS
-    pub vendor_name: String,
     /// e.g. reasynth.dll or phaser
     pub file_name: PathBuf,
 }
 
 impl FxInfo {
-    pub(super) fn from_first_line_of_tag_chunk(line: &str) -> Result<FxInfo, &'static str> {
-        // TODO-low Also handle other plugin types
+    pub(crate) fn from_first_line_of_tag_chunk(line: &str) -> Result<FxInfo, &'static str> {
+        // TODO-low Also handle other plugin types (DX, AU, LV2)
         // TODO-low Don't just assign empty strings in case of JS
-        let vst_line_regex = regex!(r#"<VST "(.+?): (.+?) \((.+?)\).*?" (.+)"#);
+        let vst_line_regex = regex!(r#"<VST "(.+?): (.+?)" (.+)"#);
         let vst_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
         let vst_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
         let js_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
@@ -577,14 +576,13 @@ impl FxInfo {
                 let captures = vst_line_regex
                     .captures(line)
                     .ok_or("Couldn't parse VST tag line")?;
-                assert_eq!(captures.len(), 5);
+                assert_eq!(captures.len(), 4);
                 Ok(FxInfo {
                     effect_name: captures[2].to_owned(),
                     type_expression: type_expression.to_owned(),
                     sub_type_expression: captures[1].to_owned(),
-                    vendor_name: captures[3].to_owned(),
                     file_name: {
-                        let remainder = &captures[4];
+                        let remainder = &captures[3];
                         let remainder_regex = if remainder.starts_with('"') {
                             vst_file_name_with_quotes_regex
                         } else {
@@ -602,7 +600,6 @@ impl FxInfo {
                 effect_name: "".to_string(),
                 type_expression: "".to_string(),
                 sub_type_expression: "".to_string(),
-                vendor_name: "".to_string(),
                 file_name: {
                     let remainder = &line[4..];
                     let remainder_regex = if remainder.starts_with('"') {
@@ -624,4 +621,117 @@ impl FxInfo {
 
 fn get_fx_id_line(guid: &Guid) -> String {
     format!("FXID {}", guid.to_string_with_braces())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn vsti_2() {
+        // Given
+        let line = r#"<VST "VSTi: ReaLearn (Helgoboss)" ReaLearn-x64.dll 0 "Launchpad EQ" 1751282284<5653546862726C7265616C6561726E00> "#;
+        // When
+        let result = FxInfo::from_first_line_of_tag_chunk(line);
+        // Then
+        assert_eq!(
+            result,
+            Ok(FxInfo {
+                effect_name: "ReaLearn (Helgoboss)".into(),
+                type_expression: "VST".into(),
+                sub_type_expression: "VSTi".into(),
+                file_name: "ReaLearn-x64.dll".into()
+            })
+        )
+    }
+
+    #[test]
+    fn vst_2() {
+        // Given
+        let line = r#"<VST "VST: EQ (Nova)" "TDR Nova GE.dll" 0 "EQ (Nova)" 1415853361 """#;
+        // When
+        let result = FxInfo::from_first_line_of_tag_chunk(line);
+        // Then
+        assert_eq!(
+            result,
+            Ok(FxInfo {
+                effect_name: "EQ (Nova)".into(),
+                type_expression: "VST".into(),
+                sub_type_expression: "VST".into(),
+                file_name: "TDR Nova GE.dll".into()
+            })
+        )
+    }
+
+    #[test]
+    fn vst_2_without_company() {
+        // Given
+        let line = r#"<VST "VST: BussColors4" BussColors464.dll 0 BussColors4 1651729204<5653546273633462757373636F6C6F72> """#;
+        // When
+        let result = FxInfo::from_first_line_of_tag_chunk(line);
+        // Then
+        assert_eq!(
+            result,
+            Ok(FxInfo {
+                effect_name: "BussColors4".into(),
+                type_expression: "VST".into(),
+                sub_type_expression: "VST".into(),
+                file_name: "BussColors464.dll".into()
+            })
+        )
+    }
+
+    #[test]
+    fn vsti_3_without_company() {
+        // Given
+        let line = r#"<VST "VST3i: Hive" Hive(x64).vst3 0 "" 437120294{D39D5B69D6AF42FA1234567868495645} """#;
+        // When
+        let result = FxInfo::from_first_line_of_tag_chunk(line);
+        // Then
+        assert_eq!(
+            result,
+            Ok(FxInfo {
+                effect_name: "Hive".into(),
+                type_expression: "VST".into(),
+                sub_type_expression: "VST3i".into(),
+                file_name: "Hive(x64).vst3".into()
+            })
+        )
+    }
+
+    #[test]
+    fn vst_3() {
+        // Given
+        let line = r#"<VST "VST3: Element FX (Kushview) (34ch)" KV_ElementFX.vst3 0 "" 1844386711{565354456C4658656C656D656E742066} """#;
+        // When
+        let result = FxInfo::from_first_line_of_tag_chunk(line);
+        // Then
+        assert_eq!(
+            result,
+            Ok(FxInfo {
+                effect_name: "Element FX (Kushview) (34ch)".into(),
+                type_expression: "VST".into(),
+                sub_type_expression: "VST3".into(),
+                file_name: "KV_ElementFX.vst3".into()
+            })
+        )
+    }
+
+    #[test]
+    fn vst_3_without_company() {
+        // Given
+        let line = r#"<VST "VST3: True Iron" "True Iron.vst3" 0 "True Iron" 1519279131{5653544B505472747275652069726F6E} """#;
+        // When
+        let result = FxInfo::from_first_line_of_tag_chunk(line);
+        // Then
+        assert_eq!(
+            result,
+            Ok(FxInfo {
+                effect_name: "True Iron".into(),
+                type_expression: "VST".into(),
+                sub_type_expression: "VST3".into(),
+                file_name: "True Iron.vst3".into()
+            })
+        )
+    }
 }

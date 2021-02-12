@@ -3082,8 +3082,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
             ));
             assert_eq!(fx_1_info.type_expression, "VST");
             assert_eq!(fx_1_info.sub_type_expression, "VST");
-            assert_eq!(fx_1_info.effect_name, "ReaControlMIDI");
-            assert_eq!(fx_1_info.vendor_name, "Cockos");
+            assert_eq!(fx_1_info.effect_name, "ReaControlMIDI (Cockos)");
 
             assert_eq!(fx_1.track(), track);
             assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
