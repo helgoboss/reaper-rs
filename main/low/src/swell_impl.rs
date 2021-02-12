@@ -219,6 +219,32 @@ impl Swell {
             (r as u32) | ((g as u32) << 8) | ((b as u32) << 16)
         }
     }
+
+    pub fn GetRValue(color: root::DWORD) -> u8 {
+        #[cfg(target_family = "unix")]
+        {
+            ((color >> 16) & 0xff) as _
+        }
+        #[cfg(target_family = "windows")]
+        {
+            (color & 0xff) as _
+        }
+    }
+
+    pub fn GetGValue(color: root::DWORD) -> u8 {
+        ((color >> 8) & 0xff) as _
+    }
+
+    pub fn GetBValue(color: root::DWORD) -> u8 {
+        #[cfg(target_family = "unix")]
+        {
+            (color & 0xff) as _
+        }
+        #[cfg(target_family = "windows")]
+        {
+            ((color >> 16) & 0xff) as _
+        }
+    }
 }
 
 /// This impl block contains functions which delegate to native win32 functions but need some
