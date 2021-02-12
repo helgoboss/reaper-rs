@@ -1,9 +1,10 @@
 use crate::{
-    CommandId, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId, ReaProject,
-    ReaperStr, ReaperStringArg, TryFromRawError,
+    CommandId, Hwnd, InsertMediaFlag, KbdSectionInfo, MediaTrack, MidiFrameOffset,
+    MidiOutputDeviceId, ReaProject, ReaperStr, ReaperStringArg, TryFromRawError,
 };
 
 use crate::util::concat_reaper_strs;
+use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
@@ -932,5 +933,25 @@ impl SendMidiTime {
             Instantly => -1,
             AtFrameOffset(o) => o.to_raw(),
         }
+    }
+}
+
+/// Decides where to insert a media file.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum InsertMediaMode {
+    AddToCurrentTrack,
+    AddNewTrack,
+    AddToSelectedItemsAsTakes,
+    // Index = high word if flag 512 set.
+    AddToTrackAtIndex(u32),
+    InsertIntoReasamplomaticOnNewTrack,
+    InsertIntoOpenReasamplomaticInstance,
+}
+
+impl InsertMediaMode {
+    /// Converts this value and the given flags to an integer as expected by the low-level API.
+    pub fn to_raw(self, _: BitFlags<InsertMediaFlag>) -> i32 {
+        // TODO-high Implement as soon as enum/flags distinction clear.
+        0
     }
 }

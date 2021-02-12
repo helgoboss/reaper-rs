@@ -42,3 +42,19 @@ pub enum ProjectPart {
     /// Track/master vol/pan/routing and aLL envelopes (master included).
     TrackCfg = raw::UNDO_STATE_TRACKCFG,
 }
+
+/// Activates certain behaviors when inserting a media file.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[repr(u32)]
+pub enum InsertMediaFlag {
+    StretchLoopToFitTimeSelection = 4,
+    TryToMatchTempo1X = 8,
+    TryToMatchTempo05X = 16,
+    TryToMatchTempo2X = 32,
+    DontPreservePitchWhenMatchingTempo = 64,
+    NoLoopSectionIfStartPctEndPctSet = 128,
+    /// Force loop regardless of global preference for looping imported items.
+    ForceLoopRegardlessOfGlobalPreference = 256,
+    /// Move to source preferred position (BWF start offset).
+    MoveSourceToPreferredPosition = 4096,
+}
