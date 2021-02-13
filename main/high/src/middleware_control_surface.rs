@@ -1,10 +1,10 @@
 use reaper_medium::{
     ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
-    ExtSetLastTouchedFxArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs, ExtTrackFxPresetChangedArgs,
-    OnTrackSelectionArgs, SetAutoModeArgs, SetPlayStateArgs, SetRepeatStateArgs,
-    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
-    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
+    ExtSetLastTouchedFxArgs, ExtSetPanExArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
+    ExtTrackFxPresetChangedArgs, OnTrackSelectionArgs, SetAutoModeArgs, SetPlayStateArgs,
+    SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
+    SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
 };
 
 use std::fmt::Debug;
@@ -149,6 +149,12 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
         1
     }
 
+    fn ext_set_pan_ex(&self, args: ExtSetPanExArgs) -> i32 {
+        self.middleware
+            .handle_event(ControlSurfaceEvent::ExtSetPanExt(args));
+        1
+    }
+
     fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
         self.middleware
             .handle_event(ControlSurfaceEvent::ExtSetFocusedFx(args));
@@ -208,6 +214,7 @@ pub enum ControlSurfaceEvent<'a> {
     ExtSetFxEnabled(ExtSetFxEnabledArgs),
     ExtSetSendVolume(ExtSetSendVolumeArgs),
     ExtSetSendPan(ExtSetSendPanArgs),
+    ExtSetPanExt(ExtSetPanExArgs),
     ExtSetFocusedFx(ExtSetFocusedFxArgs),
     ExtSetLastTouchedFx(ExtSetLastTouchedFxArgs),
     ExtSetFxOpen(ExtSetFxOpenArgs),

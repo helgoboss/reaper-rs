@@ -3,12 +3,11 @@ use crate::{
     TrackSend,
 };
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
-use reaper_medium::TrackAttributeKey::RecInput;
 use reaper_medium::{
-    reaper_str, AutomationMode, ExtSetFxParamArgs, InputMonitoringMode, MediaTrack, ReaProject,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
-    TrackAttributeKey, TrackFxChainType, TrackLocation, VersionDependentFxLocation,
-    VersionDependentTrackFxLocation,
+    reaper_str, AutomationMode, ExtSetFxParamArgs, InputMonitoringMode, MediaTrack, Pan, PanMode,
+    ReaProject, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
+    ReaperVolumeValue, TrackAttributeKey, TrackFxChainType, TrackLocation,
+    VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
@@ -34,7 +33,7 @@ type TrackDataMap = HashMap<MediaTrack, TrackData>;
 #[derive(Debug)]
 struct TrackData {
     volume: ReaperVolumeValue,
-    pan: ReaperPanValue,
+    pan: Pan,
     selected: bool,
     mute: bool,
     solo: bool,
@@ -150,19 +149,12 @@ impl ChangeDetectionMiddleware {
         match event {
             SetTrackListChange => self.set_track_list_change(handle_change),
             SetSurfacePan(args) => {
-                let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
-                    Some(td) => td,
-                };
-                if td.pan == args.pan {
-                    return;
-                }
-                td.pan = args.pan;
+                // This is mostly handled by ExtSetPanExt already but there's a situation when
+                // ExtSetPanExt is not triggered: When Programmatically changing pan via
+                // `CSurf_SetSurfacePan`, e.g. when users changes pan via ReaLearn, not via REAPER
+                // UI.
                 let track = Track::new(args.track, None);
                 handle_change(ChangeEvent::TrackPanChanged(track.clone()));
-                if !self.track_parameter_is_automated(&track, reaper_str!("Pan")) {
-                    handle_change(ChangeEvent::TrackPanTouched(track));
-                }
             }
             SetSurfaceVolume(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
@@ -247,7 +239,8 @@ impl ChangeDetectionMiddleware {
                 let recinput = unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .get_media_track_info_value(args.track, RecInput) as i32
+                        .get_media_track_info_value(args.track, TrackAttributeKey::RecInput)
+                        as i32
                 };
                 if td.recinput != recinput {
                     td.recinput = recinput;
@@ -294,6 +287,26 @@ impl ChangeDetectionMiddleware {
                 // Send volume touch event only if not automated
                 if !self.track_parameter_is_automated(&track, reaper_str!("Send Pan")) {
                     handle_change(ChangeEvent::TrackSendPanTouched(track_send));
+                }
+            }
+            ExtSetPanExt(args) => {
+                let mut td = match self.find_track_data_in_normal_state(args.track) {
+                    None => return,
+                    Some(td) => td,
+                };
+                if td.pan == args.pan {
+                    return;
+                }
+                let old = td.pan;
+                td.pan = args.pan;
+                let track = Track::new(args.track, None);
+                handle_change(ChangeEvent::TrackPanChanged(track.clone()));
+                if !self.track_parameter_is_automated(&track, reaper_str!("Pan")) {
+                    handle_change(ChangeEvent::TrackPanTouched {
+                        track,
+                        old,
+                        new: args.pan,
+                    });
                 }
             }
             ExtSetFocusedFx(args) => {
@@ -682,24 +695,58 @@ impl ChangeDetectionMiddleware {
         mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         for t in std::iter::once(project.master_track()).chain(project.tracks()) {
-            let media_track = t.raw();
-            track_datas.entry(media_track).or_insert_with(|| {
+            let mt = t.raw();
+            track_datas.entry(mt).or_insert_with(|| {
                 let func = Reaper::get().medium_reaper();
                 let mut td = unsafe {
-                    use TrackAttributeKey::*;
                     TrackData {
                         volume: ReaperVolumeValue::new(
-                            func.get_media_track_info_value(media_track, Vol),
+                            func.get_media_track_info_value(mt, TrackAttributeKey::Vol),
                         ),
-                        pan: ReaperPanValue::new(func.get_media_track_info_value(media_track, Pan)),
-                        selected: func.get_media_track_info_value(media_track, Selected) != 0.0,
-                        mute: func.get_media_track_info_value(media_track, Mute) != 0.0,
-                        solo: func.get_media_track_info_value(media_track, Solo) != 0.0,
-                        recarm: func.get_media_track_info_value(media_track, RecArm) != 0.0,
-                        number: func.get_set_media_track_info_get_track_number(media_track),
-                        recmonitor: func.get_set_media_track_info_get_rec_mon(media_track),
-                        recinput: func.get_media_track_info_value(media_track, RecInput) as i32,
-                        guid: get_media_track_guid(media_track),
+                        pan: {
+                            let project_pan_mode = {
+                                let proj_conf_result = func
+                                    .project_config_var_get_offs("panmode")
+                                    .expect("couldn't find panmode project config");
+                                let var = func.project_config_var_addr(
+                                    Proj(project.raw()),
+                                    proj_conf_result.offset,
+                                ) as *mut i32;
+                                let ipanmode = *var;
+                                PanMode::try_from_raw(ipanmode).expect("unknown project pan mode")
+                            };
+                            use PanMode::*;
+                            let track_pan_mode = func
+                                .get_set_media_track_info_get_pan_mode(mt)
+                                .unwrap_or(project_pan_mode);
+                            match track_pan_mode {
+                                BalanceV1 => {
+                                    Pan::BalanceV1(func.get_set_media_track_info_get_pan(mt))
+                                }
+                                BalanceV4 => {
+                                    Pan::BalanceV4(func.get_set_media_track_info_get_pan(mt))
+                                }
+                                StereoPan => Pan::StereoPan {
+                                    pan: func.get_set_media_track_info_get_pan(mt),
+                                    width: func.get_set_media_track_info_get_width(mt),
+                                },
+                                DualPan => Pan::DualPan {
+                                    left: func.get_set_media_track_info_get_dual_pan_l(mt),
+                                    right: func.get_set_media_track_info_get_dual_pan_r(mt),
+                                },
+                            }
+                        },
+                        selected: func.get_media_track_info_value(mt, TrackAttributeKey::Selected)
+                            != 0.0,
+                        mute: func.get_media_track_info_value(mt, TrackAttributeKey::Mute) != 0.0,
+                        solo: func.get_media_track_info_value(mt, TrackAttributeKey::Solo) != 0.0,
+                        recarm: func.get_media_track_info_value(mt, TrackAttributeKey::RecArm)
+                            != 0.0,
+                        number: func.get_set_media_track_info_get_track_number(mt),
+                        recmonitor: func.get_set_media_track_info_get_rec_mon(mt),
+                        recinput: func.get_media_track_info_value(mt, TrackAttributeKey::RecInput)
+                            as i32,
+                        guid: get_media_track_guid(mt),
                         send_volumes: Default::default(),
                         send_pans: Default::default(),
                         fx_param_values: Default::default(),
@@ -900,7 +947,7 @@ pub enum ChangeEvent {
     TrackVolumeChanged(Track),
     TrackVolumeTouched(Track),
     TrackPanChanged(Track),
-    TrackPanTouched(Track),
+    TrackPanTouched { track: Track, old: Pan, new: Pan },
     TrackSendVolumeChanged(TrackSend),
     TrackSendVolumeTouched(TrackSend),
     TrackSendPanChanged(TrackSend),

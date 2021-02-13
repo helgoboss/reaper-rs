@@ -697,6 +697,7 @@ impl From<ReaperVolumeValue> for f64 {
     derive(Serialize, Deserialize),
     serde(try_from = "f64")
 )]
+#[repr(transparent)]
 pub struct ReaperPanValue(pub(crate) f64);
 
 impl ReaperPanValue {
@@ -761,6 +762,72 @@ impl TryFrom<f64> for ReaperPanValue {
 #[doc(hidden)]
 impl From<ReaperPanValue> for f64 {
     fn from(v: ReaperPanValue) -> Self {
+        v.0
+    }
+}
+
+/// This represents a width measured in REAPER's native width unit.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+#[repr(transparent)]
+pub struct ReaperWidthValue(pub(crate) f64);
+
+impl ReaperWidthValue {
+    /// The minimum possible value (-1.0).
+    pub const MIN: ReaperWidthValue = ReaperWidthValue(-1.0);
+
+    /// The center value (0.0).
+    pub const CENTER: ReaperWidthValue = ReaperWidthValue(0.0);
+
+    /// The maximum possible value (1.0).
+    pub const MAX: ReaperWidthValue = ReaperWidthValue(1.0);
+
+    fn is_valid(value: f64) -> bool {
+        ReaperWidthValue::MIN.get() <= value && value <= ReaperWidthValue::MAX.get()
+    }
+
+    /// Creates a width value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is not within the range supported by REAPER
+    /// `(-1.0..=1.0)`.
+    pub fn new(value: f64) -> ReaperWidthValue {
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid ReaperWidthValue", value)
+        );
+        ReaperWidthValue(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for ReaperWidthValue {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be between -1.0 and 1.0",
+                value,
+            ));
+        }
+        Ok(ReaperWidthValue(value))
+    }
+}
+
+/// For being able to use it with `ValueChange`.
+#[doc(hidden)]
+impl From<ReaperWidthValue> for f64 {
+    fn from(v: ReaperWidthValue) -> Self {
         v.0
     }
 }

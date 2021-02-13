@@ -1,6 +1,6 @@
 use crate::{
     CommandId, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId, ReaProject,
-    ReaperStr, ReaperStringArg, TryFromRawError,
+    ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue, TryFromRawError,
 };
 
 use crate::util::concat_reaper_strs;
@@ -689,6 +689,65 @@ impl InputMonitoringMode {
         }
     }
 }
+
+/// Track pan mode.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum PanMode {
+    /// Classic v1 - v3.
+    BalanceV1,
+    /// Balance v4+.
+    BalanceV4,
+    /// Stereo pan.
+    StereoPan,
+    /// Dual pan.
+    DualPan,
+}
+
+impl PanMode {
+    /// Converts an integer as returned by the low-level API to a pan mode.
+    pub fn try_from_raw(v: i32) -> Result<PanMode, TryFromRawError<i32>> {
+        use PanMode::*;
+        let mode = match v {
+            0 => BalanceV1,
+            3 => BalanceV4,
+            5 => StereoPan,
+            6 => DualPan,
+            _ => return Err(TryFromRawError::new("couldn't convert to pan mode", v)),
+        };
+        Ok(mode)
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use PanMode::*;
+        match self {
+            BalanceV1 => 0,
+            BalanceV4 => 3,
+            StereoPan => 5,
+            DualPan => 6,
+        }
+    }
+}
+
+/// Track pan.
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum Pan {
+    /// Classic v1 - v3.
+    BalanceV1(ReaperPanValue),
+    /// Balance v4+.
+    BalanceV4(ReaperPanValue),
+    /// Stereo pan.
+    StereoPan {
+        pan: ReaperPanValue,
+        width: ReaperWidthValue,
+    },
+    /// Dual pan.
+    DualPan {
+        left: ReaperPanValue,
+        right: ReaperPanValue,
+    },
+}
+
 /// Something which refers to a certain project.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ProjectRef {

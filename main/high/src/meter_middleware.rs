@@ -40,6 +40,7 @@ pub struct MeterMiddlewareMetrics {
     ext_set_fx_enabled: CustomResponseTime,
     ext_set_send_volume: CustomResponseTime,
     ext_set_send_pan: CustomResponseTime,
+    ext_set_pan_ex: CustomResponseTime,
     ext_set_focused_fx: CustomResponseTime,
     ext_set_last_touched_fx: CustomResponseTime,
     ext_set_fx_open: CustomResponseTime,
@@ -140,6 +141,7 @@ impl MeterMiddlewareMetrics {
                 |m| &m.ext_set_send_pan,
                 is_critical_default,
             ),
+            MetricDescriptor::new("ext_set_pan_ex", |m| &m.ext_set_pan_ex, is_critical_default),
             MetricDescriptor::new(
                 "ext_set_focused_fx",
                 |m| &m.ext_set_focused_fx,
@@ -226,6 +228,7 @@ impl MeterMiddleware {
             ExtSetFxChange(_) => &self.metrics.ext_set_fx_change,
             ExtSetBpmAndPlayRate(_) => &self.metrics.ext_set_bpm_and_play_rate,
             ExtTrackFxPresetChanged(_) => &self.metrics.ext_track_fx_preset_changed,
+            ExtSetPanExt(_) => &self.metrics.ext_set_pan_ex,
         };
         response_time.record(elapsed);
     }
@@ -299,7 +302,7 @@ impl<R, M> MetricDescriptor<R, M> {
     }
 }
 
-type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 27];
+type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 28];
 
 fn is_critical_default(response_time: &CustomResponseTime) -> bool {
     response_time.borrow().max() > 10000

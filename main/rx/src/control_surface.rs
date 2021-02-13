@@ -1,5 +1,6 @@
 use crate::{EventStreamSubject, ReactiveEvent};
 use reaper_high::{ChangeEvent, Fx, FxParameter, Project, Track, TrackSend};
+use reaper_medium::Pan;
 use rxrust::prelude::*;
 use std::cell::RefCell;
 use std::fmt;
@@ -25,7 +26,11 @@ impl ControlSurfaceRxMiddleware {
             TrackVolumeChanged(t) => self.rx.track_volume_changed.borrow_mut().next(t),
             TrackVolumeTouched(t) => self.rx.track_volume_touched.borrow_mut().next(t),
             TrackPanChanged(t) => self.rx.track_pan_changed.borrow_mut().next(t),
-            TrackPanTouched(t) => self.rx.track_pan_touched.borrow_mut().next(t),
+            TrackPanTouched { track, old, new } => self
+                .rx
+                .track_pan_touched
+                .borrow_mut()
+                .next((track, old, new)),
             TrackSendVolumeChanged(ts) => self.rx.track_send_volume_changed.borrow_mut().next(ts),
             TrackSendVolumeTouched(ts) => self.rx.track_send_volume_touched.borrow_mut().next(ts),
             TrackSendPanChanged(ts) => self.rx.track_send_pan_changed.borrow_mut().next(ts),
@@ -71,7 +76,8 @@ pub struct ControlSurfaceRx {
     pub track_volume_changed: EventStreamSubject<Track>,
     pub track_volume_touched: EventStreamSubject<Track>,
     pub track_pan_changed: EventStreamSubject<Track>,
-    pub track_pan_touched: EventStreamSubject<Track>,
+    /// Old, New.
+    pub track_pan_touched: EventStreamSubject<(Track, Pan, Pan)>,
     pub track_send_volume_changed: EventStreamSubject<TrackSend>,
     pub track_send_volume_touched: EventStreamSubject<TrackSend>,
     pub track_send_pan_changed: EventStreamSubject<TrackSend>,
@@ -260,7 +266,8 @@ impl ControlSurfaceRx {
         self.track_pan_changed.borrow().clone()
     }
 
-    pub fn track_pan_touched(&self) -> impl ReactiveEvent<Track> {
+    /// Old, new
+    pub fn track_pan_touched(&self) -> impl ReactiveEvent<(Track, Pan, Pan)> {
         self.track_pan_touched.borrow().clone()
     }
 

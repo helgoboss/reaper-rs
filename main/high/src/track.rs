@@ -5,7 +5,7 @@ use crate::fx_chain::FxChain;
 use crate::guid::Guid;
 use crate::track_send::TrackSend;
 
-use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume};
+use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume, Width};
 
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
@@ -14,8 +14,8 @@ use reaper_medium::TrackAttributeKey::{Mute, RecArm, RecInput, RecMon, Selected,
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
-    RecordingInput, TrackAttributeKey, TrackLocation, TrackSendCategory,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, ReaperWidthValue,
+    RecordArmMode, RecordingInput, TrackAttributeKey, TrackLocation, TrackSendCategory,
 };
 use std::convert::TryInto;
 
@@ -173,12 +173,46 @@ impl Track {
                 GangBehavior::DenyGang,
             );
         }
-        // Setting the pan programmatically doesn't trigger SetSurfacePan in HelperControlSurface so
+        // Setting the pan programmatically doesn't trigger SetSurfacePan for control surfaces so
         // we need to notify manually
         unsafe {
             Reaper::get().medium_reaper().csurf_set_surface_pan(
                 self.raw(),
                 reaper_value,
+                NotifyAll,
+            );
+        }
+    }
+
+    pub fn width(&self) -> Width {
+        self.load_and_check_if_necessary_or_complain();
+        // TODO-high For Pan, we don't use D_PAN because that returns the wrong value in case an
+        // envelope is written. There's no such thing for D_WIDTH until now. Maybe request it.
+        let result = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_media_track_info_value(self.raw(), TrackAttributeKey::Width)
+        };
+        Width::from_reaper_value(ReaperWidthValue::new(result))
+    }
+
+    pub fn set_width(&self, width: Width) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper_value = width.reaper_value();
+        unsafe {
+            Reaper::get().medium_reaper().csurf_on_width_change_ex(
+                self.raw(),
+                Absolute(reaper_value),
+                GangBehavior::DenyGang,
+            );
+        }
+        // Setting the width programmatically doesn't trigger SetSurfacePan for control surfaces
+        // so we need to notify manually. There's no CSurf_SetSurfaceWidth, so we just retrigger
+        // CSurf_SetSurfacePan.
+        unsafe {
+            Reaper::get().medium_reaper().csurf_set_surface_pan(
+                self.raw(),
+                self.pan().reaper_value(),
                 NotifyAll,
             );
         }

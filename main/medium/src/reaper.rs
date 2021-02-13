@@ -17,11 +17,11 @@ use crate::{
     GlobalAutomationModeOverride, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
     MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior,
-    PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef, PromptForActionResult,
+    PanMode, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef, PromptForActionResult,
     ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
     ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
-    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId,
+    SendTarget, StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
     TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
     TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
     WindowContext,
@@ -552,8 +552,99 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
-        let irecmon = deref_as::<i32>(ptr).expect("irecmon pointer is null");
+        let irecmon = deref_as::<i32>(ptr).expect("I_RECMON pointer is null");
         InputMonitoringMode::try_from_raw(irecmon).expect("unknown input monitoring mode")
+    }
+
+    /// Convenience function which returns the given track's pan mode (I_PANMODE).
+    ///
+    /// Returns `None` if the track uses the project default.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_get_pan_mode(&self, track: MediaTrack) -> Option<PanMode>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::PanMode, null_mut());
+        let ipanmode = deref_as::<i32>(ptr).expect("I_PANMODE pointer is null");
+        if ipanmode == -1 {
+            return None;
+        }
+        Some(PanMode::try_from_raw(ipanmode).expect("unknown pan mode"))
+    }
+
+    /// Convenience function which returns the given track's pan (D_PAN).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_get_pan(&self, track: MediaTrack) -> ReaperPanValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Pan, null_mut());
+        let pan = deref_as::<f64>(ptr).expect("I_PAN pointer is null");
+        ReaperPanValue::new(pan)
+    }
+
+    /// Convenience function which returns the given track's dual-pan position 1 (D_DUALPANL).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_get_dual_pan_l(
+        &self,
+        track: MediaTrack,
+    ) -> ReaperPanValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanL, null_mut());
+        let pan = deref_as::<f64>(ptr).expect("D_DUALPANL pointer is null");
+        ReaperPanValue::new(pan)
+    }
+
+    /// Convenience function which returns the given track's dual-pan position 2 (D_DUALPANR).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_get_dual_pan_r(
+        &self,
+        track: MediaTrack,
+    ) -> ReaperPanValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanR, null_mut());
+        let pan = deref_as::<f64>(ptr).expect("D_DUALPANR pointer is null");
+        ReaperPanValue::new(pan)
+    }
+
+    /// Convenience function which returns the given track's width (D_WIDTH).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_get_width(&self, track: MediaTrack) -> ReaperWidthValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Width, null_mut());
+        let width = deref_as::<f64>(ptr).expect("I_WIDTH pointer is null");
+        ReaperWidthValue::new(width)
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
@@ -1161,6 +1252,49 @@ impl<UsageScope> Reaper<UsageScope> {
             return None;
         }
         Some(CommandId(raw_id))
+    }
+
+    /// Returns a project configuration variable descriptor to be used with
+    /// [`project_config_var_addr`]
+    ///
+    /// [`project_config_var_addr`]: #method.project_config_var_addr
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn project_config_var_get_offs<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> Option<ProjectConfigVarGetOffsResult>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut size = MaybeUninit::zeroed();
+        let offset = unsafe {
+            self.low
+                .projectconfig_var_getoffs(name.into().as_ptr(), size.as_mut_ptr())
+        };
+        if offset < 0 {
+            return None;
+        }
+        let result = ProjectConfigVarGetOffsResult {
+            offset: offset as _,
+            size: unsafe { size.assume_init() } as _,
+        };
+        Some(result)
+    }
+
+    /// Returns the project configuration object at the given address.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid index.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn project_config_var_addr(&self, project: ProjectContext, index: u32) -> *mut c_void
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .projectconfig_var_addr(project.to_raw(), index as _)
     }
 
     /// Clears the ReaScript console.
@@ -3056,6 +3190,33 @@ impl<UsageScope> Reaper<UsageScope> {
         ReaperPanValue::new(raw)
     }
 
+    /// Sets the given track's width. Also supports relative changes and gang.
+    ///
+    /// Returns the value that has actually been set.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn csurf_on_width_change_ex(
+        &self,
+        track: MediaTrack,
+        value_change: ValueChange<ReaperWidthValue>,
+        gang_behavior: GangBehavior,
+    ) -> ReaperWidthValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.CSurf_OnWidthChangeEx(
+            track.as_ptr(),
+            value_change.value(),
+            value_change.is_relative(),
+            gang_behavior == GangBehavior::AllowGang,
+        );
+        ReaperWidthValue::new(raw)
+    }
+
     /// Counts the number of selected tracks in the given project.
     ///
     /// # Panics
@@ -3673,8 +3834,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    // // send_idx>=0 for hw ouputs, >=nb_of_hw_ouputs for sends. See GetTrackReceiveUIVolPan.
-    // Returns Err if send not existing
     #[measure(ResponseTimeSingleThreaded)]
     pub unsafe fn get_track_send_ui_vol_pan(
         &self,
@@ -3703,6 +3862,68 @@ impl<UsageScope> Reaper<UsageScope> {
             volume: ReaperVolumeValue::new(volume.assume_init()),
             pan: ReaperPanValue::new(pan.assume_init()),
         })
+    }
+
+    /// Returns whether a track send is muted.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_send_ui_mute(
+        &self,
+        track: MediaTrack,
+        send_index: u32,
+    ) -> ReaperFunctionResult<bool>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        // We zero them just for being safe
+        let mut muted = MaybeUninit::zeroed();
+        let successful =
+            self.low
+                .GetTrackSendUIMute(track.as_ptr(), send_index as i32, muted.as_mut_ptr());
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't get track send mute state (probably send doesn't exist)",
+            ));
+        }
+        Ok(muted.assume_init())
+    }
+
+    /// Toggles the mute state of a track send.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn toggle_track_send_ui_mute(
+        &self,
+        track: MediaTrack,
+        send_index: u32,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self
+            .low
+            .ToggleTrackSendUIMute(track.as_ptr(), send_index as i32);
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't toggle track send mute state (probably send doesn't exist)",
+            ));
+        }
+        Ok(())
     }
 
     /// Returns the index of the currently selected FX preset as well as the total preset count.
@@ -4092,6 +4313,16 @@ pub struct TrackFxGetPresetIndexResult {
     pub index: Option<u32>,
     /// Total number of presets available.
     pub count: u32,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct ProjectConfigVarGetOffsResult {
+    /// Offset to pass to [`project_config_var_addr`].
+    ///
+    /// [`project_config_var_addr`]: struct.Reaper.html#method.project_config_var_addr
+    pub offset: u32,
+    /// Size of the object.
+    pub size: u32,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

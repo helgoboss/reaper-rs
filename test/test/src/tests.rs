@@ -8,7 +8,7 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, PlayRate, Reaper, Tempo, Track, Volume,
+    FxParameterValueRange, Guid, Pan, PlayRate, Reaper, Tempo, Track, Volume, Width,
 };
 use rxrust::prelude::*;
 
@@ -24,8 +24,8 @@ use reaper_medium::{
     reaper_str, AutomationMode, Bpm, CommandId, Db, FxPresetRef, GangBehavior, InputMonitoringMode,
     MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate,
     PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
-    ReaperVolumeValue, RecordingInput, StuffMidiMessageTarget, TrackLocation, UndoBehavior,
-    ValueChange,
+    ReaperVolumeValue, ReaperWidthValue, RecordingInput, StuffMidiMessageTarget, TrackLocation,
+    UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -67,7 +67,9 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         set_track_volume(),
         set_track_volume_extreme_values(),
         query_track_pan(),
+        query_track_width(),
         set_track_pan(),
+        set_track_width(),
         disable_all_track_fx(),
         enable_all_track_fx(),
         query_track_selection_state(),
@@ -95,6 +97,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         query_track_send(),
         set_track_send_volume(),
         set_track_send_pan(),
+        set_track_send_mute(),
         query_action(),
         invoke_action(),
         test_action_invoked_event(),
@@ -764,6 +767,25 @@ fn set_track_send_pan() -> TestStep {
     })
 }
 
+fn set_track_send_mute() -> TestStep {
+    step(AllVersions, "Mute track send", |_, _| {
+        // Given
+        let project = Reaper::get().current_project();
+        let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
+        let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
+        let send = track_1.send_by_target_track(track_3);
+        // When
+        send.mute();
+        // Then
+        assert!(send.is_muted());
+        // When
+        send.mute();
+        // Then
+        assert!(send.is_muted());
+        Ok(())
+    })
+}
+
 fn set_track_send_volume() -> TestStep {
     step(AllVersions, "Set track send volume", |_, step| {
         // Given
@@ -815,6 +837,8 @@ fn query_track_send() -> TestStep {
         assert_eq!(send_to_track_3.target_track(), track_3);
         assert_eq!(send_to_track_2.volume().db(), Db::ZERO_DB);
         assert_eq!(send_to_track_3.volume().db(), Db::ZERO_DB);
+        assert!(!send_to_track_2.is_muted());
+        assert!(!send_to_track_3.is_muted());
         Ok(())
     })
 }
@@ -1375,6 +1399,30 @@ fn set_track_pan() -> TestStep {
     })
 }
 
+fn set_track_width() -> TestStep {
+    step(AllVersions, "Set track width", |_, step| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .track_pan_changed()
+                .take_until(step.finished)
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        track.set_width(Width::from_normalized_value(0.25));
+        // Then
+        let width = track.width();
+        assert_eq!(width.reaper_value(), ReaperWidthValue::new(-0.5));
+        assert_eq!(width.normalized_value(), 0.25);
+        assert_eq!(mock.invocation_count(), 1);
+        assert_eq!(mock.last_arg(), track);
+        Ok(())
+    })
+}
+
 fn disable_all_track_fx() -> TestStep {
     step(AllVersions, "Disable all track FX", |_, _| {
         // Given
@@ -1409,6 +1457,19 @@ fn query_track_pan() -> TestStep {
         assert_eq!(pan.reaper_value(), ReaperPanValue::CENTER);
         assert_eq!(pan.normalized_value(), 0.5);
         assert_eq!(pan.to_string().as_str(), "center");
+        Ok(())
+    })
+}
+
+fn query_track_width() -> TestStep {
+    step(AllVersions, "Query track width", |_, _| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        let pan = track.width();
+        // Then
+        assert_eq!(pan.reaper_value(), ReaperWidthValue::MAX);
+        assert_eq!(pan.normalized_value(), 1.0);
         Ok(())
     })
 }

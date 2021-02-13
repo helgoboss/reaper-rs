@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, PlaybackSpeedFactor,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
-    TrackFxChainType, TrackFxLocation, TryFromRawError,
+    require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, Pan, PanMode,
+    PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
+    ReaperVolumeValue, TrackFxChainType, TrackFxLocation, TryFromRawError,
 };
 
 use reaper_low::raw;
@@ -191,6 +191,16 @@ pub trait ControlSurface: Debug {
         0
     }
 
+    /// Called when the pan of a track has changed.
+    ///
+    /// If a control surface supports this, it should ignore [`set_surface_pan`].
+    ///
+    /// [`set_surface_pan`]: #method.set_surface_pan
+    fn ext_set_pan_ex(&self, args: ExtSetPanExArgs) -> i32 {
+        let _ = args;
+        0
+    }
+
     /// Called when a certain FX has gained focus.
     fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
         let _ = args;
@@ -287,6 +297,7 @@ pub struct SetTrackTitleArgs<'a> {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct GetTouchStateArgs {
     pub track: MediaTrack,
+    // TODO-high This seems to be not just boolean (search for `isPan` in `reaper_plugin.h`)
     pub is_pan: bool,
 }
 
@@ -347,6 +358,12 @@ pub struct ExtSetSendPanArgs {
     pub track: MediaTrack,
     pub send_index: u32,
     pub pan: ReaperPanValue,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct ExtSetPanExArgs {
+    pub track: MediaTrack,
+    pub pan: Pan,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -732,6 +749,33 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                     send_index: deref_as::<i32>(parm2).expect("send index pointer is null") as u32,
                     pan: deref_as(parm3).expect("pan pointer is null"),
                 }),
+                raw::CSURF_EXT_SETPAN_EX => {
+                    let mode: i32 = deref_as(parm3).expect("pan mode pointer is null");
+                    use PanMode::*;
+                    let pan_null_msg = "pan pointer is null";
+                    let pan = match PanMode::try_from_raw(mode).expect("unknown pan mode") {
+                        BalanceV1 => Pan::BalanceV1(deref_as(parm2).expect(pan_null_msg)),
+                        BalanceV4 => Pan::BalanceV4(deref_as(parm2).expect(pan_null_msg)),
+                        StereoPan => Pan::StereoPan {
+                            pan: deref_as(parm2).expect(pan_null_msg),
+                            width: {
+                                let next = (parm2 as *const f64).offset(1);
+                                deref_as(next as _).expect("width is null")
+                            },
+                        },
+                        DualPan => Pan::DualPan {
+                            left: deref_as(parm2).expect("left pan is null"),
+                            right: {
+                                let next = (parm2 as *const f64).offset(1);
+                                deref_as(next as _).expect("right pan is null")
+                            },
+                        },
+                    };
+                    self.delegate.ext_set_pan_ex(ExtSetPanExArgs {
+                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                        pan,
+                    })
+                }
                 raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_set_fx_change(ExtSetFxChangeArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                     fx_chain_type: {
@@ -780,11 +824,11 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     }
 }
 
-unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
+unsafe fn deref_as<T: Copy>(ptr: *const c_void) -> Option<T> {
     if ptr.is_null() {
         return None;
     }
-    let ptr = ptr as *mut T;
+    let ptr = ptr as *const T;
     Some(*ptr)
 }
 

@@ -113,7 +113,7 @@ impl TrackSend {
                 .medium_reaper()
                 .get_track_send_ui_vol_pan(self.source_track().raw(), self.index())
         }
-        .expect("Couldn't get send vol/pan");
+        .expect("couldn't get send vol/pan");
         Pan::from_reaper_value(result.pan)
     }
 
@@ -124,6 +124,33 @@ impl TrackSend {
                 self.index(),
                 Absolute(pan.reaper_value()),
             );
+        }
+    }
+
+    pub fn is_muted(&self) -> bool {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_track_send_ui_mute(self.source_track().raw(), self.index())
+        }
+        .expect("couldn't get send mute")
+    }
+
+    pub fn mute(&self) {
+        self.set_muted(true);
+    }
+
+    pub fn unmute(&self) {
+        self.set_muted(false);
+    }
+
+    fn set_muted(&self, muted: bool) {
+        if self.is_muted() != muted {
+            unsafe {
+                let _ = Reaper::get()
+                    .medium_reaper
+                    .toggle_track_send_ui_mute(self.source_track().raw(), self.index());
+            }
         }
     }
 

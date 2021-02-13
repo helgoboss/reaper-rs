@@ -87,6 +87,9 @@ pub use play_rate::*;
 mod pan;
 pub use pan::*;
 
+mod width;
+pub use width::*;
+
 mod tempo;
 pub use tempo::*;
 
