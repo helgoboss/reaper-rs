@@ -20,7 +20,7 @@ use reaper_medium::{
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
 
-pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
+pub const MAX_TRACK_CHUNK_SIZE: u32 = 20_000_000;
 
 #[derive(Clone, Debug, Eq)]
 // TODO-low Reconsider design. Maybe don't do that interior mutability stuff. By moving from lazy to
