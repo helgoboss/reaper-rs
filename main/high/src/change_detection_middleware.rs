@@ -154,7 +154,7 @@ impl ChangeDetectionMiddleware {
                 // `CSurf_SetSurfacePan`, e.g. when users changes pan via ReaLearn, not via REAPER
                 // UI.
                 let track = Track::new(args.track, None);
-                handle_change(ChangeEvent::TrackPanChanged(track.clone()));
+                handle_change(ChangeEvent::TrackPanChanged(track));
             }
             SetSurfaceVolume(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
