@@ -102,9 +102,9 @@ impl Fx {
         self.load_if_necessary_or_complain();
         self.chain()
             .chunk()
-            .unwrap()
+            .expect("FX chain chunk not found")
             .find_line_starting_with(self.fx_id_line().as_str())
-            .unwrap()
+            .expect("FX ID line not found")
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
             .move_right_cursor_right_to_start_of_line_beginning_with("WAK 0")
             .move_right_cursor_right_to_end_of_current_line()
@@ -118,12 +118,12 @@ impl Fx {
         self.load_if_necessary_or_complain();
         self.chain()
             .chunk()
-            .unwrap()
+            .expect("FX chain chunk not found")
             .find_line_starting_with(self.fx_id_line().as_str())
-            .unwrap()
+            .expect("FX ID line not found")
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
             .find_first_tag(0)
-            .unwrap()
+            .expect("first tag not found")
     }
 
     pub fn state_chunk(&self) -> ChunkRegion {
