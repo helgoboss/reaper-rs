@@ -1,7 +1,7 @@
 use crate::{FxChain, Track};
 use reaper_medium::MediaItemTake;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Take {
     raw: MediaItemTake,
 }

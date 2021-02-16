@@ -8,7 +8,7 @@ use reaper_medium::{
     AddFxBehavior, ChunkCacheHint, ReaperStringArg, TrackFxChainType, TransferBehavior,
 };
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum FxChainContext {
     // TODO-medium Deal with the following PartialEq issue.
     //  The combination "Master track + input FX chain" by convention represents the
@@ -24,7 +24,7 @@ pub enum FxChainContext {
     Take(Take),
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct FxChain {
     context: FxChainContext,
 }

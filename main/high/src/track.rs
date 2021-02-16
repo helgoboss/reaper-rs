@@ -18,6 +18,7 @@ use reaper_medium::{
     RecordArmMode, RecordingInput, TrackAttributeKey, TrackLocation, TrackSendCategory,
 };
 use std::convert::TryInto;
+use std::hash::{Hash, Hasher};
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 1_000_000;
 
@@ -795,6 +796,16 @@ impl PartialEq for Track {
                 self_media_track == other_media_track
             }
             _ => self.guid() == other.guid(),
+        }
+    }
+}
+
+impl Hash for Track {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        if let Some(t) = self.media_track.get() {
+            t.hash(state);
+        } else {
+            self.guid.hash(state);
         }
     }
 }

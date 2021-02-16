@@ -12,6 +12,7 @@ use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg,
     TrackFxLocation,
 };
+use std::hash::{Hash, Hasher};
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -33,6 +34,17 @@ impl PartialEq for Fx {
             self_guid == other_guid
         } else {
             self.index == other.index
+        }
+    }
+}
+
+impl Hash for Fx {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.chain.hash(state);
+        if let Some(guid) = self.guid {
+            guid.hash(state);
+        } else {
+            self.index.get().hash(state);
         }
     }
 }
