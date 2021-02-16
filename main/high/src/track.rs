@@ -243,9 +243,19 @@ impl Track {
     pub fn set_volume(&self, volume: Volume) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = volume.reaper_value();
-        // CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The
-        // return value reflects the cropped value. The precision became much better with
-        // REAPER 5.28.
+        // Why we use this function and not the others:
+        //
+        // - Setting D_VOL directly via `set_media_track_info_value` will not work for writing
+        //   automation.
+        // - csurf_set_surface_volume seems to only inform control surfaces, doesn't actually set
+        //   the volume.
+        //
+        // Downsides of using this function:
+        //
+        // - CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The
+        //   return value reflects the cropped value. However, the precision became much better with
+        //   REAPER 5.28.
+        // - In automation mode "Touch" this leads to jumps.
         unsafe {
             Reaper::get().medium_reaper().csurf_on_volume_change_ex(
                 self.raw(),
@@ -253,8 +263,8 @@ impl Track {
                 GangBehavior::DenyGang,
             );
         }
-        // Setting the volume programmatically doesn't trigger SetSurfaceVolume in
-        // HelperControlSurface so we need to notify manually
+        // Setting the volume programmatically doesn't inform control surfaces - including our own
+        // surfaces which are important for feedback. So use the following to notify manually.
         unsafe {
             Reaper::get().medium_reaper().csurf_set_surface_volume(
                 self.raw(),
