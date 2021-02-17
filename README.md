@@ -228,7 +228,7 @@ The macro primarily exposes an `extern "C" ReaperPluginEntry()` function which c
 `reaper_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use that
 macro, have a look at the macro implementation. No magic there.
 
-#### Step-by-Step Instructions
+#### Step-by-step instructions
 
 The following instructions should result in a functional extension, loaded into REAPER on start:
 
