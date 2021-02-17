@@ -765,7 +765,9 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.CSurf_OnRecord();
     }
 
-    /// Enables or disables repeat.
+    /// Informs control surfaces that the repeat mode has changed.
+    ///
+    /// Doesn't actually change the repeat mode.
     ///
     /// # Safety
     ///
@@ -1029,7 +1031,9 @@ impl<UsageScope> Reaper<UsageScope> {
             .Main_OnCommandEx(command_id.to_raw(), flag, project.to_raw());
     }
 
-    /// Mutes or unmutes the given track.
+    /// Informs control surfaces that the given track's mute state has changed.
+    ///
+    /// Doesn't actually change the mute state.
     ///
     /// # Safety
     ///
@@ -1061,7 +1065,9 @@ impl<UsageScope> Reaper<UsageScope> {
             .CSurf_SetSurfaceMute(track.as_ptr(), mute, notification_behavior.to_raw());
     }
 
-    /// Soloes or unsoloes the given track.
+    /// Informs control surfaces that the given track's solo state has changed.
+    ///
+    /// Doesn't actually change the solo state.
     ///
     /// # Safety
     ///
@@ -3094,7 +3100,9 @@ impl<UsageScope> Reaper<UsageScope> {
         })
     }
 
-    /// Sets the given track's volume.
+    /// Informs control surfaces that the given track's volume has changed.
+    ///
+    /// Doesn't actually change the volume.
     ///
     /// # Safety
     ///
@@ -3144,7 +3152,9 @@ impl<UsageScope> Reaper<UsageScope> {
         ReaperVolumeValue::new(raw)
     }
 
-    /// Sets the given track's pan.
+    /// Informs control surfaces that the given track's pan has been changed.
+    ///
+    /// Doesn't actually change the pan.
     ///
     /// # Safety
     ///
