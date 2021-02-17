@@ -222,7 +222,7 @@ fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
 }
 ```
 
-> **IMPORTANT:** Compiled REAPER Plug-in Extensions (IE, `.dll` files) must be prefixed with `reaper_` in order for REAPER to load them during startup. Naming the library `reaper_my_extension` in `Cargo.toml` will result in the compiled file being named `reaper_my_extension`, thus obeying this rule. If you rename your library, make sure that the compiled file placed in `REAPER/UserPlugins` is prefixed with `reaper_` before attempting to test it.
+> **Important:** Compiled REAPER extension plug-ins (i.e. `.dll` files) must be prefixed with `reaper_` in order for REAPER to load them during startup - even on Linux and macOS, where library file names usually start with `lib`. On Windows, it's enough to name the library `reaper_my_extension` in `Cargo.toml` and it will result in the compiled file being named `reaper_my_extension`, thus obeying this rule. On Linux and macOS, you still need to remove the `lib` prefix. In any case, make sure that the compiled file placed in `REAPER_RESOURCE_PATH/UserPlugins` is prefixed with `reaper_` before attempting to test it!
 
 The macro primarily exposes an `extern "C" ReaperPluginEntry()` function which calls
 `reaper_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use that
