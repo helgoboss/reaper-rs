@@ -232,17 +232,15 @@ macro, have a look at the macro implementation. No magic there.
 
 The following instructions should result in a functional extension, loaded into REAPER on start:
 
-1. Make a new directory for the project.
-2. Copy the contents of the `Cargo.toml` above to the directory
-3. Copy the contents of the `lib.rs` to `src/lib.rs` in the directory
-4. From within the top-level of the newly created project directory (where the `Cargo.toml` resides),  run `cargo fetch` to fetch needed dependencies
-5. Run `cargo build` to generate the compiled plugin extension inside of the `target/debug` directory
-6. Copy the extension plug-in to the `REAPER/UserPlugins` directory
+1. Run `cargo new reaper-my-extension --lib` to initialize the project
+2. Run `cargo build` from within `reaper-my-extension` to generate the compiled plugin extension inside of the `target/debug` directory
+3. Copy the extension plug-in to the `REAPER/UserPlugins` directory
     - You could do this manually, and overwrite the file after each build
     - Or, you could create a symbolic link from the `target/debug` file, to `REAPER/UserPlugins` so that they were synced
+        - > Note: Here it's explicitly necessary to give the link a name that starts with` reaper` (by default it will start with `lib`)
         - To do this, on unix-based systems, run `ln -s ./target/debug/<name-of-the-compiled-extension-file> <path to REAPER/UserPlugins>`
         - On Windows, you can use the same command if running Git Bash, else you can use `mklink \D target\debug\<name-of-the-compiled-extension-file> %AppData%\REAPER\UserPlugins`
-7. Now start REAPER, and you should see the console message from the code appear!
+4. Now start REAPER, and you should see the console message from the code appear!
 
 
 ### REAPER VST plug-in
