@@ -237,7 +237,7 @@ The following instructions should result in a functional extension, loaded into 
 3. Copy the contents of the `lib.rs` to `src/lib.rs` in the directory
 4. From within the top-level of the newly created project directory (where the `Cargo.toml` resides),  run `cargo fetch` to fetch needed dependencies
 5. Run `cargo build` to generate the compiled plugin extension inside of the `target/debug` directory
-6. Copy the plugin extension to the `REAPER/UserPlugins` directory
+6. Copy the extension plug-in to the `REAPER/UserPlugins` directory
     - You could do this manually, and overwrite the file after each build
     - Or, you could create a symbolic link from the `target/debug` file, to `REAPER/UserPlugins` so that they were synced
         - To do this, on unix-based systems, run `ln -s ./target/debug/<name-of-the-compiled-extension-file> <path to REAPER/UserPlugins>`
