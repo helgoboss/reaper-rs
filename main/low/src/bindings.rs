@@ -349,6 +349,11 @@ pub mod root {
         pub __prev: *mut root::__pthread_internal_list,
         pub __next: *mut root::__pthread_internal_list,
     }
+    impl Default for __pthread_internal_list {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     pub type __pthread_list_t = root::__pthread_internal_list;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -362,6 +367,11 @@ pub mod root {
         pub __elision: ::std::os::raw::c_short,
         pub __list: root::__pthread_list_t,
     }
+    impl Default for __pthread_mutex_s {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub union pthread_mutex_t {
@@ -369,6 +379,11 @@ pub mod root {
         pub __size: [::std::os::raw::c_char; 40usize],
         pub __align: ::std::os::raw::c_long,
         _bindgen_union_align: [u64; 5usize],
+    }
+    impl Default for pthread_mutex_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     pub mod std {
         #[allow(unused_imports)]
@@ -422,20 +437,20 @@ pub mod root {
         ),
     >;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct POINT {
         pub x: root::LONG,
         pub y: root::LONG,
     }
     pub type LPPOINT = *mut root::POINT;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct POINTS {
         pub x: root::SHORT,
         pub y: root::SHORT,
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct RECT {
         pub left: root::LONG,
         pub top: root::LONG,
@@ -444,20 +459,20 @@ pub mod root {
     }
     pub type LPRECT = *mut root::RECT;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct ACCEL {
         pub fVirt: ::std::os::raw::c_uchar,
         pub key: ::std::os::raw::c_ushort,
         pub cmd: ::std::os::raw::c_ushort,
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct FILETIME {
         pub dwLowDateTime: root::DWORD,
         pub dwHighDateTime: root::DWORD,
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct _GUID {
         pub Data1: ::std::os::raw::c_uint,
         pub Data2: ::std::os::raw::c_ushort,
@@ -474,6 +489,11 @@ pub mod root {
         pub lParam: root::LPARAM,
         pub time: root::DWORD,
         pub pt: root::POINT,
+    }
+    impl Default for MSG {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
@@ -508,6 +528,11 @@ pub mod root {
         pub cchTextMax: ::std::os::raw::c_int,
         pub iSubItem: ::std::os::raw::c_int,
     }
+    impl Default for LVCOLUMN {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct LVITEM {
@@ -520,6 +545,11 @@ pub mod root {
         pub cchTextMax: ::std::os::raw::c_int,
         pub iImage: ::std::os::raw::c_int,
         pub lParam: root::LPARAM,
+    }
+    impl Default for LVITEM {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     pub type PFNLVCOMPARE = ::std::option::Option<
         unsafe extern "C" fn(
@@ -535,7 +565,7 @@ pub mod root {
     }
     pub type HIMAGELIST = *mut root::HIMAGELIST__;
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct LVHITTESTINFO {
         pub pt: root::POINT,
         pub flags: root::UINT,
@@ -558,6 +588,11 @@ pub mod root {
         pub pvFilter: *mut ::std::os::raw::c_void,
         pub state: root::UINT,
     }
+    impl Default for HDITEM {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct TCITEM {
@@ -568,6 +603,11 @@ pub mod root {
         pub cchTextMax: ::std::os::raw::c_int,
         pub iImage: ::std::os::raw::c_int,
         pub lParam: root::LPARAM,
+    }
+    impl Default for TCITEM {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
@@ -589,6 +629,11 @@ pub mod root {
         pub cChildren: ::std::os::raw::c_int,
         pub lParam: root::LPARAM,
     }
+    impl Default for TVITEM {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     pub type LPTVITEM = *mut root::TVITEM;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -597,6 +642,11 @@ pub mod root {
         pub hInsertAfter: root::HTREEITEM,
         pub item: root::TVITEM,
     }
+    impl Default for TVINSERTSTRUCT {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     pub type TV_INSERTSTRUCT = root::TVINSERTSTRUCT;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -604,6 +654,11 @@ pub mod root {
         pub pt: root::POINT,
         pub flags: root::UINT,
         pub hItem: root::HTREEITEM,
+    }
+    impl Default for TVHITTESTINFO {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -621,8 +676,13 @@ pub mod root {
         pub cch: ::std::os::raw::c_int,
         pub hbmpItem: root::HBITMAP,
     }
+    impl Default for MENUITEMINFO {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct LOGFONT {
         pub lfHeight: ::std::os::raw::c_int,
         pub lfWidth: ::std::os::raw::c_int,
@@ -640,7 +700,7 @@ pub mod root {
         pub lfFaceName: [::std::os::raw::c_char; 32usize],
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct TEXTMETRIC {
         pub tmHeight: root::LONG,
         pub tmAscent: root::LONG,
@@ -655,8 +715,13 @@ pub mod root {
         pub fErase: root::BOOL,
         pub rcPaint: root::RECT,
     }
+    impl Default for PAINTSTRUCT {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct SCROLLINFO {
         pub cbSize: root::UINT,
         pub fMask: root::UINT,
@@ -687,6 +752,11 @@ pub mod root {
         pub dwSequenceID: root::DWORD,
         pub ullArguments: root::ULONGLONG,
         pub cbExtraArgs: root::UINT,
+    }
+    impl Default for tagGESTUREINFO {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     pub type GESTUREINFO = root::tagGESTUREINFO;
     pub type PROPENUMPROCEX = ::std::option::Option<
@@ -735,6 +805,11 @@ pub mod root {
         pub hbmMask: root::HBITMAP,
         pub hbmColor: root::HBITMAP,
     }
+    impl Default for _ICONINFO {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     pub type ICONINFO = root::_ICONINFO;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -753,6 +828,11 @@ pub mod root {
             ) -> *mut ::std::os::raw::c_void,
         >,
     }
+    impl Default for reaper_plugin_info_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     pub struct ProjectStateContext__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
@@ -760,9 +840,14 @@ pub mod root {
     pub struct ProjectStateContext {
         pub vtable_: *const ProjectStateContext__bindgen_vtable,
     }
+    impl Default for ProjectStateContext {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[doc = " MIDI event definition and abstract list"]
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct MIDI_event_t {
         pub frame_offset: ::std::os::raw::c_int,
         pub size: ::std::os::raw::c_int,
@@ -774,6 +859,11 @@ pub mod root {
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct MIDI_eventlist {
         pub vtable_: *const MIDI_eventlist__bindgen_vtable,
+    }
+    impl Default for MIDI_eventlist {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[doc = " PCM source API"]
     #[repr(C)]
@@ -789,6 +879,11 @@ pub mod root {
         pub approximate_playback_latency: f64,
         pub absolute_time_s: f64,
         pub force_bpm: f64,
+    }
+    impl Default for PCM_source_transfer_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, PartialEq)]
@@ -817,12 +912,22 @@ pub mod root {
     pub const PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_DRUM_TRIANGLE_MODE:
         root::PCM_source_peaktransfer_t__bindgen_ty_1 = 4;
     pub type PCM_source_peaktransfer_t__bindgen_ty_1 = u32;
+    impl Default for PCM_source_peaktransfer_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     pub struct PCM_source__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct PCM_source {
         pub vtable_: *const PCM_source__bindgen_vtable,
+    }
+    impl Default for PCM_source {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     pub struct ISimpleMediaDecoder__bindgen_vtable(::std::os::raw::c_void);
@@ -831,6 +936,11 @@ pub mod root {
     pub struct ISimpleMediaDecoder {
         pub vtable_: *const ISimpleMediaDecoder__bindgen_vtable,
     }
+    impl Default for ISimpleMediaDecoder {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     pub struct PCM_sink__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
@@ -838,6 +948,11 @@ pub mod root {
     pub struct PCM_sink {
         pub vtable_: *const PCM_sink__bindgen_vtable,
         pub m_st: f64,
+    }
+    impl Default for PCM_sink {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     pub struct REAPER_Resample_Interface__bindgen_vtable(::std::os::raw::c_void);
@@ -850,12 +965,22 @@ pub mod root {
     pub struct REAPER_Resample_Interface {
         pub vtable_: *const REAPER_Resample_Interface__bindgen_vtable,
     }
+    impl Default for REAPER_Resample_Interface {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     pub struct IReaperPitchShift__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct IReaperPitchShift {
         pub vtable_: *const IReaperPitchShift__bindgen_vtable,
+    }
+    impl Default for IReaperPitchShift {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     pub struct REAPER_PeakGet_Interface__bindgen_vtable(::std::os::raw::c_void);
@@ -869,6 +994,11 @@ pub mod root {
     pub struct REAPER_PeakGet_Interface {
         pub vtable_: *const REAPER_PeakGet_Interface__bindgen_vtable,
     }
+    impl Default for REAPER_PeakGet_Interface {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     pub struct REAPER_PeakBuild_Interface__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
@@ -876,11 +1006,21 @@ pub mod root {
     pub struct REAPER_PeakBuild_Interface {
         pub vtable_: *const REAPER_PeakBuild_Interface__bindgen_vtable,
     }
+    impl Default for REAPER_PeakBuild_Interface {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct gaccel_register_t {
         pub accel: root::ACCEL,
         pub desc: *const ::std::os::raw::c_char,
+    }
+    impl Default for gaccel_register_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -904,14 +1044,24 @@ pub mod root {
             ) -> *mut root::ReaSample,
         >,
     }
+    impl Default for audio_hook_register_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct KbdCmd {
         pub cmd: root::DWORD,
         pub text: *const ::std::os::raw::c_char,
     }
+    impl Default for KbdCmd {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct KbdKeyBindingInfo {
         pub key: ::std::os::raw::c_int,
         pub cmd: ::std::os::raw::c_int,
@@ -939,6 +1089,11 @@ pub mod root {
         pub recent_cmds: *mut ::std::os::raw::c_void,
         pub extended_data: [*mut ::std::os::raw::c_void; 32usize],
     }
+    impl Default for KbdSectionInfo {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct preview_register_t {
@@ -950,6 +1105,11 @@ pub mod root {
         pub volume: f64,
         pub peakvol: [f64; 2usize],
         pub preview_track: *mut ::std::os::raw::c_void,
+    }
+    impl Default for preview_register_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     pub type screensetNewCallbackFunc = ::std::option::Option<
         unsafe extern "C" fn(
@@ -967,12 +1127,22 @@ pub mod root {
     pub struct midi_Output {
         pub vtable_: *const midi_Output__bindgen_vtable,
     }
+    impl Default for midi_Output {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     #[repr(C)]
     pub struct midi_Input__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct midi_Input {
         pub vtable_: *const midi_Input__bindgen_vtable,
+    }
+    impl Default for midi_Input {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
@@ -1005,6 +1175,11 @@ pub mod root {
     #[derive(Debug, Hash, PartialEq, Eq)]
     pub struct IReaperControlSurface {
         pub vtable_: *const IReaperControlSurface__bindgen_vtable,
+    }
+    impl Default for IReaperControlSurface {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
     }
     pub mod reaper_functions {
         #[allow(unused_imports)]

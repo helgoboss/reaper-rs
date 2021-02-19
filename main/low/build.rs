@@ -100,6 +100,7 @@ mod codegen {
                 .derive_eq(true)
                 .derive_partialeq(true)
                 .derive_hash(true)
+                .derive_default(true)
                 .clang_arg("-xc++")
                 .enable_cxx_namespaces()
                 // If we activate layout tests, we would have to regenerate at each build because
