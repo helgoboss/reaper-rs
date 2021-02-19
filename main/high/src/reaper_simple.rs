@@ -162,12 +162,16 @@ impl Reaper {
         MidiOutputDevice::new(id)
     }
 
-    pub fn midi_input_devices(&self) -> impl Iterator<Item = MidiInputDevice> + '_ {
+    pub fn midi_input_devices(
+        &self,
+    ) -> impl Iterator<Item = MidiInputDevice> + ExactSizeIterator + '_ {
         (0..self.medium_reaper().get_max_midi_inputs())
             .map(move |i| self.midi_input_device_by_id(MidiInputDeviceId::new(i as u8)))
     }
 
-    pub fn midi_output_devices(&self) -> impl Iterator<Item = MidiOutputDevice> + '_ {
+    pub fn midi_output_devices(
+        &self,
+    ) -> impl Iterator<Item = MidiOutputDevice> + ExactSizeIterator + '_ {
         (0..self.medium_reaper().get_max_midi_outputs())
             .map(move |i| self.midi_output_device_by_id(MidiOutputDeviceId::new(i as u8)))
     }
