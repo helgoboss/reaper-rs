@@ -338,17 +338,29 @@ impl Swell {
         mi: *mut root::MENUITEMINFO,
     ) -> root::BOOL {
         let mi = *mi;
-        let mut utf16_string = utf8_to_16(mi.dwTypeData);
         let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
-        utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
-        let result = winapi::um::winuser::SetMenuItemInfoW(
-            hMenu as _,
-            pos as _,
-            byPos as _,
-            &utf16_mi as *const _,
-        );
-        std::mem::drop(utf16_string);
-        result as _
+        if (mi.fMask & root::MIIM_TYPE) != 0 && (mi.fMask & root::MIIM_DATA != 0) {
+            // Sets text. Must convert it.
+            let mut utf16_string = utf8_to_16(mi.dwTypeData);
+            utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
+            let result = winapi::um::winuser::SetMenuItemInfoW(
+                hMenu as _,
+                pos as _,
+                byPos as _,
+                &utf16_mi as *const _,
+            );
+            std::mem::drop(utf16_string);
+            result as _
+        } else {
+            // Doesn't set text. No conversion necessary.
+            let result = winapi::um::winuser::SetMenuItemInfoW(
+                hMenu as _,
+                pos as _,
+                byPos as _,
+                &utf16_mi as *const _,
+            );
+            result as _
+        }
     }
 
     /// # Safety
