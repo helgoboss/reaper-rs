@@ -14,7 +14,7 @@ publish = false
 [dependencies]
 reaper-high = { path = '../high' }
 reaper-medium = { path = '../medium' }
-helgoboss-midi = "0.1.2"
+helgoboss-midi = "*"
 rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
 crossbeam-channel = "0.4"
 slog = "2.5.2"

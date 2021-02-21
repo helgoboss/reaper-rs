@@ -14,7 +14,7 @@ reaper-low = { path = "../../main/low" }
 c_str_macro = "1.0.2"
 rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
 slog = "2.5.2"
-helgoboss-midi = "0.1.2"
+helgoboss-midi = "*"
 approx = "0.3.2"
 once_cell = "1.5.2"
 crossbeam-channel = "0.4"
