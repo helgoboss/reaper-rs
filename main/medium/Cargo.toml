@@ -21,7 +21,7 @@ reaper-low = { version = "0.1.0", path = "../low" }
 reaper-macros = { path = "../macros" }
 helgoboss-midi = "0.1.2"
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
-vst = { git = "https://github.com/helgoboss/vst-rs", branch = "feature/custom-support-variant" }
+vst = "*"
 metered = { version = "0.7.0", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 

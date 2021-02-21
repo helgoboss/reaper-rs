@@ -19,7 +19,7 @@ darling = "0.10.2"
 reaper-low = { version = "0.1.0", path = "../../main/low" }
 reaper-medium = { version = "0.1.0", path = "../../main/medium" }
 reaper-high = { path = "../../main/high" }
-vst = { git = "https://github.com/helgoboss/vst-rs", branch = "feature/custom-support-variant" }
+vst = "*"
 doc-comment = "0.3.3"
 version-sync = "0.9"
 
