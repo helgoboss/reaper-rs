@@ -339,7 +339,10 @@ impl Swell {
     ) -> root::BOOL {
         let mi = *mi;
         let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
-        if (mi.fMask & root::MIIM_TYPE) != 0 && (mi.fMask & root::MIIM_DATA != 0) {
+        // Super important to use `raw` constants here because the SWELL constant values deviate
+        // from the Windows constants!!!
+        use crate::raw;
+        if (mi.fMask & raw::MIIM_TYPE) != 0 && (mi.fMask & raw::MIIM_DATA) != 0 {
             // Sets text. Must convert it.
             let mut utf16_string = utf8_to_16(mi.dwTypeData);
             utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
