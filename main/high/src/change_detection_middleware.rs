@@ -4,10 +4,10 @@ use crate::{
 };
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    reaper_str, AutomationMode, ExtSetFxParamArgs, InputMonitoringMode, MediaTrack, Pan, PanMode,
-    ReaProject, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
-    ReaperVolumeValue, TrackAttributeKey, TrackFxChainType, TrackLocation,
-    VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, InputMonitoringMode, MediaTrack, Pan,
+    PanMode, PlayState, PlaybackSpeedFactor, ReaProject, ReaperNormalizedFxParamValue,
+    ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue, TrackAttributeKey,
+    TrackFxChainType, TrackLocation, VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
@@ -49,19 +49,23 @@ struct TrackData {
 }
 
 impl TrackData {
-    /// Returns true if it has changed.
-    fn update_send_volume(&mut self, index: u32, v: ReaperVolumeValue) -> bool {
+    /// Returns true if it has changed along with the old value.
+    fn update_send_volume(
+        &mut self,
+        index: u32,
+        v: ReaperVolumeValue,
+    ) -> (bool, Option<ReaperVolumeValue>) {
         match self.send_volumes.insert(index, v) {
-            None => true,
-            Some(prev) => v != prev,
+            None => (true, None),
+            Some(prev) => (v != prev, Some(prev)),
         }
     }
 
-    /// Returns true if it has changed.
-    fn update_send_pan(&mut self, index: u32, v: ReaperPanValue) -> bool {
+    /// Returns true if it has changed along with the old value.
+    fn update_send_pan(&mut self, index: u32, v: ReaperPanValue) -> (bool, Option<ReaperPanValue>) {
         match self.send_pans.insert(index, v) {
-            None => true,
-            Some(prev) => v != prev,
+            None => (true, None),
+            Some(prev) => (v != prev, Some(prev)),
         }
     }
 
@@ -149,12 +153,21 @@ impl ChangeDetectionMiddleware {
         match event {
             SetTrackListChange => self.set_track_list_change(handle_change),
             SetSurfacePan(args) => {
+                let td = match self.find_track_data_in_normal_state(args.track) {
+                    None => return,
+                    Some(td) => td,
+                };
                 // This is mostly handled by ExtSetPanExt already but there's a situation when
                 // ExtSetPanExt is not triggered: When Programmatically changing pan via
                 // `CSurf_SetSurfacePan`, e.g. when users changes pan via ReaLearn, not via REAPER
                 // UI.
                 let track = Track::new(args.track, None);
-                handle_change(ChangeEvent::TrackPanChanged(track));
+                handle_change(ChangeEvent::TrackPanChanged(TrackPanChangedEvent {
+                    touched: false,
+                    track,
+                    old_value: td.pan,
+                    new_value: AvailablePanValue::Incomplete(args.pan),
+                }));
             }
             SetSurfaceVolume(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
@@ -164,25 +177,31 @@ impl ChangeDetectionMiddleware {
                 if td.volume == args.volume {
                     return;
                 }
+                let old = td.volume;
                 td.volume = args.volume;
                 let track = Track::new(args.track, None);
-                handle_change(ChangeEvent::TrackVolumeChanged(track.clone()));
-                if !self.track_parameter_is_automated(&track, reaper_str!("Volume")) {
-                    handle_change(ChangeEvent::TrackVolumeTouched(track));
-                }
+                handle_change(ChangeEvent::TrackVolumeChanged(TrackVolumeChangedEvent {
+                    touched: !self.track_parameter_is_automated(&track, reaper_str!("Volume")),
+                    track: track.clone(),
+                    old_value: old,
+                    new_value: args.volume,
+                }));
             }
             SetSurfaceMute(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
                     None => return,
                     Some(td) => td,
                 };
+                let old = td.mute;
                 if td.mute != args.is_mute {
                     td.mute = args.is_mute;
                     let track = Track::new(args.track, None);
-                    handle_change(ChangeEvent::TrackMuteChanged(track.clone()));
-                    if !self.track_parameter_is_automated(&track, reaper_str!("Mute")) {
-                        handle_change(ChangeEvent::TrackMuteTouched(track));
-                    }
+                    handle_change(ChangeEvent::TrackMuteChanged(TrackMuteChangedEvent {
+                        touched: !self.track_parameter_is_automated(&track, reaper_str!("Mute")),
+                        track,
+                        old_value: old,
+                        new_value: args.is_mute,
+                    }));
                 }
             }
             SetSurfaceSelected(args) => {
@@ -190,10 +209,17 @@ impl ChangeDetectionMiddleware {
                     None => return,
                     Some(td) => td,
                 };
+                let old = td.selected;
                 if td.selected != args.is_selected {
                     td.selected = args.is_selected;
                     let track = Track::new(args.track, None);
-                    handle_change(ChangeEvent::TrackSelectedChanged(track));
+                    handle_change(ChangeEvent::TrackSelectedChanged(
+                        TrackSelectedChangedEvent {
+                            track,
+                            old_value: old,
+                            new_value: args.is_selected,
+                        },
+                    ));
                 }
             }
             SetSurfaceSolo(args) => {
@@ -201,10 +227,15 @@ impl ChangeDetectionMiddleware {
                     None => return,
                     Some(td) => td,
                 };
+                let old = td.solo;
                 if td.solo != args.is_solo {
                     td.solo = args.is_solo;
                     let track = Track::new(args.track, None);
-                    handle_change(ChangeEvent::TrackSoloChanged(track));
+                    handle_change(ChangeEvent::TrackSoloChanged(TrackSoloChangedEvent {
+                        track,
+                        old_value: old,
+                        new_value: args.is_solo,
+                    }));
                 }
             }
             SetSurfaceRecArm(args) => {
@@ -212,10 +243,15 @@ impl ChangeDetectionMiddleware {
                     None => return,
                     Some(td) => td,
                 };
+                let old = td.recarm;
                 if td.recarm != args.is_armed {
                     td.recarm = args.is_armed;
                     let track = Track::new(args.track, None);
-                    handle_change(ChangeEvent::TrackArmChanged(track));
+                    handle_change(ChangeEvent::TrackArmChanged(TrackArmChangedEvent {
+                        track,
+                        old_value: old,
+                        new_value: args.is_armed,
+                    }));
                 }
             }
             SetTrackTitle(args) => {
@@ -224,17 +260,26 @@ impl ChangeDetectionMiddleware {
                     return;
                 }
                 let track = Track::new(args.track, None);
-                handle_change(ChangeEvent::TrackNameChanged(track));
+                handle_change(ChangeEvent::TrackNameChanged(TrackNameChangedEvent {
+                    track,
+                }));
             }
             ExtSetInputMonitor(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
                     None => return,
                     Some(td) => td,
                 };
+                let old = td.recmonitor;
                 if td.recmonitor != args.mode {
                     td.recmonitor = args.mode;
                     let track = Track::new(args.track, None);
-                    handle_change(ChangeEvent::TrackInputMonitoringChanged(track));
+                    handle_change(ChangeEvent::TrackInputMonitoringChanged(
+                        TrackInputMonitoringChangedEvent {
+                            track,
+                            old_value: old,
+                            new_value: args.mode,
+                        },
+                    ));
                 }
                 let recinput = unsafe {
                     Reaper::get()
@@ -245,7 +290,9 @@ impl ChangeDetectionMiddleware {
                 if td.recinput != recinput {
                     td.recinput = recinput;
                     let track = Track::new(args.track, None);
-                    handle_change(ChangeEvent::TrackInputChanged(track));
+                    handle_change(ChangeEvent::TrackInputChanged(TrackInputChangedEvent {
+                        track,
+                    }));
                 }
             }
             ExtSetFxParam(args) => self.fx_param_set(args, false, handle_change),
@@ -254,7 +301,10 @@ impl ChangeDetectionMiddleware {
                 // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
                 let track = Track::new(args.track, None);
                 if let Some(fx) = self.fx_from_parm_fx_index(&track, args.fx_location, None, None) {
-                    handle_change(ChangeEvent::FxEnabledChanged(fx));
+                    handle_change(ChangeEvent::FxEnabledChanged(FxEnabledChangedEvent {
+                        fx,
+                        new_value: args.is_enabled,
+                    }));
                 }
             }
             ExtSetSendVolume(args) => {
@@ -262,32 +312,39 @@ impl ChangeDetectionMiddleware {
                     None => return,
                     Some(td) => td,
                 };
-                if !td.update_send_volume(args.send_index, args.volume) {
+                let (changed, old) = td.update_send_volume(args.send_index, args.volume);
+                if !changed {
                     return;
                 }
                 let track = Track::new(args.track, None);
-                let track_send = track.index_based_send_by_index(args.send_index);
-                handle_change(ChangeEvent::TrackSendVolumeChanged(track_send.clone()));
-                // Send volume touch event only if not automated
-                if !self.track_parameter_is_automated(&track, reaper_str!("Send Volume")) {
-                    handle_change(ChangeEvent::TrackSendVolumeTouched(track_send));
-                }
+                let send = track.index_based_send_by_index(args.send_index);
+                handle_change(ChangeEvent::TrackSendVolumeChanged(
+                    TrackSendVolumeChangedEvent {
+                        touched: !self
+                            .track_parameter_is_automated(&track, reaper_str!("Send Volume")),
+                        send,
+                        old_value: old,
+                        new_value: args.volume,
+                    },
+                ));
             }
             ExtSetSendPan(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
                     None => return,
                     Some(td) => td,
                 };
-                if !td.update_send_pan(args.send_index, args.pan) {
+                let (changed, old) = td.update_send_pan(args.send_index, args.pan);
+                if !changed {
                     return;
                 }
                 let track = Track::new(args.track, None);
-                let track_send = track.index_based_send_by_index(args.send_index);
-                handle_change(ChangeEvent::TrackSendPanChanged(track_send.clone()));
-                // Send volume touch event only if not automated
-                if !self.track_parameter_is_automated(&track, reaper_str!("Send Pan")) {
-                    handle_change(ChangeEvent::TrackSendPanTouched(track_send));
-                }
+                let send = track.index_based_send_by_index(args.send_index);
+                handle_change(ChangeEvent::TrackSendPanChanged(TrackSendPanChangedEvent {
+                    touched: !self.track_parameter_is_automated(&track, reaper_str!("Send Pan")),
+                    send,
+                    old_value: old,
+                    new_value: args.pan,
+                }));
             }
             ExtSetPanExt(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
@@ -300,20 +357,18 @@ impl ChangeDetectionMiddleware {
                 let old = td.pan;
                 td.pan = args.pan;
                 let track = Track::new(args.track, None);
-                handle_change(ChangeEvent::TrackPanChanged(track.clone()));
-                if !self.track_parameter_is_automated(&track, reaper_str!("Pan")) {
-                    handle_change(ChangeEvent::TrackPanTouched {
-                        track,
-                        old,
-                        new: args.pan,
-                    });
-                }
+                handle_change(ChangeEvent::TrackPanChanged(TrackPanChangedEvent {
+                    touched: !self.track_parameter_is_automated(&track, reaper_str!("Pan")),
+                    track: track.clone(),
+                    old_value: old,
+                    new_value: AvailablePanValue::Complete(args.pan),
+                }));
             }
             ExtSetFocusedFx(args) => {
                 let fx_ref = match args.fx_location {
                     None => {
                         // Clear focused FX
-                        handle_change(ChangeEvent::FxFocused(None));
+                        handle_change(ChangeEvent::FxFocused(FxFocusedEvent { fx: None }));
                         return;
                     }
                     Some(r) => r,
@@ -341,7 +396,9 @@ impl ChangeDetectionMiddleware {
                                     fx.is_input_fx(),
                                     handle_change,
                                 );
-                                handle_change(ChangeEvent::FxFocused(Some(fx)));
+                                handle_change(ChangeEvent::FxFocused(FxFocusedEvent {
+                                    fx: Some(fx),
+                                }));
                             }
                         }
                     }
@@ -367,9 +424,9 @@ impl ChangeDetectionMiddleware {
                             handle_change,
                         );
                         let change_event = if args.is_open {
-                            ChangeEvent::FxOpened(fx)
+                            ChangeEvent::FxOpened(FxOpenedEvent { fx })
                         } else {
-                            ChangeEvent::FxClosed(fx)
+                            ChangeEvent::FxClosed(FxClosedEvent { fx })
                         };
                         handle_change(change_event);
                     }
@@ -407,17 +464,23 @@ impl ChangeDetectionMiddleware {
                 self.fx_has_been_touched_just_a_moment_ago.replace(true);
             }
             ExtSetBpmAndPlayRate(args) => {
-                if args.tempo.is_some() {
-                    handle_change(ChangeEvent::MasterTempoChanged);
-                    // If there's a tempo envelope, there are just tempo notifications when the
-                    // tempo is actually changed. So that's okay for "touched".
-                    // TODO-low What about gradual tempo changes?
-                    handle_change(ChangeEvent::MasterTempoTouched);
+                if let Some(tempo) = args.tempo {
+                    handle_change(ChangeEvent::MasterTempoChanged(MasterTempoChangedEvent {
+                        // If there's a tempo envelope, there are just tempo notifications when the
+                        // tempo is actually changed. So that's okay for "touched".
+                        // TODO-low What about gradual tempo changes?
+                        touched: true,
+                        new_value: tempo,
+                    }));
                 }
-                if args.play_rate.is_some() {
-                    handle_change(ChangeEvent::MasterPlayrateChanged);
-                    // FIXME What about playrate automation?
-                    handle_change(ChangeEvent::MasterPlayrateTouched);
+                if let Some(play_rate) = args.play_rate {
+                    handle_change(ChangeEvent::MasterPlayrateChanged(
+                        MasterPlayrateChangedEvent {
+                            // FIXME What about playrate automation?
+                            touched: true,
+                            new_value: play_rate,
+                        },
+                    ));
                 }
             }
             ExtTrackFxPresetChanged(args) => {
@@ -425,13 +488,21 @@ impl ChangeDetectionMiddleware {
                 let fx = track
                     .fx_by_query_index(args.fx_location.to_raw())
                     .expect("preset changed but FX not found");
-                handle_change(ChangeEvent::FxPresetChanged(fx));
+                handle_change(ChangeEvent::FxPresetChanged(FxPresetChangedEvent { fx }));
             }
-            SetPlayState(_args) => {
-                handle_change(ChangeEvent::PlayStateChanged);
+            SetPlayState(args) => {
+                handle_change(ChangeEvent::PlayStateChanged(PlayStateChangedEvent {
+                    new_value: PlayState {
+                        is_playing: args.is_playing,
+                        is_paused: args.is_paused,
+                        is_recording: args.is_recording,
+                    },
+                }));
             }
-            SetRepeatState(_args) => {
-                handle_change(ChangeEvent::RepeatStateChanged);
+            SetRepeatState(args) => {
+                handle_change(ChangeEvent::RepeatStateChanged(RepeatStateChangedEvent {
+                    new_value: args.is_enabled,
+                }));
             }
             _ => {}
         }
@@ -609,12 +680,14 @@ impl ChangeDetectionMiddleware {
             track.normal_fx_chain()
         };
         if let Some(fx) = fx_chain.fx_by_index(args.fx_index as u32) {
-            let fx_param = fx.parameter_by_index(args.param_index as u32);
-            handle_change(ChangeEvent::FxParameterValueChanged(fx_param.clone()));
-            if self.fx_has_been_touched_just_a_moment_ago.get() {
-                self.fx_has_been_touched_just_a_moment_ago.replace(false);
-                handle_change(ChangeEvent::FxParameterTouched(fx_param));
-            }
+            let parameter = fx.parameter_by_index(args.param_index as u32);
+            handle_change(ChangeEvent::FxParameterValueChanged(
+                FxParameterValueChangedEvent {
+                    touched: self.fx_has_been_touched_just_a_moment_ago.replace(false),
+                    parameter,
+                    new_value: args.param_value,
+                },
+            ));
         }
     }
 
@@ -632,8 +705,11 @@ impl ChangeDetectionMiddleware {
         mut handle_change: impl FnMut(ChangeEvent) + Copy,
     ) {
         if new_active_project != self.last_active_project.get() {
-            self.last_active_project.replace(new_active_project);
-            handle_change(ChangeEvent::ProjectSwitched(new_active_project));
+            let old = self.last_active_project.replace(new_active_project);
+            handle_change(ChangeEvent::ProjectSwitched(ProjectSwitchedEvent {
+                old_project: old,
+                new_project: new_active_project,
+            }));
         }
         self.remove_invalid_rea_projects(handle_change);
         self.detect_track_set_changes(handle_change);
@@ -647,7 +723,9 @@ impl ChangeDetectionMiddleware {
             {
                 true
             } else {
-                handle_change(ChangeEvent::ProjectClosed(Project::new(*rea_project)));
+                handle_change(ChangeEvent::ProjectClosed(ProjectClosedEvent {
+                    project: Project::new(*rea_project),
+                }));
                 false
             }
         });
@@ -682,7 +760,7 @@ impl ChangeDetectionMiddleware {
                 true
             } else {
                 let track = project.track_by_guid(&data.guid);
-                handle_change(ChangeEvent::TrackRemoved(track));
+                handle_change(ChangeEvent::TrackRemoved(TrackRemovedEvent { track }));
                 false
             }
         });
@@ -755,7 +833,9 @@ impl ChangeDetectionMiddleware {
                 };
                 // TODO-low Use try_borrow_mut(). Then this just doesn't do anything if this event
                 //  is currently thrown already. Right now it would panic, which is unreasonable.
-                handle_change(ChangeEvent::TrackAdded(t.clone()));
+                handle_change(ChangeEvent::TrackAdded(TrackAddedEvent {
+                    track: t.clone(),
+                }));
                 self.detect_fx_changes_on_track(
                     &mut td.fx_chain_pair,
                     t,
@@ -807,7 +887,7 @@ impl ChangeDetectionMiddleware {
             && !added_or_removed_input_fx
             && !added_or_removed_output_fx
         {
-            handle_change(ChangeEvent::FxReordered(track));
+            handle_change(ChangeEvent::FxReordered(FxReorderedEvent { track }));
         }
     }
 
@@ -876,7 +956,7 @@ impl ChangeDetectionMiddleware {
                         track.normal_fx_chain()
                     };
                     let removed_fx = fx_chain.fx_by_guid(old_fx_guid);
-                    handle_change(ChangeEvent::FxRemoved(removed_fx));
+                    handle_change(ChangeEvent::FxRemoved(FxRemovedEvent { fx: removed_fx }));
                 }
                 false
             }
@@ -911,7 +991,7 @@ impl ChangeDetectionMiddleware {
         for fx in fx_chain.fxs() {
             let was_inserted = fx_guids.insert(fx.guid().expect("No FX GUID set"));
             if was_inserted && notify_listeners_about_changes {
-                handle_change(ChangeEvent::FxAdded(fx));
+                handle_change(ChangeEvent::FxAdded(FxAddedEvent { fx }));
             }
         }
     }
@@ -936,48 +1016,222 @@ impl ChangeDetectionMiddleware {
             }
         }
         if tracks_have_been_reordered {
-            handle_change(ChangeEvent::TracksReordered(project));
+            handle_change(ChangeEvent::TracksReordered(TracksReorderedEvent {
+                project,
+            }));
         }
     }
 }
 
 #[derive(Clone, Debug)]
 pub enum ChangeEvent {
-    ProjectSwitched(Project),
-    TrackVolumeChanged(Track),
-    TrackVolumeTouched(Track),
-    TrackPanChanged(Track),
-    TrackPanTouched { track: Track, old: Pan, new: Pan },
-    TrackSendVolumeChanged(TrackSend),
-    TrackSendVolumeTouched(TrackSend),
-    TrackSendPanChanged(TrackSend),
-    TrackSendPanTouched(TrackSend),
-    TrackAdded(Track),
-    TrackRemoved(Track),
-    TracksReordered(Project),
-    TrackNameChanged(Track),
-    TrackInputChanged(Track),
-    TrackInputMonitoringChanged(Track),
-    TrackArmChanged(Track),
-    TrackMuteChanged(Track),
-    TrackMuteTouched(Track),
-    TrackSoloChanged(Track),
-    TrackSelectedChanged(Track),
-    FxAdded(Fx),
-    FxRemoved(Fx),
-    FxEnabledChanged(Fx),
-    FxOpened(Fx),
-    FxClosed(Fx),
-    FxFocused(Option<Fx>),
-    FxReordered(Track),
-    FxParameterValueChanged(FxParameter),
-    FxParameterTouched(FxParameter),
-    FxPresetChanged(Fx),
-    MasterTempoChanged,
-    MasterTempoTouched,
-    MasterPlayrateChanged,
-    MasterPlayrateTouched,
-    PlayStateChanged,
-    RepeatStateChanged,
-    ProjectClosed(Project),
+    ProjectSwitched(ProjectSwitchedEvent),
+    TrackVolumeChanged(TrackVolumeChangedEvent),
+    TrackPanChanged(TrackPanChangedEvent),
+    TrackSendVolumeChanged(TrackSendVolumeChangedEvent),
+    TrackSendPanChanged(TrackSendPanChangedEvent),
+    TrackAdded(TrackAddedEvent),
+    TrackRemoved(TrackRemovedEvent),
+    TracksReordered(TracksReorderedEvent),
+    TrackNameChanged(TrackNameChangedEvent),
+    TrackInputChanged(TrackInputChangedEvent),
+    TrackInputMonitoringChanged(TrackInputMonitoringChangedEvent),
+    TrackArmChanged(TrackArmChangedEvent),
+    TrackMuteChanged(TrackMuteChangedEvent),
+    TrackSoloChanged(TrackSoloChangedEvent),
+    TrackSelectedChanged(TrackSelectedChangedEvent),
+    FxAdded(FxAddedEvent),
+    FxRemoved(FxRemovedEvent),
+    FxEnabledChanged(FxEnabledChangedEvent),
+    FxOpened(FxOpenedEvent),
+    FxClosed(FxClosedEvent),
+    FxFocused(FxFocusedEvent),
+    FxReordered(FxReorderedEvent),
+    FxParameterValueChanged(FxParameterValueChangedEvent),
+    FxPresetChanged(FxPresetChangedEvent),
+    MasterTempoChanged(MasterTempoChangedEvent),
+    MasterPlayrateChanged(MasterPlayrateChangedEvent),
+    PlayStateChanged(PlayStateChangedEvent),
+    RepeatStateChanged(RepeatStateChangedEvent),
+    ProjectClosed(ProjectClosedEvent),
+}
+
+#[derive(Clone, Debug)]
+pub struct ProjectSwitchedEvent {
+    pub old_project: Project,
+    pub new_project: Project,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackVolumeChangedEvent {
+    pub touched: bool,
+    pub track: Track,
+    pub old_value: ReaperVolumeValue,
+    pub new_value: ReaperVolumeValue,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackPanChangedEvent {
+    pub touched: bool,
+    pub track: Track,
+    pub old_value: Pan,
+    pub new_value: AvailablePanValue,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum AvailablePanValue {
+    Complete(Pan),
+    Incomplete(ReaperPanValue),
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackSendVolumeChangedEvent {
+    pub touched: bool,
+    pub send: TrackSend,
+    pub old_value: Option<ReaperVolumeValue>,
+    pub new_value: ReaperVolumeValue,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackSendPanChangedEvent {
+    pub touched: bool,
+    pub send: TrackSend,
+    pub old_value: Option<ReaperPanValue>,
+    pub new_value: ReaperPanValue,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackAddedEvent {
+    pub track: Track,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackRemovedEvent {
+    pub track: Track,
+}
+
+#[derive(Clone, Debug)]
+pub struct TracksReorderedEvent {
+    pub project: Project,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackNameChangedEvent {
+    pub track: Track,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackInputChangedEvent {
+    pub track: Track,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackInputMonitoringChangedEvent {
+    pub track: Track,
+    pub old_value: InputMonitoringMode,
+    pub new_value: InputMonitoringMode,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackArmChangedEvent {
+    pub track: Track,
+    pub old_value: bool,
+    pub new_value: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackMuteChangedEvent {
+    pub touched: bool,
+    pub track: Track,
+    pub old_value: bool,
+    pub new_value: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackSoloChangedEvent {
+    pub track: Track,
+    pub old_value: bool,
+    pub new_value: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackSelectedChangedEvent {
+    pub track: Track,
+    pub old_value: bool,
+    pub new_value: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxAddedEvent {
+    pub fx: Fx,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxRemovedEvent {
+    pub fx: Fx,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxEnabledChangedEvent {
+    pub fx: Fx,
+    pub new_value: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxOpenedEvent {
+    pub fx: Fx,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxClosedEvent {
+    pub fx: Fx,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxFocusedEvent {
+    pub fx: Option<Fx>,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxReorderedEvent {
+    pub track: Track,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxParameterValueChangedEvent {
+    pub touched: bool,
+    pub parameter: FxParameter,
+    pub new_value: ReaperNormalizedFxParamValue,
+}
+
+#[derive(Clone, Debug)]
+pub struct FxPresetChangedEvent {
+    pub fx: Fx,
+}
+
+#[derive(Clone, Debug)]
+pub struct MasterTempoChangedEvent {
+    pub touched: bool,
+    pub new_value: Bpm,
+}
+
+#[derive(Clone, Debug)]
+pub struct MasterPlayrateChangedEvent {
+    pub touched: bool,
+    pub new_value: PlaybackSpeedFactor,
+}
+
+#[derive(Clone, Debug)]
+pub struct PlayStateChangedEvent {
+    pub new_value: PlayState,
+}
+
+#[derive(Clone, Debug)]
+pub struct RepeatStateChangedEvent {
+    pub new_value: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct ProjectClosedEvent {
+    pub project: Project,
 }

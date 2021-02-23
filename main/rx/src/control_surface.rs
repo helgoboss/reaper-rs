@@ -1,5 +1,5 @@
 use crate::{EventStreamSubject, ReactiveEvent};
-use reaper_high::{ChangeEvent, Fx, FxParameter, Project, Track, TrackSend};
+use reaper_high::{AvailablePanValue, ChangeEvent, Fx, FxParameter, Project, Track, TrackSend};
 use reaper_medium::Pan;
 use rxrust::prelude::*;
 use std::cell::RefCell;
@@ -22,49 +22,101 @@ impl ControlSurfaceRxMiddleware {
     pub fn handle_change(&self, event: ChangeEvent) {
         use ChangeEvent::*;
         match event {
-            ProjectSwitched(p) => self.rx.project_switched.borrow_mut().next(p),
-            TrackVolumeChanged(t) => self.rx.track_volume_changed.borrow_mut().next(t),
-            TrackVolumeTouched(t) => self.rx.track_volume_touched.borrow_mut().next(t),
-            TrackPanChanged(t) => self.rx.track_pan_changed.borrow_mut().next(t),
-            TrackPanTouched { track, old, new } => self
-                .rx
-                .track_pan_touched
-                .borrow_mut()
-                .next((track, old, new)),
-            TrackSendVolumeChanged(ts) => self.rx.track_send_volume_changed.borrow_mut().next(ts),
-            TrackSendVolumeTouched(ts) => self.rx.track_send_volume_touched.borrow_mut().next(ts),
-            TrackSendPanChanged(ts) => self.rx.track_send_pan_changed.borrow_mut().next(ts),
-            TrackSendPanTouched(ts) => self.rx.track_send_pan_touched.borrow_mut().next(ts),
-            TrackAdded(t) => self.rx.track_added.borrow_mut().next(t),
-            TrackRemoved(t) => self.rx.track_removed.borrow_mut().next(t),
-            TracksReordered(p) => self.rx.tracks_reordered.borrow_mut().next(p),
-            TrackNameChanged(t) => self.rx.track_name_changed.borrow_mut().next(t),
-            TrackInputChanged(t) => self.rx.track_input_changed.borrow_mut().next(t),
-            TrackInputMonitoringChanged(t) => {
-                self.rx.track_input_monitoring_changed.borrow_mut().next(t)
+            ProjectSwitched(e) => self.rx.project_switched.borrow_mut().next(e.new_project),
+            TrackVolumeChanged(e) => {
+                self.rx
+                    .track_volume_changed
+                    .borrow_mut()
+                    .next(e.track.clone());
+                if e.touched {
+                    self.rx.track_volume_touched.borrow_mut().next(e.track);
+                }
             }
-            TrackArmChanged(t) => self.rx.track_arm_changed.borrow_mut().next(t),
-            TrackMuteChanged(t) => self.rx.track_mute_changed.borrow_mut().next(t),
-            TrackMuteTouched(t) => self.rx.track_mute_touched.borrow_mut().next(t),
-            TrackSoloChanged(t) => self.rx.track_solo_changed.borrow_mut().next(t),
-            TrackSelectedChanged(t) => self.rx.track_selected_changed.borrow_mut().next(t),
-            FxAdded(f) => self.rx.fx_added.borrow_mut().next(f),
-            FxRemoved(f) => self.rx.fx_removed.borrow_mut().next(f),
-            FxEnabledChanged(f) => self.rx.fx_enabled_changed.borrow_mut().next(f),
-            FxOpened(f) => self.rx.fx_opened.borrow_mut().next(f),
-            FxClosed(f) => self.rx.fx_closed.borrow_mut().next(f),
-            FxFocused(f) => self.rx.fx_focused.borrow_mut().next(f),
-            FxReordered(t) => self.rx.fx_reordered.borrow_mut().next(t),
-            FxParameterValueChanged(p) => self.rx.fx_parameter_value_changed.borrow_mut().next(p),
-            FxParameterTouched(p) => self.rx.fx_parameter_touched.borrow_mut().next(p),
-            FxPresetChanged(f) => self.rx.fx_preset_changed.borrow_mut().next(f),
-            MasterTempoChanged => self.rx.master_tempo_changed.borrow_mut().next(()),
-            MasterTempoTouched => self.rx.master_tempo_touched.borrow_mut().next(()),
-            MasterPlayrateChanged => self.rx.master_playrate_changed.borrow_mut().next(()),
-            MasterPlayrateTouched => self.rx.master_playrate_touched.borrow_mut().next(()),
-            PlayStateChanged => self.rx.play_state_changed.borrow_mut().next(()),
-            RepeatStateChanged => self.rx.repeat_state_changed.borrow_mut().next(()),
-            ProjectClosed(p) => self.rx.project_closed.borrow_mut().next(p),
+            TrackPanChanged(e) => {
+                self.rx.track_pan_changed.borrow_mut().next(e.track.clone());
+                if e.touched {
+                    // When it's touched, it should always be complete.
+                    if let AvailablePanValue::Complete(new_value) = e.new_value {
+                        self.rx.track_pan_touched.borrow_mut().next((
+                            e.track,
+                            e.old_value,
+                            new_value,
+                        ));
+                    }
+                }
+            }
+            TrackSendVolumeChanged(e) => {
+                self.rx
+                    .track_send_volume_changed
+                    .borrow_mut()
+                    .next(e.send.clone());
+                if e.touched {
+                    self.rx.track_send_volume_touched.borrow_mut().next(e.send);
+                }
+            }
+            TrackSendPanChanged(e) => {
+                self.rx
+                    .track_send_pan_changed
+                    .borrow_mut()
+                    .next(e.send.clone());
+                if e.touched {
+                    self.rx.track_send_pan_touched.borrow_mut().next(e.send);
+                }
+            }
+            TrackAdded(e) => self.rx.track_added.borrow_mut().next(e.track),
+            TrackRemoved(e) => self.rx.track_removed.borrow_mut().next(e.track),
+            TracksReordered(e) => self.rx.tracks_reordered.borrow_mut().next(e.project),
+            TrackNameChanged(e) => self.rx.track_name_changed.borrow_mut().next(e.track),
+            TrackInputChanged(e) => self.rx.track_input_changed.borrow_mut().next(e.track),
+            TrackInputMonitoringChanged(e) => self
+                .rx
+                .track_input_monitoring_changed
+                .borrow_mut()
+                .next(e.track),
+            TrackArmChanged(e) => self.rx.track_arm_changed.borrow_mut().next(e.track),
+            TrackMuteChanged(e) => {
+                self.rx
+                    .track_mute_changed
+                    .borrow_mut()
+                    .next(e.track.clone());
+                if e.touched {
+                    self.rx.track_mute_touched.borrow_mut().next(e.track);
+                }
+            }
+            TrackSoloChanged(e) => self.rx.track_solo_changed.borrow_mut().next(e.track),
+            TrackSelectedChanged(e) => self.rx.track_selected_changed.borrow_mut().next(e.track),
+            FxAdded(e) => self.rx.fx_added.borrow_mut().next(e.fx),
+            FxRemoved(e) => self.rx.fx_removed.borrow_mut().next(e.fx),
+            FxEnabledChanged(e) => self.rx.fx_enabled_changed.borrow_mut().next(e.fx),
+            FxOpened(e) => self.rx.fx_opened.borrow_mut().next(e.fx),
+            FxClosed(e) => self.rx.fx_closed.borrow_mut().next(e.fx),
+            FxFocused(e) => self.rx.fx_focused.borrow_mut().next(e.fx),
+            FxReordered(e) => self.rx.fx_reordered.borrow_mut().next(e.track),
+            FxParameterValueChanged(e) => {
+                self.rx
+                    .fx_parameter_value_changed
+                    .borrow_mut()
+                    .next(e.parameter.clone());
+                if e.touched {
+                    self.rx.fx_parameter_touched.borrow_mut().next(e.parameter);
+                }
+            }
+            FxPresetChanged(e) => self.rx.fx_preset_changed.borrow_mut().next(e.fx),
+            MasterTempoChanged(e) => {
+                self.rx.master_tempo_changed.borrow_mut().next(());
+                if e.touched {
+                    self.rx.master_tempo_touched.borrow_mut().next(());
+                }
+            }
+            MasterPlayrateChanged(e) => {
+                self.rx.master_playrate_changed.borrow_mut().next(());
+                if e.touched {
+                    self.rx.master_playrate_touched.borrow_mut().next(());
+                }
+            }
+            PlayStateChanged(_) => self.rx.play_state_changed.borrow_mut().next(()),
+            RepeatStateChanged(_) => self.rx.repeat_state_changed.borrow_mut().next(()),
+            ProjectClosed(e) => self.rx.project_closed.borrow_mut().next(e.project),
         };
     }
 }
