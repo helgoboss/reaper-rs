@@ -2,11 +2,13 @@ use reaper_medium::{
     ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
     ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
     ExtSetLastTouchedFxArgs, ExtSetPanExArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    ExtTrackFxPresetChangedArgs, OnTrackSelectionArgs, SetAutoModeArgs, SetPlayStateArgs,
-    SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs,
-    SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
+    ExtTrackFxPresetChangedArgs, GetTouchStateArgs, IsKeyDownArgs, OnTrackSelectionArgs, ReaperStr,
+    SetAutoModeArgs, SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
+    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
+    SetTrackTitleArgs,
 };
 
+use std::borrow::Cow;
 use std::fmt::Debug;
 
 /// This control surface "redirects" each callback method with event character into an enum value,
@@ -21,6 +23,28 @@ pub trait ControlSurfaceMiddleware {
 
     fn handle_event(&self, event: ControlSurfaceEvent) {
         let _ = event;
+    }
+
+    fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
+        None
+    }
+
+    fn get_desc_string(&self) -> Option<Cow<'static, ReaperStr>> {
+        None
+    }
+
+    fn get_config_string(&self) -> Option<Cow<'static, ReaperStr>> {
+        None
+    }
+
+    fn get_touch_state(&self, args: GetTouchStateArgs) -> bool {
+        let _ = args;
+        false
+    }
+
+    fn is_key_down(&self, args: IsKeyDownArgs) -> bool {
+        let _ = args;
+        false
     }
 }
 
@@ -189,6 +213,26 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
         self.middleware
             .handle_event(ControlSurfaceEvent::ExtTrackFxPresetChanged(args));
         1
+    }
+
+    fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
+        self.middleware.get_type_string()
+    }
+
+    fn get_desc_string(&self) -> Option<Cow<'static, ReaperStr>> {
+        self.middleware.get_desc_string()
+    }
+
+    fn get_config_string(&self) -> Option<Cow<'static, ReaperStr>> {
+        self.middleware.get_config_string()
+    }
+
+    fn get_touch_state(&self, args: GetTouchStateArgs) -> bool {
+        self.middleware.get_touch_state(args)
+    }
+
+    fn is_key_down(&self, args: IsKeyDownArgs) -> bool {
+        self.middleware.is_key_down(args)
     }
 }
 
