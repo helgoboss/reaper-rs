@@ -46,6 +46,10 @@ pub trait ControlSurfaceMiddleware {
         let _ = args;
         false
     }
+
+    fn ext_supports_extended_touch(&self) -> bool {
+        false
+    }
 }
 
 impl<H: ControlSurfaceMiddleware + Debug> MiddlewareControlSurface<H> {
@@ -233,6 +237,10 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
 
     fn is_key_down(&self, args: IsKeyDownArgs) -> bool {
         self.middleware.is_key_down(args)
+    }
+
+    fn ext_supports_extended_touch(&self) -> bool {
+        self.middleware.ext_supports_extended_touch()
     }
 }
 

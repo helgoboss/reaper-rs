@@ -109,6 +109,10 @@ pub trait ControlSurface: Debug {
         let _ = args;
     }
 
+    /// This is regularly queried by REAPER for touch automation mode in order to determine whether
+    /// the parameter on the given track should still write automation or not.
+    ///
+    /// The main use case are touch-sensitive motor faders.
     fn get_touch_state(&self, args: GetTouchStateArgs) -> bool {
         let _ = args;
         false
@@ -238,6 +242,14 @@ pub trait ControlSurface: Debug {
         let _ = args;
         0
     }
+
+    /// Should return `true` if [`get_touch_state()`] wants to deal with parameters other than
+    /// volume and pan.
+    ///
+    /// [`get_touch_state()`]: #method.get_touch_state
+    fn ext_supports_extended_touch(&self) -> bool {
+        false
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -297,8 +309,31 @@ pub struct SetTrackTitleArgs<'a> {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct GetTouchStateArgs {
     pub track: MediaTrack,
-    // TODO-high This seems to be not just boolean (search for `isPan` in `reaper_plugin.h`)
-    pub is_pan: bool,
+    pub parameter_type: TouchedParameterType,
+}
+
+/// Type of a touched parameter.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TouchedParameterType {
+    Volume,
+    Pan,
+    Width,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
+}
+
+impl TouchedParameterType {
+    /// Converts an integer as returned by the low-level API to a type.
+    fn from_raw(value: i32) -> TouchedParameterType {
+        use TouchedParameterType::*;
+        match value {
+            0 => Volume,
+            1 => Pan,
+            2 => Width,
+            _ => Unknown,
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -405,35 +440,33 @@ pub struct ExtSetBpmAndPlayRateArgs {
     pub play_rate: Option<PlaybackSpeedFactor>,
 }
 
-/// A modifier key.
+/// Modifier key according to
+/// [this list](https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
+///
+/// You can find some frequently used predefined keys in [`mod_keys`](mod_keys/index.html).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum ModKey {
-    /// SHIFT key.
-    Shift,
-    /// CTRL key.
-    Control,
-    /// ALT key.
-    Menu,
-    /// Custom modifier key according to
-    /// [this list](https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
-    Custom(i32),
-}
+pub struct ModKey(pub(crate) i32);
 
 impl ModKey {
-    /// Converts an integer as returned by the low-level API to a mod key.
-    pub fn try_from_raw(value: i32) -> Result<ModKey, TryFromRawError<i32>> {
-        if value < 0 {
-            return Err(TryFromRawError::new("couldn't convert to mod key", value));
-        };
-        use ModKey::*;
-        let key = match value as u32 {
-            raw::VK_SHIFT => Shift,
-            raw::VK_CONTROL => Control,
-            raw::VK_MENU => Menu,
-            _ => Custom(value),
-        };
-        Ok(key)
+    /// Creates a modifier key.
+    pub const fn new(raw: i32) -> Self {
+        Self(raw)
     }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> i32 {
+        self.0
+    }
+}
+
+/// Contains predefined modifier keys.
+pub mod mod_keys {
+    use crate::ModKey;
+    use reaper_low::raw;
+
+    pub const SHIFT: ModKey = ModKey(raw::VK_SHIFT as _);
+    pub const CONTROL: ModKey = ModKey(raw::VK_CONTROL as _);
+    pub const MENU: ModKey = ModKey(raw::VK_MENU as _);
 }
 
 /// Location of a track or take FX including the parent track.
@@ -641,7 +674,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     fn GetTouchState(&self, trackid: *mut raw::MediaTrack, isPan: i32) -> bool {
         self.delegate.get_touch_state(GetTouchStateArgs {
             track: require_non_null_panic(trackid),
-            is_pan: isPan != 0,
+            parameter_type: TouchedParameterType::from_raw(isPan),
         })
     }
 
@@ -662,9 +695,8 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
     }
 
     fn IsKeyDown(&self, key: i32) -> bool {
-        self.delegate.is_key_down(IsKeyDownArgs {
-            key: ModKey::try_from_raw(key).expect("unknown key code"),
-        })
+        self.delegate
+            .is_key_down(IsKeyDownArgs { key: ModKey(key) })
     }
 
     fn Extended(
@@ -805,6 +837,13 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                             track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                             fx_location: get_as_track_fx_location(parm2).expect("invalid FX index"),
                         })
+                }
+                raw::CSURF_EXT_SUPPORTS_EXTENDED_TOUCH => {
+                    if self.delegate.ext_supports_extended_touch() {
+                        1
+                    } else {
+                        0
+                    }
                 }
                 _ => 0,
             }
