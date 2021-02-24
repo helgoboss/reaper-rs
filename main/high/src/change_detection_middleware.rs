@@ -466,17 +466,18 @@ impl ChangeDetectionMiddleware {
             ExtSetBpmAndPlayRate(args) => {
                 if let Some(tempo) = args.tempo {
                     handle_change(ChangeEvent::MasterTempoChanged(MasterTempoChangedEvent {
-                        // If there's a tempo envelope, there are just tempo notifications when the
-                        // tempo is actually changed. So that's okay for "touched".
-                        // TODO-low What about gradual tempo changes?
-                        touched: true,
+                        // At the moment we can't support touched for tempo because we always have
+                        // a tempo map envelope and sometimes there are seemingly random invocations
+                        // of this callback.
+                        touched: false,
                         new_value: tempo,
                     }));
                 }
                 if let Some(play_rate) = args.play_rate {
                     handle_change(ChangeEvent::MasterPlayrateChanged(
                         MasterPlayrateChangedEvent {
-                            // FIXME What about playrate automation?
+                            // The playrate affected by automation is something else, so we can
+                            // always consider this as touched.
                             touched: true,
                             new_value: play_rate,
                         },
