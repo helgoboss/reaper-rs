@@ -24,8 +24,8 @@ use reaper_medium::{
     reaper_str, AutomationMode, Bpm, CommandId, Db, FxPresetRef, GangBehavior, InputMonitoringMode,
     MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate,
     PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordingInput, StuffMidiMessageTarget, TrackLocation,
-    UndoBehavior, ValueChange,
+    ReaperVolumeValue, ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget,
+    TrackLocation, UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -104,6 +104,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         unmute_track(),
         mute_track(),
         solo_track(),
+        unsolo_track(),
+        solo_track_in_place(),
         unsolo_track(),
         generate_guid(),
         main_section_functions(),
@@ -589,6 +591,30 @@ fn solo_track() -> TestStep {
         track.solo();
         // Then
         assert!(track.is_solo());
+        // Started to be 2 when making master track notification work
+        assert_eq!(mock.invocation_count(), 2);
+        assert_eq!(mock.last_arg(), track);
+        Ok(())
+    })
+}
+
+fn solo_track_in_place() -> TestStep {
+    step(AllVersions, "Solo track in place", |_, step| {
+        // Given
+        let track = get_track(0)?;
+        // When
+        let (mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .track_solo_changed()
+                .take_until(step.finished)
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        track.set_solo_mode(SoloMode::SoloInPlace);
+        // Then
+        assert!(track.is_solo());
+        assert_eq!(track.solo_mode(), SoloMode::SoloInPlace);
         // Started to be 2 when making master track notification work
         assert_eq!(mock.invocation_count(), 2);
         assert_eq!(mock.last_arg(), track);

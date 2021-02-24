@@ -15,7 +15,7 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, ReaperWidthValue,
-    RecordArmMode, RecordingInput, TrackAttributeKey, TrackLocation, TrackSendCategory,
+    RecordArmMode, RecordingInput, SoloMode, TrackAttributeKey, TrackLocation, TrackSendCategory,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -411,30 +411,26 @@ impl Track {
     }
 
     pub fn mute(&self) {
-        self.load_and_check_if_necessary_or_complain();
-        let _ = unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .set_media_track_info_value(self.raw(), Mute, 1.0)
-        };
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .csurf_set_surface_mute(self.raw(), true, NotifyAll);
-        }
+        self.set_mute(true);
     }
 
     pub fn unmute(&self) {
+        self.set_mute(false);
+    }
+
+    fn set_mute(&self, mute: bool) {
         self.load_and_check_if_necessary_or_complain();
         let _ = unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .set_media_track_info_value(self.raw(), Mute, 0.0)
+            Reaper::get().medium_reaper().csurf_on_mute_change_ex(
+                self.raw(),
+                mute,
+                GangBehavior::DenyGang,
+            )
         };
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .csurf_set_surface_mute(self.raw(), false, NotifyAll);
+                .csurf_set_surface_mute(self.raw(), mute, NotifyAll);
         }
     }
 
@@ -449,30 +445,51 @@ impl Track {
     }
 
     pub fn solo(&self) {
-        self.load_and_check_if_necessary_or_complain();
-        let _ = unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .set_media_track_info_value(self.raw(), Solo, 1.0)
-        };
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .csurf_set_surface_solo(self.raw(), true, NotifyAll);
-        }
+        self.set_solo(true);
     }
 
     pub fn unsolo(&self) {
+        self.set_solo(false);
+    }
+
+    pub fn solo_mode(&self) -> SoloMode {
         self.load_and_check_if_necessary_or_complain();
-        let _ = unsafe {
+        unsafe {
             Reaper::get()
                 .medium_reaper()
-                .set_media_track_info_value(self.raw(), Solo, 0.0)
+                .get_set_media_track_info_get_solo(self.raw())
+        }
+    }
+
+    pub fn set_solo_mode(&self, mode: SoloMode) {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_track_info_set_solo(self.raw(), mode);
+        }
+        unsafe {
+            Reaper::get().medium_reaper().csurf_set_surface_solo(
+                self.raw(),
+                mode.to_raw() > 0,
+                NotifyAll,
+            );
+        }
+    }
+
+    fn set_solo(&self, solo: bool) {
+        self.load_and_check_if_necessary_or_complain();
+        let _ = unsafe {
+            Reaper::get().medium_reaper().csurf_on_solo_change_ex(
+                self.raw(),
+                solo,
+                GangBehavior::DenyGang,
+            )
         };
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .csurf_set_surface_solo(self.raw(), false, NotifyAll);
+                .csurf_set_surface_solo(self.raw(), solo, NotifyAll);
         }
     }
 

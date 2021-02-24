@@ -690,6 +690,39 @@ impl InputMonitoringMode {
     }
 }
 
+/// Track solo mode.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum SoloMode {
+    Off,
+    SoloIgnoreRouting,
+    SoloInPlace,
+    Custom(i32),
+}
+
+impl SoloMode {
+    /// Converts an integer as returned by the low-level API to a solo mode.
+    pub fn from_raw(v: i32) -> SoloMode {
+        use SoloMode::*;
+        match v {
+            0 => Off,
+            1 => SoloIgnoreRouting,
+            2 => SoloInPlace,
+            x => Custom(x),
+        }
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use SoloMode::*;
+        match self {
+            Off => 0,
+            SoloIgnoreRouting => 1,
+            SoloInPlace => 2,
+            Custom(x) => x,
+        }
+    }
+}
+
 /// Track pan mode.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum PanMode {

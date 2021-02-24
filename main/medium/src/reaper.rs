@@ -21,10 +21,10 @@ use crate::{
     ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
     ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
     ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId,
-    SendTarget, StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    SendTarget, SoloMode, StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey,
+    TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
+    VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -537,7 +537,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.get_set_media_track_info(track, TrackAttributeKey::Name, message.into().as_ptr() as _);
     }
 
-    /// Convenience function which returns the given track's input monitoring mode (I_RECMON).
+    /// Convenience function which returns the given track's input monitoring mode (`I_RECMON`).
     ///
     /// # Safety
     ///
@@ -554,6 +554,37 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
         let irecmon = deref_as::<i32>(ptr).expect("I_RECMON pointer is null");
         InputMonitoringMode::try_from_raw(irecmon).expect("unknown input monitoring mode")
+    }
+
+    /// Convenience function which returns the given track's solo mode (`I_SOLO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_get_solo(&self, track: MediaTrack) -> SoloMode
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Solo, null_mut());
+        let isolo = deref_as::<i32>(ptr).expect("I_SOLO pointer is null");
+        SoloMode::from_raw(isolo)
+    }
+
+    /// Convenience function which sets the track's solo state (`I_SOLO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_set_solo<'a>(&self, track: MediaTrack, mode: SoloMode)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let value = mode.to_raw();
+        self.get_set_media_track_info(track, TrackAttributeKey::Solo, &value as *const _ as _);
     }
 
     /// Convenience function which returns the given track's pan mode (I_PANMODE).
@@ -3593,6 +3624,56 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.CSurf_OnRecArmChangeEx(
             track.as_ptr(),
             mode.to_raw(),
+            gang_behavior == GangBehavior::AllowGang,
+        )
+    }
+
+    /// Mutes or unmutes the given track.
+    ///
+    /// Seems to return the mute state that has been set.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn csurf_on_mute_change_ex(
+        &self,
+        track: MediaTrack,
+        mute: bool,
+        gang_behavior: GangBehavior,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CSurf_OnMuteChangeEx(
+            track.as_ptr(),
+            if mute { 1 } else { 0 },
+            gang_behavior == GangBehavior::AllowGang,
+        )
+    }
+
+    /// Soloes or unsoloes the given track.
+    ///
+    /// Seems to return the solo state that has been set.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn csurf_on_solo_change_ex(
+        &self,
+        track: MediaTrack,
+        solo: bool,
+        gang_behavior: GangBehavior,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CSurf_OnSoloChangeEx(
+            track.as_ptr(),
+            if solo { 1 } else { 0 },
             gang_behavior == GangBehavior::AllowGang,
         )
     }
