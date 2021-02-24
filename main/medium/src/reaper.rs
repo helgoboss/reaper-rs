@@ -578,7 +578,7 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// REAPER can crash if you pass an invalid track.
     #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn get_set_media_track_info_set_solo<'a>(&self, track: MediaTrack, mode: SoloMode)
+    pub unsafe fn get_set_media_track_info_set_solo(&self, track: MediaTrack, mode: SoloMode)
     where
         UsageScope: MainThreadOnly,
     {
