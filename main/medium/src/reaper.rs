@@ -553,7 +553,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
         let irecmon = deref_as::<i32>(ptr).expect("I_RECMON pointer is null");
-        InputMonitoringMode::try_from_raw(irecmon).expect("unknown input monitoring mode")
+        InputMonitoringMode::from_raw(irecmon)
     }
 
     /// Convenience function which returns the given track's solo mode (`I_SOLO`).
@@ -605,7 +605,7 @@ impl<UsageScope> Reaper<UsageScope> {
         if ipanmode == -1 {
             return None;
         }
-        Some(PanMode::try_from_raw(ipanmode).expect("unknown pan mode"))
+        Some(PanMode::from_raw(ipanmode))
     }
 
     /// Convenience function which returns the given track's pan (D_PAN).
@@ -697,7 +697,7 @@ impl<UsageScope> Reaper<UsageScope> {
         if rec_input_index < 0 {
             None
         } else {
-            Some(RecordingInput::try_from_raw(rec_input_index).expect("unknown recording input"))
+            Some(RecordingInput::from_raw(rec_input_index))
         }
     }
 
@@ -1245,7 +1245,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let result = self.low.PromptForAction(0, 0, section_id.to_raw());
-        PromptForActionResult::try_from_raw(result).expect("unexpected return value")
+        PromptForActionResult::from_raw(result)
     }
 
     /// Finishes an action picker session which has been previously created via
@@ -1946,8 +1946,7 @@ impl<UsageScope> Reaper<UsageScope> {
             0 => None,
             1 => Some(TrackFx {
                 track_location: convert_tracknumber_to_track_location(tracknumber),
-                fx_location: TrackFxLocation::try_from_raw(fxnumber)
-                    .expect("unknown track FX location"),
+                fx_location: TrackFxLocation::from_raw(fxnumber),
             }),
             2 => {
                 // TODO-low Add test
@@ -1962,7 +1961,7 @@ impl<UsageScope> Reaper<UsageScope> {
                     fx_index: fxnumber & 0xFFFF,
                 })
             }
-            _ => panic!("Unknown GetFocusedFX result value"),
+            _ => Some(Unknown),
         }
     }
 
@@ -1997,8 +1996,7 @@ impl<UsageScope> Reaper<UsageScope> {
         if tracknumber_high_word == 0 {
             Some(TrackFx {
                 track_location: convert_tracknumber_to_track_location(tracknumber),
-                fx_location: TrackFxLocation::try_from_raw(fxnumber)
-                    .expect("unknown track FX location"),
+                fx_location: TrackFxLocation::from_raw(fxnumber),
                 // Although the parameter is called paramnumber, it's zero-based (checked)
                 param_index: paramnumber,
             })
@@ -2587,7 +2585,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let result = self.low.GetTrackAutomationMode(track.as_ptr());
-        AutomationMode::try_from_raw(result).expect("unknown automation mode")
+        AutomationMode::from_raw(result)
     }
 
     /// Returns the global track automation override, if any.
@@ -2601,9 +2599,7 @@ impl<UsageScope> Reaper<UsageScope> {
         match self.low.GetGlobalAutomationOverride() {
             -1 => None,
             6 => Some(Bypass),
-            x => Some(Mode(
-                AutomationMode::try_from_raw(x).expect("unknown automation mode"),
-            )),
+            x => Some(Mode(AutomationMode::from_raw(x))),
         }
     }
 
@@ -2946,7 +2942,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 r#type.to_raw(),
             )
         };
-        MessageBoxResult::try_from_raw(result).expect("unknown message box result")
+        MessageBoxResult::from_raw(result)
     }
 
     /// Parses the given string as GUID.
@@ -4483,6 +4479,9 @@ pub enum GetFocusedFxResult {
         /// Index of the FX within the take FX chain.
         fx_index: u32,
     },
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {

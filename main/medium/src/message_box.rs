@@ -1,5 +1,3 @@
-use crate::TryFromRawError;
-
 /// Type of message box to be displayed.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum MessageBoxType {
@@ -36,24 +34,24 @@ pub enum MessageBoxResult {
     Ignore,
     Yes,
     No,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl MessageBoxResult {
     /// Converts an integer as returned by the low-level API to an automation mode.
-    pub fn try_from_raw(v: i32) -> Result<MessageBoxResult, TryFromRawError<i32>> {
+    pub fn from_raw(v: i32) -> MessageBoxResult {
         use MessageBoxResult::*;
         match v {
-            1 => Ok(Okay),
-            2 => Ok(Cancel),
-            3 => Ok(Abort),
-            4 => Ok(Retry),
-            5 => Ok(Ignore),
-            6 => Ok(Yes),
-            7 => Ok(No),
-            _ => Err(TryFromRawError::new(
-                "couldn't convert to message box result",
-                v,
-            )),
+            1 => Okay,
+            2 => Cancel,
+            3 => Abort,
+            4 => Retry,
+            5 => Ignore,
+            6 => Yes,
+            7 => No,
+            _ => Unknown,
         }
     }
 }

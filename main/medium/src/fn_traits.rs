@@ -51,8 +51,7 @@ pub(crate) extern "C" fn delegating_hook_command_2<T: HookCommand2>(
     firewall(|| {
         let kbd_section_info = NonNull::new(sec).map(KbdSectionInfo);
         let section_context = SectionContext::from_medium(kbd_section_info.as_ref());
-        let value_change =
-            ActionValueChange::try_from_raw((val, valhw, relmode)).expect("unexpected values");
+        let value_change = ActionValueChange::from_raw((val, valhw, relmode));
         let window_context = WindowContext::from_raw(hwnd);
         T::call(
             section_context,
@@ -134,8 +133,7 @@ pub(crate) extern "C" fn delegating_hook_post_command_2<T: HookPostCommand2>(
     firewall(|| {
         let kbd_section_info = NonNull::new(section).map(KbdSectionInfo);
         let section_context = SectionContext::from_medium(kbd_section_info.as_ref());
-        let value_change =
-            ActionValueChange::try_from_raw((val, valhw, relmode)).expect("unexpected values");
+        let value_change = ActionValueChange::from_raw((val, valhw, relmode));
         let window_context = WindowContext::from_raw(hwnd);
         T::call(
             section_context,

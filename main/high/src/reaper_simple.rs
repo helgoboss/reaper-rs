@@ -98,6 +98,7 @@ impl Reaper {
                         })
                         .next()
                 }
+                Unknown => None,
             }
         })
     }

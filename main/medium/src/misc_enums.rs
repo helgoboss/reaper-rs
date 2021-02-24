@@ -1,13 +1,13 @@
 use crate::{
     CommandId, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId, ReaProject,
-    ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue, TryFromRawError,
+    ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue,
 };
 
 use crate::util::concat_reaper_strs;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
-use std::convert::TryInto;
+use std::convert::TryFrom;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
@@ -275,21 +275,24 @@ pub enum TrackFxLocation {
     ///
     /// On the master track (if applicable) this represents an index in the monitoring FX chain.
     InputFxChain(u32),
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl TrackFxLocation {
     /// Converts an integer as returned by the low-level API to a track FX location.
-    pub fn try_from_raw(v: i32) -> Result<TrackFxLocation, TryFromRawError<i32>> {
+    pub fn from_raw(v: i32) -> TrackFxLocation {
         use TrackFxLocation::*;
-        let v: u32 = v
-            .try_into()
-            .map_err(|_| TryFromRawError::new("FX index shouldn't be negative", v))?;
-        let result = if v >= 0x0100_0000 {
-            InputFxChain(v - 0x0100_0000)
+        if let Ok(v) = u32::try_from(v) {
+            if v >= 0x0100_0000 {
+                InputFxChain(v - 0x0100_0000)
+            } else {
+                NormalFxChain(v)
+            }
         } else {
-            NormalFxChain(v)
-        };
-        Ok(result)
+            Unknown
+        }
     }
 
     /// Converts this value to an integer as expected by the low-level API.
@@ -298,6 +301,7 @@ impl TrackFxLocation {
         let positive = match self {
             InputFxChain(idx) => 0x0100_0000 + idx,
             NormalFxChain(idx) => idx,
+            Unknown => panic!("not allowed"),
         };
         positive as i32
     }
@@ -351,6 +355,9 @@ pub enum ActionValueChange {
     /// - 65 → -1
     /// - 1 → +1
     Relative3(U7),
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl ActionValueChange {
@@ -367,41 +374,36 @@ impl ActionValueChange {
             Relative1(v) => (i32::from(v), -1, 1),
             Relative2(v) => (i32::from(v), -1, 2),
             Relative3(v) => (i32::from(v), -1, 3),
+            Unknown => panic!("not allowed"),
         }
     }
 
     /// Converts the given low-level API values to this action value change if possible.
-    pub(crate) fn try_from_raw(
-        raw: (i32, i32, i32),
-    ) -> Result<ActionValueChange, TryFromRawError<(i32, i32, i32)>> {
+    pub(crate) fn from_raw(raw: (i32, i32, i32)) -> ActionValueChange {
         let (val, valhw, relmode) = raw;
-        let val: U7 = val
-            .try_into()
-            .map_err(|_| TryFromRawError::new("val must be 7-bit", raw))?;
         use ActionValueChange::*;
-        let change = match (valhw, relmode) {
-            (-1, 0) | (-1, 1) | (-1, 2) | (-1, 3) => match relmode {
-                0 => AbsoluteLowRes(val),
-                1 => Relative1(val),
-                2 => Relative2(val),
-                3 => Relative3(val),
-                _ => unreachable!(),
-            },
-            (valhw, 0) if valhw >= 0 => {
-                let valhw: U7 = valhw
-                    .try_into()
-                    .map_err(|_| TryFromRawError::new("valhw must be 7-bit", raw))?;
-                let combined = (valhw.get() << 7) | val.get();
-                AbsoluteHighRes(combined.into())
+        if let Ok(val) = U7::try_from(val) {
+            match (valhw, relmode) {
+                (-1, 0) | (-1, 1) | (-1, 2) | (-1, 3) => match relmode {
+                    0 => AbsoluteLowRes(val),
+                    1 => Relative1(val),
+                    2 => Relative2(val),
+                    3 => Relative3(val),
+                    _ => Unknown,
+                },
+                (valhw, 0) if valhw >= 0 => {
+                    if let Ok(valhw) = U7::try_from(valhw) {
+                        let combined = (valhw.get() << 7) | val.get();
+                        AbsoluteHighRes(combined.into())
+                    } else {
+                        Unknown
+                    }
+                }
+                _ => Unknown,
             }
-            _ => {
-                return Err(TryFromRawError::new(
-                    "invalid valhw/relmode combination",
-                    raw,
-                ));
-            }
-        };
-        Ok(change)
+        } else {
+            Unknown
+        }
     }
 }
 
@@ -662,20 +664,20 @@ pub enum InputMonitoringMode {
     Normal,
     /// Monitoring only happens when playing (tape style).
     NotWhenPlaying,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl InputMonitoringMode {
     /// Converts an integer as returned by the low-level API to an input monitoring mode.
-    pub fn try_from_raw(v: i32) -> Result<InputMonitoringMode, TryFromRawError<i32>> {
+    pub fn from_raw(v: i32) -> InputMonitoringMode {
         use InputMonitoringMode::*;
         match v {
-            0 => Ok(Off),
-            1 => Ok(Normal),
-            2 => Ok(NotWhenPlaying),
-            _ => Err(TryFromRawError::new(
-                "couldn't convert to input monitoring mode",
-                v,
-            )),
+            0 => Off,
+            1 => Normal,
+            2 => NotWhenPlaying,
+            _ => Unknown,
         }
     }
 
@@ -686,6 +688,7 @@ impl InputMonitoringMode {
             Off => 0,
             Normal => 1,
             NotWhenPlaying => 2,
+            Unknown => panic!("not allowed"),
         }
     }
 }
@@ -696,7 +699,9 @@ pub enum SoloMode {
     Off,
     SoloIgnoreRouting,
     SoloInPlace,
-    Custom(i32),
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl SoloMode {
@@ -707,7 +712,7 @@ impl SoloMode {
             0 => Off,
             1 => SoloIgnoreRouting,
             2 => SoloInPlace,
-            x => Custom(x),
+            _ => Unknown,
         }
     }
 
@@ -718,7 +723,7 @@ impl SoloMode {
             Off => 0,
             SoloIgnoreRouting => 1,
             SoloInPlace => 2,
-            Custom(x) => x,
+            Unknown => panic!("not allowed"),
         }
     }
 }
@@ -734,20 +739,22 @@ pub enum PanMode {
     StereoPan,
     /// Dual pan.
     DualPan,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl PanMode {
     /// Converts an integer as returned by the low-level API to a pan mode.
-    pub fn try_from_raw(v: i32) -> Result<PanMode, TryFromRawError<i32>> {
+    pub fn from_raw(v: i32) -> PanMode {
         use PanMode::*;
-        let mode = match v {
+        match v {
             0 => BalanceV1,
             3 => BalanceV4,
             5 => StereoPan,
             6 => DualPan,
-            _ => return Err(TryFromRawError::new("couldn't convert to pan mode", v)),
-        };
-        Ok(mode)
+            _ => Unknown,
+        }
     }
 
     /// Converts this value to an integer as expected by the low-level API.
@@ -758,6 +765,7 @@ impl PanMode {
             BalanceV4 => 3,
             StereoPan => 5,
             DualPan => 6,
+            Unknown => panic!("not allowed"),
         }
     }
 }
@@ -779,6 +787,9 @@ pub enum Pan {
         left: ReaperPanValue,
         right: ReaperPanValue,
     },
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 /// Something which refers to a certain project.
@@ -986,24 +997,21 @@ pub enum PromptForActionResult {
     NoneSelected,
     /// Action with the given command ID is selected.
     Selected(CommandId),
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl PromptForActionResult {
     /// Converts an integer as returned by the low-level API to this result.
-    pub fn try_from_raw(v: i32) -> Result<PromptForActionResult, TryFromRawError<i32>> {
+    pub fn from_raw(v: i32) -> PromptForActionResult {
         use PromptForActionResult::*;
-        let result = match v {
+        match v {
             0 => NoneSelected,
             id if id > 0 => Selected(CommandId::new(id as u32)),
             -1 => ActionWindowGone,
-            _ => {
-                return Err(TryFromRawError::new(
-                    "invalid prompt-for-action result value",
-                    v,
-                ));
-            }
-        };
-        Ok(result)
+            _ => Unknown,
+        }
     }
 }
 

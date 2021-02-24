@@ -3,7 +3,7 @@ use super::MediaTrack;
 use crate::{
     require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, Pan, PanMode,
     PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
-    ReaperVolumeValue, TrackFxChainType, TrackFxLocation, TryFromRawError,
+    ReaperVolumeValue, TrackFxChainType, TrackFxLocation,
 };
 
 use reaper_low::raw;
@@ -414,9 +414,7 @@ pub struct ExtSetLastTouchedFxArgs {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct ExtSetFxOpenArgs {
     pub track: MediaTrack,
-    // It can happen that the location is not reported. Happened to me when the affected FX was
-    // floating.
-    pub fx_location: Option<VersionDependentTrackFxLocation>,
+    pub fx_location: VersionDependentTrackFxLocation,
     pub is_open: bool,
 }
 
@@ -547,8 +545,7 @@ impl DelegatingControlSurface {
             track: require_non_null_panic(media_track_ptr as *mut raw::MediaTrack),
             fx_location: if media_item_ptr.is_null() {
                 VersionDependentFxLocation::TrackFx(
-                    self.get_as_version_dependent_track_fx_ref(fx_index_ptr)
-                        .expect("weird FX index"),
+                    self.get_as_version_dependent_track_fx_ref(fx_index_ptr),
                 )
             } else {
                 VersionDependentFxLocation::TakeFx {
@@ -564,14 +561,13 @@ impl DelegatingControlSurface {
     unsafe fn get_as_version_dependent_track_fx_ref(
         &self,
         ptr: *mut c_void,
-    ) -> Result<VersionDependentTrackFxLocation, TryFromRawError<i32>> {
+    ) -> VersionDependentTrackFxLocation {
         let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
-        let location = if self.supports_detection_of_input_fx {
-            VersionDependentTrackFxLocation::New(TrackFxLocation::try_from_raw(fx_index)?)
+        if self.supports_detection_of_input_fx {
+            VersionDependentTrackFxLocation::New(TrackFxLocation::from_raw(fx_index))
         } else {
             VersionDependentTrackFxLocation::Old(fx_index as u32)
-        };
-        Ok(location)
+        }
     }
 }
 
@@ -680,7 +676,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
 
     fn SetAutoMode(&self, mode: i32) {
         self.delegate.set_auto_mode(SetAutoModeArgs {
-            mode: AutomationMode::try_from_raw(mode).expect("unknown automation mode"),
+            mode: AutomationMode::from_raw(mode),
         })
     }
 
@@ -713,8 +709,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                     let recmon: i32 = deref_as(parm2).expect("recmon pointer is null");
                     self.delegate.ext_set_input_monitor(ExtSetInputMonitorArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                        mode: InputMonitoringMode::try_from_raw(recmon)
-                            .expect("unknown input monitoring mode"),
+                        mode: InputMonitoringMode::from_raw(recmon),
                     })
                 }
                 raw::CSURF_EXT_SETFXPARAM | raw::CSURF_EXT_SETFXPARAM_RECFX => {
@@ -751,7 +746,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                 }
                 raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_set_fx_open(ExtSetFxOpenArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                    fx_location: self.get_as_version_dependent_track_fx_ref(parm2).ok(),
+                    fx_location: self.get_as_version_dependent_track_fx_ref(parm2),
                     is_open: interpret_as_bool(parm3),
                 }),
                 raw::CSURF_EXT_SETFXENABLED => {
@@ -761,9 +756,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                     } else {
                         self.delegate.ext_set_fx_enabled(ExtSetFxEnabledArgs {
                             track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                            fx_location: self
-                                .get_as_version_dependent_track_fx_ref(parm2)
-                                .expect("weird FX index"),
+                            fx_location: self.get_as_version_dependent_track_fx_ref(parm2),
                             is_enabled: interpret_as_bool(parm3),
                         })
                     }
@@ -785,7 +778,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                     let mode: i32 = deref_as(parm3).expect("pan mode pointer is null");
                     use PanMode::*;
                     let pan_null_msg = "pan pointer is null";
-                    let pan = match PanMode::try_from_raw(mode).expect("unknown pan mode") {
+                    let pan = match PanMode::from_raw(mode) {
                         BalanceV1 => Pan::BalanceV1(deref_as(parm2).expect(pan_null_msg)),
                         BalanceV4 => Pan::BalanceV4(deref_as(parm2).expect(pan_null_msg)),
                         StereoPan => Pan::StereoPan {
@@ -802,6 +795,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                                 deref_as(next as _).expect("right pan is null")
                             },
                         },
+                        Unknown => Pan::Unknown,
                     };
                     self.delegate.ext_set_pan_ex(ExtSetPanExArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
@@ -835,7 +829,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                     self.delegate
                         .ext_track_fx_preset_changed(ExtTrackFxPresetChangedArgs {
                             track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
-                            fx_location: get_as_track_fx_location(parm2).expect("invalid FX index"),
+                            fx_location: get_as_track_fx_location(parm2),
                         })
                 }
                 raw::CSURF_EXT_SUPPORTS_EXTENDED_TOUCH => {
@@ -875,9 +869,7 @@ unsafe fn interpret_as_bool(ptr: *mut c_void) -> bool {
     !ptr.is_null()
 }
 
-unsafe fn get_as_track_fx_location(
-    ptr: *mut c_void,
-) -> Result<TrackFxLocation, TryFromRawError<i32>> {
+unsafe fn get_as_track_fx_location(ptr: *mut c_void) -> TrackFxLocation {
     let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
-    TrackFxLocation::try_from_raw(fx_index)
+    TrackFxLocation::from_raw(fx_index)
 }

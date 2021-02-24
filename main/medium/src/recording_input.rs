@@ -1,7 +1,7 @@
-use crate::{MidiInputDeviceId, TryFromRawError};
+use crate::MidiInputDeviceId;
 
 use helgoboss_midi::Channel;
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 
 /// Recording input of a track.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -18,6 +18,9 @@ pub enum RecordingInput {
         device_id: Option<MidiInputDeviceId>,
         channel: Option<Channel>,
     },
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl RecordingInput {
@@ -26,46 +29,41 @@ impl RecordingInput {
     /// # Errors
     ///
     /// Fails if the given integer is not a valid recording input index.
-    pub fn try_from_raw(rec_input_index: i32) -> Result<RecordingInput, TryFromRawError<i32>> {
+    pub fn from_raw(rec_input_index: i32) -> RecordingInput {
         use RecordingInput::*;
-        let v: u32 = rec_input_index.try_into().map_err(|_| {
-            TryFromRawError::new("couldn't convert to recording input", rec_input_index)
-        })?;
-        match v {
-            0..=511 => Ok(Mono(v)),
-            512..=1023 => Ok(MonoReaRoute(v - 512)),
-            1024..=1535 => Ok(Stereo(v - 1024)),
-            1536..=2047 => Ok(StereoReaRoute(v - 1536)),
-            2048..=4095 => Err(TryFromRawError::new(
-                "couldn't convert to recording input",
-                rec_input_index,
-            )),
-            4096..=6128 => {
-                let midi_index = v - 4096;
-                Ok(Midi {
-                    device_id: {
-                        let raw_device_id = midi_index / 32;
-                        if raw_device_id == ALL_MIDI_DEVICES_FACTOR {
-                            None
-                        } else {
-                            Some(MidiInputDeviceId::new(raw_device_id as u8))
-                        }
-                    },
-                    channel: {
-                        let channel_id = midi_index % 32;
-                        if channel_id == 0 {
-                            None
-                        } else {
-                            let ch = channel_id - 1;
-                            ch.try_into().ok()
-                        }
-                    },
-                })
+        if let Ok(v) = u32::try_from(rec_input_index) {
+            match v {
+                0..=511 => Mono(v),
+                512..=1023 => MonoReaRoute(v - 512),
+                1024..=1535 => Stereo(v - 1024),
+                1536..=2047 => StereoReaRoute(v - 1536),
+                2048..=4095 => Unknown,
+                4096..=6128 => {
+                    let midi_index = v - 4096;
+                    Midi {
+                        device_id: {
+                            let raw_device_id = midi_index / 32;
+                            if raw_device_id == ALL_MIDI_DEVICES_FACTOR {
+                                None
+                            } else {
+                                Some(MidiInputDeviceId::new(raw_device_id as u8))
+                            }
+                        },
+                        channel: {
+                            let channel_id = midi_index % 32;
+                            if channel_id == 0 {
+                                None
+                            } else {
+                                let ch = channel_id - 1;
+                                ch.try_into().ok()
+                            }
+                        },
+                    }
+                }
+                _ => Unknown,
             }
-            _ => Err(TryFromRawError::new(
-                "couldn't convert to recording input",
-                rec_input_index,
-            )),
+        } else {
+            Unknown
         }
     }
 
@@ -88,6 +86,7 @@ impl RecordingInput {
                 };
                 4096 + (device_high * 32 + channel_low)
             }
+            Unknown => panic!("not allowed"),
         };
         result as i32
     }

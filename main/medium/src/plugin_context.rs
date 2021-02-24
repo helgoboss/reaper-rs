@@ -194,7 +194,7 @@ impl<'a> VstPluginContext<'a> {
             return None;
         }
         let raw_index = result - 1;
-        TrackFxLocation::try_from_raw(raw_index).ok()
+        Some(TrackFxLocation::from_raw(raw_index))
     }
 
     /// Returns the channel count of the REAPER track which contains the given VST plug-in.

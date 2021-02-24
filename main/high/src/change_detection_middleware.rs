@@ -407,11 +407,7 @@ impl ChangeDetectionMiddleware {
             ExtSetFxOpen(args) => {
                 // Unfortunately, we don't have a ReaProject* here. Therefore we pass a nullptr.
                 let track = Track::new(args.track, None);
-                let fx_location = match args.fx_location {
-                    None => return,
-                    Some(l) => l,
-                };
-                if let Some(fx) = self.fx_from_parm_fx_index(&track, fx_location, None, None) {
+                if let Some(fx) = self.fx_from_parm_fx_index(&track, args.fx_location, None, None) {
                     // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2
                     // and on chunk manipulations
                     if let Some(mut td) = self.find_track_data(track.raw()) {
@@ -792,7 +788,7 @@ impl ChangeDetectionMiddleware {
                                     proj_conf_result.offset,
                                 ) as *mut i32;
                                 let ipanmode = *var;
-                                PanMode::try_from_raw(ipanmode).expect("unknown project pan mode")
+                                PanMode::from_raw(ipanmode)
                             };
                             use PanMode::*;
                             let track_pan_mode = func
@@ -813,6 +809,7 @@ impl ChangeDetectionMiddleware {
                                     left: func.get_set_media_track_info_get_dual_pan_l(mt),
                                     right: func.get_set_media_track_info_get_dual_pan_r(mt),
                                 },
+                                Unknown => Pan::Unknown,
                             }
                         },
                         selected: func.get_media_track_info_value(mt, TrackAttributeKey::Selected)

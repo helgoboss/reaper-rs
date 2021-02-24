@@ -1,5 +1,3 @@
-use crate::TryFromRawError;
-
 /// Global override of track automation modes.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum GlobalAutomationModeOverride {
@@ -18,23 +16,23 @@ pub enum AutomationMode {
     Write,
     Latch,
     LatchPreview,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown,
 }
 
 impl AutomationMode {
     /// Converts an integer as returned by the low-level API to an automation mode.
-    pub fn try_from_raw(v: i32) -> Result<AutomationMode, TryFromRawError<i32>> {
+    pub fn from_raw(v: i32) -> AutomationMode {
         use AutomationMode::*;
         match v {
-            0 => Ok(TrimRead),
-            1 => Ok(Read),
-            2 => Ok(Touch),
-            3 => Ok(Write),
-            4 => Ok(Latch),
-            5 => Ok(LatchPreview),
-            _ => Err(TryFromRawError::new(
-                "couldn't convert to automation mode",
-                v,
-            )),
+            0 => TrimRead,
+            1 => Read,
+            2 => Touch,
+            3 => Write,
+            4 => Latch,
+            5 => LatchPreview,
+            _ => Unknown,
         }
     }
 
@@ -48,6 +46,7 @@ impl AutomationMode {
             Write => 3,
             Latch => 4,
             LatchPreview => 5,
+            Unknown => panic!("not allowed"),
         }
     }
 }
@@ -63,7 +62,7 @@ mod test {
 
     #[test]
     fn from_int() {
-        assert_eq!(AutomationMode::try_from_raw(3), Ok(AutomationMode::Write));
-        assert!(AutomationMode::try_from_raw(7).is_err());
+        assert_eq!(AutomationMode::from_raw(3), AutomationMode::Write);
+        assert_eq!(AutomationMode::from_raw(7), AutomationMode::Unknown);
     }
 }
