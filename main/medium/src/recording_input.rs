@@ -1,4 +1,4 @@
-use crate::MidiInputDeviceId;
+use crate::{Hidden, MidiInputDeviceId};
 
 use helgoboss_midi::Channel;
 use std::convert::{TryFrom, TryInto};
@@ -20,7 +20,7 @@ pub enum RecordingInput {
     },
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl RecordingInput {
@@ -37,7 +37,7 @@ impl RecordingInput {
                 512..=1023 => MonoReaRoute(v - 512),
                 1024..=1535 => Stereo(v - 1024),
                 1536..=2047 => StereoReaRoute(v - 1536),
-                2048..=4095 => Unknown,
+                2048..=4095 => Unknown(Hidden(rec_input_index)),
                 4096..=6128 => {
                     let midi_index = v - 4096;
                     Midi {
@@ -60,10 +60,10 @@ impl RecordingInput {
                         },
                     }
                 }
-                _ => Unknown,
+                _ => Unknown(Hidden(rec_input_index)),
             }
         } else {
-            Unknown
+            Unknown(Hidden(rec_input_index))
         }
     }
 
@@ -86,7 +86,7 @@ impl RecordingInput {
                 };
                 4096 + (device_high * 32 + channel_low)
             }
-            Unknown => panic!("not allowed"),
+            Unknown(Hidden(x)) => return x,
         };
         result as i32
     }

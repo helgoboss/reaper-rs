@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, Bpm, InputMonitoringMode, Pan, PanMode,
+    require_non_null_panic, AutomationMode, Bpm, Hidden, InputMonitoringMode, Pan, PanMode,
     PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
     ReaperVolumeValue, TrackFxChainType, TrackFxLocation,
 };
@@ -320,7 +320,7 @@ pub enum TouchedParameterType {
     Width,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl TouchedParameterType {
@@ -331,7 +331,7 @@ impl TouchedParameterType {
             0 => Volume,
             1 => Pan,
             2 => Width,
-            _ => Unknown,
+            x => Unknown(Hidden(x)),
         }
     }
 }
@@ -795,7 +795,7 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                                 deref_as(next as _).expect("right pan is null")
                             },
                         },
-                        Unknown => Pan::Unknown,
+                        Unknown(x) => Pan::Unknown(x),
                     };
                     self.delegate.ext_set_pan_ex(ExtSetPanExArgs {
                         track: require_non_null_panic(parm1 as *mut raw::MediaTrack),

@@ -871,3 +871,10 @@ impl MidiFrameOffset {
         self.0 as i32
     }
 }
+
+/// Represents a value which can neither be accessed nor created by the consumer.
+///
+/// It's mainly used inside `Unknown` variants in order to enable forward compatibility without
+/// information loss.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct Hidden<T>(pub(crate) T);

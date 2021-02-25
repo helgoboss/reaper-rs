@@ -1,3 +1,5 @@
+use crate::Hidden;
+
 /// Global override of track automation modes.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum GlobalAutomationModeOverride {
@@ -18,7 +20,7 @@ pub enum AutomationMode {
     LatchPreview,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl AutomationMode {
@@ -32,7 +34,7 @@ impl AutomationMode {
             3 => Write,
             4 => Latch,
             5 => LatchPreview,
-            _ => Unknown,
+            x => Unknown(Hidden(x)),
         }
     }
 
@@ -46,7 +48,7 @@ impl AutomationMode {
             Write => 3,
             Latch => 4,
             LatchPreview => 5,
-            Unknown => panic!("not allowed"),
+            Unknown(Hidden(x)) => x,
         }
     }
 }
@@ -63,6 +65,9 @@ mod test {
     #[test]
     fn from_int() {
         assert_eq!(AutomationMode::from_raw(3), AutomationMode::Write);
-        assert_eq!(AutomationMode::from_raw(7), AutomationMode::Unknown);
+        assert!(matches!(
+            AutomationMode::from_raw(7),
+            AutomationMode::Unknown(_)
+        ));
     }
 }

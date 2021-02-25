@@ -809,7 +809,7 @@ impl ChangeDetectionMiddleware {
                                     left: func.get_set_media_track_info_get_dual_pan_l(mt),
                                     right: func.get_set_media_track_info_get_dual_pan_r(mt),
                                 },
-                                Unknown => Pan::Unknown,
+                                Unknown(x) => Pan::Unknown(x),
                             }
                         },
                         selected: func.get_media_track_info_value(mt, TrackAttributeKey::Selected)

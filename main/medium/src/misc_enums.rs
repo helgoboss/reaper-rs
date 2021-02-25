@@ -1,6 +1,6 @@
 use crate::{
-    CommandId, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId, ReaProject,
-    ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue,
+    CommandId, Hidden, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId,
+    ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue,
 };
 
 use crate::util::concat_reaper_strs;
@@ -277,7 +277,7 @@ pub enum TrackFxLocation {
     InputFxChain(u32),
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl TrackFxLocation {
@@ -291,8 +291,7 @@ impl TrackFxLocation {
                 NormalFxChain(v)
             }
         } else {
-            println!("TODO-high UNKNOWN TRACK FX LOCATION {}", v);
-            Unknown
+            Unknown(Hidden(v))
         }
     }
 
@@ -302,7 +301,7 @@ impl TrackFxLocation {
         let positive = match self {
             InputFxChain(idx) => 0x0100_0000 + idx,
             NormalFxChain(idx) => idx,
-            Unknown => panic!("not allowed"),
+            Unknown(Hidden(x)) => return x,
         };
         positive as i32
     }
@@ -358,7 +357,7 @@ pub enum ActionValueChange {
     Relative3(U7),
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<(i32, i32, i32)>),
 }
 
 impl ActionValueChange {
@@ -375,7 +374,7 @@ impl ActionValueChange {
             Relative1(v) => (i32::from(v), -1, 1),
             Relative2(v) => (i32::from(v), -1, 2),
             Relative3(v) => (i32::from(v), -1, 3),
-            Unknown => panic!("not allowed"),
+            Unknown(Hidden((a, b, c))) => (a, b, c),
         }
     }
 
@@ -390,20 +389,20 @@ impl ActionValueChange {
                     1 => Relative1(val),
                     2 => Relative2(val),
                     3 => Relative3(val),
-                    _ => Unknown,
+                    _ => Unknown(Hidden((raw.0, raw.1, raw.2))),
                 },
                 (valhw, 0) if valhw >= 0 => {
                     if let Ok(valhw) = U7::try_from(valhw) {
                         let combined = (valhw.get() << 7) | val.get();
                         AbsoluteHighRes(combined.into())
                     } else {
-                        Unknown
+                        Unknown(Hidden((raw.0, raw.1, raw.2)))
                     }
                 }
-                _ => Unknown,
+                _ => Unknown(Hidden((raw.0, raw.1, raw.2))),
             }
         } else {
-            Unknown
+            Unknown(Hidden((raw.0, raw.1, raw.2)))
         }
     }
 }
@@ -667,7 +666,7 @@ pub enum InputMonitoringMode {
     NotWhenPlaying,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl InputMonitoringMode {
@@ -678,7 +677,7 @@ impl InputMonitoringMode {
             0 => Off,
             1 => Normal,
             2 => NotWhenPlaying,
-            _ => Unknown,
+            x => Unknown(Hidden(x)),
         }
     }
 
@@ -689,7 +688,7 @@ impl InputMonitoringMode {
             Off => 0,
             Normal => 1,
             NotWhenPlaying => 2,
-            Unknown => panic!("not allowed"),
+            Unknown(Hidden(x)) => x,
         }
     }
 }
@@ -702,7 +701,7 @@ pub enum SoloMode {
     SoloInPlace,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl SoloMode {
@@ -713,7 +712,7 @@ impl SoloMode {
             0 => Off,
             1 => SoloIgnoreRouting,
             2 => SoloInPlace,
-            _ => Unknown,
+            x => Unknown(Hidden(x)),
         }
     }
 
@@ -724,7 +723,7 @@ impl SoloMode {
             Off => 0,
             SoloIgnoreRouting => 1,
             SoloInPlace => 2,
-            Unknown => panic!("not allowed"),
+            Unknown(Hidden(x)) => x,
         }
     }
 }
@@ -742,7 +741,7 @@ pub enum PanMode {
     DualPan,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl PanMode {
@@ -754,7 +753,7 @@ impl PanMode {
             3 => BalanceV4,
             5 => StereoPan,
             6 => DualPan,
-            _ => Unknown,
+            x => Unknown(Hidden(x)),
         }
     }
 
@@ -766,7 +765,7 @@ impl PanMode {
             BalanceV4 => 3,
             StereoPan => 5,
             DualPan => 6,
-            Unknown => panic!("not allowed"),
+            Unknown(Hidden(x)) => x,
         }
     }
 }
@@ -790,7 +789,7 @@ pub enum Pan {
     },
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 /// Something which refers to a certain project.
@@ -1000,7 +999,7 @@ pub enum PromptForActionResult {
     Selected(CommandId),
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl PromptForActionResult {
@@ -1011,7 +1010,7 @@ impl PromptForActionResult {
             0 => NoneSelected,
             id if id > 0 => Selected(CommandId::new(id as u32)),
             -1 => ActionWindowGone,
-            _ => Unknown,
+            x => Unknown(Hidden(x)),
         }
     }
 }

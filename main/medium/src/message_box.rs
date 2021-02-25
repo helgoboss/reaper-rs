@@ -1,3 +1,5 @@
+use crate::Hidden;
+
 /// Type of message box to be displayed.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum MessageBoxType {
@@ -36,7 +38,7 @@ pub enum MessageBoxResult {
     No,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 impl MessageBoxResult {
@@ -51,7 +53,7 @@ impl MessageBoxResult {
             5 => Ignore,
             6 => Yes,
             7 => No,
-            _ => Unknown,
+            x => Unknown(Hidden(x)),
         }
     }
 }

@@ -14,7 +14,7 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint,
     CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
-    GlobalAutomationModeOverride, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
+    GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
     MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior,
     Pan, PanMode, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef,
@@ -1961,7 +1961,7 @@ impl<UsageScope> Reaper<UsageScope> {
                     fx_index: fxnumber & 0xFFFF,
                 })
             }
-            _ => Some(Unknown),
+            x => Some(Unknown(Hidden(x))),
         }
     }
 
@@ -3169,7 +3169,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 left: ReaperPanValue(pan_1.assume_init()),
                 right: ReaperPanValue(pan_2.assume_init()),
             },
-            Unknown => Pan::Unknown,
+            Unknown(x) => Pan::Unknown(x),
         };
         Ok(pan)
     }
@@ -4530,7 +4530,7 @@ pub enum GetFocusedFxResult {
     },
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
-    Unknown,
+    Unknown(Hidden<i32>),
 }
 
 fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
