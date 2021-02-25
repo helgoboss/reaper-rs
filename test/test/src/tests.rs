@@ -1492,10 +1492,10 @@ fn query_track_width() -> TestStep {
         // Given
         let track = get_track(0)?;
         // When
-        let pan = track.width();
+        let width = track.width();
         // Then
-        assert_eq!(pan.reaper_value(), ReaperWidthValue::MAX);
-        assert_eq!(pan.normalized_value(), 1.0);
+        assert_eq!(width.reaper_value(), ReaperWidthValue::MAX);
+        assert_eq!(width.normalized_value(), 1.0);
         Ok(())
     })
 }

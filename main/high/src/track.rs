@@ -159,8 +159,8 @@ impl Track {
             Reaper::get()
                 .medium_reaper()
                 .get_track_ui_vol_pan(self.raw())
-        }
-        .expect("Couldn't get vol/pan");
+                .expect("couldn't get vol/pan")
+        };
         Pan::from_reaper_value(result.pan)
     }
 
@@ -187,14 +187,20 @@ impl Track {
 
     pub fn width(&self) -> Width {
         self.load_and_check_if_necessary_or_complain();
-        // TODO-high For Pan, we don't use D_PAN because that returns the wrong value in case an
-        // envelope is written. There's no such thing for D_WIDTH until now. Maybe request it.
+        // It's important that we don't query D_WIDTH because that returns the wrong value in case
+        // an envelope is written
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_media_track_info_value(self.raw(), TrackAttributeKey::Width)
+                .get_track_ui_pan(self.raw())
+                .expect("couldn't get pan/width")
         };
-        Width::from_reaper_value(ReaperWidthValue::new(result))
+        let w = if let reaper_medium::Pan::StereoPan { width, .. } = result {
+            width
+        } else {
+            ReaperWidthValue::CENTER
+        };
+        Width::from_reaper_value(w)
     }
 
     pub fn set_width(&self, width: Width) {

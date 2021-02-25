@@ -291,6 +291,7 @@ impl TrackFxLocation {
                 NormalFxChain(v)
             }
         } else {
+            println!("TODO-high UNKNOWN TRACK FX LOCATION {}", v);
             Unknown
         }
     }

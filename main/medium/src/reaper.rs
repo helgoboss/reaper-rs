@@ -17,14 +17,14 @@ use crate::{
     GlobalAutomationModeOverride, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
     MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior,
-    PanMode, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef, PromptForActionResult,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId,
-    SendTarget, SoloMode, StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
-    VolumeSliderValue, WindowContext,
+    Pan, PanMode, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString,
+    ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode,
+    RecordingInput, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -3092,7 +3092,8 @@ impl<UsageScope> Reaper<UsageScope> {
         Db(self.low.SLIDER2DB(value.get()))
     }
 
-    /// Returns the given track's volume and pan.
+    /// Returns the given track's volume and incomplete pan. Also returns the correct value during
+    /// the process of writing an automation envelope.
     ///
     /// # Errors
     ///
@@ -3125,6 +3126,52 @@ impl<UsageScope> Reaper<UsageScope> {
             volume: ReaperVolumeValue::new(volume.assume_init()),
             pan: ReaperPanValue::new(pan.assume_init()),
         })
+    }
+
+    /// Returns the given track's complete pan. Also returns the correct value during the process of
+    /// writing an automation envelope.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful (unclear when this happens).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_ui_pan(&self, track: MediaTrack) -> ReaperFunctionResult<Pan>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        // We zero them just for being safe.
+        let mut pan_1 = MaybeUninit::zeroed();
+        let mut pan_2 = MaybeUninit::zeroed();
+        let mut pan_mode = MaybeUninit::zeroed();
+        let successful = self.low.GetTrackUIPan(
+            track.as_ptr(),
+            pan_1.as_mut_ptr(),
+            pan_2.as_mut_ptr(),
+            pan_mode.as_mut_ptr(),
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't get track pan"));
+        }
+        use PanMode::*;
+        let pan = match PanMode::from_raw(pan_mode.assume_init()) {
+            BalanceV1 => Pan::BalanceV1(ReaperPanValue(pan_1.assume_init())),
+            BalanceV4 => Pan::BalanceV4(ReaperPanValue(pan_1.assume_init())),
+            StereoPan => Pan::StereoPan {
+                pan: ReaperPanValue(pan_1.assume_init()),
+                width: ReaperWidthValue(pan_2.assume_init()),
+            },
+            DualPan => Pan::DualPan {
+                left: ReaperPanValue(pan_1.assume_init()),
+                right: ReaperPanValue(pan_2.assume_init()),
+            },
+            Unknown => Pan::Unknown,
+        };
+        Ok(pan)
     }
 
     /// Informs control surfaces that the given track's volume has changed.
@@ -3912,7 +3959,8 @@ impl<UsageScope> Reaper<UsageScope> {
         unsafe { create_passing_c_str(ptr) }.map(use_command_name)
     }
 
-    /// Returns a track send's volume and pan.
+    /// Returns a track send's volume and pan. Also returns the correct value during the process
+    /// of writing an automation envelope.
     ///
     /// # Errors
     ///
@@ -3951,7 +3999,8 @@ impl<UsageScope> Reaper<UsageScope> {
         })
     }
 
-    /// Returns whether a track send is muted.
+    /// Returns whether a track send is muted. Also returns the correct value during the process
+    /// of writing an automation envelope.
     ///
     /// # Errors
     ///
