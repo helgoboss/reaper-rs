@@ -17,14 +17,14 @@ use crate::{
     GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
     MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior,
-    Pan, PanMode, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString,
-    ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode,
-    RecordingInput, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    PanMode, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef, PromptForActionResult,
+    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
+    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
+    SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
+    UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -3139,7 +3139,10 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// REAPER can crash if you pass an invalid track.
     #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn get_track_ui_pan(&self, track: MediaTrack) -> ReaperFunctionResult<Pan>
+    pub unsafe fn get_track_ui_pan(
+        &self,
+        track: MediaTrack,
+    ) -> ReaperFunctionResult<GetTrackUiPanResult>
     where
         UsageScope: MainThreadOnly,
     {
@@ -3157,21 +3160,13 @@ impl<UsageScope> Reaper<UsageScope> {
         if !successful {
             return Err(ReaperFunctionError::new("couldn't get track pan"));
         }
-        use PanMode::*;
-        let pan = match PanMode::from_raw(pan_mode.assume_init()) {
-            BalanceV1 => Pan::BalanceV1(ReaperPanValue(pan_1.assume_init())),
-            BalanceV4 => Pan::BalanceV4(ReaperPanValue(pan_1.assume_init())),
-            StereoPan => Pan::StereoPan {
-                pan: ReaperPanValue(pan_1.assume_init()),
-                width: ReaperWidthValue(pan_2.assume_init()),
-            },
-            DualPan => Pan::DualPan {
-                left: ReaperPanValue(pan_1.assume_init()),
-                right: ReaperPanValue(pan_2.assume_init()),
-            },
-            Unknown(x) => Pan::Unknown(x),
+        let pan_mode = PanMode::from_raw(pan_mode.assume_init());
+        let res = GetTrackUiPanResult {
+            pan_mode,
+            pan_1: ReaperPanLikeValue(pan_1.assume_init()),
+            pan_2: ReaperPanLikeValue(pan_2.assume_init()),
         };
-        Ok(pan)
+        Ok(res)
     }
 
     /// Informs control surfaces that the given track's volume has changed.
@@ -4477,6 +4472,20 @@ pub struct VolumeAndPan {
     pub volume: ReaperVolumeValue,
     /// Pan.
     pub pan: ReaperPanValue,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct GetTrackUiPanResult {
+    /// The pan mode.
+    pub pan_mode: PanMode,
+    /// Pan value 1.
+    ///
+    /// Depending on the mode, this is either the only pan, the main pan or the left pan.
+    pub pan_1: ReaperPanLikeValue,
+    /// Pan value 2.
+    ///
+    /// Depending on the mode, this is either the width or the right pan.
+    pub pan_2: ReaperPanLikeValue,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

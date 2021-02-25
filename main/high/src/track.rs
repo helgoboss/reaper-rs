@@ -14,8 +14,8 @@ use reaper_medium::TrackAttributeKey::{Mute, RecArm, RecInput, RecMon, Selected,
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, ReaperWidthValue,
-    RecordArmMode, RecordingInput, SoloMode, TrackAttributeKey, TrackLocation, TrackSendCategory,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
+    RecordingInput, SoloMode, TrackAttributeKey, TrackLocation, TrackSendCategory,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -195,12 +195,7 @@ impl Track {
                 .get_track_ui_pan(self.raw())
                 .expect("couldn't get pan/width")
         };
-        let w = if let reaper_medium::Pan::StereoPan { width, .. } = result {
-            width
-        } else {
-            ReaperWidthValue::CENTER
-        };
-        Width::from_reaper_value(w)
+        Width::from_reaper_value(result.pan_2.as_width_value())
     }
 
     pub fn set_width(&self, width: Width) {

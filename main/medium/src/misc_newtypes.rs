@@ -832,6 +832,74 @@ impl From<ReaperWidthValue> for f64 {
     }
 }
 
+/// This represents a value that could either be a pan or a width value.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+#[repr(transparent)]
+pub struct ReaperPanLikeValue(pub(crate) f64);
+
+impl ReaperPanLikeValue {
+    /// The minimum possible value (-1.0).
+    pub const MIN: ReaperPanLikeValue = ReaperPanLikeValue(-1.0);
+
+    /// The center value (0.0).
+    pub const CENTER: ReaperPanLikeValue = ReaperPanLikeValue(0.0);
+
+    /// The maximum possible value (1.0).
+    pub const MAX: ReaperPanLikeValue = ReaperPanLikeValue(1.0);
+
+    fn is_valid(value: f64) -> bool {
+        ReaperPanLikeValue::MIN.get() <= value && value <= ReaperPanLikeValue::MAX.get()
+    }
+
+    /// Creates a pan-like value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is not within the range supported by REAPER
+    /// `(-1.0..=1.0)`.
+    pub fn new(value: f64) -> ReaperPanLikeValue {
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid ReaperPanLikeValue", value)
+        );
+        ReaperPanLikeValue(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+
+    /// Converts this into a pan value.
+    pub fn as_pan_value(self) -> ReaperPanValue {
+        ReaperPanValue(self.0)
+    }
+
+    /// Converts this into a width value.
+    pub fn as_width_value(self) -> ReaperWidthValue {
+        ReaperWidthValue(self.0)
+    }
+}
+
+impl TryFrom<f64> for ReaperPanLikeValue {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be between -1.0 and 1.0",
+                value,
+            ));
+        }
+        Ok(ReaperPanLikeValue(value))
+    }
+}
+
 /// Represents a particular version of REAPER.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct ReaperVersion<'a>(Cow<'a, ReaperStr>);
