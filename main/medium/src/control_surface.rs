@@ -243,12 +243,19 @@ pub trait ControlSurface: Debug {
         0
     }
 
-    /// Should return `true` if [`get_touch_state()`] wants to deal with parameters other than
-    /// volume and pan.
+    /// Should return `1` if [`get_touch_state()`] wants to deal with parameters other than
+    /// volume and pan (at the moment this is width only).
     ///
     /// [`get_touch_state()`]: #method.get_touch_state
-    fn ext_supports_extended_touch(&self) -> bool {
-        false
+    fn ext_supports_extended_touch(&self, _: ExtSupportsExtendedTouchArgs) -> i32 {
+        0
+    }
+
+    /// Clear all surface state and reset (harder reset than [`set_track_list_change`]).
+    ///
+    /// [`set_track_list_change`]: #method.set_track_list_change
+    fn ext_reset(&self, _: ExtResetArgs) -> i32 {
+        0
     }
 }
 
@@ -431,6 +438,14 @@ pub struct ExtTrackFxPresetChangedArgs {
     pub track: MediaTrack,
     pub fx_location: TrackFxLocation,
 }
+
+/// Just a placeholder for upward compatibility reasons.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct ExtSupportsExtendedTouchArgs;
+
+/// Just a placeholder for upward compatibility reasons.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct ExtResetArgs;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ExtSetBpmAndPlayRateArgs {
@@ -832,13 +847,10 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                             fx_location: get_as_track_fx_location(parm2),
                         })
                 }
-                raw::CSURF_EXT_SUPPORTS_EXTENDED_TOUCH => {
-                    if self.delegate.ext_supports_extended_touch() {
-                        1
-                    } else {
-                        0
-                    }
-                }
+                raw::CSURF_EXT_SUPPORTS_EXTENDED_TOUCH => self
+                    .delegate
+                    .ext_supports_extended_touch(ExtSupportsExtendedTouchArgs),
+                raw::CSURF_EXT_RESET => self.delegate.ext_reset(ExtResetArgs),
                 _ => 0,
             }
         };

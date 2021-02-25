@@ -47,6 +47,7 @@ pub struct MeterMiddlewareMetrics {
     ext_set_fx_change: CustomResponseTime,
     ext_set_bpm_and_play_rate: CustomResponseTime,
     ext_track_fx_preset_changed: CustomResponseTime,
+    ext_reset: CustomResponseTime,
 }
 
 impl MeterMiddlewareMetrics {
@@ -172,6 +173,7 @@ impl MeterMiddlewareMetrics {
                 |m| &m.ext_track_fx_preset_changed,
                 is_critical_default,
             ),
+            MetricDescriptor::new("ext_reset", |m| &m.ext_reset, is_critical_default),
         ]
     }
 }
@@ -199,7 +201,7 @@ impl MeterMiddleware {
         self.metrics.run.record(elapsed);
     }
 
-    pub fn record_event(&self, event: ControlSurfaceEvent, elapsed: u64) {
+    pub fn record_event(&self, event: ControlSurfaceEvent, elapsed: u64) -> bool {
         use ControlSurfaceEvent::*;
         let response_time = match event {
             CloseNoReset => &self.metrics.close_no_reset,
@@ -229,8 +231,10 @@ impl MeterMiddleware {
             ExtSetBpmAndPlayRate(_) => &self.metrics.ext_set_bpm_and_play_rate,
             ExtTrackFxPresetChanged(_) => &self.metrics.ext_track_fx_preset_changed,
             ExtSetPanExt(_) => &self.metrics.ext_set_pan_ex,
+            ExtReset(_) => &self.metrics.ext_reset,
         };
         response_time.record(elapsed);
+        true
     }
 
     pub fn warn_about_critical_metrics(&self) {
@@ -302,7 +306,7 @@ impl<R, M> MetricDescriptor<R, M> {
     }
 }
 
-type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 28];
+type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 29];
 
 fn is_critical_default(response_time: &CustomResponseTime) -> bool {
     response_time.borrow().max() > 10000

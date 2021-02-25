@@ -1,9 +1,10 @@
 use reaper_medium::{
-    ControlSurface, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs, ExtSetFxChangeArgs,
-    ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs, ExtSetInputMonitorArgs,
-    ExtSetLastTouchedFxArgs, ExtSetPanExArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    ExtTrackFxPresetChangedArgs, GetTouchStateArgs, IsKeyDownArgs, OnTrackSelectionArgs, ReaperStr,
-    SetAutoModeArgs, SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
+    ControlSurface, ExtResetArgs, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
+    ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
+    ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetPanExArgs, ExtSetSendPanArgs,
+    ExtSetSendVolumeArgs, ExtSupportsExtendedTouchArgs, ExtTrackFxPresetChangedArgs,
+    GetTouchStateArgs, IsKeyDownArgs, OnTrackSelectionArgs, ReaperStr, SetAutoModeArgs,
+    SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
     SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
     SetTrackTitleArgs,
 };
@@ -21,8 +22,10 @@ pub struct MiddlewareControlSurface<M: ControlSurfaceMiddleware + Debug> {
 pub trait ControlSurfaceMiddleware {
     fn run(&mut self) {}
 
-    fn handle_event(&self, event: ControlSurfaceEvent) {
+    /// Should return `true` if this event is handled.
+    fn handle_event(&self, event: ControlSurfaceEvent) -> bool {
         let _ = event;
+        false
     }
 
     fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
@@ -47,8 +50,8 @@ pub trait ControlSurfaceMiddleware {
         false
     }
 
-    fn ext_supports_extended_touch(&self) -> bool {
-        false
+    fn ext_supports_extended_touch(&self, _: ExtSupportsExtendedTouchArgs) -> i32 {
+        0
     }
 }
 
@@ -142,81 +145,101 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
     }
 
     fn ext_set_input_monitor(&self, args: ExtSetInputMonitorArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetInputMonitor(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetInputMonitor(args)),
+        )
     }
 
     fn ext_set_fx_param(&self, args: ExtSetFxParamArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetFxParam(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetFxParam(args)),
+        )
     }
 
     fn ext_set_fx_param_rec_fx(&self, args: ExtSetFxParamArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetFxParamRecFx(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetFxParamRecFx(args)),
+        )
     }
 
     fn ext_set_fx_enabled(&self, args: ExtSetFxEnabledArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetFxEnabled(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetFxEnabled(args)),
+        )
     }
 
     fn ext_set_send_volume(&self, args: ExtSetSendVolumeArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetSendVolume(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetSendVolume(args)),
+        )
     }
 
     fn ext_set_send_pan(&self, args: ExtSetSendPanArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetSendPan(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetSendPan(args)),
+        )
     }
 
     fn ext_set_pan_ex(&self, args: ExtSetPanExArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetPanExt(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetPanExt(args)),
+        )
     }
 
     fn ext_set_focused_fx(&self, args: ExtSetFocusedFxArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetFocusedFx(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetFocusedFx(args)),
+        )
     }
 
     fn ext_set_last_touched_fx(&self, args: ExtSetLastTouchedFxArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetLastTouchedFx(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetLastTouchedFx(args)),
+        )
     }
 
     fn ext_set_fx_open(&self, args: ExtSetFxOpenArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetFxOpen(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetFxOpen(args)),
+        )
     }
 
     fn ext_set_fx_change(&self, args: ExtSetFxChangeArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetFxChange(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetFxChange(args)),
+        )
     }
 
     fn ext_set_bpm_and_play_rate(&self, args: ExtSetBpmAndPlayRateArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtSetBpmAndPlayRate(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetBpmAndPlayRate(args)),
+        )
     }
 
     fn ext_track_fx_preset_changed(&self, args: ExtTrackFxPresetChangedArgs) -> i32 {
-        self.middleware
-            .handle_event(ControlSurfaceEvent::ExtTrackFxPresetChanged(args));
-        1
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtTrackFxPresetChanged(args)),
+        )
+    }
+
+    fn ext_reset(&self, args: ExtResetArgs) -> i32 {
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtReset(args)),
+        )
     }
 
     fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
@@ -239,8 +262,8 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
         self.middleware.is_key_down(args)
     }
 
-    fn ext_supports_extended_touch(&self) -> bool {
-        self.middleware.ext_supports_extended_touch()
+    fn ext_supports_extended_touch(&self, args: ExtSupportsExtendedTouchArgs) -> i32 {
+        self.middleware.ext_supports_extended_touch(args)
     }
 }
 
@@ -273,4 +296,9 @@ pub enum ControlSurfaceEvent<'a> {
     ExtSetFxChange(ExtSetFxChangeArgs),
     ExtSetBpmAndPlayRate(ExtSetBpmAndPlayRateArgs),
     ExtTrackFxPresetChanged(ExtTrackFxPresetChangedArgs),
+    ExtReset(ExtResetArgs),
+}
+
+fn to_int(value: bool) -> i32 {
+    if value { 1 } else { 0 }
 }

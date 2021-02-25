@@ -148,13 +148,13 @@ impl ChangeDetectionMiddleware {
         &self,
         event: ControlSurfaceEvent,
         mut handle_change: impl FnMut(ChangeEvent) + Copy,
-    ) {
+    ) -> bool {
         use ControlSurfaceEvent::*;
         match event {
             SetTrackListChange => self.set_track_list_change(handle_change),
             SetSurfacePan(args) => {
                 let td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 // This is mostly handled by ExtSetPanExt already but there's a situation when
@@ -171,11 +171,11 @@ impl ChangeDetectionMiddleware {
             }
             SetSurfaceVolume(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return false,
                     Some(td) => td,
                 };
                 if td.volume == args.volume {
-                    return;
+                    return true;
                 }
                 let old = td.volume;
                 td.volume = args.volume;
@@ -189,7 +189,7 @@ impl ChangeDetectionMiddleware {
             }
             SetSurfaceMute(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 let old = td.mute;
@@ -206,7 +206,7 @@ impl ChangeDetectionMiddleware {
             }
             SetSurfaceSelected(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 let old = td.selected;
@@ -224,7 +224,7 @@ impl ChangeDetectionMiddleware {
             }
             SetSurfaceSolo(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 let old = td.solo;
@@ -240,7 +240,7 @@ impl ChangeDetectionMiddleware {
             }
             SetSurfaceRecArm(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 let old = td.recarm;
@@ -257,7 +257,7 @@ impl ChangeDetectionMiddleware {
             SetTrackTitle(args) => {
                 if self.state() == State::PropagatingTrackSetChanges {
                     self.decrease_num_track_set_changes_left_to_be_propagated();
-                    return;
+                    return true;
                 }
                 let track = Track::new(args.track, None);
                 handle_change(ChangeEvent::TrackNameChanged(TrackNameChangedEvent {
@@ -266,7 +266,7 @@ impl ChangeDetectionMiddleware {
             }
             ExtSetInputMonitor(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 let old = td.recmonitor;
@@ -309,12 +309,12 @@ impl ChangeDetectionMiddleware {
             }
             ExtSetSendVolume(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 let (changed, old) = td.update_send_volume(args.send_index, args.volume);
                 if !changed {
-                    return;
+                    return true;
                 }
                 let track = Track::new(args.track, None);
                 let send = track.index_based_send_by_index(args.send_index);
@@ -330,12 +330,12 @@ impl ChangeDetectionMiddleware {
             }
             ExtSetSendPan(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 let (changed, old) = td.update_send_pan(args.send_index, args.pan);
                 if !changed {
-                    return;
+                    return true;
                 }
                 let track = Track::new(args.track, None);
                 let send = track.index_based_send_by_index(args.send_index);
@@ -348,11 +348,11 @@ impl ChangeDetectionMiddleware {
             }
             ExtSetPanExt(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
-                    None => return,
+                    None => return true,
                     Some(td) => td,
                 };
                 if td.pan == args.pan {
-                    return;
+                    return true;
                 }
                 let old = td.pan;
                 td.pan = args.pan;
@@ -369,7 +369,7 @@ impl ChangeDetectionMiddleware {
                     None => {
                         // Clear focused FX
                         handle_change(ChangeEvent::FxFocused(FxFocusedEvent { fx: None }));
-                        return;
+                        return true;
                     }
                     Some(r) => r,
                 };
@@ -501,8 +501,9 @@ impl ChangeDetectionMiddleware {
                     new_value: args.is_enabled,
                 }));
             }
-            _ => {}
-        }
+            _ => return false,
+        };
+        true
     }
 
     // From REAPER > 5.95, parmFxIndex should be interpreted as query index. For earlier versions

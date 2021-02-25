@@ -6,7 +6,7 @@ use std::os::raw::{c_int, c_void};
 pub use super::bindings::root::{
     audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, reaper_plugin_info_t,
     IReaperControlSurface, KbdCmd, KbdSectionInfo, MIDI_event_t, MIDI_eventlist, MediaItem,
-    MediaItem_Take, MediaTrack, PCM_source, ReaProject, ReaSample, TrackEnvelope,
+    MediaItem_Take, MediaTrack, PCM_source, ReaProject, ReaSample, TrackEnvelope, CSURF_EXT_RESET,
     CSURF_EXT_SETBPMANDPLAYRATE, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXCHANGE,
     CSURF_EXT_SETFXENABLED, CSURF_EXT_SETFXOPEN, CSURF_EXT_SETFXPARAM, CSURF_EXT_SETFXPARAM_RECFX,
     CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETPAN_EX,

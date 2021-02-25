@@ -62,10 +62,10 @@ impl ControlSurfaceMiddleware for TestControlSurfaceMiddleware {
         self.main_task_middleware.run();
     }
 
-    fn handle_event(&self, event: ControlSurfaceEvent) {
+    fn handle_event(&self, event: ControlSurfaceEvent) -> bool {
         self.change_detection_middleware.process(event, |e| {
             self.rx_middleware.handle_change(e);
-        });
+        })
     }
 }
 
