@@ -39,6 +39,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     // In theory all steps could be declared inline. But that makes the IDE become terribly slow.
     let steps_a = vec![
         global_instances(),
+        query_prefs(),
         register_api_functions(),
         strings(),
         low_plugin_context(),
@@ -2098,6 +2099,37 @@ fn strings() -> TestStep {
         Reaper::get().show_console_msg(reaper_str!("- &ReaperStr: 范例文字äöüß\n"));
         Reaper::get().show_console_msg("- &str: 范例文字äöüß\n");
         Reaper::get().show_console_msg(String::from("- String: 范例文字äöüß\n"));
+        Ok(())
+    })
+}
+
+fn query_prefs() -> TestStep {
+    step(AllVersions, "Query preferences", |_, _| {
+        fn query_track_sel_on_mouse_is_enabled() -> bool {
+            if let Some(res) = Reaper::get()
+                .medium_reaper()
+                .get_config_var("trackselonmouse")
+            {
+                if res.size != 4 {
+                    // Shouldn't be.
+                    return false;
+                }
+                let ptr = res.value.as_ptr() as *const u32;
+                let value = unsafe { *ptr };
+                // The second flag corresponds to that setting.
+                (value & 2) != 0
+            } else {
+                false
+            }
+        }
+        // When
+        let is_enabled = query_track_sel_on_mouse_is_enabled();
+        // Then
+        if is_enabled {
+            return Err(
+                "\"Mouse click on volume/pan faders and track buttons changes track selection\" seems to be enabled. Maybe you are not using the REAPER default preferences?".into(),
+            );
+        }
         Ok(())
     })
 }

@@ -1334,6 +1334,28 @@ impl<UsageScope> Reaper<UsageScope> {
             .projectconfig_var_addr(project.to_raw(), index as _)
     }
 
+    /// Returns the REAPER preference with the given name.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_config_var<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> Option<GetConfigVarResult>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut size = MaybeUninit::zeroed();
+        let ptr = unsafe {
+            self.low
+                .get_config_var(name.into().as_ptr(), size.as_mut_ptr())
+        };
+        let res = GetConfigVarResult {
+            size: unsafe { size.assume_init() as u32 },
+            value: NonNull::new(ptr)?,
+        };
+        Some(res)
+    }
+
     /// Clears the ReaScript console.
     #[measure(ResponseTimeSingleThreaded)]
     pub fn clear_console(&self)
@@ -4479,6 +4501,14 @@ pub struct ProjectConfigVarGetOffsResult {
     pub offset: u32,
     /// Size of the object.
     pub size: u32,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct GetConfigVarResult {
+    /// Size of the value.
+    pub size: u32,
+    /// Pointer to the REAPER preference value.
+    pub value: NonNull<c_void>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
