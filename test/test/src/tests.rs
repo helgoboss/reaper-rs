@@ -45,6 +45,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         low_plugin_context(),
         medium_plugin_context(),
         general(),
+        volume_types(),
         create_empty_project_in_new_tab(),
         play_pause_stop_record(),
         change_repeat_state(),
@@ -829,7 +830,7 @@ fn set_track_send_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        send.set_volume(Volume::from_soft_normalized_value(0.25));
+        send.set_volume(Volume::try_from_soft_normalized_value(0.25).unwrap());
         // Then
         assert!(abs_diff_eq!(
             send.volume().db().get(),
@@ -1514,7 +1515,7 @@ fn set_track_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_volume(Volume::from_soft_normalized_value(0.25));
+        track.set_volume(Volume::try_from_soft_normalized_value(0.25).unwrap());
         // Then
         let volume = track.volume();
         assert!(abs_diff_eq!(
@@ -2050,6 +2051,49 @@ fn general() -> TestStep {
                 .to_lowercase()
                 .contains("reaper")
         );
+        Ok(())
+    })
+}
+
+fn volume_types() -> TestStep {
+    step(AllVersions, "Volume types", |reaper, _| {
+        // Given
+        let input_values = vec![
+            0.0,
+            0.00000000000001,
+            0.2,
+            0.5,
+            0.9,
+            1.0,
+            1.0000001,
+            1.5,
+            2.0,
+            12.0,
+            20.0,
+            100_000.0,
+            std::f64::NAN,
+            // std::f64::MIN,
+            std::f64::MAX,
+            std::f64::EPSILON,
+            std::f64::INFINITY,
+            /* std::f64::MIN_POSITIVE,
+             * std::f64::NEG_INFINITY, */
+        ]
+        .into_iter()
+        .map(ReaperVolumeValue::new)
+        .chain(vec![
+            ReaperVolumeValue::MIN,
+            ReaperVolumeValue::MINUS_150_DB,
+            ReaperVolumeValue::NAN,
+            ReaperVolumeValue::TWELVE_DB,
+            ReaperVolumeValue::ZERO_DB,
+        ]);
+        // When
+        // Then
+        for input_value in input_values {
+            let output_value = Volume::from_reaper_value(input_value);
+            reaper.show_console_msg(format!("{:?} => {:?}\n", input_value, output_value));
+        }
         Ok(())
     })
 }

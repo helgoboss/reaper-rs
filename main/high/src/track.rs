@@ -24,7 +24,10 @@ pub const MAX_TRACK_CHUNK_SIZE: u32 = 20_000_000;
 
 #[derive(Clone, Debug, Eq)]
 // TODO-low Reconsider design. Maybe don't do that interior mutability stuff. By moving from lazy to
-//  eager (determining rea_project and media_track at construction time).
+//  eager (determining rea_project and media_track at construction time). This sounds good. We
+//  should provide 2 types. A light-weight one which doesn't save the GUID and one that saves it
+//  (for scenarios where we want to keep the object around). All the methods should be on the
+//  light-weight one and the heavy-weight one should have a method to return the light-weight.
 pub struct Track {
     // Only filled if track loaded.
     media_track: Cell<Option<MediaTrack>>,
@@ -236,8 +239,8 @@ impl Track {
             Reaper::get()
                 .medium_reaper()
                 .get_track_ui_vol_pan(self.raw())
-        }
-        .expect("Couldn't get vol/pan");
+                .expect("Couldn't get vol/pan")
+        };
         Volume::from_reaper_value(result.volume)
     }
 
