@@ -10,7 +10,7 @@ use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume, 
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::SendTarget::OtherTrack;
-use reaper_medium::TrackAttributeKey::{Mute, RecArm, RecInput, RecMon, Selected, Solo};
+use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo};
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
@@ -403,12 +403,8 @@ impl Track {
     #[allow(clippy::float_cmp)]
     pub fn is_muted(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
-        let mute = unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .get_media_track_info_value(self.raw(), Mute)
-        };
-        mute == 1.0
+        let mute = unsafe { Reaper::get().medium_reaper().get_track_ui_mute(self.raw()) };
+        mute.unwrap_or(false)
     }
 
     pub fn mute(&self) {
@@ -442,6 +438,7 @@ impl Track {
                 .medium_reaper()
                 .get_media_track_info_value(self.raw(), Solo)
         };
+        println!("solo: {:?}", solo);
         solo > 0.0
     }
 

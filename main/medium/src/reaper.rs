@@ -3128,6 +3128,31 @@ impl<UsageScope> Reaper<UsageScope> {
         })
     }
 
+    /// Returns the given track's mute state. Also returns the correct value during the process of
+    /// writing an automation envelope.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful (unclear when this happens).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_ui_mute(&self, track: MediaTrack) -> ReaperFunctionResult<bool>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        // We zero them just for being safe.
+        let mut mute = MaybeUninit::zeroed();
+        let successful = self.low.GetTrackUIMute(track.as_ptr(), mute.as_mut_ptr());
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't get track mute"));
+        }
+        Ok(mute.assume_init())
+    }
+
     /// Returns the given track's complete pan. Also returns the correct value during the process of
     /// writing an automation envelope.
     ///
