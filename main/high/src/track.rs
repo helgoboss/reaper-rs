@@ -441,7 +441,6 @@ impl Track {
                 .medium_reaper()
                 .get_media_track_info_value(self.raw(), Solo)
         };
-        println!("solo: {:?}", solo);
         solo > 0.0
     }
 
