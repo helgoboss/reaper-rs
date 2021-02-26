@@ -1301,7 +1301,7 @@ fn select_master_track() -> TestStep {
             1
         );
         assert_eq!(mock.invocation_count(), 2);
-        assert_eq!(mock.last_arg().index(), None);
+        assert_eq!(mock.last_arg().0.index(), None);
         Ok(())
     })
 }
@@ -1338,7 +1338,7 @@ fn unselect_track() -> TestStep {
             1
         );
         assert_eq!(mock.invocation_count(), 1);
-        assert_eq!(mock.last_arg(), track);
+        assert_eq!(mock.last_arg().0, track);
         Ok(())
     })
 }
@@ -1378,7 +1378,7 @@ fn select_track() -> TestStep {
             2
         );
         assert_eq!(mock.invocation_count(), 2);
-        assert_eq!(mock.last_arg(), track2);
+        assert_eq!(mock.last_arg().0, track2);
         Ok(())
     })
 }
