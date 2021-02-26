@@ -84,7 +84,11 @@ impl ControlSurfaceRxMiddleware {
                 }
             }
             TrackSoloChanged(e) => self.rx.track_solo_changed.borrow_mut().next(e.track),
-            TrackSelectedChanged(e) => self.rx.track_selected_changed.borrow_mut().next(e.track),
+            TrackSelectedChanged(e) => self
+                .rx
+                .track_selected_changed
+                .borrow_mut()
+                .next((e.track, e.new_value)),
             FxAdded(e) => self.rx.fx_added.borrow_mut().next(e.fx),
             FxRemoved(e) => self.rx.fx_removed.borrow_mut().next(e.fx),
             FxEnabledChanged(e) => self.rx.fx_enabled_changed.borrow_mut().next(e.fx),
@@ -144,7 +148,7 @@ pub struct ControlSurfaceRx {
     pub track_mute_changed: EventStreamSubject<Track>,
     pub track_mute_touched: EventStreamSubject<Track>,
     pub track_solo_changed: EventStreamSubject<Track>,
-    pub track_selected_changed: EventStreamSubject<Track>,
+    pub track_selected_changed: EventStreamSubject<(Track, bool)>,
     pub fx_added: EventStreamSubject<Fx>,
     pub fx_removed: EventStreamSubject<Fx>,
     pub fx_enabled_changed: EventStreamSubject<Fx>,
@@ -323,7 +327,8 @@ impl ControlSurfaceRx {
         self.track_pan_touched.borrow().clone()
     }
 
-    pub fn track_selected_changed(&self) -> impl ReactiveEvent<Track> {
+    /// New
+    pub fn track_selected_changed(&self) -> impl ReactiveEvent<(Track, bool)> {
         self.track_selected_changed.borrow().clone()
     }
 
