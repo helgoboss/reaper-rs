@@ -2,6 +2,7 @@ use helgoboss_midi::{ShortMessage, U7};
 use reaper_low::raw;
 
 use crate::{MidiFrameOffset, SendMidiTime};
+use reaper_low::raw::MIDI_event_t;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
@@ -63,6 +64,13 @@ impl<'a> MidiEventList<'a> {
             bpos: bpos as i32,
         }
     }
+
+    /// Adds an item to this list of MIDI events.
+    pub fn add_item(self, msg: &MidiEvent) {
+        unsafe {
+            self.0.AddItem(msg.0 as *const _ as _);
+        }
+    }
 }
 
 /// A MIDI event borrowed from REAPER.
@@ -89,6 +97,12 @@ impl<'a> MidiEvent<'a> {
     /// Returns the actual message.
     pub fn message(self) -> MidiMessage<'a> {
         MidiMessage::new(self.0)
+    }
+}
+
+impl<'a> AsRef<raw::MIDI_event_t> for MidiEvent<'a> {
+    fn as_ref(&self) -> &MIDI_event_t {
+        self.0
     }
 }
 
@@ -144,7 +158,20 @@ impl<'a> ShortMessage for MidiMessage<'a> {
 pub struct MidiOutput(pub(crate) NonNull<raw::midi_Output>);
 
 impl MidiOutput {
-    /// Returns the list of MIDI events which are currently in the buffer.
+    /// Sends the given arbitrary MIDI message to this device at the given time.
+    ///
+    /// This must only be called in the real-time audio thread! See [`get_midi_output()`].
+    ///
+    /// [`get_midi_output()`]: struct.Reaper.html#method.get_midi_output
+    pub fn send_msg(&self, msg: impl AsRef<raw::MIDI_event_t>, time: SendMidiTime) {
+        unsafe {
+            self.0
+                .as_ref()
+                .SendMsg(msg.as_ref() as *const _ as _, time.to_raw());
+        }
+    }
+
+    /// Sends the given short message to this device at the given time.
     ///
     /// This must only be called in the real-time audio thread! See [`get_midi_output()`].
     ///
@@ -154,7 +181,7 @@ impl MidiOutput {
         unsafe {
             self.0
                 .as_ref()
-                .Send(bytes.0, bytes.1.get(), bytes.2.get(), time.to_raw())
-        };
+                .Send(bytes.0, bytes.1.get(), bytes.2.get(), time.to_raw());
+        }
     }
 }

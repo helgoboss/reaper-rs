@@ -11006,6 +11006,12 @@ pub mod root {
             ) -> *mut root::MIDI_event_t;
         }
         extern "C" {
+            pub fn MIDI_eventlist_AddItem(
+                self_: *mut root::MIDI_eventlist,
+                evt: *mut root::MIDI_event_t,
+            );
+        }
+        extern "C" {
             pub fn midi_Input_GetReadBuf(self_: *mut root::midi_Input)
             -> *mut root::MIDI_eventlist;
         }
@@ -11015,6 +11021,13 @@ pub mod root {
                 status: ::std::os::raw::c_uchar,
                 d1: ::std::os::raw::c_uchar,
                 d2: ::std::os::raw::c_uchar,
+                frame_offset: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn midi_Output_SendMsg(
+                self_: *mut root::midi_Output,
+                msg: *mut root::MIDI_event_t,
                 frame_offset: ::std::os::raw::c_int,
             );
         }
