@@ -7,10 +7,10 @@
 
 [Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
 
-**Important note:** If you want to use _reaper-rs_ for your own project, please use the master branch for the time 
-being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often but I don't publish to 
-crates.io at the moment, so my crates there are a bit outdated. Rationale: As long as I'm the only consumer of this 
-library, this process is easier for me. I tend to keep `reaper-low` and `reaper-medium` mostly stable, so no worries 
+**Important note:** If you want to use _reaper-rs_ for your own project, please use the master branch for the time
+being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often but I don't publish to
+crates.io at the moment, so my crates there are a bit outdated. Rationale: As long as I'm the only consumer of this
+library, this process is easier for me. I tend to keep `reaper-low` and `reaper-medium` mostly stable, so no worries
 about that :)
 
 Here's the snippet:
@@ -100,14 +100,14 @@ Status:
 
 #### Examples
 
-Basics: 
+Basics:
 ```rust,ignore
 reaper.show_console_msg("Hello world from reaper-rs medium-level API!");
 let track = reaper.get_track(CurrentProject, 0).ok_or("no tracks")?;
 unsafe { reaper.delete_track(track); }
 ```
 
-Control surface: 
+Control surface:
 ```rust,ignore
 #[derive(Debug)]
 struct MyControlSurface;
@@ -202,7 +202,7 @@ reaper-medium = "0.1.0"
 reaper-macros = "0.1.0"
 
 [lib]
-name = "my_reaper_extension_plugin"
+name = "reaper_my_extension"
 crate-type = ["cdylib"]
 ```
 
@@ -222,9 +222,26 @@ fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
 }
 ```
 
+> **Important:** Compiled REAPER extension plug-ins (i.e. `.dll` files) must be prefixed with `reaper_` in order for REAPER to load them during startup - even on Linux and macOS, where library file names usually start with `lib`. On Windows, it's enough to name the library `reaper_my_extension` in `Cargo.toml` and it will result in the compiled file being named `reaper_my_extension`, thus obeying this rule. On Linux and macOS, you still need to remove the `lib` prefix. In any case, make sure that the compiled file placed in `REAPER_RESOURCE_PATH/UserPlugins` is prefixed with `reaper_` before attempting to test it!
+
 The macro primarily exposes an `extern "C" ReaperPluginEntry()` function which calls
 `reaper_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use that
 macro, have a look at the macro implementation. No magic there.
+
+#### Step-by-step instructions
+
+The following instructions should result in a functional extension, loaded into REAPER on start:
+
+1. Run `cargo new reaper-my-extension --lib` to initialize the project
+2. Run `cargo build` from within `reaper-my-extension` to generate the compiled plugin extension inside of the `target/debug` directory
+3. Copy the extension plug-in to the `REAPER/UserPlugins` directory
+    - You could do this manually, and overwrite the file after each build
+    - Or, you could create a symbolic link from the `target/debug` file, to `REAPER/UserPlugins` so that they were synced
+        - > Note: Here it's explicitly necessary to give the link a name that starts with` reaper` (by default it will start with `lib`)
+        - To do this, on unix-based systems, run `ln -s ./target/debug/<name-of-the-compiled-extension-file> <path to REAPER/UserPlugins>`
+        - On Windows, you can use the same command if running Git Bash, else you can use `mklink \D target\debug\<name-of-the-compiled-extension-file> %AppData%\REAPER\UserPlugins`
+4. Now start REAPER, and you should see the console message from the code appear!
+
 
 ### REAPER VST plug-in
 
@@ -315,7 +332,7 @@ IDE/debugging support, they are included in the Git repository like any other Ru
 You can generate these files on demand (see build section), e.g. after you have adjusted
 `reaper_plugin_functions.h`. Right now this is enabled for Linux and macOS only. If we would generate the files on
 Windows, `bindings.rs` would look quite differently (whereas `reaper.rs` should end up the
-same). The reason is that `reaper_plugin.h` includes `windows.h` on Windows, whereas on Linux and macOS, it uses 
+same). The reason is that `reaper_plugin.h` includes `windows.h` on Windows, whereas on Linux and macOS, it uses
 `swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement.
 
 Most parts of `bindings.rs` are used to generate `reaper.rs` and otherwise ignored, but a few
@@ -334,25 +351,25 @@ In the following you will find the complete instructions for Windows 10, includi
 architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
 
 1. Setup "Build tools for Visual Studio 2019"
-   - Rust uses native build toolchains. On Windows, it's necessary to use the MSVC (Microsoft Visual Studio
-     C++) toolchain because REAPER plug-ins only work with that.
-   - [Visual Studio downloads](https://visualstudio.microsoft.com/downloads/) → All downloads → Tools for Visual Studio 2019
-     → Build Tools for Visual Studio 2019
-   - Start it and follow the installer instructions
-   - Required components
-     - Workloads tab
-       - "C++ build tools" (large box on the left)
-       - Make sure "Windows 10 SDK" is checked on the right side (usually it is)
-     - Language packs
-       - English
+    - Rust uses native build toolchains. On Windows, it's necessary to use the MSVC (Microsoft Visual Studio
+      C++) toolchain because REAPER plug-ins only work with that.
+    - [Visual Studio downloads](https://visualstudio.microsoft.com/downloads/) → All downloads → Tools for Visual Studio 2019
+      → Build Tools for Visual Studio 2019
+    - Start it and follow the installer instructions
+    - Required components
+        - Workloads tab
+            - "C++ build tools" (large box on the left)
+            - Make sure "Windows 10 SDK" is checked on the right side (usually it is)
+        - Language packs
+            - English
 2. Setup Rust
-   - [Download](https://www.rust-lang.org/tools/install) and execute `rustup-init.exe`
-   - Accept the defaults
-   - Set the correct toolchain default (_nightly_ toolchain is not necessary if you only want to build
-     `reaper-low`, `reaper-medium` and `reaper-high`) :star:
-     ```batch
-     rustup default nightly-2020-12-10-x86_64-pc-windows-msvc
-     ```
+    - [Download](https://www.rust-lang.org/tools/install) and execute `rustup-init.exe`
+    - Accept the defaults
+    - Set the correct toolchain default (_nightly_ toolchain is not necessary if you only want to build
+      `reaper-low`, `reaper-medium` and `reaper-high`) :star:
+      ```batch
+      rustup default nightly-2020-12-10-x86_64-pc-windows-msvc
+      ```
 3. Download and install [Git for Windows](https://git-scm.com/download/win)
 4. Clone the _reaper-rs_ Git repository
    ```batch
@@ -368,7 +385,7 @@ Regenerating the low-level API from Windows is disabled for now.
 
 #### Linux
 
-Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS installation, 
+Complete instructions to build _reaper-rs_ from a _fresh_ Ubuntu 18.04.3 LTS installation,
 including Rust setup:
 
 ```sh
@@ -413,7 +430,7 @@ cargo fmt
 
 The following instructions include Rust setup. However, it's very well possible that some native toolchain setup
 instructions are missing, because I don't have a bare macOS installation at my disposal. The Rust installation script
-should provide you with the necessary instructions if something is missing. 
+should provide you with the necessary instructions if something is missing.
 
 ```sh
 # Install Rust
@@ -448,14 +465,14 @@ subtle changes in the REAPER C++ API itself. Currently, the test assertions are 
 the slightest deviations.
 
 **Attention:** The test should be executed using a fresh `reaper.ini`. Some assertions assume that REAPER
-preferences are set to their defaults. Executing the test with modified preferences can lead to wrong test results! 
+preferences are set to their defaults. Executing the test with modified preferences can lead to wrong test results!
 
 On Linux and macOS, the REAPER integration test will be run automatically as Cargo integration test
-`run_reaper_integration_test` when invoking `cargo test` (downloads, unpacks and executes REAPER). This test is part of 
+`run_reaper_integration_test` when invoking `cargo test` (downloads, unpacks and executes REAPER). This test is part of
 `reaper-test-extension-plugin`. It can be disabled by building that crate with `--no-default-features`.
 
 `reaper-test` activates the performance measurement features of `reaper-medium` and `reaper-high`. At the end of an
-integration test run, it prints detailed response time statistics to standard output. 
+integration test run, it prints detailed response time statistics to standard output.
 
 ## Background
 
