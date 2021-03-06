@@ -12,19 +12,21 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, Bpm, ChunkCacheHint,
-    CommandId, Db, EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
-    GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
-    MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NormalizedPlayRate, NotificationBehavior,
-    PanMode, PlaybackSpeedFactor, PluginContext, ProjectContext, ProjectRef, PromptForActionResult,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
-    SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TransferBehavior, UndoBehavior,
-    UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, BookmarkId,
+    BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, EnvChunkName, FxAddByNameBehavior,
+    FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd,
+    InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
+    NativeColor, NormalizedPlayRate, NotificationBehavior, PanMode, PlaybackSpeedFactor,
+    PluginContext, PositionInBeats, PositionInSeconds, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, SoloMode,
+    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -33,6 +35,7 @@ use reaper_low::raw::GUID;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
+use std::num::NonZeroU32;
 use std::path::{Path, PathBuf};
 
 /// Represents a privilege to execute functions which are safe to execute from any thread.
@@ -1019,6 +1022,372 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         self.low
             .GetSetRepeatEx(project.to_raw(), if repeat { 1 } else { 0 });
+    }
+
+    /// Grants temporary access to the data of the given marker/region.
+    ///
+    /// The given index starts as 0 and counts both markers and regions.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn enum_project_markers_3<R>(
+        &self,
+        project: ProjectContext,
+        index: u32,
+        // TODO-high Other functions should take an option, too! Otherwise we can't give back
+        // ownership  in case this didn't return anything! Same for all other continuation
+        // passing functions!
+        use_result: impl FnOnce(Option<EnumProjectMarkers3Result>) -> R,
+    ) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.enum_project_markers_3_unchecked(project, index, use_result) }
+    }
+
+    /// Like [`enum_project_markers_3()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`enum_project_markers_3()`]: #method.enum_project_markers_3
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn enum_project_markers_3_unchecked<R>(
+        &self,
+        project: ProjectContext,
+        index: u32,
+        use_result: impl FnOnce(Option<EnumProjectMarkers3Result>) -> R,
+    ) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut is_region = MaybeUninit::zeroed();
+        let mut pos = MaybeUninit::zeroed();
+        let mut region_end = MaybeUninit::zeroed();
+        let mut name = MaybeUninit::zeroed();
+        let mut id = MaybeUninit::zeroed();
+        let mut color = MaybeUninit::zeroed();
+        let successful = self.low.EnumProjectMarkers3(
+            project.to_raw(),
+            index as _,
+            is_region.as_mut_ptr(),
+            pos.as_mut_ptr(),
+            region_end.as_mut_ptr(),
+            name.as_mut_ptr(),
+            id.as_mut_ptr(),
+            color.as_mut_ptr(),
+        );
+        if successful == 0 {
+            return use_result(None);
+        }
+        let result = EnumProjectMarkers3Result {
+            position: PositionInSeconds::new(pos.assume_init()),
+            region_end_position: if is_region.assume_init() {
+                Some(PositionInSeconds::new(region_end.assume_init()))
+            } else {
+                None
+            },
+            name: create_passing_c_str(name.assume_init()).unwrap(),
+            id: BookmarkId(id.assume_init() as _),
+            color: NativeColor(color.assume_init() as _),
+        };
+        use_result(Some(result))
+    }
+
+    /// Seeks to the given region after the current one finishes playing (smooth seek).
+    ///
+    /// If the region is given as index, the index represents
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn go_to_region(&self, project: ProjectContext, region: BookmarkRef)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe {
+            self.go_to_region_unchecked(project, region);
+        }
+    }
+
+    /// Like [`go_to_region()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`go_to_region()`]: #method.go_to_region
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn go_to_region_unchecked(&self, project: ProjectContext, region: BookmarkRef)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.GoToRegion(
+            project.to_raw(),
+            region.to_raw(),
+            region.uses_timeline_order(),
+        );
+    }
+
+    /// Converts the given time into beats.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn time_map_2_time_to_beats(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> TimeMap2TimeToBeatsResult
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_2_time_to_beats_unchecked(project, tpos) }
+    }
+
+    /// Like [`time_map_2_time_to_beats()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_2_time_to_beats()`]: #method.time_map_2_time_to_beats
+    #[measure(ResponseTimeMultiThreaded)]
+    pub unsafe fn time_map_2_time_to_beats_unchecked(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> TimeMap2TimeToBeatsResult
+    where
+        UsageScope: AnyThread,
+    {
+        let mut measures = MaybeUninit::zeroed();
+        let mut measure_length = MaybeUninit::zeroed();
+        let mut full_beats = MaybeUninit::zeroed();
+        let mut common_denom = MaybeUninit::zeroed();
+        let beats_within_measure = self.low.TimeMap2_timeToBeats(
+            project.to_raw(),
+            tpos.get(),
+            measures.as_mut_ptr(),
+            measure_length.as_mut_ptr(),
+            full_beats.as_mut_ptr(),
+            common_denom.as_mut_ptr(),
+        );
+        TimeMap2TimeToBeatsResult {
+            full_beats: PositionInBeats::new(full_beats.assume_init()),
+            measure_index: measures.assume_init() as _,
+            beats_since_measure: PositionInBeats::new(beats_within_measure),
+            time_signature: TimeSignature {
+                numerator: NonZeroU32::new(measure_length.assume_init() as _).unwrap(),
+                denominator: NonZeroU32::new(common_denom.assume_init() as _).unwrap(),
+            },
+        }
+    }
+
+    /// Returns the current position of the edit cursor.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn get_cursor_position_ex(&self, project: ProjectContext) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_cursor_position_ex_unchecked(project) }
+    }
+
+    /// Like [`get_cursor_position_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_cursor_position_ex()`]: #method.get_cursor_position_ex
+    #[measure(ResponseTimeMultiThreaded)]
+    pub unsafe fn get_cursor_position_ex_unchecked(
+        &self,
+        project: ProjectContext,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        let res = self.low.GetCursorPositionEx(project.to_raw());
+        PositionInSeconds::new(res)
+    }
+
+    /// Returns the latency-compensated actual-what-you-hear position.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn get_play_position_ex(&self, project: ProjectContext) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_play_position_ex_unchecked(project) }
+    }
+
+    /// Like [`get_play_position_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_play_position_ex()`]: #method.get_play_position_ex
+    #[measure(ResponseTimeMultiThreaded)]
+    pub unsafe fn get_play_position_ex_unchecked(
+        &self,
+        project: ProjectContext,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        let res = self.low.GetPlayPositionEx(project.to_raw());
+        PositionInSeconds::new(res)
+    }
+
+    /// Returns the position of the next audio block being processed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn get_play_position_2_ex(&self, project: ProjectContext) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_play_position_2_ex_unchecked(project) }
+    }
+
+    /// Like [`get_play_position_2_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_play_position_2_ex()`]: #method.get_play_position_2_ex
+    #[measure(ResponseTimeMultiThreaded)]
+    pub unsafe fn get_play_position_2_ex_unchecked(
+        &self,
+        project: ProjectContext,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        let res = self.low.GetPlayPosition2Ex(project.to_raw());
+        PositionInSeconds::new(res)
+    }
+
+    /// Returns the number of markers and regions in the given project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn count_project_markers(&self, project: ProjectContext) -> CountProjectMarkersResult
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.count_project_markers_unchecked(project) }
+    }
+
+    /// Like [`count_project_markers()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`count_project_markers()`]: #method.count_project_markers
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn count_project_markers_unchecked(
+        &self,
+        project: ProjectContext,
+    ) -> CountProjectMarkersResult
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut num_markers = MaybeUninit::zeroed();
+        let mut num_regions = MaybeUninit::zeroed();
+        let total_count = self.low.CountProjectMarkers(
+            project.to_raw(),
+            num_markers.as_mut_ptr(),
+            num_regions.as_mut_ptr(),
+        );
+        CountProjectMarkersResult {
+            total_count: total_count as _,
+            marker_count: num_markers.assume_init() as _,
+            region_count: num_regions.assume_init() as _,
+        }
+    }
+
+    /// Gets the last project marker before the given time and/or the project region that includes
+    /// the given time.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_last_marker_and_cur_region(
+        &self,
+        project: ProjectContext,
+        time: PositionInSeconds,
+    ) -> GetLastMarkerAndCurRegionResult
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.get_last_marker_and_cur_region_unchecked(project, time) }
+    }
+
+    /// Like [`get_last_marker_and_cur_region()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_last_marker_and_cur_region()`]: #method.get_last_marker_and_cur_region
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_last_marker_and_cur_region_unchecked(
+        &self,
+        project: ProjectContext,
+        time: PositionInSeconds,
+    ) -> GetLastMarkerAndCurRegionResult
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut marker_idx = MaybeUninit::zeroed();
+        let mut region_idx = MaybeUninit::zeroed();
+        self.low.GetLastMarkerAndCurRegion(
+            project.to_raw(),
+            time.get(),
+            marker_idx.as_mut_ptr(),
+            region_idx.as_mut_ptr(),
+        );
+        GetLastMarkerAndCurRegionResult {
+            marker_index: make_some_if_not_negative(marker_idx.assume_init()),
+            region_index: make_some_if_not_negative(region_idx.assume_init()),
+        }
     }
 
     /// Performs an action belonging to the main section.
@@ -4522,6 +4891,50 @@ pub struct PlayState {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
+pub struct EnumProjectMarkers3Result<'a> {
+    pub position: PositionInSeconds,
+    pub region_end_position: Option<PositionInSeconds>,
+    pub name: &'a ReaperStr,
+    pub id: BookmarkId,
+    pub color: NativeColor,
+}
+
+/// The given indexes count both markers and regions.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct GetLastMarkerAndCurRegionResult {
+    pub marker_index: Option<u32>,
+    pub region_index: Option<u32>,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct TimeMap2TimeToBeatsResult {
+    /// Position in beats since project start.
+    pub full_beats: PositionInBeats,
+    /// Index of the measure in which the given position is located.
+    pub measure_index: u32,
+    /// Position in beats within that measure.
+    pub beats_since_measure: PositionInBeats,
+    /// Time signature of that measure.
+    pub time_signature: TimeSignature,
+}
+
+/// Time signature.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct TimeSignature {
+    /// Measure length in beats.
+    pub numerator: NonZeroU32,
+    /// What musical unit one beat stands for.
+    pub denominator: NonZeroU32,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct CountProjectMarkersResult {
+    pub total_count: u32,
+    pub marker_count: u32,
+    pub region_count: u32,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct VolumeAndPan {
     /// Volume.
     pub volume: ReaperVolumeValue,
@@ -4602,6 +5015,13 @@ fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
         return None;
     }
     Some(value)
+}
+
+fn make_some_if_not_negative(value: i32) -> Option<u32> {
+    if value < 0 {
+        return None;
+    }
+    Some(value as _)
 }
 
 unsafe fn deref<T: Copy>(ptr: *const T) -> Option<T> {

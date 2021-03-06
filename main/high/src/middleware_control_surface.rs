@@ -1,12 +1,12 @@
 use reaper_medium::{
     ControlSurface, ExtResetArgs, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
-    ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetPanExArgs, ExtSetSendPanArgs,
-    ExtSetSendVolumeArgs, ExtSupportsExtendedTouchArgs, ExtTrackFxPresetChangedArgs,
-    GetTouchStateArgs, IsKeyDownArgs, OnTrackSelectionArgs, ReaperStr, SetAutoModeArgs,
-    SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
-    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
-    SetTrackTitleArgs,
+    ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetPanExArgs,
+    ExtSetProjectMarkerChangeArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
+    ExtSupportsExtendedTouchArgs, ExtTrackFxPresetChangedArgs, GetTouchStateArgs, IsKeyDownArgs,
+    OnTrackSelectionArgs, ReaperStr, SetAutoModeArgs, SetPlayStateArgs, SetRepeatStateArgs,
+    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
+    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
 };
 
 use std::borrow::Cow;
@@ -242,6 +242,13 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
         )
     }
 
+    fn ext_set_project_marker_change(&self, args: ExtSetProjectMarkerChangeArgs) -> i32 {
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetProjectMarkerChange(args)),
+        )
+    }
+
     fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
         self.middleware.get_type_string()
     }
@@ -297,6 +304,7 @@ pub enum ControlSurfaceEvent<'a> {
     ExtSetBpmAndPlayRate(ExtSetBpmAndPlayRateArgs),
     ExtTrackFxPresetChanged(ExtTrackFxPresetChangedArgs),
     ExtReset(ExtResetArgs),
+    ExtSetProjectMarkerChange(ExtSetProjectMarkerChangeArgs),
 }
 
 fn to_int(value: bool) -> i32 {

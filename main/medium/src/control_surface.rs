@@ -257,6 +257,11 @@ pub trait ControlSurface: Debug {
     fn ext_reset(&self, _: ExtResetArgs) -> i32 {
         0
     }
+
+    /// Called whenever project markers are changed.
+    fn ext_set_project_marker_change(&self, _: ExtSetProjectMarkerChangeArgs) -> i32 {
+        0
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -446,6 +451,10 @@ pub struct ExtSupportsExtendedTouchArgs;
 /// Just a placeholder for upward compatibility reasons.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct ExtResetArgs;
+
+/// Just a placeholder for upward compatibility reasons.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct ExtSetProjectMarkerChangeArgs;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ExtSetBpmAndPlayRateArgs {
@@ -851,6 +860,9 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                     .delegate
                     .ext_supports_extended_touch(ExtSupportsExtendedTouchArgs),
                 raw::CSURF_EXT_RESET => self.delegate.ext_reset(ExtResetArgs),
+                raw::CSURF_EXT_SETPROJECTMARKERCHANGE => self
+                    .delegate
+                    .ext_set_project_marker_change(ExtSetProjectMarkerChangeArgs),
                 _ => 0,
             }
         };

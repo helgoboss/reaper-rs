@@ -1,6 +1,6 @@
 use crate::{
-    CommandId, Hidden, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset, MidiOutputDeviceId,
-    ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue,
+    BookmarkId, CommandId, Hidden, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset,
+    MidiOutputDeviceId, ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue,
 };
 
 use crate::util::concat_reaper_strs;
@@ -8,6 +8,7 @@ use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
 use std::convert::TryFrom;
+use std::num::NonZeroU32;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
@@ -48,6 +49,29 @@ pub enum MasterTrackBehavior {
     ExcludeMasterTrack,
     /// With master track.
     IncludeMasterTrack,
+}
+
+/// Something which refers to a certain marker or region.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum BookmarkRef {
+    /// Counts only regions or only markers depending on the usage context.
+    Position(NonZeroU32),
+    /// Relates only to regions or only to markers depending on the usage context.
+    Id(BookmarkId),
+}
+
+impl BookmarkRef {
+    pub(crate) fn to_raw(self) -> i32 {
+        use BookmarkRef::*;
+        match self {
+            Position(i) => i.get() as _,
+            Id(id) => id.get() as _,
+        }
+    }
+
+    pub(crate) fn uses_timeline_order(&self) -> bool {
+        matches!(self, BookmarkRef::Position(_))
+    }
 }
 
 /// A performance/caching hint which determines how REAPER internally gets or sets a chunk.

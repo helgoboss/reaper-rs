@@ -121,6 +121,7 @@ impl ControlSurfaceRxMiddleware {
             PlayStateChanged(_) => self.rx.play_state_changed.borrow_mut().next(()),
             RepeatStateChanged(_) => self.rx.repeat_state_changed.borrow_mut().next(()),
             ProjectClosed(e) => self.rx.project_closed.borrow_mut().next(e.project),
+            BookmarksChanged(_) => self.rx.bookmarks_changed.borrow_mut().next(()),
         };
     }
 }
@@ -166,6 +167,7 @@ pub struct ControlSurfaceRx {
     pub play_state_changed: EventStreamSubject<()>,
     pub repeat_state_changed: EventStreamSubject<()>,
     pub project_closed: EventStreamSubject<Project>,
+    pub bookmarks_changed: EventStreamSubject<()>,
 }
 
 impl fmt::Debug for ControlSurfaceRx {
@@ -218,11 +220,16 @@ impl ControlSurfaceRx {
             play_state_changed: default(),
             repeat_state_changed: default(),
             project_closed: default(),
+            bookmarks_changed: default(),
         }
     }
 
     pub fn project_switched(&self) -> impl ReactiveEvent<Project> {
         self.project_switched.borrow().clone()
+    }
+
+    pub fn bookmarks_changed(&self) -> impl ReactiveEvent<()> {
+        self.bookmarks_changed.borrow().clone()
     }
 
     pub fn fx_opened(&self) -> impl ReactiveEvent<Fx> {

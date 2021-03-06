@@ -1,14 +1,16 @@
 use crate::guid::Guid;
-use crate::{PlayRate, Reaper, Tempo, Track};
+use crate::{IdBasedBookmark, IndexBasedBookmark, PlayRate, Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    MasterTrackBehavior, PlayState, ProjectRef, ReaProject, ReaperString, ReaperStringArg,
-    TrackDefaultsBehavior, TrackLocation, UndoBehavior,
+    BookmarkId, BookmarkRef, CountProjectMarkersResult, GetLastMarkerAndCurRegionResult,
+    MasterTrackBehavior, PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject,
+    ReaperString, ReaperStringArg, TimeMap2TimeToBeatsResult, TrackDefaultsBehavior, TrackLocation,
+    UndoBehavior,
 };
 use std::path::PathBuf;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Project {
     rea_project: ReaProject,
 }
@@ -128,6 +130,10 @@ impl Project {
                 .unwrap();
             Track::new(media_track, Some(self.rea_project))
         })
+    }
+
+    pub(crate) fn context(self) -> ProjectContext {
+        Proj(self.rea_project)
     }
 
     pub fn track_count(self) -> u32 {
@@ -308,6 +314,68 @@ impl Project {
         Reaper::get()
             .medium_reaper()
             .get_play_state_ex(Proj(self.rea_project))
+    }
+
+    pub fn find_bookmark_by_index(self, index: u32) -> Option<IndexBasedBookmark> {
+        if index >= self.bookmark_count().total_count {
+            return None;
+        }
+        Some(IndexBasedBookmark::new(self, index))
+    }
+
+    pub fn bookmark_by_id(self, id: BookmarkId) -> IdBasedBookmark {
+        IdBasedBookmark::new(self, id, None)
+    }
+
+    pub fn bookmarks(self) -> impl Iterator<Item = IndexBasedBookmark> + ExactSizeIterator {
+        (0..self.bookmark_count().total_count).map(move |i| IndexBasedBookmark::new(self, i))
+    }
+
+    pub fn bookmark_count(self) -> CountProjectMarkersResult {
+        Reaper::get()
+            .medium_reaper()
+            .count_project_markers(self.context())
+    }
+
+    pub fn go_to_region_with_smooth_seek(self, region: BookmarkRef) {
+        Reaper::get()
+            .medium_reaper()
+            .go_to_region(self.context(), region);
+    }
+
+    pub fn current_bookmark(self) -> GetLastMarkerAndCurRegionResult {
+        let reference_pos = if self.is_playing() {
+            self.play_position_latency_compensated()
+        } else {
+            self.edit_cursor_position()
+        };
+        Reaper::get()
+            .medium_reaper()
+            .get_last_marker_and_cur_region(self.context(), reference_pos)
+    }
+
+    pub fn beat_info_at(self, tpos: PositionInSeconds) -> TimeMap2TimeToBeatsResult {
+        Reaper::get()
+            .medium_reaper
+            .time_map_2_time_to_beats(self.context(), tpos)
+    }
+
+    pub fn play_position_next_audio_block(self) -> PositionInSeconds {
+        Reaper::get()
+            .medium_reaper()
+            .get_play_position_2_ex(self.context())
+    }
+
+    pub fn play_position_latency_compensated(self) -> PositionInSeconds {
+        Reaper::get()
+            .medium_reaper()
+            .get_play_position_ex(self.context())
+    }
+
+    pub fn edit_cursor_position(self) -> PositionInSeconds {
+        Reaper::get()
+            .medium_reaper()
+            .get_cursor_position_ex(self.context())
     }
 
     fn set_repeat_is_enabled(self, repeat: bool) {

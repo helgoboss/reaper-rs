@@ -501,6 +501,9 @@ impl ChangeDetectionMiddleware {
                     new_value: args.is_enabled,
                 }));
             }
+            ExtSetProjectMarkerChange(_) => {
+                handle_change(ChangeEvent::BookmarksChanged(BookmarksChangedEvent {}))
+            }
             _ => return false,
         };
         true
@@ -1053,6 +1056,7 @@ pub enum ChangeEvent {
     PlayStateChanged(PlayStateChangedEvent),
     RepeatStateChanged(RepeatStateChangedEvent),
     ProjectClosed(ProjectClosedEvent),
+    BookmarksChanged(BookmarksChangedEvent),
 }
 
 #[derive(Clone, Debug)]
@@ -1234,3 +1238,6 @@ pub struct RepeatStateChangedEvent {
 pub struct ProjectClosedEvent {
     pub project: Project,
 }
+
+#[derive(Clone, Debug)]
+pub struct BookmarksChangedEvent {}

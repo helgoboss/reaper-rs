@@ -107,6 +107,53 @@ impl SectionId {
     }
 }
 
+/// A marker or region ID.
+///
+/// This uniquely identifies a marker or region. Zero is also a valid ID.
+/// Region IDs and marker IDs are two separate ID spaces.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct BookmarkId(pub(crate) u32);
+
+impl BookmarkId {
+    /// Creates a marker ID.
+    pub fn new(number: u32) -> BookmarkId {
+        BookmarkId(number)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> u32 {
+        self.0
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        self.0 as i32
+    }
+}
+
+/// An OS-dependent color.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct NativeColor(pub(crate) u32);
+
+impl NativeColor {
+    /// Creates a native color.
+    pub fn new(number: u32) -> NativeColor {
+        NativeColor(number)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> u32 {
+        self.0
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        self.0 as i32
+    }
+}
+
 /// A MIDI input device ID.
 ///
 /// This uniquely identifies a MIDI input device according to the REAPER MIDI device preferences.
@@ -456,6 +503,121 @@ impl TryFrom<f64> for Hz {
             ));
         }
         Ok(Hz(value))
+    }
+}
+
+/// This represents a position expressed as positive amount of seconds.
+///
+/// In most cases this is a particular position the main timeline, which always starts at zero
+/// despite of the fact that REAPER supports setting a negative project start value!
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+pub struct PositionInSeconds(pub(crate) f64);
+
+impl PositionInSeconds {
+    fn is_valid(value: f64) -> bool {
+        0.0 <= value
+    }
+
+    /// Creates a second value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value zero or negative.
+    pub fn new(value: f64) -> PositionInSeconds {
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid PositionInSeconds value", value)
+        );
+        PositionInSeconds(value)
+    }
+
+    /// Creates a PositionInSeconds value without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is greater than 0.0.
+    pub unsafe fn new_unchecked(value: f64) -> PositionInSeconds {
+        PositionInSeconds(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for PositionInSeconds {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be greater than 0.0",
+                value,
+            ));
+        }
+        Ok(PositionInSeconds(value))
+    }
+}
+
+/// This represents a position expressed as positive amount of beats.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+pub struct PositionInBeats(pub(crate) f64);
+
+impl PositionInBeats {
+    fn is_valid(value: f64) -> bool {
+        0.0 <= value
+    }
+
+    /// Creates a beats value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value zero or negative.
+    pub fn new(value: f64) -> PositionInBeats {
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid PositionInBeats value", value)
+        );
+        PositionInBeats(value)
+    }
+
+    /// Creates a PositionInBeats value without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is greater than 0.0.
+    pub unsafe fn new_unchecked(value: f64) -> PositionInBeats {
+        PositionInBeats(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for PositionInBeats {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be greater than 0.0",
+                value,
+            ));
+        }
+        Ok(PositionInBeats(value))
     }
 }
 
