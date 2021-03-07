@@ -1,5 +1,5 @@
 use crate::guid::Guid;
-use crate::{IdBasedBookmark, IndexBasedBookmark, PlayRate, Reaper, Tempo, Track};
+use crate::{BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, PlayRate, Reaper, Tempo, Track};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
@@ -316,15 +316,68 @@ impl Project {
             .get_play_state_ex(Proj(self.rea_project))
     }
 
+    pub fn find_bookmark_by_type_and_index(
+        self,
+        bookmark_type: BookmarkType,
+        index: u32,
+    ) -> Option<FindBookmarkResult> {
+        self.bookmarks_of_type(bookmark_type)
+            .find(|res| res.index_within_type == index)
+    }
+
+    pub fn find_bookmark_by_type_and_id(
+        self,
+        bookmark_type: BookmarkType,
+        id: BookmarkId,
+    ) -> Option<FindBookmarkResult> {
+        self.bookmarks_of_type(bookmark_type)
+            .find(|res| res.basic_info.id == id)
+    }
+
+    fn bookmarks_of_type(
+        self,
+        bookmark_type: BookmarkType,
+    ) -> impl Iterator<Item = FindBookmarkResult> {
+        self.bookmarks()
+            // Enumerate across types
+            .enumerate()
+            .map(|(i, b)| {
+                FindBookmarkResult {
+                    index: i as _,
+                    // Not yet set
+                    index_within_type: 0,
+                    bookmark: b,
+                    basic_info: b.basic_info(),
+                }
+            })
+            .filter(move |res| res.basic_info.bookmark_type() == bookmark_type)
+            // Enumerate within this type
+            .enumerate()
+            .map(|(i, mut res)| {
+                res.index_within_type = i as _;
+                res
+            })
+    }
+
+    // If we make this clean one day, I think this a good way: When wandering from the project to
+    // a bookmark, we *should* return an Option if it doesn't exist. If one wants to create a
+    // IndexBasedBookmark value - irrelevant of it exists or not - they can just create it
+    // directly. That's good because it allows for a fluent, idiomatic API. The methods of the
+    // returned object should not return an error if the object is not available - they should
+    // panic instead because at this point (the fluent API use) we can safely assume they *are*
+    // available - because it was checked in the find() call before. Long-living objects whose
+    // methods return results depending on their availability are maybe not a good idea!
+    //
+    // The returned bookmark should provide methods to dive further in a fluent way (doing
+    // REAPER function calls as necessary). It shouldn't contain any snapshot data.
+    // There's the related question how to deal with info that is discovered already while
+    // finding the bookmark. It's a snapshot only, so it should *not* be part of the actually
+    // returned bookmark. But it could be returned as side product.
     pub fn find_bookmark_by_index(self, index: u32) -> Option<IndexBasedBookmark> {
         if index >= self.bookmark_count().total_count {
             return None;
         }
         Some(IndexBasedBookmark::new(self, index))
-    }
-
-    pub fn bookmark_by_id(self, id: BookmarkId) -> IdBasedBookmark {
-        IdBasedBookmark::new(self, id, None)
     }
 
     pub fn bookmarks(self) -> impl Iterator<Item = IndexBasedBookmark> + ExactSizeIterator {
@@ -335,6 +388,12 @@ impl Project {
         Reaper::get()
             .medium_reaper()
             .count_project_markers(self.context())
+    }
+
+    pub fn go_to_marker(self, marker: BookmarkRef) {
+        Reaper::get()
+            .medium_reaper()
+            .go_to_marker(self.context(), marker);
     }
 
     pub fn go_to_region_with_smooth_seek(self, region: BookmarkRef) {
@@ -389,4 +448,11 @@ impl Project {
             panic!("Project not available");
         }
     }
+}
+
+pub struct FindBookmarkResult {
+    pub index: u32,
+    pub index_within_type: u32,
+    pub bookmark: IndexBasedBookmark,
+    pub basic_info: BasicBookmarkInfo,
 }
