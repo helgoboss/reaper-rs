@@ -1099,9 +1099,41 @@ impl<UsageScope> Reaper<UsageScope> {
         use_result(Some(result))
     }
 
-    /// Seeks to the given region after the current one finishes playing (smooth seek).
+    /// Goes to the given marker.
     ///
-    /// If the region is given as index, the index represents
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn go_to_marker(&self, project: ProjectContext, marker: BookmarkRef)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe {
+            self.go_to_marker_unchecked(project, marker);
+        }
+    }
+
+    /// Like [`go_to_marker()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// [`go_to_marker()`]: #method.go_to_marker
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn go_to_marker_unchecked(&self, project: ProjectContext, marker: BookmarkRef)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.GoToMarker(
+            project.to_raw(),
+            marker.to_raw(),
+            marker.uses_timeline_order(),
+        );
+    }
+
+    /// Seeks to the given region after the current one finishes playing (smooth seek).
     ///
     /// # Panics
     ///
@@ -1111,7 +1143,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.go_to_region_unchecked(project, region);
