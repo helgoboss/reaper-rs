@@ -506,10 +506,11 @@ impl TryFrom<f64> for Hz {
     }
 }
 
-/// This represents a position expressed as positive amount of seconds.
+/// This represents a position expressed as amount of seconds.
 ///
-/// In most cases this is a particular position the main timeline, which always starts at zero
-/// despite of the fact that REAPER supports setting a negative project start value!
+/// Sometimes this is a negative number, e.g. when it's a position on the timeline and a metronome
+/// count-in is used or at the very beginning of the project (maybe because of rounding). Negative
+/// project start values don't seem to cause negative position values though.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(
     feature = "serde",
@@ -520,7 +521,7 @@ pub struct PositionInSeconds(pub(crate) f64);
 
 impl PositionInSeconds {
     fn is_valid(value: f64) -> bool {
-        0.0 <= value
+        !value.is_infinite() && !value.is_nan()
     }
 
     /// Creates a second value.
@@ -557,7 +558,7 @@ impl TryFrom<f64> for PositionInSeconds {
     fn try_from(value: f64) -> Result<Self, Self::Error> {
         if !Self::is_valid(value) {
             return Err(TryFromGreaterError::new(
-                "value must be greater than 0.0",
+                "PositionInSeconds value must be non-special",
                 value,
             ));
         }
@@ -565,7 +566,9 @@ impl TryFrom<f64> for PositionInSeconds {
     }
 }
 
-/// This represents a position expressed as positive amount of beats.
+/// This represents a position expressed as an amount of beats.
+///
+/// Can be negative, see [`PositionInSeconds`](struct.PositionInSeconds.html).
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(
     feature = "serde",
@@ -576,7 +579,7 @@ pub struct PositionInBeats(pub(crate) f64);
 
 impl PositionInBeats {
     fn is_valid(value: f64) -> bool {
-        0.0 <= value
+        !value.is_infinite() && !value.is_nan()
     }
 
     /// Creates a beats value.
