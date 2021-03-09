@@ -79,7 +79,7 @@ impl Project {
         Track::from_guid(self, *guid)
     }
 
-    pub fn tracks(self) -> impl Iterator<Item = Track> + 'static {
+    pub fn tracks(self) -> impl Iterator<Item = Track> + ExactSizeIterator + 'static {
         self.complain_if_not_available();
         (0..self.track_count()).map(move |i| {
             let media_track = Reaper::get()
