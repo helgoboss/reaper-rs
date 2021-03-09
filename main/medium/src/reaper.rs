@@ -759,6 +759,15 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.IsInRealTimeAudio() != 0
     }
 
+    /// Returns whether audio is running at all.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn audio_is_running(&self) -> bool
+    where
+        UsageScope: AnyThread,
+    {
+        self.low.Audio_IsRunning() != 0
+    }
+
     /// Starts playing.
     #[measure(ResponseTimeSingleThreaded)]
     pub fn csurf_on_play(&self)

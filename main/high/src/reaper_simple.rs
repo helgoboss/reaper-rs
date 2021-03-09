@@ -263,4 +263,8 @@ impl Reaper {
         }
         self.medium_reaper().csurf_on_record();
     }
+
+    pub fn audio_is_running(&self) -> bool {
+        self.medium_reaper().audio_is_running()
+    }
 }
