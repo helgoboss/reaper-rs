@@ -8,7 +8,8 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, PlayRate, Reaper, Tempo, Track, Volume, Width,
+    FxParameterValueRange, Guid, Pan, PlayRate, Reaper, SendPartnerType, Tempo, Track,
+    TrackRoutePartner, Volume, Width,
 };
 use rxrust::prelude::*;
 
@@ -94,7 +95,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         remove_track(),
         query_track_automation_mode(),
         query_track_misc(),
-        query_track_send_count(),
+        query_track_route_count(),
         add_track_send(),
         query_track_send(),
         set_track_send_volume(),
@@ -775,7 +776,9 @@ fn set_track_send_pan() -> TestStep {
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
-        let send = track_1.send_by_target_track(track_3);
+        let send = track_1
+            .find_send_by_destination_track(&track_3)
+            .ok_or("missing send")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -785,7 +788,7 @@ fn set_track_send_pan() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        send.set_pan(Pan::from_normalized_value(0.25));
+        send.set_pan(Pan::from_normalized_value(0.25)).unwrap();
         // Then
         assert_eq!(send.pan().reaper_value(), ReaperPanValue::new(-0.5));
         assert_eq!(send.pan().normalized_value(), 0.25);
@@ -801,7 +804,9 @@ fn set_track_send_mute() -> TestStep {
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
-        let send = track_1.send_by_target_track(track_3);
+        let send = track_1
+            .find_send_by_destination_track(&track_3)
+            .ok_or("missing send")?;
         // When
         send.mute();
         // Then
@@ -820,7 +825,9 @@ fn set_track_send_volume() -> TestStep {
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
-        let send = track_1.send_by_target_track(track_3);
+        let send = track_1
+            .find_send_by_destination_track(&track_3)
+            .ok_or("missing send")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -830,7 +837,8 @@ fn set_track_send_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        send.set_volume(Volume::try_from_soft_normalized_value(0.25).unwrap());
+        send.set_volume(Volume::try_from_soft_normalized_value(0.25).unwrap())
+            .unwrap();
         // Then
         assert!(abs_diff_eq!(
             send.volume().db().get(),
@@ -851,18 +859,26 @@ fn query_track_send() -> TestStep {
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
         let track_3 = project.add_track();
         // When
-        let send_to_track_2 = track_1.send_by_target_track(track_2.clone());
-        let send_to_track_3 = track_1.add_send_to(track_3.clone());
+        let send_to_track_2 = track_1
+            .find_send_by_destination_track(&track_2)
+            .ok_or("missing send")?;
+        let send_to_track_3 = track_1.add_send_to(&track_3);
         // Then
         assert!(send_to_track_2.is_available());
         assert!(send_to_track_3.is_available());
         assert_eq!(send_to_track_2.index(), 0);
         assert_eq!(send_to_track_3.index(), 1);
-        assert_eq!(send_to_track_2.source_track(), &track_1);
-        assert_eq!(send_to_track_3.source_track(), &track_1);
-        assert_eq!(send_to_track_2.target_track(), track_2);
+        assert_eq!(send_to_track_2.track(), &track_1);
+        assert_eq!(send_to_track_3.track(), &track_1);
+        assert_eq!(
+            send_to_track_2.partner(),
+            Some(TrackRoutePartner::Track(track_2))
+        );
         assert_eq!(send_to_track_2.name().to_str(), "Track 2");
-        assert_eq!(send_to_track_3.target_track(), track_3);
+        assert_eq!(
+            send_to_track_3.partner(),
+            Some(TrackRoutePartner::Track(track_3))
+        );
         assert_eq!(send_to_track_2.volume().db(), Db::ZERO_DB);
         assert_eq!(send_to_track_3.volume().db(), Db::ZERO_DB);
         assert!(!send_to_track_2.is_muted());
@@ -878,30 +894,96 @@ fn add_track_send() -> TestStep {
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
         // When
-        let send = track_1.add_send_to(track_2.clone());
+        let send = track_1.add_send_to(&track_2);
         // Then
         assert_eq!(track_1.send_count(), 1);
-        assert_eq!(track_1.send_by_index(0), Some(send));
-        assert!(track_1.send_by_target_track(track_2.clone()).is_available());
-        assert!(!track_2.send_by_target_track(track_1.clone()).is_available());
-        assert!(track_1.index_based_send_by_index(0).is_available());
+        assert_eq!(track_1.typed_send_count(SendPartnerType::Track), 1);
+        assert_eq!(track_1.typed_send_count(SendPartnerType::HardwareOutput), 0);
+        assert_eq!(track_1.receive_count(), 0);
+        assert_eq!(track_2.receive_count(), 1);
+        assert_eq!(track_1.send_by_index(0).unwrap(), send);
+        assert_eq!(
+            track_1
+                .typed_send_by_index(SendPartnerType::Track, 0)
+                .unwrap(),
+            send
+        );
+        assert_eq!(
+            track_1.typed_send_by_index(SendPartnerType::HardwareOutput, 0),
+            None
+        );
+        assert_eq!(track_1.receive_by_index(0), None);
+        assert!(track_2.receive_by_index(0).unwrap().is_available());
+        assert!(
+            track_1
+                .find_send_by_destination_track(&track_2)
+                .ok_or("missing send")?
+                .is_available()
+        );
+        assert!(track_2.find_send_by_destination_track(&track_1).is_none());
+        assert!(
+            track_2
+                .find_receive_by_source_track(&track_1)
+                .ok_or("missing receive")?
+                .is_available()
+        );
+        assert!(track_1.find_receive_by_source_track(&track_2).is_none());
         assert_eq!(track_1.sends().count(), 1);
+        assert_eq!(track_2.sends().count(), 0);
+        assert_eq!(track_1.typed_sends(SendPartnerType::Track).count(), 1);
+        assert_eq!(
+            track_1.typed_sends(SendPartnerType::HardwareOutput).count(),
+            0
+        );
+        assert_eq!(track_2.receives().count(), 1);
+        assert_eq!(track_1.receives().count(), 0);
         Ok(())
     })
 }
 
-fn query_track_send_count() -> TestStep {
-    step(AllVersions, "Query track send count", |_, _| {
+fn query_track_route_count() -> TestStep {
+    step(AllVersions, "Query track route count", |_, _| {
         // Given
         let track = get_track(0)?;
         // When
-        let send_count = track.send_count();
+        let track_send_count = track.typed_send_count(SendPartnerType::Track);
+        let hw_output_send_count = track.typed_send_count(SendPartnerType::HardwareOutput);
+        let receive_count = track.receive_count();
         // Then
-        assert_eq!(send_count, 0);
+        assert_eq!(track_send_count, 0);
+        assert_eq!(hw_output_send_count, 0);
+        assert_eq!(receive_count, 0);
+        assert!(
+            track
+                .typed_send_by_index(SendPartnerType::Track, 0)
+                .is_none()
+        );
+        assert!(
+            track
+                .typed_send_by_index(SendPartnerType::HardwareOutput, 0)
+                .is_none()
+        );
+        assert!(track.receive_by_index(0).is_none());
+        assert!(track.find_send_by_destination_track(&track).is_none());
         assert!(track.send_by_index(0).is_none());
-        assert!(!track.send_by_target_track(track.clone()).is_available());
-        assert!(!track.index_based_send_by_index(0).is_available());
+        assert!(
+            track
+                .typed_send_by_index(SendPartnerType::Track, 0)
+                .is_none()
+        );
+        assert!(
+            track
+                .typed_send_by_index(SendPartnerType::HardwareOutput, 0)
+                .is_none()
+        );
+        assert!(track.receive_by_index(0).is_none());
         assert_eq!(track.sends().count(), 0);
+        assert_eq!(track.typed_sends(SendPartnerType::Track).count(), 0);
+        assert_eq!(
+            track.typed_sends(SendPartnerType::HardwareOutput).count(),
+            0
+        );
+        assert_eq!(track.receives().count(), 0);
         Ok(())
     })
 }

@@ -3,9 +3,11 @@ use std::cell::Cell;
 use crate::fx::{get_index_from_query_index, Fx};
 use crate::fx_chain::FxChain;
 use crate::guid::Guid;
-use crate::track_send::TrackSend;
+use crate::track_route::TrackRoute;
 
-use crate::{get_target_track, Chunk, ChunkRegion, Pan, Project, Reaper, Volume, Width};
+use crate::{
+    Chunk, ChunkRegion, Pan, Project, Reaper, SendPartnerType, TrackRoutePartner, Volume, Width,
+};
 
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
@@ -16,6 +18,7 @@ use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
     RecordingInput, SoloMode, TrackAttributeKey, TrackLocation, TrackSendCategory,
+    TrackSendDirection,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -591,56 +594,121 @@ impl Track {
         }
     }
 
-    pub fn send_count(&self) -> u32 {
+    pub fn receive_count(&self) -> u32 {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_num_sends(self.raw(), TrackSendCategory::Send)
+                .get_track_num_sends(self.raw(), TrackSendCategory::Receive)
         }
     }
 
-    pub fn add_send_to(&self, target_track: Track) -> TrackSend {
+    pub fn send_count(&self) -> u32 {
+        self.hw_send_count() + self.typed_send_count(SendPartnerType::Track)
+    }
+
+    pub fn typed_send_count(&self, partner_type: SendPartnerType) -> u32 {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_track_num_sends(self.raw(), partner_type.to_category())
+        }
+    }
+
+    pub fn add_send_to(&self, destination_track: &Track) -> TrackRoute {
         // TODO-low Check how this behaves if send already exists
         let send_index = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .create_track_send(self.raw(), OtherTrack(target_track.raw()))
+                .create_track_send(self.raw(), OtherTrack(destination_track.raw()))
         }
         .unwrap();
-        TrackSend::target_based(self.clone(), target_track, Some(send_index))
+        let hw_send_count = self.hw_send_count();
+        TrackRoute::new(
+            self.clone(),
+            TrackSendDirection::Send,
+            hw_send_count + send_index,
+        )
     }
 
-    // Returns target-track based sends
-    pub fn sends(&self) -> impl Iterator<Item = TrackSend> + '_ {
+    pub fn receives(&self) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
         self.load_and_check_if_necessary_or_complain();
-        (0..self.send_count()).map(move |i| {
-            // Create a stable send (based on target track)
-            TrackSend::target_based(self.clone(), get_target_track(self, i), Some(i))
-        })
+        (0..self.receive_count())
+            .map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Receive, i))
     }
 
-    pub fn send_by_index(&self, index: u32) -> Option<TrackSend> {
+    pub fn sends(&self) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
+        self.load_and_check_if_necessary_or_complain();
+        (0..self.send_count())
+            .map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Send, i))
+    }
+
+    pub fn typed_sends(
+        &self,
+        partner_type: SendPartnerType,
+    ) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
+        self.load_and_check_if_necessary_or_complain();
+        let hw_send_count = self.hw_send_count();
+        let (from, count) = match partner_type {
+            SendPartnerType::Track => {
+                (hw_send_count, self.typed_send_count(SendPartnerType::Track))
+            }
+            SendPartnerType::HardwareOutput => (0, hw_send_count),
+        };
+        let until = from + count;
+        (from..until).map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Send, i))
+    }
+
+    fn hw_send_count(&self) -> u32 {
+        self.typed_send_count(SendPartnerType::HardwareOutput)
+    }
+
+    pub fn receive_by_index(&self, index: u32) -> Option<TrackRoute> {
+        if index >= self.receive_count() {
+            return None;
+        }
+        let route = TrackRoute::new(self.clone(), TrackSendDirection::Receive, index);
+        Some(route)
+    }
+
+    pub fn send_by_index(&self, index: u32) -> Option<TrackRoute> {
         if index >= self.send_count() {
             return None;
         }
-        Some(TrackSend::target_based(
-            self.clone(),
-            get_target_track(self, index),
-            Some(index),
-        ))
+        let route = TrackRoute::new(self.clone(), TrackSendDirection::Send, index);
+        Some(route)
     }
 
-    pub fn send_by_target_track(&self, target_track: Track) -> TrackSend {
-        TrackSend::target_based(self.clone(), target_track, None)
+    pub fn typed_send_by_index(
+        &self,
+        partner_type: SendPartnerType,
+        index: u32,
+    ) -> Option<TrackRoute> {
+        if index >= self.typed_send_count(partner_type) {
+            return None;
+        }
+        let actual_index = match partner_type {
+            SendPartnerType::Track => self.hw_send_count() + index,
+            SendPartnerType::HardwareOutput => index,
+        };
+        let route = TrackRoute::new(self.clone(), TrackSendDirection::Send, actual_index);
+        Some(route)
     }
 
-    // Non-Optional. Even the index is not a stable identifier, we need a way to create
-    // sends just by an index, not to target tracks. Think of ReaLearn for example and saving
-    // a preset for a future project which doesn't have the same target track like in the
-    // example project.
-    pub fn index_based_send_by_index(&self, index: u32) -> TrackSend {
-        TrackSend::index_based(self.clone(), index)
+    pub fn find_receive_by_source_track(&self, source_track: &Track) -> Option<TrackRoute> {
+        self.receives().find(|s| match s.partner() {
+            Some(TrackRoutePartner::Track(t)) => t == *source_track,
+            _ => false,
+        })
+    }
+
+    pub fn find_send_by_destination_track(&self, destination_track: &Track) -> Option<TrackRoute> {
+        self.typed_sends(SendPartnerType::Track)
+            .find(|s| match s.partner() {
+                Some(TrackRoutePartner::Track(t)) => t == *destination_track,
+                _ => false,
+            })
     }
 
     // It's correct that this returns an optional because the index isn't a stable identifier of an

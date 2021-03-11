@@ -1,5 +1,5 @@
 use crate::{EventStreamSubject, ReactiveEvent};
-use reaper_high::{AvailablePanValue, ChangeEvent, Fx, FxParameter, Project, Track, TrackSend};
+use reaper_high::{AvailablePanValue, ChangeEvent, Fx, FxParameter, Project, Track, TrackRoute};
 use reaper_medium::Pan;
 use rxrust::prelude::*;
 use std::cell::RefCell;
@@ -135,10 +135,10 @@ pub struct ControlSurfaceRx {
     pub track_pan_changed: EventStreamSubject<Track>,
     /// Old, New.
     pub track_pan_touched: EventStreamSubject<(Track, Pan, Pan)>,
-    pub track_send_volume_changed: EventStreamSubject<TrackSend>,
-    pub track_send_volume_touched: EventStreamSubject<TrackSend>,
-    pub track_send_pan_changed: EventStreamSubject<TrackSend>,
-    pub track_send_pan_touched: EventStreamSubject<TrackSend>,
+    pub track_send_volume_changed: EventStreamSubject<TrackRoute>,
+    pub track_send_volume_touched: EventStreamSubject<TrackRoute>,
+    pub track_send_pan_changed: EventStreamSubject<TrackRoute>,
+    pub track_send_pan_touched: EventStreamSubject<TrackRoute>,
     pub track_added: EventStreamSubject<Track>,
     pub track_removed: EventStreamSubject<Track>,
     pub tracks_reordered: EventStreamSubject<Project>,
@@ -357,19 +357,19 @@ impl ControlSurfaceRx {
         self.track_arm_changed.borrow().clone()
     }
 
-    pub fn track_send_volume_changed(&self) -> impl ReactiveEvent<TrackSend> {
+    pub fn track_send_volume_changed(&self) -> impl ReactiveEvent<TrackRoute> {
         self.track_send_volume_changed.borrow().clone()
     }
 
-    pub fn track_send_volume_touched(&self) -> impl ReactiveEvent<TrackSend> {
+    pub fn track_send_volume_touched(&self) -> impl ReactiveEvent<TrackRoute> {
         self.track_send_volume_touched.borrow().clone()
     }
 
-    pub fn track_send_pan_changed(&self) -> impl ReactiveEvent<TrackSend> {
+    pub fn track_send_pan_changed(&self) -> impl ReactiveEvent<TrackRoute> {
         self.track_send_pan_changed.borrow().clone()
     }
 
-    pub fn track_send_pan_touched(&self) -> impl ReactiveEvent<TrackSend> {
+    pub fn track_send_pan_touched(&self) -> impl ReactiveEvent<TrackRoute> {
         self.track_send_pan_touched.borrow().clone()
     }
 

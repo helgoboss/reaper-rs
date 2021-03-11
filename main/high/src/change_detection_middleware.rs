@@ -1,13 +1,14 @@
 use crate::{
     get_media_track_guid, ControlSurfaceEvent, Fx, FxParameter, Guid, Project, Reaper, Track,
-    TrackSend,
+    TrackRoute,
 };
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
     reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, InputMonitoringMode, MediaTrack, Pan,
     PanMode, PlayState, PlaybackSpeedFactor, ReaProject, ReaperNormalizedFxParamValue,
     ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue, TrackAttributeKey,
-    TrackFxChainType, TrackLocation, VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    TrackFxChainType, TrackLocation, TrackSendDirection, VersionDependentFxLocation,
+    VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
@@ -317,11 +318,12 @@ impl ChangeDetectionMiddleware {
                     return true;
                 }
                 let track = Track::new(args.track, None);
-                let send = track.index_based_send_by_index(args.send_index);
+                let is_automated =
+                    self.track_parameter_is_automated(&track, reaper_str!("Send Volume"));
+                let send = TrackRoute::new(track, TrackSendDirection::Send, args.send_index);
                 handle_change(ChangeEvent::TrackSendVolumeChanged(
                     TrackSendVolumeChangedEvent {
-                        touched: !self
-                            .track_parameter_is_automated(&track, reaper_str!("Send Volume")),
+                        touched: !is_automated,
                         send,
                         old_value: old,
                         new_value: args.volume,
@@ -338,9 +340,11 @@ impl ChangeDetectionMiddleware {
                     return true;
                 }
                 let track = Track::new(args.track, None);
-                let send = track.index_based_send_by_index(args.send_index);
+                let is_automated =
+                    self.track_parameter_is_automated(&track, reaper_str!("Send Pan"));
+                let send = TrackRoute::new(track, TrackSendDirection::Send, args.send_index);
                 handle_change(ChangeEvent::TrackSendPanChanged(TrackSendPanChangedEvent {
-                    touched: !self.track_parameter_is_automated(&track, reaper_str!("Send Pan")),
+                    touched: !is_automated,
                     send,
                     old_value: old,
                     new_value: args.pan,
@@ -1090,7 +1094,7 @@ pub enum AvailablePanValue {
 #[derive(Clone, Debug)]
 pub struct TrackSendVolumeChangedEvent {
     pub touched: bool,
-    pub send: TrackSend,
+    pub send: TrackRoute,
     pub old_value: Option<ReaperVolumeValue>,
     pub new_value: ReaperVolumeValue,
 }
@@ -1098,7 +1102,7 @@ pub struct TrackSendVolumeChangedEvent {
 #[derive(Clone, Debug)]
 pub struct TrackSendPanChangedEvent {
     pub touched: bool,
-    pub send: TrackSend,
+    pub send: TrackRoute,
     pub old_value: Option<ReaperPanValue>,
     pub new_value: ReaperPanValue,
 }
