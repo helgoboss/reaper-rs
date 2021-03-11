@@ -349,11 +349,11 @@ impl ChangeDetectionMiddleware {
                 let track = Track::new(args.track, None);
                 let is_automated =
                     self.track_parameter_is_automated(&track, reaper_str!("Send Volume"));
-                let send = TrackRoute::new(track, TrackSendDirection::Send, args.send_index);
-                handle_change(ChangeEvent::TrackSendVolumeChanged(
-                    TrackSendVolumeChangedEvent {
+                let route = TrackRoute::new(track, TrackSendDirection::Send, args.send_index);
+                handle_change(ChangeEvent::TrackRouteVolumeChanged(
+                    TrackRouteVolumeChangedEvent {
                         touched: !is_automated,
-                        send,
+                        route,
                         old_value: old,
                         new_value: args.volume,
                     },
@@ -371,10 +371,10 @@ impl ChangeDetectionMiddleware {
                 let track = Track::new(args.track, None);
                 let is_automated =
                     self.track_parameter_is_automated(&track, reaper_str!("Send Pan"));
-                let send = TrackRoute::new(track, TrackSendDirection::Send, args.send_index);
-                handle_change(ChangeEvent::TrackSendPanChanged(TrackSendPanChangedEvent {
+                let route = TrackRoute::new(track, TrackSendDirection::Send, args.send_index);
+                handle_change(ChangeEvent::TrackRoutePanChanged(TrackRoutePanChangedEvent {
                     touched: !is_automated,
-                    send,
+                    route,
                     old_value: old,
                     new_value: args.pan,
                 }));
@@ -391,11 +391,11 @@ impl ChangeDetectionMiddleware {
                 let track = Track::new(args.track, None);
                 let is_automated =
                     self.track_parameter_is_automated(&track, reaper_str!("Send Volume"));
-                let receive = TrackRoute::new(track, TrackSendDirection::Receive, args.receive_index);
-                handle_change(ChangeEvent::TrackReceiveVolumeChanged(
-                    TrackReceiveVolumeChangedEvent {
+                let route = TrackRoute::new(track, TrackSendDirection::Receive, args.receive_index);
+                handle_change(ChangeEvent::TrackRouteVolumeChanged(
+                    TrackRouteVolumeChangedEvent {
                         touched: !is_automated,
-                        receive,
+                        route,
                         old_value: old,
                         new_value: args.volume,
                     },
@@ -413,10 +413,10 @@ impl ChangeDetectionMiddleware {
                 let track = Track::new(args.track, None);
                 let is_automated =
                     self.track_parameter_is_automated(&track, reaper_str!("Send Pan"));
-                let receive = TrackRoute::new(track, TrackSendDirection::Receive, args.receive_index);
-                handle_change(ChangeEvent::TrackReceivePanChanged(TrackReceivePanChangedEvent {
+                let route = TrackRoute::new(track, TrackSendDirection::Receive, args.receive_index);
+                handle_change(ChangeEvent::TrackRoutePanChanged(TrackRoutePanChangedEvent {
                     touched: !is_automated,
-                    receive,
+                    route,
                     old_value: old,
                     new_value: args.pan,
                 }));
@@ -1164,10 +1164,8 @@ pub enum ChangeEvent {
     ProjectSwitched(ProjectSwitchedEvent),
     TrackVolumeChanged(TrackVolumeChangedEvent),
     TrackPanChanged(TrackPanChangedEvent),
-    TrackSendVolumeChanged(TrackSendVolumeChangedEvent),
-    TrackSendPanChanged(TrackSendPanChangedEvent),
-    TrackReceiveVolumeChanged(TrackReceiveVolumeChangedEvent),
-    TrackReceivePanChanged(TrackReceivePanChangedEvent),
+    TrackRouteVolumeChanged(TrackRouteVolumeChangedEvent),
+    TrackRoutePanChanged(TrackRoutePanChangedEvent),
     TrackAdded(TrackAddedEvent),
     TrackRemoved(TrackRemovedEvent),
     TracksReordered(TracksReorderedEvent),
@@ -1227,33 +1225,17 @@ pub enum AvailablePanValue {
 }
 
 #[derive(Clone, Debug)]
-pub struct TrackSendVolumeChangedEvent {
+pub struct TrackRouteVolumeChangedEvent {
     pub touched: bool,
-    pub send: TrackRoute,
+    pub route: TrackRoute,
     pub old_value: Option<ReaperVolumeValue>,
     pub new_value: ReaperVolumeValue,
 }
 
 #[derive(Clone, Debug)]
-pub struct TrackSendPanChangedEvent {
+pub struct TrackRoutePanChangedEvent {
     pub touched: bool,
-    pub send: TrackRoute,
-    pub old_value: Option<ReaperPanValue>,
-    pub new_value: ReaperPanValue,
-}
-
-#[derive(Clone, Debug)]
-pub struct TrackReceiveVolumeChangedEvent {
-    pub touched: bool,
-    pub receive: TrackRoute,
-    pub old_value: Option<ReaperVolumeValue>,
-    pub new_value: ReaperVolumeValue,
-}
-
-#[derive(Clone, Debug)]
-pub struct TrackReceivePanChangedEvent {
-    pub touched: bool,
-    pub receive: TrackRoute,
+    pub route: TrackRoute,
     pub old_value: Option<ReaperPanValue>,
     pub new_value: ReaperPanValue,
 }
