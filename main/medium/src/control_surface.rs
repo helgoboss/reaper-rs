@@ -195,6 +195,18 @@ pub trait ControlSurface: Debug {
         0
     }
 
+    /// Called when the volume of a track receive has changed.
+    fn ext_set_recv_volume(&self, args: ExtSetRecvVolumeArgs) -> i32 {
+        let _ = args;
+        0
+    }
+
+    /// Called when the pan of a track receive has changed.
+    fn ext_set_recv_pan(&self, args: ExtSetRecvPanArgs) -> i32 {
+        let _ = args;
+        0
+    }
+
     /// Called when the pan of a track has changed.
     ///
     /// If a control surface supports this, it should ignore [`set_surface_pan`].
@@ -406,6 +418,20 @@ pub struct ExtSetSendPanArgs {
     pub track: MediaTrack,
     /// This starts with the hardware output sends and continues with the track sends.
     pub send_index: u32,
+    pub pan: ReaperPanValue,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct ExtSetRecvVolumeArgs {
+    pub track: MediaTrack,
+    pub receive_index: u32,
+    pub volume: ReaperVolumeValue,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct ExtSetRecvPanArgs {
+    pub track: MediaTrack,
+    pub receive_index: u32,
     pub pan: ReaperPanValue,
 }
 
@@ -798,6 +824,21 @@ impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
                 raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_set_send_pan(ExtSetSendPanArgs {
                     track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
                     send_index: deref_as::<i32>(parm2).expect("send index pointer is null") as u32,
+                    pan: deref_as(parm3).expect("pan pointer is null"),
+                }),
+                raw::CSURF_EXT_SETRECVVOLUME => {
+                    self.delegate.ext_set_recv_volume(ExtSetRecvVolumeArgs {
+                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                        receive_index: deref_as::<i32>(parm2)
+                            .expect("receive index pointer is null")
+                            as u32,
+                        volume: deref_as(parm3).expect("volume pointer is null"),
+                    })
+                }
+                raw::CSURF_EXT_SETRECVPAN => self.delegate.ext_set_recv_pan(ExtSetRecvPanArgs {
+                    track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                    receive_index: deref_as::<i32>(parm2).expect("receive index pointer is null")
+                        as u32,
                     pan: deref_as(parm3).expect("pan pointer is null"),
                 }),
                 raw::CSURF_EXT_SETPAN_EX => {

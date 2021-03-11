@@ -2,11 +2,12 @@ use reaper_medium::{
     ControlSurface, ExtResetArgs, ExtSetBpmAndPlayRateArgs, ExtSetFocusedFxArgs,
     ExtSetFxChangeArgs, ExtSetFxEnabledArgs, ExtSetFxOpenArgs, ExtSetFxParamArgs,
     ExtSetInputMonitorArgs, ExtSetLastTouchedFxArgs, ExtSetPanExArgs,
-    ExtSetProjectMarkerChangeArgs, ExtSetSendPanArgs, ExtSetSendVolumeArgs,
-    ExtSupportsExtendedTouchArgs, ExtTrackFxPresetChangedArgs, GetTouchStateArgs, IsKeyDownArgs,
-    OnTrackSelectionArgs, ReaperStr, SetAutoModeArgs, SetPlayStateArgs, SetRepeatStateArgs,
-    SetSurfaceMuteArgs, SetSurfacePanArgs, SetSurfaceRecArmArgs, SetSurfaceSelectedArgs,
-    SetSurfaceSoloArgs, SetSurfaceVolumeArgs, SetTrackTitleArgs,
+    ExtSetProjectMarkerChangeArgs, ExtSetRecvPanArgs, ExtSetRecvVolumeArgs, ExtSetSendPanArgs,
+    ExtSetSendVolumeArgs, ExtSupportsExtendedTouchArgs, ExtTrackFxPresetChangedArgs,
+    GetTouchStateArgs, IsKeyDownArgs, OnTrackSelectionArgs, ReaperStr, SetAutoModeArgs,
+    SetPlayStateArgs, SetRepeatStateArgs, SetSurfaceMuteArgs, SetSurfacePanArgs,
+    SetSurfaceRecArmArgs, SetSurfaceSelectedArgs, SetSurfaceSoloArgs, SetSurfaceVolumeArgs,
+    SetTrackTitleArgs,
 };
 
 use std::borrow::Cow;
@@ -186,6 +187,20 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
         )
     }
 
+    fn ext_set_recv_volume(&self, args: ExtSetRecvVolumeArgs) -> i32 {
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetRecvVolume(args)),
+        )
+    }
+
+    fn ext_set_recv_pan(&self, args: ExtSetRecvPanArgs) -> i32 {
+        to_int(
+            self.middleware
+                .handle_event(ControlSurfaceEvent::ExtSetRecvPan(args)),
+        )
+    }
+
     fn ext_set_pan_ex(&self, args: ExtSetPanExArgs) -> i32 {
         to_int(
             self.middleware
@@ -296,6 +311,8 @@ pub enum ControlSurfaceEvent<'a> {
     ExtSetFxEnabled(ExtSetFxEnabledArgs),
     ExtSetSendVolume(ExtSetSendVolumeArgs),
     ExtSetSendPan(ExtSetSendPanArgs),
+    ExtSetRecvVolume(ExtSetRecvVolumeArgs),
+    ExtSetRecvPan(ExtSetRecvPanArgs),
     ExtSetPanExt(ExtSetPanExArgs),
     ExtSetFocusedFx(ExtSetFocusedFxArgs),
     ExtSetLastTouchedFx(ExtSetLastTouchedFxArgs),

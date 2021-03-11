@@ -45,6 +45,8 @@ struct TrackData {
     guid: Guid,
     send_volumes: HashMap<u32, ReaperVolumeValue>,
     send_pans: HashMap<u32, ReaperPanValue>,
+    receive_volumes: HashMap<u32, ReaperVolumeValue>,
+    receive_pans: HashMap<u32, ReaperPanValue>,
     fx_param_values: HashMap<TrackFxKey, ReaperNormalizedFxParamValue>,
     fx_chain_pair: FxChainPair,
 }
@@ -65,6 +67,30 @@ impl TrackData {
     /// Returns true if it has changed along with the old value.
     fn update_send_pan(&mut self, index: u32, v: ReaperPanValue) -> (bool, Option<ReaperPanValue>) {
         match self.send_pans.insert(index, v) {
+            None => (true, None),
+            Some(prev) => (v != prev, Some(prev)),
+        }
+    }
+
+    /// Returns true if it has changed along with the old value.
+    fn update_receive_volume(
+        &mut self,
+        index: u32,
+        v: ReaperVolumeValue,
+    ) -> (bool, Option<ReaperVolumeValue>) {
+        match self.receive_volumes.insert(index, v) {
+            None => (true, None),
+            Some(prev) => (v != prev, Some(prev)),
+        }
+    }
+
+    /// Returns true if it has changed along with the old value.
+    fn update_receive_pan(
+        &mut self,
+        index: u32,
+        v: ReaperPanValue,
+    ) -> (bool, Option<ReaperPanValue>) {
+        match self.receive_pans.insert(index, v) {
             None => (true, None),
             Some(prev) => (v != prev, Some(prev)),
         }
@@ -350,6 +376,48 @@ impl ChangeDetectionMiddleware {
                     new_value: args.pan,
                 }));
             }
+            ExtSetRecvVolume(args) => {
+                let mut td = match self.find_track_data_in_normal_state(args.track) {
+                    None => return true,
+                    Some(td) => td,
+                };
+                let (changed, old) = td.update_receive_volume(args.receive_index, args.volume);
+                if !changed {
+                    return true;
+                }
+                let track = Track::new(args.track, None);
+                let is_automated =
+                    self.track_parameter_is_automated(&track, reaper_str!("Send Volume"));
+                let receive = TrackRoute::new(track, TrackSendDirection::Receive, args.receive_index);
+                handle_change(ChangeEvent::TrackReceiveVolumeChanged(
+                    TrackReceiveVolumeChangedEvent {
+                        touched: !is_automated,
+                        receive,
+                        old_value: old,
+                        new_value: args.volume,
+                    },
+                ));
+            }
+            ExtSetRecvPan(args) => {
+                let mut td = match self.find_track_data_in_normal_state(args.track) {
+                    None => return true,
+                    Some(td) => td,
+                };
+                let (changed, old) = td.update_receive_pan(args.receive_index, args.pan);
+                if !changed {
+                    return true;
+                }
+                let track = Track::new(args.track, None);
+                let is_automated =
+                    self.track_parameter_is_automated(&track, reaper_str!("Send Pan"));
+                let receive = TrackRoute::new(track, TrackSendDirection::Receive, args.receive_index);
+                handle_change(ChangeEvent::TrackReceivePanChanged(TrackReceivePanChangedEvent {
+                    touched: !is_automated,
+                    receive,
+                    old_value: old,
+                    new_value: args.pan,
+                }));
+            }
             ExtSetPanExt(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
                     None => return true,
@@ -508,7 +576,12 @@ impl ChangeDetectionMiddleware {
             ExtSetProjectMarkerChange(_) => {
                 handle_change(ChangeEvent::BookmarksChanged(BookmarksChangedEvent {}))
             }
-            _ => return false,
+            CloseNoReset |
+            SetAutoMode(_) |
+            ResetCachedVolPanStates |
+            // TODO-low What's the difference to SetSurfaceSelected?
+            OnTrackSelection(_) |
+            ExtReset(_) => return false
         };
         true
     }
@@ -833,6 +906,8 @@ impl ChangeDetectionMiddleware {
                         guid: get_media_track_guid(mt),
                         send_volumes: Default::default(),
                         send_pans: Default::default(),
+                        receive_volumes: Default::default(),
+                        receive_pans: Default::default(),
                         fx_param_values: Default::default(),
                         fx_chain_pair: Default::default(),
                     }
@@ -1036,6 +1111,8 @@ pub enum ChangeEvent {
     TrackPanChanged(TrackPanChangedEvent),
     TrackSendVolumeChanged(TrackSendVolumeChangedEvent),
     TrackSendPanChanged(TrackSendPanChangedEvent),
+    TrackReceiveVolumeChanged(TrackReceiveVolumeChangedEvent),
+    TrackReceivePanChanged(TrackReceivePanChangedEvent),
     TrackAdded(TrackAddedEvent),
     TrackRemoved(TrackRemovedEvent),
     TracksReordered(TracksReorderedEvent),
@@ -1103,6 +1180,22 @@ pub struct TrackSendVolumeChangedEvent {
 pub struct TrackSendPanChangedEvent {
     pub touched: bool,
     pub send: TrackRoute,
+    pub old_value: Option<ReaperPanValue>,
+    pub new_value: ReaperPanValue,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackReceiveVolumeChangedEvent {
+    pub touched: bool,
+    pub receive: TrackRoute,
+    pub old_value: Option<ReaperVolumeValue>,
+    pub new_value: ReaperVolumeValue,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackReceivePanChangedEvent {
+    pub touched: bool,
+    pub receive: TrackRoute,
     pub old_value: Option<ReaperPanValue>,
     pub new_value: ReaperPanValue,
 }

@@ -780,9 +780,17 @@ fn set_track_send_pan() -> TestStep {
             .find_send_by_destination_track(&track_3)
             .ok_or("missing send")?;
         // When
-        let (mock, _) = observe_invocations(|mock| {
+        let (send_mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
                 .track_send_pan_changed()
+                .take_until(step.finished.clone())
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        let (receive_mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .track_receive_pan_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
                     mock.invoke(t);
@@ -792,8 +800,11 @@ fn set_track_send_pan() -> TestStep {
         // Then
         assert_eq!(send.pan().reaper_value(), ReaperPanValue::new(-0.5));
         assert_eq!(send.pan().normalized_value(), 0.25);
-        assert_eq!(mock.invocation_count(), 1);
-        assert_eq!(mock.last_arg(), send);
+        assert_eq!(send_mock.invocation_count(), 1);
+        assert_eq!(send_mock.last_arg(), send);
+        let receive = track_3.find_receive_by_source_track(&track_1).unwrap();
+        assert_eq!(receive_mock.invocation_count(), 1);
+        assert_eq!(receive_mock.last_arg(), receive);
         Ok(())
     })
 }
@@ -829,9 +840,17 @@ fn set_track_send_volume() -> TestStep {
             .find_send_by_destination_track(&track_3)
             .ok_or("missing send")?;
         // When
-        let (mock, _) = observe_invocations(|mock| {
+        let (send_mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
                 .track_send_volume_changed()
+                .take_until(step.finished.clone())
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        let (receive_mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .track_receive_volume_changed()
                 .take_until(step.finished)
                 .subscribe(move |t| {
                     mock.invoke(t);
@@ -845,8 +864,11 @@ fn set_track_send_volume() -> TestStep {
             -30.009_531_739_774_296,
             epsilon = 0.000_000_000_000_1
         ));
-        assert_eq!(mock.invocation_count(), 1);
-        assert_eq!(mock.last_arg(), send);
+        assert_eq!(send_mock.invocation_count(), 1);
+        assert_eq!(send_mock.last_arg(), send);
+        let receive = track_3.find_receive_by_source_track(&track_1).unwrap();
+        assert_eq!(receive_mock.invocation_count(), 1);
+        assert_eq!(receive_mock.last_arg(), receive);
         Ok(())
     })
 }

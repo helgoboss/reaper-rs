@@ -40,6 +40,8 @@ pub struct MeterMiddlewareMetrics {
     ext_set_fx_enabled: CustomResponseTime,
     ext_set_send_volume: CustomResponseTime,
     ext_set_send_pan: CustomResponseTime,
+    ext_set_recv_volume: CustomResponseTime,
+    ext_set_recv_pan: CustomResponseTime,
     ext_set_pan_ex: CustomResponseTime,
     ext_set_focused_fx: CustomResponseTime,
     ext_set_last_touched_fx: CustomResponseTime,
@@ -143,6 +145,16 @@ impl MeterMiddlewareMetrics {
                 |m| &m.ext_set_send_pan,
                 is_critical_default,
             ),
+            MetricDescriptor::new(
+                "ext_set_recv_volume",
+                |m| &m.ext_set_recv_volume,
+                is_critical_default,
+            ),
+            MetricDescriptor::new(
+                "ext_set_recv_pan",
+                |m| &m.ext_set_recv_pan,
+                is_critical_default,
+            ),
             MetricDescriptor::new("ext_set_pan_ex", |m| &m.ext_set_pan_ex, is_critical_default),
             MetricDescriptor::new(
                 "ext_set_focused_fx",
@@ -230,6 +242,8 @@ impl MeterMiddleware {
             ExtSetFxEnabled(_) => &self.metrics.ext_set_fx_enabled,
             ExtSetSendVolume(_) => &self.metrics.ext_set_send_volume,
             ExtSetSendPan(_) => &self.metrics.ext_set_send_pan,
+            ExtSetRecvVolume(_) => &self.metrics.ext_set_recv_volume,
+            ExtSetRecvPan(_) => &self.metrics.ext_set_recv_pan,
             ExtSetFocusedFx(_) => &self.metrics.ext_set_focused_fx,
             ExtSetLastTouchedFx(_) => &self.metrics.ext_set_last_touched_fx,
             ExtSetFxOpen(_) => &self.metrics.ext_set_fx_open,
@@ -313,7 +327,7 @@ impl<R, M> MetricDescriptor<R, M> {
     }
 }
 
-type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 30];
+type ControlSurfaceResponseTimeDescriptors = [ResponseTimeDescriptor<MeterMiddlewareMetrics>; 32];
 
 fn is_critical_default(response_time: &CustomResponseTime) -> bool {
     response_time.borrow().max() > 10000

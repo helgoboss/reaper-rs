@@ -63,6 +63,30 @@ impl ControlSurfaceRxMiddleware {
                     self.rx.track_send_pan_touched.borrow_mut().next(e.send);
                 }
             }
+            TrackReceiveVolumeChanged(e) => {
+                self.rx
+                    .track_receive_volume_changed
+                    .borrow_mut()
+                    .next(e.receive.clone());
+                if e.touched {
+                    self.rx
+                        .track_receive_volume_touched
+                        .borrow_mut()
+                        .next(e.receive);
+                }
+            }
+            TrackReceivePanChanged(e) => {
+                self.rx
+                    .track_receive_pan_changed
+                    .borrow_mut()
+                    .next(e.receive.clone());
+                if e.touched {
+                    self.rx
+                        .track_receive_pan_touched
+                        .borrow_mut()
+                        .next(e.receive);
+                }
+            }
             TrackAdded(e) => self.rx.track_added.borrow_mut().next(e.track),
             TrackRemoved(e) => self.rx.track_removed.borrow_mut().next(e.track),
             TracksReordered(e) => self.rx.tracks_reordered.borrow_mut().next(e.project),
@@ -139,6 +163,10 @@ pub struct ControlSurfaceRx {
     pub track_send_volume_touched: EventStreamSubject<TrackRoute>,
     pub track_send_pan_changed: EventStreamSubject<TrackRoute>,
     pub track_send_pan_touched: EventStreamSubject<TrackRoute>,
+    pub track_receive_volume_changed: EventStreamSubject<TrackRoute>,
+    pub track_receive_volume_touched: EventStreamSubject<TrackRoute>,
+    pub track_receive_pan_changed: EventStreamSubject<TrackRoute>,
+    pub track_receive_pan_touched: EventStreamSubject<TrackRoute>,
     pub track_added: EventStreamSubject<Track>,
     pub track_removed: EventStreamSubject<Track>,
     pub tracks_reordered: EventStreamSubject<Project>,
@@ -192,6 +220,10 @@ impl ControlSurfaceRx {
             track_send_volume_touched: default(),
             track_send_pan_changed: default(),
             track_send_pan_touched: default(),
+            track_receive_volume_changed: default(),
+            track_receive_volume_touched: default(),
+            track_receive_pan_changed: default(),
+            track_receive_pan_touched: default(),
             track_added: default(),
             track_removed: default(),
             tracks_reordered: default(),
@@ -371,6 +403,22 @@ impl ControlSurfaceRx {
 
     pub fn track_send_pan_touched(&self) -> impl ReactiveEvent<TrackRoute> {
         self.track_send_pan_touched.borrow().clone()
+    }
+
+    pub fn track_receive_volume_changed(&self) -> impl ReactiveEvent<TrackRoute> {
+        self.track_receive_volume_changed.borrow().clone()
+    }
+
+    pub fn track_receive_volume_touched(&self) -> impl ReactiveEvent<TrackRoute> {
+        self.track_receive_volume_touched.borrow().clone()
+    }
+
+    pub fn track_receive_pan_changed(&self) -> impl ReactiveEvent<TrackRoute> {
+        self.track_receive_pan_changed.borrow().clone()
+    }
+
+    pub fn track_receive_pan_touched(&self) -> impl ReactiveEvent<TrackRoute> {
+        self.track_receive_pan_touched.borrow().clone()
     }
 
     /// Only fires if `run()` is called on the driver.
