@@ -13,7 +13,7 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, BookmarkId,
-    BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, EnvChunkName, FxAddByNameBehavior,
+    BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, EditMode, EnvChunkName, FxAddByNameBehavior,
     FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd,
     InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
@@ -25,8 +25,8 @@ use crate::{
     RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, SoloMode,
     StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
     TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
+    VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -2055,12 +2055,12 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(name)
     }
 
-    /// Returns the name of the given track send.
+    /// Returns the name of the given track send or hardware output send.
     ///
-    /// With `buffer_size` you can tell REAPER how many bytes of the track send name you want.
+    /// With `buffer_size` you can tell REAPER how many bytes of the send name you want.
     ///
-    /// When choosing the send index, keep in mind that in the list of sends, the hardware output
-    /// sends (if any) come first.
+    /// When choosing the send index, keep in mind that the hardware output sends (if any) come
+    /// first.
     ///
     /// # Panics
     ///
@@ -2092,6 +2092,45 @@ impl<UsageScope> Reaper<UsageScope> {
         if !successful {
             return Err(ReaperFunctionError::new(
                 "couldn't get send name (probably send doesn't exist)",
+            ));
+        }
+        Ok(name)
+    }
+
+    /// Returns the name of the given track receive.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the receive name you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the track send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_receive_name(
+        &self,
+        track: MediaTrack,
+        receive_index: u32,
+        buffer_size: u32,
+    ) -> ReaperFunctionResult<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        assert!(buffer_size > 0);
+        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+            self.low
+                .GetTrackReceiveName(track.as_ptr(), receive_index as i32, buffer, max_size)
+        });
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't get receive name (probably receive doesn't exist)",
             ));
         }
         Ok(name)
@@ -3894,7 +3933,8 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.DeleteTrack(track.as_ptr());
     }
 
-    /// Returns the number of sends, receives or hardware outputs of the given track.
+    /// Returns the number of track sends, hardware output sends or track receives of the given
+    /// track.
     ///
     /// # Safety
     ///
@@ -3908,7 +3948,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.GetTrackNumSends(track.as_ptr(), category.to_raw()) as u32
     }
 
-    // Gets or sets an attributes of a send, receive or hardware output of the given track.
+    /// Gets or sets an attribute of the given track send, hardware output send or track receive.
     ///
     /// Returns the current value if `new_value` is `null_mut()`.
     ///
@@ -3937,8 +3977,41 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
-    /// Convenience function which returns the destination track (`P_DESTTRACK`) of the given send
-    /// or receive.
+    /// Convenience function which returns the destination track (`P_SRCTRACK`) of the given track
+    /// send or track receive.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error e.g. if the send or receive doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_send_info_srctrack(
+        &self,
+        track: MediaTrack,
+        direction: TrackSendDirection,
+        send_index: u32,
+    ) -> ReaperFunctionResult<MediaTrack>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_track_send_info(
+            track,
+            direction.into(),
+            send_index,
+            TrackSendAttributeKey::SrcTrack,
+            null_mut(),
+        ) as *mut raw::MediaTrack;
+        NonNull::new(ptr).ok_or_else(|| {
+            ReaperFunctionError::new("couldn't get source track (maybe send doesn't exist)")
+        })
+    }
+
+    /// Convenience function which returns the destination track (`P_DESTTRACK`) of the given track
+    /// send or track receive.
     ///
     /// # Errors
     ///
@@ -4056,9 +4129,10 @@ impl<UsageScope> Reaper<UsageScope> {
         Some(csv)
     }
 
-    /// Creates a send, receive or hardware output for the given track.
+    /// Creates a track send, track receive or hardware output send for the given track.
     ///
-    /// Returns the index of the created send or receive.
+    /// Returns the index of the created track send (starting from 0) or of the created hardware
+    /// output send (also starting from 0).
     ///
     /// # Errors
     ///
@@ -4261,7 +4335,10 @@ impl<UsageScope> Reaper<UsageScope> {
             .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
     }
 
-    /// Sets the given track send's volume.
+    /// Sets the volume of the given track send or hardware output send.
+    ///
+    /// When choosing the send index, keep in mind that the hardware output sends (if any) come
+    /// first.
     ///
     /// Returns the value that has actually been set. If the send doesn't exist, returns 0.0 (which
     /// can also be a valid value that has been set, so that's not very useful).
@@ -4289,7 +4366,10 @@ impl<UsageScope> Reaper<UsageScope> {
         ReaperVolumeValue::new(raw)
     }
 
-    /// Sets the given track send's pan.
+    /// Sets the pan of the given track send or hardware output send.
+    ///
+    /// When choosing the send index, keep in mind that the hardware output sends (if any) come
+    /// first.
     ///
     /// Returns the value that has actually been set.
     ///
@@ -4410,8 +4490,11 @@ impl<UsageScope> Reaper<UsageScope> {
         unsafe { create_passing_c_str(ptr) }.map(use_command_name)
     }
 
-    /// Returns a track send's volume and pan. Also returns the correct value during the process
-    /// of writing an automation envelope.
+    /// Returns the volume and pan of the given track send or hardware output send. Also returns the
+    /// correct value during the process of writing an automation envelope.
+    ///
+    /// When choosing the send index, keep in mind that the hardware output sends (if any) come
+    /// first.
     ///
     /// # Errors
     ///
@@ -4450,8 +4533,51 @@ impl<UsageScope> Reaper<UsageScope> {
         })
     }
 
-    /// Returns whether a track send is muted. Also returns the correct value during the process
-    /// of writing an automation envelope.
+    /// Returns the volume and pan of the given track receive. Also returns the correct value during
+    /// the process of writing an automation envelope.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_receive_ui_vol_pan(
+        &self,
+        track: MediaTrack,
+        receive_index: u32,
+    ) -> ReaperFunctionResult<VolumeAndPan>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        // We zero them just for being safe
+        let mut volume = MaybeUninit::zeroed();
+        let mut pan = MaybeUninit::zeroed();
+        let successful = self.low.GetTrackReceiveUIVolPan(
+            track.as_ptr(),
+            receive_index as i32,
+            volume.as_mut_ptr(),
+            pan.as_mut_ptr(),
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't get track receive volume and pan (probably receive doesn't exist)",
+            ));
+        }
+        Ok(VolumeAndPan {
+            volume: ReaperVolumeValue::new(volume.assume_init()),
+            pan: ReaperPanValue::new(pan.assume_init()),
+        })
+    }
+
+    /// Returns whether the given track send or hardware output send is muted. Also returns the
+    /// correct value during the process of writing an automation envelope.
+    ///
+    /// When choosing the send index, keep in mind that the hardware output sends (if any) come
+    /// first.
     ///
     /// # Errors
     ///
@@ -4483,7 +4609,42 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(muted.assume_init())
     }
 
-    /// Toggles the mute state of a track send.
+    /// Returns whether the given track receive is muted. Also returns the correct value during the
+    /// process of writing an automation envelope.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_receive_ui_mute(
+        &self,
+        track: MediaTrack,
+        receive_index: u32,
+    ) -> ReaperFunctionResult<bool>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        // We zero them just for being safe
+        let mut muted = MaybeUninit::zeroed();
+        let successful = self.low.GetTrackReceiveUIMute(
+            track.as_ptr(),
+            receive_index as i32,
+            muted.as_mut_ptr(),
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't get track receive mute state (probably receive doesn't exist)",
+            ));
+        }
+        Ok(muted.assume_init())
+    }
+
+    /// Toggles the mute state of the given track send, hardware output send or track receive.
     ///
     /// # Errors
     ///
@@ -4496,7 +4657,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn toggle_track_send_ui_mute(
         &self,
         track: MediaTrack,
-        send_index: u32,
+        send: TrackSendRef,
     ) -> ReaperFunctionResult<()>
     where
         UsageScope: MainThreadOnly,
@@ -4504,10 +4665,80 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let successful = self
             .low
-            .ToggleTrackSendUIMute(track.as_ptr(), send_index as i32);
+            .ToggleTrackSendUIMute(track.as_ptr(), send.to_raw());
         if !successful {
             return Err(ReaperFunctionError::new(
                 "couldn't toggle track send mute state (probably send doesn't exist)",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Sets the volume of the given track send, hardware output send or track receive.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_track_send_ui_vol(
+        &self,
+        track: MediaTrack,
+        send: TrackSendRef,
+        volume: ReaperVolumeValue,
+        edit_mode: EditMode,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.SetTrackSendUIVol(
+            track.as_ptr(),
+            send.to_raw(),
+            volume.get(),
+            edit_mode.to_raw(),
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't set track send volume (probably send doesn't exist)",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Sets the pan of the given track send, hardware output send or track receive.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the send doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_track_send_ui_pan(
+        &self,
+        track: MediaTrack,
+        send: TrackSendRef,
+        pan: ReaperPanValue,
+        edit_mode: EditMode,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.SetTrackSendUIPan(
+            track.as_ptr(),
+            send.to_raw(),
+            pan.get(),
+            edit_mode.to_raw(),
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't set track send pan (probably send doesn't exist)",
             ));
         }
         Ok(())

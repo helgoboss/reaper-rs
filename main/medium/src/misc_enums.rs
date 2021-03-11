@@ -227,14 +227,14 @@ pub enum TrackSendDirection {
     Send,
 }
 
-/// Defines the kind of link.
+/// Defines the kind of route.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackSendCategory {
     /// A receive from another track (a send from that other track's perspective).
     Receive = -1,
     /// A send to another track (a receive from that other track's perspective).
     Send = 0,
-    /// A hardware output.
+    /// A send to a hardware output.
     HardwareOutput = 1,
 }
 
@@ -250,12 +250,57 @@ impl TrackSendCategory {
     }
 }
 
+/// Defines an edit mode for changing send volume or pan.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum EditMode {
+    /// An instant edit such as reset via double-clicking a fader or typing a value in an edit
+    /// field.
+    InstantEdit = -1,
+    /// A normal tweak just like when dragging the mouse.
+    NormalTweak = 0,
+    /// Marks the end of an edit (mouse up).
+    EndOfEdit = 1,
+}
+
+impl EditMode {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use EditMode::*;
+        match self {
+            InstantEdit => -1,
+            NormalTweak => 0,
+            EndOfEdit => 1,
+        }
+    }
+}
+
 impl From<TrackSendDirection> for TrackSendCategory {
     fn from(v: TrackSendDirection) -> TrackSendCategory {
         use TrackSendDirection::*;
         match v {
             Receive => TrackSendCategory::Receive,
             Send => TrackSendCategory::Send,
+        }
+    }
+}
+
+/// Reference to a track send, hardware output send or track receive.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TrackSendRef {
+    /// A receive from another track (a send from that other track's perspective).
+    Receive(u32),
+    /// A send to another track (a receive from that other track's perspective) or a send to a
+    /// hardware output.
+    Send(u32),
+}
+
+impl TrackSendRef {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TrackSendRef::*;
+        match self {
+            Receive(i) => -1 * (i + 1) as i32,
+            Send(i) => i as _,
         }
     }
 }

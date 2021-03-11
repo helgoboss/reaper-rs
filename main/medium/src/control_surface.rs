@@ -396,6 +396,7 @@ pub struct ExtSetFxEnabledArgs {
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ExtSetSendVolumeArgs {
     pub track: MediaTrack,
+    /// This starts with the hardware output sends and continues with the track sends.
     pub send_index: u32,
     pub volume: ReaperVolumeValue,
 }
@@ -403,6 +404,7 @@ pub struct ExtSetSendVolumeArgs {
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ExtSetSendPanArgs {
     pub track: MediaTrack,
+    /// This starts with the hardware output sends and continues with the track sends.
     pub send_index: u32,
     pub pan: ReaperPanValue,
 }
