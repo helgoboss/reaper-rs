@@ -299,7 +299,7 @@ impl TrackSendRef {
     pub fn to_raw(self) -> i32 {
         use TrackSendRef::*;
         match self {
-            Receive(i) => -1 * (i + 1) as i32,
+            Receive(i) => -((i + 1) as i32),
             Send(i) => i as _,
         }
     }
