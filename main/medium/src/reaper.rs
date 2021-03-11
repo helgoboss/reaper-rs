@@ -3980,6 +3980,8 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Convenience function which returns the destination track (`P_SRCTRACK`) of the given track
     /// send or track receive.
     ///
+    /// The given index starts at zero for both track sends and receives.
+    ///
     /// # Errors
     ///
     /// Returns an error e.g. if the send or receive doesn't exist.
@@ -4012,6 +4014,8 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Convenience function which returns the destination track (`P_DESTTRACK`) of the given track
     /// send or track receive.
+    ///
+    /// The given index starts at zero for both track sends and receives.
     ///
     /// # Errors
     ///

@@ -24,6 +24,10 @@ impl TrackRoute {
         }
     }
 
+    pub fn direction(&self) -> TrackSendDirection {
+        self.direction
+    }
+
     pub fn is_available(&self) -> bool {
         self.index_is_in_range()
     }
@@ -33,20 +37,24 @@ impl TrackRoute {
     }
 
     pub fn partner(&self) -> Option<TrackRoutePartner> {
-        let partner = if self.is_send_to_hw_output() {
-            TrackRoutePartner::HardwareOutput(self.index)
-        } else {
-            let partner_track = get_partner_track(&self.track, self.direction, self.index())?;
-            TrackRoutePartner::Track(partner_track)
+        let partner = match self.direction {
+            Receive => {
+                let partner_track = get_partner_track(&self.track, self.direction, self.index)?;
+                TrackRoutePartner::Track(partner_track)
+            }
+            Send => {
+                let hw_output_count = self.track.typed_send_count(SendPartnerType::HardwareOutput);
+                if self.index < hw_output_count {
+                    TrackRoutePartner::HardwareOutput(self.index)
+                } else {
+                    let track_send_index = self.index - hw_output_count;
+                    let partner_track =
+                        get_partner_track(&self.track, self.direction, track_send_index)?;
+                    TrackRoutePartner::Track(partner_track)
+                }
+            }
         };
         Some(partner)
-    }
-
-    fn is_send_to_hw_output(&self) -> bool {
-        if self.direction != Send {
-            return false;
-        }
-        self.index < self.track.typed_send_count(SendPartnerType::HardwareOutput)
     }
 
     pub fn index(&self) -> u32 {
