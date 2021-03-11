@@ -57,8 +57,25 @@ impl TrackRoute {
         Some(partner)
     }
 
+    /// If this is a send, it counts both hardware output sends and track sends!
     pub fn index(&self) -> u32 {
         self.index
+    }
+
+    /// This index only counts track routes. Returns None if it's a hardware output send.
+    pub fn track_route_index(&self) -> Option<u32> {
+        match self.direction {
+            Receive => Some(self.index),
+            Send => {
+                let hw_output_count = self.track.typed_send_count(SendPartnerType::HardwareOutput);
+                if self.index < hw_output_count {
+                    None
+                } else {
+                    let track_send_index = self.index - hw_output_count;
+                    Some(track_send_index)
+                }
+            }
+        }
     }
 
     pub fn volume(&self) -> Volume {
