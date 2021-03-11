@@ -910,12 +910,28 @@ fn query_track_send() -> TestStep {
 }
 
 fn add_track_send() -> TestStep {
-    step(AllVersions, "Add track send", |_session, _| {
+    step(AllVersions, "Add track send", |_session, step| {
         // Given
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
         // When
+        let (send_mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .track_send_count_changed()
+                .take_until(step.finished.clone())
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
+        let (receive_mock, _) = observe_invocations(|mock| {
+            Test::control_surface_rx()
+                .receive_count_changed()
+                .take_until(step.finished.clone())
+                .subscribe(move |t| {
+                    mock.invoke(t);
+                });
+        });
         let send = track_1.add_send_to(&track_2);
         // Then
         assert_eq!(track_1.send_count(), 1);
@@ -959,6 +975,10 @@ fn add_track_send() -> TestStep {
         );
         assert_eq!(track_2.receives().count(), 1);
         assert_eq!(track_1.receives().count(), 0);
+        assert_eq!(send_mock.invocation_count(), 1);
+        assert_eq!(send_mock.last_arg(), track_1);
+        assert_eq!(receive_mock.invocation_count(), 1);
+        assert_eq!(receive_mock.last_arg(), track_2);
         Ok(())
     })
 }

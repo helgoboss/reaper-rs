@@ -146,6 +146,13 @@ impl ControlSurfaceRxMiddleware {
             RepeatStateChanged(_) => self.rx.repeat_state_changed.borrow_mut().next(()),
             ProjectClosed(e) => self.rx.project_closed.borrow_mut().next(e.project),
             BookmarksChanged(_) => self.rx.bookmarks_changed.borrow_mut().next(()),
+            ReceiveCountChanged(e) => self.rx.receive_count_changed.borrow_mut().next(e.track),
+            HardwareOutputSendCountChanged(e) => self
+                .rx
+                .hardware_output_send_count_changed
+                .borrow_mut()
+                .next(e.track),
+            TrackSendCountChanged(e) => self.rx.track_send_count_changed.borrow_mut().next(e.track),
         };
     }
 }
@@ -170,6 +177,9 @@ pub struct ControlSurfaceRx {
     pub track_added: EventStreamSubject<Track>,
     pub track_removed: EventStreamSubject<Track>,
     pub tracks_reordered: EventStreamSubject<Project>,
+    pub receive_count_changed: EventStreamSubject<Track>,
+    pub track_send_count_changed: EventStreamSubject<Track>,
+    pub hardware_output_send_count_changed: EventStreamSubject<Track>,
     pub track_name_changed: EventStreamSubject<Track>,
     pub track_input_changed: EventStreamSubject<Track>,
     pub track_input_monitoring_changed: EventStreamSubject<Track>,
@@ -227,6 +237,9 @@ impl ControlSurfaceRx {
             track_added: default(),
             track_removed: default(),
             tracks_reordered: default(),
+            receive_count_changed: default(),
+            track_send_count_changed: default(),
+            hardware_output_send_count_changed: default(),
             track_name_changed: default(),
             track_input_changed: default(),
             track_input_monitoring_changed: default(),
@@ -283,6 +296,18 @@ impl ControlSurfaceRx {
 
     pub fn tracks_reordered(&self) -> impl ReactiveEvent<Project> {
         self.tracks_reordered.borrow().clone()
+    }
+
+    pub fn receive_count_changed(&self) -> impl ReactiveEvent<Track> {
+        self.receive_count_changed.borrow().clone()
+    }
+
+    pub fn track_send_count_changed(&self) -> impl ReactiveEvent<Track> {
+        self.track_send_count_changed.borrow().clone()
+    }
+
+    pub fn hardware_output_send_count_changed(&self) -> impl ReactiveEvent<Track> {
+        self.hardware_output_send_count_changed.borrow().clone()
     }
 
     pub fn track_name_changed(&self) -> impl ReactiveEvent<Track> {

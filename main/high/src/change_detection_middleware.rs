@@ -7,8 +7,8 @@ use reaper_medium::{
     reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, InputMonitoringMode, MediaTrack, Pan,
     PanMode, PlayState, PlaybackSpeedFactor, ReaProject, ReaperNormalizedFxParamValue,
     ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue, TrackAttributeKey,
-    TrackFxChainType, TrackLocation, TrackSendDirection, VersionDependentFxLocation,
-    VersionDependentTrackFxLocation,
+    TrackFxChainType, TrackLocation, TrackSendCategory, TrackSendDirection,
+    VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
@@ -43,6 +43,9 @@ struct TrackData {
     recmonitor: InputMonitoringMode,
     recinput: i32,
     guid: Guid,
+    receive_count: u32,
+    track_send_count: u32,
+    output_send_count: u32,
     send_volumes: HashMap<u32, ReaperVolumeValue>,
     send_pans: HashMap<u32, ReaperPanValue>,
     receive_volumes: HashMap<u32, ReaperVolumeValue>,
@@ -819,7 +822,11 @@ impl ChangeDetectionMiddleware {
         use std::cmp::Ordering::*;
         match new_track_count.cmp(&old_track_count) {
             Less => self.remove_invalid_media_tracks(project, track_datas, handle_change),
-            Equal => self.update_media_track_positions(project, track_datas, handle_change),
+            Equal => self.update_media_track_positions_and_route_counts(
+                project,
+                track_datas,
+                handle_change,
+            ),
             Greater => self.add_missing_media_tracks(project, track_datas, handle_change),
         }
     }
@@ -904,6 +911,10 @@ impl ChangeDetectionMiddleware {
                         recinput: func.get_media_track_info_value(mt, TrackAttributeKey::RecInput)
                             as i32,
                         guid: get_media_track_guid(mt),
+                        receive_count: func.get_track_num_sends(mt, TrackSendCategory::Receive),
+                        track_send_count: func.get_track_num_sends(mt, TrackSendCategory::Send),
+                        output_send_count: func
+                            .get_track_num_sends(mt, TrackSendCategory::HardwareOutput),
                         send_volumes: Default::default(),
                         send_pans: Default::default(),
                         receive_volumes: Default::default(),
@@ -1077,7 +1088,7 @@ impl ChangeDetectionMiddleware {
         }
     }
 
-    fn update_media_track_positions(
+    fn update_media_track_positions_and_route_counts(
         &self,
         project: Project,
         track_datas: &mut TrackDataMap,
@@ -1089,11 +1100,55 @@ impl ChangeDetectionMiddleware {
             if !reaper.validate_ptr_2(Proj(project.raw()), *media_track) {
                 continue;
             }
+            // Handle reordering
             let new_number =
                 unsafe { reaper.get_set_media_track_info_get_track_number(*media_track) };
             if new_number != track_data.number {
                 tracks_have_been_reordered = true;
                 track_data.number = new_number;
+            }
+            // Handle route counts
+            let new_output_send_count = unsafe {
+                reaper.get_track_num_sends(*media_track, TrackSendCategory::HardwareOutput)
+            };
+            let new_track_send_count =
+                unsafe { reaper.get_track_num_sends(*media_track, TrackSendCategory::Send) };
+            let new_receive_count =
+                unsafe { reaper.get_track_num_sends(*media_track, TrackSendCategory::Receive) };
+            if new_output_send_count != track_data.output_send_count
+                || new_track_send_count != track_data.track_send_count
+                || new_receive_count != track_data.receive_count
+            {
+                // TODO-high Use lightweight tracks so that creating them is essentially a no-op!
+                let track = Track::new(*media_track, None);
+                if new_output_send_count != track_data.output_send_count {
+                    handle_change(ChangeEvent::HardwareOutputSendCountChanged(
+                        HardwareOutputSendCountChangedEvent {
+                            track: track.clone(),
+                            old: track_data.output_send_count,
+                            new: new_output_send_count,
+                        },
+                    ));
+                    track_data.output_send_count = new_output_send_count;
+                }
+                if new_track_send_count != track_data.track_send_count {
+                    handle_change(ChangeEvent::TrackSendCountChanged(
+                        TrackSendCountChangedEvent {
+                            track: track.clone(),
+                            old: track_data.track_send_count,
+                            new: new_track_send_count,
+                        },
+                    ));
+                    track_data.track_send_count = new_track_send_count;
+                }
+                if new_receive_count != track_data.receive_count {
+                    handle_change(ChangeEvent::ReceiveCountChanged(ReceiveCountChangedEvent {
+                        track: track.clone(),
+                        old: track_data.receive_count,
+                        new: new_receive_count,
+                    }));
+                    track_data.receive_count = new_receive_count;
+                }
             }
         }
         if tracks_have_been_reordered {
@@ -1116,6 +1171,9 @@ pub enum ChangeEvent {
     TrackAdded(TrackAddedEvent),
     TrackRemoved(TrackRemovedEvent),
     TracksReordered(TracksReorderedEvent),
+    ReceiveCountChanged(ReceiveCountChangedEvent),
+    HardwareOutputSendCountChanged(HardwareOutputSendCountChangedEvent),
+    TrackSendCountChanged(TrackSendCountChangedEvent),
     TrackNameChanged(TrackNameChangedEvent),
     TrackInputChanged(TrackInputChangedEvent),
     TrackInputMonitoringChanged(TrackInputMonitoringChangedEvent),
@@ -1208,6 +1266,27 @@ pub struct TrackAddedEvent {
 #[derive(Clone, Debug)]
 pub struct TrackRemovedEvent {
     pub track: Track,
+}
+
+#[derive(Clone, Debug)]
+pub struct HardwareOutputSendCountChangedEvent {
+    pub track: Track,
+    pub old: u32,
+    pub new: u32,
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackSendCountChangedEvent {
+    pub track: Track,
+    pub old: u32,
+    pub new: u32,
+}
+
+#[derive(Clone, Debug)]
+pub struct ReceiveCountChangedEvent {
+    pub track: Track,
+    pub old: u32,
+    pub new: u32,
 }
 
 #[derive(Clone, Debug)]
