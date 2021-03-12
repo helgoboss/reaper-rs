@@ -22,11 +22,12 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
-    reaper_str, AutomationMode, Bpm, CommandId, Db, FxPresetRef, GangBehavior, InputMonitoringMode,
-    MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate,
-    PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget,
-    TrackLocation, UndoBehavior, ValueChange,
+    reaper_str, AutoSeekBehavior, AutomationMode, Bpm, CommandId, Db, DurationInSeconds,
+    FxPresetRef, GangBehavior, InputMonitoringMode, MasterTrackBehavior, MidiInputDeviceId,
+    MidiOutputDeviceId, NormalizedPlayRate, PlaybackSpeedFactor, PositionInSeconds,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
+    ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget, TrackLocation,
+    UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -101,6 +102,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         set_track_send_volume(),
         set_track_send_pan(),
         set_track_send_mute(),
+        query_time_ranges(),
+        set_time_ranges(),
         query_action(),
         invoke_action(),
         test_action_invoked_event(),
@@ -766,6 +769,42 @@ fn query_action() -> TestStep {
         assert!(toggle_action.index() > 0);
         assert_eq!(toggle_action.section(), Reaper::get().main_section());
         assert_eq!(normal_action_by_index, normal_action);
+        Ok(())
+    })
+}
+
+fn query_time_ranges() -> TestStep {
+    step(AllVersions, "Query time ranges", |_, _| {
+        // Given
+        let project = Reaper::get().current_project();
+        // When
+        let time_selection = project.time_selection();
+        let loop_points = project.loop_points();
+        // Then
+        assert!(time_selection.is_none());
+        assert!(loop_points.is_none());
+        Ok(())
+    })
+}
+
+fn set_time_ranges() -> TestStep {
+    step(AllVersions, "Set time ranges", |_, _| {
+        // Given
+        let project = Reaper::get().current_project();
+        // When
+        project.set_time_selection(PositionInSeconds::new(5.0), PositionInSeconds::new(7.0));
+        project.set_loop_points(
+            PositionInSeconds::new(5.0),
+            PositionInSeconds::new(7.0),
+            AutoSeekBehavior::DenyAutoSeek,
+        );
+        // Then
+        let time_selection = project.time_selection().unwrap();
+        assert!(abs_diff_eq!(time_selection.start.get(), 5.0));
+        assert!(abs_diff_eq!(time_selection.end.get(), 7.0));
+        let loop_points = project.loop_points().unwrap();
+        assert!(abs_diff_eq!(loop_points.start.get(), 5.0));
+        assert!(abs_diff_eq!(loop_points.end.get(), 7.0));
         Ok(())
     })
 }
@@ -2231,6 +2270,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
         assert_eq!(new_project.track_count(), 0);
         assert!(new_project.index() > 0);
         assert!(new_project.file_path().is_none());
+        assert_eq!(new_project.length(), DurationInSeconds::new(0.0));
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), new_project);
         Ok(())

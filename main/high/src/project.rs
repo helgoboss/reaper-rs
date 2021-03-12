@@ -3,10 +3,11 @@ use crate::{BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, PlayRate, Reape
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    BookmarkId, BookmarkRef, CountProjectMarkersResult, GetLastMarkerAndCurRegionResult,
-    MasterTrackBehavior, PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject,
-    ReaperString, ReaperStringArg, TimeMap2TimeToBeatsResult, TrackDefaultsBehavior, TrackLocation,
-    UndoBehavior,
+    AutoSeekBehavior, BookmarkId, BookmarkRef, CountProjectMarkersResult, DurationInSeconds,
+    GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PlayState,
+    PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString, ReaperStringArg,
+    SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeRangeType, TrackDefaultsBehavior,
+    TrackLocation, UndoBehavior,
 };
 use std::path::PathBuf;
 
@@ -437,10 +438,59 @@ impl Project {
             .get_cursor_position_ex(self.context())
     }
 
+    pub fn time_selection(self) -> Option<GetLoopTimeRange2Result> {
+        Reaper::get()
+            .medium_reaper
+            .get_set_loop_time_range_2_get(self.context(), TimeRangeType::TimeSelection)
+    }
+
+    pub fn loop_points(self) -> Option<GetLoopTimeRange2Result> {
+        Reaper::get()
+            .medium_reaper
+            .get_set_loop_time_range_2_get(self.context(), TimeRangeType::LoopPoints)
+    }
+
+    pub fn set_time_selection(self, start: PositionInSeconds, end: PositionInSeconds) {
+        Reaper::get().medium_reaper.get_set_loop_time_range_2_set(
+            self.context(),
+            TimeRangeType::TimeSelection,
+            start,
+            end,
+            AutoSeekBehavior::DenyAutoSeek,
+        );
+    }
+
+    pub fn set_loop_points(
+        self,
+        start: PositionInSeconds,
+        end: PositionInSeconds,
+        auto_seek_behavior: AutoSeekBehavior,
+    ) {
+        Reaper::get().medium_reaper.get_set_loop_time_range_2_set(
+            self.context(),
+            TimeRangeType::LoopPoints,
+            start,
+            end,
+            auto_seek_behavior,
+        );
+    }
+
+    pub fn length(self) -> DurationInSeconds {
+        Reaper::get()
+            .medium_reaper
+            .get_project_length(self.context())
+    }
+
+    pub fn set_edit_cursor_position(self, time: PositionInSeconds, options: SetEditCurPosOptions) {
+        Reaper::get()
+            .medium_reaper
+            .set_edit_curs_pos_2(self.context(), time, options);
+    }
+
     fn set_repeat_is_enabled(self, repeat: bool) {
         Reaper::get()
             .medium_reaper()
-            .get_set_repeat_ex_set(Proj(self.rea_project), repeat);
+            .get_set_repeat_ex_set(self.context(), repeat);
     }
 
     fn complain_if_not_available(self) {

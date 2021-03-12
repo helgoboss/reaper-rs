@@ -12,21 +12,21 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    require_non_null_panic, ActionValueChange, AddFxBehavior, AutomationMode, BookmarkId,
-    BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, EditMode, EnvChunkName, FxAddByNameBehavior,
-    FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MediaTrack,
-    MessageBoxResult, MessageBoxType, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId,
-    NativeColor, NormalizedPlayRate, NotificationBehavior, PanMode, PlaybackSpeedFactor,
-    PluginContext, PositionInBeats, PositionInSeconds, ProjectContext, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, SoloMode,
-    StuffMidiMessageTarget, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
-    VolumeSliderValue, WindowContext,
+    require_non_null_panic, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode,
+    BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
+    EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
+    GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
+    MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
+    NotificationBehavior, PanMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
+    PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId,
+    SendTarget, SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -1785,7 +1785,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.count_tracks_unchecked(project) }
     }
@@ -1804,6 +1803,210 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.CountTracks(project.to_raw()) as u32
+    }
+
+    /// Returns the length of the given project.
+    ///
+    /// The length is the maximum of end of media item, markers, end of regions and tempo map.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_project_length(&self, project: ProjectContext) -> DurationInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_project_length_unchecked(project) }
+    }
+
+    /// Like [`get_project_length()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_project_length()`]: #method.get_project_length
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_project_length_unchecked(&self, project: ProjectContext) -> DurationInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let res = self.low.GetProjectLength(project.to_raw());
+        DurationInSeconds::new(res)
+    }
+
+    /// Sets the position of the edit cursor and optionally moves the view and/or seeks.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn set_edit_curs_pos_2(
+        &self,
+        project: ProjectContext,
+        time: PositionInSeconds,
+        options: SetEditCurPosOptions,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe {
+            self.set_edit_curs_pos_2_unchecked(project, time, options);
+        }
+    }
+
+    /// Like [`set_edit_curs_pos_2()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`set_edit_curs_pos_2()`]: #method.set_edit_curs_pos_2
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_edit_curs_pos_2_unchecked(
+        &self,
+        project: ProjectContext,
+        time: PositionInSeconds,
+        options: SetEditCurPosOptions,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.SetEditCurPos2(
+            project.to_raw(),
+            time.get(),
+            options.move_view,
+            options.seek_play,
+        );
+    }
+
+    /// Returns the loop point or time selection time range that's currently set in the given
+    /// project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_set_loop_time_range_2_get(
+        &self,
+        project: ProjectContext,
+        time_range_type: TimeRangeType,
+    ) -> Option<GetLoopTimeRange2Result>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_set_loop_time_range_2_get_unchecked(project, time_range_type) }
+    }
+
+    /// Like [`get_set_loop_time_range_2_get()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_set_loop_time_range_2_get()`]: #method.get_set_loop_time_range_2_get
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_loop_time_range_2_get_unchecked(
+        &self,
+        project: ProjectContext,
+        time_range_type: TimeRangeType,
+    ) -> Option<GetLoopTimeRange2Result>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut start = MaybeUninit::zeroed();
+        let mut end = MaybeUninit::zeroed();
+        use TimeRangeType::*;
+        self.low.GetSet_LoopTimeRange2(
+            project.to_raw(),
+            false,
+            match time_range_type {
+                LoopPoints => true,
+                TimeSelection => false,
+            },
+            start.as_mut_ptr(),
+            end.as_mut_ptr(),
+            false,
+        );
+        let (start, end) = (start.assume_init(), end.assume_init());
+        if start == 0.0 && end == 0.0 {
+            return None;
+        }
+        let res = GetLoopTimeRange2Result {
+            start: PositionInSeconds::new(start),
+            end: PositionInSeconds::new(end),
+        };
+        Some(res)
+    }
+
+    /// Sets the loop point or time selection time range for the given project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_set_loop_time_range_2_set(
+        &self,
+        project: ProjectContext,
+        time_range_type: TimeRangeType,
+        start: PositionInSeconds,
+        end: PositionInSeconds,
+        auto_seek_behavior: AutoSeekBehavior,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe {
+            self.get_set_loop_time_range_2_set_unchecked(
+                project,
+                time_range_type,
+                start,
+                end,
+                auto_seek_behavior,
+            );
+        }
+    }
+
+    /// Like [`get_set_loop_time_range_2_set()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_set_loop_time_range_2_set()`]: #method.get_set_loop_time_range_2_set
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_loop_time_range_2_set_unchecked(
+        &self,
+        project: ProjectContext,
+        time_range_type: TimeRangeType,
+        start: PositionInSeconds,
+        end: PositionInSeconds,
+        auto_seek_behavior: AutoSeekBehavior,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        use AutoSeekBehavior::*;
+        use TimeRangeType::*;
+        self.low.GetSet_LoopTimeRange2(
+            project.to_raw(),
+            true,
+            match time_range_type {
+                LoopPoints => true,
+                TimeSelection => false,
+            },
+            &mut start.get() as _,
+            &mut end.get() as _,
+            match auto_seek_behavior {
+                DenyAutoSeek => false,
+                AllowAutoSeek => true,
+            },
+        );
     }
 
     /// Creates a new track at the given index.
@@ -5181,6 +5384,13 @@ pub struct GetLastMarkerAndCurRegionResult {
     pub region_index: Option<u32>,
 }
 
+/// The given indexes count both markers and regions.
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct GetLoopTimeRange2Result {
+    pub start: PositionInSeconds,
+    pub end: PositionInSeconds,
+}
+
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct TimeMap2TimeToBeatsResult {
     /// Position in beats since project start.
@@ -5215,6 +5425,12 @@ pub struct VolumeAndPan {
     pub volume: ReaperVolumeValue,
     /// Pan.
     pub pan: ReaperPanValue,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct SetEditCurPosOptions {
+    pub move_view: bool,
+    pub seek_play: bool,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]

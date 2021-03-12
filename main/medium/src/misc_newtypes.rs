@@ -524,11 +524,11 @@ impl PositionInSeconds {
         !value.is_infinite() && !value.is_nan()
     }
 
-    /// Creates a second value.
+    /// Creates a value.
     ///
     /// # Panics
     ///
-    /// This function panics if the given value zero or negative.
+    /// This function panics if the given value is a special number.
     pub fn new(value: f64) -> PositionInSeconds {
         assert!(
             Self::is_valid(value),
@@ -541,7 +541,7 @@ impl PositionInSeconds {
     ///
     /// # Safety
     ///
-    /// You must ensure that the given value is greater than 0.0.
+    /// You must ensure that the given value is a non-special number.
     pub unsafe fn new_unchecked(value: f64) -> PositionInSeconds {
         PositionInSeconds(value)
     }
@@ -566,6 +566,62 @@ impl TryFrom<f64> for PositionInSeconds {
     }
 }
 
+/// This represents a duration expressed as positive amount of seconds.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+pub struct DurationInSeconds(pub(crate) f64);
+
+impl DurationInSeconds {
+    fn is_valid(value: f64) -> bool {
+        value >= 0.0 && !value.is_infinite() && !value.is_nan()
+    }
+
+    /// Creates a value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is negative or a special number.
+    pub fn new(value: f64) -> DurationInSeconds {
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid DurationInSeconds value", value)
+        );
+        DurationInSeconds(value)
+    }
+
+    /// Creates a DurationInSeconds value without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is positive.
+    pub unsafe fn new_unchecked(value: f64) -> DurationInSeconds {
+        DurationInSeconds(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for DurationInSeconds {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "DurationInSeconds value must be positive",
+                value,
+            ));
+        }
+        Ok(DurationInSeconds(value))
+    }
+}
+
 /// This represents a position expressed as an amount of beats.
 ///
 /// Can be negative, see [`PositionInSeconds`](struct.PositionInSeconds.html).
@@ -582,11 +638,11 @@ impl PositionInBeats {
         !value.is_infinite() && !value.is_nan()
     }
 
-    /// Creates a beats value.
+    /// Creates a value.
     ///
     /// # Panics
     ///
-    /// This function panics if the given value zero or negative.
+    /// This function panics if the given value is a special number.
     pub fn new(value: f64) -> PositionInBeats {
         assert!(
             Self::is_valid(value),
@@ -599,7 +655,7 @@ impl PositionInBeats {
     ///
     /// # Safety
     ///
-    /// You must ensure that the given value is greater than 0.0.
+    /// You must ensure that the given value is not a special number.
     pub unsafe fn new_unchecked(value: f64) -> PositionInBeats {
         PositionInBeats(value)
     }
@@ -615,10 +671,7 @@ impl TryFrom<f64> for PositionInBeats {
 
     fn try_from(value: f64) -> Result<Self, Self::Error> {
         if !Self::is_valid(value) {
-            return Err(TryFromGreaterError::new(
-                "value must be greater than 0.0",
-                value,
-            ));
+            return Err(TryFromGreaterError::new("value must be non-special", value));
         }
         Ok(PositionInBeats(value))
     }

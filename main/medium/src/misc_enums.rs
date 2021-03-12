@@ -42,6 +42,27 @@ pub enum TrackFxChainType {
     InputFxChain,
 }
 
+/// Describes which kind of time range we are talking about in a REAPER project.
+///
+/// They are linked by default in REAPER so users might not even be aware that there's a
+/// difference, but there is.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TimeRangeType {
+    /// The loop points (displayed in the ruler).
+    LoopPoints,
+    /// The time selection (visualized with different background color in the arrange view).
+    TimeSelection,
+}
+
+/// Describes whether to allow auto-seek or not.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum AutoSeekBehavior {
+    /// Prevents auto-seek from happening when setting loop points.
+    DenyAutoSeek,
+    /// Allows auto-seek to happen when setting loop points.
+    AllowAutoSeek,
+}
+
 /// Determines how to deal with the master track.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum MasterTrackBehavior {
