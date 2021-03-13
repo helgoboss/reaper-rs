@@ -403,15 +403,23 @@ impl Project {
             .go_to_region(self.context(), region);
     }
 
+    pub fn current_bookmark_at(self, pos: PositionInSeconds) -> GetLastMarkerAndCurRegionResult {
+        Reaper::get()
+            .medium_reaper()
+            .get_last_marker_and_cur_region(self.context(), pos)
+    }
+
     pub fn current_bookmark(self) -> GetLastMarkerAndCurRegionResult {
-        let reference_pos = if self.is_playing() {
+        let reference_pos = self.play_or_edit_cursor_position();
+        self.current_bookmark_at(reference_pos)
+    }
+
+    pub fn play_or_edit_cursor_position(self) -> PositionInSeconds {
+        if self.is_playing() {
             self.play_position_latency_compensated()
         } else {
             self.edit_cursor_position()
-        };
-        Reaper::get()
-            .medium_reaper()
-            .get_last_marker_and_cur_region(self.context(), reference_pos)
+        }
     }
 
     pub fn beat_info_at(self, tpos: PositionInSeconds) -> TimeMap2TimeToBeatsResult {
