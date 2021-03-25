@@ -252,6 +252,10 @@ impl ControlSurfaceRx {
         self.fx_opened.borrow().clone()
     }
 
+    pub fn fx_closed(&self) -> impl ReactiveEvent<Fx> {
+        self.fx_closed.borrow().clone()
+    }
+
     pub fn fx_focused(&self) -> impl ReactiveEvent<Option<Fx>> {
         self.fx_focused.borrow().clone()
     }
