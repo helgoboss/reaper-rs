@@ -86,6 +86,7 @@ pub fn create_default_console_msg_formatter(
                 mi.size.map(format_as_hex).unwrap_or_else(hyphen),
             ),
         };
+        let reaper_version = Reaper::get().version();
         format!("
 
 ===== ATTENTION =====
@@ -105,6 +106,7 @@ In any case, please report this error:
 Thank you for your support!
 
 --- cut ---
+REAPER version:      {reaper_version}
 Module name:         {plugin_name}
 Module version:      {plugin_version}
 Module base address: {module_base_address_label}
@@ -116,6 +118,7 @@ Message: {panic_message}
 --- cut ---
 
 ",
+                reaper_version = reaper_version,
                 plugin_name = crash_info.plugin_name,
                 plugin_version = crash_info.plugin_version,
                 module_base_address_label = module_base_address_label,

@@ -5,6 +5,7 @@ use derive_more::*;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::convert::TryFrom;
+use std::fmt::{Display, Formatter};
 
 /// A command ID.
 ///
@@ -1131,6 +1132,12 @@ impl<'a> ReaperVersion<'a> {
     /// Consumes this version and spits out the contained cow.
     pub fn into_inner(self) -> Cow<'a, ReaperStr> {
         self.0
+    }
+}
+
+impl<'a> Display for ReaperVersion<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.to_str())
     }
 }
 
