@@ -310,7 +310,11 @@ impl Track {
 
     pub fn has_auto_arm_enabled(&self) -> bool {
         self.load_and_check_if_necessary_or_complain();
-        self.auto_arm_chunk_line().is_some()
+        if let Ok(line) = self.auto_arm_chunk_line() {
+            line.is_some()
+        } else {
+            false
+        }
     }
 
     #[allow(clippy::float_cmp)]
@@ -378,32 +382,33 @@ impl Track {
         }
     }
 
-    pub fn enable_auto_arm(&self) {
-        let mut chunk = self.chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
+    pub fn enable_auto_arm(&self) -> Result<(), &'static str> {
+        let mut chunk = self.chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode)?;
         if get_auto_arm_chunk_line(&chunk).is_some() {
-            return;
+            return Ok(());
         }
         let was_armed_before = self.is_armed(true);
         chunk.insert_after_region_as_block(&chunk.region().first_line(), "AUTO_RECARM 1");
-        self.set_chunk(chunk);
+        self.set_chunk(chunk)?;
         if was_armed_before {
             self.arm(true);
         } else {
             self.disarm(true);
         }
+        Ok(())
     }
 
-    pub fn disable_auto_arm(&self) {
+    pub fn disable_auto_arm(&self) -> Result<(), &'static str> {
         let chunk = {
-            let auto_arm_chunk_line = match self.auto_arm_chunk_line() {
-                None => return,
+            let auto_arm_chunk_line = match self.auto_arm_chunk_line()? {
+                None => return Ok(()),
                 Some(l) => l,
             };
             let mut chunk = auto_arm_chunk_line.parent_chunk();
             chunk.delete_region(&auto_arm_chunk_line);
             chunk
         };
-        self.set_chunk(chunk);
+        self.set_chunk(chunk)
     }
 
     #[allow(clippy::float_cmp)]
@@ -525,28 +530,31 @@ impl Track {
         }
     }
 
-    fn auto_arm_chunk_line(&self) -> Option<ChunkRegion> {
-        get_auto_arm_chunk_line(&self.chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::UndoMode))
+    fn auto_arm_chunk_line(&self) -> Result<Option<ChunkRegion>, &'static str> {
+        let chunk = self.chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::UndoMode)?;
+        Ok(get_auto_arm_chunk_line(&chunk))
     }
 
     // Attention! If you pass undoIsOptional = true it's faster but it returns a chunk that contains
     // weird FXID_NEXT (in front of FX tag) instead of FXID (behind FX tag). So FX chunk code
     // should be double checked then.
-    pub fn chunk(&self, max_chunk_size: u32, undo_is_optional: ChunkCacheHint) -> Chunk {
+    pub fn chunk(
+        &self,
+        max_chunk_size: u32,
+        undo_is_optional: ChunkCacheHint,
+    ) -> Result<Chunk, &'static str> {
         let chunk_content = unsafe {
-            Reaper::get().medium_reaper().get_track_state_chunk(
-                self.raw(),
-                max_chunk_size,
-                undo_is_optional,
-            )
-        }
-        .expect("Couldn't load track chunk");
-        chunk_content.into()
+            Reaper::get()
+                .medium_reaper()
+                .get_track_state_chunk(self.raw(), max_chunk_size, undo_is_optional)
+                .map_err(|_| "Couldn't load track chunk")?
+        };
+        Ok(chunk_content.into())
     }
 
     // TODO-low Report possible error
-    pub fn set_chunk(&self, chunk: Chunk) {
-        let string: String = chunk.try_into().expect("unfortunate");
+    pub fn set_chunk(&self, chunk: Chunk) -> Result<(), &'static str> {
+        let string: String = chunk.try_into().map_err(|_| "unfortunate")?;
         let _ = unsafe {
             Reaper::get().medium_reaper().set_track_state_chunk(
                 self.raw(),
@@ -554,6 +562,7 @@ impl Track {
                 ChunkCacheHint::UndoMode,
             )
         };
+        Ok(())
     }
 
     #[allow(clippy::float_cmp)]

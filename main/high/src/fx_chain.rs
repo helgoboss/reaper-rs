@@ -75,7 +75,7 @@ impl FxChain {
     }
 
     // Moves within this FX chain
-    pub fn move_fx(&self, fx: &Fx, new_index: u32) {
+    pub fn move_fx(&self, fx: &Fx, new_index: u32) -> Result<(), &'static str> {
         assert_eq!(fx.chain(), self);
         let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().TrackFX_CopyToTrack.is_some() {
@@ -96,14 +96,17 @@ impl FxChain {
                 }
             };
         } else {
-            if !fx.is_available() || fx.index() == new_index {
-                return;
+            if !fx.is_available() {
+                return Err("FX not available");
+            }
+            if fx.index() == new_index {
+                return Ok(());
             }
             let new_chunk = {
                 let actual_new_index = new_index.min(self.fx_count() - 1);
-                let original_fx_chunk_region = fx.chunk();
+                let original_fx_chunk_region = fx.chunk()?;
                 let current_fx_at_new_index_chunk_region =
-                    self.fx_by_index(actual_new_index).unwrap().chunk();
+                    self.fx_by_index(actual_new_index).unwrap().chunk()?;
                 let original_content = original_fx_chunk_region.content().to_owned();
                 if fx.index() < actual_new_index {
                     // Moves down
@@ -131,9 +134,10 @@ impl FxChain {
                 original_fx_chunk_region.parent_chunk()
             };
             self.track_fx_track()
-                .expect("working on track FX only")
-                .set_chunk(new_chunk)
-        }
+                .ok_or("working on track FX only")?
+                .set_chunk(new_chunk)?
+        };
+        Ok(())
     }
 
     fn track_fx_track(&self) -> Option<&Track> {
@@ -143,10 +147,10 @@ impl FxChain {
         }
     }
 
-    pub fn remove_fx(&self, fx: &Fx) {
+    pub fn remove_fx(&self, fx: &Fx) -> Result<(), &'static str> {
         assert_eq!(fx.chain(), self);
         if !fx.is_available() {
-            return;
+            return Err("FX not available");
         }
         let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().TrackFX_Delete.is_some() {
@@ -157,29 +161,30 @@ impl FxChain {
                     unsafe {
                         reaper
                             .track_fx_delete(track.raw(), location)
-                            .expect("couldn't delete track FX")
+                            .map_err(|_| "couldn't delete track FX")?
                     };
                 }
             };
         } else {
             let new_chunk = {
-                let fx_chunk_region = fx.chunk();
+                let fx_chunk_region = fx.chunk()?;
                 fx_chunk_region
                     .parent_chunk()
                     .delete_region(&fx_chunk_region);
                 fx_chunk_region.parent_chunk()
             };
             self.track_fx_track()
-                .expect("working on track FX only")
-                .set_chunk(new_chunk);
+                .ok_or("working on track FX only")?
+                .set_chunk(new_chunk)?;
         }
+        Ok(())
     }
 
-    pub fn add_fx_from_chunk(&self, chunk: &str) -> Option<Fx> {
+    pub fn add_fx_from_chunk(&self, chunk: &str) -> Result<Fx, &'static str> {
         let mut track_chunk = self
             .track_fx_track()
-            .expect("working on track FX only")
-            .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
+            .ok_or("working on track FX only")?
+            .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode)?;
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(tag) => {
@@ -206,9 +211,9 @@ DOCKED 0
             }
         }
         self.track_fx_track()
-            .expect("working on track FX only")
-            .set_chunk(track_chunk);
-        self.last_fx()
+            .ok_or("working on track FX only")?
+            .set_chunk(track_chunk)?;
+        self.last_fx().ok_or("FX not added")
     }
 
     // Returned FX has GUIDs set
@@ -235,19 +240,20 @@ DOCKED 0
 
     // In Track this returns Chunk, here it returns ChunkRegion. Because REAPER always returns
     // the chunk of the complete track, not just of the FX chain.
-    pub fn chunk(&self) -> Option<ChunkRegion> {
-        self.find_chunk_region(
+    pub fn chunk(&self) -> Result<Option<ChunkRegion>, &'static str> {
+        let res = self.find_chunk_region(
             self.track_fx_track()
-                .expect("working on track FX only")
-                .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode),
-        )
+                .ok_or("working on track FX only")?
+                .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode)?,
+        );
+        Ok(res)
     }
 
-    pub fn set_chunk(&self, chunk: &str) {
+    pub fn set_chunk(&self, chunk: &str) -> Result<(), &'static str> {
         let mut track_chunk = self
             .track_fx_track()
-            .expect("works on track FX only")
-            .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode);
+            .ok_or("works on track FX only")?
+            .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode)?;
         let chain_tag = self.find_chunk_region(track_chunk.clone());
         match chain_tag {
             Some(r) => {
@@ -260,8 +266,9 @@ DOCKED 0
             }
         }
         self.track_fx_track()
-            .expect("works on track FX only")
-            .set_chunk(track_chunk);
+            .ok_or("works on track FX only")?
+            .set_chunk(track_chunk)?;
+        Ok(())
     }
 
     fn find_chunk_region(&self, track_chunk: Chunk) -> Option<ChunkRegion> {

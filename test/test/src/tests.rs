@@ -1163,7 +1163,7 @@ fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
         |_, step| {
             // Given
             let track = get_track(0)?;
-            track.enable_auto_arm();
+            track.enable_auto_arm()?;
             assert!(track.has_auto_arm_enabled());
             assert!(!track.is_armed(true));
             // When
@@ -1224,7 +1224,7 @@ fn switch_track_to_auto_arm_mode_while_armed() -> TestStep {
             let track = get_track(0)?;
             track.unselect();
             // When
-            track.enable_auto_arm();
+            track.enable_auto_arm()?;
             // Then
             assert!(track.has_auto_arm_enabled());
             assert!(track.is_armed(true));
@@ -1244,7 +1244,7 @@ fn switch_to_normal_track_mode_while_armed() -> TestStep {
             track.arm(true);
             assert!(track.is_armed(true));
             // When
-            track.disable_auto_arm();
+            track.disable_auto_arm()?;
             // Then
             assert!(!track.has_auto_arm_enabled());
             assert!(track.is_armed(true));
@@ -1259,7 +1259,7 @@ fn disable_track_auto_arm_mode() -> TestStep {
         // Given
         let track = get_track(0)?;
         // When
-        track.disable_auto_arm();
+        track.disable_auto_arm()?;
         // Then
         assert!(!track.has_auto_arm_enabled());
         assert!(!track.is_armed(true));
@@ -1324,7 +1324,7 @@ fn enable_track_in_auto_arm_mode() -> TestStep {
         // Given
         let track = get_track(0)?;
         // When
-        track.enable_auto_arm();
+        track.enable_auto_arm()?;
         // Then
         assert!(track.has_auto_arm_enabled());
         assert!(!track.is_armed(true));
@@ -2495,7 +2495,7 @@ fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
                 .is_available()
         );
         assert!(fx_chain.first_fx_by_name("bla").is_none());
-        assert!(fx_chain.chunk().is_none());
+        assert!(fx_chain.chunk().unwrap().is_none());
         Ok(())
     })
 }
@@ -2558,17 +2558,17 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             );
             assert!(fx.guid().is_some());
             assert_eq!(fx.name().into_inner().as_c_str(), c_str!("JS: phaser"));
-            let fx_chunk = fx.chunk();
+            let fx_chunk = fx.chunk()?;
             assert!(fx_chunk.starts_with("BYPASS 0 0 0"));
             if Reaper::get().version() < ReaperVersion::new("6") {
                 assert!(fx_chunk.ends_with("\nWAK 0"));
             } else {
                 assert!(fx_chunk.ends_with("\nWAK 0 0"));
             }
-            let tag_chunk = fx.tag_chunk();
+            let tag_chunk = fx.tag_chunk()?;
             assert!(tag_chunk.starts_with(r#"<JS phaser """#));
             assert!(tag_chunk.ends_with("\n>"));
-            let state_chunk = fx.state_chunk();
+            let state_chunk = fx.state_chunk()?;
             assert!(!state_chunk.contains("<"));
             assert!(!state_chunk.contains(">"));
             assert_eq!(fx.track(), track);
@@ -2590,7 +2590,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             );
             assert!(fx.parameter_by_index(6).is_available());
             assert!(!fx.parameter_by_index(7).is_available());
-            let fx_info = fx.info();
+            let fx_info = fx.info()?;
             let stem = fx_info.file_name.file_stem().ok_or("No stem")?;
             assert_eq!(stem, "phaser");
             Ok(())
@@ -2756,7 +2756,7 @@ WAK 0
 "#
         );
         // When
-        other_fx_chain.set_chunk(fx_chain_chunk.as_str());
+        other_fx_chain.set_chunk(fx_chain_chunk.as_str())?;
         // Then
         assert_eq!(other_fx_chain.fx_count(), 2);
         assert_eq!(fx_chain.fx_count(), 2);
@@ -2782,7 +2782,7 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
   776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
   AAAQAAAA"#;
         // When
-        synth_fx.set_state_chunk(fx_state_chunk);
+        synth_fx.set_state_chunk(fx_state_chunk)?;
         // Then
         assert_eq!(synth_fx.index(), 1);
         assert_eq!(
@@ -2814,7 +2814,7 @@ fn set_fx_tag_chunk(get_fx_chain: GetFxChain) -> TestStep {
   AAAQAAAA
   >"#;
         // When
-        midi_fx_2.set_tag_chunk(fx_tag_chunk);
+        midi_fx_2.set_tag_chunk(fx_tag_chunk)?;
         // Then
         assert_eq!(midi_fx_2.index(), 1);
         assert_eq!(
@@ -2838,7 +2838,7 @@ fn set_fx_chunk(get_fx_chain: GetFxChain) -> TestStep {
         let synth_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find synth fx")?;
         let synth_fx_guid_before = synth_fx.guid();
         // When
-        synth_fx.set_chunk(midi_fx.chunk());
+        synth_fx.set_chunk(midi_fx.chunk()?)?;
         // Then
         assert_eq!(synth_fx.guid(), synth_fx_guid_before);
         assert!(synth_fx.is_available());
@@ -2875,9 +2875,8 @@ WAK 0
                     mock.invoke(fx);
                 });
         });
-        let synth_fx = fx_chain.add_fx_from_chunk(fx_chunk);
+        let synth_fx = fx_chain.add_fx_from_chunk(fx_chunk)?;
         // Then
-        let synth_fx = synth_fx.ok_or("Didn't return FX")?;
         assert_eq!(synth_fx.index(), 1);
         let guid = Guid::from_string_with_braces("{5FF5FB09-9102-4CBA-A3FB-3467BA1BFE5D}")?;
         assert_eq!(synth_fx.guid(), Some(guid));
@@ -2911,7 +2910,7 @@ fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
                     mock.invoke(p);
                 });
         });
-        fx_chain.remove_fx(&synth_fx);
+        fx_chain.remove_fx(&synth_fx)?;
         // Then
         assert!(!synth_fx.is_available());
         assert!(midi_fx.is_available());
@@ -2939,7 +2938,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
                     mock.invoke(p);
                 });
         });
-        fx_chain.move_fx(&synth_fx, 0);
+        fx_chain.move_fx(&synth_fx, 0)?;
         // Then
         assert_eq!(midi_fx.index(), 1);
         assert_eq!(
@@ -3194,21 +3193,21 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
                 fx_2.name().into_inner().as_c_str(),
                 c_str!("VSTi: ReaSynth (Cockos)")
             );
-            let chunk_1 = fx_1.chunk();
+            let chunk_1 = fx_1.chunk()?;
             assert!(chunk_1.starts_with("BYPASS 0 0 0"));
             if Reaper::get().version() < ReaperVersion::new("6") {
                 assert!(chunk_1.ends_with("\nWAK 0"));
             } else {
                 assert!(chunk_1.ends_with("\nWAK 0 0"));
             }
-            let tag_chunk_1 = fx_1.tag_chunk();
+            let tag_chunk_1 = fx_1.tag_chunk()?;
             assert!(tag_chunk_1.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrol"#));
             assert!(tag_chunk_1.ends_with("\n>"));
-            let state_chunk_1 = fx_1.state_chunk();
+            let state_chunk_1 = fx_1.state_chunk()?;
             assert!(!state_chunk_1.contains("<"));
             assert!(!state_chunk_1.contains(">"));
-            let fx_1_info = fx_1.info();
-            let fx_2_info = fx_2.info();
+            let fx_1_info = fx_1.info()?;
+            let fx_2_info = fx_2.info()?;
             let fx_1_file_name = fx_1_info
                 .file_name
                 .file_name()
@@ -3361,21 +3360,21 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
                 fx_1.name().into_inner().as_c_str(),
                 c_str!("VST: ReaControlMIDI (Cockos)")
             );
-            let chunk = fx_1.chunk();
+            let chunk = fx_1.chunk()?;
             assert!(chunk.starts_with("BYPASS 0 0 0"));
             if Reaper::get().version() < ReaperVersion::new("6") {
                 assert!(chunk.ends_with("\nWAK 0"));
             } else {
                 assert!(chunk.ends_with("\nWAK 0 0"));
             }
-            let tag_chunk = fx_1.tag_chunk();
+            let tag_chunk = fx_1.tag_chunk()?;
             assert!(tag_chunk.starts_with(r#"<VST "VST: ReaControlMIDI (Cockos)" reacontrol"#));
             assert!(tag_chunk.ends_with("\n>"));
-            let state_chunk = fx_1.state_chunk();
+            let state_chunk = fx_1.state_chunk()?;
             assert!(!state_chunk.contains("<"));
             assert!(!state_chunk.contains(">"));
 
-            let fx_1_info = fx_1.info();
+            let fx_1_info = fx_1.info()?;
             let file_name = fx_1_info.file_name.file_name().ok_or("No FX file name")?;
             assert!(matches!(
                 file_name
@@ -3448,7 +3447,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                 fx_chain.first_fx_by_name("ReaControlMIDI (Cockos)"),
                 Some(fx.clone())
             );
-            let chain_chunk = fx_chain.chunk();
+            let chain_chunk = fx_chain.chunk()?;
             assert!(chain_chunk.is_some());
             let chain_chunk = chain_chunk.unwrap();
             assert!(chain_chunk.starts_with("<FXCHAIN"));

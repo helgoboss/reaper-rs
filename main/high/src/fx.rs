@@ -92,49 +92,55 @@ impl Fx {
                     Reaper::get()
                         .medium_reaper()
                         .track_fx_get_fx_name(track.raw(), location, buffer_size)
-                        .expect("Couldn't get track name")
+                        .expect("Couldn't get track FX name")
                 }
             }
         }
     }
 
-    pub fn chunk(&self) -> ChunkRegion {
+    pub fn chunk(&self) -> Result<ChunkRegion, &'static str> {
         self.load_if_necessary_or_complain();
-        self.chain()
-            .chunk()
-            .expect("FX chain chunk not found")
-            .find_line_starting_with(self.fx_id_line().as_str())
-            .expect("FX ID line not found")
+        let res = self
+            .chain()
+            .chunk()?
+            .ok_or("FX chain chunk not found")?
+            .find_line_starting_with(self.fx_id_line()?.as_str())
+            .ok_or("FX ID line not found")?
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
             .move_right_cursor_right_to_start_of_line_beginning_with("WAK 0")
-            .move_right_cursor_right_to_end_of_current_line()
+            .move_right_cursor_right_to_end_of_current_line();
+        Ok(res)
     }
 
-    fn fx_id_line(&self) -> String {
-        get_fx_id_line(&self.guid().expect("Couldn't get GUID"))
+    fn fx_id_line(&self) -> Result<String, &'static str> {
+        Ok(get_fx_id_line(&self.guid().ok_or("couldn't get GUID")?))
     }
 
-    pub fn tag_chunk(&self) -> ChunkRegion {
+    pub fn tag_chunk(&self) -> Result<ChunkRegion, &'static str> {
         self.load_if_necessary_or_complain();
-        self.chain()
-            .chunk()
-            .expect("FX chain chunk not found")
-            .find_line_starting_with(self.fx_id_line().as_str())
-            .expect("FX ID line not found")
+        let res = self
+            .chain()
+            .chunk()?
+            .ok_or("FX chain chunk not found")?
+            .find_line_starting_with(self.fx_id_line()?.as_str())
+            .ok_or("FX ID line not found")?
             .move_left_cursor_left_to_start_of_line_beginning_with("BYPASS ")
             .find_first_tag(0)
-            .expect("first tag not found")
+            .ok_or("first tag not found")?;
+        Ok(res)
     }
 
-    pub fn state_chunk(&self) -> ChunkRegion {
-        self.tag_chunk()
+    pub fn state_chunk(&self) -> Result<ChunkRegion, &'static str> {
+        let res = self
+            .tag_chunk()?
             .move_left_cursor_right_to_start_of_next_line()
-            .move_right_cursor_left_to_end_of_previous_line()
+            .move_right_cursor_left_to_end_of_previous_line();
+        Ok(res)
     }
 
     // Attention: Currently implemented by parsing chunk
-    pub fn info(&self) -> FxInfo {
-        FxInfo::from_first_line_of_tag_chunk(&self.tag_chunk().first_line().content()).unwrap()
+    pub fn info(&self) -> Result<FxInfo, &'static str> {
+        FxInfo::from_first_line_of_tag_chunk(&self.tag_chunk()?.first_line().content())
     }
 
     pub fn parameter_count(&self) -> u32 {
@@ -295,26 +301,27 @@ impl Fx {
     // reconsider the ownership  requirement of ChunkRegions as a whole (but then we need to
     // care about lifetimes).
     // TODO-low Supports track FX only
-    pub fn set_chunk(&self, chunk_region: ChunkRegion) {
+    pub fn set_chunk(&self, chunk_region: ChunkRegion) -> Result<(), &'static str> {
         // First replace GUID in chunk with the one of this FX
         let mut parent_chunk = chunk_region.parent_chunk();
         if let Some(fx_id_line) = chunk_region.find_line_starting_with("FXID ") {
             // TODO-low Mmh. We assume here that this is a guid-based FX!?
-            let guid = self.guid().expect("FX doesn't have GUID");
+            let guid = self.guid().ok_or("FX doesn't have GUID")?;
             parent_chunk.replace_region(&fx_id_line, get_fx_id_line(&guid).as_str());
         }
         // Then set new chunk
-        self.replace_track_chunk_region(self.chunk(), chunk_region.content().deref());
+        self.replace_track_chunk_region(self.chunk()?, chunk_region.content().deref())?;
+        Ok(())
     }
 
     // TODO-low Supports track FX only
-    pub fn set_tag_chunk(&self, chunk: &str) {
-        self.replace_track_chunk_region(self.tag_chunk(), chunk);
+    pub fn set_tag_chunk(&self, chunk: &str) -> Result<(), &'static str> {
+        self.replace_track_chunk_region(self.tag_chunk()?, chunk)
     }
 
     // TODO-low Supports track FX only
-    pub fn set_state_chunk(&self, chunk: &str) {
-        self.replace_track_chunk_region(self.state_chunk(), chunk);
+    pub fn set_state_chunk(&self, chunk: &str) -> Result<(), &'static str> {
+        self.replace_track_chunk_region(self.state_chunk()?, chunk)
     }
 
     pub fn floating_window(&self) -> Option<Hwnd> {
@@ -367,13 +374,18 @@ impl Fx {
     }
 
     // TODO-low Supports track FX only
-    fn replace_track_chunk_region(&self, old_chunk_region: ChunkRegion, new_content: &str) {
+    fn replace_track_chunk_region(
+        &self,
+        old_chunk_region: ChunkRegion,
+        new_content: &str,
+    ) -> Result<(), &'static str> {
         let mut old_chunk = old_chunk_region.parent_chunk();
         old_chunk.replace_region(&old_chunk_region, new_content);
         std::mem::drop(old_chunk_region);
         self.track()
-            .expect("only track FX supported")
-            .set_chunk(old_chunk);
+            .ok_or("only track FX supported")?
+            .set_chunk(old_chunk)?;
+        Ok(())
     }
 
     pub fn chain(&self) -> &FxChain {
