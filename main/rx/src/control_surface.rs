@@ -76,6 +76,11 @@ impl ControlSurfaceRxMiddleware {
                 .track_input_monitoring_changed
                 .borrow_mut()
                 .next(e.track),
+            TrackAutomationModeChanged(e) => self
+                .rx
+                .track_automation_mode_changed
+                .borrow_mut()
+                .next(e.track),
             TrackArmChanged(e) => self.rx.track_arm_changed.borrow_mut().next(e.track),
             TrackMuteChanged(e) => {
                 self.rx
@@ -124,6 +129,11 @@ impl ControlSurfaceRxMiddleware {
             PlayStateChanged(_) => self.rx.play_state_changed.borrow_mut().next(()),
             RepeatStateChanged(_) => self.rx.repeat_state_changed.borrow_mut().next(()),
             ProjectClosed(e) => self.rx.project_closed.borrow_mut().next(e.project),
+            GlobalAutomationOverrideChanged(_) => self
+                .rx
+                .global_automation_override_changed
+                .borrow_mut()
+                .next(()),
             BookmarksChanged(_) => self.rx.bookmarks_changed.borrow_mut().next(()),
             ReceiveCountChanged(e) => self.rx.receive_count_changed.borrow_mut().next(e.track),
             HardwareOutputSendCountChanged(e) => self
@@ -140,6 +150,7 @@ impl ControlSurfaceRxMiddleware {
 pub struct ControlSurfaceRx {
     pub main_thread_idle: EventStreamSubject<()>,
     pub project_switched: EventStreamSubject<Project>,
+    pub global_automation_override_changed: EventStreamSubject<()>,
     pub track_volume_changed: EventStreamSubject<Track>,
     pub track_volume_touched: EventStreamSubject<Track>,
     pub track_pan_changed: EventStreamSubject<Track>,
@@ -158,6 +169,7 @@ pub struct ControlSurfaceRx {
     pub track_name_changed: EventStreamSubject<Track>,
     pub track_input_changed: EventStreamSubject<Track>,
     pub track_input_monitoring_changed: EventStreamSubject<Track>,
+    pub track_automation_mode_changed: EventStreamSubject<Track>,
     pub track_arm_changed: EventStreamSubject<Track>,
     pub track_mute_changed: EventStreamSubject<Track>,
     pub track_mute_touched: EventStreamSubject<Track>,
@@ -197,6 +209,7 @@ impl ControlSurfaceRx {
         ControlSurfaceRx {
             main_thread_idle: default(),
             project_switched: default(),
+            global_automation_override_changed: default(),
             track_volume_changed: default(),
             track_volume_touched: default(),
             track_pan_changed: default(),
@@ -214,6 +227,7 @@ impl ControlSurfaceRx {
             track_name_changed: default(),
             track_input_changed: default(),
             track_input_monitoring_changed: default(),
+            track_automation_mode_changed: default(),
             track_arm_changed: default(),
             track_mute_changed: default(),
             track_mute_touched: default(),
@@ -242,6 +256,10 @@ impl ControlSurfaceRx {
 
     pub fn project_switched(&self) -> impl ReactiveEvent<Project> {
         self.project_switched.borrow().clone()
+    }
+
+    pub fn global_automation_override_changed(&self) -> impl ReactiveEvent<()> {
+        self.global_automation_override_changed.borrow().clone()
     }
 
     pub fn bookmarks_changed(&self) -> impl ReactiveEvent<()> {
@@ -343,6 +361,10 @@ impl ControlSurfaceRx {
 
     pub fn track_input_monitoring_changed(&self) -> impl ReactiveEvent<Track> {
         self.track_input_monitoring_changed.borrow().clone()
+    }
+
+    pub fn track_automation_mode_changed(&self) -> impl ReactiveEvent<Track> {
+        self.track_automation_mode_changed.borrow().clone()
     }
 
     pub fn track_input_changed(&self) -> impl ReactiveEvent<Track> {

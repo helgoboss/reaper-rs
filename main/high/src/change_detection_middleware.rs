@@ -4,10 +4,10 @@ use crate::{
 };
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, InputMonitoringMode, MediaTrack, Pan,
-    PanMode, PlayState, PlaybackSpeedFactor, ReaProject, ReaperNormalizedFxParamValue,
-    ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue, TrackAttributeKey,
-    TrackFxChainType, TrackLocation, TrackSendCategory, TrackSendDirection,
+    reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, GlobalAutomationModeOverride,
+    InputMonitoringMode, MediaTrack, Pan, PanMode, PlayState, PlaybackSpeedFactor, ReaProject,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
+    TrackAttributeKey, TrackFxChainType, TrackLocation, TrackSendCategory, TrackSendDirection,
     VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
@@ -17,6 +17,7 @@ use std::collections::{HashMap, HashSet};
 pub struct ChangeDetectionMiddleware {
     num_track_set_changes_left_to_be_propagated: Cell<u32>,
     last_active_project: Cell<Project>,
+    last_global_automation_mode_override: Cell<Option<GlobalAutomationModeOverride>>,
     project_datas: RefCell<ProjectDataMap>,
     fx_has_been_touched_just_a_moment_ago: Cell<bool>,
     // Capabilities depending on REAPER version
@@ -41,6 +42,7 @@ struct TrackData {
     recarm: bool,
     number: Option<TrackLocation>,
     recmonitor: InputMonitoringMode,
+    automation_mode: AutomationMode,
     recinput: i32,
     guid: Guid,
     receive_count: u32,
@@ -147,6 +149,9 @@ impl Default for ChangeDetectionMiddleware {
         ChangeDetectionMiddleware {
             num_track_set_changes_left_to_be_propagated: Default::default(),
             last_active_project: Cell::new(last_active_project),
+            last_global_automation_mode_override: Cell::new(
+                Reaper::get().global_automation_override(),
+            ),
             project_datas: Default::default(),
             fx_has_been_touched_just_a_moment_ago: Default::default(),
             // since pre1,
@@ -204,18 +209,39 @@ impl ChangeDetectionMiddleware {
                     None => return false,
                     Some(td) => td,
                 };
-                if td.volume == args.volume {
-                    return true;
+                if td.volume != args.volume {
+                    let old = td.volume;
+                    td.volume = args.volume;
+                    let track = Track::new(args.track, None);
+                    handle_change(ChangeEvent::TrackVolumeChanged(TrackVolumeChangedEvent {
+                        touched: !self.track_parameter_is_automated(&track, reaper_str!("Volume")),
+                        track: track.clone(),
+                        old_value: old,
+                        new_value: args.volume,
+                    }));
                 }
-                let old = td.volume;
-                td.volume = args.volume;
-                let track = Track::new(args.track, None);
-                handle_change(ChangeEvent::TrackVolumeChanged(TrackVolumeChangedEvent {
-                    touched: !self.track_parameter_is_automated(&track, reaper_str!("Volume")),
-                    track: track.clone(),
-                    old_value: old,
-                    new_value: args.volume,
-                }));
+                let new_automation_mode = unsafe {
+                    Reaper::get().medium_reaper.get_track_automation_mode(args.track)
+                };
+                if td.automation_mode != new_automation_mode {
+                    let old = td.automation_mode;
+                    td.automation_mode = new_automation_mode;
+                    let track = Track::new(args.track, None);
+                    handle_change(ChangeEvent::TrackAutomationModeChanged(TrackAutomationModeChangedEvent {
+                        track,
+                        old_value: old,
+                        new_value: new_automation_mode,
+                    }));
+                }
+                let new_automation_override = Reaper::get().global_automation_override();
+                let old_automation_override = self.last_global_automation_mode_override.get();
+                if old_automation_override != new_automation_override {
+                    self.last_global_automation_mode_override.set(new_automation_override);
+                    handle_change(ChangeEvent::GlobalAutomationOverrideChanged(GlobalAutomationOverrideChangedEvent {
+                        old_value: old_automation_override,
+                        new_value: new_automation_override,
+                    }));
+                }
             }
             SetSurfaceMute(args) => {
                 let mut td = match self.find_track_data_in_normal_state(args.track) {
@@ -910,6 +936,7 @@ impl ChangeDetectionMiddleware {
                         recmonitor: func.get_set_media_track_info_get_rec_mon(mt),
                         recinput: func.get_media_track_info_value(mt, TrackAttributeKey::RecInput)
                             as i32,
+                        automation_mode: func.get_track_automation_mode(mt),
                         guid: get_media_track_guid(mt),
                         receive_count: func.get_track_num_sends(mt, TrackSendCategory::Receive),
                         track_send_count: func.get_track_num_sends(mt, TrackSendCategory::Send),
@@ -1179,6 +1206,7 @@ pub enum ChangeEvent {
     TrackMuteChanged(TrackMuteChangedEvent),
     TrackSoloChanged(TrackSoloChangedEvent),
     TrackSelectedChanged(TrackSelectedChangedEvent),
+    TrackAutomationModeChanged(TrackAutomationModeChangedEvent),
     FxAdded(FxAddedEvent),
     FxRemoved(FxRemovedEvent),
     FxEnabledChanged(FxEnabledChangedEvent),
@@ -1190,6 +1218,7 @@ pub enum ChangeEvent {
     FxPresetChanged(FxPresetChangedEvent),
     MasterTempoChanged(MasterTempoChangedEvent),
     MasterPlayrateChanged(MasterPlayrateChangedEvent),
+    GlobalAutomationOverrideChanged(GlobalAutomationOverrideChangedEvent),
     PlayStateChanged(PlayStateChangedEvent),
     RepeatStateChanged(RepeatStateChangedEvent),
     ProjectClosed(ProjectClosedEvent),
@@ -1323,6 +1352,13 @@ pub struct TrackSelectedChangedEvent {
 }
 
 #[derive(Clone, Debug)]
+pub struct TrackAutomationModeChangedEvent {
+    pub track: Track,
+    pub old_value: AutomationMode,
+    pub new_value: AutomationMode,
+}
+
+#[derive(Clone, Debug)]
 pub struct FxAddedEvent {
     pub fx: Fx,
 }
@@ -1380,6 +1416,12 @@ pub struct MasterTempoChangedEvent {
 pub struct MasterPlayrateChangedEvent {
     pub touched: bool,
     pub new_value: PlaybackSpeedFactor,
+}
+
+#[derive(Clone, Debug)]
+pub struct GlobalAutomationOverrideChangedEvent {
+    pub old_value: Option<GlobalAutomationModeOverride>,
+    pub new_value: Option<GlobalAutomationModeOverride>,
 }
 
 #[derive(Clone, Debug)]
