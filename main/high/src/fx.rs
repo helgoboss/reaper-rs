@@ -373,6 +373,37 @@ impl Fx {
         }
     }
 
+    pub fn hide_floating_window(&self) {
+        self.load_if_necessary_or_complain();
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_show(
+                        track.raw(),
+                        FxShowInstruction::HideFloatingWindow(location),
+                    );
+                }
+            }
+        }
+    }
+
+    pub fn show_in_chain(&self) {
+        self.load_if_necessary_or_complain();
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_show(track.raw(), FxShowInstruction::ShowChain(location));
+                }
+            }
+        }
+    }
+
     // TODO-low Supports track FX only
     fn replace_track_chunk_region(
         &self,

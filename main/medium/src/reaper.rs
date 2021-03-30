@@ -14,9 +14,9 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode,
     BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
-    EnvChunkName, FxAddByNameBehavior, FxPresetRef, FxShowInstruction, GangBehavior,
-    GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo,
-    MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
+    EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
+    GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
+    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
     MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
     NotificationBehavior, PanMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
     PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
@@ -389,6 +389,36 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.UpdateTimeline();
+    }
+
+    /// Redraws the arrange view.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn update_arrange(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.UpdateArrange();
+    }
+
+    /// Updates the track list after a minor change.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn track_list_adjust_windows_minor(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.TrackList_AdjustWindows(true);
+    }
+
+    /// Updates the track list after a major change.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn track_list_adjust_windows_major(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.TrackList_AdjustWindows(false);
     }
 
     /// Shows a message to the user in the ReaScript console.
@@ -3261,6 +3291,24 @@ impl<UsageScope> Reaper<UsageScope> {
         AutomationMode::from_raw(result)
     }
 
+    /// Sets the track automation mode.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_track_automation_mode(
+        &self,
+        track: MediaTrack,
+        automation_mode: AutomationMode,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .SetTrackAutomationMode(track.as_ptr(), automation_mode.to_raw());
+    }
+
     /// Returns the global track automation override, if any.
     #[measure(ResponseTimeSingleThreaded)]
     pub fn get_global_automation_override(&self) -> Option<GlobalAutomationModeOverride>
@@ -3274,6 +3322,24 @@ impl<UsageScope> Reaper<UsageScope> {
             6 => Some(Bypass),
             x => Some(Mode(AutomationMode::from_raw(x))),
         }
+    }
+
+    /// Sets the global track automation override.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn set_global_automation_override(
+        &self,
+        mode_override: Option<GlobalAutomationModeOverride>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        use GlobalAutomationModeOverride::*;
+        let raw = match mode_override {
+            None => -1,
+            Some(Bypass) => 6,
+            Some(Mode(x)) => x.to_raw(),
+        };
+        self.low.SetGlobalAutomationOverride(raw);
     }
 
     /// Returns the track envelope for the given track and configuration chunk name.
@@ -4540,6 +4606,36 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         self.low
             .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
+    }
+
+    /// Returns the visibility state of the given track's normal FX chain.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn track_fx_get_chain_visible(&self, track: MediaTrack) -> FxChainVisibility
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.TrackFX_GetChainVisible(track.as_ptr());
+        FxChainVisibility::from_raw(raw)
+    }
+
+    /// Returns the visibility state of the given track's input FX chain.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn track_fx_get_rec_chain_visible(&self, track: MediaTrack) -> FxChainVisibility
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.TrackFX_GetRecChainVisible(track.as_ptr());
+        FxChainVisibility::from_raw(raw)
     }
 
     /// Sets the volume of the given track send or hardware output send.

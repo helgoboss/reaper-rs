@@ -15,7 +15,7 @@ use reaper_medium::SendTarget::OtherTrack;
 use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo};
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
-    AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
+    AutomationMode, ChunkCacheHint, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
     RecordingInput, SoloMode, TrackAttributeKey, TrackLocation, TrackSendCategory,
     TrackSendDirection,
@@ -409,6 +409,32 @@ impl Track {
             chunk
         };
         self.set_chunk(chunk)
+    }
+
+    pub fn set_shown(&self, area: TrackArea, value: bool) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = &Reaper::get().medium_reaper;
+        unsafe {
+            let _ = reaper.set_media_track_info_value(
+                self.raw(),
+                area.show_attribute_key(),
+                if value { 1.0 } else { 0.0 },
+            );
+        }
+        match area {
+            TrackArea::ArrangeView => reaper.track_list_adjust_windows_minor(),
+            TrackArea::Mixer => reaper.track_list_adjust_windows_major(),
+        };
+    }
+
+    pub fn is_shown(&self, area: TrackArea) -> bool {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_track_info_value(self.raw(), area.show_attribute_key())
+                > 0.0
+        }
     }
 
     #[allow(clippy::float_cmp)]
@@ -845,12 +871,28 @@ impl Track {
         other_project.map(|p| p.raw())
     }
 
-    pub fn automation_mode(&self) -> AutomationMode {
+    pub fn set_automation_mode(&self, mode: AutomationMode) {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_automation_mode(self.media_track.get().unwrap())
+                .set_track_automation_mode(self.raw(), mode);
+        }
+    }
+
+    pub fn hide_chain(&self) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .track_fx_show(self.raw(), FxShowInstruction::HideChain);
+        }
+    }
+
+    pub fn automation_mode(&self) -> AutomationMode {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_track_automation_mode(self.raw())
         }
     }
 
@@ -935,4 +977,20 @@ fn get_track_project_raw(media_track: MediaTrack) -> Option<ReaProject> {
 
 fn get_auto_arm_chunk_line(chunk: &Chunk) -> Option<ChunkRegion> {
     chunk.region().find_line_starting_with("AUTO_RECARM 1")
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum TrackArea {
+    ArrangeView,
+    Mixer,
+}
+
+impl TrackArea {
+    fn show_attribute_key(self) -> TrackAttributeKey<'static> {
+        use TrackArea::*;
+        match self {
+            ArrangeView => TrackAttributeKey::ShowInTcp,
+            Mixer => TrackAttributeKey::ShowInMixer,
+        }
+    }
 }

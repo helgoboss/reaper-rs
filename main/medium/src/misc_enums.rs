@@ -818,6 +818,32 @@ impl SoloMode {
     }
 }
 
+/// Information about visibility of an FX chain.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum FxChainVisibility {
+    /// FX chain is not visible.
+    Hidden,
+    /// FX chain is visible.
+    ///
+    /// If the argument is `Some`, the FX with that index is selected.
+    Visible(Option<u32>),
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a
+    /// variant that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<i32>),
+}
+
+impl FxChainVisibility {
+    /// Converts an integer as returned by the low-level API to an FX chain visibility.
+    pub fn from_raw(v: i32) -> FxChainVisibility {
+        match v {
+            -2 => Self::Visible(None),
+            -1 => Self::Hidden,
+            x if x >= 0 => Self::Visible(Some(x as u32)),
+            x => Self::Unknown(Hidden(x)),
+        }
+    }
+}
+
 /// Track pan mode.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum PanMode {

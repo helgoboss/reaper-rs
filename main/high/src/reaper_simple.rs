@@ -143,6 +143,14 @@ impl Reaper {
         self.medium_reaper().get_global_automation_override()
     }
 
+    pub fn set_global_automation_override(
+        &self,
+        mode_override: Option<GlobalAutomationModeOverride>,
+    ) {
+        self.medium_reaper()
+            .set_global_automation_override(mode_override);
+    }
+
     pub fn generate_guid(&self) -> Guid {
         Guid::new(Reaper::get().medium_reaper().gen_guid())
     }

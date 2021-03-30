@@ -5,7 +5,8 @@ use crate::{
 };
 
 use reaper_medium::{
-    AddFxBehavior, ChunkCacheHint, ReaperStringArg, TrackFxChainType, TransferBehavior,
+    AddFxBehavior, ChunkCacheHint, FxChainVisibility, ReaperStringArg, TrackFxChainType,
+    TransferBehavior,
 };
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -69,6 +70,24 @@ impl FxChain {
             FxChainContext::Monitoring => {
                 let track = Reaper::get().current_project().master_track();
                 unsafe { reaper.track_fx_get_rec_count(track.raw()) }
+            }
+            FxChainContext::Take(_) => todo!(),
+        }
+    }
+
+    pub fn visibility(&self) -> FxChainVisibility {
+        let reaper = Reaper::get().medium_reaper();
+        match &self.context {
+            FxChainContext::Track { track, is_input_fx } => {
+                if *is_input_fx {
+                    unsafe { reaper.track_fx_get_rec_chain_visible(track.raw()) }
+                } else {
+                    unsafe { reaper.track_fx_get_chain_visible(track.raw()) }
+                }
+            }
+            FxChainContext::Monitoring => {
+                let track = Reaper::get().current_project().master_track();
+                unsafe { reaper.track_fx_get_rec_chain_visible(track.raw()) }
             }
             FxChainContext::Take(_) => todo!(),
         }
@@ -227,6 +246,11 @@ DOCKED 0
         })
     }
 
+    // Returned FX are light-weight and don't have GUID set.
+    pub fn index_based_fxs(&self) -> impl Iterator<Item = Fx> + ExactSizeIterator + '_ {
+        (0..self.fx_count()).map(move |i| Fx::from_index_untracked(self.clone(), i))
+    }
+
     // This returns a non-optional in order to support not-yet-loaded FX. GUID is a perfectly stable
     // identifier of an FX!
     pub fn fx_by_guid(&self, guid: &Guid) -> Fx {
@@ -300,6 +324,12 @@ DOCKED 0
                 };
                 fx_index.and_then(|i| self.fx_by_index(i))
             }
+        }
+    }
+
+    pub fn hide_all_floating_windows(&self) {
+        for fx in self.fxs() {
+            fx.hide_floating_window();
         }
     }
 
@@ -411,6 +441,14 @@ DOCKED 0
     // reorderings and so on.
     pub fn fx_by_index_untracked(&self, index: u32) -> Fx {
         Fx::from_index_untracked(self.clone(), index)
+    }
+
+    pub fn index_based_fx_by_index(&self, index: u32) -> Option<Fx> {
+        let untracked = Fx::from_index_untracked(self.clone(), index);
+        if !untracked.is_available() {
+            return None;
+        }
+        Some(untracked)
     }
 
     pub fn first_fx(&self) -> Option<Fx> {
