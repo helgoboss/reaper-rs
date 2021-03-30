@@ -42,3 +42,13 @@ pub enum ProjectPart {
     /// Track/master vol/pan/routing and aLL envelopes (master included).
     TrackCfg = raw::UNDO_STATE_TRACKCFG,
 }
+
+/// Area in the REAPER window where a track might be displayed.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[repr(u32)]
+pub enum TrackArea {
+    /// Track control panel.
+    Tcp = 1,
+    /// Mixer control panel.
+    Mcp = 2,
+}

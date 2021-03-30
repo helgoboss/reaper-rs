@@ -23,7 +23,7 @@ use crate::{
     ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
     ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
     ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId,
-    SendTarget, SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackAttributeKey,
+    SendTarget, SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
     TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
@@ -32,6 +32,7 @@ use crate::{
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
 
+use enumflags2::BitFlags;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
@@ -4621,6 +4622,36 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let raw = self.low.TrackFX_GetChainVisible(track.as_ptr());
         FxChainVisibility::from_raw(raw)
+    }
+
+    /// Returns the visibility state of the master track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_master_track_visibility(&self) -> BitFlags<TrackArea>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.GetMasterTrackVisibility();
+        BitFlags::from_bits_truncate(raw as u32)
+    }
+
+    /// Sets the visibility state of the master track and returns the previous one.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn set_master_track_visibility(&self, areas: BitFlags<TrackArea>) -> BitFlags<TrackArea>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.SetMasterTrackVisibility(areas.bits() as i32);
+        BitFlags::from_bits_truncate(raw as u32)
     }
 
     /// Returns the visibility state of the given track's input FX chain.

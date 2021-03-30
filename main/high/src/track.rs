@@ -17,7 +17,7 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
-    RecordingInput, SoloMode, TrackAttributeKey, TrackLocation, TrackSendCategory,
+    RecordingInput, SoloMode, TrackArea, TrackAttributeKey, TrackLocation, TrackSendCategory,
     TrackSendDirection,
 };
 use std::convert::TryInto;
@@ -412,28 +412,42 @@ impl Track {
     }
 
     pub fn set_shown(&self, area: TrackArea, value: bool) {
-        self.load_and_check_if_necessary_or_complain();
         let reaper = &Reaper::get().medium_reaper;
-        unsafe {
-            let _ = reaper.set_media_track_info_value(
-                self.raw(),
-                area.show_attribute_key(),
-                if value { 1.0 } else { 0.0 },
-            );
+        if self.is_master_track() {
+            let mut flags = reaper.get_master_track_visibility();
+            if (value && area == TrackArea::Tcp) || (!value && area == TrackArea::Mcp) {
+                flags.insert(area);
+            } else {
+                flags.remove(area);
+            };
+            reaper.set_master_track_visibility(flags);
+        } else {
+            unsafe {
+                let _ = reaper.set_media_track_info_value(
+                    self.raw(),
+                    get_show_attribute_key(area),
+                    if value { 1.0 } else { 0.0 },
+                );
+            }
+            match area {
+                TrackArea::Tcp => reaper.track_list_adjust_windows_minor(),
+                TrackArea::Mcp => reaper.track_list_adjust_windows_major(),
+            };
         }
-        match area {
-            TrackArea::ArrangeView => reaper.track_list_adjust_windows_minor(),
-            TrackArea::Mixer => reaper.track_list_adjust_windows_major(),
-        };
     }
 
     pub fn is_shown(&self, area: TrackArea) -> bool {
-        self.load_and_check_if_necessary_or_complain();
-        unsafe {
-            Reaper::get()
-                .medium_reaper
-                .get_media_track_info_value(self.raw(), area.show_attribute_key())
-                > 0.0
+        let reaper = &Reaper::get().medium_reaper;
+        if self.is_master_track() {
+            let has_flag = reaper.get_master_track_visibility().contains(area);
+            match area {
+                TrackArea::Tcp => has_flag,
+                TrackArea::Mcp => !has_flag,
+            }
+        } else {
+            unsafe {
+                reaper.get_media_track_info_value(self.raw(), get_show_attribute_key(area)) > 0.0
+            }
         }
     }
 
@@ -971,18 +985,10 @@ fn get_auto_arm_chunk_line(chunk: &Chunk) -> Option<ChunkRegion> {
     chunk.region().find_line_starting_with("AUTO_RECARM 1")
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum TrackArea {
-    ArrangeView,
-    Mixer,
-}
-
-impl TrackArea {
-    fn show_attribute_key(self) -> TrackAttributeKey<'static> {
-        use TrackArea::*;
-        match self {
-            ArrangeView => TrackAttributeKey::ShowInTcp,
-            Mixer => TrackAttributeKey::ShowInMixer,
-        }
+fn get_show_attribute_key(track_area: TrackArea) -> TrackAttributeKey<'static> {
+    use TrackArea::*;
+    match track_area {
+        Tcp => TrackAttributeKey::ShowInTcp,
+        Mcp => TrackAttributeKey::ShowInMixer,
     }
 }
