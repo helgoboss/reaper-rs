@@ -205,7 +205,7 @@ impl RecordArmMode {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum FxShowInstruction {
     /// Closes the complete FX chain.
-    HideChain,
+    HideChain(TrackFxChainType),
     /// Shows the complete FX chain and makes the given FX visible.
     ShowChain(TrackFxLocation),
     /// Closes the floating FX window.
@@ -220,7 +220,7 @@ impl FxShowInstruction {
     pub fn instruction_to_raw(&self) -> i32 {
         use FxShowInstruction::*;
         match self {
-            HideChain => 0,
+            HideChain(_) => 0,
             ShowChain(_) => 1,
             HideFloatingWindow(_) => 2,
             ShowFloatingWindow(_) => 3,
@@ -231,7 +231,13 @@ impl FxShowInstruction {
     pub fn location_to_raw(&self) -> i32 {
         use FxShowInstruction::*;
         match self {
-            HideChain => 0,
+            HideChain(t) => {
+                let dummy_location = match t {
+                    TrackFxChainType::NormalFxChain => TrackFxLocation::NormalFxChain(0),
+                    TrackFxChainType::InputFxChain => TrackFxLocation::InputFxChain(0),
+                };
+                dummy_location.to_raw()
+            }
             ShowChain(l) => l.to_raw(),
             HideFloatingWindow(l) => l.to_raw(),
             ShowFloatingWindow(l) => l.to_raw(),

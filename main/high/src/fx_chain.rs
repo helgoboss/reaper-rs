@@ -5,8 +5,8 @@ use crate::{
 };
 
 use reaper_medium::{
-    AddFxBehavior, ChunkCacheHint, FxChainVisibility, ReaperStringArg, TrackFxChainType,
-    TransferBehavior,
+    AddFxBehavior, ChunkCacheHint, FxChainVisibility, FxShowInstruction, ReaperStringArg,
+    TrackFxChainType, TransferBehavior,
 };
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -90,6 +90,25 @@ impl FxChain {
                 unsafe { reaper.track_fx_get_rec_chain_visible(track.raw()) }
             }
             FxChainContext::Take(_) => todo!(),
+        }
+    }
+
+    pub fn hide(&self) {
+        match self.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let track = self.track_or_master_track();
+                let instruction = FxShowInstruction::HideChain(if self.is_input_fx() {
+                    TrackFxChainType::InputFxChain
+                } else {
+                    TrackFxChainType::NormalFxChain
+                });
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_show(track.raw(), instruction);
+                }
+            }
         }
     }
 

@@ -15,7 +15,7 @@ use reaper_medium::SendTarget::OtherTrack;
 use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo};
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
-    AutomationMode, ChunkCacheHint, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
+    AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
     RecordingInput, SoloMode, TrackAttributeKey, TrackLocation, TrackSendCategory,
     TrackSendDirection,
@@ -877,14 +877,6 @@ impl Track {
             Reaper::get()
                 .medium_reaper()
                 .set_track_automation_mode(self.raw(), mode);
-        }
-    }
-
-    pub fn hide_chain(&self) {
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .track_fx_show(self.raw(), FxShowInstruction::HideChain);
         }
     }
 
