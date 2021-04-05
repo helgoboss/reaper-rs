@@ -650,8 +650,7 @@ impl ChangeDetectionMiddleware {
         self.find_track_data(track)
     }
 
-    fn find_track_data_map(&self) -> Option<RefMut<TrackDataMap>> {
-        let rea_project = Reaper::get().current_project().raw();
+    fn find_track_data_map(&self, rea_project: ReaProject) -> Option<RefMut<TrackDataMap>> {
         if !self.project_datas.borrow().contains_key(&rea_project) {
             return None;
         }
@@ -667,7 +666,13 @@ impl ChangeDetectionMiddleware {
     }
 
     fn find_track_data(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
-        let track_data_map = self.find_track_data_map()?;
+        let project = unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_track_info_get_project(track)
+                .unwrap_or_else(|| Reaper::get().current_project().raw())
+        };
+        let track_data_map = self.find_track_data_map(project)?;
         if !track_data_map.contains_key(&track) {
             return None;
         }

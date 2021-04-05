@@ -173,12 +173,23 @@ impl Track {
     pub fn set_pan(&self, pan: Pan) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = pan.reaper_value();
-        unsafe {
-            Reaper::get().medium_reaper().csurf_on_pan_change_ex(
-                self.raw(),
-                Absolute(reaper_value),
-                GangBehavior::DenyGang,
-            );
+        if self.project() == Reaper::get().current_project() {
+            unsafe {
+                Reaper::get().medium_reaper().csurf_on_pan_change_ex(
+                    self.raw(),
+                    Absolute(reaper_value),
+                    GangBehavior::DenyGang,
+                );
+            }
+        } else {
+            // ReaLearn #283
+            unsafe {
+                let _ = Reaper::get().medium_reaper().set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::Pan,
+                    reaper_value.get(),
+                );
+            }
         }
         // Setting the pan programmatically doesn't trigger SetSurfacePan for control surfaces so
         // we need to notify manually
@@ -207,12 +218,23 @@ impl Track {
     pub fn set_width(&self, width: Width) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = width.reaper_value();
-        unsafe {
-            Reaper::get().medium_reaper().csurf_on_width_change_ex(
-                self.raw(),
-                Absolute(reaper_value),
-                GangBehavior::DenyGang,
-            );
+        if self.project() == Reaper::get().current_project() {
+            unsafe {
+                Reaper::get().medium_reaper().csurf_on_width_change_ex(
+                    self.raw(),
+                    Absolute(reaper_value),
+                    GangBehavior::DenyGang,
+                );
+            }
+        } else {
+            // ReaLearn #283
+            let _ = unsafe {
+                Reaper::get().medium_reaper().set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::Width,
+                    reaper_value.get(),
+                )
+            };
         }
         // Setting the width programmatically doesn't trigger SetSurfacePan for control surfaces
         // so we need to notify manually. There's no CSurf_SetSurfaceWidth, so we just retrigger
@@ -250,25 +272,36 @@ impl Track {
     pub fn set_volume(&self, volume: Volume) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = volume.reaper_value();
-        // Why we use this function and not the others:
-        //
-        // - Setting D_VOL directly via `set_media_track_info_value` will not work for writing
-        //   automation.
-        // - csurf_set_surface_volume seems to only inform control surfaces, doesn't actually set
-        //   the volume.
-        //
-        // Downsides of using this function:
-        //
-        // - CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly. The
-        //   return value reflects the cropped value. However, the precision became much better with
-        //   REAPER 5.28.
-        // - In automation mode "Touch" this leads to jumps.
-        unsafe {
-            Reaper::get().medium_reaper().csurf_on_volume_change_ex(
-                self.raw(),
-                Absolute(reaper_value),
-                GangBehavior::DenyGang,
-            );
+        if self.project() == Reaper::get().current_project() {
+            // Why we use this function and not the others:
+            //
+            // - Setting D_VOL directly via `set_media_track_info_value` will not work for writing
+            //   automation.
+            // - csurf_set_surface_volume seems to only inform control surfaces, doesn't actually
+            //   set the volume.
+            //
+            // Downsides of using this function:
+            //
+            // - CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly.
+            //   The return value reflects the cropped value. However, the precision became much
+            //   better with REAPER 5.28.
+            // - In automation mode "Touch" this leads to jumps.
+            unsafe {
+                Reaper::get().medium_reaper().csurf_on_volume_change_ex(
+                    self.raw(),
+                    Absolute(reaper_value),
+                    GangBehavior::DenyGang,
+                );
+            }
+        } else {
+            // ReaLearn #283
+            unsafe {
+                let _ = Reaper::get().medium_reaper().set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::Vol,
+                    reaper_value.get(),
+                );
+            }
         }
         // Setting the volume programmatically doesn't inform control surfaces - including our own
         // surfaces which are important for feedback. So use the following to notify manually.
@@ -336,7 +369,7 @@ impl Track {
     pub fn arm(&self, support_auto_arm: bool) {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.select();
-        } else {
+        } else if self.project() == Reaper::get().current_project() {
             unsafe {
                 Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
                     self.raw(),
@@ -344,9 +377,9 @@ impl Track {
                     GangBehavior::DenyGang,
                 );
             }
-            // If track was auto-armed before, this would just have switched off the auto-arm but
-            // not actually armed the track. Therefore we check if it's really armed and
-            // if not we do it again.
+            // If track was auto-armed before, this would just have switched off the auto-arm
+            // but not actually armed the track. Therefore we check if it's
+            // really armed and if not we do it again.
             let recarm = unsafe {
                 Reaper::get()
                     .medium_reaper()
@@ -364,6 +397,15 @@ impl Track {
                     }
                 }
             }
+        } else {
+            // ReaLearn #283
+            let _ = unsafe {
+                Reaper::get().medium_reaper().set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::RecArm,
+                    1.0,
+                )
+            };
         }
     }
 
@@ -371,7 +413,7 @@ impl Track {
     pub fn disarm(&self, support_auto_arm: bool) {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.unselect();
-        } else {
+        } else if self.project() == Reaper::get().current_project() {
             unsafe {
                 Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
                     self.raw(),
@@ -379,6 +421,15 @@ impl Track {
                     GangBehavior::DenyGang,
                 );
             }
+        } else {
+            // ReaLearn #283
+            let _ = unsafe {
+                Reaper::get().medium_reaper().set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::RecArm,
+                    0.0,
+                )
+            };
         }
     }
 
@@ -468,13 +519,24 @@ impl Track {
 
     fn set_mute(&self, mute: bool) {
         self.load_and_check_if_necessary_or_complain();
-        let _ = unsafe {
-            Reaper::get().medium_reaper().csurf_on_mute_change_ex(
-                self.raw(),
-                mute,
-                GangBehavior::DenyGang,
-            )
-        };
+        if self.project() == Reaper::get().current_project() {
+            let _ = unsafe {
+                Reaper::get().medium_reaper().csurf_on_mute_change_ex(
+                    self.raw(),
+                    mute,
+                    GangBehavior::DenyGang,
+                )
+            };
+        } else {
+            // ReaLearn #283
+            let _ = unsafe {
+                Reaper::get().medium_reaper().set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::Mute,
+                    if mute { 1.0 } else { 0.0 },
+                )
+            };
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
@@ -527,13 +589,24 @@ impl Track {
 
     fn set_solo(&self, solo: bool) {
         self.load_and_check_if_necessary_or_complain();
-        let _ = unsafe {
-            Reaper::get().medium_reaper().csurf_on_solo_change_ex(
-                self.raw(),
-                solo,
-                GangBehavior::DenyGang,
-            )
-        };
+        if self.project() == Reaper::get().current_project() {
+            let _ = unsafe {
+                Reaper::get().medium_reaper().csurf_on_solo_change_ex(
+                    self.raw(),
+                    solo,
+                    GangBehavior::DenyGang,
+                )
+            };
+        } else {
+            // ReaLearn #283
+            let _ = unsafe {
+                Reaper::get().medium_reaper().set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::Solo,
+                    if solo { 1.0 } else { 0.0 },
+                )
+            };
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()

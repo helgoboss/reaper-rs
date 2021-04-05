@@ -231,8 +231,14 @@ impl Project {
     }
 
     pub fn tempo(self) -> Tempo {
-        // TODO This is not project-specific ... why?
-        let bpm = Reaper::get().medium_reaper().master_get_tempo();
+        let bpm = if self == Reaper::get().current_project() {
+            Reaper::get().medium_reaper().master_get_tempo()
+        } else {
+            // ReaLearn #283
+            Reaper::get()
+                .medium_reaper()
+                .time_map_2_get_divided_bpm_at_time(self.context(), PositionInSeconds::new(0.0))
+        };
         Tempo::from_bpm(bpm)
     }
 
