@@ -1266,6 +1266,46 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
+    /// Returns the effective tempo in BPM at the given position (i.e. 2x in /8 signatures).
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn time_map_2_get_divided_bpm_at_time(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> Bpm
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_2_get_divided_bpm_at_time_unchecked(project, tpos) }
+    }
+
+    /// Like [`time_map_2_get_divided_bpm_at_time()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_2_get_divided_bpm_at_time()`]: #method.time_map_2_get_divided_bpm_at_time
+    #[measure(ResponseTimeMultiThreaded)]
+    pub unsafe fn time_map_2_get_divided_bpm_at_time_unchecked(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> Bpm
+    where
+        UsageScope: AnyThread,
+    {
+        let bpm = self
+            .low
+            .TimeMap2_GetDividedBpmAtTime(project.to_raw(), tpos.get());
+        Bpm(bpm)
+    }
+
     /// Returns the current position of the edit cursor.
     ///
     /// # Panics
