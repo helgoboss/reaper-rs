@@ -209,10 +209,10 @@ impl ChangeDetectionMiddleware {
                     None => return false,
                     Some(td) => td,
                 };
+                let track = Track::new(args.track, None);
                 if td.volume != args.volume {
                     let old = td.volume;
                     td.volume = args.volume;
-                    let track = Track::new(args.track, None);
                     handle_change(ChangeEvent::TrackVolumeChanged(TrackVolumeChangedEvent {
                         touched: !self.track_parameter_is_automated(&track, reaper_str!("Volume")),
                         track: track.clone(),
@@ -238,6 +238,7 @@ impl ChangeDetectionMiddleware {
                 if old_automation_override != new_automation_override {
                     self.last_global_automation_mode_override.set(new_automation_override);
                     handle_change(ChangeEvent::GlobalAutomationOverrideChanged(GlobalAutomationOverrideChangedEvent {
+                        project: track.project(),
                         old_value: old_automation_override,
                         new_value: new_automation_override,
                     }));
@@ -563,6 +564,7 @@ impl ChangeDetectionMiddleware {
             ExtSetBpmAndPlayRate(args) => {
                 if let Some(tempo) = args.tempo {
                     handle_change(ChangeEvent::MasterTempoChanged(MasterTempoChangedEvent {
+                        project: Reaper::get().current_project(),
                         // At the moment we can't support touched for tempo because we always have
                         // a tempo map envelope and sometimes there are seemingly random invocations
                         // of this callback.
@@ -573,6 +575,7 @@ impl ChangeDetectionMiddleware {
                 if let Some(play_rate) = args.play_rate {
                     handle_change(ChangeEvent::MasterPlayrateChanged(
                         MasterPlayrateChangedEvent {
+                            project: Reaper::get().current_project(),
                             // The playrate affected by automation is something else, so we can
                             // always consider this as touched.
                             touched: true,
@@ -590,6 +593,7 @@ impl ChangeDetectionMiddleware {
             }
             SetPlayState(args) => {
                 handle_change(ChangeEvent::PlayStateChanged(PlayStateChangedEvent {
+                    project: Reaper::get().current_project(),
                     new_value: PlayState {
                         is_playing: args.is_playing,
                         is_paused: args.is_paused,
@@ -599,11 +603,14 @@ impl ChangeDetectionMiddleware {
             }
             SetRepeatState(args) => {
                 handle_change(ChangeEvent::RepeatStateChanged(RepeatStateChangedEvent {
+                    project: Reaper::get().current_project(),
                     new_value: args.is_enabled,
                 }));
             }
             ExtSetProjectMarkerChange(_) => {
-                handle_change(ChangeEvent::BookmarksChanged(BookmarksChangedEvent {}))
+                handle_change(ChangeEvent::BookmarksChanged(BookmarksChangedEvent {
+                    project: Reaper::get().current_project()
+                }));
             }
             CloseNoReset |
             SetAutoMode(_) |
@@ -1413,29 +1420,34 @@ pub struct FxPresetChangedEvent {
 
 #[derive(Clone, Debug)]
 pub struct MasterTempoChangedEvent {
+    pub project: Project,
     pub touched: bool,
     pub new_value: Bpm,
 }
 
 #[derive(Clone, Debug)]
 pub struct MasterPlayrateChangedEvent {
+    pub project: Project,
     pub touched: bool,
     pub new_value: PlaybackSpeedFactor,
 }
 
 #[derive(Clone, Debug)]
 pub struct GlobalAutomationOverrideChangedEvent {
+    pub project: Project,
     pub old_value: Option<GlobalAutomationModeOverride>,
     pub new_value: Option<GlobalAutomationModeOverride>,
 }
 
 #[derive(Clone, Debug)]
 pub struct PlayStateChangedEvent {
+    pub project: Project,
     pub new_value: PlayState,
 }
 
 #[derive(Clone, Debug)]
 pub struct RepeatStateChangedEvent {
+    pub project: Project,
     pub new_value: bool,
 }
 
@@ -1445,4 +1457,6 @@ pub struct ProjectClosedEvent {
 }
 
 #[derive(Clone, Debug)]
-pub struct BookmarksChangedEvent {}
+pub struct BookmarksChangedEvent {
+    pub project: Project,
+}
