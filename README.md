@@ -232,12 +232,12 @@ macro, have a look at the macro implementation. No magic there.
 
 The following instructions should result in a functional extension, loaded into REAPER on start:
 
-1. Run `cargo new reaper-my-extension --lib` to initialize the project
-2. Run `cargo build` from within `reaper-my-extension` to generate the compiled plugin extension inside of the `target/debug` directory
+1. Run `cargo new reaper_my_extension --lib` to initialize the project
+2. Run `cargo build` from within `reaper_my_extension` to generate the compiled plugin extension inside of the `target/debug` directory
 3. Copy the extension plug-in to the `REAPER/UserPlugins` directory
     - You could do this manually, and overwrite the file after each build
     - Or, you could create a symbolic link from the `target/debug` file, to `REAPER/UserPlugins` so that they were synced
-        - > Note: Here it's explicitly necessary to give the link a name that starts with` reaper` (by default it will start with `lib`)
+        - > Note: Here it's explicitly necessary to give the link a name that starts with `reaper_` (by default it will start with `lib`)
         - To do this, on unix-based systems, run `ln -s ./target/debug/<name-of-the-compiled-extension-file> <path to REAPER/UserPlugins>`
         - On Windows, you can use the same command if running Git Bash, else you can use `mklink \D target\debug\<name-of-the-compiled-extension-file> %AppData%\REAPER\UserPlugins`
 4. Now start REAPER, and you should see the console message from the code appear!
