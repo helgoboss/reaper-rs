@@ -330,10 +330,13 @@ pub use reaper_pointer::*;
 mod gaccel_register;
 pub use gaccel_register::*;
 
+mod preview_register;
+pub use preview_register::*;
+
 mod audio_hook_register;
 pub use audio_hook_register::*;
 
-mod infostruct_keeper;
+mod keeper;
 
 mod control_surface;
 pub use control_surface::*;
@@ -374,3 +377,6 @@ pub use errors::*;
 
 mod plugin_context;
 pub use plugin_context::*;
+
+mod mutex;
+pub use mutex::*;

@@ -1,3 +1,4 @@
+use crate::raw::preview_register_t;
 use crate::{register_plugin_destroy_hook, PluginContext, Reaper, ReaperFunctionPointers};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
@@ -53,5 +54,11 @@ impl std::fmt::Debug for ReaperFunctionPointers {
             .field("loaded_count", &self.loaded_count)
             .field("total_count", &Self::TOTAL_COUNT)
             .finish()
+    }
+}
+
+impl std::fmt::Debug for preview_register_t {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("preview_register_t").finish()
     }
 }

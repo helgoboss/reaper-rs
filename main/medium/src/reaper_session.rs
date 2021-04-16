@@ -4,21 +4,22 @@ use reaper_low::{
     add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface, PluginContext,
 };
 
-use crate::infostruct_keeper::InfostructKeeper;
+use crate::keeper::{Keeper, SharedKeeper};
 
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
     CommandId, ControlSurface, DelegatingControlSurface, HookCommand, HookCommand2,
     HookPostCommand, HookPostCommand2, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister,
-    OwnedGaccelRegister, PluginRegistration, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
-    ReaperFunctionResult, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
-    ToggleAction,
+    OwnedGaccelRegister, OwnedPreviewRegister, PlayingPreviewRegister, PluginRegistration,
+    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex,
+    ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
+use std::rc::Rc;
 
 /// This is the main hub for accessing medium-level API functions.
 ///
@@ -59,7 +60,9 @@ use std::os::raw::{c_char, c_void};
 pub struct ReaperSession {
     reaper: Reaper<MainThreadScope>,
     /// Provides a safe place in memory for registered actions.
-    gaccel_registers: InfostructKeeper<OwnedGaccelRegister, raw::gaccel_register_t>,
+    gaccel_registers: Keeper<OwnedGaccelRegister, raw::gaccel_register_t>,
+    /// Provides a safe place in memory for currently playing preview registers.
+    preview_registers: SharedKeeper<ReaperMutex<OwnedPreviewRegister>, raw::preview_register_t>,
     /// Provides a safe place in memory for command names used in command ID registrations.
     //
     // We don't need to box the string because it's content is something which is on the heap
@@ -71,7 +74,7 @@ pub struct ReaperSession {
     ///
     /// While in here, the audio hook is considered to be owned by REAPER, meaning that REAPER is
     /// supposed to have exclusive access to it.
-    audio_hook_registers: InfostructKeeper<OwnedAudioHookRegister, raw::audio_hook_register_t>,
+    audio_hook_registers: Keeper<OwnedAudioHookRegister, raw::audio_hook_register_t>,
     /// Provides a safe place in memory for each registered control surface.
     ///
     /// While in here, the control surface is considered to be owned by REAPER, meaning that REAPER
@@ -94,6 +97,7 @@ impl ReaperSession {
         ReaperSession {
             reaper: Reaper::new(low),
             gaccel_registers: Default::default(),
+            preview_registers: Default::default(),
             command_names: Default::default(),
             api_defs: Default::default(),
             audio_hook_registers: Default::default(),
@@ -492,6 +496,57 @@ impl ReaperSession {
         let handle = self.gaccel_registers.keep(register);
         unsafe { self.plugin_register_add(RegistrationObject::Gaccel(handle))? };
         Ok(handle)
+    }
+
+    /// Plays a preview register.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid preview pointer, if the pointer gets stale while
+    /// still playing, if you don't properly handle synchronization via mutex or critical section
+    /// when modifying the register while playing. Use [`play_preview_ex()`] if you want to be
+    /// released from that burden.
+    ///
+    /// [`play_preview_ex()`]: #method.play_preview_ex
+    pub unsafe fn play_preview_ex_unchecked(
+        &self,
+        preview: NonNull<raw::preview_register_t>,
+        // TODO-high Make pretty
+        bufflags: i32,
+        msi: f64,
+    ) -> ReaperFunctionResult<()> {
+        let res = self
+            .reaper
+            .low()
+            .PlayPreviewEx(preview.as_ptr(), bufflags, msi);
+        // TODO-high Put this into a set much like the plugin_register things to make sure on Drop
+        //  things get unregistered.
+        if res == 0 {
+            return Err(ReaperFunctionError::new("couldn't play preview"));
+        }
+        Ok(())
+    }
+
+    // TODO-high Document
+    pub fn play_preview_ex(
+        &mut self,
+        register: OwnedPreviewRegister,
+        // TODO-high Make pretty
+        bufflags: i32,
+        msi: f64,
+    ) -> ReaperFunctionResult<PlayingPreviewRegister> {
+        let mutex = ReaperMutex::new(register);
+        let (handle, shared) = self.preview_registers.keep(mutex);
+        unsafe { self.play_preview_ex_unchecked(handle, bufflags, msi)? };
+        let playing_register = PlayingPreviewRegister {
+            register: shared,
+            handle,
+        };
+        Ok(playing_register)
     }
 
     /// Unregisters an action.

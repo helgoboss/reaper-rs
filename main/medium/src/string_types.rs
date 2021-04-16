@@ -102,10 +102,7 @@ impl From<ReaperString> for ReaperStringArg<'static> {
 // string literal.
 impl<'a> From<&'a str> for ReaperStringArg<'a> {
     fn from(s: &'a str) -> Self {
-        // Requires copying
-        ReaperStringArg(
-            ReaperString::new(CString::new(s).expect("Rust string too exotic for REAPER")).into(),
-        )
+        ReaperStringArg(ReaperString::from_str(s).into())
     }
 }
 
@@ -115,10 +112,7 @@ impl<'a> From<&'a str> for ReaperStringArg<'a> {
 // By introducing this conversion, we want to encourage this scenario.
 impl<'a> From<String> for ReaperStringArg<'a> {
     fn from(s: String) -> Self {
-        // Doesn't require copying because we own the string now
-        ReaperStringArg(
-            ReaperString::new(CString::new(s).expect("Rust string too exotic for REAPER")).into(),
-        )
+        ReaperStringArg(ReaperString::from_string(s).into())
     }
 }
 
@@ -154,6 +148,22 @@ impl ReaperString {
     // Don't make this public!
     pub(crate) fn new(inner: CString) -> ReaperString {
         ReaperString(inner)
+    }
+
+    // Don't make this public. Try to use ReaperStringArg for consumers only.
+    //
+    // If making this public one day, use From traits.
+    pub(crate) fn from_str(s: &str) -> ReaperString {
+        // Requires copying.
+        ReaperString(CString::new(s).expect("Rust string too exotic for REAPER"))
+    }
+
+    // Don't make this public. Try to use ReaperStringArg for consumers only.
+    //
+    // If making this public one day, use From traits.
+    pub(crate) fn from_string(s: String) -> ReaperString {
+        // Doesn't require copying because we own the string now.
+        ReaperString(CString::new(s).expect("Rust string too exotic for REAPER"))
     }
 
     /// Returns a raw pointer to the string. Used by code in this crate only.

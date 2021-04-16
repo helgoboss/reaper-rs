@@ -152,6 +152,16 @@ pub enum UndoBehavior {
     AddUndoPoint,
 }
 
+/// Determines whether to import MIDI as in-project MIDI events or not.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum MidiImportBehavior {
+    /// Uses the relevant REAPER preference.
+    /// TODO-high Correct?
+    UsePreference,
+    /// Makes sure the MIDI data is not imported as in-project MIDI events.
+    ForceNoMidiImport,
+}
+
 /// Determines whether to copy or move something (e.g. an FX).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TransferBehavior {

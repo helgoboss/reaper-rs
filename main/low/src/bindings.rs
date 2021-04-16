@@ -10,6 +10,26 @@
 pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub struct preview_register_t {
+        #[cfg(unix)]
+        pub mutex: pthread_mutex_t,
+        #[cfg(windows)]
+        pub cs: winapi::um::minwinbase::CRITICAL_SECTION,
+        pub src: *mut root::PCM_source,
+        pub m_out_chan: ::std::os::raw::c_int,
+        pub curpos: f64,
+        pub loop_: bool,
+        pub volume: f64,
+        pub peakvol: [f64; 2usize],
+        pub preview_track: *mut ::std::os::raw::c_void,
+    }
+    impl Default for preview_register_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     pub const DLL_PROCESS_DETACH: u32 = 0;
     pub const DLL_PROCESS_ATTACH: u32 = 1;
     pub const MB_OK: u32 = 0;
@@ -1090,23 +1110,6 @@ pub mod root {
         pub extended_data: [*mut ::std::os::raw::c_void; 32usize],
     }
     impl Default for KbdSectionInfo {
-        fn default() -> Self {
-            unsafe { ::std::mem::zeroed() }
-        }
-    }
-    #[repr(C)]
-    #[derive(Copy, Clone)]
-    pub struct preview_register_t {
-        pub mutex: root::pthread_mutex_t,
-        pub src: *mut root::PCM_source,
-        pub m_out_chan: ::std::os::raw::c_int,
-        pub curpos: f64,
-        pub loop_: bool,
-        pub volume: f64,
-        pub peakvol: [f64; 2usize],
-        pub preview_track: *mut ::std::os::raw::c_void,
-    }
-    impl Default for preview_register_t {
         fn default() -> Self {
             unsafe { ::std::mem::zeroed() }
         }

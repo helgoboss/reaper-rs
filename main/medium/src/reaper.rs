@@ -16,17 +16,18 @@ use crate::{
     BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
     EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
     GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
-    NotificationBehavior, PanMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
-    PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId,
-    SendTarget, SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType,
+    MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor,
+    NormalizedPlayRate, NotificationBehavior, PanMode, PlaybackSpeedFactor, PluginContext,
+    PositionInBeats, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult,
+    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
+    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
+    SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TimeRangeType,
+    TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
+    TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -1137,6 +1138,59 @@ impl<UsageScope> Reaper<UsageScope> {
             color: NativeColor(color.assume_init() as _),
         };
         use_result(Some(result))
+    }
+
+    /// Creates a PCM source from the given file name and overrides the preference of MIDI files
+    /// being imported as in-project MIDI events.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the PCM source could not be created.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given file name is not valid UTF-8.
+    // TODO-high This should be the unchecked version. A safe version should be made that returns
+    //  an owned source that takes care of releasing the source on drop. An owned preview register
+    //  should also use that owned source!
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn pcm_source_create_from_file_ex(
+        &self,
+        file_name: &Path,
+        midi_import_behavior: MidiImportBehavior,
+    ) -> ReaperFunctionResult<NonNull<raw::PCM_source>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
+        let file_name_reaper_string = ReaperString::from_str(file_name_str);
+        let ptr = unsafe {
+            self.low.PCM_Source_CreateFromFileEx(
+                file_name_reaper_string.as_ptr(),
+                match midi_import_behavior {
+                    MidiImportBehavior::UsePreference => false,
+                    MidiImportBehavior::ForceNoMidiImport => true,
+                },
+            )
+        };
+        NonNull::new(ptr).ok_or(ReaperFunctionError::new(
+            "couldn't create PCM source from file",
+        ))
+    }
+
+    /// Deletes a PCM source.
+    ///
+    /// Be sure that you remove any project reference before deleting a source.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid PCM source.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn pcm_source_destroy(&self, source: NonNull<raw::PCM_source>)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low.PCM_Source_Destroy(source.as_ptr());
     }
 
     /// Goes to the given marker.

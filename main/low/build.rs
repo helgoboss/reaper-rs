@@ -114,6 +114,7 @@ mod codegen {
                 .raw_line("#![allow(non_camel_case_types)]")
                 .raw_line("#![allow(non_snake_case)]")
                 .raw_line("#![allow(dead_code)]")
+                .module_raw_line("root", include_str!("src/manual_bindings.rs"))
                 .whitelist_var("reaper_functions::.*")
                 .whitelist_var("swell_functions::.*")
                 .whitelist_var("SWELL_.*")
@@ -157,7 +158,8 @@ mod codegen {
                 .whitelist_type("LPSTR")
                 .whitelist_type("SCROLLINFO")
                 .whitelist_function("reaper_control_surface::.*")
-                .whitelist_function("reaper_midi::.*");
+                .whitelist_function("reaper_midi::.*")
+                .blacklist_type("preview_register_t");
             #[cfg(target_os = "macos")]
             let builder = builder.clang_arg("-stdlib=libc++");
             let bindings = builder.generate().expect("Unable to generate bindings");
