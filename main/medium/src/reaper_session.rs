@@ -9,14 +9,16 @@ use crate::keeper::{Keeper, SharedKeeper};
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
-    CommandId, ControlSurface, DelegatingControlSurface, HookCommand, HookCommand2,
-    HookPostCommand, HookPostCommand2, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister,
-    OwnedGaccelRegister, OwnedPreviewRegister, PlayingPreviewRegister, PluginRegistration,
-    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex,
-    ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
+    BufferingBehavior, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
+    HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment,
+    OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister,
+    PlayingPreviewRegister, PluginRegistration, RealTimeAudioThreadScope, Reaper,
+    ReaperFunctionError, ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg,
+    RegistrationHandle, RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
+use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
 use std::rc::Rc;
@@ -87,6 +89,8 @@ pub struct ReaperSession {
     plugin_registrations: HashSet<PluginRegistration>,
     /// Keep track of audio hook registrations so they can be unregistered automatically on drop.
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
+    /// Keep track of playing preview registers so they can be unregistered automatically on drop.
+    playing_preview_registers: HashSet<NonNull<raw::preview_register_t>>,
 }
 
 impl ReaperSession {
@@ -104,6 +108,7 @@ impl ReaperSession {
             csurf_insts: Default::default(),
             plugin_registrations: Default::default(),
             audio_hook_registrations: Default::default(),
+            playing_preview_registers: Default::default(),
         }
     }
 
@@ -513,35 +518,50 @@ impl ReaperSession {
     ///
     /// [`play_preview_ex()`]: #method.play_preview_ex
     pub unsafe fn play_preview_ex_unchecked(
-        &self,
+        &mut self,
         preview: NonNull<raw::preview_register_t>,
-        // TODO-high Make pretty
-        bufflags: i32,
-        msi: f64,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
     ) -> ReaperFunctionResult<()> {
-        let res = self
-            .reaper
-            .low()
-            .PlayPreviewEx(preview.as_ptr(), bufflags, msi);
-        // TODO-high Put this into a set much like the plugin_register things to make sure on Drop
-        //  things get unregistered.
-        if res == 0 {
+        self.playing_preview_registers.insert(preview);
+        let result = self.reaper.low().PlayPreviewEx(
+            preview.as_ptr(),
+            buffering_behavior.bits() as i32,
+            measure_alignment.to_raw(),
+        );
+        if result == 0 {
             return Err(ReaperFunctionError::new("couldn't play preview"));
         }
         Ok(())
+    }
+
+    /// Stops a preview that you have played with [`play_preview_ex_unchecked()`].
+    ///
+    /// Please note that stopping preview registers manually just for cleaning up is
+    /// unnecessary in most situations because *reaper-rs* takes care of automatically
+    /// unregistering everything when this struct is dropped (RAII). This happens even when using
+    /// the unsafe function variants.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    ///
+    /// [`play_preview_ex_unchecked()`]: #method.play_preview_ex_unchecked
+    pub unsafe fn stop_preview_unchecked(&mut self, register: NonNull<raw::preview_register_t>) {
+        self.reaper.low().StopPreview(register.as_ptr());
+        self.playing_preview_registers.remove(&register);
     }
 
     // TODO-high Document
     pub fn play_preview_ex(
         &mut self,
         register: OwnedPreviewRegister,
-        // TODO-high Make pretty
-        bufflags: i32,
-        msi: f64,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
     ) -> ReaperFunctionResult<PlayingPreviewRegister> {
         let mutex = ReaperMutex::new(register);
         let (handle, shared) = self.preview_registers.keep(mutex);
-        unsafe { self.play_preview_ex_unchecked(handle, bufflags, msi)? };
+        unsafe { self.play_preview_ex_unchecked(handle, buffering_behavior, measure_alignment)? };
         let playing_register = PlayingPreviewRegister {
             register: shared,
             handle,
@@ -844,6 +864,11 @@ impl ReaperSession {
 
 impl Drop for ReaperSession {
     fn drop(&mut self) {
+        for handle in self.playing_preview_registers.clone() {
+            unsafe {
+                self.stop_preview_unchecked(handle);
+            }
+        }
         for handle in self.audio_hook_registrations.clone() {
             unsafe {
                 self.audio_reg_hardware_hook_remove_unchecked(handle);

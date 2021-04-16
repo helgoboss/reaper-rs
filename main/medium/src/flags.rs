@@ -52,3 +52,14 @@ pub enum TrackArea {
     /// Mixer control panel.
     Mcp = 2,
 }
+
+/// Defines how REAPER will buffer when playing previews.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[repr(u32)]
+pub enum BufferingBehavior {
+    /// Buffers the source.
+    BufferSource = 1,
+    /// Treats length changes in source as vari-speed and adjusts internal state accordingly if
+    /// buffering.
+    VariSpeed = 2,
+}

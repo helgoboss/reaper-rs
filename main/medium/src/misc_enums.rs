@@ -211,6 +211,27 @@ impl RecordArmMode {
     }
 }
 
+/// Defines whether to align with measure starts when playing previews.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum MeasureAlignment {
+    /// Plays immediately.
+    PlayImmediately,
+    /// Aligns playback with measure start.
+    AlignWithMeasureStart,
+}
+
+impl MeasureAlignment {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> f64 {
+        use MeasureAlignment::*;
+        match self {
+            PlayImmediately => -1.0,
+            // TODO-high Test effect of passing higher numbers.
+            AlignWithMeasureStart => 1.0,
+        }
+    }
+}
+
 /// Determines if and how to show/hide a FX user interface.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum FxShowInstruction {

@@ -1154,7 +1154,7 @@ impl<UsageScope> Reaper<UsageScope> {
     //  an owned source that takes care of releasing the source on drop. An owned preview register
     //  should also use that owned source!
     #[measure(ResponseTimeSingleThreaded)]
-    pub fn pcm_source_create_from_file_ex(
+    pub unsafe fn pcm_source_create_from_file_ex_unchecked(
         &self,
         file_name: &Path,
         midi_import_behavior: MidiImportBehavior,

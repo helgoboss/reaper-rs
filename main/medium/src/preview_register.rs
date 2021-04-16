@@ -1,6 +1,6 @@
 use crate::mutex::ReaperMutex;
 use crate::{
-    destroy_mutex_primitive, initialize_mutex_primitive, ReaperLockError, ReaperMutexGuard,
+    destroy_mutex_primitive, initialize_mutex_primitive, PositionInSeconds, ReaperLockError,
     ReaperMutexPrimitive, ReaperVolumeValue,
 };
 use reaper_low::raw;
@@ -20,8 +20,6 @@ use std::rc::Rc;
 // interoperation with another extension but that would probably look differently anyway. If one
 // day we have the need, we can introduce a borrowed version, move most methods to it and at a
 // Deref implementation from owned to borrowed.
-// TODO-high Clone should probably implemented manually (mutex initialization!)
-#[derive(Clone)]
 pub struct OwnedPreviewRegister(raw::preview_register_t);
 
 impl fmt::Debug for OwnedPreviewRegister {
@@ -54,14 +52,12 @@ impl OwnedPreviewRegister {
         self.0.volume = volume.get()
     }
 
-    /// TODO-high Position in seconds?
-    pub fn cur_pos(&self) -> f64 {
-        self.0.curpos
+    pub fn cur_pos(&self) -> PositionInSeconds {
+        PositionInSeconds::new(self.0.curpos)
     }
 
-    /// TODO-high Position in seconds?
-    pub fn set_cur_pos(&mut self, pos: f64) {
-        self.0.curpos = pos;
+    pub fn set_cur_pos(&mut self, pos: PositionInSeconds) {
+        self.0.curpos = pos.get();
     }
 }
 
