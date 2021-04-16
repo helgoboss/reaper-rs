@@ -552,7 +552,15 @@ impl ReaperSession {
         self.playing_preview_registers.remove(&register);
     }
 
-    // TODO-high Document
+    /// Plays a preview register.
+    ///
+    /// Returns a playing preview register which lets you safely modify the register on-the-fly
+    /// while it's being played by REAPER. It also contains the handle which is necessary to
+    /// stop the preview at a later time.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
     pub fn play_preview_ex(
         &mut self,
         register: OwnedPreviewRegister,

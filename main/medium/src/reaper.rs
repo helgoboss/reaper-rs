@@ -1140,8 +1140,7 @@ impl<UsageScope> Reaper<UsageScope> {
         use_result(Some(result))
     }
 
-    /// Creates a PCM source from the given file name and overrides the preference of MIDI files
-    /// being imported as in-project MIDI events.
+    /// Creates a PCM source from the given file name.
     ///
     /// # Errors
     ///
@@ -1150,11 +1149,19 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given file name is not valid UTF-8.
-    // TODO-high This should be the unchecked version. A safe version should be made that returns
-    //  an owned source that takes care of releasing the source on drop. An owned preview register
-    //  should also use that owned source!
+    ///
+    /// # Safety
+    ///
+    /// It's completely up to you to destroy the returned source via [`pcm_source_destroy()`].
+    ///
+    /// [`pcm_source_destroy()`]: #method.pcm_source_destroy
+    //
+    // It's not feasible for the medium-level API to return an newtype that takes care of
+    // destroying the source when it's dropped because it needs to be done via a REAPER function.
+    // This should be left to a higher-level more object-oriented API which has static access to all
+    // REAPER functions.
     #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn pcm_source_create_from_file_ex_unchecked(
+    pub unsafe fn pcm_source_create_from_file_ex(
         &self,
         file_name: &Path,
         midi_import_behavior: MidiImportBehavior,
@@ -1162,6 +1169,8 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        // TODO-medium Can maybe be relaxed.
+        self.require_main_thread();
         let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
         let file_name_reaper_string = ReaperString::from_str(file_name_str);
         let ptr = unsafe {
@@ -1190,6 +1199,8 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
+        // TODO-medium Can probably be relaxed.
+        self.require_main_thread();
         self.low.PCM_Source_Destroy(source.as_ptr());
     }
 
