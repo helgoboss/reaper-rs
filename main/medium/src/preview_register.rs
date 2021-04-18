@@ -59,6 +59,14 @@ impl OwnedPreviewRegister {
     pub fn set_cur_pos(&mut self, pos: PositionInSeconds) {
         self.0.curpos = pos.get();
     }
+
+    pub fn is_looped(&self) -> bool {
+        self.0.loop_
+    }
+
+    pub fn set_looped(&mut self, looped: bool) {
+        self.0.loop_ = looped;
+    }
 }
 
 impl Default for OwnedPreviewRegister {
@@ -112,30 +120,5 @@ impl AsRef<ReaperMutexPrimitive> for OwnedPreviewRegister {
         {
             &self.0.mutex
         }
-    }
-}
-
-/// Preview register that's in control of REAPER because it's being played.
-pub struct PlayingPreviewRegister {
-    pub(crate) register: Rc<ReaperMutex<OwnedPreviewRegister>>,
-    pub(crate) handle: NonNull<raw::preview_register_t>,
-}
-
-impl PlayingPreviewRegister {
-    /// TODO-high Are there preview register fields that shouldn't be set while playing? In that
-    ///  case it would be better to encapsulate it using a delegate. If not, we could also expose
-    ///  the guard directly without using continuation passing style.
-    pub fn lock<R>(
-        &self,
-        f: impl FnOnce(Result<&mut OwnedPreviewRegister, ReaperLockError>) -> R,
-    ) -> R {
-        match self.register.lock() {
-            Ok(mut r) => f(Ok(&mut *r)),
-            Err(e) => f(Err(e)),
-        }
-    }
-
-    pub fn handle(&self) -> NonNull<raw::preview_register_t> {
-        self.handle
     }
 }

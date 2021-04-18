@@ -1,5 +1,7 @@
 use crate::guid::Guid;
-use crate::{BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, PlayRate, Reaper, Tempo, Track};
+use crate::{
+    BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, Item, PlayRate, Reaper, Tempo, Track,
+};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
@@ -110,6 +112,13 @@ impl Project {
             want_master,
         )?;
         Some(Track::new(media_track, Some(self.rea_project)))
+    }
+
+    pub fn first_selected_item(self) -> Option<Item> {
+        let raw_item = Reaper::get()
+            .medium_reaper()
+            .get_selected_media_item(self.context(), 0)?;
+        Some(Item::new(raw_item))
     }
 
     pub fn unselect_all_tracks(self) {

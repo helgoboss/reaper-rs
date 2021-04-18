@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::ptr::NonNull;
 use std::rc::Rc;
+use std::sync::Arc;
 
 // Some structs are not self-contained (completely owned). This container takes only
 // self-contained structs (T). Those self-contained structs expose the data (R).
@@ -38,7 +39,7 @@ impl<T: AsRef<R>, R> Keeper<T, R> {
 
 #[derive(Debug)]
 pub(crate) struct SharedKeeper<T, R> {
-    map: HashMap<NonNull<R>, Rc<T>>,
+    map: HashMap<NonNull<R>, Arc<T>>,
 }
 
 impl<T: AsRef<R>, R> Default for SharedKeeper<T, R> {
@@ -50,16 +51,14 @@ impl<T: AsRef<R>, R> Default for SharedKeeper<T, R> {
 }
 
 impl<T: AsRef<R>, R> SharedKeeper<T, R> {
-    pub fn keep(&mut self, owned_struct: T) -> (NonNull<R>, Rc<T>) {
-        let shared = Rc::new(owned_struct);
-        let shared_clone = shared.clone();
+    pub fn keep(&mut self, shared: Arc<T>) -> NonNull<R> {
         let ref_to_data: &R = (*shared).as_ref();
         let stable_ptr_to_data: NonNull<R> = ref_to_data.into();
         self.map.insert(stable_ptr_to_data, shared);
-        (stable_ptr_to_data, shared_clone)
+        stable_ptr_to_data
     }
 
-    pub fn release(&mut self, handle: NonNull<R>) -> Option<Rc<T>> {
+    pub fn release(&mut self, handle: NonNull<R>) -> Option<Arc<T>> {
         self.map.remove(&handle)
     }
 }

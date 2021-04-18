@@ -16,22 +16,22 @@ use crate::{
     BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
     EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
     GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType,
-    MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor,
-    NormalizedPlayRate, NotificationBehavior, PanMode, PlaybackSpeedFactor, PluginContext,
-    PositionInBeats, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
-    SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TimeRangeType,
-    TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    KbdSectionInfo, MasterTrackBehavior, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, PanMode,
+    PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds, ProjectContext,
+    ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, SoloMode,
+    StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey,
+    TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
-use reaper_low::raw::GUID;
+use reaper_low::raw::{PCM_source, GUID};
 
 use enumflags2::BitFlags;
 use std::fmt::Debug;
@@ -4237,7 +4237,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.get_selected_track_2_unchecked(
@@ -4271,6 +4270,80 @@ impl<UsageScope> Reaper<UsageScope> {
             selected_track_index as i32,
             master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
         );
+        NonNull::new(ptr)
+    }
+
+    /// Returns a selected item from the given project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_selected_media_item(
+        &self,
+        project: ProjectContext,
+        selected_item_index: u32,
+    ) -> Option<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_selected_media_item_unchecked(project, selected_item_index) }
+    }
+
+    /// Like [`get_selected_media_item()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_selected_media_item()`]: #method.get_selected_media_item
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_selected_media_item_unchecked(
+        &self,
+        project: ProjectContext,
+        selected_item_index: u32,
+    ) -> Option<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self
+            .low
+            .GetSelectedMediaItem(project.to_raw(), selected_item_index as i32);
+        NonNull::new(ptr)
+    }
+
+    /// Returns the media source of the given media item take.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_media_item_take_source(
+        &self,
+        take: MediaItemTake,
+    ) -> Option<NonNull<PCM_source>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetMediaItemTake_Source(take.as_ptr());
+        NonNull::new(ptr)
+    }
+
+    /// Returns the active take in this item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_active_take(&self, item: MediaItem) -> Option<MediaItemTake>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetActiveTake(item.as_ptr());
         NonNull::new(ptr)
     }
 

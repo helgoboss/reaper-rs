@@ -36,7 +36,7 @@ pub(crate) fn destroy_mutex_primitive(primitive: &mut ReaperMutexPrimitive) {
 }
 
 /// Mutex that works on native critical sections / mutexes exposed by the REAPER API.
-pub(crate) struct ReaperMutex<T: AsRef<ReaperMutexPrimitive>> {
+pub struct ReaperMutex<T: AsRef<ReaperMutexPrimitive>> {
     pub(crate) data: UnsafeCell<T>,
 }
 
@@ -65,7 +65,7 @@ impl<T: AsRef<ReaperMutexPrimitive>> ReaperMutex<T> {
     }
 }
 
-pub(crate) struct ReaperMutexGuard<'a, T: AsRef<ReaperMutexPrimitive>> {
+pub struct ReaperMutexGuard<'a, T: AsRef<ReaperMutexPrimitive>> {
     lock: &'a ReaperMutex<T>,
 }
 

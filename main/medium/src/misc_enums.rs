@@ -226,7 +226,6 @@ impl MeasureAlignment {
         use MeasureAlignment::*;
         match self {
             PlayImmediately => -1.0,
-            // TODO-high Test effect of passing higher numbers.
             AlignWithMeasureStart => 1.0,
         }
     }

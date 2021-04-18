@@ -12,9 +12,9 @@ use crate::{
     BufferingBehavior, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
     HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment,
     OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister,
-    PlayingPreviewRegister, PluginRegistration, RealTimeAudioThreadScope, Reaper,
-    ReaperFunctionError, ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg,
-    RegistrationHandle, RegistrationObject, ToggleAction,
+    PluginRegistration, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
+    ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle,
+    RegistrationObject, ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -22,6 +22,7 @@ use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// This is the main hub for accessing medium-level API functions.
 ///
@@ -542,39 +543,65 @@ impl ReaperSession {
     /// unregistering everything when this struct is dropped (RAII). This happens even when using
     /// the unsafe function variants.
     ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
     ///
     /// [`play_preview_ex_unchecked()`]: #method.play_preview_ex_unchecked
-    pub unsafe fn stop_preview_unchecked(&mut self, register: NonNull<raw::preview_register_t>) {
-        self.reaper.low().StopPreview(register.as_ptr());
+    pub unsafe fn stop_preview_unchecked(
+        &mut self,
+        register: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        let successful = self.reaper.low().StopPreview(register.as_ptr());
+        if successful == 0 {
+            return Err(ReaperFunctionError::new("couldn't stop preview"));
+        }
         self.playing_preview_registers.remove(&register);
+        Ok(())
     }
 
     /// Plays a preview register.
     ///
-    /// Returns a playing preview register which lets you safely modify the register on-the-fly
-    /// while it's being played by REAPER. It also contains the handle which is necessary to
-    /// stop the preview at a later time.
+    /// It asks for a shared mutex-protected register because it assumes you want to keep
+    /// controlling the playback. With the mutex you can safely modify the register on-the-fly while
+    /// it's being played by REAPER.
+    ///
+    /// Returns a handle which is necessary to stop the preview at a later time.
     ///
     /// # Errors
     ///
     /// Returns an error if not successful.
     pub fn play_preview_ex(
         &mut self,
-        register: OwnedPreviewRegister,
+        register: Arc<ReaperMutex<OwnedPreviewRegister>>,
         buffering_behavior: BitFlags<BufferingBehavior>,
         measure_alignment: MeasureAlignment,
-    ) -> ReaperFunctionResult<PlayingPreviewRegister> {
-        let mutex = ReaperMutex::new(register);
-        let (handle, shared) = self.preview_registers.keep(mutex);
+    ) -> ReaperFunctionResult<NonNull<raw::preview_register_t>> {
+        let handle = self.preview_registers.keep(register);
         unsafe { self.play_preview_ex_unchecked(handle, buffering_behavior, measure_alignment)? };
-        let playing_register = PlayingPreviewRegister {
-            register: shared,
-            handle,
+        Ok(handle)
+    }
+
+    /// Stops a preview that you have played with [`play_preview_ex()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful (e.g. was not playing).
+    ///
+    /// [`play_preview_ex()`]: #method.play_preview_ex
+    pub fn stop_preview(
+        &mut self,
+        handle: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        unsafe {
+            self.stop_preview_unchecked(handle)?;
         };
-        Ok(playing_register)
+        self.preview_registers.release(handle);
+        Ok(())
     }
 
     /// Unregisters an action.

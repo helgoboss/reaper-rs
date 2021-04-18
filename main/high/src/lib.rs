@@ -96,6 +96,12 @@ pub use tempo::*;
 mod chunk;
 pub use chunk::*;
 
+mod item;
+pub use item::*;
+
+mod source;
+pub use source::*;
+
 mod action_character;
 pub use action_character::*;
 
