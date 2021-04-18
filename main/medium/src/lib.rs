@@ -344,6 +344,9 @@ pub use control_surface::*;
 mod midi;
 pub use midi::*;
 
+mod pcm_source;
+pub use pcm_source::*;
+
 mod reaper_session;
 pub use reaper_session::*;
 

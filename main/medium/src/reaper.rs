@@ -18,7 +18,7 @@ use crate::{
     GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, PanMode,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, PanMode, PcmSource,
     PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds, ProjectContext,
     ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
     ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
@@ -1165,7 +1165,7 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         file_name: &Path,
         midi_import_behavior: MidiImportBehavior,
-    ) -> ReaperFunctionResult<NonNull<raw::PCM_source>>
+    ) -> ReaperFunctionResult<PcmSource>
     where
         UsageScope: MainThreadOnly,
     {
@@ -1182,9 +1182,11 @@ impl<UsageScope> Reaper<UsageScope> {
                 },
             )
         };
-        NonNull::new(ptr).ok_or(ReaperFunctionError::new(
-            "couldn't create PCM source from file",
-        ))
+        NonNull::new(ptr)
+            .ok_or(ReaperFunctionError::new(
+                "couldn't create PCM source from file",
+            ))
+            .map(PcmSource)
     }
 
     /// Deletes a PCM source.
@@ -1195,7 +1197,7 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// REAPER can crash if you pass an invalid PCM source.
     #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn pcm_source_destroy(&self, source: NonNull<raw::PCM_source>)
+    pub unsafe fn pcm_source_destroy(&self, source: PcmSource)
     where
         UsageScope: MainThreadOnly,
     {
@@ -4320,16 +4322,13 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// REAPER can crash if you pass an invalid take.
     #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn get_media_item_take_source(
-        &self,
-        take: MediaItemTake,
-    ) -> Option<NonNull<PCM_source>>
+    pub unsafe fn get_media_item_take_source(&self, take: MediaItemTake) -> Option<PcmSource>
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
         let ptr = self.low.GetMediaItemTake_Source(take.as_ptr());
-        NonNull::new(ptr)
+        NonNull::new(ptr).map(PcmSource)
     }
 
     /// Returns the active take in this item.

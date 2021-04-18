@@ -45,6 +45,7 @@ fn compile_glue_code() {
         .cpp(true)
         .warnings(false)
         .file("src/control_surface.cpp")
+        .file("src/pcm_source.cpp")
         .file("src/midi.cpp");
     if cfg!(target_os = "macos") {
         build.cpp_set_stdlib("c++");
@@ -159,6 +160,7 @@ mod codegen {
                 .whitelist_type("SCROLLINFO")
                 .whitelist_function("reaper_control_surface::.*")
                 .whitelist_function("reaper_midi::.*")
+                .whitelist_function("reaper_pcm_source::.*")
                 .blacklist_type("preview_register_t");
             #[cfg(target_os = "macos")]
             let builder = builder.clang_arg("-stdlib=libc++");

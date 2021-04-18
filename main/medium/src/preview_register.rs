@@ -1,7 +1,7 @@
 use crate::mutex::ReaperMutex;
 use crate::{
-    destroy_mutex_primitive, initialize_mutex_primitive, PositionInSeconds, ReaperLockError,
-    ReaperMutexPrimitive, ReaperVolumeValue,
+    destroy_mutex_primitive, initialize_mutex_primitive, PcmSource, PositionInSeconds,
+    ReaperLockError, ReaperMutexPrimitive, ReaperVolumeValue,
 };
 use reaper_low::raw;
 use std::fmt;
@@ -36,12 +36,12 @@ impl OwnedPreviewRegister {
         Default::default()
     }
 
-    pub fn src(&self) -> Option<NonNull<raw::PCM_source>> {
-        NonNull::new(self.0.src)
+    pub fn src(&self) -> Option<PcmSource> {
+        NonNull::new(self.0.src).map(PcmSource)
     }
 
-    pub fn set_src(&mut self, src: Option<NonNull<raw::PCM_source>>) {
-        self.0.src = src.map(NonNull::as_ptr).unwrap_or(null_mut());
+    pub fn set_src(&mut self, src: Option<PcmSource>) {
+        self.0.src = src.map(|s| s.as_ptr()).unwrap_or(null_mut());
     }
 
     pub fn volume(&self) -> ReaperVolumeValue {

@@ -11035,4 +11035,11 @@ pub mod root {
             );
         }
     }
+    pub mod reaper_pcm_source {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub fn PCM_source_GetLength(self_: *mut root::PCM_source) -> f64;
+        }
+    }
 }

@@ -93,3 +93,6 @@ mod swell_impl;
 
 mod midi;
 pub use midi::*;
+
+mod pcm_source;
+pub use pcm_source::*;
