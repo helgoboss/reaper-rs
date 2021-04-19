@@ -11,7 +11,7 @@ use reaper_medium::{
     SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeRangeType, TrackDefaultsBehavior,
     TrackLocation, UndoBehavior,
 };
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Project {
@@ -35,7 +35,7 @@ impl Project {
         self.track_by_index(0)
     }
 
-    pub fn file_path(self) -> Option<PathBuf> {
+    pub fn file(self) -> Option<PathBuf> {
         Reaper::get()
             .medium_reaper()
             .enum_projects(ProjectRef::Tab(self.index()), 5000)
@@ -348,6 +348,35 @@ impl Project {
     ) -> Option<FindBookmarkResult> {
         self.bookmarks_of_type(bookmark_type)
             .find(|res| res.basic_info.id == id)
+    }
+
+    pub fn directory(self) -> Option<PathBuf> {
+        let file = self.file()?;
+        let dir = file.parent()?;
+        Some(dir.to_owned())
+    }
+
+    pub fn make_path_relative(self, path: &Path) -> Option<PathBuf> {
+        let dir = self.directory()?;
+        pathdiff::diff_paths(path, dir)
+    }
+
+    pub fn make_path_relative_if_in_project_directory(self, path: &Path) -> Option<PathBuf> {
+        let dir = self.directory()?;
+        if path.starts_with(&dir) {
+            pathdiff::diff_paths(path, dir)
+        } else {
+            Some(path.to_owned())
+        }
+    }
+
+    pub fn make_path_absolute(self, path: &Path) -> Option<PathBuf> {
+        if path.is_relative() {
+            let dir = self.directory()?;
+            Some(dir.join(path))
+        } else {
+            Some(path.to_owned())
+        }
     }
 
     fn bookmarks_of_type(

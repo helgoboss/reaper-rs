@@ -33,6 +33,7 @@ use crate::{
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::{PCM_source, GUID};
 
+use crate::util::create_passing_c_str;
 use enumflags2::BitFlags;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -4331,6 +4332,21 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr).map(PcmSource)
     }
 
+    /// Returns the project which contains this item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_item_project_context(&self, item: MediaItem) -> Option<ReaProject>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetItemProjectContext(item.as_ptr());
+        NonNull::new(ptr)
+    }
+
     /// Returns the active take in this item.
     ///
     /// # Safety
@@ -5828,13 +5844,6 @@ unsafe fn deref<T: Copy>(ptr: *const T) -> Option<T> {
 
 unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
     deref(ptr as *const T)
-}
-
-unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a ReaperStr> {
-    if ptr.is_null() {
-        return None;
-    }
-    Some(ReaperStr::from_ptr(ptr))
 }
 
 fn convert_tracknumber_to_track_location(tracknumber: u32) -> TrackLocation {

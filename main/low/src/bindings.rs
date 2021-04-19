@@ -11041,5 +11041,109 @@ pub mod root {
         extern "C" {
             pub fn PCM_source_GetLength(self_: *mut root::PCM_source) -> f64;
         }
+        extern "C" {
+            pub fn PCM_source_Duplicate(self_: *mut root::PCM_source) -> *mut root::PCM_source;
+        }
+        extern "C" {
+            pub fn PCM_source_GetType(
+                self_: *mut root::PCM_source,
+            ) -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn PCM_source_GetFileName(
+                self_: *mut root::PCM_source,
+            ) -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn PCM_source_GetSource(self_: *mut root::PCM_source) -> *mut root::PCM_source;
+        }
+        extern "C" {
+            pub fn PCM_source_IsAvailable(self_: *mut root::PCM_source) -> bool;
+        }
+        extern "C" {
+            pub fn PCM_source_SetAvailable(self_: *mut root::PCM_source, avail: bool);
+        }
+        extern "C" {
+            pub fn PCM_source_SetFileName(
+                self_: *mut root::PCM_source,
+                newfn: *const ::std::os::raw::c_char,
+            ) -> bool;
+        }
+        extern "C" {
+            pub fn PCM_source_SetSource(self_: *mut root::PCM_source, src: *mut root::PCM_source);
+        }
+        extern "C" {
+            pub fn PCM_source_GetNumChannels(self_: *mut root::PCM_source)
+            -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PCM_source_GetSampleRate(self_: *mut root::PCM_source) -> f64;
+        }
+        extern "C" {
+            pub fn PCM_source_GetLengthBeats(self_: *mut root::PCM_source) -> f64;
+        }
+        extern "C" {
+            pub fn PCM_source_GetBitsPerSample(
+                self_: *mut root::PCM_source,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PCM_source_GetPreferredPosition(self_: *mut root::PCM_source) -> f64;
+        }
+        extern "C" {
+            pub fn PCM_source_PropertiesWindow(
+                self_: *mut root::PCM_source,
+                hwndParent: root::HWND,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PCM_source_GetSamples(
+                self_: *mut root::PCM_source,
+                block: *mut root::PCM_source_transfer_t,
+            );
+        }
+        extern "C" {
+            pub fn PCM_source_GetPeakInfo(
+                self_: *mut root::PCM_source,
+                block: *mut root::PCM_source_peaktransfer_t,
+            );
+        }
+        extern "C" {
+            pub fn PCM_source_SaveState(
+                self_: *mut root::PCM_source,
+                ctx: *mut root::ProjectStateContext,
+            );
+        }
+        extern "C" {
+            pub fn PCM_source_LoadState(
+                self_: *mut root::PCM_source,
+                firstline: *const ::std::os::raw::c_char,
+                ctx: *mut root::ProjectStateContext,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PCM_source_Peaks_Clear(self_: *mut root::PCM_source, deleteFile: bool);
+        }
+        extern "C" {
+            pub fn PCM_source_PeaksBuild_Begin(
+                self_: *mut root::PCM_source,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PCM_source_PeaksBuild_Run(self_: *mut root::PCM_source)
+            -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PCM_source_PeaksBuild_Finish(self_: *mut root::PCM_source);
+        }
+        extern "C" {
+            pub fn PCM_source_Extended(
+                self_: *mut root::PCM_source,
+                call: ::std::os::raw::c_int,
+                parm1: *mut ::std::os::raw::c_void,
+                parm2: *mut ::std::os::raw::c_void,
+                parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
     }
 }

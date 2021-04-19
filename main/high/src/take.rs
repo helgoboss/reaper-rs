@@ -25,6 +25,6 @@ impl Take {
                 .medium_reaper
                 .get_media_item_take_source(self.raw)?
         };
-        Some(Source::new(raw_source))
+        Some(Source::from_reaper(raw_source))
     }
 }

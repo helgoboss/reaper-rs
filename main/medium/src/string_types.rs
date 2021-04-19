@@ -1,5 +1,6 @@
 use std::borrow::{Borrow, Cow};
 use std::ffi::{CStr, CString};
+use std::fmt;
 use std::ops::Deref;
 use std::os::raw::c_char;
 
@@ -285,6 +286,13 @@ impl ReaperStr {
         self.0
             .to_str()
             .expect("REAPER string should be UTF-8 encoded")
+    }
+}
+
+// With this we can just write `to_string()` on a borrowed REAPER string as we are used to in Rust.
+impl fmt::Display for ReaperStr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.to_str())
     }
 }
 

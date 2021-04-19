@@ -1,4 +1,4 @@
-use crate::{Reaper, Take};
+use crate::{Project, Reaper, Take};
 use reaper_medium::MediaItem;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -13,6 +13,15 @@ impl Item {
 
     pub fn raw(self) -> MediaItem {
         self.raw
+    }
+
+    pub fn project(self) -> Option<Project> {
+        let raw_project = unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_item_project_context(self.raw)?
+        };
+        Some(Project::new(raw_project))
     }
 
     pub fn active_take(self) -> Option<Take> {
