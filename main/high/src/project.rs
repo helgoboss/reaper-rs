@@ -142,7 +142,7 @@ impl Project {
         })
     }
 
-    pub(crate) fn context(self) -> ProjectContext {
+    pub fn context(self) -> ProjectContext {
         Proj(self.rea_project)
     }
 

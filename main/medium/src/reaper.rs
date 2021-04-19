@@ -5581,7 +5581,7 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
-    fn require_valid_project(&self, project: ProjectContext)
+    pub(crate) fn require_valid_project(&self, project: ProjectContext)
     where
         UsageScope: AnyThread,
     {

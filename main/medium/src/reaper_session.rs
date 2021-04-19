@@ -12,7 +12,7 @@ use crate::{
     BufferingBehavior, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
     HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment,
     OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister,
-    PluginRegistration, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
+    PluginRegistration, ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
     ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle,
     RegistrationObject, ToggleAction,
 };
@@ -564,6 +564,72 @@ impl ReaperSession {
         Ok(())
     }
 
+    /// Plays a preview register on a specific track.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or preview pointer, if the pointer gets
+    /// stale while still playing, if you don't properly handle synchronization via mutex or
+    /// critical section when modifying the register while playing. Use
+    /// [`play_track_preview_2_ex()`] if you want to be released from that burden.
+    ///
+    /// [`play_track_preview_2_ex()`]: #method.play_track_preview_2_ex
+    pub unsafe fn play_track_preview_2_ex_unchecked(
+        &mut self,
+        project: ProjectContext,
+        preview: NonNull<raw::preview_register_t>,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
+    ) -> ReaperFunctionResult<()> {
+        self.playing_preview_registers.insert(preview);
+        let result = self.reaper.low().PlayTrackPreview2Ex(
+            project.to_raw(),
+            preview.as_ptr(),
+            buffering_behavior.bits() as i32,
+            measure_alignment.to_raw(),
+        );
+        if result == 0 {
+            return Err(ReaperFunctionError::new("couldn't play track preview"));
+        }
+        Ok(())
+    }
+
+    /// Stops a preview that you have played with [`play_track_preview_2_ex_unchecked()`].
+    ///
+    /// Please note that stopping preview registers manually just for cleaning up is
+    /// unnecessary in most situations because *reaper-rs* takes care of automatically
+    /// unregistering everything when this struct is dropped (RAII). This happens even when using
+    /// the unsafe function variants.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or register pointer.
+    ///
+    /// [`play_track_preview_2_ex_unchecked()`]: #method.play_track_preview_2_ex_unchecked
+    pub unsafe fn stop_track_preview_2_unchecked(
+        &mut self,
+        project: ProjectContext,
+        register: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        let successful = self
+            .reaper
+            .low()
+            .StopTrackPreview2(project.to_raw() as _, register.as_ptr());
+        if successful == 0 {
+            return Err(ReaperFunctionError::new("couldn't stop track preview"));
+        }
+        self.playing_preview_registers.remove(&register);
+        Ok(())
+    }
+
     /// Plays a preview register.
     ///
     /// It asks for a shared mutex-protected register because it assumes you want to keep
@@ -599,6 +665,57 @@ impl ReaperSession {
     ) -> ReaperFunctionResult<()> {
         unsafe {
             self.stop_preview_unchecked(handle)?;
+        };
+        self.preview_registers.release(handle);
+        Ok(())
+    }
+
+    /// Plays a preview register on a specific track.
+    ///
+    /// It asks for a shared mutex-protected register because it assumes you want to keep
+    /// controlling the playback. With the mutex you can safely modify the register on-the-fly while
+    /// it's being played by REAPER.
+    ///
+    /// Returns a handle which is necessary to stop the preview at a later time.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    pub fn play_track_preview_2_ex(
+        &mut self,
+        project: ProjectContext,
+        register: Arc<ReaperMutex<OwnedPreviewRegister>>,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
+    ) -> ReaperFunctionResult<NonNull<raw::preview_register_t>> {
+        self.reaper.require_valid_project(project);
+        let handle = self.preview_registers.keep(register);
+        unsafe {
+            self.play_track_preview_2_ex_unchecked(
+                project,
+                handle,
+                buffering_behavior,
+                measure_alignment,
+            )?
+        };
+        Ok(handle)
+    }
+
+    /// Stops a preview that you have played with [`play_track_preview_2_ex()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful (e.g. was not playing).
+    ///
+    /// [`play_track_preview_2_ex()`]: #method.play_track_preview_2_ex
+    pub fn stop_track_preview_2(
+        &mut self,
+        project: ProjectContext,
+        handle: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        self.reaper.require_valid_project(project);
+        unsafe {
+            self.stop_track_preview_2_unchecked(project, handle)?;
         };
         self.preview_registers.release(handle);
         Ok(())

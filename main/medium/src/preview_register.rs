@@ -1,6 +1,6 @@
 use crate::mutex::ReaperMutex;
 use crate::{
-    destroy_mutex_primitive, initialize_mutex_primitive, PcmSource, PositionInSeconds,
+    destroy_mutex_primitive, initialize_mutex_primitive, MediaTrack, PcmSource, PositionInSeconds,
     ReaperLockError, ReaperMutexPrimitive, ReaperVolumeValue,
 };
 use reaper_low::raw;
@@ -66,6 +66,24 @@ impl OwnedPreviewRegister {
 
     pub fn set_looped(&mut self, looped: bool) {
         self.0.loop_ = looped;
+    }
+
+    pub fn preview_track(&self) -> Option<MediaTrack> {
+        NonNull::new(self.0.preview_track as *mut raw::MediaTrack)
+    }
+
+    pub fn set_preview_track(&mut self, track: Option<MediaTrack>) {
+        self.0.preview_track = track.map(|t| t.as_ptr() as _).unwrap_or(null_mut());
+    }
+
+    // TODO-high Improve API. This can be either a track index or a HW output channel or none.
+    //  preview_track only has an effect if this is none.
+    pub fn out_chan(&self) -> i32 {
+        self.0.m_out_chan
+    }
+
+    pub fn set_out_chan(&mut self, value: i32) {
+        self.0.m_out_chan = value;
     }
 }
 
