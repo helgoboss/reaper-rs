@@ -33,7 +33,9 @@ use crate::{
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::{PCM_source, GUID};
 
-use crate::util::create_passing_c_str;
+use crate::util::{
+    create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_prefilled,
+};
 use enumflags2::BitFlags;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -268,18 +270,17 @@ impl<UsageScope> Reaper<UsageScope> {
                 file_path: None,
             })
         } else {
-            let (owned_c_string, ptr) =
-                with_string_buffer(buffer_size, |buffer, max_size| unsafe {
-                    self.low.EnumProjects(idx, buffer, max_size)
-                });
+            let (reaper_string, ptr) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+                self.low.EnumProjects(idx, buffer, max_size)
+            });
             let project = NonNull::new(ptr)?;
-            if owned_c_string.is_empty() {
+            if reaper_string.is_empty() {
                 return Some(EnumProjectsResult {
                     project,
                     file_path: None,
                 });
             }
-            let owned_string = owned_c_string.into_string();
+            let owned_string = reaper_string.into_string();
             Some(EnumProjectsResult {
                 project,
                 file_path: Some(PathBuf::from(owned_string)),
@@ -3638,7 +3639,7 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Converts the given GUID to a string (including braces).
-    #[measure(ResponseTimeSingleThreaded)]
+    #[measure(ResponseTimeMultiThreaded)]
     pub fn guid_to_string(&self, guid: &GUID) -> ReaperString
     where
         UsageScope: AnyThread,
@@ -3647,6 +3648,47 @@ impl<UsageScope> Reaper<UsageScope> {
             self.low.guidToString(guid as *const GUID, buffer)
         });
         guid_string
+    }
+
+    /// Returns the project recording path.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the resulting path you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_project_path_ex(&self, project: ProjectContext, buffer_size: u32) -> PathBuf
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_project_path_ex_unchecked(project, buffer_size) }
+    }
+
+    /// Like [`get_project_path_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_project_path_ex()`]: #method.get_project_path_ex
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_project_path_ex_unchecked(
+        &self,
+        project: ProjectContext,
+        buffer_size: u32,
+    ) -> PathBuf
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (reaper_string, _) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+            self.low
+                .GetProjectPathEx(project.to_raw(), buffer, max_size)
+        });
+        let owned_string = reaper_string.into_string();
+        PathBuf::from(owned_string)
     }
 
     /// Returns the master tempo of the current project.
@@ -3669,7 +3711,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.set_current_bpm_unchecked(project, tempo, undo_behavior);
@@ -4337,6 +4378,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid item.
+    // TODO-high Can this EVER be None?
     #[measure(ResponseTimeSingleThreaded)]
     pub unsafe fn get_item_project_context(&self, item: MediaItem) -> Option<ReaProject>
     where
@@ -4966,6 +5008,28 @@ impl<UsageScope> Reaper<UsageScope> {
             unsafe { create_passing_c_str(ptr).expect("should always return resource path") };
         let path = Path::new(reaper_str.to_str());
         use_resource_path(path)
+    }
+
+    /// Grants temporary access to the name of the given take.
+    ///
+    /// # Error
+    ///
+    /// Returns an error if the take is not valid.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_take_name<R>(
+        &self,
+        take: MediaItemTake,
+        use_name: impl FnOnce(ReaperFunctionResult<&ReaperStr>) -> R,
+    ) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let passing_c_str = unsafe {
+            let ptr = self.low.GetTakeName(take.as_ptr());
+            create_passing_c_str(ptr as *const c_char)
+        };
+        use_name(passing_c_str.ok_or(ReaperFunctionError::new("invalid take")))
     }
 
     /// Returns the current on/off state of a toggleable action.
@@ -5852,44 +5916,6 @@ fn convert_tracknumber_to_track_location(tracknumber: u32) -> TrackLocation {
     } else {
         TrackLocation::NormalTrack(tracknumber - 1)
     }
-}
-
-fn with_string_buffer<T>(
-    max_size: u32,
-    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
-) -> (ReaperString, T) {
-    // Using with_capacity() here wouldn't be correct because it leaves the vector length at zero.
-    let vec: Vec<u8> = vec![0; max_size as usize];
-    with_string_buffer_internal(vec, max_size, fill_buffer)
-}
-
-fn with_string_buffer_prefilled<'a, T>(
-    prefill: impl Into<ReaperStringArg<'a>>,
-    max_size: u32,
-    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
-) -> (ReaperString, T) {
-    let mut vec = Vec::from(prefill.into().as_reaper_str().as_c_str().to_bytes());
-    vec.resize(max_size as usize, 0);
-    with_string_buffer_internal(vec, max_size, fill_buffer)
-}
-
-fn with_string_buffer_internal<T>(
-    vec: Vec<u8>,
-    max_size: u32,
-    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
-) -> (ReaperString, T) {
-    let c_string = unsafe { CString::from_vec_unchecked(vec) };
-    let raw = c_string.into_raw();
-    let result = fill_buffer(raw, max_size as i32);
-    let string = unsafe { ReaperString::new(CString::from_raw(raw)) };
-    (string, result)
-}
-
-fn with_buffer<T>(max_size: u32, fill_buffer: impl FnOnce(*mut c_char, i32) -> T) -> (Vec<u8>, T) {
-    let mut vec: Vec<u8> = vec![0; max_size as usize];
-    let raw = vec.as_mut_ptr() as *mut c_char;
-    let result = fill_buffer(raw, max_size as i32);
-    (vec, result)
 }
 
 const ZERO_GUID: GUID = GUID {

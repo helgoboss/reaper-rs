@@ -1,6 +1,8 @@
 use crate::{Reaper, Take};
 use reaper_low::raw::PCM_source;
-use reaper_medium::{DurationInSeconds, MidiImportBehavior, PcmSource};
+use reaper_medium::{
+    DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior, PcmSource, ReaperFunctionError,
+};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::ptr::NonNull;
@@ -30,10 +32,11 @@ impl Source {
 
     pub fn file_name(&self) -> Option<PathBuf> {
         self.make_sure_is_valid();
-        unsafe {
-            self.raw
-                .get_file_name(|name| name.map(|n| PathBuf::from(n.to_str())))
+        let path_string = unsafe { self.raw.get_file_name(|name| name.map(|n| n.to_string()))? };
+        if path_string.trim().is_empty() {
+            return None;
         }
+        Some(path_string.into())
     }
 
     pub fn r#type(&self) -> String {
@@ -75,6 +78,16 @@ impl Source {
                 return source;
             }
         }
+    }
+
+    pub fn pooled_midi_id(&self) -> Result<ExtGetPooledMidiIdResult, ReaperFunctionError> {
+        self.make_sure_is_valid();
+        unsafe { self.raw.ext_get_pooled_midi_id() }
+    }
+
+    pub fn export_to_file(&self, file: &Path) -> Result<(), ReaperFunctionError> {
+        self.make_sure_is_valid();
+        unsafe { self.raw.ext_export_to_file(file) }
     }
 
     fn make_sure_is_valid(&self) {

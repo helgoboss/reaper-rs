@@ -2,6 +2,7 @@ use reaper_low::raw::GUID;
 
 use crate::Reaper;
 
+use reaper_medium::ReaperStringArg;
 use std::fmt;
 use std::fmt::Formatter;
 use std::str;
@@ -17,7 +18,9 @@ impl Guid {
         Guid { internal }
     }
 
-    pub fn from_string_with_braces(text: &str) -> Result<Guid, &'static str> {
+    pub fn from_string_with_braces<'a>(
+        text: impl Into<ReaperStringArg<'a>>,
+    ) -> Result<Guid, &'static str> {
         Reaper::get()
             .medium_reaper()
             .string_to_guid(text)

@@ -19,6 +19,14 @@ impl Take {
         todo!()
     }
 
+    pub fn name(&self) -> String {
+        Reaper::get()
+            .medium_reaper
+            .get_take_name(self.raw, |result| {
+                result.expect("take not valid").to_string()
+            })
+    }
+
     pub fn source(&self) -> Option<Source> {
         let raw_source = unsafe {
             Reaper::get()

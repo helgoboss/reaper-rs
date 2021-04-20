@@ -18,6 +18,8 @@ pub struct Project {
     rea_project: ReaProject,
 }
 
+const MAX_PATH_LENGTH: u32 = 5000;
+
 // The pointer will never be dereferenced, so we can safely make it Send and Sync.
 unsafe impl Send for Project {}
 unsafe impl Sync for Project {}
@@ -38,7 +40,7 @@ impl Project {
     pub fn file(self) -> Option<PathBuf> {
         Reaper::get()
             .medium_reaper()
-            .enum_projects(ProjectRef::Tab(self.index()), 5000)
+            .enum_projects(ProjectRef::Tab(self.index()), MAX_PATH_LENGTH)
             .unwrap()
             .file_path
     }
@@ -368,6 +370,12 @@ impl Project {
         } else {
             Some(path.to_owned())
         }
+    }
+
+    pub fn recording_path(self) -> PathBuf {
+        Reaper::get()
+            .medium_reaper
+            .get_project_path_ex(self.context(), MAX_PATH_LENGTH)
     }
 
     pub fn make_path_absolute(self, path: &Path) -> Option<PathBuf> {

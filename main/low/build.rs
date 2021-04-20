@@ -120,6 +120,7 @@ mod codegen {
                 .whitelist_var("swell_functions::.*")
                 .whitelist_var("SWELL_.*")
                 .whitelist_var("CSURF_EXT_.*")
+                .whitelist_var("PCM_SOURCE_EXT_.*")
                 .whitelist_var("REAPER_PLUGIN_VERSION")
                 .whitelist_var("UNDO_STATE_.*")
                 .whitelist_var("VK_.*")
