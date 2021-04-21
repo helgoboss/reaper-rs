@@ -1,7 +1,7 @@
 use crate::mutex::ReaperMutex;
 use crate::{
-    destroy_mutex_primitive, initialize_mutex_primitive, MediaTrack, PcmSource, PositionInSeconds,
-    ReaperLockError, ReaperMutexPrimitive, ReaperVolumeValue,
+    destroy_mutex_primitive, initialize_mutex_primitive, MediaTrack, OwnedPcmSource, PcmSource,
+    PositionInSeconds, ReaperLockError, ReaperMutexPrimitive, ReaperVolumeValue,
 };
 use reaper_low::raw;
 use std::fmt;
@@ -10,8 +10,9 @@ use std::rc::Rc;
 
 /// An owned preview register.
 ///
-/// It owns the mutex or critical section (and manages its lifetime) but it doesn't own the PCM
-/// source and track.
+/// It owns PCM source, mutex and critical section (and manages its lifetime) but it doesn't own the
+/// track of course.
+//
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
 //
@@ -20,11 +21,16 @@ use std::rc::Rc;
 // interoperation with another extension but that would probably look differently anyway. If one
 // day we have the need, we can introduce a borrowed version, move most methods to it and at a
 // Deref implementation from owned to borrowed.
-pub struct OwnedPreviewRegister(raw::preview_register_t);
+pub struct OwnedPreviewRegister {
+    source: Option<OwnedPcmSource>,
+    register: raw::preview_register_t,
+}
 
 impl fmt::Debug for OwnedPreviewRegister {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("OwnedPreviewRegister").finish()
+        f.debug_struct("OwnedPreviewRegister")
+            .field("source", &self.source)
+            .finish()
     }
 }
 
@@ -36,60 +42,66 @@ impl OwnedPreviewRegister {
         Default::default()
     }
 
-    pub fn src(&self) -> Option<PcmSource> {
-        NonNull::new(self.0.src).map(PcmSource)
+    pub fn src(&self) -> Option<&OwnedPcmSource> {
+        self.source.as_ref()
     }
 
-    pub fn set_src(&mut self, src: Option<PcmSource>) {
-        self.0.src = src.map(|s| s.as_ptr()).unwrap_or(null_mut());
+    pub fn set_src(&mut self, src: Option<OwnedPcmSource>) -> Option<OwnedPcmSource> {
+        let previous_source = std::mem::replace(&mut self.source, src);
+        self.register.src = self
+            .source
+            .as_ref()
+            .map(|s| s.as_ptr().to_raw())
+            .unwrap_or(null_mut());
+        previous_source
     }
 
     pub fn volume(&self) -> ReaperVolumeValue {
-        ReaperVolumeValue::new(self.0.volume)
+        ReaperVolumeValue::new(self.register.volume)
     }
 
     pub fn set_volume(&mut self, volume: ReaperVolumeValue) {
-        self.0.volume = volume.get()
+        self.register.volume = volume.get()
     }
 
     pub fn cur_pos(&self) -> PositionInSeconds {
-        PositionInSeconds::new(self.0.curpos)
+        PositionInSeconds::new(self.register.curpos)
     }
 
     pub fn set_cur_pos(&mut self, pos: PositionInSeconds) {
-        self.0.curpos = pos.get();
+        self.register.curpos = pos.get();
     }
 
     pub fn is_looped(&self) -> bool {
-        self.0.loop_
+        self.register.loop_
     }
 
     pub fn set_looped(&mut self, looped: bool) {
-        self.0.loop_ = looped;
+        self.register.loop_ = looped;
     }
 
     pub fn preview_track(&self) -> Option<MediaTrack> {
-        NonNull::new(self.0.preview_track as *mut raw::MediaTrack)
+        NonNull::new(self.register.preview_track as *mut raw::MediaTrack)
     }
 
     pub fn set_preview_track(&mut self, track: Option<MediaTrack>) {
-        self.0.preview_track = track.map(|t| t.as_ptr() as _).unwrap_or(null_mut());
+        self.register.preview_track = track.map(|t| t.as_ptr() as _).unwrap_or(null_mut());
     }
 
     // TODO-high Improve API. This can be either a track index or a HW output channel or none.
     //  preview_track only has an effect if this is none.
     pub fn out_chan(&self) -> i32 {
-        self.0.m_out_chan
+        self.register.m_out_chan
     }
 
     pub fn set_out_chan(&mut self, value: i32) {
-        self.0.m_out_chan = value;
+        self.register.m_out_chan = value;
     }
 }
 
 impl Default for OwnedPreviewRegister {
     fn default() -> Self {
-        let mut inner = raw::preview_register_t {
+        let mut register = raw::preview_register_t {
             #[cfg(windows)]
             cs: Default::default(),
             #[cfg(unix)]
@@ -97,25 +109,29 @@ impl Default for OwnedPreviewRegister {
             ..Default::default()
         };
         #[cfg(windows)]
-        initialize_mutex_primitive(&mut inner.cs);
+        initialize_mutex_primitive(&mut register.cs);
         #[cfg(unix)]
-        initialize_mutex_primitive(&mut inner.mutex);
-        Self(inner)
+        initialize_mutex_primitive(&mut register.mutex);
+        Self {
+            source: None,
+            register,
+        }
     }
 }
 
 impl Drop for OwnedPreviewRegister {
     fn drop(&mut self) {
+        // The source destroys itself.
         #[cfg(windows)]
-        destroy_mutex_primitive(&mut self.0.cs);
+        destroy_mutex_primitive(&mut self.register.cs);
         #[cfg(unix)]
-        destroy_mutex_primitive(&mut self.0.mutex);
+        destroy_mutex_primitive(&mut self.register.mutex);
     }
 }
 
 impl AsRef<raw::preview_register_t> for OwnedPreviewRegister {
     fn as_ref(&self) -> &raw::preview_register_t {
-        &self.0
+        &self.register
     }
 }
 
@@ -132,11 +148,11 @@ impl AsRef<ReaperMutexPrimitive> for OwnedPreviewRegister {
     fn as_ref(&self) -> &ReaperMutexPrimitive {
         #[cfg(windows)]
         {
-            &self.0.cs
+            &self.register.cs
         }
         #[cfg(unix)]
         {
-            &self.0.mutex
+            &self.register.mutex
         }
     }
 }

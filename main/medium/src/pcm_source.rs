@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 use helgoboss_midi::{ShortMessage, U7};
 use reaper_low::raw;
+use ref_cast::RefCast;
 
 use crate::util::{create_passing_c_str, with_string_buffer};
 use crate::{
@@ -96,6 +97,12 @@ impl OwnedPcmSource {
     pub unsafe fn new_unchecked(inner: PcmSource) -> Self {
         Self(inner)
     }
+
+    /// Returns the inner pointer **without** destroying the source.
+    pub unsafe fn leak(self) -> PcmSource {
+        let manually_dropped = std::mem::ManuallyDrop::new(self);
+        manually_dropped.0
+    }
 }
 
 impl Drop for OwnedPcmSource {
@@ -103,8 +110,20 @@ impl Drop for OwnedPcmSource {
         unsafe {
             // TODO-high Rename this into delete_cpp_pcm_source and the add function
             //  to create_cpp_to_rust_pcm_source().
-            reaper_low::remove_cpp_pcm_source(self.0.into_inner());
+            // reaper_low::remove_cpp_pcm_source(self.0.into_inner());
         }
+    }
+}
+
+impl AsRef<BorrowedPcmSource> for OwnedPcmSource {
+    fn as_ref(&self) -> &BorrowedPcmSource {
+        unsafe { self.0.as_ref() }
+    }
+}
+
+impl Borrow<BorrowedPcmSource> for OwnedPcmSource {
+    fn borrow(&self) -> &BorrowedPcmSource {
+        self.as_ref()
     }
 }
 
@@ -112,7 +131,7 @@ impl Deref for OwnedPcmSource {
     type Target = BorrowedPcmSource;
 
     fn deref(&self) -> &BorrowedPcmSource {
-        unsafe { self.0.as_ref() }
+        self.as_ref()
     }
 }
 
@@ -148,7 +167,7 @@ impl PcmSource {
     }
 
     /// Returns a pointer to the low-level PCM source.
-    pub fn as_ptr(&self) -> *mut raw::PCM_source {
+    pub fn to_raw(&self) -> *mut raw::PCM_source {
         self.0.as_ptr()
     }
 
@@ -161,12 +180,12 @@ impl PcmSource {
     ///
     /// [`validate_ptr_2()`]: struct.Reaper.html#method.validate_ptr_2
     pub unsafe fn as_ref(&self) -> &BorrowedPcmSource {
-        &*(self.0.as_ptr() as *const BorrowedPcmSource)
+        BorrowedPcmSource::ref_cast(&self.0)
     }
 }
 
 /// Borrowed (reference-only) PCM source.
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Hash, Debug, RefCast)]
 #[repr(transparent)]
 pub struct BorrowedPcmSource(pub(crate) NonNull<raw::PCM_source>);
 
@@ -212,7 +231,7 @@ impl BorrowedPcmSource {
     /// # Safety
     ///
     /// Returned string's lifetime is unbounded.
-    unsafe fn get_type_unchecked(&self) -> &ReaperStr {
+    pub unsafe fn get_type_unchecked(&self) -> &ReaperStr {
         let raw = self.0.as_ref();
         let ptr = raw.GetType();
         create_passing_c_str(ptr).unwrap_or_default()
@@ -224,17 +243,12 @@ impl BorrowedPcmSource {
     /// empty path to `None`.
     pub fn get_file_name<R>(&self, use_file: impl FnOnce(Option<&Path>) -> R) -> R {
         let file_name = unsafe { self.get_file_name_unchecked() };
-        let file = if let Some(reaper_str) = file_name {
-            let s = reaper_str.to_str();
-            if s.is_empty() {
-                None
-            } else {
-                Some(Path::new(s))
-            }
+        let path = if let Some(n) = file_name {
+            Some(Path::new(n.to_str()))
         } else {
             None
         };
-        use_file(file)
+        use_file(path)
     }
 
     /// Returns the file of this source.
@@ -245,10 +259,19 @@ impl BorrowedPcmSource {
     /// # Safety
     ///
     /// Returned string's lifetime is unbounded.
-    unsafe fn get_file_name_unchecked(&self) -> Option<&ReaperStr> {
+    pub unsafe fn get_file_name_unchecked(&self) -> Option<&ReaperStr> {
         let raw = self.0.as_ref();
         let ptr = raw.GetFileName();
-        create_passing_c_str(ptr)
+        let file_name = create_passing_c_str(ptr);
+        if let Some(reaper_str) = file_name {
+            if reaper_str.to_str().is_empty() {
+                None
+            } else {
+                Some(reaper_str)
+            }
+        } else {
+            None
+        }
     }
 
     /// Returns `true` if supported. Only call when offline.
@@ -271,14 +294,15 @@ impl BorrowedPcmSource {
     }
 
     pub fn set_source(&self, source: Option<PcmSource>) {
-        let ptr = source.map(|s| s.as_ptr()).unwrap_or(null_mut());
+        let ptr = source.map(|s| s.to_raw()).unwrap_or(null_mut());
         let raw = unsafe { self.0.as_ref() };
         raw.SetSource(ptr);
     }
 
     /// Returns number of channels.
-    pub unsafe fn get_num_channels(&self) -> Option<u32> {
-        let n = self.0.as_ref().GetNumChannels();
+    pub fn get_num_channels(&self) -> Option<u32> {
+        let raw = unsafe { self.0.as_ref() };
+        let n = raw.GetNumChannels();
         if n < 0 {
             return None;
         }
@@ -488,6 +512,14 @@ impl BorrowedPcmSource {
     // }
 }
 
+impl ToOwned for BorrowedPcmSource {
+    type Owned = OwnedPcmSource;
+
+    fn to_owned(&self) -> OwnedPcmSource {
+        self.duplicate().expect("source not cloneable")
+    }
+}
+
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct ExtGetPooledMidiIdResult {
     /// A GUID string with braces.
@@ -502,10 +534,7 @@ pub struct ExtGetPooledMidiIdResult {
 
 /// Consumers can implement this trait in order to provide own PCM source types.
 pub trait CustomPcmSource {
-    // We can't let this return an owned source which uses RAII because it would be dropped in the
-    // `DelegatingPcmSource` call already because it goes through REAPER as raw pointer. Whoever
-    // uses this "on the other side" must take ownership.
-    fn duplicate(&mut self) -> Option<PcmSource>;
+    fn duplicate(&mut self) -> Option<OwnedPcmSource>;
 
     fn is_available(&mut self) -> bool;
 
@@ -679,7 +708,10 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for DelegatingPcmSource<S> {
     fn Duplicate(&mut self) -> *mut PCM_source {
         self.delegate
             .duplicate()
-            .map(|s| s.as_ptr())
+            .map(|s| {
+                let leaked = unsafe { s.leak() };
+                leaked.to_raw()
+            })
             .unwrap_or(null_mut())
     }
 
@@ -718,7 +750,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for DelegatingPcmSource<S> {
     fn GetSource(&mut self) -> *mut PCM_source {
         self.delegate
             .get_source()
-            .map(|s| s.as_ptr())
+            .map(|s| s.to_raw())
             .unwrap_or(null_mut())
     }
 

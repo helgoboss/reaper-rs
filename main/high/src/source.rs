@@ -4,6 +4,7 @@ use reaper_medium::{
     BorrowedPcmSource, DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior,
     OwnedPcmSource, PcmSource, ReaperFunctionError,
 };
+use ref_cast::RefCast;
 use std::borrow::Borrow;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -36,8 +37,9 @@ impl ReaperSource {
             .validate_ptr_2(project.context(), self.0)
     }
 
-    pub unsafe fn as_ref(&self) -> &BorrowedSource {
-        &*(self.0.as_ptr() as *const BorrowedSource)
+    pub fn as_ref(&self) -> &BorrowedSource {
+        self.make_sure_is_valid();
+        BorrowedSource::ref_cast(unsafe { self.0.as_ref() })
     }
 
     fn make_sure_is_valid(&self) {
@@ -51,12 +53,11 @@ impl Deref for ReaperSource {
     type Target = BorrowedSource;
 
     fn deref(&self) -> &BorrowedSource {
-        self.make_sure_is_valid();
-        unsafe { self.as_ref() }
+        self.as_ref()
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Hash, Debug, RefCast)]
 #[repr(transparent)]
 pub struct BorrowedSource(BorrowedPcmSource);
 
@@ -118,6 +119,10 @@ impl OwnedSource {
         Self(raw)
     }
 
+    pub fn into_raw(self) -> OwnedPcmSource {
+        self.0
+    }
+
     pub fn from_file(
         file: &Path,
         import_behavior: MidiImportBehavior,
@@ -132,11 +137,33 @@ impl OwnedSource {
     }
 }
 
+impl AsRef<BorrowedSource> for OwnedSource {
+    fn as_ref(&self) -> &BorrowedSource {
+        BorrowedSource::ref_cast(self.0.as_ref())
+    }
+}
+
+impl Borrow<BorrowedSource> for OwnedSource {
+    fn borrow(&self) -> &BorrowedSource {
+        self.as_ref()
+    }
+}
+
+impl ToOwned for BorrowedSource {
+    type Owned = OwnedSource;
+
+    fn to_owned(&self) -> OwnedSource {
+        self.duplicate().expect("source not cloneable")
+    }
+}
+
+// TODO-high Also implement ToOwned also in medium
+
 impl Deref for OwnedSource {
     type Target = BorrowedSource;
 
     fn deref(&self) -> &BorrowedSource {
-        unsafe { &*(self.0.as_ptr().as_ptr() as *const BorrowedSource) }
+        self.as_ref()
     }
 }
 
