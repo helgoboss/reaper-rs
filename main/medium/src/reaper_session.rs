@@ -9,12 +9,12 @@ use crate::keeper::{Keeper, SharedKeeper};
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
-    BufferingBehavior, CommandId, ControlSurface, DelegatingControlSurface, HookCommand,
-    HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment,
-    OnAudioBuffer, OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister,
-    PluginRegistration, ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
-    ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle,
-    RegistrationObject, ToggleAction,
+    BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter, HookCommand, HookCommand2,
+    HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment, OnAudioBuffer,
+    OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration,
+    ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult,
+    ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
+    ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -768,7 +768,7 @@ impl ReaperSession {
         // restore the original control_surface later).
         let control_surface_thin_ptr: NonNull<T> = control_surface.as_ref().into();
         // Create low-level Rust control surface which delegates to the medium-level one.
-        let low_cs = DelegatingControlSurface::new(control_surface, &self.reaper.get_app_version());
+        let low_cs = ControlSurfaceAdapter::new(control_surface, &self.reaper.get_app_version());
         // Create the C++ counterpart surface (we need to box the Rust side twice in order to obtain
         // a thin pointer for passing it to C++ as callback target).
         let double_boxed_low_cs: Box<Box<dyn IReaperControlSurface>> = Box::new(Box::new(low_cs));
@@ -831,7 +831,7 @@ impl ReaperSession {
         // Reconstruct the initial value for handing ownership back to the consumer
         let low_cs = double_boxed_low_cs
             .into_any()
-            .downcast::<DelegatingControlSurface>()
+            .downcast::<ControlSurfaceAdapter>()
             .ok()?;
         let dyn_control_surface = low_cs.into_delegate();
         // We are not interested in the fat pointer (Box<dyn ControlSurface>) anymore.

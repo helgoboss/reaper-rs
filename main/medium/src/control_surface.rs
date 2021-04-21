@@ -562,7 +562,7 @@ pub enum VersionDependentTrackFxLocation {
 }
 
 #[derive(Debug)]
-pub(crate) struct DelegatingControlSurface {
+pub(crate) struct ControlSurfaceAdapter {
     // As you can see, this is a `Box` instead of a generic type parameter! Reasoning:
     //
     // - `ReaperSession` needs to store control surface instances of consumer-defined unknown types
@@ -578,13 +578,13 @@ pub(crate) struct DelegatingControlSurface {
     supports_detection_of_input_fx_in_set_fx_change: bool,
 }
 
-impl DelegatingControlSurface {
+impl ControlSurfaceAdapter {
     pub fn new(
         delegate: Box<dyn ControlSurface>,
         reaper_version: &ReaperVersion,
-    ) -> DelegatingControlSurface {
+    ) -> ControlSurfaceAdapter {
         let reaper_version_5_95: ReaperVersion = ReaperVersion::new("5.95");
-        DelegatingControlSurface {
+        ControlSurfaceAdapter {
             delegate,
             // since pre1,
             supports_detection_of_input_fx: reaper_version >= &reaper_version_5_95,
@@ -636,7 +636,7 @@ impl DelegatingControlSurface {
     }
 }
 
-impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
+impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
     fn GetTypeString(&self) -> *const i8 {
         self.delegate
             .get_type_string()

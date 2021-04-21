@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 use helgoboss_midi::{ShortMessage, U7};
-use reaper_low::raw;
+use reaper_low::{add_cpp_pcm_source, raw};
 use ref_cast::RefCast;
 
 use crate::util::{create_passing_c_str, with_string_buffer};
@@ -14,6 +14,8 @@ use reaper_low::raw::{
 };
 use std::borrow::{Borrow, Cow};
 use std::error::Error;
+use std::fmt;
+use std::fmt::Formatter;
 use std::mem::MaybeUninit;
 use std::ops::Deref;
 use std::os::raw::{c_char, c_int, c_void};
@@ -110,7 +112,7 @@ impl Drop for OwnedPcmSource {
         unsafe {
             // TODO-high Rename this into delete_cpp_pcm_source and the add function
             //  to create_cpp_to_rust_pcm_source().
-            // reaper_low::remove_cpp_pcm_source(self.0.into_inner());
+            reaper_low::remove_cpp_pcm_source(self.0.into_inner());
         }
     }
 }
@@ -683,7 +685,7 @@ pub struct PeaksClearArgs {
 }
 
 #[derive(Debug)]
-pub struct DelegatingPcmSource<S: CustomPcmSource> {
+struct PcmSourceAdapter<S: CustomPcmSource> {
     // Unlike `DelegatingControlSurface` we don't use a `Box` here because we don't need to store
     // multiple PCM sources of different types in one list in the medium-level API. We also don't
     // have the same "Give ownership to REAPER and get it back at some point" kind of usage. PCM
@@ -694,7 +696,7 @@ pub struct DelegatingPcmSource<S: CustomPcmSource> {
     delegate: S,
 }
 
-impl<S: CustomPcmSource> DelegatingPcmSource<S> {
+impl<S: CustomPcmSource> PcmSourceAdapter<S> {
     pub fn new(delegate: S) -> Self {
         Self { delegate }
     }
@@ -704,7 +706,7 @@ impl<S: CustomPcmSource> DelegatingPcmSource<S> {
     }
 }
 
-impl<S: CustomPcmSource> reaper_low::PCM_source for DelegatingPcmSource<S> {
+impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
     fn Duplicate(&mut self) -> *mut PCM_source {
         self.delegate
             .duplicate()
@@ -876,5 +878,64 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for DelegatingPcmSource<S> {
                 parm_3: parm3,
             })
         }
+    }
+}
+
+/// Either a REAPER PCM source or a custom one.
+#[derive(Debug)]
+pub enum FlexibleOwnedPcmSource {
+    Reaper(OwnedPcmSource),
+    Custom(CustomOwnedPcmSource),
+}
+
+impl AsRef<BorrowedPcmSource> for FlexibleOwnedPcmSource {
+    fn as_ref(&self) -> &BorrowedPcmSource {
+        match self {
+            FlexibleOwnedPcmSource::Reaper(s) => s.as_ref(),
+            FlexibleOwnedPcmSource::Custom(s) => s.as_ref(),
+        }
+    }
+}
+
+/// Represents an owned PCM source that is backed by a Rust [`CustomPcmSource`] trait
+/// implementation.
+///
+/// [`CustomPcmSource`]: trait.CustomPcmSource.html
+pub struct CustomOwnedPcmSource {
+    // Those 2 belong together. `cpp_source` without `rust_source` = crash. Never let them apart!
+    cpp_source: OwnedPcmSource,
+    rust_source: Box<Box<dyn reaper_low::PCM_source>>,
+}
+
+impl fmt::Debug for CustomOwnedPcmSource {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("CustomOwnedPcmSource")
+            .field("cpp_source", &self.cpp_source)
+            .finish()
+    }
+}
+
+impl AsRef<BorrowedPcmSource> for CustomOwnedPcmSource {
+    fn as_ref(&self) -> &BorrowedPcmSource {
+        self.cpp_source.as_ref()
+    }
+}
+
+/// Creates a REAPER PCM source for the given custom Rust implementation and returns it.
+//
+// TODO-high Think of a good name.
+pub fn create_custom_owned_pcm_source<S: CustomPcmSource + 'static>(
+    custom_source: S,
+) -> CustomOwnedPcmSource {
+    let adapter = PcmSourceAdapter::new(custom_source);
+    // Create the C++ counterpart source (we need to box the Rust side twice in order to obtain
+    // a thin pointer for passing it to C++ as callback target).
+    let rust_source: Box<Box<dyn reaper_low::PCM_source>> = Box::new(Box::new(adapter));
+    let thin_ptr_to_adapter: NonNull<_> = rust_source.as_ref().into();
+    let raw_cpp_source = unsafe { add_cpp_pcm_source(thin_ptr_to_adapter) };
+    let cpp_source = unsafe { OwnedPcmSource::new_unchecked(PcmSource::new(raw_cpp_source)) };
+    CustomOwnedPcmSource {
+        cpp_source,
+        rust_source,
     }
 }

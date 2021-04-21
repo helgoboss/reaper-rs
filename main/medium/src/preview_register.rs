@@ -1,7 +1,8 @@
 use crate::mutex::ReaperMutex;
 use crate::{
-    destroy_mutex_primitive, initialize_mutex_primitive, MediaTrack, OwnedPcmSource, PcmSource,
-    PositionInSeconds, ReaperLockError, ReaperMutexPrimitive, ReaperVolumeValue,
+    destroy_mutex_primitive, initialize_mutex_primitive, FlexibleOwnedPcmSource, MediaTrack,
+    OwnedPcmSource, PcmSource, PositionInSeconds, ReaperLockError, ReaperMutexPrimitive,
+    ReaperVolumeValue,
 };
 use reaper_low::raw;
 use std::fmt;
@@ -22,7 +23,7 @@ use std::rc::Rc;
 // day we have the need, we can introduce a borrowed version, move most methods to it and at a
 // Deref implementation from owned to borrowed.
 pub struct OwnedPreviewRegister {
-    source: Option<OwnedPcmSource>,
+    source: Option<FlexibleOwnedPcmSource>,
     register: raw::preview_register_t,
 }
 
@@ -42,16 +43,19 @@ impl OwnedPreviewRegister {
         Default::default()
     }
 
-    pub fn src(&self) -> Option<&OwnedPcmSource> {
+    pub fn src(&self) -> Option<&FlexibleOwnedPcmSource> {
         self.source.as_ref()
     }
 
-    pub fn set_src(&mut self, src: Option<OwnedPcmSource>) -> Option<OwnedPcmSource> {
+    pub fn set_src(
+        &mut self,
+        src: Option<FlexibleOwnedPcmSource>,
+    ) -> Option<FlexibleOwnedPcmSource> {
         let previous_source = std::mem::replace(&mut self.source, src);
         self.register.src = self
             .source
             .as_ref()
-            .map(|s| s.as_ptr().to_raw())
+            .map(|s| s.as_ref().as_ptr().to_raw())
             .unwrap_or(null_mut());
         previous_source
     }
