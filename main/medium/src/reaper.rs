@@ -18,16 +18,16 @@ use crate::{
     GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
     KbdSectionInfo, MasterTrackBehavior, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, PanMode, PcmSource,
-    PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds, ProjectContext,
-    ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget, SoloMode,
-    StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
+    PanMode, PcmSource, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds,
+    ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
+    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
+    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
+    SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -1152,22 +1152,13 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// Panics if the given file name is not valid UTF-8.
     ///
-    /// # Safety
-    ///
-    /// It's completely up to you to destroy the returned source via [`pcm_source_destroy()`].
-    ///
     /// [`pcm_source_destroy()`]: #method.pcm_source_destroy
-    //
-    // It's not feasible for the medium-level API to return an newtype that takes care of
-    // destroying the source when it's dropped because it needs to be done via a REAPER function.
-    // This should be left to a higher-level more object-oriented API which has static access to all
-    // REAPER functions.
     #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn pcm_source_create_from_file_ex(
+    pub fn pcm_source_create_from_file_ex(
         &self,
         file_name: &Path,
         midi_import_behavior: MidiImportBehavior,
-    ) -> ReaperFunctionResult<PcmSource>
+    ) -> ReaperFunctionResult<OwnedPcmSource>
     where
         UsageScope: MainThreadOnly,
     {
@@ -1189,23 +1180,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 "couldn't create PCM source from file",
             ))
             .map(PcmSource)
-    }
-
-    /// Deletes a PCM source.
-    ///
-    /// Be sure that you remove any project reference before deleting a source.
-    ///
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid PCM source.
-    #[measure(ResponseTimeSingleThreaded)]
-    pub unsafe fn pcm_source_destroy(&self, source: PcmSource)
-    where
-        UsageScope: MainThreadOnly,
-    {
-        // TODO-medium Can probably be relaxed.
-        self.require_main_thread();
-        self.low.PCM_Source_Destroy(source.as_ptr());
+            .map(OwnedPcmSource)
     }
 
     /// Goes to the given marker.

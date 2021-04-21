@@ -307,7 +307,7 @@ impl Default for &ReaperStr {
 impl ToOwned for ReaperStr {
     type Owned = ReaperString;
 
-    fn to_owned(&self) -> Self::Owned {
+    fn to_owned(&self) -> ReaperString {
         self.to_reaper_string()
     }
 }

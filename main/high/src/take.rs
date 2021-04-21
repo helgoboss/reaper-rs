@@ -1,4 +1,4 @@
-use crate::{FxChain, Reaper, Source, Track};
+use crate::{FxChain, Reaper, ReaperSource, Track};
 use reaper_medium::MediaItemTake;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -27,12 +27,12 @@ impl Take {
             })
     }
 
-    pub fn source(&self) -> Option<Source> {
+    pub fn source(&self) -> Option<ReaperSource> {
         let raw_source = unsafe {
             Reaper::get()
                 .medium_reaper
                 .get_media_item_take_source(self.raw)?
         };
-        Some(Source::from_reaper(raw_source))
+        Some(ReaperSource::new(raw_source))
     }
 }

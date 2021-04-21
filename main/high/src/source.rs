@@ -1,109 +1,121 @@
-use crate::{Reaper, Take};
+use crate::{Project, Reaper, Take};
 use reaper_low::raw::PCM_source;
 use reaper_medium::{
-    DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior, PcmSource, ReaperFunctionError,
+    BorrowedPcmSource, DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior,
+    OwnedPcmSource, PcmSource, ReaperFunctionError,
 };
+use std::borrow::Borrow;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::ptr::NonNull;
 
-/// Borrowed PCM source.
+/// Pointer to a PCM source that's owned and managed by REAPER.
+///
+/// Whenever a function is called via `Deref`, a validation check will be done. If it doesn't
+/// succeed, reaper-rs will panic (better than crashing).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct Source {
-    raw: PcmSource,
-    is_owned: bool,
-}
+#[repr(transparent)]
+pub struct ReaperSource(PcmSource);
 
-impl Source {
-    /// Creates a source that's owned by REAPER.
-    ///
-    /// Whenever a function is called, a validation check will be done. If it doesn't succeed,
-    /// reaper-rs will panic (better than crashing).
-    pub fn from_reaper(raw: PcmSource) -> Self {
-        Self {
-            raw,
-            is_owned: false,
-        }
+impl ReaperSource {
+    pub fn new(raw: PcmSource) -> Self {
+        Self(raw)
     }
 
     pub fn raw(&self) -> PcmSource {
-        self.raw
+        self.0
     }
 
-    pub fn file_name(&self) -> Option<PathBuf> {
+    pub fn is_valid(&self) -> bool {
+        Reaper::get().medium_reaper().validate_ptr(self.0)
+    }
+
+    pub fn is_valid_in_project(&self, project: Project) -> bool {
+        Reaper::get()
+            .medium_reaper()
+            .validate_ptr_2(project.context(), self.0)
+    }
+
+    pub unsafe fn as_ref(&self) -> &BorrowedSource {
+        &*(self.0.as_ptr() as *const BorrowedSource)
+    }
+
+    fn make_sure_is_valid(&self) {
+        if !self.is_valid() {
+            panic!("PCM source pointer is not valid anymore in REAPER")
+        }
+    }
+}
+
+impl Deref for ReaperSource {
+    type Target = BorrowedSource;
+
+    fn deref(&self) -> &BorrowedSource {
         self.make_sure_is_valid();
-        unsafe { self.raw.get_file_name(|path| path.map(|p| p.to_owned())) }
+        unsafe { self.as_ref() }
+    }
+}
+
+#[derive(Eq, PartialEq, Hash, Debug)]
+#[repr(transparent)]
+pub struct BorrowedSource(BorrowedPcmSource);
+
+impl BorrowedSource {
+    pub fn file_name(&self) -> Option<PathBuf> {
+        self.0.get_file_name(|path| path.map(|p| p.to_owned()))
     }
 
     pub fn r#type(&self) -> String {
-        self.make_sure_is_valid();
-        unsafe { self.raw.get_type(|t| t.to_string()) }
+        self.0.get_type(|t| t.to_string())
     }
 
     pub fn length(&self) -> Result<DurationInSeconds, ReaperFunctionError> {
-        self.make_sure_is_valid();
-        unsafe { self.raw.get_length() }
+        self.0.get_length()
     }
 
     pub fn duplicate(&self) -> Option<OwnedSource> {
-        self.make_sure_is_valid();
-        unsafe {
-            let raw_duplicate = self.raw.duplicate()?;
-            Some(OwnedSource::new_unchecked(raw_duplicate))
-        }
+        let raw_duplicate = self.0.duplicate()?;
+        Some(OwnedSource::new(raw_duplicate))
     }
 
-    pub fn is_valid_in_reaper(&self) -> bool {
-        Reaper::get().medium_reaper().validate_ptr(self.raw)
+    // We return a medium-level source because at this point we don't know if the parent is a
+    // REAPER-managed source or not.
+    pub fn parent_source(&self) -> Option<PcmSource> {
+        let raw = self.0.get_source()?;
+        Some(raw)
     }
 
-    pub fn parent_source(&self) -> Option<Source> {
-        let raw = unsafe { self.raw.get_source()? };
-        Some(Self::from_reaper(raw))
-    }
-
-    pub fn root_source(&self) -> Source {
-        let mut source = *self;
+    // We return a medium-level source because at this point we don't know if the root is a
+    // REAPER-managed source or not.
+    pub fn root_source(&self) -> PcmSource {
+        let mut source_ptr = self.0.as_ptr();
         loop {
-            if let Some(parent) = source.parent_source() {
-                source = parent;
+            let source = unsafe { source_ptr.as_ref() };
+            if let Some(parent) = source.get_source() {
+                source_ptr = parent;
             } else {
-                return source;
+                return source_ptr;
             }
         }
     }
 
     pub fn pooled_midi_id(&self) -> Result<ExtGetPooledMidiIdResult, ReaperFunctionError> {
-        self.make_sure_is_valid();
-        unsafe { self.raw.ext_get_pooled_midi_id() }
+        self.0.ext_get_pooled_midi_id()
     }
 
     pub fn export_to_file(&self, file: &Path) -> Result<(), ReaperFunctionError> {
-        self.make_sure_is_valid();
-        unsafe { self.raw.ext_export_to_file(file) }
-    }
-
-    fn make_sure_is_valid(&self) {
-        if !self.is_owned && !self.is_valid_in_reaper() {
-            panic!("PCM source is not valid anymore")
-        }
+        self.0.ext_export_to_file(file)
     }
 }
 
 /// Owned PCM source.
 #[derive(Debug)]
-pub struct OwnedSource {
-    source: Source,
-}
+#[repr(transparent)]
+pub struct OwnedSource(OwnedPcmSource);
 
 impl OwnedSource {
-    pub unsafe fn new_unchecked(raw: PcmSource) -> Self {
-        Self {
-            source: Source {
-                raw,
-                is_owned: true,
-            },
-        }
+    pub fn new(raw: OwnedPcmSource) -> Self {
+        Self(raw)
     }
 
     pub fn from_file(
@@ -115,24 +127,16 @@ impl OwnedSource {
                 .medium_reaper()
                 .pcm_source_create_from_file_ex(file, import_behavior)
                 .map_err(|_| "couldn't create PCM source")?;
-            Ok(Self::new_unchecked(raw))
-        }
-    }
-}
-
-impl Drop for OwnedSource {
-    fn drop(&mut self) {
-        unsafe {
-            Reaper::get().medium_reaper().pcm_source_destroy(self.raw);
+            Ok(Self(raw))
         }
     }
 }
 
 impl Deref for OwnedSource {
-    type Target = Source;
+    type Target = BorrowedSource;
 
-    fn deref(&self) -> &Source {
-        &self.source
+    fn deref(&self) -> &BorrowedSource {
+        unsafe { &*(self.0.as_ptr().as_ptr() as *const BorrowedSource) }
     }
 }
 
