@@ -238,7 +238,7 @@
 //! - [`raw::midi_Input`](../reaper_low/raw/struct.midi_Input.html) →
 //!   [`MidiInput`](struct.MidiInput.html) &
 //! - [`raw::MIDI_eventlist`](../reaper_low/raw/struct.MIDI_eventlist.html) →
-//!   [`MidiEventList`](struct.MidiEventList.html) &
+//!   [`BorrowedMidiEventList`](struct.BorrowedMidiEventList.html) &
 //! - [`raw::PCM_source`](../reaper_low/raw/struct.PCM_source.html) →
 //!   [`OwnedPcmSource`](struct.OwnedPcmSource.html), [`PcmSource`](struct.PcmSource.html),
 //!   [`BorrowedPcmSource`](struct.BorrowedPcmSource.html) &

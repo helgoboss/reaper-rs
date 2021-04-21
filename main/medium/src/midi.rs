@@ -38,9 +38,9 @@ impl MidiInput {
     ///
     /// [`MidiInput`]: struct.MidiInput.html
     /// [`get_midi_input()`]: struct.Reaper.html#method.get_midi_input
-    pub fn get_read_buf(&self) -> MidiEventList<'_> {
+    pub fn get_read_buf(&self) -> BorrowedMidiEventList<'_> {
         let raw_evt_list = unsafe { self.0.as_ref().GetReadBuf() };
-        MidiEventList::new(unsafe { &*raw_evt_list })
+        BorrowedMidiEventList(unsafe { &*raw_evt_list })
     }
 }
 
@@ -48,17 +48,14 @@ impl MidiInput {
 //
 // Internals exposed: no | vtable: yes (Rust => REAPER)
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct MidiEventList<'a>(&'a raw::MIDI_eventlist);
+pub struct BorrowedMidiEventList<'a>(pub(crate) &'a raw::MIDI_eventlist);
 
-impl<'a> MidiEventList<'a> {
-    pub(super) fn new(raw_evt_list: &'a raw::MIDI_eventlist) -> Self {
-        MidiEventList(raw_evt_list)
-    }
-
+impl<'a> BorrowedMidiEventList<'a> {
     /// Returns an iterator exposing the contained MIDI events.
     ///
     /// `bpos` is the iterator start position.
-    pub fn enum_items(self, bpos: u32) -> impl Iterator<Item = MidiEvent<'a>> {
+    // TODO-high Why does this consume self and is Copy?
+    pub fn enum_items(self, bpos: u32) -> impl Iterator<Item = BorrowedMidiEvent<'a>> {
         EnumItems {
             raw_list: self.0,
             bpos: bpos as i32,
@@ -66,7 +63,7 @@ impl<'a> MidiEventList<'a> {
     }
 
     /// Adds an item to this list of MIDI events.
-    pub fn add_item(self, msg: &MidiEvent) {
+    pub fn add_item(self, msg: BorrowedMidiEvent) {
         unsafe {
             self.0.AddItem(msg.0 as *const _ as _);
         }
@@ -78,15 +75,16 @@ impl<'a> MidiEventList<'a> {
 // TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
 //  keeps  the event around.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct MidiEvent<'a>(&'a raw::MIDI_event_t);
+pub struct BorrowedMidiEvent<'a>(&'a raw::MIDI_event_t);
 
 /// A MIDI message borrowed from REAPER.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct MidiMessage<'a>(&'a raw::MIDI_event_t);
+pub struct BorrowedMidiMessage<'a>(&'a raw::MIDI_event_t);
 
-impl<'a> MidiEvent<'a> {
-    pub(crate) unsafe fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiEvent(raw_evt)
+impl<'a> BorrowedMidiEvent<'a> {
+    /// Wraps the given raw MIDI event reference.
+    pub fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
+        BorrowedMidiEvent(raw_evt)
     }
 
     /// Returns the frame offset.
@@ -95,20 +93,20 @@ impl<'a> MidiEvent<'a> {
     }
 
     /// Returns the actual message.
-    pub fn message(self) -> MidiMessage<'a> {
-        MidiMessage::new(self.0)
+    pub fn message(self) -> BorrowedMidiMessage<'a> {
+        BorrowedMidiMessage::new(self.0)
     }
 }
 
-impl<'a> AsRef<raw::MIDI_event_t> for MidiEvent<'a> {
+impl<'a> AsRef<raw::MIDI_event_t> for BorrowedMidiEvent<'a> {
     fn as_ref(&self) -> &MIDI_event_t {
         self.0
     }
 }
 
-impl<'a> MidiMessage<'a> {
+impl<'a> BorrowedMidiMessage<'a> {
     pub(super) fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiMessage(raw_evt)
+        BorrowedMidiMessage(raw_evt)
     }
 }
 
@@ -118,7 +116,7 @@ struct EnumItems<'a> {
 }
 
 impl<'a> Iterator for EnumItems<'a> {
-    type Item = MidiEvent<'a>;
+    type Item = BorrowedMidiEvent<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let raw_evt = unsafe { self.raw_list.EnumItems(&mut self.bpos as *mut c_int) };
@@ -126,12 +124,12 @@ impl<'a> Iterator for EnumItems<'a> {
             // No MIDI events left
             return None;
         }
-        let evt = unsafe { MidiEvent::new(&*raw_evt) };
+        let evt = unsafe { BorrowedMidiEvent::new(&*raw_evt) };
         Some(evt)
     }
 }
 
-impl<'a> ShortMessage for MidiMessage<'a> {
+impl<'a> ShortMessage for BorrowedMidiMessage<'a> {
     fn status_byte(&self) -> u8 {
         self.0.midi_message[0]
     }

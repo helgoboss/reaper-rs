@@ -5,9 +5,9 @@ use ref_cast::RefCast;
 
 use crate::util::{create_passing_c_str, with_string_buffer};
 use crate::{
-    DurationInBeats, DurationInSeconds, ExtendedArgs, Hwnd, Hz, MediaItemTake, MidiFrameOffset,
-    PositionInSeconds, ReaperFunctionError, ReaperFunctionResult, ReaperStr, ReaperString,
-    SendMidiTime,
+    BorrowedMidiEventList, DurationInBeats, DurationInSeconds, ExtendedArgs, Hwnd, Hz,
+    MediaItemTake, MidiFrameOffset, PositionInSeconds, ReaperFunctionError, ReaperFunctionResult,
+    ReaperStr, ReaperString, SendMidiTime,
 };
 use reaper_low::raw::{
     MIDI_event_t, PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t, HWND__,
@@ -26,19 +26,20 @@ use std::ptr::{null, null_mut, NonNull};
 //
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(PartialEq, Debug)]
 #[repr(transparent)]
-pub struct PcmSourceTransfer(pub(crate) NonNull<raw::PCM_source_transfer_t>);
+pub struct BorrowedPcmSourceTransfer<'a>(&'a raw::PCM_source_transfer_t);
 
-impl PcmSourceTransfer {
-    /// Returns the wrapped non-null pointer to the low-level PCM source transfer.
-    pub fn into_inner(self) -> NonNull<raw::PCM_source_transfer_t> {
-        self.0
+impl<'a> BorrowedPcmSourceTransfer<'a> {
+    /// Returns the pointer to this source transfer.
+    pub fn as_ptr(&self) -> NonNull<raw::PCM_source_transfer_t> {
+        self.0.into()
     }
 
-    /// Returns a pointer to the low-level PCM source transfer.
-    pub fn as_ptr(&self) -> *mut raw::PCM_source_transfer_t {
-        self.0.as_ptr()
+    /// Returns the list of MIDI events to be filled.
+    pub fn midi_event_list(&self) -> BorrowedMidiEventList {
+        // TODO-high What if null?
+        BorrowedMidiEventList(unsafe { &*self.0.midi_events })
     }
 }
 
@@ -46,19 +47,14 @@ impl PcmSourceTransfer {
 //
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(PartialEq, Debug)]
 #[repr(transparent)]
-pub struct PcmSourcePeakTransfer(pub(crate) NonNull<raw::PCM_source_peaktransfer_t>);
+pub struct BorrowedPcmSourcePeakTransfer<'a>(&'a raw::PCM_source_peaktransfer_t);
 
-impl PcmSourcePeakTransfer {
-    /// Returns the wrapped non-null pointer to the low-level PCM source peak transfer.
-    pub fn into_inner(self) -> NonNull<raw::PCM_source_peaktransfer_t> {
-        self.0
-    }
-
-    /// Returns a pointer to the low-level PCM source peak transfer.
-    pub fn as_ptr(&self) -> *mut raw::PCM_source_peaktransfer_t {
-        self.0.as_ptr()
+impl<'a> BorrowedPcmSourcePeakTransfer<'a> {
+    /// Returns the pointer to this source peak transfer.
+    pub fn as_ptr(&self) -> NonNull<raw::PCM_source_peaktransfer_t> {
+        self.0.into()
     }
 }
 
@@ -66,19 +62,14 @@ impl PcmSourcePeakTransfer {
 //
 // Case 3: Internals exposed: no | vtable: yes
 // ===========================================
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Hash, Debug)]
 #[repr(transparent)]
-pub struct ProjectStateContext(pub(crate) NonNull<raw::ProjectStateContext>);
+pub struct BorrowedProjectStateContext<'a>(&'a raw::ProjectStateContext);
 
-impl ProjectStateContext {
-    /// Returns the wrapped non-null pointer to the low-level project state context.
-    pub fn into_inner(self) -> NonNull<raw::ProjectStateContext> {
-        self.0
-    }
-
-    /// Returns a pointer to the low-level project state context.
-    pub fn as_ptr(&self) -> *mut raw::ProjectStateContext {
-        self.0.as_ptr()
+impl<'a> BorrowedProjectStateContext<'a> {
+    /// Returns the pointer to this context.
+    pub fn as_ptr(&self) -> NonNull<raw::ProjectStateContext> {
+        self.0.into()
     }
 }
 
@@ -182,9 +173,11 @@ impl PcmSource {
     ///
     /// [`validate_ptr_2()`]: struct.Reaper.html#method.validate_ptr_2
     pub unsafe fn as_ref(&self) -> &BorrowedPcmSource<'static> {
-        let ref_to_raw: &raw::PCM_source = self.0.as_ref();
-        let ptr_to_dest = &ref_to_raw as *const _ as *const _;
-        &*ptr_to_dest
+        // let ref_to_raw: &raw::PCM_source = self.0.as_ref();
+        // let ptr_to_dest = &ref_to_raw as *const _ as *const _;
+        // &*ptr_to_dest
+        // TODO-high CONTINUE This makes problems!!!
+        std::mem::transmute(&self.0.as_ref())
     }
 }
 
@@ -194,10 +187,9 @@ impl PcmSource {
 pub struct BorrowedPcmSource<'a>(pub(crate) &'a raw::PCM_source);
 
 impl<'a> BorrowedPcmSource<'a> {
-    /// Returns the pointer.
+    /// Returns the pointer to this source.
     pub fn as_ptr(&self) -> PcmSource {
-        let non_null = unsafe { NonNull::new_unchecked(self.0 as *const _ as *mut _) };
-        PcmSource(non_null)
+        PcmSource(self.0.into())
     }
 
     /// Duplicates this source.
@@ -362,29 +354,29 @@ impl<'a> BorrowedPcmSource<'a> {
     }
 
     /// TODO-high Unstable.
-    pub unsafe fn get_samples(&self, block: &mut PcmSourceTransfer) {
-        self.0.GetSamples(block.as_ptr() as *mut _);
+    pub unsafe fn get_samples(&self, block: BorrowedPcmSourceTransfer) {
+        self.0.GetSamples(block.as_ptr().as_ptr());
     }
 
     /// TODO-high Unstable.
-    pub unsafe fn get_peak_info(&self, block: &mut PcmSourcePeakTransfer) {
-        self.0.GetPeakInfo(block.as_ptr() as *mut _);
+    pub unsafe fn get_peak_info(&self, block: BorrowedPcmSourcePeakTransfer) {
+        self.0.GetPeakInfo(block.as_ptr().as_ptr());
     }
 
     /// TODO-high Unstable.
-    pub unsafe fn save_state(&self, context: &mut ProjectStateContext) {
-        self.0.SaveState(context.as_ptr() as *mut _);
+    pub unsafe fn save_state(&self, context: BorrowedProjectStateContext) {
+        self.0.SaveState(context.as_ptr().as_ptr());
     }
 
     /// TODO-high Unstable.
     pub unsafe fn load_state(
         &self,
         first_line: &ReaperStr,
-        context: &mut ProjectStateContext,
+        context: BorrowedProjectStateContext,
     ) -> Result<(), Box<dyn Error>> {
         let res = self
             .0
-            .LoadState(first_line.as_ptr(), context.as_ptr() as *mut _);
+            .LoadState(first_line.as_ptr(), context.as_ptr().as_ptr());
         if res == -1 {
             Err("load state failed")?
         }
@@ -644,23 +636,23 @@ pub struct PropertiesWindowArgs {
 
 #[derive(PartialEq, Debug)]
 pub struct GetSamplesArgs<'a> {
-    pub block: &'a mut PcmSourceTransfer,
+    pub block: BorrowedPcmSourceTransfer<'a>,
 }
 
 #[derive(PartialEq, Debug)]
 pub struct GetPeakInfoArgs<'a> {
-    pub block: &'a mut PcmSourcePeakTransfer,
+    pub block: BorrowedPcmSourcePeakTransfer<'a>,
 }
 
 #[derive(PartialEq, Debug)]
 pub struct SaveStateArgs<'a> {
-    pub context: &'a mut ProjectStateContext,
+    pub context: BorrowedProjectStateContext<'a>,
 }
 
 #[derive(PartialEq, Debug)]
 pub struct LoadStateArgs<'a> {
     pub first_line: &'a ReaperStr,
-    pub context: &'a mut ProjectStateContext,
+    pub context: BorrowedProjectStateContext<'a>,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -792,28 +784,28 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
 
     fn GetSamples(&mut self, block: *mut PCM_source_transfer_t) {
         let block = NonNull::new(block).expect("called PCM_source::GetSamples() with null block");
-        let block = &mut PcmSourceTransfer(block);
+        let block = BorrowedPcmSourceTransfer(unsafe { block.as_ref() });
         let args = GetSamplesArgs { block };
         self.delegate.get_samples(args);
     }
 
     fn GetPeakInfo(&mut self, block: *mut PCM_source_peaktransfer_t) {
         let block = NonNull::new(block).expect("called PCM_source::GetPeakInfo() with null block");
-        let block = &mut PcmSourcePeakTransfer(block);
+        let block = BorrowedPcmSourcePeakTransfer(unsafe { block.as_ref() });
         let args = GetPeakInfoArgs { block };
         self.delegate.get_peak_info(args);
     }
 
     fn SaveState(&mut self, ctx: *mut raw::ProjectStateContext) {
         let context = NonNull::new(ctx).expect("called PCM_source::SaveState() with null context");
-        let context = &mut ProjectStateContext(context);
+        let context = BorrowedProjectStateContext(unsafe { context.as_ref() });
         let args = SaveStateArgs { context };
         self.delegate.save_state(args);
     }
 
     fn LoadState(&mut self, firstline: *const i8, ctx: *mut raw::ProjectStateContext) -> i32 {
         let context = NonNull::new(ctx).expect("called PCM_source::LoadState() with null context");
-        let context = &mut ProjectStateContext(context);
+        let context = BorrowedProjectStateContext(unsafe { context.as_ref() });
         let first_line = unsafe { create_passing_c_str(firstline) };
         let args = LoadStateArgs {
             first_line: first_line.unwrap_or_default(),
