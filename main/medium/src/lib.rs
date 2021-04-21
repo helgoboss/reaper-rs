@@ -227,12 +227,13 @@
 //! #### Examples
 //!
 //! - [`raw::IReaperControlSurface`](../reaper_low/raw/struct.IReaperControlSurface.html) →
-//!   `ReaperControlSurface` (not yet existing) & [`ControlSurface`](struct.ControlSurface.html)
+//!   `ReaperControlSurface` (not yet existing) & [`ControlSurface`](trait.ControlSurface.html)
 //! - [`raw::midi_Input`](../reaper_low/raw/struct.midi_Input.html) →
 //!   [`MidiInput`](struct.MidiInput.html) &
 //! - [`raw::MIDI_eventlist`](../reaper_low/raw/struct.MIDI_eventlist.html) →
 //!   [`MidiEventList`](struct.MidiEventList.html) &
-//! - `PCM_source` → `PcmSource` & `MediumPcmSource` (both not yet existing)
+//! - [`raw::PCM_source`](../reaper_low/raw/struct.PCM_source.html) →
+//!   [`PcmSource`](struct.PcmSource.html) & [`CustomPcmSource`](trait.CustomPcmSource.html)
 //!
 //! ## Panic/error/safety strategy
 //!

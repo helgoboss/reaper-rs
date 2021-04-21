@@ -1,6 +1,8 @@
 #include "control_surface.hpp"
 
 namespace reaper_control_surface {
+  // C++ -> Rust
+
   // This surface just delegates to the free functions implemented in Rust. See header file for an explanation.
   class ReaperRsControlSurface : public IReaperControlSurface {
   private:

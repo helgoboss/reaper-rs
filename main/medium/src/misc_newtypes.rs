@@ -623,6 +623,62 @@ impl TryFrom<f64> for DurationInSeconds {
     }
 }
 
+/// This represents a duration expressed as positive amount of beats.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+pub struct DurationInBeats(pub(crate) f64);
+
+impl DurationInBeats {
+    fn is_valid(value: f64) -> bool {
+        value >= 0.0 && !value.is_infinite() && !value.is_nan()
+    }
+
+    /// Creates a value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is negative or a special number.
+    pub fn new(value: f64) -> DurationInBeats {
+        assert!(
+            Self::is_valid(value),
+            format!("{} is not a valid DurationInBeats value", value)
+        );
+        DurationInBeats(value)
+    }
+
+    /// Creates a DurationInBeats value without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is positive.
+    pub unsafe fn new_unchecked(value: f64) -> DurationInBeats {
+        DurationInBeats(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for DurationInBeats {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "DurationInBeats value must be positive",
+                value,
+            ));
+        }
+        Ok(DurationInBeats(value))
+    }
+}
+
 /// This represents a position expressed as an amount of beats.
 ///
 /// Can be negative, see [`PositionInSeconds`](struct.PositionInSeconds.html).

@@ -32,22 +32,15 @@ impl Source {
 
     pub fn file_name(&self) -> Option<PathBuf> {
         self.make_sure_is_valid();
-        let path_string = unsafe { self.raw.get_file_name(|name| name.map(|n| n.to_string()))? };
-        if path_string.trim().is_empty() {
-            return None;
-        }
-        Some(path_string.into())
+        unsafe { self.raw.get_file_name(|path| path.map(|p| p.to_owned())) }
     }
 
     pub fn r#type(&self) -> String {
         self.make_sure_is_valid();
-        unsafe {
-            self.raw
-                .get_type(|t| t.expect("PCM source has no type").to_string())
-        }
+        unsafe { self.raw.get_type(|t| t.to_string()) }
     }
 
-    pub fn length(&self) -> Option<DurationInSeconds> {
+    pub fn length(&self) -> Result<DurationInSeconds, ReaperFunctionError> {
         self.make_sure_is_valid();
         unsafe { self.raw.get_length() }
     }

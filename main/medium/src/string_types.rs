@@ -133,7 +133,7 @@ impl<'a> From<String> for ReaperStringArg<'a> {
 // that it returns UTF-8 strings and by letting consumers create such strings via Rust
 // strings only (which are UTF-8 encoded) or via `reaper_str!` macro. So it's essential that we
 // don't have a safe public conversion from `CString` into `ReaperString`!!!
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct ReaperString(CString);
 
 impl ReaperString {
@@ -293,6 +293,12 @@ impl ReaperStr {
 impl fmt::Display for ReaperStr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(self.to_str())
+    }
+}
+
+impl Default for &ReaperStr {
+    fn default() -> Self {
+        unsafe { ReaperStr::new(Default::default()) }
     }
 }
 

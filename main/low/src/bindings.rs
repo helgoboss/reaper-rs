@@ -11088,6 +11088,128 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
+            pub fn add_pcm_source(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *mut root::PCM_source;
+        }
+        extern "C" {
+            pub fn remove_pcm_source(source: *mut root::PCM_source);
+        }
+        extern "C" {
+            pub fn GetLength(callback_target: *mut ::std::os::raw::c_void) -> f64;
+        }
+        extern "C" {
+            pub fn Duplicate(callback_target: *mut ::std::os::raw::c_void)
+            -> *mut root::PCM_source;
+        }
+        extern "C" {
+            pub fn GetType(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn GetFileName(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn GetSource(callback_target: *mut ::std::os::raw::c_void)
+            -> *mut root::PCM_source;
+        }
+        extern "C" {
+            pub fn IsAvailable(callback_target: *mut ::std::os::raw::c_void) -> bool;
+        }
+        extern "C" {
+            pub fn SetAvailable(callback_target: *mut ::std::os::raw::c_void, avail: bool);
+        }
+        extern "C" {
+            pub fn SetFileName(
+                callback_target: *mut ::std::os::raw::c_void,
+                newfn: *const ::std::os::raw::c_char,
+            ) -> bool;
+        }
+        extern "C" {
+            pub fn SetSource(
+                callback_target: *mut ::std::os::raw::c_void,
+                src: *mut root::PCM_source,
+            );
+        }
+        extern "C" {
+            pub fn GetNumChannels(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn GetSampleRate(callback_target: *mut ::std::os::raw::c_void) -> f64;
+        }
+        extern "C" {
+            pub fn GetLengthBeats(callback_target: *mut ::std::os::raw::c_void) -> f64;
+        }
+        extern "C" {
+            pub fn GetBitsPerSample(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn GetPreferredPosition(callback_target: *mut ::std::os::raw::c_void) -> f64;
+        }
+        extern "C" {
+            pub fn PropertiesWindow(
+                callback_target: *mut ::std::os::raw::c_void,
+                hwndParent: root::HWND,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn GetSamples(
+                callback_target: *mut ::std::os::raw::c_void,
+                block: *mut root::PCM_source_transfer_t,
+            );
+        }
+        extern "C" {
+            pub fn GetPeakInfo(
+                callback_target: *mut ::std::os::raw::c_void,
+                block: *mut root::PCM_source_peaktransfer_t,
+            );
+        }
+        extern "C" {
+            pub fn SaveState(
+                callback_target: *mut ::std::os::raw::c_void,
+                ctx: *mut root::ProjectStateContext,
+            );
+        }
+        extern "C" {
+            pub fn LoadState(
+                callback_target: *mut ::std::os::raw::c_void,
+                firstline: *const ::std::os::raw::c_char,
+                ctx: *mut root::ProjectStateContext,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn Peaks_Clear(callback_target: *mut ::std::os::raw::c_void, deleteFile: bool);
+        }
+        extern "C" {
+            pub fn PeaksBuild_Begin(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PeaksBuild_Run(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn PeaksBuild_Finish(callback_target: *mut ::std::os::raw::c_void);
+        }
+        extern "C" {
+            pub fn rust_PCM_source_Extended(
+                callback_target: *mut ::std::os::raw::c_void,
+                call: ::std::os::raw::c_int,
+                parm1: *mut ::std::os::raw::c_void,
+                parm2: *mut ::std::os::raw::c_void,
+                parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
             pub fn PCM_source_GetLength(self_: *mut root::PCM_source) -> f64;
         }
         extern "C" {
