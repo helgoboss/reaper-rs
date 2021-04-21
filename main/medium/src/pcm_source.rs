@@ -632,7 +632,7 @@ pub trait CustomPcmSource {
     /// Implementing this is unsafe because you need to deal with raw pointers.
     ///
     /// [`args.call`]: struct.ExtendedArgs.html#structfield.call
-    unsafe fn extended(&self, args: ExtendedArgs) -> i32 {
+    unsafe fn extended(&mut self, args: ExtendedArgs) -> i32 {
         let _ = args;
         0
     }
