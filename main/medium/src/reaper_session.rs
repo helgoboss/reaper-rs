@@ -1,24 +1,28 @@
 use std::ptr::NonNull;
 
 use reaper_low::{
-    add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface, PluginContext,
+    create_cpp_to_rust_control_surface, delete_cpp_control_surface, raw, IReaperControlSurface,
+    PluginContext,
 };
 
-use crate::infostruct_keeper::InfostructKeeper;
+use crate::keeper::{Keeper, SharedKeeper};
 
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
-    CommandId, ControlSurface, DelegatingControlSurface, HookCommand, HookCommand2,
-    HookPostCommand, HookPostCommand2, MainThreadScope, OnAudioBuffer, OwnedAudioHookRegister,
-    OwnedGaccelRegister, PluginRegistration, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
-    ReaperFunctionResult, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
+    BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter, HookCommand, HookCommand2,
+    HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment, OnAudioBuffer,
+    OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration,
+    ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult,
+    ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
     ToggleAction,
 };
 use reaper_low::raw::audio_hook_register_t;
 
+use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
+use std::sync::Arc;
 
 /// This is the main hub for accessing medium-level API functions.
 ///
@@ -59,7 +63,9 @@ use std::os::raw::{c_char, c_void};
 pub struct ReaperSession {
     reaper: Reaper<MainThreadScope>,
     /// Provides a safe place in memory for registered actions.
-    gaccel_registers: InfostructKeeper<OwnedGaccelRegister, raw::gaccel_register_t>,
+    gaccel_registers: Keeper<OwnedGaccelRegister, raw::gaccel_register_t>,
+    /// Provides a safe place in memory for currently playing preview registers.
+    preview_registers: SharedKeeper<ReaperMutex<OwnedPreviewRegister>, raw::preview_register_t>,
     /// Provides a safe place in memory for command names used in command ID registrations.
     //
     // We don't need to box the string because it's content is something which is on the heap
@@ -71,7 +77,7 @@ pub struct ReaperSession {
     ///
     /// While in here, the audio hook is considered to be owned by REAPER, meaning that REAPER is
     /// supposed to have exclusive access to it.
-    audio_hook_registers: InfostructKeeper<OwnedAudioHookRegister, raw::audio_hook_register_t>,
+    audio_hook_registers: Keeper<OwnedAudioHookRegister, raw::audio_hook_register_t>,
     /// Provides a safe place in memory for each registered control surface.
     ///
     /// While in here, the control surface is considered to be owned by REAPER, meaning that REAPER
@@ -84,6 +90,8 @@ pub struct ReaperSession {
     plugin_registrations: HashSet<PluginRegistration>,
     /// Keep track of audio hook registrations so they can be unregistered automatically on drop.
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
+    /// Keep track of playing preview registers so they can be unregistered automatically on drop.
+    playing_preview_registers: HashSet<NonNull<raw::preview_register_t>>,
 }
 
 impl ReaperSession {
@@ -94,12 +102,14 @@ impl ReaperSession {
         ReaperSession {
             reaper: Reaper::new(low),
             gaccel_registers: Default::default(),
+            preview_registers: Default::default(),
             command_names: Default::default(),
             api_defs: Default::default(),
             audio_hook_registers: Default::default(),
             csurf_insts: Default::default(),
             plugin_registrations: Default::default(),
             audio_hook_registrations: Default::default(),
+            playing_preview_registers: Default::default(),
         }
     }
 
@@ -407,14 +417,13 @@ impl ReaperSession {
         Ok(CommandId(raw_id as _))
     }
 
-    /// **This is still unstable!**
+    /// Unstable!!!
     ///
     /// # Safety
     ///
     /// You must ensure that the given function pointer is valid.
-    // TODO-high Better API (maybe a builder). Also because current one is prone to breaking
-    //  changes.
-    // TODO-high Doc
+    // TODO-high-unstable Better API (maybe a builder) and doc. Also because current one is prone to
+    //  breaking changes.
     // TODO-low Add function for removal
     #[allow(clippy::too_many_arguments)]
     pub unsafe fn plugin_register_add_api_and_def<'a>(
@@ -494,6 +503,223 @@ impl ReaperSession {
         Ok(handle)
     }
 
+    /// Plays a preview register.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid preview pointer, if the pointer gets stale while
+    /// still playing, if you don't properly handle synchronization via mutex or critical section
+    /// when modifying the register while playing. Use [`play_preview_ex()`] if you want to be
+    /// released from that burden.
+    ///
+    /// [`play_preview_ex()`]: #method.play_preview_ex
+    pub unsafe fn play_preview_ex_unchecked(
+        &mut self,
+        preview: NonNull<raw::preview_register_t>,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
+    ) -> ReaperFunctionResult<()> {
+        self.playing_preview_registers.insert(preview);
+        let result = self.reaper.low().PlayPreviewEx(
+            preview.as_ptr(),
+            buffering_behavior.bits() as i32,
+            measure_alignment.to_raw(),
+        );
+        if result == 0 {
+            return Err(ReaperFunctionError::new("couldn't play preview"));
+        }
+        Ok(())
+    }
+
+    /// Stops a preview that you have played with [`play_preview_ex_unchecked()`].
+    ///
+    /// Please note that stopping preview registers manually just for cleaning up is
+    /// unnecessary in most situations because *reaper-rs* takes care of automatically
+    /// unregistering everything when this struct is dropped (RAII). This happens even when using
+    /// the unsafe function variants.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    ///
+    /// [`play_preview_ex_unchecked()`]: #method.play_preview_ex_unchecked
+    pub unsafe fn stop_preview_unchecked(
+        &mut self,
+        register: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        let successful = self.reaper.low().StopPreview(register.as_ptr());
+        if successful == 0 {
+            return Err(ReaperFunctionError::new("couldn't stop preview"));
+        }
+        self.playing_preview_registers.remove(&register);
+        Ok(())
+    }
+
+    /// Plays a preview register on a specific track.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or preview pointer, if the pointer gets
+    /// stale while still playing, if you don't properly handle synchronization via mutex or
+    /// critical section when modifying the register while playing. Use
+    /// [`play_track_preview_2_ex()`] if you want to be released from that burden.
+    ///
+    /// [`play_track_preview_2_ex()`]: #method.play_track_preview_2_ex
+    pub unsafe fn play_track_preview_2_ex_unchecked(
+        &mut self,
+        project: ProjectContext,
+        preview: NonNull<raw::preview_register_t>,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
+    ) -> ReaperFunctionResult<()> {
+        self.playing_preview_registers.insert(preview);
+        let result = self.reaper.low().PlayTrackPreview2Ex(
+            project.to_raw(),
+            preview.as_ptr(),
+            buffering_behavior.bits() as i32,
+            measure_alignment.to_raw(),
+        );
+        if result == 0 {
+            return Err(ReaperFunctionError::new("couldn't play track preview"));
+        }
+        Ok(())
+    }
+
+    /// Stops a preview that you have played with [`play_track_preview_2_ex_unchecked()`].
+    ///
+    /// Please note that stopping preview registers manually just for cleaning up is
+    /// unnecessary in most situations because *reaper-rs* takes care of automatically
+    /// unregistering everything when this struct is dropped (RAII). This happens even when using
+    /// the unsafe function variants.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or register pointer.
+    ///
+    /// [`play_track_preview_2_ex_unchecked()`]: #method.play_track_preview_2_ex_unchecked
+    pub unsafe fn stop_track_preview_2_unchecked(
+        &mut self,
+        project: ProjectContext,
+        register: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        let successful = self
+            .reaper
+            .low()
+            .StopTrackPreview2(project.to_raw() as _, register.as_ptr());
+        if successful == 0 {
+            return Err(ReaperFunctionError::new("couldn't stop track preview"));
+        }
+        self.playing_preview_registers.remove(&register);
+        Ok(())
+    }
+
+    /// Plays a preview register.
+    ///
+    /// It asks for a shared mutex-protected register because it assumes you want to keep
+    /// controlling the playback. With the mutex you can safely modify the register on-the-fly while
+    /// it's being played by REAPER.
+    ///
+    /// Returns a handle which is necessary to stop the preview at a later time.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    pub fn play_preview_ex(
+        &mut self,
+        register: Arc<ReaperMutex<OwnedPreviewRegister>>,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
+    ) -> ReaperFunctionResult<NonNull<raw::preview_register_t>> {
+        let handle = self.preview_registers.keep(register);
+        unsafe { self.play_preview_ex_unchecked(handle, buffering_behavior, measure_alignment)? };
+        Ok(handle)
+    }
+
+    /// Stops a preview that you have played with [`play_preview_ex()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful (e.g. was not playing).
+    ///
+    /// [`play_preview_ex()`]: #method.play_preview_ex
+    pub fn stop_preview(
+        &mut self,
+        handle: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        unsafe {
+            self.stop_preview_unchecked(handle)?;
+        };
+        self.preview_registers.release(handle);
+        Ok(())
+    }
+
+    /// Plays a preview register on a specific track.
+    ///
+    /// It asks for a shared mutex-protected register because it assumes you want to keep
+    /// controlling the playback. With the mutex you can safely modify the register on-the-fly while
+    /// it's being played by REAPER.
+    ///
+    /// Returns a handle which is necessary to stop the preview at a later time.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    pub fn play_track_preview_2_ex(
+        &mut self,
+        project: ProjectContext,
+        register: Arc<ReaperMutex<OwnedPreviewRegister>>,
+        buffering_behavior: BitFlags<BufferingBehavior>,
+        measure_alignment: MeasureAlignment,
+    ) -> ReaperFunctionResult<NonNull<raw::preview_register_t>> {
+        self.reaper.require_valid_project(project);
+        let handle = self.preview_registers.keep(register);
+        unsafe {
+            self.play_track_preview_2_ex_unchecked(
+                project,
+                handle,
+                buffering_behavior,
+                measure_alignment,
+            )?
+        };
+        Ok(handle)
+    }
+
+    /// Stops a preview that you have played with [`play_track_preview_2_ex()`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful (e.g. was not playing).
+    ///
+    /// [`play_track_preview_2_ex()`]: #method.play_track_preview_2_ex
+    pub fn stop_track_preview_2(
+        &mut self,
+        project: ProjectContext,
+        handle: NonNull<raw::preview_register_t>,
+    ) -> ReaperFunctionResult<()> {
+        self.reaper.require_valid_project(project);
+        unsafe {
+            self.stop_track_preview_2_unchecked(project, handle)?;
+        };
+        self.preview_registers.release(handle);
+        Ok(())
+    }
+
     /// Unregisters an action.
     pub fn plugin_register_remove_gaccel(&mut self, handle: NonNull<raw::gaccel_register_t>) {
         unsafe { self.plugin_register_remove(RegistrationObject::Gaccel(handle)) };
@@ -541,11 +767,12 @@ impl ReaperSession {
         // restore the original control_surface later).
         let control_surface_thin_ptr: NonNull<T> = control_surface.as_ref().into();
         // Create low-level Rust control surface which delegates to the medium-level one.
-        let low_cs = DelegatingControlSurface::new(control_surface, &self.reaper.get_app_version());
+        let low_cs = ControlSurfaceAdapter::new(control_surface, &self.reaper.get_app_version());
         // Create the C++ counterpart surface (we need to box the Rust side twice in order to obtain
         // a thin pointer for passing it to C++ as callback target).
         let double_boxed_low_cs: Box<Box<dyn IReaperControlSurface>> = Box::new(Box::new(low_cs));
-        let cpp_cs = unsafe { add_cpp_control_surface(double_boxed_low_cs.as_ref().into()) };
+        let cpp_cs =
+            unsafe { create_cpp_to_rust_control_surface(double_boxed_low_cs.as_ref().into()) };
         // Store the low-level Rust control surface in memory. Although we keep it here,
         // conceptually it's owned by REAPER, so we should not access it while being registered.
         let handle = RegistrationHandle::new(control_surface_thin_ptr, cpp_cs.cast());
@@ -600,11 +827,11 @@ impl ReaperSession {
         let cpp_cs_ptr = handle.reaper_ptr().cast();
         self.plugin_register_remove(RegistrationObject::CsurfInst(cpp_cs_ptr));
         // Remove the C++ counterpart surface
-        remove_cpp_control_surface(cpp_cs_ptr);
+        delete_cpp_control_surface(cpp_cs_ptr);
         // Reconstruct the initial value for handing ownership back to the consumer
         let low_cs = double_boxed_low_cs
             .into_any()
-            .downcast::<DelegatingControlSurface>()
+            .downcast::<ControlSurfaceAdapter>()
             .ok()?;
         let dyn_control_surface = low_cs.into_delegate();
         // We are not interested in the fat pointer (Box<dyn ControlSurface>) anymore.
@@ -789,6 +1016,11 @@ impl ReaperSession {
 
 impl Drop for ReaperSession {
     fn drop(&mut self) {
+        for handle in self.playing_preview_registers.clone() {
+            unsafe {
+                let _ = self.stop_preview_unchecked(handle);
+            }
+        }
         for handle in self.audio_hook_registrations.clone() {
             unsafe {
                 self.audio_reg_hardware_hook_remove_unchecked(handle);

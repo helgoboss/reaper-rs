@@ -32,6 +32,9 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 serde_yaml = "0.8"
 backtrace = "0.3"
 metered = "0.7.0"
+ref-cast = "1.0.6"
+# For relativizing to project path
+pathdiff = "0.2.0"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["psapi", "processthreadsapi"] }

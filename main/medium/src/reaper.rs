@@ -4,7 +4,6 @@ use crate::metering::{ResponseTimeMultiThreaded, ResponseTimeSingleThreaded};
 use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
 use reaper_macros::measure;
-use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
@@ -16,14 +15,15 @@ use crate::{
     BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
     EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
     GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MediaTrack, MessageBoxResult, MessageBoxType, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
-    NotificationBehavior, PanMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
-    PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId,
-    SendTarget, SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey,
+    KbdSectionInfo, MasterTrackBehavior, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
+    PanMode, PcmSource, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds,
+    ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
+    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
+    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
+    SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey,
     TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
     TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
@@ -32,6 +32,9 @@ use crate::{
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
 
+use crate::util::{
+    create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_prefilled,
+};
 use enumflags2::BitFlags;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -266,18 +269,17 @@ impl<UsageScope> Reaper<UsageScope> {
                 file_path: None,
             })
         } else {
-            let (owned_c_string, ptr) =
-                with_string_buffer(buffer_size, |buffer, max_size| unsafe {
-                    self.low.EnumProjects(idx, buffer, max_size)
-                });
+            let (reaper_string, ptr) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+                self.low.EnumProjects(idx, buffer, max_size)
+            });
             let project = NonNull::new(ptr)?;
-            if owned_c_string.is_empty() {
+            if reaper_string.is_empty() {
                 return Some(EnumProjectsResult {
                     project,
                     file_path: None,
                 });
             }
-            let owned_string = owned_c_string.into_string();
+            let owned_string = reaper_string.into_string();
             Some(EnumProjectsResult {
                 project,
                 file_path: Some(PathBuf::from(owned_string)),
@@ -1137,6 +1139,45 @@ impl<UsageScope> Reaper<UsageScope> {
             color: NativeColor(color.assume_init() as _),
         };
         use_result(Some(result))
+    }
+
+    /// Creates a PCM source from the given file name.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the PCM source could not be created.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given file name is not valid UTF-8.
+    ///
+    /// [`pcm_source_destroy()`]: #method.pcm_source_destroy
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn pcm_source_create_from_file_ex(
+        &self,
+        file_name: &Path,
+        midi_import_behavior: MidiImportBehavior,
+    ) -> ReaperFunctionResult<OwnedPcmSource>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        // TODO-medium Can maybe be relaxed.
+        self.require_main_thread();
+        let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
+        let file_name_reaper_string = ReaperString::from_str(file_name_str);
+        let ptr = unsafe {
+            self.low.PCM_Source_CreateFromFileEx(
+                file_name_reaper_string.as_ptr(),
+                match midi_import_behavior {
+                    MidiImportBehavior::UsePreference => false,
+                    MidiImportBehavior::ForceNoMidiImport => true,
+                },
+            )
+        };
+        NonNull::new(ptr)
+            .ok_or_else(|| ReaperFunctionError::new("couldn't create PCM source from file"))
+            .map(PcmSource)
+            .map(OwnedPcmSource)
     }
 
     /// Goes to the given marker.
@@ -3570,7 +3611,7 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Converts the given GUID to a string (including braces).
-    #[measure(ResponseTimeSingleThreaded)]
+    #[measure(ResponseTimeMultiThreaded)]
     pub fn guid_to_string(&self, guid: &GUID) -> ReaperString
     where
         UsageScope: AnyThread,
@@ -3579,6 +3620,47 @@ impl<UsageScope> Reaper<UsageScope> {
             self.low.guidToString(guid as *const GUID, buffer)
         });
         guid_string
+    }
+
+    /// Returns the project recording path.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the resulting path you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_project_path_ex(&self, project: ProjectContext, buffer_size: u32) -> PathBuf
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_project_path_ex_unchecked(project, buffer_size) }
+    }
+
+    /// Like [`get_project_path_ex()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_project_path_ex()`]: #method.get_project_path_ex
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_project_path_ex_unchecked(
+        &self,
+        project: ProjectContext,
+        buffer_size: u32,
+    ) -> PathBuf
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (reaper_string, _) = with_string_buffer(buffer_size, |buffer, max_size| {
+            self.low
+                .GetProjectPathEx(project.to_raw(), buffer, max_size)
+        });
+        let owned_string = reaper_string.into_string();
+        PathBuf::from(owned_string)
     }
 
     /// Returns the master tempo of the current project.
@@ -3601,7 +3683,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.set_current_bpm_unchecked(project, tempo, undo_behavior);
@@ -4172,7 +4253,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe {
             self.get_selected_track_2_unchecked(
@@ -4206,6 +4286,95 @@ impl<UsageScope> Reaper<UsageScope> {
             selected_track_index as i32,
             master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
         );
+        NonNull::new(ptr)
+    }
+
+    /// Returns a selected item from the given project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_selected_media_item(
+        &self,
+        project: ProjectContext,
+        selected_item_index: u32,
+    ) -> Option<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_selected_media_item_unchecked(project, selected_item_index) }
+    }
+
+    /// Like [`get_selected_media_item()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_selected_media_item()`]: #method.get_selected_media_item
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_selected_media_item_unchecked(
+        &self,
+        project: ProjectContext,
+        selected_item_index: u32,
+    ) -> Option<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self
+            .low
+            .GetSelectedMediaItem(project.to_raw(), selected_item_index as i32);
+        NonNull::new(ptr)
+    }
+
+    /// Returns the media source of the given media item take.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_media_item_take_source(&self, take: MediaItemTake) -> Option<PcmSource>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetMediaItemTake_Source(take.as_ptr());
+        NonNull::new(ptr).map(PcmSource)
+    }
+
+    /// Unstable!!!
+    ///
+    /// Returns the project which contains this item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    // TODO-high-unstable Can this EVER be None?
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_item_project_context(&self, item: MediaItem) -> Option<ReaProject>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetItemProjectContext(item.as_ptr());
+        NonNull::new(ptr)
+    }
+
+    /// Returns the active take in this item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_active_take(&self, item: MediaItem) -> Option<MediaItemTake>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetActiveTake(item.as_ptr());
         NonNull::new(ptr)
     }
 
@@ -4813,6 +4982,28 @@ impl<UsageScope> Reaper<UsageScope> {
             unsafe { create_passing_c_str(ptr).expect("should always return resource path") };
         let path = Path::new(reaper_str.to_str());
         use_resource_path(path)
+    }
+
+    /// Grants temporary access to the name of the given take.
+    ///
+    /// # Error
+    ///
+    /// Returns an error if the take is not valid.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_take_name<R>(
+        &self,
+        take: MediaItemTake,
+        use_name: impl FnOnce(ReaperFunctionResult<&ReaperStr>) -> R,
+    ) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let passing_c_str = unsafe {
+            let ptr = self.low.GetTakeName(take.as_ptr());
+            create_passing_c_str(ptr as *const c_char)
+        };
+        use_name(passing_c_str.ok_or_else(|| ReaperFunctionError::new("invalid take")))
     }
 
     /// Returns the current on/off state of a toggleable action.
@@ -5428,7 +5619,7 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
-    fn require_valid_project(&self, project: ProjectContext)
+    pub(crate) fn require_valid_project(&self, project: ProjectContext)
     where
         UsageScope: AnyThread,
     {
@@ -5693,57 +5884,12 @@ unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
     deref(ptr as *const T)
 }
 
-unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a ReaperStr> {
-    if ptr.is_null() {
-        return None;
-    }
-    Some(ReaperStr::from_ptr(ptr))
-}
-
 fn convert_tracknumber_to_track_location(tracknumber: u32) -> TrackLocation {
     if tracknumber == 0 {
         TrackLocation::MasterTrack
     } else {
         TrackLocation::NormalTrack(tracknumber - 1)
     }
-}
-
-fn with_string_buffer<T>(
-    max_size: u32,
-    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
-) -> (ReaperString, T) {
-    // Using with_capacity() here wouldn't be correct because it leaves the vector length at zero.
-    let vec: Vec<u8> = vec![0; max_size as usize];
-    with_string_buffer_internal(vec, max_size, fill_buffer)
-}
-
-fn with_string_buffer_prefilled<'a, T>(
-    prefill: impl Into<ReaperStringArg<'a>>,
-    max_size: u32,
-    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
-) -> (ReaperString, T) {
-    let mut vec = Vec::from(prefill.into().as_reaper_str().as_c_str().to_bytes());
-    vec.resize(max_size as usize, 0);
-    with_string_buffer_internal(vec, max_size, fill_buffer)
-}
-
-fn with_string_buffer_internal<T>(
-    vec: Vec<u8>,
-    max_size: u32,
-    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
-) -> (ReaperString, T) {
-    let c_string = unsafe { CString::from_vec_unchecked(vec) };
-    let raw = c_string.into_raw();
-    let result = fill_buffer(raw, max_size as i32);
-    let string = unsafe { ReaperString::new(CString::from_raw(raw)) };
-    (string, result)
-}
-
-fn with_buffer<T>(max_size: u32, fill_buffer: impl FnOnce(*mut c_char, i32) -> T) -> (Vec<u8>, T) {
-    let mut vec: Vec<u8> = vec![0; max_size as usize];
-    let raw = vec.as_mut_ptr() as *mut c_char;
-    let result = fill_buffer(raw, max_size as i32);
-    (vec, result)
 }
 
 const ZERO_GUID: GUID = GUID {

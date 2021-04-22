@@ -10,7 +10,6 @@ use reaper_medium::{
     SetTrackTitleArgs,
 };
 
-use std::borrow::Cow;
 use std::fmt::Debug;
 
 /// This control surface "redirects" each callback method with event character into an enum value,
@@ -29,15 +28,15 @@ pub trait ControlSurfaceMiddleware {
         false
     }
 
-    fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_type_string(&self) -> Option<&ReaperStr> {
         None
     }
 
-    fn get_desc_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_desc_string(&self) -> Option<&ReaperStr> {
         None
     }
 
-    fn get_config_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_config_string(&self) -> Option<&ReaperStr> {
         None
     }
 
@@ -264,15 +263,15 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
         )
     }
 
-    fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_type_string(&self) -> Option<&ReaperStr> {
         self.middleware.get_type_string()
     }
 
-    fn get_desc_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_desc_string(&self) -> Option<&ReaperStr> {
         self.middleware.get_desc_string()
     }
 
-    fn get_config_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_config_string(&self) -> Option<&ReaperStr> {
         self.middleware.get_config_string()
     }
 

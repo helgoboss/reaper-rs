@@ -3,6 +3,7 @@ use reaper_low::raw;
 
 use crate::{MidiFrameOffset, SendMidiTime};
 use reaper_low::raw::MIDI_event_t;
+use ref_cast::RefCast;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
@@ -38,77 +39,162 @@ impl MidiInput {
     ///
     /// [`MidiInput`]: struct.MidiInput.html
     /// [`get_midi_input()`]: struct.Reaper.html#method.get_midi_input
-    pub fn get_read_buf(&self) -> MidiEventList<'_> {
+    pub fn get_read_buf(&self) -> &BorrowedMidiEventList {
         let raw_evt_list = unsafe { self.0.as_ref().GetReadBuf() };
-        MidiEventList::new(unsafe { &*raw_evt_list })
+        if raw_evt_list.is_null() {
+            panic!("GetReadBuf returned null");
+        }
+        unsafe { &*(raw_evt_list as *const BorrowedMidiEventList) }
     }
 }
 
 /// A list of MIDI events borrowed from REAPER.
 //
 // Internals exposed: no | vtable: yes (Rust => REAPER)
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct MidiEventList<'a>(&'a raw::MIDI_eventlist);
+#[derive(Eq, PartialEq, Hash, Debug, RefCast)]
+#[repr(transparent)]
+pub struct BorrowedMidiEventList(pub(crate) raw::MIDI_eventlist);
 
-impl<'a> MidiEventList<'a> {
-    pub(super) fn new(raw_evt_list: &'a raw::MIDI_eventlist) -> Self {
-        MidiEventList(raw_evt_list)
-    }
-
+impl BorrowedMidiEventList {
     /// Returns an iterator exposing the contained MIDI events.
     ///
     /// `bpos` is the iterator start position.
-    pub fn enum_items(self, bpos: u32) -> impl Iterator<Item = MidiEvent<'a>> {
+    pub fn enum_items(&self, bpos: u32) -> impl Iterator<Item = &MidiEvent> {
         EnumItems {
-            raw_list: self.0,
+            raw_list: &self.0,
             bpos: bpos as i32,
         }
     }
 
     /// Adds an item to this list of MIDI events.
-    pub fn add_item(self, msg: &MidiEvent) {
+    pub fn add_item(&self, msg: &MidiEvent) {
         unsafe {
-            self.0.AddItem(msg.0 as *const _ as _);
+            self.0.AddItem(&msg.0 as *const _ as _);
         }
     }
 }
 
-/// A MIDI event borrowed from REAPER.
+/// An owned or borrowed MIDI event for or from REAPER.
+///
+/// Cannot own more than a short MIDI message (just like the low-level equivalent).
+//
+// TODO-medium Support at least reading larger sizes of MIDI messages (by checking the size and
+//  unsafely returning a slice).
 // # Internals exposed: yes | vtable: no
-// TODO-low Can be converted into an owned MIDI event in case it needs to live longer than REAPER
-//  keeps  the event around.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct MidiEvent<'a>(&'a raw::MIDI_event_t);
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default, RefCast)]
+#[repr(transparent)]
+pub struct MidiEvent(raw::MIDI_event_t);
 
-/// A MIDI message borrowed from REAPER.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct MidiMessage<'a>(&'a raw::MIDI_event_t);
+/// An MIDI message borrowed from a REAPER MIDI event.
+///
+/// Can also be owned but contains more information than necessary because it contains also event
+/// data.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default, RefCast)]
+#[repr(transparent)]
+pub struct MidiMessage(raw::MIDI_event_t);
 
-impl<'a> MidiEvent<'a> {
-    pub(crate) unsafe fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiEvent(raw_evt)
+impl MidiEvent {
+    /// Turns the given owned low-level MIDI event into a medium-level one.
+    pub fn from_raw(raw: raw::MIDI_event_t) -> MidiEvent {
+        Self(raw)
+    }
+
+    /// Turns the given low-level MIDI event reference into a medium-level one.
+    pub fn from_raw_ref(raw: &raw::MIDI_event_t) -> &MidiEvent {
+        MidiEvent::ref_cast(raw)
     }
 
     /// Returns the frame offset.
-    pub fn frame_offset(self) -> MidiFrameOffset {
+    pub fn frame_offset(&self) -> MidiFrameOffset {
         MidiFrameOffset::new(self.0.frame_offset as u32)
     }
 
+    /// Sets the frame offset.
+    pub fn set_frame_offset(&mut self, offset: MidiFrameOffset) {
+        self.0.frame_offset = offset.to_raw();
+    }
+
     /// Returns the actual message.
-    pub fn message(self) -> MidiMessage<'a> {
-        MidiMessage::new(self.0)
+    pub fn message(&self) -> &MidiMessage {
+        MidiMessage::ref_cast(&self.0)
+    }
+
+    /// Sets the actual message.
+    pub fn set_message(&mut self, message: impl ShortMessage) {
+        let bytes = message.to_bytes();
+        self.0.size = 3;
+        self.0.midi_message = [bytes.0, bytes.1.into(), bytes.2.into(), 0];
     }
 }
 
-impl<'a> AsRef<raw::MIDI_event_t> for MidiEvent<'a> {
+impl AsRef<raw::MIDI_event_t> for MidiEvent {
     fn as_ref(&self) -> &MIDI_event_t {
-        self.0
+        &self.0
     }
 }
 
-impl<'a> MidiMessage<'a> {
-    pub(super) fn new(raw_evt: &'a raw::MIDI_event_t) -> Self {
-        MidiMessage(raw_evt)
+/// An owned MIDI event which can hold more than just the usual 3-byte short MIDI message.
+///
+/// Has exactly the same layout as [`MidiEvent`](struct.MidiEvent.html) but reserves much more space
+/// for the message.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[repr(C)]
+pub struct LongMidiEvent {
+    frame_offset: i32,
+    size: i32,
+    midi_message: [u8; LongMidiEvent::MAX_LENGTH],
+}
+
+impl LongMidiEvent {
+    /// The maximum message length.
+    // TODO-medium What's a good maximum value? This seems too low. Attention: An array of that size
+    // will be created!
+    pub const MAX_LENGTH: usize = 256;
+
+    /// Creates a long MIDI event directly from an owned byte array.
+    ///
+    /// Size needs to be given because the actual message length is probably lower than the maximum
+    /// size of a long message.  
+    pub fn new(
+        frame_offset: MidiFrameOffset,
+        midi_message: [u8; Self::MAX_LENGTH],
+        size: u32,
+    ) -> Self {
+        Self {
+            frame_offset: frame_offset.to_raw(),
+            size: size as _,
+            midi_message,
+        }
+    }
+
+    /// Attempts to create a long MIDI event from the given slice.
+    ///
+    /// Involves copying.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the given slice is longer than the supported maximum.
+    pub fn try_from_slice(
+        frame_offset: MidiFrameOffset,
+        midi_message: &[u8],
+    ) -> Result<Self, &'static str> {
+        if midi_message.len() > Self::MAX_LENGTH {
+            return Err("given MIDI message too long");
+        }
+        let mut array = [0; Self::MAX_LENGTH];
+        array[..midi_message.len()].copy_from_slice(&midi_message);
+        Ok(Self::new(frame_offset, array, midi_message.len() as _))
+    }
+
+    /// Returns the contained MIDI data as byte slice.
+    pub fn bytes(&self) -> &[u8] {
+        &self.midi_message[..self.size as usize]
+    }
+}
+
+impl AsRef<raw::MIDI_event_t> for LongMidiEvent {
+    fn as_ref(&self) -> &raw::MIDI_event_t {
+        unsafe { &*(self as *const LongMidiEvent as *const reaper_low::raw::MIDI_event_t) }
     }
 }
 
@@ -118,7 +204,7 @@ struct EnumItems<'a> {
 }
 
 impl<'a> Iterator for EnumItems<'a> {
-    type Item = MidiEvent<'a>;
+    type Item = &'a MidiEvent;
 
     fn next(&mut self) -> Option<Self::Item> {
         let raw_evt = unsafe { self.raw_list.EnumItems(&mut self.bpos as *mut c_int) };
@@ -126,12 +212,12 @@ impl<'a> Iterator for EnumItems<'a> {
             // No MIDI events left
             return None;
         }
-        let evt = unsafe { MidiEvent::new(&*raw_evt) };
+        let evt = unsafe { MidiEvent::ref_cast(&*raw_evt) };
         Some(evt)
     }
 }
 
-impl<'a> ShortMessage for MidiMessage<'a> {
+impl ShortMessage for MidiMessage {
     fn status_byte(&self) -> u8 {
         self.0.midi_message[0]
     }

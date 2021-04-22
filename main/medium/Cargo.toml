@@ -24,6 +24,13 @@ enumflags2 = { version = "^0.6", features = ["not_literal"] }
 vst = "*"
 metered = { version = "0.7.0", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
+ref-cast = "1.0.6"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winuser", "synchapi"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
 
 [dev-dependencies]
 version-sync = "0.9"

@@ -1,10 +1,8 @@
 use super::{MediaItem, MediaItemTake, MediaTrack, ReaProject, TrackEnvelope};
-use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
+use crate::{concat_reaper_strs, PcmSource, ReaperStr, ReaperStringArg};
 
-use reaper_low::raw;
 use std::borrow::Cow;
 use std::os::raw::c_void;
-use std::ptr::NonNull;
 
 /// Validatable REAPER pointer.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -14,7 +12,7 @@ pub enum ReaperPointer<'a> {
     MediaItem(MediaItem),
     MediaItemTake(MediaItemTake),
     TrackEnvelope(TrackEnvelope),
-    PcmSource(NonNull<raw::PCM_source>),
+    PcmSource(PcmSource),
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -66,7 +64,7 @@ impl<'a> ReaperPointer<'a> {
             MediaItem(p) => p.as_ptr() as *mut _,
             MediaItemTake(p) => p.as_ptr() as *mut _,
             TrackEnvelope(p) => p.as_ptr() as *mut _,
-            PcmSource(p) => p.as_ptr() as *mut _,
+            PcmSource(p) => p.to_raw() as *mut _,
             Custom { pointer, .. } => *pointer,
         }
     }
@@ -88,4 +86,4 @@ impl_from_ptr_to_variant!(ReaProject, ReaProject);
 impl_from_ptr_to_variant!(MediaItem, MediaItem);
 impl_from_ptr_to_variant!(MediaItemTake, MediaItemTake);
 impl_from_ptr_to_variant!(TrackEnvelope, TrackEnvelope);
-impl_from_ptr_to_variant!(NonNull<raw::PCM_source>, PcmSource);
+impl_from_ptr_to_variant!(PcmSource, PcmSource);

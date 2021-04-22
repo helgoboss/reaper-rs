@@ -7,7 +7,6 @@ use crate::{
 };
 
 use reaper_low::raw;
-use std::borrow::Cow;
 
 use std::fmt::Debug;
 use std::os::raw::c_void;
@@ -27,7 +26,11 @@ pub trait ControlSurface: Debug {
     /// Must be a simple unique string with only A-Z, 0-9, no spaces or other characters.
     ///
     /// Return `None` if this is a control surface behind the scenes.
-    fn get_type_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    //
+    // We can't let this returns something owned because it would be gone as soon as the delegate
+    // control surface turns this into a pointer and returns. This method of `IReaperControlSurface`
+    // and related ones are just designed to work that way.
+    fn get_type_string(&self) -> Option<&ReaperStr> {
         None
     }
 
@@ -36,14 +39,14 @@ pub trait ControlSurface: Debug {
     /// Should be a human readable description, can include instance-specific information.
     ///
     /// Return `None` if this is a control surface behind the scenes.
-    fn get_desc_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_desc_string(&self) -> Option<&ReaperStr> {
         None
     }
 
     /// Should return a string of configuration data.
     ///
     /// Return `None` if this is a control surface behind the scenes.
-    fn get_config_string(&self) -> Option<Cow<'static, ReaperStr>> {
+    fn get_config_string(&self) -> Option<&ReaperStr> {
         None
     }
 
@@ -378,10 +381,10 @@ pub struct IsKeyDownArgs {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct ExtendedArgs {
     /// Represents the type of event.
-    call: i32,
-    parm_1: *mut c_void,
-    parm_2: *mut c_void,
-    parm_3: *mut c_void,
+    pub call: i32,
+    pub parm_1: *mut c_void,
+    pub parm_2: *mut c_void,
+    pub parm_3: *mut c_void,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -558,20 +561,29 @@ pub enum VersionDependentTrackFxLocation {
 }
 
 #[derive(Debug)]
-pub(crate) struct DelegatingControlSurface {
+pub(crate) struct ControlSurfaceAdapter {
+    // As you can see, this is a `Box` instead of a generic type parameter! Reasoning:
+    //
+    // - `ReaperSession` needs to store control surface instances of consumer-defined unknown types
+    //   in one list. This requires boxing already.
+    // - The way we work with consumer-provided control surfaces is to give ownership to REAPER and
+    //   get it back at some point while being able to restore the original.
+    //
+    // Because control surface calls happen in the main thread, the dynamic dispatch this
+    // is absolutely no issue.
     delegate: Box<dyn ControlSurface>,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
 }
 
-impl DelegatingControlSurface {
+impl ControlSurfaceAdapter {
     pub fn new(
         delegate: Box<dyn ControlSurface>,
         reaper_version: &ReaperVersion,
-    ) -> DelegatingControlSurface {
+    ) -> ControlSurfaceAdapter {
         let reaper_version_5_95: ReaperVersion = ReaperVersion::new("5.95");
-        DelegatingControlSurface {
+        ControlSurfaceAdapter {
             delegate,
             // since pre1,
             supports_detection_of_input_fx: reaper_version >= &reaper_version_5_95,
@@ -623,7 +635,7 @@ impl DelegatingControlSurface {
     }
 }
 
-impl reaper_low::IReaperControlSurface for DelegatingControlSurface {
+impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
     fn GetTypeString(&self) -> *const i8 {
         self.delegate
             .get_type_string()

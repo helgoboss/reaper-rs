@@ -45,6 +45,7 @@ fn compile_glue_code() {
         .cpp(true)
         .warnings(false)
         .file("src/control_surface.cpp")
+        .file("src/pcm_source.cpp")
         .file("src/midi.cpp");
     if cfg!(target_os = "macos") {
         build.cpp_set_stdlib("c++");
@@ -114,10 +115,12 @@ mod codegen {
                 .raw_line("#![allow(non_camel_case_types)]")
                 .raw_line("#![allow(non_snake_case)]")
                 .raw_line("#![allow(dead_code)]")
+                .module_raw_line("root", include_str!("src/manual_bindings.rs"))
                 .whitelist_var("reaper_functions::.*")
                 .whitelist_var("swell_functions::.*")
                 .whitelist_var("SWELL_.*")
                 .whitelist_var("CSURF_EXT_.*")
+                .whitelist_var("PCM_SOURCE_EXT_.*")
                 .whitelist_var("REAPER_PLUGIN_VERSION")
                 .whitelist_var("UNDO_STATE_.*")
                 .whitelist_var("VK_.*")
@@ -157,7 +160,9 @@ mod codegen {
                 .whitelist_type("LPSTR")
                 .whitelist_type("SCROLLINFO")
                 .whitelist_function("reaper_control_surface::.*")
-                .whitelist_function("reaper_midi::.*");
+                .whitelist_function("reaper_midi::.*")
+                .whitelist_function("reaper_pcm_source::.*")
+                .blacklist_type("preview_register_t");
             #[cfg(target_os = "macos")]
             let builder = builder.clang_arg("-stdlib=libc++");
             let bindings = builder.generate().expect("Unable to generate bindings");

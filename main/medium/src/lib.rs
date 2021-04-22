@@ -192,6 +192,10 @@
 //! - If the consumer needs to be able to create such a struct: Provide an idiomatic Rust factory
 //!   function. If that's not enough because the raw struct is not completely owned, write an owned
 //!   version of that struct, prefixed with `Owned`. Ideally it should wrap the raw struct.
+//! - Sometimes when having both an owned struct *and* a pointer wrapper, it can be useful to also
+//!   introduce a borrowed reference-only struct. The owned struct can conveniently deref to the
+//!   borrowed struct. The pointer wrapper can provide an unsafe `as_ref()` which returns a
+//!   reference to the borrowed struct. See case 3 for an example (`PCM_source`).
 //!
 //! #### Explanation
 //!
@@ -223,16 +227,22 @@
 //! - If the consumer needs to be able to provide such a type (for communication from REAPER to
 //!   Rust): Create a new trait which can be implemented by the consumer. This also needs
 //!   appropriate companion C code in the low-level API.
+//! - See case 2 strategy for dealing with cases where you need both a pointer wrapper and an owned
+//!   struct.
+//! - The most complete example which uses all of these techniques: `PCM_source`
 //!
 //! #### Examples
 //!
 //! - [`raw::IReaperControlSurface`](../reaper_low/raw/struct.IReaperControlSurface.html) →
-//!   `ReaperControlSurface` (not yet existing) & [`ControlSurface`](struct.ControlSurface.html)
+//!   `ReaperControlSurface` (not yet existing) & [`ControlSurface`](trait.ControlSurface.html)
 //! - [`raw::midi_Input`](../reaper_low/raw/struct.midi_Input.html) →
 //!   [`MidiInput`](struct.MidiInput.html) &
 //! - [`raw::MIDI_eventlist`](../reaper_low/raw/struct.MIDI_eventlist.html) →
-//!   [`MidiEventList`](struct.MidiEventList.html) &
-//! - `PCM_source` → `PcmSource` & `MediumPcmSource` (both not yet existing)
+//!   [`BorrowedMidiEventList`](struct.BorrowedMidiEventList.html) &
+//! - [`raw::PCM_source`](../reaper_low/raw/struct.PCM_source.html) →
+//!   [`OwnedPcmSource`](struct.OwnedPcmSource.html), [`PcmSource`](struct.PcmSource.html),
+//!   [`BorrowedPcmSource`](struct.BorrowedPcmSource.html) &
+//!   [`CustomPcmSource`](trait.CustomPcmSource.html)
 //!
 //! ## Panic/error/safety strategy
 //!
@@ -330,16 +340,22 @@ pub use reaper_pointer::*;
 mod gaccel_register;
 pub use gaccel_register::*;
 
+mod preview_register;
+pub use preview_register::*;
+
 mod audio_hook_register;
 pub use audio_hook_register::*;
 
-mod infostruct_keeper;
+mod keeper;
 
 mod control_surface;
 pub use control_surface::*;
 
 mod midi;
 pub use midi::*;
+
+mod pcm_source;
+pub use pcm_source::*;
 
 mod reaper_session;
 pub use reaper_session::*;
@@ -374,3 +390,6 @@ pub use errors::*;
 
 mod plugin_context;
 pub use plugin_context::*;
+
+mod mutex;
+pub use mutex::*;

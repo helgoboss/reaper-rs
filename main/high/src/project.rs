@@ -1,5 +1,7 @@
 use crate::guid::Guid;
-use crate::{BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, PlayRate, Reaper, Tempo, Track};
+use crate::{
+    BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, Item, PlayRate, Reaper, Tempo, Track,
+};
 
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
@@ -9,12 +11,14 @@ use reaper_medium::{
     SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeRangeType, TrackDefaultsBehavior,
     TrackLocation, UndoBehavior,
 };
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Project {
     rea_project: ReaProject,
 }
+
+const MAX_PATH_LENGTH: u32 = 5000;
 
 // The pointer will never be dereferenced, so we can safely make it Send and Sync.
 unsafe impl Send for Project {}
@@ -33,10 +37,10 @@ impl Project {
         self.track_by_index(0)
     }
 
-    pub fn file_path(self) -> Option<PathBuf> {
+    pub fn file(self) -> Option<PathBuf> {
         Reaper::get()
             .medium_reaper()
-            .enum_projects(ProjectRef::Tab(self.index()), 5000)
+            .enum_projects(ProjectRef::Tab(self.index()), MAX_PATH_LENGTH)
             .unwrap()
             .file_path
     }
@@ -112,6 +116,13 @@ impl Project {
         Some(Track::new(media_track, Some(self.rea_project)))
     }
 
+    pub fn first_selected_item(self) -> Option<Item> {
+        let raw_item = Reaper::get()
+            .medium_reaper()
+            .get_selected_media_item(self.context(), 0)?;
+        Some(Item::new(raw_item))
+    }
+
     pub fn unselect_all_tracks(self) {
         // TODO-low No project context
         unsafe {
@@ -133,7 +144,7 @@ impl Project {
         })
     }
 
-    pub(crate) fn context(self) -> ProjectContext {
+    pub fn context(self) -> ProjectContext {
         Proj(self.rea_project)
     }
 
@@ -339,6 +350,41 @@ impl Project {
     ) -> Option<FindBookmarkResult> {
         self.bookmarks_of_type(bookmark_type)
             .find(|res| res.basic_info.id == id)
+    }
+
+    pub fn directory(self) -> Option<PathBuf> {
+        let file = self.file()?;
+        let dir = file.parent()?;
+        Some(dir.to_owned())
+    }
+
+    pub fn make_path_relative(self, path: &Path) -> Option<PathBuf> {
+        let dir = self.directory()?;
+        pathdiff::diff_paths(path, dir)
+    }
+
+    pub fn make_path_relative_if_in_project_directory(self, path: &Path) -> Option<PathBuf> {
+        let dir = self.directory()?;
+        if path.starts_with(&dir) {
+            pathdiff::diff_paths(path, dir)
+        } else {
+            Some(path.to_owned())
+        }
+    }
+
+    pub fn recording_path(self) -> PathBuf {
+        Reaper::get()
+            .medium_reaper
+            .get_project_path_ex(self.context(), MAX_PATH_LENGTH)
+    }
+
+    pub fn make_path_absolute(self, path: &Path) -> Option<PathBuf> {
+        if path.is_relative() {
+            let dir = self.directory()?;
+            Some(dir.join(path))
+        } else {
+            Some(path.to_owned())
+        }
     }
 
     fn bookmarks_of_type(

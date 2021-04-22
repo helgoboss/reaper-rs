@@ -1,5 +1,6 @@
 use std::borrow::{Borrow, Cow};
 use std::ffi::{CStr, CString};
+use std::fmt;
 use std::ops::Deref;
 use std::os::raw::c_char;
 
@@ -102,10 +103,7 @@ impl From<ReaperString> for ReaperStringArg<'static> {
 // string literal.
 impl<'a> From<&'a str> for ReaperStringArg<'a> {
     fn from(s: &'a str) -> Self {
-        // Requires copying
-        ReaperStringArg(
-            ReaperString::new(CString::new(s).expect("Rust string too exotic for REAPER")).into(),
-        )
+        ReaperStringArg(ReaperString::from_str(s).into())
     }
 }
 
@@ -115,10 +113,7 @@ impl<'a> From<&'a str> for ReaperStringArg<'a> {
 // By introducing this conversion, we want to encourage this scenario.
 impl<'a> From<String> for ReaperStringArg<'a> {
     fn from(s: String) -> Self {
-        // Doesn't require copying because we own the string now
-        ReaperStringArg(
-            ReaperString::new(CString::new(s).expect("Rust string too exotic for REAPER")).into(),
-        )
+        ReaperStringArg(ReaperString::from_string(s).into())
     }
 }
 
@@ -138,7 +133,7 @@ impl<'a> From<String> for ReaperStringArg<'a> {
 // that it returns UTF-8 strings and by letting consumers create such strings via Rust
 // strings only (which are UTF-8 encoded) or via `reaper_str!` macro. So it's essential that we
 // don't have a safe public conversion from `CString` into `ReaperString`!!!
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct ReaperString(CString);
 
 impl ReaperString {
@@ -154,6 +149,22 @@ impl ReaperString {
     // Don't make this public!
     pub(crate) fn new(inner: CString) -> ReaperString {
         ReaperString(inner)
+    }
+
+    // Don't make this public. Try to use ReaperStringArg for consumers only.
+    //
+    // If making this public one day, use From traits.
+    pub(crate) fn from_str(s: &str) -> ReaperString {
+        // Requires copying.
+        ReaperString(CString::new(s).expect("Rust string too exotic for REAPER"))
+    }
+
+    // Don't make this public. Try to use ReaperStringArg for consumers only.
+    //
+    // If making this public one day, use From traits.
+    pub(crate) fn from_string(s: String) -> ReaperString {
+        // Doesn't require copying because we own the string now.
+        ReaperString(CString::new(s).expect("Rust string too exotic for REAPER"))
     }
 
     /// Returns a raw pointer to the string. Used by code in this crate only.
@@ -201,7 +212,7 @@ impl ReaperString {
 // Necessary for `ToOwned` in other direction.
 impl Borrow<ReaperStr> for ReaperString {
     fn borrow(&self) -> &ReaperStr {
-        ReaperStr::new(&self.0)
+        unsafe { ReaperStr::new(&self.0) }
     }
 }
 
@@ -212,7 +223,7 @@ impl Deref for ReaperString {
     type Target = ReaperStr;
 
     fn deref(&self) -> &Self::Target {
-        ReaperStr::new(&self.0)
+        unsafe { ReaperStr::new(&self.0) }
     }
 }
 
@@ -234,10 +245,10 @@ impl<'a> From<ReaperString> for Cow<'a, ReaperStr> {
 pub struct ReaperStr(CStr);
 
 impl ReaperStr {
-    // Don't make this public, it's unsafe!
+    // Don't make this public, it's unsafe because a CStr can be non-UTF-8!
     // This uses the same technique like `Path`.
-    pub(crate) fn new(inner: &CStr) -> &ReaperStr {
-        unsafe { &*(inner as *const CStr as *const ReaperStr) }
+    pub(crate) unsafe fn new(inner: &CStr) -> &ReaperStr {
+        &*(inner as *const CStr as *const ReaperStr)
     }
 
     /// Wraps a raw C string with a safe Reaper string wrapper.
@@ -278,12 +289,25 @@ impl ReaperStr {
     }
 }
 
+// With this we can just write `to_string()` on a borrowed REAPER string as we are used to in Rust.
+impl fmt::Display for ReaperStr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.to_str())
+    }
+}
+
+impl Default for &ReaperStr {
+    fn default() -> Self {
+        unsafe { ReaperStr::new(Default::default()) }
+    }
+}
+
 // Important for high-level API in order to just turn a borrowed REAPER string into an owned one
 // without doing any conversions and still keeping up the UTF-8 guarantee.
 impl ToOwned for ReaperStr {
     type Owned = ReaperString;
 
-    fn to_owned(&self) -> Self::Owned {
+    fn to_owned(&self) -> ReaperString {
         self.to_reaper_string()
     }
 }

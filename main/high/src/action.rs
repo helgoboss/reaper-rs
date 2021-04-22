@@ -218,12 +218,13 @@ impl Action {
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
-            let discrete_value =
-                unsafe { U7::new_unchecked((normalized_value * 127.0).round() as u8) };
+            let discrete_value = unsafe {
+                U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
+            };
             unsafe {
                 reaper.kbd_on_main_action_ex(
                     action_command_id,
-                    ActionValueChange::AbsoluteLowRes(discrete_value),
+                    ActionValueChange::AbsoluteHighRes(discrete_value),
                     Win(reaper.get_main_hwnd()),
                     match project {
                         None => CurrentProject,

@@ -13,7 +13,7 @@ pub struct ReaperFunctionError {
 }
 
 impl ReaperFunctionError {
-    pub(crate) fn new(message: &'static str) -> ReaperFunctionError {
+    pub(crate) const fn new(message: &'static str) -> ReaperFunctionError {
         ReaperFunctionError { message }
     }
 }

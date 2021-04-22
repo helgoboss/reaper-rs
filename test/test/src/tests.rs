@@ -2269,7 +2269,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
         // projectCountBefore + 1);
         assert_eq!(new_project.track_count(), 0);
         assert!(new_project.index() > 0);
-        assert!(new_project.file_path().is_none());
+        assert!(new_project.file().is_none());
         assert_eq!(new_project.length(), DurationInSeconds::new(0.0));
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), new_project);

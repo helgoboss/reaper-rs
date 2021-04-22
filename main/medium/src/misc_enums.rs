@@ -152,6 +152,15 @@ pub enum UndoBehavior {
     AddUndoPoint,
 }
 
+/// Determines whether to import MIDI as in-project MIDI events or not.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum MidiImportBehavior {
+    /// Uses the relevant REAPER preference.
+    UsePreference,
+    /// Makes sure the MIDI data is not imported as in-project MIDI events.
+    ForceNoMidiImport,
+}
+
 /// Determines whether to copy or move something (e.g. an FX).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TransferBehavior {
@@ -197,6 +206,26 @@ impl RecordArmMode {
         match self {
             Unarmed => 0,
             Armed => 1,
+        }
+    }
+}
+
+/// Defines whether to align with measure starts when playing previews.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum MeasureAlignment {
+    /// Plays immediately.
+    PlayImmediately,
+    /// Aligns playback with measure start.
+    AlignWithMeasureStart,
+}
+
+impl MeasureAlignment {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> f64 {
+        use MeasureAlignment::*;
+        match self {
+            PlayImmediately => -1.0,
+            AlignWithMeasureStart => 1.0,
         }
     }
 }

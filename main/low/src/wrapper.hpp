@@ -30,3 +30,4 @@ namespace swell_functions {
 // Make C++ glue code functions visible to bindgen. They will be used in the real application.
 #include "control_surface.hpp"
 #include "midi.hpp"
+#include "pcm_source.hpp"

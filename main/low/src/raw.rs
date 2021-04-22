@@ -1,18 +1,21 @@
 //! Exposes important raw types, functions and constants from the C++ REAPER API.
+#![allow(non_camel_case_types)]
 
 use std::os::raw::{c_int, c_void};
 
 /// Structs, types and constants defined by REAPER.
 pub use super::bindings::root::{
-    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, reaper_plugin_info_t,
-    IReaperControlSurface, KbdCmd, KbdSectionInfo, MIDI_event_t, MIDI_eventlist, MediaItem,
-    MediaItem_Take, MediaTrack, PCM_source, ReaProject, ReaSample, TrackEnvelope, CSURF_EXT_RESET,
-    CSURF_EXT_SETBPMANDPLAYRATE, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXCHANGE,
+    audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output, preview_register_t,
+    reaper_plugin_info_t, IReaperControlSurface, KbdCmd, KbdSectionInfo, MIDI_event_t,
+    MIDI_eventlist, MediaItem, MediaItem_Take, MediaTrack, PCM_source, PCM_source_peaktransfer_t,
+    PCM_source_transfer_t, ProjectStateContext, ReaProject, ReaSample, TrackEnvelope,
+    CSURF_EXT_RESET, CSURF_EXT_SETBPMANDPLAYRATE, CSURF_EXT_SETFOCUSEDFX, CSURF_EXT_SETFXCHANGE,
     CSURF_EXT_SETFXENABLED, CSURF_EXT_SETFXOPEN, CSURF_EXT_SETFXPARAM, CSURF_EXT_SETFXPARAM_RECFX,
     CSURF_EXT_SETINPUTMONITOR, CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETPAN_EX,
     CSURF_EXT_SETPROJECTMARKERCHANGE, CSURF_EXT_SETRECVPAN, CSURF_EXT_SETRECVVOLUME,
     CSURF_EXT_SETSENDPAN, CSURF_EXT_SETSENDVOLUME, CSURF_EXT_SUPPORTS_EXTENDED_TOUCH,
-    CSURF_EXT_TRACKFX_PRESET_CHANGED, REAPER_PLUGIN_VERSION, UNDO_STATE_ALL, UNDO_STATE_FREEZE,
+    CSURF_EXT_TRACKFX_PRESET_CHANGED, PCM_SOURCE_EXT_EXPORTTOFILE, PCM_SOURCE_EXT_GETPOOLEDMIDIID,
+    PCM_SOURCE_EXT_OPENEDITOR, REAPER_PLUGIN_VERSION, UNDO_STATE_ALL, UNDO_STATE_FREEZE,
     UNDO_STATE_FX, UNDO_STATE_ITEMS, UNDO_STATE_MISCCFG, UNDO_STATE_TRACKCFG,
 };
 
@@ -73,10 +76,12 @@ pub const TBM_SETPOS: u32 = WM_USER + 5;
 pub const TBM_SETRANGE: u32 = WM_USER + 6;
 pub const TBM_SETSEL: u32 = WM_USER + 10;
 
-// Some constants are different in SWELL. Search for "these differ" in SWELL source code for
-// explanation.
+// Some constants/types are different in Unix/SWELL. Search for "these differ" in SWELL source code
+// for explanation.
 #[cfg(target_family = "unix")]
 pub use crate::bindings::root::{
+    // Mutex
+    pthread_mutex_t,
     // MIIM
     MIIM_DATA,
     MIIM_ID,
