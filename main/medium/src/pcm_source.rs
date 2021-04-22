@@ -632,22 +632,22 @@ pub struct PropertiesWindowArgs {
     pub parent_window: Option<Hwnd>,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct GetSamplesArgs<'a> {
     pub block: &'a BorrowedPcmSourceTransfer,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct GetPeakInfoArgs<'a> {
     pub block: &'a BorrowedPcmSourcePeakTransfer,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct SaveStateArgs<'a> {
     pub context: &'a BorrowedProjectStateContext,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct LoadStateArgs<'a> {
     pub first_line: &'a ReaperStr,
     pub context: &'a BorrowedProjectStateContext,

@@ -122,6 +122,7 @@ impl MidiEvent {
     /// Sets the actual message.
     pub fn set_message(&mut self, message: impl ShortMessage) {
         let bytes = message.to_bytes();
+        self.0.size = 3;
         self.0.midi_message = [bytes.0.into(), bytes.1.into(), bytes.2.into(), 0];
     }
 }
