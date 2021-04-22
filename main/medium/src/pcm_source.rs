@@ -1,25 +1,21 @@
 #![allow(non_snake_case)]
-use helgoboss_midi::{ShortMessage, U7};
 use reaper_low::{create_cpp_to_rust_pcm_source, raw};
 use ref_cast::RefCast;
 
 use crate::util::{create_passing_c_str, with_string_buffer};
 use crate::{
     BorrowedMidiEventList, DurationInBeats, DurationInSeconds, ExtendedArgs, Hwnd, Hz,
-    MediaItemTake, MidiFrameOffset, PositionInSeconds, ReaperFunctionError, ReaperFunctionResult,
-    ReaperStr, ReaperString, SendMidiTime,
+    MediaItemTake, PositionInSeconds, ReaperFunctionError, ReaperFunctionResult, ReaperStr,
+    ReaperString,
 };
-use reaper_low::raw::{
-    MIDI_event_t, PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t, HWND__,
-};
-use std::borrow::{Borrow, Cow};
+use reaper_low::raw::{PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t, HWND__};
+use std::borrow::Borrow;
 use std::error::Error;
 use std::fmt;
-use std::fmt::Formatter;
 use std::mem::MaybeUninit;
 use std::ops::Deref;
-use std::os::raw::{c_char, c_int, c_void};
-use std::path::{Path, PathBuf};
+use std::os::raw::c_void;
+use std::path::Path;
 use std::ptr::{null, null_mut, NonNull};
 
 /// Pointer to a PCM source transfer.
@@ -94,6 +90,11 @@ impl OwnedPcmSource {
     }
 
     /// Returns the inner pointer **without** destroying the source.
+    ///
+    /// # Safety
+    ///
+    /// You can run into a memory leak or crash if you don't manage the lifetime of the returned
+    /// source correctly.  
     pub unsafe fn leak(self) -> PcmSource {
         let manually_dropped = std::mem::ManuallyDrop::new(self);
         manually_dropped.0
@@ -130,10 +131,8 @@ impl Deref for OwnedPcmSource {
 
 impl Clone for OwnedPcmSource {
     fn clone(&self) -> OwnedPcmSource {
-        unsafe {
-            self.duplicate()
-                .expect("this source doesn't support duplication")
-        }
+        self.duplicate()
+            .expect("this source doesn't support duplication")
     }
 }
 
@@ -267,9 +266,9 @@ impl BorrowedPcmSource {
         if let Some(p) = new_file_name {
             let file_name_str = p.to_str().expect("file name is not valid UTF-8");
             let file_name_reaper_string = ReaperString::from_str(file_name_str);
-            self.0.SetFileName(file_name_reaper_string.as_ptr())
+            unsafe { self.0.SetFileName(file_name_reaper_string.as_ptr()) }
         } else {
-            self.0.SetFileName(null())
+            unsafe { self.0.SetFileName(null()) }
         }
     }
 
@@ -281,7 +280,9 @@ impl BorrowedPcmSource {
 
     pub fn set_source(&self, source: Option<PcmSource>) {
         let ptr = source.map(|s| s.to_raw()).unwrap_or(null_mut());
-        self.0.SetSource(ptr);
+        unsafe {
+            self.0.SetSource(ptr);
+        }
     }
 
     /// Returns number of channels.
@@ -350,21 +351,37 @@ impl BorrowedPcmSource {
     }
 
     /// Unstable!!!
+    ///
+    /// # Safety
+    ///
+    /// API still unstable.
     pub unsafe fn get_samples(&self, block: &BorrowedPcmSourceTransfer) {
         self.0.GetSamples(block.as_ptr().as_ptr());
     }
 
     /// Unstable!!!
+    ///
+    /// # Safety
+    ///
+    /// API still unstable.
     pub unsafe fn get_peak_info(&self, block: &BorrowedPcmSourcePeakTransfer) {
         self.0.GetPeakInfo(block.as_ptr().as_ptr());
     }
 
     /// Unstable!!!
+    ///
+    /// # Safety
+    ///
+    /// API still unstable.
     pub unsafe fn save_state(&self, context: &BorrowedProjectStateContext) {
         self.0.SaveState(context.as_ptr().as_ptr());
     }
 
     /// Unstable!!!
+    ///
+    /// # Safety
+    ///
+    /// API still unstable.
     pub unsafe fn load_state(
         &self,
         first_line: &ReaperStr,
@@ -374,7 +391,7 @@ impl BorrowedPcmSource {
             .0
             .LoadState(first_line.as_ptr(), context.as_ptr().as_ptr());
         if res == -1 {
-            Err("load state failed")?
+            return Err("load state failed".into());
         }
         Ok(())
     }
@@ -399,6 +416,9 @@ impl BorrowedPcmSource {
         self.0.PeaksBuild_Finish();
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass invalid pointers.
     pub unsafe fn extended(
         &self,
         call: i32,
@@ -419,7 +439,7 @@ impl BorrowedPcmSource {
     pub fn ext_get_pooled_midi_id(&self) -> ReaperFunctionResult<ExtGetPooledMidiIdResult> {
         let mut user_count: MaybeUninit<i32> = MaybeUninit::zeroed();
         let mut first_user: MaybeUninit<*mut raw::MediaItem_Take> = MaybeUninit::zeroed();
-        let (id, supported) = with_string_buffer(40, |buffer, max_size| {
+        let (id, supported) = with_string_buffer(40, |buffer, _| unsafe {
             self.0.Extended(
                 raw::PCM_SOURCE_EXT_GETPOOLEDMIDIID as _,
                 buffer as _,
@@ -453,12 +473,14 @@ impl BorrowedPcmSource {
     pub fn ext_export_to_file(&self, file_name: &Path) -> ReaperFunctionResult<()> {
         let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
         let file_name_reaper_string = ReaperString::from_str(file_name_str);
-        let supported = self.0.Extended(
-            raw::PCM_SOURCE_EXT_EXPORTTOFILE as _,
-            file_name_reaper_string.as_ptr() as _,
-            null_mut(),
-            null_mut(),
-        );
+        let supported = unsafe {
+            self.0.Extended(
+                raw::PCM_SOURCE_EXT_EXPORTTOFILE as _,
+                file_name_reaper_string.as_ptr() as _,
+                null_mut(),
+                null_mut(),
+            )
+        };
         if supported == 0 {
             return Err(ReaperFunctionError::new(
                 "PCM_SOURCE_EXT_EXPORTTOFILE not supported by source",
@@ -677,10 +699,6 @@ impl<S: CustomPcmSource> PcmSourceAdapter<S> {
     pub fn new(delegate: S) -> Self {
         Self { delegate }
     }
-
-    pub fn into_delegate(self) -> S {
-        self.delegate
-    }
 }
 
 impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
@@ -820,7 +838,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
             first_line: first_line.unwrap_or_default(),
             context,
         };
-        if let Ok(_) = self.delegate.load_state(args) {
+        if self.delegate.load_state(args).is_ok() {
             0
         } else {
             -1
@@ -889,7 +907,8 @@ impl AsRef<BorrowedPcmSource> for FlexibleOwnedPcmSource {
 pub struct CustomOwnedPcmSource {
     // Those 2 belong together. `cpp_source` without `rust_source` = crash. Never let them apart!
     cpp_source: OwnedPcmSource,
-    rust_source: Box<Box<dyn reaper_low::PCM_source>>,
+    /// Never read but important to keep in memory.
+    _rust_source: Box<Box<dyn reaper_low::PCM_source>>,
 }
 
 impl fmt::Debug for CustomOwnedPcmSource {
@@ -923,6 +942,6 @@ pub fn create_custom_owned_pcm_source<S: CustomPcmSource + 'static>(
     let cpp_source = unsafe { OwnedPcmSource::new_unchecked(PcmSource::new(raw_cpp_source)) };
     CustomOwnedPcmSource {
         cpp_source,
-        rust_source,
+        _rust_source: rust_source,
     }
 }

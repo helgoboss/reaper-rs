@@ -1,13 +1,11 @@
 use crate::mutex::ReaperMutex;
 use crate::{
     destroy_mutex_primitive, initialize_mutex_primitive, FlexibleOwnedPcmSource, MediaTrack,
-    OwnedPcmSource, PcmSource, PositionInSeconds, ReaperLockError, ReaperMutexPrimitive,
-    ReaperVolumeValue,
+    PositionInSeconds, ReaperMutexPrimitive, ReaperVolumeValue,
 };
 use reaper_low::raw;
 use std::fmt;
 use std::ptr::{null_mut, NonNull};
-use std::rc::Rc;
 
 /// An owned preview register.
 ///

@@ -212,7 +212,7 @@ impl ReaperString {
 // Necessary for `ToOwned` in other direction.
 impl Borrow<ReaperStr> for ReaperString {
     fn borrow(&self) -> &ReaperStr {
-        ReaperStr::new(&self.0)
+        unsafe { ReaperStr::new(&self.0) }
     }
 }
 
@@ -223,7 +223,7 @@ impl Deref for ReaperString {
     type Target = ReaperStr;
 
     fn deref(&self) -> &Self::Target {
-        ReaperStr::new(&self.0)
+        unsafe { ReaperStr::new(&self.0) }
     }
 }
 
@@ -245,10 +245,10 @@ impl<'a> From<ReaperString> for Cow<'a, ReaperStr> {
 pub struct ReaperStr(CStr);
 
 impl ReaperStr {
-    // Don't make this public, it's unsafe!
+    // Don't make this public, it's unsafe because a CStr can be non-UTF-8!
     // This uses the same technique like `Path`.
-    pub(crate) fn new(inner: &CStr) -> &ReaperStr {
-        unsafe { &*(inner as *const CStr as *const ReaperStr) }
+    pub(crate) unsafe fn new(inner: &CStr) -> &ReaperStr {
+        &*(inner as *const CStr as *const ReaperStr)
     }
 
     /// Wraps a raw C string with a safe Reaper string wrapper.

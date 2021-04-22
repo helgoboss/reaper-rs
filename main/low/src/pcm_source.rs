@@ -32,14 +32,17 @@ impl raw::PCM_source {
         unsafe { rust_to_cpp_PCM_source_GetSource(self as *const _ as _) }
     }
 
-    pub fn Extended(
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn Extended(
         &self,
         call: c_int,
         parm1: *mut c_void,
         parm2: *mut c_void,
         parm3: *mut c_void,
     ) -> c_int {
-        unsafe { rust_to_cpp_PCM_source_Extended(self as *const _ as _, call, parm1, parm2, parm3) }
+        rust_to_cpp_PCM_source_Extended(self as *const _ as _, call, parm1, parm2, parm3)
     }
 
     pub fn SetAvailable(&self, avail: bool) {
@@ -48,14 +51,18 @@ impl raw::PCM_source {
         }
     }
 
-    pub fn SetFileName(&self, newfn: *const ::std::os::raw::c_char) -> bool {
-        unsafe { rust_to_cpp_PCM_source_SetFileName(self as *const _ as _, newfn) }
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn SetFileName(&self, newfn: *const ::std::os::raw::c_char) -> bool {
+        rust_to_cpp_PCM_source_SetFileName(self as *const _ as _, newfn)
     }
 
-    pub fn SetSource(&self, src: *mut raw::PCM_source) {
-        unsafe {
-            rust_to_cpp_PCM_source_SetSource(self as *const _ as _, src);
-        }
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn SetSource(&self, src: *mut raw::PCM_source) {
+        rust_to_cpp_PCM_source_SetSource(self as *const _ as _, src);
     }
 
     pub fn GetNumChannels(&self) -> ::std::os::raw::c_int {
@@ -78,34 +85,43 @@ impl raw::PCM_source {
         unsafe { rust_to_cpp_PCM_source_GetPreferredPosition(self as *const _ as _) }
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
     pub fn PropertiesWindow(&self, hwndParent: raw::HWND) -> ::std::os::raw::c_int {
         unsafe { rust_to_cpp_PCM_source_PropertiesWindow(self as *const _ as _, hwndParent) }
     }
 
-    pub fn GetSamples(&self, block: *mut raw::PCM_source_transfer_t) {
-        unsafe {
-            rust_to_cpp_PCM_source_GetSamples(self as *const _ as _, block);
-        }
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetSamples(&self, block: *mut raw::PCM_source_transfer_t) {
+        rust_to_cpp_PCM_source_GetSamples(self as *const _ as _, block);
     }
 
-    pub fn GetPeakInfo(&self, block: *mut raw::PCM_source_peaktransfer_t) {
-        unsafe {
-            rust_to_cpp_PCM_source_GetPeakInfo(self as *const _ as _, block);
-        }
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetPeakInfo(&self, block: *mut raw::PCM_source_peaktransfer_t) {
+        rust_to_cpp_PCM_source_GetPeakInfo(self as *const _ as _, block);
     }
 
-    pub fn SaveState(&self, ctx: *mut raw::ProjectStateContext) {
-        unsafe {
-            rust_to_cpp_PCM_source_SaveState(self as *const _ as _, ctx);
-        }
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn SaveState(&self, ctx: *mut raw::ProjectStateContext) {
+        rust_to_cpp_PCM_source_SaveState(self as *const _ as _, ctx);
     }
 
-    pub fn LoadState(
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn LoadState(
         &self,
         firstline: *const ::std::os::raw::c_char,
         ctx: *mut raw::ProjectStateContext,
     ) -> ::std::os::raw::c_int {
-        unsafe { rust_to_cpp_PCM_source_LoadState(self as *const _ as _, firstline, ctx) }
+        rust_to_cpp_PCM_source_LoadState(self as *const _ as _, firstline, ctx)
     }
 
     pub fn Peaks_Clear(&self, deleteFile: bool) {

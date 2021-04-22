@@ -70,6 +70,7 @@ pub struct ReaperMutexGuard<'a, T: AsRef<ReaperMutexPrimitive>> {
 }
 
 impl<'a, T: AsRef<ReaperMutexPrimitive>> ReaperMutexGuard<'a, T> {
+    #[allow(clippy::unnecessary_wraps)]
     fn new(mutex: &'a ReaperMutex<T>) -> Result<Self, ReaperLockError> {
         #[cfg(windows)]
         unsafe {

@@ -22,7 +22,6 @@ use reaper_low::raw::audio_hook_register_t;
 use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// This is the main hub for accessing medium-level API functions.
@@ -1019,7 +1018,7 @@ impl Drop for ReaperSession {
     fn drop(&mut self) {
         for handle in self.playing_preview_registers.clone() {
             unsafe {
-                self.stop_preview_unchecked(handle);
+                let _ = self.stop_preview_unchecked(handle);
             }
         }
         for handle in self.audio_hook_registrations.clone() {

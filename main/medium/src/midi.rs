@@ -44,7 +44,7 @@ impl MidiInput {
         if raw_evt_list.is_null() {
             panic!("GetReadBuf returned null");
         }
-        unsafe { std::mem::transmute(raw_evt_list) }
+        unsafe { &*(raw_evt_list as *const BorrowedMidiEventList) }
     }
 }
 
@@ -123,7 +123,7 @@ impl MidiEvent {
     pub fn set_message(&mut self, message: impl ShortMessage) {
         let bytes = message.to_bytes();
         self.0.size = 3;
-        self.0.midi_message = [bytes.0.into(), bytes.1.into(), bytes.2.into(), 0];
+        self.0.midi_message = [bytes.0, bytes.1.into(), bytes.2.into(), 0];
     }
 }
 

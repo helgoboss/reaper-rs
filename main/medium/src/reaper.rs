@@ -4,7 +4,6 @@ use crate::metering::{ResponseTimeMultiThreaded, ResponseTimeSingleThreaded};
 use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
 use reaper_macros::measure;
-use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
 
@@ -31,7 +30,7 @@ use crate::{
 };
 
 use helgoboss_midi::ShortMessage;
-use reaper_low::raw::{PCM_source, GUID};
+use reaper_low::raw::GUID;
 
 use crate::util::{
     create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_prefilled,
@@ -1176,9 +1175,7 @@ impl<UsageScope> Reaper<UsageScope> {
             )
         };
         NonNull::new(ptr)
-            .ok_or(ReaperFunctionError::new(
-                "couldn't create PCM source from file",
-            ))
+            .ok_or_else(|| ReaperFunctionError::new("couldn't create PCM source from file"))
             .map(PcmSource)
             .map(OwnedPcmSource)
     }
@@ -3658,7 +3655,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let (reaper_string, _) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+        let (reaper_string, _) = with_string_buffer(buffer_size, |buffer, max_size| {
             self.low
                 .GetProjectPathEx(project.to_raw(), buffer, max_size)
         });
@@ -5006,7 +5003,7 @@ impl<UsageScope> Reaper<UsageScope> {
             let ptr = self.low.GetTakeName(take.as_ptr());
             create_passing_c_str(ptr as *const c_char)
         };
-        use_name(passing_c_str.ok_or(ReaperFunctionError::new("invalid take")))
+        use_name(passing_c_str.ok_or_else(|| ReaperFunctionError::new("invalid take")))
     }
 
     /// Returns the current on/off state of a toggleable action.

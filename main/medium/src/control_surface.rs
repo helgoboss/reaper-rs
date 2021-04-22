@@ -7,7 +7,6 @@ use crate::{
 };
 
 use reaper_low::raw;
-use std::borrow::Cow;
 
 use std::fmt::Debug;
 use std::os::raw::c_void;

@@ -1,5 +1,4 @@
-use crate::{Project, Reaper, Take};
-use reaper_low::raw::PCM_source;
+use crate::{Project, Reaper};
 use reaper_medium::{
     BorrowedPcmSource, DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior,
     OwnedPcmSource, PcmSource, ReaperFunctionError,
@@ -8,7 +7,6 @@ use ref_cast::RefCast;
 use std::borrow::Borrow;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::ptr::NonNull;
 
 /// Pointer to a PCM source that's owned and managed by REAPER.
 ///
@@ -37,15 +35,17 @@ impl ReaperSource {
             .validate_ptr_2(project.context(), self.0)
     }
 
-    pub fn as_ref(&self) -> &BorrowedSource {
-        self.make_sure_is_valid();
-        BorrowedSource::ref_cast(unsafe { self.0.as_ref() })
-    }
-
     fn make_sure_is_valid(&self) {
         if !self.is_valid() {
             panic!("PCM source pointer is not valid anymore in REAPER")
         }
+    }
+}
+
+impl AsRef<BorrowedSource> for ReaperSource {
+    fn as_ref(&self) -> &BorrowedSource {
+        self.make_sure_is_valid();
+        BorrowedSource::ref_cast(unsafe { self.0.as_ref() })
     }
 }
 
@@ -127,13 +127,11 @@ impl OwnedSource {
         file: &Path,
         import_behavior: MidiImportBehavior,
     ) -> Result<Self, &'static str> {
-        unsafe {
-            let raw = Reaper::get()
-                .medium_reaper()
-                .pcm_source_create_from_file_ex(file, import_behavior)
-                .map_err(|_| "couldn't create PCM source")?;
-            Ok(Self(raw))
-        }
+        let raw = Reaper::get()
+            .medium_reaper()
+            .pcm_source_create_from_file_ex(file, import_behavior)
+            .map_err(|_| "couldn't create PCM source")?;
+        Ok(Self(raw))
     }
 }
 

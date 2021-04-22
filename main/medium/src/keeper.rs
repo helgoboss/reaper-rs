@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::ptr::NonNull;
-use std::rc::Rc;
 use std::sync::Arc;
 
 // Some structs are not self-contained (completely owned). This container takes only

@@ -1,10 +1,8 @@
 use super::{MediaItem, MediaItemTake, MediaTrack, ReaProject, TrackEnvelope};
 use crate::{concat_reaper_strs, PcmSource, ReaperStr, ReaperStringArg};
 
-use reaper_low::raw;
 use std::borrow::Cow;
 use std::os::raw::c_void;
-use std::ptr::NonNull;
 
 /// Validatable REAPER pointer.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
