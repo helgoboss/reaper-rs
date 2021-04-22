@@ -237,7 +237,7 @@ The following instructions should result in a functional extension, loaded into 
 3. Copy the extension plug-in to the `REAPER/UserPlugins` directory
     - You could do this manually, and overwrite the file after each build
     - Or, you could create a symbolic link from the `target/debug` file, to `REAPER/UserPlugins` so that they were synced
-        - > Note: Here it's explicitly necessary to give the link a name that starts with` reaper` (by default it will start with `lib`)
+        - > Note: Here it's explicitly necessary to give the link a name that starts with `reaper_` (by default it will start with `lib`)
         - To do this, on unix-based systems, run `ln -s ./target/debug/<name-of-the-compiled-extension-file> <path to REAPER/UserPlugins>`
         - On Windows, you can use the same command if running Git Bash, else you can use `mklink \D target\debug\<name-of-the-compiled-extension-file> %AppData%\REAPER\UserPlugins`
 4. Now start REAPER, and you should see the console message from the code appear!
