@@ -108,22 +108,22 @@ impl Drop for OwnedPcmSource {
     }
 }
 
-impl AsRef<BorrowedPcmSource<'static>> for OwnedPcmSource {
-    fn as_ref(&self) -> &BorrowedPcmSource<'static> {
+impl AsRef<BorrowedPcmSource> for OwnedPcmSource {
+    fn as_ref(&self) -> &BorrowedPcmSource {
         unsafe { self.0.as_ref() }
     }
 }
 
-impl Borrow<BorrowedPcmSource<'static>> for OwnedPcmSource {
-    fn borrow(&self) -> &BorrowedPcmSource<'static> {
+impl Borrow<BorrowedPcmSource> for OwnedPcmSource {
+    fn borrow(&self) -> &BorrowedPcmSource {
         self.as_ref()
     }
 }
 
 impl Deref for OwnedPcmSource {
-    type Target = BorrowedPcmSource<'static>;
+    type Target = BorrowedPcmSource;
 
-    fn deref(&self) -> &BorrowedPcmSource<'static> {
+    fn deref(&self) -> &BorrowedPcmSource {
         self.as_ref()
     }
 }
@@ -172,29 +172,26 @@ impl PcmSource {
     /// use [`validate_ptr_2()`] to make sure the pointer is (still) valid.
     ///
     /// [`validate_ptr_2()`]: struct.Reaper.html#method.validate_ptr_2
-    pub unsafe fn as_ref(&self) -> &BorrowedPcmSource<'static> {
-        // let ref_to_raw: &raw::PCM_source = self.0.as_ref();
-        // let ptr_to_dest = &ref_to_raw as *const _ as *const _;
-        // &*ptr_to_dest
-        // TODO-high CONTINUE This makes problems!!!
-        std::mem::transmute(&self.0.as_ref())
+    pub unsafe fn as_ref(&self) -> &BorrowedPcmSource {
+        BorrowedPcmSource::ref_cast(&self.0)
     }
 }
 
 /// Borrowed (reference-only) PCM source.
 #[derive(Eq, PartialEq, Hash, Debug, RefCast)]
 #[repr(transparent)]
-pub struct BorrowedPcmSource<'a>(pub(crate) &'a raw::PCM_source);
+pub struct BorrowedPcmSource(pub(crate) NonNull<raw::PCM_source>);
 
-impl<'a> BorrowedPcmSource<'a> {
-    /// Returns the pointer to this source.
+impl BorrowedPcmSource {
+    /// Returns the pointer.
     pub fn as_ptr(&self) -> PcmSource {
-        PcmSource(self.0.into())
+        PcmSource(self.0)
     }
 
     /// Duplicates this source.
     pub fn duplicate(&self) -> Option<OwnedPcmSource> {
-        let raw_duplicate = self.0.Duplicate();
+        let raw = unsafe { self.0.as_ref() };
+        let raw_duplicate = raw.Duplicate();
         NonNull::new(raw_duplicate)
             .map(PcmSource)
             .map(OwnedPcmSource)
@@ -202,12 +199,14 @@ impl<'a> BorrowedPcmSource<'a> {
 
     /// Returns if this source is available.
     pub fn is_available(&self) -> bool {
-        self.0.IsAvailable()
+        let raw = unsafe { self.0.as_ref() };
+        raw.IsAvailable()
     }
 
     /// If called with false, closes files etc.
     pub fn set_available(&self, available: bool) {
-        self.0.SetAvailable(available);
+        let raw = unsafe { self.0.as_ref() };
+        raw.SetAvailable(available);
     }
 
     /// Grants temporary access to the type of this source.
@@ -226,7 +225,8 @@ impl<'a> BorrowedPcmSource<'a> {
     ///
     /// Returned string's lifetime is unbounded.
     pub unsafe fn get_type_unchecked(&self) -> &ReaperStr {
-        let ptr = self.0.GetType();
+        let raw = self.0.as_ref();
+        let ptr = raw.GetType();
         create_passing_c_str(ptr).unwrap_or_default()
     }
 
@@ -253,7 +253,8 @@ impl<'a> BorrowedPcmSource<'a> {
     ///
     /// Returned string's lifetime is unbounded.
     pub unsafe fn get_file_name_unchecked(&self) -> Option<&ReaperStr> {
-        let ptr = self.0.GetFileName();
+        let raw = self.0.as_ref();
+        let ptr = raw.GetFileName();
         let file_name = create_passing_c_str(ptr);
         if let Some(reaper_str) = file_name {
             if reaper_str.to_str().is_empty() {
@@ -268,29 +269,33 @@ impl<'a> BorrowedPcmSource<'a> {
 
     /// Returns `true` if supported. Only call when offline.
     pub fn set_file_name(&self, new_file_name: Option<&Path>) -> bool {
+        let raw = unsafe { self.0.as_ref() };
         if let Some(p) = new_file_name {
             let file_name_str = p.to_str().expect("file name is not valid UTF-8");
             let file_name_reaper_string = ReaperString::from_str(file_name_str);
-            self.0.SetFileName(file_name_reaper_string.as_ptr())
+            raw.SetFileName(file_name_reaper_string.as_ptr())
         } else {
-            self.0.SetFileName(null())
+            raw.SetFileName(null())
         }
     }
 
     /// Returns the parent source, if any.
     pub fn get_source(&self) -> Option<PcmSource> {
-        let ptr = self.0.GetSource();
+        let raw = unsafe { self.0.as_ref() };
+        let ptr = raw.GetSource();
         NonNull::new(ptr).map(PcmSource)
     }
 
     pub fn set_source(&self, source: Option<PcmSource>) {
         let ptr = source.map(|s| s.to_raw()).unwrap_or(null_mut());
-        self.0.SetSource(ptr);
+        let raw = unsafe { self.0.as_ref() };
+        raw.SetSource(ptr);
     }
 
     /// Returns number of channels.
     pub fn get_num_channels(&self) -> Option<u32> {
-        let n = self.0.GetNumChannels();
+        let raw = unsafe { self.0.as_ref() };
+        let n = raw.GetNumChannels();
         if n < 0 {
             return None;
         }
@@ -299,7 +304,8 @@ impl<'a> BorrowedPcmSource<'a> {
 
     /// Returns preferred sample rate. If `None` then it is assumed to be silent (or MIDI).
     pub fn get_sample_rate(&self) -> Option<Hz> {
-        let r = self.0.GetSampleRate();
+        let raw = unsafe { self.0.as_ref() };
+        let r = raw.GetSampleRate();
         if r < 1.0 {
             return None;
         }
@@ -312,7 +318,8 @@ impl<'a> BorrowedPcmSource<'a> {
     ///
     /// Returns an error if this source doesn't return a valid duration.
     pub fn get_length(&self) -> ReaperFunctionResult<DurationInSeconds> {
-        let length = self.0.GetLength();
+        let raw = unsafe { self.0.as_ref() };
+        let length = raw.GetLength();
         if length < 0.0 {
             return Err(ReaperFunctionError::new("source doesn't return length"));
         }
@@ -321,7 +328,8 @@ impl<'a> BorrowedPcmSource<'a> {
 
     /// Returns length in beats if supported.
     pub fn get_length_beats(&self) -> Option<DurationInBeats> {
-        let length = self.0.GetLengthBeats();
+        let raw = unsafe { self.0.as_ref() };
+        let length = raw.GetLengthBeats();
         if length < 0.0 {
             return None;
         }
@@ -331,12 +339,14 @@ impl<'a> BorrowedPcmSource<'a> {
     /// Returns bits/sample, if available. Only used for metadata purposes, since everything
     /// returns as doubles anyway.
     pub fn get_bits_per_sample(&self) -> u32 {
-        self.0.GetBitsPerSample() as u32
+        let raw = unsafe { self.0.as_ref() };
+        raw.GetBitsPerSample() as u32
     }
 
     /// Returns `None` if not supported.
     pub fn get_preferred_position(&self) -> Option<PositionInSeconds> {
-        let pos = self.0.GetPreferredPosition();
+        let raw = unsafe { self.0.as_ref() };
+        let pos = raw.GetPreferredPosition();
         if pos < 0.0 {
             return None;
         }
@@ -350,22 +360,22 @@ impl<'a> BorrowedPcmSource<'a> {
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn properties_window(&self, parent_window: Option<Hwnd>) -> i32 {
         let ptr = parent_window.map(|w| w.as_ptr()).unwrap_or(null_mut());
-        self.0.PropertiesWindow(ptr)
+        self.0.as_ref().PropertiesWindow(ptr)
     }
 
     /// TODO-high Unstable.
     pub unsafe fn get_samples(&self, block: BorrowedPcmSourceTransfer) {
-        self.0.GetSamples(block.as_ptr().as_ptr());
+        self.0.as_ref().GetSamples(block.as_ptr().as_ptr());
     }
 
     /// TODO-high Unstable.
     pub unsafe fn get_peak_info(&self, block: BorrowedPcmSourcePeakTransfer) {
-        self.0.GetPeakInfo(block.as_ptr().as_ptr());
+        self.0.as_ref().GetPeakInfo(block.as_ptr().as_ptr());
     }
 
     /// TODO-high Unstable.
     pub unsafe fn save_state(&self, context: BorrowedProjectStateContext) {
-        self.0.SaveState(context.as_ptr().as_ptr());
+        self.0.as_ref().SaveState(context.as_ptr().as_ptr());
     }
 
     /// TODO-high Unstable.
@@ -376,6 +386,7 @@ impl<'a> BorrowedPcmSource<'a> {
     ) -> Result<(), Box<dyn Error>> {
         let res = self
             .0
+            .as_ref()
             .LoadState(first_line.as_ptr(), context.as_ptr().as_ptr());
         if res == -1 {
             Err("load state failed")?
@@ -385,22 +396,26 @@ impl<'a> BorrowedPcmSource<'a> {
 
     /// Builds peaks for files.
     pub fn peaks_clear(&self, delete_file: bool) {
-        self.0.Peaks_Clear(delete_file);
+        let raw = unsafe { self.0.as_ref() };
+        raw.Peaks_Clear(delete_file);
     }
 
     /// Returns `true` if building is opened, otherwise it may mean building isn't necessary.
     pub fn peaks_build_begin(&self) -> bool {
-        self.0.PeaksBuild_Begin() != 0
+        let raw = unsafe { self.0.as_ref() };
+        raw.PeaksBuild_Begin() != 0
     }
 
     /// Returns `true` if building should continue.
     pub fn peaks_build_run(&self) -> bool {
-        self.0.PeaksBuild_Run() != 0
+        let raw = unsafe { self.0.as_ref() };
+        raw.PeaksBuild_Run() != 0
     }
 
     /// Call when done.
     pub fn peaks_build_finish(&self) {
-        self.0.PeaksBuild_Finish();
+        let raw = unsafe { self.0.as_ref() };
+        raw.PeaksBuild_Finish();
     }
 
     pub unsafe fn extended(
@@ -410,7 +425,7 @@ impl<'a> BorrowedPcmSource<'a> {
         parm_2: *mut c_void,
         parm_3: *mut c_void,
     ) -> i32 {
-        self.0.Extended(call, parm_1, parm_2, parm_3)
+        self.0.as_ref().Extended(call, parm_1, parm_2, parm_3)
     }
 
     /// If this source represents pooled MIDI data, this will return information about it.
@@ -422,7 +437,8 @@ impl<'a> BorrowedPcmSource<'a> {
         let mut user_count: MaybeUninit<i32> = MaybeUninit::zeroed();
         let mut first_user: MaybeUninit<*mut raw::MediaItem_Take> = MaybeUninit::zeroed();
         let (id, supported) = with_string_buffer(40, |buffer, max_size| {
-            self.0.Extended(
+            let raw = unsafe { self.0.as_ref() };
+            raw.Extended(
                 raw::PCM_SOURCE_EXT_GETPOOLEDMIDIID as _,
                 buffer as _,
                 user_count.as_mut_ptr() as _,
@@ -455,7 +471,8 @@ impl<'a> BorrowedPcmSource<'a> {
     pub fn ext_export_to_file(&self, file_name: &Path) -> ReaperFunctionResult<()> {
         let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
         let file_name_reaper_string = ReaperString::from_str(file_name_str);
-        let supported = self.0.Extended(
+        let raw = unsafe { self.0.as_ref() };
+        let supported = raw.Extended(
             raw::PCM_SOURCE_EXT_EXPORTTOFILE as _,
             file_name_reaper_string.as_ptr() as _,
             null_mut(),
@@ -490,7 +507,7 @@ impl<'a> BorrowedPcmSource<'a> {
     // }
 }
 
-impl ToOwned for BorrowedPcmSource<'static> {
+impl ToOwned for BorrowedPcmSource {
     type Owned = OwnedPcmSource;
 
     fn to_owned(&self) -> OwnedPcmSource {
@@ -864,8 +881,8 @@ pub enum FlexibleOwnedPcmSource {
     Custom(CustomOwnedPcmSource),
 }
 
-impl AsRef<BorrowedPcmSource<'static>> for FlexibleOwnedPcmSource {
-    fn as_ref(&self) -> &BorrowedPcmSource<'static> {
+impl AsRef<BorrowedPcmSource> for FlexibleOwnedPcmSource {
+    fn as_ref(&self) -> &BorrowedPcmSource {
         match self {
             FlexibleOwnedPcmSource::Reaper(s) => s.as_ref(),
             FlexibleOwnedPcmSource::Custom(s) => s.as_ref(),
@@ -891,8 +908,8 @@ impl fmt::Debug for CustomOwnedPcmSource {
     }
 }
 
-impl AsRef<BorrowedPcmSource<'static>> for CustomOwnedPcmSource {
-    fn as_ref(&self) -> &BorrowedPcmSource<'static> {
+impl AsRef<BorrowedPcmSource> for CustomOwnedPcmSource {
+    fn as_ref(&self) -> &BorrowedPcmSource {
         self.cpp_source.as_ref()
     }
 }

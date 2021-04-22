@@ -37,7 +37,7 @@ impl ReaperSource {
             .validate_ptr_2(project.context(), self.0)
     }
 
-    pub fn as_ref(&self) -> &BorrowedSource<'static> {
+    pub fn as_ref(&self) -> &BorrowedSource {
         self.make_sure_is_valid();
         BorrowedSource::ref_cast(unsafe { self.0.as_ref() })
     }
@@ -50,18 +50,18 @@ impl ReaperSource {
 }
 
 impl Deref for ReaperSource {
-    type Target = BorrowedSource<'static>;
+    type Target = BorrowedSource;
 
-    fn deref(&self) -> &BorrowedSource<'static> {
+    fn deref(&self) -> &BorrowedSource {
         self.as_ref()
     }
 }
 
 #[derive(Eq, PartialEq, Hash, Debug, RefCast)]
 #[repr(transparent)]
-pub struct BorrowedSource<'a>(BorrowedPcmSource<'a>);
+pub struct BorrowedSource(BorrowedPcmSource);
 
-impl<'a> BorrowedSource<'a> {
+impl BorrowedSource {
     pub fn file_name(&self) -> Option<PathBuf> {
         self.0.get_file_name(|path| path.map(|p| p.to_owned()))
     }
@@ -137,19 +137,19 @@ impl OwnedSource {
     }
 }
 
-impl AsRef<BorrowedSource<'static>> for OwnedSource {
-    fn as_ref(&self) -> &BorrowedSource<'static> {
+impl AsRef<BorrowedSource> for OwnedSource {
+    fn as_ref(&self) -> &BorrowedSource {
         BorrowedSource::ref_cast(self.0.as_ref())
     }
 }
 
-impl Borrow<BorrowedSource<'static>> for OwnedSource {
-    fn borrow(&self) -> &BorrowedSource<'static> {
+impl Borrow<BorrowedSource> for OwnedSource {
+    fn borrow(&self) -> &BorrowedSource {
         self.as_ref()
     }
 }
 
-impl ToOwned for BorrowedSource<'static> {
+impl ToOwned for BorrowedSource {
     type Owned = OwnedSource;
 
     fn to_owned(&self) -> OwnedSource {
@@ -157,10 +157,12 @@ impl ToOwned for BorrowedSource<'static> {
     }
 }
 
-impl Deref for OwnedSource {
-    type Target = BorrowedSource<'static>;
+// TODO-high Also implement ToOwned also in medium
 
-    fn deref(&self) -> &BorrowedSource<'static> {
+impl Deref for OwnedSource {
+    type Target = BorrowedSource;
+
+    fn deref(&self) -> &BorrowedSource {
         self.as_ref()
     }
 }
