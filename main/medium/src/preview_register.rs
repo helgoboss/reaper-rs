@@ -108,7 +108,7 @@ impl Default for OwnedPreviewRegister {
             #[cfg(windows)]
             cs: Default::default(),
             #[cfg(unix)]
-            mutex: Default::default(),
+            mutex: unsafe { std::mem::zeroed() },
             ..Default::default()
         };
         #[cfg(windows)]

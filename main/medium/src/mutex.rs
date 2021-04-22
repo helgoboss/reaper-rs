@@ -9,7 +9,7 @@ pub(crate) type ReaperMutexPrimitive = winapi::um::minwinbase::CRITICAL_SECTION;
 
 /// Type alias for the platform-specific REAPER mutex primitive.
 #[cfg(unix)]
-pub(crate) type ReaperMutexPrimitive = reaper_low::raw::pthread_mutex_t;
+pub(crate) type ReaperMutexPrimitive = libc::pthread_mutex_t;
 
 /// Initializes the given mutex primitive.
 pub(crate) fn initialize_mutex_primitive(primitive: &mut ReaperMutexPrimitive) {

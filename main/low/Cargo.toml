@@ -42,6 +42,9 @@ downcast-rs = "1.1.1"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser"] }
 
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
 [dev-dependencies]
 version-sync = "0.9"
 
