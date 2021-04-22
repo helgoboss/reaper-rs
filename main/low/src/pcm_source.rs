@@ -9,27 +9,27 @@ use std::ptr::{null, null_mut, NonNull};
 
 impl raw::PCM_source {
     pub fn GetLength(&self) -> f64 {
-        unsafe { PCM_source_GetLength(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetLength(self as *const _ as _) }
     }
 
     pub fn IsAvailable(&self) -> bool {
-        unsafe { PCM_source_IsAvailable(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_IsAvailable(self as *const _ as _) }
     }
 
     pub fn Duplicate(&self) -> *mut raw::PCM_source {
-        unsafe { PCM_source_Duplicate(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_Duplicate(self as *const _ as _) }
     }
 
     pub fn GetType(&self) -> *const c_char {
-        unsafe { PCM_source_GetType(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetType(self as *const _ as _) }
     }
 
     pub fn GetFileName(&self) -> *const c_char {
-        unsafe { PCM_source_GetFileName(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetFileName(self as *const _ as _) }
     }
 
     pub fn GetSource(&self) -> *mut raw::PCM_source {
-        unsafe { PCM_source_GetSource(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetSource(self as *const _ as _) }
     }
 
     pub fn Extended(
@@ -39,64 +39,64 @@ impl raw::PCM_source {
         parm2: *mut c_void,
         parm3: *mut c_void,
     ) -> c_int {
-        unsafe { PCM_source_Extended(self as *const _ as _, call, parm1, parm2, parm3) }
+        unsafe { rust_to_cpp_PCM_source_Extended(self as *const _ as _, call, parm1, parm2, parm3) }
     }
 
     pub fn SetAvailable(&self, avail: bool) {
         unsafe {
-            PCM_source_SetAvailable(self as *const _ as _, avail);
+            rust_to_cpp_PCM_source_SetAvailable(self as *const _ as _, avail);
         }
     }
 
     pub fn SetFileName(&self, newfn: *const ::std::os::raw::c_char) -> bool {
-        unsafe { PCM_source_SetFileName(self as *const _ as _, newfn) }
+        unsafe { rust_to_cpp_PCM_source_SetFileName(self as *const _ as _, newfn) }
     }
 
     pub fn SetSource(&self, src: *mut raw::PCM_source) {
         unsafe {
-            PCM_source_SetSource(self as *const _ as _, src);
+            rust_to_cpp_PCM_source_SetSource(self as *const _ as _, src);
         }
     }
 
     pub fn GetNumChannels(&self) -> ::std::os::raw::c_int {
-        unsafe { PCM_source_GetNumChannels(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetNumChannels(self as *const _ as _) }
     }
 
     pub fn GetSampleRate(&self) -> f64 {
-        unsafe { PCM_source_GetSampleRate(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetSampleRate(self as *const _ as _) }
     }
 
     pub fn GetLengthBeats(&self) -> f64 {
-        unsafe { PCM_source_GetLengthBeats(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetLengthBeats(self as *const _ as _) }
     }
 
     pub fn GetBitsPerSample(&self) -> ::std::os::raw::c_int {
-        unsafe { PCM_source_GetBitsPerSample(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetBitsPerSample(self as *const _ as _) }
     }
 
     pub fn GetPreferredPosition(&self) -> f64 {
-        unsafe { PCM_source_GetPreferredPosition(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_GetPreferredPosition(self as *const _ as _) }
     }
 
     pub fn PropertiesWindow(&self, hwndParent: raw::HWND) -> ::std::os::raw::c_int {
-        unsafe { PCM_source_PropertiesWindow(self as *const _ as _, hwndParent) }
+        unsafe { rust_to_cpp_PCM_source_PropertiesWindow(self as *const _ as _, hwndParent) }
     }
 
     pub fn GetSamples(&self, block: *mut raw::PCM_source_transfer_t) {
         unsafe {
-            PCM_source_GetSamples(self as *const _ as _, block);
+            rust_to_cpp_PCM_source_GetSamples(self as *const _ as _, block);
         }
     }
 
     pub fn GetPeakInfo(&self, block: *mut raw::PCM_source_peaktransfer_t) {
         unsafe {
-            PCM_source_GetPeakInfo(self as *const _ as _, block);
+            rust_to_cpp_PCM_source_GetPeakInfo(self as *const _ as _, block);
         }
     }
 
     pub fn SaveState(&self, ctx: *mut raw::ProjectStateContext) {
         unsafe {
-            PCM_source_SaveState(self as *const _ as _, ctx);
+            rust_to_cpp_PCM_source_SaveState(self as *const _ as _, ctx);
         }
     }
 
@@ -105,26 +105,26 @@ impl raw::PCM_source {
         firstline: *const ::std::os::raw::c_char,
         ctx: *mut raw::ProjectStateContext,
     ) -> ::std::os::raw::c_int {
-        unsafe { PCM_source_LoadState(self as *const _ as _, firstline, ctx) }
+        unsafe { rust_to_cpp_PCM_source_LoadState(self as *const _ as _, firstline, ctx) }
     }
 
     pub fn Peaks_Clear(&self, deleteFile: bool) {
         unsafe {
-            PCM_source_Peaks_Clear(self as *const _ as _, deleteFile);
+            rust_to_cpp_PCM_source_Peaks_Clear(self as *const _ as _, deleteFile);
         }
     }
 
     pub fn PeaksBuild_Begin(&self) -> ::std::os::raw::c_int {
-        unsafe { PCM_source_PeaksBuild_Begin(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_PeaksBuild_Begin(self as *const _ as _) }
     }
 
     pub fn PeaksBuild_Run(&self) -> ::std::os::raw::c_int {
-        unsafe { PCM_source_PeaksBuild_Run(self as *const _ as _) }
+        unsafe { rust_to_cpp_PCM_source_PeaksBuild_Run(self as *const _ as _) }
     }
 
     pub fn PeaksBuild_Finish(&self) {
         unsafe {
-            PCM_source_PeaksBuild_Finish(self as *const _ as _);
+            rust_to_cpp_PCM_source_PeaksBuild_Finish(self as *const _ as _);
         }
     }
 }
@@ -241,96 +241,120 @@ pub unsafe fn delete_cpp_pcm_source(source: NonNull<raw::PCM_source>) {
 }
 
 #[no_mangle]
-extern "C" fn GetLength(callback_target: *mut Box<dyn PCM_source>) -> f64 {
+extern "C" fn cpp_to_rust_PCM_source_GetLength(callback_target: *mut Box<dyn PCM_source>) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetLength()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn Duplicate(callback_target: *mut Box<dyn PCM_source>) -> *mut raw::PCM_source {
+extern "C" fn cpp_to_rust_PCM_source_Duplicate(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> *mut raw::PCM_source {
     firewall(|| unsafe { &mut *callback_target }.Duplicate()).unwrap_or(null_mut())
 }
 #[no_mangle]
-extern "C" fn GetType(callback_target: *mut Box<dyn PCM_source>) -> *const ::std::os::raw::c_char {
+extern "C" fn cpp_to_rust_PCM_source_GetType(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &mut *callback_target }.GetType()).unwrap_or(null())
 }
 #[no_mangle]
-extern "C" fn GetFileName(
+extern "C" fn cpp_to_rust_PCM_source_GetFileName(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &mut *callback_target }.GetFileName()).unwrap_or(null())
 }
 #[no_mangle]
-extern "C" fn GetSource(callback_target: *mut Box<dyn PCM_source>) -> *mut raw::PCM_source {
+extern "C" fn cpp_to_rust_PCM_source_GetSource(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> *mut raw::PCM_source {
     firewall(|| unsafe { &mut *callback_target }.GetSource()).unwrap_or(null_mut())
 }
 #[no_mangle]
-extern "C" fn IsAvailable(callback_target: *mut Box<dyn PCM_source>) -> bool {
+extern "C" fn cpp_to_rust_PCM_source_IsAvailable(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> bool {
     firewall(|| unsafe { &mut *callback_target }.IsAvailable()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn SetAvailable(callback_target: *mut Box<dyn PCM_source>, avail: bool) {
+extern "C" fn cpp_to_rust_PCM_source_SetAvailable(
+    callback_target: *mut Box<dyn PCM_source>,
+    avail: bool,
+) {
     firewall(|| unsafe { &mut *callback_target }.SetAvailable(avail));
 }
 #[no_mangle]
-extern "C" fn SetFileName(
+extern "C" fn cpp_to_rust_PCM_source_SetFileName(
     callback_target: *mut Box<dyn PCM_source>,
     newfn: *const ::std::os::raw::c_char,
 ) -> bool {
     firewall(|| unsafe { &mut *callback_target }.SetFileName(newfn)).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn SetSource(callback_target: *mut Box<dyn PCM_source>, src: *mut raw::PCM_source) {
+extern "C" fn cpp_to_rust_PCM_source_SetSource(
+    callback_target: *mut Box<dyn PCM_source>,
+    src: *mut raw::PCM_source,
+) {
     firewall(|| unsafe { &mut *callback_target }.SetSource(src));
 }
 #[no_mangle]
-extern "C" fn GetNumChannels(callback_target: *mut Box<dyn PCM_source>) -> ::std::os::raw::c_int {
+extern "C" fn cpp_to_rust_PCM_source_GetNumChannels(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.GetNumChannels()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn GetSampleRate(callback_target: *mut Box<dyn PCM_source>) -> f64 {
+extern "C" fn cpp_to_rust_PCM_source_GetSampleRate(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetSampleRate()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn GetLengthBeats(callback_target: *mut Box<dyn PCM_source>) -> f64 {
+extern "C" fn cpp_to_rust_PCM_source_GetLengthBeats(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetLengthBeats()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn GetBitsPerSample(callback_target: *mut Box<dyn PCM_source>) -> ::std::os::raw::c_int {
+extern "C" fn cpp_to_rust_PCM_source_GetBitsPerSample(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.GetBitsPerSample()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn GetPreferredPosition(callback_target: *mut Box<dyn PCM_source>) -> f64 {
+extern "C" fn cpp_to_rust_PCM_source_GetPreferredPosition(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetPreferredPosition()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn PropertiesWindow(
+extern "C" fn cpp_to_rust_PCM_source_PropertiesWindow(
     callback_target: *mut Box<dyn PCM_source>,
     hwndParent: raw::HWND,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.PropertiesWindow(hwndParent)).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn GetSamples(
+extern "C" fn cpp_to_rust_PCM_source_GetSamples(
     callback_target: *mut Box<dyn PCM_source>,
     block: *mut raw::PCM_source_transfer_t,
 ) {
     firewall(|| unsafe { &mut *callback_target }.GetSamples(block));
 }
 #[no_mangle]
-extern "C" fn GetPeakInfo(
+extern "C" fn cpp_to_rust_PCM_source_GetPeakInfo(
     callback_target: *mut Box<dyn PCM_source>,
     block: *mut raw::PCM_source_peaktransfer_t,
 ) {
     firewall(|| unsafe { &mut *callback_target }.GetPeakInfo(block));
 }
 #[no_mangle]
-extern "C" fn SaveState(
+extern "C" fn cpp_to_rust_PCM_source_SaveState(
     callback_target: *mut Box<dyn PCM_source>,
     ctx: *mut raw::ProjectStateContext,
 ) {
     firewall(|| unsafe { &mut *callback_target }.SaveState(ctx));
 }
 #[no_mangle]
-extern "C" fn LoadState(
+extern "C" fn cpp_to_rust_PCM_source_LoadState(
     callback_target: *mut Box<dyn PCM_source>,
     firstline: *const ::std::os::raw::c_char,
     ctx: *mut raw::ProjectStateContext,
@@ -338,27 +362,31 @@ extern "C" fn LoadState(
     firewall(|| unsafe { &mut *callback_target }.LoadState(firstline, ctx)).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn Peaks_Clear(callback_target: *mut Box<dyn PCM_source>, deleteFile: bool) {
+extern "C" fn cpp_to_rust_PCM_source_Peaks_Clear(
+    callback_target: *mut Box<dyn PCM_source>,
+    deleteFile: bool,
+) {
     firewall(|| unsafe { &mut *callback_target }.Peaks_Clear(deleteFile));
 }
 #[no_mangle]
-extern "C" fn PeaksBuild_Begin(callback_target: *mut Box<dyn PCM_source>) -> ::std::os::raw::c_int {
+extern "C" fn cpp_to_rust_PCM_source_PeaksBuild_Begin(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.PeaksBuild_Begin()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn PeaksBuild_Run(callback_target: *mut Box<dyn PCM_source>) -> ::std::os::raw::c_int {
+extern "C" fn cpp_to_rust_PCM_source_PeaksBuild_Run(
+    callback_target: *mut Box<dyn PCM_source>,
+) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.PeaksBuild_Run()).unwrap_or_default()
 }
 #[no_mangle]
-extern "C" fn PeaksBuild_Finish(callback_target: *mut Box<dyn PCM_source>) {
+extern "C" fn cpp_to_rust_PCM_source_PeaksBuild_Finish(callback_target: *mut Box<dyn PCM_source>) {
     firewall(|| unsafe { &mut *callback_target }.PeaksBuild_Finish());
 }
-// TODO-low Here we have a name conflict with the Extended function from IReaperControlSurface.
-//  This indicates that we should use prefixes (since namespaces are not supported in C).
-//  The prefix should express the type (e.g. PCM_source) and the direction (C to Rust and back)
-//  because for one method we have 2 functions, one for each direction.
+
 #[no_mangle]
-extern "C" fn rust_PCM_source_Extended(
+extern "C" fn cpp_to_rust_PCM_source_Extended(
     callback_target: *mut Box<dyn PCM_source>,
     call: ::std::os::raw::c_int,
     parm1: *mut ::std::os::raw::c_void,
