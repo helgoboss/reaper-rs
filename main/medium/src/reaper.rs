@@ -4348,12 +4348,14 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr).map(PcmSource)
     }
 
+    /// Unstable!!!
+    ///
     /// Returns the project which contains this item.
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid item.
-    // TODO-high Can this EVER be None?
+    // TODO-high-unstable Can this EVER be None?
     #[measure(ResponseTimeSingleThreaded)]
     pub unsafe fn get_item_project_context(&self, item: MediaItem) -> Option<ReaProject>
     where

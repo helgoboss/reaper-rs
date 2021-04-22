@@ -7,10 +7,10 @@
 namespace reaper_control_surface {
   // This function is called from Rust and implemented in C++. It instantiates a C++ IReaperControlSurface and returns
   // its address to Rust.
-  extern "C" IReaperControlSurface* add_control_surface(void* callback_target);
+  extern "C" IReaperControlSurface* create_cpp_to_rust_control_surface(void* callback_target);
 
   // This function is called from Rust and implemented in C++. It destroys the given C++ IReaperControlSurface object.
-  extern "C" void remove_control_surface(IReaperControlSurface* surface);
+  extern "C" void delete_control_surface(IReaperControlSurface* surface);
 
   // All of the following functions are called from C++ and implemented in Rust.
   extern "C" const char* GetTypeString(void* callback_target);

@@ -77,11 +77,11 @@ namespace reaper_control_surface {
     }
   };
 
-  IReaperControlSurface* add_control_surface(void* callback_target) {
+  IReaperControlSurface* create_cpp_to_rust_control_surface(void* callback_target) {
     return new ReaperRsControlSurface(callback_target);
   }
 
-  void remove_control_surface(IReaperControlSurface* surface) {
+  void delete_control_surface(IReaperControlSurface* surface) {
     delete surface;
   }
 }

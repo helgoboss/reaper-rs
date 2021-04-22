@@ -11,7 +11,7 @@ use std::ptr::{null, null_mut, NonNull};
 
 /// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`.
 ///
-/// An implementation of this trait can be passed to [`add_cpp_control_surface()`]. After
+/// An implementation of this trait can be passed to [`create_cpp_to_rust_control_surface()`]. After
 /// registering the returned C++ counterpart, REAPER will start invoking the callback methods.
 ///
 /// # Design
@@ -42,7 +42,7 @@ use std::ptr::{null, null_mut, NonNull};
 /// for reentrancy by using `try_borrow_mut()`. Or they might find out that they want to
 /// avoid this situation by just deferring the event handling to the next main loop cycle.
 ///
-/// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
+/// [`create_cpp_to_rust_control_surface()`]: fn.create_cpp_to_rust_control_surface.html
 pub trait IReaperControlSurface: Debug + Downcast {
     fn GetTypeString(&self) -> *const ::std::os::raw::c_char {
         null()
@@ -121,7 +121,7 @@ downcast_rs::impl_downcast!(IReaperControlSurface);
 ///
 /// ```no_run
 /// # let reaper = reaper_low::Reaper::default();
-/// use reaper_low::{add_cpp_control_surface, remove_cpp_control_surface, IReaperControlSurface};
+/// use reaper_low::{create_cpp_to_rust_control_surface, delete_cpp_control_surface, IReaperControlSurface};
 /// use std::ffi::CString;
 /// use std::ptr::NonNull;
 /// use c_str_macro::c_str;
@@ -137,11 +137,11 @@ downcast_rs::impl_downcast!(IReaperControlSurface);
 ///     }
 ///     let rust_cs: Box<dyn IReaperControlSurface> = Box::new(MyControlSurface);
 ///     let thin_ptr_to_rust_cs: NonNull<_> = (&rust_cs).into();
-///     let cpp_cs = add_cpp_control_surface(thin_ptr_to_rust_cs);
+///     let cpp_cs = create_cpp_to_rust_control_surface(thin_ptr_to_rust_cs);
 ///     reaper.plugin_register(c_str!("csurf_inst").as_ptr(), cpp_cs.as_ptr() as _);
 ///     // Unregister
 ///     reaper.plugin_register(c_str!("-csurf_inst").as_ptr(), cpp_cs.as_ptr() as _);
-///     remove_cpp_control_surface(cpp_cs);
+///     delete_cpp_control_surface(cpp_cs);
 /// }
 /// ```
 ///
@@ -153,7 +153,7 @@ downcast_rs::impl_downcast!(IReaperControlSurface);
 /// REAPER will crash** because it will attempt to invoke functions which are not loaded anymore.
 ///
 /// In order to avoid memory leaks, you also must take care of removing the C++ counterpart
-/// surface by calling [`remove_cpp_control_surface()`].
+/// surface by calling [`delete_cpp_control_surface()`].
 ///
 /// # Safety
 ///
@@ -161,28 +161,29 @@ downcast_rs::impl_downcast!(IReaperControlSurface);
 /// API instead, which makes registering a breeze.
 ///
 /// [`plugin_register()`]: struct.Reaper.html#method.plugin_register
-/// [`remove_cpp_control_surface()`]: fn.remove_cpp_control_surface.html
-pub unsafe fn add_cpp_control_surface(
+/// [`delete_cpp_control_surface()`]: fn.remove_cpp_control_surface.html
+pub unsafe fn create_cpp_to_rust_control_surface(
     callback_target: NonNull<Box<dyn IReaperControlSurface>>,
 ) -> NonNull<raw::IReaperControlSurface> {
-    let instance = crate::bindings::root::reaper_control_surface::add_control_surface(
-        callback_target.as_ptr() as *mut c_void,
-    );
+    let instance =
+        crate::bindings::root::reaper_control_surface::create_cpp_to_rust_control_surface(
+            callback_target.as_ptr() as *mut c_void,
+        );
     NonNull::new_unchecked(instance)
 }
 
 /// Destroys a C++ `IReaperControlSurface` object.
 ///
-/// Intended to be used on pointers returned from [`add_cpp_control_surface()`].
+/// Intended to be used on pointers returned from [`create_cpp_to_rust_control_surface()`].
 ///
 /// # Safety
 ///
 /// REAPER can crash if you pass an invalid pointer because C++ will attempt to free the wrong
 /// location in memory.
 ///
-/// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
-pub unsafe fn remove_cpp_control_surface(surface: NonNull<raw::IReaperControlSurface>) {
-    crate::bindings::root::reaper_control_surface::remove_control_surface(surface.as_ptr());
+/// [`create_cpp_to_rust_control_surface()`]: fn.create_cpp_to_rust_control_surface.html
+pub unsafe fn delete_cpp_control_surface(surface: NonNull<raw::IReaperControlSurface>) {
+    crate::bindings::root::reaper_control_surface::delete_control_surface(surface.as_ptr());
 }
 
 #[no_mangle]

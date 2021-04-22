@@ -5,10 +5,10 @@
 namespace reaper_pcm_source {
   // This function is called from Rust and implemented in C++. It instantiates a C++ PCM_source and returns
   // its address to Rust.
-  extern "C" PCM_source* add_pcm_source(void* callback_target);
+  extern "C" PCM_source* create_cpp_to_rust_pcm_source(void* callback_target);
 
   // This function is called from Rust and implemented in C++. It destroys the given C++ PCM_source object.
-  extern "C" void remove_pcm_source(PCM_source* source);
+  extern "C" void delete_pcm_source(PCM_source* source);
 
   // All of the following functions are called from C++ and implemented in Rust.
   extern "C" double GetLength(void* callback_target);

@@ -92,8 +92,9 @@ impl OwnedPreviewRegister {
         self.register.preview_track = track.map(|t| t.as_ptr() as _).unwrap_or(null_mut());
     }
 
-    // TODO-high Improve API. This can be either a track index or a HW output channel or none.
-    //  preview_track only has an effect if this is none.
+    /// Unstable!!!
+    // TODO-high-unstable Improve API. This can be either a track index or a HW output channel or
+    //  none. preview_track only has an effect if this is none.
     pub fn out_chan(&self) -> i32 {
         self.register.m_out_chan
     }

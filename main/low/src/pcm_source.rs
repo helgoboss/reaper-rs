@@ -131,9 +131,9 @@ impl raw::PCM_source {
 
 /// This is the Rust analog to the C++ virtual base class `PCM_source`.
 ///
-/// An implementation of this trait can be passed to [`add_cpp_pcm_source()`].
+/// An implementation of this trait can be passed to [`create_cpp_to_rust_pcm_source()`].
 ///
-/// [`add_cpp_pcm_source()`]: fn.add_cpp_pcm_source.html
+/// [`create_cpp_to_rust_pcm_source()`]: fn.create_cpp_to_rust_pcm_source.html
 pub trait PCM_source {
     fn Duplicate(&mut self) -> *mut raw::PCM_source;
 
@@ -204,23 +204,23 @@ pub trait PCM_source {
 ///
 /// # Example
 ///
-/// See [`add_cpp_control_surface()`]. Usage is very similar.
+/// See [`create_cpp_to_rust_control_surface()`]. Usage is very similar.
 ///
 /// # Cleaning up
 ///
 /// In order to avoid memory leaks, you must take care of removing the C++ counterpart
-/// PCM source by calling [`remove_cpp_pcm_source()`].
+/// PCM source by calling [`delete_cpp_pcm_source()`].
 ///
 /// # Safety
 ///
 /// This function is highly unsafe. Better use the medium-level API instead.
 ///
-/// [`remove_cpp_pcm_source()`]: fn.remove_cpp_pcm_source.html
-/// [`add_cpp_control_surface()`]: fn.add_cpp_control_surface.html
-pub unsafe fn add_cpp_pcm_source(
+/// [`delete_cpp_pcm_source()`]: fn.remove_cpp_pcm_source.html
+/// [`create_cpp_to_rust_control_surface()`]: fn.create_cpp_to_rust_control_surface.html
+pub unsafe fn create_cpp_to_rust_pcm_source(
     callback_target: NonNull<Box<dyn PCM_source>>,
 ) -> NonNull<raw::PCM_source> {
-    let instance = crate::bindings::root::reaper_pcm_source::add_pcm_source(
+    let instance = crate::bindings::root::reaper_pcm_source::create_cpp_to_rust_pcm_source(
         callback_target.as_ptr() as *mut c_void,
     );
     NonNull::new_unchecked(instance)
@@ -228,16 +228,16 @@ pub unsafe fn add_cpp_pcm_source(
 
 /// Destroys a C++ `PCM_source` object.
 ///
-/// Intended to be used on pointers returned from [`add_cpp_pcm_source()`].
+/// Intended to be used on pointers returned from [`create_cpp_to_rust_pcm_source()`].
 ///
 /// # Safety
 ///
 /// REAPER can crash if you pass an invalid pointer because C++ will attempt to free the wrong
 /// location in memory.
 ///
-/// [`add_cpp_pcm_source()`]: fn.add_cpp_pcm_source.html
-pub unsafe fn remove_cpp_pcm_source(source: NonNull<raw::PCM_source>) {
-    crate::bindings::root::reaper_pcm_source::remove_pcm_source(source.as_ptr());
+/// [`create_cpp_to_rust_pcm_source()`]: fn.create_cpp_to_rust_pcm_source.html
+pub unsafe fn delete_cpp_pcm_source(source: NonNull<raw::PCM_source>) {
+    crate::bindings::root::reaper_pcm_source::delete_pcm_source(source.as_ptr());
 }
 
 #[no_mangle]

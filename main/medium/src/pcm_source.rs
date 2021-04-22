@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 use helgoboss_midi::{ShortMessage, U7};
-use reaper_low::{add_cpp_pcm_source, raw};
+use reaper_low::{create_cpp_to_rust_pcm_source, raw};
 use ref_cast::RefCast;
 
 use crate::util::{create_passing_c_str, with_string_buffer};
@@ -103,9 +103,7 @@ impl OwnedPcmSource {
 impl Drop for OwnedPcmSource {
     fn drop(&mut self) {
         unsafe {
-            // TODO-high Rename this into delete_cpp_pcm_source and the add function
-            //  to create_cpp_to_rust_pcm_source().
-            reaper_low::remove_cpp_pcm_source(self.0.into_inner());
+            reaper_low::delete_cpp_pcm_source(self.0.into_inner());
         }
     }
 }
@@ -341,7 +339,7 @@ impl BorrowedPcmSource {
         Some(PositionInSeconds::new(pos))
     }
 
-    /// TODO-high Unstable.
+    /// Unstable!!!
     ///
     /// # Safety
     ///
@@ -351,22 +349,22 @@ impl BorrowedPcmSource {
         self.0.PropertiesWindow(ptr)
     }
 
-    /// TODO-high Unstable.
+    /// Unstable!!!
     pub unsafe fn get_samples(&self, block: &BorrowedPcmSourceTransfer) {
         self.0.GetSamples(block.as_ptr().as_ptr());
     }
 
-    /// TODO-high Unstable.
+    /// Unstable!!!
     pub unsafe fn get_peak_info(&self, block: &BorrowedPcmSourcePeakTransfer) {
         self.0.GetPeakInfo(block.as_ptr().as_ptr());
     }
 
-    /// TODO-high Unstable.
+    /// Unstable!!!
     pub unsafe fn save_state(&self, context: &BorrowedProjectStateContext) {
         self.0.SaveState(context.as_ptr().as_ptr());
     }
 
-    /// TODO-high Unstable.
+    /// Unstable!!!
     pub unsafe fn load_state(
         &self,
         first_line: &ReaperStr,
@@ -411,6 +409,8 @@ impl BorrowedPcmSource {
         self.0.Extended(call, parm_1, parm_2, parm_3)
     }
 
+    /// Unstable!!!
+    ///
     /// If this source represents pooled MIDI data, this will return information about it.
     ///
     /// # Errors
@@ -499,12 +499,12 @@ impl ToOwned for BorrowedPcmSource {
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct ExtGetPooledMidiIdResult {
     /// A GUID string with braces.
-    // TODO-high Can this be empty?
+    // TODO-high-unstable Can this be empty?
     pub id: ReaperString,
     /// Number of takes which use this pooled MIDI data.
-    // TODO-high Improve type
+    // TODO-high-unstable Improve type
     pub user_count: i32,
-    // TODO-high Can this be empty?
+    // TODO-high-unstable Can this be empty?
     pub first_user: MediaItemTake,
 }
 
@@ -569,7 +569,8 @@ pub trait CustomPcmSource {
         None
     }
 
-    // TODO-high Not sure what the return value means. Maybe use extensible enum.
+    /// Unstable!!!
+    // TODO-high-unstable Not sure what the return value means. Maybe use extensible enum.
     fn properties_window(&mut self, args: PropertiesWindowArgs) -> i32;
 
     fn get_samples(&mut self, args: GetSamplesArgs);
@@ -583,12 +584,14 @@ pub trait CustomPcmSource {
     /// Called by the peaks building UI to build peaks for files.
     fn peaks_clear(&mut self, args: PeaksClearArgs);
 
+    /// Unstable!!!
     /// Return `true` if building is opened, otherwise it may mean building isn't necessary.
-    // TODO-high Use extensible enum as return value.
+    // TODO-high-unstable Use extensible enum as return value.
     fn peaks_build_begin(&mut self) -> bool;
 
+    /// Unstable!!!
     /// Return `true` if building should continue.
-    // TODO-high Use extensible enum as return value.
+    // TODO-high-unstable Use extensible enum as return value.
     fn peaks_build_run(&mut self) -> bool;
 
     /// Called when done.
@@ -903,9 +906,11 @@ impl AsRef<BorrowedPcmSource> for CustomOwnedPcmSource {
     }
 }
 
+/// Unstable!!!
+///
 /// Creates a REAPER PCM source for the given custom Rust implementation and returns it.
 //
-// TODO-high Think of a good name.
+// TODO-high-unstable Think of a good name.
 pub fn create_custom_owned_pcm_source<S: CustomPcmSource + 'static>(
     custom_source: S,
 ) -> CustomOwnedPcmSource {
@@ -914,7 +919,7 @@ pub fn create_custom_owned_pcm_source<S: CustomPcmSource + 'static>(
     // a thin pointer for passing it to C++ as callback target).
     let rust_source: Box<Box<dyn reaper_low::PCM_source>> = Box::new(Box::new(adapter));
     let thin_ptr_to_adapter: NonNull<_> = rust_source.as_ref().into();
-    let raw_cpp_source = unsafe { add_cpp_pcm_source(thin_ptr_to_adapter) };
+    let raw_cpp_source = unsafe { create_cpp_to_rust_pcm_source(thin_ptr_to_adapter) };
     let cpp_source = unsafe { OwnedPcmSource::new_unchecked(PcmSource::new(raw_cpp_source)) };
     CustomOwnedPcmSource {
         cpp_source,

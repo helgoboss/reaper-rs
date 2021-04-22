@@ -1,7 +1,8 @@
 use std::ptr::NonNull;
 
 use reaper_low::{
-    add_cpp_control_surface, raw, remove_cpp_control_surface, IReaperControlSurface, PluginContext,
+    create_cpp_to_rust_control_surface, delete_cpp_control_surface, raw, IReaperControlSurface,
+    PluginContext,
 };
 
 use crate::keeper::{Keeper, SharedKeeper};
@@ -417,14 +418,13 @@ impl ReaperSession {
         Ok(CommandId(raw_id as _))
     }
 
-    /// **This is still unstable!**
+    /// Unstable!!!
     ///
     /// # Safety
     ///
     /// You must ensure that the given function pointer is valid.
-    // TODO-high Better API (maybe a builder). Also because current one is prone to breaking
-    //  changes.
-    // TODO-high Doc
+    // TODO-high-unstable Better API (maybe a builder) and doc. Also because current one is prone to
+    //  breaking changes.
     // TODO-low Add function for removal
     #[allow(clippy::too_many_arguments)]
     pub unsafe fn plugin_register_add_api_and_def<'a>(
@@ -772,7 +772,8 @@ impl ReaperSession {
         // Create the C++ counterpart surface (we need to box the Rust side twice in order to obtain
         // a thin pointer for passing it to C++ as callback target).
         let double_boxed_low_cs: Box<Box<dyn IReaperControlSurface>> = Box::new(Box::new(low_cs));
-        let cpp_cs = unsafe { add_cpp_control_surface(double_boxed_low_cs.as_ref().into()) };
+        let cpp_cs =
+            unsafe { create_cpp_to_rust_control_surface(double_boxed_low_cs.as_ref().into()) };
         // Store the low-level Rust control surface in memory. Although we keep it here,
         // conceptually it's owned by REAPER, so we should not access it while being registered.
         let handle = RegistrationHandle::new(control_surface_thin_ptr, cpp_cs.cast());
@@ -827,7 +828,7 @@ impl ReaperSession {
         let cpp_cs_ptr = handle.reaper_ptr().cast();
         self.plugin_register_remove(RegistrationObject::CsurfInst(cpp_cs_ptr));
         // Remove the C++ counterpart surface
-        remove_cpp_control_surface(cpp_cs_ptr);
+        delete_cpp_control_surface(cpp_cs_ptr);
         // Reconstruct the initial value for handing ownership back to the consumer
         let low_cs = double_boxed_low_cs
             .into_any()

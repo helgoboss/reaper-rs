@@ -157,8 +157,6 @@ impl ToOwned for BorrowedSource {
     }
 }
 
-// TODO-high Also implement ToOwned also in medium
-
 impl Deref for OwnedSource {
     type Target = BorrowedSource;
 

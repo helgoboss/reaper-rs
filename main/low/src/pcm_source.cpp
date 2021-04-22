@@ -78,12 +78,12 @@ namespace reaper_pcm_source {
   // C++ -> Rust
 
   // This source just delegates to the free functions implemented in Rust. See header file for an explanation.
-  class ReaperRsPcmSource : public PCM_source {
+  class CppToRustPcmSource : public PCM_source {
   private:
     // This pointer points to a Box in Rust which holds a PCM_source trait implementation.
     void* callback_target_;
   public:
-    ReaperRsPcmSource(void* callback_target) : callback_target_(callback_target) {
+    CppToRustPcmSource(void* callback_target) : callback_target_(callback_target) {
     }
 
     virtual PCM_source* Duplicate() {
@@ -160,11 +160,11 @@ namespace reaper_pcm_source {
     }
   };
 
-  PCM_source* add_pcm_source(void* callback_target) {
-    return new ReaperRsPcmSource(callback_target);
+  PCM_source* create_cpp_to_rust_pcm_source(void* callback_target) {
+    return new CppToRustPcmSource(callback_target);
   }
 
-  void remove_pcm_source(PCM_source* source) {
+  void delete_pcm_source(PCM_source* source) {
     delete source;
   }
 }

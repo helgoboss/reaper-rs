@@ -10919,12 +10919,12 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
-            pub fn add_control_surface(
+            pub fn create_cpp_to_rust_control_surface(
                 callback_target: *mut ::std::os::raw::c_void,
             ) -> *mut root::IReaperControlSurface;
         }
         extern "C" {
-            pub fn remove_control_surface(surface: *mut root::IReaperControlSurface);
+            pub fn delete_control_surface(surface: *mut root::IReaperControlSurface);
         }
         extern "C" {
             pub fn GetTypeString(
@@ -11088,12 +11088,12 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
-            pub fn add_pcm_source(
+            pub fn create_cpp_to_rust_pcm_source(
                 callback_target: *mut ::std::os::raw::c_void,
             ) -> *mut root::PCM_source;
         }
         extern "C" {
-            pub fn remove_pcm_source(source: *mut root::PCM_source);
+            pub fn delete_pcm_source(source: *mut root::PCM_source);
         }
         extern "C" {
             pub fn GetLength(callback_target: *mut ::std::os::raw::c_void) -> f64;
