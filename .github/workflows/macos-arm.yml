@@ -1,0 +1,77 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+  # For quickly detecting important differences in runner configurations
+  schedule:
+    - cron: '0 5 * * MON'
+
+name: macOS ARM
+
+jobs:
+  check:
+    name: Check
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2021-03-10-aarch64-apple-darwin
+          override: true
+      - name: cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+
+  test:
+    name: Test Suite
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: mxschmitt/action-tmate@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2021-03-10-aarch64-apple-darwin
+          override: true
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: test-plug-ins
+          path: target/debug/*.dylib
+      - name: cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -- --nocapture
+
+  clippy:
+    name: Clippy
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2021-03-10-aarch64-apple-darwin
+          override: true
+      - run: rustup component add clippy
+      - name: cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
