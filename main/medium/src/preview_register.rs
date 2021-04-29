@@ -106,7 +106,7 @@ impl Default for OwnedPreviewRegister {
     fn default() -> Self {
         let mut register = raw::preview_register_t {
             #[cfg(windows)]
-            cs: Default::default(),
+            cs: unsafe { std::mem::zeroed() },
             #[cfg(unix)]
             mutex: unsafe { std::mem::zeroed() },
             ..Default::default()
