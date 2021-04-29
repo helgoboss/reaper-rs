@@ -14,7 +14,7 @@ use std::error::Error;
 use std::fmt;
 use std::mem::MaybeUninit;
 use std::ops::Deref;
-use std::os::raw::c_void;
+use std::os::raw::{c_char, c_void};
 use std::path::Path;
 use std::ptr::{null, null_mut, NonNull};
 
@@ -718,18 +718,18 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
         });
     }
 
-    fn GetType(&mut self) -> *const i8 {
+    fn GetType(&mut self) -> *const c_char {
         self.delegate.get_type().as_ptr()
     }
 
-    fn GetFileName(&mut self) -> *const i8 {
+    fn GetFileName(&mut self) -> *const c_char {
         self.delegate
             .get_file_name()
             .map(|s| s.as_ptr())
             .unwrap_or(null())
     }
 
-    fn SetFileName(&mut self, newfn: *const i8) -> bool {
+    fn SetFileName(&mut self, newfn: *const c_char) -> bool {
         let new_file_name = if let Some(reaper_str) = unsafe { create_passing_c_str(newfn) } {
             let s = reaper_str.to_str();
             Some(Path::new(s))
@@ -824,7 +824,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
         self.delegate.save_state(args);
     }
 
-    fn LoadState(&mut self, firstline: *const i8, ctx: *mut raw::ProjectStateContext) -> i32 {
+    fn LoadState(&mut self, firstline: *const c_char, ctx: *mut raw::ProjectStateContext) -> i32 {
         if ctx.is_null() {
             panic!("called PCM_source::LoadState() with null block")
         }

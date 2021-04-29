@@ -9,7 +9,7 @@ use crate::{
 use reaper_low::raw;
 
 use std::fmt::Debug;
-use std::os::raw::c_void;
+use std::os::raw::{c_char, c_void};
 use std::ptr::null_mut;
 
 /// Consumers need to implement this trait in order to get notified about various REAPER events.
@@ -636,21 +636,21 @@ impl ControlSurfaceAdapter {
 }
 
 impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
-    fn GetTypeString(&self) -> *const i8 {
+    fn GetTypeString(&self) -> *const c_char {
         self.delegate
             .get_type_string()
             .map(|o| o.as_ptr())
             .unwrap_or(null_mut())
     }
 
-    fn GetDescString(&self) -> *const i8 {
+    fn GetDescString(&self) -> *const c_char {
         self.delegate
             .get_desc_string()
             .map(|o| o.as_ptr())
             .unwrap_or(null_mut())
     }
 
-    fn GetConfigString(&self) -> *const i8 {
+    fn GetConfigString(&self) -> *const c_char {
         self.delegate
             .get_config_string()
             .map(|o| o.as_ptr())
@@ -724,7 +724,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
             .set_repeat_state(SetRepeatStateArgs { is_enabled: rep })
     }
 
-    fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const i8) {
+    fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const c_char) {
         self.delegate.set_track_title(SetTrackTitleArgs {
             track: require_non_null_panic(trackid),
             name: unsafe { ReaperStr::from_ptr(title) },
