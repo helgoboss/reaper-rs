@@ -727,6 +727,7 @@ fn invoke_action() -> TestStep {
             let normalized_value = action
                 .normalized_value()
                 .ok_or("action should be able to report normalized value")?;
+            // TODO-high
             assert!(abs_diff_eq!(normalized_value, 1.0));
         } else {
             assert_eq!(mock.invocation_count(), 0);

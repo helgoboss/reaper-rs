@@ -7,7 +7,7 @@ use crate::util::concat_reaper_strs;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::num::NonZeroU32;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null_mut, NonNull};
@@ -518,8 +518,8 @@ impl ActionValueChange {
                 },
                 (valhw, 0) if valhw >= 0 => {
                     if let Ok(valhw) = U7::try_from(valhw) {
-                        let combined = (valhw.get() << 7) | val.get();
-                        AbsoluteHighRes(combined.into())
+                        let combined = ((valhw.get() as u16) << 7) | val.get() as u16;
+                        AbsoluteHighRes(combined.try_into().expect("impossible"))
                     } else {
                         Unknown(Hidden((raw.0, raw.1, raw.2)))
                     }

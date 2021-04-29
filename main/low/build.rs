@@ -786,10 +786,10 @@ mod codegen {
             syn::parse_quote! {
                 {
                     match self.pointers.#name {
-                        None => panic!(format!(
+                        None => panic!(
                             "Attempt to use a function that has not been loaded: {}",
                             stringify!(#name)
-                        )),
+                        ),
                         Some(f) => #fn_ptr_call,
                     }
                 }

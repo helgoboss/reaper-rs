@@ -1,3 +1,4 @@
+#![allow(renamed_and_removed_lints)]
 #![deny(broken_intra_doc_links)]
 //! This crate contains the high-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!

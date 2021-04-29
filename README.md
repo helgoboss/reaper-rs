@@ -368,7 +368,7 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
     - Set the correct toolchain default (_nightly_ toolchain is not necessary if you only want to build
       `reaper-low`, `reaper-medium` and `reaper-high`) :star:
       ```batch
-      rustup default nightly-2020-12-10-x86_64-pc-windows-msvc
+      rustup default nightly-2021-03-10-x86_64-pc-windows-msvc
       ```
 3. Download and install [Git for Windows](https://git-scm.com/download/win)
 4. Clone the _reaper-rs_ Git repository
@@ -397,7 +397,7 @@ sudo apt install curl git build-essential pkg-config libssl-dev liblzma-dev llvm
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
 source $HOME/.cargo/env
 # Using nightly is not necessary if you want to build just the low-level, medium-level or high-level API!
-rustup default nightly-2020-12-10-x86_64-unknown-linux-gnu
+rustup default nightly-2021-03-10-x86_64-unknown-linux-gnu
 
 # Clone reaper-rs
 cd Downloads
@@ -437,7 +437,7 @@ should provide you with the necessary instructions if something is missing.
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # choose 1 (default)
 source $HOME/.cargo/env
 # Using nightly is not necessary if you want to build just the low-level, medium-level or high-level API!
-rustup default nightly-2020-12-10-x86_64-apple-darwin
+rustup default nightly-2021-03-10-x86_64-apple-darwin
 
 # Clone reaper-rs
 cd Downloads

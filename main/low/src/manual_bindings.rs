@@ -9,7 +9,7 @@
 #[derive(Copy, Clone)]
 pub struct preview_register_t {
     #[cfg(unix)]
-    pub mutex: pthread_mutex_t,
+    pub mutex: libc::pthread_mutex_t,
     #[cfg(windows)]
     pub cs: winapi::um::minwinbase::CRITICAL_SECTION,
     pub src: *mut root::PCM_source,

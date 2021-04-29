@@ -138,6 +138,9 @@ impl Swell {
                     GetDlgItemText: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(GetDlgItemText)).as_ptr(),
                     )),
+                    GetWindowTextLength: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(GetWindowTextLength)).as_ptr(),
+                    )),
                     CheckDlgButton: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(CheckDlgButton)).as_ptr(),
                     )),
@@ -325,14 +328,8 @@ impl Swell {
                     ListView_EnsureVisible: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ListView_EnsureVisible)).as_ptr(),
                     )),
-                    ListView_GetSubItemRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetSubItemRect)).as_ptr(),
-                    )),
                     ListView_SetImageList: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ListView_SetImageList)).as_ptr(),
-                    )),
-                    ListView_HitTest: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_HitTest)).as_ptr(),
                     )),
                     ListView_SubItemHitTest: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ListView_SubItemHitTest)).as_ptr(),
@@ -342,9 +339,6 @@ impl Swell {
                     )),
                     ListView_SortItems: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ListView_SortItems)).as_ptr(),
-                    )),
-                    ListView_GetItemRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetItemRect)).as_ptr(),
                     )),
                     ListView_Scroll: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ListView_Scroll)).as_ptr(),
@@ -372,6 +366,15 @@ impl Swell {
                     )),
                     Header_SetItem: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(Header_SetItem)).as_ptr(),
+                    )),
+                    ListView_GetItemRect: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(ListView_GetItemRect)).as_ptr(),
+                    )),
+                    ListView_GetSubItemRect: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(ListView_GetSubItemRect)).as_ptr(),
+                    )),
+                    ListView_HitTest: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(ListView_HitTest)).as_ptr(),
                     )),
                     SWELL_GetListViewHeaderHeight: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_GetListViewHeaderHeight)).as_ptr(),
@@ -427,6 +430,9 @@ impl Swell {
                     TreeView_SelectItem: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(TreeView_SelectItem)).as_ptr(),
                     )),
+                    TreeView_EnsureVisible: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(TreeView_EnsureVisible)).as_ptr(),
+                    )),
                     TreeView_GetItem: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(TreeView_GetItem)).as_ptr(),
                     )),
@@ -438,6 +444,9 @@ impl Swell {
                     )),
                     TreeView_SetIndent: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(TreeView_SetIndent)).as_ptr(),
+                    )),
+                    TreeView_GetParent: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(TreeView_GetParent)).as_ptr(),
                     )),
                     TreeView_GetChild: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(TreeView_GetChild)).as_ptr(),
@@ -1026,6 +1035,9 @@ impl Swell {
                     SWELL_SetClassName: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_SetClassName)).as_ptr(),
                     )),
+                    SWELL_DisableContextMenu: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_DisableContextMenu)).as_ptr(),
+                    )),
                     SWELL_osx_is_dark_mode: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_osx_is_dark_mode)).as_ptr(),
                     )),
@@ -1116,6 +1128,9 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.GetDlgItemText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetWindowTextLength.is_some() {
                 loaded_count += 1;
             }
             if pointers.CheckDlgButton.is_some() {
@@ -1304,13 +1319,7 @@ impl Swell {
             if pointers.ListView_EnsureVisible.is_some() {
                 loaded_count += 1;
             }
-            if pointers.ListView_GetSubItemRect.is_some() {
-                loaded_count += 1;
-            }
             if pointers.ListView_SetImageList.is_some() {
-                loaded_count += 1;
-            }
-            if pointers.ListView_HitTest.is_some() {
                 loaded_count += 1;
             }
             if pointers.ListView_SubItemHitTest.is_some() {
@@ -1320,9 +1329,6 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.ListView_SortItems.is_some() {
-                loaded_count += 1;
-            }
-            if pointers.ListView_GetItemRect.is_some() {
                 loaded_count += 1;
             }
             if pointers.ListView_Scroll.is_some() {
@@ -1350,6 +1356,15 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.Header_SetItem.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetItemRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_GetSubItemRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.ListView_HitTest.is_some() {
                 loaded_count += 1;
             }
             if pointers.SWELL_GetListViewHeaderHeight.is_some() {
@@ -1406,6 +1421,9 @@ impl Swell {
             if pointers.TreeView_SelectItem.is_some() {
                 loaded_count += 1;
             }
+            if pointers.TreeView_EnsureVisible.is_some() {
+                loaded_count += 1;
+            }
             if pointers.TreeView_GetItem.is_some() {
                 loaded_count += 1;
             }
@@ -1416,6 +1434,9 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.TreeView_SetIndent.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.TreeView_GetParent.is_some() {
                 loaded_count += 1;
             }
             if pointers.TreeView_GetChild.is_some() {
@@ -2003,6 +2024,9 @@ impl Swell {
             if pointers.SWELL_SetClassName.is_some() {
                 loaded_count += 1;
             }
+            if pointers.SWELL_DisableContextMenu.is_some() {
+                loaded_count += 1;
+            }
             if pointers.SWELL_osx_is_dark_mode.is_some() {
                 loaded_count += 1;
             }
@@ -2024,10 +2048,10 @@ impl Swell {
         l: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_char {
         match self.pointers.lstrcpyn {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(lstrcpyn)
-            )),
+            ),
             Some(f) => f(dest, src, l),
         }
     }
@@ -2039,30 +2063,30 @@ impl Swell {
         arg3: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MulDiv {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MulDiv)
-            )),
+            ),
             Some(f) => f(arg1, arg2, arg3),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn Sleep(&self, ms: ::std::os::raw::c_int) {
         match self.pointers.Sleep {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Sleep)
-            )),
+            ),
             Some(f) => f(ms),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetTickCount(&self) -> root::DWORD {
         match self.pointers.GetTickCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTickCount)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -2078,10 +2102,10 @@ impl Swell {
         lpLastWriteTime: *mut root::FILETIME,
     ) -> root::BOOL {
         match self.pointers.GetFileTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFileTime)
-            )),
+            ),
             Some(f) => f(filedes, lpCreationTime, lpLastAccessTime, lpLastWriteTime),
         }
     }
@@ -2097,10 +2121,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
         match self.pointers.WritePrivateProfileString {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WritePrivateProfileString)
-            )),
+            ),
             Some(f) => f(appname, keyname, val, fn_),
         }
     }
@@ -2118,10 +2142,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> root::DWORD {
         match self.pointers.GetPrivateProfileString {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileString)
-            )),
+            ),
             Some(f) => f(appname, keyname, def, ret, retsize, fn_),
         }
     }
@@ -2137,10 +2161,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetPrivateProfileInt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileInt)
-            )),
+            ),
             Some(f) => f(appname, keyname, def, fn_),
         }
     }
@@ -2157,10 +2181,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
         match self.pointers.GetPrivateProfileStruct {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileStruct)
-            )),
+            ),
             Some(f) => f(appname, keyname, buf, bufsz, fn_),
         }
     }
@@ -2177,10 +2201,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
         match self.pointers.WritePrivateProfileStruct {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WritePrivateProfileStruct)
-            )),
+            ),
             Some(f) => f(appname, keyname, buf, bufsz, fn_),
         }
     }
@@ -2195,10 +2219,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
         match self.pointers.WritePrivateProfileSection {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WritePrivateProfileSection)
-            )),
+            ),
             Some(f) => f(appname, strings, fn_),
         }
     }
@@ -2214,10 +2238,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> root::DWORD {
         match self.pointers.GetPrivateProfileSection {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileSection)
-            )),
+            ),
             Some(f) => f(appname, strout, strout_len, fn_),
         }
     }
@@ -2232,10 +2256,10 @@ impl Swell {
         nSize: root::DWORD,
     ) -> root::DWORD {
         match self.pointers.GetModuleFileName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetModuleFileName)
-            )),
+            ),
             Some(f) => f(hInst, fn_, nSize),
         }
     }
@@ -2245,10 +2269,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_PtInRect(&self, r: *const root::RECT, p: root::POINT) -> root::BOOL {
         match self.pointers.SWELL_PtInRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_PtInRect)
-            )),
+            ),
             Some(f) => f(r, p),
         }
     }
@@ -2266,10 +2290,10 @@ impl Swell {
         blah: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.ShellExecute {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShellExecute)
-            )),
+            ),
             Some(f) => f(hwndDlg, action, content1, content2, content3, blah),
         }
     }
@@ -2285,10 +2309,10 @@ impl Swell {
         type_: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MessageBox {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MessageBox)
-            )),
+            ),
             Some(f) => f(hwndParent, text, caption, type_),
         }
     }
@@ -2305,10 +2329,10 @@ impl Swell {
         extlist: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_char {
         match self.pointers.BrowseForFiles {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseForFiles)
-            )),
+            ),
             Some(f) => f(text, initialdir, initialfile, allowmul, extlist),
         }
     }
@@ -2326,10 +2350,10 @@ impl Swell {
         fnsize: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.BrowseForSaveFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseForSaveFile)
-            )),
+            ),
             Some(f) => f(text, initialdir, initialfile, extlist, fn_, fnsize),
         }
     }
@@ -2345,10 +2369,10 @@ impl Swell {
         fnsize: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.BrowseForDirectory {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseForDirectory)
-            )),
+            ),
             Some(f) => f(text, initialdir, fn_, fnsize),
         }
     }
@@ -2363,10 +2387,10 @@ impl Swell {
         reshead: *mut root::SWELL_DialogResourceIndex,
     ) {
         match self.pointers.BrowseFile_SetTemplate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseFile_SetTemplate)
-            )),
+            ),
             Some(f) => f(dlgid, dlgProc, reshead),
         }
     }
@@ -2376,10 +2400,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetDlgItem(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetDlgItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDlgItem)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -2389,10 +2413,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ShowWindow(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.ShowWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowWindow)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -2402,10 +2426,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DestroyWindow(&self, hwnd: root::HWND) {
         match self.pointers.DestroyWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyWindow)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -2419,20 +2443,20 @@ impl Swell {
         gi: *mut root::GESTUREINFO,
     ) -> root::BOOL {
         match self.pointers.SWELL_GetGestureInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetGestureInfo)
-            )),
+            ),
             Some(f) => f(lParam, gi),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_HideApp(&self) {
         match self.pointers.SWELL_HideApp {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_HideApp)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -2447,10 +2471,10 @@ impl Swell {
         text: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
         match self.pointers.SetDlgItemText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetDlgItemText)
-            )),
+            ),
             Some(f) => f(arg1, idx, text),
         }
     }
@@ -2466,10 +2490,10 @@ impl Swell {
         issigned: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.SetDlgItemInt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetDlgItemInt)
-            )),
+            ),
             Some(f) => f(arg1, idx, val, issigned),
         }
     }
@@ -2485,10 +2509,10 @@ impl Swell {
         issigned: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetDlgItemInt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDlgItemInt)
-            )),
+            ),
             Some(f) => f(arg1, idx, translated, issigned),
         }
     }
@@ -2504,11 +2528,24 @@ impl Swell {
         textlen: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.GetDlgItemText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDlgItemText)
-            )),
+            ),
             Some(f) => f(arg1, idx, text, textlen),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetWindowTextLength(&self, arg1: root::HWND) -> ::std::os::raw::c_int {
+        match self.pointers.GetWindowTextLength {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetWindowTextLength)
+            ),
+            Some(f) => f(arg1),
         }
     }
     #[cfg(target_family = "unix")]
@@ -2522,10 +2559,10 @@ impl Swell {
         check: ::std::os::raw::c_int,
     ) {
         match self.pointers.CheckDlgButton {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CheckDlgButton)
-            )),
+            ),
             Some(f) => f(hwnd, idx, check),
         }
     }
@@ -2539,10 +2576,10 @@ impl Swell {
         idx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.IsDlgButtonChecked {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsDlgButtonChecked)
-            )),
+            ),
             Some(f) => f(hwnd, idx),
         }
     }
@@ -2552,10 +2589,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn EnableWindow(&self, hwnd: root::HWND, enable: ::std::os::raw::c_int) {
         match self.pointers.EnableWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnableWindow)
-            )),
+            ),
             Some(f) => f(hwnd, enable),
         }
     }
@@ -2565,20 +2602,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetFocus(&self, hwnd: root::HWND) {
         match self.pointers.SetFocus {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetFocus)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetFocus(&self) -> root::HWND {
         match self.pointers.GetFocus {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFocus)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -2588,20 +2625,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetForegroundWindow(&self, hwnd: root::HWND) {
         match self.pointers.SetForegroundWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetForegroundWindow)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetForegroundWindow(&self) -> root::HWND {
         match self.pointers.GetForegroundWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetForegroundWindow)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -2611,30 +2648,30 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetCapture(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.SetCapture {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetCapture)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetCapture(&self) -> root::HWND {
         match self.pointers.GetCapture {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCapture)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn ReleaseCapture(&self) {
         match self.pointers.ReleaseCapture {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReleaseCapture)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -2648,10 +2685,10 @@ impl Swell {
         hwndChild: root::HWND,
     ) -> ::std::os::raw::c_int {
         match self.pointers.IsChild {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsChild)
-            )),
+            ),
             Some(f) => f(hwndParent, hwndChild),
         }
     }
@@ -2661,10 +2698,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetParent(&self, hwnd: root::HWND) -> root::HWND {
         match self.pointers.GetParent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetParent)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -2674,10 +2711,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetParent(&self, hwnd: root::HWND, newPar: root::HWND) -> root::HWND {
         match self.pointers.SetParent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetParent)
-            )),
+            ),
             Some(f) => f(hwnd, newPar),
         }
     }
@@ -2687,10 +2724,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetWindow(&self, hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND {
         match self.pointers.GetWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindow)
-            )),
+            ),
             Some(f) => f(hwnd, what),
         }
     }
@@ -2706,10 +2743,10 @@ impl Swell {
         lp: root::LPARAM,
     ) -> root::BOOL {
         match self.pointers.EnumWindows {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumWindows)
-            )),
+            ),
             Some(f) => f(proc_, lp),
         }
     }
@@ -2725,10 +2762,10 @@ impl Swell {
         title: *const ::std::os::raw::c_char,
     ) -> root::HWND {
         match self.pointers.FindWindowEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FindWindowEx)
-            )),
+            ),
             Some(f) => f(par, lastw, classname, title),
         }
     }
@@ -2738,10 +2775,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ClientToScreen(&self, hwnd: root::HWND, p: *mut root::POINT) {
         match self.pointers.ClientToScreen {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClientToScreen)
-            )),
+            ),
             Some(f) => f(hwnd, p),
         }
     }
@@ -2751,10 +2788,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ScreenToClient(&self, hwnd: root::HWND, p: *mut root::POINT) {
         match self.pointers.ScreenToClient {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScreenToClient)
-            )),
+            ),
             Some(f) => f(hwnd, p),
         }
     }
@@ -2764,10 +2801,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetWindowRect(&self, hwnd: root::HWND, r: *mut root::RECT) -> bool {
         match self.pointers.GetWindowRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowRect)
-            )),
+            ),
             Some(f) => f(hwnd, r),
         }
     }
@@ -2777,10 +2814,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetWindowContentViewRect(&self, hwnd: root::HWND, r: *mut root::RECT) {
         match self.pointers.GetWindowContentViewRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowContentViewRect)
-            )),
+            ),
             Some(f) => f(hwnd, r),
         }
     }
@@ -2790,10 +2827,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetClientRect(&self, hwnd: root::HWND, r: *mut root::RECT) {
         match self.pointers.GetClientRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetClientRect)
-            )),
+            ),
             Some(f) => f(hwnd, r),
         }
     }
@@ -2803,10 +2840,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn WindowFromPoint(&self, p: root::POINT) -> root::HWND {
         match self.pointers.WindowFromPoint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WindowFromPoint)
-            )),
+            ),
             Some(f) => f(p),
         }
     }
@@ -2821,10 +2858,10 @@ impl Swell {
         dy: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.WinOffsetRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinOffsetRect)
-            )),
+            ),
             Some(f) => f(lprc, dx, dy),
         }
     }
@@ -2841,10 +2878,10 @@ impl Swell {
         yBottom: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.WinSetRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinSetRect)
-            )),
+            ),
             Some(f) => f(lprc, xLeft, yTop, xRight, yBottom),
         }
     }
@@ -2859,10 +2896,10 @@ impl Swell {
         in2: *const root::RECT,
     ) {
         match self.pointers.WinUnionRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinUnionRect)
-            )),
+            ),
             Some(f) => f(out, in1, in2),
         }
     }
@@ -2877,10 +2914,10 @@ impl Swell {
         in2: *const root::RECT,
     ) -> ::std::os::raw::c_int {
         match self.pointers.WinIntersectRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinIntersectRect)
-            )),
+            ),
             Some(f) => f(out, in1, in2),
         }
     }
@@ -2899,10 +2936,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) {
         match self.pointers.SetWindowPos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetWindowPos)
-            )),
+            ),
             Some(f) => f(hwnd, unused, x, y, cx, cy, flags),
         }
     }
@@ -2916,10 +2953,10 @@ impl Swell {
         newlevel: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_SetWindowLevel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetWindowLevel)
-            )),
+            ),
             Some(f) => f(hwnd, newlevel),
         }
     }
@@ -2934,10 +2971,10 @@ impl Swell {
         eraseBk: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.InvalidateRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InvalidateRect)
-            )),
+            ),
             Some(f) => f(hwnd, r, eraseBk),
         }
     }
@@ -2947,10 +2984,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn UpdateWindow(&self, hwnd: root::HWND) {
         match self.pointers.UpdateWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateWindow)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -2964,10 +3001,10 @@ impl Swell {
         idx: ::std::os::raw::c_int,
     ) -> root::LONG_PTR {
         match self.pointers.GetWindowLong {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowLong)
-            )),
+            ),
             Some(f) => f(hwnd, idx),
         }
     }
@@ -2982,10 +3019,10 @@ impl Swell {
         val: root::LONG_PTR,
     ) -> root::LONG_PTR {
         match self.pointers.SetWindowLong {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetWindowLong)
-            )),
+            ),
             Some(f) => f(hwnd, idx, val),
         }
     }
@@ -3002,10 +3039,10 @@ impl Swell {
         lpClipRect: *const root::RECT,
     ) -> root::BOOL {
         match self.pointers.ScrollWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScrollWindow)
-            )),
+            ),
             Some(f) => f(hwnd, xamt, yamt, lpRect, lpClipRect),
         }
     }
@@ -3020,10 +3057,10 @@ impl Swell {
         arg3: root::LPARAM,
     ) -> ::std::os::raw::c_int {
         match self.pointers.EnumPropsEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumPropsEx)
-            )),
+            ),
             Some(f) => f(arg1, arg2, arg3),
         }
     }
@@ -3037,10 +3074,10 @@ impl Swell {
         arg2: *const ::std::os::raw::c_char,
     ) -> root::HANDLE {
         match self.pointers.GetProp {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProp)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -3055,10 +3092,10 @@ impl Swell {
         arg3: root::HANDLE,
     ) -> root::BOOL {
         match self.pointers.SetProp {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProp)
-            )),
+            ),
             Some(f) => f(arg1, arg2, arg3),
         }
     }
@@ -3072,10 +3109,10 @@ impl Swell {
         arg2: *const ::std::os::raw::c_char,
     ) -> root::HANDLE {
         match self.pointers.RemoveProp {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RemoveProp)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -3085,10 +3122,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn IsWindowVisible(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindowVisible {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsWindowVisible)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -3098,10 +3135,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn IsWindow(&self, hwnd: root::HWND) -> bool {
         match self.pointers.IsWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsWindow)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -3117,10 +3154,10 @@ impl Swell {
         tProc: root::TIMERPROC,
     ) -> root::UINT_PTR {
         match self.pointers.SetTimer {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTimer)
-            )),
+            ),
             Some(f) => f(hwnd, timerid, rate, tProc),
         }
     }
@@ -3130,10 +3167,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn KillTimer(&self, hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL {
         match self.pointers.KillTimer {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(KillTimer)
-            )),
+            ),
             Some(f) => f(hwnd, timerid),
         }
     }
@@ -3148,10 +3185,10 @@ impl Swell {
         style: ::std::os::raw::c_int,
     ) {
         match self.pointers.ListView_SetExtendedListViewStyleEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetExtendedListViewStyleEx)
-            )),
+            ),
             Some(f) => f(h, mask, style),
         }
     }
@@ -3166,10 +3203,10 @@ impl Swell {
         lvc: *const root::LVCOLUMN,
     ) {
         match self.pointers.ListView_InsertColumn {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_InsertColumn)
-            )),
+            ),
             Some(f) => f(h, pos, lvc),
         }
     }
@@ -3179,10 +3216,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_DeleteColumn(&self, h: root::HWND, pos: ::std::os::raw::c_int) -> bool {
         match self.pointers.ListView_DeleteColumn {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_DeleteColumn)
-            )),
+            ),
             Some(f) => f(h, pos),
         }
     }
@@ -3197,10 +3234,10 @@ impl Swell {
         lvc: *const root::LVCOLUMN,
     ) {
         match self.pointers.ListView_SetColumn {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetColumn)
-            )),
+            ),
             Some(f) => f(h, pos, lvc),
         }
     }
@@ -3214,10 +3251,10 @@ impl Swell {
         pos: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetColumnWidth {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetColumnWidth)
-            )),
+            ),
             Some(f) => f(h, pos),
         }
     }
@@ -3231,10 +3268,10 @@ impl Swell {
         item: *const root::LVITEM,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ListView_InsertItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_InsertItem)
-            )),
+            ),
             Some(f) => f(h, item),
         }
     }
@@ -3250,10 +3287,10 @@ impl Swell {
         txt: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.ListView_SetItemText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItemText)
-            )),
+            ),
             Some(f) => f(h, ipos, cpos, txt),
         }
     }
@@ -3263,10 +3300,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_SetItem(&self, h: root::HWND, item: *mut root::LVITEM) -> bool {
         match self.pointers.ListView_SetItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItem)
-            )),
+            ),
             Some(f) => f(h, item),
         }
     }
@@ -3281,10 +3318,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetNextItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetNextItem)
-            )),
+            ),
             Some(f) => f(h, istart, flags),
         }
     }
@@ -3294,10 +3331,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_GetItem(&self, h: root::HWND, item: *mut root::LVITEM) -> bool {
         match self.pointers.ListView_GetItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItem)
-            )),
+            ),
             Some(f) => f(h, item),
         }
     }
@@ -3312,10 +3349,10 @@ impl Swell {
         mask: root::UINT,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetItemState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItemState)
-            )),
+            ),
             Some(f) => f(h, ipos, mask),
         }
     }
@@ -3325,10 +3362,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_DeleteItem(&self, h: root::HWND, ipos: ::std::os::raw::c_int) {
         match self.pointers.ListView_DeleteItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_DeleteItem)
-            )),
+            ),
             Some(f) => f(h, ipos),
         }
     }
@@ -3338,10 +3375,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_DeleteAllItems(&self, h: root::HWND) {
         match self.pointers.ListView_DeleteAllItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_DeleteAllItems)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3351,10 +3388,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_GetSelectedCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectedCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetSelectedCount)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3364,10 +3401,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetItemCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItemCount)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3377,10 +3414,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_GetSelectionMark(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetSelectionMark {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetSelectionMark)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3395,10 +3432,10 @@ impl Swell {
         wid: ::std::os::raw::c_int,
     ) {
         match self.pointers.ListView_SetColumnWidth {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetColumnWidth)
-            )),
+            ),
             Some(f) => f(h, colpos, wid),
         }
     }
@@ -3414,10 +3451,10 @@ impl Swell {
         statemask: root::UINT,
     ) -> bool {
         match self.pointers.ListView_SetItemState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItemState)
-            )),
+            ),
             Some(f) => f(h, item, state, statemask),
         }
     }
@@ -3432,10 +3469,10 @@ impl Swell {
         enditem: ::std::os::raw::c_int,
     ) {
         match self.pointers.ListView_RedrawItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_RedrawItems)
-            )),
+            ),
             Some(f) => f(h, startitem, enditem),
         }
     }
@@ -3445,10 +3482,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_SetItemCount(&self, h: root::HWND, cnt: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetItemCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItemCount)
-            )),
+            ),
             Some(f) => f(h, cnt),
         }
     }
@@ -3463,31 +3500,11 @@ impl Swell {
         pok: root::BOOL,
     ) {
         match self.pointers.ListView_EnsureVisible {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_EnsureVisible)
-            )),
+            ),
             Some(f) => f(h, i, pok),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn ListView_GetSubItemRect(
-        &self,
-        h: root::HWND,
-        item: ::std::os::raw::c_int,
-        subitem: ::std::os::raw::c_int,
-        code: ::std::os::raw::c_int,
-        r: *mut root::RECT,
-    ) -> bool {
-        match self.pointers.ListView_GetSubItemRect {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(ListView_GetSubItemRect)
-            )),
-            Some(f) => f(h, item, subitem, code, r),
         }
     }
     #[cfg(target_family = "unix")]
@@ -3501,28 +3518,11 @@ impl Swell {
         which: ::std::os::raw::c_int,
     ) {
         match self.pointers.ListView_SetImageList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetImageList)
-            )),
+            ),
             Some(f) => f(h, imagelist, which),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn ListView_HitTest(
-        &self,
-        h: root::HWND,
-        pinf: *mut root::LVHITTESTINFO,
-    ) -> ::std::os::raw::c_int {
-        match self.pointers.ListView_HitTest {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(ListView_HitTest)
-            )),
-            Some(f) => f(h, pinf),
         }
     }
     #[cfg(target_family = "unix")]
@@ -3535,10 +3535,10 @@ impl Swell {
         pinf: *mut root::LVHITTESTINFO,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ListView_SubItemHitTest {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SubItemHitTest)
-            )),
+            ),
             Some(f) => f(h, pinf),
         }
     }
@@ -3555,10 +3555,10 @@ impl Swell {
         textmax: ::std::os::raw::c_int,
     ) {
         match self.pointers.ListView_GetItemText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItemText)
-            )),
+            ),
             Some(f) => f(hwnd, item, subitem, text, textmax),
         }
     }
@@ -3573,30 +3573,11 @@ impl Swell {
         parm: root::LPARAM,
     ) {
         match self.pointers.ListView_SortItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SortItems)
-            )),
+            ),
             Some(f) => f(hwnd, compf, parm),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn ListView_GetItemRect(
-        &self,
-        h: root::HWND,
-        item: ::std::os::raw::c_int,
-        r: *mut root::RECT,
-        code: ::std::os::raw::c_int,
-    ) -> bool {
-        match self.pointers.ListView_GetItemRect {
-            None => panic!(format!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(ListView_GetItemRect)
-            )),
-            Some(f) => f(h, item, r, code),
         }
     }
     #[cfg(target_family = "unix")]
@@ -3610,10 +3591,10 @@ impl Swell {
         yscroll: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.ListView_Scroll {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_Scroll)
-            )),
+            ),
             Some(f) => f(h, xscroll, yscroll),
         }
     }
@@ -3623,10 +3604,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_GetTopIndex(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetTopIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetTopIndex)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3636,10 +3617,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_GetCountPerPage(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.ListView_GetCountPerPage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetCountPerPage)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3654,10 +3635,10 @@ impl Swell {
         arr: *mut ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.ListView_SetColumnOrderArray {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetColumnOrderArray)
-            )),
+            ),
             Some(f) => f(h, cnt, arr),
         }
     }
@@ -3672,10 +3653,10 @@ impl Swell {
         arr: *mut ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.ListView_GetColumnOrderArray {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetColumnOrderArray)
-            )),
+            ),
             Some(f) => f(h, cnt, arr),
         }
     }
@@ -3685,10 +3666,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_GetHeader(&self, h: root::HWND) -> root::HWND {
         match self.pointers.ListView_GetHeader {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetHeader)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3698,10 +3679,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Header_GetItemCount(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.Header_GetItemCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Header_GetItemCount)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -3716,10 +3697,10 @@ impl Swell {
         hi: *mut root::HDITEM,
     ) -> root::BOOL {
         match self.pointers.Header_GetItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Header_GetItem)
-            )),
+            ),
             Some(f) => f(h, col, hi),
         }
     }
@@ -3734,11 +3715,67 @@ impl Swell {
         hi: *mut root::HDITEM,
     ) -> root::BOOL {
         match self.pointers.Header_SetItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Header_SetItem)
-            )),
+            ),
             Some(f) => f(h, col, hi),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetItemRect(
+        &self,
+        h: root::HWND,
+        item: ::std::os::raw::c_int,
+        r: *mut root::RECT,
+        code: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.ListView_GetItemRect {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(ListView_GetItemRect)
+            ),
+            Some(f) => f(h, item, r, code),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_GetSubItemRect(
+        &self,
+        h: root::HWND,
+        item: ::std::os::raw::c_int,
+        subitem: ::std::os::raw::c_int,
+        code: ::std::os::raw::c_int,
+        r: *mut root::RECT,
+    ) -> bool {
+        match self.pointers.ListView_GetSubItemRect {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(ListView_GetSubItemRect)
+            ),
+            Some(f) => f(h, item, subitem, code, r),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ListView_HitTest(
+        &self,
+        h: root::HWND,
+        pinf: *mut root::LVHITTESTINFO,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.ListView_HitTest {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(ListView_HitTest)
+            ),
+            Some(f) => f(h, pinf),
         }
     }
     #[cfg(target_family = "unix")]
@@ -3747,20 +3784,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GetListViewHeaderHeight(&self, h: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetListViewHeaderHeight {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetListViewHeaderHeight)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn ImageList_CreateEx(&self) -> root::HIMAGELIST {
         match self.pointers.ImageList_CreateEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_CreateEx)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -3774,10 +3811,10 @@ impl Swell {
         idx: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.ImageList_Remove {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_Remove)
-            )),
+            ),
             Some(f) => f(list, idx),
         }
     }
@@ -3792,10 +3829,10 @@ impl Swell {
         image: root::HICON,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ImageList_ReplaceIcon {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_ReplaceIcon)
-            )),
+            ),
             Some(f) => f(list, offset, image),
         }
     }
@@ -3810,10 +3847,10 @@ impl Swell {
         mask: root::HBITMAP,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ImageList_Add {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_Add)
-            )),
+            ),
             Some(f) => f(list, image, mask),
         }
     }
@@ -3823,10 +3860,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ImageList_Destroy(&self, arg1: root::HIMAGELIST) {
         match self.pointers.ImageList_Destroy {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_Destroy)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -3836,10 +3873,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TabCtrl_GetItemCount(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetItemCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_GetItemCount)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -3853,10 +3890,10 @@ impl Swell {
         idx: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.TabCtrl_DeleteItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_DeleteItem)
-            )),
+            ),
             Some(f) => f(hwnd, idx),
         }
     }
@@ -3871,10 +3908,10 @@ impl Swell {
         item: *mut root::TCITEM,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_InsertItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_InsertItem)
-            )),
+            ),
             Some(f) => f(hwnd, idx, item),
         }
     }
@@ -3888,10 +3925,10 @@ impl Swell {
         idx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_SetCurSel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_SetCurSel)
-            )),
+            ),
             Some(f) => f(hwnd, idx),
         }
     }
@@ -3901,10 +3938,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TabCtrl_GetCurSel(&self, hwnd: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.TabCtrl_GetCurSel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_GetCurSel)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -3919,10 +3956,10 @@ impl Swell {
         r: *mut root::RECT,
     ) -> root::BOOL {
         match self.pointers.TabCtrl_AdjustRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_AdjustRect)
-            )),
+            ),
             Some(f) => f(hwnd, fLarger, r),
         }
     }
@@ -3936,10 +3973,10 @@ impl Swell {
         ins: *mut root::TV_INSERTSTRUCT,
     ) -> root::HTREEITEM {
         match self.pointers.TreeView_InsertItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_InsertItem)
-            )),
+            ),
             Some(f) => f(hwnd, ins),
         }
     }
@@ -3954,10 +3991,10 @@ impl Swell {
         flag: root::UINT,
     ) -> root::BOOL {
         match self.pointers.TreeView_Expand {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_Expand)
-            )),
+            ),
             Some(f) => f(hwnd, item, flag),
         }
     }
@@ -3967,10 +4004,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_GetSelection(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetSelection {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetSelection)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -3980,10 +4017,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_DeleteItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_DeleteItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_DeleteItem)
-            )),
+            ),
             Some(f) => f(hwnd, item),
         }
     }
@@ -3993,10 +4030,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_DeleteAllItems(&self, hwnd: root::HWND) {
         match self.pointers.TreeView_DeleteAllItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_DeleteAllItems)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -4006,10 +4043,23 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_SelectItem(&self, hwnd: root::HWND, item: root::HTREEITEM) {
         match self.pointers.TreeView_SelectItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SelectItem)
-            )),
+            ),
+            Some(f) => f(hwnd, item),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_EnsureVisible(&self, hwnd: root::HWND, item: root::HTREEITEM) {
+        match self.pointers.TreeView_EnsureVisible {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(TreeView_EnsureVisible)
+            ),
             Some(f) => f(hwnd, item),
         }
     }
@@ -4019,10 +4069,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_GetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_GetItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetItem)
-            )),
+            ),
             Some(f) => f(hwnd, pitem),
         }
     }
@@ -4032,10 +4082,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_SetItem(&self, hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL {
         match self.pointers.TreeView_SetItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetItem)
-            )),
+            ),
             Some(f) => f(hwnd, pitem),
         }
     }
@@ -4049,10 +4099,10 @@ impl Swell {
         hti: *mut root::TVHITTESTINFO,
     ) -> root::HTREEITEM {
         match self.pointers.TreeView_HitTest {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_HitTest)
-            )),
+            ),
             Some(f) => f(hwnd, hti),
         }
     }
@@ -4066,11 +4116,28 @@ impl Swell {
         indent: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.TreeView_SetIndent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetIndent)
-            )),
+            ),
             Some(f) => f(hwnd, indent),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TreeView_GetParent(
+        &self,
+        hwnd: root::HWND,
+        item: root::HTREEITEM,
+    ) -> root::HTREEITEM {
+        match self.pointers.TreeView_GetParent {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(TreeView_GetParent)
+            ),
+            Some(f) => f(hwnd, item),
         }
     }
     #[cfg(target_family = "unix")]
@@ -4083,10 +4150,10 @@ impl Swell {
         item: root::HTREEITEM,
     ) -> root::HTREEITEM {
         match self.pointers.TreeView_GetChild {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetChild)
-            )),
+            ),
             Some(f) => f(hwnd, item),
         }
     }
@@ -4100,10 +4167,10 @@ impl Swell {
         item: root::HTREEITEM,
     ) -> root::HTREEITEM {
         match self.pointers.TreeView_GetNextSibling {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetNextSibling)
-            )),
+            ),
             Some(f) => f(hwnd, item),
         }
     }
@@ -4113,10 +4180,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_GetRoot(&self, hwnd: root::HWND) -> root::HTREEITEM {
         match self.pointers.TreeView_GetRoot {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetRoot)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -4126,10 +4193,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetBkColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetBkColor)
-            )),
+            ),
             Some(f) => f(hwnd, color),
         }
     }
@@ -4139,10 +4206,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TreeView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.TreeView_SetTextColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetTextColor)
-            )),
+            ),
             Some(f) => f(hwnd, color),
         }
     }
@@ -4152,10 +4219,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_SetBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetBkColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetBkColor)
-            )),
+            ),
             Some(f) => f(hwnd, color),
         }
     }
@@ -4165,10 +4232,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_SetTextBkColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextBkColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetTextBkColor)
-            )),
+            ),
             Some(f) => f(hwnd, color),
         }
     }
@@ -4178,10 +4245,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_SetTextColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetTextColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetTextColor)
-            )),
+            ),
             Some(f) => f(hwnd, color),
         }
     }
@@ -4191,10 +4258,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ListView_SetGridColor(&self, hwnd: root::HWND, color: ::std::os::raw::c_int) {
         match self.pointers.ListView_SetGridColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetGridColor)
-            )),
+            ),
             Some(f) => f(hwnd, color),
         }
     }
@@ -4209,10 +4276,10 @@ impl Swell {
         ncolors: ::std::os::raw::c_int,
     ) {
         match self.pointers.ListView_SetSelColors {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetSelColors)
-            )),
+            ),
             Some(f) => f(hwnd, colors, ncolors),
         }
     }
@@ -4222,10 +4289,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_ModalWindowStart(&self, hwnd: root::HWND) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_ModalWindowStart {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ModalWindowStart)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -4239,10 +4306,10 @@ impl Swell {
         ret: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SWELL_ModalWindowRun {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ModalWindowRun)
-            )),
+            ),
             Some(f) => f(ctx, ret),
         }
     }
@@ -4252,10 +4319,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_ModalWindowEnd(&self, ctx: *mut ::std::os::raw::c_void) {
         match self.pointers.SWELL_ModalWindowEnd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ModalWindowEnd)
-            )),
+            ),
             Some(f) => f(ctx),
         }
     }
@@ -4265,20 +4332,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_CloseWindow(&self, hwnd: root::HWND) {
         match self.pointers.SWELL_CloseWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CloseWindow)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn CreatePopupMenu(&self) -> root::HMENU {
         match self.pointers.CreatePopupMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePopupMenu)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -4288,10 +4355,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CreatePopupMenuEx(&self, title: *const ::std::os::raw::c_char) -> root::HMENU {
         match self.pointers.CreatePopupMenuEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePopupMenuEx)
-            )),
+            ),
             Some(f) => f(title),
         }
     }
@@ -4301,10 +4368,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DestroyMenu(&self, hMenu: root::HMENU) {
         match self.pointers.DestroyMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyMenu)
-            )),
+            ),
             Some(f) => f(hMenu),
         }
     }
@@ -4320,10 +4387,10 @@ impl Swell {
         tagid: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.AddMenuItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddMenuItem)
-            )),
+            ),
             Some(f) => f(hMenu, pos, name, tagid),
         }
     }
@@ -4333,10 +4400,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetSubMenu(&self, hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU {
         match self.pointers.GetSubMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSubMenu)
-            )),
+            ),
             Some(f) => f(hMenu, pos),
         }
     }
@@ -4346,10 +4413,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMenuItemCount(&self, hMenu: root::HMENU) -> ::std::os::raw::c_int {
         match self.pointers.GetMenuItemCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenuItemCount)
-            )),
+            ),
             Some(f) => f(hMenu),
         }
     }
@@ -4363,10 +4430,10 @@ impl Swell {
         pos: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetMenuItemID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenuItemID)
-            )),
+            ),
             Some(f) => f(hMenu, pos),
         }
     }
@@ -4383,10 +4450,10 @@ impl Swell {
         mask: ::std::os::raw::c_uint,
     ) -> bool {
         match self.pointers.SetMenuItemModifier {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenuItemModifier)
-            )),
+            ),
             Some(f) => f(hMenu, idx, flag, code, mask),
         }
     }
@@ -4402,10 +4469,10 @@ impl Swell {
         text: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.SetMenuItemText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenuItemText)
-            )),
+            ),
             Some(f) => f(hMenu, idx, flag, text),
         }
     }
@@ -4420,10 +4487,10 @@ impl Swell {
         en: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.EnableMenuItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnableMenuItem)
-            )),
+            ),
             Some(f) => f(hMenu, idx, en),
         }
     }
@@ -4438,10 +4505,10 @@ impl Swell {
         flag: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.DeleteMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteMenu)
-            )),
+            ),
             Some(f) => f(hMenu, idx, flag),
         }
     }
@@ -4456,10 +4523,10 @@ impl Swell {
         chk: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.CheckMenuItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CheckMenuItem)
-            )),
+            ),
             Some(f) => f(hMenu, idx, chk),
         }
     }
@@ -4475,10 +4542,10 @@ impl Swell {
         mi: *mut root::MENUITEMINFO,
     ) {
         match self.pointers.InsertMenuItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertMenuItem)
-            )),
+            ),
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
@@ -4495,10 +4562,10 @@ impl Swell {
         str: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.SWELL_InsertMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_InsertMenu)
-            )),
+            ),
             Some(f) => f(menu, pos, flag, idx, str),
         }
     }
@@ -4514,10 +4581,10 @@ impl Swell {
         mi: *mut root::MENUITEMINFO,
     ) -> root::BOOL {
         match self.pointers.GetMenuItemInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenuItemInfo)
-            )),
+            ),
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
@@ -4533,10 +4600,10 @@ impl Swell {
         mi: *mut root::MENUITEMINFO,
     ) -> root::BOOL {
         match self.pointers.SetMenuItemInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenuItemInfo)
-            )),
+            ),
             Some(f) => f(hMenu, pos, byPos, mi),
         }
     }
@@ -4546,10 +4613,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DrawMenuBar(&self, arg1: root::HWND) {
         match self.pointers.DrawMenuBar {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DrawMenuBar)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -4563,10 +4630,10 @@ impl Swell {
         resid: *const ::std::os::raw::c_char,
     ) -> root::HMENU {
         match self.pointers.SWELL_LoadMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LoadMenu)
-            )),
+            ),
             Some(f) => f(head, resid),
         }
     }
@@ -4585,10 +4652,10 @@ impl Swell {
         r: *const root::RECT,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackPopupMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackPopupMenu)
-            )),
+            ),
             Some(f) => f(hMenu, flags, xpos, ypos, resvd, hwnd, r),
         }
     }
@@ -4598,10 +4665,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetMenuDestination(&self, menu: root::HMENU, hwnd: root::HWND) {
         match self.pointers.SWELL_SetMenuDestination {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetMenuDestination)
-            )),
+            ),
             Some(f) => f(menu, hwnd),
         }
     }
@@ -4611,10 +4678,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_DuplicateMenu(&self, menu: root::HMENU) -> root::HMENU {
         match self.pointers.SWELL_DuplicateMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DuplicateMenu)
-            )),
+            ),
             Some(f) => f(menu),
         }
     }
@@ -4624,10 +4691,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetMenu(&self, hwnd: root::HWND, menu: root::HMENU) -> root::BOOL {
         match self.pointers.SetMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenu)
-            )),
+            ),
             Some(f) => f(hwnd, menu),
         }
     }
@@ -4637,20 +4704,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMenu(&self, hwnd: root::HWND) -> root::HMENU {
         match self.pointers.GetMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenu)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_GetDefaultWindowMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetDefaultWindowMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDefaultWindowMenu)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -4660,20 +4727,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetDefaultWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultWindowMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetDefaultWindowMenu)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_GetDefaultModalWindowMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetDefaultModalWindowMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDefaultModalWindowMenu)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -4683,20 +4750,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetDefaultModalWindowMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetDefaultModalWindowMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetDefaultModalWindowMenu)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_GetCurrentMenu(&self) -> root::HMENU {
         match self.pointers.SWELL_GetCurrentMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCurrentMenu)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -4706,10 +4773,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetCurrentMenu(&self, arg1: root::HMENU) {
         match self.pointers.SWELL_SetCurrentMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetCurrentMenu)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -4726,10 +4793,10 @@ impl Swell {
         param: root::LPARAM,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_DialogBox {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DialogBox)
-            )),
+            ),
             Some(f) => f(reshead, resid, parent, dlgproc, param),
         }
     }
@@ -4746,10 +4813,10 @@ impl Swell {
         param: root::LPARAM,
     ) -> root::HWND {
         match self.pointers.SWELL_CreateDialog {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateDialog)
-            )),
+            ),
             Some(f) => f(reshead, resid, parent, dlgproc, param),
         }
     }
@@ -4759,10 +4826,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_RegisterCustomControlCreator(&self, proc_: root::SWELL_ControlCreatorProc) {
         match self.pointers.SWELL_RegisterCustomControlCreator {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_RegisterCustomControlCreator)
-            )),
+            ),
             Some(f) => f(proc_),
         }
     }
@@ -4775,10 +4842,10 @@ impl Swell {
         proc_: root::SWELL_ControlCreatorProc,
     ) {
         match self.pointers.SWELL_UnregisterCustomControlCreator {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_UnregisterCustomControlCreator)
-            )),
+            ),
             Some(f) => f(proc_),
         }
     }
@@ -4794,10 +4861,10 @@ impl Swell {
         lParam: root::LPARAM,
     ) -> root::LRESULT {
         match self.pointers.DefWindowProc {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DefWindowProc)
-            )),
+            ),
             Some(f) => f(hwnd, msg, wParam, lParam),
         }
     }
@@ -4807,10 +4874,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn EndDialog(&self, arg1: root::HWND, arg2: ::std::os::raw::c_int) {
         match self.pointers.EndDialog {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EndDialog)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -4824,10 +4891,10 @@ impl Swell {
         onlyIfEnabled: bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetDefaultButtonID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDefaultButtonID)
-            )),
+            ),
             Some(f) => f(hwndDlg, onlyIfEnabled),
         }
     }
@@ -4843,10 +4910,10 @@ impl Swell {
         arg4: root::LPARAM,
     ) -> root::LRESULT {
         match self.pointers.SendMessage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SendMessage)
-            )),
+            ),
             Some(f) => f(arg1, arg2, arg3, arg4),
         }
     }
@@ -4861,10 +4928,10 @@ impl Swell {
         arg3: root::LPARAM,
     ) {
         match self.pointers.SWELL_BroadcastMessage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_BroadcastMessage)
-            )),
+            ),
             Some(f) => f(arg1, arg2, arg3),
         }
     }
@@ -4880,20 +4947,20 @@ impl Swell {
         lParam: root::LPARAM,
     ) -> root::BOOL {
         match self.pointers.PostMessage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PostMessage)
-            )),
+            ),
             Some(f) => f(hwnd, msg, wParam, lParam),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_MessageQueue_Flush(&self) {
         match self.pointers.SWELL_MessageQueue_Flush {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MessageQueue_Flush)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -4903,10 +4970,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_MessageQueue_Clear(&self, h: root::HWND) {
         match self.pointers.SWELL_MessageQueue_Clear {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MessageQueue_Clear)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -4921,20 +4988,20 @@ impl Swell {
         newflags: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_KeyToASCII {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_KeyToASCII)
-            )),
+            ),
             Some(f) => f(wParam, lParam, newflags),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetAsyncKeyState(&self, key: ::std::os::raw::c_int) -> root::WORD {
         match self.pointers.GetAsyncKeyState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAsyncKeyState)
-            )),
+            ),
             Some(f) => f(key),
         }
     }
@@ -4944,20 +5011,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetCursorPos(&self, pt: *mut root::POINT) {
         match self.pointers.GetCursorPos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorPos)
-            )),
+            ),
             Some(f) => f(pt),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetMessagePos(&self) -> root::DWORD {
         match self.pointers.GetMessagePos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMessagePos)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -4967,10 +5034,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_LoadCursor(&self, idx: *const ::std::os::raw::c_char) -> root::HCURSOR {
         match self.pointers.SWELL_LoadCursor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LoadCursor)
-            )),
+            ),
             Some(f) => f(idx),
         }
     }
@@ -4980,10 +5047,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetCursor(&self, curs: root::HCURSOR) {
         match self.pointers.SWELL_SetCursor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetCursor)
-            )),
+            ),
             Some(f) => f(curs),
         }
     }
@@ -4993,40 +5060,40 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_EnableRightClickEmulate(&self, enable: root::BOOL) {
         match self.pointers.SWELL_EnableRightClickEmulate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_EnableRightClickEmulate)
-            )),
+            ),
             Some(f) => f(enable),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_GetCursor(&self) -> root::HCURSOR {
         match self.pointers.SWELL_GetCursor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCursor)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_GetLastSetCursor(&self) -> root::HCURSOR {
         match self.pointers.SWELL_GetLastSetCursor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetLastSetCursor)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_IsCursorVisible(&self) -> bool {
         match self.pointers.SWELL_IsCursorVisible {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsCursorVisible)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -5036,10 +5103,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_ShowCursor(&self, bShow: root::BOOL) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_ShowCursor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ShowCursor)
-            )),
+            ),
             Some(f) => f(bShow),
         }
     }
@@ -5050,10 +5117,10 @@ impl Swell {
         Y: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.SWELL_SetCursorPos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetCursorPos)
-            )),
+            ),
             Some(f) => f(X, Y),
         }
     }
@@ -5068,10 +5135,10 @@ impl Swell {
         wantWork: bool,
     ) {
         match self.pointers.SWELL_GetViewPort {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetViewPort)
-            )),
+            ),
             Some(f) => f(r, sourcerect, wantWork),
         }
     }
@@ -5081,20 +5148,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn OpenClipboard(&self, hwndDlg: root::HWND) -> bool {
         match self.pointers.OpenClipboard {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OpenClipboard)
-            )),
+            ),
             Some(f) => f(hwndDlg),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn CloseClipboard(&self) {
         match self.pointers.CloseClipboard {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CloseClipboard)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -5104,20 +5171,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetClipboardData(&self, type_: root::UINT) -> root::HANDLE {
         match self.pointers.GetClipboardData {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetClipboardData)
-            )),
+            ),
             Some(f) => f(type_),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn EmptyClipboard(&self) {
         match self.pointers.EmptyClipboard {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EmptyClipboard)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -5127,10 +5194,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetClipboardData(&self, type_: root::UINT, h: root::HANDLE) {
         match self.pointers.SetClipboardData {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetClipboardData)
-            )),
+            ),
             Some(f) => f(type_, h),
         }
     }
@@ -5143,10 +5210,10 @@ impl Swell {
         desc: *const ::std::os::raw::c_char,
     ) -> root::UINT {
         match self.pointers.RegisterClipboardFormat {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RegisterClipboardFormat)
-            )),
+            ),
             Some(f) => f(desc),
         }
     }
@@ -5156,10 +5223,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn EnumClipboardFormats(&self, lastfmt: root::UINT) -> root::UINT {
         match self.pointers.EnumClipboardFormats {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumClipboardFormats)
-            )),
+            ),
             Some(f) => f(lastfmt),
         }
     }
@@ -5170,10 +5237,10 @@ impl Swell {
         sz: ::std::os::raw::c_int,
     ) -> root::HANDLE {
         match self.pointers.GlobalAlloc {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalAlloc)
-            )),
+            ),
             Some(f) => f(flags, sz),
         }
     }
@@ -5183,10 +5250,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GlobalLock(&self, h: root::HANDLE) -> *mut ::std::os::raw::c_void {
         match self.pointers.GlobalLock {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalLock)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -5196,10 +5263,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GlobalSize(&self, h: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.GlobalSize {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalSize)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -5209,10 +5276,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GlobalUnlock(&self, h: root::HANDLE) {
         match self.pointers.GlobalUnlock {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalUnlock)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -5222,10 +5289,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GlobalFree(&self, h: root::HANDLE) {
         match self.pointers.GlobalFree {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalFree)
-            )),
+            ),
             Some(f) => f(h),
         }
     }
@@ -5243,10 +5310,10 @@ impl Swell {
         tidOut: *mut root::DWORD,
     ) -> root::HANDLE {
         match self.pointers.CreateThread {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateThread)
-            )),
+            ),
             Some(f) => f(TA, stackSize, ThreadProc, parm, cf, tidOut),
         }
     }
@@ -5262,10 +5329,10 @@ impl Swell {
         ignored: *const ::std::os::raw::c_char,
     ) -> root::HANDLE {
         match self.pointers.CreateEvent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateEvent)
-            )),
+            ),
             Some(f) => f(SA, manualReset, initialSig, ignored),
         }
     }
@@ -5281,20 +5348,20 @@ impl Swell {
         ignored: *const ::std::os::raw::c_char,
     ) -> root::HANDLE {
         match self.pointers.CreateEventAsSocket {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateEventAsSocket)
-            )),
+            ),
             Some(f) => f(SA, manualReset, initialSig, ignored),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetCurrentThreadId(&self) -> root::DWORD {
         match self.pointers.GetCurrentThreadId {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCurrentThreadId)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -5304,10 +5371,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn WaitForSingleObject(&self, hand: root::HANDLE, msTO: root::DWORD) -> root::DWORD {
         match self.pointers.WaitForSingleObject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WaitForSingleObject)
-            )),
+            ),
             Some(f) => f(hand, msTO),
         }
     }
@@ -5322,10 +5389,10 @@ impl Swell {
         msTO: root::DWORD,
     ) -> root::DWORD {
         match self.pointers.WaitForAnySocketObject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WaitForAnySocketObject)
-            )),
+            ),
             Some(f) => f(numObjs, objs, msTO),
         }
     }
@@ -5335,10 +5402,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CloseHandle(&self, hand: root::HANDLE) -> root::BOOL {
         match self.pointers.CloseHandle {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CloseHandle)
-            )),
+            ),
             Some(f) => f(hand),
         }
     }
@@ -5352,10 +5419,10 @@ impl Swell {
         prio: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.SetThreadPriority {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetThreadPriority)
-            )),
+            ),
             Some(f) => f(evt, prio),
         }
     }
@@ -5365,10 +5432,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.SetEvent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEvent)
-            )),
+            ),
             Some(f) => f(evt),
         }
     }
@@ -5378,20 +5445,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ResetEvent(&self, evt: root::HANDLE) -> root::BOOL {
         match self.pointers.ResetEvent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ResetEvent)
-            )),
+            ),
             Some(f) => f(evt),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_CreateProcessFromPID(&self, pid: ::std::os::raw::c_int) -> root::HANDLE {
         match self.pointers.SWELL_CreateProcessFromPID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateProcessFromPID)
-            )),
+            ),
             Some(f) => f(pid),
         }
     }
@@ -5406,10 +5473,10 @@ impl Swell {
         params: *mut *const ::std::os::raw::c_char,
     ) -> root::HANDLE {
         match self.pointers.SWELL_CreateProcess {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateProcess)
-            )),
+            ),
             Some(f) => f(exe, nparams, params),
         }
     }
@@ -5419,10 +5486,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GetProcessExitCode(&self, hand: root::HANDLE) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetProcessExitCode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetProcessExitCode)
-            )),
+            ),
             Some(f) => f(hand),
         }
     }
@@ -5436,10 +5503,10 @@ impl Swell {
         symbolsAsGlobals: bool,
     ) -> root::HINSTANCE {
         match self.pointers.LoadLibraryGlobals {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LoadLibraryGlobals)
-            )),
+            ),
             Some(f) => f(fileName, symbolsAsGlobals),
         }
     }
@@ -5449,10 +5516,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn LoadLibrary(&self, fileName: *const ::std::os::raw::c_char) -> root::HINSTANCE {
         match self.pointers.LoadLibrary {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LoadLibrary)
-            )),
+            ),
             Some(f) => f(fileName),
         }
     }
@@ -5466,10 +5533,10 @@ impl Swell {
         procName: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetProcAddress {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProcAddress)
-            )),
+            ),
             Some(f) => f(hInst, procName),
         }
     }
@@ -5479,10 +5546,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn FreeLibrary(&self, hInst: root::HINSTANCE) -> root::BOOL {
         match self.pointers.FreeLibrary {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FreeLibrary)
-            )),
+            ),
             Some(f) => f(hInst),
         }
     }
@@ -5492,10 +5559,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GetBundle(&self, hInst: root::HINSTANCE) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetBundle {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetBundle)
-            )),
+            ),
             Some(f) => f(hInst),
         }
     }
@@ -5510,10 +5577,10 @@ impl Swell {
         h: ::std::os::raw::c_int,
     ) -> root::HDC {
         match self.pointers.SWELL_CreateMemContext {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateMemContext)
-            )),
+            ),
             Some(f) => f(hdc, w, h),
         }
     }
@@ -5523,10 +5590,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_DeleteGfxContext(&self, arg1: root::HDC) {
         match self.pointers.SWELL_DeleteGfxContext {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DeleteGfxContext)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -5536,10 +5603,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GetCtxGC(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxGC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCtxGC)
-            )),
+            ),
             Some(f) => f(ctx),
         }
     }
@@ -5549,10 +5616,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GetCtxFrameBuffer(&self, ctx: root::HDC) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_GetCtxFrameBuffer {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCtxFrameBuffer)
-            )),
+            ),
             Some(f) => f(ctx),
         }
     }
@@ -5562,10 +5629,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_PushClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PushClipRegion {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_PushClipRegion)
-            )),
+            ),
             Some(f) => f(ctx),
         }
     }
@@ -5575,10 +5642,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetClipRegion(&self, ctx: root::HDC, r: *const root::RECT) {
         match self.pointers.SWELL_SetClipRegion {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetClipRegion)
-            )),
+            ),
             Some(f) => f(ctx, r),
         }
     }
@@ -5588,10 +5655,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_PopClipRegion(&self, ctx: root::HDC) {
         match self.pointers.SWELL_PopClipRegion {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_PopClipRegion)
-            )),
+            ),
             Some(f) => f(ctx),
         }
     }
@@ -5601,10 +5668,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CreateFontIndirect(&self, arg1: *mut root::LOGFONT) -> root::HFONT {
         match self.pointers.CreateFontIndirect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateFontIndirect)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -5630,10 +5697,10 @@ impl Swell {
         lfFaceName: *const ::std::os::raw::c_char,
     ) -> root::HFONT {
         match self.pointers.CreateFont {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateFont)
-            )),
+            ),
             Some(f) => f(
                 lfHeight,
                 lfWidth,
@@ -5660,20 +5727,20 @@ impl Swell {
         col: ::std::os::raw::c_int,
     ) -> root::HPEN {
         match self.pointers.CreatePen {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePen)
-            )),
+            ),
             Some(f) => f(attr, wid, col),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn CreateSolidBrush(&self, col: ::std::os::raw::c_int) -> root::HBRUSH {
         match self.pointers.CreateSolidBrush {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateSolidBrush)
-            )),
+            ),
             Some(f) => f(col),
         }
     }
@@ -5686,20 +5753,20 @@ impl Swell {
         alpha: f32,
     ) -> root::HPEN {
         match self.pointers.CreatePenAlpha {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePenAlpha)
-            )),
+            ),
             Some(f) => f(attr, wid, col, alpha),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn CreateSolidBrushAlpha(&self, col: ::std::os::raw::c_int, alpha: f32) -> root::HBRUSH {
         match self.pointers.CreateSolidBrushAlpha {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateSolidBrushAlpha)
-            )),
+            ),
             Some(f) => f(col, alpha),
         }
     }
@@ -5709,20 +5776,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SelectObject(&self, ctx: root::HDC, pen: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SelectObject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SelectObject)
-            )),
+            ),
             Some(f) => f(ctx, pen),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetStockObject(&self, wh: ::std::os::raw::c_int) -> root::HGDIOBJ {
         match self.pointers.GetStockObject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetStockObject)
-            )),
+            ),
             Some(f) => f(wh),
         }
     }
@@ -5732,10 +5799,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DeleteObject(&self, arg1: root::HGDIOBJ) {
         match self.pointers.DeleteObject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteObject)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -5745,10 +5812,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_FillRect(&self, ctx: root::HDC, r: *const root::RECT, br: root::HBRUSH) {
         match self.pointers.SWELL_FillRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_FillRect)
-            )),
+            ),
             Some(f) => f(ctx, r, br),
         }
     }
@@ -5765,10 +5832,10 @@ impl Swell {
         b: ::std::os::raw::c_int,
     ) {
         match self.pointers.Rectangle {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Rectangle)
-            )),
+            ),
             Some(f) => f(ctx, l, t, r, b),
         }
     }
@@ -5785,10 +5852,10 @@ impl Swell {
         b: ::std::os::raw::c_int,
     ) {
         match self.pointers.Ellipse {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Ellipse)
-            )),
+            ),
             Some(f) => f(ctx, l, t, r, b),
         }
     }
@@ -5803,10 +5870,10 @@ impl Swell {
         npts: ::std::os::raw::c_int,
     ) {
         match self.pointers.SWELL_Polygon {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Polygon)
-            )),
+            ),
             Some(f) => f(ctx, pts, npts),
         }
     }
@@ -5822,10 +5889,10 @@ impl Swell {
         op: *mut root::POINT,
     ) {
         match self.pointers.MoveToEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MoveToEx)
-            )),
+            ),
             Some(f) => f(ctx, x, y, op),
         }
     }
@@ -5840,10 +5907,10 @@ impl Swell {
         y: ::std::os::raw::c_int,
     ) {
         match self.pointers.SWELL_LineTo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LineTo)
-            )),
+            ),
             Some(f) => f(ctx, x, y),
         }
     }
@@ -5859,10 +5926,10 @@ impl Swell {
         c: ::std::os::raw::c_int,
     ) {
         match self.pointers.SWELL_SetPixel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetPixel)
-            )),
+            ),
             Some(f) => f(ctx, x, y, c),
         }
     }
@@ -5877,10 +5944,10 @@ impl Swell {
         np: ::std::os::raw::c_int,
     ) {
         match self.pointers.PolyBezierTo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PolyBezierTo)
-            )),
+            ),
             Some(f) => f(ctx, pts, np),
         }
     }
@@ -5897,10 +5964,10 @@ impl Swell {
         align: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_DrawText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DrawText)
-            )),
+            ),
             Some(f) => f(ctx, buf, len, r, align),
         }
     }
@@ -5910,10 +5977,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetTextColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTextColor)
-            )),
+            ),
             Some(f) => f(ctx, col),
         }
     }
@@ -5923,10 +5990,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTextColor(&self, ctx: root::HDC) -> ::std::os::raw::c_int {
         match self.pointers.GetTextColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTextColor)
-            )),
+            ),
             Some(f) => f(ctx),
         }
     }
@@ -5936,10 +6003,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetBkColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetBkColor)
-            )),
+            ),
             Some(f) => f(ctx, col),
         }
     }
@@ -5949,10 +6016,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetBkMode(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         match self.pointers.SetBkMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetBkMode)
-            )),
+            ),
             Some(f) => f(ctx, col),
         }
     }
@@ -5969,10 +6036,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetGlyphIndicesW {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetGlyphIndicesW)
-            )),
+            ),
             Some(f) => f(ctx, buf, len, indices, flags),
         }
     }
@@ -5991,10 +6058,10 @@ impl Swell {
         yrnd: ::std::os::raw::c_int,
     ) {
         match self.pointers.RoundRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RoundRect)
-            )),
+            ),
             Some(f) => f(ctx, x, y, x2, y2, xrnd, yrnd),
         }
     }
@@ -6010,10 +6077,10 @@ impl Swell {
         nseg: ::std::os::raw::c_int,
     ) {
         match self.pointers.PolyPolyline {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PolyPolyline)
-            )),
+            ),
             Some(f) => f(ctx, pts, cnts, nseg),
         }
     }
@@ -6023,10 +6090,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTextMetrics(&self, ctx: root::HDC, tm: *mut root::TEXTMETRIC) -> root::BOOL {
         match self.pointers.GetTextMetrics {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTextMetrics)
-            )),
+            ),
             Some(f) => f(ctx, tm),
         }
     }
@@ -6041,10 +6108,10 @@ impl Swell {
         lpFaceName: root::LPTSTR,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetTextFace {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTextFace)
-            )),
+            ),
             Some(f) => f(ctx, nCount, lpFaceName),
         }
     }
@@ -6059,10 +6126,10 @@ impl Swell {
         _bm: *mut ::std::os::raw::c_void,
     ) -> root::BOOL {
         match self.pointers.GetObject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetObject)
-            )),
+            ),
             Some(f) => f(icon, bmsz, _bm),
         }
     }
@@ -6072,10 +6139,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CreateIconIndirect(&self, iconinfo: *mut root::ICONINFO) -> root::HICON {
         match self.pointers.CreateIconIndirect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateIconIndirect)
-            )),
+            ),
             Some(f) => f(iconinfo),
         }
     }
@@ -6089,10 +6156,10 @@ impl Swell {
         alphaFromMask: bool,
     ) -> root::HICON {
         match self.pointers.LoadNamedImage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LoadNamedImage)
-            )),
+            ),
             Some(f) => f(name, alphaFromMask),
         }
     }
@@ -6102,10 +6169,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DrawImageInRect(&self, ctx: root::HDC, img: root::HICON, r: *const root::RECT) {
         match self.pointers.DrawImageInRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DrawImageInRect)
-            )),
+            ),
             Some(f) => f(ctx, img, r),
         }
     }
@@ -6126,10 +6193,10 @@ impl Swell {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.BitBlt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BitBlt)
-            )),
+            ),
             Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, mode),
         }
     }
@@ -6152,10 +6219,10 @@ impl Swell {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.StretchBlt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StretchBlt)
-            )),
+            ),
             Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, srcw, srch, mode),
         }
     }
@@ -6176,20 +6243,20 @@ impl Swell {
         srcspan: ::std::os::raw::c_int,
     ) {
         match self.pointers.StretchBltFromMem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StretchBltFromMem)
-            )),
+            ),
             Some(f) => f(hdcOut, x, y, w, h, bits, srcw, srch, srcspan),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_GetScaling256(&self) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetScaling256 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetScaling256)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -6203,20 +6270,20 @@ impl Swell {
         v: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.SWELL_ExtendedAPI {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ExtendedAPI)
-            )),
+            ),
             Some(f) => f(key, v),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetSysColor(&self, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSysColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSysColor)
-            )),
+            ),
             Some(f) => f(idx),
         }
     }
@@ -6233,10 +6300,10 @@ impl Swell {
         bits: *mut ::std::os::raw::c_uchar,
     ) -> root::HBITMAP {
         match self.pointers.CreateBitmap {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateBitmap)
-            )),
+            ),
             Some(f) => f(width, height, numplanes, bitsperpixel, bits),
         }
     }
@@ -6246,10 +6313,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetOpaque(&self, h: root::HWND, isopaque: bool) {
         match self.pointers.SetOpaque {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetOpaque)
-            )),
+            ),
             Some(f) => f(h, isopaque),
         }
     }
@@ -6259,10 +6326,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetAllowNoMiddleManRendering(&self, h: root::HWND, allow: bool) {
         match self.pointers.SetAllowNoMiddleManRendering {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetAllowNoMiddleManRendering)
-            )),
+            ),
             Some(f) => f(h, allow),
         }
     }
@@ -6272,10 +6339,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn BeginPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC {
         match self.pointers.BeginPaint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BeginPaint)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -6285,10 +6352,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn EndPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::BOOL {
         match self.pointers.EndPaint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EndPaint)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -6298,10 +6365,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetDC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDC)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6311,10 +6378,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetWindowDC(&self, arg1: root::HWND) -> root::HDC {
         match self.pointers.GetWindowDC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowDC)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6324,10 +6391,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ReleaseDC(&self, arg1: root::HWND, arg2: root::HDC) {
         match self.pointers.ReleaseDC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReleaseDC)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -6342,10 +6409,10 @@ impl Swell {
         level: ::std::os::raw::c_int,
     ) {
         match self.pointers.SWELL_FillDialogBackground {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_FillDialogBackground)
-            )),
+            ),
             Some(f) => f(hdc, r, level),
         }
     }
@@ -6355,20 +6422,20 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_CloneGDIObject(&self, a: root::HGDIOBJ) -> root::HGDIOBJ {
         match self.pointers.SWELL_CloneGDIObject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CloneGDIObject)
-            )),
+            ),
             Some(f) => f(a),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn GetSystemMetrics(&self, arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSystemMetrics {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSystemMetrics)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6378,10 +6445,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DragQueryPoint(&self, arg1: root::HDROP, arg2: root::LPPOINT) -> root::BOOL {
         match self.pointers.DragQueryPoint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DragQueryPoint)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -6391,10 +6458,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DragFinish(&self, arg1: root::HDROP) {
         match self.pointers.DragFinish {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DragFinish)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6410,10 +6477,10 @@ impl Swell {
         arg4: root::UINT,
     ) -> root::UINT {
         match self.pointers.DragQueryFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DragQueryFile)
-            )),
+            ),
             Some(f) => f(arg1, arg2, arg3, arg4),
         }
     }
@@ -6431,10 +6498,10 @@ impl Swell {
         >,
     ) {
         match self.pointers.SWELL_InitiateDragDrop {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_InitiateDragDrop)
-            )),
+            ),
             Some(f) => f(arg1, srcrect, srcfn, callback),
         }
     }
@@ -6451,20 +6518,20 @@ impl Swell {
         icon: root::HICON,
     ) {
         match self.pointers.SWELL_InitiateDragDropOfFileList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_InitiateDragDropOfFileList)
-            )),
+            ),
             Some(f) => f(arg1, srcrect, srclist, srccount, icon),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_FinishDragDrop(&self) {
         match self.pointers.SWELL_FinishDragDrop {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_FinishDragDrop)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -6479,10 +6546,10 @@ impl Swell {
         handle: *mut *mut ::std::os::raw::c_void,
     ) {
         match self.pointers.SWELL_DrawFocusRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DrawFocusRect)
-            )),
+            ),
             Some(f) => f(hwndPar, rct, handle),
         }
     }
@@ -6501,10 +6568,10 @@ impl Swell {
         dosizetofit: bool,
     ) {
         match self.pointers.SWELL_MakeSetCurParms {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeSetCurParms)
-            )),
+            ),
             Some(f) => f(xscale, yscale, xtrans, ytrans, parent, doauto, dosizetofit),
         }
     }
@@ -6524,10 +6591,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeButton {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeButton)
-            )),
+            ),
             Some(f) => f(def, label, idx, x, y, w, h, flags),
         }
     }
@@ -6542,10 +6609,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeEditField {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeEditField)
-            )),
+            ),
             Some(f) => f(idx, x, y, w, h, flags),
         }
     }
@@ -6565,10 +6632,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeLabel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeLabel)
-            )),
+            ),
             Some(f) => f(align, label, idx, x, y, w, h, flags),
         }
     }
@@ -6589,10 +6656,10 @@ impl Swell {
         exstyle: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeControl {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeControl)
-            )),
+            ),
             Some(f) => f(cname, idx, classname, style, x, y, w, h, exstyle),
         }
     }
@@ -6607,10 +6674,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeCombo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeCombo)
-            )),
+            ),
             Some(f) => f(idx, x, y, w, h, flags),
         }
     }
@@ -6629,10 +6696,10 @@ impl Swell {
         style: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeGroupBox {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeGroupBox)
-            )),
+            ),
             Some(f) => f(name, idx, x, y, w, h, style),
         }
     }
@@ -6651,10 +6718,10 @@ impl Swell {
         flags: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeCheckBox {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeCheckBox)
-            )),
+            ),
             Some(f) => f(name, idx, x, y, w, h, flags),
         }
     }
@@ -6669,10 +6736,10 @@ impl Swell {
         styles: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.SWELL_MakeListBox {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeListBox)
-            )),
+            ),
             Some(f) => f(idx, x, y, w, h, styles),
         }
     }
@@ -6688,10 +6755,10 @@ impl Swell {
         flags: ::std::os::raw::c_uint,
     ) {
         match self.pointers.SWELL_Menu_AddMenuItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Menu_AddMenuItem)
-            )),
+            ),
             Some(f) => f(hMenu, name, idx, flags),
         }
     }
@@ -6706,10 +6773,10 @@ impl Swell {
         listsz: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GenerateMenuFromList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GenerateMenuFromList)
-            )),
+            ),
             Some(f) => f(hMenu, list, listsz),
         }
     }
@@ -6723,10 +6790,10 @@ impl Swell {
         listsz: ::std::os::raw::c_int,
     ) {
         match self.pointers.SWELL_GenerateDialogFromList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GenerateDialogFromList)
-            )),
+            ),
             Some(f) => f(list, listsz),
         }
     }
@@ -6737,20 +6804,20 @@ impl Swell {
         mask: ::std::os::raw::c_uint,
     ) -> ::std::os::raw::c_uint {
         match self.pointers._controlfp {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(_controlfp)
-            )),
+            ),
             Some(f) => f(flag, mask),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_Internal_PostMessage_Init(&self) {
         match self.pointers.SWELL_Internal_PostMessage_Init {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Internal_PostMessage_Init)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -6763,10 +6830,10 @@ impl Swell {
         fn_: *const ::std::os::raw::c_char,
     ) -> root::HCURSOR {
         match self.pointers.SWELL_LoadCursorFromFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LoadCursorFromFile)
-            )),
+            ),
             Some(f) => f(fn_),
         }
     }
@@ -6776,10 +6843,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetWindowWantRaiseAmt(&self, h: root::HWND, amt: ::std::os::raw::c_int) {
         match self.pointers.SWELL_SetWindowWantRaiseAmt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetWindowWantRaiseAmt)
-            )),
+            ),
             Some(f) => f(h, amt),
         }
     }
@@ -6789,10 +6856,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GetWindowWantRaiseAmt(&self, arg1: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.SWELL_GetWindowWantRaiseAmt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetWindowWantRaiseAmt)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6806,10 +6873,10 @@ impl Swell {
         mask: ::std::os::raw::c_int,
     ) {
         match self.pointers.SWELL_SetListViewFastClickMask {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetListViewFastClickMask)
-            )),
+            ),
             Some(f) => f(hList, mask),
         }
     }
@@ -6819,10 +6886,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTempPath(&self, sz: ::std::os::raw::c_int, buf: *mut ::std::os::raw::c_char) {
         match self.pointers.GetTempPath {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTempPath)
-            )),
+            ),
             Some(f) => f(sz, buf),
         }
     }
@@ -6836,20 +6903,20 @@ impl Swell {
         argv: *mut *mut *mut ::std::os::raw::c_char,
     ) {
         match self.pointers.SWELL_initargs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_initargs)
-            )),
+            ),
             Some(f) => f(argc, argv),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_RunMessageLoop(&self) {
         match self.pointers.SWELL_RunMessageLoop {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_RunMessageLoop)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -6861,13 +6928,13 @@ impl Swell {
         &self,
         viewpar: root::HWND,
         wref: *mut *mut ::std::os::raw::c_void,
-        arg1: *mut root::RECT,
+        arg1: *const root::RECT,
     ) -> root::HWND {
         match self.pointers.SWELL_CreateXBridgeWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateXBridgeWindow)
-            )),
+            ),
             Some(f) => f(viewpar, wref, arg1),
         }
     }
@@ -6877,10 +6944,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GenerateGUID(&self, g: *mut ::std::os::raw::c_void) -> bool {
         match self.pointers.SWELL_GenerateGUID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GenerateGUID)
-            )),
+            ),
             Some(f) => f(g),
         }
     }
@@ -6897,10 +6964,10 @@ impl Swell {
         lParam: root::LPARAM,
     ) -> root::BOOL {
         match self.pointers.EnumChildWindows {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumChildWindows)
-            )),
+            ),
             Some(f) => f(hwnd, cwEnumFunc, lParam),
         }
     }
@@ -6910,10 +6977,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_IsGroupBox(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsGroupBox {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsGroupBox)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6923,10 +6990,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_IsButton(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsButton {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsButton)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6936,10 +7003,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_IsStaticText(&self, arg1: root::HWND) -> root::BOOL {
         match self.pointers.SWELL_IsStaticText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsStaticText)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -6949,10 +7016,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GetDesiredControlSize(&self, hwnd: root::HWND, r: *mut root::RECT) {
         match self.pointers.SWELL_GetDesiredControlSize {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDesiredControlSize)
-            )),
+            ),
             Some(f) => f(hwnd, r),
         }
     }
@@ -6967,10 +7034,10 @@ impl Swell {
         pdv: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
         match self.pointers.AddFontResourceEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddFontResourceEx)
-            )),
+            ),
             Some(f) => f(str, fl, pdv),
         }
     }
@@ -6986,10 +7053,10 @@ impl Swell {
         hotspot_y: ::std::os::raw::c_int,
     ) {
         match self.pointers.SWELL_Register_Cursor_Resource {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Register_Cursor_Resource)
-            )),
+            ),
             Some(f) => f(idx, name, hotspot_x, hotspot_y),
         }
     }
@@ -7000,15 +7067,15 @@ impl Swell {
     pub unsafe fn SWELL_ChooseColor(
         &self,
         arg1: root::HWND,
-        arg2: *mut ::std::os::raw::c_int,
+        arg2: *mut root::COLORREF,
         ncustom: ::std::os::raw::c_int,
-        custom: *mut ::std::os::raw::c_int,
+        custom: *mut root::COLORREF,
     ) -> bool {
         match self.pointers.SWELL_ChooseColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ChooseColor)
-            )),
+            ),
             Some(f) => f(arg1, arg2, ncustom, custom),
         }
     }
@@ -7018,10 +7085,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_ChooseFont(&self, arg1: root::HWND, arg2: *mut root::LOGFONT) -> bool {
         match self.pointers.SWELL_ChooseFont {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ChooseFont)
-            )),
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
@@ -7031,10 +7098,10 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn IsWindowEnabled(&self, arg1: root::HWND) -> bool {
         match self.pointers.IsWindowEnabled {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsWindowEnabled)
-            )),
+            ),
             Some(f) => f(arg1),
         }
     }
@@ -7049,10 +7116,10 @@ impl Swell {
         arg3: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetClassName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetClassName)
-            )),
+            ),
             Some(f) => f(arg1, arg2, arg3),
         }
     }
@@ -7062,20 +7129,33 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_SetClassName(&self, arg1: root::HWND, arg2: *const ::std::os::raw::c_char) {
         match self.pointers.SWELL_SetClassName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetClassName)
-            )),
+            ),
+            Some(f) => f(arg1, arg2),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_DisableContextMenu(&self, arg1: root::HWND, arg2: bool) {
+        match self.pointers.SWELL_DisableContextMenu {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_DisableContextMenu)
+            ),
             Some(f) => f(arg1, arg2),
         }
     }
     #[cfg(target_family = "unix")]
     pub fn SWELL_osx_is_dark_mode(&self, mode: ::std::os::raw::c_int) -> bool {
         match self.pointers.SWELL_osx_is_dark_mode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_osx_is_dark_mode)
-            )),
+            ),
             Some(f) => f(mode),
         }
     }
@@ -7860,6 +7940,8 @@ pub struct SwellFunctionPointers {
             textlen: ::std::os::raw::c_int,
         ) -> root::BOOL,
     >,
+    pub GetWindowTextLength:
+        Option<unsafe extern "C" fn(arg1: root::HWND) -> ::std::os::raw::c_int>,
     pub CheckDlgButton: Option<
         unsafe extern "C" fn(
             hwnd: root::HWND,
@@ -8094,27 +8176,12 @@ pub struct SwellFunctionPointers {
         Option<unsafe extern "C" fn(h: root::HWND, cnt: ::std::os::raw::c_int)>,
     pub ListView_EnsureVisible:
         Option<unsafe extern "C" fn(h: root::HWND, i: ::std::os::raw::c_int, pok: root::BOOL)>,
-    pub ListView_GetSubItemRect: Option<
-        unsafe extern "C" fn(
-            h: root::HWND,
-            item: ::std::os::raw::c_int,
-            subitem: ::std::os::raw::c_int,
-            code: ::std::os::raw::c_int,
-            r: *mut root::RECT,
-        ) -> bool,
-    >,
     pub ListView_SetImageList: Option<
         unsafe extern "C" fn(
             h: root::HWND,
             imagelist: root::HIMAGELIST,
             which: ::std::os::raw::c_int,
         ),
-    >,
-    pub ListView_HitTest: Option<
-        unsafe extern "C" fn(
-            h: root::HWND,
-            pinf: *mut root::LVHITTESTINFO,
-        ) -> ::std::os::raw::c_int,
     >,
     pub ListView_SubItemHitTest: Option<
         unsafe extern "C" fn(
@@ -8133,14 +8200,6 @@ pub struct SwellFunctionPointers {
     >,
     pub ListView_SortItems: Option<
         unsafe extern "C" fn(hwnd: root::HWND, compf: root::PFNLVCOMPARE, parm: root::LPARAM),
-    >,
-    pub ListView_GetItemRect: Option<
-        unsafe extern "C" fn(
-            h: root::HWND,
-            item: ::std::os::raw::c_int,
-            r: *mut root::RECT,
-            code: ::std::os::raw::c_int,
-        ) -> bool,
     >,
     pub ListView_Scroll: Option<
         unsafe extern "C" fn(
@@ -8181,6 +8240,29 @@ pub struct SwellFunctionPointers {
             col: ::std::os::raw::c_int,
             hi: *mut root::HDITEM,
         ) -> root::BOOL,
+    >,
+    pub ListView_GetItemRect: Option<
+        unsafe extern "C" fn(
+            h: root::HWND,
+            item: ::std::os::raw::c_int,
+            r: *mut root::RECT,
+            code: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub ListView_GetSubItemRect: Option<
+        unsafe extern "C" fn(
+            h: root::HWND,
+            item: ::std::os::raw::c_int,
+            subitem: ::std::os::raw::c_int,
+            code: ::std::os::raw::c_int,
+            r: *mut root::RECT,
+        ) -> bool,
+    >,
+    pub ListView_HitTest: Option<
+        unsafe extern "C" fn(
+            h: root::HWND,
+            pinf: *mut root::LVHITTESTINFO,
+        ) -> ::std::os::raw::c_int,
     >,
     pub SWELL_GetListViewHeaderHeight:
         Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
@@ -8239,6 +8321,8 @@ pub struct SwellFunctionPointers {
     pub TreeView_DeleteItem: Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM)>,
     pub TreeView_DeleteAllItems: Option<unsafe extern "C" fn(hwnd: root::HWND)>,
     pub TreeView_SelectItem: Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM)>,
+    pub TreeView_EnsureVisible:
+        Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM)>,
     pub TreeView_GetItem:
         Option<unsafe extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL>,
     pub TreeView_SetItem:
@@ -8248,6 +8332,8 @@ pub struct SwellFunctionPointers {
     >,
     pub TreeView_SetIndent:
         Option<unsafe extern "C" fn(hwnd: root::HWND, indent: ::std::os::raw::c_int) -> root::BOOL>,
+    pub TreeView_GetParent:
+        Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM>,
     pub TreeView_GetChild:
         Option<unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM>,
     pub TreeView_GetNextSibling:
@@ -8989,7 +9075,7 @@ pub struct SwellFunctionPointers {
         unsafe extern "C" fn(
             viewpar: root::HWND,
             wref: *mut *mut ::std::os::raw::c_void,
-            arg1: *mut root::RECT,
+            arg1: *const root::RECT,
         ) -> root::HWND,
     >,
     pub SWELL_GenerateGUID: Option<unsafe extern "C" fn(g: *mut ::std::os::raw::c_void) -> bool>,
@@ -9025,9 +9111,9 @@ pub struct SwellFunctionPointers {
     pub SWELL_ChooseColor: Option<
         unsafe extern "C" fn(
             arg1: root::HWND,
-            arg2: *mut ::std::os::raw::c_int,
+            arg2: *mut root::COLORREF,
             ncustom: ::std::os::raw::c_int,
-            custom: *mut ::std::os::raw::c_int,
+            custom: *mut root::COLORREF,
         ) -> bool,
     >,
     pub SWELL_ChooseFont:
@@ -9042,10 +9128,11 @@ pub struct SwellFunctionPointers {
     >,
     pub SWELL_SetClassName:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char)>,
+    pub SWELL_DisableContextMenu: Option<unsafe extern "C" fn(arg1: root::HWND, arg2: bool)>,
     pub SWELL_osx_is_dark_mode: Option<extern "C" fn(mode: ::std::os::raw::c_int) -> bool>,
 }
 impl SwellFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 325u32;
+    pub(crate) const TOTAL_COUNT: u32 = 329u32;
 }
 #[cfg(target_family = "windows")]
 mod windows {
