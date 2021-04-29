@@ -1,5 +1,6 @@
 #![doc(html_root_url = "https://docs.rs/reaper-macros/0.1.0")]
-#![deny(rustdoc::broken_intra_doc_links)]
+#![allow(renamed_and_removed_lints)]
+#![deny(broken_intra_doc_links)]
 
 //! This crate is part of [reaper-rs](https://github.com/helgoboss/reaper-rs) and contains a
 //! [simple attribute macro](attr.reaper_extension_plugin.html) to simplify bootstrapping REAPER
