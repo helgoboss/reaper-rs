@@ -5703,10 +5703,10 @@ impl Reaper {
         tmpspace: *mut ::std::os::raw::c_void,
     ) {
         match self.pointers.__mergesort {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(__mergesort)
-            )),
+            ),
             Some(f) => f(base, nmemb, size, cmpfunc, tmpspace),
         }
     }
@@ -5721,19 +5721,19 @@ impl Reaper {
         addtomainmenu: bool,
     ) -> bool {
         match self.pointers.AddCustomizableMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddCustomizableMenu)
-            )),
+            ),
             Some(f) => f(menuidstr, menuname, kbdsecname, addtomainmenu),
         }
     }
     pub fn AddExtensionsMainMenu(&self) -> bool {
         match self.pointers.AddExtensionsMainMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddExtensionsMainMenu)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -5742,10 +5742,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn AddMediaItemToTrack(&self, tr: *mut root::MediaTrack) -> *mut root::MediaItem {
         match self.pointers.AddMediaItemToTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddMediaItemToTrack)
-            )),
+            ),
             Some(f) => f(tr),
         }
     }
@@ -5762,10 +5762,10 @@ impl Reaper {
         wantidx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.AddProjectMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddProjectMarker)
-            )),
+            ),
             Some(f) => f(proj, isrgn, pos, rgnend, name, wantidx),
         }
     }
@@ -5783,10 +5783,10 @@ impl Reaper {
         color: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.AddProjectMarker2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddProjectMarker2)
-            )),
+            ),
             Some(f) => f(proj, isrgn, pos, rgnend, name, wantidx, color),
         }
     }
@@ -5801,10 +5801,10 @@ impl Reaper {
         commit: bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.AddRemoveReaScript {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddRemoveReaScript)
-            )),
+            ),
             Some(f) => f(add, sectionID, scriptfn, commit),
         }
     }
@@ -5816,10 +5816,10 @@ impl Reaper {
         item: *mut root::MediaItem,
     ) -> *mut root::MediaItem_Take {
         match self.pointers.AddTakeToMediaItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddTakeToMediaItem)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -5836,10 +5836,10 @@ impl Reaper {
         lineartempochange: bool,
     ) -> bool {
         match self.pointers.AddTempoTimeSigMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddTempoTimeSigMarker)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 timepos,
@@ -5858,10 +5858,10 @@ impl Reaper {
         centermode: ::std::os::raw::c_int,
     ) {
         match self.pointers.adjustZoom {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(adjustZoom)
-            )),
+            ),
             Some(f) => f(amt, forceset, doupd, centermode),
         }
     }
@@ -5870,10 +5870,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn AnyTrackSolo(&self, proj: *mut root::ReaProject) -> bool {
         match self.pointers.AnyTrackSolo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AnyTrackSolo)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -5882,19 +5882,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn APIExists(&self, function_name: *const ::std::os::raw::c_char) -> bool {
         match self.pointers.APIExists {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(APIExists)
-            )),
+            ),
             Some(f) => f(function_name),
         }
     }
     pub fn APITest(&self) {
         match self.pointers.APITest {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(APITest)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -5912,10 +5912,10 @@ impl Reaper {
         copies: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.ApplyNudge {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ApplyNudge)
-            )),
+            ),
             Some(f) => f(
                 project, nudgeflag, nudgewhat, nudgeunits, value, reverse, copies,
             ),
@@ -5930,46 +5930,46 @@ impl Reaper {
         sectionname: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.ArmCommand {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ArmCommand)
-            )),
+            ),
             Some(f) => f(cmd, sectionname),
         }
     }
     pub fn Audio_Init(&self) {
         match self.pointers.Audio_Init {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_Init)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn Audio_IsPreBuffer(&self) -> ::std::os::raw::c_int {
         match self.pointers.Audio_IsPreBuffer {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_IsPreBuffer)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn Audio_IsRunning(&self) -> ::std::os::raw::c_int {
         match self.pointers.Audio_IsRunning {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_IsRunning)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn Audio_Quit(&self) {
         match self.pointers.Audio_Quit {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_Quit)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -5982,10 +5982,10 @@ impl Reaper {
         reg: *mut root::audio_hook_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.Audio_RegHardwareHook {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_RegHardwareHook)
-            )),
+            ),
             Some(f) => f(isAdd, reg),
         }
     }
@@ -5997,10 +5997,10 @@ impl Reaper {
         accessor: *mut root::reaper_functions::AudioAccessor,
     ) -> bool {
         match self.pointers.AudioAccessorStateChanged {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AudioAccessorStateChanged)
-            )),
+            ),
             Some(f) => f(accessor),
         }
     }
@@ -6009,10 +6009,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn AudioAccessorUpdate(&self, accessor: *mut root::reaper_functions::AudioAccessor) {
         match self.pointers.AudioAccessorUpdate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AudioAccessorUpdate)
-            )),
+            ),
             Some(f) => f(accessor),
         }
     }
@@ -6024,19 +6024,19 @@ impl Reaper {
         accessor: *mut root::reaper_functions::AudioAccessor,
     ) -> bool {
         match self.pointers.AudioAccessorValidateState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AudioAccessorValidateState)
-            )),
+            ),
             Some(f) => f(accessor),
         }
     }
     pub fn BypassFxAllTracks(&self, bypass: ::std::os::raw::c_int) {
         match self.pointers.BypassFxAllTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BypassFxAllTracks)
-            )),
+            ),
             Some(f) => f(bypass),
         }
     }
@@ -6049,10 +6049,10 @@ impl Reaper {
         pksBlock: *mut root::PCM_source_peaktransfer_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CalculatePeaks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CalculatePeaks)
-            )),
+            ),
             Some(f) => f(srcBlock, pksBlock),
         }
     }
@@ -6065,37 +6065,37 @@ impl Reaper {
         pksBlock: *mut root::PCM_source_peaktransfer_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CalculatePeaksFloatSrcPtr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CalculatePeaksFloatSrcPtr)
-            )),
+            ),
             Some(f) => f(srcBlock, pksBlock),
         }
     }
     pub fn ClearAllRecArmed(&self) {
         match self.pointers.ClearAllRecArmed {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClearAllRecArmed)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn ClearConsole(&self) {
         match self.pointers.ClearConsole {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClearConsole)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn ClearPeakCache(&self) {
         match self.pointers.ClearPeakCache {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClearPeakCache)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -6110,10 +6110,10 @@ impl Reaper {
         bOut: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.ColorFromNative {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ColorFromNative)
-            )),
+            ),
             Some(f) => f(col, rOut, gOut, bOut),
         }
     }
@@ -6124,10 +6124,10 @@ impl Reaper {
         b: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ColorToNative {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ColorToNative)
-            )),
+            ),
             Some(f) => f(r, g, b),
         }
     }
@@ -6140,10 +6140,10 @@ impl Reaper {
         cmdID: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountActionShortcuts {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountActionShortcuts)
-            )),
+            ),
             Some(f) => f(section, cmdID),
         }
     }
@@ -6155,10 +6155,10 @@ impl Reaper {
         env: *mut root::TrackEnvelope,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountAutomationItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountAutomationItems)
-            )),
+            ),
             Some(f) => f(env),
         }
     }
@@ -6170,10 +6170,10 @@ impl Reaper {
         envelope: *mut root::TrackEnvelope,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountEnvelopePoints {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountEnvelopePoints)
-            )),
+            ),
             Some(f) => f(envelope),
         }
     }
@@ -6186,10 +6186,10 @@ impl Reaper {
         autoitem_idx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountEnvelopePointsEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountEnvelopePointsEx)
-            )),
+            ),
             Some(f) => f(envelope, autoitem_idx),
         }
     }
@@ -6198,10 +6198,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CountMediaItems(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.CountMediaItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountMediaItems)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -6215,10 +6215,10 @@ impl Reaper {
         num_regionsOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountProjectMarkers {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountProjectMarkers)
-            )),
+            ),
             Some(f) => f(proj, num_markersOut, num_regionsOut),
         }
     }
@@ -6230,10 +6230,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountSelectedMediaItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountSelectedMediaItems)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -6242,10 +6242,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CountSelectedTracks(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.CountSelectedTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountSelectedTracks)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -6258,10 +6258,10 @@ impl Reaper {
         wantmaster: bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountSelectedTracks2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountSelectedTracks2)
-            )),
+            ),
             Some(f) => f(proj, wantmaster),
         }
     }
@@ -6273,10 +6273,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountTakeEnvelopes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTakeEnvelopes)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -6285,10 +6285,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CountTakes(&self, item: *mut root::MediaItem) -> ::std::os::raw::c_int {
         match self.pointers.CountTakes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTakes)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -6301,10 +6301,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountTCPFXParms {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTCPFXParms)
-            )),
+            ),
             Some(f) => f(project, track),
         }
     }
@@ -6316,10 +6316,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountTempoTimeSigMarkers {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTempoTimeSigMarkers)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -6331,10 +6331,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountTrackEnvelopes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTrackEnvelopes)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -6346,10 +6346,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CountTrackMediaItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTrackMediaItems)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -6358,10 +6358,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CountTracks(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.CountTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTracks)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -6374,19 +6374,19 @@ impl Reaper {
         callback: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.CreateLocalOscHandler {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateLocalOscHandler)
-            )),
+            ),
             Some(f) => f(obj, callback),
         }
     }
     pub fn CreateMIDIInput(&self, dev: ::std::os::raw::c_int) -> *mut root::midi_Input {
         match self.pointers.CreateMIDIInput {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateMIDIInput)
-            )),
+            ),
             Some(f) => f(dev),
         }
     }
@@ -6400,10 +6400,10 @@ impl Reaper {
         msoffset100: *mut ::std::os::raw::c_int,
     ) -> *mut root::midi_Output {
         match self.pointers.CreateMIDIOutput {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateMIDIOutput)
-            )),
+            ),
             Some(f) => f(dev, streamMode, msoffset100),
         }
     }
@@ -6418,10 +6418,10 @@ impl Reaper {
         qnInOptional: *const bool,
     ) -> *mut root::MediaItem {
         match self.pointers.CreateNewMIDIItemInProj {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateNewMIDIItemInProj)
-            )),
+            ),
             Some(f) => f(track, starttime, endtime, qnInOptional),
         }
     }
@@ -6433,10 +6433,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> *mut root::reaper_functions::AudioAccessor {
         match self.pointers.CreateTakeAudioAccessor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateTakeAudioAccessor)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -6448,10 +6448,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> *mut root::reaper_functions::AudioAccessor {
         match self.pointers.CreateTrackAudioAccessor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateTrackAudioAccessor)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -6464,19 +6464,19 @@ impl Reaper {
         desttrInOptional: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CreateTrackSend {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateTrackSend)
-            )),
+            ),
             Some(f) => f(tr, desttrInOptional),
         }
     }
     pub fn CSurf_FlushUndo(&self, force: bool) {
         match self.pointers.CSurf_FlushUndo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_FlushUndo)
-            )),
+            ),
             Some(f) => f(force),
         }
     }
@@ -6489,55 +6489,55 @@ impl Reaper {
         isPan: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.CSurf_GetTouchState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_GetTouchState)
-            )),
+            ),
             Some(f) => f(trackid, isPan),
         }
     }
     pub fn CSurf_GoEnd(&self) {
         match self.pointers.CSurf_GoEnd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_GoEnd)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn CSurf_GoStart(&self) {
         match self.pointers.CSurf_GoStart {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_GoStart)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn CSurf_NumTracks(&self, mcpView: bool) -> ::std::os::raw::c_int {
         match self.pointers.CSurf_NumTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_NumTracks)
-            )),
+            ),
             Some(f) => f(mcpView),
         }
     }
     pub fn CSurf_OnArrow(&self, whichdir: ::std::os::raw::c_int, wantzoom: bool) {
         match self.pointers.CSurf_OnArrow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnArrow)
-            )),
+            ),
             Some(f) => f(whichdir, wantzoom),
         }
     }
     pub fn CSurf_OnFwd(&self, seekplay: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnFwd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnFwd)
-            )),
+            ),
             Some(f) => f(seekplay),
         }
     }
@@ -6550,10 +6550,10 @@ impl Reaper {
         en: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.CSurf_OnFXChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnFXChange)
-            )),
+            ),
             Some(f) => f(trackid, en),
         }
     }
@@ -6566,10 +6566,10 @@ impl Reaper {
         monitor: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CSurf_OnInputMonitorChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnInputMonitorChange)
-            )),
+            ),
             Some(f) => f(trackid, monitor),
         }
     }
@@ -6583,10 +6583,10 @@ impl Reaper {
         allowgang: bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CSurf_OnInputMonitorChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnInputMonitorChangeEx)
-            )),
+            ),
             Some(f) => f(trackid, monitor, allowgang),
         }
     }
@@ -6599,10 +6599,10 @@ impl Reaper {
         mute: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.CSurf_OnMuteChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnMuteChange)
-            )),
+            ),
             Some(f) => f(trackid, mute),
         }
     }
@@ -6616,10 +6616,10 @@ impl Reaper {
         allowgang: bool,
     ) -> bool {
         match self.pointers.CSurf_OnMuteChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnMuteChangeEx)
-            )),
+            ),
             Some(f) => f(trackid, mute, allowgang),
         }
     }
@@ -6632,10 +6632,10 @@ impl Reaper {
         arg: *const f32,
     ) {
         match self.pointers.CSurf_OnOscControlMessage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnOscControlMessage)
-            )),
+            ),
             Some(f) => f(msg, arg),
         }
     }
@@ -6649,10 +6649,10 @@ impl Reaper {
         relative: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnPanChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPanChange)
-            )),
+            ),
             Some(f) => f(trackid, pan, relative),
         }
     }
@@ -6667,37 +6667,37 @@ impl Reaper {
         allowGang: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnPanChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPanChangeEx)
-            )),
+            ),
             Some(f) => f(trackid, pan, relative, allowGang),
         }
     }
     pub fn CSurf_OnPause(&self) {
         match self.pointers.CSurf_OnPause {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPause)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn CSurf_OnPlay(&self) {
         match self.pointers.CSurf_OnPlay {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPlay)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn CSurf_OnPlayRateChange(&self, playrate: f64) {
         match self.pointers.CSurf_OnPlayRateChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPlayRateChange)
-            )),
+            ),
             Some(f) => f(playrate),
         }
     }
@@ -6710,10 +6710,10 @@ impl Reaper {
         recarm: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.CSurf_OnRecArmChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecArmChange)
-            )),
+            ),
             Some(f) => f(trackid, recarm),
         }
     }
@@ -6727,19 +6727,19 @@ impl Reaper {
         allowgang: bool,
     ) -> bool {
         match self.pointers.CSurf_OnRecArmChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecArmChangeEx)
-            )),
+            ),
             Some(f) => f(trackid, recarm, allowgang),
         }
     }
     pub fn CSurf_OnRecord(&self) {
         match self.pointers.CSurf_OnRecord {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecord)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -6754,10 +6754,10 @@ impl Reaper {
         relative: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnRecvPanChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecvPanChange)
-            )),
+            ),
             Some(f) => f(trackid, recv_index, pan, relative),
         }
     }
@@ -6772,37 +6772,37 @@ impl Reaper {
         relative: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnRecvVolumeChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecvVolumeChange)
-            )),
+            ),
             Some(f) => f(trackid, recv_index, volume, relative),
         }
     }
     pub fn CSurf_OnRew(&self, seekplay: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnRew {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRew)
-            )),
+            ),
             Some(f) => f(seekplay),
         }
     }
     pub fn CSurf_OnRewFwd(&self, seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnRewFwd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRewFwd)
-            )),
+            ),
             Some(f) => f(seekplay, dir),
         }
     }
     pub fn CSurf_OnScroll(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnScroll {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnScroll)
-            )),
+            ),
             Some(f) => f(xdir, ydir),
         }
     }
@@ -6815,10 +6815,10 @@ impl Reaper {
         selected: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.CSurf_OnSelectedChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSelectedChange)
-            )),
+            ),
             Some(f) => f(trackid, selected),
         }
     }
@@ -6833,10 +6833,10 @@ impl Reaper {
         relative: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnSendPanChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSendPanChange)
-            )),
+            ),
             Some(f) => f(trackid, send_index, pan, relative),
         }
     }
@@ -6851,10 +6851,10 @@ impl Reaper {
         relative: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnSendVolumeChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSendVolumeChange)
-            )),
+            ),
             Some(f) => f(trackid, send_index, volume, relative),
         }
     }
@@ -6867,10 +6867,10 @@ impl Reaper {
         solo: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.CSurf_OnSoloChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSoloChange)
-            )),
+            ),
             Some(f) => f(trackid, solo),
         }
     }
@@ -6884,28 +6884,28 @@ impl Reaper {
         allowgang: bool,
     ) -> bool {
         match self.pointers.CSurf_OnSoloChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSoloChangeEx)
-            )),
+            ),
             Some(f) => f(trackid, solo, allowgang),
         }
     }
     pub fn CSurf_OnStop(&self) {
         match self.pointers.CSurf_OnStop {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnStop)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn CSurf_OnTempoChange(&self, bpm: f64) {
         match self.pointers.CSurf_OnTempoChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnTempoChange)
-            )),
+            ),
             Some(f) => f(bpm),
         }
     }
@@ -6914,10 +6914,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CSurf_OnTrackSelection(&self, trackid: *mut root::MediaTrack) {
         match self.pointers.CSurf_OnTrackSelection {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnTrackSelection)
-            )),
+            ),
             Some(f) => f(trackid),
         }
     }
@@ -6931,10 +6931,10 @@ impl Reaper {
         relative: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnVolumeChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnVolumeChange)
-            )),
+            ),
             Some(f) => f(trackid, volume, relative),
         }
     }
@@ -6949,10 +6949,10 @@ impl Reaper {
         allowGang: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnVolumeChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnVolumeChangeEx)
-            )),
+            ),
             Some(f) => f(trackid, volume, relative, allowGang),
         }
     }
@@ -6966,10 +6966,10 @@ impl Reaper {
         relative: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnWidthChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnWidthChange)
-            )),
+            ),
             Some(f) => f(trackid, width, relative),
         }
     }
@@ -6984,37 +6984,37 @@ impl Reaper {
         allowGang: bool,
     ) -> f64 {
         match self.pointers.CSurf_OnWidthChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnWidthChangeEx)
-            )),
+            ),
             Some(f) => f(trackid, width, relative, allowGang),
         }
     }
     pub fn CSurf_OnZoom(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
         match self.pointers.CSurf_OnZoom {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnZoom)
-            )),
+            ),
             Some(f) => f(xdir, ydir),
         }
     }
     pub fn CSurf_ResetAllCachedVolPanStates(&self) {
         match self.pointers.CSurf_ResetAllCachedVolPanStates {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_ResetAllCachedVolPanStates)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn CSurf_ScrubAmt(&self, amt: f64) {
         match self.pointers.CSurf_ScrubAmt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_ScrubAmt)
-            )),
+            ),
             Some(f) => f(amt),
         }
     }
@@ -7027,10 +7027,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetAutoMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetAutoMode)
-            )),
+            ),
             Some(f) => f(mode, ignoresurf),
         }
     }
@@ -7045,10 +7045,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetPlayState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetPlayState)
-            )),
+            ),
             Some(f) => f(play, pause, rec, ignoresurf),
         }
     }
@@ -7061,10 +7061,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetRepeatState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetRepeatState)
-            )),
+            ),
             Some(f) => f(rep, ignoresurf),
         }
     }
@@ -7078,10 +7078,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetSurfaceMute {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceMute)
-            )),
+            ),
             Some(f) => f(trackid, mute, ignoresurf),
         }
     }
@@ -7095,10 +7095,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetSurfacePan {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfacePan)
-            )),
+            ),
             Some(f) => f(trackid, pan, ignoresurf),
         }
     }
@@ -7112,10 +7112,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetSurfaceRecArm {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceRecArm)
-            )),
+            ),
             Some(f) => f(trackid, recarm, ignoresurf),
         }
     }
@@ -7129,10 +7129,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetSurfaceSelected {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceSelected)
-            )),
+            ),
             Some(f) => f(trackid, selected, ignoresurf),
         }
     }
@@ -7146,10 +7146,10 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetSurfaceSolo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceSolo)
-            )),
+            ),
             Some(f) => f(trackid, solo, ignoresurf),
         }
     }
@@ -7163,19 +7163,19 @@ impl Reaper {
         ignoresurf: *mut root::IReaperControlSurface,
     ) {
         match self.pointers.CSurf_SetSurfaceVolume {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceVolume)
-            )),
+            ),
             Some(f) => f(trackid, volume, ignoresurf),
         }
     }
     pub fn CSurf_SetTrackListChange(&self) {
         match self.pointers.CSurf_SetTrackListChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetTrackListChange)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -7185,10 +7185,10 @@ impl Reaper {
         mcpView: bool,
     ) -> *mut root::MediaTrack {
         match self.pointers.CSurf_TrackFromID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_TrackFromID)
-            )),
+            ),
             Some(f) => f(idx, mcpView),
         }
     }
@@ -7201,19 +7201,19 @@ impl Reaper {
         mcpView: bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CSurf_TrackToID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_TrackToID)
-            )),
+            ),
             Some(f) => f(track, mcpView),
         }
     }
     pub fn DB2SLIDER(&self, x: f64) -> f64 {
         match self.pointers.DB2SLIDER {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DB2SLIDER)
-            )),
+            ),
             Some(f) => f(x),
         }
     }
@@ -7227,10 +7227,10 @@ impl Reaper {
         shortcutidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.DeleteActionShortcut {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteActionShortcut)
-            )),
+            ),
             Some(f) => f(section, cmdID, shortcutidx),
         }
     }
@@ -7244,10 +7244,10 @@ impl Reaper {
         ptidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.DeleteEnvelopePointEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteEnvelopePointEx)
-            )),
+            ),
             Some(f) => f(envelope, autoitem_idx, ptidx),
         }
     }
@@ -7261,10 +7261,10 @@ impl Reaper {
         time_end: f64,
     ) -> bool {
         match self.pointers.DeleteEnvelopePointRange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteEnvelopePointRange)
-            )),
+            ),
             Some(f) => f(envelope, time_start, time_end),
         }
     }
@@ -7279,10 +7279,10 @@ impl Reaper {
         time_end: f64,
     ) -> bool {
         match self.pointers.DeleteEnvelopePointRangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteEnvelopePointRangeEx)
-            )),
+            ),
             Some(f) => f(envelope, autoitem_idx, time_start, time_end),
         }
     }
@@ -7296,10 +7296,10 @@ impl Reaper {
         persist: bool,
     ) {
         match self.pointers.DeleteExtState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteExtState)
-            )),
+            ),
             Some(f) => f(section, key, persist),
         }
     }
@@ -7313,10 +7313,10 @@ impl Reaper {
         isrgn: bool,
     ) -> bool {
         match self.pointers.DeleteProjectMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteProjectMarker)
-            )),
+            ),
             Some(f) => f(proj, markrgnindexnumber, isrgn),
         }
     }
@@ -7329,10 +7329,10 @@ impl Reaper {
         markrgnidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.DeleteProjectMarkerByIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteProjectMarkerByIndex)
-            )),
+            ),
             Some(f) => f(proj, markrgnidx),
         }
     }
@@ -7345,10 +7345,10 @@ impl Reaper {
         idx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.DeleteTakeMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTakeMarker)
-            )),
+            ),
             Some(f) => f(take, idx),
         }
     }
@@ -7362,10 +7362,10 @@ impl Reaper {
         countInOptional: *const ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.DeleteTakeStretchMarkers {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTakeStretchMarkers)
-            )),
+            ),
             Some(f) => f(take, idx, countInOptional),
         }
     }
@@ -7378,10 +7378,10 @@ impl Reaper {
         markerindex: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.DeleteTempoTimeSigMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTempoTimeSigMarker)
-            )),
+            ),
             Some(f) => f(project, markerindex),
         }
     }
@@ -7390,10 +7390,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DeleteTrack(&self, tr: *mut root::MediaTrack) {
         match self.pointers.DeleteTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTrack)
-            )),
+            ),
             Some(f) => f(tr),
         }
     }
@@ -7406,10 +7406,10 @@ impl Reaper {
         it: *mut root::MediaItem,
     ) -> bool {
         match self.pointers.DeleteTrackMediaItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTrackMediaItem)
-            )),
+            ),
             Some(f) => f(tr, it),
         }
     }
@@ -7421,10 +7421,10 @@ impl Reaper {
         accessor: *mut root::reaper_functions::AudioAccessor,
     ) {
         match self.pointers.DestroyAudioAccessor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyAudioAccessor)
-            )),
+            ),
             Some(f) => f(accessor),
         }
     }
@@ -7433,10 +7433,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DestroyLocalOscHandler(&self, local_osc_handler: *mut ::std::os::raw::c_void) {
         match self.pointers.DestroyLocalOscHandler {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyLocalOscHandler)
-            )),
+            ),
             Some(f) => f(local_osc_handler),
         }
     }
@@ -7451,10 +7451,10 @@ impl Reaper {
         shortcutidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.DoActionShortcutDialog {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DoActionShortcutDialog)
-            )),
+            ),
             Some(f) => f(hwnd, section, cmdID, shortcutidx),
         }
     }
@@ -7467,19 +7467,19 @@ impl Reaper {
         whichDock: ::std::os::raw::c_int,
     ) {
         match self.pointers.Dock_UpdateDockID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Dock_UpdateDockID)
-            )),
+            ),
             Some(f) => f(ident_str, whichDock),
         }
     }
     pub fn DockGetPosition(&self, whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.DockGetPosition {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockGetPosition)
-            )),
+            ),
             Some(f) => f(whichDock),
         }
     }
@@ -7492,10 +7492,10 @@ impl Reaper {
         isFloatingDockerOut: *mut bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.DockIsChildOfDock {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockIsChildOfDock)
-            )),
+            ),
             Some(f) => f(hwnd, isFloatingDockerOut),
         }
     }
@@ -7504,10 +7504,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DockWindowActivate(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowActivate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowActivate)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -7522,10 +7522,10 @@ impl Reaper {
         allowShow: bool,
     ) {
         match self.pointers.DockWindowAdd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowAdd)
-            )),
+            ),
             Some(f) => f(hwnd, name, pos, allowShow),
         }
     }
@@ -7540,19 +7540,19 @@ impl Reaper {
         allowShow: bool,
     ) {
         match self.pointers.DockWindowAddEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowAddEx)
-            )),
+            ),
             Some(f) => f(hwnd, name, identstr, allowShow),
         }
     }
     pub fn DockWindowRefresh(&self) {
         match self.pointers.DockWindowRefresh {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowRefresh)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -7561,10 +7561,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DockWindowRefreshForHWND(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowRefreshForHWND {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowRefreshForHWND)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -7573,10 +7573,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn DockWindowRemove(&self, hwnd: root::HWND) {
         match self.pointers.DockWindowRemove {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowRemove)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -7589,10 +7589,10 @@ impl Reaper {
         destmenu: *mut ::std::os::raw::c_void,
     ) -> bool {
         match self.pointers.DuplicateCustomizableMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DuplicateCustomizableMenu)
-            )),
+            ),
             Some(f) => f(srcmenu, destmenu),
         }
     }
@@ -7605,10 +7605,10 @@ impl Reaper {
         markerindex: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.EditTempoTimeSigMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EditTempoTimeSigMarker)
-            )),
+            ),
             Some(f) => f(project, markerindex),
         }
     }
@@ -7617,10 +7617,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn EnsureNotCompletelyOffscreen(&self, rInOut: *mut root::RECT) {
         match self.pointers.EnsureNotCompletelyOffscreen {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnsureNotCompletelyOffscreen)
-            )),
+            ),
             Some(f) => f(rInOut),
         }
     }
@@ -7633,10 +7633,10 @@ impl Reaper {
         fileindex: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.EnumerateFiles {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumerateFiles)
-            )),
+            ),
             Some(f) => f(path, fileindex),
         }
     }
@@ -7649,10 +7649,10 @@ impl Reaper {
         subdirindex: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.EnumerateSubdirectories {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumerateSubdirectories)
-            )),
+            ),
             Some(f) => f(path, subdirindex),
         }
     }
@@ -7665,10 +7665,10 @@ impl Reaper {
         strOut: *mut *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.EnumPitchShiftModes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumPitchShiftModes)
-            )),
+            ),
             Some(f) => f(mode, strOut),
         }
     }
@@ -7678,10 +7678,10 @@ impl Reaper {
         submode: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.EnumPitchShiftSubModes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumPitchShiftSubModes)
-            )),
+            ),
             Some(f) => f(mode, submode),
         }
     }
@@ -7698,10 +7698,10 @@ impl Reaper {
         markrgnindexnumberOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.EnumProjectMarkers {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjectMarkers)
-            )),
+            ),
             Some(f) => f(
                 idx,
                 isrgnOut,
@@ -7726,10 +7726,10 @@ impl Reaper {
         markrgnindexnumberOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.EnumProjectMarkers2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjectMarkers2)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 idx,
@@ -7756,10 +7756,10 @@ impl Reaper {
         colorOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.EnumProjectMarkers3 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjectMarkers3)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 idx,
@@ -7782,10 +7782,10 @@ impl Reaper {
         projfnOutOptional_sz: ::std::os::raw::c_int,
     ) -> *mut root::ReaProject {
         match self.pointers.EnumProjects {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjects)
-            )),
+            ),
             Some(f) => f(idx, projfnOutOptional, projfnOutOptional_sz),
         }
     }
@@ -7803,10 +7803,10 @@ impl Reaper {
         valOutOptional_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.EnumProjExtState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjExtState)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 extname,
@@ -7828,10 +7828,10 @@ impl Reaper {
         rendertrack: ::std::os::raw::c_int,
     ) -> *mut root::MediaTrack {
         match self.pointers.EnumRegionRenderMatrix {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumRegionRenderMatrix)
-            )),
+            ),
             Some(f) => f(proj, regionindex, rendertrack),
         }
     }
@@ -7846,10 +7846,10 @@ impl Reaper {
         programName_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.EnumTrackMIDIProgramNames {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumTrackMIDIProgramNames)
-            )),
+            ),
             Some(f) => f(track, programNumber, programName, programName_sz),
         }
     }
@@ -7865,10 +7865,10 @@ impl Reaper {
         programName_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.EnumTrackMIDIProgramNamesEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumTrackMIDIProgramNamesEx)
-            )),
+            ),
             Some(f) => f(proj, track, programNumber, programName, programName_sz),
         }
     }
@@ -7887,10 +7887,10 @@ impl Reaper {
         dddVdSOutOptional: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.Envelope_Evaluate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_Evaluate)
-            )),
+            ),
             Some(f) => f(
                 envelope,
                 time,
@@ -7914,10 +7914,10 @@ impl Reaper {
         bufOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.Envelope_FormatValue {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_FormatValue)
-            )),
+            ),
             Some(f) => f(env, value, bufOut, bufOut_sz),
         }
     }
@@ -7931,10 +7931,10 @@ impl Reaper {
         index2OutOptional: *mut ::std::os::raw::c_int,
     ) -> *mut root::MediaItem_Take {
         match self.pointers.Envelope_GetParentTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_GetParentTake)
-            )),
+            ),
             Some(f) => f(env, indexOutOptional, index2OutOptional),
         }
     }
@@ -7948,10 +7948,10 @@ impl Reaper {
         index2OutOptional: *mut ::std::os::raw::c_int,
     ) -> *mut root::MediaTrack {
         match self.pointers.Envelope_GetParentTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_GetParentTrack)
-            )),
+            ),
             Some(f) => f(env, indexOutOptional, index2OutOptional),
         }
     }
@@ -7960,10 +7960,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Envelope_SortPoints(&self, envelope: *mut root::TrackEnvelope) -> bool {
         match self.pointers.Envelope_SortPoints {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_SortPoints)
-            )),
+            ),
             Some(f) => f(envelope),
         }
     }
@@ -7976,10 +7976,10 @@ impl Reaper {
         autoitem_idx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.Envelope_SortPointsEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_SortPointsEx)
-            )),
+            ),
             Some(f) => f(envelope, autoitem_idx),
         }
     }
@@ -7992,10 +7992,10 @@ impl Reaper {
         timeoutmsec: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.ExecProcess {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ExecProcess)
-            )),
+            ),
             Some(f) => f(cmdline, timeoutmsec),
         }
     }
@@ -8004,10 +8004,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn file_exists(&self, path: *const ::std::os::raw::c_char) -> bool {
         match self.pointers.file_exists {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(file_exists)
-            )),
+            ),
             Some(f) => f(path),
         }
     }
@@ -8020,10 +8020,10 @@ impl Reaper {
         time: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.FindTempoTimeSigMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FindTempoTimeSigMarker)
-            )),
+            ),
             Some(f) => f(project, time),
         }
     }
@@ -8037,10 +8037,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.format_timestr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(format_timestr)
-            )),
+            ),
             Some(f) => f(tpos, buf, buf_sz),
         }
     }
@@ -8056,10 +8056,10 @@ impl Reaper {
         modeoverride: ::std::os::raw::c_int,
     ) {
         match self.pointers.format_timestr_len {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(format_timestr_len)
-            )),
+            ),
             Some(f) => f(tpos, buf, buf_sz, offset, modeoverride),
         }
     }
@@ -8074,10 +8074,10 @@ impl Reaper {
         modeoverride: ::std::os::raw::c_int,
     ) {
         match self.pointers.format_timestr_pos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(format_timestr_pos)
-            )),
+            ),
             Some(f) => f(tpos, buf, buf_sz, modeoverride),
         }
     }
@@ -8086,10 +8086,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn FreeHeapPtr(&self, ptr: *mut ::std::os::raw::c_void) {
         match self.pointers.FreeHeapPtr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FreeHeapPtr)
-            )),
+            ),
             Some(f) => f(ptr),
         }
     }
@@ -8098,10 +8098,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn genGuid(&self, g: *mut root::GUID) {
         match self.pointers.genGuid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(genGuid)
-            )),
+            ),
             Some(f) => f(g),
         }
     }
@@ -8114,10 +8114,10 @@ impl Reaper {
         szOut: *mut ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.get_config_var {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_config_var)
-            )),
+            ),
             Some(f) => f(name, szOut),
         }
     }
@@ -8131,19 +8131,19 @@ impl Reaper {
         bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.get_config_var_string {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_config_var_string)
-            )),
+            ),
             Some(f) => f(name, bufOut, bufOut_sz),
         }
     }
     pub fn get_ini_file(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.get_ini_file {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_ini_file)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8156,10 +8156,10 @@ impl Reaper {
         szOut: *mut ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.get_midi_config_var {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_midi_config_var)
-            )),
+            ),
             Some(f) => f(name, szOut),
         }
     }
@@ -8175,10 +8175,10 @@ impl Reaper {
         desclen: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetActionShortcutDesc {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetActionShortcutDesc)
-            )),
+            ),
             Some(f) => f(section, cmdID, shortcutidx, desc, desclen),
         }
     }
@@ -8187,10 +8187,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetActiveTake(&self, item: *mut root::MediaItem) -> *mut root::MediaItem_Take {
         match self.pointers.GetActiveTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetActiveTake)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -8202,19 +8202,19 @@ impl Reaper {
         ignoreProject: *mut root::ReaProject,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetAllProjectPlayStates {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAllProjectPlayStates)
-            )),
+            ),
             Some(f) => f(ignoreProject),
         }
     }
     pub fn GetAppVersion(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetAppVersion {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAppVersion)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8227,10 +8227,10 @@ impl Reaper {
         secOut_sz: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetArmedCommand {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetArmedCommand)
-            )),
+            ),
             Some(f) => f(secOut, secOut_sz),
         }
     }
@@ -8242,10 +8242,10 @@ impl Reaper {
         accessor: *mut root::reaper_functions::AudioAccessor,
     ) -> f64 {
         match self.pointers.GetAudioAccessorEndTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorEndTime)
-            )),
+            ),
             Some(f) => f(accessor),
         }
     }
@@ -8258,10 +8258,10 @@ impl Reaper {
         hashNeed128: *mut ::std::os::raw::c_char,
     ) {
         match self.pointers.GetAudioAccessorHash {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorHash)
-            )),
+            ),
             Some(f) => f(accessor, hashNeed128),
         }
     }
@@ -8278,10 +8278,10 @@ impl Reaper {
         samplebuffer: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetAudioAccessorSamples {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorSamples)
-            )),
+            ),
             Some(f) => f(
                 accessor,
                 samplerate,
@@ -8300,10 +8300,10 @@ impl Reaper {
         accessor: *mut root::reaper_functions::AudioAccessor,
     ) -> f64 {
         match self.pointers.GetAudioAccessorStartTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorStartTime)
-            )),
+            ),
             Some(f) => f(accessor),
         }
     }
@@ -8317,10 +8317,10 @@ impl Reaper {
         desc_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetAudioDeviceInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioDeviceInfo)
-            )),
+            ),
             Some(f) => f(attribute, desc, desc_sz),
         }
     }
@@ -8330,10 +8330,10 @@ impl Reaper {
         defval: ::std::os::raw::c_int,
     ) -> root::INT_PTR {
         match self.pointers.GetColorTheme {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetColorTheme)
-            )),
+            ),
             Some(f) => f(idx, defval),
         }
     }
@@ -8345,10 +8345,10 @@ impl Reaper {
         szOut: *mut ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetColorThemeStruct {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetColorThemeStruct)
-            )),
+            ),
             Some(f) => f(szOut),
         }
     }
@@ -8360,55 +8360,55 @@ impl Reaper {
         ident_str: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetConfigWantsDock {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetConfigWantsDock)
-            )),
+            ),
             Some(f) => f(ident_str),
         }
     }
     pub fn GetContextMenu(&self, idx: ::std::os::raw::c_int) -> root::HMENU {
         match self.pointers.GetContextMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetContextMenu)
-            )),
+            ),
             Some(f) => f(idx),
         }
     }
     pub fn GetCurrentProjectInLoadSave(&self) -> *mut root::ReaProject {
         match self.pointers.GetCurrentProjectInLoadSave {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCurrentProjectInLoadSave)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetCursorContext(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetCursorContext {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorContext)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetCursorContext2(&self, want_last_valid: bool) -> ::std::os::raw::c_int {
         match self.pointers.GetCursorContext2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorContext2)
-            )),
+            ),
             Some(f) => f(want_last_valid),
         }
     }
     pub fn GetCursorPosition(&self) -> f64 {
         match self.pointers.GetCursorPosition {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorPosition)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8417,10 +8417,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetCursorPositionEx(&self, proj: *mut root::ReaProject) -> f64 {
         match self.pointers.GetCursorPositionEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorPositionEx)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -8432,10 +8432,10 @@ impl Reaper {
         item: *mut root::MediaItem,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetDisplayedMediaItemColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDisplayedMediaItemColor)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -8448,10 +8448,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetDisplayedMediaItemColor2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDisplayedMediaItemColor2)
-            )),
+            ),
             Some(f) => f(item, take),
         }
     }
@@ -8464,10 +8464,10 @@ impl Reaper {
         parmname: *const ::std::os::raw::c_char,
     ) -> f64 {
         match self.pointers.GetEnvelopeInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeInfo_Value)
-            )),
+            ),
             Some(f) => f(tr, parmname),
         }
     }
@@ -8481,10 +8481,10 @@ impl Reaper {
         bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetEnvelopeName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeName)
-            )),
+            ),
             Some(f) => f(env, bufOut, bufOut_sz),
         }
     }
@@ -8502,10 +8502,10 @@ impl Reaper {
         selectedOutOptional: *mut bool,
     ) -> bool {
         match self.pointers.GetEnvelopePoint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePoint)
-            )),
+            ),
             Some(f) => f(
                 envelope,
                 ptidx,
@@ -8526,10 +8526,10 @@ impl Reaper {
         time: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetEnvelopePointByTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePointByTime)
-            )),
+            ),
             Some(f) => f(envelope, time),
         }
     }
@@ -8543,10 +8543,10 @@ impl Reaper {
         time: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetEnvelopePointByTimeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePointByTimeEx)
-            )),
+            ),
             Some(f) => f(envelope, autoitem_idx, time),
         }
     }
@@ -8565,10 +8565,10 @@ impl Reaper {
         selectedOutOptional: *mut bool,
     ) -> bool {
         match self.pointers.GetEnvelopePointEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePointEx)
-            )),
+            ),
             Some(f) => f(
                 envelope,
                 autoitem_idx,
@@ -8589,10 +8589,10 @@ impl Reaper {
         env: *mut root::TrackEnvelope,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetEnvelopeScalingMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeScalingMode)
-            )),
+            ),
             Some(f) => f(env),
         }
     }
@@ -8607,19 +8607,19 @@ impl Reaper {
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.GetEnvelopeStateChunk {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeStateChunk)
-            )),
+            ),
             Some(f) => f(env, strNeedBig, strNeedBig_sz, isundoOptional),
         }
     }
     pub fn GetExePath(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetExePath {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetExePath)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8632,10 +8632,10 @@ impl Reaper {
         key: *const ::std::os::raw::c_char,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetExtState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetExtState)
-            )),
+            ),
             Some(f) => f(section, key),
         }
     }
@@ -8649,10 +8649,10 @@ impl Reaper {
         fxnumberOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetFocusedFX {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFocusedFX)
-            )),
+            ),
             Some(f) => f(tracknumberOut, itemnumberOut, fxnumberOut),
         }
     }
@@ -8665,10 +8665,10 @@ impl Reaper {
         pathidx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetFreeDiskSpaceForRecordPath {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFreeDiskSpaceForRecordPath)
-            )),
+            ),
             Some(f) => f(proj, pathidx),
         }
     }
@@ -8683,28 +8683,28 @@ impl Reaper {
         create: bool,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetFXEnvelope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFXEnvelope)
-            )),
+            ),
             Some(f) => f(track, fxindex, parameterindex, create),
         }
     }
     pub fn GetGlobalAutomationOverride(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetGlobalAutomationOverride {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetGlobalAutomationOverride)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetHZoomLevel(&self) -> f64 {
         match self.pointers.GetHZoomLevel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetHZoomLevel)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8716,10 +8716,10 @@ impl Reaper {
         name: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetIconThemePointer {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetIconThemePointer)
-            )),
+            ),
             Some(f) => f(name),
         }
     }
@@ -8732,10 +8732,10 @@ impl Reaper {
         dpisc: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetIconThemePointerForDPI {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetIconThemePointerForDPI)
-            )),
+            ),
             Some(f) => f(name, dpisc),
         }
     }
@@ -8747,10 +8747,10 @@ impl Reaper {
         szOut: *mut ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetIconThemeStruct {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetIconThemeStruct)
-            )),
+            ),
             Some(f) => f(szOut),
         }
     }
@@ -8759,10 +8759,10 @@ impl Reaper {
         channelIndex: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetInputChannelName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetInputChannelName)
-            )),
+            ),
             Some(f) => f(channelIndex),
         }
     }
@@ -8775,10 +8775,10 @@ impl Reaper {
         outputLatencyOut: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.GetInputOutputLatency {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetInputOutputLatency)
-            )),
+            ),
             Some(f) => f(inputlatencyOut, outputLatencyOut),
         }
     }
@@ -8791,10 +8791,10 @@ impl Reaper {
         flagsOut: *mut ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.GetItemEditingTime2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemEditingTime2)
-            )),
+            ),
             Some(f) => f(which_itemOut, flagsOut),
         }
     }
@@ -8809,10 +8809,10 @@ impl Reaper {
         takeOutOptional: *mut *mut root::MediaItem_Take,
     ) -> *mut root::MediaItem {
         match self.pointers.GetItemFromPoint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemFromPoint)
-            )),
+            ),
             Some(f) => f(screen_x, screen_y, allow_locked, takeOutOptional),
         }
     }
@@ -8824,10 +8824,10 @@ impl Reaper {
         item: *mut root::MediaItem,
     ) -> *mut root::ReaProject {
         match self.pointers.GetItemProjectContext {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemProjectContext)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -8842,19 +8842,19 @@ impl Reaper {
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.GetItemStateChunk {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemStateChunk)
-            )),
+            ),
             Some(f) => f(item, strNeedBig, strNeedBig_sz, isundoOptional),
         }
     }
     pub fn GetLastColorThemeFile(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetLastColorThemeFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastColorThemeFile)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8869,10 +8869,10 @@ impl Reaper {
         regionidxOut: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.GetLastMarkerAndCurRegion {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastMarkerAndCurRegion)
-            )),
+            ),
             Some(f) => f(proj, time, markeridxOut, regionidxOut),
         }
     }
@@ -8886,37 +8886,37 @@ impl Reaper {
         paramnumberOut: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetLastTouchedFX {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastTouchedFX)
-            )),
+            ),
             Some(f) => f(tracknumberOut, fxnumberOut, paramnumberOut),
         }
     }
     pub fn GetLastTouchedTrack(&self) -> *mut root::MediaTrack {
         match self.pointers.GetLastTouchedTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastTouchedTrack)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetMainHwnd(&self) -> root::HWND {
         match self.pointers.GetMainHwnd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMainHwnd)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetMasterMuteSoloFlags(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMasterMuteSoloFlags {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMasterMuteSoloFlags)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8925,37 +8925,37 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMasterTrack(&self, proj: *mut root::ReaProject) -> *mut root::MediaTrack {
         match self.pointers.GetMasterTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMasterTrack)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
     pub fn GetMasterTrackVisibility(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMasterTrackVisibility {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMasterTrackVisibility)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetMaxMidiInputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMaxMidiInputs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMaxMidiInputs)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetMaxMidiOutputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetMaxMidiOutputs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMaxMidiOutputs)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -8968,10 +8968,10 @@ impl Reaper {
         itemidx: ::std::os::raw::c_int,
     ) -> *mut root::MediaItem {
         match self.pointers.GetMediaItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItem)
-            )),
+            ),
             Some(f) => f(proj, itemidx),
         }
     }
@@ -8980,10 +8980,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMediaItem_Track(&self, item: *mut root::MediaItem) -> *mut root::MediaTrack {
         match self.pointers.GetMediaItem_Track {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItem_Track)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -8996,10 +8996,10 @@ impl Reaper {
         parmname: *const ::std::os::raw::c_char,
     ) -> f64 {
         match self.pointers.GetMediaItemInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemInfo_Value)
-            )),
+            ),
             Some(f) => f(item, parmname),
         }
     }
@@ -9008,10 +9008,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMediaItemNumTakes(&self, item: *mut root::MediaItem) -> ::std::os::raw::c_int {
         match self.pointers.GetMediaItemNumTakes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemNumTakes)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -9024,10 +9024,10 @@ impl Reaper {
         tk: ::std::os::raw::c_int,
     ) -> *mut root::MediaItem_Take {
         match self.pointers.GetMediaItemTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake)
-            )),
+            ),
             Some(f) => f(item, tk),
         }
     }
@@ -9039,10 +9039,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> *mut root::MediaItem {
         match self.pointers.GetMediaItemTake_Item {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Item)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -9060,10 +9060,10 @@ impl Reaper {
         buf: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetMediaItemTake_Peaks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Peaks)
-            )),
+            ),
             Some(f) => f(
                 take,
                 peakrate,
@@ -9083,10 +9083,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> *mut root::PCM_source {
         match self.pointers.GetMediaItemTake_Source {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Source)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -9098,10 +9098,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> *mut root::MediaTrack {
         match self.pointers.GetMediaItemTake_Track {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Track)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -9114,10 +9114,10 @@ impl Reaper {
         guid: *const root::GUID,
     ) -> *mut root::MediaItem_Take {
         match self.pointers.GetMediaItemTakeByGUID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTakeByGUID)
-            )),
+            ),
             Some(f) => f(project, guid),
         }
     }
@@ -9130,10 +9130,10 @@ impl Reaper {
         parmname: *const ::std::os::raw::c_char,
     ) -> f64 {
         match self.pointers.GetMediaItemTakeInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTakeInfo_Value)
-            )),
+            ),
             Some(f) => f(take, parmname),
         }
     }
@@ -9142,10 +9142,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMediaItemTrack(&self, item: *mut root::MediaItem) -> *mut root::MediaTrack {
         match self.pointers.GetMediaItemTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTrack)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -9159,10 +9159,10 @@ impl Reaper {
         filenamebuf_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetMediaSourceFileName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceFileName)
-            )),
+            ),
             Some(f) => f(source, filenamebuf, filenamebuf_sz),
         }
     }
@@ -9175,10 +9175,10 @@ impl Reaper {
         lengthIsQNOut: *mut bool,
     ) -> f64 {
         match self.pointers.GetMediaSourceLength {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceLength)
-            )),
+            ),
             Some(f) => f(source, lengthIsQNOut),
         }
     }
@@ -9190,10 +9190,10 @@ impl Reaper {
         source: *mut root::PCM_source,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetMediaSourceNumChannels {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceNumChannels)
-            )),
+            ),
             Some(f) => f(source),
         }
     }
@@ -9202,10 +9202,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMediaSourceParent(&self, src: *mut root::PCM_source) -> *mut root::PCM_source {
         match self.pointers.GetMediaSourceParent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceParent)
-            )),
+            ),
             Some(f) => f(src),
         }
     }
@@ -9217,10 +9217,10 @@ impl Reaper {
         source: *mut root::PCM_source,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetMediaSourceSampleRate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceSampleRate)
-            )),
+            ),
             Some(f) => f(source),
         }
     }
@@ -9234,10 +9234,10 @@ impl Reaper {
         typebuf_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetMediaSourceType {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceType)
-            )),
+            ),
             Some(f) => f(source, typebuf, typebuf_sz),
         }
     }
@@ -9250,10 +9250,10 @@ impl Reaper {
         parmname: *const ::std::os::raw::c_char,
     ) -> f64 {
         match self.pointers.GetMediaTrackInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaTrackInfo_Value)
-            )),
+            ),
             Some(f) => f(tr, parmname),
         }
     }
@@ -9267,10 +9267,10 @@ impl Reaper {
         nameout_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetMIDIInputName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMIDIInputName)
-            )),
+            ),
             Some(f) => f(dev, nameout, nameout_sz),
         }
     }
@@ -9284,19 +9284,19 @@ impl Reaper {
         nameout_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetMIDIOutputName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMIDIOutputName)
-            )),
+            ),
             Some(f) => f(dev, nameout, nameout_sz),
         }
     }
     pub fn GetMixerScroll(&self) -> *mut root::MediaTrack {
         match self.pointers.GetMixerScroll {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMixerScroll)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -9311,10 +9311,10 @@ impl Reaper {
         action_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetMouseModifier {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMouseModifier)
-            )),
+            ),
             Some(f) => f(context, modifier_flag, action, action_sz),
         }
     }
@@ -9327,46 +9327,46 @@ impl Reaper {
         yOut: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.GetMousePosition {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMousePosition)
-            )),
+            ),
             Some(f) => f(xOut, yOut),
         }
     }
     pub fn GetNumAudioInputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumAudioInputs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumAudioInputs)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetNumAudioOutputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumAudioOutputs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumAudioOutputs)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetNumMIDIInputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumMIDIInputs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumMIDIInputs)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetNumMIDIOutputs(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumMIDIOutputs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumMIDIOutputs)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -9378,28 +9378,28 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetNumTakeMarkers {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumTakeMarkers)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
     pub fn GetNumTracks(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetNumTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumTracks)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetOS(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetOS {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetOS)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -9408,19 +9408,19 @@ impl Reaper {
         channelIndex: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetOutputChannelName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetOutputChannelName)
-            )),
+            ),
             Some(f) => f(channelIndex),
         }
     }
     pub fn GetOutputLatency(&self) -> f64 {
         match self.pointers.GetOutputLatency {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetOutputLatency)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -9429,10 +9429,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetParentTrack(&self, track: *mut root::MediaTrack) -> *mut root::MediaTrack {
         match self.pointers.GetParentTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetParentTrack)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -9446,10 +9446,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetPeakFileName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeakFileName)
-            )),
+            ),
             Some(f) => f(fn_, buf, buf_sz),
         }
     }
@@ -9464,10 +9464,10 @@ impl Reaper {
         forWrite: bool,
     ) {
         match self.pointers.GetPeakFileNameEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeakFileNameEx)
-            )),
+            ),
             Some(f) => f(fn_, buf, buf_sz, forWrite),
         }
     }
@@ -9483,10 +9483,10 @@ impl Reaper {
         peaksfileextension: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.GetPeakFileNameEx2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeakFileNameEx2)
-            )),
+            ),
             Some(f) => f(fn_, buf, buf_sz, forWrite, peaksfileextension),
         }
     }
@@ -9502,28 +9502,28 @@ impl Reaper {
         bmp: *mut root::reaper_functions::LICE_IBitmap,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetPeaksBitmap {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeaksBitmap)
-            )),
+            ),
             Some(f) => f(pks, maxamp, w, h, bmp),
         }
     }
     pub fn GetPlayPosition(&self) -> f64 {
         match self.pointers.GetPlayPosition {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPosition)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn GetPlayPosition2(&self) -> f64 {
         match self.pointers.GetPlayPosition2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPosition2)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -9532,10 +9532,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetPlayPosition2Ex(&self, proj: *mut root::ReaProject) -> f64 {
         match self.pointers.GetPlayPosition2Ex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPosition2Ex)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -9544,19 +9544,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetPlayPositionEx(&self, proj: *mut root::ReaProject) -> f64 {
         match self.pointers.GetPlayPositionEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPositionEx)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
     pub fn GetPlayState(&self) -> ::std::os::raw::c_int {
         match self.pointers.GetPlayState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayState)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -9565,10 +9565,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetPlayStateEx(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.GetPlayStateEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayStateEx)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -9582,10 +9582,10 @@ impl Reaper {
         bs: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.GetPreferredDiskReadMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPreferredDiskReadMode)
-            )),
+            ),
             Some(f) => f(mode, nb, bs),
         }
     }
@@ -9599,10 +9599,10 @@ impl Reaper {
         bs: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.GetPreferredDiskReadModePeak {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPreferredDiskReadModePeak)
-            )),
+            ),
             Some(f) => f(mode, nb, bs),
         }
     }
@@ -9616,10 +9616,10 @@ impl Reaper {
         bs: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.GetPreferredDiskWriteMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPreferredDiskWriteMode)
-            )),
+            ),
             Some(f) => f(mode, nb, bs),
         }
     }
@@ -9628,10 +9628,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetProjectLength(&self, proj: *mut root::ReaProject) -> f64 {
         match self.pointers.GetProjectLength {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectLength)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -9645,10 +9645,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetProjectName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectName)
-            )),
+            ),
             Some(f) => f(proj, buf, buf_sz),
         }
     }
@@ -9661,10 +9661,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetProjectPath {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectPath)
-            )),
+            ),
             Some(f) => f(buf, buf_sz),
         }
     }
@@ -9678,10 +9678,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetProjectPathEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectPathEx)
-            )),
+            ),
             Some(f) => f(proj, buf, buf_sz),
         }
     }
@@ -9693,10 +9693,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetProjectStateChangeCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectStateChangeCount)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -9705,10 +9705,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetProjectTimeOffset(&self, proj: *mut root::ReaProject, rndframe: bool) -> f64 {
         match self.pointers.GetProjectTimeOffset {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectTimeOffset)
-            )),
+            ),
             Some(f) => f(proj, rndframe),
         }
     }
@@ -9717,10 +9717,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetProjectTimeSignature(&self, bpmOut: *mut f64, bpiOut: *mut f64) {
         match self.pointers.GetProjectTimeSignature {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectTimeSignature)
-            )),
+            ),
             Some(f) => f(bpmOut, bpiOut),
         }
     }
@@ -9734,10 +9734,10 @@ impl Reaper {
         bpiOut: *mut f64,
     ) {
         match self.pointers.GetProjectTimeSignature2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectTimeSignature2)
-            )),
+            ),
             Some(f) => f(proj, bpmOut, bpiOut),
         }
     }
@@ -9753,19 +9753,19 @@ impl Reaper {
         valOutNeedBig_sz: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetProjExtState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjExtState)
-            )),
+            ),
             Some(f) => f(proj, extname, key, valOutNeedBig, valOutNeedBig_sz),
         }
     }
     pub fn GetResourcePath(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.GetResourcePath {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetResourcePath)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -9777,10 +9777,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetSelectedEnvelope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedEnvelope)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -9793,10 +9793,10 @@ impl Reaper {
         selitem: ::std::os::raw::c_int,
     ) -> *mut root::MediaItem {
         match self.pointers.GetSelectedMediaItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedMediaItem)
-            )),
+            ),
             Some(f) => f(proj, selitem),
         }
     }
@@ -9809,10 +9809,10 @@ impl Reaper {
         seltrackidx: ::std::os::raw::c_int,
     ) -> *mut root::MediaTrack {
         match self.pointers.GetSelectedTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedTrack)
-            )),
+            ),
             Some(f) => f(proj, seltrackidx),
         }
     }
@@ -9826,10 +9826,10 @@ impl Reaper {
         wantmaster: bool,
     ) -> *mut root::MediaTrack {
         match self.pointers.GetSelectedTrack2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedTrack2)
-            )),
+            ),
             Some(f) => f(proj, seltrackidx, wantmaster),
         }
     }
@@ -9841,10 +9841,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetSelectedTrackEnvelope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedTrackEnvelope)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -9861,10 +9861,10 @@ impl Reaper {
         end_timeOut: *mut f64,
     ) {
         match self.pointers.GetSet_ArrangeView2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSet_ArrangeView2)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 isSet,
@@ -9887,10 +9887,10 @@ impl Reaper {
         allowautoseek: bool,
     ) {
         match self.pointers.GetSet_LoopTimeRange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSet_LoopTimeRange)
-            )),
+            ),
             Some(f) => f(isSet, isLoop, startOut, endOut, allowautoseek),
         }
     }
@@ -9907,10 +9907,10 @@ impl Reaper {
         allowautoseek: bool,
     ) {
         match self.pointers.GetSet_LoopTimeRange2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSet_LoopTimeRange2)
-            )),
+            ),
             Some(f) => f(proj, isSet, isLoop, startOut, endOut, allowautoseek),
         }
     }
@@ -9926,10 +9926,10 @@ impl Reaper {
         is_set: bool,
     ) -> f64 {
         match self.pointers.GetSetAutomationItemInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetAutomationItemInfo)
-            )),
+            ),
             Some(f) => f(env, autoitem_idx, desc, value, is_set),
         }
     }
@@ -9945,10 +9945,10 @@ impl Reaper {
         is_set: bool,
     ) -> bool {
         match self.pointers.GetSetAutomationItemInfo_String {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetAutomationItemInfo_String)
-            )),
+            ),
             Some(f) => f(env, autoitem_idx, desc, valuestrNeedBig, is_set),
         }
     }
@@ -9963,10 +9963,10 @@ impl Reaper {
         setNewValue: bool,
     ) -> bool {
         match self.pointers.GetSetEnvelopeInfo_String {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeInfo_String)
-            )),
+            ),
             Some(f) => f(env, parmname, stringNeedBig, setNewValue),
         }
     }
@@ -9980,10 +9980,10 @@ impl Reaper {
         str_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetSetEnvelopeState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeState)
-            )),
+            ),
             Some(f) => f(env, str, str_sz),
         }
     }
@@ -9998,10 +9998,10 @@ impl Reaper {
         isundo: bool,
     ) -> bool {
         match self.pointers.GetSetEnvelopeState2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeState2)
-            )),
+            ),
             Some(f) => f(env, str, str_sz, isundo),
         }
     }
@@ -10015,10 +10015,10 @@ impl Reaper {
         str_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetSetItemState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetItemState)
-            )),
+            ),
             Some(f) => f(item, str, str_sz),
         }
     }
@@ -10033,10 +10033,10 @@ impl Reaper {
         isundo: bool,
     ) -> bool {
         match self.pointers.GetSetItemState2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetItemState2)
-            )),
+            ),
             Some(f) => f(item, str, str_sz, isundo),
         }
     }
@@ -10050,10 +10050,10 @@ impl Reaper {
         setNewValue: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetSetMediaItemInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemInfo)
-            )),
+            ),
             Some(f) => f(item, parmname, setNewValue),
         }
     }
@@ -10068,10 +10068,10 @@ impl Reaper {
         setNewValue: bool,
     ) -> bool {
         match self.pointers.GetSetMediaItemInfo_String {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemInfo_String)
-            )),
+            ),
             Some(f) => f(item, parmname, stringNeedBig, setNewValue),
         }
     }
@@ -10085,10 +10085,10 @@ impl Reaper {
         setNewValue: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetSetMediaItemTakeInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemTakeInfo)
-            )),
+            ),
             Some(f) => f(tk, parmname, setNewValue),
         }
     }
@@ -10103,10 +10103,10 @@ impl Reaper {
         setNewValue: bool,
     ) -> bool {
         match self.pointers.GetSetMediaItemTakeInfo_String {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemTakeInfo_String)
-            )),
+            ),
             Some(f) => f(tk, parmname, stringNeedBig, setNewValue),
         }
     }
@@ -10120,10 +10120,10 @@ impl Reaper {
         setNewValue: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetSetMediaTrackInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaTrackInfo)
-            )),
+            ),
             Some(f) => f(tr, parmname, setNewValue),
         }
     }
@@ -10138,10 +10138,10 @@ impl Reaper {
         setNewValue: bool,
     ) -> bool {
         match self.pointers.GetSetMediaTrackInfo_String {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaTrackInfo_String)
-            )),
+            ),
             Some(f) => f(tr, parmname, stringNeedBig, setNewValue),
         }
     }
@@ -10154,10 +10154,10 @@ impl Reaper {
         str: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_char {
         match self.pointers.GetSetObjectState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetObjectState)
-            )),
+            ),
             Some(f) => f(obj, str),
         }
     }
@@ -10171,10 +10171,10 @@ impl Reaper {
         isundo: bool,
     ) -> *mut ::std::os::raw::c_char {
         match self.pointers.GetSetObjectState2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetObjectState2)
-            )),
+            ),
             Some(f) => f(obj, str, isundo),
         }
     }
@@ -10189,10 +10189,10 @@ impl Reaper {
         author_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetSetProjectAuthor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectAuthor)
-            )),
+            ),
             Some(f) => f(proj, set, author, author_sz),
         }
     }
@@ -10208,10 +10208,10 @@ impl Reaper {
         swingamtInOutOptional: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetSetProjectGrid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectGrid)
-            )),
+            ),
             Some(f) => f(
                 project,
                 set,
@@ -10232,10 +10232,10 @@ impl Reaper {
         is_set: bool,
     ) -> f64 {
         match self.pointers.GetSetProjectInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectInfo)
-            )),
+            ),
             Some(f) => f(project, desc, value, is_set),
         }
     }
@@ -10250,10 +10250,10 @@ impl Reaper {
         is_set: bool,
     ) -> bool {
         match self.pointers.GetSetProjectInfo_String {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectInfo_String)
-            )),
+            ),
             Some(f) => f(project, desc, valuestrNeedBig, is_set),
         }
     }
@@ -10268,19 +10268,19 @@ impl Reaper {
         notesNeedBig_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetSetProjectNotes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectNotes)
-            )),
+            ),
             Some(f) => f(proj, set, notesNeedBig, notesNeedBig_sz),
         }
     }
     pub fn GetSetRepeat(&self, val: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GetSetRepeat {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetRepeat)
-            )),
+            ),
             Some(f) => f(val),
         }
     }
@@ -10293,10 +10293,10 @@ impl Reaper {
         val: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetSetRepeatEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetRepeatEx)
-            )),
+            ),
             Some(f) => f(proj, val),
         }
     }
@@ -10311,10 +10311,10 @@ impl Reaper {
         setvalue: ::std::os::raw::c_uint,
     ) -> ::std::os::raw::c_uint {
         match self.pointers.GetSetTrackGroupMembership {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackGroupMembership)
-            )),
+            ),
             Some(f) => f(tr, groupname, setmask, setvalue),
         }
     }
@@ -10329,10 +10329,10 @@ impl Reaper {
         setvalue: ::std::os::raw::c_uint,
     ) -> ::std::os::raw::c_uint {
         match self.pointers.GetSetTrackGroupMembershipHigh {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackGroupMembershipHigh)
-            )),
+            ),
             Some(f) => f(tr, groupname, setmask, setvalue),
         }
     }
@@ -10347,10 +10347,10 @@ impl Reaper {
         filename: *const ::std::os::raw::c_char,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetSetTrackMIDISupportFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackMIDISupportFile)
-            )),
+            ),
             Some(f) => f(proj, track, which, filename),
         }
     }
@@ -10366,10 +10366,10 @@ impl Reaper {
         setNewValue: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.GetSetTrackSendInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackSendInfo)
-            )),
+            ),
             Some(f) => f(tr, category, sendidx, parmname, setNewValue),
         }
     }
@@ -10386,10 +10386,10 @@ impl Reaper {
         setNewValue: bool,
     ) -> bool {
         match self.pointers.GetSetTrackSendInfo_String {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackSendInfo_String)
-            )),
+            ),
             Some(f) => f(tr, category, sendidx, parmname, stringNeedBig, setNewValue),
         }
     }
@@ -10403,10 +10403,10 @@ impl Reaper {
         str_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetSetTrackState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackState)
-            )),
+            ),
             Some(f) => f(track, str, str_sz),
         }
     }
@@ -10421,10 +10421,10 @@ impl Reaper {
         isundo: bool,
     ) -> bool {
         match self.pointers.GetSetTrackState2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackState2)
-            )),
+            ),
             Some(f) => f(track, str, str_sz, isundo),
         }
     }
@@ -10436,10 +10436,10 @@ impl Reaper {
         src: *mut root::PCM_source,
     ) -> *mut root::ReaProject {
         match self.pointers.GetSubProjectFromSource {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSubProjectFromSource)
-            )),
+            ),
             Some(f) => f(src),
         }
     }
@@ -10452,10 +10452,10 @@ impl Reaper {
         takeidx: ::std::os::raw::c_int,
     ) -> *mut root::MediaItem_Take {
         match self.pointers.GetTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTake)
-            )),
+            ),
             Some(f) => f(item, takeidx),
         }
     }
@@ -10468,10 +10468,10 @@ impl Reaper {
         envidx: ::std::os::raw::c_int,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetTakeEnvelope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeEnvelope)
-            )),
+            ),
             Some(f) => f(take, envidx),
         }
     }
@@ -10484,10 +10484,10 @@ impl Reaper {
         envname: *const ::std::os::raw::c_char,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetTakeEnvelopeByName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeEnvelopeByName)
-            )),
+            ),
             Some(f) => f(take, envname),
         }
     }
@@ -10503,10 +10503,10 @@ impl Reaper {
         colorOutOptional: *mut ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.GetTakeMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeMarker)
-            )),
+            ),
             Some(f) => f(take, idx, nameOut, nameOut_sz, colorOutOptional),
         }
     }
@@ -10518,10 +10518,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetTakeName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeName)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -10533,10 +10533,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetTakeNumStretchMarkers {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeNumStretchMarkers)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -10551,10 +10551,10 @@ impl Reaper {
         srcposOutOptional: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetTakeStretchMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeStretchMarker)
-            )),
+            ),
             Some(f) => f(take, idx, posOut, srcposOutOptional),
         }
     }
@@ -10567,10 +10567,10 @@ impl Reaper {
         idx: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.GetTakeStretchMarkerSlope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeStretchMarkerSlope)
-            )),
+            ),
             Some(f) => f(take, idx),
         }
     }
@@ -10586,10 +10586,10 @@ impl Reaper {
         parmidxOut: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTCPFXParm {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTCPFXParm)
-            )),
+            ),
             Some(f) => f(project, track, index, fxindexOut, parmidxOut),
         }
     }
@@ -10606,10 +10606,10 @@ impl Reaper {
         targetlenOut: *mut f64,
     ) -> bool {
         match self.pointers.GetTempoMatchPlayRate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTempoMatchPlayRate)
-            )),
+            ),
             Some(f) => f(source, srcscale, position, mult, rateOut, targetlenOut),
         }
     }
@@ -10629,10 +10629,10 @@ impl Reaper {
         lineartempoOut: *mut bool,
     ) -> bool {
         match self.pointers.GetTempoTimeSigMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTempoTimeSigMarker)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 ptidx,
@@ -10655,10 +10655,10 @@ impl Reaper {
         flagsOptional: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetThemeColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetThemeColor)
-            )),
+            ),
             Some(f) => f(ini_key, flagsOptional),
         }
     }
@@ -10667,10 +10667,10 @@ impl Reaper {
         command_id: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetToggleCommandState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandState)
-            )),
+            ),
             Some(f) => f(command_id),
         }
     }
@@ -10683,10 +10683,10 @@ impl Reaper {
         command_id: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetToggleCommandState2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandState2)
-            )),
+            ),
             Some(f) => f(section, command_id),
         }
     }
@@ -10696,10 +10696,10 @@ impl Reaper {
         command_id: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetToggleCommandStateEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandStateEx)
-            )),
+            ),
             Some(f) => f(section_id, command_id),
         }
     }
@@ -10712,19 +10712,19 @@ impl Reaper {
         command_id: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetToggleCommandStateThroughHooks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandStateThroughHooks)
-            )),
+            ),
             Some(f) => f(section, command_id),
         }
     }
     pub fn GetTooltipWindow(&self) -> root::HWND {
         match self.pointers.GetTooltipWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTooltipWindow)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -10737,10 +10737,10 @@ impl Reaper {
         trackidx: ::std::os::raw::c_int,
     ) -> *mut root::MediaTrack {
         match self.pointers.GetTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrack)
-            )),
+            ),
             Some(f) => f(proj, trackidx),
         }
     }
@@ -10752,10 +10752,10 @@ impl Reaper {
         tr: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetTrackAutomationMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackAutomationMode)
-            )),
+            ),
             Some(f) => f(tr),
         }
     }
@@ -10764,10 +10764,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTrackColor(&self, track: *mut root::MediaTrack) -> ::std::os::raw::c_int {
         match self.pointers.GetTrackColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackColor)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -10776,10 +10776,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTrackDepth(&self, track: *mut root::MediaTrack) -> ::std::os::raw::c_int {
         match self.pointers.GetTrackDepth {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackDepth)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -10792,10 +10792,10 @@ impl Reaper {
         envidx: ::std::os::raw::c_int,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetTrackEnvelope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackEnvelope)
-            )),
+            ),
             Some(f) => f(track, envidx),
         }
     }
@@ -10808,10 +10808,10 @@ impl Reaper {
         cfgchunkname: *const ::std::os::raw::c_char,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetTrackEnvelopeByChunkName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackEnvelopeByChunkName)
-            )),
+            ),
             Some(f) => f(tr, cfgchunkname),
         }
     }
@@ -10824,10 +10824,10 @@ impl Reaper {
         envname: *const ::std::os::raw::c_char,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetTrackEnvelopeByName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackEnvelopeByName)
-            )),
+            ),
             Some(f) => f(track, envname),
         }
     }
@@ -10841,10 +10841,10 @@ impl Reaper {
         infoOutOptional: *mut ::std::os::raw::c_int,
     ) -> *mut root::MediaTrack {
         match self.pointers.GetTrackFromPoint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackFromPoint)
-            )),
+            ),
             Some(f) => f(screen_x, screen_y, infoOutOptional),
         }
     }
@@ -10853,10 +10853,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTrackGUID(&self, tr: *mut root::MediaTrack) -> *mut root::GUID {
         match self.pointers.GetTrackGUID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackGUID)
-            )),
+            ),
             Some(f) => f(tr),
         }
     }
@@ -10869,10 +10869,10 @@ impl Reaper {
         flags: *mut ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetTrackInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackInfo)
-            )),
+            ),
             Some(f) => f(track, flags),
         }
     }
@@ -10885,10 +10885,10 @@ impl Reaper {
         itemidx: ::std::os::raw::c_int,
     ) -> *mut root::MediaItem {
         match self.pointers.GetTrackMediaItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMediaItem)
-            )),
+            ),
             Some(f) => f(tr, itemidx),
         }
     }
@@ -10903,10 +10903,10 @@ impl Reaper {
         bufWantNeedBig_sz: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackMIDILyrics {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDILyrics)
-            )),
+            ),
             Some(f) => f(track, flag, bufWantNeedBig, bufWantNeedBig_sz),
         }
     }
@@ -10917,10 +10917,10 @@ impl Reaper {
         chan: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetTrackMIDINoteName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDINoteName)
-            )),
+            ),
             Some(f) => f(track, pitch, chan),
         }
     }
@@ -10935,10 +10935,10 @@ impl Reaper {
         chan: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetTrackMIDINoteNameEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDINoteNameEx)
-            )),
+            ),
             Some(f) => f(proj, track, pitch, chan),
         }
     }
@@ -10953,10 +10953,10 @@ impl Reaper {
         note_hiOut: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.GetTrackMIDINoteRange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDINoteRange)
-            )),
+            ),
             Some(f) => f(proj, track, note_loOut, note_hiOut),
         }
     }
@@ -10970,10 +10970,10 @@ impl Reaper {
         bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackName)
-            )),
+            ),
             Some(f) => f(track, bufOut, bufOut_sz),
         }
     }
@@ -10982,10 +10982,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTrackNumMediaItems(&self, tr: *mut root::MediaTrack) -> ::std::os::raw::c_int {
         match self.pointers.GetTrackNumMediaItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackNumMediaItems)
-            )),
+            ),
             Some(f) => f(tr),
         }
     }
@@ -10998,10 +10998,10 @@ impl Reaper {
         category: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GetTrackNumSends {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackNumSends)
-            )),
+            ),
             Some(f) => f(tr, category),
         }
     }
@@ -11016,10 +11016,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackReceiveName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackReceiveName)
-            )),
+            ),
             Some(f) => f(track, recv_index, buf, buf_sz),
         }
     }
@@ -11033,10 +11033,10 @@ impl Reaper {
         muteOut: *mut bool,
     ) -> bool {
         match self.pointers.GetTrackReceiveUIMute {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackReceiveUIMute)
-            )),
+            ),
             Some(f) => f(track, recv_index, muteOut),
         }
     }
@@ -11051,10 +11051,10 @@ impl Reaper {
         panOut: *mut f64,
     ) -> bool {
         match self.pointers.GetTrackReceiveUIVolPan {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackReceiveUIVolPan)
-            )),
+            ),
             Some(f) => f(track, recv_index, volumeOut, panOut),
         }
     }
@@ -11069,10 +11069,10 @@ impl Reaper {
         parmname: *const ::std::os::raw::c_char,
     ) -> f64 {
         match self.pointers.GetTrackSendInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendInfo_Value)
-            )),
+            ),
             Some(f) => f(tr, category, sendidx, parmname),
         }
     }
@@ -11087,10 +11087,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackSendName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendName)
-            )),
+            ),
             Some(f) => f(track, send_index, buf, buf_sz),
         }
     }
@@ -11104,10 +11104,10 @@ impl Reaper {
         muteOut: *mut bool,
     ) -> bool {
         match self.pointers.GetTrackSendUIMute {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendUIMute)
-            )),
+            ),
             Some(f) => f(track, send_index, muteOut),
         }
     }
@@ -11122,10 +11122,10 @@ impl Reaper {
         panOut: *mut f64,
     ) -> bool {
         match self.pointers.GetTrackSendUIVolPan {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendUIVolPan)
-            )),
+            ),
             Some(f) => f(track, send_index, volumeOut, panOut),
         }
     }
@@ -11138,10 +11138,10 @@ impl Reaper {
         flagsOut: *mut ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.GetTrackState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackState)
-            )),
+            ),
             Some(f) => f(track, flagsOut),
         }
     }
@@ -11156,10 +11156,10 @@ impl Reaper {
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.GetTrackStateChunk {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackStateChunk)
-            )),
+            ),
             Some(f) => f(track, strNeedBig, strNeedBig_sz, isundoOptional),
         }
     }
@@ -11168,10 +11168,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTrackUIMute(&self, track: *mut root::MediaTrack, muteOut: *mut bool) -> bool {
         match self.pointers.GetTrackUIMute {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackUIMute)
-            )),
+            ),
             Some(f) => f(track, muteOut),
         }
     }
@@ -11186,10 +11186,10 @@ impl Reaper {
         panmodeOut: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackUIPan {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackUIPan)
-            )),
+            ),
             Some(f) => f(track, pan1Out, pan2Out, panmodeOut),
         }
     }
@@ -11203,10 +11203,10 @@ impl Reaper {
         panOut: *mut f64,
     ) -> bool {
         match self.pointers.GetTrackUIVolPan {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackUIVolPan)
-            )),
+            ),
             Some(f) => f(track, volumeOut, panOut),
         }
     }
@@ -11220,10 +11220,10 @@ impl Reaper {
         curtimeOutOptional: *mut ::std::os::raw::c_uint,
     ) {
         match self.pointers.GetUnderrunTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetUnderrunTime)
-            )),
+            ),
             Some(f) => f(
                 audio_xrunOutOptional,
                 media_xrunOutOptional,
@@ -11241,10 +11241,10 @@ impl Reaper {
         defext: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.GetUserFileNameForRead {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetUserFileNameForRead)
-            )),
+            ),
             Some(f) => f(filenameNeed4096, title, defext),
         }
     }
@@ -11260,10 +11260,10 @@ impl Reaper {
         retvals_csv_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetUserInputs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetUserInputs)
-            )),
+            ),
             Some(f) => f(title, num_inputs, captions_csv, retvals_csv, retvals_csv_sz),
         }
     }
@@ -11277,10 +11277,10 @@ impl Reaper {
         use_timeline_order: bool,
     ) {
         match self.pointers.GoToMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GoToMarker)
-            )),
+            ),
             Some(f) => f(proj, marker_index, use_timeline_order),
         }
     }
@@ -11294,10 +11294,10 @@ impl Reaper {
         use_timeline_order: bool,
     ) {
         match self.pointers.GoToRegion {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GoToRegion)
-            )),
+            ),
             Some(f) => f(proj, region_index, use_timeline_order),
         }
     }
@@ -11310,19 +11310,19 @@ impl Reaper {
         colorOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.GR_SelectColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GR_SelectColor)
-            )),
+            ),
             Some(f) => f(hwnd, colorOut),
         }
     }
     pub fn GSC_mainwnd(&self, t: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.GSC_mainwnd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GSC_mainwnd)
-            )),
+            ),
             Some(f) => f(t),
         }
     }
@@ -11335,10 +11335,10 @@ impl Reaper {
         destNeed64: *mut ::std::os::raw::c_char,
     ) {
         match self.pointers.guidToString {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(guidToString)
-            )),
+            ),
             Some(f) => f(g, destNeed64),
         }
     }
@@ -11351,10 +11351,10 @@ impl Reaper {
         key: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.HasExtState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HasExtState)
-            )),
+            ),
             Some(f) => f(section, key),
         }
     }
@@ -11363,10 +11363,10 @@ impl Reaper {
         track: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.HasTrackMIDIPrograms {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HasTrackMIDIPrograms)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -11379,10 +11379,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.HasTrackMIDIProgramsEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HasTrackMIDIProgramsEx)
-            )),
+            ),
             Some(f) => f(proj, track),
         }
     }
@@ -11395,10 +11395,10 @@ impl Reaper {
         is_temporary_help: bool,
     ) {
         match self.pointers.Help_Set {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Help_Set)
-            )),
+            ),
             Some(f) => f(helpstring, is_temporary_help),
         }
     }
@@ -11411,10 +11411,10 @@ impl Reaper {
         block: *mut root::PCM_source_peaktransfer_t,
     ) {
         match self.pointers.HiresPeaksFromSource {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HiresPeaksFromSource)
-            )),
+            ),
             Some(f) => f(src, block),
         }
     }
@@ -11428,10 +11428,10 @@ impl Reaper {
         out_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.image_resolve_fn {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(image_resolve_fn)
-            )),
+            ),
             Some(f) => f(in_, out, out_sz),
         }
     }
@@ -11446,10 +11446,10 @@ impl Reaper {
         length: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.InsertAutomationItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertAutomationItem)
-            )),
+            ),
             Some(f) => f(env, pool_id, position, length),
         }
     }
@@ -11467,10 +11467,10 @@ impl Reaper {
         noSortInOptional: *mut bool,
     ) -> bool {
         match self.pointers.InsertEnvelopePoint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertEnvelopePoint)
-            )),
+            ),
             Some(f) => f(
                 envelope,
                 time,
@@ -11497,10 +11497,10 @@ impl Reaper {
         noSortInOptional: *mut bool,
     ) -> bool {
         match self.pointers.InsertEnvelopePointEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertEnvelopePointEx)
-            )),
+            ),
             Some(f) => f(
                 envelope,
                 autoitem_idx,
@@ -11522,10 +11522,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.InsertMedia {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertMedia)
-            )),
+            ),
             Some(f) => f(file, mode),
         }
     }
@@ -11541,28 +11541,28 @@ impl Reaper {
         pitchshift: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.InsertMediaSection {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertMediaSection)
-            )),
+            ),
             Some(f) => f(file, mode, startpct, endpct, pitchshift),
         }
     }
     pub fn InsertTrackAtIndex(&self, idx: ::std::os::raw::c_int, wantDefaults: bool) {
         match self.pointers.InsertTrackAtIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertTrackAtIndex)
-            )),
+            ),
             Some(f) => f(idx, wantDefaults),
         }
     }
     pub fn IsInRealTimeAudio(&self) -> ::std::os::raw::c_int {
         match self.pointers.IsInRealTimeAudio {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsInRealTimeAudio)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -11575,10 +11575,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> bool {
         match self.pointers.IsItemTakeActiveForPlayback {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsItemTakeActiveForPlayback)
-            )),
+            ),
             Some(f) => f(item, take),
         }
     }
@@ -11591,10 +11591,10 @@ impl Reaper {
         wantOthers: bool,
     ) -> bool {
         match self.pointers.IsMediaExtension {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsMediaExtension)
-            )),
+            ),
             Some(f) => f(ext, wantOthers),
         }
     }
@@ -11603,10 +11603,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn IsMediaItemSelected(&self, item: *mut root::MediaItem) -> bool {
         match self.pointers.IsMediaItemSelected {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsMediaItemSelected)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
@@ -11615,19 +11615,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn IsProjectDirty(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.IsProjectDirty {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsProjectDirty)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
     pub fn IsREAPER(&self) -> bool {
         match self.pointers.IsREAPER {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsREAPER)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -11636,10 +11636,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn IsTrackSelected(&self, track: *mut root::MediaTrack) -> bool {
         match self.pointers.IsTrackSelected {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsTrackSelected)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -11648,10 +11648,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn IsTrackVisible(&self, track: *mut root::MediaTrack, mixer: bool) -> bool {
         match self.pointers.IsTrackVisible {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsTrackVisible)
-            )),
+            ),
             Some(f) => f(track, mixer),
         }
     }
@@ -11663,10 +11663,10 @@ impl Reaper {
         guid: *const root::GUID,
     ) -> *mut root::reaper_functions::joystick_device {
         match self.pointers.joystick_create {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_create)
-            )),
+            ),
             Some(f) => f(guid),
         }
     }
@@ -11675,10 +11675,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn joystick_destroy(&self, device: *mut root::reaper_functions::joystick_device) {
         match self.pointers.joystick_destroy {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_destroy)
-            )),
+            ),
             Some(f) => f(device),
         }
     }
@@ -11691,10 +11691,10 @@ impl Reaper {
         namestrOutOptional: *mut *const ::std::os::raw::c_char,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.joystick_enum {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_enum)
-            )),
+            ),
             Some(f) => f(index, namestrOutOptional),
         }
     }
@@ -11707,10 +11707,10 @@ impl Reaper {
         axis: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.joystick_getaxis {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getaxis)
-            )),
+            ),
             Some(f) => f(dev, axis),
         }
     }
@@ -11722,10 +11722,10 @@ impl Reaper {
         dev: *mut root::reaper_functions::joystick_device,
     ) -> ::std::os::raw::c_uint {
         match self.pointers.joystick_getbuttonmask {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getbuttonmask)
-            )),
+            ),
             Some(f) => f(dev),
         }
     }
@@ -11739,10 +11739,10 @@ impl Reaper {
         povsOutOptional: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.joystick_getinfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getinfo)
-            )),
+            ),
             Some(f) => f(dev, axesOutOptional, povsOutOptional),
         }
     }
@@ -11755,10 +11755,10 @@ impl Reaper {
         pov: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.joystick_getpov {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getpov)
-            )),
+            ),
             Some(f) => f(dev, pov),
         }
     }
@@ -11770,10 +11770,10 @@ impl Reaper {
         dev: *mut root::reaper_functions::joystick_device,
     ) -> bool {
         match self.pointers.joystick_update {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_update)
-            )),
+            ),
             Some(f) => f(dev),
         }
     }
@@ -11787,10 +11787,10 @@ impl Reaper {
         nameOut: *mut *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int {
         match self.pointers.kbd_enumerateActions {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_enumerateActions)
-            )),
+            ),
             Some(f) => f(section, idx, nameOut),
         }
     }
@@ -11799,10 +11799,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn kbd_formatKeyName(&self, ac: *mut root::ACCEL, s: *mut ::std::os::raw::c_char) {
         match self.pointers.kbd_formatKeyName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_formatKeyName)
-            )),
+            ),
             Some(f) => f(ac, s),
         }
     }
@@ -11816,10 +11816,10 @@ impl Reaper {
         section: *mut root::KbdSectionInfo,
     ) {
         match self.pointers.kbd_getCommandName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_getCommandName)
-            )),
+            ),
             Some(f) => f(cmd, s, section),
         }
     }
@@ -11832,10 +11832,10 @@ impl Reaper {
         section: *mut root::KbdSectionInfo,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.kbd_getTextFromCmd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_getTextFromCmd)
-            )),
+            ),
             Some(f) => f(cmd, section),
         }
     }
@@ -11852,10 +11852,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> ::std::os::raw::c_int {
         match self.pointers.KBD_OnMainActionEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(KBD_OnMainActionEx)
-            )),
+            ),
             Some(f) => f(cmd, val, valhw, relmode, hwnd, proj),
         }
     }
@@ -11868,10 +11868,10 @@ impl Reaper {
         dev_index: ::std::os::raw::c_int,
     ) {
         match self.pointers.kbd_OnMidiEvent {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_OnMidiEvent)
-            )),
+            ),
             Some(f) => f(evt, dev_index),
         }
     }
@@ -11884,10 +11884,10 @@ impl Reaper {
         dev_index: ::std::os::raw::c_int,
     ) {
         match self.pointers.kbd_OnMidiList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_OnMidiList)
-            )),
+            ),
             Some(f) => f(list, dev_index),
         }
     }
@@ -11900,10 +11900,10 @@ impl Reaper {
         section: *mut root::KbdSectionInfo,
     ) {
         match self.pointers.kbd_ProcessActionsMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_ProcessActionsMenu)
-            )),
+            ),
             Some(f) => f(menu, section),
         }
     }
@@ -11917,10 +11917,10 @@ impl Reaper {
         hwndCtx: root::HWND,
     ) -> bool {
         match self.pointers.kbd_processMidiEventActionEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_processMidiEventActionEx)
-            )),
+            ),
             Some(f) => f(evt, section, hwndCtx),
         }
     }
@@ -11929,10 +11929,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn kbd_reprocessMenu(&self, menu: root::HMENU, section: *mut root::KbdSectionInfo) {
         match self.pointers.kbd_reprocessMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_reprocessMenu)
-            )),
+            ),
             Some(f) => f(menu, section),
         }
     }
@@ -11949,10 +11949,10 @@ impl Reaper {
         hwnd: root::HWND,
     ) -> bool {
         match self.pointers.kbd_RunCommandThroughHooks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_RunCommandThroughHooks)
-            )),
+            ),
             Some(f) => f(section, actionCommandID, val, valhw, relmode, hwnd),
         }
     }
@@ -11966,10 +11966,10 @@ impl Reaper {
         section: *mut root::KbdSectionInfo,
     ) -> ::std::os::raw::c_int {
         match self.pointers.kbd_translateAccelerator {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_translateAccelerator)
-            )),
+            ),
             Some(f) => f(hwnd, msg, section),
         }
     }
@@ -11982,10 +11982,10 @@ impl Reaper {
         midimsg: *mut ::std::os::raw::c_uchar,
     ) -> bool {
         match self.pointers.kbd_translateMouse {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_translateMouse)
-            )),
+            ),
             Some(f) => f(winmsg, midimsg),
         }
     }
@@ -11994,10 +11994,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn LICE__Destroy(&self, bm: *mut root::reaper_functions::LICE_IBitmap) {
         match self.pointers.LICE__Destroy {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__Destroy)
-            )),
+            ),
             Some(f) => f(bm),
         }
     }
@@ -12006,10 +12006,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn LICE__DestroyFont(&self, font: *mut root::reaper_functions::LICE_IFont) {
         match self.pointers.LICE__DestroyFont {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__DestroyFont)
-            )),
+            ),
             Some(f) => f(font),
         }
     }
@@ -12026,10 +12026,10 @@ impl Reaper {
         dtFlags: root::UINT,
     ) -> ::std::os::raw::c_int {
         match self.pointers.LICE__DrawText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__DrawText)
-            )),
+            ),
             Some(f) => f(font, bm, str, strcnt, rect, dtFlags),
         }
     }
@@ -12041,10 +12041,10 @@ impl Reaper {
         bm: *mut root::reaper_functions::LICE_IBitmap,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.LICE__GetBits {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetBits)
-            )),
+            ),
             Some(f) => f(bm),
         }
     }
@@ -12053,10 +12053,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn LICE__GetDC(&self, bm: *mut root::reaper_functions::LICE_IBitmap) -> root::HDC {
         match self.pointers.LICE__GetDC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetDC)
-            )),
+            ),
             Some(f) => f(bm),
         }
     }
@@ -12068,10 +12068,10 @@ impl Reaper {
         bm: *mut root::reaper_functions::LICE_IBitmap,
     ) -> ::std::os::raw::c_int {
         match self.pointers.LICE__GetHeight {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetHeight)
-            )),
+            ),
             Some(f) => f(bm),
         }
     }
@@ -12083,10 +12083,10 @@ impl Reaper {
         bm: *mut root::reaper_functions::LICE_IBitmap,
     ) -> ::std::os::raw::c_int {
         match self.pointers.LICE__GetRowSpan {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetRowSpan)
-            )),
+            ),
             Some(f) => f(bm),
         }
     }
@@ -12098,10 +12098,10 @@ impl Reaper {
         bm: *mut root::reaper_functions::LICE_IBitmap,
     ) -> ::std::os::raw::c_int {
         match self.pointers.LICE__GetWidth {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetWidth)
-            )),
+            ),
             Some(f) => f(bm),
         }
     }
@@ -12110,10 +12110,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn LICE__IsFlipped(&self, bm: *mut root::reaper_functions::LICE_IBitmap) -> bool {
         match self.pointers.LICE__IsFlipped {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__IsFlipped)
-            )),
+            ),
             Some(f) => f(bm),
         }
     }
@@ -12127,10 +12127,10 @@ impl Reaper {
         h: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.LICE__resize {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__resize)
-            )),
+            ),
             Some(f) => f(bm, w, h),
         }
     }
@@ -12143,10 +12143,10 @@ impl Reaper {
         color: root::reaper_functions::LICE_pixel,
     ) -> root::reaper_functions::LICE_pixel {
         match self.pointers.LICE__SetBkColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetBkColor)
-            )),
+            ),
             Some(f) => f(font, color),
         }
     }
@@ -12160,10 +12160,10 @@ impl Reaper {
         flags: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE__SetFromHFont {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetFromHFont)
-            )),
+            ),
             Some(f) => f(font, hfont, flags),
         }
     }
@@ -12176,10 +12176,10 @@ impl Reaper {
         color: root::reaper_functions::LICE_pixel,
     ) -> root::reaper_functions::LICE_pixel {
         match self.pointers.LICE__SetTextColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetTextColor)
-            )),
+            ),
             Some(f) => f(font, color),
         }
     }
@@ -12193,10 +12193,10 @@ impl Reaper {
         alpha: f32,
     ) {
         match self.pointers.LICE__SetTextCombineMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetTextCombineMode)
-            )),
+            ),
             Some(f) => f(ifont, mode, alpha),
         }
     }
@@ -12217,10 +12217,10 @@ impl Reaper {
         aa: bool,
     ) {
         match self.pointers.LICE_Arc {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Arc)
-            )),
+            ),
             Some(f) => f(dest, cx, cy, r, minAngle, maxAngle, color, alpha, mode, aa),
         }
     }
@@ -12241,10 +12241,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_Blit {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Blit)
-            )),
+            ),
             Some(f) => f(dest, src, dstx, dsty, srcx, srcy, srcw, srch, alpha, mode),
         }
     }
@@ -12263,10 +12263,10 @@ impl Reaper {
         srch: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_Blur {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Blur)
-            )),
+            ),
             Some(f) => f(dest, src, dstx, dsty, srcx, srcy, srcw, srch),
         }
     }
@@ -12286,10 +12286,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_BorderedRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_BorderedRect)
-            )),
+            ),
             Some(f) => f(dest, x, y, w, h, bgcolor, fgcolor, alpha, mode),
         }
     }
@@ -12308,10 +12308,10 @@ impl Reaper {
         aa: bool,
     ) {
         match self.pointers.LICE_Circle {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Circle)
-            )),
+            ),
             Some(f) => f(dest, cx, cy, r, color, alpha, mode, aa),
         }
     }
@@ -12324,10 +12324,10 @@ impl Reaper {
         color: root::reaper_functions::LICE_pixel,
     ) {
         match self.pointers.LICE_Clear {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Clear)
-            )),
+            ),
             Some(f) => f(dest, color),
         }
     }
@@ -12345,10 +12345,10 @@ impl Reaper {
         orbits: root::reaper_functions::LICE_pixel,
     ) {
         match self.pointers.LICE_ClearRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_ClearRect)
-            )),
+            ),
             Some(f) => f(dest, x, y, w, h, mask, orbits),
         }
     }
@@ -12367,10 +12367,10 @@ impl Reaper {
         yHi: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.LICE_ClipLine {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_ClipLine)
-            )),
+            ),
             Some(f) => f(pX1Out, pY1Out, pX2Out, pY2Out, xLo, yLo, xHi, yHi),
         }
     }
@@ -12383,10 +12383,10 @@ impl Reaper {
         src: *mut root::reaper_functions::LICE_IBitmap,
     ) {
         match self.pointers.LICE_Copy {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Copy)
-            )),
+            ),
             Some(f) => f(dest, src),
         }
     }
@@ -12397,19 +12397,19 @@ impl Reaper {
         h: ::std::os::raw::c_int,
     ) -> *mut root::reaper_functions::LICE_IBitmap {
         match self.pointers.LICE_CreateBitmap {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_CreateBitmap)
-            )),
+            ),
             Some(f) => f(mode, w, h),
         }
     }
     pub fn LICE_CreateFont(&self) -> *mut root::reaper_functions::LICE_IFont {
         match self.pointers.LICE_CreateFont {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_CreateFont)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -12434,10 +12434,10 @@ impl Reaper {
         tol: f64,
     ) {
         match self.pointers.LICE_DrawCBezier {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawCBezier)
-            )),
+            ),
             Some(f) => f(
                 dest, xstart, ystart, xctl1, yctl1, xctl2, yctl2, xend, yend, color, alpha, mode,
                 aa, tol,
@@ -12458,10 +12458,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_DrawChar {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawChar)
-            )),
+            ),
             Some(f) => f(bm, x, y, c, color, alpha, mode),
         }
     }
@@ -12481,10 +12481,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_DrawGlyph {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawGlyph)
-            )),
+            ),
             Some(f) => f(dest, x, y, color, alphas, glyph_w, glyph_h, alpha, mode),
         }
     }
@@ -12503,10 +12503,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_DrawRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawRect)
-            )),
+            ),
             Some(f) => f(dest, x, y, w, h, color, alpha, mode),
         }
     }
@@ -12524,10 +12524,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_DrawText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawText)
-            )),
+            ),
             Some(f) => f(bm, x, y, string, color, alpha, mode),
         }
     }
@@ -12553,10 +12553,10 @@ impl Reaper {
         tol: f64,
     ) {
         match self.pointers.LICE_FillCBezier {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillCBezier)
-            )),
+            ),
             Some(f) => f(
                 dest, xstart, ystart, xctl1, yctl1, xctl2, yctl2, xend, yend, yfill, color, alpha,
                 mode, aa, tol,
@@ -12578,10 +12578,10 @@ impl Reaper {
         aa: bool,
     ) {
         match self.pointers.LICE_FillCircle {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillCircle)
-            )),
+            ),
             Some(f) => f(dest, cx, cy, r, color, alpha, mode, aa),
         }
     }
@@ -12599,10 +12599,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_FillConvexPolygon {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillConvexPolygon)
-            )),
+            ),
             Some(f) => f(dest, x, y, npoints, color, alpha, mode),
         }
     }
@@ -12621,10 +12621,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_FillRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillRect)
-            )),
+            ),
             Some(f) => f(dest, x, y, w, h, color, alpha, mode),
         }
     }
@@ -12645,10 +12645,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_FillTrapezoid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillTrapezoid)
-            )),
+            ),
             Some(f) => f(dest, x1a, x1b, y1, x2a, x2b, y2, color, alpha, mode),
         }
     }
@@ -12669,10 +12669,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_FillTriangle {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillTriangle)
-            )),
+            ),
             Some(f) => f(dest, x1, y1, x2, y2, x3, y3, color, alpha, mode),
         }
     }
@@ -12686,10 +12686,10 @@ impl Reaper {
         y: ::std::os::raw::c_int,
     ) -> root::reaper_functions::LICE_pixel {
         match self.pointers.LICE_GetPixel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_GetPixel)
-            )),
+            ),
             Some(f) => f(bm, x, y),
         }
     }
@@ -12718,10 +12718,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_GradRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_GradRect)
-            )),
+            ),
             Some(f) => f(
                 dest, dstx, dsty, dstw, dsth, ir, ig, ib, ia, drdx, dgdx, dbdx, dadx, drdy, dgdy,
                 dbdy, dady, mode,
@@ -12744,10 +12744,10 @@ impl Reaper {
         aa: bool,
     ) {
         match self.pointers.LICE_Line {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Line)
-            )),
+            ),
             Some(f) => f(dest, x1, y1, x2, y2, color, alpha, mode, aa),
         }
     }
@@ -12767,10 +12767,10 @@ impl Reaper {
         aa: bool,
     ) {
         match self.pointers.LICE_LineInt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_LineInt)
-            )),
+            ),
             Some(f) => f(dest, x1, y1, x2, y2, color, alpha, mode, aa),
         }
     }
@@ -12783,10 +12783,10 @@ impl Reaper {
         bmp: *mut root::reaper_functions::LICE_IBitmap,
     ) -> *mut root::reaper_functions::LICE_IBitmap {
         match self.pointers.LICE_LoadPNG {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_LoadPNG)
-            )),
+            ),
             Some(f) => f(filename, bmp),
         }
     }
@@ -12800,10 +12800,10 @@ impl Reaper {
         bmp: *mut root::reaper_functions::LICE_IBitmap,
     ) -> *mut root::reaper_functions::LICE_IBitmap {
         match self.pointers.LICE_LoadPNGFromResource {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_LoadPNGFromResource)
-            )),
+            ),
             Some(f) => f(hInst, resid, bmp),
         }
     }
@@ -12817,10 +12817,10 @@ impl Reaper {
         h: *mut ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_MeasureText {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_MeasureText)
-            )),
+            ),
             Some(f) => f(string, w, h),
         }
     }
@@ -12844,10 +12844,10 @@ impl Reaper {
         aadd: f32,
     ) {
         match self.pointers.LICE_MultiplyAddRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_MultiplyAddRect)
-            )),
+            ),
             Some(f) => f(dest, x, y, w, h, rsc, gsc, bsc, asc, radd, gadd, badd, aadd),
         }
     }
@@ -12864,10 +12864,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_PutPixel {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_PutPixel)
-            )),
+            ),
             Some(f) => f(bm, x, y, color, alpha, mode),
         }
     }
@@ -12894,10 +12894,10 @@ impl Reaper {
         rotycent: f32,
     ) {
         match self.pointers.LICE_RotatedBlit {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_RotatedBlit)
-            )),
+            ),
             Some(f) => f(
                 dest,
                 src,
@@ -12935,10 +12935,10 @@ impl Reaper {
         aa: bool,
     ) {
         match self.pointers.LICE_RoundRect {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_RoundRect)
-            )),
+            ),
             Some(f) => f(drawbm, xpos, ypos, w, h, cornerradius, col, alpha, mode, aa),
         }
     }
@@ -12961,10 +12961,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.LICE_ScaledBlit {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_ScaledBlit)
-            )),
+            ),
             Some(f) => f(
                 dest, src, dstx, dsty, dstw, dsth, srcx, srcy, srcw, srch, alpha, mode,
             ),
@@ -12983,10 +12983,10 @@ impl Reaper {
         keepmask: root::reaper_functions::LICE_pixel,
     ) {
         match self.pointers.LICE_SimpleFill {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_SimpleFill)
-            )),
+            ),
             Some(f) => f(dest, x, y, newcolor, comparemask, keepmask),
         }
     }
@@ -13000,10 +13000,10 @@ impl Reaper {
         flagsOptional: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.LocalizeString {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LocalizeString)
-            )),
+            ),
             Some(f) => f(src_string, section, flagsOptional),
         }
     }
@@ -13016,19 +13016,19 @@ impl Reaper {
         direction: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.Loop_OnArrow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Loop_OnArrow)
-            )),
+            ),
             Some(f) => f(project, direction),
         }
     }
     pub fn Main_OnCommand(&self, command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int) {
         match self.pointers.Main_OnCommand {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_OnCommand)
-            )),
+            ),
             Some(f) => f(command, flag),
         }
     }
@@ -13042,10 +13042,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) {
         match self.pointers.Main_OnCommandEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_OnCommandEx)
-            )),
+            ),
             Some(f) => f(command, flag, proj),
         }
     }
@@ -13054,10 +13054,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Main_openProject(&self, name: *const ::std::os::raw::c_char) {
         match self.pointers.Main_openProject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_openProject)
-            )),
+            ),
             Some(f) => f(name),
         }
     }
@@ -13070,19 +13070,19 @@ impl Reaper {
         forceSaveAsInOptional: bool,
     ) {
         match self.pointers.Main_SaveProject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_SaveProject)
-            )),
+            ),
             Some(f) => f(proj, forceSaveAsInOptional),
         }
     }
     pub fn Main_UpdateLoopInfo(&self, ignoremask: ::std::os::raw::c_int) {
         match self.pointers.Main_UpdateLoopInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_UpdateLoopInfo)
-            )),
+            ),
             Some(f) => f(ignoremask),
         }
     }
@@ -13091,10 +13091,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MarkProjectDirty(&self, proj: *mut root::ReaProject) {
         match self.pointers.MarkProjectDirty {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MarkProjectDirty)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -13107,10 +13107,10 @@ impl Reaper {
         item: *mut root::MediaItem,
     ) {
         match self.pointers.MarkTrackItemsDirty {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MarkTrackItemsDirty)
-            )),
+            ),
             Some(f) => f(track, item),
         }
     }
@@ -13119,10 +13119,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Master_GetPlayRate(&self, project: *mut root::ReaProject) -> f64 {
         match self.pointers.Master_GetPlayRate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_GetPlayRate)
-            )),
+            ),
             Some(f) => f(project),
         }
     }
@@ -13131,37 +13131,37 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Master_GetPlayRateAtTime(&self, time_s: f64, proj: *mut root::ReaProject) -> f64 {
         match self.pointers.Master_GetPlayRateAtTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_GetPlayRateAtTime)
-            )),
+            ),
             Some(f) => f(time_s, proj),
         }
     }
     pub fn Master_GetTempo(&self) -> f64 {
         match self.pointers.Master_GetTempo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_GetTempo)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn Master_NormalizePlayRate(&self, playrate: f64, isnormalized: bool) -> f64 {
         match self.pointers.Master_NormalizePlayRate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_NormalizePlayRate)
-            )),
+            ),
             Some(f) => f(playrate, isnormalized),
         }
     }
     pub fn Master_NormalizeTempo(&self, bpm: f64, isnormalized: bool) -> f64 {
         match self.pointers.Master_NormalizeTempo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_NormalizeTempo)
-            )),
+            ),
             Some(f) => f(bpm, isnormalized),
         }
     }
@@ -13175,10 +13175,10 @@ impl Reaper {
         type_: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MB {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MB)
-            )),
+            ),
             Some(f) => f(msg, title, type_),
         }
     }
@@ -13191,10 +13191,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MediaItemDescendsFromTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MediaItemDescendsFromTrack)
-            )),
+            ),
             Some(f) => f(item, track),
         }
     }
@@ -13209,10 +13209,10 @@ impl Reaper {
         textsyxevtcntOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MIDI_CountEvts {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_CountEvts)
-            )),
+            ),
             Some(f) => f(take, notecntOut, ccevtcntOut, textsyxevtcntOut),
         }
     }
@@ -13225,10 +13225,10 @@ impl Reaper {
         ccidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_DeleteCC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteCC)
-            )),
+            ),
             Some(f) => f(take, ccidx),
         }
     }
@@ -13241,10 +13241,10 @@ impl Reaper {
         evtidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_DeleteEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteEvt)
-            )),
+            ),
             Some(f) => f(take, evtidx),
         }
     }
@@ -13257,10 +13257,10 @@ impl Reaper {
         noteidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_DeleteNote {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteNote)
-            )),
+            ),
             Some(f) => f(take, noteidx),
         }
     }
@@ -13273,10 +13273,10 @@ impl Reaper {
         textsyxevtidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_DeleteTextSysexEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteTextSysexEvt)
-            )),
+            ),
             Some(f) => f(take, textsyxevtidx),
         }
     }
@@ -13285,10 +13285,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDI_DisableSort(&self, take: *mut root::MediaItem_Take) {
         match self.pointers.MIDI_DisableSort {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DisableSort)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -13301,10 +13301,10 @@ impl Reaper {
         ccidx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MIDI_EnumSelCC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelCC)
-            )),
+            ),
             Some(f) => f(take, ccidx),
         }
     }
@@ -13317,10 +13317,10 @@ impl Reaper {
         evtidx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MIDI_EnumSelEvts {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelEvts)
-            )),
+            ),
             Some(f) => f(take, evtidx),
         }
     }
@@ -13333,10 +13333,10 @@ impl Reaper {
         noteidx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MIDI_EnumSelNotes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelNotes)
-            )),
+            ),
             Some(f) => f(take, noteidx),
         }
     }
@@ -13349,19 +13349,19 @@ impl Reaper {
         textsyxidx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MIDI_EnumSelTextSysexEvts {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelTextSysexEvts)
-            )),
+            ),
             Some(f) => f(take, textsyxidx),
         }
     }
     pub fn MIDI_eventlist_Create(&self) -> *mut root::MIDI_eventlist {
         match self.pointers.MIDI_eventlist_Create {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_eventlist_Create)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -13370,10 +13370,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDI_eventlist_Destroy(&self, evtlist: *mut root::MIDI_eventlist) {
         match self.pointers.MIDI_eventlist_Destroy {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_eventlist_Destroy)
-            )),
+            ),
             Some(f) => f(evtlist),
         }
     }
@@ -13387,10 +13387,10 @@ impl Reaper {
         bufNeedBig_sz: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetAllEvts {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetAllEvts)
-            )),
+            ),
             Some(f) => f(take, bufNeedBig, bufNeedBig_sz),
         }
     }
@@ -13410,10 +13410,10 @@ impl Reaper {
         msg3Out: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetCC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetCC)
-            )),
+            ),
             Some(f) => f(
                 take,
                 ccidx,
@@ -13438,10 +13438,10 @@ impl Reaper {
         beztensionOut: *mut f64,
     ) -> bool {
         match self.pointers.MIDI_GetCCShape {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetCCShape)
-            )),
+            ),
             Some(f) => f(take, ccidx, shapeOut, beztensionOut),
         }
     }
@@ -13459,10 +13459,10 @@ impl Reaper {
         msg_sz: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetEvt)
-            )),
+            ),
             Some(f) => f(take, evtidx, selectedOut, mutedOut, ppqposOut, msg, msg_sz),
         }
     }
@@ -13476,10 +13476,10 @@ impl Reaper {
         noteLenOutOptional: *mut f64,
     ) -> f64 {
         match self.pointers.MIDI_GetGrid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetGrid)
-            )),
+            ),
             Some(f) => f(take, swingOutOptional, noteLenOutOptional),
         }
     }
@@ -13494,10 +13494,10 @@ impl Reaper {
         hash_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetHash {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetHash)
-            )),
+            ),
             Some(f) => f(take, notesonly, hash, hash_sz),
         }
     }
@@ -13517,10 +13517,10 @@ impl Reaper {
         velOut: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetNote {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetNote)
-            )),
+            ),
             Some(f) => f(
                 take,
                 noteidx,
@@ -13543,10 +13543,10 @@ impl Reaper {
         ppqpos: f64,
     ) -> f64 {
         match self.pointers.MIDI_GetPPQPos_EndOfMeasure {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPos_EndOfMeasure)
-            )),
+            ),
             Some(f) => f(take, ppqpos),
         }
     }
@@ -13559,10 +13559,10 @@ impl Reaper {
         ppqpos: f64,
     ) -> f64 {
         match self.pointers.MIDI_GetPPQPos_StartOfMeasure {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPos_StartOfMeasure)
-            )),
+            ),
             Some(f) => f(take, ppqpos),
         }
     }
@@ -13575,10 +13575,10 @@ impl Reaper {
         projqn: f64,
     ) -> f64 {
         match self.pointers.MIDI_GetPPQPosFromProjQN {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPosFromProjQN)
-            )),
+            ),
             Some(f) => f(take, projqn),
         }
     }
@@ -13591,10 +13591,10 @@ impl Reaper {
         projtime: f64,
     ) -> f64 {
         match self.pointers.MIDI_GetPPQPosFromProjTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPosFromProjTime)
-            )),
+            ),
             Some(f) => f(take, projtime),
         }
     }
@@ -13607,10 +13607,10 @@ impl Reaper {
         ppqpos: f64,
     ) -> f64 {
         match self.pointers.MIDI_GetProjQNFromPPQPos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetProjQNFromPPQPos)
-            )),
+            ),
             Some(f) => f(take, ppqpos),
         }
     }
@@ -13623,10 +13623,10 @@ impl Reaper {
         ppqpos: f64,
     ) -> f64 {
         match self.pointers.MIDI_GetProjTimeFromPPQPos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetProjTimeFromPPQPos)
-            )),
+            ),
             Some(f) => f(take, ppqpos),
         }
     }
@@ -13642,10 +13642,10 @@ impl Reaper {
         name_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetScale {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetScale)
-            )),
+            ),
             Some(f) => f(take, rootOut, scaleOut, name, name_sz),
         }
     }
@@ -13664,10 +13664,10 @@ impl Reaper {
         msgOptional_sz: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetTextSysexEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetTextSysexEvt)
-            )),
+            ),
             Some(f) => f(
                 take,
                 textsyxevtidx,
@@ -13691,10 +13691,10 @@ impl Reaper {
         hash_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetTrackHash {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetTrackHash)
-            )),
+            ),
             Some(f) => f(track, notesonly, hash, hash_sz),
         }
     }
@@ -13713,10 +13713,10 @@ impl Reaper {
         msg3: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_InsertCC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertCC)
-            )),
+            ),
             Some(f) => f(take, selected, muted, ppqpos, chanmsg, chan, msg2, msg3),
         }
     }
@@ -13733,10 +13733,10 @@ impl Reaper {
         bytestr_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_InsertEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertEvt)
-            )),
+            ),
             Some(f) => f(take, selected, muted, ppqpos, bytestr, bytestr_sz),
         }
     }
@@ -13756,10 +13756,10 @@ impl Reaper {
         noSortInOptional: *const bool,
     ) -> bool {
         match self.pointers.MIDI_InsertNote {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertNote)
-            )),
+            ),
             Some(f) => f(
                 take,
                 selected,
@@ -13787,19 +13787,19 @@ impl Reaper {
         bytestr_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_InsertTextSysexEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertTextSysexEvt)
-            )),
+            ),
             Some(f) => f(take, selected, muted, ppqpos, type_, bytestr, bytestr_sz),
         }
     }
     pub fn midi_reinit(&self) {
         match self.pointers.midi_reinit {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(midi_reinit)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -13808,10 +13808,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDI_SelectAll(&self, take: *mut root::MediaItem_Take, select: bool) {
         match self.pointers.MIDI_SelectAll {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SelectAll)
-            )),
+            ),
             Some(f) => f(take, select),
         }
     }
@@ -13825,10 +13825,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_SetAllEvts {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetAllEvts)
-            )),
+            ),
             Some(f) => f(take, buf, buf_sz),
         }
     }
@@ -13849,10 +13849,10 @@ impl Reaper {
         noSortInOptional: *const bool,
     ) -> bool {
         match self.pointers.MIDI_SetCC {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetCC)
-            )),
+            ),
             Some(f) => f(
                 take,
                 ccidx,
@@ -13879,10 +13879,10 @@ impl Reaper {
         noSortInOptional: *const bool,
     ) -> bool {
         match self.pointers.MIDI_SetCCShape {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetCCShape)
-            )),
+            ),
             Some(f) => f(take, ccidx, shape, beztension, noSortInOptional),
         }
     }
@@ -13901,10 +13901,10 @@ impl Reaper {
         noSortInOptional: *const bool,
     ) -> bool {
         match self.pointers.MIDI_SetEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetEvt)
-            )),
+            ),
             Some(f) => f(
                 take,
                 evtidx,
@@ -13927,10 +13927,10 @@ impl Reaper {
         endQN: f64,
     ) -> bool {
         match self.pointers.MIDI_SetItemExtents {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetItemExtents)
-            )),
+            ),
             Some(f) => f(item, startQN, endQN),
         }
     }
@@ -13951,10 +13951,10 @@ impl Reaper {
         noSortInOptional: *const bool,
     ) -> bool {
         match self.pointers.MIDI_SetNote {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetNote)
-            )),
+            ),
             Some(f) => f(
                 take,
                 noteidx,
@@ -13985,10 +13985,10 @@ impl Reaper {
         noSortInOptional: *const bool,
     ) -> bool {
         match self.pointers.MIDI_SetTextSysexEvt {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetTextSysexEvt)
-            )),
+            ),
             Some(f) => f(
                 take,
                 textsyxevtidx,
@@ -14007,19 +14007,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDI_Sort(&self, take: *mut root::MediaItem_Take) {
         match self.pointers.MIDI_Sort {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_Sort)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
     pub fn MIDIEditor_GetActive(&self) -> root::HWND {
         match self.pointers.MIDIEditor_GetActive {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetActive)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -14028,10 +14028,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDIEditor_GetMode(&self, midieditor: root::HWND) -> ::std::os::raw::c_int {
         match self.pointers.MIDIEditor_GetMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetMode)
-            )),
+            ),
             Some(f) => f(midieditor),
         }
     }
@@ -14044,10 +14044,10 @@ impl Reaper {
         setting_desc: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int {
         match self.pointers.MIDIEditor_GetSetting_int {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetSetting_int)
-            )),
+            ),
             Some(f) => f(midieditor, setting_desc),
         }
     }
@@ -14062,10 +14062,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDIEditor_GetSetting_str {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetSetting_str)
-            )),
+            ),
             Some(f) => f(midieditor, setting_desc, buf, buf_sz),
         }
     }
@@ -14074,10 +14074,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDIEditor_GetTake(&self, midieditor: root::HWND) -> *mut root::MediaItem_Take {
         match self.pointers.MIDIEditor_GetTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetTake)
-            )),
+            ),
             Some(f) => f(midieditor),
         }
     }
@@ -14087,10 +14087,10 @@ impl Reaper {
         islistviewcommand: bool,
     ) -> bool {
         match self.pointers.MIDIEditor_LastFocused_OnCommand {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_LastFocused_OnCommand)
-            )),
+            ),
             Some(f) => f(command_id, islistviewcommand),
         }
     }
@@ -14103,10 +14103,10 @@ impl Reaper {
         command_id: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDIEditor_OnCommand {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_OnCommand)
-            )),
+            ),
             Some(f) => f(midieditor, command_id),
         }
     }
@@ -14120,10 +14120,10 @@ impl Reaper {
         setting: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDIEditor_SetSetting_int {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_SetSetting_int)
-            )),
+            ),
             Some(f) => f(midieditor, setting_desc, setting),
         }
     }
@@ -14132,10 +14132,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn mkpanstr(&self, strNeed64: *mut ::std::os::raw::c_char, pan: f64) {
         match self.pointers.mkpanstr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(mkpanstr)
-            )),
+            ),
             Some(f) => f(strNeed64, pan),
         }
     }
@@ -14144,10 +14144,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn mkvolpanstr(&self, strNeed64: *mut ::std::os::raw::c_char, vol: f64, pan: f64) {
         match self.pointers.mkvolpanstr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(mkvolpanstr)
-            )),
+            ),
             Some(f) => f(strNeed64, vol, pan),
         }
     }
@@ -14156,19 +14156,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn mkvolstr(&self, strNeed64: *mut ::std::os::raw::c_char, vol: f64) {
         match self.pointers.mkvolstr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(mkvolstr)
-            )),
+            ),
             Some(f) => f(strNeed64, vol),
         }
     }
     pub fn MoveEditCursor(&self, adjamt: f64, dosel: bool) {
         match self.pointers.MoveEditCursor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MoveEditCursor)
-            )),
+            ),
             Some(f) => f(adjamt, dosel),
         }
     }
@@ -14181,19 +14181,19 @@ impl Reaper {
         desttr: *mut root::MediaTrack,
     ) -> bool {
         match self.pointers.MoveMediaItemToTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MoveMediaItemToTrack)
-            )),
+            ),
             Some(f) => f(item, desttr),
         }
     }
     pub fn MuteAllTracks(&self, mute: bool) {
         match self.pointers.MuteAllTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MuteAllTracks)
-            )),
+            ),
             Some(f) => f(mute),
         }
     }
@@ -14207,10 +14207,10 @@ impl Reaper {
         wantWorkArea: bool,
     ) {
         match self.pointers.my_getViewport {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(my_getViewport)
-            )),
+            ),
             Some(f) => f(r, sr, wantWorkArea),
         }
     }
@@ -14222,19 +14222,19 @@ impl Reaper {
         command_name: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int {
         match self.pointers.NamedCommandLookup {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(NamedCommandLookup)
-            )),
+            ),
             Some(f) => f(command_name),
         }
     }
     pub fn OnPauseButton(&self) {
         match self.pointers.OnPauseButton {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPauseButton)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -14243,19 +14243,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn OnPauseButtonEx(&self, proj: *mut root::ReaProject) {
         match self.pointers.OnPauseButtonEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPauseButtonEx)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
     pub fn OnPlayButton(&self) {
         match self.pointers.OnPlayButton {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPlayButton)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -14264,19 +14264,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn OnPlayButtonEx(&self, proj: *mut root::ReaProject) {
         match self.pointers.OnPlayButtonEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPlayButtonEx)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
     pub fn OnStopButton(&self) {
         match self.pointers.OnStopButton {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnStopButton)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -14285,10 +14285,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn OnStopButtonEx(&self, proj: *mut root::ReaProject) {
         match self.pointers.OnStopButtonEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnStopButtonEx)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -14297,10 +14297,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn OpenColorThemeFile(&self, fn_: *const ::std::os::raw::c_char) -> bool {
         match self.pointers.OpenColorThemeFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OpenColorThemeFile)
-            )),
+            ),
             Some(f) => f(fn_),
         }
     }
@@ -14313,10 +14313,10 @@ impl Reaper {
         play: bool,
     ) -> root::HWND {
         match self.pointers.OpenMediaExplorer {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OpenMediaExplorer)
-            )),
+            ),
             Some(f) => f(mediafn, play),
         }
     }
@@ -14329,10 +14329,10 @@ impl Reaper {
         valueInOptional: *const f64,
     ) {
         match self.pointers.OscLocalMessageToHost {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OscLocalMessageToHost)
-            )),
+            ),
             Some(f) => f(message, valueInOptional),
         }
     }
@@ -14341,10 +14341,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn parse_timestr(&self, buf: *const ::std::os::raw::c_char) -> f64 {
         match self.pointers.parse_timestr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parse_timestr)
-            )),
+            ),
             Some(f) => f(buf),
         }
     }
@@ -14358,10 +14358,10 @@ impl Reaper {
         modeoverride: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.parse_timestr_len {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parse_timestr_len)
-            )),
+            ),
             Some(f) => f(buf, offset, modeoverride),
         }
     }
@@ -14374,10 +14374,10 @@ impl Reaper {
         modeoverride: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.parse_timestr_pos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parse_timestr_pos)
-            )),
+            ),
             Some(f) => f(buf, modeoverride),
         }
     }
@@ -14386,10 +14386,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn parsepanstr(&self, str: *const ::std::os::raw::c_char) -> f64 {
         match self.pointers.parsepanstr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parsepanstr)
-            )),
+            ),
             Some(f) => f(str),
         }
     }
@@ -14406,10 +14406,10 @@ impl Reaper {
         buildpeaks: bool,
     ) -> *mut root::PCM_sink {
         match self.pointers.PCM_Sink_Create {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_Create)
-            )),
+            ),
             Some(f) => f(filename, cfg, cfg_sz, nch, srate, buildpeaks),
         }
     }
@@ -14427,10 +14427,10 @@ impl Reaper {
         buildpeaks: bool,
     ) -> *mut root::PCM_sink {
         match self.pointers.PCM_Sink_CreateEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_CreateEx)
-            )),
+            ),
             Some(f) => f(proj, filename, cfg, cfg_sz, nch, srate, buildpeaks),
         }
     }
@@ -14446,10 +14446,10 @@ impl Reaper {
         div: ::std::os::raw::c_int,
     ) -> *mut root::PCM_sink {
         match self.pointers.PCM_Sink_CreateMIDIFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_CreateMIDIFile)
-            )),
+            ),
             Some(f) => f(filename, cfg, cfg_sz, bpm, div),
         }
     }
@@ -14466,10 +14466,10 @@ impl Reaper {
         div: ::std::os::raw::c_int,
     ) -> *mut root::PCM_sink {
         match self.pointers.PCM_Sink_CreateMIDIFileEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_CreateMIDIFileEx)
-            )),
+            ),
             Some(f) => f(proj, filename, cfg, cfg_sz, bpm, div),
         }
     }
@@ -14482,10 +14482,10 @@ impl Reaper {
         descstrOut: *mut *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_uint {
         match self.pointers.PCM_Sink_Enum {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_Enum)
-            )),
+            ),
             Some(f) => f(idx, descstrOut),
         }
     }
@@ -14498,10 +14498,10 @@ impl Reaper {
         data_sz: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.PCM_Sink_GetExtension {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_GetExtension)
-            )),
+            ),
             Some(f) => f(data, data_sz),
         }
     }
@@ -14515,10 +14515,10 @@ impl Reaper {
         hwndParent: root::HWND,
     ) -> root::HWND {
         match self.pointers.PCM_Sink_ShowConfig {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_ShowConfig)
-            )),
+            ),
             Some(f) => f(cfg, cfg_sz, hwndParent),
         }
     }
@@ -14530,10 +14530,10 @@ impl Reaper {
         filename: *const ::std::os::raw::c_char,
     ) -> *mut root::PCM_source {
         match self.pointers.PCM_Source_CreateFromFile {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromFile)
-            )),
+            ),
             Some(f) => f(filename),
         }
     }
@@ -14546,10 +14546,10 @@ impl Reaper {
         forcenoMidiImp: bool,
     ) -> *mut root::PCM_source {
         match self.pointers.PCM_Source_CreateFromFileEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromFileEx)
-            )),
+            ),
             Some(f) => f(filename, forcenoMidiImp),
         }
     }
@@ -14562,10 +14562,10 @@ impl Reaper {
         fn_: *const ::std::os::raw::c_char,
     ) -> *mut root::PCM_source {
         match self.pointers.PCM_Source_CreateFromSimple {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromSimple)
-            )),
+            ),
             Some(f) => f(dec, fn_),
         }
     }
@@ -14577,10 +14577,10 @@ impl Reaper {
         sourcetype: *const ::std::os::raw::c_char,
     ) -> *mut root::PCM_source {
         match self.pointers.PCM_Source_CreateFromType {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromType)
-            )),
+            ),
             Some(f) => f(sourcetype),
         }
     }
@@ -14589,10 +14589,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn PCM_Source_Destroy(&self, src: *mut root::PCM_source) {
         match self.pointers.PCM_Source_Destroy {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_Destroy)
-            )),
+            ),
             Some(f) => f(src),
         }
     }
@@ -14610,10 +14610,10 @@ impl Reaper {
         buf: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PCM_Source_GetPeaks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_GetPeaks)
-            )),
+            ),
             Some(f) => f(
                 src,
                 peakrate,
@@ -14636,10 +14636,10 @@ impl Reaper {
         revOut: *mut bool,
     ) -> bool {
         match self.pointers.PCM_Source_GetSectionInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_GetSectionInfo)
-            )),
+            ),
             Some(f) => f(src, offsOut, lenOut, revOut),
         }
     }
@@ -14654,10 +14654,10 @@ impl Reaper {
         nch: ::std::os::raw::c_int,
     ) -> *mut root::REAPER_PeakBuild_Interface {
         match self.pointers.PeakBuild_Create {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PeakBuild_Create)
-            )),
+            ),
             Some(f) => f(src, fn_, srate, nch),
         }
     }
@@ -14673,10 +14673,10 @@ impl Reaper {
         flags: ::std::os::raw::c_int,
     ) -> *mut root::REAPER_PeakBuild_Interface {
         match self.pointers.PeakBuild_CreateEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PeakBuild_CreateEx)
-            )),
+            ),
             Some(f) => f(src, fn_, srate, nch, flags),
         }
     }
@@ -14690,10 +14690,10 @@ impl Reaper {
         nch: ::std::os::raw::c_int,
     ) -> *mut root::REAPER_PeakGet_Interface {
         match self.pointers.PeakGet_Create {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PeakGet_Create)
-            )),
+            ),
             Some(f) => f(fn_, srate, nch),
         }
     }
@@ -14709,10 +14709,10 @@ impl Reaper {
         submode_sel: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PitchShiftSubModeMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PitchShiftSubModeMenu)
-            )),
+            ),
             Some(f) => f(hwnd, x, y, mode, submode_sel),
         }
     }
@@ -14724,10 +14724,10 @@ impl Reaper {
         preview: *mut root::preview_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PlayPreview {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayPreview)
-            )),
+            ),
             Some(f) => f(preview),
         }
     }
@@ -14741,10 +14741,10 @@ impl Reaper {
         MSI: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PlayPreviewEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayPreviewEx)
-            )),
+            ),
             Some(f) => f(preview, bufflags, MSI),
         }
     }
@@ -14756,10 +14756,10 @@ impl Reaper {
         preview: *mut root::preview_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PlayTrackPreview {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayTrackPreview)
-            )),
+            ),
             Some(f) => f(preview),
         }
     }
@@ -14772,10 +14772,10 @@ impl Reaper {
         preview: *mut root::preview_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PlayTrackPreview2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayTrackPreview2)
-            )),
+            ),
             Some(f) => f(proj, preview),
         }
     }
@@ -14790,10 +14790,10 @@ impl Reaper {
         msi: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PlayTrackPreview2Ex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayTrackPreview2Ex)
-            )),
+            ),
             Some(f) => f(proj, preview, flags, msi),
         }
     }
@@ -14805,28 +14805,28 @@ impl Reaper {
         name: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.plugin_getapi {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_getapi)
-            )),
+            ),
             Some(f) => f(name),
         }
     }
     pub fn plugin_getFilterList(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.plugin_getFilterList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_getFilterList)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn plugin_getImportableProjectFilterList(&self) -> *const ::std::os::raw::c_char {
         match self.pointers.plugin_getImportableProjectFilterList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_getImportableProjectFilterList)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -14839,28 +14839,28 @@ impl Reaper {
         infostruct: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
         match self.pointers.plugin_register {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_register)
-            )),
+            ),
             Some(f) => f(name, infostruct),
         }
     }
     pub fn PluginWantsAlwaysRunFx(&self, amt: ::std::os::raw::c_int) {
         match self.pointers.PluginWantsAlwaysRunFx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PluginWantsAlwaysRunFx)
-            )),
+            ),
             Some(f) => f(amt),
         }
     }
     pub fn PreventUIRefresh(&self, prevent_count: ::std::os::raw::c_int) {
         match self.pointers.PreventUIRefresh {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PreventUIRefresh)
-            )),
+            ),
             Some(f) => f(prevent_count),
         }
     }
@@ -14873,10 +14873,10 @@ impl Reaper {
         idx: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         match self.pointers.projectconfig_var_addr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(projectconfig_var_addr)
-            )),
+            ),
             Some(f) => f(proj, idx),
         }
     }
@@ -14889,10 +14889,10 @@ impl Reaper {
         szOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.projectconfig_var_getoffs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(projectconfig_var_getoffs)
-            )),
+            ),
             Some(f) => f(name, szOut),
         }
     }
@@ -14903,10 +14903,10 @@ impl Reaper {
         section_id: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PromptForAction {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PromptForAction)
-            )),
+            ),
             Some(f) => f(session_mode, init_id, section_id),
         }
     }
@@ -14920,10 +14920,10 @@ impl Reaper {
         new_size: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.realloc_cmd_ptr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(realloc_cmd_ptr)
-            )),
+            ),
             Some(f) => f(ptr, ptr_size, new_size),
         }
     }
@@ -14932,10 +14932,10 @@ impl Reaper {
         version: ::std::os::raw::c_int,
     ) -> *mut root::IReaperPitchShift {
         match self.pointers.ReaperGetPitchShiftAPI {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReaperGetPitchShiftAPI)
-            )),
+            ),
             Some(f) => f(version),
         }
     }
@@ -14944,10 +14944,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ReaScriptError(&self, errmsg: *const ::std::os::raw::c_char) {
         match self.pointers.ReaScriptError {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReaScriptError)
-            )),
+            ),
             Some(f) => f(errmsg),
         }
     }
@@ -14960,28 +14960,28 @@ impl Reaper {
         ignored: usize,
     ) -> ::std::os::raw::c_int {
         match self.pointers.RecursiveCreateDirectory {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RecursiveCreateDirectory)
-            )),
+            ),
             Some(f) => f(path, ignored),
         }
     }
     pub fn reduce_open_files(&self, flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.reduce_open_files {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(reduce_open_files)
-            )),
+            ),
             Some(f) => f(flags),
         }
     }
     pub fn RefreshToolbar(&self, command_id: ::std::os::raw::c_int) {
         match self.pointers.RefreshToolbar {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RefreshToolbar)
-            )),
+            ),
             Some(f) => f(command_id),
         }
     }
@@ -14991,10 +14991,10 @@ impl Reaper {
         command_id: ::std::os::raw::c_int,
     ) {
         match self.pointers.RefreshToolbar2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RefreshToolbar2)
-            )),
+            ),
             Some(f) => f(section_id, command_id),
         }
     }
@@ -15008,10 +15008,10 @@ impl Reaper {
         out_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.relative_fn {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(relative_fn)
-            )),
+            ),
             Some(f) => f(in_, out, out_sz),
         }
     }
@@ -15025,10 +15025,10 @@ impl Reaper {
         sendidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.RemoveTrackSend {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RemoveTrackSend)
-            )),
+            ),
             Some(f) => f(tr, category, sendidx),
         }
     }
@@ -15044,10 +15044,10 @@ impl Reaper {
         playrate: f64,
     ) -> bool {
         match self.pointers.RenderFileSection {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RenderFileSection)
-            )),
+            ),
             Some(f) => f(
                 source_filename,
                 target_filename,
@@ -15063,28 +15063,28 @@ impl Reaper {
         makePrevFolder: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.ReorderSelectedTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReorderSelectedTracks)
-            )),
+            ),
             Some(f) => f(beforeTrackIdx, makePrevFolder),
         }
     }
     pub fn Resample_EnumModes(&self, mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char {
         match self.pointers.Resample_EnumModes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Resample_EnumModes)
-            )),
+            ),
             Some(f) => f(mode),
         }
     }
     pub fn Resampler_Create(&self) -> *mut root::REAPER_Resample_Interface {
         match self.pointers.Resampler_Create {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Resampler_Create)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -15098,10 +15098,10 @@ impl Reaper {
         out_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.resolve_fn {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(resolve_fn)
-            )),
+            ),
             Some(f) => f(in_, out, out_sz),
         }
     }
@@ -15116,10 +15116,10 @@ impl Reaper {
         checkSubDirOptional: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.resolve_fn2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(resolve_fn2)
-            )),
+            ),
             Some(f) => f(in_, out, out_sz, checkSubDirOptional),
         }
     }
@@ -15128,28 +15128,28 @@ impl Reaper {
         command_id: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.ReverseNamedCommandLookup {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReverseNamedCommandLookup)
-            )),
+            ),
             Some(f) => f(command_id),
         }
     }
     pub fn ScaleFromEnvelopeMode(&self, scaling_mode: ::std::os::raw::c_int, val: f64) -> f64 {
         match self.pointers.ScaleFromEnvelopeMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScaleFromEnvelopeMode)
-            )),
+            ),
             Some(f) => f(scaling_mode, val),
         }
     }
     pub fn ScaleToEnvelopeMode(&self, scaling_mode: ::std::os::raw::c_int, val: f64) -> f64 {
         match self.pointers.ScaleToEnvelopeMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScaleToEnvelopeMode)
-            )),
+            ),
             Some(f) => f(scaling_mode, val),
         }
     }
@@ -15163,10 +15163,10 @@ impl Reaper {
         param: *mut ::std::os::raw::c_void,
     ) {
         match self.pointers.screenset_register {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_register)
-            )),
+            ),
             Some(f) => f(id, callbackFunc, param),
         }
     }
@@ -15180,10 +15180,10 @@ impl Reaper {
         param: *mut ::std::os::raw::c_void,
     ) {
         match self.pointers.screenset_registerNew {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_registerNew)
-            )),
+            ),
             Some(f) => f(id, callbackFunc, param),
         }
     }
@@ -15192,10 +15192,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn screenset_unregister(&self, id: *mut ::std::os::raw::c_char) {
         match self.pointers.screenset_unregister {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_unregister)
-            )),
+            ),
             Some(f) => f(id),
         }
     }
@@ -15204,10 +15204,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn screenset_unregisterByParam(&self, param: *mut ::std::os::raw::c_void) {
         match self.pointers.screenset_unregisterByParam {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_unregisterByParam)
-            )),
+            ),
             Some(f) => f(param),
         }
     }
@@ -15216,10 +15216,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn screenset_updateLastFocus(&self, prevWin: root::HWND) {
         match self.pointers.screenset_updateLastFocus {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_updateLastFocus)
-            )),
+            ),
             Some(f) => f(prevWin),
         }
     }
@@ -15228,10 +15228,10 @@ impl Reaper {
         uniqueID: ::std::os::raw::c_int,
     ) -> *mut root::KbdSectionInfo {
         match self.pointers.SectionFromUniqueID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SectionFromUniqueID)
-            )),
+            ),
             Some(f) => f(uniqueID),
         }
     }
@@ -15240,10 +15240,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SelectAllMediaItems(&self, proj: *mut root::ReaProject, selected: bool) {
         match self.pointers.SelectAllMediaItems {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SelectAllMediaItems)
-            )),
+            ),
             Some(f) => f(proj, selected),
         }
     }
@@ -15252,10 +15252,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SelectProjectInstance(&self, proj: *mut root::ReaProject) {
         match self.pointers.SelectProjectInstance {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SelectProjectInstance)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -15269,10 +15269,10 @@ impl Reaper {
         msglen: ::std::os::raw::c_int,
     ) {
         match self.pointers.SendLocalOscMessage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SendLocalOscMessage)
-            )),
+            ),
             Some(f) => f(local_osc_handler, msg, msglen),
         }
     }
@@ -15281,19 +15281,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetActiveTake(&self, take: *mut root::MediaItem_Take) {
         match self.pointers.SetActiveTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetActiveTake)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
     pub fn SetAutomationMode(&self, mode: ::std::os::raw::c_int, onlySel: bool) {
         match self.pointers.SetAutomationMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetAutomationMode)
-            )),
+            ),
             Some(f) => f(mode, onlySel),
         }
     }
@@ -15302,10 +15302,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetCurrentBPM(&self, __proj: *mut root::ReaProject, bpm: f64, wantUndo: bool) {
         match self.pointers.SetCurrentBPM {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetCurrentBPM)
-            )),
+            ),
             Some(f) => f(__proj, bpm, wantUndo),
         }
     }
@@ -15318,19 +15318,19 @@ impl Reaper {
         envInOptional: *mut root::TrackEnvelope,
     ) {
         match self.pointers.SetCursorContext {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetCursorContext)
-            )),
+            ),
             Some(f) => f(mode, envInOptional),
         }
     }
     pub fn SetEditCurPos(&self, time: f64, moveview: bool, seekplay: bool) {
         match self.pointers.SetEditCurPos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEditCurPos)
-            )),
+            ),
             Some(f) => f(time, moveview, seekplay),
         }
     }
@@ -15345,10 +15345,10 @@ impl Reaper {
         seekplay: bool,
     ) {
         match self.pointers.SetEditCurPos2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEditCurPos2)
-            )),
+            ),
             Some(f) => f(proj, time, moveview, seekplay),
         }
     }
@@ -15367,10 +15367,10 @@ impl Reaper {
         noSortInOptional: *mut bool,
     ) -> bool {
         match self.pointers.SetEnvelopePoint {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEnvelopePoint)
-            )),
+            ),
             Some(f) => f(
                 envelope,
                 ptidx,
@@ -15399,10 +15399,10 @@ impl Reaper {
         noSortInOptional: *mut bool,
     ) -> bool {
         match self.pointers.SetEnvelopePointEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEnvelopePointEx)
-            )),
+            ),
             Some(f) => f(
                 envelope,
                 autoitem_idx,
@@ -15426,10 +15426,10 @@ impl Reaper {
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.SetEnvelopeStateChunk {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEnvelopeStateChunk)
-            )),
+            ),
             Some(f) => f(env, str, isundoOptional),
         }
     }
@@ -15444,19 +15444,19 @@ impl Reaper {
         persist: bool,
     ) {
         match self.pointers.SetExtState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetExtState)
-            )),
+            ),
             Some(f) => f(section, key, value, persist),
         }
     }
     pub fn SetGlobalAutomationOverride(&self, mode: ::std::os::raw::c_int) {
         match self.pointers.SetGlobalAutomationOverride {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetGlobalAutomationOverride)
-            )),
+            ),
             Some(f) => f(mode),
         }
     }
@@ -15470,19 +15470,19 @@ impl Reaper {
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.SetItemStateChunk {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetItemStateChunk)
-            )),
+            ),
             Some(f) => f(item, str, isundoOptional),
         }
     }
     pub fn SetMasterTrackVisibility(&self, flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
         match self.pointers.SetMasterTrackVisibility {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMasterTrackVisibility)
-            )),
+            ),
             Some(f) => f(flag),
         }
     }
@@ -15496,10 +15496,10 @@ impl Reaper {
         newvalue: f64,
     ) -> bool {
         match self.pointers.SetMediaItemInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemInfo_Value)
-            )),
+            ),
             Some(f) => f(item, parmname, newvalue),
         }
     }
@@ -15513,10 +15513,10 @@ impl Reaper {
         refreshUI: bool,
     ) -> bool {
         match self.pointers.SetMediaItemLength {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemLength)
-            )),
+            ),
             Some(f) => f(item, length, refreshUI),
         }
     }
@@ -15530,10 +15530,10 @@ impl Reaper {
         refreshUI: bool,
     ) -> bool {
         match self.pointers.SetMediaItemPosition {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemPosition)
-            )),
+            ),
             Some(f) => f(item, position, refreshUI),
         }
     }
@@ -15542,10 +15542,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetMediaItemSelected(&self, item: *mut root::MediaItem, selected: bool) {
         match self.pointers.SetMediaItemSelected {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemSelected)
-            )),
+            ),
             Some(f) => f(item, selected),
         }
     }
@@ -15558,10 +15558,10 @@ impl Reaper {
         source: *mut root::PCM_source,
     ) -> bool {
         match self.pointers.SetMediaItemTake_Source {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemTake_Source)
-            )),
+            ),
             Some(f) => f(take, source),
         }
     }
@@ -15575,10 +15575,10 @@ impl Reaper {
         newvalue: f64,
     ) -> bool {
         match self.pointers.SetMediaItemTakeInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemTakeInfo_Value)
-            )),
+            ),
             Some(f) => f(take, parmname, newvalue),
         }
     }
@@ -15592,10 +15592,10 @@ impl Reaper {
         newvalue: f64,
     ) -> bool {
         match self.pointers.SetMediaTrackInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaTrackInfo_Value)
-            )),
+            ),
             Some(f) => f(tr, parmname, newvalue),
         }
     }
@@ -15604,10 +15604,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetMIDIEditorGrid(&self, project: *mut root::ReaProject, division: f64) {
         match self.pointers.SetMIDIEditorGrid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMIDIEditorGrid)
-            )),
+            ),
             Some(f) => f(project, division),
         }
     }
@@ -15619,10 +15619,10 @@ impl Reaper {
         leftmosttrack: *mut root::MediaTrack,
     ) -> *mut root::MediaTrack {
         match self.pointers.SetMixerScroll {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMixerScroll)
-            )),
+            ),
             Some(f) => f(leftmosttrack),
         }
     }
@@ -15636,10 +15636,10 @@ impl Reaper {
         action: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.SetMouseModifier {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMouseModifier)
-            )),
+            ),
             Some(f) => f(context, modifier_flag, action),
         }
     }
@@ -15648,10 +15648,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetOnlyTrackSelected(&self, track: *mut root::MediaTrack) {
         match self.pointers.SetOnlyTrackSelected {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetOnlyTrackSelected)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -15660,10 +15660,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetProjectGrid(&self, project: *mut root::ReaProject, division: f64) {
         match self.pointers.SetProjectGrid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectGrid)
-            )),
+            ),
             Some(f) => f(project, division),
         }
     }
@@ -15679,10 +15679,10 @@ impl Reaper {
         name: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.SetProjectMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker)
-            )),
+            ),
             Some(f) => f(markrgnindexnumber, isrgn, pos, rgnend, name),
         }
     }
@@ -15699,10 +15699,10 @@ impl Reaper {
         name: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.SetProjectMarker2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker2)
-            )),
+            ),
             Some(f) => f(proj, markrgnindexnumber, isrgn, pos, rgnend, name),
         }
     }
@@ -15720,10 +15720,10 @@ impl Reaper {
         color: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SetProjectMarker3 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker3)
-            )),
+            ),
             Some(f) => f(proj, markrgnindexnumber, isrgn, pos, rgnend, name, color),
         }
     }
@@ -15742,10 +15742,10 @@ impl Reaper {
         flags: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SetProjectMarker4 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker4)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 markrgnindexnumber,
@@ -15773,10 +15773,10 @@ impl Reaper {
         color: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SetProjectMarkerByIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarkerByIndex)
-            )),
+            ),
             Some(f) => f(proj, markrgnidx, isrgn, pos, rgnend, IDnumber, name, color),
         }
     }
@@ -15796,10 +15796,10 @@ impl Reaper {
         flags: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SetProjectMarkerByIndex2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarkerByIndex2)
-            )),
+            ),
             Some(f) => f(
                 proj, markrgnidx, isrgn, pos, rgnend, IDnumber, name, color, flags,
             ),
@@ -15816,10 +15816,10 @@ impl Reaper {
         value: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SetProjExtState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjExtState)
-            )),
+            ),
             Some(f) => f(proj, extname, key, value),
         }
     }
@@ -15834,10 +15834,10 @@ impl Reaper {
         addorremove: ::std::os::raw::c_int,
     ) {
         match self.pointers.SetRegionRenderMatrix {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetRegionRenderMatrix)
-            )),
+            ),
             Some(f) => f(proj, regionindex, track, addorremove),
         }
     }
@@ -15846,10 +15846,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetRenderLastError(&self, errorstr: *const ::std::os::raw::c_char) {
         match self.pointers.SetRenderLastError {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetRenderLastError)
-            )),
+            ),
             Some(f) => f(errorstr),
         }
     }
@@ -15865,10 +15865,10 @@ impl Reaper {
         colorInOptional: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SetTakeMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTakeMarker)
-            )),
+            ),
             Some(f) => f(take, idx, nameIn, srcposInOptional, colorInOptional),
         }
     }
@@ -15883,10 +15883,10 @@ impl Reaper {
         srcposInOptional: *const f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SetTakeStretchMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTakeStretchMarker)
-            )),
+            ),
             Some(f) => f(take, idx, pos, srcposInOptional),
         }
     }
@@ -15900,10 +15900,10 @@ impl Reaper {
         slope: f64,
     ) -> bool {
         match self.pointers.SetTakeStretchMarkerSlope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTakeStretchMarkerSlope)
-            )),
+            ),
             Some(f) => f(take, idx, slope),
         }
     }
@@ -15923,10 +15923,10 @@ impl Reaper {
         lineartempo: bool,
     ) -> bool {
         match self.pointers.SetTempoTimeSigMarker {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTempoTimeSigMarker)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 ptidx,
@@ -15950,10 +15950,10 @@ impl Reaper {
         flagsOptional: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.SetThemeColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetThemeColor)
-            )),
+            ),
             Some(f) => f(ini_key, color, flagsOptional),
         }
     }
@@ -15964,10 +15964,10 @@ impl Reaper {
         state: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SetToggleCommandState {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetToggleCommandState)
-            )),
+            ),
             Some(f) => f(section_id, command_id, state),
         }
     }
@@ -15980,10 +15980,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) {
         match self.pointers.SetTrackAutomationMode {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackAutomationMode)
-            )),
+            ),
             Some(f) => f(tr, mode),
         }
     }
@@ -15992,10 +15992,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetTrackColor(&self, track: *mut root::MediaTrack, color: ::std::os::raw::c_int) {
         match self.pointers.SetTrackColor {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackColor)
-            )),
+            ),
             Some(f) => f(track, color),
         }
     }
@@ -16009,10 +16009,10 @@ impl Reaper {
         str: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.SetTrackMIDILyrics {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackMIDILyrics)
-            )),
+            ),
             Some(f) => f(track, flag, str),
         }
     }
@@ -16027,10 +16027,10 @@ impl Reaper {
         name: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.SetTrackMIDINoteName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackMIDINoteName)
-            )),
+            ),
             Some(f) => f(track, pitch, chan, name),
         }
     }
@@ -16046,10 +16046,10 @@ impl Reaper {
         name: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.SetTrackMIDINoteNameEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackMIDINoteNameEx)
-            )),
+            ),
             Some(f) => f(proj, track, pitch, chan, name),
         }
     }
@@ -16058,10 +16058,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetTrackSelected(&self, track: *mut root::MediaTrack, selected: bool) {
         match self.pointers.SetTrackSelected {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSelected)
-            )),
+            ),
             Some(f) => f(track, selected),
         }
     }
@@ -16077,10 +16077,10 @@ impl Reaper {
         newvalue: f64,
     ) -> bool {
         match self.pointers.SetTrackSendInfo_Value {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSendInfo_Value)
-            )),
+            ),
             Some(f) => f(tr, category, sendidx, parmname, newvalue),
         }
     }
@@ -16095,10 +16095,10 @@ impl Reaper {
         isend: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SetTrackSendUIPan {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSendUIPan)
-            )),
+            ),
             Some(f) => f(track, send_idx, pan, isend),
         }
     }
@@ -16113,10 +16113,10 @@ impl Reaper {
         isend: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.SetTrackSendUIVol {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSendUIVol)
-            )),
+            ),
             Some(f) => f(track, send_idx, vol, isend),
         }
     }
@@ -16130,10 +16130,10 @@ impl Reaper {
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.SetTrackStateChunk {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackStateChunk)
-            )),
+            ),
             Some(f) => f(track, str, isundoOptional),
         }
     }
@@ -16142,10 +16142,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ShowActionList(&self, caller: *mut root::KbdSectionInfo, callerWnd: root::HWND) {
         match self.pointers.ShowActionList {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowActionList)
-            )),
+            ),
             Some(f) => f(caller, callerWnd),
         }
     }
@@ -16154,10 +16154,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn ShowConsoleMsg(&self, msg: *const ::std::os::raw::c_char) {
         match self.pointers.ShowConsoleMsg {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowConsoleMsg)
-            )),
+            ),
             Some(f) => f(msg),
         }
     }
@@ -16171,10 +16171,10 @@ impl Reaper {
         type_: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.ShowMessageBox {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowMessageBox)
-            )),
+            ),
             Some(f) => f(msg, title, type_),
         }
     }
@@ -16192,10 +16192,10 @@ impl Reaper {
         ctx3Optional: ::std::os::raw::c_int,
     ) {
         match self.pointers.ShowPopupMenu {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowPopupMenu)
-            )),
+            ),
             Some(f) => f(
                 name,
                 x,
@@ -16209,10 +16209,10 @@ impl Reaper {
     }
     pub fn SLIDER2DB(&self, y: f64) -> f64 {
         match self.pointers.SLIDER2DB {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SLIDER2DB)
-            )),
+            ),
             Some(f) => f(y),
         }
     }
@@ -16221,28 +16221,28 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SnapToGrid(&self, project: *mut root::ReaProject, time_pos: f64) -> f64 {
         match self.pointers.SnapToGrid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SnapToGrid)
-            )),
+            ),
             Some(f) => f(project, time_pos),
         }
     }
     pub fn SoloAllTracks(&self, solo: ::std::os::raw::c_int) {
         match self.pointers.SoloAllTracks {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SoloAllTracks)
-            )),
+            ),
             Some(f) => f(solo),
         }
     }
     pub fn Splash_GetWnd(&self) -> root::HWND {
         match self.pointers.Splash_GetWnd {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Splash_GetWnd)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -16255,10 +16255,10 @@ impl Reaper {
         position: f64,
     ) -> *mut root::MediaItem {
         match self.pointers.SplitMediaItem {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SplitMediaItem)
-            )),
+            ),
             Some(f) => f(item, position),
         }
     }
@@ -16270,10 +16270,10 @@ impl Reaper {
         preview: *mut root::preview_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.StopPreview {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StopPreview)
-            )),
+            ),
             Some(f) => f(preview),
         }
     }
@@ -16285,10 +16285,10 @@ impl Reaper {
         preview: *mut root::preview_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.StopTrackPreview {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StopTrackPreview)
-            )),
+            ),
             Some(f) => f(preview),
         }
     }
@@ -16301,10 +16301,10 @@ impl Reaper {
         preview: *mut root::preview_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.StopTrackPreview2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StopTrackPreview2)
-            )),
+            ),
             Some(f) => f(proj, preview),
         }
     }
@@ -16313,10 +16313,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn stringToGuid(&self, str: *const ::std::os::raw::c_char, g: *mut root::GUID) {
         match self.pointers.stringToGuid {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(stringToGuid)
-            )),
+            ),
             Some(f) => f(str, g),
         }
     }
@@ -16328,10 +16328,10 @@ impl Reaper {
         msg3: ::std::os::raw::c_int,
     ) {
         match self.pointers.StuffMIDIMessage {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StuffMIDIMessage)
-            )),
+            ),
             Some(f) => f(mode, msg1, msg2, msg3),
         }
     }
@@ -16345,10 +16345,10 @@ impl Reaper {
         instantiate: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_AddByName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_AddByName)
-            )),
+            ),
             Some(f) => f(take, fxname, instantiate),
         }
     }
@@ -16364,10 +16364,10 @@ impl Reaper {
         is_move: bool,
     ) {
         match self.pointers.TakeFX_CopyToTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_CopyToTake)
-            )),
+            ),
             Some(f) => f(src_take, src_fx, dest_take, dest_fx, is_move),
         }
     }
@@ -16383,10 +16383,10 @@ impl Reaper {
         is_move: bool,
     ) {
         match self.pointers.TakeFX_CopyToTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_CopyToTrack)
-            )),
+            ),
             Some(f) => f(src_take, src_fx, dest_track, dest_fx, is_move),
         }
     }
@@ -16399,10 +16399,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_Delete {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_Delete)
-            )),
+            ),
             Some(f) => f(take, fx),
         }
     }
@@ -16416,10 +16416,10 @@ impl Reaper {
         param: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_EndParamEdit {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_EndParamEdit)
-            )),
+            ),
             Some(f) => f(take, fx, param),
         }
     }
@@ -16436,10 +16436,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_FormatParamValue {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_FormatParamValue)
-            )),
+            ),
             Some(f) => f(take, fx, param, val, buf, buf_sz),
         }
     }
@@ -16456,10 +16456,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_FormatParamValueNormalized {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_FormatParamValueNormalized)
-            )),
+            ),
             Some(f) => f(take, fx, param, value, buf, buf_sz),
         }
     }
@@ -16471,10 +16471,10 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetChainVisible {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetChainVisible)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -16483,10 +16483,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TakeFX_GetCount(&self, take: *mut root::MediaItem_Take) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetCount)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -16499,10 +16499,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetEnabled {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetEnabled)
-            )),
+            ),
             Some(f) => f(take, fx),
         }
     }
@@ -16517,10 +16517,10 @@ impl Reaper {
         create: bool,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.TakeFX_GetEnvelope {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetEnvelope)
-            )),
+            ),
             Some(f) => f(take, fxindex, parameterindex, create),
         }
     }
@@ -16533,10 +16533,10 @@ impl Reaper {
         index: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.TakeFX_GetFloatingWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFloatingWindow)
-            )),
+            ),
             Some(f) => f(take, index),
         }
     }
@@ -16552,10 +16552,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetFormattedParamValue {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFormattedParamValue)
-            )),
+            ),
             Some(f) => f(take, fx, param, buf, buf_sz),
         }
     }
@@ -16568,10 +16568,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> *mut root::GUID {
         match self.pointers.TakeFX_GetFXGUID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFXGUID)
-            )),
+            ),
             Some(f) => f(take, fx),
         }
     }
@@ -16586,10 +16586,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetFXName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFXName)
-            )),
+            ),
             Some(f) => f(take, fx, buf, buf_sz),
         }
     }
@@ -16604,10 +16604,10 @@ impl Reaper {
         outputPinsOutOptional: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetIOSize {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetIOSize)
-            )),
+            ),
             Some(f) => f(take, fx, inputPinsOutOptional, outputPinsOutOptional),
         }
     }
@@ -16623,10 +16623,10 @@ impl Reaper {
         bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetNamedConfigParm {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetNamedConfigParm)
-            )),
+            ),
             Some(f) => f(take, fx, parmname, bufOut, bufOut_sz),
         }
     }
@@ -16639,10 +16639,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetNumParams {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetNumParams)
-            )),
+            ),
             Some(f) => f(take, fx),
         }
     }
@@ -16655,10 +16655,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetOffline {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetOffline)
-            )),
+            ),
             Some(f) => f(take, fx),
         }
     }
@@ -16671,10 +16671,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetOpen {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetOpen)
-            )),
+            ),
             Some(f) => f(take, fx),
         }
     }
@@ -16690,10 +16690,10 @@ impl Reaper {
         maxvalOut: *mut f64,
     ) -> f64 {
         match self.pointers.TakeFX_GetParam {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParam)
-            )),
+            ),
             Some(f) => f(take, fx, param, minvalOut, maxvalOut),
         }
     }
@@ -16711,10 +16711,10 @@ impl Reaper {
         istoggleOut: *mut bool,
     ) -> bool {
         match self.pointers.TakeFX_GetParameterStepSizes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParameterStepSizes)
-            )),
+            ),
             Some(f) => f(
                 take,
                 fx,
@@ -16739,10 +16739,10 @@ impl Reaper {
         midvalOut: *mut f64,
     ) -> f64 {
         match self.pointers.TakeFX_GetParamEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamEx)
-            )),
+            ),
             Some(f) => f(take, fx, param, minvalOut, maxvalOut, midvalOut),
         }
     }
@@ -16758,10 +16758,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetParamName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamName)
-            )),
+            ),
             Some(f) => f(take, fx, param, buf, buf_sz),
         }
     }
@@ -16775,10 +16775,10 @@ impl Reaper {
         param: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.TakeFX_GetParamNormalized {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamNormalized)
-            )),
+            ),
             Some(f) => f(take, fx, param),
         }
     }
@@ -16794,10 +16794,10 @@ impl Reaper {
         high32OutOptional: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetPinMappings {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPinMappings)
-            )),
+            ),
             Some(f) => f(tr, fx, isoutput, pin, high32OutOptional),
         }
     }
@@ -16812,10 +16812,10 @@ impl Reaper {
         presetname_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetPreset {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPreset)
-            )),
+            ),
             Some(f) => f(take, fx, presetname, presetname_sz),
         }
     }
@@ -16829,10 +16829,10 @@ impl Reaper {
         numberOfPresetsOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetPresetIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPresetIndex)
-            )),
+            ),
             Some(f) => f(take, fx, numberOfPresetsOut),
         }
     }
@@ -16847,10 +16847,10 @@ impl Reaper {
         fn_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.TakeFX_GetUserPresetFilename {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetUserPresetFilename)
-            )),
+            ),
             Some(f) => f(take, fx, fn_, fn_sz),
         }
     }
@@ -16864,10 +16864,10 @@ impl Reaper {
         presetmove: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_NavigatePresets {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_NavigatePresets)
-            )),
+            ),
             Some(f) => f(take, fx, presetmove),
         }
     }
@@ -16881,10 +16881,10 @@ impl Reaper {
         enabled: bool,
     ) {
         match self.pointers.TakeFX_SetEnabled {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetEnabled)
-            )),
+            ),
             Some(f) => f(take, fx, enabled),
         }
     }
@@ -16899,10 +16899,10 @@ impl Reaper {
         value: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.TakeFX_SetNamedConfigParm {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetNamedConfigParm)
-            )),
+            ),
             Some(f) => f(take, fx, parmname, value),
         }
     }
@@ -16916,10 +16916,10 @@ impl Reaper {
         offline: bool,
     ) {
         match self.pointers.TakeFX_SetOffline {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetOffline)
-            )),
+            ),
             Some(f) => f(take, fx, offline),
         }
     }
@@ -16933,10 +16933,10 @@ impl Reaper {
         open: bool,
     ) {
         match self.pointers.TakeFX_SetOpen {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetOpen)
-            )),
+            ),
             Some(f) => f(take, fx, open),
         }
     }
@@ -16951,10 +16951,10 @@ impl Reaper {
         val: f64,
     ) -> bool {
         match self.pointers.TakeFX_SetParam {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetParam)
-            )),
+            ),
             Some(f) => f(take, fx, param, val),
         }
     }
@@ -16969,10 +16969,10 @@ impl Reaper {
         value: f64,
     ) -> bool {
         match self.pointers.TakeFX_SetParamNormalized {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetParamNormalized)
-            )),
+            ),
             Some(f) => f(take, fx, param, value),
         }
     }
@@ -16989,10 +16989,10 @@ impl Reaper {
         hi32bits: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_SetPinMappings {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetPinMappings)
-            )),
+            ),
             Some(f) => f(tr, fx, isoutput, pin, low32bits, hi32bits),
         }
     }
@@ -17006,10 +17006,10 @@ impl Reaper {
         presetname: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.TakeFX_SetPreset {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetPreset)
-            )),
+            ),
             Some(f) => f(take, fx, presetname),
         }
     }
@@ -17023,10 +17023,10 @@ impl Reaper {
         idx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_SetPresetByIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetPresetByIndex)
-            )),
+            ),
             Some(f) => f(take, fx, idx),
         }
     }
@@ -17040,10 +17040,10 @@ impl Reaper {
         showFlag: ::std::os::raw::c_int,
     ) {
         match self.pointers.TakeFX_Show {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_Show)
-            )),
+            ),
             Some(f) => f(take, index, showFlag),
         }
     }
@@ -17052,10 +17052,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TakeIsMIDI(&self, take: *mut root::MediaItem_Take) -> bool {
         match self.pointers.TakeIsMIDI {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeIsMIDI)
-            )),
+            ),
             Some(f) => f(take),
         }
     }
@@ -17070,10 +17070,10 @@ impl Reaper {
         nameOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.ThemeLayout_GetLayout {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_GetLayout)
-            )),
+            ),
             Some(f) => f(section, idx, nameOut, nameOut_sz),
         }
     }
@@ -17090,10 +17090,10 @@ impl Reaper {
         maxValueOutOptional: *mut ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.ThemeLayout_GetParameter {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_GetParameter)
-            )),
+            ),
             Some(f) => f(
                 wp,
                 descOutOptional,
@@ -17106,10 +17106,10 @@ impl Reaper {
     }
     pub fn ThemeLayout_RefreshAll(&self) {
         match self.pointers.ThemeLayout_RefreshAll {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_RefreshAll)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -17122,10 +17122,10 @@ impl Reaper {
         layout: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.ThemeLayout_SetLayout {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_SetLayout)
-            )),
+            ),
             Some(f) => f(section, layout),
         }
     }
@@ -17136,19 +17136,19 @@ impl Reaper {
         persist: bool,
     ) -> bool {
         match self.pointers.ThemeLayout_SetParameter {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_SetParameter)
-            )),
+            ),
             Some(f) => f(wp, value, persist),
         }
     }
     pub fn time_precise(&self) -> f64 {
         match self.pointers.time_precise {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(time_precise)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -17162,10 +17162,10 @@ impl Reaper {
         measuresInOptional: *const ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.TimeMap2_beatsToTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_beatsToTime)
-            )),
+            ),
             Some(f) => f(proj, tpos, measuresInOptional),
         }
     }
@@ -17178,10 +17178,10 @@ impl Reaper {
         time: f64,
     ) -> f64 {
         match self.pointers.TimeMap2_GetDividedBpmAtTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_GetDividedBpmAtTime)
-            )),
+            ),
             Some(f) => f(proj, time),
         }
     }
@@ -17190,10 +17190,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TimeMap2_GetNextChangeTime(&self, proj: *mut root::ReaProject, time: f64) -> f64 {
         match self.pointers.TimeMap2_GetNextChangeTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_GetNextChangeTime)
-            )),
+            ),
             Some(f) => f(proj, time),
         }
     }
@@ -17202,10 +17202,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TimeMap2_QNToTime(&self, proj: *mut root::ReaProject, qn: f64) -> f64 {
         match self.pointers.TimeMap2_QNToTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_QNToTime)
-            )),
+            ),
             Some(f) => f(proj, qn),
         }
     }
@@ -17222,10 +17222,10 @@ impl Reaper {
         cdenomOutOptional: *mut ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.TimeMap2_timeToBeats {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_timeToBeats)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 tpos,
@@ -17241,10 +17241,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TimeMap2_timeToQN(&self, proj: *mut root::ReaProject, tpos: f64) -> f64 {
         match self.pointers.TimeMap2_timeToQN {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_timeToQN)
-            )),
+            ),
             Some(f) => f(proj, tpos),
         }
     }
@@ -17257,19 +17257,19 @@ impl Reaper {
         dropFrameOutOptional: *mut bool,
     ) -> f64 {
         match self.pointers.TimeMap_curFrameRate {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_curFrameRate)
-            )),
+            ),
             Some(f) => f(proj, dropFrameOutOptional),
         }
     }
     pub fn TimeMap_GetDividedBpmAtTime(&self, time: f64) -> f64 {
         match self.pointers.TimeMap_GetDividedBpmAtTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetDividedBpmAtTime)
-            )),
+            ),
             Some(f) => f(time),
         }
     }
@@ -17287,10 +17287,10 @@ impl Reaper {
         tempoOut: *mut f64,
     ) -> f64 {
         match self.pointers.TimeMap_GetMeasureInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetMeasureInfo)
-            )),
+            ),
             Some(f) => f(
                 proj,
                 measure,
@@ -17313,10 +17313,10 @@ impl Reaper {
         pattern_sz: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TimeMap_GetMetronomePattern {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetMetronomePattern)
-            )),
+            ),
             Some(f) => f(proj, time, pattern, pattern_sz),
         }
     }
@@ -17332,10 +17332,10 @@ impl Reaper {
         tempoOut: *mut f64,
     ) {
         match self.pointers.TimeMap_GetTimeSigAtTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetTimeSigAtTime)
-            )),
+            ),
             Some(f) => f(proj, time, timesig_numOut, timesig_denomOut, tempoOut),
         }
     }
@@ -17350,19 +17350,19 @@ impl Reaper {
         qnMeasureEndOutOptional: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TimeMap_QNToMeasures {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_QNToMeasures)
-            )),
+            ),
             Some(f) => f(proj, qn, qnMeasureStartOutOptional, qnMeasureEndOutOptional),
         }
     }
     pub fn TimeMap_QNToTime(&self, qn: f64) -> f64 {
         match self.pointers.TimeMap_QNToTime {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_QNToTime)
-            )),
+            ),
             Some(f) => f(qn),
         }
     }
@@ -17371,19 +17371,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TimeMap_QNToTime_abs(&self, proj: *mut root::ReaProject, qn: f64) -> f64 {
         match self.pointers.TimeMap_QNToTime_abs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_QNToTime_abs)
-            )),
+            ),
             Some(f) => f(proj, qn),
         }
     }
     pub fn TimeMap_timeToQN(&self, tpos: f64) -> f64 {
         match self.pointers.TimeMap_timeToQN {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_timeToQN)
-            )),
+            ),
             Some(f) => f(tpos),
         }
     }
@@ -17392,10 +17392,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TimeMap_timeToQN_abs(&self, proj: *mut root::ReaProject, tpos: f64) -> f64 {
         match self.pointers.TimeMap_timeToQN_abs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_timeToQN_abs)
-            )),
+            ),
             Some(f) => f(proj, tpos),
         }
     }
@@ -17408,10 +17408,10 @@ impl Reaper {
         send_idx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.ToggleTrackSendUIMute {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ToggleTrackSendUIMute)
-            )),
+            ),
             Some(f) => f(track, send_idx),
         }
     }
@@ -17425,10 +17425,10 @@ impl Reaper {
         clear: bool,
     ) -> f64 {
         match self.pointers.Track_GetPeakHoldDB {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Track_GetPeakHoldDB)
-            )),
+            ),
             Some(f) => f(track, channel, clear),
         }
     }
@@ -17441,10 +17441,10 @@ impl Reaper {
         channel: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.Track_GetPeakInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Track_GetPeakInfo)
-            )),
+            ),
             Some(f) => f(track, channel),
         }
     }
@@ -17459,10 +17459,10 @@ impl Reaper {
         topmost: bool,
     ) {
         match self.pointers.TrackCtl_SetToolTip {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackCtl_SetToolTip)
-            )),
+            ),
             Some(f) => f(fmt, xpos, ypos, topmost),
         }
     }
@@ -17477,10 +17477,10 @@ impl Reaper {
         instantiate: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_AddByName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_AddByName)
-            )),
+            ),
             Some(f) => f(track, fxname, recFX, instantiate),
         }
     }
@@ -17496,10 +17496,10 @@ impl Reaper {
         is_move: bool,
     ) {
         match self.pointers.TrackFX_CopyToTake {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_CopyToTake)
-            )),
+            ),
             Some(f) => f(src_track, src_fx, dest_take, dest_fx, is_move),
         }
     }
@@ -17515,10 +17515,10 @@ impl Reaper {
         is_move: bool,
     ) {
         match self.pointers.TrackFX_CopyToTrack {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_CopyToTrack)
-            )),
+            ),
             Some(f) => f(src_track, src_fx, dest_track, dest_fx, is_move),
         }
     }
@@ -17531,10 +17531,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_Delete {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_Delete)
-            )),
+            ),
             Some(f) => f(track, fx),
         }
     }
@@ -17548,10 +17548,10 @@ impl Reaper {
         param: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_EndParamEdit {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_EndParamEdit)
-            )),
+            ),
             Some(f) => f(track, fx, param),
         }
     }
@@ -17568,10 +17568,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_FormatParamValue {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_FormatParamValue)
-            )),
+            ),
             Some(f) => f(track, fx, param, val, buf, buf_sz),
         }
     }
@@ -17588,10 +17588,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_FormatParamValueNormalized {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_FormatParamValueNormalized)
-            )),
+            ),
             Some(f) => f(track, fx, param, value, buf, buf_sz),
         }
     }
@@ -17605,10 +17605,10 @@ impl Reaper {
         instantiate: bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetByName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetByName)
-            )),
+            ),
             Some(f) => f(track, fxname, instantiate),
         }
     }
@@ -17620,10 +17620,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetChainVisible {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetChainVisible)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -17632,10 +17632,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TrackFX_GetCount(&self, track: *mut root::MediaTrack) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetCount)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -17648,10 +17648,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetEnabled {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEnabled)
-            )),
+            ),
             Some(f) => f(track, fx),
         }
     }
@@ -17664,10 +17664,10 @@ impl Reaper {
         instantiate: bool,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetEQ {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEQ)
-            )),
+            ),
             Some(f) => f(track, instantiate),
         }
     }
@@ -17682,10 +17682,10 @@ impl Reaper {
         bandidx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetEQBandEnabled {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEQBandEnabled)
-            )),
+            ),
             Some(f) => f(track, fxidx, bandtype, bandidx),
         }
     }
@@ -17703,10 +17703,10 @@ impl Reaper {
         normvalOut: *mut f64,
     ) -> bool {
         match self.pointers.TrackFX_GetEQParam {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEQParam)
-            )),
+            ),
             Some(f) => f(
                 track,
                 fxidx,
@@ -17727,10 +17727,10 @@ impl Reaper {
         index: ::std::os::raw::c_int,
     ) -> root::HWND {
         match self.pointers.TrackFX_GetFloatingWindow {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFloatingWindow)
-            )),
+            ),
             Some(f) => f(track, index),
         }
     }
@@ -17746,10 +17746,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetFormattedParamValue {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFormattedParamValue)
-            )),
+            ),
             Some(f) => f(track, fx, param, buf, buf_sz),
         }
     }
@@ -17762,10 +17762,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> *mut root::GUID {
         match self.pointers.TrackFX_GetFXGUID {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFXGUID)
-            )),
+            ),
             Some(f) => f(track, fx),
         }
     }
@@ -17780,10 +17780,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetFXName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFXName)
-            )),
+            ),
             Some(f) => f(track, fx, buf, buf_sz),
         }
     }
@@ -17795,10 +17795,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetInstrument {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetInstrument)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -17813,10 +17813,10 @@ impl Reaper {
         outputPinsOutOptional: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetIOSize {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetIOSize)
-            )),
+            ),
             Some(f) => f(track, fx, inputPinsOutOptional, outputPinsOutOptional),
         }
     }
@@ -17832,10 +17832,10 @@ impl Reaper {
         bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetNamedConfigParm {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetNamedConfigParm)
-            )),
+            ),
             Some(f) => f(track, fx, parmname, bufOut, bufOut_sz),
         }
     }
@@ -17848,10 +17848,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetNumParams {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetNumParams)
-            )),
+            ),
             Some(f) => f(track, fx),
         }
     }
@@ -17864,10 +17864,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetOffline {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetOffline)
-            )),
+            ),
             Some(f) => f(track, fx),
         }
     }
@@ -17880,10 +17880,10 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetOpen {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetOpen)
-            )),
+            ),
             Some(f) => f(track, fx),
         }
     }
@@ -17899,10 +17899,10 @@ impl Reaper {
         maxvalOut: *mut f64,
     ) -> f64 {
         match self.pointers.TrackFX_GetParam {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParam)
-            )),
+            ),
             Some(f) => f(track, fx, param, minvalOut, maxvalOut),
         }
     }
@@ -17920,10 +17920,10 @@ impl Reaper {
         istoggleOut: *mut bool,
     ) -> bool {
         match self.pointers.TrackFX_GetParameterStepSizes {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParameterStepSizes)
-            )),
+            ),
             Some(f) => f(
                 track,
                 fx,
@@ -17948,10 +17948,10 @@ impl Reaper {
         midvalOut: *mut f64,
     ) -> f64 {
         match self.pointers.TrackFX_GetParamEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamEx)
-            )),
+            ),
             Some(f) => f(track, fx, param, minvalOut, maxvalOut, midvalOut),
         }
     }
@@ -17967,10 +17967,10 @@ impl Reaper {
         buf_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetParamName {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamName)
-            )),
+            ),
             Some(f) => f(track, fx, param, buf, buf_sz),
         }
     }
@@ -17984,10 +17984,10 @@ impl Reaper {
         param: ::std::os::raw::c_int,
     ) -> f64 {
         match self.pointers.TrackFX_GetParamNormalized {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamNormalized)
-            )),
+            ),
             Some(f) => f(track, fx, param),
         }
     }
@@ -18003,10 +18003,10 @@ impl Reaper {
         high32OutOptional: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetPinMappings {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPinMappings)
-            )),
+            ),
             Some(f) => f(tr, fx, isoutput, pin, high32OutOptional),
         }
     }
@@ -18021,10 +18021,10 @@ impl Reaper {
         presetname_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetPreset {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPreset)
-            )),
+            ),
             Some(f) => f(track, fx, presetname, presetname_sz),
         }
     }
@@ -18038,10 +18038,10 @@ impl Reaper {
         numberOfPresetsOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetPresetIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPresetIndex)
-            )),
+            ),
             Some(f) => f(track, fx, numberOfPresetsOut),
         }
     }
@@ -18053,10 +18053,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetRecChainVisible {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetRecChainVisible)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -18068,10 +18068,10 @@ impl Reaper {
         track: *mut root::MediaTrack,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetRecCount {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetRecCount)
-            )),
+            ),
             Some(f) => f(track),
         }
     }
@@ -18086,10 +18086,10 @@ impl Reaper {
         fn_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.TrackFX_GetUserPresetFilename {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetUserPresetFilename)
-            )),
+            ),
             Some(f) => f(track, fx, fn_, fn_sz),
         }
     }
@@ -18103,10 +18103,10 @@ impl Reaper {
         presetmove: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_NavigatePresets {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_NavigatePresets)
-            )),
+            ),
             Some(f) => f(track, fx, presetmove),
         }
     }
@@ -18120,10 +18120,10 @@ impl Reaper {
         enabled: bool,
     ) {
         match self.pointers.TrackFX_SetEnabled {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetEnabled)
-            )),
+            ),
             Some(f) => f(track, fx, enabled),
         }
     }
@@ -18139,10 +18139,10 @@ impl Reaper {
         enable: bool,
     ) -> bool {
         match self.pointers.TrackFX_SetEQBandEnabled {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetEQBandEnabled)
-            )),
+            ),
             Some(f) => f(track, fxidx, bandtype, bandidx, enable),
         }
     }
@@ -18160,10 +18160,10 @@ impl Reaper {
         isnorm: bool,
     ) -> bool {
         match self.pointers.TrackFX_SetEQParam {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetEQParam)
-            )),
+            ),
             Some(f) => f(track, fxidx, bandtype, bandidx, paramtype, val, isnorm),
         }
     }
@@ -18178,10 +18178,10 @@ impl Reaper {
         value: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.TrackFX_SetNamedConfigParm {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetNamedConfigParm)
-            )),
+            ),
             Some(f) => f(track, fx, parmname, value),
         }
     }
@@ -18195,10 +18195,10 @@ impl Reaper {
         offline: bool,
     ) {
         match self.pointers.TrackFX_SetOffline {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetOffline)
-            )),
+            ),
             Some(f) => f(track, fx, offline),
         }
     }
@@ -18212,10 +18212,10 @@ impl Reaper {
         open: bool,
     ) {
         match self.pointers.TrackFX_SetOpen {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetOpen)
-            )),
+            ),
             Some(f) => f(track, fx, open),
         }
     }
@@ -18230,10 +18230,10 @@ impl Reaper {
         val: f64,
     ) -> bool {
         match self.pointers.TrackFX_SetParam {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetParam)
-            )),
+            ),
             Some(f) => f(track, fx, param, val),
         }
     }
@@ -18248,10 +18248,10 @@ impl Reaper {
         value: f64,
     ) -> bool {
         match self.pointers.TrackFX_SetParamNormalized {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetParamNormalized)
-            )),
+            ),
             Some(f) => f(track, fx, param, value),
         }
     }
@@ -18268,10 +18268,10 @@ impl Reaper {
         hi32bits: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_SetPinMappings {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetPinMappings)
-            )),
+            ),
             Some(f) => f(tr, fx, isoutput, pin, low32bits, hi32bits),
         }
     }
@@ -18285,10 +18285,10 @@ impl Reaper {
         presetname: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.TrackFX_SetPreset {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetPreset)
-            )),
+            ),
             Some(f) => f(track, fx, presetname),
         }
     }
@@ -18302,10 +18302,10 @@ impl Reaper {
         idx: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_SetPresetByIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetPresetByIndex)
-            )),
+            ),
             Some(f) => f(track, fx, idx),
         }
     }
@@ -18319,37 +18319,37 @@ impl Reaper {
         showFlag: ::std::os::raw::c_int,
     ) {
         match self.pointers.TrackFX_Show {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_Show)
-            )),
+            ),
             Some(f) => f(track, index, showFlag),
         }
     }
     pub fn TrackList_AdjustWindows(&self, isMinor: bool) {
         match self.pointers.TrackList_AdjustWindows {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackList_AdjustWindows)
-            )),
+            ),
             Some(f) => f(isMinor),
         }
     }
     pub fn TrackList_UpdateAllExternalSurfaces(&self) {
         match self.pointers.TrackList_UpdateAllExternalSurfaces {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackList_UpdateAllExternalSurfaces)
-            )),
+            ),
             Some(f) => f(),
         }
     }
     pub fn Undo_BeginBlock(&self) {
         match self.pointers.Undo_BeginBlock {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_BeginBlock)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -18358,10 +18358,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Undo_BeginBlock2(&self, proj: *mut root::ReaProject) {
         match self.pointers.Undo_BeginBlock2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_BeginBlock2)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -18373,10 +18373,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.Undo_CanRedo2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_CanRedo2)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -18388,10 +18388,10 @@ impl Reaper {
         proj: *mut root::ReaProject,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.Undo_CanUndo2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_CanUndo2)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -18400,10 +18400,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Undo_DoRedo2(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.Undo_DoRedo2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_DoRedo2)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -18412,10 +18412,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Undo_DoUndo2(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.Undo_DoUndo2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_DoUndo2)
-            )),
+            ),
             Some(f) => f(proj),
         }
     }
@@ -18428,10 +18428,10 @@ impl Reaper {
         extraflags: ::std::os::raw::c_int,
     ) {
         match self.pointers.Undo_EndBlock {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_EndBlock)
-            )),
+            ),
             Some(f) => f(descchange, extraflags),
         }
     }
@@ -18445,10 +18445,10 @@ impl Reaper {
         extraflags: ::std::os::raw::c_int,
     ) {
         match self.pointers.Undo_EndBlock2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_EndBlock2)
-            )),
+            ),
             Some(f) => f(proj, descchange, extraflags),
         }
     }
@@ -18457,10 +18457,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn Undo_OnStateChange(&self, descchange: *const ::std::os::raw::c_char) {
         match self.pointers.Undo_OnStateChange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChange)
-            )),
+            ),
             Some(f) => f(descchange),
         }
     }
@@ -18473,10 +18473,10 @@ impl Reaper {
         descchange: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.Undo_OnStateChange2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChange2)
-            )),
+            ),
             Some(f) => f(proj, descchange),
         }
     }
@@ -18490,10 +18490,10 @@ impl Reaper {
         item: *mut root::MediaItem,
     ) {
         match self.pointers.Undo_OnStateChange_Item {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChange_Item)
-            )),
+            ),
             Some(f) => f(proj, name, item),
         }
     }
@@ -18507,10 +18507,10 @@ impl Reaper {
         trackparm: ::std::os::raw::c_int,
     ) {
         match self.pointers.Undo_OnStateChangeEx {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChangeEx)
-            )),
+            ),
             Some(f) => f(descchange, whichStates, trackparm),
         }
     }
@@ -18525,10 +18525,10 @@ impl Reaper {
         trackparm: ::std::os::raw::c_int,
     ) {
         match self.pointers.Undo_OnStateChangeEx2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChangeEx2)
-            )),
+            ),
             Some(f) => f(proj, descchange, whichStates, trackparm),
         }
     }
@@ -18538,19 +18538,19 @@ impl Reaper {
         writeamt: ::std::os::raw::c_int,
     ) {
         match self.pointers.update_disk_counters {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(update_disk_counters)
-            )),
+            ),
             Some(f) => f(readamt, writeamt),
         }
     }
     pub fn UpdateArrange(&self) {
         match self.pointers.UpdateArrange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateArrange)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -18559,19 +18559,19 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn UpdateItemInProject(&self, item: *mut root::MediaItem) {
         match self.pointers.UpdateItemInProject {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateItemInProject)
-            )),
+            ),
             Some(f) => f(item),
         }
     }
     pub fn UpdateTimeline(&self) {
         match self.pointers.UpdateTimeline {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateTimeline)
-            )),
+            ),
             Some(f) => f(),
         }
     }
@@ -18584,10 +18584,10 @@ impl Reaper {
         ctypename: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.ValidatePtr {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ValidatePtr)
-            )),
+            ),
             Some(f) => f(pointer, ctypename),
         }
     }
@@ -18601,10 +18601,10 @@ impl Reaper {
         ctypename: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.ValidatePtr2 {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ValidatePtr2)
-            )),
+            ),
             Some(f) => f(proj, pointer, ctypename),
         }
     }
@@ -18617,10 +18617,10 @@ impl Reaper {
         pageByName: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.ViewPrefs {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ViewPrefs)
-            )),
+            ),
             Some(f) => f(page, pageByName),
         }
     }
@@ -18643,10 +18643,10 @@ impl Reaper {
         mode: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.WDL_VirtualWnd_ScaledBlitBG {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WDL_VirtualWnd_ScaledBlitBG)
-            )),
+            ),
             Some(f) => f(
                 dest, src, destx, desty, destw, desth, clipx, clipy, clipw, cliph, alpha, mode,
             ),
@@ -18654,19 +18654,19 @@ impl Reaper {
     }
     pub fn GetMidiInput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Input {
         match self.pointers.GetMidiInput {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMidiInput)
-            )),
+            ),
             Some(f) => f(idx),
         }
     }
     pub fn GetMidiOutput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Output {
         match self.pointers.GetMidiOutput {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMidiOutput)
-            )),
+            ),
             Some(f) => f(idx),
         }
     }
@@ -18675,10 +18675,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn InitializeCoolSB(&self, hwnd: root::HWND) -> root::BOOL {
         match self.pointers.InitializeCoolSB {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InitializeCoolSB)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -18687,10 +18687,10 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn UninitializeCoolSB(&self, hwnd: root::HWND) -> root::HRESULT {
         match self.pointers.UninitializeCoolSB {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UninitializeCoolSB)
-            )),
+            ),
             Some(f) => f(hwnd),
         }
     }
@@ -18704,10 +18704,10 @@ impl Reaper {
         size: root::UINT,
     ) -> root::BOOL {
         match self.pointers.CoolSB_SetMinThumbSize {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetMinThumbSize)
-            )),
+            ),
             Some(f) => f(hwnd, wBar, size),
         }
     }
@@ -18721,10 +18721,10 @@ impl Reaper {
         lpsi: root::LPSCROLLINFO,
     ) -> root::BOOL {
         match self.pointers.CoolSB_GetScrollInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_GetScrollInfo)
-            )),
+            ),
             Some(f) => f(hwnd, fnBar, lpsi),
         }
     }
@@ -18739,10 +18739,10 @@ impl Reaper {
         fRedraw: root::BOOL,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CoolSB_SetScrollInfo {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetScrollInfo)
-            )),
+            ),
             Some(f) => f(hwnd, fnBar, lpsi, fRedraw),
         }
     }
@@ -18757,10 +18757,10 @@ impl Reaper {
         fRedraw: root::BOOL,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CoolSB_SetScrollPos {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetScrollPos)
-            )),
+            ),
             Some(f) => f(hwnd, nBar, nPos, fRedraw),
         }
     }
@@ -18776,10 +18776,10 @@ impl Reaper {
         fRedraw: root::BOOL,
     ) -> ::std::os::raw::c_int {
         match self.pointers.CoolSB_SetScrollRange {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetScrollRange)
-            )),
+            ),
             Some(f) => f(hwnd, nBar, nMinPos, nMaxPos, fRedraw),
         }
     }
@@ -18793,10 +18793,10 @@ impl Reaper {
         fShow: root::BOOL,
     ) -> root::BOOL {
         match self.pointers.CoolSB_ShowScrollBar {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_ShowScrollBar)
-            )),
+            ),
             Some(f) => f(hwnd, wBar, fShow),
         }
     }
@@ -18809,10 +18809,10 @@ impl Reaper {
         active: root::BOOL,
     ) -> root::BOOL {
         match self.pointers.CoolSB_SetResizingThumb {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetResizingThumb)
-            )),
+            ),
             Some(f) => f(hwnd, active),
         }
     }
@@ -18825,10 +18825,10 @@ impl Reaper {
         idx: ::std::os::raw::c_int,
     ) -> root::BOOL {
         match self.pointers.CoolSB_SetThemeIndex {
-            None => panic!(format!(
+            None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetThemeIndex)
-            )),
+            ),
             Some(f) => f(hwnd, idx),
         }
     }

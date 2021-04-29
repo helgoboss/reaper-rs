@@ -20,16 +20,16 @@ reaper_vst_plugin!();
 #[derive(Default)]
 struct TestVstPlugin {
     host: HostCallback,
-    session: Option<reaper_medium::ReaperSession>,
-    reaper_guard: Option<Arc<ReaperGuard>>,
+    _session: Option<reaper_medium::ReaperSession>,
+    _reaper_guard: Option<Arc<ReaperGuard>>,
 }
 
 impl Plugin for TestVstPlugin {
     fn new(host: HostCallback) -> Self {
         Self {
             host,
-            session: None,
-            reaper_guard: None,
+            _session: None,
+            _reaper_guard: None,
         }
     }
 
@@ -116,7 +116,7 @@ impl TestVstPlugin {
             med.audio_reg_hardware_hook_add(Box::new(MyOnAudioBuffer { sender, counter: 0 }))
                 .expect("couldn't register audio hook");
         }
-        self.session = Some(med);
+        self._session = Some(med);
     }
 
     fn use_high_level_reaper(&mut self) {
@@ -149,7 +149,7 @@ impl TestVstPlugin {
             },
             || || {},
         );
-        self.reaper_guard = Some(guard);
+        self._reaper_guard = Some(guard);
         // Some Rx stuff
         #[derive(Debug)]
         struct CustomControlSurface {

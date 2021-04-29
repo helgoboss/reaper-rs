@@ -1,5 +1,5 @@
 #![doc(html_root_url = "https://docs.rs/reaper-medium/0.1.0")]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 //! This crate contains the medium-level API of [reaper-rs](https://github.com/helgoboss/reaper-rs).
 //!

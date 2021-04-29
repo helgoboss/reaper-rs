@@ -34,12 +34,20 @@ pub mod root {
     pub const DLL_PROCESS_ATTACH: u32 = 1;
     pub const MB_OK: u32 = 0;
     pub const MB_OKCANCEL: u32 = 1;
+    pub const MB_ABORTRETRYIGNORE: u32 = 2;
     pub const MB_YESNOCANCEL: u32 = 3;
     pub const MB_YESNO: u32 = 4;
     pub const MB_RETRYCANCEL: u32 = 5;
+    pub const MB_DEFBUTTON1: u32 = 0;
+    pub const MB_DEFBUTTON2: u32 = 256;
+    pub const MB_DEFBUTTON3: u32 = 512;
     pub const MB_ICONERROR: u32 = 0;
     pub const MB_ICONSTOP: u32 = 0;
     pub const MB_ICONINFORMATION: u32 = 0;
+    pub const MB_ICONWARNING: u32 = 0;
+    pub const MB_ICONQUESTION: u32 = 0;
+    pub const MB_TOPMOST: u32 = 0;
+    pub const MB_ICONEXCLAMATION: u32 = 0;
     pub const IDOK: u32 = 1;
     pub const IDCANCEL: u32 = 2;
     pub const IDABORT: u32 = 3;
@@ -196,6 +204,7 @@ pub mod root {
     pub const WM_MOUSELAST: u32 = 522;
     pub const WM_CAPTURECHANGED: u32 = 533;
     pub const WM_DROPFILES: u32 = 563;
+    pub const WM_SWELL_EXTENDED: u32 = 921;
     pub const WM_USER: u32 = 1024;
     pub const CBN_SELCHANGE: u32 = 1;
     pub const CBN_EDITCHANGE: u32 = 5;
@@ -331,6 +340,8 @@ pub mod root {
     pub const GMEM_DISCARDABLE: u32 = 0;
     pub const GMEM_SHARE: u32 = 0;
     pub const GMEM_LOWER: u32 = 0;
+    pub const CF_TEXT: u32 = 1;
+    pub const CF_HDROP: u32 = 2;
     pub const REAPER_PLUGIN_VERSION: i32 = 526;
     pub const PCM_SOURCE_EXT_INLINEEDITOR: u32 = 256;
     pub const PCM_SOURCE_EXT_PROJCHANGENOTIFY: u32 = 8192;
@@ -470,6 +481,7 @@ pub mod root {
     pub type BOOL = ::std::os::raw::c_schar;
     pub type WORD = ::std::os::raw::c_ushort;
     pub type DWORD = ::std::os::raw::c_uint;
+    pub type COLORREF = root::DWORD;
     pub type UINT = ::std::os::raw::c_uint;
     pub type WPARAM = root::ULONG_PTR;
     pub type LPARAM = root::LONG_PTR;
@@ -8893,6 +8905,11 @@ pub mod root {
             >;
         }
         extern "C" {
+            pub static mut GetWindowTextLength: ::std::option::Option<
+                unsafe extern "C" fn(arg1: root::HWND) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
             pub static mut CheckDlgButton: ::std::option::Option<
                 unsafe extern "C" fn(
                     hwnd: root::HWND,
@@ -9308,31 +9325,12 @@ pub mod root {
             >;
         }
         extern "C" {
-            pub static mut ListView_GetSubItemRect: ::std::option::Option<
-                unsafe extern "C" fn(
-                    h: root::HWND,
-                    item: ::std::os::raw::c_int,
-                    subitem: ::std::os::raw::c_int,
-                    code: ::std::os::raw::c_int,
-                    r: *mut root::RECT,
-                ) -> bool,
-            >;
-        }
-        extern "C" {
             pub static mut ListView_SetImageList: ::std::option::Option<
                 unsafe extern "C" fn(
                     h: root::HWND,
                     imagelist: root::HIMAGELIST,
                     which: ::std::os::raw::c_int,
                 ),
-            >;
-        }
-        extern "C" {
-            pub static mut ListView_HitTest: ::std::option::Option<
-                unsafe extern "C" fn(
-                    h: root::HWND,
-                    pinf: *mut root::LVHITTESTINFO,
-                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -9361,16 +9359,6 @@ pub mod root {
                     compf: root::PFNLVCOMPARE,
                     parm: root::LPARAM,
                 ),
-            >;
-        }
-        extern "C" {
-            pub static mut ListView_GetItemRect: ::std::option::Option<
-                unsafe extern "C" fn(
-                    h: root::HWND,
-                    item: ::std::os::raw::c_int,
-                    r: *mut root::RECT,
-                    code: ::std::os::raw::c_int,
-                ) -> bool,
             >;
         }
         extern "C" {
@@ -9432,6 +9420,35 @@ pub mod root {
                     col: ::std::os::raw::c_int,
                     hi: *mut root::HDITEM,
                 ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetItemRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    item: ::std::os::raw::c_int,
+                    r: *mut root::RECT,
+                    code: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_GetSubItemRect: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    item: ::std::os::raw::c_int,
+                    subitem: ::std::os::raw::c_int,
+                    code: ::std::os::raw::c_int,
+                    r: *mut root::RECT,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            pub static mut ListView_HitTest: ::std::option::Option<
+                unsafe extern "C" fn(
+                    h: root::HWND,
+                    pinf: *mut root::LVHITTESTINFO,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -9549,6 +9566,11 @@ pub mod root {
             >;
         }
         extern "C" {
+            pub static mut TreeView_EnsureVisible: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM),
+            >;
+        }
+        extern "C" {
             pub static mut TreeView_GetItem: ::std::option::Option<
                 unsafe extern "C" fn(hwnd: root::HWND, pitem: root::LPTVITEM) -> root::BOOL,
             >;
@@ -9569,6 +9591,11 @@ pub mod root {
         extern "C" {
             pub static mut TreeView_SetIndent: ::std::option::Option<
                 unsafe extern "C" fn(hwnd: root::HWND, indent: ::std::os::raw::c_int) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut TreeView_GetParent: ::std::option::Option<
+                unsafe extern "C" fn(hwnd: root::HWND, item: root::HTREEITEM) -> root::HTREEITEM,
             >;
         }
         extern "C" {
@@ -10823,7 +10850,7 @@ pub mod root {
                 unsafe extern "C" fn(
                     viewpar: root::HWND,
                     wref: *mut *mut ::std::os::raw::c_void,
-                    arg1: *mut root::RECT,
+                    arg1: *const root::RECT,
                 ) -> root::HWND,
             >;
         }
@@ -10881,9 +10908,9 @@ pub mod root {
             pub static mut SWELL_ChooseColor: ::std::option::Option<
                 unsafe extern "C" fn(
                     arg1: root::HWND,
-                    arg2: *mut ::std::os::raw::c_int,
+                    arg2: *mut root::COLORREF,
                     ncustom: ::std::os::raw::c_int,
-                    custom: *mut ::std::os::raw::c_int,
+                    custom: *mut root::COLORREF,
                 ) -> bool,
             >;
         }
@@ -10909,6 +10936,10 @@ pub mod root {
             pub static mut SWELL_SetClassName: ::std::option::Option<
                 unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char),
             >;
+        }
+        extern "C" {
+            pub static mut SWELL_DisableContextMenu:
+                ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND, arg2: bool)>;
         }
         extern "C" {
             pub static mut SWELL_osx_is_dark_mode:
