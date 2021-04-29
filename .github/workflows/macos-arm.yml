@@ -13,8 +13,8 @@ on:
 name: macOS ARM
 
 jobs:
-  check:
-    name: Check
+  build:
+    name: Build
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,55 +23,15 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2021-03-10-aarch64-apple-darwin
+          toolchain: nightly-2021-03-10
+          target: aarch64-apple-darwin
           override: true
-      - name: cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-
-  test:
-    name: Test Suite
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - uses: mxschmitt/action-tmate@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly-2021-03-10-aarch64-apple-darwin
-          override: true
+      - name: Set SDKROOT
+        run: echo "SDKROOT=$(xcrun -sdk macosx11.1 --show-sdk-path)" >> $GITHUB_ENV
+      - name: Set MACOSX_DEPLOYMENT_TARGET
+        run: echo "MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx11.1 --show-sdk-platform-version)" >> $GITHUB_ENV
       - name: cargo build
         uses: actions-rs/cargo@v1
         with:
           command: build
-      - uses: actions/upload-artifact@v2
-        with:
-          name: test-plug-ins
-          path: target/debug/*.dylib
-      - name: cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: -- --nocapture
-
-  clippy:
-    name: Clippy
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly-2021-03-10-aarch64-apple-darwin
-          override: true
-      - run: rustup component add clippy
-      - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+          args: --target aarch64-apple-darwin
