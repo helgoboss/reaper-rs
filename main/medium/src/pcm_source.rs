@@ -231,11 +231,7 @@ impl BorrowedPcmSource {
     /// empty path to `None`.
     pub fn get_file_name<R>(&self, use_file: impl FnOnce(Option<&Path>) -> R) -> R {
         let file_name = unsafe { self.get_file_name_unchecked() };
-        let path = if let Some(n) = file_name {
-            Some(Path::new(n.to_str()))
-        } else {
-            None
-        };
+        let path = file_name.map(|n| Path::new(n.to_str()));
         use_file(path)
     }
 
