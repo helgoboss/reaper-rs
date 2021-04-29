@@ -10,12 +10,12 @@ on:
   schedule:
     - cron: '0 5 * * MON'
 
-name: Windows
+name: macOS x86_64
 
 jobs:
   check:
     name: Check
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -32,7 +32,7 @@ jobs:
 
   test:
     name: Test Suite
-    runs-on: windows-latest
+    runs-on: macos-latest
     env:
       MACOSX_DEPLOYMENT_TARGET: 10.7
     steps:
@@ -48,10 +48,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v2
       - uses: actions/upload-artifact@v2
         with:
           name: test-plug-ins
-          path: target/debug/*.dll
+          path: target/debug/*.dylib
       - name: cargo test
         uses: actions-rs/cargo@v1
         with:
@@ -60,7 +62,7 @@ jobs:
 
   clippy:
     name: Clippy
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
         with:

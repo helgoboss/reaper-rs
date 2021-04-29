@@ -10,7 +10,7 @@ on:
   schedule:
     - cron: '0 5 * * MON'
 
-name: macOS ARM
+name: macOS aarch64
 
 jobs:
   build:
