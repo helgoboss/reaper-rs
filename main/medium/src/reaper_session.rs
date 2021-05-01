@@ -393,6 +393,29 @@ impl ReaperSession {
         }
     }
 
+    /// Registers a timer.
+    ///
+    /// The given function will be called regularly until removal. Roughly 30 times per second,
+    /// just like the `run()` method of a control surface.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_timer(
+        &mut self,
+        timer_func: extern "C" fn(),
+    ) -> ReaperFunctionResult<()> {
+        unsafe { self.plugin_register_add(RegistrationObject::Timer(timer_func))? };
+        Ok(())
+    }
+
+    /// Unregisters a timer.
+    pub fn plugin_register_remove_timer(&mut self, timer_func: extern "C" fn()) {
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::Timer(timer_func));
+        }
+    }
+
     /// Registers a command ID for the given command name.
     ///
     /// The given command name must be a unique identifier with only A-Z and 0-9.

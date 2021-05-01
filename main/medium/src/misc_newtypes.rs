@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
+use std::ops::{Add, Rem, Sub};
 
 /// A command ID.
 ///
@@ -515,9 +516,13 @@ impl TryFrom<f64> for Hz {
     derive(Serialize, Deserialize),
     serde(try_from = "f64")
 )]
+#[repr(transparent)]
 pub struct PositionInSeconds(pub(crate) f64);
 
 impl PositionInSeconds {
+    /// Position at 0.0 seconds. E.g. start of project, measure, etc. depending on the context.
+    pub const ZERO: PositionInSeconds = PositionInSeconds(0.0);
+
     fn is_valid(value: f64) -> bool {
         !value.is_infinite() && !value.is_nan()
     }
@@ -565,6 +570,34 @@ impl TryFrom<f64> for PositionInSeconds {
     }
 }
 
+impl Sub for PositionInSeconds {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        PositionInSeconds(self.0 - rhs.0)
+    }
+}
+
+impl Add for PositionInSeconds {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        PositionInSeconds(self.0 + rhs.0)
+    }
+}
+
+impl Rem<DurationInSeconds> for PositionInSeconds {
+    type Output = Option<Self>;
+
+    fn rem(self, rhs: DurationInSeconds) -> Option<Self> {
+        let res = self.0 % rhs.0;
+        if res.is_nan() {
+            return None;
+        }
+        Some(PositionInSeconds(res))
+    }
+}
+
 /// This represents a duration expressed as positive amount of seconds.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(
@@ -575,6 +608,12 @@ impl TryFrom<f64> for PositionInSeconds {
 pub struct DurationInSeconds(pub(crate) f64);
 
 impl DurationInSeconds {
+    /// The minimum duration (zero, empty, none).
+    pub const MIN: DurationInSeconds = DurationInSeconds(0.0);
+
+    /// The maximum possible duration (highest possible floating-point number).
+    pub const MAX: DurationInSeconds = DurationInSeconds(f64::MAX);
+
     fn is_valid(value: f64) -> bool {
         value >= 0.0 && !value.is_infinite() && !value.is_nan()
     }
@@ -691,6 +730,9 @@ impl TryFrom<f64> for DurationInBeats {
 pub struct PositionInBeats(pub(crate) f64);
 
 impl PositionInBeats {
+    /// Position at 0.0 beats. E.g. start of project, measure, etc. depending on the context.
+    pub const ZERO: PositionInBeats = PositionInBeats(0.0);
+
     fn is_valid(value: f64) -> bool {
         !value.is_infinite() && !value.is_nan()
     }

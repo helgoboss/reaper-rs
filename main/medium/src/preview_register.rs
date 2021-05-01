@@ -45,6 +45,10 @@ impl OwnedPreviewRegister {
         self.source.as_ref()
     }
 
+    pub fn src_mut(&mut self) -> Option<&mut FlexibleOwnedPcmSource> {
+        self.source.as_mut()
+    }
+
     pub fn set_src(
         &mut self,
         src: Option<FlexibleOwnedPcmSource>,

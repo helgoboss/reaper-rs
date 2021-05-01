@@ -32,6 +32,16 @@ impl BorrowedPcmSourceTransfer {
         NonNull::from(&self.0)
     }
 
+    /// Returns the start time of the block.
+    pub fn time_s(&self) -> PositionInSeconds {
+        unsafe { PositionInSeconds::new_unchecked(self.0.time_s) }
+    }
+
+    /// Sets the start time of the block.
+    pub fn set_time_s(&mut self, time: PositionInSeconds) {
+        self.0.time_s = time.get();
+    }
+
     /// Returns the list of MIDI events to be filled.
     pub fn midi_event_list(&self) -> &BorrowedMidiEventList {
         if self.0.midi_events.is_null() {
@@ -115,6 +125,12 @@ impl AsRef<BorrowedPcmSource> for OwnedPcmSource {
     }
 }
 
+impl AsMut<BorrowedPcmSource> for OwnedPcmSource {
+    fn as_mut(&mut self) -> &mut BorrowedPcmSource {
+        unsafe { self.0.as_mut() }
+    }
+}
+
 impl Borrow<BorrowedPcmSource> for OwnedPcmSource {
     fn borrow(&self) -> &BorrowedPcmSource {
         self.as_ref()
@@ -173,6 +189,17 @@ impl PcmSource {
     /// [`validate_ptr_2()`]: struct.Reaper.html#method.validate_ptr_2
     pub unsafe fn as_ref(&self) -> &BorrowedPcmSource {
         BorrowedPcmSource::ref_cast(&*self.0.as_ref())
+    }
+
+    /// Turns this pointer into a mutable reference.
+    ///
+    /// # Safety
+    ///
+    /// See [`as_ref()`].
+    ///
+    /// [`as_ref()`]: #method.as_ref
+    pub unsafe fn as_mut(&mut self) -> &mut BorrowedPcmSource {
+        BorrowedPcmSource::ref_cast_mut(&mut *self.0.as_mut())
     }
 }
 
@@ -653,9 +680,9 @@ pub struct PropertiesWindowArgs {
     pub parent_window: Option<Hwnd>,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(PartialEq, Debug)]
 pub struct GetSamplesArgs<'a> {
-    pub block: &'a BorrowedPcmSourceTransfer,
+    pub block: &'a mut BorrowedPcmSourceTransfer,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -801,7 +828,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
         if block.is_null() {
             panic!("called PCM_source::GetSamples() with null block")
         }
-        let block = BorrowedPcmSourceTransfer::ref_cast(unsafe { &*block });
+        let block = BorrowedPcmSourceTransfer::ref_cast_mut(unsafe { &mut *block });
         let args = GetSamplesArgs { block };
         self.delegate.get_samples(args);
     }
@@ -896,6 +923,15 @@ impl AsRef<BorrowedPcmSource> for FlexibleOwnedPcmSource {
     }
 }
 
+impl AsMut<BorrowedPcmSource> for FlexibleOwnedPcmSource {
+    fn as_mut(&mut self) -> &mut BorrowedPcmSource {
+        match self {
+            FlexibleOwnedPcmSource::Reaper(s) => s.as_mut(),
+            FlexibleOwnedPcmSource::Custom(s) => s.as_mut(),
+        }
+    }
+}
+
 /// Represents an owned PCM source that is backed by a Rust [`CustomPcmSource`] trait
 /// implementation.
 ///
@@ -918,6 +954,12 @@ impl fmt::Debug for CustomOwnedPcmSource {
 impl AsRef<BorrowedPcmSource> for CustomOwnedPcmSource {
     fn as_ref(&self) -> &BorrowedPcmSource {
         self.cpp_source.as_ref()
+    }
+}
+
+impl AsMut<BorrowedPcmSource> for CustomOwnedPcmSource {
+    fn as_mut(&mut self) -> &mut BorrowedPcmSource {
+        self.cpp_source.as_mut()
     }
 }
 

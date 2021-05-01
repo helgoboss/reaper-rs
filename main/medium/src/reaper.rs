@@ -5,7 +5,7 @@ use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
 use reaper_macros::measure;
 use std::os::raw::{c_char, c_void};
-use std::ptr::{null_mut, NonNull};
+use std::ptr::{null, null_mut, NonNull};
 
 use reaper_low::{raw, register_plugin_destroy_hook};
 
@@ -15,8 +15,8 @@ use crate::{
     BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
     EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
     GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     PanMode, PcmSource, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds,
     ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
@@ -1298,13 +1298,61 @@ impl<UsageScope> Reaper<UsageScope> {
         );
         TimeMap2TimeToBeatsResult {
             full_beats: PositionInBeats::new(full_beats.assume_init()),
-            measure_index: measures.assume_init() as _,
+            measure_index: measures.assume_init(),
             beats_since_measure: PositionInBeats::new(beats_within_measure),
             time_signature: TimeSignature {
                 numerator: NonZeroU32::new(measure_length.assume_init() as _).unwrap(),
                 denominator: NonZeroU32::new(common_denom.assume_init() as _).unwrap(),
             },
         }
+    }
+
+    /// Converts the given beat position to time, optionally starting from a specific measure.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn time_map_2_beats_to_time(
+        &self,
+        project: ProjectContext,
+        measure_mode: MeasureMode,
+        bpos: PositionInBeats,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_2_beats_to_time_unchecked(project, measure_mode, bpos) }
+    }
+
+    /// Like [`time_map_2_beats_to_time()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_2_beats_to_time()`]: #method.time_map_2_beats_to_time
+    #[measure(ResponseTimeMultiThreaded)]
+    pub unsafe fn time_map_2_beats_to_time_unchecked(
+        &self,
+        project: ProjectContext,
+        measure_mode: MeasureMode,
+        bpos: PositionInBeats,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        use MeasureMode::*;
+        let tpos = self.low.TimeMap2_beatsToTime(
+            project.to_raw(),
+            bpos.0,
+            match measure_mode {
+                IgnoreMeasure => null(),
+                FromMeasureAtIndex(i) => &i as *const _,
+            },
+        );
+        PositionInSeconds::new(tpos)
     }
 
     /// Returns the effective tempo in BPM at the given position (i.e. 2x in /8 signatures).
@@ -5754,7 +5802,7 @@ pub struct TimeMap2TimeToBeatsResult {
     /// Position in beats since project start.
     pub full_beats: PositionInBeats,
     /// Index of the measure in which the given position is located.
-    pub measure_index: u32,
+    pub measure_index: i32,
     /// Position in beats within that measure.
     pub beats_since_measure: PositionInBeats,
     /// Time signature of that measure.

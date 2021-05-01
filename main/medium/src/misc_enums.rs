@@ -210,6 +210,16 @@ impl RecordArmMode {
     }
 }
 
+/// Defines whether to ignore measures or from which measure to count.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum MeasureMode {
+    /// Counts beats only. Doesn't stop at tempo markers.
+    IgnoreMeasure,
+    /// Counts beats starting from the measure at the given index. Stops counting at the next tempo
+    /// marker.
+    FromMeasureAtIndex(i32),
+}
+
 /// Defines whether to align with measure starts when playing previews.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum MeasureAlignment {
@@ -607,6 +617,8 @@ pub enum RegistrationObject<'a> {
     HookPostCommand(raw::HookPostCommand),
     /// A hook post command 2.
     HookPostCommand2(raw::HookPostCommand2),
+    /// A timer.
+    Timer(raw::TimerFunction),
     /// A toggle action.
     ///
     /// Extract from `reaper_plugin.h`:
@@ -732,6 +744,10 @@ impl<'a> RegistrationObject<'a> {
             },
             HookPostCommand2(func) => PluginRegistration {
                 key: reaper_str!("hookpostcommand2").into(),
+                value: func as _,
+            },
+            Timer(func) => PluginRegistration {
+                key: reaper_str!("timer").into(),
                 value: func as _,
             },
             ToggleAction(func) => PluginRegistration {
