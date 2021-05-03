@@ -42,6 +42,16 @@ impl BorrowedPcmSourceTransfer {
         self.0.time_s = time.get();
     }
 
+    /// Returns the number of sample(pair)s actually rendered.
+    pub fn samples_out(&self) -> i32 {
+        self.0.samples_out
+    }
+
+    /// Sets the number of sample(pair)s actually rendered.
+    pub fn set_samples_out(&mut self, number: i32) {
+        self.0.samples_out = number;
+    }
+
     /// Returns the list of MIDI events to be filled.
     pub fn midi_event_list(&self) -> &BorrowedMidiEventList {
         if self.0.midi_events.is_null() {

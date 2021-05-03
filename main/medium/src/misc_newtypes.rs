@@ -671,6 +671,12 @@ impl TryFrom<f64> for DurationInSeconds {
 pub struct DurationInBeats(pub(crate) f64);
 
 impl DurationInBeats {
+    /// The minimum duration (zero, empty, none).
+    pub const MIN: DurationInBeats = DurationInBeats(0.0);
+
+    /// The maximum possible duration (highest possible floating-point number).
+    pub const MAX: DurationInBeats = DurationInBeats(f64::MAX);
+
     fn is_valid(value: f64) -> bool {
         value >= 0.0 && !value.is_infinite() && !value.is_nan()
     }
