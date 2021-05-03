@@ -1355,6 +1355,62 @@ impl<UsageScope> Reaper<UsageScope> {
         PositionInSeconds::new(tpos)
     }
 
+    /// Gets the arrange view start/end time for the given screen coordinates.
+    ///
+    /// Set both `screen_x_start` and `screen_x_end` to 0 to get the full arrange view's start/end
+    /// time.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeMultiThreaded)]
+    pub fn get_set_arrange_view_2_get(
+        &self,
+        project: ProjectContext,
+        screen_x_start: u32,
+        screen_x_end: u32,
+    ) -> GetSetArrangeView2Result
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_set_arrange_view_2_get_unchecked(project, screen_x_start, screen_x_end) }
+    }
+
+    /// Like [`get_set_arrange_view_2_get()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_set_arrange_view_2_get()`]: #method.get_set_arrange_view_2_get
+    #[measure(ResponseTimeMultiThreaded)]
+    pub unsafe fn get_set_arrange_view_2_get_unchecked(
+        &self,
+        project: ProjectContext,
+        screen_x_start: u32,
+        screen_x_end: u32,
+    ) -> GetSetArrangeView2Result
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut start_time = MaybeUninit::zeroed();
+        let mut end_time = MaybeUninit::zeroed();
+        self.low.GetSet_ArrangeView2(
+            project.to_raw(),
+            false,
+            screen_x_start as _,
+            screen_x_end as _,
+            start_time.as_mut_ptr(),
+            end_time.as_mut_ptr(),
+        );
+        GetSetArrangeView2Result {
+            start_time: PositionInSeconds::new(start_time.assume_init()),
+            end_time: PositionInSeconds::new(end_time.assume_init()),
+        }
+    }
+
     /// Returns the effective tempo in BPM at the given position (i.e. 2x in /8 signatures).
     ///
     /// # Panics
@@ -5795,6 +5851,13 @@ pub struct GetLastMarkerAndCurRegionResult {
 pub struct GetLoopTimeRange2Result {
     pub start: PositionInSeconds,
     pub end: PositionInSeconds,
+}
+
+/// The arrange view start/end time for the given screen coordinates.
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct GetSetArrangeView2Result {
+    pub start_time: PositionInSeconds,
+    pub end_time: PositionInSeconds,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
