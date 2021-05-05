@@ -3576,6 +3576,21 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr)
     }
 
+    /// Returns the current peak volume for the given track channel.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn track_get_peak_info(&self, track: MediaTrack, channel: u32) -> ReaperVolumeValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let result = self.low.Track_GetPeakInfo(track.as_ptr(), channel as _);
+        ReaperVolumeValue::new(result)
+    }
+
     /// Gets a track attribute as numerical value.
     ///
     /// # Safety

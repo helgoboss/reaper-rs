@@ -43,13 +43,76 @@ impl BorrowedPcmSourceTransfer {
     }
 
     /// Returns the number of sample(pair)s actually rendered.
+    // TODO-high Can we make this u32?
     pub fn samples_out(&self) -> i32 {
         self.0.samples_out
     }
 
     /// Sets the number of sample(pair)s actually rendered.
-    pub fn set_samples_out(&mut self, number: i32) {
+    ///
+    /// # Safety
+    ///
+    /// TODO-high-unstable
+    pub unsafe fn set_samples_out(&mut self, number: i32) {
         self.0.samples_out = number;
+    }
+
+    /// Returns the desired number of sample(pair)s to be filled.
+    ///
+    /// # Safety
+    ///
+    /// TODO-high-unstable
+    // TODO-high Can we make this u32?
+    pub fn length(&self) -> i32 {
+        self.0.length
+    }
+
+    /// Sets the desired number of sample(pair)s to be filled.
+    ///
+    /// # Safety
+    ///
+    /// TODO-high-unstable
+    pub unsafe fn set_length(&mut self, length: i32) {
+        self.0.length = length;
+    }
+
+    /// Returns the desired number of channels.
+    // TODO-high Can we make this u32?
+    pub fn nch(&self) -> i32 {
+        self.0.nch
+    }
+
+    /// Sets the desired number of channels.
+    ///
+    /// # Safety
+    ///
+    /// TODO-high-unstable
+    pub unsafe fn set_nch(&mut self, nch: i32) {
+        self.0.nch = nch;
+    }
+
+    /// Returns the sample(pair)s to be rendered.
+    pub fn samples(&self) -> *mut f64 {
+        self.0.samples
+    }
+
+    /// Sets the sample(pair)s to be rendered.
+    ///
+    /// # Safety
+    ///
+    /// TODO-high-unstable
+    pub unsafe fn set_samples(&mut self, samples: *mut f64) {
+        self.0.samples = samples;
+    }
+
+    /// Returns the desired output sample rate.
+    pub fn sample_rate(&self) -> Hz {
+        Hz(self.0.samplerate)
+    }
+
+    /// Sets the desired output sample rate.
+    pub fn set_sample_rate(&mut self, rate: Hz) {
+        self.0.samplerate = rate.get();
     }
 
     /// Returns the list of MIDI events to be filled.
