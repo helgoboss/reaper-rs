@@ -501,11 +501,16 @@ impl ActionValueChange {
         use ActionValueChange::*;
         match self {
             AbsoluteLowRes(v) => (i32::from(v), -1, 0),
-            AbsoluteHighRes(v) => (
-                ((u32::from(v) >> 7) & 0x7f) as i32,
-                (u32::from(v) & 0x7f) as i32,
-                0,
-            ),
+            AbsoluteHighRes(v) => {
+                (
+                    // val (most significant)
+                    ((u32::from(v) >> 7) & 0x7f) as i32,
+                    // valhw (least significant)
+                    (u32::from(v) & 0x7f) as i32,
+                    // relmode
+                    0,
+                )
+            }
             Relative1(v) => (i32::from(v), -1, 1),
             Relative2(v) => (i32::from(v), -1, 2),
             Relative3(v) => (i32::from(v), -1, 3),
@@ -528,7 +533,7 @@ impl ActionValueChange {
                 },
                 (valhw, 0) if valhw >= 0 => {
                     if let Ok(valhw) = U7::try_from(valhw) {
-                        let combined = ((valhw.get() as u16) << 7) | val.get() as u16;
+                        let combined = ((val.get() as u32) << 7) | valhw.get() as u32;
                         AbsoluteHighRes(combined.try_into().expect("impossible"))
                     } else {
                         Unknown(Hidden((raw.0, raw.1, raw.2)))
