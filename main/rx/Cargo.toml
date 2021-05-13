@@ -15,6 +15,6 @@ publish = false
 reaper-high = { path = '../high' }
 reaper-medium = { path = '../medium' }
 helgoboss-midi = "*"
-rxrust = { git = "https://github.com/helgoboss/rxRust", branch = "reaper-rs" }
-crossbeam-channel = "0.4"
+rxrust = { git = "https://github.com/rxRust/rxRust", branch = "master" }
+crossbeam-channel = "0.5"
 slog = "2.5.2"

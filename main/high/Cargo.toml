@@ -18,13 +18,13 @@ reaper-meter = ["reaper-medium/reaper-meter", "serde"]
 [dependencies]
 c_str_macro = "1.0.2"
 once_cell = "1.3.1"
-crossbeam-channel = "0.4"
+crossbeam-channel = "0.5"
 reaper-medium = { path = '../medium' }
 reaper-low = { path = '../low' }
 helgoboss-midi = "*"
 regex = "1.3.4"
 slog = "2.5.2"
-slog-stdlog = "4.0.0"
+slog-stdlog = "4.1.0"
 slog-term = "2.5.0"
 num_enum = "0.4.2"
 futures = "0.3"

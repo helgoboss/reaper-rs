@@ -8,13 +8,8 @@ pub use action::*;
 mod midi;
 pub use midi::*;
 
-mod scheduling;
-pub use scheduling::*;
-
 mod main_thread;
 pub use main_thread::*;
 
 mod types;
 pub use types::*;
-
-mod run_loop_scheduler;
