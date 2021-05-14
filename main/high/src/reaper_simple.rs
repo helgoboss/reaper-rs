@@ -94,7 +94,11 @@ impl Reaper {
                         .filter_map(|p| {
                             let track = p.track_by_ref(track_location)?;
                             let fx = track.fx_by_query_index(fx_location.to_raw())?;
-                            if fx.window_is_open() { Some(fx) } else { None }
+                            if fx.window_is_open() {
+                                Some(fx)
+                            } else {
+                                None
+                            }
                         })
                         .next()
                 }

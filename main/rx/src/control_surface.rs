@@ -254,181 +254,181 @@ impl ControlSurfaceRx {
         }
     }
 
-    pub fn project_switched(&self) -> impl ReactiveEvent<Project> {
+    pub fn project_switched(&self) -> ReactiveEvent<Project> {
         self.project_switched.borrow().clone()
     }
 
-    pub fn global_automation_override_changed(&self) -> impl ReactiveEvent<()> {
+    pub fn global_automation_override_changed(&self) -> ReactiveEvent<()> {
         self.global_automation_override_changed.borrow().clone()
     }
 
-    pub fn bookmarks_changed(&self) -> impl ReactiveEvent<()> {
+    pub fn bookmarks_changed(&self) -> ReactiveEvent<()> {
         self.bookmarks_changed.borrow().clone()
     }
 
-    pub fn fx_opened(&self) -> impl ReactiveEvent<Fx> {
+    pub fn fx_opened(&self) -> ReactiveEvent<Fx> {
         self.fx_opened.borrow().clone()
     }
 
-    pub fn fx_closed(&self) -> impl ReactiveEvent<Fx> {
+    pub fn fx_closed(&self) -> ReactiveEvent<Fx> {
         self.fx_closed.borrow().clone()
     }
 
-    pub fn fx_focused(&self) -> impl ReactiveEvent<Option<Fx>> {
+    pub fn fx_focused(&self) -> ReactiveEvent<Option<Fx>> {
         self.fx_focused.borrow().clone()
     }
 
-    pub fn track_added(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_added(&self) -> ReactiveEvent<Track> {
         self.track_added.borrow().clone()
     }
 
     // Delivers a GUID-based track (to still be able to identify it even it is deleted)
-    pub fn track_removed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_removed(&self) -> ReactiveEvent<Track> {
         self.track_removed.borrow().clone()
     }
 
-    pub fn tracks_reordered(&self) -> impl ReactiveEvent<Project> {
+    pub fn tracks_reordered(&self) -> ReactiveEvent<Project> {
         self.tracks_reordered.borrow().clone()
     }
 
-    pub fn receive_count_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn receive_count_changed(&self) -> ReactiveEvent<Track> {
         self.receive_count_changed.borrow().clone()
     }
 
-    pub fn track_send_count_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_send_count_changed(&self) -> ReactiveEvent<Track> {
         self.track_send_count_changed.borrow().clone()
     }
 
-    pub fn hardware_output_send_count_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn hardware_output_send_count_changed(&self) -> ReactiveEvent<Track> {
         self.hardware_output_send_count_changed.borrow().clone()
     }
 
-    pub fn track_name_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_name_changed(&self) -> ReactiveEvent<Track> {
         self.track_name_changed.borrow().clone()
     }
 
-    pub fn master_tempo_changed(&self) -> impl ReactiveEvent<()> {
+    pub fn master_tempo_changed(&self) -> ReactiveEvent<()> {
         self.master_tempo_changed.borrow().clone()
     }
 
-    pub fn master_tempo_touched(&self) -> impl ReactiveEvent<()> {
+    pub fn master_tempo_touched(&self) -> ReactiveEvent<()> {
         self.master_tempo_touched.borrow().clone()
     }
 
-    pub fn master_playrate_changed(&self) -> impl ReactiveEvent<()> {
+    pub fn master_playrate_changed(&self) -> ReactiveEvent<()> {
         self.master_playrate_changed.borrow().clone()
     }
 
-    pub fn master_playrate_touched(&self) -> impl ReactiveEvent<()> {
+    pub fn master_playrate_touched(&self) -> ReactiveEvent<()> {
         self.master_playrate_touched.borrow().clone()
     }
 
-    pub fn play_state_changed(&self) -> impl ReactiveEvent<()> {
+    pub fn play_state_changed(&self) -> ReactiveEvent<()> {
         self.play_state_changed.borrow().clone()
     }
 
-    pub fn repeat_state_changed(&self) -> impl ReactiveEvent<()> {
+    pub fn repeat_state_changed(&self) -> ReactiveEvent<()> {
         self.repeat_state_changed.borrow().clone()
     }
 
-    pub fn fx_added(&self) -> impl ReactiveEvent<Fx> {
+    pub fn fx_added(&self) -> ReactiveEvent<Fx> {
         self.fx_added.borrow().clone()
     }
 
-    pub fn fx_enabled_changed(&self) -> impl ReactiveEvent<Fx> {
+    pub fn fx_enabled_changed(&self) -> ReactiveEvent<Fx> {
         self.fx_enabled_changed.borrow().clone()
     }
 
-    pub fn fx_reordered(&self) -> impl ReactiveEvent<Track> {
+    pub fn fx_reordered(&self) -> ReactiveEvent<Track> {
         self.fx_reordered.borrow().clone()
     }
 
-    pub fn fx_removed(&self) -> impl ReactiveEvent<Fx> {
+    pub fn fx_removed(&self) -> ReactiveEvent<Fx> {
         self.fx_removed.borrow().clone()
     }
 
-    pub fn fx_parameter_value_changed(&self) -> impl ReactiveEvent<FxParameter> {
+    pub fn fx_parameter_value_changed(&self) -> ReactiveEvent<FxParameter> {
         self.fx_parameter_value_changed.borrow().clone()
     }
 
-    pub fn fx_parameter_touched(&self) -> impl ReactiveEvent<FxParameter> {
+    pub fn fx_parameter_touched(&self) -> ReactiveEvent<FxParameter> {
         self.fx_parameter_touched.borrow().clone()
     }
 
-    pub fn fx_preset_changed(&self) -> impl ReactiveEvent<Fx> {
+    pub fn fx_preset_changed(&self) -> ReactiveEvent<Fx> {
         self.fx_preset_changed.borrow().clone()
     }
 
-    pub fn track_input_monitoring_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_input_monitoring_changed(&self) -> ReactiveEvent<Track> {
         self.track_input_monitoring_changed.borrow().clone()
     }
 
-    pub fn track_automation_mode_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_automation_mode_changed(&self) -> ReactiveEvent<Track> {
         self.track_automation_mode_changed.borrow().clone()
     }
 
-    pub fn track_input_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_input_changed(&self) -> ReactiveEvent<Track> {
         self.track_input_changed.borrow().clone()
     }
 
-    pub fn track_volume_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_volume_changed(&self) -> ReactiveEvent<Track> {
         self.track_volume_changed.borrow().clone()
     }
 
-    pub fn track_volume_touched(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_volume_touched(&self) -> ReactiveEvent<Track> {
         self.track_volume_touched.borrow().clone()
     }
 
-    pub fn track_pan_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_pan_changed(&self) -> ReactiveEvent<Track> {
         self.track_pan_changed.borrow().clone()
     }
 
     /// Old, new
-    pub fn track_pan_touched(&self) -> impl ReactiveEvent<(Track, Pan, Pan)> {
+    pub fn track_pan_touched(&self) -> ReactiveEvent<(Track, Pan, Pan)> {
         self.track_pan_touched.borrow().clone()
     }
 
     /// New
-    pub fn track_selected_changed(&self) -> impl ReactiveEvent<(Track, bool)> {
+    pub fn track_selected_changed(&self) -> ReactiveEvent<(Track, bool)> {
         self.track_selected_changed.borrow().clone()
     }
 
-    pub fn track_mute_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_mute_changed(&self) -> ReactiveEvent<Track> {
         // TODO-medium Use try_borrow() and emit a helpful error message, e.g.
         //  "Don't subscribe to an event x while this event is raised! Defer the subscription."
         self.track_mute_changed.borrow().clone()
     }
 
-    pub fn track_mute_touched(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_mute_touched(&self) -> ReactiveEvent<Track> {
         self.track_mute_touched.borrow().clone()
     }
 
-    pub fn track_solo_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_solo_changed(&self) -> ReactiveEvent<Track> {
         self.track_solo_changed.borrow().clone()
     }
 
-    pub fn track_arm_changed(&self) -> impl ReactiveEvent<Track> {
+    pub fn track_arm_changed(&self) -> ReactiveEvent<Track> {
         self.track_arm_changed.borrow().clone()
     }
 
-    pub fn track_route_volume_changed(&self) -> impl ReactiveEvent<TrackRoute> {
+    pub fn track_route_volume_changed(&self) -> ReactiveEvent<TrackRoute> {
         self.track_route_volume_changed.borrow().clone()
     }
 
-    pub fn track_route_volume_touched(&self) -> impl ReactiveEvent<TrackRoute> {
+    pub fn track_route_volume_touched(&self) -> ReactiveEvent<TrackRoute> {
         self.track_route_volume_touched.borrow().clone()
     }
 
-    pub fn track_route_pan_changed(&self) -> impl ReactiveEvent<TrackRoute> {
+    pub fn track_route_pan_changed(&self) -> ReactiveEvent<TrackRoute> {
         self.track_route_pan_changed.borrow().clone()
     }
 
-    pub fn track_route_pan_touched(&self) -> impl ReactiveEvent<TrackRoute> {
+    pub fn track_route_pan_touched(&self) -> ReactiveEvent<TrackRoute> {
         self.track_route_pan_touched.borrow().clone()
     }
 
     /// Only fires if `run()` is called on the driver.
-    pub fn main_thread_idle(&self) -> impl ReactiveEvent<()> {
+    pub fn main_thread_idle(&self) -> ReactiveEvent<()> {
         self.main_thread_idle.borrow().clone()
     }
 }

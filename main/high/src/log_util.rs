@@ -30,8 +30,8 @@ fn create_stdout_drain() -> Fuse<FullFormat<PlainSyncDecorator<Stdout>>> {
     slog_term::FullFormat::new(plain).build().fuse()
 }
 
-fn create_reaper_console_drain()
--> Fuse<FullFormat<PlainSyncDecorator<LineWriter<ReaperConsoleSink>>>> {
+fn create_reaper_console_drain(
+) -> Fuse<FullFormat<PlainSyncDecorator<LineWriter<ReaperConsoleSink>>>> {
     let sink = io::LineWriter::new(ReaperConsoleSink::new());
     let plain = slog_term::PlainSyncDecorator::new(sink);
     slog_term::FullFormat::new(plain).build().fuse()

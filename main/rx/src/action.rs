@@ -14,7 +14,7 @@ pub struct ActionRx {
 }
 
 impl ActionRx {
-    pub fn action_invoked(&self) -> impl ReactiveEvent<Rc<Action>> {
+    pub fn action_invoked(&self) -> ReactiveEvent<Rc<Action>> {
         self.action_invoked.borrow().clone()
     }
 }

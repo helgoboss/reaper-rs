@@ -1,7 +1,7 @@
 use rxrust::prelude::*;
 use std::cell::RefCell;
 
-pub trait ReactiveEvent<T> = Observable<Item = T> + LocalObservable<'static, Err = ()> + 'static;
+pub type ReactiveEvent<T> = LocalSubject<'static, T, ()>;
 
 // This is a RefCell. So calling next() while another next() is still running will panic.
 // I guess it's good that way because this is very generic code, panicking or not panicking

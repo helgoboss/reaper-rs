@@ -50,7 +50,7 @@ impl MidiRxMiddleware {
 }
 
 impl MidiRx {
-    pub fn midi_message_received(&self) -> impl ReactiveEvent<MidiEvent<RawShortMessage>> {
+    pub fn midi_message_received(&self) -> ReactiveEvent<MidiEvent<RawShortMessage>> {
         self.midi_message_received.clone()
     }
 }

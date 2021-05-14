@@ -9369,7 +9369,7 @@ mod windows {
     }
     extern "system" {
         pub fn GlobalAlloc(flags: ::std::os::raw::c_int, sz: ::std::os::raw::c_int)
-        -> root::HANDLE;
+            -> root::HANDLE;
     }
     extern "system" {
         pub fn GlobalLock(h: root::HANDLE) -> *mut ::std::os::raw::c_void;

@@ -23,7 +23,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2020-12-10
+          toolchain: stable
           override: true
       - name: cargo check
         uses: actions-rs/cargo@v1
@@ -40,7 +40,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2020-12-10
+          toolchain: stable
           override: true
       - name: cargo build
         uses: actions-rs/cargo@v1
@@ -58,7 +58,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2020-12-10
+          toolchain: stable
           override: true
       - name: cargo build
         uses: actions-rs/cargo@v1
@@ -82,7 +82,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2020-12-10
+          toolchain: stable
           override: true
       - run: rustup component add rustfmt
       - name: cargo fmt
@@ -101,7 +101,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2020-12-10
+          toolchain: stable
           override: true
       - run: rustup component add rust-docs
       - name: cargo doc
@@ -119,7 +119,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2020-12-10
+          toolchain: stable
           override: true
       - run: rustup component add clippy
       - name: cargo clippy

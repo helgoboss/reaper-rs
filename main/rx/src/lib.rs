@@ -1,4 +1,3 @@
-#![feature(trait_alias)]
 mod control_surface;
 pub use control_surface::*;
 

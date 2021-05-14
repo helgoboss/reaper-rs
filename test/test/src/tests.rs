@@ -967,19 +967,15 @@ fn add_track_send() -> TestStep {
         );
         assert_eq!(track_1.receive_by_index(0), None);
         assert!(track_2.receive_by_index(0).unwrap().is_available());
-        assert!(
-            track_1
-                .find_send_by_destination_track(&track_2)
-                .ok_or("missing send")?
-                .is_available()
-        );
+        assert!(track_1
+            .find_send_by_destination_track(&track_2)
+            .ok_or("missing send")?
+            .is_available());
         assert!(track_2.find_send_by_destination_track(&track_1).is_none());
-        assert!(
-            track_2
-                .find_receive_by_source_track(&track_1)
-                .ok_or("missing receive")?
-                .is_available()
-        );
+        assert!(track_2
+            .find_receive_by_source_track(&track_1)
+            .ok_or("missing receive")?
+            .is_available());
         assert!(track_1.find_receive_by_source_track(&track_2).is_none());
         assert_eq!(track_1.sends().count(), 1);
         assert_eq!(track_2.sends().count(), 0);
@@ -1010,29 +1006,21 @@ fn query_track_route_count() -> TestStep {
         assert_eq!(track_send_count, 0);
         assert_eq!(hw_output_send_count, 0);
         assert_eq!(receive_count, 0);
-        assert!(
-            track
-                .typed_send_by_index(SendPartnerType::Track, 0)
-                .is_none()
-        );
-        assert!(
-            track
-                .typed_send_by_index(SendPartnerType::HardwareOutput, 0)
-                .is_none()
-        );
+        assert!(track
+            .typed_send_by_index(SendPartnerType::Track, 0)
+            .is_none());
+        assert!(track
+            .typed_send_by_index(SendPartnerType::HardwareOutput, 0)
+            .is_none());
         assert!(track.receive_by_index(0).is_none());
         assert!(track.find_send_by_destination_track(&track).is_none());
         assert!(track.send_by_index(0).is_none());
-        assert!(
-            track
-                .typed_send_by_index(SendPartnerType::Track, 0)
-                .is_none()
-        );
-        assert!(
-            track
-                .typed_send_by_index(SendPartnerType::HardwareOutput, 0)
-                .is_none()
-        );
+        assert!(track
+            .typed_send_by_index(SendPartnerType::Track, 0)
+            .is_none());
+        assert!(track
+            .typed_send_by_index(SendPartnerType::HardwareOutput, 0)
+            .is_none());
         assert!(track.receive_by_index(0).is_none());
         assert_eq!(track.sends().count(), 0);
         assert_eq!(track.typed_sends(SendPartnerType::Track).count(), 0);
@@ -1139,11 +1127,9 @@ fn select_track_exclusively() -> TestStep {
             project.selected_track_count(MasterTrackBehavior::ExcludeMasterTrack),
             1
         );
-        assert!(
-            project
-                .first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
-                .is_some()
-        );
+        assert!(project
+            .first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
+            .is_some());
         assert_eq!(
             project
                 .selected_tracks(MasterTrackBehavior::ExcludeMasterTrack)
@@ -2183,13 +2169,11 @@ fn general() -> TestStep {
         let resource_path = reaper.resource_path();
         // Then
         assert!(resource_path.is_dir());
-        assert!(
-            resource_path
-                .to_str()
-                .ok_or("invalid resource path")?
-                .to_lowercase()
-                .contains("reaper")
-        );
+        assert!(resource_path
+            .to_str()
+            .ok_or("invalid resource path")?
+            .to_lowercase()
+            .contains("reaper"));
         Ok(())
     })
 }
@@ -2489,11 +2473,9 @@ fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
         let non_existing_guid =
             Guid::from_string_without_braces("E64BB283-FB17-4702-ACFA-2DDB7E38F14F")?;
         assert!(!fx_chain.fx_by_guid(&non_existing_guid).is_available());
-        assert!(
-            !fx_chain
-                .fx_by_guid_and_index(&non_existing_guid, 0)
-                .is_available()
-        );
+        assert!(!fx_chain
+            .fx_by_guid_and_index(&non_existing_guid, 0)
+            .is_available());
         assert!(fx_chain.first_fx_by_name("bla").is_none());
         assert!(fx_chain.chunk().unwrap().is_none());
         Ok(())
@@ -2624,11 +2606,9 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             assert!(fx_chain.fx_by_guid(&fx_guid).is_available());
             let guid: Guid = "{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}".parse()?;
             assert!(!fx_chain.fx_by_guid_and_index(&guid, 0).is_available());
-            assert!(
-                fx_chain
-                    .first_fx_by_name("ReaControlMIDI (Cockos)")
-                    .is_some()
-            );
+            assert!(fx_chain
+                .first_fx_by_name("ReaControlMIDI (Cockos)")
+                .is_some());
             assert_eq!(
                 fx_chain.first_fx_by_name(reaper_str!("phaser")),
                 Some(fx.clone())
@@ -3240,42 +3220,34 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert!(fx_2.parameters().count() >= 15);
             assert!(fx_1.parameter_by_index(15).is_available());
             assert!(!fx_1.parameter_by_index(17).is_available());
-            assert!(
-                track
-                    .fx_by_query_index(if fx_chain.is_input_fx() {
-                        0x0100_0000
-                    } else {
-                        0
-                    })
-                    .is_some()
-            );
-            assert!(
-                track
-                    .fx_by_query_index(if fx_chain.is_input_fx() {
-                        0x0100_0001
-                    } else {
-                        1
-                    })
-                    .is_some()
-            );
-            assert!(
-                !track
-                    .fx_by_query_index(if fx_chain.is_input_fx() {
-                        0
-                    } else {
-                        0x0100_0000
-                    })
-                    .is_some()
-            );
-            assert!(
-                !track
-                    .fx_by_query_index(if fx_chain.is_input_fx() {
-                        1
-                    } else {
-                        0x0100_0001
-                    })
-                    .is_some()
-            );
+            assert!(track
+                .fx_by_query_index(if fx_chain.is_input_fx() {
+                    0x0100_0000
+                } else {
+                    0
+                })
+                .is_some());
+            assert!(track
+                .fx_by_query_index(if fx_chain.is_input_fx() {
+                    0x0100_0001
+                } else {
+                    1
+                })
+                .is_some());
+            assert!(!track
+                .fx_by_query_index(if fx_chain.is_input_fx() {
+                    0
+                } else {
+                    0x0100_0000
+                })
+                .is_some());
+            assert!(!track
+                .fx_by_query_index(if fx_chain.is_input_fx() {
+                    1
+                } else {
+                    0x0100_0001
+                })
+                .is_some());
             if !fx_chain.is_input_fx() {
                 let first_instrument_fx = fx_chain
                     .first_instrument_fx()
@@ -3438,11 +3410,9 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             assert!(fx_chain.fx_by_guid_and_index(&guid, 1).is_available());
             let non_existing_guid =
                 Guid::from_string_with_braces("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}")?;
-            assert!(
-                !fx_chain
-                    .fx_by_guid_and_index(&non_existing_guid, 0)
-                    .is_available()
-            );
+            assert!(!fx_chain
+                .fx_by_guid_and_index(&non_existing_guid, 0)
+                .is_available());
             assert_eq!(
                 fx_chain.first_fx_by_name("ReaControlMIDI (Cockos)"),
                 Some(fx.clone())

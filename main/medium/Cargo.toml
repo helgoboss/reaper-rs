@@ -33,4 +33,4 @@ winapi = { version = "0.3", features = ["winuser", "synchapi"] }
 libc = "0.2"
 
 [dev-dependencies]
-version-sync = "0.9"
+version-sync = "0.9.2"

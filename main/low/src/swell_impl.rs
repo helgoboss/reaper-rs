@@ -204,7 +204,11 @@ impl Swell {
                 winapi::um::winuser::GetWindowTextW(hwnd as _, buffer, max_size) as _
             });
             // Just return whether successful in order to conform to SWELL.
-            if len == 0 { 0 } else { 1 }
+            if len == 0 {
+                0
+            } else {
+                1
+            }
         }
     }
 
