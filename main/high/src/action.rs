@@ -1,6 +1,9 @@
 use crate::{ActionCharacter, Project, Reaper, Section};
 use c_str_macro::c_str;
-use reaper_medium::{ActionValueChange, CommandId, ReaperStr, ReaperString, SectionContext};
+use reaper_medium::{
+    ActionValueChange, CommandId, ProjectContext, ReaperStr, ReaperString, SectionContext,
+    WindowContext,
+};
 
 use helgoboss_midi::{U14, U7};
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
@@ -195,8 +198,6 @@ impl Action {
         // bool (*kbd_RunCommandThroughHooks)(KbdSectionInfo* section, int* actionCommandID, int*
         // val, int* valhw, int* relmode, HWND hwnd); int (*KBD_OnMainActionEx)(int cmd, int
         // val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
-        let rd = self.load_if_necessary_or_complain();
-        let action_command_id = rd.command_id;
         let reaper = Reaper::get().medium_reaper();
         if is_step_count {
             let relative_value = 64 + normalized_value as i32;
@@ -204,37 +205,49 @@ impl Action {
                 unsafe { U7::new_unchecked(relative_value.clamp(0, 127) as u8) };
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
-            unsafe {
-                reaper.kbd_on_main_action_ex(
-                    action_command_id,
-                    ActionValueChange::Relative2(cropped_relative_value),
-                    Win(reaper.get_main_hwnd()),
-                    match project {
-                        None => CurrentProject,
-                        Some(p) => Proj(p.raw()),
-                    },
-                );
-            }
+            self.invoke_directly(
+                ActionValueChange::Relative2(cropped_relative_value),
+                Win(reaper.get_main_hwnd()),
+                match project {
+                    None => CurrentProject,
+                    Some(p) => Proj(p.raw()),
+                },
+            )
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
             let discrete_value = unsafe {
                 U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
             };
-            unsafe {
-                reaper.kbd_on_main_action_ex(
-                    action_command_id,
-                    ActionValueChange::AbsoluteHighRes(discrete_value),
-                    Win(reaper.get_main_hwnd()),
-                    match project {
-                        None => CurrentProject,
-                        Some(p) => Proj(p.raw()),
-                    },
-                );
-            }
+            self.invoke_directly(
+                ActionValueChange::AbsoluteHighRes(discrete_value),
+                Win(reaper.get_main_hwnd()),
+                match project {
+                    None => CurrentProject,
+                    Some(p) => Proj(p.raw()),
+                },
+            );
             // Main_OnCommandEx would trigger the actionInvoked event but it has not enough
             // parameters for passing values etc.          reaper::
             // Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
+        }
+    }
+
+    pub fn invoke_directly(
+        &self,
+        value_change: ActionValueChange,
+        window: WindowContext,
+        project: ProjectContext,
+    ) {
+        let rd = self.load_if_necessary_or_complain();
+        let action_command_id = rd.command_id;
+        unsafe {
+            Reaper::get().medium_reaper.kbd_on_main_action_ex(
+                action_command_id,
+                value_change,
+                window,
+                project,
+            );
         }
     }
 
