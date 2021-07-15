@@ -197,8 +197,10 @@ impl Project {
             operation()
         } else {
             let label = label.into().into_inner();
-            let _undo_block = Reaper::get().enter_undo_block_internal(self, label.as_ref());
-            operation()
+            let undo_block = Reaper::get().enter_undo_block_internal(self, label.as_ref());
+            let result = operation();
+            std::mem::drop(undo_block);
+            result
         }
     }
 
