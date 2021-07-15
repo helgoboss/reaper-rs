@@ -248,7 +248,7 @@ impl PcmSource {
     }
 
     /// Returns a pointer to the low-level PCM source.
-    pub fn to_raw(&self) -> *mut raw::PCM_source {
+    pub fn to_raw(self) -> *mut raw::PCM_source {
         self.0.as_ptr()
     }
 
