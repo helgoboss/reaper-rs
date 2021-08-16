@@ -182,7 +182,7 @@ impl LongMidiEvent {
             return Err("given MIDI message too long");
         }
         let mut array = [0; Self::MAX_LENGTH];
-        array[..midi_message.len()].copy_from_slice(&midi_message);
+        array[..midi_message.len()].copy_from_slice(midi_message);
         Ok(Self::new(frame_offset, array, midi_message.len() as _))
     }
 

@@ -1101,7 +1101,7 @@ impl<'a> SectionContext<'a> {
                 if info.unique_id().get() == 0 {
                     MainSection
                 } else {
-                    Sec(&info)
+                    Sec(info)
                 }
             }
         }

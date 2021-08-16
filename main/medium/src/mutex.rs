@@ -56,7 +56,7 @@ impl<T: AsRef<ReaperMutexPrimitive>> ReaperMutex<T> {
 
     /// Acquires read/write access to the underlying data.
     pub fn lock(&self) -> Result<ReaperMutexGuard<T>, ReaperLockError> {
-        ReaperMutexGuard::new(&self)
+        ReaperMutexGuard::new(self)
     }
 
     fn primitive_ptr(&self) -> *mut ReaperMutexPrimitive {
