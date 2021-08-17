@@ -5,10 +5,11 @@ use crate::{
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
     reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, Pan, PanMode, PlayState, PlaybackSpeedFactor, ReaProject,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
-    TrackAttributeKey, TrackFxChainType, TrackLocation, TrackSendCategory, TrackSendDirection,
-    VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    InputMonitoringMode, MediaTrack, Pan, PanMode, PlayState, PlaybackSpeedFactor,
+    QualifiedFxLocation, ReaProject, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr,
+    ReaperVersion, ReaperVolumeValue, TrackAttributeKey, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackSendCategory, TrackSendDirection, VersionDependentFxLocation,
+    VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
@@ -19,7 +20,7 @@ pub struct ChangeDetectionMiddleware {
     last_active_project: Cell<Project>,
     last_global_automation_mode_override: Cell<Option<GlobalAutomationModeOverride>>,
     project_datas: RefCell<ProjectDataMap>,
-    fx_has_been_touched_just_a_moment_ago: Cell<bool>,
+    fx_has_been_touched_just_a_moment_ago: Cell<Option<QualifiedFxLocation>>,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
@@ -558,8 +559,8 @@ impl ChangeDetectionMiddleware {
                     }
                 }
             }
-            ExtSetLastTouchedFx(_) => {
-                self.fx_has_been_touched_just_a_moment_ago.replace(true);
+            ExtSetLastTouchedFx(args) => {
+                self.fx_has_been_touched_just_a_moment_ago.replace(args.fx_location);
             }
             ExtSetBpmAndPlayRate(args) => {
                 if let Some(tempo) = args.tempo {
@@ -802,7 +803,44 @@ impl ChangeDetectionMiddleware {
             let parameter = fx.parameter_by_index(args.param_index as u32);
             handle_change(ChangeEvent::FxParameterValueChanged(
                 FxParameterValueChangedEvent {
-                    touched: self.fx_has_been_touched_just_a_moment_ago.replace(false),
+                    touched: {
+                        if let Some(last_touched_fx) =
+                            self.fx_has_been_touched_just_a_moment_ago.replace(None)
+                        {
+                            if last_touched_fx.track == args.track {
+                                use VersionDependentFxLocation::*;
+                                match last_touched_fx.fx_location {
+                                    TakeFx { .. } => {
+                                        // Not yet supported
+                                        false
+                                    }
+                                    TrackFx(l) => {
+                                        use VersionDependentTrackFxLocation::*;
+                                        match l {
+                                            // Old REAPER version ... whatever.
+                                            Old(_) => true,
+                                            New(l) => {
+                                                use TrackFxLocation::*;
+                                                match l {
+                                                    NormalFxChain(i) => {
+                                                        !is_input_fx && args.fx_index == i
+                                                    }
+                                                    InputFxChain(i) => {
+                                                        is_input_fx && args.fx_index == i
+                                                    }
+                                                    Unknown(_) => false,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        }
+                    },
                     parameter,
                     new_value: args.param_value,
                 },
