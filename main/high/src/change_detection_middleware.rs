@@ -5,11 +5,10 @@ use crate::{
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
     reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, Pan, PanMode, PlayState, PlaybackSpeedFactor,
-    QualifiedFxLocation, ReaProject, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr,
-    ReaperVersion, ReaperVolumeValue, TrackAttributeKey, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackSendCategory, TrackSendDirection, VersionDependentFxLocation,
-    VersionDependentTrackFxLocation,
+    InputMonitoringMode, MediaTrack, Pan, PanMode, PlayState, PlaybackSpeedFactor, ReaProject,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
+    TrackAttributeKey, TrackFxChainType, TrackLocation, TrackSendCategory, TrackSendDirection,
+    VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
@@ -20,7 +19,6 @@ pub struct ChangeDetectionMiddleware {
     last_active_project: Cell<Project>,
     last_global_automation_mode_override: Cell<Option<GlobalAutomationModeOverride>>,
     project_datas: RefCell<ProjectDataMap>,
-    fx_has_been_touched_just_a_moment_ago: Cell<Option<QualifiedFxLocation>>,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
     supports_detection_of_input_fx_in_set_fx_change: bool,
@@ -154,7 +152,6 @@ impl Default for ChangeDetectionMiddleware {
                 Reaper::get().global_automation_override(),
             ),
             project_datas: Default::default(),
-            fx_has_been_touched_just_a_moment_ago: Default::default(),
             // since pre1,
             supports_detection_of_input_fx: version >= reaper_version_5_95,
             // since pre2 to be accurate but so what
@@ -559,9 +556,6 @@ impl ChangeDetectionMiddleware {
                     }
                 }
             }
-            ExtSetLastTouchedFx(args) => {
-                self.fx_has_been_touched_just_a_moment_ago.replace(args.fx_location);
-            }
             ExtSetBpmAndPlayRate(args) => {
                 if let Some(tempo) = args.tempo {
                     handle_change(ChangeEvent::MasterTempoChanged(MasterTempoChangedEvent {
@@ -618,7 +612,8 @@ impl ChangeDetectionMiddleware {
             ResetCachedVolPanStates |
             // TODO-low What's the difference to SetSurfaceSelected?
             OnTrackSelection(_) |
-            ExtReset(_) => return false
+            ExtReset(_) |
+            ExtSetLastTouchedFx(_) => return false
         };
         true
     }
@@ -804,39 +799,9 @@ impl ChangeDetectionMiddleware {
             handle_change(ChangeEvent::FxParameterValueChanged(
                 FxParameterValueChangedEvent {
                     touched: {
-                        if let Some(last_touched_fx) =
-                            self.fx_has_been_touched_just_a_moment_ago.replace(None)
+                        if let Some(last_touched_param) = Reaper::get().last_touched_fx_parameter()
                         {
-                            if last_touched_fx.track == args.track {
-                                use VersionDependentFxLocation::*;
-                                match last_touched_fx.fx_location {
-                                    TakeFx { .. } => {
-                                        // Not yet supported
-                                        false
-                                    }
-                                    TrackFx(l) => {
-                                        use VersionDependentTrackFxLocation::*;
-                                        match l {
-                                            // Old REAPER version ... whatever.
-                                            Old(_) => true,
-                                            New(l) => {
-                                                use TrackFxLocation::*;
-                                                match l {
-                                                    NormalFxChain(i) => {
-                                                        !is_input_fx && args.fx_index == i
-                                                    }
-                                                    InputFxChain(i) => {
-                                                        is_input_fx && args.fx_index == i
-                                                    }
-                                                    Unknown(_) => false,
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                false
-                            }
+                            parameter == last_touched_param
                         } else {
                             false
                         }
