@@ -34,6 +34,20 @@ impl MIDI_eventlist {
     pub unsafe fn DeleteItem(&self, bpos: c_int) {
         MIDI_eventlist_DeleteItem(self as *const _ as _, bpos);
     }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetSize(&self) -> c_int {
+        MIDI_eventlist_GetSize(self as *const _ as _)
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn Empty(&self) {
+        MIDI_eventlist_Empty(self as *const _ as _);
+    }
 }
 
 impl midi_Output {

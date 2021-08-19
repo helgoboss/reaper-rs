@@ -15,6 +15,14 @@ namespace reaper_midi {
     self->DeleteItem(bpos);
   }
 
+  int MIDI_eventlist_GetSize(MIDI_eventlist* self) {
+    return self->GetSize();
+  }
+
+  void MIDI_eventlist_Empty(MIDI_eventlist* self) {
+    self->Empty();
+  }
+
   // midi_Input methods
 
   MIDI_eventlist* midi_Input_GetReadBuf(midi_Input* self) {

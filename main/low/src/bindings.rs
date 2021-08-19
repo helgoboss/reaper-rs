@@ -11112,6 +11112,14 @@ pub mod root {
             );
         }
         extern "C" {
+            pub fn MIDI_eventlist_GetSize(
+                self_: *mut root::MIDI_eventlist,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn MIDI_eventlist_Empty(self_: *mut root::MIDI_eventlist);
+        }
+        extern "C" {
             pub fn midi_Input_GetReadBuf(self_: *mut root::midi_Input)
                 -> *mut root::MIDI_eventlist;
         }

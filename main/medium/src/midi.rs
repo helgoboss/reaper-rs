@@ -79,6 +79,18 @@ impl BorrowedMidiEventList {
             self.0.DeleteItem(bpos as _);
         }
     }
+
+    /// Returns the size of the block in bytes.
+    pub fn get_size(&self) -> u32 {
+        unsafe { self.0.GetSize() as _ }
+    }
+
+    /// Empties this list of MIDI events.
+    pub fn empty(&self) {
+        unsafe {
+            self.0.Empty();
+        }
+    }
 }
 
 /// An owned or borrowed MIDI event for or from REAPER.
