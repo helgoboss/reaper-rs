@@ -251,14 +251,21 @@ impl Swell {
     }
 }
 
-/// This impl block contains functions which delegate to native win32 functions but need some
-/// character encoding conversion.
+/// This impl block contains functions which delegate to native win32 functions but don't have
+/// exactly the same signature or need some character encoding conversion.
 ///
 /// SWELL uses UTF-8-encoded strings as byte arrays (`*const i8`), exactly like REAPER itself.
 /// Windows uses UTF-16-encoded strings as u16 arrays (`*const u16`). It's very convenient that we
 /// can use UTF-8 throughout: Rust, REAPER, SWELL ... just Windows was missing.
 #[cfg(target_family = "windows")]
 impl Swell {
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn UpdateWindow(&self, hwnd: root::HWND) {
+        winapi::um::winuser::UpdateWindow(hwnd as _);
+    }
+
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
