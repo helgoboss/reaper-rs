@@ -27,6 +27,13 @@ impl MIDI_eventlist {
     pub unsafe fn AddItem(&self, evt: *mut MIDI_event_t) {
         MIDI_eventlist_AddItem(self as *const _ as _, evt);
     }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn DeleteItem(&self, bpos: c_int) {
+        MIDI_eventlist_DeleteItem(self as *const _ as _, bpos);
+    }
 }
 
 impl midi_Output {

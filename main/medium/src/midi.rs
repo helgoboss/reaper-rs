@@ -72,6 +72,13 @@ impl BorrowedMidiEventList {
             self.0.AddItem(&msg.0 as *const _ as _);
         }
     }
+
+    /// Deletes an item from this list of MIDI events.
+    pub fn delete_item(&self, bpos: u32) {
+        unsafe {
+            self.0.DeleteItem(bpos as _);
+        }
+    }
 }
 
 /// An owned or borrowed MIDI event for or from REAPER.

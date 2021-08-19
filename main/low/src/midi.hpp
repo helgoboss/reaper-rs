@@ -9,6 +9,7 @@ namespace reaper_midi {
   // MIDI_eventlist methods
   extern "C" MIDI_event_t* MIDI_eventlist_EnumItems(MIDI_eventlist* self, int* bpos);
   extern "C" void MIDI_eventlist_AddItem(MIDI_eventlist* self, MIDI_event_t* evt);
+  extern "C" void MIDI_eventlist_DeleteItem(MIDI_eventlist* self, int bpos);
 
   // midi_Input methods
   extern "C" MIDI_eventlist* midi_Input_GetReadBuf(midi_Input* self);
