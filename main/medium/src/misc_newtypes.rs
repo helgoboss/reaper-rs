@@ -168,8 +168,11 @@ impl NativeColor {
 pub struct MidiInputDeviceId(pub(crate) u8);
 
 impl MidiInputDeviceId {
+    /// Maximum number of MIDI input devices.
+    pub const MAX_DEVICE_COUNT: u8 = 63;
+
     fn is_valid(value: u8) -> bool {
-        value < 63
+        value < Self::MAX_DEVICE_COUNT
     }
 
     /// Creates the MIDI input device ID.
