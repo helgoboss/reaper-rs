@@ -33,7 +33,7 @@ impl MidiRxMiddleware {
                         return;
                     };
                     let evt_list = input.get_read_buf();
-                    for evt in evt_list.enum_items(0) {
+                    for evt in evt_list {
                         let msg = evt.message();
                         if msg.r#type() == ShortMessageType::ActiveSensing {
                             // TODO-low We should forward active sensing. Can be filtered out

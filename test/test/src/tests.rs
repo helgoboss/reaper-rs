@@ -36,6 +36,8 @@ use std::os::raw::{c_int, c_void};
 use std::ptr::null_mut;
 use std::rc::Rc;
 
+const EPSILON: f64 = 0.000_000_1;
+
 /// Creates all integration test steps to be executed. The order matters!
 pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
     // In theory all steps could be declared inline. But that makes the IDE become terribly slow.
@@ -881,7 +883,7 @@ fn set_track_send_volume() -> TestStep {
         assert!(abs_diff_eq!(
             send.volume().db().get(),
             -30.009_531_739_774_296,
-            epsilon = 0.000_000_000_000_1
+            epsilon = EPSILON
         ));
         assert_eq!(mock.invocation_count(), 2);
         Ok(())
@@ -1646,18 +1648,14 @@ fn set_track_volume() -> TestStep {
         assert!(abs_diff_eq!(
             volume.reaper_value().get(),
             0.031_588_093_366_685_01,
-            epsilon = 0.000_000_000_000_1
+            epsilon = EPSILON
         ));
         let db = volume.db().get();
-        assert!(abs_diff_eq!(
-            db,
-            -30.009_531_739_774_296,
-            epsilon = 0.000_000_000_000_1
-        ));
+        assert!(abs_diff_eq!(db, -30.009_531_739_774_296, epsilon = EPSILON));
         assert!(abs_diff_eq!(
             volume.soft_normalized_value(),
             0.250_000_000_000_034_97,
-            epsilon = 0.000_000_000_000_1
+            epsilon = EPSILON
         ));
         assert_eq!(volume.to_string().as_str(), "-30.0dB");
         assert_eq!(mock.invocation_count(), 1);
