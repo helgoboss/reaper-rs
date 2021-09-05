@@ -17,6 +17,8 @@ use std::collections::VecDeque;
 use reaper_medium::RegistrationHandle;
 use reaper_rx::{ActionRxHookPostCommand, ActionRxHookPostCommand2, ControlSurfaceRxMiddleware};
 use slog::info;
+use std::error::Error;
+use std::fmt::Display;
 use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
 
@@ -24,7 +26,7 @@ use std::panic::AssertUnwindSafe;
 ///
 /// Calls the given callback as soon as finished (either when the first test step failed
 /// or when all steps have executed successfully).
-pub fn execute_integration_test(on_finish: impl Fn(Result<(), &str>) + 'static) {
+pub fn execute_integration_test(on_finish: impl Fn(Result<(), Box<dyn Error>>) + 'static) {
     Reaper::get().clear_console();
     log("# Testing reaper-rs\n");
     let steps: VecDeque<_> = create_test_steps().collect();
@@ -104,7 +106,7 @@ impl RxSetup {
 fn execute_next_step(
     mut steps: VecDeque<TestStep>,
     step_count: usize,
-    on_finish: impl Fn(Result<(), &str>) + 'static,
+    on_finish: impl Fn(Result<(), Box<dyn Error>>) + 'static,
 ) {
     let step = match steps.pop_front() {
         Some(step) => step,
@@ -138,9 +140,9 @@ fn execute_next_step(
                     })
                     .expect("couldn't schedule next test step");
             }
-            Err(msg) => {
-                log_failure(&msg);
-                on_finish(Err(&msg));
+            Err(e) => {
+                log_failure(&e);
+                on_finish(Err(e));
             }
         }
     } else {
@@ -172,7 +174,7 @@ fn log_skip(msg: &str) {
     log(format!("→ **SKIPPED** ({})", msg));
 }
 
-fn log_failure(msg: &str) {
+fn log_failure(msg: &impl Display) {
     log(format!("→ **FAILED**\n\n{}", msg));
 }
 

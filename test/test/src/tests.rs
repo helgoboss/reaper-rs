@@ -75,6 +75,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         query_track_pan(),
         query_track_width(),
         set_track_pan(),
+        set_track_pan_weirdness(),
         set_track_width(),
         disable_all_track_fx(),
         enable_all_track_fx(),
@@ -1552,6 +1553,29 @@ fn set_track_pan() -> TestStep {
         assert!(abs_diff_eq!(parsed_pan.reaper_value().get(), -0.2));
         Ok(())
     })
+}
+
+fn set_track_pan_weirdness() -> TestStep {
+    step(
+        AllVersions,
+        "Set track pan - weirdness",
+        |reaper, _| unsafe {
+            use GangBehavior::DenyGang;
+            use ValueChange::Absolute;
+            let reaper = reaper.medium_reaper();
+            let track = get_track(0)?.raw();
+            // Given
+            reaper.csurf_on_pan_change_ex(track, Absolute(ReaperPanValue::new(0.0)), DenyGang);
+            let pan_before = reaper.get_track_ui_vol_pan(track)?.pan;
+            assert_eq!(pan_before.get(), 0.0);
+            // When
+            reaper.csurf_on_pan_change_ex(track, Absolute(ReaperPanValue::new(0.025)), DenyGang);
+            // Then
+            let pan_after = reaper.get_track_ui_vol_pan(track)?.pan;
+            assert_eq!(pan_after.get(), 0.0);
+            Ok(())
+        },
+    )
 }
 
 fn set_track_width() -> TestStep {
