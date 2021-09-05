@@ -1555,6 +1555,7 @@ fn set_track_pan() -> TestStep {
     })
 }
 
+/// https://github.com/helgoboss/realearn/issues/433
 fn set_track_pan_weirdness() -> TestStep {
     step(
         AllVersions,
@@ -1569,7 +1570,7 @@ fn set_track_pan_weirdness() -> TestStep {
             let pan_before = reaper.get_track_ui_vol_pan(track)?.pan;
             assert_eq!(pan_before.get(), 0.0);
             // When
-            reaper.csurf_on_pan_change_ex(track, Absolute(ReaperPanValue::new(0.025)), DenyGang);
+            reaper.csurf_on_pan_change_ex(track, Absolute(ReaperPanValue::new(0.01)), DenyGang);
             // Then
             let pan_after = reaper.get_track_ui_vol_pan(track)?.pan;
             assert_eq!(pan_after.get(), 0.0);
