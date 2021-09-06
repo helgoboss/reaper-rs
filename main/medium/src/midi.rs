@@ -255,7 +255,9 @@ impl<'a> Iterator for EnumItems<'a> {
     type Item = &'a MidiEvent;
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(self.list.enum_items(self.bpos)?.midi_event)
+        let result = self.list.enum_items(self.bpos)?;
+        self.bpos = result.next_bpos;
+        Some(result.midi_event)
     }
 }
 
