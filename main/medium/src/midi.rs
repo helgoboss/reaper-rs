@@ -261,6 +261,13 @@ impl<'a> Iterator for EnumItems<'a> {
     }
 }
 
+impl MidiMessage {
+    /// Returns all contained MIDI bytes as slice.
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe { std::slice::from_raw_parts(self.0.midi_message.as_ptr(), self.0.size as _) }
+    }
+}
+
 impl ShortMessage for MidiMessage {
     fn status_byte(&self) -> u8 {
         self.0.midi_message[0]
