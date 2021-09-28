@@ -1,8 +1,8 @@
 use crate::{Pan, Reaper, Track, Volume};
 
 use reaper_medium::{
-    EditMode, MediaTrack, ReaperFunctionError, ReaperString, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, VolumeAndPan,
+    AutomationMode, EditMode, MediaTrack, ReaperFunctionError, ReaperString, TrackSendAttributeKey,
+    TrackSendCategory, TrackSendDirection, TrackSendRef, VolumeAndPan,
 };
 use std::fmt;
 use TrackSendDirection::*;
@@ -111,6 +111,20 @@ impl TrackRoute {
         }
     }
 
+    fn category_with_index(&self) -> (TrackSendCategory, u32) {
+        match self.direction {
+            Receive => (TrackSendCategory::Receive, self.index),
+            Send => {
+                let hw_output_count = self.track.typed_send_count(SendPartnerType::HardwareOutput);
+                if self.index < hw_output_count {
+                    (TrackSendCategory::HardwareOutput, self.index)
+                } else {
+                    (TrackSendCategory::Send, self.index - hw_output_count)
+                }
+            }
+        }
+    }
+
     fn send_ref(&self) -> TrackSendRef {
         match self.direction {
             Send => TrackSendRef::Send(self.index),
@@ -182,6 +196,64 @@ impl TrackRoute {
                     .medium_reaper
                     .toggle_track_send_ui_mute(self.track().raw(), self.send_ref());
             }
+        }
+    }
+
+    pub fn is_mono(&self) -> bool {
+        self.prop_is_enabled(TrackSendAttributeKey::Mono)
+    }
+
+    pub fn set_mono(&self, mono: bool) {
+        self.set_prop_enabled(TrackSendAttributeKey::Mono, mono);
+    }
+
+    pub fn phase_is_inverted(&self) -> bool {
+        self.prop_is_enabled(TrackSendAttributeKey::Phase)
+    }
+
+    pub fn set_phase_inverted(&self, inverted: bool) {
+        self.set_prop_enabled(TrackSendAttributeKey::Phase, inverted);
+    }
+
+    pub fn set_automation_mode(&self, mode: AutomationMode) {
+        self.set_prop_numeric_value(TrackSendAttributeKey::AutoMode, mode.to_raw() as _);
+    }
+
+    pub fn automation_mode(&self) -> AutomationMode {
+        let raw_mode = self.prop_numeric_value(TrackSendAttributeKey::AutoMode) as i32;
+        AutomationMode::from_raw(raw_mode)
+    }
+
+    fn set_prop_enabled(&self, key: TrackSendAttributeKey, enabled: bool) {
+        self.set_prop_numeric_value(key, if enabled { 1.0 } else { 0.0 });
+    }
+
+    fn prop_is_enabled(&self, key: TrackSendAttributeKey) -> bool {
+        self.prop_numeric_value(key) > 0.0
+    }
+
+    fn set_prop_numeric_value(&self, key: TrackSendAttributeKey, value: f64) {
+        let (category, index) = self.category_with_index();
+        unsafe {
+            let _ = Reaper::get().medium_reaper().set_track_send_info_value(
+                self.track().raw(),
+                category,
+                index,
+                key,
+                value,
+            );
+        }
+    }
+
+    fn prop_numeric_value(&self, key: TrackSendAttributeKey) -> f64 {
+        let (category, index) = self.category_with_index();
+        unsafe {
+            Reaper::get().medium_reaper().get_track_send_info_value(
+                self.track().raw(),
+                category,
+                index,
+                key,
+            )
         }
     }
 

@@ -3610,6 +3610,31 @@ impl<UsageScope> Reaper<UsageScope> {
             .GetMediaTrackInfo_Value(track.as_ptr(), attribute_key.into_raw().as_ptr())
     }
 
+    /// Gets a track track send, hardware output send or track receive attribute as numerical value.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_send_info_value(
+        &self,
+        track: MediaTrack,
+        category: TrackSendCategory,
+        send_index: u32,
+        attribute_key: TrackSendAttributeKey,
+    ) -> f64
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.GetTrackSendInfo_Value(
+            track.as_ptr(),
+            category.to_raw(),
+            send_index as i32,
+            attribute_key.into_raw().as_ptr(),
+        )
+    }
+
     /// Gets the number of FX instances on the given track's normal FX chain.
     ///
     /// # Safety
@@ -4021,6 +4046,43 @@ impl<UsageScope> Reaper<UsageScope> {
         if !successful {
             return Err(ReaperFunctionError::new(
                 "couldn't set track attribute (maybe attribute key is invalid)",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Sets a track track send, hardware output send or track receive attribute as numerical value.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if an invalid (e.g. non-numerical) attribute key is passed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_track_send_info_value(
+        &self,
+        track: MediaTrack,
+        category: TrackSendCategory,
+        send_index: u32,
+        attribute_key: TrackSendAttributeKey,
+        new_value: f64,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.SetTrackSendInfo_Value(
+            track.as_ptr(),
+            category.to_raw(),
+            send_index as i32,
+            attribute_key.into_raw().as_ptr(),
+            new_value,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't set track send attribute (maybe attribute key is invalid)",
             ));
         }
         Ok(())

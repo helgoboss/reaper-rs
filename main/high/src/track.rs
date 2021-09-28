@@ -399,13 +399,7 @@ impl Track {
             }
         } else {
             // ReaLearn #283
-            let _ = unsafe {
-                Reaper::get().medium_reaper().set_media_track_info_value(
-                    self.raw(),
-                    TrackAttributeKey::RecArm,
-                    1.0,
-                )
-            };
+            self.set_prop_enabled(TrackAttributeKey::RecArm, true);
         }
     }
 
@@ -423,13 +417,7 @@ impl Track {
             }
         } else {
             // ReaLearn #283
-            let _ = unsafe {
-                Reaper::get().medium_reaper().set_media_track_info_value(
-                    self.raw(),
-                    TrackAttributeKey::RecArm,
-                    0.0,
-                )
-            };
+            self.set_prop_enabled(TrackAttributeKey::RecArm, false);
         }
     }
 
@@ -460,6 +448,41 @@ impl Track {
             chunk
         };
         self.set_chunk(chunk)
+    }
+
+    pub fn phase_is_inverted(&self) -> bool {
+        self.prop_is_enabled(TrackAttributeKey::Phase)
+    }
+
+    pub fn set_phase_inverted(&self, inverted: bool) {
+        self.set_prop_enabled(TrackAttributeKey::Phase, inverted);
+    }
+
+    fn set_prop_enabled(&self, key: TrackAttributeKey, enabled: bool) {
+        self.set_prop_numeric_value(key, if enabled { 1.0 } else { 0.0 });
+    }
+
+    fn prop_is_enabled(&self, key: TrackAttributeKey) -> bool {
+        self.prop_numeric_value(key) > 0.0
+    }
+
+    fn set_prop_numeric_value(&self, key: TrackAttributeKey, value: f64) {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            let _ =
+                Reaper::get()
+                    .medium_reaper()
+                    .set_media_track_info_value(self.raw(), key, value);
+        }
+    }
+
+    fn prop_numeric_value(&self, key: TrackAttributeKey) -> f64 {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_media_track_info_value(self.raw(), key)
+        }
     }
 
     pub fn set_shown(&self, area: TrackArea, value: bool) {
@@ -518,8 +541,8 @@ impl Track {
     }
 
     fn set_mute(&self, mute: bool) {
-        self.load_and_check_if_necessary_or_complain();
         if self.project() == Reaper::get().current_project() {
+            self.load_and_check_if_necessary_or_complain();
             let _ = unsafe {
                 Reaper::get().medium_reaper().csurf_on_mute_change_ex(
                     self.raw(),
@@ -529,13 +552,7 @@ impl Track {
             };
         } else {
             // ReaLearn #283
-            let _ = unsafe {
-                Reaper::get().medium_reaper().set_media_track_info_value(
-                    self.raw(),
-                    TrackAttributeKey::Mute,
-                    if mute { 1.0 } else { 0.0 },
-                )
-            };
+            self.set_prop_enabled(TrackAttributeKey::Mute, mute);
         }
         unsafe {
             Reaper::get()
@@ -588,8 +605,8 @@ impl Track {
     }
 
     fn set_solo(&self, solo: bool) {
-        self.load_and_check_if_necessary_or_complain();
         if self.project() == Reaper::get().current_project() {
+            self.load_and_check_if_necessary_or_complain();
             let _ = unsafe {
                 Reaper::get().medium_reaper().csurf_on_solo_change_ex(
                     self.raw(),
@@ -599,13 +616,7 @@ impl Track {
             };
         } else {
             // ReaLearn #283
-            let _ = unsafe {
-                Reaper::get().medium_reaper().set_media_track_info_value(
-                    self.raw(),
-                    TrackAttributeKey::Solo,
-                    if solo { 1.0 } else { 0.0 },
-                )
-            };
+            self.set_prop_enabled(TrackAttributeKey::Solo, solo);
         }
         unsafe {
             Reaper::get()
@@ -615,13 +626,7 @@ impl Track {
     }
 
     pub fn fx_is_enabled(&self) -> bool {
-        self.load_and_check_if_necessary_or_complain();
-        let result = unsafe {
-            Reaper::get()
-                .medium_reaper
-                .get_media_track_info_value(self.raw(), TrackAttributeKey::FxEn)
-        };
-        result > 0.0
+        self.prop_is_enabled(TrackAttributeKey::FxEn)
     }
 
     pub fn enable_fx(&self) {
@@ -633,14 +638,7 @@ impl Track {
     }
 
     fn set_fx_is_enabled(&self, enabled: bool) {
-        self.load_and_check_if_necessary_or_complain();
-        unsafe {
-            let _ = Reaper::get().medium_reaper.set_media_track_info_value(
-                self.raw(),
-                TrackAttributeKey::FxEn,
-                if enabled { 1.0 } else { 0.0 },
-            );
-        }
+        self.set_prop_enabled(TrackAttributeKey::FxEn, enabled);
     }
 
     fn auto_arm_chunk_line(&self) -> Result<Option<ChunkRegion>, &'static str> {
