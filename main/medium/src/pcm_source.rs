@@ -1021,6 +1021,7 @@ pub struct CustomOwnedPcmSource {
     // Those 2 belong together. `cpp_source` without `rust_source` = crash. Never let them apart!
     cpp_source: OwnedPcmSource,
     /// Never read but important to keep in memory.
+    #[allow(clippy::redundant_allocation)]
     _rust_source: Box<Box<dyn reaper_low::PCM_source>>,
 }
 

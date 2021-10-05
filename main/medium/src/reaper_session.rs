@@ -82,6 +82,7 @@ pub struct ReaperSession {
     ///
     /// While in here, the control surface is considered to be owned by REAPER, meaning that REAPER
     /// is supposed to have exclusive access to it.
+    #[allow(clippy::redundant_allocation)]
     csurf_insts: HashMap<NonNull<c_void>, Box<Box<dyn IReaperControlSurface>>>,
     /// Provides a safe place in memory for plug-in registration keys (e.g. "API_myfunction").
     ///
