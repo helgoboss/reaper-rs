@@ -23,10 +23,10 @@ use crate::{
     ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
     ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
     ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
-    SoloMode, StuffMidiMessageTarget, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    SoloMode, StuffMidiMessageTarget, TimeFormattingModeOverride, TimeRangeType, TrackArea,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef,
+    TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -5788,6 +5788,62 @@ impl<UsageScope> Reaper<UsageScope> {
             self.low.mkvolstr(buffer, value.get());
         });
         volume_string
+    }
+
+    /// Formats the given position in time.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the time string you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn format_timestr_pos(
+        &self,
+        tpos: PositionInSeconds,
+        buffer_size: u32,
+        mode_override: TimeFormattingModeOverride,
+    ) -> ReaperString
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (time_string, _) = with_string_buffer(buffer_size, |buffer, max| unsafe {
+            self.low
+                .format_timestr_pos(tpos.get(), buffer, max, mode_override.to_raw());
+        });
+        time_string
+    }
+
+    /// Formats the given duration, starting from the given timeline position offset.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the time string you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn format_timestr_len(
+        &self,
+        tpos: DurationInSeconds,
+        buffer_size: u32,
+        offset: PositionInSeconds,
+        mode_override: TimeFormattingModeOverride,
+    ) -> ReaperString
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (time_string, _) = with_string_buffer(buffer_size, |buffer, max| unsafe {
+            self.low.format_timestr_len(
+                tpos.get(),
+                buffer,
+                max,
+                offset.get(),
+                mode_override.to_raw(),
+            );
+        });
+        time_string
     }
 
     fn require_main_thread(&self)

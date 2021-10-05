@@ -1206,3 +1206,53 @@ impl SendMidiTime {
         }
     }
 }
+
+/// Override of time formatting modes.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TimeFormattingModeOverride {
+    /// Uses the time formatting mode set for the project.
+    ProjectDefault,
+    /// Uses the given time formatting mode.
+    Mode(TimeFormattingMode),
+}
+
+impl TimeFormattingModeOverride {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub(crate) fn to_raw(self) -> i32 {
+        use TimeFormattingModeOverride::*;
+        match self {
+            ProjectDefault => -1,
+            Mode(m) => m.to_raw(),
+        }
+    }
+}
+
+/// Time formatting mode.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TimeFormattingMode {
+    Time,
+    MeasuresBeatsTime,
+    MeasuresBeats,
+    Seconds,
+    Samples,
+    HoursMinutesSecondsFrames,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<i32>),
+}
+
+impl TimeFormattingMode {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TimeFormattingMode::*;
+        match self {
+            Time => 0,
+            MeasuresBeatsTime => 1,
+            MeasuresBeats => 2,
+            Seconds => 3,
+            Samples => 4,
+            HoursMinutesSecondsFrames => 5,
+            Unknown(Hidden(x)) => x,
+        }
+    }
+}
