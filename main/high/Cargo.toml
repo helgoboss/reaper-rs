@@ -13,7 +13,7 @@ publish = false
 
 [features]
 # Activates measuring of REAPER function execution times.
-reaper-meter = ["reaper-medium/reaper-meter", "serde"]
+reaper-meter = ["metered", "reaper-medium/reaper-meter", "serde"]
 
 [dependencies]
 c_str_macro = "1.0.2"
@@ -31,7 +31,7 @@ futures = "0.3"
 serde = { version = "1.0", features = ["derive"], optional = true }
 serde_yaml = "0.8"
 backtrace = "0.3"
-metered = "0.7.0"
+metered = { version = "0.8.0", optional = true }
 ref-cast = "1.0.6"
 # For relativizing to project path
 pathdiff = "0.2.0"

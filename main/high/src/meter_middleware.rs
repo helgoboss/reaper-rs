@@ -1,3 +1,4 @@
+#![cfg(feature = "reaper-meter")]
 use crate::ControlSurfaceEvent;
 use metered::hdr_histogram::HdrHistogram;
 use metered::metric::Histogram;

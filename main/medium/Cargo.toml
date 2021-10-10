@@ -22,7 +22,7 @@ reaper-macros = { path = "../macros" }
 helgoboss-midi = "*"
 enumflags2 = { version = "^0.6", features = ["not_literal"] }
 vst = "*"
-metered = { version = "0.7.0", optional = true }
+metered = { version = "0.8.0", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 ref-cast = "1.0.6"
 
