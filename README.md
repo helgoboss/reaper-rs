@@ -1,10 +1,12 @@
 # reaper-rs
 
-[![Windows x86_64](https://github.com/helgoboss/reaper-rs/actions/workflows/windows-x86_64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/windows.yml)
-[![macOS x86_64](https://github.com/helgoboss/reaper-rs/actions/workflows/macos-x86_64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/macos.yml)
-[![macOS aarch64](https://github.com/helgoboss/reaper-rs/actions/workflows/macos-aarch64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/macos-arm.yml)
-[![Linux x86_64](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-x86_64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/linux.yml)
-[![Linux aarch64](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-aarch64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/linux.yml)
+[![Windows x86_64](https://github.com/helgoboss/reaper-rs/actions/workflows/windows-x86_64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/windows-x86_64.yml)
+[![Windows i686](https://github.com/helgoboss/reaper-rs/actions/workflows/windows-i686.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/windows-i686.yml)
+[![macOS x86_64](https://github.com/helgoboss/reaper-rs/actions/workflows/macos-x86_64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/macos-x86_64.yml)
+[![macOS aarch64](https://github.com/helgoboss/reaper-rs/actions/workflows/macos-aarch64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/macos-aarch64.yml)
+[![Linux x86_64](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-x86_64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-x86_64.yml)
+[![Linux aarch64](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-aarch64.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-aarch64.yml)
+[![Linux armv7](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-armv7.yml/badge.svg)](https://github.com/helgoboss/reaper-rs/actions/workflows/linux-armv7.yml)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/helgoboss/reaper-rs/master/LICENSE)
 
 [Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
