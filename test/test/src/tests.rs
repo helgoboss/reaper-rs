@@ -7,13 +7,13 @@ use std::ops::Deref;
 use c_str_macro::c_str;
 
 use reaper_high::{
-    get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxParameterCharacter,
-    FxParameterValueRange, Guid, Pan, PlayRate, Reaper, SendPartnerType, Tempo, Track,
-    TrackRoutePartner, Volume, Width,
+    get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxInfo,
+    FxParameterCharacter, FxParameterValueRange, Guid, Pan, PlayRate, Reaper, SendPartnerType,
+    Tempo, Track, TrackRoutePartner, Volume, Width,
 };
 use rxrust::prelude::*;
 
-use crate::api::{step, Test, TestStep};
+use crate::api::{step, Test, TestStep, VersionRestriction};
 
 use super::invocation_mock::observe_invocations;
 use crate::api::VersionRestriction::AllVersions;
@@ -1558,7 +1558,7 @@ fn set_track_pan() -> TestStep {
 /// https://github.com/helgoboss/realearn/issues/433
 fn set_track_pan_weirdness() -> TestStep {
     step(
-        AllVersions,
+        VersionRestriction::Max(ReaperVersion::new("6.35")),
         "Set track pan - weirdness",
         |reaper, _| unsafe {
             use GangBehavior::DenyGang;
@@ -2579,8 +2579,8 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(fx.track(), track);
             assert_eq!(fx.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx.chain(), &fx_chain);
-            assert_eq!(fx.parameter_count(), 7);
-            assert_eq!(fx.parameters().count(), 7);
+            assert!(fx.parameter_count() >= 7);
+            assert!(fx.parameters().count() >= 7);
             let param1 = fx.parameter_by_index(0);
             assert!(param1.is_available());
             // TODO-low Fix for input FX (there it's 1.0 for some reason)
@@ -2594,10 +2594,16 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
                 }
             );
             assert!(fx.parameter_by_index(6).is_available());
-            assert!(!fx.parameter_by_index(7).is_available());
-            let fx_info = fx.info()?;
-            let stem = fx_info.file_name.file_stem().ok_or("No stem")?;
-            assert_eq!(stem, "phaser");
+            assert!(!fx.parameter_by_index(50).is_available());
+            let fx_info: FxInfo = fx.info()?;
+            assert_eq!(fx_info.type_expression, "JS");
+            assert_eq!(fx_info.file_name.as_os_str(), "phaser");
+            assert_eq!(fx_info.sub_type_expression, "JS");
+            if Reaper::get().version() < ReaperVersion::new("6.37") {
+                assert_eq!(fx_info.effect_name, "");
+            } else {
+                assert_eq!(fx_info.effect_name, "JS: phaser");
+            }
             Ok(())
         },
     )
@@ -3209,8 +3215,8 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             let state_chunk_1 = fx_1.state_chunk()?;
             assert!(!state_chunk_1.contains("<"));
             assert!(!state_chunk_1.contains(">"));
-            let fx_1_info = fx_1.info()?;
-            let fx_2_info = fx_2.info()?;
+            let fx_1_info: FxInfo = fx_1.info()?;
+            let fx_2_info: FxInfo = fx_2.info()?;
             let fx_1_file_name = fx_1_info
                 .file_name
                 .file_name()
@@ -3231,6 +3237,12 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
                     .expect("FX 1 file name is not valid unicode"),
                 "reasynth.dll" | "reasynth.vst.so" | "reasynth.vst.dylib"
             ));
+            assert_eq!(fx_1_info.type_expression, "VST");
+            assert_eq!(fx_2_info.type_expression, "VST");
+            assert_eq!(fx_1_info.sub_type_expression, "VST");
+            assert_eq!(fx_2_info.sub_type_expression, "VSTi");
+            assert_eq!(fx_1_info.effect_name, "VST: ReaControlMIDI (Cockos)");
+            assert_eq!(fx_2_info.effect_name, "VSTi: ReaSynth (Cockos)");
             assert_eq!(fx_1.track().ok_or("no track")?, track);
             assert_eq!(fx_2.track().ok_or("no track")?, track);
             assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
@@ -3242,7 +3254,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert!(fx_1.parameters().count() >= 17);
             assert!(fx_2.parameters().count() >= 15);
             assert!(fx_1.parameter_by_index(15).is_available());
-            assert!(!fx_1.parameter_by_index(17).is_available());
+            assert!(!fx_1.parameter_by_index(50).is_available());
             assert!(track
                 .fx_by_query_index(if fx_chain.is_input_fx() {
                     0x0100_0000
@@ -3369,7 +3381,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert!(!state_chunk.contains("<"));
             assert!(!state_chunk.contains(">"));
 
-            let fx_1_info = fx_1.info()?;
+            let fx_1_info: FxInfo = fx_1.info()?;
             let file_name = fx_1_info.file_name.file_name().ok_or("No FX file name")?;
             assert!(matches!(
                 file_name
@@ -3379,15 +3391,15 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
             ));
             assert_eq!(fx_1_info.type_expression, "VST");
             assert_eq!(fx_1_info.sub_type_expression, "VST");
-            assert_eq!(fx_1_info.effect_name, "ReaControlMIDI (Cockos)");
+            assert_eq!(fx_1_info.effect_name, "VST: ReaControlMIDI (Cockos)");
 
             assert_eq!(fx_1.track(), track);
             assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx_1.chain(), &fx_chain);
-            assert_eq!(fx_1.parameter_count(), 17);
-            assert_eq!(fx_1.parameters().count(), 17);
+            assert!(fx_1.parameter_count() >= 17);
+            assert!(fx_1.parameters().count() >= 17);
             assert!(fx_1.parameter_by_index(15).is_available());
-            assert!(!fx_1.parameter_by_index(17).is_available());
+            assert!(!fx_1.parameter_by_index(50).is_available());
             assert!(fx_1.is_enabled());
             Ok(())
         },

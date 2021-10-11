@@ -3,7 +3,9 @@ use std::fmt::{Debug, Display};
 
 /// An error which can occur when executing a REAPER function.
 ///
-/// This is not an error caused by *reaper-rs*, but one reported by REAPER itself.
+/// In most cases this is an error reported by REAPER itself. When using some of the convenience
+/// functions, the error could also originate from *reaper-rs*.
+///
 /// The error message is not very specific most of the time because REAPER functions usually don't
 /// give information about the cause of the error.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]

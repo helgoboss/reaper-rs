@@ -1,7 +1,7 @@
 use std::cell::Cell;
 
 use std::ops::Deref;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
@@ -118,6 +118,10 @@ impl Fx {
 
     pub fn tag_chunk(&self) -> Result<ChunkRegion, &'static str> {
         self.load_if_necessary_or_complain();
+        self.tag_chunk_internal()
+    }
+
+    fn tag_chunk_internal(&self) -> Result<ChunkRegion, &'static str> {
         let res = self
             .chain()
             .chunk()?
@@ -140,7 +144,40 @@ impl Fx {
 
     // Attention: Currently implemented by parsing chunk
     pub fn info(&self) -> Result<FxInfo, &'static str> {
-        FxInfo::from_first_line_of_tag_chunk(&self.tag_chunk()?.first_line().content())
+        self.load_if_necessary_or_complain();
+        let loc = self.track_and_location();
+        let fx_type = self.get_named_config_param_as_string_internal("fx_type", 10, &loc);
+        if let Ok(fx_type) = fx_type {
+            // This must be REAPER >= 6.37. Use function to determine remaining FX info.
+            let fx_type = fx_type.into_string();
+            let info = FxInfo {
+                effect_name: self
+                    .get_named_config_param_as_string_internal("fx_name", 64, &loc)
+                    .map(|rs| rs.into_inner().to_string_lossy().into_owned())
+                    .unwrap_or_default(),
+                type_expression: match fx_type.as_str() {
+                    "VST" | "VSTi" | "VST3" | "VST3i" => "VST",
+                    "JS" => "JS",
+                    _ => "",
+                }
+                .to_owned(),
+                sub_type_expression: fx_type,
+                file_name: self
+                    .get_named_config_param_as_string_internal("fx_ident", 1000, &loc)
+                    .ok()
+                    .and_then(|rs| {
+                        let c_string = rs.into_inner();
+                        let cow = c_string.to_string_lossy();
+                        let path = Path::new(cow.as_ref());
+                        Some(PathBuf::from(path.file_name()?))
+                    })
+                    .unwrap_or_default(),
+            };
+            Ok(info)
+        } else {
+            // This must be REAPER < 6.37. Parse FX info from chunk.
+            FxInfo::from_first_line_of_tag_chunk(&self.tag_chunk_internal()?.first_line().content())
+        }
     }
 
     pub fn parameter_count(&self) -> u32 {
@@ -187,6 +224,27 @@ impl Fx {
                         .track_fx_get_named_config_parm(track.raw(), location, name, buffer_size)
                 }
             }
+        }
+    }
+
+    fn get_named_config_param_as_string_internal<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+        (track, location): &(Track, TrackFxLocation),
+    ) -> Result<ReaperString, ReaperFunctionError> {
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => unsafe {
+                Reaper::get()
+                    .medium_reaper()
+                    .track_fx_get_named_config_parm_as_string(
+                        track.raw(),
+                        *location,
+                        name,
+                        buffer_size,
+                    )
+            },
         }
     }
 
@@ -603,20 +661,18 @@ pub fn get_track_fx_location(index: u32, is_input_fx: bool) -> TrackFxLocation {
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct FxInfo {
-    /// e.g. "ReaSynth (Cockos)", currently empty if JS
+    /// e.g. "VSTi: ReaSynth (Cockos)", for types other than VST supported since REAPER 6.37
     pub effect_name: String,
-    /// e.g. "VST" or "JS"
+    /// e.g. "VST" or "JS", for types other than VST and JS supported since REAPER 6.37
     pub type_expression: String,
-    /// e.g. "VSTi", currently empty if JS
+    /// e.g. "VSTi" or "JS", for types other than VST and JS supported since REAPER 6.37
     pub sub_type_expression: String,
-    /// e.g. reasynth.dll or phaser
+    /// e.g. reasynth.dll or phaser, for types other than VST and JS supported since REAPER 6.37
     pub file_name: PathBuf,
 }
 
 impl FxInfo {
     pub(crate) fn from_first_line_of_tag_chunk(line: &str) -> Result<FxInfo, &'static str> {
-        // TODO-low Also handle other plugin types (DX, AU, LV2)
-        // TODO-low Don't just assign empty strings in case of JS
         let vst_line_regex = regex!(r#"<VST "(.+?): (.+?)" (.+)"#);
         let vst_file_name_with_quotes_regex = regex!(r#""(.+?)".*"#);
         let vst_file_name_without_quotes_regex = regex!(r#"([^ ]+) .*"#);
@@ -633,7 +689,7 @@ impl FxInfo {
                     .ok_or("Couldn't parse VST tag line")?;
                 assert_eq!(captures.len(), 4);
                 Ok(FxInfo {
-                    effect_name: captures[2].to_owned(),
+                    effect_name: format!("{}: {}", &captures[1], &captures[2]),
                     type_expression: type_expression.to_owned(),
                     sub_type_expression: captures[1].to_owned(),
                     file_name: {
@@ -653,8 +709,8 @@ impl FxInfo {
             }
             "JS" => Ok(FxInfo {
                 effect_name: "".to_string(),
-                type_expression: "".to_string(),
-                sub_type_expression: "".to_string(),
+                type_expression: type_expression.to_owned(),
+                sub_type_expression: "JS".to_string(),
                 file_name: {
                     let remainder = &line[4..];
                     let remainder_regex = if remainder.starts_with('"') {

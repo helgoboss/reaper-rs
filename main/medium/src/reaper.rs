@@ -4,6 +4,7 @@ use crate::metering::{ResponseTimeMultiThreaded, ResponseTimeSingleThreaded};
 use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
 use reaper_macros::measure;
+use std::ffi::CString;
 use std::os::raw::{c_char, c_void};
 use std::ptr::{null, null_mut, NonNull};
 
@@ -3091,6 +3092,38 @@ impl<UsageScope> Reaper<UsageScope> {
             ));
         }
         Ok(buffer)
+    }
+
+    /// Like [`track_fx_get_named_config_parm`] but interpreting the result as a string.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the given FX doesn't have this named parameter, doesn't support named
+    /// parameters or if the returned data doesn't resemble a proper string.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn track_fx_get_named_config_parm_as_string<'a>(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+        param_name: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+    ) -> ReaperFunctionResult<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let mut bytes =
+            self.track_fx_get_named_config_parm(track, fx_location, param_name, buffer_size)?;
+        if let Some(nul_byte_index) = bytes.iter().position(|b| *b == 0) {
+            // Crop end of vector so that it doesn't include the nul terminator anymore.
+            bytes.resize(nul_byte_index, 0);
+            Ok(ReaperString::new(CString::from_vec_unchecked(bytes)))
+        } else {
+            Err(ReaperFunctionError::new("result is not a string"))
+        }
     }
 
     /// Sets a plug-in specific named configuration value.
