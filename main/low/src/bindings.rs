@@ -1630,7 +1630,7 @@ pub mod root {
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions11CountTracksE"]
             pub static mut CountTracks: ::std::option::Option<
-                unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int,
+                unsafe extern "C" fn(projOptional: *mut root::ReaProject) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -2706,8 +2706,8 @@ pub mod root {
             pub static mut GetAudioDeviceInfo: ::std::option::Option<
                 unsafe extern "C" fn(
                     attribute: *const ::std::os::raw::c_char,
-                    desc: *mut ::std::os::raw::c_char,
-                    desc_sz: ::std::os::raw::c_int,
+                    descOut: *mut ::std::os::raw::c_char,
+                    descOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -2786,7 +2786,7 @@ pub mod root {
             #[link_name = "\u{1}_ZN16reaper_functions21GetEnvelopeInfo_ValueE"]
             pub static mut GetEnvelopeInfo_Value: ::std::option::Option<
                 unsafe extern "C" fn(
-                    tr: *mut root::TrackEnvelope,
+                    env: *mut root::TrackEnvelope,
                     parmname: *const ::std::os::raw::c_char,
                 ) -> f64,
             >;
@@ -2883,6 +2883,16 @@ pub mod root {
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions12GetFocusedFXE"]
             pub static mut GetFocusedFX: ::std::option::Option<
+                unsafe extern "C" fn(
+                    tracknumberOut: *mut ::std::os::raw::c_int,
+                    itemnumberOut: *mut ::std::os::raw::c_int,
+                    fxnumberOut: *mut ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions13GetFocusedFX2E"]
+            pub static mut GetFocusedFX2: ::std::option::Option<
                 unsafe extern "C" fn(
                     tracknumberOut: *mut ::std::os::raw::c_int,
                     itemnumberOut: *mut ::std::os::raw::c_int,
@@ -3060,6 +3070,17 @@ pub mod root {
                 ::std::option::Option<unsafe extern "C" fn() -> ::std::os::raw::c_int>;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions20GetMediaFileMetadataE"]
+            pub static mut GetMediaFileMetadata: ::std::option::Option<
+                unsafe extern "C" fn(
+                    mediaSource: *mut root::PCM_source,
+                    identifier: *const ::std::os::raw::c_char,
+                    bufOutNeedBig: *mut ::std::os::raw::c_char,
+                    bufOutNeedBig_sz: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions12GetMediaItemE"]
             pub static mut GetMediaItem: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -3159,8 +3180,8 @@ pub mod root {
             pub static mut GetMediaSourceFileName: ::std::option::Option<
                 unsafe extern "C" fn(
                     source: *mut root::PCM_source,
-                    filenamebuf: *mut ::std::os::raw::c_char,
-                    filenamebuf_sz: ::std::os::raw::c_int,
+                    filenamebufOut: *mut ::std::os::raw::c_char,
+                    filenamebufOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -3196,8 +3217,8 @@ pub mod root {
             pub static mut GetMediaSourceType: ::std::option::Option<
                 unsafe extern "C" fn(
                     source: *mut root::PCM_source,
-                    typebuf: *mut ::std::os::raw::c_char,
-                    typebuf_sz: ::std::os::raw::c_int,
+                    typebufOut: *mut ::std::os::raw::c_char,
+                    typebufOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -3241,8 +3262,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     context: *const ::std::os::raw::c_char,
                     modifier_flag: ::std::os::raw::c_int,
-                    action: *mut ::std::os::raw::c_char,
-                    action_sz: ::std::os::raw::c_int,
+                    actionOut: *mut ::std::os::raw::c_char,
+                    actionOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -3314,8 +3335,8 @@ pub mod root {
             pub static mut GetPeakFileName: ::std::option::Option<
                 unsafe extern "C" fn(
                     fn_: *const ::std::os::raw::c_char,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -3423,8 +3444,8 @@ pub mod root {
             pub static mut GetProjectName: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -3432,8 +3453,8 @@ pub mod root {
             #[link_name = "\u{1}_ZN16reaper_functions14GetProjectPathE"]
             pub static mut GetProjectPath: ::std::option::Option<
                 unsafe extern "C" fn(
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -3442,8 +3463,8 @@ pub mod root {
             pub static mut GetProjectPathEx: ::std::option::Option<
                 unsafe extern "C" fn(
                     proj: *mut root::ReaProject,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -4008,6 +4029,17 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions17GetThingFromPointE"]
+            pub static mut GetThingFromPoint: ::std::option::Option<
+                unsafe extern "C" fn(
+                    screen_x: ::std::os::raw::c_int,
+                    screen_y: ::std::os::raw::c_int,
+                    infoOut: *mut ::std::os::raw::c_char,
+                    infoOut_sz: ::std::os::raw::c_int,
+                ) -> *mut root::MediaTrack,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions21GetToggleCommandStateE"]
             pub static mut GetToggleCommandState: ::std::option::Option<
                 unsafe extern "C" fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
@@ -4086,7 +4118,7 @@ pub mod root {
             pub static mut GetTrackEnvelopeByChunkName: ::std::option::Option<
                 unsafe extern "C" fn(
                     tr: *mut root::MediaTrack,
-                    cfgchunkname: *const ::std::os::raw::c_char,
+                    cfgchunkname_or_guid: *const ::std::os::raw::c_char,
                 ) -> *mut root::TrackEnvelope,
             >;
         }
@@ -4139,8 +4171,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     flag: ::std::os::raw::c_int,
-                    bufWantNeedBig: *mut ::std::os::raw::c_char,
-                    bufWantNeedBig_sz: *mut ::std::os::raw::c_int,
+                    bufOutWantNeedBig: *mut ::std::os::raw::c_char,
+                    bufOutWantNeedBig_sz: *mut ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -4207,8 +4239,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     recv_index: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -4250,8 +4282,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     send_index: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -5598,8 +5630,8 @@ pub mod root {
             pub static mut MIDI_GetAllEvts: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
-                    bufNeedBig: *mut ::std::os::raw::c_char,
-                    bufNeedBig_sz: *mut ::std::os::raw::c_int,
+                    bufOutNeedBig: *mut ::std::os::raw::c_char,
+                    bufOutNeedBig_sz: *mut ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -5639,8 +5671,8 @@ pub mod root {
                     selectedOut: *mut bool,
                     mutedOut: *mut bool,
                     ppqposOut: *mut f64,
-                    msg: *mut ::std::os::raw::c_char,
-                    msg_sz: *mut ::std::os::raw::c_int,
+                    msgOut: *mut ::std::os::raw::c_char,
+                    msgOut_sz: *mut ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -5660,8 +5692,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
                     notesonly: bool,
-                    hash: *mut ::std::os::raw::c_char,
-                    hash_sz: ::std::os::raw::c_int,
+                    hashOut: *mut ::std::os::raw::c_char,
+                    hashOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -5724,8 +5756,8 @@ pub mod root {
                     take: *mut root::MediaItem_Take,
                     rootOut: *mut ::std::os::raw::c_int,
                     scaleOut: *mut ::std::os::raw::c_int,
-                    name: *mut ::std::os::raw::c_char,
-                    name_sz: ::std::os::raw::c_int,
+                    nameOut: *mut ::std::os::raw::c_char,
+                    nameOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -5750,8 +5782,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     notesonly: bool,
-                    hash: *mut ::std::os::raw::c_char,
-                    hash_sz: ::std::os::raw::c_int,
+                    hashOut: *mut ::std::os::raw::c_char,
+                    hashOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -5920,6 +5952,16 @@ pub mod root {
             #[link_name = "\u{1}_ZN16reaper_functions9MIDI_SortE"]
             pub static mut MIDI_Sort:
                 ::std::option::Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions20MIDIEditor_EnumTakesE"]
+            pub static mut MIDIEditor_EnumTakes: ::std::option::Option<
+                unsafe extern "C" fn(
+                    midieditor: root::HWND,
+                    takeindex: ::std::os::raw::c_int,
+                    editable_only: bool,
+                ) -> *mut root::MediaItem_Take,
+            >;
         }
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions20MIDIEditor_GetActiveE"]
@@ -6199,6 +6241,15 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions21PCM_Source_BuildPeaksE"]
+            pub static mut PCM_Source_BuildPeaks: ::std::option::Option<
+                unsafe extern "C" fn(
+                    src: *mut root::PCM_source,
+                    mode: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions25PCM_Source_CreateFromFileE"]
             pub static mut PCM_Source_CreateFromFile: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -6321,7 +6372,7 @@ pub mod root {
                 unsafe extern "C" fn(
                     preview: *mut root::preview_register_t,
                     bufflags: ::std::os::raw::c_int,
-                    MSI: f64,
+                    measure_align: f64,
                 ) -> ::std::os::raw::c_int,
             >;
         }
@@ -6349,7 +6400,7 @@ pub mod root {
                     proj: *mut root::ReaProject,
                     preview: *mut root::preview_register_t,
                     flags: ::std::os::raw::c_int,
-                    msi: f64,
+                    measure_align: f64,
                 ) -> ::std::os::raw::c_int,
             >;
         }
@@ -6542,6 +6593,18 @@ pub mod root {
                     out_sz: ::std::os::raw::c_int,
                     checkSubDirOptional: *const ::std::os::raw::c_char,
                 ),
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions20ResolveRenderPatternE"]
+            pub static mut ResolveRenderPattern: ::std::option::Option<
+                unsafe extern "C" fn(
+                    project: *mut root::ReaProject,
+                    path: *const ::std::os::raw::c_char,
+                    pattern: *const ::std::os::raw::c_char,
+                    targets: *mut ::std::os::raw::c_char,
+                    targets_sz: ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -7284,8 +7347,8 @@ pub mod root {
                     fx: ::std::os::raw::c_int,
                     param: ::std::os::raw::c_int,
                     val: f64,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -7350,8 +7413,8 @@ pub mod root {
                     take: *mut root::MediaItem_Take,
                     fx: ::std::os::raw::c_int,
                     param: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -7370,8 +7433,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
                     fx: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -7465,14 +7528,36 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions24TakeFX_GetParamFromIdentE"]
+            pub static mut TakeFX_GetParamFromIdent: ::std::option::Option<
+                unsafe extern "C" fn(
+                    take: *mut root::MediaItem_Take,
+                    fx: ::std::os::raw::c_int,
+                    ident_str: *const ::std::os::raw::c_char,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions20TakeFX_GetParamIdentE"]
+            pub static mut TakeFX_GetParamIdent: ::std::option::Option<
+                unsafe extern "C" fn(
+                    take: *mut root::MediaItem_Take,
+                    fx: ::std::os::raw::c_int,
+                    param: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions19TakeFX_GetParamNameE"]
             pub static mut TakeFX_GetParamName: ::std::option::Option<
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
                     fx: ::std::os::raw::c_int,
                     param: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -7504,8 +7589,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
                     fx: ::std::os::raw::c_int,
-                    presetname: *mut ::std::os::raw::c_char,
-                    presetname_sz: ::std::os::raw::c_int,
+                    presetnameOut: *mut ::std::os::raw::c_char,
+                    presetnameOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -7525,8 +7610,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     take: *mut root::MediaItem_Take,
                     fx: ::std::os::raw::c_int,
-                    fn_: *mut ::std::os::raw::c_char,
-                    fn_sz: ::std::os::raw::c_int,
+                    fnOut: *mut ::std::os::raw::c_char,
+                    fnOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }
@@ -7935,8 +8020,8 @@ pub mod root {
                     fx: ::std::os::raw::c_int,
                     param: ::std::os::raw::c_int,
                     val: f64,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -8034,8 +8119,8 @@ pub mod root {
                     track: *mut root::MediaTrack,
                     fx: ::std::os::raw::c_int,
                     param: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -8054,8 +8139,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     fx: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -8155,14 +8240,36 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions25TrackFX_GetParamFromIdentE"]
+            pub static mut TrackFX_GetParamFromIdent: ::std::option::Option<
+                unsafe extern "C" fn(
+                    track: *mut root::MediaTrack,
+                    fx: ::std::os::raw::c_int,
+                    ident_str: *const ::std::os::raw::c_char,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions21TrackFX_GetParamIdentE"]
+            pub static mut TrackFX_GetParamIdent: ::std::option::Option<
+                unsafe extern "C" fn(
+                    track: *mut root::MediaTrack,
+                    fx: ::std::os::raw::c_int,
+                    param: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions20TrackFX_GetParamNameE"]
             pub static mut TrackFX_GetParamName: ::std::option::Option<
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     fx: ::std::os::raw::c_int,
                     param: ::std::os::raw::c_int,
-                    buf: *mut ::std::os::raw::c_char,
-                    buf_sz: ::std::os::raw::c_int,
+                    bufOut: *mut ::std::os::raw::c_char,
+                    bufOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -8194,8 +8301,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     fx: ::std::os::raw::c_int,
-                    presetname: *mut ::std::os::raw::c_char,
-                    presetname_sz: ::std::os::raw::c_int,
+                    presetnameOut: *mut ::std::os::raw::c_char,
+                    presetnameOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -8227,8 +8334,8 @@ pub mod root {
                 unsafe extern "C" fn(
                     track: *mut root::MediaTrack,
                     fx: ::std::os::raw::c_int,
-                    fn_: *mut ::std::os::raw::c_char,
-                    fn_sz: ::std::os::raw::c_int,
+                    fnOut: *mut ::std::os::raw::c_char,
+                    fnOut_sz: ::std::os::raw::c_int,
                 ),
             >;
         }

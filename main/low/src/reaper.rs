@@ -806,6 +806,9 @@ impl Reaper {
                 GetFocusedFX: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetFocusedFX)).as_ptr()),
                 ),
+                GetFocusedFX2: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetFocusedFX2)).as_ptr()),
+                ),
                 GetFreeDiskSpaceForRecordPath: std::mem::transmute(plugin_context.GetFunc(
                     c_str_macro::c_str!(stringify!(GetFreeDiskSpaceForRecordPath)).as_ptr(),
                 )),
@@ -895,6 +898,10 @@ impl Reaper {
                 GetMaxMidiOutputs: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetMaxMidiOutputs)).as_ptr()),
+                ),
+                GetMediaFileMetadata: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(GetMediaFileMetadata)).as_ptr()),
                 ),
                 GetMediaItem: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetMediaItem)).as_ptr()),
@@ -1325,6 +1332,10 @@ impl Reaper {
                 ),
                 GetThemeColor: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetThemeColor)).as_ptr()),
+                ),
+                GetThingFromPoint: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(GetThingFromPoint)).as_ptr()),
                 ),
                 GetToggleCommandState: std::mem::transmute(
                     plugin_context
@@ -2042,6 +2053,10 @@ impl Reaper {
                 MIDI_Sort: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(MIDI_Sort)).as_ptr()),
                 ),
+                MIDIEditor_EnumTakes: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(MIDIEditor_EnumTakes)).as_ptr()),
+                ),
                 MIDIEditor_GetActive: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(MIDIEditor_GetActive)).as_ptr()),
@@ -2178,6 +2193,10 @@ impl Reaper {
                 PCM_Sink_ShowConfig: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(PCM_Sink_ShowConfig)).as_ptr()),
+                ),
+                PCM_Source_BuildPeaks: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(PCM_Source_BuildPeaks)).as_ptr()),
                 ),
                 PCM_Source_CreateFromFile: std::mem::transmute(
                     plugin_context.GetFunc(
@@ -2334,6 +2353,10 @@ impl Reaper {
                 ),
                 resolve_fn2: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(resolve_fn2)).as_ptr()),
+                ),
+                ResolveRenderPattern: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(ResolveRenderPattern)).as_ptr()),
                 ),
                 ReverseNamedCommandLookup: std::mem::transmute(
                     plugin_context.GetFunc(
@@ -2719,6 +2742,15 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(TakeFX_GetParamEx)).as_ptr()),
                 ),
+                TakeFX_GetParamFromIdent: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(TakeFX_GetParamFromIdent)).as_ptr(),
+                    ),
+                ),
+                TakeFX_GetParamIdent: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(TakeFX_GetParamIdent)).as_ptr()),
+                ),
                 TakeFX_GetParamName: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(TakeFX_GetParamName)).as_ptr()),
@@ -3002,6 +3034,15 @@ impl Reaper {
                 TrackFX_GetParamEx: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(TrackFX_GetParamEx)).as_ptr()),
+                ),
+                TrackFX_GetParamFromIdent: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(TrackFX_GetParamFromIdent)).as_ptr(),
+                    ),
+                ),
+                TrackFX_GetParamIdent: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(TrackFX_GetParamIdent)).as_ptr()),
                 ),
                 TrackFX_GetParamName: std::mem::transmute(
                     plugin_context
@@ -3811,6 +3852,9 @@ impl Reaper {
         if pointers.GetFocusedFX.is_some() {
             loaded_count += 1;
         }
+        if pointers.GetFocusedFX2.is_some() {
+            loaded_count += 1;
+        }
         if pointers.GetFreeDiskSpaceForRecordPath.is_some() {
             loaded_count += 1;
         }
@@ -3878,6 +3922,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetMaxMidiOutputs.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GetMediaFileMetadata.is_some() {
             loaded_count += 1;
         }
         if pointers.GetMediaItem.is_some() {
@@ -4199,6 +4246,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetThemeColor.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GetThingFromPoint.is_some() {
             loaded_count += 1;
         }
         if pointers.GetToggleCommandState.is_some() {
@@ -4774,6 +4824,9 @@ impl Reaper {
         if pointers.MIDI_Sort.is_some() {
             loaded_count += 1;
         }
+        if pointers.MIDIEditor_EnumTakes.is_some() {
+            loaded_count += 1;
+        }
         if pointers.MIDIEditor_GetActive.is_some() {
             loaded_count += 1;
         }
@@ -4880,6 +4933,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.PCM_Sink_ShowConfig.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.PCM_Source_BuildPeaks.is_some() {
             loaded_count += 1;
         }
         if pointers.PCM_Source_CreateFromFile.is_some() {
@@ -5000,6 +5056,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.resolve_fn2.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.ResolveRenderPattern.is_some() {
             loaded_count += 1;
         }
         if pointers.ReverseNamedCommandLookup.is_some() {
@@ -5299,6 +5358,12 @@ impl Reaper {
         if pointers.TakeFX_GetParamEx.is_some() {
             loaded_count += 1;
         }
+        if pointers.TakeFX_GetParamFromIdent.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.TakeFX_GetParamIdent.is_some() {
+            loaded_count += 1;
+        }
         if pointers.TakeFX_GetParamName.is_some() {
             loaded_count += 1;
         }
@@ -5510,6 +5575,12 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.TrackFX_GetParamEx.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.TrackFX_GetParamFromIdent.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.TrackFX_GetParamIdent.is_some() {
             loaded_count += 1;
         }
         if pointers.TrackFX_GetParamName.is_some() {
@@ -6356,13 +6427,13 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn CountTracks(&self, proj: *mut root::ReaProject) -> ::std::os::raw::c_int {
+    pub unsafe fn CountTracks(&self, projOptional: *mut root::ReaProject) -> ::std::os::raw::c_int {
         match self.pointers.CountTracks {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTracks)
             ),
-            Some(f) => f(proj),
+            Some(f) => f(projOptional),
         }
     }
     #[doc = r" # Safety"]
@@ -8313,15 +8384,15 @@ impl Reaper {
     pub unsafe fn GetAudioDeviceInfo(
         &self,
         attribute: *const ::std::os::raw::c_char,
-        desc: *mut ::std::os::raw::c_char,
-        desc_sz: ::std::os::raw::c_int,
+        descOut: *mut ::std::os::raw::c_char,
+        descOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetAudioDeviceInfo {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioDeviceInfo)
             ),
-            Some(f) => f(attribute, desc, desc_sz),
+            Some(f) => f(attribute, descOut, descOut_sz),
         }
     }
     pub fn GetColorTheme(
@@ -8460,7 +8531,7 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetEnvelopeInfo_Value(
         &self,
-        tr: *mut root::TrackEnvelope,
+        env: *mut root::TrackEnvelope,
         parmname: *const ::std::os::raw::c_char,
     ) -> f64 {
         match self.pointers.GetEnvelopeInfo_Value {
@@ -8468,7 +8539,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeInfo_Value)
             ),
-            Some(f) => f(tr, parmname),
+            Some(f) => f(env, parmname),
         }
     }
     #[doc = r" # Safety"]
@@ -8652,6 +8723,23 @@ impl Reaper {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFocusedFX)
+            ),
+            Some(f) => f(tracknumberOut, itemnumberOut, fxnumberOut),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetFocusedFX2(
+        &self,
+        tracknumberOut: *mut ::std::os::raw::c_int,
+        itemnumberOut: *mut ::std::os::raw::c_int,
+        fxnumberOut: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.GetFocusedFX2 {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetFocusedFX2)
             ),
             Some(f) => f(tracknumberOut, itemnumberOut, fxnumberOut),
         }
@@ -8962,6 +9050,24 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMediaFileMetadata(
+        &self,
+        mediaSource: *mut root::PCM_source,
+        identifier: *const ::std::os::raw::c_char,
+        bufOutNeedBig: *mut ::std::os::raw::c_char,
+        bufOutNeedBig_sz: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.GetMediaFileMetadata {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetMediaFileMetadata)
+            ),
+            Some(f) => f(mediaSource, identifier, bufOutNeedBig, bufOutNeedBig_sz),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetMediaItem(
         &self,
         proj: *mut root::ReaProject,
@@ -9155,15 +9261,15 @@ impl Reaper {
     pub unsafe fn GetMediaSourceFileName(
         &self,
         source: *mut root::PCM_source,
-        filenamebuf: *mut ::std::os::raw::c_char,
-        filenamebuf_sz: ::std::os::raw::c_int,
+        filenamebufOut: *mut ::std::os::raw::c_char,
+        filenamebufOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetMediaSourceFileName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceFileName)
             ),
-            Some(f) => f(source, filenamebuf, filenamebuf_sz),
+            Some(f) => f(source, filenamebufOut, filenamebufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -9230,15 +9336,15 @@ impl Reaper {
     pub unsafe fn GetMediaSourceType(
         &self,
         source: *mut root::PCM_source,
-        typebuf: *mut ::std::os::raw::c_char,
-        typebuf_sz: ::std::os::raw::c_int,
+        typebufOut: *mut ::std::os::raw::c_char,
+        typebufOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetMediaSourceType {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceType)
             ),
-            Some(f) => f(source, typebuf, typebuf_sz),
+            Some(f) => f(source, typebufOut, typebufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -9307,15 +9413,15 @@ impl Reaper {
         &self,
         context: *const ::std::os::raw::c_char,
         modifier_flag: ::std::os::raw::c_int,
-        action: *mut ::std::os::raw::c_char,
-        action_sz: ::std::os::raw::c_int,
+        actionOut: *mut ::std::os::raw::c_char,
+        actionOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetMouseModifier {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMouseModifier)
             ),
-            Some(f) => f(context, modifier_flag, action, action_sz),
+            Some(f) => f(context, modifier_flag, actionOut, actionOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -9442,15 +9548,15 @@ impl Reaper {
     pub unsafe fn GetPeakFileName(
         &self,
         fn_: *const ::std::os::raw::c_char,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetPeakFileName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeakFileName)
             ),
-            Some(f) => f(fn_, buf, buf_sz),
+            Some(f) => f(fn_, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -9641,15 +9747,15 @@ impl Reaper {
     pub unsafe fn GetProjectName(
         &self,
         proj: *mut root::ReaProject,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetProjectName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectName)
             ),
-            Some(f) => f(proj, buf, buf_sz),
+            Some(f) => f(proj, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -9657,15 +9763,15 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetProjectPath(
         &self,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetProjectPath {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectPath)
             ),
-            Some(f) => f(buf, buf_sz),
+            Some(f) => f(bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -9674,15 +9780,15 @@ impl Reaper {
     pub unsafe fn GetProjectPathEx(
         &self,
         proj: *mut root::ReaProject,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.GetProjectPathEx {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectPathEx)
             ),
-            Some(f) => f(proj, buf, buf_sz),
+            Some(f) => f(proj, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -10662,6 +10768,24 @@ impl Reaper {
             Some(f) => f(ini_key, flagsOptional),
         }
     }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetThingFromPoint(
+        &self,
+        screen_x: ::std::os::raw::c_int,
+        screen_y: ::std::os::raw::c_int,
+        infoOut: *mut ::std::os::raw::c_char,
+        infoOut_sz: ::std::os::raw::c_int,
+    ) -> *mut root::MediaTrack {
+        match self.pointers.GetThingFromPoint {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetThingFromPoint)
+            ),
+            Some(f) => f(screen_x, screen_y, infoOut, infoOut_sz),
+        }
+    }
     pub fn GetToggleCommandState(
         &self,
         command_id: ::std::os::raw::c_int,
@@ -10805,14 +10929,14 @@ impl Reaper {
     pub unsafe fn GetTrackEnvelopeByChunkName(
         &self,
         tr: *mut root::MediaTrack,
-        cfgchunkname: *const ::std::os::raw::c_char,
+        cfgchunkname_or_guid: *const ::std::os::raw::c_char,
     ) -> *mut root::TrackEnvelope {
         match self.pointers.GetTrackEnvelopeByChunkName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackEnvelopeByChunkName)
             ),
-            Some(f) => f(tr, cfgchunkname),
+            Some(f) => f(tr, cfgchunkname_or_guid),
         }
     }
     #[doc = r" # Safety"]
@@ -10899,15 +11023,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         flag: ::std::os::raw::c_int,
-        bufWantNeedBig: *mut ::std::os::raw::c_char,
-        bufWantNeedBig_sz: *mut ::std::os::raw::c_int,
+        bufOutWantNeedBig: *mut ::std::os::raw::c_char,
+        bufOutWantNeedBig_sz: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackMIDILyrics {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDILyrics)
             ),
-            Some(f) => f(track, flag, bufWantNeedBig, bufWantNeedBig_sz),
+            Some(f) => f(track, flag, bufOutWantNeedBig, bufOutWantNeedBig_sz),
         }
     }
     pub fn GetTrackMIDINoteName(
@@ -11012,15 +11136,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         recv_index: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackReceiveName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackReceiveName)
             ),
-            Some(f) => f(track, recv_index, buf, buf_sz),
+            Some(f) => f(track, recv_index, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -11083,15 +11207,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         send_index: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetTrackSendName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendName)
             ),
-            Some(f) => f(track, send_index, buf, buf_sz),
+            Some(f) => f(track, send_index, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -13383,15 +13507,15 @@ impl Reaper {
     pub unsafe fn MIDI_GetAllEvts(
         &self,
         take: *mut root::MediaItem_Take,
-        bufNeedBig: *mut ::std::os::raw::c_char,
-        bufNeedBig_sz: *mut ::std::os::raw::c_int,
+        bufOutNeedBig: *mut ::std::os::raw::c_char,
+        bufOutNeedBig_sz: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetAllEvts {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetAllEvts)
             ),
-            Some(f) => f(take, bufNeedBig, bufNeedBig_sz),
+            Some(f) => f(take, bufOutNeedBig, bufOutNeedBig_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -13455,15 +13579,23 @@ impl Reaper {
         selectedOut: *mut bool,
         mutedOut: *mut bool,
         ppqposOut: *mut f64,
-        msg: *mut ::std::os::raw::c_char,
-        msg_sz: *mut ::std::os::raw::c_int,
+        msgOut: *mut ::std::os::raw::c_char,
+        msgOut_sz: *mut ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetEvt {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetEvt)
             ),
-            Some(f) => f(take, evtidx, selectedOut, mutedOut, ppqposOut, msg, msg_sz),
+            Some(f) => f(
+                take,
+                evtidx,
+                selectedOut,
+                mutedOut,
+                ppqposOut,
+                msgOut,
+                msgOut_sz,
+            ),
         }
     }
     #[doc = r" # Safety"]
@@ -13490,15 +13622,15 @@ impl Reaper {
         &self,
         take: *mut root::MediaItem_Take,
         notesonly: bool,
-        hash: *mut ::std::os::raw::c_char,
-        hash_sz: ::std::os::raw::c_int,
+        hashOut: *mut ::std::os::raw::c_char,
+        hashOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetHash {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetHash)
             ),
-            Some(f) => f(take, notesonly, hash, hash_sz),
+            Some(f) => f(take, notesonly, hashOut, hashOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -13638,15 +13770,15 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
         rootOut: *mut ::std::os::raw::c_int,
         scaleOut: *mut ::std::os::raw::c_int,
-        name: *mut ::std::os::raw::c_char,
-        name_sz: ::std::os::raw::c_int,
+        nameOut: *mut ::std::os::raw::c_char,
+        nameOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetScale {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetScale)
             ),
-            Some(f) => f(take, rootOut, scaleOut, name, name_sz),
+            Some(f) => f(take, rootOut, scaleOut, nameOut, nameOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -13687,15 +13819,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         notesonly: bool,
-        hash: *mut ::std::os::raw::c_char,
-        hash_sz: ::std::os::raw::c_int,
+        hashOut: *mut ::std::os::raw::c_char,
+        hashOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDI_GetTrackHash {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetTrackHash)
             ),
-            Some(f) => f(track, notesonly, hash, hash_sz),
+            Some(f) => f(track, notesonly, hashOut, hashOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -14012,6 +14144,23 @@ impl Reaper {
                 stringify!(MIDI_Sort)
             ),
             Some(f) => f(take),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn MIDIEditor_EnumTakes(
+        &self,
+        midieditor: root::HWND,
+        takeindex: ::std::os::raw::c_int,
+        editable_only: bool,
+    ) -> *mut root::MediaItem_Take {
+        match self.pointers.MIDIEditor_EnumTakes {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(MIDIEditor_EnumTakes)
+            ),
+            Some(f) => f(midieditor, takeindex, editable_only),
         }
     }
     pub fn MIDIEditor_GetActive(&self) -> root::HWND {
@@ -14525,6 +14674,22 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn PCM_Source_BuildPeaks(
+        &self,
+        src: *mut root::PCM_source,
+        mode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.PCM_Source_BuildPeaks {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(PCM_Source_BuildPeaks)
+            ),
+            Some(f) => f(src, mode),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn PCM_Source_CreateFromFile(
         &self,
         filename: *const ::std::os::raw::c_char,
@@ -14738,14 +14903,14 @@ impl Reaper {
         &self,
         preview: *mut root::preview_register_t,
         bufflags: ::std::os::raw::c_int,
-        MSI: f64,
+        measure_align: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PlayPreviewEx {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayPreviewEx)
             ),
-            Some(f) => f(preview, bufflags, MSI),
+            Some(f) => f(preview, bufflags, measure_align),
         }
     }
     #[doc = r" # Safety"]
@@ -14787,14 +14952,14 @@ impl Reaper {
         proj: *mut root::ReaProject,
         preview: *mut root::preview_register_t,
         flags: ::std::os::raw::c_int,
-        msi: f64,
+        measure_align: f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.PlayTrackPreview2Ex {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayTrackPreview2Ex)
             ),
-            Some(f) => f(proj, preview, flags, msi),
+            Some(f) => f(proj, preview, flags, measure_align),
         }
     }
     #[doc = r" # Safety"]
@@ -15121,6 +15286,25 @@ impl Reaper {
                 stringify!(resolve_fn2)
             ),
             Some(f) => f(in_, out, out_sz, checkSubDirOptional),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn ResolveRenderPattern(
+        &self,
+        project: *mut root::ReaProject,
+        path: *const ::std::os::raw::c_char,
+        pattern: *const ::std::os::raw::c_char,
+        targets: *mut ::std::os::raw::c_char,
+        targets_sz: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.ResolveRenderPattern {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(ResolveRenderPattern)
+            ),
+            Some(f) => f(project, path, pattern, targets, targets_sz),
         }
     }
     pub fn ReverseNamedCommandLookup(
@@ -16432,15 +16616,15 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
         param: ::std::os::raw::c_int,
         val: f64,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_FormatParamValue {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_FormatParamValue)
             ),
-            Some(f) => f(take, fx, param, val, buf, buf_sz),
+            Some(f) => f(take, fx, param, val, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -16548,15 +16732,15 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
         param: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetFormattedParamValue {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFormattedParamValue)
             ),
-            Some(f) => f(take, fx, param, buf, buf_sz),
+            Some(f) => f(take, fx, param, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -16582,15 +16766,15 @@ impl Reaper {
         &self,
         take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetFXName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFXName)
             ),
-            Some(f) => f(take, fx, buf, buf_sz),
+            Some(f) => f(take, fx, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -16749,20 +16933,56 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TakeFX_GetParamFromIdent(
+        &self,
+        take: *mut root::MediaItem_Take,
+        fx: ::std::os::raw::c_int,
+        ident_str: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.TakeFX_GetParamFromIdent {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(TakeFX_GetParamFromIdent)
+            ),
+            Some(f) => f(take, fx, ident_str),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TakeFX_GetParamIdent(
+        &self,
+        take: *mut root::MediaItem_Take,
+        fx: ::std::os::raw::c_int,
+        param: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.TakeFX_GetParamIdent {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(TakeFX_GetParamIdent)
+            ),
+            Some(f) => f(take, fx, param, bufOut, bufOut_sz),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TakeFX_GetParamName(
         &self,
         take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
         param: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetParamName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamName)
             ),
-            Some(f) => f(take, fx, param, buf, buf_sz),
+            Some(f) => f(take, fx, param, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -16808,15 +17028,15 @@ impl Reaper {
         &self,
         take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
-        presetname: *mut ::std::os::raw::c_char,
-        presetname_sz: ::std::os::raw::c_int,
+        presetnameOut: *mut ::std::os::raw::c_char,
+        presetnameOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetPreset {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPreset)
             ),
-            Some(f) => f(take, fx, presetname, presetname_sz),
+            Some(f) => f(take, fx, presetnameOut, presetnameOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -16843,15 +17063,15 @@ impl Reaper {
         &self,
         take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
-        fn_: *mut ::std::os::raw::c_char,
-        fn_sz: ::std::os::raw::c_int,
+        fnOut: *mut ::std::os::raw::c_char,
+        fnOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.TakeFX_GetUserPresetFilename {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetUserPresetFilename)
             ),
-            Some(f) => f(take, fx, fn_, fn_sz),
+            Some(f) => f(take, fx, fnOut, fnOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -17564,15 +17784,15 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
         param: ::std::os::raw::c_int,
         val: f64,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_FormatParamValue {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_FormatParamValue)
             ),
-            Some(f) => f(track, fx, param, val, buf, buf_sz),
+            Some(f) => f(track, fx, param, val, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -17742,15 +17962,15 @@ impl Reaper {
         track: *mut root::MediaTrack,
         fx: ::std::os::raw::c_int,
         param: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetFormattedParamValue {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFormattedParamValue)
             ),
-            Some(f) => f(track, fx, param, buf, buf_sz),
+            Some(f) => f(track, fx, param, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -17776,15 +17996,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         fx: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetFXName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFXName)
             ),
-            Some(f) => f(track, fx, buf, buf_sz),
+            Some(f) => f(track, fx, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -17958,20 +18178,56 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TrackFX_GetParamFromIdent(
+        &self,
+        track: *mut root::MediaTrack,
+        fx: ::std::os::raw::c_int,
+        ident_str: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.TrackFX_GetParamFromIdent {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(TrackFX_GetParamFromIdent)
+            ),
+            Some(f) => f(track, fx, ident_str),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn TrackFX_GetParamIdent(
+        &self,
+        track: *mut root::MediaTrack,
+        fx: ::std::os::raw::c_int,
+        param: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.TrackFX_GetParamIdent {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(TrackFX_GetParamIdent)
+            ),
+            Some(f) => f(track, fx, param, bufOut, bufOut_sz),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TrackFX_GetParamName(
         &self,
         track: *mut root::MediaTrack,
         fx: ::std::os::raw::c_int,
         param: ::std::os::raw::c_int,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetParamName {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamName)
             ),
-            Some(f) => f(track, fx, param, buf, buf_sz),
+            Some(f) => f(track, fx, param, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -18017,15 +18273,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         fx: ::std::os::raw::c_int,
-        presetname: *mut ::std::os::raw::c_char,
-        presetname_sz: ::std::os::raw::c_int,
+        presetnameOut: *mut ::std::os::raw::c_char,
+        presetnameOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetPreset {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPreset)
             ),
-            Some(f) => f(track, fx, presetname, presetname_sz),
+            Some(f) => f(track, fx, presetnameOut, presetnameOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -18082,15 +18338,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         fx: ::std::os::raw::c_int,
-        fn_: *mut ::std::os::raw::c_char,
-        fn_sz: ::std::os::raw::c_int,
+        fnOut: *mut ::std::os::raw::c_char,
+        fnOut_sz: ::std::os::raw::c_int,
     ) {
         match self.pointers.TrackFX_GetUserPresetFilename {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetUserPresetFilename)
             ),
-            Some(f) => f(track, fx, fn_, fn_sz),
+            Some(f) => f(track, fx, fnOut, fnOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -19031,7 +19287,7 @@ pub struct ReaperFunctionPointers {
     pub CountTrackMediaItems:
         Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> ::std::os::raw::c_int>,
     pub CountTracks:
-        Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> ::std::os::raw::c_int>,
+        Option<unsafe extern "C" fn(projOptional: *mut root::ReaProject) -> ::std::os::raw::c_int>,
     pub CreateLocalOscHandler: Option<
         unsafe extern "C" fn(
             obj: *mut ::std::os::raw::c_void,
@@ -19646,8 +19902,8 @@ pub struct ReaperFunctionPointers {
     pub GetAudioDeviceInfo: Option<
         unsafe extern "C" fn(
             attribute: *const ::std::os::raw::c_char,
-            desc: *mut ::std::os::raw::c_char,
-            desc_sz: ::std::os::raw::c_int,
+            descOut: *mut ::std::os::raw::c_char,
+            descOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetColorTheme: Option<
@@ -19675,7 +19931,7 @@ pub struct ReaperFunctionPointers {
     >,
     pub GetEnvelopeInfo_Value: Option<
         unsafe extern "C" fn(
-            tr: *mut root::TrackEnvelope,
+            env: *mut root::TrackEnvelope,
             parmname: *const ::std::os::raw::c_char,
         ) -> f64,
     >,
@@ -19740,6 +19996,13 @@ pub struct ReaperFunctionPointers {
         ) -> *const ::std::os::raw::c_char,
     >,
     pub GetFocusedFX: Option<
+        unsafe extern "C" fn(
+            tracknumberOut: *mut ::std::os::raw::c_int,
+            itemnumberOut: *mut ::std::os::raw::c_int,
+            fxnumberOut: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub GetFocusedFX2: Option<
         unsafe extern "C" fn(
             tracknumberOut: *mut ::std::os::raw::c_int,
             itemnumberOut: *mut ::std::os::raw::c_int,
@@ -19830,6 +20093,14 @@ pub struct ReaperFunctionPointers {
     pub GetMasterTrackVisibility: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetMaxMidiInputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub GetMaxMidiOutputs: Option<extern "C" fn() -> ::std::os::raw::c_int>,
+    pub GetMediaFileMetadata: Option<
+        unsafe extern "C" fn(
+            mediaSource: *mut root::PCM_source,
+            identifier: *const ::std::os::raw::c_char,
+            bufOutNeedBig: *mut ::std::os::raw::c_char,
+            bufOutNeedBig_sz: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub GetMediaItem: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -19886,8 +20157,8 @@ pub struct ReaperFunctionPointers {
     pub GetMediaSourceFileName: Option<
         unsafe extern "C" fn(
             source: *mut root::PCM_source,
-            filenamebuf: *mut ::std::os::raw::c_char,
-            filenamebuf_sz: ::std::os::raw::c_int,
+            filenamebufOut: *mut ::std::os::raw::c_char,
+            filenamebufOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetMediaSourceLength: Option<
@@ -19902,8 +20173,8 @@ pub struct ReaperFunctionPointers {
     pub GetMediaSourceType: Option<
         unsafe extern "C" fn(
             source: *mut root::PCM_source,
-            typebuf: *mut ::std::os::raw::c_char,
-            typebuf_sz: ::std::os::raw::c_int,
+            typebufOut: *mut ::std::os::raw::c_char,
+            typebufOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetMediaTrackInfo_Value: Option<
@@ -19931,8 +20202,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             context: *const ::std::os::raw::c_char,
             modifier_flag: ::std::os::raw::c_int,
-            action: *mut ::std::os::raw::c_char,
-            action_sz: ::std::os::raw::c_int,
+            actionOut: *mut ::std::os::raw::c_char,
+            actionOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetMousePosition: Option<
@@ -19954,8 +20225,8 @@ pub struct ReaperFunctionPointers {
     pub GetPeakFileName: Option<
         unsafe extern "C" fn(
             fn_: *const ::std::os::raw::c_char,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetPeakFileNameEx: Option<
@@ -20016,18 +20287,18 @@ pub struct ReaperFunctionPointers {
     pub GetProjectName: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetProjectPath: Option<
-        unsafe extern "C" fn(buf: *mut ::std::os::raw::c_char, buf_sz: ::std::os::raw::c_int),
+        unsafe extern "C" fn(bufOut: *mut ::std::os::raw::c_char, bufOut_sz: ::std::os::raw::c_int),
     >,
     pub GetProjectPathEx: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub GetProjectStateChangeCount:
@@ -20403,6 +20674,14 @@ pub struct ReaperFunctionPointers {
             flagsOptional: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
+    pub GetThingFromPoint: Option<
+        unsafe extern "C" fn(
+            screen_x: ::std::os::raw::c_int,
+            screen_y: ::std::os::raw::c_int,
+            infoOut: *mut ::std::os::raw::c_char,
+            infoOut_sz: ::std::os::raw::c_int,
+        ) -> *mut root::MediaTrack,
+    >,
     pub GetToggleCommandState:
         Option<extern "C" fn(command_id: ::std::os::raw::c_int) -> ::std::os::raw::c_int>,
     pub GetToggleCommandState2: Option<
@@ -20445,7 +20724,7 @@ pub struct ReaperFunctionPointers {
     pub GetTrackEnvelopeByChunkName: Option<
         unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
-            cfgchunkname: *const ::std::os::raw::c_char,
+            cfgchunkname_or_guid: *const ::std::os::raw::c_char,
         ) -> *mut root::TrackEnvelope,
     >,
     pub GetTrackEnvelopeByName: Option<
@@ -20478,8 +20757,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             flag: ::std::os::raw::c_int,
-            bufWantNeedBig: *mut ::std::os::raw::c_char,
-            bufWantNeedBig_sz: *mut ::std::os::raw::c_int,
+            bufOutWantNeedBig: *mut ::std::os::raw::c_char,
+            bufOutWantNeedBig_sz: *mut ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetTrackMIDINoteName: Option<
@@ -20524,8 +20803,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             recv_index: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetTrackReceiveUIMute: Option<
@@ -20555,8 +20834,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             send_index: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetTrackSendUIMute: Option<
@@ -21446,8 +21725,8 @@ pub struct ReaperFunctionPointers {
     pub MIDI_GetAllEvts: Option<
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
-            bufNeedBig: *mut ::std::os::raw::c_char,
-            bufNeedBig_sz: *mut ::std::os::raw::c_int,
+            bufOutNeedBig: *mut ::std::os::raw::c_char,
+            bufOutNeedBig_sz: *mut ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDI_GetCC: Option<
@@ -21478,8 +21757,8 @@ pub struct ReaperFunctionPointers {
             selectedOut: *mut bool,
             mutedOut: *mut bool,
             ppqposOut: *mut f64,
-            msg: *mut ::std::os::raw::c_char,
-            msg_sz: *mut ::std::os::raw::c_int,
+            msgOut: *mut ::std::os::raw::c_char,
+            msgOut_sz: *mut ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDI_GetGrid: Option<
@@ -21493,8 +21772,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             notesonly: bool,
-            hash: *mut ::std::os::raw::c_char,
-            hash_sz: ::std::os::raw::c_int,
+            hashOut: *mut ::std::os::raw::c_char,
+            hashOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDI_GetNote: Option<
@@ -21527,8 +21806,8 @@ pub struct ReaperFunctionPointers {
             take: *mut root::MediaItem_Take,
             rootOut: *mut ::std::os::raw::c_int,
             scaleOut: *mut ::std::os::raw::c_int,
-            name: *mut ::std::os::raw::c_char,
-            name_sz: ::std::os::raw::c_int,
+            nameOut: *mut ::std::os::raw::c_char,
+            nameOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDI_GetTextSysexEvt: Option<
@@ -21547,8 +21826,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             notesonly: bool,
-            hash: *mut ::std::os::raw::c_char,
-            hash_sz: ::std::os::raw::c_int,
+            hashOut: *mut ::std::os::raw::c_char,
+            hashOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDI_InsertCC: Option<
@@ -21671,6 +21950,13 @@ pub struct ReaperFunctionPointers {
         ) -> bool,
     >,
     pub MIDI_Sort: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
+    pub MIDIEditor_EnumTakes: Option<
+        unsafe extern "C" fn(
+            midieditor: root::HWND,
+            takeindex: ::std::os::raw::c_int,
+            editable_only: bool,
+        ) -> *mut root::MediaItem_Take,
+    >,
     pub MIDIEditor_GetActive: Option<extern "C" fn() -> root::HWND>,
     pub MIDIEditor_GetMode:
         Option<unsafe extern "C" fn(midieditor: root::HWND) -> ::std::os::raw::c_int>,
@@ -21804,6 +22090,12 @@ pub struct ReaperFunctionPointers {
             hwndParent: root::HWND,
         ) -> root::HWND,
     >,
+    pub PCM_Source_BuildPeaks: Option<
+        unsafe extern "C" fn(
+            src: *mut root::PCM_source,
+            mode: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub PCM_Source_CreateFromFile: Option<
         unsafe extern "C" fn(filename: *const ::std::os::raw::c_char) -> *mut root::PCM_source,
     >,
@@ -21882,7 +22174,7 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             preview: *mut root::preview_register_t,
             bufflags: ::std::os::raw::c_int,
-            MSI: f64,
+            measure_align: f64,
         ) -> ::std::os::raw::c_int,
     >,
     pub PlayTrackPreview: Option<
@@ -21899,7 +22191,7 @@ pub struct ReaperFunctionPointers {
             proj: *mut root::ReaProject,
             preview: *mut root::preview_register_t,
             flags: ::std::os::raw::c_int,
-            msi: f64,
+            measure_align: f64,
         ) -> ::std::os::raw::c_int,
     >,
     pub plugin_getapi: Option<
@@ -22002,6 +22294,15 @@ pub struct ReaperFunctionPointers {
             out_sz: ::std::os::raw::c_int,
             checkSubDirOptional: *const ::std::os::raw::c_char,
         ),
+    >,
+    pub ResolveRenderPattern: Option<
+        unsafe extern "C" fn(
+            project: *mut root::ReaProject,
+            path: *const ::std::os::raw::c_char,
+            pattern: *const ::std::os::raw::c_char,
+            targets: *mut ::std::os::raw::c_char,
+            targets_sz: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub ReverseNamedCommandLookup:
         Option<extern "C" fn(command_id: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
@@ -22442,8 +22743,8 @@ pub struct ReaperFunctionPointers {
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
             val: f64,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_FormatParamValueNormalized: Option<
@@ -22482,8 +22783,8 @@ pub struct ReaperFunctionPointers {
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_GetFXGUID: Option<
@@ -22496,8 +22797,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_GetIOSize: Option<
@@ -22559,13 +22860,29 @@ pub struct ReaperFunctionPointers {
             midvalOut: *mut f64,
         ) -> f64,
     >,
+    pub TakeFX_GetParamFromIdent: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            fx: ::std::os::raw::c_int,
+            ident_str: *const ::std::os::raw::c_char,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub TakeFX_GetParamIdent: Option<
+        unsafe extern "C" fn(
+            take: *mut root::MediaItem_Take,
+            fx: ::std::os::raw::c_int,
+            param: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
     pub TakeFX_GetParamName: Option<
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_GetParamNormalized: Option<
@@ -22588,8 +22905,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
-            presetname: *mut ::std::os::raw::c_char,
-            presetname_sz: ::std::os::raw::c_int,
+            presetnameOut: *mut ::std::os::raw::c_char,
+            presetnameOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_GetPresetIndex: Option<
@@ -22603,8 +22920,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
-            fn_: *mut ::std::os::raw::c_char,
-            fn_sz: ::std::os::raw::c_int,
+            fnOut: *mut ::std::os::raw::c_char,
+            fnOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub TakeFX_NavigatePresets: Option<
@@ -22858,8 +23175,8 @@ pub struct ReaperFunctionPointers {
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
             val: f64,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_FormatParamValueNormalized: Option<
@@ -22922,8 +23239,8 @@ pub struct ReaperFunctionPointers {
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_GetFXGUID: Option<
@@ -22936,8 +23253,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_GetInstrument:
@@ -23001,13 +23318,29 @@ pub struct ReaperFunctionPointers {
             midvalOut: *mut f64,
         ) -> f64,
     >,
+    pub TrackFX_GetParamFromIdent: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            fx: ::std::os::raw::c_int,
+            ident_str: *const ::std::os::raw::c_char,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub TrackFX_GetParamIdent: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            fx: ::std::os::raw::c_int,
+            param: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
     pub TrackFX_GetParamName: Option<
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             param: ::std::os::raw::c_int,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_GetParamNormalized: Option<
@@ -23030,8 +23363,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
-            presetname: *mut ::std::os::raw::c_char,
-            presetname_sz: ::std::os::raw::c_int,
+            presetnameOut: *mut ::std::os::raw::c_char,
+            presetnameOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_GetPresetIndex: Option<
@@ -23049,8 +23382,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
-            fn_: *mut ::std::os::raw::c_char,
-            fn_sz: ::std::os::raw::c_int,
+            fnOut: *mut ::std::os::raw::c_char,
+            fnOut_sz: ::std::os::raw::c_int,
         ),
     >,
     pub TrackFX_NavigatePresets: Option<
@@ -23303,5 +23636,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 820u32;
+    pub(crate) const TOTAL_COUNT: u32 = 830u32;
 }
