@@ -748,7 +748,7 @@ mod tests {
         assert_eq!(
             result,
             Ok(FxInfo {
-                effect_name: "ReaLearn (Helgoboss)".into(),
+                effect_name: "VSTi: ReaLearn (Helgoboss)".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VSTi".into(),
                 file_name: "ReaLearn-x64.dll".into()
@@ -766,7 +766,7 @@ mod tests {
         assert_eq!(
             result,
             Ok(FxInfo {
-                effect_name: "EQ (Nova)".into(),
+                effect_name: "VST: EQ (Nova)".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST".into(),
                 file_name: "TDR Nova GE.dll".into()
@@ -784,7 +784,7 @@ mod tests {
         assert_eq!(
             result,
             Ok(FxInfo {
-                effect_name: "BussColors4".into(),
+                effect_name: "VST: BussColors4".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST".into(),
                 file_name: "BussColors464.dll".into()
@@ -802,7 +802,7 @@ mod tests {
         assert_eq!(
             result,
             Ok(FxInfo {
-                effect_name: "Hive".into(),
+                effect_name: "VST3i: Hive".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST3i".into(),
                 file_name: "Hive(x64).vst3".into()
@@ -820,7 +820,7 @@ mod tests {
         assert_eq!(
             result,
             Ok(FxInfo {
-                effect_name: "Element FX (Kushview) (34ch)".into(),
+                effect_name: "VST3: Element FX (Kushview) (34ch)".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST3".into(),
                 file_name: "KV_ElementFX.vst3".into()
@@ -838,7 +838,7 @@ mod tests {
         assert_eq!(
             result,
             Ok(FxInfo {
-                effect_name: "True Iron".into(),
+                effect_name: "VST3: True Iron".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST3".into(),
                 file_name: "True Iron.vst3".into()
