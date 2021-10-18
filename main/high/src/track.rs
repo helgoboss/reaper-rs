@@ -17,8 +17,8 @@ use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
-    RecordingInput, SoloMode, TrackArea, TrackAttributeKey, TrackLocation, TrackSendCategory,
-    TrackSendDirection,
+    RecordingInput, RgbColor, SoloMode, TrackArea, TrackAttributeKey, TrackLocation,
+    TrackSendCategory, TrackSendDirection,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -90,6 +90,18 @@ impl Track {
             Reaper::get()
                 .medium_reaper()
                 .get_set_media_track_info_get_name(self.raw(), |n| n.to_owned())
+        }
+    }
+
+    pub fn custom_color(&self) -> Option<RgbColor> {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = Reaper::get().medium_reaper();
+        let res = unsafe { reaper.get_track_color(self.raw())? };
+        if res.is_used {
+            let rgb_color = reaper.color_from_native(res.color);
+            Some(rgb_color)
+        } else {
+            None
         }
     }
 

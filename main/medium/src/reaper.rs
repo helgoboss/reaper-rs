@@ -3510,6 +3510,65 @@ impl<UsageScope> Reaper<UsageScope> {
         AutomationMode::from_raw(result)
     }
 
+    /// Returns the custom color of the given track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_color(&self, track: MediaTrack) -> Option<NativeColorResult>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let value = self.low.GetTrackColor(track.as_ptr());
+        NativeColorResult::from_track_color_value(value)
+    }
+
+    /// Extracts an RGB color from the given OS-dependent color.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn color_from_native(&self, color: NativeColor) -> RgbColor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (mut r, mut g, mut b) = (
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+        );
+        unsafe {
+            self.low.ColorFromNative(
+                color.to_raw(),
+                r.as_mut_ptr(),
+                g.as_mut_ptr(),
+                b.as_mut_ptr(),
+            );
+        }
+        RgbColor {
+            r: unsafe { r.assume_init() as _ },
+            g: unsafe { g.assume_init() as _ },
+            b: unsafe { b.assume_init() as _ },
+        }
+    }
+
+    /// Runs the system color chooser dialog.
+    ///
+    /// Returns `None` if the user cancels the dialog.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn gr_select_color(&self, window: WindowContext) -> Option<NativeColor>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut raw = MaybeUninit::uninit();
+        let picked = unsafe { self.low.GR_SelectColor(window.to_raw(), raw.as_mut_ptr()) };
+        if picked == 0 {
+            return None;
+        }
+        Some(NativeColor::new(unsafe { raw.assume_init() } as _))
+    }
+
     /// Sets the track automation mode.
     ///
     /// # Safety
@@ -6134,6 +6193,42 @@ pub enum GetFocusedFxResult {
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
     Unknown(Hidden<i32>),
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct RgbColor {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct NativeColorResult {
+    /// The OS-dependent color.
+    pub color: NativeColor,
+    /// Whether the color is actually displayed (vs. just internally stored).
+    pub is_used: bool,
+}
+
+impl NativeColorResult {
+    fn from_track_color_value(value: i32) -> Option<Self> {
+        if value == 0 {
+            return None;
+        }
+        let used_offset = 0x100000;
+        let res = if value < used_offset {
+            Self {
+                color: NativeColor::new(value as _),
+                is_used: false,
+            }
+        } else {
+            Self {
+                color: NativeColor::new((value - used_offset) as _),
+                is_used: true,
+            }
+        };
+        Some(res)
+    }
 }
 
 fn make_some_if_greater_than_zero(value: f64) -> Option<f64> {
