@@ -3094,7 +3094,8 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(buffer)
     }
 
-    /// Like [`track_fx_get_named_config_parm`] but interpreting the result as a string.
+    /// Like [`track_fx_get_named_config_parm`](Self::track_fx_get_named_config_parm)
+    /// but interpreting the result as a string.
     ///
     /// # Errors
     ///
