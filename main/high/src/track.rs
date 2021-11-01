@@ -185,13 +185,13 @@ impl Track {
     pub fn set_pan(&self, pan: Pan) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = pan.reaper_value();
-        if self.project() == Reaper::get().current_project() {
+        let reaper_value = if self.project() == Reaper::get().current_project() {
             unsafe {
                 Reaper::get().medium_reaper().csurf_on_pan_change_ex(
                     self.raw(),
                     Absolute(reaper_value),
                     GangBehavior::DenyGang,
-                );
+                )
             }
         } else {
             // ReaLearn #283
@@ -202,7 +202,8 @@ impl Track {
                     reaper_value.get(),
                 );
             }
-        }
+            reaper_value
+        };
         // Setting the pan programmatically doesn't trigger SetSurfacePan for control surfaces so
         // we need to notify manually
         unsafe {
@@ -284,7 +285,7 @@ impl Track {
     pub fn set_volume(&self, volume: Volume) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = volume.reaper_value();
-        if self.project() == Reaper::get().current_project() {
+        let reaper_value = if self.project() == Reaper::get().current_project() {
             // Why we use this function and not the others:
             //
             // - Setting D_VOL directly via `set_media_track_info_value` will not work for writing
@@ -303,7 +304,7 @@ impl Track {
                     self.raw(),
                     Absolute(reaper_value),
                     GangBehavior::DenyGang,
-                );
+                )
             }
         } else {
             // ReaLearn #283
@@ -314,7 +315,8 @@ impl Track {
                     reaper_value.get(),
                 );
             }
-        }
+            reaper_value
+        };
         // Setting the volume programmatically doesn't inform control surfaces - including our own
         // surfaces which are important for feedback. So use the following to notify manually.
         unsafe {
