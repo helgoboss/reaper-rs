@@ -908,17 +908,7 @@ impl ChangeDetectionMiddleware {
                             func.get_media_track_info_value(mt, TrackAttributeKey::Vol),
                         ),
                         pan: {
-                            let project_pan_mode = {
-                                let proj_conf_result = func
-                                    .project_config_var_get_offs("panmode")
-                                    .expect("couldn't find panmode project config");
-                                let var = func.project_config_var_addr(
-                                    Proj(project.raw()),
-                                    proj_conf_result.offset,
-                                ) as *mut i32;
-                                let ipanmode = *var;
-                                PanMode::from_raw(ipanmode)
-                            };
+                            let project_pan_mode = project.pan_mode();
                             use PanMode::*;
                             let track_pan_mode = func
                                 .get_set_media_track_info_get_pan_mode(mt)

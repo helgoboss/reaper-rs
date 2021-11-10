@@ -24,7 +24,7 @@ use crate::{
     ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
     ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
     ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
-    SoloMode, StuffMidiMessageTarget, TimeFormattingModeOverride, TimeRangeType, TrackArea,
+    SoloMode, StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea,
     TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
     TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef,
     TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
@@ -5895,7 +5895,7 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         tpos: PositionInSeconds,
         buffer_size: u32,
-        mode_override: TimeFormattingModeOverride,
+        mode_override: TimeModeOverride,
     ) -> ReaperString
     where
         UsageScope: MainThreadOnly,
@@ -5921,7 +5921,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: DurationInSeconds,
         buffer_size: u32,
         offset: PositionInSeconds,
-        mode_override: TimeFormattingModeOverride,
+        mode_override: TimeModeOverride,
     ) -> ReaperString
     where
         UsageScope: MainThreadOnly,

@@ -6,10 +6,10 @@ use crate::{
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
     AutoSeekBehavior, BookmarkId, BookmarkRef, CountProjectMarkersResult, DurationInSeconds,
-    GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PlayState,
-    PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString, ReaperStringArg,
-    SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeRangeType, TrackDefaultsBehavior,
-    TrackLocation, UndoBehavior,
+    GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PanMode,
+    PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString,
+    ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeMode, TimeModeOverride,
+    TimeRangeType, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
 };
 use std::path::{Path, PathBuf};
 
@@ -547,6 +547,56 @@ impl Project {
         Reaper::get()
             .medium_reaper
             .set_edit_curs_pos_2(self.context(), time, options);
+    }
+
+    pub fn pan_mode(self) -> PanMode {
+        let raw = unsafe {
+            self.get_project_config("panmode")
+                .expect("couldn't get panmode")
+        };
+        PanMode::from_raw(raw)
+    }
+
+    pub fn ruler_time_mode(self) -> TimeMode {
+        let raw: i32 = unsafe {
+            self.get_project_config("projtimemode")
+                .expect("couldn't get projtimemode")
+        };
+        TimeMode::from_raw(raw)
+    }
+
+    pub fn transport_time_mode(self) -> TimeModeOverride {
+        let raw: i32 = unsafe {
+            self.get_project_config("projtimemode2")
+                .expect("couldn't get projtimemode2")
+        };
+        TimeModeOverride::from_raw(raw)
+    }
+
+    pub fn time_offset(self) -> PositionInSeconds {
+        let raw = unsafe {
+            self.get_project_config("projtimeoffs")
+                .expect("couldn't get projtimeoffs")
+        };
+        PositionInSeconds::new(raw)
+    }
+
+    pub fn measure_offset(self) -> i32 {
+        unsafe {
+            self.get_project_config("projmeasoffs")
+                .expect("couldn't get projmeasoffs")
+        }
+    }
+
+    unsafe fn get_project_config<T: Copy>(self, name: &str) -> Option<T> {
+        let reaper = Reaper::get().medium_reaper();
+        let proj_conf_result = reaper.project_config_var_get_offs(name)?;
+        let ptr =
+            reaper.project_config_var_addr(Proj(self.raw()), proj_conf_result.offset) as *mut T;
+        if ptr.is_null() {
+            return None;
+        }
+        Some(*ptr)
     }
 
     fn set_repeat_is_enabled(self, repeat: bool) {

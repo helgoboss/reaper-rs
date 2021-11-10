@@ -1207,44 +1207,55 @@ impl SendMidiTime {
     }
 }
 
-/// Override of time formatting modes.
+/// Override of time modes.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum TimeFormattingModeOverride {
-    /// Uses the time formatting mode set for the project.
+pub enum TimeModeOverride {
+    /// Uses the time mode set for the project.
     ProjectDefault,
     /// Uses the given time formatting mode.
-    Mode(TimeFormattingMode),
+    Mode(TimeMode),
 }
 
-impl TimeFormattingModeOverride {
+impl TimeModeOverride {
     /// Converts this value to an integer as expected by the low-level API.
-    pub(crate) fn to_raw(self) -> i32 {
-        use TimeFormattingModeOverride::*;
+    pub fn to_raw(self) -> i32 {
+        use TimeModeOverride::*;
         match self {
             ProjectDefault => -1,
             Mode(m) => m.to_raw(),
         }
     }
+
+    /// Converts an integer as returned by the low-level API to a time mode override.
+    pub fn from_raw(v: i32) -> Self {
+        use TimeModeOverride::*;
+        match v {
+            -1 => ProjectDefault,
+            i => Mode(TimeMode::from_raw(i)),
+        }
+    }
 }
 
-/// Time formatting mode.
+/// Time mode.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum TimeFormattingMode {
+pub enum TimeMode {
     Time,
     MeasuresBeatsTime,
     MeasuresBeats,
+    MeasuresBeatsMinimal,
     Seconds,
     Samples,
     HoursMinutesSecondsFrames,
+    AbsoluteFrames,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
     Unknown(Hidden<i32>),
 }
 
-impl TimeFormattingMode {
+impl TimeMode {
     /// Converts this value to an integer as expected by the low-level API.
     pub fn to_raw(self) -> i32 {
-        use TimeFormattingMode::*;
+        use TimeMode::*;
         match self {
             Time => 0,
             MeasuresBeatsTime => 1,
@@ -1252,7 +1263,25 @@ impl TimeFormattingMode {
             Seconds => 3,
             Samples => 4,
             HoursMinutesSecondsFrames => 5,
+            MeasuresBeatsMinimal => 6,
+            AbsoluteFrames => 8,
             Unknown(Hidden(x)) => x,
+        }
+    }
+
+    /// Converts an integer as returned by the low-level API to a time mode.
+    pub fn from_raw(v: i32) -> Self {
+        use TimeMode::*;
+        match v & 0xff {
+            0 => Time,
+            1 => MeasuresBeatsTime,
+            2 => MeasuresBeats,
+            3 => Seconds,
+            4 => Samples,
+            5 => HoursMinutesSecondsFrames,
+            6 | 7 => MeasuresBeatsMinimal,
+            8 => AbsoluteFrames,
+            x => Unknown(Hidden(x)),
         }
     }
 }
