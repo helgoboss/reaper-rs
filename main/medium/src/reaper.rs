@@ -875,6 +875,36 @@ impl<UsageScope> Reaper<UsageScope> {
             .CSurf_SetRepeatState(repeat_state, notification_behavior.to_raw());
     }
 
+    /// Returns `true` if any track in the given project is soloed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn any_track_solo(&self, project: ProjectContext) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.any_track_solo_unchecked(project) }
+    }
+
+    /// Like [`any_track_solo()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`any_track_solo()`]: #method.any_track_solo
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn any_track_solo_unchecked(&self, project: ProjectContext) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.AnyTrackSolo(project.to_raw())
+    }
+
     /// Directly simulates a play button hit.
     ///
     /// # Panics
@@ -885,7 +915,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.on_play_button_ex_unchecked(project) }
     }

@@ -45,6 +45,10 @@ impl Project {
             .file_path
     }
 
+    pub fn any_solo(self) -> bool {
+        Reaper::get().medium_reaper().any_track_solo(self.context())
+    }
+
     pub fn index(self) -> u32 {
         self.complain_if_not_available();
         let rea_project = self.rea_project;
