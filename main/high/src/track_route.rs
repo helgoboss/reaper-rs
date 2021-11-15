@@ -78,14 +78,14 @@ impl TrackRoute {
         }
     }
 
-    pub fn volume(&self) -> Volume {
-        Volume::from_reaper_value(self.vol_pan().volume)
+    pub fn volume(&self) -> Result<Volume, ReaperFunctionError> {
+        Ok(Volume::from_reaper_value(self.vol_pan()?.volume))
     }
 
-    fn vol_pan(&self) -> VolumeAndPan {
+    fn vol_pan(&self) -> Result<VolumeAndPan, ReaperFunctionError> {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the
         // wrong value if an envelope is written.
-        let result = match self.direction {
+        match self.direction {
             Send => unsafe {
                 Reaper::get()
                     .medium_reaper()
@@ -96,8 +96,7 @@ impl TrackRoute {
                     .medium_reaper()
                     .get_track_receive_ui_vol_pan(self.track().raw(), self.index)
             },
-        };
-        result.expect("Couldn't get send vol/pan")
+        }
     }
 
     pub fn set_volume(&self, volume: Volume) -> Result<(), ReaperFunctionError> {
@@ -150,8 +149,8 @@ impl TrackRoute {
         }
     }
 
-    pub fn pan(&self) -> Pan {
-        Pan::from_reaper_value(self.vol_pan().pan)
+    pub fn pan(&self) -> Result<Pan, ReaperFunctionError> {
+        Ok(Pan::from_reaper_value(self.vol_pan()?.pan))
     }
 
     pub fn set_pan(&self, pan: Pan) -> Result<(), ReaperFunctionError> {
