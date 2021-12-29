@@ -21,7 +21,6 @@ pub struct ChangeDetectionMiddleware {
     project_datas: RefCell<ProjectDataMap>,
     // Capabilities depending on REAPER version
     supports_detection_of_input_fx: bool,
-    supports_detection_of_input_fx_in_set_fx_change: bool,
 }
 
 type ProjectDataMap = HashMap<ReaProject, TrackDataMap>;
@@ -154,8 +153,6 @@ impl Default for ChangeDetectionMiddleware {
             project_datas: Default::default(),
             // since pre1,
             supports_detection_of_input_fx: version >= reaper_version_5_95,
-            // since pre2 to be accurate but so what
-            supports_detection_of_input_fx_in_set_fx_change: version >= reaper_version_5_95,
         }
     }
 }
