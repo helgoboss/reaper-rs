@@ -10,7 +10,7 @@ use crate::option_util::OptionExt;
 use crate::{ChunkRegion, FxChainContext, Project, Reaper, Track};
 use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg,
-    TrackFxLocation,
+    TrackFxGetPresetIndexResult, TrackFxLocation,
 };
 use std::hash::{Hash, Hasher};
 
@@ -168,7 +168,14 @@ impl Fx {
                     .and_then(|rs| {
                         let c_string = rs.into_inner();
                         let cow = c_string.to_string_lossy();
-                        let path = Path::new(cow.as_ref());
+                        let str_ref = if let Some(index_of_hash_start) =
+                            cow.chars().position(|ch| ch == '<')
+                        {
+                            &cow.as_ref()[..index_of_hash_start]
+                        } else {
+                            cow.as_ref()
+                        };
+                        let path = Path::new(str_ref);
                         Some(PathBuf::from(path.file_name()?))
                     })
                     .unwrap_or_default(),
@@ -528,7 +535,9 @@ impl Fx {
         self.guid.is_some()
     }
 
-    pub fn preset_count(&self) -> Result<u32, ReaperFunctionError> {
+    pub fn preset_index_and_count(
+        &self,
+    ) -> Result<TrackFxGetPresetIndexResult, ReaperFunctionError> {
         self.load_if_necessary_or_complain();
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
@@ -539,23 +548,7 @@ impl Fx {
                         .medium_reaper()
                         .track_fx_get_preset_index(track.raw(), location)?
                 };
-                Ok(res.count)
-            }
-        }
-    }
-
-    pub fn preset_index(&self) -> Result<Option<u32>, ReaperFunctionError> {
-        self.load_if_necessary_or_complain();
-        match self.chain.context() {
-            FxChainContext::Take(_) => todo!(),
-            _ => {
-                let (track, location) = self.track_and_location();
-                let res = unsafe {
-                    Reaper::get()
-                        .medium_reaper()
-                        .track_fx_get_preset_index(track.raw(), location)?
-                };
-                Ok(res.index)
+                Ok(res)
             }
         }
     }

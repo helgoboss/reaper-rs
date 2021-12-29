@@ -26,8 +26,8 @@ use reaper_medium::{
     FxPresetRef, GangBehavior, InputMonitoringMode, MasterTrackBehavior, MidiInputDeviceId,
     MidiOutputDeviceId, NormalizedPlayRate, PlaybackSpeedFactor, PositionInSeconds,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
-    ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget, TrackLocation,
-    UndoBehavior, ValueChange,
+    ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget,
+    TrackFxGetPresetIndexResult, TrackLocation, UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -832,8 +832,11 @@ fn set_track_send_pan() -> TestStep {
         });
         send.set_pan(Pan::from_normalized_value(0.25)).unwrap();
         // Then
-        assert_eq!(send.pan().reaper_value(), ReaperPanValue::new(-0.5));
-        assert_eq!(send.pan().normalized_value(), 0.25);
+        assert_eq!(
+            send.pan().unwrap().reaper_value(),
+            ReaperPanValue::new(-0.5)
+        );
+        assert_eq!(send.pan().unwrap().normalized_value(), 0.25);
         assert_eq!(mock.invocation_count(), 2);
         Ok(())
     })
@@ -882,7 +885,7 @@ fn set_track_send_volume() -> TestStep {
             .unwrap();
         // Then
         assert!(abs_diff_eq!(
-            send.volume().db().get(),
+            send.volume().unwrap().db().get(),
             -30.009_531_739_774_296,
             epsilon = EPSILON
         ));
@@ -919,8 +922,8 @@ fn query_track_send() -> TestStep {
             send_to_track_3.partner(),
             Some(TrackRoutePartner::Track(track_3))
         );
-        assert_eq!(send_to_track_2.volume().db(), Db::ZERO_DB);
-        assert_eq!(send_to_track_3.volume().db(), Db::ZERO_DB);
+        assert_eq!(send_to_track_2.volume().unwrap().db(), Db::ZERO_DB);
+        assert_eq!(send_to_track_3.volume().unwrap().db(), Db::ZERO_DB);
         assert!(!send_to_track_2.is_muted());
         assert!(!send_to_track_3.is_muted());
         Ok(())
@@ -3086,8 +3089,13 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
         let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
         // When
         // Then
-        assert_eq!(fx.preset_count(), Ok(0));
-        assert_eq!(fx.preset_index(), Ok(None));
+        assert_eq!(
+            fx.preset_index_and_count().unwrap(),
+            TrackFxGetPresetIndexResult {
+                index: None,
+                count: 0
+            }
+        );
         assert!(fx.preset_name().is_none());
         assert!(fx.preset_is_dirty());
         Ok(())
@@ -3383,6 +3391,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
 
             let fx_1_info: FxInfo = fx_1.info()?;
             let file_name = fx_1_info.file_name.file_name().ok_or("No FX file name")?;
+            dbg!("HEY", file_name);
             assert!(matches!(
                 file_name
                     .to_str()
