@@ -2268,6 +2268,16 @@ impl<UsageScope> Reaper<UsageScope> {
         );
     }
 
+    /// Resets all MIDI devices.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn midi_reinit(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.midi_reinit();
+    }
+
     /// Returns the maximum number of MIDI input devices (usually 63).
     #[measure(ResponseTimeMultiThreaded)]
     pub fn get_max_midi_inputs(&self) -> u32
