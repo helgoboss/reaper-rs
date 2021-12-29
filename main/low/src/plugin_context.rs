@@ -276,18 +276,10 @@ impl Default for StaticVstPluginContext {
 /// static variables.
 ///
 /// This just contains the SWELL function provider at the moment.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub struct StaticExtensionPluginContext {
     /// Function which returns SWELL function by its name.
     ///
     /// Linux/macOS only.
     pub get_swell_func: Option<GetSwellFunc>,
-}
-
-impl Default for StaticExtensionPluginContext {
-    fn default() -> Self {
-        StaticExtensionPluginContext {
-            get_swell_func: None,
-        }
-    }
 }
