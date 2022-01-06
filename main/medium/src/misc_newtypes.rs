@@ -4,9 +4,10 @@ use derive_more::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::convert::TryFrom;
+use std::cmp::Ordering;
+use std::convert::{TryFrom, TryInto};
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Rem, Sub};
+use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 /// A command ID.
 ///
@@ -557,6 +558,17 @@ impl PositionInSeconds {
     pub const fn get(self) -> f64 {
         self.0
     }
+
+    /// See [`f64::rem_euclid`].
+    pub fn rem_euclid(self, rhs: DurationInSeconds) -> DurationInSeconds {
+        DurationInSeconds(self.0.rem_euclid(rhs.0))
+    }
+}
+
+impl From<DurationInSeconds> for PositionInSeconds {
+    fn from(v: DurationInSeconds) -> Self {
+        PositionInSeconds(v.0)
+    }
 }
 
 impl TryFrom<f64> for PositionInSeconds {
@@ -589,6 +601,50 @@ impl Add for PositionInSeconds {
     }
 }
 
+impl Add<DurationInSeconds> for PositionInSeconds {
+    type Output = Self;
+
+    fn add(self, rhs: DurationInSeconds) -> Self {
+        PositionInSeconds(self.0 + rhs.0)
+    }
+}
+
+impl Sub<DurationInSeconds> for PositionInSeconds {
+    type Output = Self;
+
+    fn sub(self, rhs: DurationInSeconds) -> Self {
+        Self(self.0 - rhs.0)
+    }
+}
+
+impl PartialEq<DurationInSeconds> for PositionInSeconds {
+    fn eq(&self, other: &DurationInSeconds) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl Neg for PositionInSeconds {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self(-self.0)
+    }
+}
+
+impl PartialOrd<DurationInSeconds> for PositionInSeconds {
+    fn partial_cmp(&self, other: &DurationInSeconds) -> Option<Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
+
+impl Div<DurationInSeconds> for PositionInSeconds {
+    type Output = Self;
+
+    fn div(self, rhs: DurationInSeconds) -> Self::Output {
+        Self(self.0 / rhs.0)
+    }
+}
+
 impl Rem<DurationInSeconds> for PositionInSeconds {
     type Output = Option<Self>;
 
@@ -611,8 +667,11 @@ impl Rem<DurationInSeconds> for PositionInSeconds {
 pub struct DurationInSeconds(pub(crate) f64);
 
 impl DurationInSeconds {
-    /// The minimum duration (zero, empty, none).
-    pub const MIN: DurationInSeconds = DurationInSeconds(0.0);
+    /// The minimum duration (zero, empty).
+    pub const ZERO: DurationInSeconds = DurationInSeconds(0.0);
+
+    /// The minimum duration (zero, empty).
+    pub const MIN: DurationInSeconds = Self::ZERO;
 
     /// The maximum possible duration (highest possible floating-point number).
     pub const MAX: DurationInSeconds = DurationInSeconds(f64::MAX);
@@ -647,6 +706,22 @@ impl DurationInSeconds {
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl Mul<u32> for DurationInSeconds {
+    type Output = Self;
+
+    fn mul(self, rhs: u32) -> Self {
+        Self(self.0 * rhs as f64)
+    }
+}
+
+impl TryFrom<PositionInSeconds> for DurationInSeconds {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: PositionInSeconds) -> Result<Self, Self::Error> {
+        value.0.try_into()
     }
 }
 
