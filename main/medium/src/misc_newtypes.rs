@@ -495,6 +495,17 @@ impl Hz {
     }
 }
 
+impl Div<f64> for Hz {
+    type Output = Option<Hz>;
+
+    fn div(self, rhs: f64) -> Option<Hz> {
+        if rhs <= 0.0 {
+            return None;
+        }
+        Some(Self(self.0 / rhs))
+    }
+}
+
 impl TryFrom<f64> for Hz {
     type Error = TryFromGreaterError<f64>;
 
@@ -514,7 +525,7 @@ impl TryFrom<f64> for Hz {
 /// Sometimes this is a negative number, e.g. when it's a position on the timeline and a metronome
 /// count-in is used or at the very beginning of the project (maybe because of rounding). Negative
 /// project start values don't seem to cause negative position values though.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[derive(Copy, Clone, PartialEq, Debug, Default, Display)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
@@ -522,6 +533,22 @@ impl TryFrom<f64> for Hz {
 )]
 #[repr(transparent)]
 pub struct PositionInSeconds(pub(crate) f64);
+
+impl Eq for PositionInSeconds {}
+
+impl PartialOrd for PositionInSeconds {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for PositionInSeconds {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.0
+            .partial_cmp(&other.0)
+            .expect("position in seconds is never NaN")
+    }
+}
 
 impl PositionInSeconds {
     /// Position at 0.0 seconds. E.g. start of project, measure, etc. depending on the context.
@@ -593,11 +620,35 @@ impl Sub for PositionInSeconds {
     }
 }
 
+impl Sub<f64> for PositionInSeconds {
+    type Output = Self;
+
+    fn sub(self, rhs: f64) -> Self {
+        PositionInSeconds(self.0 - rhs)
+    }
+}
+
 impl Add for PositionInSeconds {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self {
         PositionInSeconds(self.0 + rhs.0)
+    }
+}
+
+impl Add<f64> for PositionInSeconds {
+    type Output = Self;
+
+    fn add(self, rhs: f64) -> Self {
+        PositionInSeconds(self.0 + rhs)
+    }
+}
+
+impl Mul<f64> for PositionInSeconds {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self {
+        Self(self.0 * rhs)
     }
 }
 
@@ -637,6 +688,8 @@ impl PartialOrd<DurationInSeconds> for PositionInSeconds {
     }
 }
 
+impl Eq for DurationInSeconds {}
+
 impl Div<DurationInSeconds> for PositionInSeconds {
     type Output = Self;
 
@@ -658,7 +711,7 @@ impl Rem<DurationInSeconds> for PositionInSeconds {
 }
 
 /// This represents a duration expressed as positive amount of seconds.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[derive(Copy, Clone, PartialEq, Debug, Default, Display)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
@@ -709,11 +762,28 @@ impl DurationInSeconds {
     }
 }
 
-impl Mul<u32> for DurationInSeconds {
-    type Output = Self;
+impl PartialOrd for DurationInSeconds {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 
-    fn mul(self, rhs: u32) -> Self {
-        Self(self.0 * rhs as f64)
+impl Ord for DurationInSeconds {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.0
+            .partial_cmp(&other.0)
+            .expect("duration in seconds is never NaN")
+    }
+}
+
+impl Mul<f64> for DurationInSeconds {
+    type Output = Option<Self>;
+
+    fn mul(self, rhs: f64) -> Option<Self> {
+        if rhs < 0.0 {
+            return None;
+        }
+        Some(Self(self.0 * rhs))
     }
 }
 

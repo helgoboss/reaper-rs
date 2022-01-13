@@ -4,7 +4,7 @@ use ref_cast::RefCast;
 
 use crate::util::{create_passing_c_str, with_string_buffer};
 use crate::{
-    BorrowedMidiEventList, DurationInBeats, DurationInSeconds, ExtendedArgs, Hwnd, Hz,
+    BorrowedMidiEventList, Bpm, DurationInBeats, DurationInSeconds, ExtendedArgs, Hwnd, Hz,
     MediaItemTake, PositionInSeconds, ReaperFunctionError, ReaperFunctionResult, ReaperStr,
     ReaperString,
 };
@@ -40,6 +40,16 @@ impl BorrowedPcmSourceTransfer {
     /// Sets the start time of the block.
     pub fn set_time_s(&mut self, time: PositionInSeconds) {
         self.0.time_s = time.get();
+    }
+
+    /// Returns the absolute start time of the block.
+    pub fn absolute_time_s(&self) -> PositionInSeconds {
+        unsafe { PositionInSeconds::new_unchecked(self.0.absolute_time_s) }
+    }
+
+    /// Sets the absolute start time of the block.
+    pub fn set_absolute_time_s(&mut self, time: PositionInSeconds) {
+        self.0.absolute_time_s = time.get();
     }
 
     /// Returns the number of sample(pair)s actually rendered.
@@ -96,6 +106,28 @@ impl BorrowedPcmSourceTransfer {
         self.0.samples
     }
 
+    /// Returns the samples as read-only slice.
+    ///
+    /// # Safety
+    ///
+    /// If the length or the samples are set incorrectly, this results in undefined behavior.
+    ///
+    /// TODO-high-unstable
+    pub unsafe fn samples_as_slice(&self) -> &[f64] {
+        std::slice::from_raw_parts(self.0.samples, (self.0.length * self.0.nch) as usize)
+    }
+
+    /// Returns the samples as mutable slice.
+    ///
+    /// # Safety
+    ///
+    /// If the length or the samples are set incorrectly, this results in undefined behavior.
+    ///
+    /// TODO-high-unstable
+    pub unsafe fn samples_as_mut_slice(&mut self) -> &mut [f64] {
+        std::slice::from_raw_parts_mut(self.0.samples, (self.0.length * self.0.nch) as usize)
+    }
+
     /// Sets the sample(pair)s to be rendered.
     ///
     /// # Safety
@@ -121,6 +153,14 @@ impl BorrowedPcmSourceTransfer {
             panic!("PCM source transfer didn't provide MIDI event list");
         }
         BorrowedMidiEventList::ref_cast(unsafe { &*self.0.midi_events })
+    }
+
+    pub fn force_bpm(&self) -> Bpm {
+        Bpm::new(self.0.force_bpm)
+    }
+
+    pub fn set_force_bpm(&mut self, force_bpm: Bpm) {
+        self.0.force_bpm = force_bpm.get();
     }
 }
 
