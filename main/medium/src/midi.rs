@@ -64,6 +64,11 @@ pub struct EnumItemsResult<'a> {
 }
 
 impl BorrowedMidiEventList {
+    /// Returns the raw pointer.
+    pub fn raw(&self) -> NonNull<raw::MIDI_eventlist> {
+        NonNull::from(&self.0)
+    }
+
     /// Returns the MIDI event at the given byte index along with the byte index of the
     /// next event.
     pub fn enum_items(&self, bpos: u32) -> Option<EnumItemsResult> {

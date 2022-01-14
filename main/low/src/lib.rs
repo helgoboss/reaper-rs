@@ -95,5 +95,11 @@ mod swell_impl;
 mod midi;
 pub use midi::*;
 
+mod resample;
+pub use resample::*;
+
+mod pitch_shift;
+pub use pitch_shift::*;
+
 mod pcm_source;
 pub use pcm_source::*;

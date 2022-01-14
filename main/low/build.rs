@@ -155,6 +155,7 @@ mod codegen {
                 .whitelist_type("reaper_plugin_info_t")
                 .whitelist_type("gaccel_register_t")
                 .whitelist_type("audio_hook_register_t")
+                .whitelist_type("midi_realtime_write_struct_t")
                 .whitelist_type("KbdSectionInfo")
                 .whitelist_type("GUID")
                 .whitelist_type("LPSTR")
@@ -162,6 +163,8 @@ mod codegen {
                 .whitelist_function("reaper_control_surface::.*")
                 .whitelist_function("reaper_midi::.*")
                 .whitelist_function("reaper_pcm_source::.*")
+                .whitelist_function("reaper_resample::.*")
+                .whitelist_function("reaper_pitch_shift::.*")
                 .blacklist_type("preview_register_t");
             #[cfg(target_os = "macos")]
             let builder = builder.clang_arg("-stdlib=libc++");

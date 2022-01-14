@@ -11531,4 +11531,117 @@ pub mod root {
             ) -> ::std::os::raw::c_int;
         }
     }
+    pub mod reaper_resample {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub fn REAPER_Resample_Interface_SetRates(
+                self_: *mut root::REAPER_Resample_Interface,
+                rate_in: f64,
+                rate_out: f64,
+            );
+        }
+        extern "C" {
+            pub fn REAPER_Resample_Interface_Reset(self_: *mut root::REAPER_Resample_Interface);
+        }
+        extern "C" {
+            pub fn REAPER_Resample_Interface_GetCurrentLatency(
+                self_: *mut root::REAPER_Resample_Interface,
+            ) -> f64;
+        }
+        extern "C" {
+            pub fn REAPER_Resample_Interface_ResamplePrepare(
+                self_: *mut root::REAPER_Resample_Interface,
+                out_samples: ::std::os::raw::c_int,
+                nch: ::std::os::raw::c_int,
+                inbuffer: *mut *mut root::ReaSample,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn REAPER_Resample_Interface_ResampleOut(
+                self_: *mut root::REAPER_Resample_Interface,
+                out: *mut root::ReaSample,
+                nsamples_in: ::std::os::raw::c_int,
+                nsamples_out: ::std::os::raw::c_int,
+                nch: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn REAPER_Resample_Interface_Extended(
+                self_: *mut root::REAPER_Resample_Interface,
+                call: ::std::os::raw::c_int,
+                parm1: *mut ::std::os::raw::c_void,
+                parm2: *mut ::std::os::raw::c_void,
+                parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+    }
+    pub mod reaper_pitch_shift {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub fn IReaperPitchShift_set_srate(self_: *mut root::IReaperPitchShift, srate: f64);
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_set_nch(
+                self_: *mut root::IReaperPitchShift,
+                nch: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_set_shift(self_: *mut root::IReaperPitchShift, shift: f64);
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_set_formant_shift(
+                self_: *mut root::IReaperPitchShift,
+                shift: f64,
+            );
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_set_tempo(self_: *mut root::IReaperPitchShift, tempo: f64);
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_Reset(self_: *mut root::IReaperPitchShift);
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_GetBuffer(
+                self_: *mut root::IReaperPitchShift,
+                size: ::std::os::raw::c_int,
+            ) -> *mut root::ReaSample;
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_BufferDone(
+                self_: *mut root::IReaperPitchShift,
+                input_filled: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_FlushSamples(self_: *mut root::IReaperPitchShift);
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_IsReset(self_: *mut root::IReaperPitchShift) -> bool;
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_GetSamples(
+                self_: *mut root::IReaperPitchShift,
+                requested_output: ::std::os::raw::c_int,
+                buffer: *mut root::ReaSample,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_SetQualityParameter(
+                self_: *mut root::IReaperPitchShift,
+                parm: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn IReaperPitchShift_Extended(
+                self_: *mut root::IReaperPitchShift,
+                call: ::std::os::raw::c_int,
+                parm1: *mut ::std::os::raw::c_void,
+                parm2: *mut ::std::os::raw::c_void,
+                parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+    }
 }
