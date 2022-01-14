@@ -239,6 +239,78 @@ impl MidiOutputDeviceId {
     }
 }
 
+/// A resample mode, backed by a positive integer.
+///
+/// This uniquely identifies a resample mode.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ResampleMode(pub(crate) u32);
+
+impl ResampleMode {
+    /// Creates the resample mode.
+    pub fn new(number: u32) -> ResampleMode {
+        ResampleMode(number)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> u32 {
+        self.0
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        self.0 as i32
+    }
+}
+
+/// A pitch shift mode, backed by a positive integer.
+///
+/// This uniquely identifies a pitch shift mode.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct PitchShiftMode(pub(crate) u32);
+
+impl PitchShiftMode {
+    /// Creates the pitch shift mode.
+    pub fn new(number: u32) -> PitchShiftMode {
+        PitchShiftMode(number)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> u32 {
+        self.0
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        self.0 as i32
+    }
+}
+
+/// A pitch shift sub mode, backed by a positive integer.
+///
+/// This uniquely identifies a pitch shift sub mode within the parent pitch shift mode.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct PitchShiftSubMode(pub(crate) u32);
+
+impl PitchShiftSubMode {
+    /// Creates the pitch shift sub mode.
+    pub fn new(number: u32) -> PitchShiftSubMode {
+        PitchShiftSubMode(number)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> u32 {
+        self.0
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        self.0 as i32
+    }
+}
+
 /// This represents a particular value of an FX parameter in "REAPER-normalized" form.
 ///
 /// Please note that this value is **not** always normalized in the classical sense of being in the

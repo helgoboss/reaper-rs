@@ -19,15 +19,16 @@ use crate::{
     KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
-    PanMode, PcmSource, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds,
-    ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
-    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
-    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
-    ReaperWidthValue, RecordArmMode, RecordingInput, SectionContext, SectionId, SendTarget,
-    SoloMode, StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef,
-    TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    PanMode, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionInBeats, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult,
+    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
+    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
+    ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey,
+    TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -2374,6 +2375,78 @@ impl<UsageScope> Reaper<UsageScope> {
                 name: Some(name),
             }
         }
+    }
+
+    /// Returns information about the given pitch shift mode.
+    ///
+    /// Start querying modes at 0. Returns `None` when no more modes possible.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn enum_pitch_shift_modes(
+        &self,
+        mode: PitchShiftMode,
+    ) -> Option<EnumPitchShiftModesResult<'static>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut name = MaybeUninit::zeroed();
+        let exists = unsafe {
+            self.low
+                .EnumPitchShiftModes(mode.to_raw(), name.as_mut_ptr())
+        };
+        if !exists {
+            return None;
+        }
+        let name = unsafe { name.assume_init() };
+        let res = if name.is_null() {
+            EnumPitchShiftModesResult::Unsupported
+        } else {
+            EnumPitchShiftModesResult::Supported {
+                name: unsafe { create_passing_c_str(name).unwrap() },
+            }
+        };
+        Some(res)
+    }
+
+    /// Grants temporary access to the name of the given pitch shift sub mode.
+    ///
+    /// Start querying modes at 0. Returns `None` when no more sub modes possible.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn enum_pitch_shift_sub_modes<R>(
+        &self,
+        mode: PitchShiftMode,
+        sub_mode: PitchShiftSubMode,
+        use_name: impl FnOnce(Option<&ReaperStr>) -> R,
+    ) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let name = self
+            .low
+            .EnumPitchShiftSubModes(mode.to_raw(), sub_mode.to_raw());
+        if name.is_null() {
+            return use_name(None);
+        }
+        let name = unsafe { create_passing_c_str(name).unwrap() };
+        use_name(Some(name))
+    }
+
+    /// Returns the name of the given resample mode.
+    ///
+    /// Start querying modes at 0. Returns `None` when no more sub modes possible.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn resample_enum_modes(&self, mode: ResampleMode) -> Option<&'static ReaperStr>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let name = self.low.Resample_EnumModes(mode.to_raw());
+        if name.is_null() {
+            return None;
+        }
+        let name = unsafe { create_passing_c_str(name).unwrap() };
+        Some(name)
     }
 
     // Return type Option or Result can't be easily chosen here because if instantiate is 0, it
@@ -6046,6 +6119,17 @@ pub struct GetMidiDevNameResult {
     pub is_present: bool,
     /// Name of the device (only if name requested).
     pub name: Option<ReaperString>,
+}
+
+#[derive(Clone, PartialEq, Hash, Debug)]
+pub enum EnumPitchShiftModesResult<'a> {
+    /// Pitch shift mode exists but is currently unsupported.
+    Unsupported,
+    /// Pitch shift mode exists and is supported.
+    Supported {
+        /// Name of the pitch shift mode.
+        name: &'a ReaperStr,
+    },
 }
 
 #[derive(Clone, PartialEq, Hash, Debug)]

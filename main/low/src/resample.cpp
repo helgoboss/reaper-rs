@@ -1,4 +1,3 @@
-#include "pitch_shift.hpp"
 #include "resample.hpp"
 
 namespace reaper_resample {
@@ -9,7 +8,7 @@ namespace reaper_resample {
     self->Reset();
   }
   double REAPER_Resample_Interface_GetCurrentLatency(REAPER_Resample_Interface* self) {
-    self->GetCurrentLatency();
+    return self->GetCurrentLatency();
   }
   int REAPER_Resample_Interface_ResamplePrepare(REAPER_Resample_Interface* self, int out_samples, int nch, ReaSample** inbuffer) {
     return self->ResamplePrepare(out_samples, nch, inbuffer);

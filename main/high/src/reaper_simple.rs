@@ -7,8 +7,9 @@ use crate::{
 };
 use helgoboss_midi::ShortMessage;
 use reaper_medium::{
-    CommandId, GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd, MidiInputDeviceId,
-    MidiOutputDeviceId, ProjectRef, ReaperStringArg, ReaperVersion, SectionId,
+    CommandId, EnumPitchShiftModesResult, GetLastTouchedFxResult, GlobalAutomationModeOverride,
+    Hwnd, MidiInputDeviceId, MidiOutputDeviceId, PitchShiftMode, PitchShiftSubMode, ProjectRef,
+    ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ResampleMode, SectionId,
     StuffMidiMessageTarget, TrackLocation,
 };
 use std::path::PathBuf;
@@ -118,6 +119,44 @@ impl Reaper {
 
     pub fn main_window(&self) -> Hwnd {
         self.medium_reaper().get_main_hwnd()
+    }
+
+    pub fn resample_modes(&self) -> impl Iterator<Item = &'static ReaperStr> + '_ {
+        (0..)
+            .map(move |i| {
+                self.medium_reaper()
+                    .resample_enum_modes(ResampleMode::new(i))
+            })
+            .take_while(|r| !r.is_none())
+            .map(|r| r.unwrap())
+    }
+
+    pub fn pitch_shift_modes(
+        &self,
+    ) -> impl Iterator<Item = EnumPitchShiftModesResult<'static>> + '_ {
+        (0..)
+            .map(move |i| {
+                self.medium_reaper()
+                    .enum_pitch_shift_modes(PitchShiftMode::new(i))
+            })
+            .take_while(|r| !r.is_none())
+            .map(|r| r.unwrap())
+    }
+
+    pub fn pitch_shift_sub_modes(
+        &self,
+        mode: PitchShiftMode,
+    ) -> impl Iterator<Item = ReaperString> + '_ {
+        (0..)
+            .map(move |i| {
+                self.medium_reaper().enum_pitch_shift_sub_modes(
+                    mode,
+                    PitchShiftSubMode::new(i),
+                    |n| n.map(|n| n.to_reaper_string()),
+                )
+            })
+            .take_while(|r| !r.is_none())
+            .map(|r| r.unwrap())
     }
 
     pub fn projects(&self) -> impl Iterator<Item = Project> + '_ {

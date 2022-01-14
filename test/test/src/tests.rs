@@ -23,10 +23,10 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
     reaper_str, AutoSeekBehavior, AutomationMode, Bpm, CommandId, Db, DurationInSeconds,
-    FxPresetRef, GangBehavior, InputMonitoringMode, MasterTrackBehavior, MidiInputDeviceId,
-    MidiOutputDeviceId, NormalizedPlayRate, PlaybackSpeedFactor, PositionInSeconds,
-    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
-    ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget,
+    EnumPitchShiftModesResult, FxPresetRef, GangBehavior, InputMonitoringMode, MasterTrackBehavior,
+    MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate, PitchShiftMode, PlaybackSpeedFactor,
+    PositionInSeconds, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
+    ReaperVolumeValue, ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget,
     TrackFxGetPresetIndexResult, TrackLocation, UndoBehavior, ValueChange,
 };
 
@@ -49,6 +49,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         low_plugin_context(),
         medium_plugin_context(),
         general(),
+        resample_modes(),
+        pitch_shift_modes(),
         volume_types(),
         create_empty_project_in_new_tab(),
         play_pause_stop_record(),
@@ -2200,6 +2202,46 @@ fn general() -> TestStep {
             .ok_or("invalid resource path")?
             .to_lowercase()
             .contains("reaper"));
+        Ok(())
+    })
+}
+
+fn resample_modes() -> TestStep {
+    step(AllVersions, "Resample modes", |reaper, _| {
+        for (i, m) in reaper.resample_modes().enumerate() {
+            reaper.show_console_msg(format!("- ({}) {}\n", i, m))
+        }
+        Ok(())
+    })
+}
+
+fn pitch_shift_modes() -> TestStep {
+    step(AllVersions, "Pitch-shift modes", |reaper, _| {
+        for (i, m) in reaper.pitch_shift_modes().enumerate() {
+            use EnumPitchShiftModesResult::*;
+            let text = match m {
+                Unsupported => "<Unsupported>",
+                Supported { name } => name.to_str(),
+            };
+            reaper.show_console_msg(format!("- ({}) {}\n", i, text));
+            if m != Unsupported {
+                let pitch_shift_sub_modes: Vec<_> = reaper
+                    .pitch_shift_sub_modes(PitchShiftMode::new(i as _))
+                    .collect();
+                let max_display_count = 10;
+                for (j, sm) in pitch_shift_sub_modes
+                    .iter()
+                    .take(max_display_count)
+                    .enumerate()
+                {
+                    reaper.show_console_msg(format!("    - ({}) {}\n", j, sm))
+                }
+                let count = pitch_shift_sub_modes.len();
+                if count > max_display_count {
+                    reaper.show_console_msg(format!("    - ... ({} in total)\n", count))
+                }
+            }
+        }
         Ok(())
     })
 }

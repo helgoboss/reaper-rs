@@ -156,7 +156,9 @@ impl ReaperString {
     // If making this public one day, use From traits.
     pub(crate) fn from_str(s: &str) -> ReaperString {
         // Requires copying.
-        ReaperString(CString::new(s).expect("Rust string too exotic for REAPER"))
+        ReaperString(
+            CString::new(s).expect("Rust string too exotic for REAPER (contains nul bytes)"),
+        )
     }
 
     // Don't make this public. Try to use ReaperStringArg for consumers only.
@@ -164,7 +166,9 @@ impl ReaperString {
     // If making this public one day, use From traits.
     pub(crate) fn from_string(s: String) -> ReaperString {
         // Doesn't require copying because we own the string now.
-        ReaperString(CString::new(s).expect("Rust string too exotic for REAPER"))
+        ReaperString(
+            CString::new(s).expect("Rust string too exotic for REAPER (contains nul bytes)"),
+        )
     }
 
     /// Returns a raw pointer to the string. Used by code in this crate only.
@@ -293,6 +297,15 @@ impl ReaperStr {
 impl fmt::Display for ReaperStr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(self.to_str())
+    }
+}
+
+// With this we can just write `to_string()` on an owned REAPER string as we are used to in Rust.
+impl fmt::Display for ReaperString {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Delegate to ReaperStr impl
+        let r = unsafe { ReaperStr::new(&self.0) };
+        r.fmt(f)
     }
 }
 

@@ -46,7 +46,9 @@ fn compile_glue_code() {
         .warnings(false)
         .file("src/control_surface.cpp")
         .file("src/pcm_source.cpp")
-        .file("src/midi.cpp");
+        .file("src/midi.cpp")
+        .file("src/resample.cpp")
+        .file("src/pitch_shift.cpp");
     if cfg!(target_os = "macos") {
         build.cpp_set_stdlib("c++");
     }
@@ -122,6 +124,7 @@ mod codegen {
                 .whitelist_var("CSURF_EXT_.*")
                 .whitelist_var("PCM_SOURCE_EXT_.*")
                 .whitelist_var("REAPER_PLUGIN_VERSION")
+                .whitelist_var("REAPER_PITCHSHIFT_API_VER")
                 .whitelist_var("UNDO_STATE_.*")
                 .whitelist_var("VK_.*")
                 .whitelist_var("BM_.*")
