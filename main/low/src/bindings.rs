@@ -999,6 +999,24 @@ pub mod root {
         }
     }
     #[repr(C)]
+    #[derive(Debug, Copy, Clone, PartialEq)]
+    pub struct midi_realtime_write_struct_t {
+        pub global_time: f64,
+        pub global_item_time: f64,
+        pub srate: f64,
+        pub length: ::std::os::raw::c_int,
+        pub overwritemode: ::std::os::raw::c_int,
+        pub events: *mut root::MIDI_eventlist,
+        pub item_playrate: f64,
+        pub latency: f64,
+        pub overwrite_actives: *mut ::std::os::raw::c_uint,
+    }
+    impl Default for midi_realtime_write_struct_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
+    #[repr(C)]
     pub struct PCM_source__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
     #[derive(Debug, Hash, PartialEq, Eq)]
