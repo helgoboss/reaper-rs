@@ -65,7 +65,7 @@ pub struct EnumItemsResult<'a> {
 
 impl BorrowedMidiEventList {
     /// Returns the raw pointer.
-    pub fn raw(&self) -> NonNull<raw::MIDI_eventlist> {
+    pub fn as_ptr(&self) -> NonNull<raw::MIDI_eventlist> {
         NonNull::from(&self.0)
     }
 

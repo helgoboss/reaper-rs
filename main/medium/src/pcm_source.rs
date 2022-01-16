@@ -18,15 +18,15 @@ use std::os::raw::{c_char, c_void};
 use std::path::Path;
 use std::ptr::{null, null_mut, NonNull};
 
-/// Pointer to a PCM source transfer.
+/// PCM source transfer.
 //
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
-#[derive(PartialEq, Debug, RefCast)]
+#[derive(Copy, Clone, PartialEq, Debug, RefCast)]
 #[repr(transparent)]
-pub struct BorrowedPcmSourceTransfer(raw::PCM_source_transfer_t);
+pub struct PcmSourceTransfer(raw::PCM_source_transfer_t);
 
-impl BorrowedPcmSourceTransfer {
+impl PcmSourceTransfer {
     /// Returns the pointer to this source transfer.
     pub fn as_ptr(&self) -> NonNull<raw::PCM_source_transfer_t> {
         NonNull::from(&self.0)
@@ -164,15 +164,15 @@ impl BorrowedPcmSourceTransfer {
     }
 }
 
-/// Pointer to a PCM source peak transfer.
+/// PCM source peak transfer.
 //
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
-#[derive(PartialEq, Debug, RefCast)]
+#[derive(Copy, Clone, PartialEq, Debug, RefCast)]
 #[repr(transparent)]
-pub struct BorrowedPcmSourcePeakTransfer(raw::PCM_source_peaktransfer_t);
+pub struct PcmSourcePeakTransfer(raw::PCM_source_peaktransfer_t);
 
-impl BorrowedPcmSourcePeakTransfer {
+impl PcmSourcePeakTransfer {
     /// Returns the pointer to this source peak transfer.
     pub fn as_ptr(&self) -> NonNull<raw::PCM_source_peaktransfer_t> {
         NonNull::from(&self.0)
@@ -491,7 +491,7 @@ impl BorrowedPcmSource {
     /// # Safety
     ///
     /// API still unstable.
-    pub unsafe fn get_samples(&self, block: &BorrowedPcmSourceTransfer) {
+    pub unsafe fn get_samples(&self, block: &PcmSourceTransfer) {
         self.0.GetSamples(block.as_ptr().as_ptr());
     }
 
@@ -500,7 +500,7 @@ impl BorrowedPcmSource {
     /// # Safety
     ///
     /// API still unstable.
-    pub unsafe fn get_peak_info(&self, block: &BorrowedPcmSourcePeakTransfer) {
+    pub unsafe fn get_peak_info(&self, block: &PcmSourcePeakTransfer) {
         self.0.GetPeakInfo(block.as_ptr().as_ptr());
     }
 
@@ -795,12 +795,12 @@ pub struct PropertiesWindowArgs {
 
 #[derive(PartialEq, Debug)]
 pub struct GetSamplesArgs<'a> {
-    pub block: &'a mut BorrowedPcmSourceTransfer,
+    pub block: &'a mut PcmSourceTransfer,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct GetPeakInfoArgs<'a> {
-    pub block: &'a BorrowedPcmSourcePeakTransfer,
+    pub block: &'a PcmSourcePeakTransfer,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -941,7 +941,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
         if block.is_null() {
             panic!("called PCM_source::GetSamples() with null block")
         }
-        let block = BorrowedPcmSourceTransfer::ref_cast_mut(unsafe { &mut *block });
+        let block = PcmSourceTransfer::ref_cast_mut(unsafe { &mut *block });
         let args = GetSamplesArgs { block };
         self.delegate.get_samples(args);
     }
@@ -950,7 +950,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
         if block.is_null() {
             panic!("called PCM_source::GetPeakInfo() with null block")
         }
-        let block = BorrowedPcmSourcePeakTransfer::ref_cast(unsafe { &*block });
+        let block = PcmSourcePeakTransfer::ref_cast(unsafe { &*block });
         let args = GetPeakInfoArgs { block };
         self.delegate.get_peak_info(args);
     }

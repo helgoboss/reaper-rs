@@ -166,11 +166,14 @@
 //! #### Explanation
 //!
 //! Such structs are relevant for the consumers *as pointers only*. Because they are
-//! completely opaque (internals not exposed, not even a vtable). We don't create a newtype because
-//! the `NonNull` guarantee is all we need and we will never provide any methods on them (no vtable
-//! emulation, no convenience methods). Using a wrapper just for reasons of symmetry would not be
-//! good because it comes with a cost (more code to write, less substitution possibilities) but in
-//! this case without any benefit.
+//! completely opaque (internals not exposed, not even a vtable) and we never own them. We don't
+//! create a newtype because the `NonNull` guarantee is all we need and we will never provide any
+//! methods on them (no vtable emulation, no convenience methods). Using a wrapper just for reasons
+//! of symmetry would not be good because it comes with a cost (more code to write, less
+//! substitution possibilities) but in this case without any benefit.
+//!
+//! We use pointers instead of references because there's no way we could name a lifetime. REAPER
+//! itself provides functions for checking if those pointers are still valid.
 //!
 //! #### Examples
 //!
@@ -186,26 +189,38 @@
 //! #### Strategy
 //!
 //! - *Don't* create an alias for a `NonNull` pointer! In situations where just the pointer is
-//!   interesting and not the internals, write `NonNull<...>` everywhere.
-//! - If the consumer shall get access to the internals: Wrap the `NonNull` pointer in a public
-//!   newtype. This newtype should expose the internals in a way which is idiomatic for Rust (like
+//!   interesting and not the internals, write `NonNull<...>` everywhere. Reason: We need the
+//!   alias name for a newtype that's going to be used in situations where the internals matter.
+//! - If the consumer shall get access to the internals: Create a newtype that wraps a value of
+//!   this struct (not a reference and not a pointer!). By using
+//!   [refcast](https://github.com/dtolnay/ref-cast), we can use this newtype not just for owned
+//!   values but also for borrowed ones (by taking the newtype by reference, as one would expect).
+//!   For borrowed structs, it won't matter if they are owned by REAPER or by our Rust code.
+//!   Previously, the guideline was to create an extra newtype for borrowed usage that would wrap
+//!   the `NonNull` pointer, but this is unnecessary now.    
+//! - The newtype should expose the internals in a way which is idiomatic for Rust (like
 //!   the rest of the medium-level API does).
 //! - If the consumer needs to be able to create such a struct: Provide an idiomatic Rust factory
-//!   function. If that's not enough because the raw struct is not completely owned, write an owned
-//!   version of that struct, prefixed with `Owned`. Ideally it should wrap the raw struct.
-//! - Sometimes when having both an owned struct *and* a pointer wrapper, it can be useful to also
-//!   introduce a borrowed reference-only struct. The owned struct can conveniently deref to the
-//!   borrowed struct. The pointer wrapper can provide an unsafe `as_ref()` which returns a
-//!   reference to the borrowed struct. See case 3 for an example (`PCM_source`).
+//!   function on the newtype.
+//! - In situations where the raw struct is not completely owned (contains pointers itself) and we
+//!   need a completely owned version, add an owned version of that struct, prefixed with `Owned`.
+//!   Ideally it should wrap the raw struct. That way, the owned struct can conveniently deref to
+//!   the borrowed struct.
 //!
 //! #### Explanation
 //!
 //! Unlike [`raw::MediaTrack`](../reaper_low/raw/struct.MediaTrack.html) and friends, these
-//! structs are *not* opaque. Still, we need them as pointers and they have the same lifetime
-//! considerations. The difference is that we add type-safe methods to them in order to lift their
-//! members to medium-level API style.
+//! structs are *not* opaque. Also, we might create and own such values.
 //!
-//! #### Examples
+//! #### Up-to-date examples (using ref-cast)
+//!
+//! - [`raw::PCM_source_transfer_t`](../reaper_low/raw/struct.PCM_source_transfer_t.html) →
+//!   [`PcmSourceTransfer`](struct.PcmSourceTransfer.html)
+//!
+//!
+//! #### Legacy examples (NonNull pointer wrappers with separation into borrowed and owned versions)
+//!
+//! TODO-high Migrate them to ref-cast.
 //!
 //! - [`raw::KbdSectionInfo`](../reaper_low/raw/struct.KbdSectionInfo.html) →
 //!   [`KbdSectionInfo`](struct.KbdSectionInfo.html) & `MediumKdbSectionInfo` (not yet existing)
@@ -216,6 +231,7 @@
 //!   (not yet existing) & [`OwnedGaccelRegister`](struct.OwnedGaccelRegister.html)
 //!
 //! ### Case 3: Internals not exposed | vtable
+//!
 //!
 //! #### Strategy
 //!

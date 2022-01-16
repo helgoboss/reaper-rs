@@ -74,6 +74,8 @@ mod codegen {
                     || name.starts_with("SW_")
                     // Signed because reaper_plugin_info_t::caller_version is signed.
                     || name == "REAPER_PLUGIN_VERSION"
+                    // Signed because ReaperGetPitchShiftAPI parameter is signed.
+                    || name == "REAPER_PITCHSHIFT_API_VER"
                 {
                     return Some(IntKind::I32);
                 }
