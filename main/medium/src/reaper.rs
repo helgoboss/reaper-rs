@@ -1,5 +1,5 @@
 #[cfg(feature = "reaper-meter")]
-use crate::metering::{ResponseTimeMultiThreaded, ResponseTimeSingleThreaded};
+use crate::metering::ResponseTimeSingleThreaded;
 #[cfg(feature = "reaper-meter")]
 use metered::metered;
 #[cfg(not(feature = "reaper-meter"))]
@@ -351,7 +351,6 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// Returns `true` if the pointer is a valid object of the correct type in the given project.
     /// The project is ignored if the pointer itself is a project.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn validate_ptr_2<'a>(
         &self,
         project: ProjectContext,
@@ -786,7 +785,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// anticipative FX thread.
     ///
     /// [`OnAudioBuffer`]: trait.OnAudioBuffer.html#method.call
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn is_in_real_time_audio(&self) -> bool
     where
         UsageScope: AnyThread,
@@ -795,7 +793,6 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Returns whether audio is running at all.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn audio_is_running(&self) -> bool
     where
         UsageScope: AnyThread,
@@ -1003,7 +1000,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_play_state_ex(&self, project: ProjectContext) -> PlayState
     where
         UsageScope: AnyThread,
@@ -1019,7 +1015,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_play_state_ex()`]: #method.get_play_state_ex
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn get_play_state_ex_unchecked(&self, project: ProjectContext) -> PlayState
     where
         UsageScope: AnyThread,
@@ -1286,7 +1281,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn time_map_2_time_to_beats(
         &self,
         project: ProjectContext,
@@ -1306,7 +1300,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`time_map_2_time_to_beats()`]: #method.time_map_2_time_to_beats
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn time_map_2_time_to_beats_unchecked(
         &self,
         project: ProjectContext,
@@ -1343,7 +1336,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn time_map_2_beats_to_time(
         &self,
         project: ProjectContext,
@@ -1364,7 +1356,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`time_map_2_beats_to_time()`]: #method.time_map_2_beats_to_time
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn time_map_2_beats_to_time_unchecked(
         &self,
         project: ProjectContext,
@@ -1394,7 +1385,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_set_arrange_view_2_get(
         &self,
         project: ProjectContext,
@@ -1415,7 +1405,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_set_arrange_view_2_get()`]: #method.get_set_arrange_view_2_get
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn get_set_arrange_view_2_get_unchecked(
         &self,
         project: ProjectContext,
@@ -1447,7 +1436,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn time_map_2_get_divided_bpm_at_time(
         &self,
         project: ProjectContext,
@@ -1467,7 +1455,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`time_map_2_get_divided_bpm_at_time()`]: #method.time_map_2_get_divided_bpm_at_time
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn time_map_2_get_divided_bpm_at_time_unchecked(
         &self,
         project: ProjectContext,
@@ -1487,7 +1474,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_cursor_position_ex(&self, project: ProjectContext) -> PositionInSeconds
     where
         UsageScope: AnyThread,
@@ -1503,7 +1489,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_cursor_position_ex()`]: #method.get_cursor_position_ex
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn get_cursor_position_ex_unchecked(
         &self,
         project: ProjectContext,
@@ -1520,7 +1505,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_play_position_ex(&self, project: ProjectContext) -> PositionInSeconds
     where
         UsageScope: AnyThread,
@@ -1536,7 +1520,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_play_position_ex()`]: #method.get_play_position_ex
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn get_play_position_ex_unchecked(
         &self,
         project: ProjectContext,
@@ -1553,7 +1536,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_play_position_2_ex(&self, project: ProjectContext) -> PositionInSeconds
     where
         UsageScope: AnyThread,
@@ -1569,7 +1551,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`get_play_position_2_ex()`]: #method.get_play_position_2_ex
-    #[measure(ResponseTimeMultiThreaded)]
     pub unsafe fn get_play_position_2_ex_unchecked(
         &self,
         project: ProjectContext,
@@ -2280,7 +2261,6 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Returns the maximum number of MIDI input devices (usually 63).
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_max_midi_inputs(&self) -> u32
     where
         UsageScope: AnyThread,
@@ -2289,7 +2269,6 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Returns the maximum number of MIDI output devices (usually 64).
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_max_midi_outputs(&self) -> u32
     where
         UsageScope: AnyThread,
@@ -3960,7 +3939,6 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Converts the given GUID to a string (including braces).
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn guid_to_string(&self, guid: &GUID) -> ReaperString
     where
         UsageScope: AnyThread,
@@ -5910,7 +5888,6 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Returns if the given device is open (enabled in REAPER's MIDI preferences).
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_midi_input_is_open(&self, device_id: MidiInputDeviceId) -> bool
     where
         UsageScope: AnyThread,
@@ -5948,7 +5925,6 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Returns if the given device is open (enabled in REAPER's MIDI preferences).
-    #[measure(ResponseTimeMultiThreaded)]
     pub fn get_midi_output_is_open(&self, device_id: MidiOutputDeviceId) -> bool
     where
         UsageScope: AnyThread,
