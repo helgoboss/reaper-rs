@@ -22,7 +22,7 @@ use std::ptr::{null, null_mut, NonNull};
 //
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
-#[derive(Copy, Clone, PartialEq, Debug, RefCast)]
+#[derive(Copy, Clone, PartialEq, Debug, Default, RefCast)]
 #[repr(transparent)]
 pub struct PcmSourceTransfer(raw::PCM_source_transfer_t);
 
