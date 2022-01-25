@@ -155,6 +155,11 @@ impl PcmSourceTransfer {
         BorrowedMidiEventList::ref_cast(unsafe { &*self.0.midi_events })
     }
 
+    /// Sets the list of MIDI events to be filled.
+    pub fn set_midi_event_list(&mut self, list: &BorrowedMidiEventList) {
+        self.0.midi_events = list.as_ptr().as_ptr();
+    }
+
     pub fn force_bpm(&self) -> Bpm {
         Bpm::new(self.0.force_bpm)
     }

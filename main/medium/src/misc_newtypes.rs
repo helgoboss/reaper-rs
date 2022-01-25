@@ -23,7 +23,7 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 ///
 /// [^command]: A command is a function that will be executed when a particular action is requested
 /// to be run.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
@@ -34,6 +34,12 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 // command IDs usually as c_int, which is basically always i32. Also makes sense ... why would
 // someone need 2^64 commands!
 pub struct CommandId(pub(crate) u32);
+
+impl Default for CommandId {
+    fn default() -> Self {
+        CommandId(1)
+    }
+}
 
 impl CommandId {
     fn is_valid(value: u32) -> bool {
@@ -361,13 +367,19 @@ impl From<f64> for ReaperNormalizedFxParamValue {
 }
 
 /// This represents a tempo measured in beats per minute.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Display)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(try_from = "f64")
 )]
 pub struct Bpm(pub(crate) f64);
+
+impl Default for Bpm {
+    fn default() -> Self {
+        Bpm::MIN
+    }
+}
 
 impl Bpm {
     /// The minimum possible value (1.0 bpm).
@@ -412,13 +424,19 @@ impl TryFrom<f64> for Bpm {
 }
 
 /// This represents a play rate measured as factor of the normal play speed.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Display)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(try_from = "f64")
 )]
 pub struct PlaybackSpeedFactor(pub(crate) f64);
+
+impl Default for PlaybackSpeedFactor {
+    fn default() -> Self {
+        PlaybackSpeedFactor::NORMAL
+    }
+}
 
 impl PlaybackSpeedFactor {
     /// The minimum possible value (a quarter of the normal playback speed).
@@ -472,13 +490,19 @@ impl TryFrom<f64> for PlaybackSpeedFactor {
 /// This represents a play rate measured as value between 0 and 1.
 ///
 /// This corresponds to the position on the project play rate slider.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Display)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(try_from = "f64")
 )]
 pub struct NormalizedPlayRate(pub(crate) f64);
+
+impl Default for NormalizedPlayRate {
+    fn default() -> Self {
+        NormalizedPlayRate::NORMAL
+    }
+}
 
 impl NormalizedPlayRate {
     /// The minimum possible value (a quarter of the normal play speed).
@@ -529,7 +553,7 @@ impl TryFrom<f64> for NormalizedPlayRate {
 }
 
 /// This represents a frequency measured in hertz (how often something happens per second).
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Display)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
@@ -564,6 +588,12 @@ impl Hz {
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+}
+
+impl Default for Hz {
+    fn default() -> Self {
+        Hz(1.0)
     }
 }
 
@@ -661,6 +691,11 @@ impl PositionInSeconds {
     /// See [`f64::rem_euclid`].
     pub fn rem_euclid(self, rhs: DurationInSeconds) -> DurationInSeconds {
         DurationInSeconds(self.0.rem_euclid(rhs.0))
+    }
+
+    /// Computes the absolute value, returning a duration.
+    pub fn abs(self) -> DurationInSeconds {
+        DurationInSeconds(self.0.abs())
     }
 }
 
@@ -845,6 +880,14 @@ impl Ord for DurationInSeconds {
         self.0
             .partial_cmp(&other.0)
             .expect("duration in seconds is never NaN")
+    }
+}
+
+impl Add<DurationInSeconds> for DurationInSeconds {
+    type Output = DurationInSeconds;
+
+    fn add(self, rhs: DurationInSeconds) -> Self::Output {
+        Self(self.0 + rhs.0)
     }
 }
 
