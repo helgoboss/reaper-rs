@@ -11814,4 +11814,45 @@ pub mod root {
             ) -> ::std::os::raw::c_int;
         }
     }
+    pub mod reaper_project_state_context {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub fn create_cpp_to_rust_project_state_context(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *mut root::ProjectStateContext;
+        }
+        extern "C" {
+            pub fn delete_project_state_context(context: *mut root::ProjectStateContext);
+        }
+        extern "C" {
+            pub fn cpp_to_rust_ProjectStateContext_AddLine(
+                callback_target: *mut ::std::os::raw::c_void,
+                line: *const ::std::os::raw::c_char,
+            );
+        }
+        extern "C" {
+            pub fn cpp_to_rust_ProjectStateContext_GetLine(
+                callback_target: *mut ::std::os::raw::c_void,
+                buf: *mut ::std::os::raw::c_char,
+                buflen: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_ProjectStateContext_GetOutputSize(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_longlong;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_ProjectStateContext_GetTempFlag(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_ProjectStateContext_SetTempFlag(
+                callback_target: *mut ::std::os::raw::c_void,
+                flag: ::std::os::raw::c_int,
+            );
+        }
+    }
 }

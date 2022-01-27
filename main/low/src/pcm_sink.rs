@@ -171,7 +171,7 @@ pub trait PCM_sink {
 ///
 /// This function is highly unsafe. Better use the medium-level API instead.
 ///
-/// [`delete_cpp_pcm_sink()`]: fn.remove_cpp_pcm_sink.html
+/// [`delete_cpp_pcm_sink()`]: fn.delete_cpp_pcm_sink.html
 /// [`create_cpp_to_rust_control_surface()`]: fn.create_cpp_to_rust_control_surface.html
 pub unsafe fn create_cpp_to_rust_pcm_sink(
     callback_target: NonNull<Box<dyn PCM_sink>>,

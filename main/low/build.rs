@@ -49,7 +49,8 @@ fn compile_glue_code() {
         .file("src/pcm_sink.cpp")
         .file("src/midi.cpp")
         .file("src/resample.cpp")
-        .file("src/pitch_shift.cpp");
+        .file("src/pitch_shift.cpp")
+        .file("src/project_state_context.cpp");
     if cfg!(target_os = "macos") {
         build.cpp_set_stdlib("c++");
     }
@@ -172,6 +173,7 @@ mod codegen {
                 .whitelist_function("reaper_pcm_sink::.*")
                 .whitelist_function("reaper_resample::.*")
                 .whitelist_function("reaper_pitch_shift::.*")
+                .whitelist_function("reaper_project_state_context::.*")
                 .blacklist_type("preview_register_t");
             #[cfg(target_os = "macos")]
             let builder = builder.clang_arg("-stdlib=libc++");

@@ -231,7 +231,7 @@ pub trait PCM_source {
 ///
 /// This function is highly unsafe. Better use the medium-level API instead.
 ///
-/// [`delete_cpp_pcm_source()`]: fn.remove_cpp_pcm_source.html
+/// [`delete_cpp_pcm_source()`]: fn.delete_cpp_pcm_source.html
 /// [`create_cpp_to_rust_control_surface()`]: fn.create_cpp_to_rust_control_surface.html
 pub unsafe fn create_cpp_to_rust_pcm_source(
     callback_target: NonNull<Box<dyn PCM_source>>,
