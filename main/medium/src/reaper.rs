@@ -372,12 +372,10 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Checks if the given pointer is still valid.
     ///
     /// Returns `true` if the pointer is a valid object of the correct type in the current project.
-    #[cfg_attr(feature = "measure", measure)]
     pub fn validate_ptr<'a>(&self, pointer: impl Into<ReaperPointer<'a>>) -> bool
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let pointer = pointer.into();
         unsafe {
             self.low

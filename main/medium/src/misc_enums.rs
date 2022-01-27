@@ -1019,6 +1019,9 @@ pub enum ProjectContext {
     Proj(ReaProject),
 }
 
+// TODO-medium Maybe change strategy and make ReaProject a newtype that implements Send?
+unsafe impl Send for ProjectContext {}
+
 impl ProjectContext {
     /// Converts this value to a raw pointer as expected by the low-level API.
     pub fn to_raw(self) -> *mut raw::ReaProject {
