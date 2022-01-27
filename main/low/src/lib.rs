@@ -103,3 +103,6 @@ pub use pitch_shift::*;
 
 mod pcm_source;
 pub use pcm_source::*;
+
+mod pcm_sink;
+pub use pcm_sink::*;

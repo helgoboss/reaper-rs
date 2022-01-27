@@ -11532,6 +11532,175 @@ pub mod root {
             ) -> ::std::os::raw::c_int;
         }
     }
+    pub mod reaper_pcm_sink {
+        #[allow(unused_imports)]
+        use self::super::super::root;
+        extern "C" {
+            pub fn create_cpp_to_rust_pcm_sink(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *mut root::PCM_sink;
+        }
+        extern "C" {
+            pub fn delete_pcm_sink(sink: *mut root::PCM_sink);
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetOutputInfoString(
+                callback_target: *mut ::std::os::raw::c_void,
+                buf: *mut ::std::os::raw::c_char,
+                buflen: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetStartTime(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> f64;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_SetStartTime(
+                callback_target: *mut ::std::os::raw::c_void,
+                st: f64,
+            );
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetFileName(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetNumChannels(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetLength(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> f64;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetFileSize(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_longlong;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_WriteMIDI(
+                callback_target: *mut ::std::os::raw::c_void,
+                events: *mut root::MIDI_eventlist,
+                len: ::std::os::raw::c_int,
+                samplerate: f64,
+            );
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_WriteDoubles(
+                callback_target: *mut ::std::os::raw::c_void,
+                samples: *mut *mut root::ReaSample,
+                len: ::std::os::raw::c_int,
+                nch: ::std::os::raw::c_int,
+                offset: ::std::os::raw::c_int,
+                spacing: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_WantMIDI(
+                callback_target: *mut ::std::os::raw::c_void,
+            ) -> bool;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetLastSecondPeaks(
+                callback_target: *mut ::std::os::raw::c_void,
+                sz: ::std::os::raw::c_int,
+                buf: *mut root::ReaSample,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_GetPeakInfo(
+                callback_target: *mut ::std::os::raw::c_void,
+                block: *mut root::PCM_source_peaktransfer_t,
+            );
+        }
+        extern "C" {
+            pub fn cpp_to_rust_PCM_sink_Extended(
+                callback_target: *mut ::std::os::raw::c_void,
+                call: ::std::os::raw::c_int,
+                parm1: *mut ::std::os::raw::c_void,
+                parm2: *mut ::std::os::raw::c_void,
+                parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetOutputInfoString(
+                self_: *mut root::PCM_sink,
+                buf: *mut ::std::os::raw::c_char,
+                buflen: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetStartTime(self_: *mut root::PCM_sink) -> f64;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_SetStartTime(self_: *mut root::PCM_sink, st: f64);
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetFileName(
+                self_: *mut root::PCM_sink,
+            ) -> *const ::std::os::raw::c_char;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetNumChannels(
+                self_: *mut root::PCM_sink,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetLength(self_: *mut root::PCM_sink) -> f64;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetFileSize(
+                self_: *mut root::PCM_sink,
+            ) -> ::std::os::raw::c_longlong;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_WriteMIDI(
+                self_: *mut root::PCM_sink,
+                events: *mut root::MIDI_eventlist,
+                len: ::std::os::raw::c_int,
+                samplerate: f64,
+            );
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_WriteDoubles(
+                self_: *mut root::PCM_sink,
+                samples: *mut *mut root::ReaSample,
+                len: ::std::os::raw::c_int,
+                nch: ::std::os::raw::c_int,
+                offset: ::std::os::raw::c_int,
+                spacing: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_WantMIDI(self_: *mut root::PCM_sink) -> bool;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetLastSecondPeaks(
+                self_: *mut root::PCM_sink,
+                sz: ::std::os::raw::c_int,
+                buf: *mut root::ReaSample,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_GetPeakInfo(
+                self_: *mut root::PCM_sink,
+                block: *mut root::PCM_source_peaktransfer_t,
+            );
+        }
+        extern "C" {
+            pub fn rust_to_cpp_PCM_sink_Extended(
+                self_: *mut root::PCM_sink,
+                call: ::std::os::raw::c_int,
+                parm1: *mut ::std::os::raw::c_void,
+                parm2: *mut ::std::os::raw::c_void,
+                parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+    }
     pub mod reaper_resample {
         #[allow(unused_imports)]
         use self::super::super::root;

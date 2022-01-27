@@ -46,6 +46,7 @@ fn compile_glue_code() {
         .warnings(false)
         .file("src/control_surface.cpp")
         .file("src/pcm_source.cpp")
+        .file("src/pcm_sink.cpp")
         .file("src/midi.cpp")
         .file("src/resample.cpp")
         .file("src/pitch_shift.cpp");
@@ -168,6 +169,7 @@ mod codegen {
                 .whitelist_function("reaper_control_surface::.*")
                 .whitelist_function("reaper_midi::.*")
                 .whitelist_function("reaper_pcm_source::.*")
+                .whitelist_function("reaper_pcm_sink::.*")
                 .whitelist_function("reaper_resample::.*")
                 .whitelist_function("reaper_pitch_shift::.*")
                 .blacklist_type("preview_register_t");

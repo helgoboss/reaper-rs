@@ -31,5 +31,6 @@ namespace swell_functions {
 #include "control_surface.hpp"
 #include "midi.hpp"
 #include "pcm_source.hpp"
+#include "pcm_sink.hpp"
 #include "resample.hpp"
 #include "pitch_shift.hpp"
