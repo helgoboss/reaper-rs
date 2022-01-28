@@ -179,11 +179,11 @@ namespace reaper_pcm_source {
     delete ctx;
     return size;
   }
-  void rust_to_cpp_copy_heap_buf_to_buf(WDL_HeapBuf* in_buf, char* out_buf) {
+  void rust_to_cpp_copy_heap_buf_to_buf(WDL_HeapBuf* in_buf, unsigned char* out_buf) {
     memcpy(out_buf, in_buf->GetFast(), in_buf->GetSize());
     delete in_buf;
   }
-  int rust_to_cpp_load_pcm_source_state_from_buf(PCM_source* source, char* in_buf, int in_buf_size) {
+  int rust_to_cpp_load_pcm_source_state_from_buf(PCM_source* source, unsigned char* in_buf, int in_buf_size) {
     WDL_HeapBuf heapBuf;
     heapBuf.Resize(in_buf_size);
     memcpy(heapBuf.GetFast(), in_buf, in_buf_size);

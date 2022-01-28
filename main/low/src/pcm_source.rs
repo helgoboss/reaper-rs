@@ -441,10 +441,7 @@ pub unsafe fn save_pcm_source_state_to_heap_buf(
 /// Copies the content of the given heap buffer to the given output buffer (which must be sized correctly).
 ///
 /// Takes ownership of the passed buffer, so takes care of destruction!
-pub unsafe fn copy_heap_buf_to_buf(
-    in_buf: *mut raw::WDL_HeapBuf,
-    out_buf: *mut ::std::os::raw::c_char,
-) {
+pub unsafe fn copy_heap_buf_to_buf(in_buf: *mut raw::WDL_HeapBuf, out_buf: *mut u8) {
     rust_to_cpp_copy_heap_buf_to_buf(in_buf, out_buf);
 }
 
@@ -453,7 +450,7 @@ pub unsafe fn copy_heap_buf_to_buf(
 /// Returns -1 on error.
 pub unsafe fn load_pcm_source_state_from_buf(
     source: *mut raw::PCM_source,
-    in_buf: *mut ::std::os::raw::c_char,
+    in_buf: *mut u8,
     in_buf_size: ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int {
     rust_to_cpp_load_pcm_source_state_from_buf(source, in_buf, in_buf_size)

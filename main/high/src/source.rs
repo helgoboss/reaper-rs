@@ -1,4 +1,8 @@
 use crate::{Project, Reaper};
+use reaper_low::{
+    copy_heap_buf_to_buf, create_heap_buf, load_pcm_source_state_from_buf,
+    save_pcm_source_state_to_heap_buf,
+};
 use reaper_medium::{
     BorrowedPcmSource, DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior,
     OwnedPcmSource, PcmSource, ReaperFunctionError,
@@ -46,6 +50,13 @@ impl AsRef<BorrowedSource> for ReaperSource {
     fn as_ref(&self) -> &BorrowedSource {
         self.make_sure_is_valid();
         BorrowedSource::ref_cast(unsafe { self.0.as_ref() })
+    }
+}
+
+impl AsMut<BorrowedSource> for ReaperSource {
+    fn as_mut(&mut self) -> &mut BorrowedSource {
+        self.make_sure_is_valid();
+        BorrowedSource::ref_cast_mut(unsafe { self.0.as_mut() })
     }
 }
 
@@ -106,6 +117,40 @@ impl BorrowedSource {
 
     pub fn export_to_file(&self, file: &Path) -> Result<(), ReaperFunctionError> {
         self.0.ext_export_to_file(file)
+    }
+
+    pub fn state_chunk(&self) -> String {
+        let heap_buf = create_heap_buf();
+        let size = unsafe { save_pcm_source_state_to_heap_buf(self.0.as_ptr().to_raw(), heap_buf) };
+        let mut buffer = vec![0u8; size as usize];
+        unsafe { copy_heap_buf_to_buf(heap_buf, buffer.as_mut_ptr()) };
+        // I think it's safe to assume that the content written to the buffer is made up by multiple
+        // segments, each of which is a proper UTF-8-encoded line (not containing newlines or
+        // carriage returns). Each segment is separated by a nul byte. So if we convert each nul
+        // byte to a newline, we should obtain a proper UTF-8-encoded string (which doesn't contain
+        // a trailing nul byte)!
+        for b in &mut buffer {
+            if *b == b'\0' {
+                *b = b'\n';
+            }
+        }
+        unsafe { String::from_utf8_unchecked(buffer) }
+    }
+
+    pub fn set_state_chunk(&mut self, chunk: String) {
+        let mut buffer: Vec<u8> = chunk.into();
+        for b in &mut buffer {
+            if *b == b'\n' {
+                *b = b'\0';
+            }
+        }
+        unsafe {
+            load_pcm_source_state_from_buf(
+                self.0.as_ptr().to_raw(),
+                buffer.as_mut_ptr(),
+                buffer.len() as _,
+            );
+        }
     }
 }
 

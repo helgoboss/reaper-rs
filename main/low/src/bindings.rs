@@ -11558,13 +11558,13 @@ pub mod root {
         extern "C" {
             pub fn rust_to_cpp_copy_heap_buf_to_buf(
                 in_buf: *mut root::WDL_HeapBuf,
-                out_buf: *mut ::std::os::raw::c_char,
+                out_buf: *mut ::std::os::raw::c_uchar,
             );
         }
         extern "C" {
             pub fn rust_to_cpp_load_pcm_source_state_from_buf(
                 source: *mut root::PCM_source,
-                in_buf: *mut ::std::os::raw::c_char,
+                in_buf: *mut ::std::os::raw::c_uchar,
                 in_buf_size: ::std::os::raw::c_int,
             ) -> ::std::os::raw::c_int;
         }
