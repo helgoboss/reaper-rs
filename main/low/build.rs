@@ -50,7 +50,8 @@ fn compile_glue_code() {
         .file("src/midi.cpp")
         .file("src/resample.cpp")
         .file("src/pitch_shift.cpp")
-        .file("src/project_state_context.cpp");
+        .file("src/project_state_context.cpp")
+        .file("lib/WDL/WDL/projectcontext.cpp");
     if cfg!(target_os = "macos") {
         build.cpp_set_stdlib("c++");
     }

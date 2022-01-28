@@ -1,6 +1,23 @@
 #include "project_state_context.hpp"
 
 namespace reaper_project_state_context {
+  // Rust -> C++
+  void rust_to_cpp_ProjectStateContext_AddLine(ProjectStateContext* self, const char* line) {
+    self->AddLine(line);
+  }
+  int rust_to_cpp_ProjectStateContext_GetLine(ProjectStateContext* self, char* buf, int buflen) {
+    return self->GetLine(buf, buflen);
+  }
+  INT64 rust_to_cpp_ProjectStateContext_GetOutputSize(ProjectStateContext* self) {
+    return self->GetOutputSize();
+  }
+  int rust_to_cpp_ProjectStateContext_GetTempFlag(ProjectStateContext* self) {
+    return self->GetTempFlag();
+  }
+  void rust_to_cpp_ProjectStateContext_SetTempFlag(ProjectStateContext* self, int flag) {
+    self->SetTempFlag(flag);
+  }
+
   // C++ -> Rust
 
   // This source just delegates to the free functions implemented in Rust. See header file for an explanation.
@@ -14,12 +31,10 @@ namespace reaper_project_state_context {
 
 #ifdef __GNUC__
     virtual void  __attribute__ ((format (printf,2,3))) AddLine(const char *fmt, ...) {
-      // TODO-high Render fmt and variadics to temporary string.
       ::reaper_project_state_context::cpp_to_rust_ProjectStateContext_AddLine(this->callback_target_, fmt);
     }
 #else
     virtual void AddLine(const char* fmt, ...) {
-      // TODO-high Render fmt and variadics to temporary string.
       ::reaper_project_state_context::cpp_to_rust_ProjectStateContext_AddLine(this->callback_target_, fmt);
     }
 #endif

@@ -412,3 +412,49 @@ extern "C" fn cpp_to_rust_PCM_source_Extended(
     firewall(|| unsafe { &mut *callback_target }.Extended(call, parm1, parm2, parm3))
         .unwrap_or_default()
 }
+
+// Convenience functions
+//
+// At this point, the project state context stuff is not really usable from reaper-rs yet because I didn't bother to
+// deal with the variadics (which are not supported in stable Rust at the time of this writing, at least not
+// natively). I personally don't need to implement a project state context in Rust or use one with all of its
+// bells and whistles, so that's not a big deal.
+//
+// However, I need to persist the state of PCM sources and restore it again. So here are some very specialized
+// convenience functions for doing exactly that. It would be possible to make this more generic, e.g. to work on
+// heap buffers and project state context in general, but let's do that as soon as necessary.
+
+/// Creates a heap buffer and passes ownership to the caller.
+pub fn create_heap_buf() -> *mut raw::WDL_HeapBuf {
+    unsafe { rust_to_cpp_create_heap_buf() }
+}
+
+/// Saves the state of the given PCM source into the given heap buffer and returns the size of the data written into
+/// the buffer.
+pub unsafe fn save_pcm_source_state_to_heap_buf(
+    source: *mut raw::PCM_source,
+    buf: *mut raw::WDL_HeapBuf,
+) -> raw::WDL_INT64 {
+    rust_to_cpp_save_pcm_source_state_to_heap_buf(source, buf)
+}
+
+/// Copies the content of the given heap buffer to the given output buffer (which must be sized correctly).
+///
+/// Takes ownership of the passed buffer, so takes care of destruction!
+pub unsafe fn copy_heap_buf_to_buf(
+    in_buf: *mut raw::WDL_HeapBuf,
+    out_buf: *mut ::std::os::raw::c_char,
+) {
+    rust_to_cpp_copy_heap_buf_to_buf(in_buf, out_buf);
+}
+
+/// Restores the PCM source state from the given buffer.
+///
+/// Returns -1 on error.
+pub unsafe fn load_pcm_source_state_from_buf(
+    source: *mut raw::PCM_source,
+    in_buf: *mut ::std::os::raw::c_char,
+    in_buf_size: ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int {
+    rust_to_cpp_load_pcm_source_state_from_buf(source, in_buf, in_buf_size)
+}

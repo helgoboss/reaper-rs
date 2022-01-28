@@ -1,4 +1,5 @@
 #include "pcm_source.hpp"
+#include "../lib/WDL/WDL/projectcontext.h"
 
 namespace reaper_pcm_source {
   // Rust -> C++
@@ -166,5 +167,31 @@ namespace reaper_pcm_source {
 
   void delete_pcm_source(PCM_source* source) {
     delete source;
+  }
+
+  WDL_HeapBuf* rust_to_cpp_create_heap_buf() {
+    return new WDL_HeapBuf();
+  }
+  WDL_INT64 rust_to_cpp_save_pcm_source_state_to_heap_buf(PCM_source* source, WDL_HeapBuf* buf) {
+    ProjectStateContext* ctx = ProjectCreateMemCtx_Write(buf);
+    source->SaveState(ctx);
+    auto size = ctx->GetOutputSize();
+    delete ctx;
+    return size;
+  }
+  void rust_to_cpp_copy_heap_buf_to_buf(WDL_HeapBuf* in_buf, char* out_buf) {
+    memcpy(out_buf, in_buf->GetFast(), in_buf->GetSize());
+    delete in_buf;
+  }
+  int rust_to_cpp_load_pcm_source_state_from_buf(PCM_source* source, char* in_buf, int in_buf_size) {
+    WDL_HeapBuf heapBuf;
+    heapBuf.Resize(in_buf_size);
+    memcpy(heapBuf.GetFast(), in_buf, in_buf_size);
+    ProjectStateContext* ctx = ProjectCreateMemCtx_Read(&heapBuf);
+    char firstLine[4096];
+    ctx->GetLine(firstLine, sizeof(firstLine));
+    int result = source->LoadState(firstLine, ctx);
+    delete ctx;
+    return result;
   }
 }

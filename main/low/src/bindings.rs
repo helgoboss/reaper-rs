@@ -11266,6 +11266,21 @@ pub mod root {
             );
         }
     }
+    pub type WDL_INT64 = ::std::os::raw::c_longlong;
+    #[repr(C)]
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct WDL_HeapBuf {
+        pub m_buf: *mut ::std::os::raw::c_void,
+        pub m_alloc: ::std::os::raw::c_int,
+        pub m_size: ::std::os::raw::c_int,
+        pub m_granul: ::std::os::raw::c_int,
+        pub ___pad: ::std::os::raw::c_int,
+    }
+    impl Default for WDL_HeapBuf {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
     pub mod reaper_pcm_source {
         #[allow(unused_imports)]
         use self::super::super::root;
@@ -11529,6 +11544,28 @@ pub mod root {
                 parm1: *mut ::std::os::raw::c_void,
                 parm2: *mut ::std::os::raw::c_void,
                 parm3: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_create_heap_buf() -> *mut root::WDL_HeapBuf;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_save_pcm_source_state_to_heap_buf(
+                source: *mut root::PCM_source,
+                buf: *mut root::WDL_HeapBuf,
+            ) -> root::WDL_INT64;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_copy_heap_buf_to_buf(
+                in_buf: *mut root::WDL_HeapBuf,
+                out_buf: *mut ::std::os::raw::c_char,
+            );
+        }
+        extern "C" {
+            pub fn rust_to_cpp_load_pcm_source_state_from_buf(
+                source: *mut root::PCM_source,
+                in_buf: *mut ::std::os::raw::c_char,
+                in_buf_size: ::std::os::raw::c_int,
             ) -> ::std::os::raw::c_int;
         }
     }
@@ -11851,6 +11888,35 @@ pub mod root {
         extern "C" {
             pub fn cpp_to_rust_ProjectStateContext_SetTempFlag(
                 callback_target: *mut ::std::os::raw::c_void,
+                flag: ::std::os::raw::c_int,
+            );
+        }
+        extern "C" {
+            pub fn rust_to_cpp_ProjectStateContext_AddLine(
+                self_: *mut root::ProjectStateContext,
+                line: *const ::std::os::raw::c_char,
+            );
+        }
+        extern "C" {
+            pub fn rust_to_cpp_ProjectStateContext_GetLine(
+                self_: *mut root::ProjectStateContext,
+                buf: *mut ::std::os::raw::c_char,
+                buflen: ::std::os::raw::c_int,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_ProjectStateContext_GetOutputSize(
+                self_: *mut root::ProjectStateContext,
+            ) -> ::std::os::raw::c_longlong;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_ProjectStateContext_GetTempFlag(
+                self_: *mut root::ProjectStateContext,
+            ) -> ::std::os::raw::c_int;
+        }
+        extern "C" {
+            pub fn rust_to_cpp_ProjectStateContext_SetTempFlag(
+                self_: *mut root::ProjectStateContext,
                 flag: ::std::os::raw::c_int,
             );
         }

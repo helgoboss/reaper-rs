@@ -2,13 +2,45 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+use crate::bindings::root::reaper_project_state_context::*;
 use crate::{firewall, raw};
 use std::os::raw::c_void;
 use std::ptr::NonNull;
 
+impl raw::ProjectStateContext {
+    /// Attention: Not really usable yet due to the lack of the variadic parameter in AddLine.
+    pub fn AddLine(&mut self, line: *const ::std::os::raw::c_char) {
+        unsafe {
+            rust_to_cpp_ProjectStateContext_AddLine(self as *const _ as _, line);
+        }
+    }
+
+    pub fn GetLine(
+        &mut self,
+        buf: *mut ::std::os::raw::c_char,
+        buflen: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        unsafe { rust_to_cpp_ProjectStateContext_GetLine(self as *const _ as _, buf, buflen) }
+    }
+
+    pub fn GetOutputSize(&mut self) -> ::std::os::raw::c_longlong {
+        unsafe { rust_to_cpp_ProjectStateContext_GetOutputSize(self as *const _ as _) }
+    }
+
+    pub fn GetTempFlag(&mut self) -> ::std::os::raw::c_int {
+        unsafe { rust_to_cpp_ProjectStateContext_GetTempFlag(self as *const _ as _) }
+    }
+
+    pub fn SetTempFlag(&mut self, flag: ::std::os::raw::c_int) {
+        unsafe { rust_to_cpp_ProjectStateContext_SetTempFlag(self as *const _ as _, flag) }
+    }
+}
+
 /// This is the Rust analog to the C++ virtual base class `ProjectStateContext`.
 ///
 /// An implementation of this trait can be passed to [`create_cpp_to_rust_project_state_context()`].
+///
+/// Attention: Not really usable yet due to the lack of the variadic parameter in AddLine.
 ///
 /// [`create_cpp_to_rust_project_state_context()`]: fn.create_cpp_to_rust_project_state_context.html
 pub trait ProjectStateContext {
