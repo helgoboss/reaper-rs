@@ -71,5 +71,5 @@ namespace reaper_pcm_source {
 
   extern "C" void rust_to_cpp_copy_heap_buf_to_buf(WDL_HeapBuf* in_buf, unsigned char* out_buf);
 
-  extern "C" int rust_to_cpp_load_pcm_source_state_from_buf(PCM_source* source, unsigned char* in_buf, int in_buf_size);
+  extern "C" int rust_to_cpp_load_pcm_source_state_from_buf(PCM_source* source, const char* first_line, unsigned char* in_buf, int in_buf_size);
 }

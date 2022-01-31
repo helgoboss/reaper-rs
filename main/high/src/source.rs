@@ -5,11 +5,11 @@ use reaper_low::{
 };
 use reaper_medium::{
     BorrowedPcmSource, DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior,
-    OwnedPcmSource, PcmSource, ReaperFunctionError,
+    OwnedPcmSource, PcmSource, ReaperFunctionError, ReaperStringArg,
 };
 use ref_cast::RefCast;
 use std::borrow::Borrow;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 
 /// Pointer to a PCM source that's owned and managed by REAPER.
@@ -115,6 +115,10 @@ impl BorrowedSource {
         self.0.ext_get_pooled_midi_id()
     }
 
+    pub fn remove_from_midi_pool(&self) -> Result<(), ReaperFunctionError> {
+        self.0.ext_remove_from_midi_pool()
+    }
+
     pub fn export_to_file(&self, file: &Path) -> Result<(), ReaperFunctionError> {
         self.0.ext_export_to_file(file)
     }
@@ -134,23 +138,32 @@ impl BorrowedSource {
                 *b = b'\n';
             }
         }
-        unsafe { String::from_utf8_unchecked(buffer) }
+        String::from_utf8(buffer).expect("not UTF-8")
     }
 
-    pub fn set_state_chunk(&mut self, chunk: String) {
+    pub fn set_state_chunk<'a>(
+        &mut self,
+        first_line: impl Into<ReaperStringArg<'a>>,
+        chunk: String,
+    ) -> Result<(), &'static str> {
         let mut buffer: Vec<u8> = chunk.into();
         for b in &mut buffer {
             if *b == b'\n' {
                 *b = b'\0';
             }
         }
-        unsafe {
+        let result = unsafe {
             load_pcm_source_state_from_buf(
                 self.0.as_ptr().to_raw(),
+                first_line.into().into_inner().as_c_str().as_ptr(),
                 buffer.as_mut_ptr(),
                 buffer.len() as _,
-            );
+            )
+        };
+        if result < 0 {
+            return Err("couldn't load PCM source state");
         }
+        Ok(())
     }
 }
 
@@ -175,7 +188,15 @@ impl OwnedSource {
         let raw = Reaper::get()
             .medium_reaper()
             .pcm_source_create_from_file_ex(file, import_behavior)
-            .map_err(|_| "couldn't create PCM source")?;
+            .map_err(|_| "couldn't create PCM source by file")?;
+        Ok(Self(raw))
+    }
+
+    pub fn from_type(source_type: &str) -> Result<Self, &'static str> {
+        let raw = Reaper::get()
+            .medium_reaper()
+            .pcm_source_create_from_type(source_type)
+            .map_err(|_| "couldn't create PCM source by type")?;
         Ok(Self(raw))
     }
 }
@@ -183,6 +204,12 @@ impl OwnedSource {
 impl AsRef<BorrowedSource> for OwnedSource {
     fn as_ref(&self) -> &BorrowedSource {
         BorrowedSource::ref_cast(self.0.as_ref())
+    }
+}
+
+impl AsMut<BorrowedSource> for OwnedSource {
+    fn as_mut(&mut self) -> &mut BorrowedSource {
+        BorrowedSource::ref_cast_mut(self.0.as_mut())
     }
 }
 
@@ -205,6 +232,12 @@ impl Deref for OwnedSource {
 
     fn deref(&self) -> &BorrowedSource {
         self.as_ref()
+    }
+}
+
+impl DerefMut for OwnedSource {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.as_mut()
     }
 }
 

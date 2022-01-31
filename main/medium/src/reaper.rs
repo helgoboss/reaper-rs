@@ -1174,8 +1174,6 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given file name is not valid UTF-8.
-    ///
-    /// [`pcm_source_destroy()`]: #method.pcm_source_destroy
     #[measure(ResponseTimeSingleThreaded)]
     pub fn pcm_source_create_from_file_ex(
         &self,
@@ -1200,6 +1198,36 @@ impl<UsageScope> Reaper<UsageScope> {
         };
         NonNull::new(ptr)
             .ok_or_else(|| ReaperFunctionError::new("couldn't create PCM source from file"))
+            .map(PcmSource)
+            .map(OwnedPcmSource)
+    }
+
+    /// Creates a PCM source from a type identifier.
+    ///
+    /// TODO-high Documentation/API ... unstable
+    ///
+    /// Use this if you're going to load its state via LoadState/ProjectStateContext.
+    /// Valid types include "WAVE", "MIDI", or whatever plug-ins define as well.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the PCM source could not be created.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn pcm_source_create_from_type<'a>(
+        &self,
+        source_type: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperFunctionResult<OwnedPcmSource>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        // TODO-medium Can maybe be relaxed.
+        self.require_main_thread();
+        let ptr = unsafe {
+            self.low
+                .PCM_Source_CreateFromType(source_type.into().as_ptr())
+        };
+        NonNull::new(ptr)
+            .ok_or_else(|| ReaperFunctionError::new("couldn't create PCM source from type"))
             .map(PcmSource)
             .map(OwnedPcmSource)
     }

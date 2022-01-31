@@ -183,14 +183,18 @@ namespace reaper_pcm_source {
     memcpy(out_buf, in_buf->GetFast(), in_buf->GetSize());
     delete in_buf;
   }
-  int rust_to_cpp_load_pcm_source_state_from_buf(PCM_source* source, unsigned char* in_buf, int in_buf_size) {
-    WDL_HeapBuf heapBuf;
-    heapBuf.Resize(in_buf_size);
-    memcpy(heapBuf.GetFast(), in_buf, in_buf_size);
-    ProjectStateContext* ctx = ProjectCreateMemCtx_Read(&heapBuf);
-    char firstLine[4096];
-    ctx->GetLine(firstLine, sizeof(firstLine));
-    int result = source->LoadState(firstLine, ctx);
+  int rust_to_cpp_load_pcm_source_state_from_buf(PCM_source* source, const char* first_line, unsigned char* in_buf, int in_buf_size) {
+    // Copy buffer to heap buffer
+    WDL_HeapBuf heap_buf;
+    void* heap_buf_mem = heap_buf.Resize(in_buf_size, false);
+    if (!heap_buf_mem || heap_buf.GetSize() != in_buf_size) {
+      // Shouldn't happen.
+      return -2;
+    }
+    memcpy(heap_buf_mem, in_buf, in_buf_size);
+    // Load state
+    ProjectStateContext* ctx = ProjectCreateMemCtx_Read(&heap_buf);
+    int result = source->LoadState(first_line, ctx);
     delete ctx;
     return result;
   }

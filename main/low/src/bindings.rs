@@ -11564,6 +11564,7 @@ pub mod root {
         extern "C" {
             pub fn rust_to_cpp_load_pcm_source_state_from_buf(
                 source: *mut root::PCM_source,
+                first_line: *const ::std::os::raw::c_char,
                 in_buf: *mut ::std::os::raw::c_uchar,
                 in_buf_size: ::std::os::raw::c_int,
             ) -> ::std::os::raw::c_int;

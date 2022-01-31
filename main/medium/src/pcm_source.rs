@@ -202,6 +202,9 @@ impl BorrowedProjectStateContext {
 /// Owned PCM source.
 ///
 /// This PCM source automatically destroys the associated C++ `PCM_source` when dropped.
+// TODO-high We don't need to distinguish between so many types. Just one: PcmSource.
+//  Implement Drop for it. If we have a reference (created by ref_cast), Rust will not invoke
+//  the Drop code.
 #[derive(Eq, PartialEq, Hash, Debug)]
 #[repr(transparent)]
 pub struct OwnedPcmSource(pub(crate) PcmSource);
@@ -625,6 +628,28 @@ impl BorrowedPcmSource {
         if supported == 0 {
             return Err(ReaperFunctionError::new(
                 "PCM_SOURCE_EXT_EXPORTTOFILE not supported by source",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Unpools the MIDI in this source.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not supported.
+    pub fn ext_remove_from_midi_pool(&self) -> ReaperFunctionResult<()> {
+        let supported = unsafe {
+            self.0.Extended(
+                raw::PCM_SOURCE_EXT_REMOVEFROMMIDIPOOL as _,
+                null_mut(),
+                null_mut(),
+                null_mut(),
+            )
+        };
+        if supported == 0 {
+            return Err(ReaperFunctionError::new(
+                "PCM_SOURCE_EXT_REMOVEFROMMIDIPOOL not supported by source",
             ));
         }
         Ok(())

@@ -450,8 +450,9 @@ pub unsafe fn copy_heap_buf_to_buf(in_buf: *mut raw::WDL_HeapBuf, out_buf: *mut 
 /// Returns -1 on error.
 pub unsafe fn load_pcm_source_state_from_buf(
     source: *mut raw::PCM_source,
+    first_line: *const ::std::os::raw::c_char,
     in_buf: *mut u8,
     in_buf_size: ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int {
-    rust_to_cpp_load_pcm_source_state_from_buf(source, in_buf, in_buf_size)
+    rust_to_cpp_load_pcm_source_state_from_buf(source, first_line, in_buf, in_buf_size)
 }
