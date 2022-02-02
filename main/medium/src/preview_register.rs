@@ -20,6 +20,7 @@ use std::ptr::{null_mut, NonNull};
 // interoperation with another extension but that would probably look differently anyway. If one
 // day we have the need, we can introduce a borrowed version, move most methods to it and at a
 // Deref implementation from owned to borrowed.
+#[derive(Clone)]
 pub struct OwnedPreviewRegister {
     source: Option<FlexibleOwnedPcmSource>,
     register: raw::preview_register_t,

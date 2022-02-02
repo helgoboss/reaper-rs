@@ -698,6 +698,18 @@ pub struct ExtGetPooledMidiIdResult {
 
 /// Consumers can implement this trait in order to provide own PCM source types.
 pub trait CustomPcmSource {
+    // TODO-high Mmh, I think duplicate() doesn't make sense like this. All methods in this trait
+    //  are first and foremost for usage by REAPER, not by us, especially this one ... there's no
+    //  reason for us to call it from Rust side. REAPER takes ownership of the returned source.
+    //  So it also manages its lifecycle and eventually calls C++ delete when not used anymore.
+    //  We would implement it probably by cloning Self and obtaining a CustomOwnedPcmSource from it
+    //  by calling create_custom_owned_pcm_source(). From this we could obtain the
+    //  OwnedPcmSource. However, what happens to the _rust_source? We would have to leak it to
+    //  REAPER! When REAPER calls delete, we should make sure this _rust_source is dropped ... so we
+    //  actually need to implement the destructor of our source on C++ side and forward it to a
+    //  destroy function in Rust land. Before we don't have that, duplication within REAPER will not
+    //  work for CustomPcmSource. As soon as we have it, we should implement duplicate()
+    //  automatically for a CustomPcmSource that implements Clone.
     fn duplicate(&mut self) -> Option<OwnedPcmSource>;
 
     fn is_available(&mut self) -> bool;
@@ -1065,6 +1077,18 @@ pub enum FlexibleOwnedPcmSource {
     Custom(CustomOwnedPcmSource),
 }
 
+impl Clone for FlexibleOwnedPcmSource {
+    fn clone(&self) -> Self {
+        use FlexibleOwnedPcmSource::*;
+        match &self {
+            Reaper(s) => Reaper(s.duplicate().unwrap()),
+            // TODO-high As soon as we solve the Duplicate() issue for CustomPcmSource, we can
+            //  improve this.
+            Custom(s) => panic!("Clone not supported for custom PCM sources at the moment"),
+        }
+    }
+}
+
 impl AsRef<BorrowedPcmSource> for FlexibleOwnedPcmSource {
     fn as_ref(&self) -> &BorrowedPcmSource {
         match self {
@@ -1089,6 +1113,8 @@ impl AsMut<BorrowedPcmSource> for FlexibleOwnedPcmSource {
 /// [`CustomPcmSource`]: trait.CustomPcmSource.html
 pub struct CustomOwnedPcmSource {
     // Those 2 belong together. `cpp_source` without `rust_source` = crash. Never let them apart!
+    // TODO-high See Duplicate() of CustomPcmSource. We could actually let them apart and make
+    //  the C++ destructor call a destroy function on Rust side. That would be more consequent.
     cpp_source: OwnedPcmSource,
     /// Never read but important to keep in memory.
     #[allow(clippy::redundant_allocation)]
