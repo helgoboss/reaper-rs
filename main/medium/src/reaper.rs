@@ -3602,12 +3602,10 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Returns the version of the REAPER application in which this plug-in is currently running.
-    #[measure(ResponseTimeSingleThreaded)]
     pub fn get_app_version(&self) -> ReaperVersion<'static>
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let ptr = self.low.GetAppVersion();
         let version_str = unsafe { ReaperStr::from_ptr(ptr) };
         ReaperVersion::new(version_str)
