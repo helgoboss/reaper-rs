@@ -29,7 +29,8 @@ impl ReaperSource {
         self.0
     }
 
-    pub fn is_valid(&self) -> bool {
+    /// This checks if the source is used within REAPER.
+    pub fn is_used_by_reaper(&self) -> bool {
         Reaper::get().medium_reaper().validate_ptr(self.0)
     }
 
@@ -39,23 +40,28 @@ impl ReaperSource {
             .validate_ptr_2(project.context(), self.0)
     }
 
-    fn make_sure_is_valid(&self) {
-        if !self.is_valid() {
-            panic!("PCM source pointer is not valid anymore in REAPER")
-        }
-    }
+    // fn make_sure_is_valid(&self) {
+    //     if !self.is_used_by_reaper() {
+    //         panic!("PCM source pointer is not valid anymore in REAPER")
+    //     }
+    // }
 }
 
 impl AsRef<BorrowedSource> for ReaperSource {
     fn as_ref(&self) -> &BorrowedSource {
-        self.make_sure_is_valid();
+        // TODO-high We can't double check if the source still exists because we only have a method
+        //  to check if the source is still valid as far as REAPER knows. But that would exclude
+        //  working with sources that exist but REAPER doesn't know about, i.e. our own non-item
+        //  sources. We should add some logic to recognize when it's our source and when not.
+        // self.make_sure_is_valid();
         BorrowedSource::ref_cast(unsafe { self.0.as_ref() })
     }
 }
 
 impl AsMut<BorrowedSource> for ReaperSource {
     fn as_mut(&mut self) -> &mut BorrowedSource {
-        self.make_sure_is_valid();
+        // TODO-high See AsRef
+        // self.make_sure_is_valid();
         BorrowedSource::ref_cast_mut(unsafe { self.0.as_mut() })
     }
 }
