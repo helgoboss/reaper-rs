@@ -148,11 +148,13 @@ impl PcmSourceTransfer {
     }
 
     /// Returns the list of MIDI events to be filled.
-    pub fn midi_event_list(&self) -> &BorrowedMidiEventList {
+    pub fn midi_event_list(&self) -> Option<&BorrowedMidiEventList> {
         if self.0.midi_events.is_null() {
-            panic!("PCM source transfer didn't provide MIDI event list");
+            return None;
         }
-        BorrowedMidiEventList::ref_cast(unsafe { &*self.0.midi_events })
+        Some(BorrowedMidiEventList::ref_cast(unsafe {
+            &*self.0.midi_events
+        }))
     }
 
     /// Sets the list of MIDI events to be filled.
@@ -1084,7 +1086,7 @@ impl Clone for FlexibleOwnedPcmSource {
             Reaper(s) => Reaper(s.duplicate().unwrap()),
             // TODO-high As soon as we solve the Duplicate() issue for CustomPcmSource, we can
             //  improve this.
-            Custom(s) => panic!("Clone not supported for custom PCM sources at the moment"),
+            Custom(_) => panic!("Clone not supported for custom PCM sources at the moment"),
         }
     }
 }
