@@ -19,16 +19,16 @@ use crate::{
     KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
-    PanMode, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionInBeats, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
-    ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget,
-    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    OwnedReaperPitchShift, OwnedReaperResample, PanMode, PcmSource, PitchShiftMode,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds,
+    ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
+    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
+    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    ReaperWidthValue, RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId,
+    SendTarget, SoloMode, StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef,
+    TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -2382,6 +2382,19 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
+    /// Returns a new pitch shift API instance.
+    ///
+    /// Version must be [raw::REAPER_PITCHSHIFT_API_VER].
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn reaper_get_pitch_shift_api(&self, version: i32) -> Option<OwnedReaperPitchShift>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.ReaperGetPitchShiftAPI(version);
+        NonNull::new(raw).map(|ptr| unsafe { OwnedReaperPitchShift::from_raw(ptr) })
+    }
+
     /// Returns information about the given pitch shift mode.
     ///
     /// Start querying modes at 0. Returns `None` when no more modes possible.
@@ -2435,6 +2448,18 @@ impl<UsageScope> Reaper<UsageScope> {
         }
         let name = unsafe { create_passing_c_str(name).unwrap() };
         use_name(Some(name))
+    }
+
+    /// Returns a new resample instance.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn resampler_create(&self) -> OwnedReaperResample
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.Resampler_Create();
+        let ptr = NonNull::new(raw).expect("REAPER didn't return a resample instance");
+        unsafe { OwnedReaperResample::from_raw(ptr) }
     }
 
     /// Returns the name of the given resample mode.

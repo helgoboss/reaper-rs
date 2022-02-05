@@ -206,7 +206,10 @@ impl BorrowedProjectStateContext {
 /// This PCM source automatically destroys the associated C++ `PCM_source` when dropped.
 // TODO-high We don't need to distinguish between so many types. Just one: PcmSource.
 //  Implement Drop for it. If we have a reference (created by ref_cast), Rust will not invoke
-//  the Drop code.
+//  the Drop code. Ah no, doesn't work. We can't just wrap the vtable struct and own it.
+//  We need to wrap a pointer. But hopefully 2 structs are enough, owned and borrowed.
+//  The pointer could be just NonNull<...> and then we have &PcmSource and OwnedPcmSource.
+//  See ReaperPitchShift. This should be the new model.
 #[derive(Eq, PartialEq, Hash, Debug)]
 #[repr(transparent)]
 pub struct OwnedPcmSource(pub(crate) PcmSource);
@@ -288,11 +291,14 @@ pub struct PcmSource(pub(crate) NonNull<raw::PCM_source>);
 
 impl PcmSource {
     /// Creates this pointer by wrapping the given non-null pointer to the low-level PCM source.
+    // TODO-high Rename to from_raw
     pub fn new(raw: NonNull<raw::PCM_source>) -> Self {
         Self(raw)
     }
 
     /// Returns the wrapped non-null pointer to the low-level PCM source.
+    // TODO-high I think it would be less confusing to call this to_raw() and remove the existing
+    //  to_raw().
     pub fn into_inner(self) -> NonNull<raw::PCM_source> {
         self.0
     }

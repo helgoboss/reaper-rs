@@ -1,6 +1,10 @@
 #include "resample.hpp"
 
 namespace reaper_resample {
+  void delete_reaper_resample_interface(REAPER_Resample_Interface* resample_interface) {
+    delete resample_interface;
+  }
+
   void REAPER_Resample_Interface_SetRates(REAPER_Resample_Interface* self, double rate_in, double rate_out) {
     self->SetRates(rate_in, rate_out);
   }

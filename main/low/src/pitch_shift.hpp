@@ -6,6 +6,9 @@
 // to the respective method of the `self` object. This glue code is necessary because Rust can't call  C++ pure virtual
 // functions directly.
 namespace reaper_pitch_shift {
+  // This function is called from Rust and implemented in C++. It destroys the given C++ IReaperPitchShift object.
+  extern "C" void delete_reaper_pitch_shift(IReaperPitchShift* pitch_shift);
+
   extern "C" void IReaperPitchShift_set_srate(IReaperPitchShift* self, double srate);
   extern "C" void IReaperPitchShift_set_nch(IReaperPitchShift* self, int nch);
   extern "C" void IReaperPitchShift_set_shift(IReaperPitchShift* self, double shift);

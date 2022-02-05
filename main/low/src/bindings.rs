@@ -11743,6 +11743,11 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
+            pub fn delete_reaper_resample_interface(
+                resample_interface: *mut root::REAPER_Resample_Interface,
+            );
+        }
+        extern "C" {
             pub fn REAPER_Resample_Interface_SetRates(
                 self_: *mut root::REAPER_Resample_Interface,
                 rate_in: f64,
@@ -11787,6 +11792,9 @@ pub mod root {
     pub mod reaper_pitch_shift {
         #[allow(unused_imports)]
         use self::super::super::root;
+        extern "C" {
+            pub fn delete_reaper_pitch_shift(pitch_shift: *mut root::IReaperPitchShift);
+        }
         extern "C" {
             pub fn IReaperPitchShift_set_srate(self_: *mut root::IReaperPitchShift, srate: f64);
         }

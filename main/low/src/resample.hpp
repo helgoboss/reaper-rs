@@ -6,6 +6,9 @@
 // to the respective method of the `self` object. This glue code is necessary because Rust can't call  C++ pure virtual
 // functions directly.
 namespace reaper_resample {
+  // This function is called from Rust and implemented in C++. It destroys the given C++ REAPER_Resample_Interface object.
+  extern "C" void delete_reaper_resample_interface(REAPER_Resample_Interface* resample_interface);
+
   extern "C" void REAPER_Resample_Interface_SetRates(REAPER_Resample_Interface* self, double rate_in, double rate_out);
   extern "C" void REAPER_Resample_Interface_Reset(REAPER_Resample_Interface* self);
   extern "C" double REAPER_Resample_Interface_GetCurrentLatency(REAPER_Resample_Interface* self);

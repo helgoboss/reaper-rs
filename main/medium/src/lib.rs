@@ -247,6 +247,7 @@
 //! - See case 2 strategy for dealing with cases where you need both a pointer wrapper and an owned
 //!   struct.
 //! - The most complete example which uses all of these techniques: `PCM_source`
+//!    TODO-high but outdated, ReaperPitchShift has a better approach
 //!
 //! #### Examples
 //!
@@ -373,6 +374,12 @@ pub use midi::*;
 
 mod pcm_source;
 pub use pcm_source::*;
+
+mod pitch_shift;
+pub use pitch_shift::*;
+
+mod resample;
+pub use resample::*;
 
 mod reaper_session;
 pub use reaper_session::*;

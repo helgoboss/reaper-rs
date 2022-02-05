@@ -1,6 +1,10 @@
 #include "pitch_shift.hpp"
 
 namespace reaper_pitch_shift {
+  void delete_reaper_pitch_shift(IReaperPitchShift* pitch_shift) {
+    delete pitch_shift;
+  }
+
   void IReaperPitchShift_set_srate(IReaperPitchShift* self, double srate) {
     self->set_srate(srate);
   }
