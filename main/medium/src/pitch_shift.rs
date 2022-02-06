@@ -1,8 +1,8 @@
+use crate::ReaperPitchShift;
 use reaper_low::raw;
 use reaper_low::raw::IReaperPitchShift;
 use ref_cast::RefCast;
 use std::ops::{Deref, DerefMut};
-use std::ptr::NonNull;
 
 // Case 3: Internals exposed: no | vtable: yes
 // ===========================================
@@ -12,12 +12,12 @@ use std::ptr::NonNull;
 /// This one automatically destroys the associated C++ `IReaperPitchShift` when dropped.
 #[derive(Eq, PartialEq, Hash, Debug)]
 #[repr(transparent)]
-pub struct OwnedReaperPitchShift(NonNull<raw::IReaperPitchShift>);
+pub struct OwnedReaperPitchShift(ReaperPitchShift);
 
 /// Borrowed (reference-only) REAPER pitch shift instance.
 #[derive(Eq, PartialEq, Hash, Debug, RefCast)]
 #[repr(transparent)]
-pub struct ReaperPitchShift(raw::IReaperPitchShift);
+pub struct BorrowedReaperPitchShift(raw::IReaperPitchShift);
 
 impl OwnedReaperPitchShift {
     /// Takes ownership of the given pitch shift instance.
@@ -26,7 +26,7 @@ impl OwnedReaperPitchShift {
     ///
     /// You must guarantee that the given instance is currently owner-less, otherwise double-free or
     /// use-after-free can occur.
-    pub unsafe fn from_raw(raw: NonNull<raw::IReaperPitchShift>) -> Self {
+    pub unsafe fn from_raw(raw: ReaperPitchShift) -> Self {
         Self(raw)
     }
 }
@@ -39,20 +39,20 @@ impl Drop for OwnedReaperPitchShift {
     }
 }
 
-impl AsRef<ReaperPitchShift> for OwnedReaperPitchShift {
-    fn as_ref(&self) -> &ReaperPitchShift {
-        ReaperPitchShift::ref_cast(unsafe { self.0.as_ref() })
+impl AsRef<BorrowedReaperPitchShift> for OwnedReaperPitchShift {
+    fn as_ref(&self) -> &BorrowedReaperPitchShift {
+        BorrowedReaperPitchShift::ref_cast(unsafe { self.0.as_ref() })
     }
 }
 
-impl AsMut<ReaperPitchShift> for OwnedReaperPitchShift {
-    fn as_mut(&mut self) -> &mut ReaperPitchShift {
-        ReaperPitchShift::ref_cast_mut(unsafe { self.0.as_mut() })
+impl AsMut<BorrowedReaperPitchShift> for OwnedReaperPitchShift {
+    fn as_mut(&mut self) -> &mut BorrowedReaperPitchShift {
+        BorrowedReaperPitchShift::ref_cast_mut(unsafe { self.0.as_mut() })
     }
 }
 
 impl Deref for OwnedReaperPitchShift {
-    type Target = ReaperPitchShift;
+    type Target = BorrowedReaperPitchShift;
 
     fn deref(&self) -> &Self::Target {
         self.as_ref()
@@ -65,13 +65,13 @@ impl DerefMut for OwnedReaperPitchShift {
     }
 }
 
-impl AsRef<raw::IReaperPitchShift> for ReaperPitchShift {
+impl AsRef<raw::IReaperPitchShift> for BorrowedReaperPitchShift {
     fn as_ref(&self) -> &IReaperPitchShift {
         &self.0
     }
 }
 
-impl AsMut<raw::IReaperPitchShift> for ReaperPitchShift {
+impl AsMut<raw::IReaperPitchShift> for BorrowedReaperPitchShift {
     fn as_mut(&mut self) -> &mut IReaperPitchShift {
         &mut self.0
     }

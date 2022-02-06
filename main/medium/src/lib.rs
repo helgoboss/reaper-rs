@@ -217,10 +217,7 @@
 //! - [`raw::PCM_source_transfer_t`](../reaper_low/raw/struct.PCM_source_transfer_t.html) →
 //!   [`PcmSourceTransfer`](struct.PcmSourceTransfer.html)
 //!
-//!
 //! #### Legacy examples (NonNull pointer wrappers with separation into borrowed and owned versions)
-//!
-//! TODO-high Migrate them to ref-cast.
 //!
 //! - [`raw::KbdSectionInfo`](../reaper_low/raw/struct.KbdSectionInfo.html) →
 //!   [`KbdSectionInfo`](struct.KbdSectionInfo.html) & `MediumKdbSectionInfo` (not yet existing)
@@ -232,24 +229,26 @@
 //!
 //! ### Case 3: Internals not exposed | vtable
 //!
-//!
 //! #### Strategy
 //!
-//! - *Don't* create an alias for a `NonNull` pointer! In situations where just the pointer is
-//!   interesting and not the internals, write `NonNull<...>` everywhere.
-//! - If the consumer shall get access to the virtual functions: Wrap `NonNull` pointer in a public
-//!   newtype. This newtype should expose the virtual functions in a way which is idiomatic for
-//!   Rust. It's intended for the communication from Rust to REAPER. This needs appropriate
-//!   companion C code in the low-level API.
+//! - Create an alias for a `NonNull` pointer!
+//! - If the consumer shall get access to the virtual functions: Wrap low-level struct in a public
+//!   newtype starting with `Borrowed` and use `RefCast`. This newtype should expose the virtual
+//!   functions in a way which is idiomatic for Rust. It's intended for the communication from Rust
+//!   to REAPER. This needs appropriate companion C code in the low-level API.
+//! - If the consumer shall be able to own the type, introduce another newtype starting with
+//!   `Owned` that wraps a `NonNull` pointer.
 //! - If the consumer needs to be able to provide such a type (for communication from REAPER to
 //!   Rust): Create a new trait which can be implemented by the consumer. This also needs
 //!   appropriate companion C code in the low-level API.
-//! - See case 2 strategy for dealing with cases where you need both a pointer wrapper and an owned
-//!   struct.
-//! - The most complete example which uses all of these techniques: `PCM_source`
-//!    TODO-high but outdated, ReaperPitchShift has a better approach
 //!
-//! #### Examples
+//! #### Up-to-date examples (using ref-cast)
+//!
+//! - [`PcmSink`]
+//! - [`ReaperPitchShift`]
+//! - [`ReaperResample`]
+//!
+//! #### Legacy examples
 //!
 //! - [`raw::IReaperControlSurface`](../reaper_low/raw/struct.IReaperControlSurface.html) →
 //!   `ReaperControlSurface` (not yet existing) & [`ControlSurface`](trait.ControlSurface.html)
@@ -374,6 +373,9 @@ pub use midi::*;
 
 mod pcm_source;
 pub use pcm_source::*;
+
+mod pcm_sink;
+pub use pcm_sink::*;
 
 mod pitch_shift;
 pub use pitch_shift::*;

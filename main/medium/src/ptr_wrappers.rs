@@ -168,3 +168,15 @@ pub(crate) fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
     );
     unsafe { NonNull::new_unchecked(ptr) }
 }
+
+// Case 3: Internals exposed: no | vtable: yes
+// ===========================================
+
+/// Pointer to a PCM sink.
+pub type PcmSink = NonNull<raw::PCM_sink>;
+
+/// Pointer to a REAPER pitch shift instance.
+pub type ReaperPitchShift = NonNull<raw::IReaperPitchShift>;
+
+/// Pointer to a REAPER resample instance.
+pub type ReaperResample = NonNull<raw::REAPER_Resample_Interface>;
