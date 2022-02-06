@@ -1,8 +1,8 @@
 use crate::ReaperResample;
 use reaper_low::raw;
-use reaper_low::raw::REAPER_Resample_Interface;
 use ref_cast::RefCast;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 
 // Case 3: Internals exposed: no | vtable: yes
 // ===========================================
@@ -41,13 +41,13 @@ impl Drop for OwnedReaperResample {
 
 impl AsRef<BorrowedReaperResample> for OwnedReaperResample {
     fn as_ref(&self) -> &BorrowedReaperResample {
-        BorrowedReaperResample::ref_cast(unsafe { self.0.as_ref() })
+        BorrowedReaperResample::from_raw(unsafe { self.0.as_ref() })
     }
 }
 
 impl AsMut<BorrowedReaperResample> for OwnedReaperResample {
     fn as_mut(&mut self) -> &mut BorrowedReaperResample {
-        BorrowedReaperResample::ref_cast_mut(unsafe { self.0.as_mut() })
+        BorrowedReaperResample::from_raw_mut(unsafe { self.0.as_mut() })
     }
 }
 
@@ -65,14 +65,31 @@ impl DerefMut for OwnedReaperResample {
     }
 }
 
+impl BorrowedReaperResample {
+    /// Creates a medium-level representation from the given low-level reference.
+    pub fn from_raw(raw: &raw::REAPER_Resample_Interface) -> &Self {
+        Self::ref_cast(raw)
+    }
+
+    /// Creates a mutable medium-level representation from the given low-level reference.
+    pub fn from_raw_mut(raw: &mut raw::REAPER_Resample_Interface) -> &mut Self {
+        Self::ref_cast_mut(raw)
+    }
+
+    /// Returns the pointer to this resample instance.
+    pub fn as_ptr(&self) -> ReaperResample {
+        NonNull::from(self.as_ref())
+    }
+}
+
 impl AsRef<raw::REAPER_Resample_Interface> for BorrowedReaperResample {
-    fn as_ref(&self) -> &REAPER_Resample_Interface {
+    fn as_ref(&self) -> &raw::REAPER_Resample_Interface {
         &self.0
     }
 }
 
 impl AsMut<raw::REAPER_Resample_Interface> for BorrowedReaperResample {
-    fn as_mut(&mut self) -> &mut REAPER_Resample_Interface {
+    fn as_mut(&mut self) -> &mut raw::REAPER_Resample_Interface {
         &mut self.0
     }
 }

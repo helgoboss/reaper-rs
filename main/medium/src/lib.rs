@@ -244,6 +244,7 @@
 //!
 //! #### Up-to-date examples (using ref-cast)
 //!
+//! - [`PcmSource`] (most complete example so far)
 //! - [`PcmSink`]
 //! - [`ReaperPitchShift`]
 //! - [`ReaperResample`]
@@ -256,10 +257,6 @@
 //!   [`MidiInput`](struct.MidiInput.html) &
 //! - [`raw::MIDI_eventlist`](../reaper_low/raw/struct.MIDI_eventlist.html) →
 //!   [`BorrowedMidiEventList`](struct.BorrowedMidiEventList.html) &
-//! - [`raw::PCM_source`](../reaper_low/raw/struct.PCM_source.html) →
-//!   [`OwnedPcmSource`](struct.OwnedPcmSource.html), [`PcmSource`](struct.PcmSource.html),
-//!   [`BorrowedPcmSource`](struct.BorrowedPcmSource.html) &
-//!   [`CustomPcmSource`](trait.CustomPcmSource.html)
 //!
 //! ## Panic/error/safety strategy
 //!

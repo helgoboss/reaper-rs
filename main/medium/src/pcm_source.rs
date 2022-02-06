@@ -5,15 +5,15 @@ use ref_cast::RefCast;
 use crate::util::{create_passing_c_str, with_string_buffer};
 use crate::{
     BorrowedMidiEventList, Bpm, DurationInBeats, DurationInSeconds, ExtendedArgs, Hwnd, Hz,
-    MediaItemTake, PositionInSeconds, ReaperFunctionError, ReaperFunctionResult, ReaperStr,
-    ReaperString,
+    MediaItemTake, PcmSource, PositionInSeconds, ReaperFunctionError, ReaperFunctionResult,
+    ReaperStr, ReaperString,
 };
 use reaper_low::raw::{PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t, HWND__};
 use std::borrow::Borrow;
 use std::error::Error;
 use std::fmt;
 use std::mem::MaybeUninit;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::os::raw::{c_char, c_void};
 use std::path::Path;
 use std::ptr::{null, null_mut, NonNull};
@@ -201,6 +201,9 @@ impl BorrowedProjectStateContext {
     }
 }
 
+// Case 3: Internals exposed: no | vtable: yes
+// ===========================================
+
 /// Owned PCM source.
 ///
 /// This PCM source automatically destroys the associated C++ `PCM_source` when dropped.
@@ -215,8 +218,8 @@ impl OwnedPcmSource {
     ///
     /// You must guarantee that the given source is currently owner-less, otherwise double-free or
     /// use-after-free can occur.
-    pub unsafe fn new_unchecked(inner: PcmSource) -> Self {
-        Self(inner)
+    pub unsafe fn from_raw(raw: PcmSource) -> Self {
+        Self(raw)
     }
 
     /// Returns the inner pointer **without** destroying the source.
@@ -234,20 +237,20 @@ impl OwnedPcmSource {
 impl Drop for OwnedPcmSource {
     fn drop(&mut self) {
         unsafe {
-            reaper_low::delete_cpp_pcm_source(self.0.into_inner());
+            reaper_low::delete_cpp_pcm_source(self.0);
         }
     }
 }
 
 impl AsRef<BorrowedPcmSource> for OwnedPcmSource {
     fn as_ref(&self) -> &BorrowedPcmSource {
-        unsafe { self.0.as_ref() }
+        BorrowedPcmSource::from_raw(unsafe { self.0.as_ref() })
     }
 }
 
 impl AsMut<BorrowedPcmSource> for OwnedPcmSource {
     fn as_mut(&mut self) -> &mut BorrowedPcmSource {
-        unsafe { self.0.as_mut() }
+        BorrowedPcmSource::from_raw_mut(unsafe { self.0.as_mut() })
     }
 }
 
@@ -265,64 +268,16 @@ impl Deref for OwnedPcmSource {
     }
 }
 
+impl DerefMut for OwnedPcmSource {
+    fn deref_mut(&mut self) -> &mut BorrowedPcmSource {
+        self.as_mut()
+    }
+}
+
 impl Clone for OwnedPcmSource {
     fn clone(&self) -> OwnedPcmSource {
         self.duplicate()
             .expect("this source doesn't support duplication")
-    }
-}
-
-/// Pointer to a PCM source.
-//
-// Copy and clone because it's one of the types for which `validate_ptr_2` can be called to check
-// pointer validity.
-//
-// Case 3: Internals exposed: no | vtable: yes
-// ===========================================
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-#[repr(transparent)]
-pub struct PcmSource(pub(crate) NonNull<raw::PCM_source>);
-
-impl PcmSource {
-    /// Creates this pointer by wrapping the given non-null pointer to the low-level PCM source.
-    // TODO-high Rename to from_raw
-    pub fn new(raw: NonNull<raw::PCM_source>) -> Self {
-        Self(raw)
-    }
-
-    /// Returns the wrapped non-null pointer to the low-level PCM source.
-    // TODO-high I think it would be less confusing to call this to_raw() and remove the existing
-    //  to_raw().
-    pub fn into_inner(self) -> NonNull<raw::PCM_source> {
-        self.0
-    }
-
-    /// Returns a pointer to the low-level PCM source.
-    pub fn to_raw(self) -> *mut raw::PCM_source {
-        self.0.as_ptr()
-    }
-
-    /// Turns this pointer into a reference.
-    ///
-    /// # Safety
-    ///
-    /// For all we know this pointer might be stale. For PCM sources used within REAPER, you can
-    /// use [`validate_ptr_2()`] to make sure the pointer is (still) valid.
-    ///
-    /// [`validate_ptr_2()`]: struct.Reaper.html#method.validate_ptr_2
-    pub unsafe fn as_ref(&self) -> &BorrowedPcmSource {
-        BorrowedPcmSource::ref_cast(&*self.0.as_ref())
-    }
-
-    /// Turns this pointer into a mutable reference.
-    ///
-    /// # Safety
-    ///
-    /// See [`as_ref()`].
-    ///
-    /// [`as_ref()`]: #method.as_ref
-    pub unsafe fn as_mut(&mut self) -> &mut BorrowedPcmSource {
-        BorrowedPcmSource::ref_cast_mut(&mut *self.0.as_mut())
     }
 }
 
@@ -332,17 +287,24 @@ impl PcmSource {
 pub struct BorrowedPcmSource(raw::PCM_source);
 
 impl BorrowedPcmSource {
-    /// Returns the pointer.
+    /// Creates a medium-level representation from the given low-level reference.
+    pub fn from_raw(raw: &raw::PCM_source) -> &Self {
+        Self::ref_cast(raw)
+    }
+
+    /// Creates a mutable medium-level representation from the given low-level reference.
+    pub fn from_raw_mut(raw: &mut raw::PCM_source) -> &mut Self {
+        Self::ref_cast_mut(raw)
+    }
+    /// Returns the pointer to this source.
     pub fn as_ptr(&self) -> PcmSource {
-        PcmSource(NonNull::from(&self.0))
+        NonNull::from(self.as_ref())
     }
 
     /// Duplicates this source.
     pub fn duplicate(&self) -> Option<OwnedPcmSource> {
         let raw_duplicate = self.0.Duplicate();
-        NonNull::new(raw_duplicate)
-            .map(PcmSource)
-            .map(OwnedPcmSource)
+        NonNull::new(raw_duplicate).map(OwnedPcmSource)
     }
 
     /// Returns if this source is available.
@@ -421,11 +383,11 @@ impl BorrowedPcmSource {
     /// Returns the parent source, if any.
     pub fn get_source(&self) -> Option<PcmSource> {
         let ptr = self.0.GetSource();
-        NonNull::new(ptr).map(PcmSource)
+        NonNull::new(ptr)
     }
 
     pub fn set_source(&self, source: Option<PcmSource>) {
-        let ptr = source.map(|s| s.to_raw()).unwrap_or(null_mut());
+        let ptr = source.map(|s| s.as_ptr()).unwrap_or(null_mut());
         unsafe {
             self.0.SetSource(ptr);
         }
@@ -686,6 +648,18 @@ impl ToOwned for BorrowedPcmSource {
     }
 }
 
+impl AsRef<raw::PCM_source> for BorrowedPcmSource {
+    fn as_ref(&self) -> &raw::PCM_source {
+        &self.0
+    }
+}
+
+impl AsMut<raw::PCM_source> for BorrowedPcmSource {
+    fn as_mut(&mut self) -> &mut raw::PCM_source {
+        &mut self.0
+    }
+}
+
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct ExtGetPooledMidiIdResult {
     /// A GUID string with braces.
@@ -887,7 +861,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
             .duplicate()
             .map(|s| {
                 let leaked = unsafe { s.leak() };
-                leaked.to_raw()
+                leaked.as_ptr()
             })
             .unwrap_or(null_mut())
     }
@@ -927,13 +901,13 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
     fn GetSource(&mut self) -> *mut PCM_source {
         self.delegate
             .get_source()
-            .map(|s| s.to_raw())
+            .map(|s| s.as_ptr())
             .unwrap_or(null_mut())
     }
 
     fn SetSource(&mut self, src: *mut PCM_source) {
         let args = SetSourceArgs {
-            source: NonNull::new(src).map(PcmSource),
+            source: NonNull::new(src),
         };
         self.delegate.set_source(args);
     }
@@ -1157,7 +1131,7 @@ pub fn create_custom_owned_pcm_source<S: CustomPcmSource + 'static>(
     let rust_source: Box<Box<dyn reaper_low::PCM_source>> = Box::new(Box::new(adapter));
     let thin_ptr_to_adapter: NonNull<_> = rust_source.as_ref().into();
     let raw_cpp_source = unsafe { create_cpp_to_rust_pcm_source(thin_ptr_to_adapter) };
-    let cpp_source = unsafe { OwnedPcmSource::new_unchecked(PcmSource::new(raw_cpp_source)) };
+    let cpp_source = unsafe { OwnedPcmSource::from_raw(raw_cpp_source) };
     CustomOwnedPcmSource {
         cpp_source,
         _rust_source: rust_source,

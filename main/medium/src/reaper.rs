@@ -1198,7 +1198,6 @@ impl<UsageScope> Reaper<UsageScope> {
         };
         NonNull::new(ptr)
             .ok_or_else(|| ReaperFunctionError::new("couldn't create PCM source from file"))
-            .map(PcmSource)
             .map(OwnedPcmSource)
     }
 
@@ -1228,7 +1227,6 @@ impl<UsageScope> Reaper<UsageScope> {
         };
         NonNull::new(ptr)
             .ok_or_else(|| ReaperFunctionError::new("couldn't create PCM source from type"))
-            .map(PcmSource)
             .map(OwnedPcmSource)
     }
 
@@ -4755,7 +4753,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetMediaItemTake_Source(take.as_ptr());
-        NonNull::new(ptr).map(PcmSource)
+        NonNull::new(ptr)
     }
 
     /// Unstable!!!

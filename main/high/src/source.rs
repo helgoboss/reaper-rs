@@ -54,7 +54,7 @@ impl AsRef<BorrowedSource> for ReaperSource {
         //  working with sources that exist but REAPER doesn't know about, i.e. our own non-item
         //  sources. We should add some logic to recognize when it's our source and when not.
         // self.make_sure_is_valid();
-        BorrowedSource::ref_cast(unsafe { self.0.as_ref() })
+        BorrowedSource::ref_cast(BorrowedPcmSource::from_raw(unsafe { self.0.as_ref() }))
     }
 }
 
@@ -62,7 +62,7 @@ impl AsMut<BorrowedSource> for ReaperSource {
     fn as_mut(&mut self) -> &mut BorrowedSource {
         // TODO-high See AsRef
         // self.make_sure_is_valid();
-        BorrowedSource::ref_cast_mut(unsafe { self.0.as_mut() })
+        BorrowedSource::ref_cast_mut(BorrowedPcmSource::from_raw_mut(unsafe { self.0.as_mut() }))
     }
 }
 
@@ -108,7 +108,7 @@ impl BorrowedSource {
     pub fn root_source(&self) -> PcmSource {
         let mut source_ptr = self.0.as_ptr();
         loop {
-            let source = unsafe { source_ptr.as_ref() };
+            let source = BorrowedPcmSource::from_raw(unsafe { source_ptr.as_ref() });
             if let Some(parent) = source.get_source() {
                 source_ptr = parent;
             } else {
@@ -131,7 +131,9 @@ impl BorrowedSource {
 
     pub fn state_chunk(&self) -> String {
         let heap_buf = create_heap_buf();
-        let size = unsafe { save_pcm_source_state_to_heap_buf(self.0.as_ptr().to_raw(), heap_buf) };
+        let size = unsafe {
+            save_pcm_source_state_to_heap_buf(self.0.as_ref() as *const _ as *mut _, heap_buf)
+        };
         let mut buffer = vec![0u8; size as usize];
         unsafe { copy_heap_buf_to_buf(heap_buf, buffer.as_mut_ptr()) };
         // I think it's safe to assume that the content written to the buffer is made up by multiple
@@ -160,7 +162,7 @@ impl BorrowedSource {
         }
         let result = unsafe {
             load_pcm_source_state_from_buf(
-                self.0.as_ptr().to_raw(),
+                self.0.as_ref() as *const _ as *mut _,
                 first_line.into().into_inner().as_c_str().as_ptr(),
                 buffer.as_mut_ptr(),
                 buffer.len() as _,

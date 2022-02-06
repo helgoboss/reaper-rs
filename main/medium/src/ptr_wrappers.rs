@@ -175,6 +175,9 @@ pub(crate) fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
 /// Pointer to a PCM sink.
 pub type PcmSink = NonNull<raw::PCM_sink>;
 
+/// Pointer to a PCM source.
+pub type PcmSource = NonNull<raw::PCM_source>;
+
 /// Pointer to a REAPER pitch shift instance.
 pub type ReaperPitchShift = NonNull<raw::IReaperPitchShift>;
 

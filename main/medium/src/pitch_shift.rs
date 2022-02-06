@@ -1,8 +1,8 @@
 use crate::ReaperPitchShift;
 use reaper_low::raw;
-use reaper_low::raw::IReaperPitchShift;
 use ref_cast::RefCast;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 
 // Case 3: Internals exposed: no | vtable: yes
 // ===========================================
@@ -41,13 +41,13 @@ impl Drop for OwnedReaperPitchShift {
 
 impl AsRef<BorrowedReaperPitchShift> for OwnedReaperPitchShift {
     fn as_ref(&self) -> &BorrowedReaperPitchShift {
-        BorrowedReaperPitchShift::ref_cast(unsafe { self.0.as_ref() })
+        BorrowedReaperPitchShift::from_raw(unsafe { self.0.as_ref() })
     }
 }
 
 impl AsMut<BorrowedReaperPitchShift> for OwnedReaperPitchShift {
     fn as_mut(&mut self) -> &mut BorrowedReaperPitchShift {
-        BorrowedReaperPitchShift::ref_cast_mut(unsafe { self.0.as_mut() })
+        BorrowedReaperPitchShift::from_raw_mut(unsafe { self.0.as_mut() })
     }
 }
 
@@ -65,14 +65,31 @@ impl DerefMut for OwnedReaperPitchShift {
     }
 }
 
+impl BorrowedReaperPitchShift {
+    /// Creates a medium-level representation from the given low-level reference.
+    pub fn from_raw(raw: &raw::IReaperPitchShift) -> &Self {
+        Self::ref_cast(raw)
+    }
+
+    /// Creates a mutable medium-level representation from the given low-level reference.
+    pub fn from_raw_mut(raw: &mut raw::IReaperPitchShift) -> &mut Self {
+        Self::ref_cast_mut(raw)
+    }
+
+    /// Returns the pointer to this pitch shift instance.
+    pub fn as_ptr(&self) -> ReaperPitchShift {
+        NonNull::from(self.as_ref())
+    }
+}
+
 impl AsRef<raw::IReaperPitchShift> for BorrowedReaperPitchShift {
-    fn as_ref(&self) -> &IReaperPitchShift {
+    fn as_ref(&self) -> &raw::IReaperPitchShift {
         &self.0
     }
 }
 
 impl AsMut<raw::IReaperPitchShift> for BorrowedReaperPitchShift {
-    fn as_mut(&mut self) -> &mut IReaperPitchShift {
+    fn as_mut(&mut self) -> &mut raw::IReaperPitchShift {
         &mut self.0
     }
 }

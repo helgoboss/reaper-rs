@@ -2,6 +2,7 @@ use crate::PcmSink;
 use reaper_low::raw;
 use ref_cast::RefCast;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 
 // Case 3: Internals exposed: no | vtable: yes
 // ===========================================
@@ -40,13 +41,13 @@ impl Drop for OwnedPcmSink {
 
 impl AsRef<BorrowedPcmSink> for OwnedPcmSink {
     fn as_ref(&self) -> &BorrowedPcmSink {
-        BorrowedPcmSink::ref_cast(unsafe { self.0.as_ref() })
+        BorrowedPcmSink::from_raw(unsafe { self.0.as_ref() })
     }
 }
 
 impl AsMut<BorrowedPcmSink> for OwnedPcmSink {
     fn as_mut(&mut self) -> &mut BorrowedPcmSink {
-        BorrowedPcmSink::ref_cast_mut(unsafe { self.0.as_mut() })
+        BorrowedPcmSink::from_raw_mut(unsafe { self.0.as_mut() })
     }
 }
 
@@ -61,6 +62,23 @@ impl Deref for OwnedPcmSink {
 impl DerefMut for OwnedPcmSink {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.as_mut()
+    }
+}
+
+impl BorrowedPcmSink {
+    /// Creates a medium-level representation from the given low-level reference.
+    pub fn from_raw(raw: &raw::PCM_sink) -> &Self {
+        Self::ref_cast(raw)
+    }
+
+    /// Creates a mutable medium-level representation from the given low-level reference.
+    pub fn from_raw_mut(raw: &mut raw::PCM_sink) -> &mut Self {
+        Self::ref_cast_mut(raw)
+    }
+
+    /// Returns the pointer to this sink.
+    pub fn as_ptr(&self) -> PcmSink {
+        NonNull::from(self.as_ref())
     }
 }
 

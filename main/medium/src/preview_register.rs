@@ -58,7 +58,7 @@ impl OwnedPreviewRegister {
         self.register.src = self
             .source
             .as_ref()
-            .map(|s| s.as_ref().as_ptr().to_raw())
+            .map(|s| s.as_ref().as_ref() as *const _ as *mut _)
             .unwrap_or(null_mut());
         previous_source
     }
