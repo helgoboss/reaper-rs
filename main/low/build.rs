@@ -70,9 +70,9 @@ mod codegen {
 
         impl ParseCallbacks for CustomParseCallbacks {
             fn int_macro(&self, name: &str, _value: i64) -> Option<IntKind> {
-                // Signed because directly associated with IReaperControlSurface::Extended()
+                // Signed because directly associated with Extended()
                 // `call` parameter, which is signed.
-                if name.starts_with("CSURF_EXT_")
+                if name.contains("_EXT_")
                     // Signed because ShowWindow() expects signed. winapi-rs conforms.
                     || name.starts_with("SW_")
                     // Signed because reaper_plugin_info_t::caller_version is signed.
@@ -127,6 +127,7 @@ mod codegen {
                 .whitelist_var("swell_functions::.*")
                 .whitelist_var("SWELL_.*")
                 .whitelist_var("CSURF_EXT_.*")
+                .whitelist_var("PCM_SINK_EXT_.*")
                 .whitelist_var("PCM_SOURCE_EXT_.*")
                 .whitelist_var("REAPER_PLUGIN_VERSION")
                 .whitelist_var("REAPER_PITCHSHIFT_API_VER")
