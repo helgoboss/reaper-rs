@@ -1174,17 +1174,14 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given file name is not valid UTF-8.
-    #[measure(ResponseTimeSingleThreaded)]
     pub fn pcm_source_create_from_file_ex(
         &self,
         file_name: &Path,
         midi_import_behavior: MidiImportBehavior,
     ) -> ReaperFunctionResult<OwnedPcmSource>
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        // TODO-medium Can maybe be relaxed.
-        self.require_main_thread();
         let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
         let file_name_reaper_string = ReaperString::from_str(file_name_str);
         let ptr = unsafe {
