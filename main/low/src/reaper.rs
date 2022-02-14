@@ -128,6 +128,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(BypassFxAllTracks)).as_ptr()),
                 ),
+                CalculateNormalization: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(CalculateNormalization)).as_ptr()),
+                ),
                 CalculatePeaks: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(CalculatePeaks)).as_ptr()),
@@ -1853,6 +1857,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(Main_SaveProject)).as_ptr()),
                 ),
+                Main_SaveProjectEx: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(Main_SaveProjectEx)).as_ptr()),
+                ),
                 Main_UpdateLoopInfo: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(Main_UpdateLoopInfo)).as_ptr()),
@@ -1992,6 +2000,11 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(MIDI_GetProjTimeFromPPQPos)).as_ptr(),
                     ),
                 ),
+                MIDI_GetRecentInputEvent: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(MIDI_GetRecentInputEvent)).as_ptr(),
+                    ),
+                ),
                 MIDI_GetScale: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(MIDI_GetScale)).as_ptr()),
                 ),
@@ -2002,6 +2015,9 @@ impl Reaper {
                 MIDI_GetTrackHash: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(MIDI_GetTrackHash)).as_ptr()),
+                ),
+                midi_init: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(midi_init)).as_ptr()),
                 ),
                 MIDI_InsertCC: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(MIDI_InsertCC)).as_ptr()),
@@ -3331,6 +3347,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.BypassFxAllTracks.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.CalculateNormalization.is_some() {
             loaded_count += 1;
         }
         if pointers.CalculatePeaks.is_some() {
@@ -4668,6 +4687,9 @@ impl Reaper {
         if pointers.Main_SaveProject.is_some() {
             loaded_count += 1;
         }
+        if pointers.Main_SaveProjectEx.is_some() {
+            loaded_count += 1;
+        }
         if pointers.Main_UpdateLoopInfo.is_some() {
             loaded_count += 1;
         }
@@ -4773,6 +4795,9 @@ impl Reaper {
         if pointers.MIDI_GetProjTimeFromPPQPos.is_some() {
             loaded_count += 1;
         }
+        if pointers.MIDI_GetRecentInputEvent.is_some() {
+            loaded_count += 1;
+        }
         if pointers.MIDI_GetScale.is_some() {
             loaded_count += 1;
         }
@@ -4780,6 +4805,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.MIDI_GetTrackHash.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.midi_init.is_some() {
             loaded_count += 1;
         }
         if pointers.MIDI_InsertCC.is_some() {
@@ -6109,6 +6137,31 @@ impl Reaper {
                 stringify!(BypassFxAllTracks)
             ),
             Some(f) => f(bypass),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CalculateNormalization(
+        &self,
+        source: *mut root::PCM_source,
+        normalizeTo: ::std::os::raw::c_int,
+        normalizeTarget: f64,
+        normalizeStart: f64,
+        normalizeEnd: f64,
+    ) -> f64 {
+        match self.pointers.CalculateNormalization {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(CalculateNormalization)
+            ),
+            Some(f) => f(
+                source,
+                normalizeTo,
+                normalizeTarget,
+                normalizeStart,
+                normalizeEnd,
+            ),
         }
     }
     #[doc = r" # Safety"]
@@ -7952,10 +8005,10 @@ impl Reaper {
         time: f64,
         samplerate: f64,
         samplesRequested: ::std::os::raw::c_int,
-        valueOutOptional: *mut f64,
-        dVdSOutOptional: *mut f64,
-        ddVdSOutOptional: *mut f64,
-        dddVdSOutOptional: *mut f64,
+        valueOut: *mut f64,
+        dVdSOut: *mut f64,
+        ddVdSOut: *mut f64,
+        dddVdSOut: *mut f64,
     ) -> ::std::os::raw::c_int {
         match self.pointers.Envelope_Evaluate {
             None => panic!(
@@ -7967,10 +8020,10 @@ impl Reaper {
                 time,
                 samplerate,
                 samplesRequested,
-                valueOutOptional,
-                dVdSOutOptional,
-                ddVdSOutOptional,
-                dddVdSOutOptional,
+                valueOut,
+                dVdSOut,
+                ddVdSOut,
+                dddVdSOut,
             ),
         }
     }
@@ -7998,15 +8051,15 @@ impl Reaper {
     pub unsafe fn Envelope_GetParentTake(
         &self,
         env: *mut root::TrackEnvelope,
-        indexOutOptional: *mut ::std::os::raw::c_int,
-        index2OutOptional: *mut ::std::os::raw::c_int,
+        indexOut: *mut ::std::os::raw::c_int,
+        index2Out: *mut ::std::os::raw::c_int,
     ) -> *mut root::MediaItem_Take {
         match self.pointers.Envelope_GetParentTake {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_GetParentTake)
             ),
-            Some(f) => f(env, indexOutOptional, index2OutOptional),
+            Some(f) => f(env, indexOut, index2Out),
         }
     }
     #[doc = r" # Safety"]
@@ -8015,15 +8068,15 @@ impl Reaper {
     pub unsafe fn Envelope_GetParentTrack(
         &self,
         env: *mut root::TrackEnvelope,
-        indexOutOptional: *mut ::std::os::raw::c_int,
-        index2OutOptional: *mut ::std::os::raw::c_int,
+        indexOut: *mut ::std::os::raw::c_int,
+        index2Out: *mut ::std::os::raw::c_int,
     ) -> *mut root::MediaTrack {
         match self.pointers.Envelope_GetParentTrack {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_GetParentTrack)
             ),
-            Some(f) => f(env, indexOutOptional, index2OutOptional),
+            Some(f) => f(env, indexOut, index2Out),
         }
     }
     #[doc = r" # Safety"]
@@ -8566,11 +8619,11 @@ impl Reaper {
         &self,
         envelope: *mut root::TrackEnvelope,
         ptidx: ::std::os::raw::c_int,
-        timeOutOptional: *mut f64,
-        valueOutOptional: *mut f64,
-        shapeOutOptional: *mut ::std::os::raw::c_int,
-        tensionOutOptional: *mut f64,
-        selectedOutOptional: *mut bool,
+        timeOut: *mut f64,
+        valueOut: *mut f64,
+        shapeOut: *mut ::std::os::raw::c_int,
+        tensionOut: *mut f64,
+        selectedOut: *mut bool,
     ) -> bool {
         match self.pointers.GetEnvelopePoint {
             None => panic!(
@@ -8580,11 +8633,11 @@ impl Reaper {
             Some(f) => f(
                 envelope,
                 ptidx,
-                timeOutOptional,
-                valueOutOptional,
-                shapeOutOptional,
-                tensionOutOptional,
-                selectedOutOptional,
+                timeOut,
+                valueOut,
+                shapeOut,
+                tensionOut,
+                selectedOut,
             ),
         }
     }
@@ -8629,11 +8682,11 @@ impl Reaper {
         envelope: *mut root::TrackEnvelope,
         autoitem_idx: ::std::os::raw::c_int,
         ptidx: ::std::os::raw::c_int,
-        timeOutOptional: *mut f64,
-        valueOutOptional: *mut f64,
-        shapeOutOptional: *mut ::std::os::raw::c_int,
-        tensionOutOptional: *mut f64,
-        selectedOutOptional: *mut bool,
+        timeOut: *mut f64,
+        valueOut: *mut f64,
+        shapeOut: *mut ::std::os::raw::c_int,
+        tensionOut: *mut f64,
+        selectedOut: *mut bool,
     ) -> bool {
         match self.pointers.GetEnvelopePointEx {
             None => panic!(
@@ -8644,11 +8697,11 @@ impl Reaper {
                 envelope,
                 autoitem_idx,
                 ptidx,
-                timeOutOptional,
-                valueOutOptional,
-                shapeOutOptional,
-                tensionOutOptional,
-                selectedOutOptional,
+                timeOut,
+                valueOut,
+                shapeOut,
+                tensionOut,
+                selectedOut,
             ),
         }
     }
@@ -9963,8 +10016,8 @@ impl Reaper {
         isSet: bool,
         screen_x_start: ::std::os::raw::c_int,
         screen_x_end: ::std::os::raw::c_int,
-        start_timeOut: *mut f64,
-        end_timeOut: *mut f64,
+        start_timeInOut: *mut f64,
+        end_timeInOut: *mut f64,
     ) {
         match self.pointers.GetSet_ArrangeView2 {
             None => panic!(
@@ -9976,8 +10029,8 @@ impl Reaper {
                 isSet,
                 screen_x_start,
                 screen_x_end,
-                start_timeOut,
-                end_timeOut,
+                start_timeInOut,
+                end_timeInOut,
             ),
         }
     }
@@ -11339,20 +11392,16 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetUnderrunTime(
         &self,
-        audio_xrunOutOptional: *mut ::std::os::raw::c_uint,
-        media_xrunOutOptional: *mut ::std::os::raw::c_uint,
-        curtimeOutOptional: *mut ::std::os::raw::c_uint,
+        audio_xrunOut: *mut ::std::os::raw::c_uint,
+        media_xrunOut: *mut ::std::os::raw::c_uint,
+        curtimeOut: *mut ::std::os::raw::c_uint,
     ) {
         match self.pointers.GetUnderrunTime {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetUnderrunTime)
             ),
-            Some(f) => f(
-                audio_xrunOutOptional,
-                media_xrunOutOptional,
-                curtimeOutOptional,
-            ),
+            Some(f) => f(audio_xrunOut, media_xrunOut, curtimeOut),
         }
     }
     #[doc = r" # Safety"]
@@ -13201,6 +13250,23 @@ impl Reaper {
             Some(f) => f(proj, forceSaveAsInOptional),
         }
     }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn Main_SaveProjectEx(
+        &self,
+        proj: *mut root::ReaProject,
+        filename: *const ::std::os::raw::c_char,
+        options: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.Main_SaveProjectEx {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(Main_SaveProjectEx)
+            ),
+            Some(f) => f(proj, filename, options),
+        }
+    }
     pub fn Main_UpdateLoopInfo(&self, ignoremask: ::std::os::raw::c_int) {
         match self.pointers.Main_UpdateLoopInfo {
             None => panic!(
@@ -13765,6 +13831,35 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn MIDI_GetRecentInputEvent(
+        &self,
+        idx: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: *mut ::std::os::raw::c_int,
+        tsOut: *mut ::std::os::raw::c_int,
+        devIdxOut: *mut ::std::os::raw::c_int,
+        projPosOut: *mut f64,
+        projLoopCntOut: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.MIDI_GetRecentInputEvent {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(MIDI_GetRecentInputEvent)
+            ),
+            Some(f) => f(
+                idx,
+                bufOut,
+                bufOut_sz,
+                tsOut,
+                devIdxOut,
+                projPosOut,
+                projLoopCntOut,
+            ),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDI_GetScale(
         &self,
         take: *mut root::MediaItem_Take,
@@ -13828,6 +13923,19 @@ impl Reaper {
                 stringify!(MIDI_GetTrackHash)
             ),
             Some(f) => f(track, notesonly, hashOut, hashOut_sz),
+        }
+    }
+    pub fn midi_init(
+        &self,
+        force_reinit_input: ::std::os::raw::c_int,
+        force_reinit_output: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.midi_init {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(midi_init)
+            ),
+            Some(f) => f(force_reinit_input, force_reinit_output),
         }
     }
     #[doc = r" # Safety"]
@@ -14207,15 +14315,15 @@ impl Reaper {
         &self,
         midieditor: root::HWND,
         setting_desc: *const ::std::os::raw::c_char,
-        buf: *mut ::std::os::raw::c_char,
-        buf_sz: ::std::os::raw::c_int,
+        bufOut: *mut ::std::os::raw::c_char,
+        bufOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.MIDIEditor_GetSetting_str {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetSetting_str)
             ),
-            Some(f) => f(midieditor, setting_desc, buf, buf_sz),
+            Some(f) => f(midieditor, setting_desc, bufOut, bufOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -16481,7 +16589,7 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn StopTrackPreview2(
         &self,
-        proj: *mut ::std::os::raw::c_void,
+        proj: *mut root::ReaProject,
         preview: *mut root::preview_register_t,
     ) -> ::std::os::raw::c_int {
         match self.pointers.StopTrackPreview2 {
@@ -16784,15 +16892,15 @@ impl Reaper {
         &self,
         take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
-        inputPinsOutOptional: *mut ::std::os::raw::c_int,
-        outputPinsOutOptional: *mut ::std::os::raw::c_int,
+        inputPinsOut: *mut ::std::os::raw::c_int,
+        outputPinsOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetIOSize {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetIOSize)
             ),
-            Some(f) => f(take, fx, inputPinsOutOptional, outputPinsOutOptional),
+            Some(f) => f(take, fx, inputPinsOut, outputPinsOut),
         }
     }
     #[doc = r" # Safety"]
@@ -17007,18 +17115,18 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TakeFX_GetPinMappings(
         &self,
-        tr: *mut root::MediaItem_Take,
+        take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
         isoutput: ::std::os::raw::c_int,
         pin: ::std::os::raw::c_int,
-        high32OutOptional: *mut ::std::os::raw::c_int,
+        high32Out: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TakeFX_GetPinMappings {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPinMappings)
             ),
-            Some(f) => f(tr, fx, isoutput, pin, high32OutOptional),
+            Some(f) => f(take, fx, isoutput, pin, high32Out),
         }
     }
     #[doc = r" # Safety"]
@@ -17201,7 +17309,7 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn TakeFX_SetPinMappings(
         &self,
-        tr: *mut root::MediaItem_Take,
+        take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
         isoutput: ::std::os::raw::c_int,
         pin: ::std::os::raw::c_int,
@@ -17213,7 +17321,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetPinMappings)
             ),
-            Some(f) => f(tr, fx, isoutput, pin, low32bits, hi32bits),
+            Some(f) => f(take, fx, isoutput, pin, low32bits, hi32bits),
         }
     }
     #[doc = r" # Safety"]
@@ -17474,14 +17582,14 @@ impl Reaper {
     pub unsafe fn TimeMap_curFrameRate(
         &self,
         proj: *mut root::ReaProject,
-        dropFrameOutOptional: *mut bool,
+        dropFrameOut: *mut bool,
     ) -> f64 {
         match self.pointers.TimeMap_curFrameRate {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_curFrameRate)
             ),
-            Some(f) => f(proj, dropFrameOutOptional),
+            Some(f) => f(proj, dropFrameOut),
         }
     }
     pub fn TimeMap_GetDividedBpmAtTime(&self, time: f64) -> f64 {
@@ -18029,15 +18137,15 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         fx: ::std::os::raw::c_int,
-        inputPinsOutOptional: *mut ::std::os::raw::c_int,
-        outputPinsOutOptional: *mut ::std::os::raw::c_int,
+        inputPinsOut: *mut ::std::os::raw::c_int,
+        outputPinsOut: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetIOSize {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetIOSize)
             ),
-            Some(f) => f(track, fx, inputPinsOutOptional, outputPinsOutOptional),
+            Some(f) => f(track, fx, inputPinsOut, outputPinsOut),
         }
     }
     #[doc = r" # Safety"]
@@ -18256,14 +18364,14 @@ impl Reaper {
         fx: ::std::os::raw::c_int,
         isoutput: ::std::os::raw::c_int,
         pin: ::std::os::raw::c_int,
-        high32OutOptional: *mut ::std::os::raw::c_int,
+        high32Out: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         match self.pointers.TrackFX_GetPinMappings {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPinMappings)
             ),
-            Some(f) => f(tr, fx, isoutput, pin, high32OutOptional),
+            Some(f) => f(tr, fx, isoutput, pin, high32Out),
         }
     }
     #[doc = r" # Safety"]
@@ -19205,6 +19313,15 @@ pub struct ReaperFunctionPointers {
     pub AudioAccessorValidateState:
         Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool>,
     pub BypassFxAllTracks: Option<extern "C" fn(bypass: ::std::os::raw::c_int)>,
+    pub CalculateNormalization: Option<
+        unsafe extern "C" fn(
+            source: *mut root::PCM_source,
+            normalizeTo: ::std::os::raw::c_int,
+            normalizeTarget: f64,
+            normalizeStart: f64,
+            normalizeEnd: f64,
+        ) -> f64,
+    >,
     pub CalculatePeaks: Option<
         unsafe extern "C" fn(
             srcBlock: *mut root::PCM_source_transfer_t,
@@ -19767,10 +19884,10 @@ pub struct ReaperFunctionPointers {
             time: f64,
             samplerate: f64,
             samplesRequested: ::std::os::raw::c_int,
-            valueOutOptional: *mut f64,
-            dVdSOutOptional: *mut f64,
-            ddVdSOutOptional: *mut f64,
-            dddVdSOutOptional: *mut f64,
+            valueOut: *mut f64,
+            dVdSOut: *mut f64,
+            ddVdSOut: *mut f64,
+            dddVdSOut: *mut f64,
         ) -> ::std::os::raw::c_int,
     >,
     pub Envelope_FormatValue: Option<
@@ -19784,15 +19901,15 @@ pub struct ReaperFunctionPointers {
     pub Envelope_GetParentTake: Option<
         unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
-            indexOutOptional: *mut ::std::os::raw::c_int,
-            index2OutOptional: *mut ::std::os::raw::c_int,
+            indexOut: *mut ::std::os::raw::c_int,
+            index2Out: *mut ::std::os::raw::c_int,
         ) -> *mut root::MediaItem_Take,
     >,
     pub Envelope_GetParentTrack: Option<
         unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
-            indexOutOptional: *mut ::std::os::raw::c_int,
-            index2OutOptional: *mut ::std::os::raw::c_int,
+            indexOut: *mut ::std::os::raw::c_int,
+            index2Out: *mut ::std::os::raw::c_int,
         ) -> *mut root::MediaTrack,
     >,
     pub Envelope_SortPoints:
@@ -19946,11 +20063,11 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             envelope: *mut root::TrackEnvelope,
             ptidx: ::std::os::raw::c_int,
-            timeOutOptional: *mut f64,
-            valueOutOptional: *mut f64,
-            shapeOutOptional: *mut ::std::os::raw::c_int,
-            tensionOutOptional: *mut f64,
-            selectedOutOptional: *mut bool,
+            timeOut: *mut f64,
+            valueOut: *mut f64,
+            shapeOut: *mut ::std::os::raw::c_int,
+            tensionOut: *mut f64,
+            selectedOut: *mut bool,
         ) -> bool,
     >,
     pub GetEnvelopePointByTime: Option<
@@ -19971,11 +20088,11 @@ pub struct ReaperFunctionPointers {
             envelope: *mut root::TrackEnvelope,
             autoitem_idx: ::std::os::raw::c_int,
             ptidx: ::std::os::raw::c_int,
-            timeOutOptional: *mut f64,
-            valueOutOptional: *mut f64,
-            shapeOutOptional: *mut ::std::os::raw::c_int,
-            tensionOutOptional: *mut f64,
-            selectedOutOptional: *mut bool,
+            timeOut: *mut f64,
+            valueOut: *mut f64,
+            shapeOut: *mut ::std::os::raw::c_int,
+            tensionOut: *mut f64,
+            selectedOut: *mut bool,
         ) -> bool,
     >,
     pub GetEnvelopeScalingMode:
@@ -20348,8 +20465,8 @@ pub struct ReaperFunctionPointers {
             isSet: bool,
             screen_x_start: ::std::os::raw::c_int,
             screen_x_end: ::std::os::raw::c_int,
-            start_timeOut: *mut f64,
-            end_timeOut: *mut f64,
+            start_timeInOut: *mut f64,
+            end_timeInOut: *mut f64,
         ),
     >,
     pub GetSet_LoopTimeRange: Option<
@@ -20886,9 +21003,9 @@ pub struct ReaperFunctionPointers {
     >,
     pub GetUnderrunTime: Option<
         unsafe extern "C" fn(
-            audio_xrunOutOptional: *mut ::std::os::raw::c_uint,
-            media_xrunOutOptional: *mut ::std::os::raw::c_uint,
-            curtimeOutOptional: *mut ::std::os::raw::c_uint,
+            audio_xrunOut: *mut ::std::os::raw::c_uint,
+            media_xrunOut: *mut ::std::os::raw::c_uint,
+            curtimeOut: *mut ::std::os::raw::c_uint,
         ),
     >,
     pub GetUserFileNameForRead: Option<
@@ -21643,6 +21760,13 @@ pub struct ReaperFunctionPointers {
     pub Main_openProject: Option<unsafe extern "C" fn(name: *const ::std::os::raw::c_char)>,
     pub Main_SaveProject:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject, forceSaveAsInOptional: bool)>,
+    pub Main_SaveProjectEx: Option<
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            filename: *const ::std::os::raw::c_char,
+            options: ::std::os::raw::c_int,
+        ),
+    >,
     pub Main_UpdateLoopInfo: Option<extern "C" fn(ignoremask: ::std::os::raw::c_int)>,
     pub MarkProjectDirty: Option<unsafe extern "C" fn(proj: *mut root::ReaProject)>,
     pub MarkTrackItemsDirty:
@@ -21801,6 +21925,17 @@ pub struct ReaperFunctionPointers {
         Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
     pub MIDI_GetProjTimeFromPPQPos:
         Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, ppqpos: f64) -> f64>,
+    pub MIDI_GetRecentInputEvent: Option<
+        unsafe extern "C" fn(
+            idx: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: *mut ::std::os::raw::c_int,
+            tsOut: *mut ::std::os::raw::c_int,
+            devIdxOut: *mut ::std::os::raw::c_int,
+            projPosOut: *mut f64,
+            projLoopCntOut: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub MIDI_GetScale: Option<
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
@@ -21829,6 +21964,12 @@ pub struct ReaperFunctionPointers {
             hashOut: *mut ::std::os::raw::c_char,
             hashOut_sz: ::std::os::raw::c_int,
         ) -> bool,
+    >,
+    pub midi_init: Option<
+        extern "C" fn(
+            force_reinit_input: ::std::os::raw::c_int,
+            force_reinit_output: ::std::os::raw::c_int,
+        ),
     >,
     pub MIDI_InsertCC: Option<
         unsafe extern "C" fn(
@@ -21970,8 +22111,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             midieditor: root::HWND,
             setting_desc: *const ::std::os::raw::c_char,
-            buf: *mut ::std::os::raw::c_char,
-            buf_sz: ::std::os::raw::c_int,
+            bufOut: *mut ::std::os::raw::c_char,
+            bufOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub MIDIEditor_GetTake:
@@ -22688,7 +22829,7 @@ pub struct ReaperFunctionPointers {
     >,
     pub StopTrackPreview2: Option<
         unsafe extern "C" fn(
-            proj: *mut ::std::os::raw::c_void,
+            proj: *mut root::ReaProject,
             preview: *mut root::preview_register_t,
         ) -> ::std::os::raw::c_int,
     >,
@@ -22805,8 +22946,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
-            inputPinsOutOptional: *mut ::std::os::raw::c_int,
-            outputPinsOutOptional: *mut ::std::os::raw::c_int,
+            inputPinsOut: *mut ::std::os::raw::c_int,
+            outputPinsOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub TakeFX_GetNamedConfigParm: Option<
@@ -22894,11 +23035,11 @@ pub struct ReaperFunctionPointers {
     >,
     pub TakeFX_GetPinMappings: Option<
         unsafe extern "C" fn(
-            tr: *mut root::MediaItem_Take,
+            take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             isoutput: ::std::os::raw::c_int,
             pin: ::std::os::raw::c_int,
-            high32OutOptional: *mut ::std::os::raw::c_int,
+            high32Out: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub TakeFX_GetPreset: Option<
@@ -22978,7 +23119,7 @@ pub struct ReaperFunctionPointers {
     >,
     pub TakeFX_SetPinMappings: Option<
         unsafe extern "C" fn(
-            tr: *mut root::MediaItem_Take,
+            take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             isoutput: ::std::os::raw::c_int,
             pin: ::std::os::raw::c_int,
@@ -23066,9 +23207,8 @@ pub struct ReaperFunctionPointers {
     >,
     pub TimeMap2_timeToQN:
         Option<unsafe extern "C" fn(proj: *mut root::ReaProject, tpos: f64) -> f64>,
-    pub TimeMap_curFrameRate: Option<
-        unsafe extern "C" fn(proj: *mut root::ReaProject, dropFrameOutOptional: *mut bool) -> f64,
-    >,
+    pub TimeMap_curFrameRate:
+        Option<unsafe extern "C" fn(proj: *mut root::ReaProject, dropFrameOut: *mut bool) -> f64>,
     pub TimeMap_GetDividedBpmAtTime: Option<extern "C" fn(time: f64) -> f64>,
     pub TimeMap_GetMeasureInfo: Option<
         unsafe extern "C" fn(
@@ -23263,8 +23403,8 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
-            inputPinsOutOptional: *mut ::std::os::raw::c_int,
-            outputPinsOutOptional: *mut ::std::os::raw::c_int,
+            inputPinsOut: *mut ::std::os::raw::c_int,
+            outputPinsOut: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub TrackFX_GetNamedConfigParm: Option<
@@ -23356,7 +23496,7 @@ pub struct ReaperFunctionPointers {
             fx: ::std::os::raw::c_int,
             isoutput: ::std::os::raw::c_int,
             pin: ::std::os::raw::c_int,
-            high32OutOptional: *mut ::std::os::raw::c_int,
+            high32Out: *mut ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
     pub TrackFX_GetPreset: Option<
@@ -23636,5 +23776,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 830u32;
+    pub(crate) const TOTAL_COUNT: u32 = 834u32;
 }
