@@ -14,6 +14,8 @@ use std::ptr::NonNull;
 #[repr(transparent)]
 pub struct OwnedPcmSink(PcmSink);
 
+unsafe impl Send for OwnedPcmSink {}
+
 /// Borrowed (reference-only) PCM sink.
 #[derive(PartialEq, Debug, RefCast)]
 #[repr(transparent)]

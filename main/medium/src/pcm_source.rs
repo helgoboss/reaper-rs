@@ -211,6 +211,8 @@ impl BorrowedProjectStateContext {
 #[repr(transparent)]
 pub struct OwnedPcmSource(pub(crate) PcmSource);
 
+unsafe impl Send for OwnedPcmSource {}
+
 impl OwnedPcmSource {
     /// Takes ownership of the given source.
     ///
