@@ -686,11 +686,12 @@ impl ReaperSession {
         &mut self,
         handle: NonNull<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
-        unsafe {
-            self.stop_preview_unchecked(handle)?;
-        };
+        let result = unsafe { self.stop_preview_unchecked(handle) };
+        // If stopping was not successful, it usually means that the preview was not playing
+        // anymore, e.g. because the track was removed already. In that case we still need to
+        // clean up, otherwise we have a leak.
         self.preview_registers.release(handle);
-        Ok(())
+        result
     }
 
     /// Plays a preview register on a specific track.
@@ -737,11 +738,12 @@ impl ReaperSession {
         handle: NonNull<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
         self.reaper.require_valid_project(project);
-        unsafe {
-            self.stop_track_preview_2_unchecked(project, handle)?;
-        };
+        let result = unsafe { self.stop_track_preview_2_unchecked(project, handle) };
+        // If stopping was not successful, it usually means that the preview was not playing
+        // anymore, e.g. because the track was removed already. In that case we still need to
+        // clean up, otherwise we have a leak.
         self.preview_registers.release(handle);
-        Ok(())
+        result
     }
 
     /// Unregisters an action.
