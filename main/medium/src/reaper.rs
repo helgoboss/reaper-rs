@@ -6085,11 +6085,20 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: AnyThread,
     {
+        assert!(
+            self.project_is_valid(project),
+            "ReaProject doesn't exist anymore"
+        );
+    }
+
+    pub(crate) fn project_is_valid(&self, project: ProjectContext) -> bool
+    where
+        UsageScope: AnyThread,
+    {
         if let ProjectContext::Proj(p) = project {
-            assert!(
-                self.validate_ptr_2(CurrentProject, p),
-                "ReaProject doesn't exist anymore"
-            )
+            self.validate_ptr_2(CurrentProject, p)
+        } else {
+            true
         }
     }
 }

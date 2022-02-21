@@ -93,6 +93,8 @@ pub struct ReaperSession {
     audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
     /// Keep track of playing preview registers so they can be unregistered automatically on drop.
     playing_preview_registers: HashSet<NonNull<raw::preview_register_t>>,
+    /// Keep track of playing track preview registers so they can be unregistered automatically on drop.
+    playing_track_preview_registers: HashSet<(ProjectContext, NonNull<raw::preview_register_t>)>,
 }
 
 impl ReaperSession {
@@ -111,6 +113,7 @@ impl ReaperSession {
             plugin_registrations: Default::default(),
             audio_hook_registrations: Default::default(),
             playing_preview_registers: Default::default(),
+            playing_track_preview_registers: Default::default(),
         }
     }
 
@@ -580,10 +583,12 @@ impl ReaperSession {
         register: NonNull<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
         let successful = self.reaper.low().StopPreview(register.as_ptr());
+        // If not successful, it usually means the preview is stopped already. Let's remove
+        // the handle now so that we don't try stopping again when dropping the session.
+        self.playing_preview_registers.remove(&register);
         if successful == 0 {
             return Err(ReaperFunctionError::new("couldn't stop preview"));
         }
-        self.playing_preview_registers.remove(&register);
         Ok(())
     }
 
@@ -608,7 +613,8 @@ impl ReaperSession {
         buffering_behavior: BitFlags<BufferingBehavior>,
         measure_alignment: MeasureAlignment,
     ) -> ReaperFunctionResult<()> {
-        self.playing_preview_registers.insert(preview);
+        self.playing_track_preview_registers
+            .insert((project, preview));
         let result = self.reaper.low().PlayTrackPreview2Ex(
             project.to_raw(),
             preview.as_ptr(),
@@ -634,7 +640,7 @@ impl ReaperSession {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid project or register pointer.
+    /// REAPER can crash if you pass an invalid register pointer.
     ///
     /// [`play_track_preview_2_ex_unchecked()`]: #method.play_track_preview_2_ex_unchecked
     pub unsafe fn stop_track_preview_2_unchecked(
@@ -646,10 +652,13 @@ impl ReaperSession {
             .reaper
             .low()
             .StopTrackPreview2(project.to_raw() as _, register.as_ptr());
+        // If not successful, it usually means the preview is stopped already. Let's remove
+        // the handle now so that we don't try stopping again when dropping the session.
+        self.playing_track_preview_registers
+            .remove(&(project, register));
         if successful == 0 {
             return Err(ReaperFunctionError::new("couldn't stop track preview"));
         }
-        self.playing_preview_registers.remove(&register);
         Ok(())
     }
 
@@ -737,8 +746,16 @@ impl ReaperSession {
         project: ProjectContext,
         handle: NonNull<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
-        self.reaper.require_valid_project(project);
-        let result = unsafe { self.stop_track_preview_2_unchecked(project, handle) };
+        // It's important we don't just panic when the given project is invalid because that would
+        // force the consumer to check the project validity before and not call this method if the
+        // project is invalid. However, that would leak the preview register.
+        let result = if self.reaper.project_is_valid(project) {
+            unsafe { self.stop_track_preview_2_unchecked(project, handle) }
+        } else {
+            Err(ReaperFunctionError::new(
+                "project not valid anymore, preview stopped already",
+            ))
+        };
         // If stopping was not successful, it usually means that the preview was not playing
         // anymore, e.g. because the track was removed already. In that case we still need to
         // clean up, otherwise we have a leak.
@@ -1042,6 +1059,11 @@ impl ReaperSession {
 
 impl Drop for ReaperSession {
     fn drop(&mut self) {
+        for (project, handle) in self.playing_track_preview_registers.clone() {
+            unsafe {
+                let _ = self.stop_track_preview_2_unchecked(project, handle);
+            }
+        }
         for handle in self.playing_preview_registers.clone() {
             unsafe {
                 let _ = self.stop_preview_unchecked(handle);
