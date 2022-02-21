@@ -14,6 +14,8 @@ use std::ptr::NonNull;
 #[repr(transparent)]
 pub struct OwnedReaperResample(ReaperResample);
 
+unsafe impl Send for OwnedReaperResample {}
+
 /// Borrowed (reference-only) REAPER resample instance.
 #[derive(Eq, PartialEq, Hash, Debug, RefCast)]
 #[repr(transparent)]

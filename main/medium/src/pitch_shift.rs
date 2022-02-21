@@ -14,6 +14,8 @@ use std::ptr::NonNull;
 #[repr(transparent)]
 pub struct OwnedReaperPitchShift(ReaperPitchShift);
 
+unsafe impl Send for OwnedReaperPitchShift {}
+
 /// Borrowed (reference-only) REAPER pitch shift instance.
 #[derive(Eq, PartialEq, Hash, Debug, RefCast)]
 #[repr(transparent)]

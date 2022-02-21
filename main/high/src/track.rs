@@ -44,6 +44,8 @@ pub struct Track {
     guid: Guid,
 }
 
+unsafe impl Send for Track {}
+
 impl Track {
     /// mediaTrack must not be null
     /// reaProject can be null but providing it can speed things up quite much for REAPER versions <
