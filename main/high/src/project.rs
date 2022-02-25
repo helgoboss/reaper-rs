@@ -622,3 +622,13 @@ pub struct FindBookmarkResult {
     pub bookmark: IndexBasedBookmark,
     pub basic_info: BasicBookmarkInfo,
 }
+
+pub trait OrCurrentProject {
+    fn or_current_project(&self) -> Project;
+}
+
+impl OrCurrentProject for Option<Project> {
+    fn or_current_project(&self) -> Project {
+        self.unwrap_or_else(|| Reaper::get().current_project())
+    }
+}
