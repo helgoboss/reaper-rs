@@ -129,6 +129,7 @@ mod codegen {
                 .whitelist_var("CSURF_EXT_.*")
                 .whitelist_var("PCM_SINK_EXT_.*")
                 .whitelist_var("PCM_SOURCE_EXT_.*")
+                .whitelist_var("RESAMPLE_EXT_.*")
                 .whitelist_var("REAPER_PLUGIN_VERSION")
                 .whitelist_var("REAPER_PITCHSHIFT_API_VER")
                 .whitelist_var("UNDO_STATE_.*")

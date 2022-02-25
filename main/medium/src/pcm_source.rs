@@ -148,16 +148,17 @@ impl PcmSourceTransfer {
     }
 
     /// Returns the list of MIDI events to be filled.
-    pub fn midi_event_list(&self) -> Option<&BorrowedMidiEventList> {
+    pub fn midi_event_list_mut(&mut self) -> Option<&mut BorrowedMidiEventList> {
         if self.0.midi_events.is_null() {
             return None;
         }
-        Some(BorrowedMidiEventList::ref_cast(unsafe {
-            &*self.0.midi_events
+        Some(BorrowedMidiEventList::ref_cast_mut(unsafe {
+            &mut *self.0.midi_events
         }))
     }
 
     /// Sets the list of MIDI events to be filled.
+    /// TODO-high This is bad modeling. Passing a reference and saving it.
     pub fn set_midi_event_list(&mut self, list: &BorrowedMidiEventList) {
         self.0.midi_events = list.as_ptr().as_ptr();
     }

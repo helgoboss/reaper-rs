@@ -39,12 +39,12 @@ impl MidiInput {
     ///
     /// [`MidiInput`]: struct.MidiInput.html
     /// [`get_midi_input()`]: struct.Reaper.html#method.get_midi_input
-    pub fn get_read_buf(&self) -> &BorrowedMidiEventList {
-        let raw_evt_list = unsafe { self.0.as_ref().GetReadBuf() };
+    pub fn get_read_buf(&self) -> &mut BorrowedMidiEventList {
+        let raw_evt_list = unsafe { (*self.0.as_ptr()).GetReadBuf() };
         if raw_evt_list.is_null() {
             panic!("GetReadBuf returned null");
         }
-        unsafe { &*(raw_evt_list as *const BorrowedMidiEventList) }
+        unsafe { &mut *(raw_evt_list as *mut BorrowedMidiEventList) }
     }
 }
 
@@ -55,10 +55,35 @@ impl MidiInput {
 #[repr(transparent)]
 pub struct BorrowedMidiEventList(pub(crate) raw::MIDI_eventlist);
 
-#[derive(Clone, PartialEq, Debug)]
-pub struct EnumItemsResult<'a> {
+#[derive(PartialEq, Debug)]
+pub struct EnumItemsResult<T> {
     /// MIDI event.
-    pub midi_event: &'a MidiEvent,
+    pub midi_event: T,
+    /// Start position of the next event in bytes.
+    pub next_bpos: u32,
+}
+
+impl<T: RefCast<From = MIDI_event_t>> EnumItemsResult<&T> {
+    fn from_internal(internal_res: InternalEnumItemsResult) -> Self {
+        EnumItemsResult {
+            midi_event: { unsafe { T::ref_cast(internal_res.midi_event.as_ref()) } },
+            next_bpos: internal_res.next_bpos,
+        }
+    }
+}
+
+impl<T: RefCast<From = MIDI_event_t>> EnumItemsResult<&mut T> {
+    fn from_internal_mut(mut internal_res: InternalEnumItemsResult) -> Self {
+        EnumItemsResult {
+            midi_event: { unsafe { T::ref_cast_mut(internal_res.midi_event.as_mut()) } },
+            next_bpos: internal_res.next_bpos,
+        }
+    }
+}
+
+struct InternalEnumItemsResult {
+    /// Pointer to MIDI event.
+    pub midi_event: NonNull<raw::MIDI_event_t>,
     /// Start position of the next event in bytes.
     pub next_bpos: u32,
 }
@@ -71,22 +96,49 @@ impl BorrowedMidiEventList {
 
     /// Returns the MIDI event at the given byte index along with the byte index of the
     /// next event.
-    pub fn enum_items(&self, bpos: u32) -> Option<EnumItemsResult> {
-        let mut bpos_int = bpos as c_int;
-        let raw_evt = unsafe { self.0.EnumItems(&mut bpos_int as *mut c_int) };
-        if raw_evt.is_null() {
-            // No MIDI events left
-            return None;
+    pub fn enum_items(&self, bpos: u32) -> Option<EnumItemsResult<&MidiEvent>> {
+        let internal_res = self.enum_items_internal(bpos)?;
+        Some(EnumItemsResult::from_internal(internal_res))
+    }
+
+    /// Returns the MIDI event at the given byte index along with the byte index of the
+    /// next event.
+    pub fn enum_items_mut(&mut self, bpos: u32) -> Option<EnumItemsResult<&mut MidiEvent>> {
+        let internal_res = self.enum_items_internal(bpos)?;
+        Some(EnumItemsResult::from_internal_mut(internal_res))
+    }
+
+    pub fn iter(&self) -> EnumItems<&BorrowedMidiEventList> {
+        EnumItems {
+            list: self,
+            bpos: 0,
         }
-        let res = EnumItemsResult {
-            midi_event: { unsafe { MidiEvent::ref_cast(&*raw_evt) } },
+    }
+
+    pub fn iter_mut(&mut self) -> EnumItems<&mut BorrowedMidiEventList> {
+        EnumItems {
+            list: self,
+            bpos: 0,
+        }
+    }
+
+    fn enum_items_internal(&self, bpos: u32) -> Option<InternalEnumItemsResult> {
+        let mut bpos_int = bpos as c_int;
+        let raw_evt = unsafe {
+            self.as_ptr()
+                .as_mut()
+                .EnumItems(&mut bpos_int as *mut c_int)
+        };
+        let res = InternalEnumItemsResult {
+            // No MIDI events left if this fails.
+            midi_event: NonNull::new(raw_evt)?,
             next_bpos: bpos_int as _,
         };
         Some(res)
     }
 
     /// Adds an item to this list of MIDI events.
-    pub fn add_item(&self, msg: &MidiEvent) {
+    pub fn add_item(&mut self, msg: &MidiEvent) {
         unsafe {
             self.0.AddItem(&msg.0 as *const _ as _);
         }
@@ -95,7 +147,7 @@ impl BorrowedMidiEventList {
     /// Deletes an item from this list of MIDI events.
     ///
     /// `bpos` is the byte index (not the index of the item!).
-    pub fn delete_item(&self, bpos: u32) {
+    pub fn delete_item(&mut self, bpos: u32) {
         unsafe {
             self.0.DeleteItem(bpos as _);
         }
@@ -103,11 +155,11 @@ impl BorrowedMidiEventList {
 
     /// Returns the size of the block in bytes.
     pub fn get_size(&self) -> u32 {
-        unsafe { self.0.GetSize() as _ }
+        unsafe { self.as_ptr().as_mut().GetSize() as _ }
     }
 
     /// Completely clears this list of MIDI events.
-    pub fn empty(&self) {
+    pub fn empty(&mut self) {
         unsafe {
             self.0.Empty();
         }
@@ -116,13 +168,19 @@ impl BorrowedMidiEventList {
 
 impl<'a> IntoIterator for &'a BorrowedMidiEventList {
     type Item = &'a MidiEvent;
-    type IntoIter = EnumItems<'a>;
+    type IntoIter = EnumItems<&'a BorrowedMidiEventList>;
 
     fn into_iter(self) -> Self::IntoIter {
-        EnumItems {
-            list: self,
-            bpos: 0,
-        }
+        self.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a mut BorrowedMidiEventList {
+    type Item = &'a mut MidiEvent;
+    type IntoIter = EnumItems<&'a mut BorrowedMidiEventList>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
     }
 }
 
@@ -251,16 +309,28 @@ impl AsRef<raw::MIDI_event_t> for LongMidiEvent {
 }
 
 /// MIDI event list iterator.
-pub struct EnumItems<'a> {
-    list: &'a BorrowedMidiEventList,
+pub struct EnumItems<T> {
+    list: T,
     bpos: u32,
 }
 
-impl<'a> Iterator for EnumItems<'a> {
+impl<'a> Iterator for EnumItems<&'a BorrowedMidiEventList> {
     type Item = &'a MidiEvent;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let result = self.list.enum_items(self.bpos)?;
+        let internal_result = self.list.enum_items_internal(self.bpos)?;
+        let result = EnumItemsResult::from_internal(internal_result);
+        self.bpos = result.next_bpos;
+        Some(result.midi_event)
+    }
+}
+
+impl<'a> Iterator for EnumItems<&'a mut BorrowedMidiEventList> {
+    type Item = &'a mut MidiEvent;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let internal_result = self.list.enum_items_internal(self.bpos)?;
+        let result = EnumItemsResult::from_internal_mut(internal_result);
         self.bpos = result.next_bpos;
         Some(result.midi_event)
     }

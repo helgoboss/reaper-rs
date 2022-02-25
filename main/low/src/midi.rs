@@ -8,8 +8,8 @@ use crate::bindings::root::midi_Output;
 use std::os::raw::c_int;
 
 impl midi_Input {
-    pub fn GetReadBuf(&self) -> *mut MIDI_eventlist {
-        unsafe { midi_Input_GetReadBuf(self as *const _ as _) }
+    pub fn GetReadBuf(&mut self) -> *mut MIDI_eventlist {
+        unsafe { midi_Input_GetReadBuf(self as _) }
     }
 }
 
@@ -17,36 +17,36 @@ impl MIDI_eventlist {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    pub unsafe fn EnumItems(&self, bpos: *mut c_int) -> *mut MIDI_event_t {
-        MIDI_eventlist_EnumItems(self as *const _ as _, bpos)
+    pub unsafe fn EnumItems(&mut self, bpos: *mut c_int) -> *mut MIDI_event_t {
+        MIDI_eventlist_EnumItems(self as _, bpos)
     }
 
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    pub unsafe fn AddItem(&self, evt: *mut MIDI_event_t) {
-        MIDI_eventlist_AddItem(self as *const _ as _, evt);
+    pub unsafe fn AddItem(&mut self, evt: *mut MIDI_event_t) {
+        MIDI_eventlist_AddItem(self as _, evt);
     }
 
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    pub unsafe fn DeleteItem(&self, bpos: c_int) {
-        MIDI_eventlist_DeleteItem(self as *const _ as _, bpos);
+    pub unsafe fn DeleteItem(&mut self, bpos: c_int) {
+        MIDI_eventlist_DeleteItem(self as _, bpos);
     }
 
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    pub unsafe fn GetSize(&self) -> c_int {
-        MIDI_eventlist_GetSize(self as *const _ as _)
+    pub unsafe fn GetSize(&mut self) -> c_int {
+        MIDI_eventlist_GetSize(self as _)
     }
 
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    pub unsafe fn Empty(&self) {
-        MIDI_eventlist_Empty(self as *const _ as _);
+    pub unsafe fn Empty(&mut self) {
+        MIDI_eventlist_Empty(self as _);
     }
 }
 

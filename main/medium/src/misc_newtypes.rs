@@ -1519,6 +1519,9 @@ impl<'a> Display for ReaperVersion<'a> {
 pub struct MidiFrameOffset(pub(crate) u32);
 
 impl MidiFrameOffset {
+    /// Minimum frame offset (zero).
+    pub const MIN: MidiFrameOffset = MidiFrameOffset(0);
+
     /// Creates a MIDI frame offset.
     pub fn new(value: u32) -> MidiFrameOffset {
         MidiFrameOffset(value)
