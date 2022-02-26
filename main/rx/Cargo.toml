@@ -7,7 +7,7 @@ description = "rxRust integration for the reaper-rs high-level API"
 repository = "https://github.com/helgoboss/reaper-rs"
 readme = "../../README.md"
 keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
-edition = "2018"
+edition = "2021"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 publish = false
 

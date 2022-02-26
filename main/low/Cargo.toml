@@ -7,7 +7,7 @@ description = "Bindings for the REAPER C++ API - low-level API"
 repository = "https://github.com/helgoboss/reaper-rs"
 readme = "../../README.md"
 keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
-edition = "2018"
+edition = "2021"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 include = [
     "/lib/reaper/reaper_plugin.h",
