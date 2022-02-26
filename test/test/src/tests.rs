@@ -3319,20 +3319,20 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
                     1
                 })
                 .is_some());
-            assert!(!track
+            assert!(track
                 .fx_by_query_index(if fx_chain.is_input_fx() {
                     0
                 } else {
                     0x0100_0000
                 })
-                .is_some());
-            assert!(!track
+                .is_none());
+            assert!(track
                 .fx_by_query_index(if fx_chain.is_input_fx() {
                     1
                 } else {
                     0x0100_0001
                 })
-                .is_some());
+                .is_none());
             if !fx_chain.is_input_fx() {
                 let first_instrument_fx = fx_chain
                     .first_instrument_fx()

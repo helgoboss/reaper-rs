@@ -9,18 +9,23 @@ use std::ptr::NonNull;
 
 impl raw::ProjectStateContext {
     /// Attention: Not really usable yet due to the lack of the variadic parameter in AddLine.
-    pub fn AddLine(&mut self, line: *const ::std::os::raw::c_char) {
-        unsafe {
-            rust_to_cpp_ProjectStateContext_AddLine(self as *const _ as _, line);
-        }
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn AddLine(&mut self, line: *const ::std::os::raw::c_char) {
+        rust_to_cpp_ProjectStateContext_AddLine(self as *const _ as _, line);
     }
 
-    pub fn GetLine(
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetLine(
         &mut self,
         buf: *mut ::std::os::raw::c_char,
         buflen: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
-        unsafe { rust_to_cpp_ProjectStateContext_GetLine(self as *const _ as _, buf, buflen) }
+        rust_to_cpp_ProjectStateContext_GetLine(self as *const _ as _, buf, buflen)
     }
 
     pub fn GetOutputSize(&mut self) -> ::std::os::raw::c_longlong {

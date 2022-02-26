@@ -5921,14 +5921,14 @@ impl<UsageScope> Reaper<UsageScope> {
     pub fn get_midi_input<R>(
         &self,
         device_id: MidiInputDeviceId,
-        use_device: impl FnOnce(Option<&MidiInput>) -> R,
+        use_device: impl FnOnce(Option<&mut MidiInput>) -> R,
     ) -> R
     where
         UsageScope: AudioThreadOnly,
     {
         let ptr = self.low.GetMidiInput(device_id.to_raw());
-        let arg = NonNull::new(ptr).map(MidiInput);
-        use_device(arg.as_ref())
+        let mut arg = NonNull::new(ptr).map(MidiInput);
+        use_device(arg.as_mut())
     }
 
     /// Returns if the given device is open (enabled in REAPER's MIDI preferences).

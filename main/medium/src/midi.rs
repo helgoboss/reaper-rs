@@ -39,7 +39,7 @@ impl MidiInput {
     ///
     /// [`MidiInput`]: struct.MidiInput.html
     /// [`get_midi_input()`]: struct.Reaper.html#method.get_midi_input
-    pub fn get_read_buf(&self) -> &mut BorrowedMidiEventList {
+    pub fn get_read_buf(&mut self) -> &mut BorrowedMidiEventList {
         let raw_evt_list = unsafe { (*self.0.as_ptr()).GetReadBuf() };
         if raw_evt_list.is_null() {
             panic!("GetReadBuf returned null");

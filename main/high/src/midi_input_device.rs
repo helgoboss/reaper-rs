@@ -27,7 +27,7 @@ impl MidiInputDevice {
     }
 
     /// Must be called from real-time audio thread only!
-    pub fn with_midi_input<R>(self, use_device: impl FnOnce(Option<&MidiInput>) -> R) -> R {
+    pub fn with_midi_input<R>(self, use_device: impl FnOnce(Option<&mut MidiInput>) -> R) -> R {
         Reaper::get()
             .medium_real_time_reaper
             .get_midi_input(self.id, use_device)

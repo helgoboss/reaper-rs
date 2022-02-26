@@ -8,46 +8,59 @@ use std::os::raw::c_void;
 use std::ptr::{null, NonNull};
 
 impl raw::PCM_sink {
-    pub fn GetOutputInfoString(
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetOutputInfoString(
         &self,
         buf: *mut ::std::os::raw::c_char,
         buflen: ::std::os::raw::c_int,
     ) {
-        unsafe {
-            rust_to_cpp_PCM_sink_GetOutputInfoString(self as *const _ as _, buf, buflen);
-        }
+        rust_to_cpp_PCM_sink_GetOutputInfoString(self as *const _ as _, buf, buflen);
     }
+
     pub fn GetStartTime(&self) -> f64 {
         unsafe { rust_to_cpp_PCM_sink_GetStartTime(self as *const _ as _) }
     }
+
     pub fn SetStartTime(&self, st: f64) {
         unsafe {
             rust_to_cpp_PCM_sink_SetStartTime(self as *const _ as _, st);
         }
     }
+
     pub fn GetFileName(&self) -> *const ::std::os::raw::c_char {
         unsafe { rust_to_cpp_PCM_sink_GetFileName(self as *const _ as _) }
     }
+
     pub fn GetNumChannels(&self) -> ::std::os::raw::c_int {
         unsafe { rust_to_cpp_PCM_sink_GetNumChannels(self as *const _ as _) }
     }
+
     pub fn GetLength(&self) -> f64 {
         unsafe { rust_to_cpp_PCM_sink_GetLength(self as *const _ as _) }
     }
+
     pub fn GetFileSize(&self) -> ::std::os::raw::c_longlong {
         unsafe { rust_to_cpp_PCM_sink_GetFileSize(self as *const _ as _) }
     }
-    pub fn WriteMIDI(
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn WriteMIDI(
         &self,
         events: *mut raw::MIDI_eventlist,
         len: ::std::os::raw::c_int,
         samplerate: f64,
     ) {
-        unsafe {
-            rust_to_cpp_PCM_sink_WriteMIDI(self as *const _ as _, events, len, samplerate);
-        }
+        rust_to_cpp_PCM_sink_WriteMIDI(self as *const _ as _, events, len, samplerate);
     }
-    pub fn WriteDoubles(
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn WriteDoubles(
         &self,
         samples: *mut *mut raw::ReaSample,
         len: ::std::os::raw::c_int,
@@ -55,40 +68,49 @@ impl raw::PCM_sink {
         offset: ::std::os::raw::c_int,
         spacing: ::std::os::raw::c_int,
     ) {
-        unsafe {
-            rust_to_cpp_PCM_sink_WriteDoubles(
-                self as *const _ as _,
-                samples,
-                len,
-                nch,
-                offset,
-                spacing,
-            );
-        }
+        rust_to_cpp_PCM_sink_WriteDoubles(
+            self as *const _ as _,
+            samples,
+            len,
+            nch,
+            offset,
+            spacing,
+        );
     }
+
     pub fn WantMIDI(&self) -> bool {
         unsafe { rust_to_cpp_PCM_sink_WantMIDI(self as *const _ as _) }
     }
-    pub fn GetLastSecondPeaks(
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetLastSecondPeaks(
         &self,
         sz: ::std::os::raw::c_int,
         buf: *mut raw::ReaSample,
     ) -> ::std::os::raw::c_int {
-        unsafe { rust_to_cpp_PCM_sink_GetLastSecondPeaks(self as *const _ as _, sz, buf) }
+        rust_to_cpp_PCM_sink_GetLastSecondPeaks(self as *const _ as _, sz, buf)
     }
-    pub fn GetPeakInfo(&self, block: *mut raw::PCM_source_peaktransfer_t) {
-        unsafe {
-            rust_to_cpp_PCM_sink_GetPeakInfo(self as *const _ as _, block);
-        }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetPeakInfo(&self, block: *mut raw::PCM_source_peaktransfer_t) {
+        rust_to_cpp_PCM_sink_GetPeakInfo(self as *const _ as _, block);
     }
-    pub fn Extended(
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn Extended(
         &self,
         call: ::std::os::raw::c_int,
         parm1: *mut ::std::os::raw::c_void,
         parm2: *mut ::std::os::raw::c_void,
         parm3: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
-        unsafe { rust_to_cpp_PCM_sink_Extended(self as *const _ as _, call, parm1, parm2, parm3) }
+        rust_to_cpp_PCM_sink_Extended(self as *const _ as _, call, parm1, parm2, parm3)
     }
 }
 

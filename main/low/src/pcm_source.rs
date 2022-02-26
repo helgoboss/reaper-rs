@@ -431,6 +431,10 @@ pub fn create_heap_buf() -> *mut raw::WDL_HeapBuf {
 
 /// Saves the state of the given PCM source into the given heap buffer and returns the size of the data written into
 /// the buffer.
+///
+/// # Safety
+///
+/// REAPER can crash if you pass an invalid pointer.
 pub unsafe fn save_pcm_source_state_to_heap_buf(
     source: *mut raw::PCM_source,
     buf: *mut raw::WDL_HeapBuf,
@@ -441,6 +445,10 @@ pub unsafe fn save_pcm_source_state_to_heap_buf(
 /// Copies the content of the given heap buffer to the given output buffer (which must be sized correctly).
 ///
 /// Takes ownership of the passed buffer, so takes care of destruction!
+///
+/// # Safety
+///
+/// REAPER can crash if you pass an invalid pointer.
 pub unsafe fn copy_heap_buf_to_buf(in_buf: *mut raw::WDL_HeapBuf, out_buf: *mut u8) {
     rust_to_cpp_copy_heap_buf_to_buf(in_buf, out_buf);
 }
@@ -448,6 +456,10 @@ pub unsafe fn copy_heap_buf_to_buf(in_buf: *mut raw::WDL_HeapBuf, out_buf: *mut 
 /// Restores the PCM source state from the given buffer.
 ///
 /// Returns -1 on error.
+///
+/// # Safety
+///
+/// REAPER can crash if you pass an invalid pointer.
 pub unsafe fn load_pcm_source_state_from_buf(
     source: *mut raw::PCM_source,
     first_line: *const ::std::os::raw::c_char,
