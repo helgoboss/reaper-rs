@@ -44,6 +44,8 @@ fn compile_glue_code() {
     build
         .cpp(true)
         .warnings(false)
+        // To make it compile for ARM targets (armv7 and aarch64) whose char type is unsigned.
+        .define("WDL_ALLOW_UNSIGNED_DEFAULT_CHAR", None)
         .file("src/control_surface.cpp")
         .file("src/pcm_source.cpp")
         .file("src/pcm_sink.cpp")

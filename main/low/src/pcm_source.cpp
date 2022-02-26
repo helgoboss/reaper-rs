@@ -175,7 +175,7 @@ namespace reaper_pcm_source {
   WDL_INT64 rust_to_cpp_save_pcm_source_state_to_heap_buf(PCM_source* source, WDL_HeapBuf* buf) {
     ProjectStateContext* ctx = ProjectCreateMemCtx_Write(buf);
     source->SaveState(ctx);
-    auto size = ctx->GetOutputSize();
+    INT64 size = ctx->GetOutputSize();
     delete ctx;
     return size;
   }
