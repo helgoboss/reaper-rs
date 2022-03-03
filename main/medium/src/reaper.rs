@@ -4342,22 +4342,18 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Converts a decibel value into a volume slider value.
-    #[measure(ResponseTimeSingleThreaded)]
     pub fn db2slider(&self, value: Db) -> VolumeSliderValue
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         VolumeSliderValue(self.low.DB2SLIDER(value.get()))
     }
 
     /// Converts a volume slider value into a decibel value.
-    #[measure(ResponseTimeSingleThreaded)]
     pub fn slider2db(&self, value: VolumeSliderValue) -> Db
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         Db(self.low.SLIDER2DB(value.get()))
     }
 
