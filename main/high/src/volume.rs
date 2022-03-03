@@ -9,6 +9,12 @@ pub struct Volume {
     soft_normalized_value: f64,
 }
 
+impl Default for Volume {
+    fn default() -> Self {
+        Self::MIN
+    }
+}
+
 const LN10_OVER_TWENTY: f64 = 0.115_129_254_649_702_28;
 
 impl Volume {
