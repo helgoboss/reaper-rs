@@ -562,6 +562,9 @@ impl TryFrom<f64> for NormalizedPlayRate {
 pub struct Hz(pub(crate) f64);
 
 impl Hz {
+    /// The minimum frequency.
+    pub const MIN: Hz = Hz(f64::EPSILON);
+
     fn is_valid(value: f64) -> bool {
         0.0 < value
     }
@@ -593,7 +596,7 @@ impl Hz {
 
 impl Default for Hz {
     fn default() -> Self {
-        Hz(1.0)
+        Hz::MIN
     }
 }
 
