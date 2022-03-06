@@ -1049,6 +1049,65 @@ impl TryFrom<f64> for PositionInBeats {
     }
 }
 
+/// This represents a position expressed as an amount of quarter notes.
+///
+/// Can be negative, see [`PositionInSeconds`](struct.PositionInSeconds.html).
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+pub struct PositionInQuarterNotes(pub(crate) f64);
+
+impl PositionInQuarterNotes {
+    /// Position at 0.0 quarter notes.
+    pub const ZERO: PositionInQuarterNotes = PositionInQuarterNotes(0.0);
+
+    fn is_valid(value: f64) -> bool {
+        !value.is_infinite() && !value.is_nan()
+    }
+
+    /// Creates a value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is a special number.
+    pub fn new(value: f64) -> PositionInQuarterNotes {
+        assert!(
+            Self::is_valid(value),
+            "{} is not a valid PositionInQn value",
+            value
+        );
+        PositionInQuarterNotes(value)
+    }
+
+    /// Creates a PositionInQn value without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is not a special number.
+    pub unsafe fn new_unchecked(value: f64) -> PositionInQuarterNotes {
+        PositionInQuarterNotes(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for PositionInQuarterNotes {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new("value must be non-special", value));
+        }
+        Ok(PositionInQuarterNotes(value))
+    }
+}
+
 /// This represents a volume measured in decibel.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(

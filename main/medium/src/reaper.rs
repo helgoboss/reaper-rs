@@ -20,15 +20,16 @@ use crate::{
     MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInSeconds,
-    ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
-    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
-    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
-    ReaperWidthValue, RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId,
-    SendTarget, SoloMode, StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef,
-    TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
+    PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, ResampleMode,
+    SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TimeModeOverride,
+    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
+    VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -1396,6 +1397,154 @@ impl<UsageScope> Reaper<UsageScope> {
             },
         );
         PositionInSeconds::new(tpos)
+    }
+
+    /// Converts the given quarter-note position to time.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn time_map_2_qn_to_time(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_2_qn_to_time_unchecked(project, qn) }
+    }
+
+    /// Like [`time_map_2_qn_to_time()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_2_qn_to_time()`]: #method.time_map_2_qn_to_time
+    pub unsafe fn time_map_2_qn_to_time_unchecked(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
+        PositionInSeconds::new(tpos)
+    }
+
+    /// Converts the given time to a quarter-note position.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn time_map_2_time_to_qn(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> PositionInQuarterNotes
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_2_time_to_qn_unchecked(project, tpos) }
+    }
+
+    /// Like [`time_map_2_time_to_qn()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_2_time_to_qn()`]: #method.time_map_2_time_to_qn
+    pub unsafe fn time_map_2_time_to_qn_unchecked(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> PositionInQuarterNotes
+    where
+        UsageScope: AnyThread,
+    {
+        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
+        PositionInQuarterNotes::new(qn)
+    }
+
+    /// Converts the given quarter-note position to time.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn time_map_2_qn_to_time_abs(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_2_qn_to_time_unchecked(project, qn) }
+    }
+
+    /// Like [`time_map_2_qn_to_time_abs()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_2_qn_to_time_abs()`]: #method.time_map_2_qn_to_time_abs
+    pub unsafe fn time_map_2_qn_to_time_abs_unchecked(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
+        PositionInSeconds::new(tpos)
+    }
+
+    /// Converts the given time to a quarter-note position.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn time_map_2_time_to_qn_abs(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> PositionInQuarterNotes
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_2_time_to_qn_abs_unchecked(project, tpos) }
+    }
+
+    /// Like [`time_map_2_time_to_qn_abs()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_2_time_to_qn_abs()`]: #method.time_map_2_time_to_qn_abs
+    pub unsafe fn time_map_2_time_to_qn_abs_unchecked(
+        &self,
+        project: ProjectContext,
+        tpos: PositionInSeconds,
+    ) -> PositionInQuarterNotes
+    where
+        UsageScope: AnyThread,
+    {
+        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
+        PositionInQuarterNotes::new(qn)
     }
 
     /// Gets the arrange view start/end time for the given screen coordinates.
