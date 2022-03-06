@@ -1353,6 +1353,64 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
+    /// Returns information about the given measure.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn time_map_get_measure_info(
+        &self,
+        project: ProjectContext,
+        measure_index: i32,
+    ) -> TimeMapGetMeasureInfoResult
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_get_measure_info_unchecked(project, measure_index) }
+    }
+
+    /// Like [`time_map_get_measure_info()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_get_measure_info()`]: #method.time_map_get_measure_info
+    pub unsafe fn time_map_get_measure_info_unchecked(
+        &self,
+        project: ProjectContext,
+        measure_index: i32,
+    ) -> TimeMapGetMeasureInfoResult
+    where
+        UsageScope: AnyThread,
+    {
+        let mut start_qn = MaybeUninit::zeroed();
+        let mut end_qn = MaybeUninit::zeroed();
+        let mut num = MaybeUninit::zeroed();
+        let mut denom = MaybeUninit::zeroed();
+        let mut bpm = MaybeUninit::zeroed();
+        let start_time = self.low.TimeMap_GetMeasureInfo(
+            project.to_raw(),
+            measure_index,
+            start_qn.as_mut_ptr(),
+            end_qn.as_mut_ptr(),
+            num.as_mut_ptr(),
+            denom.as_mut_ptr(),
+            bpm.as_mut_ptr(),
+        );
+        TimeMapGetMeasureInfoResult {
+            start_time: PositionInSeconds::new(start_time),
+            start_qn: PositionInQuarterNotes::new(start_qn.assume_init()),
+            end_qn: PositionInQuarterNotes::new(end_qn.assume_init()),
+            time_signature: TimeSignature {
+                numerator: NonZeroU32::new(num.assume_init() as _).unwrap(),
+                denominator: NonZeroU32::new(denom.assume_init() as _).unwrap(),
+            },
+            tempo: Bpm::new(bpm.assume_init()),
+        }
+    }
+
     /// Converts the given beat position to time, optionally starting from a specific measure.
     ///
     /// # Panics
@@ -6393,6 +6451,20 @@ pub struct TimeMap2TimeToBeatsResult {
     pub beats_since_measure: PositionInBeats,
     /// Time signature of that measure.
     pub time_signature: TimeSignature,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct TimeMapGetMeasureInfoResult {
+    /// Start position of the measure in seconds.
+    pub start_time: PositionInSeconds,
+    /// Start position of the measure in quarter notes.
+    pub start_qn: PositionInQuarterNotes,
+    /// End position of the measure in quarter notes.
+    pub end_qn: PositionInQuarterNotes,
+    /// Time signature of that measure.
+    pub time_signature: TimeSignature,
+    /// Tempo at that measure.
+    pub tempo: Bpm,
 }
 
 /// Time signature.
