@@ -584,7 +584,7 @@ impl Hz {
     /// # Safety
     ///
     /// You must ensure that the given value is greater than 0.0.
-    pub unsafe fn new_unchecked(value: f64) -> Hz {
+    pub const unsafe fn new_unchecked(value: f64) -> Hz {
         Hz(value)
     }
 
