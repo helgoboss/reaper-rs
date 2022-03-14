@@ -18,6 +18,11 @@ impl ReaperFunctionError {
     pub(crate) const fn new(message: &'static str) -> ReaperFunctionError {
         ReaperFunctionError { message }
     }
+
+    /// Returns the error message.
+    pub const fn message(&self) -> &'static str {
+        self.message
+    }
 }
 
 pub(crate) type ReaperFunctionResult<T> = Result<T, ReaperFunctionError>;

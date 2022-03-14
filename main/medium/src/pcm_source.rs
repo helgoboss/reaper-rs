@@ -622,6 +622,30 @@ impl BorrowedPcmSource {
         Ok(())
     }
 
+    /// Sets the preview tempo for this source.
+    ///
+    /// This will make the source ignore the project tempo.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not supported.
+    pub fn ext_set_preview_tempo(&self, tempo: Bpm) -> ReaperFunctionResult<()> {
+        let supported = unsafe {
+            self.0.Extended(
+                raw::PCM_SOURCE_EXT_SETPREVIEWTEMPO as _,
+                &tempo as *const _ as *mut _,
+                null_mut(),
+                null_mut(),
+            )
+        };
+        if supported == 0 {
+            return Err(ReaperFunctionError::new(
+                "PCM_SOURCE_EXT_SETPREVIEWTEMPO not supported by source",
+            ));
+        }
+        Ok(())
+    }
+
     // /// Opens the editor for this source.
     // ///
     // /// # Errors

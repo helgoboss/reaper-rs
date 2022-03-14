@@ -4,7 +4,7 @@ use reaper_low::{
     save_pcm_source_state_to_heap_buf,
 };
 use reaper_medium::{
-    BorrowedPcmSource, DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior,
+    BorrowedPcmSource, Bpm, DurationInSeconds, ExtGetPooledMidiIdResult, MidiImportBehavior,
     OwnedPcmSource, PcmSource, ReaperFunctionError, ReaperStringArg,
 };
 use ref_cast::RefCast;
@@ -123,6 +123,10 @@ impl BorrowedSource {
 
     pub fn remove_from_midi_pool(&self) -> Result<(), ReaperFunctionError> {
         self.0.ext_remove_from_midi_pool()
+    }
+
+    pub fn set_preview_tempo(&self, tempo: Bpm) -> Result<(), ReaperFunctionError> {
+        self.0.ext_set_preview_tempo(tempo)
     }
 
     pub fn export_to_file(&self, file: &Path) -> Result<(), ReaperFunctionError> {

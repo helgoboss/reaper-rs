@@ -373,6 +373,7 @@ impl From<f64> for ReaperNormalizedFxParamValue {
     derive(Serialize, Deserialize),
     serde(try_from = "f64")
 )]
+#[repr(transparent)]
 pub struct Bpm(pub(crate) f64);
 
 impl Default for Bpm {
@@ -400,6 +401,15 @@ impl Bpm {
     /// `(1.0..=960.0)`.
     pub fn new(value: f64) -> Bpm {
         assert!(Self::is_valid(value), "{} is not a valid Bpm value", value);
+        Bpm(value)
+    }
+
+    /// Creates a BPM value without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is within the range `(1.0..=960.0)`.
+    pub const unsafe fn new_unchecked(value: f64) -> Bpm {
         Bpm(value)
     }
 

@@ -272,6 +272,15 @@ impl Track {
         result as _
     }
 
+    pub fn channel_count(&self) -> u32 {
+        let result = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_media_track_info_value(self.raw(), TrackAttributeKey::Nchan)
+        };
+        result as _
+    }
+
     pub fn volume(&self) -> Volume {
         // It's important that we don't query D_VOL because that returns the wrong value in case an
         // envelope is written
