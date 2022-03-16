@@ -15,21 +15,21 @@ use crate::{
     require_non_null_panic, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode,
     BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
     EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
-    GangBehavior, GlobalAutomationModeOverride, Hidden, Hwnd, InitialAction, InputMonitoringMode,
-    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
-    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
-    OwnedReaperPitchShift, OwnedReaperResample, PanMode, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, ResampleMode,
-    SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TimeModeOverride,
-    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange,
-    VolumeSliderValue, WindowContext,
+    GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
+    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem,
+    MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
+    NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
+    PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode,
+    StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -4382,6 +4382,16 @@ impl<UsageScope> Reaper<UsageScope> {
             )
         };
         MessageBoxResult::from_raw(result)
+    }
+
+    /// Displays a text close to the transport bar.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn help_set<'a>(&self, message: impl Into<ReaperStringArg<'a>>, mode: HelpMode)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        unsafe { self.low.Help_Set(message.into().as_ptr(), mode.to_raw()) };
     }
 
     /// Parses the given string as GUID.

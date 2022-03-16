@@ -26,6 +26,24 @@ impl MessageBoxType {
     }
 }
 
+/// Whether to display help text temporarily or permanently.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum HelpMode {
+    Permanent,
+    Temporary,
+}
+
+impl HelpMode {
+    /// Converts this value to a boolean value as expected by the low-level API.
+    pub fn to_raw(self) -> bool {
+        use HelpMode::*;
+        match self {
+            Permanent => false,
+            Temporary => true,
+        }
+    }
+}
+
 /// Message box result informing about the user's choice.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum MessageBoxResult {
