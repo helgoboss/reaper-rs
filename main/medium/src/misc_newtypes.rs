@@ -1594,6 +1594,9 @@ impl MidiFrameOffset {
     /// Minimum frame offset (zero).
     pub const MIN: MidiFrameOffset = MidiFrameOffset(0);
 
+    /// The frame rate to which this unit relates.
+    pub const REFERENCE_FRAME_RATE: Hz = Hz(1_024_000.0);
+
     /// Creates a MIDI frame offset.
     pub fn new(value: u32) -> MidiFrameOffset {
         MidiFrameOffset(value)
