@@ -256,6 +256,15 @@ impl TrackRoute {
         }
     }
 
+    pub fn delete(&self) -> Result<(), ReaperFunctionError> {
+        let (category, index) = self.category_with_index();
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .remove_track_send(self.track().raw(), category, index)
+        }
+    }
+
     fn index_is_in_range(&self) -> bool {
         if !self.track.is_available() {
             return false;

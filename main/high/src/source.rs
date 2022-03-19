@@ -79,6 +79,10 @@ impl Deref for ReaperSource {
 pub struct BorrowedSource(BorrowedPcmSource);
 
 impl BorrowedSource {
+    pub fn as_raw(&self) -> &BorrowedPcmSource {
+        &self.0
+    }
+
     pub fn file_name(&self) -> Option<PathBuf> {
         self.0.get_file_name(|path| path.map(|p| p.to_owned()))
     }

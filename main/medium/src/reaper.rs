@@ -5275,6 +5275,35 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(result as u32)
     }
 
+    /// Removes a track send, track receive or hardware output send from the given track.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful (unclear when this happens).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn remove_track_send(
+        &self,
+        track: MediaTrack,
+        category: TrackSendCategory,
+        send_index: u32,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful =
+            self.low
+                .RemoveTrackSend(track.as_ptr(), category.to_raw(), send_index as i32);
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't remove track send"));
+        }
+        Ok(())
+    }
+
     /// Arms or unarms the given track for recording.
     ///
     /// Seems to return `true` if it was armed and `false` if not.
