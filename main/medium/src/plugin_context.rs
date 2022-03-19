@@ -114,6 +114,11 @@ pub struct VstPluginContext<'a> {
 }
 
 impl<'a> VstPluginContext<'a> {
+    /// Creates a medium-level VST plug-in context from the given low-level VST plug-in context.
+    pub fn new(low: &'a reaper_low::VstPluginContext) -> Self {
+        Self { low }
+    }
+
     /// Generic host callback function for communicating with REAPER from the VST plug-in.
     ///
     /// This is just a pass-through to the VST host callback.

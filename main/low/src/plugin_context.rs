@@ -200,6 +200,11 @@ impl ExtensionPluginContext {
 }
 
 impl VstPluginContext {
+    /// Creates a VST plug-in context based on the given host callback.
+    pub fn new(host_callback: HostCallbackProc) -> Self {
+        Self { host_callback }
+    }
+
     /// Generic host callback function for communicating with REAPER from the VST plug-in.
     ///
     /// This is just a pass-through to the VST host callback.
