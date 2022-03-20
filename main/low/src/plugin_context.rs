@@ -25,6 +25,9 @@ pub struct PluginContext {
     main_thread_id: std::thread::ThreadId,
 }
 
+// The raw pointers contained in the plug-in context don't do harm when sent to another thread.
+unsafe impl Send for PluginContext {}
+
 /// Additional stuff available in the plug-in context specific to a certain plug-in type.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum TypeSpecificPluginContext {

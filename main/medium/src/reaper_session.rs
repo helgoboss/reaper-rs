@@ -97,6 +97,9 @@ pub struct ReaperSession {
     playing_track_preview_registers: HashSet<(ProjectContext, NonNull<raw::preview_register_t>)>,
 }
 
+// The raw pointers contained in the session don't do harm when sent to another thread.
+unsafe impl Send for ReaperSession {}
+
 impl ReaperSession {
     /// Creates a new instance by getting hold of a [low-level `Reaper`] instance.
     ///
