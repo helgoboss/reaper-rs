@@ -1745,9 +1745,9 @@ fn set_track_volume_extreme_values() -> TestStep {
             assert!(track_2_volume.soft_normalized_value().is_nan());
             assert!(track_2_volume.reaper_value().get().is_nan());
             #[cfg(target_family = "windows")]
-            assert_eq!(track_2_volume.to_string().as_str(), "1.#RdB");
+            assert!(track_2_volume.to_string().as_str().contains("1.#RdB"));
             #[cfg(target_family = "unix")]
-            assert_eq!(track_2_volume.to_string().as_str(), "nandB");
+            assert!(track_2_volume.to_string().contains("nandB"));
             Ok(())
         },
     )
