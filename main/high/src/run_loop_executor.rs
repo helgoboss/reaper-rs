@@ -1,4 +1,5 @@
 //! Provides an executor for executing futures on a custom run loop.
+use crate::mutex_util::lock_ignoring_poisoning;
 use crossbeam_channel::{Receiver, Sender};
 use {
     futures::{
@@ -84,7 +85,7 @@ impl RunLoopExecutor {
         for task in self.ready_queue.try_iter().take(self.bulk_size) {
             // Take the future, and if it has not yet completed (is still Some),
             // poll it in an attempt to complete it.
-            let mut future_slot = task.future.lock().unwrap();
+            let mut future_slot = lock_ignoring_poisoning(&task.future);
             if let Some(mut future) = future_slot.take() {
                 // Create a `LocalWaker` from the task itself
                 let waker = waker_ref(&task);

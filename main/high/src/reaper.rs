@@ -18,6 +18,7 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use reaper_low::PluginContext;
 
 use crate::helper_control_surface::{HelperControlSurface, HelperTask};
+use crate::mutex_util::lock_ignoring_poisoning;
 use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
@@ -267,7 +268,7 @@ impl Reaper {
         // This is supposed to be called in the main thread. A check is not necessary, because this
         // is protected by a mutex and it will fail in the initializer and getter if called from
         // wrong thread.
-        let mut guard = REAPER_GUARD.lock().unwrap();
+        let mut guard = lock_ignoring_poisoning(&REAPER_GUARD);
         if let Some(arc) = guard.upgrade() {
             // There's at least one active instance. No need to reactivate.
             return arc;
