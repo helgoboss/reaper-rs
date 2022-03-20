@@ -1,4 +1,4 @@
-use std::sync::{LockResult, Mutex, MutexGuard};
+use std::sync::{Mutex, MutexGuard};
 
 /// Locks the given mutex even it has been poisoned.
 ///

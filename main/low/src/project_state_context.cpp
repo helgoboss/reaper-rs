@@ -3,7 +3,8 @@
 namespace reaper_project_state_context {
   // Rust -> C++
   void rust_to_cpp_ProjectStateContext_AddLine(ProjectStateContext* self, const char* line) {
-    self->AddLine(line);
+    // TODO-high This can't work. Wait for variadics support in stable Rust.
+//    self->AddLine(line);
   }
   int rust_to_cpp_ProjectStateContext_GetLine(ProjectStateContext* self, char* buf, int buflen) {
     return self->GetLine(buf, buflen);
