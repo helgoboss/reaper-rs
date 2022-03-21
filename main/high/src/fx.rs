@@ -216,6 +216,20 @@ impl Fx {
         }
     }
 
+    pub fn is_online(&self) -> bool {
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    !Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_offline(track.raw(), location)
+                }
+            }
+        }
+    }
+
     pub fn get_named_config_param<'a>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,
@@ -506,6 +520,22 @@ impl Fx {
                         track.raw(),
                         location,
                         enabled,
+                    );
+                }
+            }
+        }
+    }
+
+    pub fn set_online(&self, online: bool) {
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_set_offline(
+                        track.raw(),
+                        location,
+                        !online,
                     );
                 }
             }

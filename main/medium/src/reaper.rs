@@ -2780,6 +2780,25 @@ impl<UsageScope> Reaper<UsageScope> {
             .TrackFX_GetEnabled(track.as_ptr(), fx_location.to_raw())
     }
 
+    /// Returns whether the given track FX is offline.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn track_fx_get_offline(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .TrackFX_GetOffline(track.as_ptr(), fx_location.to_raw())
+    }
+
     /// Returns the name of the given FX.
     ///
     /// With `buffer_size` you can tell REAPER how many bytes of the FX name you want.
@@ -2930,13 +2949,32 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
-        is_enabled: bool,
+        enabled: bool,
     ) where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
         self.low
-            .TrackFX_SetEnabled(track.as_ptr(), fx_location.to_raw(), is_enabled);
+            .TrackFX_SetEnabled(track.as_ptr(), fx_location.to_raw(), enabled);
+    }
+
+    /// Sets the given track FX offline or online.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn track_fx_set_offline(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+        offline: bool,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .TrackFX_SetOffline(track.as_ptr(), fx_location.to_raw(), offline);
     }
 
     /// Returns the number of parameters of given track FX.
