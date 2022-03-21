@@ -5965,6 +5965,7 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// REAPER can crash if you pass an invalid track.
     #[measure(ResponseTimeSingleThreaded)]
+    #[allow(clippy::if_same_then_else)]
     pub unsafe fn track_fx_get_preset_index(
         &self,
         track: MediaTrack,
