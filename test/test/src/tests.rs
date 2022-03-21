@@ -2829,7 +2829,11 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
             .set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.0))
             .map_err(|_| "couldn't set parameter value")?;
         assert_ne!(
-            synth_param_5.formatted_value().into_inner().as_c_str(),
+            synth_param_5
+                .formatted_value()
+                .unwrap()
+                .into_inner()
+                .as_c_str(),
             c_str!("-6.00")
         );
         let fx_state_chunk = r#"eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
@@ -2844,7 +2848,11 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
             c_str!("VSTi: ReaSynth (Cockos)")
         );
         assert_eq!(
-            synth_param_5.formatted_value().into_inner().as_c_str(),
+            synth_param_5
+                .formatted_value()
+                .unwrap()
+                .into_inner()
+                .as_c_str(),
             c_str!("-6.00")
         );
         assert_eq!(midi_fx.index(), 0);
@@ -2938,6 +2946,7 @@ WAK 0
             synth_fx
                 .parameter_by_index(5)
                 .formatted_value()
+                .unwrap()
                 .into_inner()
                 .as_c_str(),
             c_str!("-6.00")
@@ -3092,7 +3101,10 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
         } else {
             assert_eq!(last_touched_fx_param, Some(p.clone()));
         }
-        assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("-4.44"));
+        assert_eq!(
+            p.formatted_value().unwrap().into_inner().as_c_str(),
+            c_str!("-4.44")
+        );
         assert!(abs_diff_eq!(
             p.reaper_normalized_value().get(),
             0.300_000_011_920_928_96
@@ -3181,7 +3193,10 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         assert_eq!(p.index(), 5);
         assert_eq!(p.character(), FxParameterCharacter::Continuous);
         assert_eq!(p.clone(), p);
-        assert_eq!(p.formatted_value().into_inner().as_c_str(), c_str!("0"));
+        assert_eq!(
+            p.formatted_value().unwrap().into_inner().as_c_str(),
+            c_str!("0")
+        );
         assert_eq!(
             p.reaper_normalized_value(),
             ReaperNormalizedFxParamValue::new(0.5)

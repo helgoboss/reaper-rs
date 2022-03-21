@@ -115,7 +115,7 @@ impl FxParameter {
         }
     }
 
-    pub fn formatted_value(&self) -> ReaperString {
+    pub fn formatted_value(&self) -> Result<ReaperString, ReaperFunctionError> {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -124,7 +124,6 @@ impl FxParameter {
                     Reaper::get()
                         .medium_reaper()
                         .track_fx_get_formatted_param_value(track.raw(), location, self.index, 256)
-                        .expect("Couldn't format FX param value")
                 }
             }
         }
