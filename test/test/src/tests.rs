@@ -3144,7 +3144,7 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
         // When
         // Then
         assert_eq!(
-            fx.preset_index_and_count().unwrap(),
+            fx.preset_index_and_count(),
             TrackFxGetPresetIndexResult {
                 index: None,
                 count: 0

@@ -5961,10 +5961,6 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Returns the index of the currently selected FX preset as well as the total preset count.
     ///
-    /// # Errors
-    ///
-    /// Returns an error e.g. if the FX doesn't exist.
-    ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
@@ -5973,7 +5969,7 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
-    ) -> ReaperFunctionResult<TrackFxGetPresetIndexResult>
+    ) -> TrackFxGetPresetIndexResult
     where
         UsageScope: MainThreadOnly,
     {
@@ -5985,20 +5981,21 @@ impl<UsageScope> Reaper<UsageScope> {
             fx_location.to_raw(),
             num_presets.as_mut_ptr(),
         );
-        if index == -1 {
-            return Err(ReaperFunctionError::new(
-                "couldn't get FX preset index (maybe FX doesn't exist)",
-            ));
-        }
         let num_presets = num_presets.assume_init();
-        Ok(TrackFxGetPresetIndexResult {
-            index: if index == num_presets {
+        TrackFxGetPresetIndexResult {
+            index: if index == -1 {
+                // This either means the FX doesn't exist or it's a VST3 plug-in and the factory
+                // preset is active. We can't distinguish between that. Justin says that querying of
+                // the active VST3 presets is poorly defined by the spec so this can happen.
+                None
+            } else if index == num_presets {
+                // For VST2 this means the factory preset is active.
                 None
             } else {
                 Some(index as u32)
             },
             count: num_presets as u32,
-        })
+        }
     }
 
     /// Selects a preset of the given track FX.
@@ -6416,9 +6413,11 @@ pub struct TrackFxGetPresetResult {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct TrackFxGetPresetIndexResult {
-    /// Preset index or `None` if no preset selected.
+    /// Preset index or `None` if no preset or factory preset is selected or the FX doesn't exist.
     pub index: Option<u32>,
     /// Total number of presets available.
+    ///
+    /// 0 if the FX doesn't exist.
     pub count: u32,
 }
 

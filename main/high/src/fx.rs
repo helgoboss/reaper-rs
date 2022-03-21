@@ -535,20 +535,17 @@ impl Fx {
         self.guid.is_some()
     }
 
-    pub fn preset_index_and_count(
-        &self,
-    ) -> Result<TrackFxGetPresetIndexResult, ReaperFunctionError> {
+    pub fn preset_index_and_count(&self) -> TrackFxGetPresetIndexResult {
         self.load_if_necessary_or_complain();
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.track_and_location();
-                let res = unsafe {
+                unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_preset_index(track.raw(), location)?
-                };
-                Ok(res)
+                        .track_fx_get_preset_index(track.raw(), location)
+                }
             }
         }
     }
