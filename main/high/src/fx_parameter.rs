@@ -2,7 +2,8 @@ use crate::fx::Fx;
 
 use crate::{FxChain, FxChainContext, Reaper};
 use reaper_medium::{
-    GetParameterStepSizesResult, ReaperFunctionError, ReaperNormalizedFxParamValue, ReaperString,
+    GetParamExResult, GetParameterStepSizesResult, ReaperFunctionError,
+    ReaperNormalizedFxParamValue, ReaperString,
 };
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -20,6 +21,7 @@ impl FxParameter {
         &self,
         reaper_value: impl Into<ReaperNormalizedFxParamValue>,
     ) -> Result<(), ReaperFunctionError> {
+        Reaper::get().require_main_thread();
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -37,6 +39,7 @@ impl FxParameter {
     }
 
     pub fn reaper_normalized_value(&self) -> ReaperNormalizedFxParamValue {
+        Reaper::get().require_main_thread();
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -86,6 +89,7 @@ impl FxParameter {
     }
 
     pub fn step_sizes(&self) -> Option<GetParameterStepSizesResult> {
+        Reaper::get().require_main_thread();
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -178,7 +182,7 @@ impl FxParameter {
                 let range = self.value_range();
                 // We are primarily interested in the smallest step size that makes sense. We can
                 // always create multiples of it.
-                let span = (range.max_val - range.min_val).abs();
+                let span = (range.max_value - range.min_value).abs();
                 if span == 0.0 {
                     return None;
                 }
@@ -190,8 +194,9 @@ impl FxParameter {
     }
 
     // Doesn't necessarily return normalized values
-    pub fn value_range(&self) -> FxParameterValueRange {
-        let result = match self.chain().context() {
+    pub fn value_range(&self) -> GetParamExResult {
+        Reaper::get().require_main_thread();
+        match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.fx().track_and_location();
@@ -203,11 +208,6 @@ impl FxParameter {
                     )
                 }
             }
-        };
-        FxParameterValueRange {
-            min_val: result.min_value,
-            mid_val: result.mid_value,
-            max_val: result.max_value,
         }
     }
 }
@@ -217,11 +217,4 @@ pub enum FxParameterCharacter {
     Toggle,
     Discrete,
     Continuous,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct FxParameterValueRange {
-    pub min_val: f64,
-    pub mid_val: f64,
-    pub max_val: f64,
 }

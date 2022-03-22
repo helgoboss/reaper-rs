@@ -3164,8 +3164,10 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
-    #[measure(ResponseTimeSingleThreaded)]
+    /// - REAPER can crash if you pass an invalid track.
+    /// - Calling this from any other thread than the main thread causes undefined behavior!
+    /// - However, there's one exception: Calling it in a real-time thread directly "from the track"
+    ///   which is currently processing should be okay.
     pub unsafe fn track_fx_set_param_normalized(
         &self,
         track: MediaTrack,
@@ -3174,9 +3176,8 @@ impl<UsageScope> Reaper<UsageScope> {
         param_value: ReaperNormalizedFxParamValue,
     ) -> ReaperFunctionResult<()>
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let successful = self.low.TrackFX_SetParamNormalized(
             track.as_ptr(),
             fx_location.to_raw(),
@@ -3350,12 +3351,14 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// - REAPER can crash if you pass an invalid track.
+    /// - Calling this from any other thread than the main thread causes undefined behavior!
+    /// - However, there's one exception: Calling it in a real-time thread directly "from the track"
+    ///   which is currently processing should be okay.
     //
     // Option makes more sense than Result here because this function is at the same time the
     // correct function to be used to determine *if* a parameter reports step sizes. So
     // "parameter doesn't report step sizes" is a valid result.
-    #[measure(ResponseTimeSingleThreaded)]
     pub unsafe fn track_fx_get_parameter_step_sizes(
         &self,
         track: MediaTrack,
@@ -3363,9 +3366,8 @@ impl<UsageScope> Reaper<UsageScope> {
         param_index: u32,
     ) -> Option<GetParameterStepSizesResult>
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         // It's important to zero these variables (could also do that without MaybeUninit) because
         // if REAPER returns true, that doesn't always mean that it initialized all of the variables
         // correctly. Learned this the hard way with some super random results coming up.
@@ -3401,8 +3403,10 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
-    #[measure(ResponseTimeSingleThreaded)]
+    /// - REAPER can crash if you pass an invalid track.
+    /// - Calling this from any other thread than the main thread causes undefined behavior!
+    /// - However, there's one exception: Calling it in a real-time thread directly "from the track"
+    ///   which is currently processing should be okay.
     pub unsafe fn track_fx_get_param_ex(
         &self,
         track: MediaTrack,
@@ -3410,9 +3414,8 @@ impl<UsageScope> Reaper<UsageScope> {
         param_index: u32,
     ) -> GetParamExResult
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let mut min_val = MaybeUninit::uninit();
         let mut max_val = MaybeUninit::uninit();
         let mut mid_val = MaybeUninit::uninit();
@@ -4173,10 +4176,12 @@ impl<UsageScope> Reaper<UsageScope> {
     ///  
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// - REAPER can crash if you pass an invalid track.
+    /// - Calling this from any other thread than the main thread causes undefined behavior!
+    /// - However, there's one exception: Calling it in a real-time thread directly "from the track"
+    ///   which is currently processing should be okay.
     ///
     /// [`ReaperNormalizedFxParamValue`]: struct.ReaperNormalizedFxParamValue.html
-    #[measure(ResponseTimeSingleThreaded)]
     pub unsafe fn track_fx_get_param_normalized(
         &self,
         track: MediaTrack,
@@ -4184,9 +4189,8 @@ impl<UsageScope> Reaper<UsageScope> {
         param_index: u32,
     ) -> ReaperNormalizedFxParamValue
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let raw_value = self.low.TrackFX_GetParamNormalized(
             track.as_ptr(),
             fx_location.to_raw(),

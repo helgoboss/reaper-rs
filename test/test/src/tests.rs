@@ -8,8 +8,8 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxInfo,
-    FxParameterCharacter, FxParameterValueRange, Guid, Pan, PlayRate, Reaper, SendPartnerType,
-    Tempo, Track, TrackRoutePartner, Volume, Width,
+    FxParameterCharacter, Guid, Pan, PlayRate, Reaper, SendPartnerType, Tempo, Track,
+    TrackRoutePartner, Volume, Width,
 };
 use rxrust::prelude::*;
 
@@ -23,11 +23,11 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
     reaper_str, AutoSeekBehavior, AutomationMode, Bpm, CommandId, Db, DurationInSeconds,
-    EnumPitchShiftModesResult, FxPresetRef, GangBehavior, InputMonitoringMode, MasterTrackBehavior,
-    MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate, PitchShiftMode, PlaybackSpeedFactor,
-    PositionInSeconds, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget,
-    TrackFxGetPresetIndexResult, TrackLocation, UndoBehavior, ValueChange,
+    EnumPitchShiftModesResult, FxPresetRef, GangBehavior, GetParamExResult, InputMonitoringMode,
+    MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate, PitchShiftMode,
+    PlaybackSpeedFactor, PositionInSeconds, ReaperNormalizedFxParamValue, ReaperPanValue,
+    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordingInput, SoloMode,
+    StuffMidiMessageTarget, TrackFxGetPresetIndexResult, TrackLocation, UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -2632,10 +2632,11 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             // assert_eq!(param1.step_size(), Some(0.01));
             assert_eq!(
                 param1.value_range(),
-                FxParameterValueRange {
-                    min_val: 0.0,
-                    mid_val: 5.0,
-                    max_val: 10.0
+                GetParamExResult {
+                    current_value: 0.5,
+                    min_value: 0.0,
+                    mid_value: 5.0,
+                    max_value: 10.0
                 }
             );
             assert!(fx.parameter_by_index(6).is_available());
@@ -3212,10 +3213,11 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         assert!(p.step_size().is_none());
         assert_eq!(
             p.value_range(),
-            FxParameterValueRange {
-                min_val: 0.0,
-                mid_val: 0.5,
-                max_val: 1.0
+            GetParamExResult {
+                current_value: 0.5,
+                min_value: 0.0,
+                mid_value: 0.5,
+                max_value: 1.0,
             }
         );
         Ok(())

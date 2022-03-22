@@ -313,7 +313,7 @@ impl Fx {
 
     /// Panics if this is a take FX.
     pub(crate) fn track_and_location(&self) -> (Track, TrackFxLocation) {
-        get_track_and_location(&self.chain, self.index())
+        get_track_and_location(&self.chain, self.index()).expect("must be take FX")
     }
 
     pub fn index(&self) -> u32 {
@@ -630,19 +630,18 @@ impl Fx {
     }
 }
 
-/// Panics if a take FX chain is passed.
-fn get_track_and_location(chain: &FxChain, index: u32) -> (Track, TrackFxLocation) {
+fn get_track_and_location(chain: &FxChain, index: u32) -> Option<(Track, TrackFxLocation)> {
     match chain.context() {
         FxChainContext::Monitoring => {
             let track = Reaper::get().current_project().master_track();
             let location = TrackFxLocation::InputFxChain(index);
-            (track, location)
+            Some((track, location))
         }
         FxChainContext::Track { track, is_input_fx } => {
             let location = get_track_fx_location(index, *is_input_fx);
-            (track.clone(), location)
+            Some((track.clone(), location))
         }
-        FxChainContext::Take(_) => panic!("not possible for take FX"),
+        FxChainContext::Take(_) => None,
     }
 }
 
@@ -650,7 +649,7 @@ pub fn get_fx_guid(chain: &FxChain, index: u32) -> Option<Guid> {
     let raw_guid = match chain.context() {
         FxChainContext::Take(_) => todo!(),
         _ => {
-            let (track, location) = get_track_and_location(chain, index);
+            let (track, location) = get_track_and_location(chain, index).expect("must be take FX");
             unsafe {
                 Reaper::get()
                     .medium_reaper()
