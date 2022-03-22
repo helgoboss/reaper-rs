@@ -6,6 +6,8 @@ pub struct Take {
     raw: MediaItemTake,
 }
 
+unsafe impl Send for Take {}
+
 impl Take {
     pub fn new(raw: MediaItemTake) -> Take {
         Take { raw }
