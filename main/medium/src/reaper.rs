@@ -269,7 +269,10 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: AnyThread,
     {
         if buffer_size > 0 {
-            self.require_main_thread();
+            assert!(
+                self.low.plugin_context().is_in_main_thread(),
+                "enum_projects must only be called from main thread if buffer_size > 0"
+            );
         }
         let idx = project_ref.to_raw();
         if buffer_size == 0 {
