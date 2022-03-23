@@ -375,7 +375,7 @@ pub struct OnTrackSelectionArgs {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct IsKeyDownArgs {
-    pub key: ModKey,
+    pub key: VirtKey,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -493,15 +493,15 @@ pub struct ExtSetBpmAndPlayRateArgs {
     pub play_rate: Option<PlaybackSpeedFactor>,
 }
 
-/// Modifier key according to
+/// Virtual key according to
 /// [this list](https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
 ///
 /// You can find some frequently used predefined keys in [`mod_keys`](mod_keys/index.html).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct ModKey(pub(crate) i32);
+pub struct VirtKey(pub(crate) i32);
 
-impl ModKey {
-    /// Creates a modifier key.
+impl VirtKey {
+    /// Creates a virtual key.
     pub const fn new(raw: i32) -> Self {
         Self(raw)
     }
@@ -512,14 +512,14 @@ impl ModKey {
     }
 }
 
-/// Contains predefined modifier keys.
-pub mod mod_keys {
-    use crate::ModKey;
+/// Contains predefined virtual keys.
+pub mod virt_keys {
+    use crate::VirtKey;
     use reaper_low::raw;
 
-    pub const SHIFT: ModKey = ModKey(raw::VK_SHIFT as _);
-    pub const CONTROL: ModKey = ModKey(raw::VK_CONTROL as _);
-    pub const MENU: ModKey = ModKey(raw::VK_MENU as _);
+    pub const SHIFT: VirtKey = VirtKey(raw::VK_SHIFT as _);
+    pub const CONTROL: VirtKey = VirtKey(raw::VK_CONTROL as _);
+    pub const MENU: VirtKey = VirtKey(raw::VK_MENU as _);
 }
 
 /// Location of a track or take FX including the parent track.
@@ -756,7 +756,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
 
     fn IsKeyDown(&self, key: i32) -> bool {
         self.delegate
-            .is_key_down(IsKeyDownArgs { key: ModKey(key) })
+            .is_key_down(IsKeyDownArgs { key: VirtKey(key) })
     }
 
     fn Extended(

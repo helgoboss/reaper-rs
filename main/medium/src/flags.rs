@@ -63,3 +63,19 @@ pub enum BufferingBehavior {
     /// buffering.
     VariSpeed = 2,
 }
+
+/// Defines the behavior of an accelerator.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[repr(u8)]
+pub enum AcceleratorBehavior {
+    /// The ALT key must be held down.
+    Alt = 0x10,
+    /// The CTRL key must be held down.
+    Control = 0x08,
+    /// The SHIFT key must be held down.
+    Shift = 0x04,
+    /// The key member specifies a virtual-key code.
+    ///
+    /// If this flag is not specified, key is assumed to specify a character code.
+    VirtKey = 0x01,
+}

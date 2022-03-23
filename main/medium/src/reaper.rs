@@ -11,26 +11,7 @@ use std::ptr::{null, null_mut, NonNull};
 use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
-use crate::{
-    require_non_null_panic, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode,
-    BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode,
-    EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
-    GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
-    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem,
-    MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
-    NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
-    PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode,
-    StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
-};
+use crate::{require_non_null_panic, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext, Accel};
 
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
@@ -4253,17 +4234,13 @@ impl<UsageScope> Reaper<UsageScope> {
         guid_string
     }
 
-    /// Converts the given key descriptor to a human-readable name.
-    pub fn kbd_format_key_name(&self, f_virt: u8, key: u16, cmd: u16) -> ReaperString
+    /// Converts the given accelerator key to a human-readable name.
+    pub fn kbd_format_key_name(&self, accel: Accel) -> ReaperString
     where
         UsageScope: AnyThread,
     {
         let (key_string, _) = with_string_buffer(64, |buffer, _| unsafe {
-            let mut accel = raw::ACCEL {
-                fVirt: f_virt,
-                key,
-                cmd,
-            };
+            let mut accel = accel.to_raw();
             self.low.kbd_formatKeyName(&mut accel as *mut _, buffer)
         });
         key_string
