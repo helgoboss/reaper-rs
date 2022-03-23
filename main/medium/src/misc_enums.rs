@@ -555,25 +555,25 @@ pub enum RegistrationObject<'a> {
     ///
     /// Extract from `reaper_plugin_functions.h`:
     ///
-    /// <pre>
+    /// ```text
     /// if you have a function called myfunction(..) that you want to expose to other extensions or
     /// plug-ins, use register("API_myfunction",funcaddress), and "-API_myfunction" to remove.
     /// Other extensions then use GetFunc("myfunction") to get the function pointer.
     /// REAPER will also export the function address to ReaScript, so your extension could supply
     /// a Python module that provides a wrapper called RPR_myfunction(..).
-    /// </pre>
+    /// ```
     Api(Cow<'a, ReaperStr>, *mut c_void),
     /// A function definition that describes a function registered via [`Api`].
     ///
     /// Extract from `reaper_plugin_functions.h`:
     ///
-    /// <pre>
+    /// ```text
     /// register("APIdef_myfunction",defstring) will include your function declaration and help
     /// in the auto-generated REAPER API header and ReaScript documentation.
     /// defstring is four null-separated fields: return type, argument types, argument names, and
     /// help. Example: double myfunction(char* str, int flag) would have
     /// defstring="double\0char*,int\0str,flag\0help text for myfunction"
-    /// </pre>
+    /// ```
     /// [`Api`]: #variant.Api
     ApiDef(Cow<'a, ReaperStr>, *const c_char),
     /// A var-arg function for exposing a function to ReaScript.
@@ -583,7 +583,7 @@ pub enum RegistrationObject<'a> {
     ///
     /// Extract from `reaper_plugin_functions.h`:
     ///
-    /// <pre>
+    /// ```text
     /// another thing you can register is "hookcommand", which you pass a callback:
     ///  NON_API: bool runCommand(int command, int flag);
     ///           register("hookcommand",runCommand);
@@ -592,13 +592,13 @@ pub enum RegistrationObject<'a> {
     /// note: it's OK to call Main_OnCommand() within your runCommand, however you MUST check for
     /// recursion if doing so! > in fact, any use of this hook should benefit from a simple
     /// reentrancy test...
-    /// </pre>
+    /// ```
     HookCommand(raw::HookCommand),
     /// A hook command that supports MIDI CC/mousewheel actions.
     ///
     /// Extract from `reaper_plugin_functions.h`:
     ///
-    /// <pre>
+    /// ```text
     /// you can also register "hookcommand2", which you pass a callback:
     ///  NON_API: bool onAction(KbdSectionInfo *sec, int command, int val, int valhw, int relmode,
     /// HWND hwnd);           register("hookcommand2",onAction);
@@ -607,18 +607,18 @@ pub enum RegistrationObject<'a> {
     /// val = [0..127] and valhw = -1 for MIDI CC,
     /// valhw >=0 for MIDI pitch or OSC with value = (valhw|val<<7)/16383.0,
     /// relmode absolute(0) or 1/2/3 for relative adjust modes
-    /// </pre>
+    /// ```
     HookCommand2(raw::HookCommand2),
     /// A hook post command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
     ///
-    /// <pre>
+    /// ```text
     /// to get notified when an action of the main section is performed,
     /// you can register "hookpostcommand", which you pass a callback:
     ///  NON_API: void postCommand(int command, int flag);
     ///           register("hookpostcommand",postCommand);
-    /// </pre>
+    /// ```
     HookPostCommand(raw::HookPostCommand),
     /// A hook post command 2.
     HookPostCommand2(raw::HookPostCommand2),
@@ -628,7 +628,7 @@ pub enum RegistrationObject<'a> {
     ///
     /// Extract from `reaper_plugin.h`:
     ///
-    /// <pre>
+    /// ```text
     /// register("toggleaction", toggleactioncallback) lets you register a callback function
     /// that is called to check if an action registered by an extension has an on/off state.
     ///
@@ -639,36 +639,38 @@ pub enum RegistrationObject<'a> {
     ///   -1=action does not belong to this extension, or does not toggle
     ///   0=action belongs to this extension and is currently set to "off"
     ///   1=action belongs to this extension and is currently set to "on"
-    /// </pre>
+    /// ```
     ToggleAction(raw::ToggleAction),
     // ActionHelp(*mut c_void),
     /// A command ID for the given command name.
     ///
     /// Extract from `reaper_plugin_functions.h`:
-    /// <pre>
+    /// ```text
     /// you can also register command IDs for actions,
     /// register with "command_id", parameter is a unique string with only A-Z, 0-9,
     /// returns command ID (or 0 if not supported/out of actions)
-    /// </pre>
+    /// ```
     CommandId(*const c_char),
     // CommandIdLookup(*mut c_void),
     /// An action description and shortcut.
     ///
     /// Extract from `reaper_plugin.h`:
-    /// <pre>
+    /// ```text
     /// gaccel_register_t allows you to register ("gaccel") an action into the main keyboard
     /// section action list, and at the same time a default binding for it (accel.cmd is the
     /// command ID, desc is the description, and accel's other parameters are the key to bind.
-    /// </pre>
+    /// ```
     Gaccel(NonNull<raw::gaccel_register_t>),
+    /// An record which lets you get a place in the keyboard processing queue.
+    Accelerator(NonNull<raw::accelerator_register_t>),
     /// A hidden control surface (useful for being notified by REAPER about events).
     ///
     /// Extract from `reaper_plugin.h`:
     ///
-    /// <pre>
+    /// ```text
     /// note you can also add a control surface behind the scenes with "csurf_inst"
     /// (IReaperControlSurface*)instance
-    /// </pre>
+    /// ```
     CsurfInst(NonNull<raw::IReaperControlSurface>),
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
@@ -765,6 +767,10 @@ impl<'a> RegistrationObject<'a> {
             },
             Gaccel(reg) => PluginRegistration {
                 key: reaper_str!("gaccel").into(),
+                value: reg.as_ptr() as _,
+            },
+            Accelerator(reg) => PluginRegistration {
+                key: reaper_str!("accelerator").into(),
                 value: reg.as_ptr() as _,
             },
             CsurfInst(inst) => PluginRegistration {

@@ -1,10 +1,10 @@
-use crate::Hz;
+use crate::{decode_user_data, encode_user_data, Hz};
 use reaper_low::raw::audio_hook_register_t;
 use reaper_low::{firewall, raw};
 
 use std::fmt;
 use std::fmt::Debug;
-use std::os::raw::{c_int, c_void};
+use std::os::raw::c_int;
 use std::ptr::{null_mut, NonNull};
 
 /// Consumers need to implement this trait in order to be called back in the real-time audio thread.
@@ -62,7 +62,7 @@ impl AudioHookRegister {
     }
 }
 
-pub(crate) extern "C" fn delegating_on_audio_buffer<T: OnAudioBuffer>(
+extern "C" fn delegating_on_audio_buffer<T: OnAudioBuffer>(
     is_post: bool,
     len: c_int,
     srate: f64,
@@ -79,19 +79,6 @@ pub(crate) extern "C" fn delegating_on_audio_buffer<T: OnAudioBuffer>(
             reg: &AudioHookRegister::new(reg),
         });
     });
-}
-
-// We really need a box here in order to obtain a thin pointer. We must not consume it, that's why
-// we take it as reference.
-#[allow(clippy::borrowed_box)]
-fn encode_user_data<U>(data: &Box<U>) -> *mut c_void {
-    data.as_ref() as *const _ as *mut c_void
-}
-
-fn decode_user_data<'a, U>(data: *mut c_void) -> &'a mut U {
-    assert!(!data.is_null());
-    let data = data as *mut U;
-    unsafe { &mut *data }
 }
 
 pub(crate) struct OwnedAudioHookRegister {

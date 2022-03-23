@@ -1,5 +1,5 @@
 use crate::{ReaperStr, ReaperString, ReaperStringArg};
-use std::ffi::CString;
+use std::ffi::{c_void, CString};
 use std::os::raw::c_char;
 
 pub fn concat_reaper_strs(first: &ReaperStr, second: &ReaperStr) -> ReaperString {
@@ -55,4 +55,17 @@ pub fn with_buffer<T>(
     let raw = vec.as_mut_ptr() as *mut c_char;
     let result = fill_buffer(raw, max_size as i32);
     (vec, result)
+}
+
+/// We really need a box here in order to obtain a thin pointer. We must not consume it, that's why
+/// we take it as reference.
+#[allow(clippy::borrowed_box)]
+pub fn encode_user_data<U>(data: &Box<U>) -> *mut c_void {
+    data.as_ref() as *const _ as *mut c_void
+}
+
+pub fn decode_user_data<'a, U>(data: *mut c_void) -> &'a mut U {
+    assert!(!data.is_null());
+    let data = data as *mut U;
+    unsafe { &mut *data }
 }

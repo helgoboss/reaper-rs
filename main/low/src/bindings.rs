@@ -1124,6 +1124,23 @@ pub mod root {
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct accelerator_register_t {
+        pub translateAccel: ::std::option::Option<
+            unsafe extern "C" fn(
+                msg: *mut root::MSG,
+                ctx: *mut root::accelerator_register_t,
+            ) -> ::std::os::raw::c_int,
+        >,
+        pub isLocal: bool,
+        pub user: *mut ::std::os::raw::c_void,
+    }
+    impl Default for accelerator_register_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct gaccel_register_t {
         pub accel: root::ACCEL,
         pub desc: *const ::std::os::raw::c_char,

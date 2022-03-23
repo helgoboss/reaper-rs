@@ -354,6 +354,9 @@ pub use reaper_pointer::*;
 mod gaccel_register;
 pub use gaccel_register::*;
 
+mod accelerator_register;
+pub use accelerator_register::*;
+
 mod preview_register;
 pub use preview_register::*;
 

@@ -4253,6 +4253,22 @@ impl<UsageScope> Reaper<UsageScope> {
         guid_string
     }
 
+    /// Converts the given key descriptor to a human-readable name.
+    pub fn kbd_format_key_name(&self, f_virt: u8, key: u16, cmd: u16) -> ReaperString
+    where
+        UsageScope: AnyThread,
+    {
+        let (key_string, _) = with_string_buffer(64, |buffer, _| unsafe {
+            let mut accel = raw::ACCEL {
+                fVirt: f_virt,
+                key,
+                cmd,
+            };
+            self.low.kbd_formatKeyName(&mut accel as *mut _, buffer)
+        });
+        key_string
+    }
+
     /// Returns the project recording path.
     ///
     /// With `buffer_size` you can tell REAPER how many bytes of the resulting path you want.

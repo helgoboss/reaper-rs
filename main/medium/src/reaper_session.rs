@@ -12,10 +12,10 @@ use crate::{
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
     BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter, HookCommand, HookCommand2,
     HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment, OnAudioBuffer,
-    OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration,
-    ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult,
-    ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
-    ToggleAction,
+    OwnedAcceleratorRegister, OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister,
+    PluginRegistration, ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
+    ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle,
+    RegistrationObject, ToggleAction, TranslateAccel,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -64,6 +64,8 @@ pub struct ReaperSession {
     reaper: Reaper<MainThreadScope>,
     /// Provides a safe place in memory for registered actions.
     gaccel_registers: Keeper<OwnedGaccelRegister, raw::gaccel_register_t>,
+    /// Provides a safe place in memory for accelerator registers.
+    accelerator_registers: Keeper<OwnedAcceleratorRegister, raw::accelerator_register_t>,
     /// Provides a safe place in memory for currently playing preview registers.
     preview_registers: SharedKeeper<ReaperMutex<OwnedPreviewRegister>, raw::preview_register_t>,
     /// Provides a safe place in memory for command names used in command ID registrations.
@@ -108,6 +110,7 @@ impl ReaperSession {
         ReaperSession {
             reaper: Reaper::new(low),
             gaccel_registers: Default::default(),
+            accelerator_registers: Default::default(),
             preview_registers: Default::default(),
             command_names: Default::default(),
             api_defs: Default::default(),
@@ -533,6 +536,28 @@ impl ReaperSession {
         Ok(handle)
     }
 
+    pub fn plugin_register_add_accelerator_register<T>(
+        &mut self,
+        callback: Box<T>,
+    ) -> ReaperFunctionResult<RegistrationHandle<T>>
+    where
+        T: TranslateAccel + 'static,
+    {
+        // Create thin pointer of callback before making it a trait object (for being able to
+        // restore the original callback later).
+        let callback_thin_ptr: NonNull<T> = callback.as_ref().into();
+        // Create accelerator register and make it own the callback (as user data)
+        let register = OwnedAcceleratorRegister::new(callback);
+        // Store it in memory.  Although we keep it here, conceptually it's owned by REAPER, so we
+        // should not access it while being registered.
+        let reaper_ptr = self.accelerator_registers.keep(register);
+        // Register the low-level register at REAPER
+        unsafe { self.plugin_register_add(RegistrationObject::Accelerator(reaper_ptr))? };
+        // Returns a handle which the consumer can use to unregister
+        let handle = RegistrationHandle::new(callback_thin_ptr, reaper_ptr.cast());
+        Ok(handle)
+    }
+
     /// Plays a preview register.
     ///
     /// # Errors
@@ -769,6 +794,33 @@ impl ReaperSession {
     /// Unregisters an action.
     pub fn plugin_register_remove_gaccel(&mut self, handle: NonNull<raw::gaccel_register_t>) {
         unsafe { self.plugin_register_remove(RegistrationObject::Gaccel(handle)) };
+    }
+
+    pub fn plugin_register_remove_accelerator<T>(
+        &mut self,
+        handle: RegistrationHandle<T>,
+    ) -> Option<Box<T>>
+    where
+        T: TranslateAccel,
+    {
+        // Unregister the low-level register from REAPER
+        let reaper_ptr = handle.reaper_ptr().cast();
+        unsafe { self.plugin_register_remove(RegistrationObject::Accelerator(reaper_ptr)) };
+        // Take the owned register out of its storage
+        let owned_register = self
+            .accelerator_registers
+            .release(handle.reaper_ptr().cast())?;
+        // Reconstruct the initial value for handing ownership back to the consumer
+        let dyn_callback = owned_register.into_callback();
+        // We are not interested in the fat pointer (Box<dyn TranslateAccel>) anymore.
+        // By calling leak(), we make the pointer go away but prevent Rust from
+        // dropping its content.
+        Box::leak(dyn_callback);
+        // Here we pick up the content again and treat it as a Box - but this
+        // time not a trait object box (Box<dyn TranslateAccel> = fat pointer) but a
+        // normal box (Box<T> = thin pointer) ... original type restored.
+        let callback = unsafe { handle.restore_original() };
+        Some(callback)
     }
 
     /// Registers a hidden control surface.
