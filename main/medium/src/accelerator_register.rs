@@ -86,7 +86,7 @@ pub struct Accel {
 }
 
 impl Accel {
-    pub(crate) fn to_raw(&self) -> raw::ACCEL {
+    pub(crate) fn to_raw(self) -> raw::ACCEL {
         raw::ACCEL {
             fVirt: self.f_virt.bits(),
             key: self.key.to_raw(),
@@ -111,7 +111,7 @@ impl AcceleratorKey {
         }
     }
 
-    pub(crate) fn to_raw(&self) -> u16 {
+    pub(crate) fn to_raw(self) -> u16 {
         use AcceleratorKey::*;
         match self {
             // TODO-high Is VirtKey i32 too broad?
