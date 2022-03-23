@@ -243,6 +243,13 @@ impl<UsageScope> Reaper<UsageScope> {
     /// With `buffer_size` you can tell REAPER how many bytes of the file name you want. If you
     /// are not interested in the file name at all, pass 0.
     ///
+    /// # Threading
+    ///
+    /// If `buffer_size > 0`, this must be called from the main thread (panics if not).
+    ///
+    /// If `buffer_size == 0`, this may also be called from a real-time or worker thread, not from
+    /// your own thread (this won't be checked!)
+    ///
     /// # Example
     ///
     /// ```no_run
@@ -253,16 +260,17 @@ impl<UsageScope> Reaper<UsageScope> {
     /// let project_dir = result.file_path.ok_or("Project not saved yet")?.parent();
     /// # Ok::<_, Box<dyn std::error::Error>>(())
     /// ```
-    #[measure(ResponseTimeSingleThreaded)]
     pub fn enum_projects(
         &self,
         project_ref: ProjectRef,
         buffer_size: u32,
     ) -> Option<EnumProjectsResult>
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
+        if buffer_size > 0 {
+            self.require_main_thread();
+        }
         let idx = project_ref.to_raw();
         if buffer_size == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
