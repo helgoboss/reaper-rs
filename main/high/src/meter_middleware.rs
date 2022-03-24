@@ -220,7 +220,7 @@ impl MeterMiddleware {
         self.metrics.run.record(elapsed);
     }
 
-    pub fn record_event(&self, event: ControlSurfaceEvent, elapsed: u64) -> bool {
+    pub fn record_event(&self, event: &ControlSurfaceEvent, elapsed: u64) -> bool {
         use ControlSurfaceEvent::*;
         let response_time = match event {
             CloseNoReset => &self.metrics.close_no_reset,

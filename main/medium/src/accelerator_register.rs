@@ -116,7 +116,7 @@ impl AcceleratorKey {
         match self {
             // TODO-high Is VirtKey i32 too broad?
             VirtKey(key) => key.get() as u16,
-            Character(ch) => *ch as u16,
+            Character(ch) => ch as u16,
         }
     }
 }

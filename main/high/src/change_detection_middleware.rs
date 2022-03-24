@@ -176,7 +176,7 @@ impl ChangeDetectionMiddleware {
 
     pub fn process(
         &self,
-        event: ControlSurfaceEvent,
+        event: &ControlSurfaceEvent,
         mut handle_change: impl FnMut(ChangeEvent),
     ) -> bool {
         use ControlSurfaceEvent::*;
@@ -758,7 +758,7 @@ impl ChangeDetectionMiddleware {
 
     fn fx_param_set(
         &self,
-        args: ExtSetFxParamArgs,
+        args: &ExtSetFxParamArgs,
         is_input_fx_if_supported: bool,
         mut handle_change: impl FnMut(ChangeEvent),
     ) {

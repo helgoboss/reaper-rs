@@ -288,7 +288,7 @@ impl<H: ControlSurfaceMiddleware + Debug> ControlSurface for MiddlewareControlSu
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum ControlSurfaceEvent<'a> {
     CloseNoReset,
     SetTrackListChange,
@@ -321,6 +321,47 @@ pub enum ControlSurfaceEvent<'a> {
     ExtTrackFxPresetChanged(ExtTrackFxPresetChangedArgs),
     ExtReset(ExtResetArgs),
     ExtSetProjectMarkerChange(ExtSetProjectMarkerChangeArgs),
+}
+
+impl<'a> ControlSurfaceEvent<'a> {
+    pub fn into_owned(self) -> ControlSurfaceEvent<'static> {
+        use ControlSurfaceEvent::*;
+        match self {
+            SetTrackTitle(e) => {
+                SetTrackTitle(e.into_owned())
+            },
+            CloseNoReset => CloseNoReset,
+            SetTrackListChange => SetTrackListChange,
+            SetSurfaceVolume(e) => SetSurfaceVolume(e),
+            SetSurfacePan(e) => SetSurfacePan(e),
+            SetSurfaceMute(e) => SetSurfaceMute(e),
+            SetSurfaceSelected(e) => SetSurfaceSelected(e),
+            SetSurfaceSolo(e) => SetSurfaceSolo(e),
+            SetSurfaceRecArm(e) => SetSurfaceRecArm(e),
+            SetPlayState(e) => SetPlayState(e),
+            SetRepeatState(e) => SetRepeatState(e),
+            SetAutoMode(e) => SetAutoMode(e),
+            ResetCachedVolPanStates => ResetCachedVolPanStates,
+            OnTrackSelection(e) =>   OnTrackSelection(e),
+            ExtSetInputMonitor(e) => ExtSetInputMonitor(e),
+            ExtSetFxParam(e) => ExtSetFxParam(e),
+            ExtSetFxParamRecFx(e) => ExtSetFxParamRecFx(e),
+            ExtSetFxEnabled(e) => ExtSetFxEnabled(e),
+            ExtSetSendVolume(e) => ExtSetSendVolume(e),
+            ExtSetSendPan(e) => ExtSetSendPan(e),
+            ExtSetRecvVolume(e) => ExtSetRecvVolume(e),
+            ExtSetRecvPan(e) => ExtSetRecvPan(e),
+            ExtSetPanExt(e) => ExtSetPanExt(e),
+            ExtSetFocusedFx(e) => ExtSetFocusedFx(e),
+            ExtSetLastTouchedFx(e) => ExtSetLastTouchedFx(e),
+            ExtSetFxOpen(e) => ExtSetFxOpen(e),
+            ExtSetFxChange(e) => ExtSetFxChange(e),
+            ExtSetBpmAndPlayRate(e) => ExtSetBpmAndPlayRate(e),
+            ExtTrackFxPresetChanged(e) => ExtTrackFxPresetChanged(e),
+            ExtReset(e) => ExtReset(e),
+            ExtSetProjectMarkerChange(e) => ExtSetProjectMarkerChange(e),
+        }
+    }
 }
 
 fn to_int(value: bool) -> i32 {
