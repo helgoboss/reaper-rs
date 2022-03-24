@@ -189,10 +189,16 @@ impl Action {
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
-        self.invoke(1.0, false, project)
+        self.invoke(1.0, false, project, true);
     }
 
-    pub fn invoke(&self, normalized_value: f64, is_step_count: bool, project: Option<Project>) {
+    pub fn invoke(
+        &self,
+        normalized_value: f64,
+        is_step_count: bool,
+        project: Option<Project>,
+        enforce_7_bit_control: bool,
+    ) {
         // TODO-low I have no idea how to launch an action in a specific section. The first function
         // doesn't seem to launch the action :(
         // bool (*kbd_RunCommandThroughHooks)(KbdSectionInfo* section, int* actionCommandID, int*
@@ -216,11 +222,19 @@ impl Action {
         } else {
             // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
             // &valhw, &relmode, reaper::GetMainHwnd());
-            let discrete_value = unsafe {
-                U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
+            let value_change = if enforce_7_bit_control {
+                let discrete_value = unsafe {
+                    U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
+                };
+                ActionValueChange::AbsoluteHighRes(discrete_value)
+            } else {
+                let discrete_value = unsafe {
+                    U7::new_unchecked((normalized_value * U7::MAX.get() as f64).round() as u8)
+                };
+                ActionValueChange::AbsoluteLowRes(discrete_value)
             };
             self.invoke_directly(
-                ActionValueChange::AbsoluteHighRes(discrete_value),
+                value_change,
                 Win(reaper.get_main_hwnd()),
                 match project {
                     None => CurrentProject,
