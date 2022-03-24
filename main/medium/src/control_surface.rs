@@ -1,4 +1,6 @@
 #![allow(non_snake_case)]
+
+use std::borrow::Cow;
 use super::MediaTrack;
 use crate::{
     require_non_null_panic, AutomationMode, Bpm, Hidden, InputMonitoringMode, Pan, PanMode,
@@ -327,10 +329,19 @@ pub struct SetRepeatStateArgs {
     pub is_enabled: bool,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct SetTrackTitleArgs<'a> {
     pub track: MediaTrack,
-    pub name: &'a ReaperStr,
+    pub name: Cow<'a, ReaperStr>,
+}
+
+impl<'a> SetTrackTitleArgs<'a> {
+    pub fn into_owned(self) -> SetTrackTitleArgs<'static> {
+        SetTrackTitleArgs {
+            track: self.track,
+            name: Cow::Owned(self.name.into_owned())
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -727,7 +738,10 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
     fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const c_char) {
         self.delegate.set_track_title(SetTrackTitleArgs {
             track: require_non_null_panic(trackid),
-            name: unsafe { ReaperStr::from_ptr(title) },
+            name: {
+                let borrowed_name = unsafe { ReaperStr::from_ptr(title) };
+                Cow::Borrowed(borrowed_name)
+            },
         })
     }
 
