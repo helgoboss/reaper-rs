@@ -11,7 +11,26 @@ use std::ptr::{null, null_mut, NonNull};
 use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
-use crate::{require_non_null_panic, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext, Accel};
+use crate::{
+    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AutoSeekBehavior,
+    AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds,
+    EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
+    GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
+    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem,
+    MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
+    NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
+    PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode,
+    StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+};
 
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
@@ -3159,7 +3178,9 @@ impl<UsageScope> Reaper<UsageScope> {
     /// - REAPER can crash if you pass an invalid track.
     /// - Calling this from any other thread than the main thread causes undefined behavior!
     /// - However, there's one exception: Calling it in a real-time thread directly "from the track"
-    ///   which is currently processing should be okay.
+    ///   which is currently processing is okay, and only for REAPER >= v6.52+dev0323. Previous
+    ///   REAPER versions will send control surface change notifications, in the wrong thread.
+    ///   Newer versions don't send any notifications when this function is called in real-time.
     pub unsafe fn track_fx_set_param_normalized(
         &self,
         track: MediaTrack,
