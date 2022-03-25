@@ -189,13 +189,28 @@ impl Action {
     }
 
     pub fn invoke_as_trigger(&self, project: Option<Project>) {
-        self.invoke(1.0, false, project, true);
+        self.invoke_absolute(1.0, project, false);
     }
 
-    pub fn invoke(
+    pub fn invoke_relative(&self, amount: i32, project: Option<Project>) {
+        let relative_value = 64 + amount;
+        let cropped_relative_value =
+            unsafe { U7::new_unchecked(relative_value.clamp(0, 127) as u8) };
+        // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
+        // &valhw, &relmode, reaper::GetMainHwnd());
+        self.invoke_directly(
+            ActionValueChange::Relative2(cropped_relative_value),
+            Win(Reaper::get().medium_reaper().get_main_hwnd()),
+            match project {
+                None => CurrentProject,
+                Some(p) => Proj(p.raw()),
+            },
+        )
+    }
+
+    pub fn invoke_absolute(
         &self,
         normalized_value: f64,
-        is_step_count: bool,
         project: Option<Project>,
         enforce_7_bit_control: bool,
     ) {
@@ -204,47 +219,30 @@ impl Action {
         // bool (*kbd_RunCommandThroughHooks)(KbdSectionInfo* section, int* actionCommandID, int*
         // val, int* valhw, int* relmode, HWND hwnd); int (*KBD_OnMainActionEx)(int cmd, int
         // val, int valhw, int relmode, HWND hwnd, ReaProject* proj);
-        let reaper = Reaper::get().medium_reaper();
-        if is_step_count {
-            let relative_value = 64 + normalized_value as i32;
-            let cropped_relative_value =
-                unsafe { U7::new_unchecked(relative_value.clamp(0, 127) as u8) };
-            // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
-            // &valhw, &relmode, reaper::GetMainHwnd());
-            self.invoke_directly(
-                ActionValueChange::Relative2(cropped_relative_value),
-                Win(reaper.get_main_hwnd()),
-                match project {
-                    None => CurrentProject,
-                    Some(p) => Proj(p.raw()),
-                },
-            )
-        } else {
-            // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
-            // &valhw, &relmode, reaper::GetMainHwnd());
-            let value_change = if enforce_7_bit_control {
-                let discrete_value = unsafe {
-                    U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
-                };
-                ActionValueChange::AbsoluteHighRes(discrete_value)
-            } else {
-                let discrete_value = unsafe {
-                    U7::new_unchecked((normalized_value * U7::MAX.get() as f64).round() as u8)
-                };
-                ActionValueChange::AbsoluteLowRes(discrete_value)
+        // reaper::kbd_RunCommandThroughHooks(section_.sectionInfo(), &actionCommandId, &val,
+        // &valhw, &relmode, reaper::GetMainHwnd());
+        let value_change = if enforce_7_bit_control {
+            let discrete_value = unsafe {
+                U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
             };
-            self.invoke_directly(
-                value_change,
-                Win(reaper.get_main_hwnd()),
-                match project {
-                    None => CurrentProject,
-                    Some(p) => Proj(p.raw()),
-                },
-            );
-            // Main_OnCommandEx would trigger the actionInvoked event but it has not enough
-            // parameters for passing values etc.          reaper::
-            // Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
-        }
+            ActionValueChange::AbsoluteHighRes(discrete_value)
+        } else {
+            let discrete_value = unsafe {
+                U7::new_unchecked((normalized_value * U7::MAX.get() as f64).round() as u8)
+            };
+            ActionValueChange::AbsoluteLowRes(discrete_value)
+        };
+        self.invoke_directly(
+            value_change,
+            Win(Reaper::get().medium_reaper().get_main_hwnd()),
+            match project {
+                None => CurrentProject,
+                Some(p) => Proj(p.raw()),
+            },
+        );
+        // Main_OnCommandEx would trigger the actionInvoked event but it has not enough
+        // parameters for passing values etc.          reaper::
+        // Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
     }
 
     pub fn invoke_directly(
