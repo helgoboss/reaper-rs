@@ -1,9 +1,9 @@
-use crate::{AcceleratorBehavior, decode_user_data, encode_user_data, Hidden, Hwnd, VirtKey};
+use crate::{decode_user_data, encode_user_data, AcceleratorBehavior, Hidden, Hwnd, VirtKey};
+use enumflags2::BitFlags;
 use reaper_low::{firewall, raw};
 use std::fmt::{Debug, Formatter};
 use std::os::raw::c_int;
 use std::ptr::NonNull;
-use enumflags2::BitFlags;
 
 /// Consumers need to implement this trait in order to be called back as part of the keyboard
 /// processing.
@@ -47,7 +47,7 @@ impl AccelMsg {
             behavior,
             key: AcceleratorKey::from_raw(loword(msg.wParam as isize), behavior),
             time: msg.time,
-            point: Point::from_raw(msg.pt)
+            point: Point::from_raw(msg.pt),
         }
     }
 }
@@ -73,7 +73,7 @@ impl AccelMsgKind {
             raw::WM_KEYDOWN => KeyDown,
             raw::WM_KEYUP => KeyUp,
             raw::WM_CHAR => Char,
-            v => Unknown(Hidden(v))
+            v => Unknown(Hidden(v)),
         }
     }
 }
@@ -90,7 +90,7 @@ impl Accel {
         raw::ACCEL {
             fVirt: self.f_virt.bits(),
             key: self.key.to_raw(),
-            cmd: self.cmd
+            cmd: self.cmd,
         }
     }
 }
@@ -99,7 +99,7 @@ impl Accel {
 pub enum AcceleratorKey {
     VirtKey(VirtKey),
     // TODO-high Can this be more than u8?
-    Character(u8)
+    Character(u8),
 }
 
 impl AcceleratorKey {
@@ -128,10 +128,10 @@ pub struct Point {
 }
 
 impl Point {
-    pub(crate)  fn from_raw(v: raw::POINT) -> Self {
+    pub(crate) fn from_raw(v: raw::POINT) -> Self {
         Self {
             x: v.x as u32,
-            y: v.y as u32
+            y: v.y as u32,
         }
     }
 }

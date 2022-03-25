@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
 
-use std::borrow::Cow;
 use super::MediaTrack;
 use crate::{
     require_non_null_panic, AutomationMode, Bpm, Hidden, InputMonitoringMode, Pan, PanMode,
     PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
     ReaperVolumeValue, TrackFxChainType, TrackFxLocation,
 };
+use std::borrow::Cow;
 
 use reaper_low::raw;
 
@@ -339,7 +339,7 @@ impl<'a> SetTrackTitleArgs<'a> {
     pub fn into_owned(self) -> SetTrackTitleArgs<'static> {
         SetTrackTitleArgs {
             track: self.track,
-            name: Cow::Owned(self.name.into_owned())
+            name: Cow::Owned(self.name.into_owned()),
         }
     }
 }

@@ -327,9 +327,7 @@ impl<'a> ControlSurfaceEvent<'a> {
     pub fn into_owned(self) -> ControlSurfaceEvent<'static> {
         use ControlSurfaceEvent::*;
         match self {
-            SetTrackTitle(e) => {
-                SetTrackTitle(e.into_owned())
-            },
+            SetTrackTitle(e) => SetTrackTitle(e.into_owned()),
             CloseNoReset => CloseNoReset,
             SetTrackListChange => SetTrackListChange,
             SetSurfaceVolume(e) => SetSurfaceVolume(e),
@@ -342,7 +340,7 @@ impl<'a> ControlSurfaceEvent<'a> {
             SetRepeatState(e) => SetRepeatState(e),
             SetAutoMode(e) => SetAutoMode(e),
             ResetCachedVolPanStates => ResetCachedVolPanStates,
-            OnTrackSelection(e) =>   OnTrackSelection(e),
+            OnTrackSelection(e) => OnTrackSelection(e),
             ExtSetInputMonitor(e) => ExtSetInputMonitor(e),
             ExtSetFxParam(e) => ExtSetFxParam(e),
             ExtSetFxParamRecFx(e) => ExtSetFxParamRecFx(e),
