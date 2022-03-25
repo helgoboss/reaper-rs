@@ -10,12 +10,13 @@ use crate::keeper::{Keeper, SharedKeeper};
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
-    BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter, HookCommand, HookCommand2,
-    HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment, OnAudioBuffer,
-    OwnedAcceleratorRegister, OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister,
-    PluginRegistration, ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
-    ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle,
-    RegistrationObject, ToggleAction, TranslateAccel,
+    AcceleratorPosition, BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter,
+    HookCommand, HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope,
+    MeasureAlignment, OnAudioBuffer, OwnedAcceleratorRegister, OwnedAudioHookRegister,
+    OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration, ProjectContext,
+    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex,
+    ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
+    TranslateAccel,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -539,6 +540,7 @@ impl ReaperSession {
     pub fn plugin_register_add_accelerator_register<T>(
         &mut self,
         callback: Box<T>,
+        position: AcceleratorPosition,
     ) -> ReaperFunctionResult<RegistrationHandle<T>>
     where
         T: TranslateAccel + 'static,
@@ -552,7 +554,11 @@ impl ReaperSession {
         // should not access it while being registered.
         let reaper_ptr = self.accelerator_registers.keep(register);
         // Register the low-level register at REAPER
-        unsafe { self.plugin_register_add(RegistrationObject::Accelerator(reaper_ptr))? };
+        let reg = match position {
+            AcceleratorPosition::Front => RegistrationObject::FrontAccelerator(reaper_ptr),
+            AcceleratorPosition::Back => RegistrationObject::BackAccelerator(reaper_ptr),
+        };
+        unsafe { self.plugin_register_add(reg)? };
         // Returns a handle which the consumer can use to unregister
         let handle = RegistrationHandle::new(callback_thin_ptr, reaper_ptr.cast());
         Ok(handle)
@@ -805,7 +811,7 @@ impl ReaperSession {
     {
         // Unregister the low-level register from REAPER
         let reaper_ptr = handle.reaper_ptr().cast();
-        unsafe { self.plugin_register_remove(RegistrationObject::Accelerator(reaper_ptr)) };
+        unsafe { self.plugin_register_remove(RegistrationObject::BackAccelerator(reaper_ptr)) };
         // Take the owned register out of its storage
         let owned_register = self
             .accelerator_registers

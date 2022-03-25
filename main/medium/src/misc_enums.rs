@@ -661,8 +661,10 @@ pub enum RegistrationObject<'a> {
     /// command ID, desc is the description, and accel's other parameters are the key to bind.
     /// ```
     Gaccel(NonNull<raw::gaccel_register_t>),
-    /// An record which lets you get a place in the keyboard processing queue.
-    Accelerator(NonNull<raw::accelerator_register_t>),
+    /// A record which lets you get a place in the keyboard processing queue.
+    BackAccelerator(NonNull<raw::accelerator_register_t>),
+    /// A record which lets you get the first place in the keyboard processing queue.
+    FrontAccelerator(NonNull<raw::accelerator_register_t>),
     /// A hidden control surface (useful for being notified by REAPER about events).
     ///
     /// Extract from `reaper_plugin.h`:
@@ -769,8 +771,12 @@ impl<'a> RegistrationObject<'a> {
                 key: reaper_str!("gaccel").into(),
                 value: reg.as_ptr() as _,
             },
-            Accelerator(reg) => PluginRegistration {
+            BackAccelerator(reg) => PluginRegistration {
                 key: reaper_str!("accelerator").into(),
+                value: reg.as_ptr() as _,
+            },
+            FrontAccelerator(reg) => PluginRegistration {
+                key: reaper_str!("<accelerator").into(),
                 value: reg.as_ptr() as _,
             },
             CsurfInst(inst) => PluginRegistration {
@@ -1293,4 +1299,13 @@ impl TimeMode {
             x => Unknown(Hidden(x)),
         }
     }
+}
+
+/// Determines the position of the accelerator in the keyboard processing queue.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum AcceleratorPosition {
+    /// Adds the accelerator to the front of the queue.
+    Front,
+    /// Adds the accelerator to the back of the queue.
+    Back,
 }
