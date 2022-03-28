@@ -1052,6 +1052,19 @@ pub mod root {
             unsafe { ::std::mem::zeroed() }
         }
     }
+    #[doc = " PCM sink API"]
+    #[repr(C)]
+    #[derive(Debug, Default, Copy, Clone, PartialEq)]
+    pub struct midi_quantize_mode_t {
+        pub doquant: bool,
+        pub movemode: ::std::os::raw::c_char,
+        pub sizemode: ::std::os::raw::c_char,
+        pub quantstrength: ::std::os::raw::c_char,
+        pub quantamt: f64,
+        pub swingamt: ::std::os::raw::c_char,
+        pub range_min: ::std::os::raw::c_char,
+        pub range_max: ::std::os::raw::c_char,
+    }
     #[repr(C)]
     pub struct PCM_sink__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]

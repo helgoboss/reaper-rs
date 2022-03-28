@@ -171,6 +171,7 @@ mod codegen {
                 .whitelist_type("accelerator_register_t")
                 .whitelist_type("audio_hook_register_t")
                 .whitelist_type("midi_realtime_write_struct_t")
+                .whitelist_type("midi_quantize_mode_t")
                 .whitelist_type("KbdSectionInfo")
                 .whitelist_type("GUID")
                 .whitelist_type("LPSTR")

@@ -90,6 +90,12 @@ impl Swell {
                     GetModuleFileName: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(GetModuleFileName)).as_ptr(),
                     )),
+                    SWELL_CStringToCFString: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CStringToCFString)).as_ptr(),
+                    )),
+                    SWELL_CFStringToCString: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CFStringToCString)).as_ptr(),
+                    )),
                     SWELL_PtInRect: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_PtInRect)).as_ptr(),
                     )),
@@ -263,6 +269,51 @@ impl Swell {
                     )),
                     KillTimer: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(KillTimer)).as_ptr(),
+                    )),
+                    SWELL_CB_AddString: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_AddString)).as_ptr(),
+                    )),
+                    SWELL_CB_SetCurSel: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_SetCurSel)).as_ptr(),
+                    )),
+                    SWELL_CB_GetCurSel: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_GetCurSel)).as_ptr(),
+                    )),
+                    SWELL_CB_GetNumItems: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_GetNumItems)).as_ptr(),
+                    )),
+                    SWELL_CB_SetItemData: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_SetItemData)).as_ptr(),
+                    )),
+                    SWELL_CB_GetItemData: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_GetItemData)).as_ptr(),
+                    )),
+                    SWELL_CB_Empty: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_Empty)).as_ptr(),
+                    )),
+                    SWELL_CB_InsertString: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_InsertString)).as_ptr(),
+                    )),
+                    SWELL_CB_GetItemText: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_GetItemText)).as_ptr(),
+                    )),
+                    SWELL_CB_DeleteString: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_DeleteString)).as_ptr(),
+                    )),
+                    SWELL_CB_FindString: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CB_FindString)).as_ptr(),
+                    )),
+                    SWELL_TB_SetPos: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_TB_SetPos)).as_ptr(),
+                    )),
+                    SWELL_TB_SetRange: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_TB_SetRange)).as_ptr(),
+                    )),
+                    SWELL_TB_GetPos: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_TB_GetPos)).as_ptr(),
+                    )),
+                    SWELL_TB_SetTic: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_TB_SetTic)).as_ptr(),
                     )),
                     ListView_SetExtendedListViewStyleEx: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ListView_SetExtendedListViewStyleEx))
@@ -615,6 +666,12 @@ impl Swell {
                     SWELL_MessageQueue_Clear: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_MessageQueue_Clear)).as_ptr(),
                     )),
+                    SWELL_MacKeyToWindowsKey: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_MacKeyToWindowsKey)).as_ptr(),
+                    )),
+                    SWELL_MacKeyToWindowsKeyEx: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_MacKeyToWindowsKeyEx)).as_ptr(),
+                    )),
                     SWELL_KeyToASCII: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_KeyToASCII)).as_ptr(),
                     )),
@@ -720,8 +777,23 @@ impl Swell {
                     ResetEvent: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ResetEvent)).as_ptr(),
                     )),
-                    SWELL_CreateProcessFromPID: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CreateProcessFromPID)).as_ptr(),
+                    SWELL_EnsureMultithreadedCocoa: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_EnsureMultithreadedCocoa)).as_ptr(),
+                    )),
+                    SWELL_InitAutoRelease: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_InitAutoRelease)).as_ptr(),
+                    )),
+                    SWELL_QuitAutoRelease: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_QuitAutoRelease)).as_ptr(),
+                    )),
+                    SWELL_TerminateProcess: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_TerminateProcess)).as_ptr(),
+                    )),
+                    SWELL_CreateProcessIO: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_CreateProcessIO)).as_ptr(),
+                    )),
+                    SWELL_ReadWriteProcessIO: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_ReadWriteProcessIO)).as_ptr(),
                     )),
                     SWELL_CreateProcess: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_CreateProcess)).as_ptr(),
@@ -846,6 +918,9 @@ impl Swell {
                     GetTextFace: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(GetTextFace)).as_ptr(),
                     )),
+                    GetNSImageFromHICON: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(GetNSImageFromHICON)).as_ptr(),
+                    )),
                     GetObject: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(GetObject)).as_ptr(),
                     )),
@@ -864,12 +939,6 @@ impl Swell {
                     StretchBlt: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(StretchBlt)).as_ptr(),
                     )),
-                    StretchBltFromMem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(StretchBltFromMem)).as_ptr(),
-                    )),
-                    SWELL_GetScaling256: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetScaling256)).as_ptr(),
-                    )),
                     SWELL_ExtendedAPI: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_ExtendedAPI)).as_ptr(),
                     )),
@@ -885,6 +954,24 @@ impl Swell {
                     SetAllowNoMiddleManRendering: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SetAllowNoMiddleManRendering)).as_ptr(),
                     )),
+                    SWELL_IsRetinaDC: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_IsRetinaDC)).as_ptr(),
+                    )),
+                    SWELL_IsRetinaHWND: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_IsRetinaHWND)).as_ptr(),
+                    )),
+                    SWELL_SetViewGL: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_SetViewGL)).as_ptr(),
+                    )),
+                    SWELL_GetViewGL: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_GetViewGL)).as_ptr(),
+                    )),
+                    SWELL_SetGLContextToView: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_SetGLContextToView)).as_ptr(),
+                    )),
+                    SWELL_EnableMetal: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_EnableMetal)).as_ptr(),
+                    )),
                     BeginPaint: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(BeginPaint)).as_ptr(),
                     )),
@@ -899,6 +986,9 @@ impl Swell {
                     )),
                     ReleaseDC: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(ReleaseDC)).as_ptr(),
+                    )),
+                    SWELL_FlushWindow: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_FlushWindow)).as_ptr(),
                     )),
                     SWELL_FillDialogBackground: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_FillDialogBackground)).as_ptr(),
@@ -929,6 +1019,15 @@ impl Swell {
                     )),
                     SWELL_DrawFocusRect: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_DrawFocusRect)).as_ptr(),
+                    )),
+                    SWELL_SetWindowRepre: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_SetWindowRepre)).as_ptr(),
+                    )),
+                    SWELL_PostQuitMessage: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_PostQuitMessage)).as_ptr(),
+                    )),
+                    SWELL_osx_is_dark_mode: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_osx_is_dark_mode)).as_ptr(),
                     )),
                     SWELL_MakeSetCurParms: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_MakeSetCurParms)).as_ptr(),
@@ -987,15 +1086,6 @@ impl Swell {
                     GetTempPath: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(GetTempPath)).as_ptr(),
                     )),
-                    SWELL_initargs: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_initargs)).as_ptr(),
-                    )),
-                    SWELL_RunMessageLoop: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_RunMessageLoop)).as_ptr(),
-                    )),
-                    SWELL_CreateXBridgeWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CreateXBridgeWindow)).as_ptr(),
-                    )),
                     SWELL_GenerateGUID: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_GenerateGUID)).as_ptr(),
                     )),
@@ -1017,6 +1107,12 @@ impl Swell {
                     AddFontResourceEx: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(AddFontResourceEx)).as_ptr(),
                     )),
+                    SWELL_DisableAppNap: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_DisableAppNap)).as_ptr(),
+                    )),
+                    SWELL_GetOSXVersion: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_GetOSXVersion)).as_ptr(),
+                    )),
                     SWELL_Register_Cursor_Resource: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_Register_Cursor_Resource)).as_ptr(),
                     )),
@@ -1037,9 +1133,6 @@ impl Swell {
                     )),
                     SWELL_DisableContextMenu: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_DisableContextMenu)).as_ptr(),
-                    )),
-                    SWELL_osx_is_dark_mode: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_osx_is_dark_mode)).as_ptr(),
                     )),
                 }
             };
@@ -1080,6 +1173,12 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.GetModuleFileName.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CStringToCFString.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CFStringToCString.is_some() {
                 loaded_count += 1;
             }
             if pointers.SWELL_PtInRect.is_some() {
@@ -1254,6 +1353,51 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.KillTimer.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_AddString.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_SetCurSel.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_GetCurSel.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_GetNumItems.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_SetItemData.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_GetItemData.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_Empty.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_InsertString.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_GetItemText.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_DeleteString.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CB_FindString.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_TB_SetPos.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_TB_SetRange.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_TB_GetPos.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_TB_SetTic.is_some() {
                 loaded_count += 1;
             }
             if pointers.ListView_SetExtendedListViewStyleEx.is_some() {
@@ -1604,6 +1748,12 @@ impl Swell {
             if pointers.SWELL_MessageQueue_Clear.is_some() {
                 loaded_count += 1;
             }
+            if pointers.SWELL_MacKeyToWindowsKey.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_MacKeyToWindowsKeyEx.is_some() {
+                loaded_count += 1;
+            }
             if pointers.SWELL_KeyToASCII.is_some() {
                 loaded_count += 1;
             }
@@ -1709,7 +1859,22 @@ impl Swell {
             if pointers.ResetEvent.is_some() {
                 loaded_count += 1;
             }
-            if pointers.SWELL_CreateProcessFromPID.is_some() {
+            if pointers.SWELL_EnsureMultithreadedCocoa.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_InitAutoRelease.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_QuitAutoRelease.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_TerminateProcess.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_CreateProcessIO.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_ReadWriteProcessIO.is_some() {
                 loaded_count += 1;
             }
             if pointers.SWELL_CreateProcess.is_some() {
@@ -1835,6 +2000,9 @@ impl Swell {
             if pointers.GetTextFace.is_some() {
                 loaded_count += 1;
             }
+            if pointers.GetNSImageFromHICON.is_some() {
+                loaded_count += 1;
+            }
             if pointers.GetObject.is_some() {
                 loaded_count += 1;
             }
@@ -1853,12 +2021,6 @@ impl Swell {
             if pointers.StretchBlt.is_some() {
                 loaded_count += 1;
             }
-            if pointers.StretchBltFromMem.is_some() {
-                loaded_count += 1;
-            }
-            if pointers.SWELL_GetScaling256.is_some() {
-                loaded_count += 1;
-            }
             if pointers.SWELL_ExtendedAPI.is_some() {
                 loaded_count += 1;
             }
@@ -1874,6 +2036,24 @@ impl Swell {
             if pointers.SetAllowNoMiddleManRendering.is_some() {
                 loaded_count += 1;
             }
+            if pointers.SWELL_IsRetinaDC.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_IsRetinaHWND.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetViewGL.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetViewGL.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetGLContextToView.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_EnableMetal.is_some() {
+                loaded_count += 1;
+            }
             if pointers.BeginPaint.is_some() {
                 loaded_count += 1;
             }
@@ -1887,6 +2067,9 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.ReleaseDC.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_FlushWindow.is_some() {
                 loaded_count += 1;
             }
             if pointers.SWELL_FillDialogBackground.is_some() {
@@ -1917,6 +2100,15 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.SWELL_DrawFocusRect.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetWindowRepre.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_PostQuitMessage.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_osx_is_dark_mode.is_some() {
                 loaded_count += 1;
             }
             if pointers.SWELL_MakeSetCurParms.is_some() {
@@ -1976,15 +2168,6 @@ impl Swell {
             if pointers.GetTempPath.is_some() {
                 loaded_count += 1;
             }
-            if pointers.SWELL_initargs.is_some() {
-                loaded_count += 1;
-            }
-            if pointers.SWELL_RunMessageLoop.is_some() {
-                loaded_count += 1;
-            }
-            if pointers.SWELL_CreateXBridgeWindow.is_some() {
-                loaded_count += 1;
-            }
             if pointers.SWELL_GenerateGUID.is_some() {
                 loaded_count += 1;
             }
@@ -2006,6 +2189,12 @@ impl Swell {
             if pointers.AddFontResourceEx.is_some() {
                 loaded_count += 1;
             }
+            if pointers.SWELL_DisableAppNap.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetOSXVersion.is_some() {
+                loaded_count += 1;
+            }
             if pointers.SWELL_Register_Cursor_Resource.is_some() {
                 loaded_count += 1;
             }
@@ -2025,9 +2214,6 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.SWELL_DisableContextMenu.is_some() {
-                loaded_count += 1;
-            }
-            if pointers.SWELL_osx_is_dark_mode.is_some() {
                 loaded_count += 1;
             }
             pointers.loaded_count = loaded_count;
@@ -2261,6 +2447,40 @@ impl Swell {
                 stringify!(GetModuleFileName)
             ),
             Some(f) => f(hInst, fn_, nSize),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CStringToCFString(
+        &self,
+        str: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_void {
+        match self.pointers.SWELL_CStringToCFString {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CStringToCFString)
+            ),
+            Some(f) => f(str),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CFStringToCString(
+        &self,
+        str: *const ::std::os::raw::c_void,
+        buf: *mut ::std::os::raw::c_char,
+        buflen: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.SWELL_CFStringToCString {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CFStringToCString)
+            ),
+            Some(f) => f(str, buf, buflen),
         }
     }
     #[cfg(target_family = "unix")]
@@ -3172,6 +3392,275 @@ impl Swell {
                 stringify!(KillTimer)
             ),
             Some(f) => f(hwnd, timerid),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_AddString(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        str: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_CB_AddString {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_AddString)
+            ),
+            Some(f) => f(hwnd, idx, str),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_SetCurSel(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        sel: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.SWELL_CB_SetCurSel {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_SetCurSel)
+            ),
+            Some(f) => f(hwnd, idx, sel),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_GetCurSel(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_CB_GetCurSel {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_GetCurSel)
+            ),
+            Some(f) => f(hwnd, idx),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_GetNumItems(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_CB_GetNumItems {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_GetNumItems)
+            ),
+            Some(f) => f(hwnd, idx),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_SetItemData(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        item: ::std::os::raw::c_int,
+        data: root::LONG_PTR,
+    ) {
+        match self.pointers.SWELL_CB_SetItemData {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_SetItemData)
+            ),
+            Some(f) => f(hwnd, idx, item, data),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_GetItemData(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        item: ::std::os::raw::c_int,
+    ) -> root::LONG_PTR {
+        match self.pointers.SWELL_CB_GetItemData {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_GetItemData)
+            ),
+            Some(f) => f(hwnd, idx, item),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_Empty(&self, hwnd: root::HWND, idx: ::std::os::raw::c_int) {
+        match self.pointers.SWELL_CB_Empty {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_Empty)
+            ),
+            Some(f) => f(hwnd, idx),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_InsertString(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        pos: ::std::os::raw::c_int,
+        str: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_CB_InsertString {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_InsertString)
+            ),
+            Some(f) => f(hwnd, idx, pos, str),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_GetItemText(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        item: ::std::os::raw::c_int,
+        buf: *mut ::std::os::raw::c_char,
+        bufsz: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_CB_GetItemText {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_GetItemText)
+            ),
+            Some(f) => f(hwnd, idx, item, buf, bufsz),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_DeleteString(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        wh: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.SWELL_CB_DeleteString {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_DeleteString)
+            ),
+            Some(f) => f(hwnd, idx, wh),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CB_FindString(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        startAfter: ::std::os::raw::c_int,
+        str: *const ::std::os::raw::c_char,
+        exact: bool,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_CB_FindString {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CB_FindString)
+            ),
+            Some(f) => f(hwnd, idx, startAfter, str, exact),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_TB_SetPos(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        pos: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.SWELL_TB_SetPos {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_TB_SetPos)
+            ),
+            Some(f) => f(hwnd, idx, pos),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_TB_SetRange(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        low: ::std::os::raw::c_int,
+        hi: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.SWELL_TB_SetRange {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_TB_SetRange)
+            ),
+            Some(f) => f(hwnd, idx, low, hi),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_TB_GetPos(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_TB_GetPos {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_TB_GetPos)
+            ),
+            Some(f) => f(hwnd, idx),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_TB_SetTic(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        pos: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.SWELL_TB_SetTic {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_TB_SetTic)
+            ),
+            Some(f) => f(hwnd, idx, pos),
         }
     }
     #[cfg(target_family = "unix")]
@@ -4981,6 +5470,41 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_MacKeyToWindowsKey(
+        &self,
+        nsevent: *mut ::std::os::raw::c_void,
+        flags: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_MacKeyToWindowsKey {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_MacKeyToWindowsKey)
+            ),
+            Some(f) => f(nsevent, flags),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_MacKeyToWindowsKeyEx(
+        &self,
+        nsevent: *mut ::std::os::raw::c_void,
+        flags: *mut ::std::os::raw::c_int,
+        mode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_MacKeyToWindowsKeyEx {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_MacKeyToWindowsKeyEx)
+            ),
+            Some(f) => f(nsevent, flags, mode),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_KeyToASCII(
         &self,
         wParam: ::std::os::raw::c_int,
@@ -5453,13 +5977,87 @@ impl Swell {
         }
     }
     #[cfg(target_family = "unix")]
-    pub fn SWELL_CreateProcessFromPID(&self, pid: ::std::os::raw::c_int) -> root::HANDLE {
-        match self.pointers.SWELL_CreateProcessFromPID {
+    pub fn SWELL_EnsureMultithreadedCocoa(&self) {
+        match self.pointers.SWELL_EnsureMultithreadedCocoa {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
-                stringify!(SWELL_CreateProcessFromPID)
+                stringify!(SWELL_EnsureMultithreadedCocoa)
             ),
-            Some(f) => f(pid),
+            Some(f) => f(),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    pub fn SWELL_InitAutoRelease(&self) -> *mut ::std::os::raw::c_void {
+        match self.pointers.SWELL_InitAutoRelease {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_InitAutoRelease)
+            ),
+            Some(f) => f(),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_QuitAutoRelease(&self, p: *mut ::std::os::raw::c_void) {
+        match self.pointers.SWELL_QuitAutoRelease {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_QuitAutoRelease)
+            ),
+            Some(f) => f(p),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_TerminateProcess(&self, hand: root::HANDLE) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_TerminateProcess {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_TerminateProcess)
+            ),
+            Some(f) => f(hand),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_CreateProcessIO(
+        &self,
+        exe: *const ::std::os::raw::c_char,
+        nparams: ::std::os::raw::c_int,
+        params: *mut *const ::std::os::raw::c_char,
+        redirectIO: bool,
+    ) -> root::HANDLE {
+        match self.pointers.SWELL_CreateProcessIO {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_CreateProcessIO)
+            ),
+            Some(f) => f(exe, nparams, params, redirectIO),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_ReadWriteProcessIO(
+        &self,
+        arg1: root::HANDLE,
+        w: ::std::os::raw::c_int,
+        buf: *mut ::std::os::raw::c_char,
+        bufsz: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_ReadWriteProcessIO {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_ReadWriteProcessIO)
+            ),
+            Some(f) => f(arg1, w, buf, bufsz),
         }
     }
     #[cfg(target_family = "unix")]
@@ -6119,6 +6717,19 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetNSImageFromHICON(&self, arg1: root::HICON) -> *mut ::std::os::raw::c_void {
+        match self.pointers.GetNSImageFromHICON {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetNSImageFromHICON)
+            ),
+            Some(f) => f(arg1),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetObject(
         &self,
         icon: root::HICON,
@@ -6230,40 +6841,6 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn StretchBltFromMem(
-        &self,
-        hdcOut: root::HDC,
-        x: ::std::os::raw::c_int,
-        y: ::std::os::raw::c_int,
-        w: ::std::os::raw::c_int,
-        h: ::std::os::raw::c_int,
-        bits: *const ::std::os::raw::c_void,
-        srcw: ::std::os::raw::c_int,
-        srch: ::std::os::raw::c_int,
-        srcspan: ::std::os::raw::c_int,
-    ) {
-        match self.pointers.StretchBltFromMem {
-            None => panic!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(StretchBltFromMem)
-            ),
-            Some(f) => f(hdcOut, x, y, w, h, bits, srcw, srch, srcspan),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    pub fn SWELL_GetScaling256(&self) -> ::std::os::raw::c_int {
-        match self.pointers.SWELL_GetScaling256 {
-            None => panic!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(SWELL_GetScaling256)
-            ),
-            Some(f) => f(),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_ExtendedAPI(
         &self,
         key: *const ::std::os::raw::c_char,
@@ -6337,6 +6914,88 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_IsRetinaDC(&self, hdc: root::HDC) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_IsRetinaDC {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_IsRetinaDC)
+            ),
+            Some(f) => f(hdc),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_IsRetinaHWND(&self, h: root::HWND) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_IsRetinaHWND {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_IsRetinaHWND)
+            ),
+            Some(f) => f(h),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetViewGL(&self, h: root::HWND, wantGL: ::std::os::raw::c_char) {
+        match self.pointers.SWELL_SetViewGL {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_SetViewGL)
+            ),
+            Some(f) => f(h, wantGL),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetViewGL(&self, h: root::HWND) -> bool {
+        match self.pointers.SWELL_GetViewGL {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_GetViewGL)
+            ),
+            Some(f) => f(h),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetGLContextToView(&self, h: root::HWND) -> bool {
+        match self.pointers.SWELL_SetGLContextToView {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_SetGLContextToView)
+            ),
+            Some(f) => f(h),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_EnableMetal(
+        &self,
+        h: root::HWND,
+        mode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_EnableMetal {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_EnableMetal)
+            ),
+            Some(f) => f(h, mode),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn BeginPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC {
         match self.pointers.BeginPaint {
             None => panic!(
@@ -6396,6 +7055,19 @@ impl Swell {
                 stringify!(ReleaseDC)
             ),
             Some(f) => f(arg1, arg2),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_FlushWindow(&self, arg1: root::HWND) {
+        match self.pointers.SWELL_FlushWindow {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_FlushWindow)
+            ),
+            Some(f) => f(arg1),
         }
     }
     #[cfg(target_family = "unix")]
@@ -6551,6 +7223,47 @@ impl Swell {
                 stringify!(SWELL_DrawFocusRect)
             ),
             Some(f) => f(hwndPar, rct, handle),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetWindowRepre(
+        &self,
+        hwnd: root::HWND,
+        fn_: *const ::std::os::raw::c_char,
+        isDirty: bool,
+    ) {
+        match self.pointers.SWELL_SetWindowRepre {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_SetWindowRepre)
+            ),
+            Some(f) => f(hwnd, fn_, isDirty),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_PostQuitMessage(&self, sender: *mut ::std::os::raw::c_void) {
+        match self.pointers.SWELL_PostQuitMessage {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_PostQuitMessage)
+            ),
+            Some(f) => f(sender),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    pub fn SWELL_osx_is_dark_mode(&self, mode: ::std::os::raw::c_int) -> bool {
+        match self.pointers.SWELL_osx_is_dark_mode {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_osx_is_dark_mode)
+            ),
+            Some(f) => f(mode),
         }
     }
     #[cfg(target_family = "unix")]
@@ -6897,51 +7610,6 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn SWELL_initargs(
-        &self,
-        argc: *mut ::std::os::raw::c_int,
-        argv: *mut *mut *mut ::std::os::raw::c_char,
-    ) {
-        match self.pointers.SWELL_initargs {
-            None => panic!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(SWELL_initargs)
-            ),
-            Some(f) => f(argc, argv),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    pub fn SWELL_RunMessageLoop(&self) {
-        match self.pointers.SWELL_RunMessageLoop {
-            None => panic!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(SWELL_RunMessageLoop)
-            ),
-            Some(f) => f(),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn SWELL_CreateXBridgeWindow(
-        &self,
-        viewpar: root::HWND,
-        wref: *mut *mut ::std::os::raw::c_void,
-        arg1: *const root::RECT,
-    ) -> root::HWND {
-        match self.pointers.SWELL_CreateXBridgeWindow {
-            None => panic!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(SWELL_CreateXBridgeWindow)
-            ),
-            Some(f) => f(viewpar, wref, arg1),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GenerateGUID(&self, g: *mut ::std::os::raw::c_void) -> bool {
         match self.pointers.SWELL_GenerateGUID {
             None => panic!(
@@ -7039,6 +7707,26 @@ impl Swell {
                 stringify!(AddFontResourceEx)
             ),
             Some(f) => f(str, fl, pdv),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    pub fn SWELL_DisableAppNap(&self, disable: ::std::os::raw::c_int) {
+        match self.pointers.SWELL_DisableAppNap {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_DisableAppNap)
+            ),
+            Some(f) => f(disable),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    pub fn SWELL_GetOSXVersion(&self) -> ::std::os::raw::c_int {
+        match self.pointers.SWELL_GetOSXVersion {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_GetOSXVersion)
+            ),
+            Some(f) => f(),
         }
     }
     #[cfg(target_family = "unix")]
@@ -7147,16 +7835,6 @@ impl Swell {
                 stringify!(SWELL_DisableContextMenu)
             ),
             Some(f) => f(arg1, arg2),
-        }
-    }
-    #[cfg(target_family = "unix")]
-    pub fn SWELL_osx_is_dark_mode(&self, mode: ::std::os::raw::c_int) -> bool {
-        match self.pointers.SWELL_osx_is_dark_mode {
-            None => panic!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(SWELL_osx_is_dark_mode)
-            ),
-            Some(f) => f(mode),
         }
     }
     #[cfg(target_family = "windows")]
@@ -7847,6 +8525,16 @@ pub struct SwellFunctionPointers {
             nSize: root::DWORD,
         ) -> root::DWORD,
     >,
+    pub SWELL_CStringToCFString: Option<
+        unsafe extern "C" fn(str: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void,
+    >,
+    pub SWELL_CFStringToCString: Option<
+        unsafe extern "C" fn(
+            str: *const ::std::os::raw::c_void,
+            buf: *mut ::std::os::raw::c_char,
+            buflen: ::std::os::raw::c_int,
+        ),
+    >,
     pub SWELL_PtInRect:
         Option<unsafe extern "C" fn(r: *const root::RECT, p: root::POINT) -> root::BOOL>,
     pub ShellExecute: Option<
@@ -8095,6 +8783,100 @@ pub struct SwellFunctionPointers {
     >,
     pub KillTimer:
         Option<unsafe extern "C" fn(hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL>,
+    pub SWELL_CB_AddString: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            str: *const ::std::os::raw::c_char,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_CB_SetCurSel: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            sel: ::std::os::raw::c_int,
+        ),
+    >,
+    pub SWELL_CB_GetCurSel: Option<
+        unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_CB_GetNumItems: Option<
+        unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_CB_SetItemData: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            item: ::std::os::raw::c_int,
+            data: root::LONG_PTR,
+        ),
+    >,
+    pub SWELL_CB_GetItemData: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            item: ::std::os::raw::c_int,
+        ) -> root::LONG_PTR,
+    >,
+    pub SWELL_CB_Empty: Option<unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int)>,
+    pub SWELL_CB_InsertString: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            pos: ::std::os::raw::c_int,
+            str: *const ::std::os::raw::c_char,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_CB_GetItemText: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            item: ::std::os::raw::c_int,
+            buf: *mut ::std::os::raw::c_char,
+            bufsz: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_CB_DeleteString: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            wh: ::std::os::raw::c_int,
+        ),
+    >,
+    pub SWELL_CB_FindString: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            startAfter: ::std::os::raw::c_int,
+            str: *const ::std::os::raw::c_char,
+            exact: bool,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_TB_SetPos: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            pos: ::std::os::raw::c_int,
+        ),
+    >,
+    pub SWELL_TB_SetRange: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            low: ::std::os::raw::c_int,
+            hi: ::std::os::raw::c_int,
+        ),
+    >,
+    pub SWELL_TB_GetPos: Option<
+        unsafe extern "C" fn(hwnd: root::HWND, idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_TB_SetTic: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            idx: ::std::os::raw::c_int,
+            pos: ::std::os::raw::c_int,
+        ),
+    >,
     pub ListView_SetExtendedListViewStyleEx: Option<
         unsafe extern "C" fn(
             h: root::HWND,
@@ -8542,6 +9324,19 @@ pub struct SwellFunctionPointers {
     >,
     pub SWELL_MessageQueue_Flush: Option<extern "C" fn()>,
     pub SWELL_MessageQueue_Clear: Option<unsafe extern "C" fn(h: root::HWND)>,
+    pub SWELL_MacKeyToWindowsKey: Option<
+        unsafe extern "C" fn(
+            nsevent: *mut ::std::os::raw::c_void,
+            flags: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub SWELL_MacKeyToWindowsKeyEx: Option<
+        unsafe extern "C" fn(
+            nsevent: *mut ::std::os::raw::c_void,
+            flags: *mut ::std::os::raw::c_int,
+            mode: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub SWELL_KeyToASCII: Option<
         unsafe extern "C" fn(
             wParam: ::std::os::raw::c_int,
@@ -8623,8 +9418,27 @@ pub struct SwellFunctionPointers {
         Option<unsafe extern "C" fn(evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL>,
     pub SetEvent: Option<unsafe extern "C" fn(evt: root::HANDLE) -> root::BOOL>,
     pub ResetEvent: Option<unsafe extern "C" fn(evt: root::HANDLE) -> root::BOOL>,
-    pub SWELL_CreateProcessFromPID:
-        Option<extern "C" fn(pid: ::std::os::raw::c_int) -> root::HANDLE>,
+    pub SWELL_EnsureMultithreadedCocoa: Option<extern "C" fn()>,
+    pub SWELL_InitAutoRelease: Option<extern "C" fn() -> *mut ::std::os::raw::c_void>,
+    pub SWELL_QuitAutoRelease: Option<unsafe extern "C" fn(p: *mut ::std::os::raw::c_void)>,
+    pub SWELL_TerminateProcess:
+        Option<unsafe extern "C" fn(hand: root::HANDLE) -> ::std::os::raw::c_int>,
+    pub SWELL_CreateProcessIO: Option<
+        unsafe extern "C" fn(
+            exe: *const ::std::os::raw::c_char,
+            nparams: ::std::os::raw::c_int,
+            params: *mut *const ::std::os::raw::c_char,
+            redirectIO: bool,
+        ) -> root::HANDLE,
+    >,
+    pub SWELL_ReadWriteProcessIO: Option<
+        unsafe extern "C" fn(
+            arg1: root::HANDLE,
+            w: ::std::os::raw::c_int,
+            buf: *mut ::std::os::raw::c_char,
+            bufsz: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub SWELL_CreateProcess: Option<
         unsafe extern "C" fn(
             exe: *const ::std::os::raw::c_char,
@@ -8801,6 +9615,8 @@ pub struct SwellFunctionPointers {
             lpFaceName: root::LPTSTR,
         ) -> ::std::os::raw::c_int,
     >,
+    pub GetNSImageFromHICON:
+        Option<unsafe extern "C" fn(arg1: root::HICON) -> *mut ::std::os::raw::c_void>,
     pub GetObject: Option<
         unsafe extern "C" fn(
             icon: root::HICON,
@@ -8846,20 +9662,6 @@ pub struct SwellFunctionPointers {
             mode: ::std::os::raw::c_int,
         ),
     >,
-    pub StretchBltFromMem: Option<
-        unsafe extern "C" fn(
-            hdcOut: root::HDC,
-            x: ::std::os::raw::c_int,
-            y: ::std::os::raw::c_int,
-            w: ::std::os::raw::c_int,
-            h: ::std::os::raw::c_int,
-            bits: *const ::std::os::raw::c_void,
-            srcw: ::std::os::raw::c_int,
-            srch: ::std::os::raw::c_int,
-            srcspan: ::std::os::raw::c_int,
-        ),
-    >,
-    pub SWELL_GetScaling256: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub SWELL_ExtendedAPI: Option<
         unsafe extern "C" fn(
             key: *const ::std::os::raw::c_char,
@@ -8878,6 +9680,15 @@ pub struct SwellFunctionPointers {
     >,
     pub SetOpaque: Option<unsafe extern "C" fn(h: root::HWND, isopaque: bool)>,
     pub SetAllowNoMiddleManRendering: Option<unsafe extern "C" fn(h: root::HWND, allow: bool)>,
+    pub SWELL_IsRetinaDC: Option<unsafe extern "C" fn(hdc: root::HDC) -> ::std::os::raw::c_int>,
+    pub SWELL_IsRetinaHWND: Option<unsafe extern "C" fn(h: root::HWND) -> ::std::os::raw::c_int>,
+    pub SWELL_SetViewGL:
+        Option<unsafe extern "C" fn(h: root::HWND, wantGL: ::std::os::raw::c_char)>,
+    pub SWELL_GetViewGL: Option<unsafe extern "C" fn(h: root::HWND) -> bool>,
+    pub SWELL_SetGLContextToView: Option<unsafe extern "C" fn(h: root::HWND) -> bool>,
+    pub SWELL_EnableMetal: Option<
+        unsafe extern "C" fn(h: root::HWND, mode: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
+    >,
     pub BeginPaint:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC>,
     pub EndPaint:
@@ -8885,6 +9696,7 @@ pub struct SwellFunctionPointers {
     pub GetDC: Option<unsafe extern "C" fn(arg1: root::HWND) -> root::HDC>,
     pub GetWindowDC: Option<unsafe extern "C" fn(arg1: root::HWND) -> root::HDC>,
     pub ReleaseDC: Option<unsafe extern "C" fn(arg1: root::HWND, arg2: root::HDC)>,
+    pub SWELL_FlushWindow: Option<unsafe extern "C" fn(arg1: root::HWND)>,
     pub SWELL_FillDialogBackground: Option<
         unsafe extern "C" fn(hdc: root::HDC, r: *const root::RECT, level: ::std::os::raw::c_int),
     >,
@@ -8929,6 +9741,11 @@ pub struct SwellFunctionPointers {
             handle: *mut *mut ::std::os::raw::c_void,
         ),
     >,
+    pub SWELL_SetWindowRepre: Option<
+        unsafe extern "C" fn(hwnd: root::HWND, fn_: *const ::std::os::raw::c_char, isDirty: bool),
+    >,
+    pub SWELL_PostQuitMessage: Option<unsafe extern "C" fn(sender: *mut ::std::os::raw::c_void)>,
+    pub SWELL_osx_is_dark_mode: Option<extern "C" fn(mode: ::std::os::raw::c_int) -> bool>,
     pub SWELL_MakeSetCurParms: Option<
         unsafe extern "C" fn(
             xscale: f32,
@@ -9064,20 +9881,6 @@ pub struct SwellFunctionPointers {
         Option<unsafe extern "C" fn(hList: root::HWND, mask: ::std::os::raw::c_int)>,
     pub GetTempPath:
         Option<unsafe extern "C" fn(sz: ::std::os::raw::c_int, buf: *mut ::std::os::raw::c_char)>,
-    pub SWELL_initargs: Option<
-        unsafe extern "C" fn(
-            argc: *mut ::std::os::raw::c_int,
-            argv: *mut *mut *mut ::std::os::raw::c_char,
-        ),
-    >,
-    pub SWELL_RunMessageLoop: Option<extern "C" fn()>,
-    pub SWELL_CreateXBridgeWindow: Option<
-        unsafe extern "C" fn(
-            viewpar: root::HWND,
-            wref: *mut *mut ::std::os::raw::c_void,
-            arg1: *const root::RECT,
-        ) -> root::HWND,
-    >,
     pub SWELL_GenerateGUID: Option<unsafe extern "C" fn(g: *mut ::std::os::raw::c_void) -> bool>,
     pub EnumChildWindows: Option<
         unsafe extern "C" fn(
@@ -9100,6 +9903,8 @@ pub struct SwellFunctionPointers {
             pdv: *mut ::std::os::raw::c_void,
         ) -> ::std::os::raw::c_int,
     >,
+    pub SWELL_DisableAppNap: Option<extern "C" fn(disable: ::std::os::raw::c_int)>,
+    pub SWELL_GetOSXVersion: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub SWELL_Register_Cursor_Resource: Option<
         unsafe extern "C" fn(
             idx: *const ::std::os::raw::c_char,
@@ -9129,10 +9934,9 @@ pub struct SwellFunctionPointers {
     pub SWELL_SetClassName:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char)>,
     pub SWELL_DisableContextMenu: Option<unsafe extern "C" fn(arg1: root::HWND, arg2: bool)>,
-    pub SWELL_osx_is_dark_mode: Option<extern "C" fn(mode: ::std::os::raw::c_int) -> bool>,
 }
 impl SwellFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 329u32;
+    pub(crate) const TOTAL_COUNT: u32 = 360u32;
 }
 #[cfg(target_family = "windows")]
 mod windows {
