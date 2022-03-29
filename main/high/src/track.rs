@@ -6,7 +6,8 @@ use crate::guid::Guid;
 use crate::track_route::TrackRoute;
 
 use crate::{
-    Chunk, ChunkRegion, Pan, Project, Reaper, SendPartnerType, TrackRoutePartner, Volume, Width,
+    Chunk, ChunkRegion, Item, Pan, Project, Reaper, SendPartnerType, TrackRoutePartner, Volume,
+    Width,
 };
 
 use reaper_medium::NotificationBehavior::NotifyAll;
@@ -16,9 +17,9 @@ use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo}
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperString, ReaperStringArg, RecordArmMode,
-    RecordingInput, RgbColor, SoloMode, TrackArea, TrackAttributeKey, TrackLocation,
-    TrackSendCategory, TrackSendDirection,
+    InputMonitoringMode, MediaTrack, ReaProject, ReaperFunctionError, ReaperString,
+    ReaperStringArg, RecordArmMode, RecordingInput, RgbColor, SoloMode, TrackArea,
+    TrackAttributeKey, TrackLocation, TrackSendCategory, TrackSendDirection,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -82,6 +83,16 @@ impl Track {
                 .medium_reaper()
                 .get_set_media_track_info_set_name(self.raw(), name);
         }
+    }
+
+    pub fn add_item(&self) -> Result<Item, ReaperFunctionError> {
+        self.load_and_check_if_necessary_or_complain();
+        let raw_item = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .add_media_item_to_track(self.raw())?
+        };
+        Ok(Item::new(raw_item))
     }
 
     // TODO-low It's really annoying to always have to unwrap an option even if we know this is not

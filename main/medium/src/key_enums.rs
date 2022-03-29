@@ -448,6 +448,43 @@ impl<'a> TrackAttributeKey<'a> {
     }
 }
 
+/// Take attribute key which you can pass to [`get_set_media_item_take_info()`].
+///
+/// [`get_set_media_item_take_info()`]: struct.Reaper.html#method.get_set_media_item_take_info
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TakeAttributeKey<'a> {
+    /// Current source.
+    ///
+    /// Note that if setting this, you should first retrieve the old source, set the new, *then*
+    /// delete the old.
+    ///
+    /// `*mut PCM_source`
+    Source,
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
+    Custom(Cow<'a, ReaperStr>),
+}
+
+impl<'a> TakeAttributeKey<'a> {
+    /// Convenience function for creating a [`Custom`] key.
+    ///
+    /// [`Custom`]: #variant.Custom
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> TakeAttributeKey<'a> {
+        TakeAttributeKey::Custom(key.into().into_inner())
+    }
+
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
+        use TakeAttributeKey::*;
+        match self {
+            Source => reaper_str!("P_SOURCE").into(),
+            Custom(key) => key,
+        }
+    }
+}
+
 /// Track send attribute key which you can pass to [`get_set_track_send_info()`].
 ///
 /// [`get_set_track_send_info()`]: struct.Reaper.html#method.get_set_track_send_info

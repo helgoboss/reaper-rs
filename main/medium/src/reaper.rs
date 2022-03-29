@@ -26,10 +26,11 @@ use crate::{
     ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
     ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
     RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode,
-    StuffMidiMessageTarget, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -470,6 +471,59 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         self.low
             .GetSetMediaTrackInfo(track.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
+    }
+
+    /// Gets or sets a take attribute.
+    ///
+    /// Returns the current value if `new_value` is `null_mut()`.
+    ///
+    /// It's recommended to use one of the convenience functions instead. They all start with
+    /// `get_set_media_item_take_info_` and are more type-safe.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take or invalid new value.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_item_take_info(
+        &self,
+        take: MediaItemTake,
+        attribute_key: TakeAttributeKey,
+        new_value: *mut c_void,
+    ) -> *mut c_void
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.GetSetMediaItemTakeInfo(
+            take.as_ptr(),
+            attribute_key.into_raw().as_ptr(),
+            new_value,
+        )
+    }
+
+    /// Convenience function which sets the take's source (`P_SOURCE`).
+    ///
+    /// Returns the previous source in case the take had a source assigned.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_item_take_info_set_source(
+        &self,
+        take: MediaItemTake,
+        source: OwnedPcmSource,
+    ) -> Option<OwnedPcmSource>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let previous_source_ptr =
+            self.get_set_media_item_take_info(take, TakeAttributeKey::Source, null_mut())
+                as *mut raw::PCM_source;
+        let new_source_ptr = source.leak().as_ptr();
+        self.get_set_media_item_take_info(take, TakeAttributeKey::Source, new_source_ptr as _);
+        NonNull::new(previous_source_ptr).map(|raw| OwnedPcmSource::from_raw(raw))
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
@@ -4527,6 +4581,104 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.SetMixerScroll(track.as_ptr());
         NonNull::new(ptr)
+    }
+
+    /// Creates a new media item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn add_media_item_to_track(
+        &self,
+        track: MediaTrack,
+    ) -> ReaperFunctionResult<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.AddMediaItemToTrack(track.as_ptr());
+        NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't add item to track"))
+    }
+
+    /// Creates a new take in an item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn add_take_to_media_item(
+        &self,
+        item: MediaItem,
+    ) -> ReaperFunctionResult<MediaItemTake>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.AddTakeToMediaItem(item.as_ptr());
+        NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't add take to item"))
+    }
+
+    /// Sets the position of the given item.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_media_item_position(
+        &self,
+        item: MediaItem,
+        pos: PositionInSeconds,
+        refresh_behavior: UiRefreshBehavior,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.SetMediaItemPosition(
+            item.as_ptr(),
+            pos.get(),
+            refresh_behavior == UiRefreshBehavior::Refresh,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't set item position"));
+        }
+        Ok(())
+    }
+
+    /// Sets the length of the given item.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_media_item_length(
+        &self,
+        item: MediaItem,
+        length: DurationInSeconds,
+        refresh_behavior: UiRefreshBehavior,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.SetMediaItemLength(
+            item.as_ptr(),
+            length.get(),
+            refresh_behavior == UiRefreshBehavior::Refresh,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't set item length"));
+        }
+        Ok(())
     }
 
     /// Sets a track attribute as numerical value.

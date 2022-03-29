@@ -152,6 +152,15 @@ pub enum UndoBehavior {
     AddUndoPoint,
 }
 
+/// Determines whether to refresh the UI.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum UiRefreshBehavior {
+    /// Doesn't refresh the UI.
+    NoRefresh,
+    /// Refreshes the UI.
+    Refresh,
+}
+
 /// Determines whether to import MIDI as in-project MIDI events or not.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum MidiImportBehavior {
