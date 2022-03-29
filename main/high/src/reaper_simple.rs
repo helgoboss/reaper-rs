@@ -12,7 +12,9 @@ use reaper_medium::{
     ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ResampleMode, SectionId,
     StuffMidiMessageTarget, TrackLocation,
 };
+use std::fmt::Debug;
 use std::path::PathBuf;
+use std::{mem, os};
 
 impl Reaper {
     /// Gives access to the medium-level Reaper instance.
@@ -317,5 +319,53 @@ impl Reaper {
 
     pub fn audio_is_running(&self) -> bool {
         self.medium_reaper().audio_is_running()
+    }
+
+    pub fn with_pref_pool_midi_when_duplicating<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
+        // Bit 1 (2^1 = 2) of "trimmidionsplit" pref
+        self.with_temporarily_modified_preference(
+            "trimmidionsplit",
+            |v: os::raw::c_int| if on { v | 2 } else { v & !2 },
+            f,
+        )
+        .unwrap()
+    }
+
+    pub fn with_pref_import_as_mid_file_reference<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
+        // Bit 3 (2^3 = 8) of "opencopyprompt" changes between "Import as MID file reference" (on)
+        // and "Import as in-project MIDI" (off).
+        self.with_temporarily_modified_preference(
+            "opencopyprompt",
+            |v: os::raw::c_int| if on { v | 8 } else { v & !8 },
+            f,
+        )
+        .unwrap()
+    }
+
+    fn with_temporarily_modified_preference<'a, T: Copy + Debug, R>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+        create_new_value: impl FnOnce(T) -> T,
+        f: impl FnOnce() -> R,
+    ) -> Result<R, &'static str> {
+        // trimmidionsplit: bit 0 (2^0 = 1) => Trim MIDI on split, bit 1 (2^1 = 2) => pool MIDI source data when pasting/duplicating
+        let config_var_result = Reaper::get()
+            .medium_reaper
+            .get_config_var(name)
+            .ok_or("preference doesn't exist")?;
+        let size_matches = config_var_result.size as usize == mem::size_of::<T>();
+        if !size_matches {
+            return Err("size mismatch");
+        }
+        let mut casted_value_ptr = config_var_result.value.cast::<T>();
+        let casted_value_ref = unsafe { casted_value_ptr.as_mut() };
+        let old_value = *casted_value_ref;
+        let new_value = create_new_value(old_value);
+        println!("Setting new value: {:?}", new_value);
+        *casted_value_ref = new_value;
+        let result = f();
+        println!("Restoring old value: {:?}", old_value);
+        *casted_value_ref = old_value;
+        Ok(result)
     }
 }
