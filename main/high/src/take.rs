@@ -44,6 +44,6 @@ impl Take {
                 .medium_reaper
                 .get_set_media_item_take_info_set_source(self.raw, source.into_raw())
         };
-        previous_source.map(|raw| OwnedSource::new(raw))
+        previous_source.map(OwnedSource::new)
     }
 }
