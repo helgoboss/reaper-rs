@@ -99,6 +99,24 @@ impl Project {
         })
     }
 
+    pub fn items(self) -> impl Iterator<Item = Item> + ExactSizeIterator + 'static {
+        self.complain_if_not_available();
+        (0..self.item_count()).map(move |i| {
+            let media_item = Reaper::get()
+                .medium_reaper()
+                .get_media_item(self.context(), i)
+                .unwrap();
+            Item::new(media_item)
+        })
+    }
+
+    pub fn select_item_exclusively(&self, item: Item) {
+        for item in self.items() {
+            item.set_selected(false);
+        }
+        item.set_selected(true);
+    }
+
     pub fn is_available(self) -> bool {
         Reaper::get()
             .medium_reaper()
@@ -154,9 +172,14 @@ impl Project {
 
     pub fn track_count(self) -> u32 {
         self.complain_if_not_available();
+        Reaper::get().medium_reaper().count_tracks(self.context()) as u32
+    }
+
+    pub fn item_count(self) -> u32 {
+        self.complain_if_not_available();
         Reaper::get()
             .medium_reaper()
-            .count_tracks(Proj(self.rea_project)) as u32
+            .count_media_items(self.context()) as u32
     }
 
     // TODO-low Introduce variant that doesn't notify ControlSurface

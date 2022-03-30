@@ -25,12 +25,12 @@ use crate::{
     PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
     ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
     ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef,
-    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
+    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -345,6 +345,42 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
+        NonNull::new(ptr)
+    }
+
+    /// Returns the item at the given index.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_media_item(&self, project: ProjectContext, item_index: u32) -> Option<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.get_media_item_unchecked(project, item_index) }
+    }
+
+    /// Like [`get_media_item()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_media_item()`]: #method.get_media_item
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_media_item_unchecked(
+        &self,
+        project: ProjectContext,
+        item_index: u32,
+    ) -> Option<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetMediaItem(project.to_raw(), item_index as i32);
         NonNull::new(ptr)
     }
 
@@ -686,6 +722,42 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let value = mode.to_raw();
         self.get_set_media_track_info(track, TrackAttributeKey::Solo, &value as *const _ as _);
+    }
+
+    /// Convenience function which sets whether the track is shown in the mixer (`B_SHOWINMIXER`).
+    ///
+    /// Do not use on master track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_set_show_in_mixer(&self, track: MediaTrack, show: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_track_info(
+            track,
+            TrackAttributeKey::ShowInMixer,
+            &show as *const _ as _,
+        );
+    }
+
+    /// Convenience function which sets whether the track is shown in the arrange view (`B_SHOWINTCP`).
+    ///
+    /// Do not use on master track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_set_media_track_info_set_show_in_tcp(&self, track: MediaTrack, show: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_track_info(track, TrackAttributeKey::ShowInTcp, &show as *const _ as _);
     }
 
     /// Convenience function which returns the given track's pan mode (I_PANMODE).
@@ -1992,6 +2064,33 @@ impl<UsageScope> Reaper<UsageScope> {
             .Main_OnCommandEx(command_id.to_raw(), flag, project.to_raw());
     }
 
+    /// Sends an action command to the last focused MIDI editor.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if no MIDI editor is open or if the view mode does not match the input.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn midi_editor_last_focused_on_command(
+        &self,
+        command_id: CommandId,
+        required_view_mode: RequiredViewMode,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.MIDIEditor_LastFocused_OnCommand(
+            command_id.to_raw(),
+            required_view_mode == RequiredViewMode::ListView,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "no MIDI editor with this view mode open",
+            ));
+        }
+        Ok(())
+    }
+
     /// Informs control surfaces that the given track's mute state has changed.
     ///
     /// Doesn't actually change the mute state.
@@ -2201,6 +2300,16 @@ impl<UsageScope> Reaper<UsageScope> {
         require_non_null_panic(self.low.GetMainHwnd())
     }
 
+    /// Returns the focused MIDI editor window.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn midi_editor_get_active(&self) -> Option<Hwnd>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        NonNull::new(self.low.MIDIEditor_GetActive())
+    }
+
     /// Looks up the command ID for a named command.
     ///
     /// Named commands can be registered by extensions (e.g. `_SWS_ABOUT`), ReaScripts
@@ -2324,6 +2433,36 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.CountTracks(project.to_raw()) as u32
+    }
+
+    /// Returns the number of items in the given project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn count_media_items(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.count_media_items_unchecked(project) }
+    }
+
+    /// Like [`count_media_items()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`count_media_items()`]: #method.count_media_items
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn count_media_items_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CountMediaItems(project.to_raw()) as u32
     }
 
     /// Returns the length of the given project.
@@ -4178,6 +4317,35 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
+    /// Counts the number of items in the given track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn count_track_media_items(&self, track: MediaTrack) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CountTrackMediaItems(track.as_ptr()) as u32
+    }
+
+    /// Returns the media item on the given track at the given index.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_track_media_item(&self, track: MediaTrack, item_idx: u32) -> Option<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = unsafe { self.low.GetTrackMediaItem(track.as_ptr(), item_idx as _) };
+        NonNull::new(ptr)
+    }
+
     /// Gets the number of FX instances on the given track's normal FX chain.
     ///
     /// # Safety
@@ -4601,6 +4769,34 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't add item to track"))
     }
 
+    /// Deletes the given media item.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not successful.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track or item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn delete_track_media_item(
+        &self,
+        track: MediaTrack,
+        item: MediaItem,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.DeleteTrackMediaItem(track.as_ptr(), item.as_ptr());
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "deletion of media item not successful",
+            ));
+        }
+        Ok(())
+    }
+
     /// Creates a new take in an item.
     ///
     /// # Safety
@@ -4679,6 +4875,20 @@ impl<UsageScope> Reaper<UsageScope> {
             return Err(ReaperFunctionError::new("couldn't set item length"));
         }
         Ok(())
+    }
+
+    /// Selects or unselects the given media item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_media_item_selected(&self, item: MediaItem, selected: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.SetMediaItemSelected(item.as_ptr(), selected);
     }
 
     /// Sets a track attribute as numerical value.
@@ -5216,6 +5426,24 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.GetActiveTake(item.as_ptr());
         NonNull::new(ptr)
+    }
+
+    /// Returns the take that is currently being edited in the given MIDI editor.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid window.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn midi_editor_get_take(
+        &self,
+        midi_editor: Hwnd,
+    ) -> ReaperFunctionResult<MediaItemTake>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.MIDIEditor_GetTake(midi_editor.as_ptr());
+        NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't get MIDI editor take"))
     }
 
     /// Selects exactly one track and deselects all others.
@@ -5899,6 +6127,28 @@ impl<UsageScope> Reaper<UsageScope> {
         let result = self
             .low
             .GetToggleCommandState2(section.to_raw(), command_id.to_raw());
+        if result == -1 {
+            return None;
+        }
+        Some(result != 0)
+    }
+
+    /// Returns the current on/off state of a toggleable action, taking the section ID.
+    ///
+    /// Returns `None` if the action doesn't support on/off states (or if the action doesn't exist).
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_toggle_command_state_ex(
+        &self,
+        section_id: SectionId,
+        command_id: CommandId,
+    ) -> Option<bool>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let result = self
+            .low
+            .GetToggleCommandStateEx(section_id.to_raw(), command_id.to_raw());
         if result == -1 {
             return None;
         }

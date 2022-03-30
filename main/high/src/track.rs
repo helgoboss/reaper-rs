@@ -85,6 +85,29 @@ impl Track {
         }
     }
 
+    pub fn item_count(&self) -> u32 {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .count_track_media_items(self.raw())
+        }
+    }
+
+    pub fn items(&self) -> impl Iterator<Item = Item> + ExactSizeIterator + 'static {
+        self.load_and_check_if_necessary_or_complain();
+        let raw = self.raw();
+        (0..self.item_count()).map(move |i| {
+            let media_item = unsafe {
+                Reaper::get()
+                    .medium_reaper()
+                    .get_track_media_item(raw, i as _)
+                    .unwrap()
+            };
+            Item::new(media_item)
+        })
+    }
+
     pub fn add_item(&self) -> Result<Item, ReaperFunctionError> {
         self.load_and_check_if_necessary_or_complain();
         let raw_item = unsafe {

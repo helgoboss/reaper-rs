@@ -63,4 +63,12 @@ impl Item {
                 .set_media_item_length(self.raw, length, refresh_behavior)
         }
     }
+
+    pub fn set_selected(&self, selected: bool) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .set_media_item_selected(self.raw, selected);
+        }
+    }
 }

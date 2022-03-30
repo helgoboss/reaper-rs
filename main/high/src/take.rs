@@ -13,6 +13,10 @@ impl Take {
         Take { raw }
     }
 
+    pub fn raw(&self) -> MediaItemTake {
+        self.raw
+    }
+
     pub fn fx_chain(&self) -> FxChain {
         FxChain::from_take(*self)
     }

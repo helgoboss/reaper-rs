@@ -569,7 +569,7 @@ impl BorrowedPcmSource {
             user_count: unsafe { user_count.assume_init() },
             first_user: {
                 let ptr = unsafe { first_user.assume_init() };
-                NonNull::new(ptr).unwrap()
+                NonNull::new(ptr)
             },
         })
     }
@@ -646,25 +646,29 @@ impl BorrowedPcmSource {
         Ok(())
     }
 
-    // /// Opens the editor for this source.
-    // ///
-    // /// # Errors
-    // ///
-    // /// Returns an error if not supported.
-    // pub unsafe fn ext_open_editor(&self, hwnd: Hwnd, track_index: u32) ->
-    // ReaperFunctionResult<()> {     let supported = self.0.as_ref().Extended(
-    //         raw::PCM_SOURCE_EXT_OPENEDITOR as _,
-    //         hwnd.as_ptr() as _,
-    //         track_index as isize as _,
-    //         null_mut(),
-    //     );
-    //     if supported == 0 {
-    //         return Err(ReaperFunctionError::new(
-    //             "PCM_SOURCE_EXT_OPENEDITOR not supported by source",
-    //         ));
-    //     }
-    //     Ok(())
-    // }
+    /// Opens the editor for this source.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not supported.
+    ///
+    /// # Panics
+    ///
+    /// REAPER can crash if you pass an invalid window.
+    pub unsafe fn ext_open_editor(&self, hwnd: Hwnd, track_index: u32) -> ReaperFunctionResult<()> {
+        let supported = self.as_ref().Extended(
+            raw::PCM_SOURCE_EXT_OPENEDITOR as _,
+            hwnd.as_ptr() as _,
+            track_index as isize as _,
+            null_mut(),
+        );
+        if supported == 0 {
+            return Err(ReaperFunctionError::new(
+                "PCM_SOURCE_EXT_OPENEDITOR not supported by source",
+            ));
+        }
+        Ok(())
+    }
 }
 
 impl ToOwned for BorrowedPcmSource {
@@ -695,8 +699,8 @@ pub struct ExtGetPooledMidiIdResult {
     /// Number of takes which use this pooled MIDI data.
     // TODO-high-unstable Improve type
     pub user_count: i32,
-    // TODO-high-unstable Can this be empty?
-    pub first_user: MediaItemTake,
+    // TODO-high-unstable
+    pub first_user: Option<MediaItemTake>,
 }
 
 /// Consumers can implement this trait in order to provide own PCM source types.

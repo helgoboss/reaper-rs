@@ -1318,3 +1318,12 @@ pub enum AcceleratorPosition {
     /// Adds the accelerator to the back of the queue.
     Back,
 }
+
+/// Determines which MIDI editors to considers when targeting the last focused one.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum RequiredViewMode {
+    /// Only considers MIDI editors that are not in list view mode.
+    Normal,
+    /// Only considers MIDI editors that are in list view mode.
+    ListView,
+}
