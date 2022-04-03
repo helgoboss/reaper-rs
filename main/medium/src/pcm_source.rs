@@ -652,7 +652,7 @@ impl BorrowedPcmSource {
     ///
     /// Returns an error if not supported.
     ///
-    /// # Panics
+    /// # Safety
     ///
     /// REAPER can crash if you pass an invalid window.
     pub unsafe fn ext_open_editor(&self, hwnd: Hwnd, track_index: u32) -> ReaperFunctionResult<()> {

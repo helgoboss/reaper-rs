@@ -1,6 +1,8 @@
-use crate::{decode_user_data, encode_user_data, AcceleratorBehavior, Hidden, Hwnd, VirtKey};
+use crate::{decode_user_data, encode_user_data, AcceleratorBehavior, Hidden, Hwnd};
 use enumflags2::BitFlags;
 use reaper_low::{firewall, raw};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 use std::os::raw::c_int;
 use std::ptr::NonNull;
@@ -18,21 +20,16 @@ pub trait TranslateAccel {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct TranslateAccelArgs<'a> {
-    // TODO-high medium-level message
-    // loword(wparam) translates to key param: VirtKey (VK constants)
-    // loword(lparam) translates to f_virt (some modifier bitmap, at least on macOS)
     pub msg: AccelMsg,
     pub ctx: &'a AcceleratorRegister,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct AccelMsg {
-    // TODO-high Can this really be null?
-    pub window: Option<Hwnd>,
-    // TODO-high Use enum KeyDown, KeyUp etc. and unknown, extract from loword
+    pub window: Hwnd,
     pub message: AccelMsgKind,
     pub behavior: BitFlags<AcceleratorBehavior>,
-    pub key: AcceleratorKey,
+    pub key: AcceleratorKeyCode,
     /// Milliseconds since system started.
     pub time: u32,
     pub point: Point,
@@ -42,10 +39,10 @@ impl AccelMsg {
     pub(crate) fn from_raw(msg: &raw::MSG) -> Self {
         let behavior = BitFlags::from_bits_truncate(loword(msg.lParam) as u8);
         Self {
-            window: Hwnd::new(msg.hwnd),
+            window: Hwnd::new(msg.hwnd).expect("MSG hwnd was null"),
             message: AccelMsgKind::from_raw(msg.message),
             behavior,
-            key: AcceleratorKey::from_raw(loword(msg.wParam as isize), behavior),
+            key: AcceleratorKeyCode(loword(msg.wParam as isize)),
             time: msg.time,
             point: Point::from_raw(msg.pt),
         }
@@ -81,7 +78,7 @@ impl AccelMsgKind {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Accel {
     pub f_virt: BitFlags<AcceleratorBehavior>,
-    pub key: AcceleratorKey,
+    pub key: AcceleratorKeyCode,
     pub cmd: u16,
 }
 
@@ -89,35 +86,30 @@ impl Accel {
     pub(crate) fn to_raw(self) -> raw::ACCEL {
         raw::ACCEL {
             fVirt: self.f_virt.bits(),
-            key: self.key.to_raw(),
+            key: self.key.get(),
             cmd: self.cmd,
         }
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum AcceleratorKey {
-    VirtKey(VirtKey),
-    // TODO-high Can this be more than u8?
-    Character(u8),
-}
+/// A value that either refers to a character code or to a virtual key.
+///
+/// The [Win32 docs](https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-accel)
+/// say that this can be either a virtual-key code or a character code. It also says it's word-sized
+/// (unsigned 16-bit).
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, derive_more::Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct AcceleratorKeyCode(u16);
 
-impl AcceleratorKey {
-    pub(crate) fn from_raw(v: u16, f_virt: BitFlags<AcceleratorBehavior>) -> Self {
-        if f_virt.contains(AcceleratorBehavior::VirtKey) {
-            Self::VirtKey(VirtKey::new(v as i32))
-        } else {
-            Self::Character(v as u8)
-        }
+impl AcceleratorKeyCode {
+    /// Creates a key code.
+    pub fn new(value: u16) -> Self {
+        Self(value)
     }
 
-    pub(crate) fn to_raw(self) -> u16 {
-        use AcceleratorKey::*;
-        match self {
-            // TODO-high Is VirtKey i32 too broad?
-            VirtKey(key) => key.get() as u16,
-            Character(ch) => ch as u16,
-        }
+    /// Returns the wrapped value.
+    pub const fn get(&self) -> u16 {
+        self.0
     }
 }
 

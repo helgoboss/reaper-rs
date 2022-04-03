@@ -125,4 +125,7 @@ mod option_util;
 mod bookmark;
 pub use bookmark::*;
 
+mod accelerator;
+pub use accelerator::*;
+
 mod mutex_util;

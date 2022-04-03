@@ -28,7 +28,8 @@ impl UndoScope {
 }
 
 /// Part of a project that could have been affected by an undoable operation.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[repr(u32)]
 pub enum ProjectPart {
     /// Freeze state.
@@ -44,7 +45,8 @@ pub enum ProjectPart {
 }
 
 /// Area in the REAPER window where a track might be displayed.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[repr(u32)]
 pub enum TrackArea {
     /// Track control panel.
@@ -54,7 +56,8 @@ pub enum TrackArea {
 }
 
 /// Defines how REAPER will buffer when playing previews.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[repr(u32)]
 pub enum BufferingBehavior {
     /// Buffers the source.
@@ -65,7 +68,8 @@ pub enum BufferingBehavior {
 }
 
 /// Defines the behavior of an accelerator.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, BitFlags)]
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[repr(u8)]
 pub enum AcceleratorBehavior {
     /// The ALT key must be held down.
