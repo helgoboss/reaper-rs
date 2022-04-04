@@ -55,10 +55,15 @@ fn loword(v: isize) -> u16 {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum AccelMsgKind {
+    /// Key press.
     KeyDown,
+    /// Key release.
     KeyUp,
+    /// Character code (key-down only, transmitted on Windows only).
     Char,
+    /// Key press that is intended for processing by system, but not necessarily.
     SysKeyDown,
+    /// Key release that is intended for processing by system, but not necessarily.
     SysKeyUp,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!

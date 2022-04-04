@@ -509,16 +509,16 @@ pub struct ExtSetBpmAndPlayRateArgs {
 ///
 /// You can find some frequently used predefined keys in [`mod_keys`](mod_keys/index.html).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct VirtKey(pub(crate) i32);
+pub struct VirtKey(pub(crate) u8);
 
 impl VirtKey {
     /// Creates a virtual key.
-    pub const fn new(raw: i32) -> Self {
+    pub const fn new(raw: u8) -> Self {
         Self(raw)
     }
 
     /// Returns the wrapped value.
-    pub const fn get(self) -> i32 {
+    pub const fn get(self) -> u8 {
         self.0
     }
 }
@@ -837,8 +837,12 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
     }
 
     fn IsKeyDown(&self, key: i32) -> bool {
-        self.delegate
-            .is_key_down(IsKeyDownArgs { key: VirtKey(key) })
+        self.delegate.is_key_down(IsKeyDownArgs {
+            key: VirtKey(
+                key.try_into()
+                    .expect("IsKeyDown called with non-byte value"),
+            ),
+        })
     }
 
     fn Extended(

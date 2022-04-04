@@ -4,8 +4,7 @@ use reaper_medium::{AcceleratorBehavior, AcceleratorKeyCode, VirtKey};
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum AcceleratorKey {
     VirtKey(VirtKey),
-    // TODO-high Can this be more than u8?
-    Character(u8),
+    Character(u16),
 }
 
 impl AcceleratorKey {
@@ -14,18 +13,21 @@ impl AcceleratorKey {
         code: AcceleratorKeyCode,
     ) -> Self {
         if f_virt.contains(AcceleratorBehavior::VirtKey) {
-            Self::VirtKey(VirtKey::new(code.get() as i32))
+            Self::VirtKey(VirtKey::new(
+                code.get()
+                    .try_into()
+                    .expect("accelerator virtual key code larger than byte"),
+            ))
         } else {
-            Self::Character(code.get() as u8)
+            Self::Character(code.get())
         }
     }
 
     pub fn to_code(self) -> u16 {
         use AcceleratorKey::*;
         match self {
-            // TODO-high Is VirtKey i32 too broad?
             VirtKey(key) => key.get() as u16,
-            Character(ch) => ch as u16,
+            Character(ch) => ch,
         }
     }
 }
