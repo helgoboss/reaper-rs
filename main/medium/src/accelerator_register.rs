@@ -58,6 +58,8 @@ pub enum AccelMsgKind {
     KeyDown,
     KeyUp,
     Char,
+    SysKeyDown,
+    SysKeyUp,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
     Unknown(Hidden<u32>),
@@ -70,6 +72,8 @@ impl AccelMsgKind {
             raw::WM_KEYDOWN => KeyDown,
             raw::WM_KEYUP => KeyUp,
             raw::WM_CHAR => Char,
+            raw::WM_SYSKEYDOWN => SysKeyDown,
+            raw::WM_SYSKEYUP => SysKeyUp,
             v => Unknown(Hidden(v)),
         }
     }
