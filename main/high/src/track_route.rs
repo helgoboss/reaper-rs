@@ -99,13 +99,17 @@ impl TrackRoute {
         }
     }
 
-    pub fn set_volume(&self, volume: Volume) -> Result<(), ReaperFunctionError> {
+    pub fn set_volume(
+        &self,
+        volume: Volume,
+        edit_mode: EditMode,
+    ) -> Result<(), ReaperFunctionError> {
         unsafe {
             Reaper::get().medium_reaper().set_track_send_ui_vol(
                 self.track().raw(),
                 self.send_ref(),
                 volume.reaper_value(),
-                EditMode::NormalTweak,
+                edit_mode,
             )
         }
     }
@@ -153,13 +157,13 @@ impl TrackRoute {
         Ok(Pan::from_reaper_value(self.vol_pan()?.pan))
     }
 
-    pub fn set_pan(&self, pan: Pan) -> Result<(), ReaperFunctionError> {
+    pub fn set_pan(&self, pan: Pan, edit_mode: EditMode) -> Result<(), ReaperFunctionError> {
         unsafe {
             Reaper::get().medium_reaper().set_track_send_ui_pan(
                 self.track().raw(),
                 self.send_ref(),
                 pan.reaper_value(),
-                EditMode::NormalTweak,
+                edit_mode,
             )
         }
     }

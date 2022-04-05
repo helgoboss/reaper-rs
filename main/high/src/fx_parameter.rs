@@ -55,6 +55,23 @@ impl FxParameter {
         }
     }
 
+    pub fn end_edit(&self) -> Result<(), ReaperFunctionError> {
+        Reaper::get().require_main_thread();
+        match self.chain().context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.fx().track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_end_param_edit(
+                        track.raw(),
+                        location,
+                        self.index,
+                    )
+                }
+            }
+        }
+    }
+
     fn chain(&self) -> &FxChain {
         self.fx().chain()
     }

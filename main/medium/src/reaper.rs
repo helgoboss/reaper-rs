@@ -3398,6 +3398,42 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(())
     }
 
+    /// Notifies REAPER that we are done changing parameter values
+    ///
+    /// This is important for automation mode _Touch_.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the FX or parameter doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// - REAPER can crash if you pass an invalid track.
+    /// - Calling this from any other thread than the main thread causes undefined behavior!
+    /// - However, there's one exception: Calling it in a real-time thread directly "from the track"
+    ///   which is currently processing is okay, and only for REAPER >= v6.52+dev0323. Previous
+    ///   REAPER versions will send control surface change notifications, in the wrong thread.
+    ///   Newer versions don't send any notifications when this function is called in real-time.
+    pub unsafe fn track_fx_end_param_edit(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+        param_index: u32,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: AnyThread,
+    {
+        let successful =
+            self.low
+                .TrackFX_EndParamEdit(track.as_ptr(), fx_location.to_raw(), param_index as i32);
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't end FX parameter edit (probably FX or parameter doesn't exist)",
+            ));
+        }
+        Ok(())
+    }
+
     /// Returns information about the (last) focused FX window.
     ///
     /// Returns `Some` if an FX window has focus or was the last focused one and is still open.

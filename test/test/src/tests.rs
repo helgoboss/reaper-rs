@@ -22,7 +22,7 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
-    reaper_str, AutoSeekBehavior, AutomationMode, Bpm, CommandId, Db, DurationInSeconds,
+    reaper_str, AutoSeekBehavior, AutomationMode, Bpm, CommandId, Db, DurationInSeconds, EditMode,
     EnumPitchShiftModesResult, FxPresetRef, GangBehavior, GetParamExResult, InputMonitoringMode,
     MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate, PitchShiftMode,
     PlaybackSpeedFactor, PositionInSeconds, ReaperNormalizedFxParamValue, ReaperPanValue,
@@ -832,7 +832,8 @@ fn set_track_send_pan() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        send.set_pan(Pan::from_normalized_value(0.25)).unwrap();
+        send.set_pan(Pan::from_normalized_value(0.25), EditMode::NormalTweak)
+            .unwrap();
         // Then
         assert_eq!(
             send.pan().unwrap().reaper_value(),
@@ -883,8 +884,11 @@ fn set_track_send_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        send.set_volume(Volume::try_from_soft_normalized_value(0.25).unwrap())
-            .unwrap();
+        send.set_volume(
+            Volume::try_from_soft_normalized_value(0.25).unwrap(),
+            EditMode::NormalTweak,
+        )
+        .unwrap();
         // Then
         assert!(abs_diff_eq!(
             send.volume().unwrap().db().get(),
