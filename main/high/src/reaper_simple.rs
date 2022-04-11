@@ -7,10 +7,10 @@ use crate::{
 };
 use helgoboss_midi::ShortMessage;
 use reaper_medium::{
-    CommandId, EnumPitchShiftModesResult, GetLastTouchedFxResult, GlobalAutomationModeOverride,
-    Hwnd, MidiInputDeviceId, MidiOutputDeviceId, PitchShiftMode, PitchShiftSubMode, ProjectRef,
-    ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ResampleMode, SectionId,
-    StuffMidiMessageTarget, TrackLocation,
+    AudioDeviceAttributeKey, CommandId, EnumPitchShiftModesResult, GetLastTouchedFxResult,
+    GlobalAutomationModeOverride, Hwnd, Hz, MidiInputDeviceId, MidiOutputDeviceId, PitchShiftMode,
+    PitchShiftSubMode, ProjectRef, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ResampleMode, SectionId, StuffMidiMessageTarget, TrackLocation,
 };
 use std::fmt::Debug;
 use std::path::PathBuf;
@@ -27,6 +27,20 @@ impl Reaper {
             .low()
             .plugin_context()
             .is_in_main_thread()
+    }
+
+    pub fn audio_device_sample_rate(&self) -> Result<Hz, &'static str> {
+        let sample_rate_string = self
+            .medium_reaper
+            .get_audio_device_info(AudioDeviceAttributeKey::SRate, 10)
+            .map_err(|e| e.message())?;
+        let sample_rate_number: f64 = sample_rate_string
+            .to_str()
+            .parse()
+            .map_err(|_| "couldn't parse sample rate")?;
+        sample_rate_number
+            .try_into()
+            .map_err(|_| "invalid sample rate")
     }
 
     pub fn main_section(&self) -> Section {

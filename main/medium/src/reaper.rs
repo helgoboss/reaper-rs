@@ -11,27 +11,7 @@ use std::ptr::{null, null_mut, NonNull};
 use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
-use crate::{
-    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AutoSeekBehavior,
-    AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds,
-    EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
-    GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
-    InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem,
-    MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
-    NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
-    PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
-    SendTarget, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
-    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TrackSendRef, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
-};
+use crate::{require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext, AudioDeviceAttributeKey};
 
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
@@ -6783,6 +6763,33 @@ impl<UsageScope> Reaper<UsageScope> {
                 .format_timestr_pos(tpos.get(), buffer, max, mode_override.to_raw());
         });
         time_string
+    }
+
+    /// Returns information about the currently open audio device.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the information you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub fn get_audio_device_info(
+        &self,
+        key: AudioDeviceAttributeKey,
+        buffer_size: u32
+    ) -> ReaperFunctionResult<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (info, successful) = with_string_buffer(buffer_size, |buffer, max| unsafe {
+            self.low
+                .GetAudioDeviceInfo(key.into_raw().as_ptr(), buffer, max)
+        });
+        if !successful {
+            return Err(ReaperFunctionError::new("audio device not open or attribute doesn't exist"));
+        }
+        Ok(info)
     }
 
     /// Formats the given duration, starting from the given timeline position offset.

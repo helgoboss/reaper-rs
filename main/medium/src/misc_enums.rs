@@ -1327,3 +1327,48 @@ pub enum RequiredViewMode {
     /// Only considers MIDI editors that are in list view mode.
     ListView,
 }
+
+/// Determines which info about the audio device shall be returned.
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub enum AudioDeviceAttributeKey<'a> {
+    /// No idea.
+    Mode,
+    /// Identifier of input device.
+    IdentIn,
+    /// Identifier of output device.
+    IdentOut,
+    /// Buffer size.
+    BSize,
+    /// Sample rate.
+    SRate,
+    /// Resolution.
+    Bps,
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
+    Custom(Cow<'a, ReaperStr>)
+}
+
+impl<'a> AudioDeviceAttributeKey<'a> {
+    /// Convenience function for creating a [`Custom`] key.
+    ///
+    /// [`Custom`]: #variant.Custom
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(key.into().into_inner())
+    }
+
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
+        use AudioDeviceAttributeKey::*;
+        match self {
+            Mode => reaper_str!("MODE").into(),
+            IdentIn => reaper_str!("IDENT_IN").into(),
+            IdentOut => reaper_str!("IDENT_OUT").into(),
+            BSize => reaper_str!("BSIZE").into(),
+            SRate => reaper_str!("SRATE").into(),
+            Bps => reaper_str!("BPS").into(),
+            Custom(key) => key
+        }
+    }
+}
