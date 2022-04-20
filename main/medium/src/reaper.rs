@@ -11,7 +11,27 @@ use std::ptr::{null, null_mut, NonNull};
 use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
-use crate::{require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext, AudioDeviceAttributeKey};
+use crate::{
+    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
+    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
+    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
+    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
+    InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode,
+    MediaItem, MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior,
+    MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
+    NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
+    PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
+    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
+};
 
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
@@ -3180,6 +3200,23 @@ impl<UsageScope> Reaper<UsageScope> {
             .TrackFX_GetNumParams(track.as_ptr(), fx_location.to_raw()) as u32
     }
 
+    /// Returns the audio device input/output latency in samples.
+    pub fn get_input_output_latency(&self) -> GetInputOutputLatencyResult
+    where
+        UsageScope: AnyThread,
+    {
+        let mut input_latency = MaybeUninit::uninit();
+        let mut output_latency = MaybeUninit::uninit();
+        unsafe {
+            self.low
+                .GetInputOutputLatency(input_latency.as_mut_ptr(), output_latency.as_mut_ptr())
+        };
+        GetInputOutputLatencyResult {
+            input_latency: unsafe { input_latency.assume_init() } as u32,
+            output_latency: unsafe { output_latency.assume_init() } as u32,
+        }
+    }
+
     /// Returns the current project if it's just being loaded or saved.
     ///
     /// This is usually only used from `project_config_extension_t`.
@@ -4347,6 +4384,56 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.CountTrackMediaItems(track.as_ptr()) as u32
     }
 
+    /// Counts the number of FX parameter knobs displayed on the track control panel.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn count_tcp_fx_parms(&self, project: ProjectContext, track: MediaTrack) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CountTCPFXParms(project.to_raw(), track.as_ptr()) as u32
+    }
+
+    /// Returns information about a specific FX parameter knob displayed on the track control panel.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn get_tcp_fx_parm(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        index: u32,
+    ) -> ReaperFunctionResult<GetTcpFxParmResult>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut fx_index = MaybeUninit::uninit();
+        let mut param_index = MaybeUninit::uninit();
+        let successful = self.low.GetTCPFXParm(
+            project.to_raw(),
+            track.as_ptr(),
+            index as _,
+            fx_index.as_mut_ptr(),
+            param_index.as_mut_ptr(),
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't get TCP FX param info"));
+        }
+        let fx_index = fx_index.assume_init();
+        let result = GetTcpFxParmResult {
+            fx_location: TrackFxLocation::from_raw(fx_index),
+            param_index: param_index.assume_init() as u32,
+        };
+        Ok(result)
+    }
+
     /// Returns the media item on the given track at the given index.
     ///
     /// # Safety
@@ -4358,7 +4445,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let ptr = unsafe { self.low.GetTrackMediaItem(track.as_ptr(), item_idx as _) };
+        let ptr = self.low.GetTrackMediaItem(track.as_ptr(), item_idx as _);
         NonNull::new(ptr)
     }
 
@@ -6776,7 +6863,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub fn get_audio_device_info(
         &self,
         key: AudioDeviceAttributeKey,
-        buffer_size: u32
+        buffer_size: u32,
     ) -> ReaperFunctionResult<ReaperString>
     where
         UsageScope: MainThreadOnly,
@@ -6787,7 +6874,9 @@ impl<UsageScope> Reaper<UsageScope> {
                 .GetAudioDeviceInfo(key.into_raw().as_ptr(), buffer, max)
         });
         if !successful {
-            return Err(ReaperFunctionError::new("audio device not open or attribute doesn't exist"));
+            return Err(ReaperFunctionError::new(
+                "audio device not open or attribute doesn't exist",
+            ));
         }
         Ok(info)
     }
@@ -6911,6 +7000,12 @@ pub enum EnumPitchShiftModesResult<'a> {
         /// Name of the pitch shift mode.
         name: &'a ReaperStr,
     },
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct GetInputOutputLatencyResult {
+    pub input_latency: u32,
+    pub output_latency: u32,
 }
 
 #[derive(Clone, PartialEq, Hash, Debug)]
@@ -7060,6 +7155,14 @@ pub struct GetTrackUiPanResult {
     ///
     /// Depending on the mode, this is either the width or the right pan.
     pub pan_2: ReaperPanLikeValue,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct GetTcpFxParmResult {
+    /// Location of the FX on that track.
+    pub fx_location: TrackFxLocation,
+    /// Index of the parameter.
+    pub param_index: u32,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

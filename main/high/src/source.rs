@@ -79,6 +79,10 @@ impl Deref for ReaperSource {
 pub struct BorrowedSource(BorrowedPcmSource);
 
 impl BorrowedSource {
+    pub fn from_raw(raw: &BorrowedPcmSource) -> &Self {
+        Self::ref_cast(raw)
+    }
+
     pub fn as_raw(&self) -> &BorrowedPcmSource {
         &self.0
     }
