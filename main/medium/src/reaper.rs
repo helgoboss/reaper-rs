@@ -537,6 +537,39 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
+    /// Sets a take attribute as numerical value.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if an invalid (e.g. non-numerical) track attribute key is passed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn set_media_item_take_info_value(
+        &self,
+        take: MediaItemTake,
+        attribute_key: TakeAttributeKey,
+        new_value: f64,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.SetMediaItemTakeInfo_Value(
+            take.as_ptr(),
+            attribute_key.into_raw().as_ptr(),
+            new_value,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't set take attribute (maybe attribute key is invalid)",
+            ));
+        }
+        Ok(())
+    }
+
     /// Convenience function which sets the take's source (`P_SOURCE`).
     ///
     /// Returns the previous source in case the take had a source assigned.

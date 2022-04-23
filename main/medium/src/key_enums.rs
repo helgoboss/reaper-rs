@@ -453,6 +453,8 @@ impl<'a> TrackAttributeKey<'a> {
 /// [`get_set_media_item_take_info()`]: struct.Reaper.html#method.get_set_media_item_take_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TakeAttributeKey<'a> {
+    /// Start offset in source media in seconds.
+    StartOffs,
     /// Current source.
     ///
     /// Note that if setting this, you should first retrieve the old source, set the new, *then*
@@ -480,6 +482,7 @@ impl<'a> TakeAttributeKey<'a> {
         use TakeAttributeKey::*;
         match self {
             Source => reaper_str!("P_SOURCE").into(),
+            StartOffs => reaper_str!("D_STARTOFFS").into(),
             Custom(key) => key,
         }
     }

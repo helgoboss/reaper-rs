@@ -1,5 +1,5 @@
 use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track};
-use reaper_medium::MediaItemTake;
+use reaper_medium::{MediaItemTake, PositionInSeconds, ReaperFunctionError, TakeAttributeKey};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Take {
@@ -49,5 +49,15 @@ impl Take {
                 .get_set_media_item_take_info_set_source(self.raw, source.into_raw())
         };
         previous_source.map(OwnedSource::new)
+    }
+
+    pub fn set_start_offset(&self, length: PositionInSeconds) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_take_info_value(
+                self.raw,
+                TakeAttributeKey::StartOffs,
+                length.get(),
+            )
+        }
     }
 }
