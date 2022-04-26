@@ -626,14 +626,20 @@ impl BorrowedPcmSource {
     ///
     /// This will make the source ignore the project tempo.
     ///
+    /// Setting `None` will reset IGNTEMPO in REAPER versions >= v6.56+dev0425 or so.
+    ///
     /// # Errors
     ///
     /// Returns an error if not supported.
-    pub fn ext_set_preview_tempo(&self, tempo: Bpm) -> ReaperFunctionResult<()> {
+    pub fn ext_set_preview_tempo(&self, tempo: Option<Bpm>) -> ReaperFunctionResult<()> {
+        let tempo_ptr = match &tempo {
+            None => null_mut(),
+            Some(t) => t as *const _ as *mut _,
+        };
         let supported = unsafe {
             self.0.Extended(
                 raw::PCM_SOURCE_EXT_SETPREVIEWTEMPO as _,
-                &tempo as *const _ as *mut _,
+                tempo_ptr,
                 null_mut(),
                 null_mut(),
             )
