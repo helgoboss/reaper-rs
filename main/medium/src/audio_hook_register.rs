@@ -39,7 +39,7 @@ pub struct OnAudioBufferArgs<'a> {
 // We don't expose the user-defined data pointers. The first one is already exposed implicitly as
 // `&mut self` in the callback function. The second one is unnecessary.
 #[derive(Eq, PartialEq, Hash, Debug)]
-pub struct AudioHookRegister(pub(crate) NonNull<raw::audio_hook_register_t>);
+pub struct AudioHookRegister(pub NonNull<raw::audio_hook_register_t>);
 
 impl AudioHookRegister {
     pub(crate) fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister {
