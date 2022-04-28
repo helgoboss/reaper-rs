@@ -1,11 +1,12 @@
 use crate::{decode_user_data, encode_user_data, Hz};
-use reaper_low::raw::audio_hook_register_t;
+use reaper_low::raw::{audio_hook_register_t, ReaSample};
 use reaper_low::{firewall, raw};
 
 use std::fmt;
 use std::fmt::Debug;
 use std::os::raw::c_int;
 use std::ptr::{null_mut, NonNull};
+use std::slice::{from_raw_parts_mut};
 
 /// Consumers need to implement this trait in order to be called back in the real-time audio thread.
 ///
@@ -39,7 +40,7 @@ pub struct OnAudioBufferArgs<'a> {
 // We don't expose the user-defined data pointers. The first one is already exposed implicitly as
 // `&mut self` in the callback function. The second one is unnecessary.
 #[derive(Eq, PartialEq, Hash, Debug)]
-pub struct AudioHookRegister(pub NonNull<raw::audio_hook_register_t>);
+pub struct AudioHookRegister(pub(crate) NonNull<raw::audio_hook_register_t>);
 
 impl AudioHookRegister {
     pub(crate) fn new(ptr: NonNull<raw::audio_hook_register_t>) -> AudioHookRegister {
@@ -59,6 +60,34 @@ impl AudioHookRegister {
     /// Returns the current number of output channels.
     pub fn output_nch(&self) -> u32 {
         unsafe { self.0.as_ref() }.output_nch as u32
+    }
+
+    /// Get access to the underlying samples of an output channel
+    pub fn output_channel_samples(&self, ch: usize, args: &OnAudioBufferArgs) -> Option<&mut [ReaSample]> {
+        unsafe {
+            if let Some(get_buffer) = self.0.as_ref().GetBuffer {
+                let ptr = get_buffer(true, ch as i32);
+                if ptr != null_mut() {
+                    return Some(from_raw_parts_mut(ptr, args.len as usize));
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Get access to the underlying samples of an input channel
+    pub fn input_channel_samples(&self, ch: usize, args: &OnAudioBufferArgs) -> Option<&mut [ReaSample]> {
+        unsafe {
+            if let Some(get_buffer) = self.0.as_ref().GetBuffer {
+                let ptr = get_buffer(false, ch as i32);
+                if ptr != null_mut() {
+                    return Some(from_raw_parts_mut(ptr, args.len as usize));
+                }
+            }
+        }
+
+        None
     }
 }
 
@@ -124,7 +153,7 @@ impl OwnedAudioHookRegister {
                 userdata1: encode_user_data(&callback),
                 userdata2: null_mut(),
                 input_nch: 0,
-                output_nch: 2,
+                output_nch: 0,
                 GetBuffer: None,
             },
             callback,
