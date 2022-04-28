@@ -124,7 +124,7 @@ impl OwnedAudioHookRegister {
                 userdata1: encode_user_data(&callback),
                 userdata2: null_mut(),
                 input_nch: 0,
-                output_nch: 0,
+                output_nch: 2,
                 GetBuffer: None,
             },
             callback,
