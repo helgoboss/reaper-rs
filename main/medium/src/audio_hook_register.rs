@@ -58,7 +58,7 @@ impl AudioHookRegister {
 
     /// Returns the current number of output channels.
     pub fn output_nch(&self) -> u32 {
-        unsafe { self.0.as_ref() }.input_nch as u32
+        unsafe { self.0.as_ref() }.output_nch as u32
     }
 }
 
