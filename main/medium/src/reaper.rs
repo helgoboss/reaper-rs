@@ -900,11 +900,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
         let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
-        if rec_input_index < 0 {
-            None
-        } else {
-            Some(RecordingInput::from_raw(rec_input_index))
-        }
+        RecordingInput::from_raw(rec_input_index)
     }
 
     /// Convenience function which returns the type and location of the given track

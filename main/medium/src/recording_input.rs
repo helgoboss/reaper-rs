@@ -29,10 +29,10 @@ impl RecordingInput {
     /// # Errors
     ///
     /// Fails if the given integer is not a valid recording input index.
-    pub fn from_raw(rec_input_index: i32) -> RecordingInput {
+    pub fn from_raw(rec_input_index: i32) -> Option<RecordingInput> {
         use RecordingInput::*;
         if let Ok(v) = u32::try_from(rec_input_index) {
-            match v {
+            let res = match v {
                 0..=511 => Mono(v),
                 512..=1023 => MonoReaRoute(v - 512),
                 1024..=1535 => Stereo(v - 1024),
@@ -61,9 +61,10 @@ impl RecordingInput {
                     }
                 }
                 _ => Unknown(Hidden(rec_input_index)),
-            }
+            };
+            Some(res)
         } else {
-            Unknown(Hidden(rec_input_index))
+            None
         }
     }
 

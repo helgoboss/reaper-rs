@@ -1854,7 +1854,7 @@ fn set_track_recording_input_midi_all_all() -> TestStep {
             assert_eq!(input, given_input);
             let input = input.unwrap();
             assert_eq!(input.to_raw(), 6112);
-            assert_eq!(RecordingInput::from_raw(6112), input);
+            assert_eq!(RecordingInput::from_raw(6112), Some(input));
             // TODO-high Search in project for 5198273 for a hacky way to solve this
             assert_eq!(mock.invocation_count(), 0);
             // assert_eq!(mock.last_arg(), track);
