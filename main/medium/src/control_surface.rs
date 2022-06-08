@@ -29,7 +29,7 @@ pub trait ControlSurface: Debug {
     ///
     /// Return `None` if this is a control surface behind the scenes.
     //
-    // We can't let this returns something owned because it would be gone as soon as the delegate
+    // We can't let this return something owned because it would be gone as soon as the delegate
     // control surface turns this into a pointer and returns. This method of `IReaperControlSurface`
     // and related ones are just designed to work that way.
     fn get_type_string(&self) -> Option<&ReaperStr> {
