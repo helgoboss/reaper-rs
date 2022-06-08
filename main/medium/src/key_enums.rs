@@ -144,13 +144,6 @@ pub enum TrackAttributeKey<'a> {
     ///
     /// 2 - 64, even numbers only.
     Nchan,
-    /// Track selected.
-    ///
-    /// `*mut i32`
-    ///
-    /// - 0 → unselected
-    /// - 1 → selected
-    VuMode,
     /// Track vu mode.
     ///  
     /// `*mut i32`
@@ -161,7 +154,15 @@ pub enum TrackAttributeKey<'a> {
     /// - 12 → LUFS-M
     /// - 16 → LUFS-S (readout = Max)
     /// - 20 → LUFS-S (readout = Current)
+    ///
     /// LUFS calculation on channels 1+2 only.
+    VuMode,
+    /// Track selected.
+    ///
+    /// `*mut i32`
+    ///
+    /// - 0 → unselected
+    /// - 1 → selected
     Selected,
     /// Current TCP window height in pixels including envelopes (read-only).
     ///
