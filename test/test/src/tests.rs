@@ -2309,7 +2309,6 @@ fn create_empty_project_in_new_tab() -> TestStep {
         });
         let new_project = Reaper::get().create_empty_project_in_new_tab();
         // Then
-        assert_eq!(current_project_before, current_project_before);
         assert_eq!(Reaper::get().project_count(), project_count_before + 1);
         assert_eq!(
             Reaper::get().projects().count() as u32,

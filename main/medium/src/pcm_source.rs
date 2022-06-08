@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(clippy::wrong_self_convention)]
 use reaper_low::{create_cpp_to_rust_pcm_source, raw};
 use ref_cast::RefCast;
 
