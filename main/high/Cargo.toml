@@ -21,7 +21,7 @@ once_cell = "1.3.1"
 crossbeam-channel = "0.5"
 reaper-medium = { path = '../medium' }
 reaper-low = { path = '../low' }
-helgoboss-midi = "*"
+helgoboss-midi = "0.4.0"
 regex = "1.3.4"
 slog = "2.5.2"
 slog-stdlog = "4.1.0"
