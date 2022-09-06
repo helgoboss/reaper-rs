@@ -7,8 +7,8 @@ use reaper_medium::{
     reaper_str, AutomationMode, Bpm, ExtSetFxParamArgs, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, Pan, PanMode, PlayState, PlaybackSpeedFactor, ReaProject,
     ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
-    TrackAttributeKey, TrackFxChainType, TrackLocation, TrackSendCategory, TrackSendDirection,
-    VersionDependentFxLocation, VersionDependentTrackFxLocation,
+    RecordingInput, TrackAttributeKey, TrackFxChainType, TrackLocation, TrackSendCategory,
+    TrackSendDirection, VersionDependentFxLocation, VersionDependentTrackFxLocation,
 };
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
@@ -340,10 +340,13 @@ impl ChangeDetectionMiddleware {
                         as i32
                 };
                 if td.recinput != recinput {
+                    let old = td.recinput;
                     td.recinput = recinput;
                     let track = Track::new(args.track, None);
                     handle_change(ChangeEvent::TrackInputChanged(TrackInputChangedEvent {
                         track,
+                        old_value: RecordingInput::from_raw(old),
+                        new_value: RecordingInput::from_raw(recinput)
                     }));
                 }
             }
@@ -1315,6 +1318,8 @@ pub struct TrackNameChangedEvent {
 #[derive(Clone, Debug)]
 pub struct TrackInputChangedEvent {
     pub track: Track,
+    pub old_value: Option<RecordingInput>,
+    pub new_value: Option<RecordingInput>,
 }
 
 #[derive(Clone, Debug)]

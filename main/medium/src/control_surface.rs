@@ -29,7 +29,7 @@ pub trait ControlSurface: Debug {
     ///
     /// Return `None` if this is a control surface behind the scenes.
     //
-    // We can't let this returns something owned because it would be gone as soon as the delegate
+    // We can't let this return something owned because it would be gone as soon as the delegate
     // control surface turns this into a pointer and returns. This method of `IReaperControlSurface`
     // and related ones are just designed to work that way.
     fn get_type_string(&self) -> Option<&ReaperStr> {
@@ -131,7 +131,9 @@ pub trait ControlSurface: Debug {
     /// Should flush the control states.
     fn reset_cached_vol_pan_states(&self) {}
 
-    /// Called when a track has been selected.
+    /// Called after multiple tracks have been selected (seems to be batched).
+    ///
+    /// Doesn't seem to be called though when using [`crate::Reaper::set_track_selected`].
     fn on_track_selection(&self, args: OnTrackSelectionArgs) {
         let _ = args;
     }

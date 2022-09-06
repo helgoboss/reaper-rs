@@ -144,6 +144,19 @@ pub enum TrackAttributeKey<'a> {
     ///
     /// 2 - 64, even numbers only.
     Nchan,
+    /// Track vu mode.
+    ///  
+    /// `*mut i32`
+    /// - 0 → Stereo Peaks
+    /// - 2 → Multichannel Peaks
+    /// - 4 → Stereo RMS
+    /// - 8 → Combined RMS
+    /// - 12 → LUFS-M
+    /// - 16 → LUFS-S (readout = Max)
+    /// - 20 → LUFS-S (readout = Current)
+    ///
+    /// LUFS calculation on channels 1+2 only.
+    VuMode,
     /// Track selected.
     ///
     /// `*mut i32`
@@ -416,6 +429,7 @@ impl<'a> TrackAttributeKey<'a> {
             McpY => reaper_str!("I_MCPY").into(),
             MidiHwOut => reaper_str!("I_MIDIHWOUT").into(),
             Nchan => reaper_str!("I_NCHAN").into(),
+            VuMode => reaper_str!("I_VUMODE").into(),
             PanMode => reaper_str!("I_PANMODE").into(),
             PerfFlags => reaper_str!("I_PERFFLAGS").into(),
             PlayOffsetFlag => reaper_str!("I_PLAY_OFFSET_FLAG").into(),

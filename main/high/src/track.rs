@@ -424,6 +424,28 @@ impl Track {
         }
     }
 
+    pub fn parent_send_enabled(&self) -> bool {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_media_track_info_value(self.raw(), TrackAttributeKey::MainSend)
+                > 0.0
+        }
+    }
+
+    pub fn set_parent_send_enabled(&self, parent_send: bool) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .set_media_track_info_value(
+                    self.raw(),
+                    TrackAttributeKey::MainSend,
+                    if parent_send { 1.0 } else { 0.0 },
+                )
+                .unwrap();
+        }
+    }
+
     // If supportAutoArm is false, auto-arm mode is disabled if it has been enabled before
     pub fn arm(&self, support_auto_arm: bool) {
         if support_auto_arm && self.has_auto_arm_enabled() {

@@ -21,7 +21,7 @@ impl MidiInputDevice {
     pub fn name(self) -> ReaperString {
         Reaper::get()
             .medium_reaper()
-            .get_midi_input_name(self.id, 33)
+            .get_midi_input_name(self.id, 64)
             .name
             .unwrap()
     }

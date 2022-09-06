@@ -19,7 +19,7 @@ c_str_macro = "1.0.2"
 derive_more = "0.99.5"
 reaper-low = { version = "0.1.0", path = "../low" }
 reaper-macros = { path = "../macros" }
-helgoboss-midi = "*"
+helgoboss-midi = "0.4.0"
 enumflags2 = { version = "0.7.4", features = ["serde"] }
 vst = "*"
 metered = { version = "0.8.0", optional = true }

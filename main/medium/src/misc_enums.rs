@@ -1348,7 +1348,7 @@ pub enum AudioDeviceAttributeKey<'a> {
     /// Use [`custom()`] to create this variant.
     ///
     /// [`custom()`]: #method.custom
-    Custom(Cow<'a, ReaperStr>)
+    Custom(Cow<'a, ReaperStr>),
 }
 
 impl<'a> AudioDeviceAttributeKey<'a> {
@@ -1368,7 +1368,7 @@ impl<'a> AudioDeviceAttributeKey<'a> {
             BSize => reaper_str!("BSIZE").into(),
             SRate => reaper_str!("SRATE").into(),
             Bps => reaper_str!("BPS").into(),
-            Custom(key) => key
+            Custom(key) => key,
         }
     }
 }

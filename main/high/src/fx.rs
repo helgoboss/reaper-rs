@@ -292,8 +292,24 @@ impl Fx {
         (0..self.parameter_count()).map(move |i| self.parameter_by_index(i))
     }
 
+    /// Returns the GUID of this FX *only* if it has been created in a GUID-based way,
+    /// not if it has been created in an index-based way!!!
+    ///
+    /// See [`Self::get_or_query_guid`].
+    // TODO-high We really should use separate types in reaper-high!
     pub fn guid(&self) -> Option<Guid> {
         self.guid
+    }
+
+    /// This queries the GUID for index-based FXs.
+    pub fn get_or_query_guid(&self) -> Result<Guid, &'static str> {
+        if let Some(guid) = self.guid {
+            return Ok(guid);
+        }
+        self.chain()
+            .fx_by_index(self.index())
+            .and_then(|f| f.guid())
+            .ok_or("FX was not resolvable")
     }
 
     pub fn parameter_by_index(&self, index: u32) -> FxParameter {

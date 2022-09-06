@@ -375,10 +375,8 @@ impl Reaper {
         let casted_value_ref = unsafe { casted_value_ptr.as_mut() };
         let old_value = *casted_value_ref;
         let new_value = create_new_value(old_value);
-        println!("Setting new value: {:?}", new_value);
         *casted_value_ref = new_value;
         let result = f();
-        println!("Restoring old value: {:?}", old_value);
         *casted_value_ref = old_value;
         Ok(result)
     }

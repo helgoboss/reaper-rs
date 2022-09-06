@@ -88,8 +88,8 @@ impl raw::PCM_source {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
-    pub fn PropertiesWindow(&self, hwndParent: raw::HWND) -> ::std::os::raw::c_int {
-        unsafe { rust_to_cpp_PCM_source_PropertiesWindow(self as *const _ as _, hwndParent) }
+    pub unsafe fn PropertiesWindow(&self, hwndParent: raw::HWND) -> ::std::os::raw::c_int {
+        rust_to_cpp_PCM_source_PropertiesWindow(self as *const _ as _, hwndParent)
     }
 
     /// # Safety

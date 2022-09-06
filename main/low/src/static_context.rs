@@ -66,15 +66,15 @@ mod swell {
     > = None;
     pub static INIT_GET_SWELL_FUNC: Once = Once::new();
 
-    /// On Linux, this function is implemented on C++ side (`swell-modstub-generic-custom.cpp`).
-    ///
-    /// This is supposed to be called by Rust as soon as it gets hold of the SWELL function provider
-    /// via the Linux SWELL main entry point `SWELL_dllMain()`. Calling this give the C++ side of
-    /// the plug-in the chance to initialize its SWELL function pointers as well, which is necessary
-    /// for many use cases (e.g. creating dialog windows). This is only needed on Linux. On Windows
-    /// we don't have SWELL and on macOS the mechanism of obtaining SWELL is different.
     #[cfg(target_os = "linux")]
     extern "C" {
+        /// On Linux, this function is implemented on C++ side (`swell-modstub-generic-custom.cpp`).
+        ///
+        /// This is supposed to be called by Rust as soon as it gets hold of the SWELL function provider
+        /// via the Linux SWELL main entry point `SWELL_dllMain()`. Calling this give the C++ side of
+        /// the plug-in the chance to initialize its SWELL function pointers as well, which is necessary
+        /// for many use cases (e.g. creating dialog windows). This is only needed on Linux. On Windows
+        /// we don't have SWELL and on macOS the mechanism of obtaining SWELL is different.
         pub fn register_swell_function_provider_called_from_rust(
             get_func: Option<crate::GetSwellFunc>,
         );

@@ -133,7 +133,7 @@ impl BorrowedSource {
         self.0.ext_remove_from_midi_pool()
     }
 
-    pub fn set_preview_tempo(&self, tempo: Bpm) -> Result<(), ReaperFunctionError> {
+    pub fn set_preview_tempo(&self, tempo: Option<Bpm>) -> Result<(), ReaperFunctionError> {
         self.0.ext_set_preview_tempo(tempo)
     }
 
