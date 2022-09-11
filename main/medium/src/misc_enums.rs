@@ -1372,3 +1372,39 @@ impl<'a> AudioDeviceAttributeKey<'a> {
         }
     }
 }
+
+/// Identifies an FX parameter.
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub enum ParamId<'a> {
+    /// Wet amount of that FX.
+    Wet,
+    /// Enable/disable FX.
+    Bypass,
+    /// Delta solo.
+    Delta,
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
+    Custom(Cow<'a, ReaperStr>),
+}
+
+impl<'a> ParamId<'a> {
+    /// Convenience function for creating a [`Custom`] ident.
+    ///
+    /// [`Custom`]: #variant.Custom
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> Self {
+        Self::Custom(key.into().into_inner())
+    }
+
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
+        use ParamId::*;
+        match self {
+            Wet => reaper_str!(":wet").into(),
+            Bypass => reaper_str!(":bypass").into(),
+            Delta => reaper_str!(":delta").into(),
+            Custom(key) => key,
+        }
+    }
+}

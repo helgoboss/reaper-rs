@@ -20,7 +20,7 @@ use crate::{
     MediaItem, MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior,
     MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
     NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
-    PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    ParamId, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
     PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef,
     PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
     ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
@@ -2956,6 +2956,33 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         match self.track_fx_add_by_name(track, fx_name, fx_chain_type, FxAddByNameBehavior::Query) {
+            -1 => None,
+            idx if idx >= 0 => Some(idx as u32),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Returns the parameter index corresponding to the given identifier.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    #[measure(ResponseTimeSingleThreaded)]
+    pub unsafe fn track_fx_get_param_from_ident<'a>(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+        ident: ParamId,
+    ) -> Option<u32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        match self.low.TrackFX_GetParamFromIdent(
+            track.as_ptr(),
+            fx_location.to_raw(),
+            ident.into_raw().as_ptr(),
+        ) {
             -1 => None,
             idx if idx >= 0 => Some(idx as u32),
             _ => unreachable!(),
