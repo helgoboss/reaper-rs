@@ -392,10 +392,6 @@ pub use reaper::*;
 mod util;
 use util::*;
 
-#[cfg(feature = "reaper-meter")]
-#[doc(hidden)]
-mod metering;
-
 mod string_types;
 pub use string_types::*;
 

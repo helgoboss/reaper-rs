@@ -106,10 +106,6 @@ pub use source::*;
 mod action_character;
 pub use action_character::*;
 
-mod meter_middleware;
-#[cfg(feature = "reaper-meter")]
-pub use meter_middleware::*;
-
 mod undo_block;
 
 mod normalized_value;

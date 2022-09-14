@@ -140,7 +140,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         get_project_tempo(),
         set_project_tempo(),
         swell(),
-        metrics(),
     ]
     .into_iter();
     let output_fx_steps = create_fx_steps("Output FX chain", || {
@@ -173,17 +172,6 @@ fn swell() -> TestStep {
         //     c_str!("reaper-rs SWELL").as_ptr(),
         //     1,
         // );
-    })
-}
-
-fn metrics() -> TestStep {
-    step(AllVersions, "Metrics", |_session, _| {
-        // TODO-low Log as yaml (and only the metrics - put it behind feature gate)
-        println!(
-            "reaper_medium::Reaper metrics after integration test: {:#?}",
-            Reaper::get().medium_reaper()
-        );
-        Ok(())
     })
 }
 
@@ -2379,21 +2367,17 @@ fn global_instances() -> TestStep {
         use std::mem::size_of_val;
         let medium_session = Reaper::get().medium_session();
         let medium_reaper = Reaper::get().medium_reaper();
-        let metrics_size = size_of_val(medium_reaper.metrics());
         Reaper::get().show_console_msg(format!(
             "\
             Struct sizes in byte:\n\
-            - reaper_high::Reaper: {high_reaper} ({high_reaper_no_metrics} without metrics)\n\
-            - reaper_medium::ReaperSession: {medium_session} ({medium_session_no_metrics} without metrics)\n\
-            - reaper_medium::Reaper: {medium_reaper} ({medium_reaper_no_metrics} without metrics)\n\
+            - reaper_high::Reaper: {high_reaper}\n\
+            - reaper_medium::ReaperSession: {medium_session}\n\
+            - reaper_medium::Reaper: {medium_reaper}\n\
             - reaper_low::Reaper: {low_reaper}\n\
             ",
             high_reaper = size_of_val(Reaper::get()),
-            high_reaper_no_metrics = size_of_val(Reaper::get()) - metrics_size,
             medium_session = size_of_val(medium_session.deref()),
-            medium_session_no_metrics = size_of_val(medium_session.deref()) - metrics_size,
             medium_reaper = size_of_val(medium_reaper),
-            medium_reaper_no_metrics = size_of_val(medium_reaper) - metrics_size,
             low_reaper = size_of_val(medium_reaper.low()),
         ));
         // Low-level REAPER
