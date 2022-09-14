@@ -55,7 +55,7 @@ impl MidiInput {
 #[repr(transparent)]
 pub struct BorrowedMidiEventList(pub(crate) raw::MIDI_eventlist);
 
-#[derive(PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub struct EnumItemsResult<T> {
     /// MIDI event.
     pub midi_event: T,

@@ -2846,7 +2846,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn track_fx_get_param_from_ident<'a>(
+    pub unsafe fn track_fx_get_param_from_ident(
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
@@ -6759,7 +6759,7 @@ pub struct GetParamExResult {
     pub max_value: f64,
 }
 
-#[derive(Clone, PartialEq, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct EnumProjectsResult {
     /// Project pointer.
     pub project: ReaProject,
@@ -6767,7 +6767,7 @@ pub struct EnumProjectsResult {
     pub file_path: Option<PathBuf>,
 }
 
-#[derive(Clone, PartialEq, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct GetMidiDevNameResult {
     /// Whether the device is currently connected.
     pub is_present: bool,
@@ -6775,7 +6775,7 @@ pub struct GetMidiDevNameResult {
     pub name: Option<ReaperString>,
 }
 
-#[derive(Clone, PartialEq, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum EnumPitchShiftModesResult<'a> {
     /// Pitch shift mode exists but is currently unsupported.
     Unsupported,
@@ -6792,7 +6792,7 @@ pub struct GetInputOutputLatencyResult {
     pub output_latency: u32,
 }
 
-#[derive(Clone, PartialEq, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct TrackFxGetPresetResult {
     /// Whether the current state of the FX matches the preset.
     ///
@@ -6841,7 +6841,7 @@ pub struct PlayState {
     pub is_recording: bool,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct EnumProjectMarkers3Result<'a> {
     pub position: PositionInSeconds,
     pub region_end_position: Option<PositionInSeconds>,
@@ -6858,14 +6858,14 @@ pub struct GetLastMarkerAndCurRegionResult {
 }
 
 /// The given indexes count both markers and regions.
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct GetLoopTimeRange2Result {
     pub start: PositionInSeconds,
     pub end: PositionInSeconds,
 }
 
 /// The arrange view start/end time for the given screen coordinates.
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct GetSetArrangeView2Result {
     pub start_time: PositionInSeconds,
     pub end_time: PositionInSeconds,
@@ -6921,7 +6921,7 @@ pub struct VolumeAndPan {
     pub pan: ReaperPanValue,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct SetEditCurPosOptions {
     pub move_view: bool,
     pub seek_play: bool,
@@ -7003,14 +7003,14 @@ pub enum GetFocusedFxResult {
     Unknown(Hidden<i32>),
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct RgbColor {
     pub r: u8,
     pub g: u8,
     pub b: u8,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct NativeColorResult {
     /// The OS-dependent color.
     pub color: NativeColor,

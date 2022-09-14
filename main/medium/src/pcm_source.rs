@@ -829,22 +829,22 @@ pub trait CustomPcmSource {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct SetAvailableArgs {
     pub is_available: bool,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct SetFileNameArgs<'a> {
     pub new_file_name: Option<&'a Path>,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct SetSourceArgs {
     pub source: Option<PcmSource>,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct PropertiesWindowArgs {
     pub parent_window: Option<Hwnd>,
 }
@@ -859,18 +859,18 @@ pub struct GetPeakInfoArgs<'a> {
     pub block: &'a PcmSourcePeakTransfer,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct SaveStateArgs<'a> {
     pub context: &'a BorrowedProjectStateContext,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct LoadStateArgs<'a> {
     pub first_line: &'a ReaperStr,
     pub context: &'a BorrowedProjectStateContext,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct PeaksClearArgs {
     pub delete_file: bool,
 }

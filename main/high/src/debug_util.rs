@@ -34,7 +34,7 @@ pub fn resolve_symbols_from_text(text: &str) -> Result<(), Box<dyn std::error::E
         .collect();
     let hex_numbers = hex_numbers?;
     let their_module_base_address = *hex_numbers
-        .get(0)
+        .first()
         .ok_or("Module base address missing in error report")?;
     let their_module_size = *hex_numbers
         .get(1)
