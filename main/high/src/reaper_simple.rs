@@ -313,7 +313,8 @@ impl Reaper {
     pub fn create_empty_project_in_new_tab(&self) -> Project {
         self.main_section()
             .action_by_command_id(CommandId::new(41929))
-            .invoke_as_trigger(None);
+            .invoke_as_trigger(None)
+            .expect("built-in action for creating empty project must exist");
         self.current_project()
     }
 

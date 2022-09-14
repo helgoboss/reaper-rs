@@ -471,15 +471,15 @@ fn register_and_unregister_toggle_action() -> TestStep {
             let _command_id = action.command_id();
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
-            assert_eq!(action.is_on(), Some(false));
-            action.invoke_as_trigger(None);
+            assert_eq!(action.is_on()?, Some(false));
+            action.invoke_as_trigger(None)?;
             assert_eq!(mock.invocation_count(), 1);
             assert_eq!(mock.last_arg(), 43);
-            assert_eq!(action.is_on(), Some(true));
-            assert_eq!(action.character(), ActionCharacter::Toggle);
-            assert!(action.command_id() > CommandId::new(1));
+            assert_eq!(action.is_on()?, Some(true));
+            assert_eq!(action.character()?, ActionCharacter::Toggle);
+            assert!(action.command_id()? > CommandId::new(1));
             assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest2");
-            assert_eq!(action.name().to_str(), "reaper-rs test toggle action");
+            assert_eq!(action.name()?.to_str(), "reaper-rs test toggle action");
             reg.unregister();
             assert!(!action.is_available());
             Ok(())
@@ -509,14 +509,14 @@ fn register_and_unregister_action() -> TestStep {
             // Then
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
-            action.invoke_as_trigger(None);
+            action.invoke_as_trigger(None)?;
             assert_eq!(mock.invocation_count(), 1);
             assert_eq!(mock.last_arg(), 42);
-            assert_eq!(action.character(), ActionCharacter::Trigger);
-            assert!(action.command_id() > CommandId::new(1));
+            assert_eq!(action.character()?, ActionCharacter::Trigger);
+            assert!(action.command_id()? > CommandId::new(1));
             assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest");
-            assert_eq!(action.is_on(), None);
-            assert_eq!(action.name().to_str(), "reaper-rs test action");
+            assert_eq!(action.is_on()?, None);
+            assert_eq!(action.name()?.to_str(), "reaper-rs test action");
             reaper.go_to_sleep()?;
             assert!(!action.is_available());
             reaper.wake_up()?;
@@ -684,7 +684,7 @@ fn test_action_invoked_event() -> TestStep {
         });
         Reaper::get()
             .medium_reaper()
-            .main_on_command_ex(action.command_id(), 0, CurrentProject);
+            .main_on_command_ex(action.command_id()?, 0, CurrentProject);
         // Then
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(*mock.last_arg(), action);
@@ -708,9 +708,9 @@ fn invoke_action() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        action.invoke_as_trigger(None);
+        action.invoke_as_trigger(None)?;
         // Then
-        assert_eq!(action.is_on(), Some(true));
+        assert_eq!(action.is_on()?, Some(true));
         assert!(track.is_muted());
         let reaper_version = reaper.version();
         if reaper_version >= ReaperVersion::new("6.20")
@@ -744,23 +744,23 @@ fn query_action() -> TestStep {
             .action_by_command_id(CommandId::new(41075));
         let normal_action_by_index = Reaper::get()
             .main_section()
-            .action_by_index(normal_action.index());
+            .action_by_index(normal_action.index()?);
         // Then
         assert!(toggle_action.is_available());
         assert!(normal_action.is_available());
-        assert_eq!(toggle_action.character(), ActionCharacter::Toggle);
-        assert_eq!(normal_action.character(), ActionCharacter::Trigger);
-        assert_eq!(toggle_action.is_on(), Some(false));
-        assert_eq!(normal_action.is_on(), None);
+        assert_eq!(toggle_action.character()?, ActionCharacter::Toggle);
+        assert_eq!(normal_action.character()?, ActionCharacter::Trigger);
+        assert_eq!(toggle_action.is_on()?, Some(false));
+        assert_eq!(normal_action.is_on()?, None);
         assert_eq!(toggle_action.clone(), toggle_action);
-        assert_eq!(toggle_action.command_id(), CommandId::new(6));
+        assert_eq!(toggle_action.command_id()?, CommandId::new(6));
         assert!(toggle_action.command_name().is_none());
         assert_eq!(
-            toggle_action.name().to_str(),
+            toggle_action.name()?.to_str(),
             "Track: Toggle mute for selected tracks"
         );
-        assert!(toggle_action.index() > 0);
-        assert_eq!(toggle_action.section(), Reaper::get().main_section());
+        assert!(toggle_action.index()? > 0);
+        assert_eq!(toggle_action.section()?, Reaper::get().main_section());
         assert_eq!(normal_action_by_index, normal_action);
         Ok(())
     })

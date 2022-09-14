@@ -106,6 +106,9 @@ pub use source::*;
 mod action_character;
 pub use action_character::*;
 
+mod error;
+pub use error::*;
+
 mod undo_block;
 
 mod normalized_value;
