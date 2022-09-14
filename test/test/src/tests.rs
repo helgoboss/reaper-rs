@@ -191,7 +191,7 @@ fn set_project_tempo() -> TestStep {
         project.set_tempo(
             Tempo::from_bpm(Bpm::new(130.0)),
             UndoBehavior::OmitUndoPoint,
-        );
+        )?;
         // Then
         assert_eq!(project.tempo().bpm(), Bpm::new(130.0));
         // TODO-low There should be only one event invocation
@@ -430,7 +430,7 @@ fn insert_track_at() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        let new_track = project.insert_track_at(1);
+        let new_track = project.insert_track_at(1)?;
         new_track.set_name("Inserted track");
         // Then
         assert_eq!(project.track_count(), 4);
@@ -894,7 +894,7 @@ fn query_track_send() -> TestStep {
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
-        let track_3 = project.add_track();
+        let track_3 = project.add_track()?;
         // When
         let send_to_track_2 = track_1
             .find_send_by_destination_track(&track_2)
@@ -1103,7 +1103,7 @@ fn select_track_exclusively() -> TestStep {
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
         let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
-        let master_track = project.master_track();
+        let master_track = project.master_track()?;
         assert!(master_track.is_selected());
         track_1.unselect();
         track_2.select();
@@ -1397,7 +1397,7 @@ fn select_master_track() -> TestStep {
     step(AllVersions, "Select master track", |_, step| {
         // Given
         let project = Reaper::get().current_project();
-        let master_track = project.master_track();
+        let master_track = project.master_track()?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -1968,7 +1968,7 @@ fn query_non_existent_track_by_guid() -> TestStep {
             let project = Reaper::get().current_project();
             // When
             let guid = Guid::from_string_with_braces("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}")?;
-            let found_track = project.track_by_guid(&guid);
+            let found_track = project.track_by_guid(&guid)?;
             // Then
             assert!(!found_track.is_available());
             Ok(())
@@ -1981,9 +1981,9 @@ fn query_track_by_guid() -> TestStep {
         // Given
         let project = Reaper::get().current_project();
         let first_track = get_track(0)?;
-        let new_track = project.add_track();
+        let new_track = project.add_track()?;
         // When
-        let found_track = project.track_by_guid(new_track.guid());
+        let found_track = project.track_by_guid(new_track.guid())?;
         // Then
         assert!(found_track.is_available());
         assert_eq!(&found_track, &new_track);
@@ -1997,7 +1997,7 @@ fn query_all_tracks() -> TestStep {
     step(AllVersions, "Query all tracks", |_session, _| {
         // Given
         let project = Reaper::get().current_project();
-        project.add_track();
+        project.add_track()?;
         // When
         let tracks = project.tracks();
         // Then
@@ -2011,7 +2011,7 @@ fn query_master_track() -> TestStep {
         // Given
         let project = Reaper::get().current_project();
         // When
-        let master_track = project.master_track();
+        let master_track = project.master_track()?;
         // Then
         assert_eq!(master_track.location(), TrackLocation::MasterTrack);
         assert!(master_track.is_master_track());
@@ -2172,7 +2172,7 @@ fn add_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        let new_track = project.add_track();
+        let new_track = project.add_track()?;
         // Then
         assert_eq!(project.track_count(), 1);
         assert_eq!(new_track.index(), Some(0));
@@ -2311,7 +2311,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
         // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
         // projectCountBefore + 1);
         assert_eq!(new_project.track_count(), 0);
-        assert!(new_project.index() > 0);
+        assert!(new_project.index()? > 0);
         assert!(new_project.file().is_none());
         assert_eq!(new_project.length(), DurationInSeconds::new(0.0));
         assert_eq!(mock.invocation_count(), 1);

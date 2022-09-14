@@ -885,8 +885,9 @@ impl ChangeDetectionMiddleware {
             {
                 true
             } else {
-                let track = project.track_by_guid(&data.guid);
-                handle_change(ChangeEvent::TrackRemoved(TrackRemovedEvent { track }));
+                if let Ok(track) = project.track_by_guid(&data.guid) {
+                    handle_change(ChangeEvent::TrackRemoved(TrackRemovedEvent { track }));
+                }
                 false
             }
         });
@@ -898,7 +899,7 @@ impl ChangeDetectionMiddleware {
         track_datas: &mut TrackDataMap,
         mut handle_change: impl FnMut(ChangeEvent),
     ) {
-        for t in std::iter::once(project.master_track()).chain(project.tracks()) {
+        for t in project.master_track().into_iter().chain(project.tracks()) {
             let mt = t.raw();
             track_datas.entry(mt).or_insert_with(|| {
                 let func = Reaper::get().medium_reaper();

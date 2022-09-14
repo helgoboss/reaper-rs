@@ -69,7 +69,10 @@ impl Reaper {
                         // Track exists in this project
                         use TrackLocation::*;
                         let track = match track_location {
-                            MasterTrack => self.current_project().master_track(),
+                            MasterTrack => self
+                                .current_project()
+                                .master_track()
+                                .expect("master track of current project should exist"),
                             NormalTrack(idx) => {
                                 if idx >= self.current_project().track_count() {
                                     // Must be in another project

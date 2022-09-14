@@ -31,6 +31,7 @@ ref-cast = "1.0.6"
 # For relativizing to project path
 pathdiff = "0.2.0"
 enumflags2 = "0.7.4"
+either = "1.8.0"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["psapi", "processthreadsapi"] }

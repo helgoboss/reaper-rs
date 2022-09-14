@@ -685,7 +685,10 @@ impl Fx {
 fn get_track_and_location(chain: &FxChain, index: u32) -> Option<(Track, TrackFxLocation)> {
     match chain.context() {
         FxChainContext::Monitoring => {
-            let track = Reaper::get().current_project().master_track();
+            let track = Reaper::get()
+                .current_project()
+                .master_track()
+                .expect("master track of current project should exist");
             let location = TrackFxLocation::InputFxChain(index);
             Some((track, location))
         }
