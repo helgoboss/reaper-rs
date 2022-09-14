@@ -942,7 +942,7 @@ impl Track {
         }
     }
 
-    // Precondition: mediaTrack_ must be filled!
+    /// Precondition: mediaTrack_ must be filled!
     fn is_valid(&self) -> bool {
         let media_track = match self.media_track.get() {
             None => panic!("Track can not be validated if mediaTrack not available"),
@@ -963,7 +963,7 @@ impl Track {
         }
     }
 
-    // Precondition: mediaTrack_ must be filled!
+    /// Precondition: mediaTrack_ must be filled!
     fn attempt_to_fill_project_if_necessary(&self) {
         if self.rea_project.get().is_none() {
             self.rea_project.replace(self.find_containing_project_raw());
@@ -1008,7 +1008,9 @@ impl Track {
         Project::new(self.rea_project.get().unwrap())
     }
 
-    // Precondition: mediaTrack_ must be filled!
+    /// Precondition: mediaTrack_ must be filled!
+    ///
+    /// Should be rather cheap on the happy path because we try with the current project first!
     fn find_containing_project_raw(&self) -> Option<ReaProject> {
         let media_track = match self.media_track.get() {
             None => panic!("Containing project cannot be found if mediaTrack not available"),
