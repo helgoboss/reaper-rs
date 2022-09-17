@@ -7023,7 +7023,7 @@ impl NativeColorResult {
         if value == 0 {
             return None;
         }
-        let used_offset = 0x100000;
+        let used_offset = 0x1000000;
         let res = if value < used_offset {
             Self {
                 color: NativeColor::new(value as _),
