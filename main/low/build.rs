@@ -79,6 +79,8 @@ mod codegen {
                 if name.contains("_EXT_")
                     // Signed because ShowWindow() expects signed. winapi-rs conforms.
                     || name.starts_with("SW_")
+                    // Signed because GetSystemMetrics() expects signed. winapi-rs conforms.
+                    || name.starts_with("SM_")
                     // Signed because reaper_plugin_info_t::caller_version is signed.
                     || name == "REAPER_PLUGIN_VERSION"
                     // Signed because ReaperGetPitchShiftAPI parameter is signed.

@@ -342,6 +342,13 @@ pub mod root {
     pub const GMEM_LOWER: u32 = 0;
     pub const CF_TEXT: u32 = 1;
     pub const CF_HDROP: u32 = 2;
+    pub const SM_CXSCREEN: i32 = 0;
+    pub const SM_CYSCREEN: i32 = 1;
+    pub const SM_CXVSCROLL: i32 = 2;
+    pub const SM_CYHSCROLL: i32 = 3;
+    pub const SM_CYMENU: i32 = 15;
+    pub const SM_CYVSCROLL: i32 = 20;
+    pub const SM_CXHSCROLL: i32 = 21;
     pub const REAPER_PLUGIN_VERSION: i32 = 526;
     pub const PCM_SOURCE_EXT_INLINEEDITOR: i32 = 256;
     pub const PCM_SOURCE_EXT_PROJCHANGENOTIFY: i32 = 8192;
