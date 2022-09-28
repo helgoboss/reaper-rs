@@ -3,7 +3,8 @@ use crate::{
     BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, Item, PlayRate, Reaper, ReaperResult,
     Tempo, Track,
 };
-use std::iter;
+use std::fmt::Debug;
+use std::{iter, mem};
 
 use either::Either;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
@@ -637,15 +638,52 @@ impl Project {
         }
     }
 
+    pub fn with_track_grouping<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
+        self.with_temporarily_modified_setting(
+            "projtrackgroupdisabled",
+            |_| if on { 0 } else { 1 },
+            f,
+        )
+        .unwrap()
+    }
+
+    fn with_temporarily_modified_setting<'a, T: Copy + Debug, R>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+        create_new_value: impl FnOnce(T) -> T,
+        f: impl FnOnce() -> R,
+    ) -> Result<R, &'static str> {
+        let casted_value_ref = self.get_setting_ref(name)?;
+        let old_value = *casted_value_ref;
+        let new_value = create_new_value(old_value);
+        *casted_value_ref = new_value;
+        let result = f();
+        *casted_value_ref = old_value;
+        Ok(result)
+    }
+
     unsafe fn get_project_config<T: Copy>(self, name: &str) -> Option<T> {
+        Some(*self.get_setting_ref(name).ok()?)
+    }
+
+    fn get_setting_ref<'a, T>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> Result<&mut T, &'static str> {
         let reaper = Reaper::get().medium_reaper();
-        let proj_conf_result = reaper.project_config_var_get_offs(name)?;
-        let ptr =
-            reaper.project_config_var_addr(Proj(self.raw()), proj_conf_result.offset) as *mut T;
-        if ptr.is_null() {
-            return None;
+        let proj_conf_result = reaper
+            .project_config_var_get_offs(name)
+            .ok_or("setting doesn't exist")?;
+        let size_matches = proj_conf_result.size as usize == mem::size_of::<T>();
+        if !size_matches {
+            return Err("size mismatch");
         }
-        Some(*ptr)
+        let ptr = reaper
+            .project_config_var_addr(Proj(self.raw()), proj_conf_result.offset)
+            .ok_or("setting exists but null pointer returned")?;
+        let mut casted_value_ptr = ptr.cast::<T>();
+        let casted_value_ref = unsafe { casted_value_ptr.as_mut() };
+        Ok(casted_value_ref)
     }
 
     fn set_repeat_is_enabled(self, repeat: bool) {

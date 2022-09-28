@@ -564,7 +564,7 @@ fn unsolo_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.unsolo();
+        track.unsolo(GangBehavior::DenyGang);
         // Then
         assert!(!track.is_solo());
         // Started to be 2 when making master track notification work
@@ -587,7 +587,7 @@ fn solo_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.solo();
+        track.solo(GangBehavior::DenyGang);
         // Then
         assert!(track.is_solo());
         // Started to be 2 when making master track notification work
@@ -634,7 +634,7 @@ fn mute_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.mute();
+        track.mute(GangBehavior::DenyGang);
         // Then
         assert!(track.is_muted());
         assert_eq!(mock.invocation_count(), 1);
@@ -656,7 +656,7 @@ fn unmute_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.unmute();
+        track.unmute(GangBehavior::DenyGang);
         // Then
         assert!(!track.is_muted());
         // For some reason REAPER doesn't call SetSurfaceMute on control surfaces when an action
@@ -1161,7 +1161,7 @@ fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
                         mock.invoke(t);
                     });
             });
-            track.arm(false);
+            track.arm(false, GangBehavior::DenyGang);
             // Then
             assert!(track.is_armed(true));
             assert!(track.is_armed(false));
@@ -1189,7 +1189,7 @@ fn disarm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
                         mock.invoke(t);
                     });
             });
-            track.disarm(false);
+            track.disarm(false, GangBehavior::DenyGang);
             // Then
             assert!(!track.is_armed(true));
             assert!(!track.is_armed(false));
@@ -1227,7 +1227,7 @@ fn switch_to_normal_track_mode_while_armed() -> TestStep {
         |_, _| {
             // Given
             let track = get_track(0)?;
-            track.arm(true);
+            track.arm(true, GangBehavior::DenyGang);
             assert!(track.is_armed(true));
             // When
             track.disable_auto_arm()?;
@@ -1267,7 +1267,7 @@ fn disarm_track_in_auto_arm_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.disarm(true);
+        track.disarm(true, GangBehavior::DenyGang);
         // Then
         assert!(!track.is_armed(true));
         assert!(!track.is_armed(false));
@@ -1291,7 +1291,7 @@ fn arm_track_in_auto_arm_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.arm(true);
+        track.arm(true, GangBehavior::DenyGang);
         // Then
         assert!(track.is_armed(true));
         // TODO Interesting! GetMediaTrackInfo_Value read with I_RECARM seems to support
@@ -1332,7 +1332,7 @@ fn disarm_track_in_normal_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.disarm(true);
+        track.disarm(true, GangBehavior::DenyGang);
         // Then
         assert!(!track.is_armed(true));
         assert!(!track.is_armed(false));
@@ -1356,7 +1356,7 @@ fn arm_track_in_normal_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.arm(true);
+        track.arm(true, GangBehavior::DenyGang);
         // Then
         assert!(track.is_armed(true));
         assert!(track.is_armed(false));
@@ -1538,7 +1538,7 @@ fn set_track_pan() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_pan(Pan::from_normalized_value(0.25));
+        track.set_pan(Pan::from_normalized_value(0.25), GangBehavior::DenyGang);
         // Then
         let pan = track.pan();
         assert_eq!(pan.reaper_value(), ReaperPanValue::new(-0.5));
@@ -1589,7 +1589,7 @@ fn set_track_width() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_width(Width::from_normalized_value(0.25));
+        track.set_width(Width::from_normalized_value(0.25), GangBehavior::DenyGang);
         // Then
         let width = track.width();
         assert_eq!(width.reaper_value(), ReaperWidthValue::new(-0.5));
@@ -1664,7 +1664,10 @@ fn set_track_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_volume(Volume::try_from_soft_normalized_value(0.25).unwrap());
+        track.set_volume(
+            Volume::try_from_soft_normalized_value(0.25).unwrap(),
+            GangBehavior::DenyGang,
+        );
         // Then
         let volume = track.volume();
         assert!(abs_diff_eq!(
@@ -1878,7 +1881,8 @@ fn set_track_input_monitoring() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying);
+        track
+            .set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying, GangBehavior::DenyGang);
         // Then
         assert_eq!(
             track.input_monitoring_mode(),

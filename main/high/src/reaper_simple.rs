@@ -369,6 +369,11 @@ impl Reaper {
             .unwrap()
     }
 
+    pub fn with_solo_in_place<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
+        self.with_temporarily_modified_preference("soloip", |_| if on { 1 } else { 0 }, f)
+            .unwrap()
+    }
+
     fn with_temporarily_modified_preference<'a, T: Copy + Debug, R>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,

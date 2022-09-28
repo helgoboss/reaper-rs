@@ -150,12 +150,16 @@ impl Track {
         }
     }
 
-    pub fn set_input_monitoring_mode(&self, mode: InputMonitoringMode) {
+    pub fn set_input_monitoring_mode(
+        &self,
+        mode: InputMonitoringMode,
+        gang_behavior: GangBehavior,
+    ) {
         self.load_and_check_if_necessary_or_complain();
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .csurf_on_input_monitoring_change_ex(self.raw(), mode, GangBehavior::DenyGang);
+                .csurf_on_input_monitoring_change_ex(self.raw(), mode, gang_behavior);
         }
     }
 
@@ -218,7 +222,7 @@ impl Track {
         Pan::from_reaper_value(result.pan)
     }
 
-    pub fn set_pan(&self, pan: Pan) {
+    pub fn set_pan(&self, pan: Pan, gang_behavior: GangBehavior) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = pan.reaper_value();
         let reaper_value = if self.project() == Reaper::get().current_project() {
@@ -226,7 +230,7 @@ impl Track {
                 Reaper::get().medium_reaper().csurf_on_pan_change_ex(
                     self.raw(),
                     Absolute(reaper_value),
-                    GangBehavior::DenyGang,
+                    gang_behavior,
                 )
             }
         } else {
@@ -264,7 +268,7 @@ impl Track {
         Width::from_reaper_value(result.pan_2.as_width_value())
     }
 
-    pub fn set_width(&self, width: Width) {
+    pub fn set_width(&self, width: Width, gang_behavior: GangBehavior) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = width.reaper_value();
         if self.project() == Reaper::get().current_project() {
@@ -272,7 +276,7 @@ impl Track {
                 Reaper::get().medium_reaper().csurf_on_width_change_ex(
                     self.raw(),
                     Absolute(reaper_value),
-                    GangBehavior::DenyGang,
+                    gang_behavior,
                 );
             }
         } else {
@@ -327,7 +331,7 @@ impl Track {
         Volume::from_reaper_value(result.volume)
     }
 
-    pub fn set_volume(&self, volume: Volume) {
+    pub fn set_volume(&self, volume: Volume, gang_behavior: GangBehavior) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = volume.reaper_value();
         let reaper_value = if self.project() == Reaper::get().current_project() {
@@ -348,7 +352,7 @@ impl Track {
                 Reaper::get().medium_reaper().csurf_on_volume_change_ex(
                     self.raw(),
                     Absolute(reaper_value),
-                    GangBehavior::DenyGang,
+                    gang_behavior,
                 )
             }
         } else {
@@ -447,7 +451,7 @@ impl Track {
     }
 
     // If supportAutoArm is false, auto-arm mode is disabled if it has been enabled before
-    pub fn arm(&self, support_auto_arm: bool) {
+    pub fn arm(&self, support_auto_arm: bool, gang_behavior: GangBehavior) {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.select();
         } else if self.project() == Reaper::get().current_project() {
@@ -455,7 +459,7 @@ impl Track {
                 Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
                     self.raw(),
                     RecordArmMode::Armed,
-                    GangBehavior::DenyGang,
+                    gang_behavior,
                 );
             }
             // If track was auto-armed before, this would just have switched off the auto-arm
@@ -473,7 +477,7 @@ impl Track {
                         Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
                             self.raw(),
                             RecordArmMode::Armed,
-                            GangBehavior::DenyGang,
+                            gang_behavior,
                         );
                     }
                 }
@@ -485,7 +489,7 @@ impl Track {
     }
 
     // If supportAutoArm is false, auto-arm mode is disabled if it has been enabled before
-    pub fn disarm(&self, support_auto_arm: bool) {
+    pub fn disarm(&self, support_auto_arm: bool, gang_behavior: GangBehavior) {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.unselect();
         } else if self.project() == Reaper::get().current_project() {
@@ -493,7 +497,7 @@ impl Track {
                 Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
                     self.raw(),
                     RecordArmMode::Unarmed,
-                    GangBehavior::DenyGang,
+                    gang_behavior,
                 );
             }
         } else {
@@ -511,9 +515,9 @@ impl Track {
         chunk.insert_after_region_as_block(&chunk.region().first_line(), "AUTO_RECARM 1");
         self.set_chunk(chunk)?;
         if was_armed_before {
-            self.arm(true);
+            self.arm(true, GangBehavior::DenyGang);
         } else {
-            self.disarm(true);
+            self.disarm(true, GangBehavior::DenyGang);
         }
         Ok(())
     }
@@ -613,22 +617,22 @@ impl Track {
         mute.unwrap_or(false)
     }
 
-    pub fn mute(&self) {
-        self.set_mute(true);
+    pub fn mute(&self, gang_behavior: GangBehavior) {
+        self.set_mute(true, gang_behavior);
     }
 
-    pub fn unmute(&self) {
-        self.set_mute(false);
+    pub fn unmute(&self, gang_behavior: GangBehavior) {
+        self.set_mute(false, gang_behavior);
     }
 
-    fn set_mute(&self, mute: bool) {
+    fn set_mute(&self, mute: bool, gang_behavior: GangBehavior) {
         if self.project() == Reaper::get().current_project() {
             self.load_and_check_if_necessary_or_complain();
             let _ = unsafe {
                 Reaper::get().medium_reaper().csurf_on_mute_change_ex(
                     self.raw(),
                     mute,
-                    GangBehavior::DenyGang,
+                    gang_behavior,
                 )
             };
         } else {
@@ -652,12 +656,12 @@ impl Track {
         solo > 0.0
     }
 
-    pub fn solo(&self) {
-        self.set_solo(true);
+    pub fn solo(&self, gang_behavior: GangBehavior) {
+        self.set_solo(true, gang_behavior);
     }
 
-    pub fn unsolo(&self) {
-        self.set_solo(false);
+    pub fn unsolo(&self, gang_behavior: GangBehavior) {
+        self.set_solo(false, gang_behavior);
     }
 
     pub fn solo_mode(&self) -> SoloMode {
@@ -685,14 +689,14 @@ impl Track {
         }
     }
 
-    fn set_solo(&self, solo: bool) {
+    fn set_solo(&self, solo: bool, gang_behavior: GangBehavior) {
         if self.project() == Reaper::get().current_project() {
             self.load_and_check_if_necessary_or_complain();
             let _ = unsafe {
                 Reaper::get().medium_reaper().csurf_on_solo_change_ex(
                     self.raw(),
                     solo,
-                    GangBehavior::DenyGang,
+                    gang_behavior,
                 )
             };
         } else {
