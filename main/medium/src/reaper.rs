@@ -2292,17 +2292,38 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Returns the project configuration object at the given address.
+    pub fn project_config_var_addr(
+        &self,
+        project: ProjectContext,
+        index: u32,
+    ) -> Option<NonNull<c_void>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.project_config_var_addr_unchecked(project, index) }
+    }
+
+    /// Like [`project_config_var_addr()`] but doesn't check if project is valid.
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid index.
-    pub unsafe fn project_config_var_addr(&self, project: ProjectContext, index: u32) -> *mut c_void
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`project_config_var_addr()`]: #method.project_config_var_addr
+    pub unsafe fn project_config_var_addr_unchecked(
+        &self,
+        project: ProjectContext,
+        index: u32,
+    ) -> Option<NonNull<c_void>>
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        self.low
-            .projectconfig_var_addr(project.to_raw(), index as _)
+        let ptr = self
+            .low
+            .projectconfig_var_addr(project.to_raw(), index as _);
+        NonNull::new(ptr)
     }
 
     /// Returns the REAPER preference with the given name.
