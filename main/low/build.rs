@@ -143,6 +143,7 @@ mod codegen {
                 .whitelist_var("BM_.*")
                 .whitelist_var("BST_.*")
                 .whitelist_var("SW_.*")
+                .whitelist_var("SM_.*")
                 .whitelist_var("SWP_.*")
                 .whitelist_var("CB_.*")
                 .whitelist_var("MB_.*")
