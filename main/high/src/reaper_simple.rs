@@ -69,7 +69,10 @@ impl Reaper {
                         // Track exists in this project
                         use TrackLocation::*;
                         let track = match track_location {
-                            MasterTrack => self.current_project().master_track(),
+                            MasterTrack => self
+                                .current_project()
+                                .master_track()
+                                .expect("master track of current project should exist"),
                             NormalTrack(idx) => {
                                 if idx >= self.current_project().track_count() {
                                     // Must be in another project
@@ -313,7 +316,8 @@ impl Reaper {
     pub fn create_empty_project_in_new_tab(&self) -> Project {
         self.main_section()
             .action_by_command_id(CommandId::new(41929))
-            .invoke_as_trigger(None);
+            .invoke_as_trigger(None)
+            .expect("built-in action for creating empty project must exist");
         self.current_project()
     }
 
@@ -356,13 +360,39 @@ impl Reaper {
         .unwrap()
     }
 
+    pub fn smooth_seek_is_enabled(&self) -> bool {
+        self.get_preference_ref("smoothseek") == Ok(&mut 1)
+    }
+
+    pub fn with_smooth_seek<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
+        self.with_temporarily_modified_preference("smoothseek", |_| if on { 1 } else { 0 }, f)
+            .unwrap()
+    }
+
+    pub fn with_solo_in_place<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
+        self.with_temporarily_modified_preference("soloip", |_| if on { 1 } else { 0 }, f)
+            .unwrap()
+    }
+
     fn with_temporarily_modified_preference<'a, T: Copy + Debug, R>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,
         create_new_value: impl FnOnce(T) -> T,
         f: impl FnOnce() -> R,
     ) -> Result<R, &'static str> {
-        // trimmidionsplit: bit 0 (2^0 = 1) => Trim MIDI on split, bit 1 (2^1 = 2) => pool MIDI source data when pasting/duplicating
+        let casted_value_ref = self.get_preference_ref(name)?;
+        let old_value = *casted_value_ref;
+        let new_value = create_new_value(old_value);
+        *casted_value_ref = new_value;
+        let result = f();
+        *casted_value_ref = old_value;
+        Ok(result)
+    }
+
+    fn get_preference_ref<'a, T>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> Result<&mut T, &'static str> {
         let config_var_result = Reaper::get()
             .medium_reaper
             .get_config_var(name)
@@ -373,11 +403,6 @@ impl Reaper {
         }
         let mut casted_value_ptr = config_var_result.value.cast::<T>();
         let casted_value_ref = unsafe { casted_value_ptr.as_mut() };
-        let old_value = *casted_value_ref;
-        let new_value = create_new_value(old_value);
-        *casted_value_ref = new_value;
-        let result = f();
-        *casted_value_ref = old_value;
-        Ok(result)
+        Ok(casted_value_ref)
     }
 }

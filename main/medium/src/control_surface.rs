@@ -510,17 +510,20 @@ pub struct ExtSetBpmAndPlayRateArgs {
 /// [this list](https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
 ///
 /// You can find some frequently used predefined keys in [`mod_keys`](mod_keys/index.html).
+//
+// u16 because I encountered a much higher value than u8 could carry when entering a ^ on a
+// German keyboard on macOS (1034 or so).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct VirtKey(pub(crate) u8);
+pub struct VirtKey(pub(crate) u16);
 
 impl VirtKey {
     /// Creates a virtual key.
-    pub const fn new(raw: u8) -> Self {
+    pub const fn new(raw: u16) -> Self {
         Self(raw)
     }
 
     /// Returns the wrapped value.
-    pub const fn get(self) -> u8 {
+    pub const fn get(self) -> u16 {
         self.0
     }
 }

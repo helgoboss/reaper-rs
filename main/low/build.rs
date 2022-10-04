@@ -79,6 +79,8 @@ mod codegen {
                 if name.contains("_EXT_")
                     // Signed because ShowWindow() expects signed. winapi-rs conforms.
                     || name.starts_with("SW_")
+                    // Signed because GetSystemMetrics() expects signed. winapi-rs conforms.
+                    || name.starts_with("SM_")
                     // Signed because reaper_plugin_info_t::caller_version is signed.
                     || name == "REAPER_PLUGIN_VERSION"
                     // Signed because ReaperGetPitchShiftAPI parameter is signed.
@@ -141,6 +143,7 @@ mod codegen {
                 .whitelist_var("BM_.*")
                 .whitelist_var("BST_.*")
                 .whitelist_var("SW_.*")
+                .whitelist_var("SM_.*")
                 .whitelist_var("SWP_.*")
                 .whitelist_var("CB_.*")
                 .whitelist_var("MB_.*")

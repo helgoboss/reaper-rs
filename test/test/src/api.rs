@@ -12,10 +12,12 @@ pub struct TestStepContext {
 }
 type TestStepResult = Result<(), Box<dyn Error>>;
 
+type TestOperation = dyn FnOnce(&Reaper, TestStepContext) -> TestStepResult;
+
 pub struct TestStep {
     pub name: Cow<'static, str>,
     pub version_restriction: VersionRestriction,
-    pub operation: Box<dyn FnOnce(&Reaper, TestStepContext) -> TestStepResult>,
+    pub operation: Box<TestOperation>,
 }
 
 pub fn step<Op>(

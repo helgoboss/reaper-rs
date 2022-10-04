@@ -140,7 +140,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         get_project_tempo(),
         set_project_tempo(),
         swell(),
-        metrics(),
     ]
     .into_iter();
     let output_fx_steps = create_fx_steps("Output FX chain", || {
@@ -176,17 +175,6 @@ fn swell() -> TestStep {
     })
 }
 
-fn metrics() -> TestStep {
-    step(AllVersions, "Metrics", |_session, _| {
-        // TODO-low Log as yaml (and only the metrics - put it behind feature gate)
-        println!(
-            "reaper_medium::Reaper metrics after integration test: {:#?}",
-            Reaper::get().medium_reaper()
-        );
-        Ok(())
-    })
-}
-
 fn set_project_tempo() -> TestStep {
     step(AllVersions, "Set project tempo", |_, step| {
         // Given
@@ -203,7 +191,7 @@ fn set_project_tempo() -> TestStep {
         project.set_tempo(
             Tempo::from_bpm(Bpm::new(130.0)),
             UndoBehavior::OmitUndoPoint,
-        );
+        )?;
         // Then
         assert_eq!(project.tempo().bpm(), Bpm::new(130.0));
         // TODO-low There should be only one event invocation
@@ -442,7 +430,7 @@ fn insert_track_at() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        let new_track = project.insert_track_at(1);
+        let new_track = project.insert_track_at(1)?;
         new_track.set_name("Inserted track");
         // Then
         assert_eq!(project.track_count(), 4);
@@ -483,15 +471,15 @@ fn register_and_unregister_toggle_action() -> TestStep {
             let _command_id = action.command_id();
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
-            assert_eq!(action.is_on(), Some(false));
-            action.invoke_as_trigger(None);
+            assert_eq!(action.is_on()?, Some(false));
+            action.invoke_as_trigger(None)?;
             assert_eq!(mock.invocation_count(), 1);
             assert_eq!(mock.last_arg(), 43);
-            assert_eq!(action.is_on(), Some(true));
-            assert_eq!(action.character(), ActionCharacter::Toggle);
-            assert!(action.command_id() > CommandId::new(1));
+            assert_eq!(action.is_on()?, Some(true));
+            assert_eq!(action.character()?, ActionCharacter::Toggle);
+            assert!(action.command_id()? > CommandId::new(1));
             assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest2");
-            assert_eq!(action.name().to_str(), "reaper-rs test toggle action");
+            assert_eq!(action.name()?.to_str(), "reaper-rs test toggle action");
             reg.unregister();
             assert!(!action.is_available());
             Ok(())
@@ -521,14 +509,14 @@ fn register_and_unregister_action() -> TestStep {
             // Then
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
-            action.invoke_as_trigger(None);
+            action.invoke_as_trigger(None)?;
             assert_eq!(mock.invocation_count(), 1);
             assert_eq!(mock.last_arg(), 42);
-            assert_eq!(action.character(), ActionCharacter::Trigger);
-            assert!(action.command_id() > CommandId::new(1));
+            assert_eq!(action.character()?, ActionCharacter::Trigger);
+            assert!(action.command_id()? > CommandId::new(1));
             assert_eq!(action.command_name().unwrap().to_str(), "reaperRsTest");
-            assert_eq!(action.is_on(), None);
-            assert_eq!(action.name().to_str(), "reaper-rs test action");
+            assert_eq!(action.is_on()?, None);
+            assert_eq!(action.name()?.to_str(), "reaper-rs test action");
             reaper.go_to_sleep()?;
             assert!(!action.is_available());
             reaper.wake_up()?;
@@ -576,7 +564,7 @@ fn unsolo_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.unsolo();
+        track.unsolo(GangBehavior::DenyGang);
         // Then
         assert!(!track.is_solo());
         // Started to be 2 when making master track notification work
@@ -599,7 +587,7 @@ fn solo_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.solo();
+        track.solo(GangBehavior::DenyGang);
         // Then
         assert!(track.is_solo());
         // Started to be 2 when making master track notification work
@@ -646,7 +634,7 @@ fn mute_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.mute();
+        track.mute(GangBehavior::DenyGang);
         // Then
         assert!(track.is_muted());
         assert_eq!(mock.invocation_count(), 1);
@@ -668,7 +656,7 @@ fn unmute_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.unmute();
+        track.unmute(GangBehavior::DenyGang);
         // Then
         assert!(!track.is_muted());
         // For some reason REAPER doesn't call SetSurfaceMute on control surfaces when an action
@@ -696,7 +684,7 @@ fn test_action_invoked_event() -> TestStep {
         });
         Reaper::get()
             .medium_reaper()
-            .main_on_command_ex(action.command_id(), 0, CurrentProject);
+            .main_on_command_ex(action.command_id()?, 0, CurrentProject);
         // Then
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(*mock.last_arg(), action);
@@ -720,9 +708,9 @@ fn invoke_action() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        action.invoke_as_trigger(None);
+        action.invoke_as_trigger(None)?;
         // Then
-        assert_eq!(action.is_on(), Some(true));
+        assert_eq!(action.is_on()?, Some(true));
         assert!(track.is_muted());
         let reaper_version = reaper.version();
         if reaper_version >= ReaperVersion::new("6.20")
@@ -756,23 +744,23 @@ fn query_action() -> TestStep {
             .action_by_command_id(CommandId::new(41075));
         let normal_action_by_index = Reaper::get()
             .main_section()
-            .action_by_index(normal_action.index());
+            .action_by_index(normal_action.index()?);
         // Then
         assert!(toggle_action.is_available());
         assert!(normal_action.is_available());
-        assert_eq!(toggle_action.character(), ActionCharacter::Toggle);
-        assert_eq!(normal_action.character(), ActionCharacter::Trigger);
-        assert_eq!(toggle_action.is_on(), Some(false));
-        assert_eq!(normal_action.is_on(), None);
+        assert_eq!(toggle_action.character()?, ActionCharacter::Toggle);
+        assert_eq!(normal_action.character()?, ActionCharacter::Trigger);
+        assert_eq!(toggle_action.is_on()?, Some(false));
+        assert_eq!(normal_action.is_on()?, None);
         assert_eq!(toggle_action.clone(), toggle_action);
-        assert_eq!(toggle_action.command_id(), CommandId::new(6));
+        assert_eq!(toggle_action.command_id()?, CommandId::new(6));
         assert!(toggle_action.command_name().is_none());
         assert_eq!(
-            toggle_action.name().to_str(),
+            toggle_action.name()?.to_str(),
             "Track: Toggle mute for selected tracks"
         );
-        assert!(toggle_action.index() > 0);
-        assert_eq!(toggle_action.section(), Reaper::get().main_section());
+        assert!(toggle_action.index()? > 0);
+        assert_eq!(toggle_action.section()?, Reaper::get().main_section());
         assert_eq!(normal_action_by_index, normal_action);
         Ok(())
     })
@@ -906,7 +894,7 @@ fn query_track_send() -> TestStep {
         let project = Reaper::get().current_project();
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
-        let track_3 = project.add_track();
+        let track_3 = project.add_track()?;
         // When
         let send_to_track_2 = track_1
             .find_send_by_destination_track(&track_2)
@@ -1115,7 +1103,7 @@ fn select_track_exclusively() -> TestStep {
         let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
         let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
         let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
-        let master_track = project.master_track();
+        let master_track = project.master_track()?;
         assert!(master_track.is_selected());
         track_1.unselect();
         track_2.select();
@@ -1173,7 +1161,7 @@ fn arm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
                         mock.invoke(t);
                     });
             });
-            track.arm(false);
+            track.arm(false, GangBehavior::DenyGang);
             // Then
             assert!(track.is_armed(true));
             assert!(track.is_armed(false));
@@ -1201,7 +1189,7 @@ fn disarm_track_in_auto_arm_mode_ignoring_auto_arm() -> TestStep {
                         mock.invoke(t);
                     });
             });
-            track.disarm(false);
+            track.disarm(false, GangBehavior::DenyGang);
             // Then
             assert!(!track.is_armed(true));
             assert!(!track.is_armed(false));
@@ -1239,7 +1227,7 @@ fn switch_to_normal_track_mode_while_armed() -> TestStep {
         |_, _| {
             // Given
             let track = get_track(0)?;
-            track.arm(true);
+            track.arm(true, GangBehavior::DenyGang);
             assert!(track.is_armed(true));
             // When
             track.disable_auto_arm()?;
@@ -1279,7 +1267,7 @@ fn disarm_track_in_auto_arm_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.disarm(true);
+        track.disarm(true, GangBehavior::DenyGang);
         // Then
         assert!(!track.is_armed(true));
         assert!(!track.is_armed(false));
@@ -1303,7 +1291,7 @@ fn arm_track_in_auto_arm_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.arm(true);
+        track.arm(true, GangBehavior::DenyGang);
         // Then
         assert!(track.is_armed(true));
         // TODO Interesting! GetMediaTrackInfo_Value read with I_RECARM seems to support
@@ -1344,7 +1332,7 @@ fn disarm_track_in_normal_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.disarm(true);
+        track.disarm(true, GangBehavior::DenyGang);
         // Then
         assert!(!track.is_armed(true));
         assert!(!track.is_armed(false));
@@ -1368,7 +1356,7 @@ fn arm_track_in_normal_mode() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.arm(true);
+        track.arm(true, GangBehavior::DenyGang);
         // Then
         assert!(track.is_armed(true));
         assert!(track.is_armed(false));
@@ -1409,7 +1397,7 @@ fn select_master_track() -> TestStep {
     step(AllVersions, "Select master track", |_, step| {
         // Given
         let project = Reaper::get().current_project();
-        let master_track = project.master_track();
+        let master_track = project.master_track()?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -1550,7 +1538,7 @@ fn set_track_pan() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_pan(Pan::from_normalized_value(0.25));
+        track.set_pan(Pan::from_normalized_value(0.25), GangBehavior::DenyGang);
         // Then
         let pan = track.pan();
         assert_eq!(pan.reaper_value(), ReaperPanValue::new(-0.5));
@@ -1601,7 +1589,7 @@ fn set_track_width() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_width(Width::from_normalized_value(0.25));
+        track.set_width(Width::from_normalized_value(0.25), GangBehavior::DenyGang);
         // Then
         let width = track.width();
         assert_eq!(width.reaper_value(), ReaperWidthValue::new(-0.5));
@@ -1676,7 +1664,10 @@ fn set_track_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_volume(Volume::try_from_soft_normalized_value(0.25).unwrap());
+        track.set_volume(
+            Volume::try_from_soft_normalized_value(0.25).unwrap(),
+            GangBehavior::DenyGang,
+        );
         // Then
         let volume = track.volume();
         assert!(abs_diff_eq!(
@@ -1890,7 +1881,8 @@ fn set_track_input_monitoring() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying);
+        track
+            .set_input_monitoring_mode(InputMonitoringMode::NotWhenPlaying, GangBehavior::DenyGang);
         // Then
         assert_eq!(
             track.input_monitoring_mode(),
@@ -1980,7 +1972,7 @@ fn query_non_existent_track_by_guid() -> TestStep {
             let project = Reaper::get().current_project();
             // When
             let guid = Guid::from_string_with_braces("{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}")?;
-            let found_track = project.track_by_guid(&guid);
+            let found_track = project.track_by_guid(&guid)?;
             // Then
             assert!(!found_track.is_available());
             Ok(())
@@ -1993,9 +1985,9 @@ fn query_track_by_guid() -> TestStep {
         // Given
         let project = Reaper::get().current_project();
         let first_track = get_track(0)?;
-        let new_track = project.add_track();
+        let new_track = project.add_track()?;
         // When
-        let found_track = project.track_by_guid(new_track.guid());
+        let found_track = project.track_by_guid(new_track.guid())?;
         // Then
         assert!(found_track.is_available());
         assert_eq!(&found_track, &new_track);
@@ -2009,7 +2001,7 @@ fn query_all_tracks() -> TestStep {
     step(AllVersions, "Query all tracks", |_session, _| {
         // Given
         let project = Reaper::get().current_project();
-        project.add_track();
+        project.add_track()?;
         // When
         let tracks = project.tracks();
         // Then
@@ -2023,7 +2015,7 @@ fn query_master_track() -> TestStep {
         // Given
         let project = Reaper::get().current_project();
         // When
-        let master_track = project.master_track();
+        let master_track = project.master_track()?;
         // Then
         assert_eq!(master_track.location(), TrackLocation::MasterTrack);
         assert!(master_track.is_master_track());
@@ -2184,7 +2176,7 @@ fn add_track() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        let new_track = project.add_track();
+        let new_track = project.add_track()?;
         // Then
         assert_eq!(project.track_count(), 1);
         assert_eq!(new_track.index(), Some(0));
@@ -2323,7 +2315,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
         // assertTrue(Reaper::instance().projectsWithCurrentOneFirst().as_blocking().count() ==
         // projectCountBefore + 1);
         assert_eq!(new_project.track_count(), 0);
-        assert!(new_project.index() > 0);
+        assert!(new_project.index()? > 0);
         assert!(new_project.file().is_none());
         assert_eq!(new_project.length(), DurationInSeconds::new(0.0));
         assert_eq!(mock.invocation_count(), 1);
@@ -2379,21 +2371,17 @@ fn global_instances() -> TestStep {
         use std::mem::size_of_val;
         let medium_session = Reaper::get().medium_session();
         let medium_reaper = Reaper::get().medium_reaper();
-        let metrics_size = size_of_val(medium_reaper.metrics());
         Reaper::get().show_console_msg(format!(
             "\
             Struct sizes in byte:\n\
-            - reaper_high::Reaper: {high_reaper} ({high_reaper_no_metrics} without metrics)\n\
-            - reaper_medium::ReaperSession: {medium_session} ({medium_session_no_metrics} without metrics)\n\
-            - reaper_medium::Reaper: {medium_reaper} ({medium_reaper_no_metrics} without metrics)\n\
+            - reaper_high::Reaper: {high_reaper}\n\
+            - reaper_medium::ReaperSession: {medium_session}\n\
+            - reaper_medium::Reaper: {medium_reaper}\n\
             - reaper_low::Reaper: {low_reaper}\n\
             ",
             high_reaper = size_of_val(Reaper::get()),
-            high_reaper_no_metrics = size_of_val(Reaper::get()) - metrics_size,
             medium_session = size_of_val(medium_session.deref()),
-            medium_session_no_metrics = size_of_val(medium_session.deref()) - metrics_size,
             medium_reaper = size_of_val(medium_reaper),
-            medium_reaper_no_metrics = size_of_val(medium_reaper) - metrics_size,
             low_reaper = size_of_val(medium_reaper.low()),
         ));
         // Low-level REAPER
@@ -2757,6 +2745,7 @@ fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             // Given
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+            fx.hide_floating_window();
             // When
             // Then
             assert!(fx.floating_window().is_none());

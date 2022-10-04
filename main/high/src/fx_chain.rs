@@ -68,7 +68,10 @@ impl FxChain {
                 }
             }
             FxChainContext::Monitoring => {
-                let track = Reaper::get().current_project().master_track();
+                let track = Reaper::get()
+                    .current_project()
+                    .master_track()
+                    .expect("master track of current project should exist");
                 unsafe { reaper.track_fx_get_rec_count(track.raw()) }
             }
             FxChainContext::Take(_) => todo!(),
@@ -86,7 +89,10 @@ impl FxChain {
                 }
             }
             FxChainContext::Monitoring => {
-                let track = Reaper::get().current_project().master_track();
+                let track = Reaper::get()
+                    .current_project()
+                    .master_track()
+                    .expect("master track of current project should exist");
                 unsafe { reaper.track_fx_get_rec_chain_visible(track.raw()) }
             }
             FxChainContext::Take(_) => todo!(),
@@ -387,7 +393,10 @@ DOCKED 0
     /// - although it has nothing to do with the current project.
     fn track_or_master_track(&self) -> Track {
         match self.context() {
-            FxChainContext::Monitoring => Reaper::get().current_project().master_track(),
+            FxChainContext::Monitoring => Reaper::get()
+                .current_project()
+                .master_track()
+                .expect("master track of current project should exist"),
             FxChainContext::Track { track, .. } => track.clone(),
             FxChainContext::Take(take) => take.track().clone(),
         }
@@ -429,7 +438,11 @@ DOCKED 0
             },
             FxChainContext::Monitoring => unsafe {
                 Reaper::get().medium_reaper().track_fx_add_by_name_query(
-                    Reaper::get().current_project().master_track().raw(),
+                    Reaper::get()
+                        .current_project()
+                        .master_track()
+                        .expect("master track of current project should exist")
+                        .raw(),
                     name,
                     TrackFxChainType::InputFxChain,
                 )?

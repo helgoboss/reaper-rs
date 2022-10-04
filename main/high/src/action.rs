@@ -1,4 +1,4 @@
-use crate::{ActionCharacter, Project, Reaper, Section};
+use crate::{ActionCharacter, Project, Reaper, ReaperError, ReaperResult, Section};
 use c_str_macro::c_str;
 use reaper_medium::{
     ActionValueChange, CommandId, ProjectContext, ReaperStr, ReaperString, SectionContext,
@@ -68,9 +68,12 @@ impl Action {
         }
     }
 
-    pub fn index(&self) -> u32 {
-        if let Some(cached_index) = self.load_if_necessary_or_complain().cached_index {
-            return cached_index;
+    pub fn index(&self) -> ReaperResult<u32> {
+        {
+            let rd = self.load_if_necessary_or_complain()?;
+            if let Some(cached_index) = rd.cached_index {
+                return Ok(cached_index);
+            }
         }
         let mut opt_runtime_data = self.runtime_data.borrow_mut();
         let mut runtime_data = opt_runtime_data.as_mut().unwrap();
@@ -78,12 +81,12 @@ impl Action {
             .find_index(runtime_data)
             .expect("Index couldn't be found");
         runtime_data.cached_index = Some(index);
-        index
+        Ok(index)
     }
 
-    pub fn section(&self) -> Section {
-        let rd = self.load_if_necessary_or_complain();
-        rd.section
+    pub fn section(&self) -> ReaperResult<Section> {
+        let rd = self.load_if_necessary_or_complain()?;
+        Ok(rd.section)
     }
 
     fn find_index(&self, runtime_data: &RuntimeData) -> Option<u32> {
@@ -120,24 +123,25 @@ impl Action {
         self.load_by_command_name()
     }
 
-    pub fn character(&self) -> ActionCharacter {
-        let rd = self.load_if_necessary_or_complain();
+    pub fn character(&self) -> ReaperResult<ActionCharacter> {
+        let rd = self.load_if_necessary_or_complain()?;
         let state = unsafe {
             Reaper::get()
                 .medium_reaper()
                 .get_toggle_command_state_2(Sec(&rd.section.raw()), rd.command_id)
         };
-        match state {
+        let ch = match state {
             Some(_) => ActionCharacter::Toggle,
             None => ActionCharacter::Trigger,
-        }
+        };
+        Ok(ch)
     }
 
     /// reaper-rs listens to MIDI CC/mousewheel action invocations since REAPER 6.19+dev1226
     /// and tracks their latest *absolute* value invocations if there are any. This returns the
     /// latest absolute value *if there is any*. Only works for main section.
     pub fn normalized_value(&self) -> Option<f64> {
-        let rd = self.load_if_necessary_or_complain();
+        let rd = self.load_if_necessary_or_complain().ok()?;
         let last_change = Reaper::get().find_last_action_value_change(rd.command_id)?;
         use ActionValueChange::*;
         let normalized_value = match last_change {
@@ -148,18 +152,19 @@ impl Action {
         Some(normalized_value)
     }
 
-    pub fn is_on(&self) -> Option<bool> {
-        let rd = self.load_if_necessary_or_complain();
-        unsafe {
+    pub fn is_on(&self) -> ReaperResult<Option<bool>> {
+        let rd = self.load_if_necessary_or_complain()?;
+        let on = unsafe {
             Reaper::get()
                 .medium_reaper()
                 .get_toggle_command_state_2(Sec(&rd.section.raw()), rd.command_id)
-        }
+        };
+        Ok(on)
     }
 
-    pub fn command_id(&self) -> CommandId {
-        let rd = self.load_if_necessary_or_complain();
-        rd.command_id
+    pub fn command_id(&self) -> ReaperResult<CommandId> {
+        let rd = self.load_if_necessary_or_complain()?;
+        Ok(rd.command_id)
     }
 
     // TODO-low Don't copy into string. Split into command-based action and command-id based action
@@ -176,23 +181,24 @@ impl Action {
         })
     }
 
-    pub fn name(&self) -> ReaperString {
-        let rd = self.load_if_necessary_or_complain();
-        unsafe {
+    pub fn name(&self) -> ReaperResult<ReaperString> {
+        let rd = self.load_if_necessary_or_complain()?;
+        let name = unsafe {
             Reaper::get()
                 .medium_reaper()
                 .kbd_get_text_from_cmd(rd.command_id, SectionContext::Sec(&rd.section.raw()), |s| {
                     s.to_owned()
                 })
-                .expect("action not existing")
-        }
+                .ok_or(ReaperError::new("action not existing"))?
+        };
+        Ok(name)
     }
 
-    pub fn invoke_as_trigger(&self, project: Option<Project>) {
-        self.invoke_absolute(1.0, project, false);
+    pub fn invoke_as_trigger(&self, project: Option<Project>) -> ReaperResult<()> {
+        self.invoke_absolute(1.0, project, false)
     }
 
-    pub fn invoke_relative(&self, amount: i32, project: Option<Project>) {
+    pub fn invoke_relative(&self, amount: i32, project: Option<Project>) -> ReaperResult<()> {
         let relative_value = 64 + amount;
         let cropped_relative_value =
             unsafe { U7::new_unchecked(relative_value.clamp(0, 127) as u8) };
@@ -213,7 +219,7 @@ impl Action {
         normalized_value: f64,
         project: Option<Project>,
         enforce_7_bit_control: bool,
-    ) {
+    ) -> ReaperResult<()> {
         // TODO-low I have no idea how to launch an action in a specific section. The first function
         // doesn't seem to launch the action :(
         // bool (*kbd_RunCommandThroughHooks)(KbdSectionInfo* section, int* actionCommandID, int*
@@ -239,7 +245,7 @@ impl Action {
                 None => CurrentProject,
                 Some(p) => Proj(p.raw()),
             },
-        );
+        )
         // Main_OnCommandEx would trigger the actionInvoked event but it has not enough
         // parameters for passing values etc.          reaper::
         // Main_OnCommandEx(actionCommandId, 0, project ? project->reaProject() : nullptr);
@@ -250,8 +256,8 @@ impl Action {
         value_change: ActionValueChange,
         window: WindowContext,
         project: ProjectContext,
-    ) {
-        let rd = self.load_if_necessary_or_complain();
+    ) -> ReaperResult<()> {
+        let rd = self.load_if_necessary_or_complain()?;
         let action_command_id = rd.command_id;
         unsafe {
             Reaper::get().medium_reaper.kbd_on_main_action_ex(
@@ -261,14 +267,17 @@ impl Action {
                 project,
             );
         }
+        Ok(())
     }
 
-    fn load_if_necessary_or_complain(&self) -> Ref<RuntimeData> {
+    fn load_if_necessary_or_complain(&self) -> ReaperResult<Ref<RuntimeData>> {
         let is_loaded = self.runtime_data.borrow().is_none();
         if is_loaded && !self.load_by_command_name() {
-            panic!("Action not loadable")
+            return Err(ReaperError::new("Action not loadable"));
         }
-        Ref::map(self.runtime_data.borrow(), |rd| rd.as_ref().unwrap())
+        Ok(Ref::map(self.runtime_data.borrow(), |rd| {
+            rd.as_ref().unwrap()
+        }))
     }
 
     fn load_by_command_name(&self) -> bool {

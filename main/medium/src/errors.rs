@@ -25,6 +25,18 @@ impl ReaperFunctionError {
     }
 }
 
+impl From<ReaperFunctionError> for &'static str {
+    fn from(e: ReaperFunctionError) -> Self {
+        e.message
+    }
+}
+
+impl From<&'static str> for ReaperFunctionError {
+    fn from(e: &'static str) -> Self {
+        Self::new(e)
+    }
+}
+
 pub(crate) type ReaperFunctionResult<T> = Result<T, ReaperFunctionError>;
 
 /// An error which can occur when converting from a type with a greater value range to one with a

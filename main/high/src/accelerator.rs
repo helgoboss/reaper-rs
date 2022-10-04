@@ -13,11 +13,8 @@ impl AcceleratorKey {
         code: AcceleratorKeyCode,
     ) -> Self {
         if f_virt.contains(AcceleratorBehavior::VirtKey) {
-            Self::VirtKey(VirtKey::new(
-                code.get()
-                    .try_into()
-                    .expect("accelerator virtual key code larger than byte"),
-            ))
+            let virt_key = VirtKey::new(code.get());
+            Self::VirtKey(virt_key)
         } else {
             Self::Character(code.get())
         }

@@ -475,9 +475,6 @@ On Linux and macOS, the REAPER integration test will be run automatically as Car
 `run_reaper_integration_test` when invoking `cargo test` (downloads, unpacks and executes REAPER). This test is part of
 `reaper-test-extension-plugin`. It can be disabled by building that crate with `--no-default-features`.
 
-`reaper-test` activates the performance measurement features of `reaper-medium` and `reaper-high`. At the end of an
-integration test run, it prints detailed response time statistics to standard output.
-
 ## Background
 
 _reaper-rs_ has been born as part of the effort of porting the REAPER VST plug-in

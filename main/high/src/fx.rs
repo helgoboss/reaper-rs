@@ -9,8 +9,8 @@ use crate::guid::Guid;
 use crate::option_util::OptionExt;
 use crate::{ChunkRegion, FxChainContext, Project, Reaper, Track};
 use reaper_medium::{
-    FxPresetRef, FxShowInstruction, Hwnd, ReaperFunctionError, ReaperString, ReaperStringArg,
-    TrackFxGetPresetIndexResult, TrackFxLocation,
+    FxPresetRef, FxShowInstruction, Hwnd, ParamId, ReaperFunctionError, ReaperString,
+    ReaperStringArg, TrackFxGetPresetIndexResult, TrackFxLocation,
 };
 use std::hash::{Hash, Hasher};
 
@@ -189,6 +189,10 @@ impl Fx {
 
     pub fn parameter_count(&self) -> u32 {
         self.load_if_necessary_or_complain();
+        self.parameter_count_internal()
+    }
+
+    fn parameter_count_internal(&self) -> u32 {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -314,6 +318,38 @@ impl Fx {
 
     pub fn parameter_by_index(&self, index: u32) -> FxParameter {
         FxParameter::new(self.clone(), index)
+    }
+
+    /// Falls back to convention if REAPER is too old to support `TrackFX_GetParamFromIdent`.
+    pub fn parameter_by_id(&self, id: ParamId) -> Option<FxParameter> {
+        self.load_if_necessary_or_complain();
+        if Reaper::get()
+            .medium_reaper()
+            .low()
+            .pointers()
+            .TrackFX_GetParamFromIdent
+            .is_none()
+        {
+            // Fallback because old REAPER version.
+            let index = match id {
+                ParamId::Wet => self.parameter_count() + 1,
+                ParamId::Bypass => self.parameter_count(),
+                ParamId::Delta | ParamId::Custom(_) => return None,
+            };
+            return Some(FxParameter::new(self.clone(), index));
+        }
+        let index = match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_get_param_from_ident(track.raw(), location, id)?
+                }
+            }
+        };
+        Some(self.parameter_by_index(index))
     }
 
     /// Will return None if monitoring FX.
@@ -649,7 +685,10 @@ impl Fx {
 fn get_track_and_location(chain: &FxChain, index: u32) -> Option<(Track, TrackFxLocation)> {
     match chain.context() {
         FxChainContext::Monitoring => {
-            let track = Reaper::get().current_project().master_track();
+            let track = Reaper::get()
+                .current_project()
+                .master_track()
+                .expect("master track of current project should exist");
             let location = TrackFxLocation::InputFxChain(index);
             Some((track, location))
         }

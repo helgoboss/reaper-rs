@@ -4,7 +4,7 @@ use reaper_low::raw;
 
 /// When creating an undo point, this defines what parts of the project might have been affected by
 /// the undoable operation.
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum UndoScope {
     /// Everything could have been affected.
     ///

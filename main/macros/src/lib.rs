@@ -70,13 +70,6 @@ pub fn reaper_extension_plugin(attr: TokenStream, input: TokenStream) -> TokenSt
     }
 }
 
-/// No-op macro as work-around for https://github.com/magnet/metered-rs/issues/23.
-#[doc(hidden)]
-#[proc_macro_attribute]
-pub fn measure(_: TokenStream, input: TokenStream) -> TokenStream {
-    input
-}
-
 fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
