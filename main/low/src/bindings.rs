@@ -137,6 +137,8 @@ pub mod root {
     pub const WM_MOVE: u32 = 3;
     pub const WM_SIZE: u32 = 5;
     pub const WM_ACTIVATE: u32 = 6;
+    pub const WM_SETFOCUS: u32 = 7;
+    pub const WM_KILLFOCUS: u32 = 8;
     pub const WM_SETREDRAW: u32 = 11;
     pub const WM_SETTEXT: u32 = 12;
     pub const WM_PAINT: u32 = 15;
@@ -911,6 +913,15 @@ pub mod root {
         }
     }
     pub type ICONINFO = root::_ICONINFO;
+    pub type HMONITOR = *mut ::std::os::raw::c_void;
+    pub type MONITORENUMPROC = ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: root::HMONITOR,
+            arg2: root::HDC,
+            arg3: root::LPRECT,
+            arg4: root::LPARAM,
+        ) -> root::BOOL,
+    >;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct reaper_plugin_info_t {
@@ -10775,6 +10786,19 @@ pub mod root {
                 ::std::option::Option<unsafe extern "C" fn(h: root::HWND, allow: bool)>;
         }
         extern "C" {
+            pub static mut SWELL_SetViewGL: ::std::option::Option<
+                unsafe extern "C" fn(h: root::HWND, wantGL: ::std::os::raw::c_char),
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetViewGL:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> bool>;
+        }
+        extern "C" {
+            pub static mut SWELL_SetGLContextToView:
+                ::std::option::Option<unsafe extern "C" fn(h: root::HWND) -> bool>;
+        }
+        extern "C" {
             pub static mut BeginPaint: ::std::option::Option<
                 unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC,
             >;
@@ -11071,6 +11095,21 @@ pub mod root {
             >;
         }
         extern "C" {
+            pub static mut SWELL_GetOSWindow: ::std::option::Option<
+                unsafe extern "C" fn(
+                    hwnd: root::HWND,
+                    type_: *const ::std::os::raw::c_char,
+                ) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
+            pub static mut SWELL_GetOSEvent: ::std::option::Option<
+                unsafe extern "C" fn(
+                    type_: *const ::std::os::raw::c_char,
+                ) -> *mut ::std::os::raw::c_void,
+            >;
+        }
+        extern "C" {
             pub static mut SWELL_GenerateGUID:
                 ::std::option::Option<unsafe extern "C" fn(g: *mut ::std::os::raw::c_void) -> bool>;
         }
@@ -11156,6 +11195,24 @@ pub mod root {
         extern "C" {
             pub static mut SWELL_DisableContextMenu:
                 ::std::option::Option<unsafe extern "C" fn(arg1: root::HWND, arg2: bool)>;
+        }
+        extern "C" {
+            pub static mut EnumDisplayMonitors: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HDC,
+                    arg2: root::LPRECT,
+                    arg3: root::MONITORENUMPROC,
+                    arg4: root::LPARAM,
+                ) -> root::BOOL,
+            >;
+        }
+        extern "C" {
+            pub static mut GetMonitorInfo: ::std::option::Option<
+                unsafe extern "C" fn(
+                    arg1: root::HMONITOR,
+                    arg2: *mut ::std::os::raw::c_void,
+                ) -> root::BOOL,
+            >;
         }
         extern "C" {
             pub static mut SWELL_osx_is_dark_mode:

@@ -885,6 +885,15 @@ impl Swell {
                     SetAllowNoMiddleManRendering: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SetAllowNoMiddleManRendering)).as_ptr(),
                     )),
+                    SWELL_SetViewGL: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_SetViewGL)).as_ptr(),
+                    )),
+                    SWELL_GetViewGL: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_GetViewGL)).as_ptr(),
+                    )),
+                    SWELL_SetGLContextToView: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_SetGLContextToView)).as_ptr(),
+                    )),
                     BeginPaint: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(BeginPaint)).as_ptr(),
                     )),
@@ -996,6 +1005,12 @@ impl Swell {
                     SWELL_CreateXBridgeWindow: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_CreateXBridgeWindow)).as_ptr(),
                     )),
+                    SWELL_GetOSWindow: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_GetOSWindow)).as_ptr(),
+                    )),
+                    SWELL_GetOSEvent: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(SWELL_GetOSEvent)).as_ptr(),
+                    )),
                     SWELL_GenerateGUID: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_GenerateGUID)).as_ptr(),
                     )),
@@ -1037,6 +1052,12 @@ impl Swell {
                     )),
                     SWELL_DisableContextMenu: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_DisableContextMenu)).as_ptr(),
+                    )),
+                    EnumDisplayMonitors: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(EnumDisplayMonitors)).as_ptr(),
+                    )),
+                    GetMonitorInfo: std::mem::transmute(get_func(
+                        c_str_macro::c_str!(stringify!(GetMonitorInfo)).as_ptr(),
                     )),
                     SWELL_osx_is_dark_mode: std::mem::transmute(get_func(
                         c_str_macro::c_str!(stringify!(SWELL_osx_is_dark_mode)).as_ptr(),
@@ -1874,6 +1895,15 @@ impl Swell {
             if pointers.SetAllowNoMiddleManRendering.is_some() {
                 loaded_count += 1;
             }
+            if pointers.SWELL_SetViewGL.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetViewGL.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_SetGLContextToView.is_some() {
+                loaded_count += 1;
+            }
             if pointers.BeginPaint.is_some() {
                 loaded_count += 1;
             }
@@ -1985,6 +2015,12 @@ impl Swell {
             if pointers.SWELL_CreateXBridgeWindow.is_some() {
                 loaded_count += 1;
             }
+            if pointers.SWELL_GetOSWindow.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.SWELL_GetOSEvent.is_some() {
+                loaded_count += 1;
+            }
             if pointers.SWELL_GenerateGUID.is_some() {
                 loaded_count += 1;
             }
@@ -2025,6 +2061,12 @@ impl Swell {
                 loaded_count += 1;
             }
             if pointers.SWELL_DisableContextMenu.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.EnumDisplayMonitors.is_some() {
+                loaded_count += 1;
+            }
+            if pointers.GetMonitorInfo.is_some() {
                 loaded_count += 1;
             }
             if pointers.SWELL_osx_is_dark_mode.is_some() {
@@ -6337,6 +6379,45 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetViewGL(&self, h: root::HWND, wantGL: ::std::os::raw::c_char) {
+        match self.pointers.SWELL_SetViewGL {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_SetViewGL)
+            ),
+            Some(f) => f(h, wantGL),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetViewGL(&self, h: root::HWND) -> bool {
+        match self.pointers.SWELL_GetViewGL {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_GetViewGL)
+            ),
+            Some(f) => f(h),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_SetGLContextToView(&self, h: root::HWND) -> bool {
+        match self.pointers.SWELL_SetGLContextToView {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_SetGLContextToView)
+            ),
+            Some(f) => f(h),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn BeginPaint(&self, arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC {
         match self.pointers.BeginPaint {
             None => panic!(
@@ -6942,6 +7023,39 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetOSWindow(
+        &self,
+        hwnd: root::HWND,
+        type_: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_void {
+        match self.pointers.SWELL_GetOSWindow {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_GetOSWindow)
+            ),
+            Some(f) => f(hwnd, type_),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SWELL_GetOSEvent(
+        &self,
+        type_: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_void {
+        match self.pointers.SWELL_GetOSEvent {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SWELL_GetOSEvent)
+            ),
+            Some(f) => f(type_),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SWELL_GenerateGUID(&self, g: *mut ::std::os::raw::c_void) -> bool {
         match self.pointers.SWELL_GenerateGUID {
             None => panic!(
@@ -7145,6 +7259,42 @@ impl Swell {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DisableContextMenu)
+            ),
+            Some(f) => f(arg1, arg2),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumDisplayMonitors(
+        &self,
+        arg1: root::HDC,
+        arg2: root::LPRECT,
+        arg3: root::MONITORENUMPROC,
+        arg4: root::LPARAM,
+    ) -> root::BOOL {
+        match self.pointers.EnumDisplayMonitors {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(EnumDisplayMonitors)
+            ),
+            Some(f) => f(arg1, arg2, arg3, arg4),
+        }
+    }
+    #[cfg(target_family = "unix")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetMonitorInfo(
+        &self,
+        arg1: root::HMONITOR,
+        arg2: *mut ::std::os::raw::c_void,
+    ) -> root::BOOL {
+        match self.pointers.GetMonitorInfo {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetMonitorInfo)
             ),
             Some(f) => f(arg1, arg2),
         }
@@ -8878,6 +9028,10 @@ pub struct SwellFunctionPointers {
     >,
     pub SetOpaque: Option<unsafe extern "C" fn(h: root::HWND, isopaque: bool)>,
     pub SetAllowNoMiddleManRendering: Option<unsafe extern "C" fn(h: root::HWND, allow: bool)>,
+    pub SWELL_SetViewGL:
+        Option<unsafe extern "C" fn(h: root::HWND, wantGL: ::std::os::raw::c_char)>,
+    pub SWELL_GetViewGL: Option<unsafe extern "C" fn(h: root::HWND) -> bool>,
+    pub SWELL_SetGLContextToView: Option<unsafe extern "C" fn(h: root::HWND) -> bool>,
     pub BeginPaint:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC>,
     pub EndPaint:
@@ -9078,6 +9232,15 @@ pub struct SwellFunctionPointers {
             arg1: *const root::RECT,
         ) -> root::HWND,
     >,
+    pub SWELL_GetOSWindow: Option<
+        unsafe extern "C" fn(
+            hwnd: root::HWND,
+            type_: *const ::std::os::raw::c_char,
+        ) -> *mut ::std::os::raw::c_void,
+    >,
+    pub SWELL_GetOSEvent: Option<
+        unsafe extern "C" fn(type_: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_void,
+    >,
     pub SWELL_GenerateGUID: Option<unsafe extern "C" fn(g: *mut ::std::os::raw::c_void) -> bool>,
     pub EnumChildWindows: Option<
         unsafe extern "C" fn(
@@ -9129,10 +9292,21 @@ pub struct SwellFunctionPointers {
     pub SWELL_SetClassName:
         Option<unsafe extern "C" fn(arg1: root::HWND, arg2: *const ::std::os::raw::c_char)>,
     pub SWELL_DisableContextMenu: Option<unsafe extern "C" fn(arg1: root::HWND, arg2: bool)>,
+    pub EnumDisplayMonitors: Option<
+        unsafe extern "C" fn(
+            arg1: root::HDC,
+            arg2: root::LPRECT,
+            arg3: root::MONITORENUMPROC,
+            arg4: root::LPARAM,
+        ) -> root::BOOL,
+    >,
+    pub GetMonitorInfo: Option<
+        unsafe extern "C" fn(arg1: root::HMONITOR, arg2: *mut ::std::os::raw::c_void) -> root::BOOL,
+    >,
     pub SWELL_osx_is_dark_mode: Option<extern "C" fn(mode: ::std::os::raw::c_int) -> bool>,
 }
 impl SwellFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 329u32;
+    pub(crate) const TOTAL_COUNT: u32 = 336u32;
 }
 #[cfg(target_family = "windows")]
 mod windows {
