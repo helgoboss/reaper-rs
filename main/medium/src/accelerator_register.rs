@@ -26,26 +26,41 @@ pub struct TranslateAccelArgs<'a> {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct AccelMsg {
-    pub window: Hwnd,
-    pub message: AccelMsgKind,
-    pub behavior: BitFlags<AcceleratorBehavior>,
-    pub key: AcceleratorKeyCode,
-    /// Milliseconds since system started.
-    pub time: u32,
-    pub point: Point,
+    msg: raw::MSG,
 }
 
 impl AccelMsg {
-    pub(crate) fn from_raw(msg: &raw::MSG) -> Self {
-        let behavior = BitFlags::from_bits_truncate(loword(msg.lParam) as u8);
-        Self {
-            window: Hwnd::new(msg.hwnd).expect("MSG hwnd was null"),
-            message: AccelMsgKind::from_raw(msg.message),
-            behavior,
-            key: AcceleratorKeyCode(loword(msg.wParam as isize)),
-            time: msg.time,
-            point: Point::from_raw(msg.pt),
-        }
+    pub(crate) fn from_raw(msg: raw::MSG) -> Self {
+        Self { msg }
+    }
+
+    pub fn raw(&self) -> raw::MSG {
+        self.msg
+    }
+
+    pub fn window(&self) -> Hwnd {
+        Hwnd::new(self.msg.hwnd).expect("MSG hwnd was null")
+    }
+
+    pub fn message(&self) -> AccelMsgKind {
+        AccelMsgKind::from_raw(self.msg.message)
+    }
+
+    pub fn behavior(&self) -> BitFlags<AcceleratorBehavior> {
+        BitFlags::from_bits_truncate(loword(self.msg.lParam) as u8)
+    }
+
+    pub fn key(&self) -> AcceleratorKeyCode {
+        AcceleratorKeyCode(loword(self.msg.wParam as isize))
+    }
+
+    /// Milliseconds since system started.
+    pub fn time(&self) -> u32 {
+        self.msg.time
+    }
+
+    pub fn point(&self) -> Point {
+        Point::from_raw(self.msg.pt)
     }
 }
 
@@ -180,7 +195,7 @@ extern "C" fn delegating_translate_accel<T: TranslateAccel>(
     firewall(|| {
         let ctx = unsafe { NonNull::new_unchecked(ctx) };
         let callback_struct: &mut T = decode_user_data(unsafe { ctx.as_ref() }.user);
-        let msg = AccelMsg::from_raw(unsafe { &*msg });
+        let msg = AccelMsg::from_raw(unsafe { *msg });
         callback_struct
             .call(TranslateAccelArgs {
                 msg,
