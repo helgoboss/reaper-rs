@@ -93,7 +93,9 @@ impl Project {
         Ok(Track::from_guid(self, *guid))
     }
 
-    pub fn tracks(self) -> impl Iterator<Item = Track> + ExactSizeIterator + 'static {
+    pub fn tracks(
+        self,
+    ) -> impl Iterator<Item = Track> + ExactSizeIterator + DoubleEndedIterator + 'static {
         if self.complain_if_not_available().is_err() {
             return Either::Left(iter::empty());
         }
@@ -107,7 +109,9 @@ impl Project {
         Either::Right(iter)
     }
 
-    pub fn items(self) -> impl Iterator<Item = Item> + ExactSizeIterator + 'static {
+    pub fn items(
+        self,
+    ) -> impl Iterator<Item = Item> + ExactSizeIterator + DoubleEndedIterator + 'static {
         if self.complain_if_not_available().is_err() {
             return Either::Left(iter::empty());
         }
@@ -166,7 +170,7 @@ impl Project {
     pub fn selected_tracks(
         self,
         want_master: MasterTrackBehavior,
-    ) -> impl Iterator<Item = Track> + 'static {
+    ) -> impl Iterator<Item = Track> + ExactSizeIterator + DoubleEndedIterator + 'static {
         if self.complain_if_not_available().is_err() {
             return Either::Left(iter::empty());
         }
