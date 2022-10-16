@@ -28,6 +28,7 @@ reaper-macros = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Example](#example)
 - [Basics](#basics)
 - [Usage](#usage)
 - [Contribution](#contribution)
@@ -42,6 +43,10 @@ language. It does so by providing raw Rust bindings for the
 It also exposes the [SWELL C++ API](https://www.cockos.com/wdl/), which is provided by
 REAPER on Linux and macOS in order to enable developers to create cross-platform user interfaces with a subset of the
 Win32 API.
+
+## Example
+
+A minimal working extension project can be found [here](https://github.com/helgoboss/reaper-rs-hello-world-extension). **Make sure you also read the [basics](#basics) though!** It's important to understand the differences between the provided APIs and be aware that the high-level API shouldn't be used for anything else than bootstrapping the extension (because I don't keep it stable). 
 
 ## Basics
 
