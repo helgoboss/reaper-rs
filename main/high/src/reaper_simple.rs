@@ -14,7 +14,7 @@ use reaper_medium::{
 };
 use std::fmt::Debug;
 use std::path::PathBuf;
-use std::{mem, os};
+use std::{fs, mem, os};
 
 impl Reaper {
     /// Gives access to the medium-level Reaper instance.
@@ -372,6 +372,37 @@ impl Reaper {
     pub fn with_solo_in_place<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
         self.with_temporarily_modified_preference("soloip", |_| if on { 1 } else { 0 }, f)
             .unwrap()
+    }
+
+    /// Attention: Just returns the first one found. Doesn't care of preferring the one in the
+    /// current processor architecture.
+    pub fn find_vst_file_name_by_vst_magic_number(&self, vst_magic_number: u32) -> Option<PathBuf> {
+        let mut ini_file_entries = fs::read_dir(self.resource_path())
+            .ok()?
+            .flatten()
+            .filter_map(|entry| {
+                let file_name = entry.file_name();
+                let file_name = file_name.to_str()?;
+                if file_name.starts_with("reaper-vstplugins") {
+                    Some(entry)
+                } else {
+                    None
+                }
+            });
+        let vst_magic_number = vst_magic_number.to_string();
+        ini_file_entries.find_map(|e| {
+            let mut reader = csv::ReaderBuilder::new()
+                .flexible(true)
+                .from_path(e.path())
+                .ok()?;
+            let record = reader
+                .records()
+                .flatten()
+                .find(|r| r.get(1).map(|s| s.trim()) == Some(vst_magic_number.as_str()))?;
+            let first_field = record.get(0)?;
+            let file_name: String = first_field.chars().take_while(|ch| *ch != '=').collect();
+            Some(file_name.replace('_', " ").into())
+        })
     }
 
     fn with_temporarily_modified_preference<'a, T: Copy + Debug, R>(

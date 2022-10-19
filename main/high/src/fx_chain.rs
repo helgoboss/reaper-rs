@@ -358,9 +358,25 @@ DOCKED 0
         }
     }
 
+    pub fn insert_fx_by_name<'a>(
+        &self,
+        index: u32,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> Option<Fx> {
+        self.add_or_insert_fx_by_name(name, AddFxBehavior::AlwaysAddAt(index))
+    }
+
     pub fn add_fx_by_original_name<'a>(
         &self,
         original_fx_name: impl Into<ReaperStringArg<'a>>,
+    ) -> Option<Fx> {
+        self.add_or_insert_fx_by_name(original_fx_name, AddFxBehavior::AlwaysAdd)
+    }
+
+    fn add_or_insert_fx_by_name<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+        behavior: AddFxBehavior,
     ) -> Option<Fx> {
         let fx_index = match self.context() {
             FxChainContext::Take(_) => todo!(),
@@ -369,22 +385,23 @@ DOCKED 0
                     .medium_reaper()
                     .track_fx_add_by_name_add(
                         self.track_or_master_track().raw(),
-                        original_fx_name,
+                        name,
                         if self.is_input_fx() {
                             TrackFxChainType::InputFxChain
                         } else {
                             TrackFxChainType::NormalFxChain
                         },
-                        AddFxBehavior::AlwaysAdd,
+                        behavior,
                     )
                     .ok()?
             },
         };
-        Some(Fx::from_guid_and_index(
+        let fx = Fx::from_guid_and_index(
             self.clone(),
             get_fx_guid(self, fx_index).expect("Couldn't get GUID"),
             fx_index,
-        ))
+        );
+        Some(fx)
     }
 
     /// For internal use only.

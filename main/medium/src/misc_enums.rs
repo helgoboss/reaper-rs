@@ -19,6 +19,8 @@ pub enum AddFxBehavior {
     AddIfNotFound,
     /// Adds the FX even if it already exists in the FX chain.
     AlwaysAdd,
+    /// Adds the FX even if it already exists in the FX chain, at a specific position.
+    AlwaysAddAt(u32),
 }
 
 impl From<AddFxBehavior> for FxAddByNameBehavior {
@@ -27,6 +29,7 @@ impl From<AddFxBehavior> for FxAddByNameBehavior {
         match b {
             AddIfNotFound => FxAddByNameBehavior::AddIfNotFound,
             AlwaysAdd => FxAddByNameBehavior::AlwaysAdd,
+            AlwaysAddAt(i) => FxAddByNameBehavior::AlwaysAddAt(i),
         }
     }
 }
@@ -456,6 +459,8 @@ impl TrackFxLocation {
 pub(crate) enum FxAddByNameBehavior {
     /// Adds the FX even if it already exists in the FX chain.
     AlwaysAdd,
+    /// Adds the FX even if it already exists in the FX chain, at a specific position.
+    AlwaysAddAt(u32),
     /// Just queries the FX location.
     Query,
     /// Adds the FX if it hasn't been found in the FX chain.
@@ -468,6 +473,7 @@ impl FxAddByNameBehavior {
         use FxAddByNameBehavior::*;
         match self {
             AlwaysAdd => -1,
+            AlwaysAddAt(i) => -1000 - i as i32,
             Query => 0,
             AddIfNotFound => 1,
         }
