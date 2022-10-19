@@ -374,9 +374,17 @@ impl Reaper {
             .unwrap()
     }
 
+    /// Parses the "reaper-vstplugins*.ini" files to find the VST2 file name.
+    ///
+    /// Usually not necessary for REAPER >= 6.37 because one can use [`FxInfo::id`] for
+    /// querying and `<` + magic number for adding a FX.
+    ///
     /// Attention: Just returns the first one found. Doesn't care of preferring the one in the
     /// current processor architecture.
-    pub fn find_vst_file_name_by_vst_magic_number(&self, vst_magic_number: u32) -> Option<PathBuf> {
+    pub fn find_vst_file_name_by_vst2_magic_number(
+        &self,
+        vst_magic_number: u32,
+    ) -> Option<PathBuf> {
         let mut ini_file_entries = fs::read_dir(self.resource_path())
             .ok()?
             .flatten()

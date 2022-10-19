@@ -290,11 +290,11 @@ DOCKED 0
     // In Track this returns Chunk, here it returns ChunkRegion. Because REAPER always returns
     // the chunk of the complete track, not just of the FX chain.
     pub fn chunk(&self) -> Result<Option<ChunkRegion>, &'static str> {
-        let res = self.find_chunk_region(
-            self.track_fx_track()
-                .ok_or("working on track FX only")?
-                .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode)?,
-        );
+        let chunk = self
+            .track_fx_track()
+            .ok_or("working on track FX only")?
+            .chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode)?;
+        let res = self.find_chunk_region(chunk);
         Ok(res)
     }
 

@@ -148,6 +148,29 @@ impl Fx {
         self.load_if_necessary_or_complain();
         let loc = self.track_and_location();
         let fx_type = self.get_named_config_param_as_string_internal("fx_type", 10, &loc);
+        let fx_ident = self.get_named_config_param_as_string_internal("fx_ident", 1000, &loc);
+        let (file_name, id) = if let Ok(fx_ident) = fx_ident {
+            let c_string = fx_ident.into_inner();
+            let cow = c_string.to_string_lossy();
+            let (first, id) = if let Some((a, b)) = cow.split_once('<') {
+                let id = if let Some((_, vst_3_id)) = b.split_once('{') {
+                    vst_3_id
+                } else {
+                    b
+                };
+                (a, id)
+            } else {
+                (cow.as_ref(), "")
+            };
+            let file_name = if let Some(file_name) = Path::new(first).file_name() {
+                PathBuf::from(file_name)
+            } else {
+                Default::default()
+            };
+            (file_name, id.to_string())
+        } else {
+            Default::default()
+        };
         if let Ok(fx_type) = fx_type {
             // This must be REAPER >= 6.37. Use function to determine remaining FX info.
             let fx_type = fx_type.into_string();
@@ -159,27 +182,13 @@ impl Fx {
                 type_expression: match fx_type.as_str() {
                     "VST" | "VSTi" | "VST3" | "VST3i" => "VST",
                     "JS" => "JS",
+                    "AU" | "AUi" => "AU",
                     _ => "",
                 }
                 .to_owned(),
                 sub_type_expression: fx_type,
-                file_name: self
-                    .get_named_config_param_as_string_internal("fx_ident", 1000, &loc)
-                    .ok()
-                    .and_then(|rs| {
-                        let c_string = rs.into_inner();
-                        let cow = c_string.to_string_lossy();
-                        let str_ref = if let Some(index_of_hash_start) =
-                            cow.chars().position(|ch| ch == '<')
-                        {
-                            &cow.as_ref()[..index_of_hash_start]
-                        } else {
-                            cow.as_ref()
-                        };
-                        let path = Path::new(str_ref);
-                        Some(PathBuf::from(path.file_name()?))
-                    })
-                    .unwrap_or_default(),
+                file_name,
+                id,
             };
             Ok(info)
         } else {
@@ -749,14 +758,38 @@ pub fn get_track_fx_location(index: u32, is_input_fx: bool) -> TrackFxLocation {
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct FxInfo {
-    /// e.g. "VSTi: ReaSynth (Cockos)", for types other than VST supported since REAPER 6.37
+    /// Name of the FX as per default displayed after adding it to a chain.
+    ///
+    /// For types other than VST supported since REAPER 6.37.
+    ///
+    /// Example: "VSTi: ReaSynth (Cockos)"
     pub effect_name: String,
-    /// e.g. "VST" or "JS", for types other than VST and JS supported since REAPER 6.37
+    /// Basic type of the FX.
+    ///
+    /// For types other than VST and JS supported since REAPER 6.37.
+    ///
+    /// Examples: "VST", "JS", "AU"
     pub type_expression: String,
-    /// e.g. "VSTi" or "JS", for types other than VST and JS supported since REAPER 6.37
+    /// Detailed type of the FX.
+    ///
+    /// For types other than VST and JS supported since REAPER 6.37.
+    ///
+    /// Examples: "VST", "VSTi", "VST3", "VST3i", "AU", "AUi", "JS"
     pub sub_type_expression: String,
-    /// e.g. reasynth.dll or phaser, for types other than VST and JS supported since REAPER 6.37
+    /// File/bundle name including extension
+    ///
+    /// For types other than VST and JS supported since REAPER 6.37.
+    ///
+    /// Examples: "reasynth.dll", "phaser", "Zebra2.vst"
     pub file_name: PathBuf,
+    /// Unique ID for VST plug-ins.
+    ///
+    /// Supported since REAPER 6.37.
+    ///
+    /// Examples:
+    /// - VST 2: "1397572658"
+    /// - VST 3: "5653545074376D7069616E6F74657120"
+    pub id: String,
 }
 
 impl FxInfo {
@@ -793,6 +826,7 @@ impl FxInfo {
                         assert_eq!(remainder_captures.len(), 2);
                         PathBuf::from(&remainder_captures[1])
                     },
+                    id: "".into(),
                 })
             }
             "JS" => Ok(FxInfo {
@@ -812,6 +846,7 @@ impl FxInfo {
                     assert_eq!(remainder_captures.len(), 2);
                     PathBuf::from(&remainder_captures[1])
                 },
+                id: "".into(),
             }),
             _ => Err("Can only handle VST and JS FX types right now"),
         }
@@ -853,7 +888,8 @@ mod tests {
                 effect_name: "VSTi: ReaLearn (Helgoboss)".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VSTi".into(),
-                file_name: "ReaLearn-x64.dll".into()
+                file_name: "ReaLearn-x64.dll".into(),
+                id: "".into()
             })
         )
     }
@@ -871,7 +907,8 @@ mod tests {
                 effect_name: "VST: EQ (Nova)".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST".into(),
-                file_name: "TDR Nova GE.dll".into()
+                file_name: "TDR Nova GE.dll".into(),
+                id: "".into()
             })
         )
     }
@@ -889,7 +926,8 @@ mod tests {
                 effect_name: "VST: BussColors4".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST".into(),
-                file_name: "BussColors464.dll".into()
+                file_name: "BussColors464.dll".into(),
+                id: "".into()
             })
         )
     }
@@ -907,7 +945,8 @@ mod tests {
                 effect_name: "VST3i: Hive".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST3i".into(),
-                file_name: "Hive(x64).vst3".into()
+                file_name: "Hive(x64).vst3".into(),
+                id: "".into()
             })
         )
     }
@@ -925,7 +964,8 @@ mod tests {
                 effect_name: "VST3: Element FX (Kushview) (34ch)".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST3".into(),
-                file_name: "KV_ElementFX.vst3".into()
+                file_name: "KV_ElementFX.vst3".into(),
+                id: "".into()
             })
         )
     }
@@ -943,7 +983,8 @@ mod tests {
                 effect_name: "VST3: True Iron".into(),
                 type_expression: "VST".into(),
                 sub_type_expression: "VST3".into(),
-                file_name: "True Iron.vst3".into()
+                file_name: "True Iron.vst3".into(),
+                id: "".into()
             })
         )
     }
