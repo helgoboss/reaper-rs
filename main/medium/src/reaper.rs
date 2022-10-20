@@ -10,21 +10,21 @@ use crate::{
     AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
     DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
     FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode,
-    MediaItem, MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior,
-    MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
-    NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
-    ParamId, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, ProjectContext, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
-    SendTarget, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
-    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TrackSendRef, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
+    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
+    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
+    OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
+    PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
+    ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget,
+    TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
+    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -6715,6 +6715,32 @@ impl<UsageScope> Reaper<UsageScope> {
             );
         });
         time_string
+    }
+
+    /// Inserts the given file as new media item.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when inserting the file failed.
+    pub fn insert_media(
+        &self,
+        file: impl AsRef<Path>,
+        mode: InsertMediaMode,
+        flags: BitFlags<InsertMediaFlag>,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let path_str_c = CString::new(file.as_ref().to_string_lossy().as_bytes()).unwrap();
+        let result = unsafe {
+            self.low
+                .InsertMedia(path_str_c.as_ptr(), mode.to_raw(flags))
+        };
+        if result == 0 {
+            return Err(ReaperFunctionError::new("couldn't insert media"));
+        }
+        Ok(())
     }
 
     fn require_main_thread(&self)

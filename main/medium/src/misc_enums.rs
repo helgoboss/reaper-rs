@@ -1,9 +1,11 @@
 use crate::{
-    BookmarkId, CommandId, Hidden, Hwnd, KbdSectionInfo, MediaTrack, MidiFrameOffset,
-    MidiOutputDeviceId, ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue,
+    BookmarkId, CommandId, Hidden, Hwnd, InsertMediaFlag, KbdSectionInfo, MediaTrack,
+    MidiFrameOffset, MidiOutputDeviceId, ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg,
+    ReaperWidthValue,
 };
 
 use crate::util::concat_reaper_strs;
+use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
 use std::borrow::Cow;
@@ -1412,5 +1414,57 @@ impl<'a> ParamId<'a> {
             Delta => reaper_str!(":delta").into(),
             Custom(key) => key,
         }
+    }
+}
+
+/// Decides where to insert a media file.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum InsertMediaMode {
+    /// Adds the media as item to the last touched track.
+    ///
+    /// Creates a track if none exists.
+    CurrentTrack,
+    /// Adds the media as item to a new track.
+    ///
+    /// The new track is created below the last touched one.
+    NewTrack,
+    /// Adds the media as take to the currently selected items.
+    SelectedItemsAsTakes,
+    /// Adds the media as item to the track at the given index.
+    ///
+    /// Creates a new track if the index is out of bounds.
+    TrackAtIndex(u32),
+    /// Creates a new track and loads the media into a new RS5K instance on the normal FX chain
+    /// of that track.
+    ///
+    /// The track is created below the last touched one.
+    // 0 | 1024
+    NewReasamplomaticOnNewTrack,
+    /// Loads the media into a new RS5K instance on the normal FX chain of the last touched track.
+    ///
+    // 1 | 1024
+    NewReasamplomaticOnCurrentTrack,
+    // 0 | 512 | 1024 | (i << 16)
+    NewReasamplomaticOnTrackAtIndex(u32),
+    /// Loads the media into the last focused RS5K instance.
+    CurrentReasamplomatic,
+}
+
+impl InsertMediaMode {
+    /// Converts this value and the given flags to an integer as expected by the low-level API.
+    pub fn to_raw(self, flags: BitFlags<InsertMediaFlag>) -> i32 {
+        let mut bits: u32 = flags.bits();
+        use InsertMediaMode::*;
+        bits |= match self {
+            CurrentTrack => 0,
+            NewTrack => 1,
+            SelectedItemsAsTakes => 3,
+            TrackAtIndex(i) => 512 | (i << 16),
+            NewReasamplomaticOnNewTrack => 1024,
+            NewReasamplomaticOnCurrentTrack => 1 | 1024,
+            NewReasamplomaticOnTrackAtIndex(i) => 512 | 1024 | (i << 16),
+            CurrentReasamplomatic => 2048,
+        };
+        bits as i32
     }
 }
