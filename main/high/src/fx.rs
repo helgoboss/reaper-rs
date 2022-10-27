@@ -1,4 +1,5 @@
 use std::cell::Cell;
+use std::ffi::CString;
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -8,7 +9,6 @@ use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::option_util::OptionExt;
 use crate::{ChunkRegion, FxChainContext, Project, Reaper, Track};
-use itertools::Itertools;
 use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ParamId, ReaperFunctionError, ReaperString,
     ReaperStringArg, TrackFxGetPresetIndexResult, TrackFxLocation,
@@ -466,15 +466,11 @@ impl Fx {
     }
 
     pub fn set_vst_chunk(&self, bytes: &[u8]) -> Result<(), &'static str> {
-        let complete_state_chunk = self.state_chunk()?;
-        let complete_state_chunk = complete_state_chunk.content();
-        let first_state_chunk_line = complete_state_chunk
-            .lines()
-            .next()
-            .ok_or("state chunk has no first line")?;
-        let vst_chunk_reaper_encoded = encode_vst_chunk_for_reaper(bytes);
-        let new_state_chunk = format!("{}\n{}", first_state_chunk_line, vst_chunk_reaper_encoded);
-        self.set_state_chunk(&new_state_chunk)?;
+        self.load_if_necessary_or_complain();
+        let encoded = base64::encode(bytes);
+        let c_string =
+            CString::new(encoded).map_err(|_| "base64-encoded VST chunk contains nul byte")?;
+        self.set_named_config_param("vst_chunk", c_string.as_bytes_with_nul())?;
         Ok(())
     }
 
@@ -855,20 +851,6 @@ impl FxInfo {
 
 fn get_fx_id_line(guid: &Guid) -> String {
     format!("FXID {}", guid.to_string_with_braces())
-}
-
-fn encode_vst_chunk_for_reaper(bytes: &[u8]) -> String {
-    let encoded = base64::encode(bytes);
-    encoded
-        .chars()
-        .chunks(280)
-        .into_iter()
-        .map(|chunk| {
-            let s: String = chunk.collect();
-            s
-        })
-        .into_iter()
-        .join("\n")
 }
 
 #[cfg(test)]
