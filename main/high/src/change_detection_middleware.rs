@@ -826,6 +826,9 @@ impl ChangeDetectionMiddleware {
         new_active_project: Project,
         mut handle_change: impl FnMut(ChangeEvent),
     ) {
+        handle_change(ChangeEvent::TrackListChanged(TrackListChangedEvent {
+            project: new_active_project,
+        }));
         if new_active_project != self.last_active_project.get() {
             let old = self.last_active_project.replace(new_active_project);
             handle_change(ChangeEvent::ProjectSwitched(ProjectSwitchedEvent {
@@ -1194,6 +1197,11 @@ impl ChangeDetectionMiddleware {
 
 #[derive(Clone, Debug)]
 pub enum ChangeEvent {
+    /// Some changes of track properties don't have proper notifications, e.g. changes in track
+    /// visibility. However, some at least trigger a track-list-change notification. It's not
+    /// possible to identify the track on which something changed (without iterating over all
+    /// tracks anyway) but this event could still be useful to some consumers. Better than nothing.
+    TrackListChanged(TrackListChangedEvent),
     ProjectSwitched(ProjectSwitchedEvent),
     TrackVolumeChanged(TrackVolumeChangedEvent),
     TrackPanChanged(TrackPanChangedEvent),
@@ -1245,6 +1253,7 @@ impl ChangeEvent {
     /// refered object might have been deleted in the meantime. In this case, we should check that!
     pub fn is_still_valid(&self) -> bool {
         match self {
+            ChangeEvent::TrackListChanged(evt) => evt.project.is_available(),
             ChangeEvent::ProjectSwitched(evt) => evt.new_project.is_available(),
             ChangeEvent::TrackVolumeChanged(evt) => evt.track.is_available(),
             ChangeEvent::TrackPanChanged(evt) => evt.track.is_available(),
@@ -1284,6 +1293,11 @@ impl ChangeEvent {
             ChangeEvent::BookmarksChanged(evt) => evt.project.is_available(),
         }
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct TrackListChangedEvent {
+    pub project: Project,
 }
 
 #[derive(Clone, Debug)]

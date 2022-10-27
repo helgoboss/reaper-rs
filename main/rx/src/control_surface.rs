@@ -142,6 +142,8 @@ impl ControlSurfaceRxMiddleware {
                 .borrow_mut()
                 .next(e.track),
             TrackSendCountChanged(e) => self.rx.track_send_count_changed.borrow_mut().next(e.track),
+            // Don't implement the new stuff, ReaLearn doesn't use rx anymore for the most part.
+            _ => {}
         };
     }
 }
