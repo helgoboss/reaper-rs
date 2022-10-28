@@ -37,6 +37,12 @@ impl Project {
         self.rea_project
     }
 
+    pub fn state_change_count(self) -> u32 {
+        Reaper::get()
+            .medium_reaper()
+            .get_project_state_change_count(self.context())
+    }
+
     pub fn first_track(self) -> Option<Track> {
         self.track_by_index(0)
     }

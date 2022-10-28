@@ -23,7 +23,13 @@ pub struct ChangeDetectionMiddleware {
     supports_detection_of_input_fx: bool,
 }
 
-type ProjectDataMap = HashMap<ReaProject, TrackDataMap>;
+type ProjectDataMap = HashMap<ReaProject, ProjectData>;
+
+#[derive(Debug, Default)]
+struct ProjectData {
+    track_datas: TrackDataMap,
+}
+
 type TrackDataMap = HashMap<MediaTrack, TrackData>;
 
 /// Keeps current track values for detecting real value changes.
@@ -35,6 +41,7 @@ struct TrackData {
     volume: ReaperVolumeValue,
     pan: Pan,
     selected: bool,
+    visibility: TrackVisibility,
     mute: bool,
     solo: bool,
     recarm: bool,
@@ -160,6 +167,49 @@ impl Default for ChangeDetectionMiddleware {
 impl ChangeDetectionMiddleware {
     pub fn new() -> ChangeDetectionMiddleware {
         Default::default()
+    }
+
+    /// This should be called regularly. It takes care of detecting changes that can only be
+    /// detected via polling. Some things only when project state count has changed, others every
+    /// single time.
+    pub fn run(&mut self, handle_change: &mut impl FnMut(ChangeEvent)) {
+        let reaper = Reaper::get();
+        let project = reaper.current_project();
+        if let Some(mut project_data) = self.find_project_data(project.raw()) {
+            self.poll_for_more_track_prop_changes(
+                reaper.medium_reaper(),
+                project.raw(),
+                &mut project_data,
+                handle_change,
+            );
+        }
+    }
+
+    fn poll_for_more_track_prop_changes(
+        &self,
+        reaper: &reaper_medium::Reaper,
+        project: ReaProject,
+        project_data: &mut ProjectData,
+        handle_change: &mut impl FnMut(ChangeEvent),
+    ) {
+        for (track, td) in &mut project_data.track_datas {
+            // Track visibility.
+            // It's not enough to do this when the project state count changes because ReaLearn
+            // chooses to show/hide tracks without influencing the project state.
+            let old_value = td.visibility;
+            let new_value = unsafe { get_track_visibility(reaper, *track) };
+            if old_value != new_value {
+                td.visibility = new_value;
+                let track = Track::new(*track, Some(project));
+                handle_change(ChangeEvent::TrackVisibilityChanged(
+                    TrackVisibilityChangedEvent {
+                        track,
+                        old_value,
+                        new_value,
+                    },
+                ));
+            }
+        }
     }
 
     pub fn reset(&self, handle_change: impl FnMut(ChangeEvent)) {
@@ -653,7 +703,7 @@ impl ChangeDetectionMiddleware {
         self.find_track_data(track)
     }
 
-    fn find_track_data_map(&self, rea_project: ReaProject) -> Option<RefMut<TrackDataMap>> {
+    fn find_project_data(&self, rea_project: ReaProject) -> Option<RefMut<ProjectData>> {
         if !self.project_datas.borrow().contains_key(&rea_project) {
             return None;
         }
@@ -675,12 +725,12 @@ impl ChangeDetectionMiddleware {
                 .get_set_media_track_info_get_project(track)
                 .unwrap_or_else(|| Reaper::get().current_project().raw())
         };
-        let track_data_map = self.find_track_data_map(project)?;
-        if !track_data_map.contains_key(&track) {
+        let project_data = self.find_project_data(project)?;
+        if !project_data.track_datas.contains_key(&track) {
             return None;
         }
-        Some(RefMut::map(track_data_map, |tdm| {
-            tdm.get_mut(&track).unwrap()
+        Some(RefMut::map(project_data, |pd| {
+            pd.track_datas.get_mut(&track).unwrap()
         }))
     }
 
@@ -826,9 +876,6 @@ impl ChangeDetectionMiddleware {
         new_active_project: Project,
         mut handle_change: impl FnMut(ChangeEvent),
     ) {
-        handle_change(ChangeEvent::TrackListChanged(TrackListChangedEvent {
-            project: new_active_project,
-        }));
         if new_active_project != self.last_active_project.get() {
             let old = self.last_active_project.replace(new_active_project);
             handle_change(ChangeEvent::ProjectSwitched(ProjectSwitchedEvent {
@@ -859,7 +906,8 @@ impl ChangeDetectionMiddleware {
     fn detect_track_set_changes(&self, handle_change: impl FnMut(ChangeEvent)) {
         let project = Reaper::get().current_project();
         let mut project_datas = self.project_datas.borrow_mut();
-        let track_datas = project_datas.entry(project.raw()).or_default();
+        let project_data = project_datas.entry(project.raw()).or_default();
+        let track_datas = &mut project_data.track_datas;
         let old_track_count = track_datas.len() as u32;
         // +1 for master track
         let new_track_count = project.track_count() + 1;
@@ -937,6 +985,7 @@ impl ChangeDetectionMiddleware {
                         },
                         selected: func.get_media_track_info_value(mt, TrackAttributeKey::Selected)
                             != 0.0,
+                        visibility: get_track_visibility(func, mt),
                         mute: func.get_media_track_info_value(mt, TrackAttributeKey::Mute) != 0.0,
                         solo: func.get_media_track_info_value(mt, TrackAttributeKey::Solo) != 0.0,
                         recarm: func.get_media_track_info_value(mt, TrackAttributeKey::RecArm)
@@ -1197,11 +1246,6 @@ impl ChangeDetectionMiddleware {
 
 #[derive(Clone, Debug)]
 pub enum ChangeEvent {
-    /// Some changes of track properties don't have proper notifications, e.g. changes in track
-    /// visibility. However, some at least trigger a track-list-change notification. It's not
-    /// possible to identify the track on which something changed (without iterating over all
-    /// tracks anyway) but this event could still be useful to some consumers. Better than nothing.
-    TrackListChanged(TrackListChangedEvent),
     ProjectSwitched(ProjectSwitchedEvent),
     TrackVolumeChanged(TrackVolumeChangedEvent),
     TrackPanChanged(TrackPanChangedEvent),
@@ -1221,6 +1265,7 @@ pub enum ChangeEvent {
     TrackSoloChanged(TrackSoloChangedEvent),
     TrackSelectedChanged(TrackSelectedChangedEvent),
     TrackAutomationModeChanged(TrackAutomationModeChangedEvent),
+    TrackVisibilityChanged(TrackVisibilityChangedEvent),
     FxAdded(FxAddedEvent),
     FxRemoved(FxRemovedEvent),
     FxEnabledChanged(FxEnabledChangedEvent),
@@ -1253,7 +1298,6 @@ impl ChangeEvent {
     /// refered object might have been deleted in the meantime. In this case, we should check that!
     pub fn is_still_valid(&self) -> bool {
         match self {
-            ChangeEvent::TrackListChanged(evt) => evt.project.is_available(),
             ChangeEvent::ProjectSwitched(evt) => evt.new_project.is_available(),
             ChangeEvent::TrackVolumeChanged(evt) => evt.track.is_available(),
             ChangeEvent::TrackPanChanged(evt) => evt.track.is_available(),
@@ -1272,6 +1316,7 @@ impl ChangeEvent {
             ChangeEvent::TrackMuteChanged(evt) => evt.track.is_available(),
             ChangeEvent::TrackSoloChanged(evt) => evt.track.is_available(),
             ChangeEvent::TrackSelectedChanged(evt) => evt.track.is_available(),
+            ChangeEvent::TrackVisibilityChanged(evt) => evt.track.is_available(),
             ChangeEvent::TrackAutomationModeChanged(evt) => evt.track.is_available(),
             ChangeEvent::FxAdded(evt) => evt.fx.is_available(),
             ChangeEvent::FxRemoved(_) => true,
@@ -1293,11 +1338,6 @@ impl ChangeEvent {
             ChangeEvent::BookmarksChanged(evt) => evt.project.is_available(),
         }
     }
-}
-
-#[derive(Clone, Debug)]
-pub struct TrackListChangedEvent {
-    pub project: Project,
 }
 
 #[derive(Clone, Debug)]
@@ -1429,6 +1469,19 @@ pub struct TrackSelectedChangedEvent {
 }
 
 #[derive(Clone, Debug)]
+pub struct TrackVisibilityChangedEvent {
+    pub track: Track,
+    pub old_value: TrackVisibility,
+    pub new_value: TrackVisibility,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct TrackVisibility {
+    pub tcp: bool,
+    pub mcp: bool,
+}
+
+#[derive(Clone, Debug)]
 pub struct TrackAutomationModeChangedEvent {
     pub track: Track,
     pub old_value: AutomationMode,
@@ -1524,4 +1577,22 @@ pub struct ProjectClosedEvent {
 #[derive(Clone, Debug)]
 pub struct BookmarksChangedEvent {
     pub project: Project,
+}
+
+unsafe fn get_track_visibility(
+    reaper: &reaper_medium::Reaper,
+    track: MediaTrack,
+) -> TrackVisibility {
+    TrackVisibility {
+        tcp: get_boolean_track_prop(reaper, track, TrackAttributeKey::ShowInTcp),
+        mcp: get_boolean_track_prop(reaper, track, TrackAttributeKey::ShowInMixer),
+    }
+}
+
+unsafe fn get_boolean_track_prop(
+    reaper: &reaper_medium::Reaper,
+    track: MediaTrack,
+    key: TrackAttributeKey,
+) -> bool {
+    reaper.get_media_track_info_value(track, key) != 0.0
 }
