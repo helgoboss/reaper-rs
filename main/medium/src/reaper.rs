@@ -2384,6 +2384,34 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.CountTracks(project.to_raw()) as u32
     }
 
+    /// Returns an integer that changes when the project state changes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn get_project_state_change_count(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_project_state_change_count_unchecked(project) }
+    }
+
+    /// Like [`get_project_state_change_count()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_project_state_change_count()`]: #method.get_project_state_change_count
+    pub unsafe fn get_project_state_change_count_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.GetProjectStateChangeCount(project.to_raw()) as u32
+    }
+
     /// Returns the number of items in the given project.
     ///
     /// # Panics
