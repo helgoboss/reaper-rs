@@ -468,10 +468,22 @@ impl Fx {
     pub fn set_vst_chunk(&self, bytes: &[u8]) -> Result<(), &'static str> {
         self.load_if_necessary_or_complain();
         let encoded = base64::encode(bytes);
+        self.set_vst_chunk_encoded(encoded)
+    }
+
+    pub fn set_vst_chunk_encoded(&self, encoded: String) -> Result<(), &'static str> {
+        self.load_if_necessary_or_complain();
         let c_string =
             CString::new(encoded).map_err(|_| "base64-encoded VST chunk contains nul byte")?;
         self.set_named_config_param("vst_chunk", c_string.as_bytes_with_nul())?;
         Ok(())
+    }
+
+    pub fn vst_chunk_encoded(&self) -> Result<ReaperString, &'static str> {
+        self.load_if_necessary_or_complain();
+        let loc = self.track_and_location();
+        let encoded = self.get_named_config_param_as_string_internal("vst_chunk", 100_000, &loc)?;
+        Ok(encoded)
     }
 
     pub fn floating_window(&self) -> Option<Hwnd> {
