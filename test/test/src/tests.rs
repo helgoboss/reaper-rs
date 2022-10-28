@@ -2598,7 +2598,9 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
                 }
             );
             assert!(fx.guid().is_some());
-            assert_eq!(fx.name().into_inner().as_c_str(), c_str!("JS: phaser"));
+            let js_name = fx.name().into_inner();
+            let js_name = js_name.as_c_str();
+            assert!(js_name == c_str!("JS: phaser") || js_name == c_str!("4-Tap Phaser"));
             let fx_chunk = fx.chunk()?;
             assert!(fx_chunk.starts_with("BYPASS 0 0 0"));
             if Reaper::get().version() < ReaperVersion::new("6") {
@@ -2607,7 +2609,10 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
                 assert!(fx_chunk.ends_with("\nWAK 0 0"));
             }
             let tag_chunk = fx.tag_chunk()?;
-            assert!(tag_chunk.starts_with(r#"<JS phaser """#));
+            assert!(
+                tag_chunk.starts_with(r#"<JS phaser """#)
+                    || tag_chunk.starts_with(r#"<JS guitar/phaser """#)
+            );
             assert!(tag_chunk.ends_with("\n>"));
             let state_chunk = fx.state_chunk()?;
             assert!(!state_chunk.contains("<"));
@@ -2639,7 +2644,9 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             if Reaper::get().version() < ReaperVersion::new("6.37") {
                 assert_eq!(fx_info.effect_name, "");
             } else {
-                assert_eq!(fx_info.effect_name, "JS: phaser");
+                assert!(
+                    fx_info.effect_name == "JS: phaser" || fx_info.effect_name == "4-Tap Phaser"
+                );
             }
             Ok(())
         },
@@ -2676,7 +2683,9 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
                 .first_fx_by_name("ReaControlMIDI (Cockos)")
                 .is_some());
             assert_eq!(
-                fx_chain.first_fx_by_name(reaper_str!("phaser")),
+                fx_chain
+                    .first_fx_by_name(reaper_str!("phaser"))
+                    .or_else(|| fx_chain.first_fx_by_name(reaper_str!("4-Tap Phaser"))),
                 Some(fx.clone())
             );
             if Reaper::get().version() < ReaperVersion::new("6") {
