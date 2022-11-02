@@ -1118,7 +1118,32 @@ impl TryFrom<f64> for PositionInQuarterNotes {
     }
 }
 
-/// This represents a position expressed as an amount of MIDI ticks (PPQ).
+impl std::ops::Add for PositionInQuarterNotes {
+    fn add(self, rhs: Self) -> Self {
+        PositionInQuarterNotes::new(self.get() + rhs.get())
+    }
+    type Output = Self;
+}
+impl std::ops::Sub for PositionInQuarterNotes {
+    fn sub(self, rhs: Self) -> Self {
+        PositionInQuarterNotes::new(self.get() - rhs.get())
+    }
+    type Output = Self;
+}
+impl std::ops::Div for PositionInQuarterNotes {
+    fn div(self, rhs: Self) -> Self {
+        PositionInQuarterNotes::new(self.get() / rhs.get())
+    }
+    type Output = Self;
+}
+impl std::ops::Mul for PositionInQuarterNotes {
+    fn mul(self, rhs: Self) -> Self {
+        PositionInQuarterNotes::new(self.get() * rhs.get())
+    }
+    type Output = Self;
+}
+
+/// This represents a position expressed as an amount of midi ticks (PPQ).
 ///
 /// Can be negative, see [`PositionInSeconds`](struct.PositionInSeconds.html).
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
