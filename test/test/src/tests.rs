@@ -139,6 +139,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         set_project_play_rate(),
         get_project_tempo(),
         set_project_tempo(),
+        track_midi_functions(),
         swell(),
     ]
     .into_iter();
@@ -3575,6 +3576,60 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             Ok(())
         },
     )
+}
+
+fn track_midi_functions() -> TestStep {
+    step(AllVersions, "Test MIDI functions on track.", |_, _| {
+        let reaper = Reaper::get();
+        let project = reaper.current_project();
+
+        let track = project.add_track()?;
+
+        let medium = reaper.medium_reaper();
+
+        unsafe {
+            let item = medium.create_midi_item_in_proj(track.raw(), 1.0, 2.0, true)?;
+            let take = medium
+                .get_active_take(item)
+                .ok_or("No tke in created item!")?;
+
+            assert!(medium.take_is_midi(&take));
+            let track_index = track.index().ok_or("Can not take Track index.")?;
+            match medium.set_track_midi_note_name(track_index, 60, 0, "test name") {
+                true => Ok(true),
+                false => Err("returned false"),
+            }?;
+            match medium.set_track_midi_note_name_ex(
+                project.context(),
+                track.raw(),
+                61,
+                -1,
+                "test name_ex",
+            ) {
+                true => Ok(true),
+                false => Err("returned false"),
+            }?;
+            assert_eq!(
+                medium
+                    .get_track_midi_note_name(track_index, 61, 3)
+                    .ok_or("should be set")?
+                    .to_str(),
+                "test name_ex"
+            );
+            assert_eq!(
+                medium
+                    .get_track_midi_note_name_ex(project.context(), track.raw(), 60, 0)
+                    .ok_or("should be set")?
+                    .to_str(),
+                "test name ahh"
+            );
+        }
+        assert_eq!("ahhh!", "Not!");
+
+        project.remove_track(&track);
+
+        Ok(())
+    })
 }
 
 fn get_track(index: u32) -> Result<Track, &'static str> {

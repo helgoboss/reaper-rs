@@ -1589,7 +1589,7 @@ impl<UsageScope> Reaper<UsageScope> {
             start_qn.as_mut_ptr(),
             end_qn.as_mut_ptr(),
         );
-        TimeMapQNToMeasuresResult{
+        TimeMapQNToMeasuresResult {
             measure_index: measure,
             start_qn: PositionInQuarterNotes::new(start_qn.assume_init()),
             end_qn: PositionInQuarterNotes::new(end_qn.assume_init()),
@@ -5731,6 +5731,237 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't get MIDI editor take"))
     }
 
+    /// Create a new MIDI media item, containing no MIDI events.
+    ///
+    /// Time is in seconds unless time_in_qn is true.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn create_midi_item_in_proj(
+        &self,
+        track: MediaTrack,
+        starttime: f64,
+        endtime: f64,
+        time_in_qn: bool,
+    ) -> ReaperFunctionResult<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self
+            .low
+            .CreateNewMIDIItemInProj(track.as_ptr(), starttime, endtime, &time_in_qn);
+        NonNull::new(ptr).ok_or_else(|| {
+            ReaperFunctionError::new("couldn't create MediaItem (maybe track is invalid)")
+        })
+    }
+
+    /// returns false if there are no plugins on the track that support MIDI programs,
+    /// or if all programs have been enumerated
+    pub fn enum_track_midi_program_names(
+        &self,
+        track: i32,
+        program_number: i32,
+        buffer_size: u32,
+    ) -> Option<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            let (program_name, status) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low
+                    .EnumTrackMIDIProgramNames(track, program_number, buffer, max_size)
+            });
+            match status {
+                true => Some(program_name),
+                false => None,
+            }
+        }
+    }
+
+    /// returns false if there are no plugins on the track that support MIDI programs,
+    /// or if all programs have been enumerated
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or track.
+    pub unsafe fn enum_track_midi_program_names_ex(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        program_number: i32,
+        buffer_size: u32,
+    ) -> Option<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        self.enum_track_midi_program_names_ex_unchecked(project, track, program_number, buffer_size)
+    }
+
+    /// returns false if there are no plugins on the track that support MIDI programs,
+    /// or if all programs have been enumerated
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or track.
+    pub unsafe fn enum_track_midi_program_names_ex_unchecked(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        program_number: i32,
+        buffer_size: u32,
+    ) -> Option<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let (program_name, status) = with_string_buffer(buffer_size, |buffer, max_size| {
+            self.low.EnumTrackMIDIProgramNamesEx(
+                project.to_raw(),
+                track.as_ptr(),
+                program_number,
+                buffer,
+                max_size,
+            )
+        });
+        match status {
+            true => Some(program_name),
+            false => None,
+        }
+    }
+
+    /// Gets note name for the note, if set on track.
+    pub fn get_track_midi_note_name<'a>(
+        &self,
+        track_index: u32,
+        pitch: u32,
+        channel: u32,
+    ) -> Option<&'a ReaperStr>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ptr = self
+            .low
+            .GetTrackMIDINoteName(track_index as i32, pitch as i32, channel as i32);
+        unsafe { create_passing_c_str(ptr) }
+    }
+
+    /// Gets note name for the note, if set on track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, if you pass an invalid track.
+    pub unsafe fn get_track_midi_note_name_ex<'a>(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        pitch: u32,
+        channel: u32,
+    ) -> Option<&'a ReaperStr>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        self.get_track_midi_note_name_ex_unchecked(project, track, pitch, channel)
+    }
+
+    /// Gets note name for the note, if set on track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, if you pass an invalid track.
+    pub unsafe fn get_track_midi_note_name_ex_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        pitch: u32,
+        channel: u32,
+    ) -> Option<&'a ReaperStr>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ptr = self.low.GetTrackMIDINoteNameEx(
+            project.to_raw(),
+            track.as_ptr(),
+            pitch as i32,
+            channel as i32,
+        );
+        create_passing_c_str(ptr)
+    }
+
+    /// Assignes name to the midi note or CC on the entire track.
+    ///
+    /// channel < 0 assigns these note names to all channels.
+    pub fn set_track_midi_note_name<'a>(
+        &self,
+        track: u32,
+        pitch: u32,
+        channel: i32,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            self.low.SetTrackMIDINoteName(
+                track as i32,
+                pitch as i32,
+                channel as i32,
+                name.into().as_ptr(),
+            )
+        }
+    }
+
+    // Assignes name to the midi note or CC on the entire track.
+    ///
+    /// channel < 0 assigns these note names to all channels.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid track.
+    pub unsafe fn set_track_midi_note_name_ex<'a>(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        pitch: u32,
+        channel: i32,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.project_is_valid(project);
+        self.set_track_midi_note_name_ex_unchecked(project, track, pitch, channel, name)
+    }
+
+    // Assignes name to the midi note or CC on the entire track.
+    ///
+    /// channel < 0 assigns these note names to all channels.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid track.
+    pub unsafe fn set_track_midi_note_name_ex_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        mut track: MediaTrack,
+        pitch: u32,
+        channel: i32,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low.SetTrackMIDINoteNameEx(
+            project.to_raw(),
+            track.as_mut(),
+            pitch as i32,
+            channel,
+            name.into().as_ptr(),
+        )
+    }
+
     /// Selects exactly one track and deselects all others.
     ///
     /// If `None` is passed, deselects all tracks.
@@ -6432,6 +6663,16 @@ impl<UsageScope> Reaper<UsageScope> {
             create_passing_c_str(ptr as *const c_char)
         };
         use_name(passing_c_str.ok_or_else(|| ReaperFunctionError::new("invalid take")))
+    }
+
+    /// #Safety
+    ///
+    /// REAPER can crash if invalid track is passed.
+    pub fn take_is_midi(&self, take: &MediaItemTake) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe { self.low.TakeIsMIDI(take.as_ptr()) }
     }
 
     /// Returns the current on/off state of a toggleable action.
