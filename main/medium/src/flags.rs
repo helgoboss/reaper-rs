@@ -101,3 +101,12 @@ pub enum InsertMediaFlag {
     MoveSourceToPreferredPosition = 4096,
     Reverse = 8192,
 }
+
+/// Defines which track grouping behaviors to prevent when using the `set_track_ui_*` functions.
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[repr(u32)]
+pub enum SetTrackUiFlags {
+    PreventTrackGrouping = 1,
+    PreventSelectionGanging = 2,
+}

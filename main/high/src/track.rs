@@ -10,6 +10,7 @@ use crate::{
     Width,
 };
 
+use enumflags2::BitFlags;
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::SendTarget::OtherTrack;
@@ -17,9 +18,10 @@ use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo}
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, ReaProject, ReaperFunctionError, ReaperString,
-    ReaperStringArg, RecordArmMode, RecordingInput, RgbColor, SoloMode, TrackArea,
-    TrackAttributeKey, TrackLocation, TrackSendCategory, TrackSendDirection,
+    InputMonitoringMode, MediaTrack, Progress, ReaProject, ReaperFunctionError, ReaperString,
+    ReaperStringArg, RecordArmMode, RecordingInput, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
+    TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackPolarityOperation,
+    TrackRecArmOperation, TrackSendCategory, TrackSendDirection, TrackSoloOperation,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -154,12 +156,22 @@ impl Track {
         &self,
         mode: InputMonitoringMode,
         gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
     ) {
         self.load_and_check_if_necessary_or_complain();
-        unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .csurf_on_input_monitoring_change_ex(self.raw(), mode, gang_behavior);
+        let reaper = Reaper::get().medium_reaper();
+        if reaper.low().pointers().SetTrackUIInputMonitor.is_some() {
+            unsafe {
+                reaper.set_track_ui_input_monitor(
+                    self.raw(),
+                    mode,
+                    build_track_ui_flags(gang_behavior, grouping_behavior),
+                )
+            };
+        } else {
+            unsafe {
+                reaper.csurf_on_input_monitoring_change_ex(self.raw(), mode, gang_behavior);
+            }
         }
     }
 
@@ -222,16 +234,29 @@ impl Track {
         Pan::from_reaper_value(result.pan)
     }
 
-    pub fn set_pan(&self, pan: Pan, gang_behavior: GangBehavior) {
+    pub fn set_pan(
+        &self,
+        pan: Pan,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = pan.reaper_value();
         let reaper_value = if self.project() == Reaper::get().current_project() {
-            unsafe {
-                Reaper::get().medium_reaper().csurf_on_pan_change_ex(
-                    self.raw(),
-                    Absolute(reaper_value),
-                    gang_behavior,
-                )
+            let reaper = Reaper::get().medium_reaper();
+            if reaper.low().pointers().SetTrackUIPan.is_some() {
+                unsafe {
+                    reaper.set_track_ui_pan(
+                        self.raw(),
+                        Absolute(reaper_value),
+                        Progress::Done,
+                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                    )
+                }
+            } else {
+                unsafe {
+                    reaper.csurf_on_pan_change_ex(self.raw(), Absolute(reaper_value), gang_behavior)
+                }
             }
         } else {
             // ReaLearn #283
@@ -268,16 +293,33 @@ impl Track {
         Width::from_reaper_value(result.pan_2.as_width_value())
     }
 
-    pub fn set_width(&self, width: Width, gang_behavior: GangBehavior) {
+    pub fn set_width(
+        &self,
+        width: Width,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = width.reaper_value();
         if self.project() == Reaper::get().current_project() {
-            unsafe {
-                Reaper::get().medium_reaper().csurf_on_width_change_ex(
-                    self.raw(),
-                    Absolute(reaper_value),
-                    gang_behavior,
-                );
+            let reaper = Reaper::get().medium_reaper();
+            if reaper.low().pointers().SetTrackUIWidth.is_some() {
+                unsafe {
+                    reaper.set_track_ui_width(
+                        self.raw(),
+                        Absolute(reaper_value),
+                        Progress::Done,
+                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                    );
+                }
+            } else {
+                unsafe {
+                    reaper.csurf_on_width_change_ex(
+                        self.raw(),
+                        Absolute(reaper_value),
+                        gang_behavior,
+                    );
+                }
             }
         } else {
             // ReaLearn #283
@@ -331,29 +373,45 @@ impl Track {
         Volume::from_reaper_value(result.volume)
     }
 
-    pub fn set_volume(&self, volume: Volume, gang_behavior: GangBehavior) {
+    pub fn set_volume(
+        &self,
+        volume: Volume,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
         self.load_and_check_if_necessary_or_complain();
         let reaper_value = volume.reaper_value();
         let reaper_value = if self.project() == Reaper::get().current_project() {
+            let reaper = Reaper::get().medium_reaper();
             // Why we use this function and not the others:
             //
             // - Setting D_VOL directly via `set_media_track_info_value` will not work for writing
             //   automation.
             // - csurf_set_surface_volume seems to only inform control surfaces, doesn't actually
             //   set the volume.
-            //
-            // Downsides of using this function:
-            //
-            // - CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly.
-            //   The return value reflects the cropped value. However, the precision became much
-            //   better with REAPER 5.28.
-            // - In automation mode "Touch" this leads to jumps.
-            unsafe {
-                Reaper::get().medium_reaper().csurf_on_volume_change_ex(
-                    self.raw(),
-                    Absolute(reaper_value),
-                    gang_behavior,
-                )
+            if reaper.low().pointers().SetTrackUIVolume.is_some() {
+                unsafe {
+                    reaper.set_track_ui_volume(
+                        self.raw(),
+                        Absolute(reaper_value),
+                        Progress::Done,
+                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                    )
+                }
+            } else {
+                // Downsides of using this function:
+                //
+                // - CSurf_OnVolumeChangeEx has a slightly lower precision than setting D_VOL directly.
+                //   The return value reflects the cropped value. However, the precision became much
+                //   better with REAPER 5.28.
+                // - In automation mode "Touch" this leads to jumps.
+                unsafe {
+                    reaper.csurf_on_volume_change_ex(
+                        self.raw(),
+                        Absolute(reaper_value),
+                        gang_behavior,
+                    )
+                }
             }
         } else {
             // ReaLearn #283
@@ -451,17 +509,16 @@ impl Track {
     }
 
     // If supportAutoArm is false, auto-arm mode is disabled if it has been enabled before
-    pub fn arm(&self, support_auto_arm: bool, gang_behavior: GangBehavior) {
+    pub fn arm(
+        &self,
+        support_auto_arm: bool,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.select();
         } else if self.project() == Reaper::get().current_project() {
-            unsafe {
-                Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
-                    self.raw(),
-                    RecordArmMode::Armed,
-                    gang_behavior,
-                );
-            }
+            self.set_arm_state_internal(RecordArmMode::Armed, gang_behavior, grouping_behavior);
             // If track was auto-armed before, this would just have switched off the auto-arm
             // but not actually armed the track. Therefore we check if it's
             // really armed and if not we do it again.
@@ -473,13 +530,11 @@ impl Track {
             #[allow(clippy::float_cmp)]
             {
                 if recarm != 1.0 {
-                    unsafe {
-                        Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
-                            self.raw(),
-                            RecordArmMode::Armed,
-                            gang_behavior,
-                        );
-                    }
+                    self.set_arm_state_internal(
+                        RecordArmMode::Armed,
+                        gang_behavior,
+                        grouping_behavior,
+                    );
                 }
             }
         } else {
@@ -489,20 +544,46 @@ impl Track {
     }
 
     // If supportAutoArm is false, auto-arm mode is disabled if it has been enabled before
-    pub fn disarm(&self, support_auto_arm: bool, gang_behavior: GangBehavior) {
+    pub fn disarm(
+        &self,
+        support_auto_arm: bool,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
         if support_auto_arm && self.has_auto_arm_enabled() {
             self.unselect();
         } else if self.project() == Reaper::get().current_project() {
-            unsafe {
-                Reaper::get().medium_reaper().csurf_on_rec_arm_change_ex(
-                    self.raw(),
-                    RecordArmMode::Unarmed,
-                    gang_behavior,
-                );
-            }
+            self.set_arm_state_internal(RecordArmMode::Unarmed, gang_behavior, grouping_behavior);
         } else {
             // ReaLearn #283
             self.set_prop_enabled(TrackAttributeKey::RecArm, false);
+        }
+    }
+
+    fn set_arm_state_internal(
+        &self,
+        mode: RecordArmMode,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
+        let reaper = Reaper::get().medium_reaper();
+        if reaper.low().pointers().SetTrackUIRecArm.is_some() {
+            let operation = if mode == RecordArmMode::Armed {
+                TrackRecArmOperation::SetRecArm
+            } else {
+                TrackRecArmOperation::UnsetRecArm
+            };
+            unsafe {
+                reaper.set_track_ui_rec_arm(
+                    self.raw(),
+                    operation,
+                    build_track_ui_flags(gang_behavior, grouping_behavior),
+                );
+            }
+        } else {
+            unsafe {
+                reaper.csurf_on_rec_arm_change_ex(self.raw(), mode, gang_behavior);
+            }
         }
     }
 
@@ -515,9 +596,17 @@ impl Track {
         chunk.insert_after_region_as_block(&chunk.region().first_line(), "AUTO_RECARM 1");
         self.set_chunk(chunk)?;
         if was_armed_before {
-            self.arm(true, GangBehavior::DenyGang);
+            self.arm(
+                true,
+                GangBehavior::DenyGang,
+                GroupingBehavior::PreventGrouping,
+            );
         } else {
-            self.disarm(true, GangBehavior::DenyGang);
+            self.disarm(
+                true,
+                GangBehavior::DenyGang,
+                GroupingBehavior::PreventGrouping,
+            );
         }
         Ok(())
     }
@@ -539,8 +628,29 @@ impl Track {
         self.prop_is_enabled(TrackAttributeKey::Phase)
     }
 
-    pub fn set_phase_inverted(&self, inverted: bool) {
-        self.set_prop_enabled(TrackAttributeKey::Phase, inverted);
+    pub fn set_phase_inverted(
+        &self,
+        inverted: bool,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
+        let reaper = Reaper::get().medium_reaper();
+        if reaper.low().pointers().SetTrackUIPolarity.is_some() {
+            unsafe {
+                let operation = if inverted {
+                    TrackPolarityOperation::SetInverted
+                } else {
+                    TrackPolarityOperation::SetNormal
+                };
+                reaper.set_track_ui_polarity(
+                    self.raw(),
+                    operation,
+                    build_track_ui_flags(gang_behavior, grouping_behavior),
+                );
+            }
+        } else {
+            self.set_prop_enabled(TrackAttributeKey::Phase, inverted);
+        }
     }
 
     fn set_prop_enabled(&self, key: TrackAttributeKey, enabled: bool) {
@@ -617,24 +727,39 @@ impl Track {
         mute.unwrap_or(false)
     }
 
-    pub fn mute(&self, gang_behavior: GangBehavior) {
-        self.set_mute(true, gang_behavior);
+    pub fn mute(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
+        self.set_mute(true, gang_behavior, grouping_behavior);
     }
 
-    pub fn unmute(&self, gang_behavior: GangBehavior) {
-        self.set_mute(false, gang_behavior);
+    pub fn unmute(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
+        self.set_mute(false, gang_behavior, grouping_behavior);
     }
 
-    fn set_mute(&self, mute: bool, gang_behavior: GangBehavior) {
+    fn set_mute(
+        &self,
+        mute: bool,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
         if self.project() == Reaper::get().current_project() {
             self.load_and_check_if_necessary_or_complain();
-            let _ = unsafe {
-                Reaper::get().medium_reaper().csurf_on_mute_change_ex(
-                    self.raw(),
-                    mute,
-                    gang_behavior,
-                )
-            };
+            let reaper = Reaper::get().medium_reaper();
+            if reaper.low().pointers().SetTrackUIMute.is_some() {
+                let operation = if mute {
+                    TrackMuteOperation::SetMute
+                } else {
+                    TrackMuteOperation::UnsetMute
+                };
+                unsafe {
+                    reaper.set_track_ui_mute(
+                        self.raw(),
+                        operation,
+                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                    )
+                };
+            } else {
+                unsafe { reaper.csurf_on_mute_change_ex(self.raw(), mute, gang_behavior) };
+            }
         } else {
             // ReaLearn #283
             self.set_prop_enabled(TrackAttributeKey::Mute, mute);
@@ -656,12 +781,12 @@ impl Track {
         solo > 0.0
     }
 
-    pub fn solo(&self, gang_behavior: GangBehavior) {
-        self.set_solo(true, gang_behavior);
+    pub fn solo(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
+        self.set_solo(true, gang_behavior, grouping_behavior);
     }
 
-    pub fn unsolo(&self, gang_behavior: GangBehavior) {
-        self.set_solo(false, gang_behavior);
+    pub fn unsolo(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
+        self.set_solo(false, gang_behavior, grouping_behavior);
     }
 
     pub fn solo_mode(&self) -> SoloMode {
@@ -689,16 +814,31 @@ impl Track {
         }
     }
 
-    fn set_solo(&self, solo: bool, gang_behavior: GangBehavior) {
+    fn set_solo(
+        &self,
+        solo: bool,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
         if self.project() == Reaper::get().current_project() {
             self.load_and_check_if_necessary_or_complain();
-            let _ = unsafe {
-                Reaper::get().medium_reaper().csurf_on_solo_change_ex(
-                    self.raw(),
-                    solo,
-                    gang_behavior,
-                )
-            };
+            let reaper = Reaper::get().medium_reaper();
+            if reaper.low().pointers().SetTrackUIMute.is_some() {
+                let operation = if solo {
+                    TrackSoloOperation::SetSolo
+                } else {
+                    TrackSoloOperation::UnsetSolo
+                };
+                unsafe {
+                    reaper.set_track_ui_solo(
+                        self.raw(),
+                        operation,
+                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                    )
+                };
+            } else {
+                unsafe { reaper.csurf_on_solo_change_ex(self.raw(), solo, gang_behavior) };
+            }
         } else {
             // ReaLearn #283
             self.set_prop_enabled(TrackAttributeKey::Solo, solo);
@@ -1149,4 +1289,24 @@ fn get_show_attribute_key(track_area: TrackArea) -> TrackAttributeKey<'static> {
         Tcp => TrackAttributeKey::ShowInTcp,
         Mcp => TrackAttributeKey::ShowInMixer,
     }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum GroupingBehavior {
+    PreventGrouping,
+    UseGrouping,
+}
+
+fn build_track_ui_flags(
+    gang_behavior: GangBehavior,
+    grouping_behavior: GroupingBehavior,
+) -> BitFlags<SetTrackUiFlags> {
+    let mut flags = BitFlags::empty();
+    if gang_behavior == GangBehavior::DenyGang {
+        flags |= SetTrackUiFlags::PreventSelectionGanging;
+    }
+    if grouping_behavior == GroupingBehavior::PreventGrouping {
+        flags |= SetTrackUiFlags::PreventTrackGrouping;
+    }
+    flags
 }

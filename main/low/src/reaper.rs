@@ -128,6 +128,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(BypassFxAllTracks)).as_ptr()),
                 ),
+                CalcMediaSrcLoudness: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(CalcMediaSrcLoudness)).as_ptr()),
+                ),
                 CalculateNormalization: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(CalculateNormalization)).as_ptr()),
@@ -800,6 +804,10 @@ impl Reaper {
                 GetEnvelopeStateChunk: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetEnvelopeStateChunk)).as_ptr()),
+                ),
+                GetEnvelopeUIState: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(GetEnvelopeUIState)).as_ptr()),
                 ),
                 GetExePath: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetExePath)).as_ptr()),
@@ -1834,6 +1842,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(LICE_SimpleFill)).as_ptr()),
                 ),
+                LICE_ThickFLine: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(LICE_ThickFLine)).as_ptr()),
+                ),
                 LocalizeString: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(LocalizeString)).as_ptr()),
@@ -2312,9 +2324,18 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(PromptForAction)).as_ptr()),
                 ),
+                realloc_cmd_clear: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(realloc_cmd_clear)).as_ptr()),
+                ),
                 realloc_cmd_ptr: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(realloc_cmd_ptr)).as_ptr()),
+                ),
+                realloc_cmd_register_buf: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(realloc_cmd_register_buf)).as_ptr(),
+                    ),
                 ),
                 ReaperGetPitchShiftAPI: std::mem::transmute(
                     plugin_context
@@ -2618,6 +2639,37 @@ impl Reaper {
                 SetTrackStateChunk: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(SetTrackStateChunk)).as_ptr()),
+                ),
+                SetTrackUIInputMonitor: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(SetTrackUIInputMonitor)).as_ptr()),
+                ),
+                SetTrackUIMute: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(SetTrackUIMute)).as_ptr()),
+                ),
+                SetTrackUIPan: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(SetTrackUIPan)).as_ptr()),
+                ),
+                SetTrackUIPolarity: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(SetTrackUIPolarity)).as_ptr()),
+                ),
+                SetTrackUIRecArm: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(SetTrackUIRecArm)).as_ptr()),
+                ),
+                SetTrackUISolo: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(SetTrackUISolo)).as_ptr()),
+                ),
+                SetTrackUIVolume: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(SetTrackUIVolume)).as_ptr()),
+                ),
+                SetTrackUIWidth: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(SetTrackUIWidth)).as_ptr()),
                 ),
                 ShowActionList: std::mem::transmute(
                     plugin_context
@@ -3349,6 +3401,9 @@ impl Reaper {
         if pointers.BypassFxAllTracks.is_some() {
             loaded_count += 1;
         }
+        if pointers.CalcMediaSrcLoudness.is_some() {
+            loaded_count += 1;
+        }
         if pointers.CalculateNormalization.is_some() {
             loaded_count += 1;
         }
@@ -3860,6 +3915,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetEnvelopeStateChunk.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GetEnvelopeUIState.is_some() {
             loaded_count += 1;
         }
         if pointers.GetExePath.is_some() {
@@ -4669,6 +4727,9 @@ impl Reaper {
         if pointers.LICE_SimpleFill.is_some() {
             loaded_count += 1;
         }
+        if pointers.LICE_ThickFLine.is_some() {
+            loaded_count += 1;
+        }
         if pointers.LocalizeString.is_some() {
             loaded_count += 1;
         }
@@ -5041,7 +5102,13 @@ impl Reaper {
         if pointers.PromptForAction.is_some() {
             loaded_count += 1;
         }
+        if pointers.realloc_cmd_clear.is_some() {
+            loaded_count += 1;
+        }
         if pointers.realloc_cmd_ptr.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.realloc_cmd_register_buf.is_some() {
             loaded_count += 1;
         }
         if pointers.ReaperGetPitchShiftAPI.is_some() {
@@ -5273,6 +5340,30 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.SetTrackStateChunk.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUIInputMonitor.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUIMute.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUIPan.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUIPolarity.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUIRecArm.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUISolo.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUIVolume.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SetTrackUIWidth.is_some() {
             loaded_count += 1;
         }
         if pointers.ShowActionList.is_some() {
@@ -6137,6 +6228,21 @@ impl Reaper {
                 stringify!(BypassFxAllTracks)
             ),
             Some(f) => f(bypass),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CalcMediaSrcLoudness(
+        &self,
+        mediasource: *mut root::PCM_source,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.CalcMediaSrcLoudness {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(CalcMediaSrcLoudness)
+            ),
+            Some(f) => f(mediasource),
         }
     }
     #[doc = r" # Safety"]
@@ -8736,6 +8842,21 @@ impl Reaper {
                 stringify!(GetEnvelopeStateChunk)
             ),
             Some(f) => f(env, strNeedBig, strNeedBig_sz, isundoOptional),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetEnvelopeUIState(
+        &self,
+        env: *mut root::TrackEnvelope,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.GetEnvelopeUIState {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetEnvelopeUIState)
+            ),
+            Some(f) => f(env),
         }
     }
     pub fn GetExePath(&self) -> *const ::std::os::raw::c_char {
@@ -12001,7 +12122,7 @@ impl Reaper {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn kbd_getTextFromCmd(
         &self,
-        cmd: root::DWORD,
+        cmd: ::std::os::raw::c_int,
         section: *mut root::KbdSectionInfo,
     ) -> *const ::std::os::raw::c_char {
         match self.pointers.kbd_getTextFromCmd {
@@ -13161,6 +13282,29 @@ impl Reaper {
                 stringify!(LICE_SimpleFill)
             ),
             Some(f) => f(dest, x, y, newcolor, comparemask, keepmask),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn LICE_ThickFLine(
+        &self,
+        dest: *mut root::reaper_functions::LICE_IBitmap,
+        x1: f64,
+        y1: f64,
+        x2: f64,
+        y2: f64,
+        color: root::reaper_functions::LICE_pixel,
+        alpha: f32,
+        mode: ::std::os::raw::c_int,
+        wid: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.LICE_ThickFLine {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(LICE_ThickFLine)
+            ),
+            Some(f) => f(dest, x1, y1, x2, y2, color, alpha, mode, wid),
         }
     }
     #[doc = r" # Safety"]
@@ -15183,6 +15327,15 @@ impl Reaper {
             Some(f) => f(session_mode, init_id, section_id),
         }
     }
+    pub fn realloc_cmd_clear(&self, tok: ::std::os::raw::c_int) {
+        match self.pointers.realloc_cmd_clear {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(realloc_cmd_clear)
+            ),
+            Some(f) => f(tok),
+        }
+    }
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -15198,6 +15351,22 @@ impl Reaper {
                 stringify!(realloc_cmd_ptr)
             ),
             Some(f) => f(ptr, ptr_size, new_size),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn realloc_cmd_register_buf(
+        &self,
+        ptr: *mut *mut ::std::os::raw::c_char,
+        ptr_size: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.realloc_cmd_register_buf {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(realloc_cmd_register_buf)
+            ),
+            Some(f) => f(ptr, ptr_size),
         }
     }
     pub fn ReaperGetPitchShiftAPI(
@@ -16123,14 +16292,14 @@ impl Reaper {
         proj: *mut root::ReaProject,
         regionindex: ::std::os::raw::c_int,
         track: *mut root::MediaTrack,
-        addorremove: ::std::os::raw::c_int,
+        flag: ::std::os::raw::c_int,
     ) {
         match self.pointers.SetRegionRenderMatrix {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetRegionRenderMatrix)
             ),
-            Some(f) => f(proj, regionindex, track, addorremove),
+            Some(f) => f(proj, regionindex, track, flag),
         }
     }
     #[doc = r" # Safety"]
@@ -16427,6 +16596,148 @@ impl Reaper {
                 stringify!(SetTrackStateChunk)
             ),
             Some(f) => f(track, str, isundoOptional),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUIInputMonitor(
+        &self,
+        track: *mut root::MediaTrack,
+        monitor: ::std::os::raw::c_int,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.SetTrackUIInputMonitor {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUIInputMonitor)
+            ),
+            Some(f) => f(track, monitor, igngroupflags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUIMute(
+        &self,
+        track: *mut root::MediaTrack,
+        mute: ::std::os::raw::c_int,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.SetTrackUIMute {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUIMute)
+            ),
+            Some(f) => f(track, mute, igngroupflags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUIPan(
+        &self,
+        track: *mut root::MediaTrack,
+        pan: f64,
+        relative: bool,
+        done: bool,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> f64 {
+        match self.pointers.SetTrackUIPan {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUIPan)
+            ),
+            Some(f) => f(track, pan, relative, done, igngroupflags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUIPolarity(
+        &self,
+        track: *mut root::MediaTrack,
+        polarity: ::std::os::raw::c_int,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.SetTrackUIPolarity {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUIPolarity)
+            ),
+            Some(f) => f(track, polarity, igngroupflags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUIRecArm(
+        &self,
+        track: *mut root::MediaTrack,
+        recarm: ::std::os::raw::c_int,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.SetTrackUIRecArm {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUIRecArm)
+            ),
+            Some(f) => f(track, recarm, igngroupflags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUISolo(
+        &self,
+        track: *mut root::MediaTrack,
+        solo: ::std::os::raw::c_int,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.SetTrackUISolo {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUISolo)
+            ),
+            Some(f) => f(track, solo, igngroupflags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUIVolume(
+        &self,
+        track: *mut root::MediaTrack,
+        volume: f64,
+        relative: bool,
+        done: bool,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> f64 {
+        match self.pointers.SetTrackUIVolume {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUIVolume)
+            ),
+            Some(f) => f(track, volume, relative, done, igngroupflags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetTrackUIWidth(
+        &self,
+        track: *mut root::MediaTrack,
+        width: f64,
+        relative: bool,
+        done: bool,
+        igngroupflags: ::std::os::raw::c_int,
+    ) -> f64 {
+        match self.pointers.SetTrackUIWidth {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SetTrackUIWidth)
+            ),
+            Some(f) => f(track, width, relative, done, igngroupflags),
         }
     }
     #[doc = r" # Safety"]
@@ -16911,15 +17222,15 @@ impl Reaper {
         take: *mut root::MediaItem_Take,
         fx: ::std::os::raw::c_int,
         parmname: *const ::std::os::raw::c_char,
-        bufOut: *mut ::std::os::raw::c_char,
-        bufOut_sz: ::std::os::raw::c_int,
+        bufOutNeedBig: *mut ::std::os::raw::c_char,
+        bufOutNeedBig_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TakeFX_GetNamedConfigParm {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetNamedConfigParm)
             ),
-            Some(f) => f(take, fx, parmname, bufOut, bufOut_sz),
+            Some(f) => f(take, fx, parmname, bufOutNeedBig, bufOutNeedBig_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -18156,15 +18467,15 @@ impl Reaper {
         track: *mut root::MediaTrack,
         fx: ::std::os::raw::c_int,
         parmname: *const ::std::os::raw::c_char,
-        bufOut: *mut ::std::os::raw::c_char,
-        bufOut_sz: ::std::os::raw::c_int,
+        bufOutNeedBig: *mut ::std::os::raw::c_char,
+        bufOutNeedBig_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.TrackFX_GetNamedConfigParm {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetNamedConfigParm)
             ),
-            Some(f) => f(track, fx, parmname, bufOut, bufOut_sz),
+            Some(f) => f(track, fx, parmname, bufOutNeedBig, bufOutNeedBig_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -19313,6 +19624,8 @@ pub struct ReaperFunctionPointers {
     pub AudioAccessorValidateState:
         Option<unsafe extern "C" fn(accessor: *mut root::reaper_functions::AudioAccessor) -> bool>,
     pub BypassFxAllTracks: Option<extern "C" fn(bypass: ::std::os::raw::c_int)>,
+    pub CalcMediaSrcLoudness:
+        Option<unsafe extern "C" fn(mediasource: *mut root::PCM_source) -> ::std::os::raw::c_int>,
     pub CalculateNormalization: Option<
         unsafe extern "C" fn(
             source: *mut root::PCM_source,
@@ -20105,6 +20418,8 @@ pub struct ReaperFunctionPointers {
             isundoOptional: bool,
         ) -> bool,
     >,
+    pub GetEnvelopeUIState:
+        Option<unsafe extern "C" fn(env: *mut root::TrackEnvelope) -> ::std::os::raw::c_int>,
     pub GetExePath: Option<extern "C" fn() -> *const ::std::os::raw::c_char>,
     pub GetExtState: Option<
         unsafe extern "C" fn(
@@ -21194,7 +21509,7 @@ pub struct ReaperFunctionPointers {
     >,
     pub kbd_getTextFromCmd: Option<
         unsafe extern "C" fn(
-            cmd: root::DWORD,
+            cmd: ::std::os::raw::c_int,
             section: *mut root::KbdSectionInfo,
         ) -> *const ::std::os::raw::c_char,
     >,
@@ -21733,6 +22048,19 @@ pub struct ReaperFunctionPointers {
             newcolor: root::reaper_functions::LICE_pixel,
             comparemask: root::reaper_functions::LICE_pixel,
             keepmask: root::reaper_functions::LICE_pixel,
+        ),
+    >,
+    pub LICE_ThickFLine: Option<
+        unsafe extern "C" fn(
+            dest: *mut root::reaper_functions::LICE_IBitmap,
+            x1: f64,
+            y1: f64,
+            x2: f64,
+            y2: f64,
+            color: root::reaper_functions::LICE_pixel,
+            alpha: f32,
+            mode: ::std::os::raw::c_int,
+            wid: ::std::os::raw::c_int,
         ),
     >,
     pub LocalizeString: Option<
@@ -22368,12 +22696,19 @@ pub struct ReaperFunctionPointers {
             section_id: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
+    pub realloc_cmd_clear: Option<extern "C" fn(tok: ::std::os::raw::c_int)>,
     pub realloc_cmd_ptr: Option<
         unsafe extern "C" fn(
             ptr: *mut *mut ::std::os::raw::c_char,
             ptr_size: *mut ::std::os::raw::c_int,
             new_size: ::std::os::raw::c_int,
         ) -> bool,
+    >,
+    pub realloc_cmd_register_buf: Option<
+        unsafe extern "C" fn(
+            ptr: *mut *mut ::std::os::raw::c_char,
+            ptr_size: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
     >,
     pub ReaperGetPitchShiftAPI:
         Option<extern "C" fn(version: ::std::os::raw::c_int) -> *mut root::IReaperPitchShift>,
@@ -22675,7 +23010,7 @@ pub struct ReaperFunctionPointers {
             proj: *mut root::ReaProject,
             regionindex: ::std::os::raw::c_int,
             track: *mut root::MediaTrack,
-            addorremove: ::std::os::raw::c_int,
+            flag: ::std::os::raw::c_int,
         ),
     >,
     pub SetRenderLastError: Option<unsafe extern "C" fn(errorstr: *const ::std::os::raw::c_char)>,
@@ -22791,6 +23126,68 @@ pub struct ReaperFunctionPointers {
             str: *const ::std::os::raw::c_char,
             isundoOptional: bool,
         ) -> bool,
+    >,
+    pub SetTrackUIInputMonitor: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            monitor: ::std::os::raw::c_int,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub SetTrackUIMute: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            mute: ::std::os::raw::c_int,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub SetTrackUIPan: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            pan: f64,
+            relative: bool,
+            done: bool,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> f64,
+    >,
+    pub SetTrackUIPolarity: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            polarity: ::std::os::raw::c_int,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub SetTrackUIRecArm: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            recarm: ::std::os::raw::c_int,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub SetTrackUISolo: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            solo: ::std::os::raw::c_int,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub SetTrackUIVolume: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            volume: f64,
+            relative: bool,
+            done: bool,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> f64,
+    >,
+    pub SetTrackUIWidth: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            width: f64,
+            relative: bool,
+            done: bool,
+            igngroupflags: ::std::os::raw::c_int,
+        ) -> f64,
     >,
     pub ShowActionList:
         Option<unsafe extern "C" fn(caller: *mut root::KbdSectionInfo, callerWnd: root::HWND)>,
@@ -22955,8 +23352,8 @@ pub struct ReaperFunctionPointers {
             take: *mut root::MediaItem_Take,
             fx: ::std::os::raw::c_int,
             parmname: *const ::std::os::raw::c_char,
-            bufOut: *mut ::std::os::raw::c_char,
-            bufOut_sz: ::std::os::raw::c_int,
+            bufOutNeedBig: *mut ::std::os::raw::c_char,
+            bufOutNeedBig_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TakeFX_GetNumParams: Option<
@@ -23412,8 +23809,8 @@ pub struct ReaperFunctionPointers {
             track: *mut root::MediaTrack,
             fx: ::std::os::raw::c_int,
             parmname: *const ::std::os::raw::c_char,
-            bufOut: *mut ::std::os::raw::c_char,
-            bufOut_sz: ::std::os::raw::c_int,
+            bufOutNeedBig: *mut ::std::os::raw::c_char,
+            bufOutNeedBig_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub TrackFX_GetNumParams: Option<
@@ -23776,5 +24173,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 834u32;
+    pub(crate) const TOTAL_COUNT: u32 = 847u32;
 }

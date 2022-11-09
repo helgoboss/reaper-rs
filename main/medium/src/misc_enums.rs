@@ -224,6 +224,24 @@ impl RecordArmMode {
     }
 }
 
+/// Defines whether some adjustment is done or not.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum Progress {
+    NotDone,
+    Done,
+}
+
+impl Progress {
+    /// Converts this value to a bool as expected by the low-level API.
+    pub fn to_raw(self) -> bool {
+        use Progress::*;
+        match self {
+            NotDone => false,
+            Done => true,
+        }
+    }
+}
+
 /// Defines whether to ignore measures or from which measure to count.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum MeasureMode {
@@ -838,6 +856,8 @@ pub enum InputMonitoringMode {
     /// Monitoring happens always.
     Normal,
     /// Monitoring only happens when playing (tape style).
+    ///
+    /// Also called auto-monitoring.
     NotWhenPlaying,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
@@ -864,6 +884,104 @@ impl InputMonitoringMode {
             Normal => 1,
             NotWhenPlaying => 2,
             Unknown(Hidden(x)) => x,
+        }
+    }
+}
+
+/// Defines how to adjust track mute state.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TrackMuteOperation {
+    /// Toggles the current state.
+    Toggle,
+    /// Unsets the mute flag.
+    UnsetMute,
+    /// Sets the mute flag.
+    SetMute,
+}
+
+impl TrackMuteOperation {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TrackMuteOperation::*;
+        match self {
+            Toggle => -1,
+            UnsetMute => 0,
+            SetMute => 1,
+        }
+    }
+}
+
+/// Defines how to adjust track polarity (phase).
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TrackPolarityOperation {
+    /// Toggles the current state.
+    Toggle,
+    /// Sets the phase to normal.
+    SetNormal,
+    /// Sets the phase to inverted.
+    SetInverted,
+}
+
+impl TrackPolarityOperation {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TrackPolarityOperation::*;
+        match self {
+            Toggle => -1,
+            SetNormal => 0,
+            SetInverted => 1,
+        }
+    }
+}
+
+/// Defines how to adjust track arm state.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TrackRecArmOperation {
+    /// Toggles the current state.
+    Toggle,
+    /// Disarms the track.
+    UnsetRecArm,
+    /// Arms the track.
+    SetRecArm,
+}
+
+impl TrackRecArmOperation {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TrackRecArmOperation::*;
+        match self {
+            Toggle => -1,
+            UnsetRecArm => 0,
+            SetRecArm => 1,
+        }
+    }
+}
+
+/// Defines which solo mode to set.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TrackSoloOperation {
+    /// Toggles the current state.
+    Toggle,
+    /// Unsets solo.
+    UnsetSolo,
+    /// Sets solo (default mode).
+    SetSolo,
+    /// Sets solo (non-solo-in-place).
+    SetSoloIgnoreRouting,
+    /// Sets solo-in-place.
+    SetSoloInPlace,
+}
+
+impl TrackSoloOperation {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TrackSoloOperation::*;
+        match self {
+            Toggle => -1,
+            UnsetSolo => 0,
+            SetSolo => 1,
+            SetSoloIgnoreRouting => 2,
+            SetSoloInPlace => 4,
         }
     }
 }

@@ -16,15 +16,17 @@ use crate::{
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
     PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
+    PositionInSeconds, Progress, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
     ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
     ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
     ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SoloMode, StuffMidiMessageTarget,
-    TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TransferBehavior,
-    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
+    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackMuteOperation, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -4725,6 +4727,8 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Sets the input monitoring mode of the given track.
     ///
+    /// Returns the new value.
+    ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
@@ -4733,16 +4737,41 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         mode: InputMonitoringMode,
         gang_behavior: GangBehavior,
-    ) -> i32
+    ) -> InputMonitoringMode
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        self.low.CSurf_OnInputMonitorChangeEx(
+        let raw = self.low.CSurf_OnInputMonitorChangeEx(
             track.as_ptr(),
             mode.to_raw(),
             gang_behavior == GangBehavior::AllowGang,
-        )
+        );
+        InputMonitoringMode::from_raw(raw)
+    }
+
+    /// Sets the input monitoring mode of the given track.
+    ///
+    /// Has fewer side effects than [`Reaper::csurf_on_input_monitoring_change_ex`] and allows
+    /// more fine-grained control of track grouping behavior.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_input_monitor(
+        &self,
+        track: MediaTrack,
+        mode: InputMonitoringMode,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> InputMonitoringMode
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self
+            .low
+            .SetTrackUIInputMonitor(track.as_ptr(), mode.to_raw(), flags.bits() as _);
+        InputMonitoringMode::from_raw(raw)
     }
 
     /// Scrolls the mixer so that the given track is the leftmost visible track.
@@ -5130,7 +5159,7 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Sets the given track's volume, also supports relative changes and gang.
     ///
-    /// Returns the value that has actually been set. I think this only deviates if 0.0 is sent.
+    /// Returns the new value. I think this only deviates if 0.0 is sent.
     /// Then it returns a slightly higher value - the one which actually corresponds to -150 dB.
     ///
     /// # Safety
@@ -5151,6 +5180,38 @@ impl<UsageScope> Reaper<UsageScope> {
             value_change.value(),
             value_change.is_relative(),
             gang_behavior == GangBehavior::AllowGang,
+        );
+        ReaperVolumeValue::new(raw)
+    }
+
+    /// Sets the given track's volume, also supports relative changes and gang.
+    ///
+    /// Returns the new value. I think this only deviates if 0.0 is sent.
+    /// Then it returns a slightly higher value - the one which actually corresponds to -150 dB.
+    ///
+    /// Has fewer side effects than [`Reaper::csurf_on_volume_change_ex`] and allows more
+    /// fine-grained control of track grouping behavior.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_volume(
+        &self,
+        track: MediaTrack,
+        value_change: ValueChange<ReaperVolumeValue>,
+        progress: Progress,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> ReaperVolumeValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.SetTrackUIVolume(
+            track.as_ptr(),
+            value_change.value(),
+            value_change.is_relative(),
+            progress.to_raw(),
+            flags.bits() as _,
         );
         ReaperVolumeValue::new(raw)
     }
@@ -5177,7 +5238,7 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Sets the given track's pan. Also supports relative changes and gang.
     ///
-    /// Returns the value that has actually been set.
+    /// Returns the new value.
     ///
     /// # Safety
     ///
@@ -5201,9 +5262,61 @@ impl<UsageScope> Reaper<UsageScope> {
         ReaperPanValue::new(raw)
     }
 
+    /// Sets the given track's pan. Also supports relative changes and gang.
+    ///
+    /// Returns the new value.
+    ///
+    /// Has fewer side effects than [`Reaper::csurf_on_pan_change_ex`] and allows more
+    /// fine-grained control of track grouping behavior.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_pan(
+        &self,
+        track: MediaTrack,
+        value_change: ValueChange<ReaperPanValue>,
+        progress: Progress,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> ReaperPanValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.SetTrackUIPan(
+            track.as_ptr(),
+            value_change.value(),
+            value_change.is_relative(),
+            progress.to_raw(),
+            flags.bits() as _,
+        );
+        ReaperPanValue::new(raw)
+    }
+
+    /// Sets the given track's polarity (phase).
+    ///
+    /// Returns the new value.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_polarity(
+        &self,
+        track: MediaTrack,
+        value: TrackPolarityOperation,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .SetTrackUIPolarity(track.as_ptr(), value.to_raw(), flags.bits() as _)
+    }
+
     /// Sets the given track's width. Also supports relative changes and gang.
     ///
-    /// Returns the value that has actually been set.
+    /// Returns the new value.
     ///
     /// # Safety
     ///
@@ -5223,6 +5336,37 @@ impl<UsageScope> Reaper<UsageScope> {
             value_change.value(),
             value_change.is_relative(),
             gang_behavior == GangBehavior::AllowGang,
+        );
+        ReaperWidthValue::new(raw)
+    }
+
+    /// Sets the given track's width. Also supports relative changes and gang.
+    ///
+    /// Returns the new value.
+    ///
+    /// Has fewer side effects than [`Reaper::csurf_on_width_change_ex`] and allows more
+    /// fine-grained control of track grouping behavior.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_width(
+        &self,
+        track: MediaTrack,
+        value_change: ValueChange<ReaperWidthValue>,
+        progress: Progress,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> ReaperWidthValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.SetTrackUIWidth(
+            track.as_ptr(),
+            value_change.value(),
+            value_change.is_relative(),
+            progress.to_raw(),
+            flags.bits() as _,
         );
         ReaperWidthValue::new(raw)
     }
@@ -5725,9 +5869,9 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(())
     }
 
-    /// Arms or unarms the given track for recording.
+    /// Arms or disarms the given track for recording.
     ///
-    /// Seems to return `true` if it was armed and `false` if not.
+    /// Returns the new value.
     ///
     /// # Safety
     ///
@@ -5747,6 +5891,30 @@ impl<UsageScope> Reaper<UsageScope> {
             mode.to_raw(),
             gang_behavior == GangBehavior::AllowGang,
         )
+    }
+
+    /// Arms or disarms the given track for recording.
+    ///
+    /// Returns the new value.
+    ///
+    /// Has fewer side effects than [`Reaper::csurf_on_rec_arm_change_ex`] and allows more
+    /// fine-grained control of track grouping behavior.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_rec_arm(
+        &self,
+        track: MediaTrack,
+        value: TrackRecArmOperation,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .SetTrackUIRecArm(track.as_ptr(), value.to_raw(), flags.bits() as _)
     }
 
     /// Mutes or unmutes the given track.
@@ -5773,6 +5941,30 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
+    /// Mutes or unmutes the given track.
+    ///
+    /// Returns the new value.
+    ///
+    /// Has fewer side effects than [`Reaper::csurf_on_mute_change_ex`] and allows more
+    /// fine-grained control of track grouping behavior.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_mute(
+        &self,
+        track: MediaTrack,
+        mute: TrackMuteOperation,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .SetTrackUIMute(track.as_ptr(), mute.to_raw(), flags.bits() as _)
+    }
+
     /// Soloes or unsoloes the given track.
     ///
     /// Seems to return the solo state that has been set.
@@ -5795,6 +5987,30 @@ impl<UsageScope> Reaper<UsageScope> {
             if solo { 1 } else { 0 },
             gang_behavior == GangBehavior::AllowGang,
         )
+    }
+
+    /// Soloes or unsoloes the given track.
+    ///
+    /// Returns the new value.
+    ///
+    /// Has fewer side effects than [`Reaper::csurf_on_solo_change_ex`] and allows more
+    /// fine-grained control of track grouping behavior.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_ui_solo(
+        &self,
+        track: MediaTrack,
+        value: TrackSoloOperation,
+        flags: BitFlags<SetTrackUiFlags>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .SetTrackUISolo(track.as_ptr(), value.to_raw(), flags.bits() as _)
     }
 
     /// Sets the RPPXML state of the given track.
@@ -5920,7 +6136,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let raw = self.low.SetMasterTrackVisibility(areas.bits() as i32);
+        let raw = self.low.SetMasterTrackVisibility(areas.bits() as _);
         BitFlags::from_bits_truncate(raw as u32)
     }
 
@@ -5943,7 +6159,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// When choosing the send index, keep in mind that the hardware output sends (if any) come
     /// first.
     ///
-    /// Returns the value that has actually been set. If the send doesn't exist, returns 0.0 (which
+    /// Returns the new value. If the send doesn't exist, returns 0.0 (which
     /// can also be a valid value that has been set, so that's not very useful).
     ///
     /// # Safety
@@ -5973,7 +6189,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// When choosing the send index, keep in mind that the hardware output sends (if any) come
     /// first.
     ///
-    /// Returns the value that has actually been set.
+    /// Returns the new value.
     ///
     /// # Safety
     ///
