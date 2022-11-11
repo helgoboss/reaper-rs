@@ -5700,6 +5700,19 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr)
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if passed item is invalid.
+    pub unsafe fn get_media_item_track(&self, item: MediaItem) -> ReaperFunctionResult<MediaTrack>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ptr = self.low.GetMediaItemTrack(item.as_ptr());
+        MediaTrack::new(ptr).ok_or(ReaperFunctionError::new(
+            "Can not find item track. Probably, item is invalid.",
+        ))
+    }
+
     /// Returns the active take in this item.
     ///
     /// # Safety
