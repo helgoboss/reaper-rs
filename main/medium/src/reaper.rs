@@ -1548,12 +1548,12 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Converts the given quarter-note position to measure index
-    /// and returnes also measure bounds in quarter notes.
+    /// and returns measure bounds in quarter notes.
     ///
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn time_map_qn_to_measure(
+    pub fn time_map_qn_to_measures(
         &self,
         project: ProjectContext,
         qn: PositionInQuarterNotes,
@@ -1572,7 +1572,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid project.
     ///
     /// [`time_map_qn_to_measure()`]: #method.time_map_qn_to_measure
-    pub unsafe fn time_map_qn_to_measure_unchecked(
+    pub unsafe fn time_map_qn_to_measures_unchecked(
         &self,
         project: ProjectContext,
         qn: PositionInQuarterNotes,
@@ -7021,8 +7021,8 @@ pub struct TimeMapGetMeasureInfoResult {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct TimeMapQNToMeasuresResult {
-    /// Measue index in project.
+pub struct TimeMapQnToMeasuresResult {
+    /// Measure index in project.
     pub measure_index: i32,
     /// Start position of the measure in quarter notes.
     pub start_qn: PositionInQuarterNotes,
