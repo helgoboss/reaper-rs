@@ -1046,20 +1046,12 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
 
     fn PeaksBuild_Begin(&mut self) -> i32 {
         let opened = self.delegate.peaks_build_begin();
-        if opened {
-            1
-        } else {
-            0
-        }
+        i32::from(opened)
     }
 
     fn PeaksBuild_Run(&mut self) -> i32 {
         let more = self.delegate.peaks_build_run();
-        if more {
-            1
-        } else {
-            0
-        }
+        i32::from(more)
     }
 
     fn PeaksBuild_Finish(&mut self) {

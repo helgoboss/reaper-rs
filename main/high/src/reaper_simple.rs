@@ -365,12 +365,12 @@ impl Reaper {
     }
 
     pub fn with_smooth_seek<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
-        self.with_temporarily_modified_preference("smoothseek", |_| if on { 1 } else { 0 }, f)
+        self.with_temporarily_modified_preference("smoothseek", |_| i32::from(on), f)
             .unwrap()
     }
 
     pub fn with_solo_in_place<R>(&self, on: bool, f: impl FnOnce() -> R) -> R {
-        self.with_temporarily_modified_preference("soloip", |_| if on { 1 } else { 0 }, f)
+        self.with_temporarily_modified_preference("soloip", |_| i32::from(on), f)
             .unwrap()
     }
 

@@ -363,9 +363,5 @@ impl<'a> ControlSurfaceEvent<'a> {
 }
 
 fn to_int(value: bool) -> i32 {
-    if value {
-        1
-    } else {
-        0
-    }
+    i32::from(value)
 }

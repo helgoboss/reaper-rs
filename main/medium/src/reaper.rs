@@ -1186,8 +1186,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        self.low
-            .GetSetRepeatEx(project.to_raw(), if repeat { 1 } else { 0 });
+        self.low.GetSetRepeatEx(project.to_raw(), i32::from(repeat));
     }
 
     /// Grants temporary access to the data of the given marker/region.
@@ -5936,7 +5935,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         self.low.CSurf_OnMuteChangeEx(
             track.as_ptr(),
-            if mute { 1 } else { 0 },
+            i32::from(mute),
             gang_behavior == GangBehavior::AllowGang,
         )
     }
@@ -5984,7 +5983,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         self.low.CSurf_OnSoloChangeEx(
             track.as_ptr(),
-            if solo { 1 } else { 0 },
+            i32::from(solo),
             gang_behavior == GangBehavior::AllowGang,
         )
     }
