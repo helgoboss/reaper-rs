@@ -7,29 +7,30 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
-    OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInPpq,
-    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
-    SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
-    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
-    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, CcMessage, ChunkCacheHint,
+    CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GenericMessage,
+    GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode,
+    InsertMediaFlag, InsertMediaMode, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem,
+    MediaItemTake, MediaTrack, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
+    NotificationBehavior, OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode,
+    ParamId, PcmSource, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionInBeats, PositionInPpq, PositionInQuarterNotes, PositionInSeconds, Progress,
+    ProjectContext, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
+    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
+    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode,
+    SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode, SourceMidiEvent,
+    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackMuteOperation, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
-use helgoboss_midi::ShortMessage;
+use helgoboss_midi::{ShortMessage, U4, U7};
 use reaper_low::raw::GUID;
 
 use crate::util::{
@@ -41,6 +42,8 @@ use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::num::NonZeroU32;
 use std::path::{Path, PathBuf};
+
+const MAX_MIDI_MESSAGE_SIZE: usize = 2;
 
 /// Represents a privilege to execute functions which are safe to execute from any thread.
 pub trait AnyThread: private::Sealed {}
@@ -5991,6 +5994,96 @@ impl<UsageScope> Reaper<UsageScope> {
         match status {
             true => Some(events),
             false => None,
+        }
+    }
+
+    pub unsafe fn midi_get_cc(
+        &self,
+        take: MediaItemTake,
+        cc_index: u32,
+    ) -> Option<SourceMidiEvent<CcMessage>> {
+        let (mut selected, mut muted) = (MaybeUninit::new(false), MaybeUninit::new(false));
+        let mut ppqpos = MaybeUninit::new(0.0);
+        let (mut chanmsg, mut chan, mut msg2, mut msg3) = (
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+        );
+
+        let result = self.low.MIDI_GetCC(
+            take.as_ptr(),
+            cc_index as i32,
+            selected.as_mut_ptr(),
+            muted.as_mut_ptr(),
+            ppqpos.as_mut_ptr(),
+            chanmsg.as_mut_ptr(),
+            chan.as_mut_ptr(),
+            msg2.as_mut_ptr(),
+            msg3.as_mut_ptr(),
+        );
+        match result {
+            false => None,
+            true => Some(SourceMidiEvent::new(
+                PositionInPpq(ppqpos.assume_init()),
+                selected.assume_init(),
+                muted.assume_init(),
+                CcMessage {
+                    channel_message: U4::new(chanmsg.assume_init() as u8),
+                    channel: U4::new(chan.assume_init() as u8),
+                    cc_num: U7::new(msg2.assume_init() as u8),
+                    value: U7::new(msg3.assume_init() as u8),
+                },
+            )),
+        }
+    }
+
+    pub unsafe fn midi_get_evt(
+        &self,
+        take: MediaItemTake,
+        evt_index: u32,
+    ) -> Option<SourceMidiEvent<GenericMessage>> {
+        let (mut selected, mut muted) = (MaybeUninit::new(false), MaybeUninit::new(false));
+        let mut ppqpos = MaybeUninit::new(0.0);
+        let mut msg_size = MaybeUninit::new(5);
+        let (mut msg, result) = with_buffer(2, |msg, _| {
+            self.low.MIDI_GetEvt(
+                take.as_ptr(),
+                evt_index as i32,
+                selected.as_mut_ptr(),
+                muted.as_mut_ptr(),
+                ppqpos.as_mut_ptr(),
+                msg,
+                msg_size.as_mut_ptr(),
+            )
+        });
+        match result {
+            false => None,
+            true => {
+                let m_size = msg_size.assume_init() as u32;
+                if m_size > msg.len() as u32 {
+                    (msg, _) = with_buffer(m_size, |msg, _| {
+                        self.low.MIDI_GetEvt(
+                            take.as_ptr(),
+                            evt_index as i32,
+                            selected.as_mut_ptr(),
+                            muted.as_mut_ptr(),
+                            ppqpos.as_mut_ptr(),
+                            msg,
+                            msg_size.as_mut_ptr(),
+                        )
+                    });
+                }
+                Some(SourceMidiEvent::new(
+                    PositionInPpq(ppqpos.assume_init()),
+                    selected.assume_init(),
+                    muted.assume_init(),
+                    GenericMessage {
+                        size: m_size as u32,
+                        message: msg,
+                    },
+                ))
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 //! This module defines various newtypes in order to achieve more type safety.
-use crate::{CcShape, ReaperStr, ReaperStringArg, TryFromGreaterError};
+use crate::{ReaperStr, ReaperStringArg, TryFromGreaterError};
 use derive_more::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -269,14 +269,14 @@ impl ResampleMode {
     }
 }
 
-#[derive(Clone, PartialEq, PartialOrd, Debug, Default)]
-pub struct SourceMidiEvent {
-    position_in_ppq: PositionInPpq,
-    is_selected: bool,
-    is_muted: bool,
-    cc_shape: CcShape,
-    buf: Vec<u8>,
-}
+// #[derive(Clone, PartialEq, PartialOrd, Debug, Default)]
+// pub struct SourceMidiEvent {
+//     position_in_ppq: PositionInPpq,
+//     is_selected: bool,
+//     is_muted: bool,
+//     cc_shape: CcShapeKind,
+//     buf: Vec<u8>,
+// }
 // impl Display for SourceMidiEvent{
 //     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 

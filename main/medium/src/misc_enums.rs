@@ -1589,7 +1589,7 @@ impl InsertMediaMode {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
-pub enum CcShape {
+pub enum CcShapeKind {
     #[default]
     Square = 0,
     Linear = 16,
