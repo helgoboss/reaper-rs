@@ -5975,6 +5975,25 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
+    pub unsafe fn midi_get_all_events_raw(
+        &self,
+        take: MediaItemTake,
+        max_size: u32,
+    ) -> Option<Vec<u8>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let (events, status) = with_buffer(max_size, |buffer, size| {
+            let mut size = MaybeUninit::new(size);
+            self.low
+                .MIDI_GetAllEvts(take.as_ptr(), buffer, size.as_mut_ptr())
+        });
+        match status {
+            true => Some(events),
+            false => None,
+        }
+    }
+
     /// Selects exactly one track and deselects all others.
     ///
     /// If `None` is passed, deselects all tracks.

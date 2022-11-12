@@ -120,6 +120,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         unsolo_track(),
         generate_guid(),
         main_section_functions(),
+        midi_functions(),
         register_and_unregister_action(),
         register_and_unregister_toggle_action(),
     ]
@@ -139,7 +140,6 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         set_project_play_rate(),
         get_project_tempo(),
         set_project_tempo(),
-        track_midi_functions(),
         swell(),
     ]
     .into_iter();
@@ -3578,7 +3578,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
     )
 }
 
-fn track_midi_functions() -> TestStep {
+fn midi_functions() -> TestStep {
     step(AllVersions, "Test MIDI functions on track.", |_, _| {
         let reaper = Reaper::get();
         let project = reaper.current_project();
@@ -3621,16 +3621,16 @@ fn track_midi_functions() -> TestStep {
                     .get_track_midi_note_name_ex(project.context(), track.raw(), 60, 0)
                     .ok_or("should be set")?
                     .to_str(),
-                "test name ahh"
+                "test name"
             );
         }
-        assert_eq!("ahhh!", "Not!");
 
         project.remove_track(&track);
 
         Ok(())
     })
 }
+
 
 fn get_track(index: u32) -> Result<Track, &'static str> {
     Reaper::get()

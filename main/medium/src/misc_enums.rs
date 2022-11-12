@@ -5,6 +5,7 @@ use crate::{
 };
 
 use crate::util::concat_reaper_strs;
+use derive_more::Display;
 use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
@@ -1585,4 +1586,15 @@ impl InsertMediaMode {
         };
         bits as i32
     }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+pub enum CcShape {
+    #[default]
+    Square = 0,
+    Linear = 16,
+    SlowStartEnd = 32,
+    FastStart = 16 | 32,
+    FastEnd = 64,
+    Beizer = 16 | 64,
 }
