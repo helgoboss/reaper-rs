@@ -271,7 +271,7 @@ impl ResampleMode {
 
 #[derive(Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct SourceMidiEvent {
-    position_in_ppq: PositionInPPQ,
+    position_in_ppq: PositionInPpq,
     is_selected: bool,
     is_muted: bool,
     cc_shape: CcShape,
