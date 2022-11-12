@@ -15,18 +15,18 @@ use crate::{
     MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackPolarityOperation, TrackRecArmOperation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
-    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInPpq,
+    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -1694,6 +1694,116 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
         PositionInQuarterNotes::new(qn)
+    }
+
+    /// Returns the MIDI tick (PPQ) position corresponding to the start of the measure.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_start_of_measure(
+        &self,
+        take: MediaItemTake,
+        ppq: PositionInPpq,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPos_StartOfMeasure(take.as_ptr(), ppq.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Returns the MIDI tick (ppq) position corresponding to the start of the measure.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_end_of_measure(
+        &self,
+        take: MediaItemTake,
+        ppq: PositionInPpq,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPos_EndOfMeasure(take.as_ptr(), ppq.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Converts the given ppq in take to a project quarter-note position.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_proj_qn_from_ppq_pos(
+        &self,
+        take: MediaItemTake,
+        ppqpos: PositionInPpq,
+    ) -> PositionInQuarterNotes
+    where
+        UsageScope: AnyThread,
+    {
+        let qn = self.low.MIDI_GetProjQNFromPPQPos(take.as_ptr(), ppqpos.0);
+        PositionInQuarterNotes::new(qn)
+    }
+
+    /// Converts the given project quarter-note position to take PPQ.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_from_proj_qn(
+        &self,
+        take: MediaItemTake,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Converts the given ppq in take to a seconds from the project start.
+    ///
+    /// Time is counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_proj_time_from_ppq_pos(
+        &self,
+        take: MediaItemTake,
+        ppqpos: PositionInPpq,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        let seconds = self.low.MIDI_GetProjTimeFromPPQPos(take.as_ptr(), ppqpos.0);
+        PositionInSeconds::new(seconds)
+    }
+
+    /// Converts the given project time in seconds to the take PPQ
+    ///
+    /// Time is counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_from_proj_time(
+        &self,
+        take: MediaItemTake,
+        time: PositionInSeconds,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPosFromProjTime(take.as_ptr(), time.0);
+        PositionInPpq::new(ppq)
     }
 
     /// Gets the arrange view start/end time for the given screen coordinates.
