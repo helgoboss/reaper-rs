@@ -1,122 +1,117 @@
-// use crate::{CcShapeKind, MidiFrameOffset, PositionInPpq};
+use std::vec::IntoIter;
 
-// #[derive(Debug, Clone)]
-// pub struct MidiMessage {
-//     size: u32,
-//     bytes: Box<[u8]>,
-// }
-// impl MidiMessage {
-//     pub fn size(&self) -> u32 {
-//         self.size
-//     }
-//     pub fn get(self) -> Box<[u8]> {
-//         self.bytes
-//     }
-//     pub fn set(&mut self, bytes: Box<[u8]>) {
-//         self.bytes = bytes;
-//     }
-// }
+use helgoboss_midi::U7;
 
-// pub struct EnumSourceMidiEvent {
-//     pub message: MidiMessage,
-//     pub offset: MidiFrameOffset
-// }
-// impl EnumSourceMidiEvent{
-//     pub fn new(message:MidiMessage, offset:MidiFrameOffset)->Self{
-//         Self { message, offset }
-//     }
-// }
-
-// pub enum SourceMidiEvent{
-//     Cc(SourceCcEvent),
-//     NoteOn(SourceNoteOnEvent),
-
-// }
-
-use helgoboss_midi::{U4, U7};
-
-use crate::PositionInPpq;
+use crate::{CcShapeKind, PositionInPpq};
 
 #[derive(Debug)]
-pub struct SourceMidiEvent<T> {
+pub struct SourceMidiEvent {
     position_in_ppq: PositionInPpq,
     is_selected: bool,
     is_muted: bool,
-    event: T,
+    cc_shape_kind: CcShapeKind,
+    message: Vec<U7>,
 }
-impl<T> SourceMidiEvent<T> {
-    pub fn new(position_in_ppq: PositionInPpq, selected: bool, muted: bool, event: T) -> Self {
+impl SourceMidiEvent {
+    pub fn new(
+        position_in_ppq: PositionInPpq,
+        is_selected: bool,
+        is_muted: bool,
+        cc_shape_kind: CcShapeKind,
+        message: Vec<U7>,
+    ) -> Self {
         Self {
             position_in_ppq,
-            is_selected: selected,
-            is_muted: muted,
-            event,
+            is_selected,
+            is_muted,
+            cc_shape_kind,
+            message,
         }
+    }
+    pub fn get_position(&self) -> PositionInPpq {
+        self.position_in_ppq
+    }
+    pub fn set_position(&mut self, position: PositionInPpq) {
+        self.position_in_ppq = position;
+    }
+    pub fn get_selected(&self) -> bool {
+        self.is_selected
+    }
+    pub fn set_selected(&mut self, selected: bool) {
+        self.is_selected = selected;
+    }
+    pub fn get_muted(&self) -> bool {
+        self.is_muted
+    }
+    pub fn set_muted(&mut self, muted: bool) {
+        self.is_muted = muted;
+    }
+    pub fn get_cc_shape_kind(&self) -> CcShapeKind {
+        self.cc_shape_kind
+    }
+    pub fn set_cc_shape_kind(&mut self, cc_shape_kind: CcShapeKind) {
+        self.cc_shape_kind = cc_shape_kind;
+    }
+    pub fn get_message(&self) -> &Vec<U7> {
+        &self.message
+    }
+    pub fn get_message_mut(&mut self) -> &mut Vec<U7> {
+        &mut self.message
+    }
+    pub fn set_message(&mut self, message: Vec<U7>) {
+        self.message = message;
     }
 }
 
-#[derive(Debug)]
-pub struct GenericMessage{
-    pub size:u32,
-    pub message: Vec<u8>
+pub struct SourceMidiEventIterator {
+    buf: IntoIter<u8>,
+    current_ppq: u32,
 }
+impl SourceMidiEventIterator {
+    pub(crate) fn new(buf: Vec<u8>) -> Self {
+        Self {
+            buf: buf.into_iter(),
+            current_ppq: 0,
+        }
+    }
 
-#[derive(Debug)]
-pub struct CcMessage {
-    pub channel_message: U4,
-    pub channel: U4,
-    pub cc_num: U7,
-    pub value: U7,
+    fn next_4(&mut self) -> Option<[u8; 4]> {
+        match (
+            self.buf.next(),
+            self.buf.next(),
+            self.buf.next(),
+            self.buf.next(),
+        ) {
+            (Some(a), Some(b), Some(c), Some(d)) => Some([a, b, c, d]),
+            _ => None,
+        }
+    }
 }
-// impl SourceMidiEvent_bck {
-//     pub fn get_pos_in_ppq(&self) -> PositionInPpq {
-//         self.position_in_ppq
-//     }
-//     pub fn set_pos_in_ppq(&mut self, position: PositionInPpq) {
-//         self.position_in_ppq = position;
-//     }
-//     pub fn is_selected(&self) -> bool {
-//         self.is_selected
-//     }
-//     pub fn set_selected(&mut self, selected: bool) {
-//         self.is_selected = selected;
-//     }
-//     pub fn is_muted(&self) -> bool {
-//         self.is_muted
-//     }
-//     pub fn set_muted(&mut self, muted: bool) {
-//         self.is_muted = muted;
-//     }
-//     pub fn get_message(self) -> MidiMessage {
-//         self.message
-//     }
-//     pub fn set_message(&mut self, message: MidiMessage) {
-//         self.message = message
-//     }
-//     pub fn get_cc_shape(self) -> CcShape {
-//         self.cc_shape
-//     }
-//     pub fn set_cc_shape(&mut self, cc_shape: CcShape) {
-//         self.cc_shape = cc_shape;
-//     }
-// }
+impl Iterator for SourceMidiEventIterator {
+    type Item = SourceMidiEvent;
 
-// pub struct CcShape {
-//     kind: CcShapeKind,
-//     tension: Option<f32>,
-// }
-// impl CcShape {
-//     pub fn get_kind(&self) -> CcShapeKind {
-//         self.kind
-//     }
-//     pub fn set_kind(&mut self, kind: CcShapeKind) {
-//         self.kind = kind;
-//     }
-//     pub fn get_tension(&self) -> Option<f32> {
-//         self.tension
-//     }
-//     pub fn set_tension(&mut self, tension: Option<f32>) {
-//         self.tension = tension;
-//     }
-//     // pub fn from_events(events:)
-// }
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = match self.next_4() {
+            Some(value) => value,
+            None => return None,
+        };
+        let offset = u32::from_le_bytes(result);
+        let flag = self
+            .buf
+            .next()
+            .expect("unexpectetly ended. Should be flag.");
+        let length = u32::from_le_bytes(self.next_4().expect("should take length"));
+        if length == 0 {
+            return None;
+        }
+        self.current_ppq += offset;
+        let buf = self.buf.by_ref().take(length as usize);
+        Some(SourceMidiEvent {
+            position_in_ppq: PositionInPpq::new(self.current_ppq as f64),
+            cc_shape_kind: CcShapeKind::from_raw(flag & 0b11110000),
+            is_selected: (flag & 1) != 0,
+            is_muted: (flag & 2) != 0,
+            message: Vec::from_iter(buf.map(|byte| U7::new(byte))),
+        })
+    }
+}

@@ -1591,10 +1591,34 @@ impl InsertMediaMode {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
 pub enum CcShapeKind {
     #[default]
-    Square = 0,
-    Linear = 16,
-    SlowStartEnd = 32,
-    FastStart = 16 | 32,
-    FastEnd = 64,
-    Beizer = 16 | 64,
+    Square,
+    Linear,
+    SlowStartEnd,
+    FastStart,
+    FastEnd,
+    Beizer,
+}
+impl CcShapeKind {
+    pub fn from_raw(value: u8) -> Self {
+        match value {
+            v if v == 0 => Self::Square,
+            v if v == 16 => Self::Linear,
+            v if v == 32 => Self::SlowStartEnd,
+            v if v == 16 | 32 => Self::FastStart,
+            v if v == 64 => Self::FastEnd,
+            v if v == 16 | 64 => Self::Beizer,
+            _ => panic!("not a cc shape: {:?}", value),
+        }
+    }
+
+    pub fn to_raw(&self) -> u8 {
+        match self {
+            Self::Square => 0,
+            Self::Linear => 16,
+            Self::SlowStartEnd => 32,
+            Self::FastStart => 16 | 32,
+            Self::FastEnd => 64,
+            Self::Beizer => 16 | 64,
+        }
+    }
 }
