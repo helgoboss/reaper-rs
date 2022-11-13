@@ -1,7 +1,5 @@
 use std::vec::IntoIter;
 
-use helgoboss_midi::U7;
-
 use crate::{CcShapeKind, PositionInPpq};
 
 #[derive(Debug)]
@@ -10,7 +8,7 @@ pub struct SourceMidiEvent {
     is_selected: bool,
     is_muted: bool,
     cc_shape_kind: CcShapeKind,
-    message: Vec<U7>,
+    message: Vec<u8>,
 }
 impl SourceMidiEvent {
     pub fn new(
@@ -18,7 +16,7 @@ impl SourceMidiEvent {
         is_selected: bool,
         is_muted: bool,
         cc_shape_kind: CcShapeKind,
-        message: Vec<U7>,
+        message: Vec<u8>,
     ) -> Self {
         Self {
             position_in_ppq,
@@ -52,13 +50,13 @@ impl SourceMidiEvent {
     pub fn set_cc_shape_kind(&mut self, cc_shape_kind: CcShapeKind) {
         self.cc_shape_kind = cc_shape_kind;
     }
-    pub fn get_message(&self) -> &Vec<U7> {
+    pub fn get_message(&self) -> &Vec<u8> {
         &self.message
     }
-    pub fn get_message_mut(&mut self) -> &mut Vec<U7> {
+    pub fn get_message_mut(&mut self) -> &mut Vec<u8> {
         &mut self.message
     }
-    pub fn set_message(&mut self, message: Vec<U7>) {
+    pub fn set_message(&mut self, message: Vec<u8>) {
         self.message = message;
     }
 }
@@ -111,7 +109,7 @@ impl Iterator for SourceMidiEventIterator {
             cc_shape_kind: CcShapeKind::from_raw(flag & 0b11110000),
             is_selected: (flag & 1) != 0,
             is_muted: (flag & 2) != 0,
-            message: Vec::from_iter(buf.map(|byte| U7::new(byte))),
+            message: Vec::from_iter(buf),
         })
     }
 }
