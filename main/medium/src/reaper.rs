@@ -5939,7 +5939,7 @@ impl<UsageScope> Reaper<UsageScope> {
         project: ProjectContext,
         track: MediaTrack,
         pitch: u32,
-        channel: u32,
+        channel: i32,
         name: impl Into<ReaperStringArg<'a>>,
     ) -> bool
     where
@@ -5961,7 +5961,7 @@ impl<UsageScope> Reaper<UsageScope> {
         project: ProjectContext,
         mut track: MediaTrack,
         pitch: u32,
-        channel: u32,
+        channel: i32,
         name: impl Into<ReaperStringArg<'a>>,
     ) -> bool
     where
@@ -5971,7 +5971,7 @@ impl<UsageScope> Reaper<UsageScope> {
             project.to_raw(),
             track.as_mut(),
             pitch as i32,
-            channel as i32,
+            channel,
             name.into().as_ptr(),
         )
     }
