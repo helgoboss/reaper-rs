@@ -7,29 +7,33 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, CcShapeKind, ChunkCacheHint,
+    CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
+    HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackPolarityOperation, TrackRecArmOperation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
-    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInPpq,
+    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SetTrackUiFlags, SoloMode, SourceMidiEvent, SourceMidiEventBuilder,
+    SourceMidiEventConsumer, SourceMidiMessage, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
-use helgoboss_midi::ShortMessage;
+use helgoboss_midi::{
+    Channel, ControllerNumber, RawShortMessage, ShortMessage, ShortMessageFactory,
+    ShortMessageType, U7,
+};
 use reaper_low::raw::GUID;
 
 use crate::util::{
@@ -1548,6 +1552,54 @@ impl<UsageScope> Reaper<UsageScope> {
         PositionInSeconds::new(tpos)
     }
 
+    /// Converts the given quarter-note position to measure index
+    /// and returnes also measure bounds in quarter notes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn time_map_qn_to_measure(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> TimeMapQNToMeasuresResult
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_qn_to_measure_unchecked(project, qn) }
+    }
+
+    /// Like [`time_map_qn_to_measure()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_qn_to_measure()`]: #method.time_map_qn_to_measure
+    pub unsafe fn time_map_qn_to_measure_unchecked(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> TimeMapQNToMeasuresResult
+    where
+        UsageScope: AnyThread,
+    {
+        let mut start_qn = MaybeUninit::zeroed();
+        let mut end_qn = MaybeUninit::zeroed();
+        let measure = self.low.TimeMap_QNToMeasures(
+            project.to_raw(),
+            qn.0,
+            start_qn.as_mut_ptr(),
+            end_qn.as_mut_ptr(),
+        );
+        TimeMapQNToMeasuresResult {
+            measure_index: measure,
+            start_qn: PositionInQuarterNotes::new(start_qn.assume_init()),
+            end_qn: PositionInQuarterNotes::new(end_qn.assume_init()),
+        }
+    }
+
     /// Converts the given quarter-note position to time.
     ///
     /// # Panics
@@ -1694,6 +1746,116 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
         PositionInQuarterNotes::new(qn)
+    }
+
+    /// Returns the MIDI tick (PPQ) position corresponding to the start of the measure.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_start_of_measure(
+        &self,
+        take: MediaItemTake,
+        ppq: PositionInPpq,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPos_StartOfMeasure(take.as_ptr(), ppq.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Returns the MIDI tick (ppq) position corresponding to the start of the measure.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_end_of_measure(
+        &self,
+        take: MediaItemTake,
+        ppq: PositionInPpq,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPos_EndOfMeasure(take.as_ptr(), ppq.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Converts the given ppq in take to a project quarter-note position.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_proj_qn_from_ppq_pos(
+        &self,
+        take: MediaItemTake,
+        ppqpos: PositionInPpq,
+    ) -> PositionInQuarterNotes
+    where
+        UsageScope: AnyThread,
+    {
+        let qn = self.low.MIDI_GetProjQNFromPPQPos(take.as_ptr(), ppqpos.0);
+        PositionInQuarterNotes::new(qn)
+    }
+
+    /// Converts the given project quarter-note position to take PPQ.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_from_proj_qn(
+        &self,
+        take: MediaItemTake,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Converts the given ppq in take to a seconds from the project start.
+    ///
+    /// Time is counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_proj_time_from_ppq_pos(
+        &self,
+        take: MediaItemTake,
+        ppqpos: PositionInPpq,
+    ) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        let seconds = self.low.MIDI_GetProjTimeFromPPQPos(take.as_ptr(), ppqpos.0);
+        PositionInSeconds::new(seconds)
+    }
+
+    /// Converts the given project time in seconds to the take PPQ
+    ///
+    /// Time is counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_from_proj_time(
+        &self,
+        take: MediaItemTake,
+        time: PositionInSeconds,
+    ) -> PositionInPpq
+    where
+        UsageScope: AnyThread,
+    {
+        let ppq = self.low.MIDI_GetPPQPosFromProjTime(take.as_ptr(), time.0);
+        PositionInPpq::new(ppq)
     }
 
     /// Gets the arrange view start/end time for the given screen coordinates.
@@ -5542,6 +5704,19 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr)
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if passed item is invalid.
+    pub unsafe fn get_media_item_track(&self, item: MediaItem) -> ReaperFunctionResult<MediaTrack>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ptr = self.low.GetMediaItemTrack(item.as_ptr());
+        MediaTrack::new(ptr).ok_or(ReaperFunctionError::new(
+            "Can not find item track. Probably, item is invalid.",
+        ))
+    }
+
     /// Returns the active take in this item.
     ///
     /// # Safety
@@ -5571,6 +5746,461 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.MIDIEditor_GetTake(midi_editor.as_ptr());
         NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't get MIDI editor take"))
+    }
+
+    /// Create a new MIDI media item, containing no MIDI events.
+    ///
+    /// Time is in seconds unless time_in_qn is true.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn create_midi_item_in_proj(
+        &self,
+        track: MediaTrack,
+        starttime: f64,
+        endtime: f64,
+        time_in_qn: bool,
+    ) -> ReaperFunctionResult<MediaItem>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self
+            .low
+            .CreateNewMIDIItemInProj(track.as_ptr(), starttime, endtime, &time_in_qn);
+        NonNull::new(ptr).ok_or_else(|| {
+            ReaperFunctionError::new("couldn't create MediaItem (maybe track is invalid)")
+        })
+    }
+
+    /// returns false if there are no plugins on the track that support MIDI programs,
+    /// or if all programs have been enumerated
+    pub fn enum_track_midi_program_names(
+        &self,
+        track: i32,
+        program_number: i32,
+        buffer_size: u32,
+    ) -> Option<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            let (program_name, status) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low
+                    .EnumTrackMIDIProgramNames(track, program_number, buffer, max_size)
+            });
+            match status {
+                true => Some(program_name),
+                false => None,
+            }
+        }
+    }
+
+    /// returns false if there are no plugins on the track that support MIDI programs,
+    /// or if all programs have been enumerated
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or track.
+    pub unsafe fn enum_track_midi_program_names_ex(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        program_number: i32,
+        buffer_size: u32,
+    ) -> Option<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        self.enum_track_midi_program_names_ex_unchecked(project, track, program_number, buffer_size)
+    }
+
+    /// returns false if there are no plugins on the track that support MIDI programs,
+    /// or if all programs have been enumerated
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project or track.
+    pub unsafe fn enum_track_midi_program_names_ex_unchecked(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        program_number: i32,
+        buffer_size: u32,
+    ) -> Option<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let (program_name, status) = with_string_buffer(buffer_size, |buffer, max_size| {
+            self.low.EnumTrackMIDIProgramNamesEx(
+                project.to_raw(),
+                track.as_ptr(),
+                program_number,
+                buffer,
+                max_size,
+            )
+        });
+        match status {
+            true => Some(program_name),
+            false => None,
+        }
+    }
+
+    /// Gets note name for the note, if set on track.
+    pub fn get_track_midi_note_name<'a>(
+        &self,
+        track_index: u32,
+        pitch: u32,
+        channel: u32,
+    ) -> Option<&'a ReaperStr>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ptr = self
+            .low
+            .GetTrackMIDINoteName(track_index as i32, pitch as i32, channel as i32);
+        unsafe { create_passing_c_str(ptr) }
+    }
+
+    /// Gets note name for the note, if set on track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, if you pass an invalid track.
+    pub unsafe fn get_track_midi_note_name_ex<'a>(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        pitch: u32,
+        channel: u32,
+    ) -> Option<&'a ReaperStr>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        self.get_track_midi_note_name_ex_unchecked(project, track, pitch, channel)
+    }
+
+    /// Gets note name for the note, if set on track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, if you pass an invalid track.
+    pub unsafe fn get_track_midi_note_name_ex_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        pitch: u32,
+        channel: u32,
+    ) -> Option<&'a ReaperStr>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ptr = self.low.GetTrackMIDINoteNameEx(
+            project.to_raw(),
+            track.as_ptr(),
+            pitch as i32,
+            channel as i32,
+        );
+        create_passing_c_str(ptr)
+    }
+
+    /// Assignes name to the midi note or CC on the entire track.
+    ///
+    /// channel < 0 assigns these note names to all channels.
+    pub fn set_track_midi_note_name<'a>(
+        &self,
+        track: u32,
+        pitch: u32,
+        channel: u32,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            self.low.SetTrackMIDINoteName(
+                track as i32,
+                pitch as i32,
+                channel as i32,
+                name.into().as_ptr(),
+            )
+        }
+    }
+
+    // Assignes name to the midi note or CC on the entire track.
+    ///
+    /// channel < 0 assigns these note names to all channels.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid track.
+    pub unsafe fn set_track_midi_note_name_ex<'a>(
+        &self,
+        project: ProjectContext,
+        track: MediaTrack,
+        pitch: u32,
+        channel: i32,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.project_is_valid(project);
+        self.set_track_midi_note_name_ex_unchecked(project, track, pitch, channel, name)
+    }
+
+    // Assignes name to the midi note or CC on the entire track.
+    ///
+    /// channel < 0 assigns these note names to all channels.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid track.
+    pub unsafe fn set_track_midi_note_name_ex_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        mut track: MediaTrack,
+        pitch: u32,
+        channel: i32,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low.SetTrackMIDINoteNameEx(
+            project.to_raw(),
+            track.as_mut(),
+            pitch as i32,
+            channel,
+            name.into().as_ptr(),
+        )
+    }
+
+    /// Returns Iterator over all midi events from the given take
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_get_all_evts(
+        &self,
+        take: MediaItemTake,
+        max_size: u32,
+    ) -> Option<SourceMidiEventBuilder>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        match self.midi_get_all_evts_raw(take, max_size) {
+            None => None,
+            Some(buf) => Some(SourceMidiEventBuilder::new(buf)),
+        }
+    }
+
+    /// Returns all midi events from the given take
+    ///
+    /// These events represented as Vec<u8> as they are returned from
+    /// REAPER take.
+    ///
+    /// Each event consist of:
+    /// - offset in ppq from the previous event: 4 bytes — little-endian i32 (u32)
+    /// - flag: 1 bit
+    ///     - 0b1000_0000 — selected
+    ///     - 0b0100_0000 — muted
+    ///     - 0b0000_1000 — CcShapeKind::Linear
+    ///     - 0b0000_0100 — CcShapeKind::SlowStartEnd
+    ///     - 0b0000_1100 — CcShapeKind::FastStart
+    ///     - 0b0000_0010 — CcShapeKind::FastEnd
+    ///     - 0b0000_1010 — CcShapeKind::Beizer
+    /// - length in bytes: 4 bytes — little-endinan i32 (u32)
+    /// - message: <length> bytes
+    ///
+    /// A meta-event of type 0xF followed by 'CCBZ ' and 5 more bytes represents
+    /// bezier curve data for the previous MIDI event:
+    /// - 1 byte for the bezier type (usually 0)
+    /// - 4 bytes for the bezier tension as a float.
+    ///
+    /// The rest of the vector is filled by zeroes.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_get_all_evts_raw(
+        &self,
+        take: MediaItemTake,
+        max_size: u32,
+    ) -> Option<Vec<u8>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let (events, status) = with_buffer(max_size, |buffer, size| {
+            let mut size = MaybeUninit::new(size);
+            self.low
+                .MIDI_GetAllEvts(take.as_ptr(), buffer, size.as_mut_ptr())
+        });
+        match status {
+            true => Some(events),
+            false => None,
+        }
+    }
+
+    /// Replace all events in the given take.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_set_all_evts<T: SourceMidiMessage>(
+        &self,
+        take: MediaItemTake,
+        events: Vec<SourceMidiEvent<T>>,
+        sort: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.midi_set_all_evts_raw(
+            take,
+            SourceMidiEventConsumer::new(events, sort).collect::<Vec<i8>>(),
+        )
+    }
+
+    /// Returns all midi events from the given take
+    ///
+    /// These events represented as Vec<u8> as they are returned from
+    /// REAPER take.
+    ///
+    /// For the raw event representation of events see `Reaper::midi_get_all_evts_raw()`
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_set_all_evts_raw(&self, take: MediaItemTake, buffer: Vec<i8>) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low
+            .MIDI_SetAllEvts(take.as_ptr(), buffer.as_ptr(), buffer.len() as i32)
+    }
+
+    /// Get CC event from given take.
+    ///
+    /// index is 0-based
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_get_cc(
+        &self,
+        take: MediaItemTake,
+        cc_index: u32,
+    ) -> Option<SourceMidiEvent<RawShortMessage>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let (mut selected, mut muted) = (MaybeUninit::new(false), MaybeUninit::new(false));
+        let mut ppqpos = MaybeUninit::new(0.0);
+        let (mut chanmsg, mut chan, mut msg2, mut msg3) = (
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+        );
+        let result = self.low.MIDI_GetCC(
+            take.as_ptr(),
+            cc_index as i32,
+            selected.as_mut_ptr(),
+            muted.as_mut_ptr(),
+            ppqpos.as_mut_ptr(),
+            chanmsg.as_mut_ptr(),
+            chan.as_mut_ptr(),
+            msg2.as_mut_ptr(),
+            msg3.as_mut_ptr(),
+        );
+        match result {
+            false => None,
+            true => Some(SourceMidiEvent::new(
+                PositionInPpq(ppqpos.assume_init()),
+                selected.assume_init(),
+                muted.assume_init(),
+                CcShapeKind::Square,
+                RawShortMessage::control_change(
+                    Channel::new(chan.assume_init() as u8),
+                    ControllerNumber::new(msg2.assume_init() as u8),
+                    U7::new(msg3.assume_init() as u8),
+                ),
+            )),
+        }
+    }
+
+    /// Change ControlChange event at the given index.
+    ///
+    /// Returns error if:
+    /// - is not CC message
+    /// - faced problems with unpacking the message
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_set_cc(
+        &self,
+        take: MediaItemTake,
+        cc_index: u32,
+        event: SourceMidiEvent<RawShortMessage>,
+        sort_after: bool,
+    ) -> Result<bool, String>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let msg = event.get_message();
+        if msg.r#type() != ShortMessageType::ControlChange {
+            return Err(String::from("should be ControlChange message"));
+        }
+        Ok(self.low().MIDI_SetCC(
+            take.as_ptr(),
+            cc_index as i32,
+            &event.get_selected(),
+            &event.get_muted(),
+            &event.get_position().get(),
+            &(msg.status_byte() as i32),
+            &(msg.channel().ok_or("should have channel")?.get() as i32),
+            &i32::from(msg.controller_number().ok_or("should have cc_num")?),
+            &i32::from(msg.control_value().ok_or("should have control value")?),
+            &sort_after,
+        ))
+    }
+
+    /// Insert ControlChange event.
+    ///
+    /// Returns error if:
+    /// - is not CC message
+    /// - faced problems with unpacking the message
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_insert_cc(
+        &self,
+        take: MediaItemTake,
+        event: SourceMidiEvent<RawShortMessage>,
+    ) -> Result<bool, String>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let msg = event.get_message();
+        if msg.r#type() != ShortMessageType::ControlChange {
+            return Err(String::from("should be ControlChange message"));
+        }
+        Ok(self.low().MIDI_InsertCC(
+            take.as_ptr(),
+            event.get_selected(),
+            event.get_muted(),
+            event.get_position().get(),
+            msg.status_byte() as i32,
+            msg.channel().ok_or("should have channel")?.get() as i32,
+            i32::from(msg.controller_number().ok_or("should have cc_num")?),
+            i32::from(msg.control_value().ok_or("should have control value")?),
+        ))
     }
 
     /// Selects exactly one track and deselects all others.
@@ -6274,6 +6904,16 @@ impl<UsageScope> Reaper<UsageScope> {
             create_passing_c_str(ptr as *const c_char)
         };
         use_name(passing_c_str.ok_or_else(|| ReaperFunctionError::new("invalid take")))
+    }
+
+    /// #Safety
+    ///
+    /// REAPER can crash if invalid track is passed.
+    pub fn take_is_midi(&self, take: &MediaItemTake) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe { self.low.TakeIsMIDI(take.as_ptr()) }
     }
 
     /// Returns the current on/off state of a toggleable action.
@@ -7185,6 +7825,16 @@ pub struct TimeMapGetMeasureInfoResult {
     pub time_signature: TimeSignature,
     /// Tempo at that measure.
     pub tempo: Bpm,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct TimeMapQNToMeasuresResult {
+    /// Measue index in project.
+    pub measure_index: i32,
+    /// Start position of the measure in quarter notes.
+    pub start_qn: PositionInQuarterNotes,
+    /// End position of the measure in quarter notes.
+    pub end_qn: PositionInQuarterNotes,
 }
 
 /// Time signature.

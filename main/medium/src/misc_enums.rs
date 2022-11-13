@@ -5,6 +5,7 @@ use crate::{
 };
 
 use crate::util::concat_reaper_strs;
+use derive_more::Display;
 use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
@@ -1584,5 +1585,54 @@ impl InsertMediaMode {
             CurrentReasamplomatic => 2048,
         };
         bits as i32
+    }
+}
+
+/// Represents MediaItemTake midi CC shape kind.
+///
+/// # Note
+///
+/// If CcShapeKind::Beizer is given to CC event, additional midi event
+/// should be put at the same position:
+/// 0xF followed by 'CCBZ ' and 5 more bytes represents
+/// bezier curve data for the previous MIDI event:
+/// - 1 byte for the bezier type (usually 0)
+/// - 4 bytes for the bezier tension as a float.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
+pub enum CcShapeKind {
+    #[default]
+    Square,
+    Linear,
+    SlowStartEnd,
+    FastStart,
+    FastEnd,
+    Beizer,
+}
+impl CcShapeKind {
+    /// CcShapeKind from u8.
+    ///
+    /// Returns Err if can not find proper variant.
+    pub fn from_raw(value: u8) -> Result<Self, String> {
+        match value {
+            v if v == 0 => Ok(Self::Square),
+            v if v == 16 => Ok(Self::Linear),
+            v if v == 32 => Ok(Self::SlowStartEnd),
+            v if v == 16 | 32 => Ok(Self::FastStart),
+            v if v == 64 => Ok(Self::FastEnd),
+            v if v == 16 | 64 => Ok(Self::Beizer),
+            _ => Err(format!("not a cc shape: {:?}", value)),
+        }
+    }
+
+    /// u8 representation of CcShapeKind
+    pub fn to_raw(&self) -> u8 {
+        match self {
+            Self::Square => 0,
+            Self::Linear => 16,
+            Self::SlowStartEnd => 32,
+            Self::FastStart => 16 | 32,
+            Self::FastEnd => 64,
+            Self::Beizer => 16 | 64,
+        }
     }
 }

@@ -371,6 +371,9 @@ pub use control_surface::*;
 mod midi;
 pub use midi::*;
 
+mod source_midi;
+pub use source_midi::*;
+
 mod pcm_source;
 pub use pcm_source::*;
 
