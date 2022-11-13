@@ -31,7 +31,8 @@ use crate::{
 };
 
 use helgoboss_midi::{
-    Channel, ControllerNumber, RawShortMessage, ShortMessage, ShortMessageFactory, U7,
+    Channel, ControllerNumber, RawShortMessage, ShortMessage, ShortMessageFactory,
+    ShortMessageType, U7,
 };
 use reaper_low::raw::GUID;
 
@@ -6130,6 +6131,76 @@ impl<UsageScope> Reaper<UsageScope> {
                 ),
             )),
         }
+    }
+
+    /// Change ControlChange event at the given index.
+    ///
+    /// Returns error if:
+    /// - is not CC message
+    /// - faced problems with unpacking the message
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_set_cc(
+        &self,
+        take: MediaItemTake,
+        cc_index: u32,
+        event: SourceMidiEvent<RawShortMessage>,
+        sort_after: bool,
+    ) -> Result<bool, String>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let msg = event.get_message();
+        if msg.r#type() != ShortMessageType::ControlChange {
+            return Err(String::from("should be ControlChange message"));
+        }
+        Ok(self.low().MIDI_SetCC(
+            take.as_ptr(),
+            cc_index as i32,
+            &event.get_selected(),
+            &event.get_muted(),
+            &event.get_position().get(),
+            &(msg.status_byte() as i32),
+            &(msg.channel().ok_or("should have channel")?.get() as i32),
+            &i32::from(msg.controller_number().ok_or("should have cc_num")?),
+            &i32::from(msg.control_value().ok_or("should have control value")?),
+            &sort_after,
+        ))
+    }
+
+    /// Insert ControlChange event.
+    ///
+    /// Returns error if:
+    /// - is not CC message
+    /// - faced problems with unpacking the message
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_insert_cc(
+        &self,
+        take: MediaItemTake,
+        event: SourceMidiEvent<RawShortMessage>,
+    ) -> Result<bool, String>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let msg = event.get_message();
+        if msg.r#type() != ShortMessageType::ControlChange {
+            return Err(String::from("should be ControlChange message"));
+        }
+        Ok(self.low().MIDI_InsertCC(
+            take.as_ptr(),
+            event.get_selected(),
+            event.get_muted(),
+            event.get_position().get(),
+            msg.status_byte() as i32,
+            msg.channel().ok_or("should have channel")?.get() as i32,
+            i32::from(msg.controller_number().ok_or("should have cc_num")?),
+            i32::from(msg.control_value().ok_or("should have control value")?),
+        ))
     }
 
     /// Selects exactly one track and deselects all others.
