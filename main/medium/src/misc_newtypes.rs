@@ -269,20 +269,6 @@ impl ResampleMode {
     }
 }
 
-// #[derive(Clone, PartialEq, PartialOrd, Debug, Default)]
-// pub struct SourceMidiEvent {
-//     position_in_ppq: PositionInPpq,
-//     is_selected: bool,
-//     is_muted: bool,
-//     cc_shape: CcShapeKind,
-//     buf: Vec<u8>,
-// }
-// impl Display for SourceMidiEvent{
-//     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-
-//     }
-// }
-
 /// A pitch shift mode, backed by a positive integer.
 ///
 /// This uniquely identifies a pitch shift mode.
