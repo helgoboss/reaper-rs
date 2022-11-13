@@ -21,12 +21,13 @@ use crate::{
     ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
     ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
     RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
-    SendTarget, SetTrackUiFlags, SoloMode, SourceMidiEventIterator, StuffMidiMessageTarget,
-    TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackMuteOperation, TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior,
-    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    SendTarget, SetTrackUiFlags, SoloMode, SourceMidiEvent, SourceMidiEventBuilder,
+    SourceMidiEventConsumer, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
+    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation, TrackPolarityOperation,
+    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
+    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -5910,7 +5911,7 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         track: u32,
         pitch: u32,
-        channel: i32,
+        channel: u32,
         name: impl Into<ReaperStringArg<'a>>,
     ) -> bool
     where
@@ -5938,7 +5939,7 @@ impl<UsageScope> Reaper<UsageScope> {
         project: ProjectContext,
         track: MediaTrack,
         pitch: u32,
-        channel: i32,
+        channel: u32,
         name: impl Into<ReaperStringArg<'a>>,
     ) -> bool
     where
@@ -5960,7 +5961,7 @@ impl<UsageScope> Reaper<UsageScope> {
         project: ProjectContext,
         mut track: MediaTrack,
         pitch: u32,
-        channel: i32,
+        channel: u32,
         name: impl Into<ReaperStringArg<'a>>,
     ) -> bool
     where
@@ -5970,26 +5971,59 @@ impl<UsageScope> Reaper<UsageScope> {
             project.to_raw(),
             track.as_mut(),
             pitch as i32,
-            channel,
+            channel as i32,
             name.into().as_ptr(),
         )
     }
 
-    pub unsafe fn midi_get_all_events_iter(
+    /// Returns Iterator over all midi events from the given take
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_get_all_evts(
         &self,
         take: MediaItemTake,
         max_size: u32,
-    ) -> Option<SourceMidiEventIterator>
+    ) -> Option<SourceMidiEventBuilder>
     where
         UsageScope: MainThreadOnly,
     {
-        match self.midi_get_all_events(take, max_size) {
+        match self.midi_get_all_evts_raw(take, max_size) {
             None => None,
-            Some(buf) => Some(SourceMidiEventIterator::new(buf)),
+            Some(buf) => Some(SourceMidiEventBuilder::new(buf)),
         }
     }
 
-    pub unsafe fn midi_get_all_events(
+    /// Returns all midi events from the given take
+    ///
+    /// These events represented as Vec<u8> as they are returned from
+    /// REAPER take.
+    ///
+    /// Each event consist of:
+    /// - offset in ppq from the previous event: 4 bytes — little-endian i32 (u32)
+    /// - flag: 1 bit
+    ///     - 0b1000_0000 — selected
+    ///     - 0b0100_0000 — muted
+    ///     - 0b0000_1000 — CcShapeKind::Linear
+    ///     - 0b0000_0100 — CcShapeKind::SlowStartEnd
+    ///     - 0b0000_1100 — CcShapeKind::FastStart
+    ///     - 0b0000_0010 — CcShapeKind::FastEnd
+    ///     - 0b0000_1010 — CcShapeKind::Beizer
+    /// - length in bytes: 4 bytes — little-endinan i32 (u32)
+    /// - message: <length> bytes
+    ///
+    /// A meta-event of type 0xF followed by 'CCBZ ' and 5 more bytes represents
+    /// bezier curve data for the previous MIDI event:
+    /// - 1 byte for the bezier type (usually 0)
+    /// - 4 bytes for the bezier tension as a float.
+    ///
+    /// The rest of the vector is filled by zeroes.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_get_all_evts_raw(
         &self,
         take: MediaItemTake,
         max_size: u32,
@@ -6006,6 +6040,44 @@ impl<UsageScope> Reaper<UsageScope> {
             true => Some(events),
             false => None,
         }
+    }
+
+    /// Replace all events in the given take.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_set_all_evts(
+        &self,
+        take: MediaItemTake,
+        events: Vec<SourceMidiEvent>,
+        sort: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.midi_set_all_evts_raw(
+            take,
+            SourceMidiEventConsumer::new(events, sort).collect::<Vec<i8>>(),
+        )
+    }
+
+    /// Returns all midi events from the given take
+    ///
+    /// These events represented as Vec<u8> as they are returned from
+    /// REAPER take.
+    ///
+    /// For the raw event representation of events see `Reaper::midi_get_all_evts_raw()`
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_set_all_evts_raw(&self, take: MediaItemTake, buffer: Vec<i8>) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low
+            .MIDI_SetAllEvts(take.as_ptr(), buffer.as_ptr(), buffer.len() as i32)
     }
 
     // unsafe fn midi_get_cc(
@@ -6046,55 +6118,6 @@ impl<UsageScope> Reaper<UsageScope> {
     //                 value: U7::new(msg3.assume_init() as u8),
     //             },
     //         )),
-    //     }
-    // }
-
-    // unsafe fn midi_get_evt(
-    //     &self,
-    //     take: MediaItemTake,
-    //     evt_index: u32,
-    // ) -> Option<SourceMidiEvent<GenericMessage>> {
-    //     let (mut selected, mut muted) = (MaybeUninit::new(false), MaybeUninit::new(false));
-    //     let mut ppqpos = MaybeUninit::new(0.0);
-    //     let mut msg_size = MaybeUninit::new(4);
-    //     let (mut msg, result) = with_buffer(3, |msg, _| {
-    //         self.low.MIDI_GetEvt(
-    //             take.as_ptr(),
-    //             evt_index as i32,
-    //             selected.as_mut_ptr(),
-    //             muted.as_mut_ptr(),
-    //             ppqpos.as_mut_ptr(),
-    //             msg,
-    //             msg_size.as_mut_ptr(),
-    //         )
-    //     });
-    //     match result {
-    //         false => None,
-    //         true => {
-    //             let m_size = msg_size.assume_init() as u32;
-    //             if m_size > msg.len() as u32 {
-    //                 (msg, _) = with_buffer(m_size, |msg, _| {
-    //                     self.low.MIDI_GetEvt(
-    //                         take.as_ptr(),
-    //                         evt_index as i32,
-    //                         selected.as_mut_ptr(),
-    //                         muted.as_mut_ptr(),
-    //                         ppqpos.as_mut_ptr(),
-    //                         msg,
-    //                         msg_size.as_mut_ptr(),
-    //                     )
-    //                 });
-    //             }
-    //             Some(SourceMidiEvent::new(
-    //                 PositionInPpq(ppqpos.assume_init()),
-    //                 selected.assume_init(),
-    //                 muted.assume_init(),
-    //                 GenericMessage {
-    //                     size: m_size as u32,
-    //                     message: msg,
-    //                 },
-    //             ))
-    //         }
     //     }
     // }
 
