@@ -7,12 +7,12 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, CcMessage, CcShapeKind,
+    ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
+    HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
     PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInPpq,
@@ -22,15 +22,15 @@ use crate::{
     ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
     RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
     SendTarget, SetTrackUiFlags, SoloMode, SourceMidiEvent, SourceMidiEventBuilder,
-    SourceMidiEventConsumer, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
-    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    SourceMidiEventConsumer, SourceMidiMessage, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
-use helgoboss_midi::ShortMessage;
+use helgoboss_midi::{Channel, ShortMessage, U4, U7};
 use reaper_low::raw::GUID;
 
 use crate::util::{
@@ -6047,10 +6047,10 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash, it you pass an invalid take.
-    pub unsafe fn midi_set_all_evts(
+    pub unsafe fn midi_set_all_evts<T: SourceMidiMessage>(
         &self,
         take: MediaItemTake,
-        events: Vec<SourceMidiEvent>,
+        events: Vec<SourceMidiEvent<T>>,
         sort: bool,
     ) -> bool
     where
@@ -6080,46 +6080,56 @@ impl<UsageScope> Reaper<UsageScope> {
             .MIDI_SetAllEvts(take.as_ptr(), buffer.as_ptr(), buffer.len() as i32)
     }
 
-    // unsafe fn midi_get_cc(
-    //     &self,
-    //     take: MediaItemTake,
-    //     cc_index: u32,
-    // ) -> Option<SourceMidiEvent<CcMessage>> {
-    //     let (mut selected, mut muted) = (MaybeUninit::new(false), MaybeUninit::new(false));
-    //     let mut ppqpos = MaybeUninit::new(0.0);
-    //     let (mut chanmsg, mut chan, mut msg2, mut msg3) = (
-    //         MaybeUninit::new(0),
-    //         MaybeUninit::new(0),
-    //         MaybeUninit::new(0),
-    //         MaybeUninit::new(0),
-    //     );
-
-    //     let result = self.low.MIDI_GetCC(
-    //         take.as_ptr(),
-    //         cc_index as i32,
-    //         selected.as_mut_ptr(),
-    //         muted.as_mut_ptr(),
-    //         ppqpos.as_mut_ptr(),
-    //         chanmsg.as_mut_ptr(),
-    //         chan.as_mut_ptr(),
-    //         msg2.as_mut_ptr(),
-    //         msg3.as_mut_ptr(),
-    //     );
-    //     match result {
-    //         false => None,
-    //         true => Some(SourceMidiEvent::new(
-    //             PositionInPpq(ppqpos.assume_init()),
-    //             selected.assume_init(),
-    //             muted.assume_init(),
-    //             CcMessage {
-    //                 channel_message: U4::new(chanmsg.assume_init() as u8),
-    //                 channel: U4::new(chan.assume_init() as u8),
-    //                 cc_num: U7::new(msg2.assume_init() as u8),
-    //                 value: U7::new(msg3.assume_init() as u8),
-    //             },
-    //         )),
-    //     }
-    // }
+    /// Get CC event from given take.
+    ///
+    /// index is 0-based
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash, it you pass an invalid take.
+    pub unsafe fn midi_get_cc(
+        &self,
+        take: MediaItemTake,
+        cc_index: u32,
+    ) -> Option<SourceMidiEvent<CcMessage>>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let (mut selected, mut muted) = (MaybeUninit::new(false), MaybeUninit::new(false));
+        let mut ppqpos = MaybeUninit::new(0.0);
+        let (mut chanmsg, mut chan, mut msg2, mut msg3) = (
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+            MaybeUninit::new(0),
+        );
+        let result = self.low.MIDI_GetCC(
+            take.as_ptr(),
+            cc_index as i32,
+            selected.as_mut_ptr(),
+            muted.as_mut_ptr(),
+            ppqpos.as_mut_ptr(),
+            chanmsg.as_mut_ptr(),
+            chan.as_mut_ptr(),
+            msg2.as_mut_ptr(),
+            msg3.as_mut_ptr(),
+        );
+        match result {
+            false => None,
+            true => Some(SourceMidiEvent::new(
+                PositionInPpq(ppqpos.assume_init()),
+                selected.assume_init(),
+                muted.assume_init(),
+                CcShapeKind::Square,
+                CcMessage {
+                    channel_message: U4::new(chanmsg.assume_init() as u8),
+                    channel: Channel::new(chan.assume_init() as u8),
+                    cc_num: U7::new(msg2.assume_init() as u8),
+                    value: U7::new(msg3.assume_init() as u8),
+                },
+            )),
+        }
+    }
 
     /// Selects exactly one track and deselects all others.
     ///
