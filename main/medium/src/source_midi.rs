@@ -1,6 +1,6 @@
 use std::vec::IntoIter;
 
-use helgoboss_midi::{Channel, U4, U7};
+use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageFactory, U7};
 
 use crate::{CcShapeKind, PositionInPpq};
 
@@ -24,37 +24,25 @@ impl SourceMidiMessage for RawMidiMessage {
     }
 }
 
-#[derive(Clone, PartialEq, PartialOrd, Debug, Default)]
-pub struct CcMessage {
-    pub channel_message: U4,
-    pub channel: Channel,
-    pub cc_num: U7,
-    pub value: U7,
-}
-impl SourceMidiMessage for CcMessage {
-    fn from_raw(buf: Vec<u8>) -> Option<Self> {
-        if buf.len() != 3 {
+impl SourceMidiMessage for RawShortMessage {
+    fn from_raw(buf: Vec<u8>) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if buf.len() > 3 {
             return None;
-        };
-        if buf[0] < 0xb0 || buf[0] >= 0xc0 {
-            return None;
-        };
-        let channel_message: U4 = U4::new(buf[0] >> 4);
-        let channel: Channel = Channel::new(buf[0] & 0xf);
-        let cc_num: U7 = U7::new(buf[1]);
-        let value: U7 = U7::new(buf[2]);
-        Some(Self {
-            channel_message,
-            channel,
-            cc_num,
-            value,
-        })
+        }
+        match RawShortMessage::from_bytes((buf[0], U7::new(buf[1]), U7::new(buf[2]))) {
+            Err(_) => None,
+            Ok(msg) => Some(msg),
+        }
     }
+
     fn get_raw(&self) -> Vec<u8> {
         vec![
-            (u8::from(self.channel_message)) << 4_u8 | u8::from(self.channel),
-            u8::from(self.cc_num),
-            u8::from(self.value),
+            self.status_byte(),
+            u8::from(self.data_byte_1()),
+            u8::from(self.data_byte_2()),
         ]
     }
 }

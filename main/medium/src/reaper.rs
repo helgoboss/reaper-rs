@@ -7,8 +7,8 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, CcMessage, CcShapeKind,
-    ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, CcShapeKind, ChunkCacheHint,
+    CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
     FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
     HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
     KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
@@ -30,7 +30,9 @@ use crate::{
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
-use helgoboss_midi::{Channel, ShortMessage, U4, U7};
+use helgoboss_midi::{
+    Channel, ControllerNumber, RawShortMessage, ShortMessage, ShortMessageFactory, U7,
+};
 use reaper_low::raw::GUID;
 
 use crate::util::{
@@ -6091,7 +6093,7 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         take: MediaItemTake,
         cc_index: u32,
-    ) -> Option<SourceMidiEvent<CcMessage>>
+    ) -> Option<SourceMidiEvent<RawShortMessage>>
     where
         UsageScope: MainThreadOnly,
     {
@@ -6121,12 +6123,11 @@ impl<UsageScope> Reaper<UsageScope> {
                 selected.assume_init(),
                 muted.assume_init(),
                 CcShapeKind::Square,
-                CcMessage {
-                    channel_message: U4::new(chanmsg.assume_init() as u8),
-                    channel: Channel::new(chan.assume_init() as u8),
-                    cc_num: U7::new(msg2.assume_init() as u8),
-                    value: U7::new(msg3.assume_init() as u8),
-                },
+                RawShortMessage::control_change(
+                    Channel::new(chan.assume_init() as u8),
+                    ControllerNumber::new(msg2.assume_init() as u8),
+                    U7::new(msg3.assume_init() as u8),
+                ),
             )),
         }
     }
