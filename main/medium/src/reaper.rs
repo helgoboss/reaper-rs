@@ -282,6 +282,114 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
+    /// Add Marker or Region to the given Project
+    ///
+    /// Returns marker\region index on success, None on failure.
+    ///
+    /// If you want to specify index — desired_index should be >=0,
+    /// but it would not be used, if index is already in use.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn add_project_marker(
+        &self,
+        project: ProjectContext,
+        region: bool,
+        pos: PositionInSeconds,
+        region_end_position: PositionInSeconds,
+        name: ReaperStringArg,
+        desired_index: i32,
+    ) -> Option<i32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let result = self.low().AddProjectMarker(
+            project.to_raw(),
+            region,
+            pos.get(),
+            region_end_position.get(),
+            name.as_ptr(),
+            desired_index,
+        );
+        match result {
+            -1 => None,
+            _ => Some(result),
+        }
+    }
+
+    /// Add Marker or Region to the given Project
+    ///
+    /// Returns marker\region index on success, None on failure.
+    ///
+    /// If you want to specify index — desired_index should be >=0,
+    /// but it would not be used, if index is already in use.
+    ///
+    /// # Note
+    ///
+    /// To pass RGB color — use color_to_native()
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn add_project_marker_2(
+        &self,
+        project: ProjectContext,
+        region: bool,
+        pos: PositionInSeconds,
+        region_end_position: PositionInSeconds,
+        name: ReaperStringArg,
+        desired_index: i32,
+        color: NativeColor,
+    ) -> Option<i32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let result = self.low().AddProjectMarker2(
+            project.to_raw(),
+            region,
+            pos.get(),
+            region_end_position.get(),
+            name.as_ptr(),
+            desired_index,
+            color.to_raw(),
+        );
+        match result {
+            -1 => None,
+            _ => Some(result),
+        }
+    }
+
+    /// Add rescript from file.
+    ///
+    /// Returns command id on success, None on failure.
+    ///
+    /// # Note
+    ///
+    /// commit should be true always, but adding scripts in bulk.
+    /// In the last case — the last function call should be with
+    /// commit=true.
+    pub fn add_remove_reascript(
+        &self,
+        add: bool,
+        section_id: i32,
+        script_file: ReaperStringArg,
+        commit: bool,
+    ) -> Option<u32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            let result =
+                self.low()
+                    .AddRemoveReaScript(add, section_id, script_file.as_ptr(), commit);
+            match result {
+                x if (x <= 0) => None,
+                _ => Some(result as u32),
+            }
+        }
+    }
+
     /// Returns the track at the given index.
     ///
     /// # Panics
@@ -4850,6 +4958,75 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.AddTakeToMediaItem(item.as_ptr());
         NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't add take to item"))
+    }
+
+    /// Set or insert tempo\time signature marker.
+    ///
+    /// Returns true on success.
+    ///
+    /// # Note
+    ///
+    /// - index = -1 will insert new marker.
+    /// - Position can be set either with time_position or with
+    /// measure and beat position. Other position should be None.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn set_tempo_time_signature_marker(
+        &self,
+        project: ProjectContext,
+        index: i32,
+        time_position: Option<PositionInSeconds>,
+        measure_position: Option<u32>,
+        beat_position: Option<PositionInQuarterNotes>,
+        bpm: Bpm,
+        time_signature: Option<TimeSignature>,
+        linear_tempo: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let timesig_num: i32;
+        let timesig_denom: i32;
+        match time_signature {
+            None => {
+                timesig_num = 0;
+                timesig_denom = 0;
+            }
+            Some(ts) => {
+                timesig_num = ts.numerator.get() as i32;
+                timesig_denom = ts.denominator.get() as i32;
+            }
+        }
+
+        let tpos: f64;
+        match time_position {
+            None => tpos = -1.0,
+            Some(time) => tpos = time.get(),
+        }
+        let mpos: i32;
+        match measure_position {
+            None => mpos = -1,
+            Some(time) => mpos = time as i32,
+        }
+        let bpos: f64;
+        match beat_position {
+            None => bpos = -1.0,
+            Some(time) => bpos = time.get(),
+        }
+
+        self.low().SetTempoTimeSigMarker(
+            project.to_raw(),
+            index,
+            tpos,
+            mpos,
+            bpos,
+            bpm.get(),
+            timesig_num,
+            timesig_denom,
+            linear_tempo,
+        )
     }
 
     /// Sets the position of the given item.
