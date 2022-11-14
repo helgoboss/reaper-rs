@@ -110,3 +110,14 @@ pub enum SetTrackUiFlags {
     PreventTrackGrouping = 1,
     PreventSelectionGanging = 2,
 }
+
+/// Defines nudge mode in `apply_nudge`
+/// 
+/// if not SetToValue — will nudge by value.
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[repr(u32)]
+pub enum ApplyNudgeFlag {
+    SetToValue = 1,
+    Snap = 2,
+}

@@ -1664,3 +1664,53 @@ impl InsertMediaMode {
         bits as i32
     }
 }
+
+/// Defines, in which units nudge will be applied.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum NudgeUnits {
+    Milliseconds,
+    Seconds,
+    Grid,
+    Notes256,
+    Notes128,
+    Notes64,
+    Notes32,
+    Notes16,
+    Notes8,
+    Notes4,
+    Notes2,
+    NotesWhole,
+    /// (1.15 = 1 measure + 1.5 beats)
+    MeasuresBeats,
+    Samples,
+    Frames,
+    Pixels,
+    ItemLength,
+    ItemSelections,
+}
+
+impl NudgeUnits {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        match self {
+            Self::Milliseconds => 0,
+            Self::Seconds => 1,
+            Self::Grid => 2,
+            Self::Notes256 => 3,
+            Self::Notes128 => 4,
+            Self::Notes64 => 5,
+            Self::Notes32 => 6,
+            Self::Notes16 => 7,
+            Self::Notes8 => 8,
+            Self::Notes4 => 9,
+            Self::Notes2 => 10,
+            Self::NotesWhole => 15,
+            Self::MeasuresBeats => 16,
+            Self::Samples => 17,
+            Self::Frames => 18,
+            Self::Pixels => 19,
+            Self::ItemLength => 20,
+            Self::ItemSelections => 21,
+        }
+    }
+}
