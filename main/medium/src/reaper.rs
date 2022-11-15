@@ -1143,6 +1143,24 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low().APITest()
     }
 
+    /// Arms or disarms a command.
+    ///
+    /// If command is None — disarms.
+    /// If section_name is empty string — arms in MainSection.
+    pub fn arm_command(&self, command: Option<CommandId>, section_name: ReaperStringArg)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let cmd: i32;
+        match command {
+            None => cmd = 0,
+            Some(id) => cmd = id.get() as i32,
+        }
+        unsafe {
+            self.low().ArmCommand(cmd, section_name.as_ptr());
+        }
+    }
+
     /// Directly simulates a play button hit.
     ///
     /// # Panics
