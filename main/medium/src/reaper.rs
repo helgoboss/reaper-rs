@@ -1055,6 +1055,15 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low().Audio_Quit();
     }
 
+    /// Bypass all tracks if true, unbypass if false.
+    pub fn bypass_fx_all_tracks(&self, bypass: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let byp = if bypass == true { -1 } else { 1 };
+        self.low().BypassFxAllTracks(byp);
+    }
+
     /// Starts playing.
     pub fn csurf_on_play(&self)
     where
