@@ -20,8 +20,9 @@ use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, Progress, ReaProject, ReaperFunctionError, ReaperString,
     ReaperStringArg, RecordArmMode, RecordingInput, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
-    TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendCategory, TrackSendDirection, TrackSoloOperation,
+    TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory, TrackSendDirection,
+    TrackSoloOperation,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -568,15 +569,10 @@ impl Track {
     ) {
         let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().SetTrackUIRecArm.is_some() {
-            let operation = if mode == RecordArmMode::Armed {
-                TrackRecArmOperation::SetRecArm
-            } else {
-                TrackRecArmOperation::UnsetRecArm
-            };
             unsafe {
                 reaper.set_track_ui_rec_arm(
                     self.raw(),
-                    operation,
+                    TrackRecArmOperation::Set(mode),
                     build_track_ui_flags(gang_behavior, grouping_behavior),
                 );
             }
@@ -630,26 +626,21 @@ impl Track {
 
     pub fn set_phase_inverted(
         &self,
-        inverted: bool,
+        polarity: TrackPolarity,
         gang_behavior: GangBehavior,
         grouping_behavior: GroupingBehavior,
     ) {
         let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().SetTrackUIPolarity.is_some() {
             unsafe {
-                let operation = if inverted {
-                    TrackPolarityOperation::SetInverted
-                } else {
-                    TrackPolarityOperation::SetNormal
-                };
                 reaper.set_track_ui_polarity(
                     self.raw(),
-                    operation,
+                    TrackPolarityOperation::Set(polarity),
                     build_track_ui_flags(gang_behavior, grouping_behavior),
                 );
             }
         } else {
-            self.set_prop_enabled(TrackAttributeKey::Phase, inverted);
+            self.set_prop_numeric_value(TrackAttributeKey::Phase, polarity.to_raw() as f64);
         }
     }
 
@@ -728,16 +719,16 @@ impl Track {
     }
 
     pub fn mute(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
-        self.set_mute(true, gang_behavior, grouping_behavior);
+        self.set_mute(TrackMuteState::Mute, gang_behavior, grouping_behavior);
     }
 
     pub fn unmute(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
-        self.set_mute(false, gang_behavior, grouping_behavior);
+        self.set_mute(TrackMuteState::Unmute, gang_behavior, grouping_behavior);
     }
 
     fn set_mute(
         &self,
-        mute: bool,
+        state: TrackMuteState,
         gang_behavior: GangBehavior,
         grouping_behavior: GroupingBehavior,
     ) {
@@ -745,29 +736,32 @@ impl Track {
             self.load_and_check_if_necessary_or_complain();
             let reaper = Reaper::get().medium_reaper();
             if reaper.low().pointers().SetTrackUIMute.is_some() {
-                let operation = if mute {
-                    TrackMuteOperation::SetMute
-                } else {
-                    TrackMuteOperation::UnsetMute
-                };
                 unsafe {
                     reaper.set_track_ui_mute(
                         self.raw(),
-                        operation,
+                        TrackMuteOperation::Set(state),
                         build_track_ui_flags(gang_behavior, grouping_behavior),
                     )
                 };
             } else {
-                unsafe { reaper.csurf_on_mute_change_ex(self.raw(), mute, gang_behavior) };
+                unsafe {
+                    reaper.csurf_on_mute_change_ex(
+                        self.raw(),
+                        state == TrackMuteState::Mute,
+                        gang_behavior,
+                    )
+                };
             }
         } else {
             // ReaLearn #283
-            self.set_prop_enabled(TrackAttributeKey::Mute, mute);
+            self.set_prop_numeric_value(TrackAttributeKey::Mute, state.to_raw() as f64);
         }
         unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .csurf_set_surface_mute(self.raw(), mute, NotifyAll);
+            Reaper::get().medium_reaper().csurf_set_surface_mute(
+                self.raw(),
+                state == TrackMuteState::Mute,
+                NotifyAll,
+            );
         }
     }
 

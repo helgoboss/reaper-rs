@@ -229,14 +229,14 @@ impl Action {
         // &valhw, &relmode, reaper::GetMainHwnd());
         let value_change = if enforce_7_bit_control {
             let discrete_value = unsafe {
-                U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
-            };
-            ActionValueChange::AbsoluteHighRes(discrete_value)
-        } else {
-            let discrete_value = unsafe {
                 U7::new_unchecked((normalized_value * U7::MAX.get() as f64).round() as u8)
             };
             ActionValueChange::AbsoluteLowRes(discrete_value)
+        } else {
+            let discrete_value = unsafe {
+                U14::new_unchecked((normalized_value * U14::MAX.get() as f64).round() as u16)
+            };
+            ActionValueChange::AbsoluteHighRes(discrete_value)
         };
         self.invoke_directly(
             value_change,

@@ -211,15 +211,29 @@ pub enum RecordArmMode {
     Unarmed,
     /// Track is armed for recording.
     Armed,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<i32>),
 }
 
 impl RecordArmMode {
+    /// Converts an integer as returned by the low-level API to a record arm mode.
+    pub fn from_raw(v: i32) -> Self {
+        use RecordArmMode::*;
+        match v {
+            0 => Unarmed,
+            1 => Armed,
+            x => Unknown(Hidden(x)),
+        }
+    }
+
     /// Converts this value to an integer as expected by the low-level API.
     pub fn to_raw(self) -> i32 {
         use RecordArmMode::*;
         match self {
             Unarmed => 0,
             Armed => 1,
+            Unknown(Hidden(x)) => x,
         }
     }
 }
@@ -893,10 +907,8 @@ impl InputMonitoringMode {
 pub enum TrackMuteOperation {
     /// Toggles the current state.
     Toggle,
-    /// Unsets the mute flag.
-    UnsetMute,
-    /// Sets the mute flag.
-    SetMute,
+    /// Sets the mute state to a specific value.
+    Set(TrackMuteState),
 }
 
 impl TrackMuteOperation {
@@ -905,8 +917,40 @@ impl TrackMuteOperation {
         use TrackMuteOperation::*;
         match self {
             Toggle => -1,
-            UnsetMute => 0,
-            SetMute => 1,
+            Set(s) => s.to_raw(),
+        }
+    }
+}
+/// Possible track polarity (phase) values.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TrackMuteState {
+    /// Not muted.
+    Unmute,
+    /// Muted
+    Mute,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<i32>),
+}
+
+impl TrackMuteState {
+    /// Converts an integer as returned by the low-level API to a mute state.
+    pub fn from_raw(v: i32) -> Self {
+        use TrackMuteState::*;
+        match v {
+            0 => Unmute,
+            1 => Mute,
+            x => Unknown(Hidden(x)),
+        }
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TrackMuteState::*;
+        match self {
+            Unmute => 0,
+            Mute => 1,
+            Unknown(Hidden(x)) => x,
         }
     }
 }
@@ -916,10 +960,8 @@ impl TrackMuteOperation {
 pub enum TrackPolarityOperation {
     /// Toggles the current state.
     Toggle,
-    /// Sets the phase to normal.
-    SetNormal,
-    /// Sets the phase to inverted.
-    SetInverted,
+    /// Sets the phase to a specific value.
+    Set(TrackPolarity),
 }
 
 impl TrackPolarityOperation {
@@ -928,21 +970,52 @@ impl TrackPolarityOperation {
         use TrackPolarityOperation::*;
         match self {
             Toggle => -1,
-            SetNormal => 0,
-            SetInverted => 1,
+            Set(p) => p.to_raw(),
         }
     }
 }
 
-/// Defines how to adjust track arm state.
+/// Possible track polarity (phase) values.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum TrackPolarity {
+    /// Normal phase.
+    Normal,
+    /// Inverted phase.
+    Inverted,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<i32>),
+}
+
+impl TrackPolarity {
+    /// Converts an integer as returned by the low-level API to a polarity.
+    pub fn from_raw(v: i32) -> Self {
+        use TrackPolarity::*;
+        match v {
+            0 => Normal,
+            1 => Inverted,
+            x => Unknown(Hidden(x)),
+        }
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use TrackPolarity::*;
+        match self {
+            Normal => 0,
+            Inverted => 1,
+            Unknown(Hidden(x)) => x,
+        }
+    }
+}
+
+/// Defines how to adjust track arm mode.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TrackRecArmOperation {
     /// Toggles the current state.
     Toggle,
-    /// Disarms the track.
-    UnsetRecArm,
-    /// Arms the track.
-    SetRecArm,
+    /// Sets the track arm mode to a specific value.
+    Set(RecordArmMode),
 }
 
 impl TrackRecArmOperation {
@@ -951,8 +1024,7 @@ impl TrackRecArmOperation {
         use TrackRecArmOperation::*;
         match self {
             Toggle => -1,
-            UnsetRecArm => 0,
-            SetRecArm => 1,
+            Set(m) => m.to_raw(),
         }
     }
 }
@@ -992,6 +1064,8 @@ pub enum SoloMode {
     Off,
     SoloIgnoreRouting,
     SoloInPlace,
+    SafeSoloIgnoreRouting,
+    SafeSoloInPlace,
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
     Unknown(Hidden<i32>),
@@ -1005,6 +1079,8 @@ impl SoloMode {
             0 => Off,
             1 => SoloIgnoreRouting,
             2 => SoloInPlace,
+            5 => SafeSoloIgnoreRouting,
+            6 => SafeSoloInPlace,
             x => Unknown(Hidden(x)),
         }
     }
@@ -1016,6 +1092,8 @@ impl SoloMode {
             Off => 0,
             SoloIgnoreRouting => 1,
             SoloInPlace => 2,
+            SafeSoloIgnoreRouting => 5,
+            SafeSoloInPlace => 6,
             Unknown(Hidden(x)) => x,
         }
     }

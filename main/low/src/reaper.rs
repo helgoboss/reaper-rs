@@ -12236,10 +12236,10 @@ impl Reaper {
     pub unsafe fn kbd_RunCommandThroughHooks(
         &self,
         section: *mut root::KbdSectionInfo,
-        actionCommandID: *mut ::std::os::raw::c_int,
-        val: *mut ::std::os::raw::c_int,
-        valhw: *mut ::std::os::raw::c_int,
-        relmode: *mut ::std::os::raw::c_int,
+        actionCommandID: *const ::std::os::raw::c_int,
+        val: *const ::std::os::raw::c_int,
+        valhw: *const ::std::os::raw::c_int,
+        relmode: *const ::std::os::raw::c_int,
         hwnd: root::HWND,
     ) -> bool {
         match self.pointers.kbd_RunCommandThroughHooks {
@@ -16623,7 +16623,7 @@ impl Reaper {
         track: *mut root::MediaTrack,
         mute: ::std::os::raw::c_int,
         igngroupflags: ::std::os::raw::c_int,
-    ) -> bool {
+    ) -> ::std::os::raw::c_int {
         match self.pointers.SetTrackUIMute {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -16659,7 +16659,7 @@ impl Reaper {
         track: *mut root::MediaTrack,
         polarity: ::std::os::raw::c_int,
         igngroupflags: ::std::os::raw::c_int,
-    ) -> bool {
+    ) -> ::std::os::raw::c_int {
         match self.pointers.SetTrackUIPolarity {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -16676,7 +16676,7 @@ impl Reaper {
         track: *mut root::MediaTrack,
         recarm: ::std::os::raw::c_int,
         igngroupflags: ::std::os::raw::c_int,
-    ) -> bool {
+    ) -> ::std::os::raw::c_int {
         match self.pointers.SetTrackUIRecArm {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -16693,7 +16693,7 @@ impl Reaper {
         track: *mut root::MediaTrack,
         solo: ::std::os::raw::c_int,
         igngroupflags: ::std::os::raw::c_int,
-    ) -> bool {
+    ) -> ::std::os::raw::c_int {
         match self.pointers.SetTrackUISolo {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
@@ -21543,10 +21543,10 @@ pub struct ReaperFunctionPointers {
     pub kbd_RunCommandThroughHooks: Option<
         unsafe extern "C" fn(
             section: *mut root::KbdSectionInfo,
-            actionCommandID: *mut ::std::os::raw::c_int,
-            val: *mut ::std::os::raw::c_int,
-            valhw: *mut ::std::os::raw::c_int,
-            relmode: *mut ::std::os::raw::c_int,
+            actionCommandID: *const ::std::os::raw::c_int,
+            val: *const ::std::os::raw::c_int,
+            valhw: *const ::std::os::raw::c_int,
+            relmode: *const ::std::os::raw::c_int,
             hwnd: root::HWND,
         ) -> bool,
     >,
@@ -23139,7 +23139,7 @@ pub struct ReaperFunctionPointers {
             track: *mut root::MediaTrack,
             mute: ::std::os::raw::c_int,
             igngroupflags: ::std::os::raw::c_int,
-        ) -> bool,
+        ) -> ::std::os::raw::c_int,
     >,
     pub SetTrackUIPan: Option<
         unsafe extern "C" fn(
@@ -23155,21 +23155,21 @@ pub struct ReaperFunctionPointers {
             track: *mut root::MediaTrack,
             polarity: ::std::os::raw::c_int,
             igngroupflags: ::std::os::raw::c_int,
-        ) -> bool,
+        ) -> ::std::os::raw::c_int,
     >,
     pub SetTrackUIRecArm: Option<
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             recarm: ::std::os::raw::c_int,
             igngroupflags: ::std::os::raw::c_int,
-        ) -> bool,
+        ) -> ::std::os::raw::c_int,
     >,
     pub SetTrackUISolo: Option<
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             solo: ::std::os::raw::c_int,
             igngroupflags: ::std::os::raw::c_int,
-        ) -> bool,
+        ) -> ::std::os::raw::c_int,
     >,
     pub SetTrackUIVolume: Option<
         unsafe extern "C" fn(

@@ -4854,10 +4854,10 @@ pub mod root {
             pub static mut kbd_RunCommandThroughHooks: ::std::option::Option<
                 unsafe extern "C" fn(
                     section: *mut root::KbdSectionInfo,
-                    actionCommandID: *mut ::std::os::raw::c_int,
-                    val: *mut ::std::os::raw::c_int,
-                    valhw: *mut ::std::os::raw::c_int,
-                    relmode: *mut ::std::os::raw::c_int,
+                    actionCommandID: *const ::std::os::raw::c_int,
+                    val: *const ::std::os::raw::c_int,
+                    valhw: *const ::std::os::raw::c_int,
+                    relmode: *const ::std::os::raw::c_int,
                     hwnd: root::HWND,
                 ) -> bool,
             >;
@@ -7362,7 +7362,7 @@ pub mod root {
                     track: *mut root::MediaTrack,
                     mute: ::std::os::raw::c_int,
                     igngroupflags: ::std::os::raw::c_int,
-                ) -> bool,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -7384,7 +7384,7 @@ pub mod root {
                     track: *mut root::MediaTrack,
                     polarity: ::std::os::raw::c_int,
                     igngroupflags: ::std::os::raw::c_int,
-                ) -> bool,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -7394,7 +7394,7 @@ pub mod root {
                     track: *mut root::MediaTrack,
                     recarm: ::std::os::raw::c_int,
                     igngroupflags: ::std::os::raw::c_int,
-                ) -> bool,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {
@@ -7404,7 +7404,7 @@ pub mod root {
                     track: *mut root::MediaTrack,
                     solo: ::std::os::raw::c_int,
                     igngroupflags: ::std::os::raw::c_int,
-                ) -> bool,
+                ) -> ::std::os::raw::c_int,
             >;
         }
         extern "C" {

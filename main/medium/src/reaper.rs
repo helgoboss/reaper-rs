@@ -23,10 +23,10 @@ use crate::{
     ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
     StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
     TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackPolarityOperation, TrackRecArmOperation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
-    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
+    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
+    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -5304,13 +5304,15 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         value: TrackPolarityOperation,
         flags: BitFlags<SetTrackUiFlags>,
-    ) -> bool
+    ) -> TrackPolarity
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        self.low
-            .SetTrackUIPolarity(track.as_ptr(), value.to_raw(), flags.bits() as _)
+        let raw = self
+            .low
+            .SetTrackUIPolarity(track.as_ptr(), value.to_raw(), flags.bits() as _);
+        TrackPolarity::from_raw(raw)
     }
 
     /// Sets the given track's width. Also supports relative changes and gang.
@@ -5907,13 +5909,15 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         value: TrackRecArmOperation,
         flags: BitFlags<SetTrackUiFlags>,
-    ) -> bool
+    ) -> RecordArmMode
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        self.low
-            .SetTrackUIRecArm(track.as_ptr(), value.to_raw(), flags.bits() as _)
+        let raw = self
+            .low
+            .SetTrackUIRecArm(track.as_ptr(), value.to_raw(), flags.bits() as _);
+        RecordArmMode::from_raw(raw)
     }
 
     /// Mutes or unmutes the given track.
@@ -5955,13 +5959,15 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         mute: TrackMuteOperation,
         flags: BitFlags<SetTrackUiFlags>,
-    ) -> bool
+    ) -> TrackMuteState
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        self.low
-            .SetTrackUIMute(track.as_ptr(), mute.to_raw(), flags.bits() as _)
+        let raw = self
+            .low
+            .SetTrackUIMute(track.as_ptr(), mute.to_raw(), flags.bits() as _);
+        TrackMuteState::from_raw(raw)
     }
 
     /// Soloes or unsoloes the given track.
@@ -5990,6 +5996,8 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// Soloes or unsoloes the given track.
     ///
+    /// TODO-high The return value will change in future. Not clear yet how to interpret it.
+    ///
     /// Returns the new value.
     ///
     /// Has fewer side effects than [`Reaper::csurf_on_solo_change_ex`] and allows more
@@ -6003,7 +6011,7 @@ impl<UsageScope> Reaper<UsageScope> {
         track: MediaTrack,
         value: TrackSoloOperation,
         flags: BitFlags<SetTrackUiFlags>,
-    ) -> bool
+    ) -> i32
     where
         UsageScope: MainThreadOnly,
     {
