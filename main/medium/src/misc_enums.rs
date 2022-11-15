@@ -1714,3 +1714,97 @@ impl NudgeUnits {
         }
     }
 }
+
+/// Selects string information, that can be set or retrieved from project.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum ProjectInfoStringCategory {
+    /// Project file name (read-only, is_set will be ignored).
+    ProjectName,
+
+    /// Title field from Project Settings/Notes dialog
+    ProjectTitle,
+
+    /// Author field from Project Settings/Notes dialog
+    ProjectAuthor,
+
+    /// Track group name, value should be 1..64
+    TrackGroupName(u8),
+
+    /// Get the GUID (unique ID) of the marker or region with given index,
+    /// index is the one, that passed to `enum_project_markers`,
+    /// not necessarily the displayed number.
+    MarkerGuid(u32),
+
+    /// Recording directory -- may be blank or a relative path,
+    /// to get the effective path see get_project_path_ex()
+    RecordPath,
+
+    /// Secondary recording directory.
+    RecordPathSecondary,
+
+    /// Render directory
+    RenderFile,
+
+    /// Render file name (may contain wildcards)
+    RenderPattern,
+
+    /// The metadata saved with the project
+    /// (not metadata embedded in project media).
+    ///
+    /// # Example ID3 album name metadata:
+    ///
+    /// value=ReaperStringArg::from("ID3:TALB") to get
+    /// value=ReaperStringArg::from("ID3:TALB|my album name") to set.
+    ///
+    /// Returns as a semicolon-separated list of defined project metadata identifiers.
+    RenderMetadata,
+
+    /// Semicolon separated list of files that would be written
+    /// if the project is rendered using the most recent render settings.
+    RenderTargets,
+
+    /// (read-only) semicolon separated list of statistics
+    /// for the most recently rendered files.
+    /// Call with value=ReaperStringArg::from("XXX") to run an action
+    /// (for example, "42437"=dry run render selected items) before returning statistics.
+    RenderStats,
+
+    ///  base64-encoded sink configuration (see project files, etc).
+    ///
+    /// Callers can also pass a simple 4-byte string (non-base64-encoded),
+    /// e.g. "evaw" or "l3pm", to use default settings for that sink type.
+    ///
+    /// Generate ReaScriptAPI from the REAPER to see which formats are supported
+    /// and retrieve their strings.
+    ///
+    /// Typical are: "wave" "aiff" "caff" "iso " "ddp " "flac" "mp3l" "oggv"
+    /// "OggS" "FFMP" "WMF " "GIF " "LCF " "wvpk"
+    RenderFormat,
+
+    /// See RenderFormat
+    RenderFormat2,
+}
+
+impl<'a> ProjectInfoStringCategory {
+    /// Converts this value to an &str as expected by the low-level API.
+    pub fn to_raw(self) -> ReaperStringArg<'a> {
+        match self {
+            Self::ProjectName => ReaperStringArg::from("PROJECT_NAME"),
+            Self::ProjectTitle => ReaperStringArg::from("PROJECT_TITLE"),
+            Self::ProjectAuthor => ReaperStringArg::from("PROJECT_AUTHOR"),
+            Self::TrackGroupName(val) => {
+                ReaperStringArg::from(format!("TRACK_GROUP_NAME:{:?}", val))
+            }
+            Self::MarkerGuid(val) => ReaperStringArg::from(format!("MARKER_GUID:{:?}", val)),
+            Self::RecordPath => ReaperStringArg::from("RECORD_PATH"),
+            Self::RecordPathSecondary => ReaperStringArg::from("RECORD_PATH_SECONDARY"),
+            Self::RenderFile => ReaperStringArg::from("RENDER_FILE"),
+            Self::RenderPattern => ReaperStringArg::from("RENDER_PATTERN"),
+            Self::RenderMetadata => ReaperStringArg::from("RENDER_METADATA"),
+            Self::RenderTargets => ReaperStringArg::from("RENDER_TARGETS"),
+            Self::RenderStats => ReaperStringArg::from("RENDER_STATS"),
+            Self::RenderFormat => ReaperStringArg::from("RENDER_FORMAT"),
+            Self::RenderFormat2 => ReaperStringArg::from("RENDER_FORMAT2"),
+        }
+    }
+}

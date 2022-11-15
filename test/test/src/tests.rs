@@ -122,6 +122,7 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         main_section_functions(),
         register_and_unregister_action(),
         register_and_unregister_toggle_action(),
+        project_info_string(),
     ]
     .into_iter();
     let steps_b = vec![
@@ -268,6 +269,46 @@ fn mark_project_as_dirty() -> TestStep {
         // Then
         // TODO Doesn't say very much because it has been dirty before already. Save before!?
         assert!(project.is_dirty());
+        Ok(())
+    })
+}
+
+fn project_info_string() -> TestStep {
+    step(AllVersions, "Test Project info string", |rpr, _| {
+        // Given
+        let project = rpr.current_project();
+        let medium = rpr.medium_reaper();
+
+        unsafe {
+            medium.get_set_project_info_string_set(
+                project.context(),
+                reaper_medium::ProjectInfoStringCategory::RenderFile,
+                "reaper-rs",
+            );
+            let result = medium.get_set_project_info_string_get(
+                project.context(),
+                reaper_medium::ProjectInfoStringCategory::RenderFile,
+            );
+            assert_eq!(result.unwrap(), "reaper-rs");
+            // assert_eq!(
+            //     reaper_medium::ProjectInfoStringCategory::TrackGroupName(2)
+            //         .to_raw()
+            //         .into_inner()
+            //         .to_string(),
+            //     String::from("TRACK_GROUP_NAME:2")
+            // );
+            // medium.get_set_project_info_string_set(
+            //     project.context(),
+            //     reaper_medium::ProjectInfoStringCategory::TrackGroupName(2),
+            //     "My group name",
+            // )?;
+            // let result = medium.get_set_project_info_string_get(
+            //     project.context(),
+            //     reaper_medium::ProjectInfoStringCategory::TrackGroupName(2),
+            // );
+            // assert_eq!(result.unwrap(), "My group name");
+        }
+
         Ok(())
     })
 }

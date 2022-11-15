@@ -16,8 +16,8 @@ use crate::{
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, NudgeUnits,
     OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
     PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
-    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectInfoStringCategory,
+    ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
     ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
     ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
     RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
@@ -5605,6 +5605,75 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.GetActiveTake(item.as_ptr());
         NonNull::new(ptr)
+    }
+
+    /// Set project information.
+    ///
+    /// For more information of possible values see `ProjectInfoStringCategory`
+    /// documentation.
+    ///
+    /// # Known bugs
+    ///
+    /// This function constantly returns false, but sometimes it works.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn get_set_project_info_string_set<'a, I: Into<ReaperStringArg<'a>>>(
+        &self,
+        project: ProjectContext,
+        category: ProjectInfoStringCategory,
+        value: I,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let val: ReaperStringArg = value.into();
+        let val: CString = CString::from(val.as_reaper_str().as_c_str());
+        let category_string = category.to_raw();
+        self.low().GetSetProjectInfo_String(
+            project.to_raw(),
+            category_string.as_ptr(),
+            val.into_raw(),
+            true,
+        )
+    }
+
+    /// Get project information.
+    ///
+    /// For more information of possible values see `ProjectInfoStringCategory`
+    /// documentation.
+    ///
+    /// # Known bugs
+    ///
+    /// There are problems with several categories. At least, with
+    /// TrackGroupName(x), which makes definitely right string for category,
+    /// but doesn't work with reaper-rs.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn get_set_project_info_string_get(
+        &self,
+        project: ProjectContext,
+        category: ProjectInfoStringCategory,
+    ) -> ReaperFunctionResult<String>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let max_size = 1024 * 10;
+        let (result, status) = with_string_buffer(max_size, |buf, _| -> bool {
+            self.low().GetSetProjectInfo_String(
+                project.to_raw(),
+                category.to_raw().as_ptr(),
+                buf,
+                false,
+            )
+        });
+        match status {
+            true => Ok(result.into_string()),
+            false => Err(ReaperFunctionError::new("Can not get project info.")),
+        }
     }
 
     /// Returns the take that is currently being edited in the given MIDI editor.
