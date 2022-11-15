@@ -1127,6 +1127,22 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.AnyTrackSolo(project.to_raw())
     }
 
+    /// True if function name exists in the REAPER API
+    pub fn api_exists(&self, function_name: ReaperStringArg) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe { self.low().APIExists(function_name.as_ptr()) }
+    }
+
+    /// Displays a message window if the API was successfully called.
+    pub fn api_test(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().APITest()
+    }
+
     /// Directly simulates a play button hit.
     ///
     /// # Panics
