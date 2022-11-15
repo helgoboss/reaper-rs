@@ -1023,12 +1023,36 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.IsInRealTimeAudio() != 0
     }
 
+    /// Open all audio and MIDI devices, if not open.
+    pub fn audio_init(&self)
+    where
+        UsageScope: AnyThread,
+    {
+        self.low().Audio_Init();
+    }
+
     /// Returns whether audio is running at all.
     pub fn audio_is_running(&self) -> bool
     where
         UsageScope: AnyThread,
     {
         self.low.Audio_IsRunning() != 0
+    }
+
+    /// Returns whether audio is in pre-buffer.
+    pub fn audio_is_pre_buffer(&self) -> bool
+    where
+        UsageScope: AnyThread,
+    {
+        self.low.Audio_IsPreBuffer() != 0
+    }
+
+    /// Close all audio and MIDI devices, if open.
+    pub fn audio_quit(&self)
+    where
+        UsageScope: AnyThread,
+    {
+        self.low().Audio_Quit();
     }
 
     /// Starts playing.
