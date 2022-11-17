@@ -1161,11 +1161,11 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// True if function name exists in the REAPER API
-    pub fn api_exists(&self, function_name: ReaperStringArg) -> bool
+    pub fn api_exists<'a, I: Into<ReaperStringArg<'a>>>(&self, function_name: I) -> bool
     where
         UsageScope: MainThreadOnly,
     {
-        unsafe { self.low().APIExists(function_name.as_ptr()) }
+        unsafe { self.low().APIExists(function_name.into().as_ptr()) }
     }
 
     /// Displays a message window if the API was successfully called.
