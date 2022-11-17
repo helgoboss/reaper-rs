@@ -1116,6 +1116,21 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
+    pub fn clear_all_rec_armed(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().ClearAllRecArmed()
+    }
+
+    /// Reset the global peak caches.
+    pub fn clear_peak_cache(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().ClearPeakCache()
+    }
+
     /// Starts playing.
     pub fn csurf_on_play(&self)
     where
