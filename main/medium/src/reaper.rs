@@ -390,12 +390,12 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
-    /// forceset=0,doupd=true,centermode=-1 for default
-    pub fn adjust_zoom(&self, amt: f64, force_set: i32, doupd: bool, centermode: i32)
+    /// force_set=0, doupd=true, center_mode=-1 for default
+    pub fn adjust_zoom(&self, amt: f64, force_set: i32, doupd: bool, center_mode: i32)
     where
         UsageScope: MainThreadOnly,
     {
-        self.low().adjustZoom(amt, force_set, doupd, centermode)
+        self.low().adjustZoom(amt, force_set, doupd, center_mode)
     }
 
     /// Returns the track at the given index.
@@ -1073,6 +1073,10 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Returns Ok(()) if loudness was calculated successfully,
     /// Err("User aborted render") if user canceled the dry run render,
     /// Err("Unexpected result") if something went wrong.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid media source.
     pub unsafe fn calc_media_src_loudness(
         &self,
         media_source: PcmSource,
