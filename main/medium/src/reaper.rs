@@ -7,12 +7,12 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, CalculateNormalizationParam,
+    ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
+    HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
     PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
@@ -1089,6 +1089,31 @@ impl<UsageScope> Reaper<UsageScope> {
             -1 => Err(ReaperFunctionError::new("User aborted render.")),
             _ => Err(ReaperFunctionError::new("Unexpected result.")),
         }
+    }
+
+    /// Calculate normalize adjustment for source media.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid media source.
+    pub unsafe fn calculate_normalization(
+        &self,
+        media_source: &PcmSource,
+        normalize_to: CalculateNormalizationParam,
+        normalize_target: Db,
+        normalize_start: PositionInSeconds,
+        normalize_end: PositionInSeconds,
+    ) -> f64
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CalculateNormalization(
+            media_source.as_ptr(),
+            normalize_to.to_raw(),
+            normalize_target.get(),
+            normalize_start.get(),
+            normalize_end.get(),
+        )
     }
 
     /// Starts playing.
