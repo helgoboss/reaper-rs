@@ -1064,6 +1064,29 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low().BypassFxAllTracks(byp);
     }
 
+    /// Calculates loudness statistics of media via dry run render.
+    ///
+    /// Statistics will be displayed to the user.
+    ///
+    /// call GetSetProjectInfo_String("RENDER_STATS") to retrieve via API.
+    ///
+    /// Returns Ok(()) if loudness was calculated successfully,
+    /// Err("User aborted render") if user canceled the dry run render,
+    /// Err("Unexpected result") if something went wrong.
+    pub unsafe fn calc_media_src_loudness(
+        &self,
+        media_source: PcmSource,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        match self.low().CalcMediaSrcLoudness(media_source.as_ptr()) {
+            1 => Ok(()),
+            -1 => Err(ReaperFunctionError::new("User aborted render.")),
+            _ => Err(ReaperFunctionError::new("Unexpected result.")),
+        }
+    }
+
     /// Starts playing.
     pub fn csurf_on_play(&self)
     where
