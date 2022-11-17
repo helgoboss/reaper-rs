@@ -1079,7 +1079,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// REAPER can crash if you pass an invalid media source.
     pub unsafe fn calc_media_src_loudness(
         &self,
-        media_source: PcmSource,
+        media_source: &PcmSource,
     ) -> ReaperFunctionResult<()>
     where
         UsageScope: MainThreadOnly,
