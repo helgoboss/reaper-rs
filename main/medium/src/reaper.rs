@@ -2131,6 +2131,59 @@ impl<UsageScope> Reaper<UsageScope> {
         PositionInSeconds::new(res)
     }
 
+    /// Get amount of automation items in envelope.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass invalid envelope.
+    pub unsafe fn count_automation_items(&self, envelope: &TrackEnvelope) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountAutomationItems(envelope.as_ptr()) as u32
+    }
+
+    /// Get the number of points in the envelope.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass invalid envelope.
+    pub unsafe fn count_envelope_points(&self, envelope: &TrackEnvelope) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountEnvelopePoints(envelope.as_ptr()) as u32
+    }
+
+    /// Get the number of points in the envelope.
+    ///
+    /// automation_item_index=-1 for the underlying envelope,
+    /// 0 for the first automation item on the envelope, etc.
+    ///
+    /// For automation items, pass automation_item_index|0x10000000
+    /// to base ptidx on the number of points in one full loop iteration,
+    /// even if the automation item is trimmed so that not
+    /// all points are visible.
+    ///
+    /// Otherwise, ptidx will be based on the number of
+    /// visible points in the automation item,
+    /// including all loop iterations.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass invalid envelope.
+    pub unsafe fn count_envelope_points_ex(
+        &self,
+        envelope: &TrackEnvelope,
+        automation_item_index: i32,
+    ) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .CountEnvelopePointsEx(envelope.as_ptr(), automation_item_index) as u32
+    }
+
     /// Returns the number of markers and regions in the given project.
     ///
     /// # Panics
@@ -2635,6 +2688,26 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.CountTracks(project.to_raw()) as u32
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn count_take_envelopes(&self, take: MediaItemTake) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountTakeEnvelopes(take.as_ptr()) as u32
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn count_takes(&self, item: MediaItem) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountTakes(item.as_ptr()) as u32
+    }
+
     /// Returns an integer that changes when the project state changes.
     ///
     /// # Panics
@@ -2689,6 +2762,21 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.CountMediaItems(project.to_raw()) as u32
+    }
+
+    pub fn count_selected_media_items(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.count_selected_media_items_unchecked(project) }
+    }
+
+    pub unsafe fn count_selected_media_items_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountSelectedMediaItems(project.to_raw()) as u32
     }
 
     /// Returns the length of the given project.
@@ -4578,6 +4666,24 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.CountTCPFXParms(project.to_raw(), track.as_ptr()) as u32
+    }
+
+    pub fn count_tempo_time_sig_markers(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.count_tempo_time_sig_markers_unchecked(project) }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn count_tempo_time_sig_markers_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountTempoTimeSigMarkers(project.to_raw()) as u32
     }
 
     /// Returns information about a specific FX parameter knob displayed on the track control panel.
