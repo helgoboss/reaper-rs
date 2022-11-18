@@ -2359,6 +2359,132 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
+    /// # Note
+    ///
+    /// marker_index is the index, displayed in marker edit window.
+    pub fn delete_project_marker(
+        &self,
+        project: ProjectContext,
+        marker_index: u32,
+        is_region: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.delete_project_marker_unchecked(project, marker_index, is_region) }
+    }
+
+    /// Like [`delete_project_marker()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn delete_project_marker_unchecked(
+        &self,
+        project: ProjectContext,
+        marker_index: u32,
+        is_region: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteProjectMarker(project.to_raw(), marker_index as i32, is_region)
+    }
+
+    /// Like [`delete_project_marker()`] but with different indexing.
+    ///
+    /// # Note
+    ///
+    /// marker_index is 0 for the first marker/region, 1 for the next, etc
+    pub fn delete_project_marker_by_index(&self, project: ProjectContext, marker_index: u32) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.delete_project_marker_by_index_unchecked(project, marker_index) }
+    }
+
+    /// Like [`delete_project_marker_by_index()`] but doesn't check
+    /// if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn delete_project_marker_by_index_unchecked(
+        &self,
+        project: ProjectContext,
+        marker_index: u32,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteProjectMarkerByIndex(project.to_raw(), marker_index as i32)
+    }
+
+    /// Delete a take marker.
+    ///
+    /// # Note
+    ///
+    /// index will change for all following take markers.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn delete_take_marker(&self, take: MediaItemTake, index: u32) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().DeleteTakeMarker(take.as_ptr(), index as i32)
+    }
+
+    /// Deletes one or more stretch markers.
+    ///
+    /// Returns number of stretch markers deleted.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn delete_take_stretch_markers(
+        &self,
+        mut take: MediaItemTake,
+        index: u32,
+        amount: u32,
+    ) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteTakeStretchMarkers(take.as_mut(), index as i32, &(amount as i32)) as u32
+    }
+
+    pub fn delete_tempo_time_signature_marker(&self, project: ProjectContext, index: u32) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe { self.delete_tempo_time_signature_marker_unchecked(project, index) }
+    }
+
+    /// Like [`delete_tempo_time_signature_marker()`] but doesn't check
+    /// if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn delete_tempo_time_signature_marker_unchecked(
+        &self,
+        project: ProjectContext,
+        index: u32,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteTempoTimeSigMarker(project.to_raw(), index as i32)
+    }
+
     /// Performs an action belonging to the main section.
     ///
     /// To perform non-native actions (ReaScripts, custom or extension plugin actions) safely, see
