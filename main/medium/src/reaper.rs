@@ -33,7 +33,8 @@ use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
 
 use crate::util::{
-    create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_prefilled,
+    create_passing_c_str, create_string_buffer, with_buffer, with_string_buffer,
+    with_string_buffer_prefilled,
 };
 use enumflags2::BitFlags;
 use std::fmt::Debug;
@@ -6531,6 +6532,252 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(())
     }
 
+    /// Set the extended state value for a specific section and key.
+    ///
+    /// persist=true means the value should be stored and reloaded
+    /// the next time REAPER is opened.
+    pub fn set_ext_state<'a>(
+        &self,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+        value: impl Into<ReaperStringArg<'a>>,
+        persist: bool,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            self.low().SetExtState(
+                section.into().as_ptr(),
+                key.into().as_ptr(),
+                value.into().as_ptr(),
+                persist,
+            )
+        }
+    }
+
+    /// Get the extended state value for a specific section and key.
+    pub fn get_ext_state<'a>(
+        &self,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperString
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            let ptr = self
+                .low()
+                .GetExtState(section.into().as_ptr(), key.into().as_ptr());
+            ReaperStr::from_ptr(ptr).to_reaper_string()
+        }
+    }
+
+    /// Returns true if there exists an extended state value
+    /// for a specific section and key.
+    pub fn has_ext_state<'a>(
+        &self,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            self.low()
+                .HasExtState(section.into().as_ptr(), key.into().as_ptr())
+        }
+    }
+
+    /// Delete the extended state value for a specific section and key.
+    ///
+    /// persist=true means the value should remain deleted
+    /// the next time REAPER is opened
+    pub fn delete_ext_state<'a>(
+        &self,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+        persist: bool,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            self.low()
+                .DeleteExtState(section.into().as_ptr(), key.into().as_ptr(), persist)
+        }
+    }
+
+    /// Save a key/value pair for a specific extension,
+    /// to be restored the next time this specific project is loaded.
+    ///
+    /// Typically extname will be the name of a reascript or extension section.
+    ///
+    /// For idiomatic deleting project state use [`delete_project_ext_State`]
+    pub fn set_project_ext_state<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+        value: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.set_project_ext_state_unchecked(project, section, key, value) }
+    }
+
+    pub unsafe fn set_project_ext_state_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+        value: impl Into<ReaperStringArg<'a>>,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().SetProjExtState(
+            project.to_raw(),
+            section.into().as_ptr(),
+            key.into().as_ptr(),
+            value.into().as_ptr(),
+        ) != 0
+    }
+
+    /// Get the extended state value for a specific section and key.
+    pub fn get_project_ext_state<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+    ) -> ReaperFunctionResult<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        self.get_project_ext_state_unchecked(project, section, key, buffer_size)
+    }
+
+    pub fn get_project_ext_state_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+    ) -> ReaperFunctionResult<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            let (value, result) = with_string_buffer(buffer_size, |buf, size| {
+                self.low().GetProjExtState(
+                    project.to_raw(),
+                    section.into().as_ptr(),
+                    key.into().as_ptr(),
+                    buf,
+                    size,
+                )
+            });
+            match result {
+                x if x < 0 => Err(ReaperFunctionError::new("Can not get ext state.")),
+                _ => Ok(value),
+            }
+        }
+    }
+
+    /// Delete the extended state value for a specific section and key.
+    ///
+    /// if key = None, deletes the whole section.
+    ///
+    /// # Panics
+    ///
+    /// If you pass an invalid project.
+    pub fn delete_project_ext_state<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: Option<impl Into<ReaperStringArg<'a>>>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        self.delete_project_ext_state_unchecked(project, section, key)
+    }
+
+    pub fn delete_project_ext_state_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        key: Option<impl Into<ReaperStringArg<'a>>>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        let key = match key {
+            None => ReaperStringArg::from(""),
+            Some(val) => val.into(),
+        };
+        unsafe {
+            self.low().SetProjExtState(
+                project.to_raw(),
+                section.into().as_ptr(),
+                key.as_ptr(),
+                ReaperStringArg::from("").as_ptr(),
+            );
+        }
+    }
+
+    /// Enumerate the data stored with the project for a specific extname.
+    ///
+    /// result.is_more is false, when there is no more data.
+    ///
+    /// index is 0-based.
+    pub fn enum_project_ext_state<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        index: u32,
+        key_size: u32,
+        val_size: u32,
+    ) -> EnumProjectExtStateResult
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe {
+            self.enum_project_ext_state_unchecked(project, section, index, key_size, val_size)
+        }
+    }
+
+    pub unsafe fn enum_project_ext_state_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        section: impl Into<ReaperStringArg<'a>>,
+        index: u32,
+        key_size: u32,
+        val_size: u32,
+    ) -> EnumProjectExtStateResult
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let key_buf = create_string_buffer(key_size);
+        let val_buf = create_string_buffer(val_size);
+        let state = self.low().EnumProjExtState(
+            project.to_raw(),
+            section.into().as_ptr(),
+            index as i32,
+            key_buf,
+            key_size as i32,
+            val_buf,
+            val_size as i32,
+        );
+        EnumProjectExtStateResult {
+            is_empty: !state,
+            key: ReaperStr::from_ptr(key_buf).to_reaper_string(),
+            value: ReaperStr::from_ptr(val_buf).to_reaper_string(),
+        }
+    }
+
     /// Sets the volume of the given track send, hardware output send or track receive.
     ///
     /// # Errors
@@ -7299,6 +7546,23 @@ pub enum GetFocusedFxResult {
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
     Unknown(Hidden<i32>),
+}
+
+#[derive(Clone, PartialEq, Hash, Debug)]
+pub struct EnumProjectExtStateResult {
+    /// true, if function can be called with the next index.
+    pub is_empty: bool,
+    pub key: ReaperString,
+    pub value: ReaperString,
+}
+impl EnumProjectExtStateResult {
+    pub fn new(is_empty: bool, key: &str, value: &str) -> Self {
+        Self {
+            is_empty,
+            key: ReaperString::from_str(key),
+            value: ReaperString::from_str(value),
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]

@@ -47,14 +47,26 @@ pub fn with_string_buffer_internal<T>(
     (string, result)
 }
 
+pub fn create_string_buffer(max_size: u32) -> *mut i8 {
+    let vec: Vec<u8> = vec![0; max_size as usize];
+    let c_string = unsafe { CString::from_vec_unchecked(vec) };
+    let raw = c_string.into_raw();
+    raw
+}
+
 pub fn with_buffer<T>(
     max_size: u32,
     fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
 ) -> (Vec<u8>, T) {
-    let mut vec: Vec<u8> = vec![0; max_size as usize];
-    let raw = vec.as_mut_ptr() as *mut c_char;
+    let (vec, raw) = create_buffer(max_size);
     let result = fill_buffer(raw, max_size as i32);
     (vec, result)
+}
+
+pub fn create_buffer(max_size: u32) -> (Vec<u8>, *mut i8) {
+    let mut vec: Vec<u8> = vec![0; max_size as usize];
+    let raw = vec.as_mut_ptr() as *mut c_char;
+    (vec, raw)
 }
 
 /// We really need a box here in order to obtain a thin pointer. We must not consume it, that's why
