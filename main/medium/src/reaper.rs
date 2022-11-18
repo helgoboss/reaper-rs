@@ -2184,6 +2184,86 @@ impl<UsageScope> Reaper<UsageScope> {
             .CountEnvelopePointsEx(envelope.as_ptr(), automation_item_index) as u32
     }
 
+    /// Delete an envelope point.
+    ///
+    /// # Note
+    ///
+    /// `automation_item_idx = -1` for the underlying envelope,
+    /// `0` for the first automation item on the envelope, etc.
+    ///
+    /// For automation items, pass automation_item_idx|0x10000000
+    /// to base point_index on the number of points in one full loop iteration,
+    /// even if the automation item is trimmed so that not all points
+    /// are visible.
+    ///
+    /// Otherwise, point_index will be based on the number of visible points
+    /// in the automation item, including all loop iterations.
+    ///
+    /// # Note from original API
+    ///
+    /// If setting multiple points at once, set noSort=true,
+    /// and call Envelope_SortPoints when done.
+    ///
+    /// But we don't have noSort argument.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid envelope.
+    pub unsafe fn delete_envelope_point_ex(
+        &self,
+        mut envelope: TrackEnvelope,
+        automation_item_idx: i32,
+        point_index: u32,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteEnvelopePointEx(envelope.as_mut(), automation_item_idx, point_index as i32)
+    }
+
+    /// Delete envelope points between time bounds.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid envelope.
+    pub unsafe fn delete_envelope_point_range(
+        &self,
+        mut envelope: TrackEnvelope,
+        time_start: PositionInSeconds,
+        time_end: PositionInSeconds,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteEnvelopePointRange(envelope.as_mut(), time_start.get(), time_end.get())
+    }
+
+    /// Delete envelope points between time bounds, defining
+    /// automation item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid envelope.
+    pub unsafe fn delete_envelope_point_range_ex(
+        &self,
+        mut envelope: TrackEnvelope,
+        automation_item_idx: i32,
+        time_start: PositionInSeconds,
+        time_end: PositionInSeconds,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().DeleteEnvelopePointRangeEx(
+            envelope.as_mut(),
+            automation_item_idx,
+            time_start.get(),
+            time_end.get(),
+        )
+    }
+
     /// Returns the number of markers and regions in the given project.
     ///
     /// # Panics
