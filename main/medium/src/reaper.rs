@@ -292,13 +292,13 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn add_project_marker(
+    pub unsafe fn add_project_marker<'a>(
         &self,
         project: ProjectContext,
         region: bool,
         pos: PositionInSeconds,
         region_end_position: PositionInSeconds,
-        name: ReaperStringArg,
+        name: impl Into<ReaperStringArg<'a>>,
         desired_index: i32,
     ) -> Option<i32>
     where
@@ -309,7 +309,7 @@ impl<UsageScope> Reaper<UsageScope> {
             region,
             pos.get(),
             region_end_position.get(),
-            name.as_ptr(),
+            name.into().as_ptr(),
             desired_index,
         );
         match result {
@@ -332,13 +332,13 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn add_project_marker_2(
+    pub unsafe fn add_project_marker_2<'a>(
         &self,
         project: ProjectContext,
         region: bool,
         pos: PositionInSeconds,
         region_end_position: PositionInSeconds,
-        name: ReaperStringArg,
+        name: impl Into<ReaperStringArg<'a>>,
         desired_index: i32,
         color: NativeColor,
     ) -> Option<i32>
@@ -350,7 +350,7 @@ impl<UsageScope> Reaper<UsageScope> {
             region,
             pos.get(),
             region_end_position.get(),
-            name.as_ptr(),
+            name.into().as_ptr(),
             desired_index,
             color.to_raw(),
         );
@@ -369,11 +369,11 @@ impl<UsageScope> Reaper<UsageScope> {
     /// commit should be true always, but adding scripts in bulk.
     /// In the last case — the last function call should be with
     /// commit=true.
-    pub fn add_remove_reascript(
+    pub fn add_remove_reascript<'a>(
         &self,
         add: bool,
         section_id: i32,
-        script_file: ReaperStringArg,
+        script_file: impl Into<ReaperStringArg<'a>>,
         commit: bool,
     ) -> Option<u32>
     where
@@ -382,7 +382,7 @@ impl<UsageScope> Reaper<UsageScope> {
         unsafe {
             let result =
                 self.low()
-                    .AddRemoveReaScript(add, section_id, script_file.as_ptr(), commit);
+                    .AddRemoveReaScript(add, section_id, script_file.into().as_ptr(), commit);
             match result {
                 x if (x <= 0) => None,
                 _ => Some(result as u32),
@@ -1228,7 +1228,7 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// True if function name exists in the REAPER API
-    pub fn api_exists<'a, I: Into<ReaperStringArg<'a>>>(&self, function_name: I) -> bool
+    pub fn api_exists<'a>(&self, function_name: impl Into<ReaperStringArg<'a>>) -> bool
     where
         UsageScope: MainThreadOnly,
     {
@@ -1247,8 +1247,11 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// If command is None — disarms.
     /// If section_name is empty string — arms in MainSection.
-    pub fn arm_command(&self, command: Option<CommandId>, section_name: ReaperStringArg)
-    where
+    pub fn arm_command<'a>(
+        &self,
+        command: Option<CommandId>,
+        section_name: impl Into<ReaperStringArg<'a>>,
+    ) where
         UsageScope: MainThreadOnly,
     {
         let cmd: i32;
@@ -1257,7 +1260,7 @@ impl<UsageScope> Reaper<UsageScope> {
             Some(id) => cmd = id.get() as i32,
         }
         unsafe {
-            self.low().ArmCommand(cmd, section_name.as_ptr());
+            self.low().ArmCommand(cmd, section_name.into().as_ptr());
         }
     }
 
