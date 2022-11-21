@@ -100,31 +100,52 @@ impl Reaper {
 
     // Attention: Returns normal fx only, not input fx!
     // This is not reliable! After REAPER start no focused Fx can be found!
-    pub fn focused_fx(&self) -> Option<Fx> {
-        self.medium_reaper().get_focused_fx().and_then(|res| {
-            use reaper_medium::GetFocusedFxResult::*;
-            match res {
-                TakeFx { .. } => None, // TODO-low implement
-                TrackFx {
-                    track_location,
-                    fx_location,
-                } => {
-                    // We don't know the project so we must check each project
-                    self.projects()
-                        .filter_map(|p| {
-                            let track = p.track_by_ref(track_location)?;
-                            let fx = track.fx_by_query_index(fx_location.to_raw())?;
-                            if fx.window_is_open() {
-                                Some(fx)
-                            } else {
-                                None
-                            }
-                        })
-                        .next()
-                }
-                Unknown(_) => None,
+    #[allow(deprecated)]
+    pub fn focused_fx(&self) -> Option<FocusedFxResult> {
+        let reaper = self.medium_reaper();
+        if reaper.low().pointers().GetFocusedFX2.is_some() {
+            reaper.get_focused_fx_2().and_then(|res| {
+                self.translate_focused_fx_result(res.fx, Some(res.is_still_focused))
+            })
+        } else {
+            reaper
+                .get_focused_fx()
+                .and_then(|res| self.translate_focused_fx_result(res, None))
+        }
+    }
+
+    fn translate_focused_fx_result(
+        &self,
+        fx: reaper_medium::GetFocusedFxResult,
+        is_still_focused: Option<bool>,
+    ) -> Option<FocusedFxResult> {
+        use reaper_medium::GetFocusedFxResult::*;
+        let fx = match fx {
+            TakeFx { .. } => return None, // TODO-low implement
+            TrackFx {
+                track_location,
+                fx_location,
+            } => {
+                // We don't know the project so we must check each project
+                self.projects()
+                    .filter_map(|p| {
+                        let track = p.track_by_ref(track_location)?;
+                        let fx = track.fx_by_query_index(fx_location.to_raw())?;
+                        if fx.window_is_open() {
+                            Some(fx)
+                        } else {
+                            None
+                        }
+                    })
+                    .next()?
             }
-        })
+            Unknown(_) => return None,
+        };
+        let res = FocusedFxResult {
+            is_still_focused,
+            fx,
+        };
+        Some(res)
     }
 
     pub fn current_project(&self) -> Project {
@@ -444,4 +465,10 @@ impl Reaper {
         let casted_value_ref = unsafe { casted_value_ptr.as_mut() };
         Ok(casted_value_ref)
     }
+}
+
+pub struct FocusedFxResult {
+    /// If `None`, it's not clear whether the FX is still focused (older REAPER versions).
+    pub is_still_focused: Option<bool>,
+    pub fx: Fx,
 }

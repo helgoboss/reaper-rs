@@ -7,7 +7,6 @@ use std::path::{Path, PathBuf};
 use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
-use crate::option_util::OptionExt;
 use crate::{ChunkRegion, FxChainContext, Project, Reaper, Track};
 use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ParamId, ReaperFunctionError, ReaperString,
@@ -516,7 +515,10 @@ impl Fx {
     }
 
     pub fn window_has_focus(&self) -> bool {
-        OptionExt::contains(&Reaper::get().focused_fx(), self)
+        match Reaper::get().focused_fx() {
+            None => false,
+            Some(res) => res.is_still_focused.unwrap_or(true) && &res.fx == self,
+        }
     }
 
     pub fn show_in_floating_window(&self) {

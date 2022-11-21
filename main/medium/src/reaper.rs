@@ -1,5 +1,5 @@
 use std::ffi::CString;
-use std::os::raw::{c_char, c_void};
+use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::{null, null_mut, NonNull};
 
 use reaper_low::{raw, register_plugin_destroy_hook};
@@ -3424,7 +3424,9 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Returns information about the (last) focused FX window.
     ///
     /// Returns `Some` if an FX window has focus or was the last focused one and is still open.
-    /// Returns `None` if no FX window has focus.
+    ///
+    /// Returns `None` otherwise.
+    #[deprecated = "use `get_focused_fx_2` instead"]
     pub fn get_focused_fx(&self) -> Option<GetFocusedFxResult>
     where
         UsageScope: MainThreadOnly,
@@ -3440,10 +3442,55 @@ impl<UsageScope> Reaper<UsageScope> {
                 fxnumber.as_mut_ptr(),
             )
         };
+        self.get_focused_fx_internal(result, tracknumber, itemnumber, fxnumber)
+    }
+
+    /// Returns information about the focused FX window.
+    ///
+    /// Returns `Some` if an FX window has focus or was the last focused one and is still open.
+    /// The wrapped value contains additional information about whether the window is still focused.
+    ///
+    /// Returns `None` otherwise.
+    pub fn get_focused_fx_2(&self) -> Option<GetFocusedFx2Result>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut tracknumber = MaybeUninit::uninit();
+        let mut itemnumber = MaybeUninit::uninit();
+        let mut fxnumber = MaybeUninit::uninit();
+        let result = unsafe {
+            self.low.GetFocusedFX2(
+                tracknumber.as_mut_ptr(),
+                itemnumber.as_mut_ptr(),
+                fxnumber.as_mut_ptr(),
+            )
+        };
+        let fx = self.get_focused_fx_internal(result, tracknumber, itemnumber, fxnumber)?;
+        let result = GetFocusedFx2Result {
+            is_still_focused: result & 0b100 == 0,
+            fx,
+        };
+        Some(result)
+    }
+
+    /// `result` can be either from `GetFocusedFx` or `GetFocusedFx2`. It only looks at the first
+    /// two bits.
+    fn get_focused_fx_internal(
+        &self,
+        result: i32,
+        tracknumber: MaybeUninit<c_int>,
+        itemnumber: MaybeUninit<c_int>,
+        fxnumber: MaybeUninit<c_int>,
+    ) -> Option<GetFocusedFxResult>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let kind = result & 0b11;
         let tracknumber = unsafe { tracknumber.assume_init() as u32 };
         let fxnumber = unsafe { fxnumber.assume_init() };
         use GetFocusedFxResult::*;
-        match result {
+        match kind {
             0 => None,
             1 => Some(TrackFx {
                 track_location: convert_tracknumber_to_track_location(tracknumber),
@@ -7274,6 +7321,14 @@ pub enum GetLastTouchedFxResult {
         /// Index of the last touched parameter.
         param_index: u32,
     },
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct GetFocusedFx2Result {
+    /// Whether the FX is still focused (vs. unfocused but still open).
+    pub is_still_focused: bool,
+    /// Returns the actual FX.
+    pub fx: GetFocusedFxResult,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
