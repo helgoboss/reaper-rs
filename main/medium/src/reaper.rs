@@ -1588,7 +1588,7 @@ impl<UsageScope> Reaper<UsageScope> {
             start_qn.as_mut_ptr(),
             end_qn.as_mut_ptr(),
         );
-        TimeMapQNToMeasuresResult{
+        TimeMapQNToMeasuresResult {
             measure_index: measure,
             start_qn: PositionInQuarterNotes::new(start_qn.assume_init()),
             end_qn: PositionInQuarterNotes::new(end_qn.assume_init()),
