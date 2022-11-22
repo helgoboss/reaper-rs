@@ -15,18 +15,19 @@ use crate::{
     MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext, PositionInPpq,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInPpq,
+    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -1400,7 +1401,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> TimeMap2TimeToBeatsResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_time_to_beats_unchecked(project, tpos) }
@@ -1419,7 +1420,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> TimeMap2TimeToBeatsResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let mut measures = MaybeUninit::zeroed();
         let mut measure_length = MaybeUninit::zeroed();
@@ -1455,7 +1456,7 @@ impl<UsageScope> Reaper<UsageScope> {
         measure_index: i32,
     ) -> TimeMapGetMeasureInfoResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_get_measure_info_unchecked(project, measure_index) }
@@ -1474,7 +1475,7 @@ impl<UsageScope> Reaper<UsageScope> {
         measure_index: i32,
     ) -> TimeMapGetMeasureInfoResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let mut start_qn = MaybeUninit::zeroed();
         let mut end_qn = MaybeUninit::zeroed();
@@ -1514,7 +1515,7 @@ impl<UsageScope> Reaper<UsageScope> {
         bpos: PositionInBeats,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_beats_to_time_unchecked(project, measure_mode, bpos) }
@@ -1534,7 +1535,7 @@ impl<UsageScope> Reaper<UsageScope> {
         bpos: PositionInBeats,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         use MeasureMode::*;
         let tpos = self.low.TimeMap2_beatsToTime(
@@ -1559,7 +1560,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_qn_to_time_unchecked(project, qn) }
@@ -1578,7 +1579,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
         PositionInSeconds::new(tpos)
@@ -1595,7 +1596,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_time_to_qn_unchecked(project, tpos) }
@@ -1614,7 +1615,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
         PositionInQuarterNotes::new(qn)
@@ -1633,7 +1634,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_qn_to_time_unchecked(project, qn) }
@@ -1652,7 +1653,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
         PositionInSeconds::new(tpos)
@@ -1671,7 +1672,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_time_to_qn_abs_unchecked(project, tpos) }
@@ -1690,7 +1691,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
         PositionInQuarterNotes::new(qn)
@@ -1707,7 +1708,7 @@ impl<UsageScope> Reaper<UsageScope> {
         ppq: PositionInPpq,
     ) -> PositionInPpq
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let ppq = self.low.MIDI_GetPPQPos_StartOfMeasure(take.as_ptr(), ppq.0);
         PositionInPpq::new(ppq)
@@ -1724,7 +1725,7 @@ impl<UsageScope> Reaper<UsageScope> {
         ppq: PositionInPpq,
     ) -> PositionInPpq
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let ppq = self.low.MIDI_GetPPQPos_EndOfMeasure(take.as_ptr(), ppq.0);
         PositionInPpq::new(ppq)
@@ -1743,7 +1744,7 @@ impl<UsageScope> Reaper<UsageScope> {
         ppqpos: PositionInPpq,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let qn = self.low.MIDI_GetProjQNFromPPQPos(take.as_ptr(), ppqpos.0);
         PositionInQuarterNotes::new(qn)
@@ -1762,7 +1763,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInPpq
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let ppq = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.0);
         PositionInPpq::new(ppq)
@@ -1781,7 +1782,7 @@ impl<UsageScope> Reaper<UsageScope> {
         ppqpos: PositionInPpq,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let seconds = self.low.MIDI_GetProjTimeFromPPQPos(take.as_ptr(), ppqpos.0);
         PositionInSeconds::new(seconds)
@@ -1800,7 +1801,7 @@ impl<UsageScope> Reaper<UsageScope> {
         time: PositionInSeconds,
     ) -> PositionInPpq
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let ppq = self.low.MIDI_GetPPQPosFromProjTime(take.as_ptr(), time.0);
         PositionInPpq::new(ppq)
