@@ -1548,8 +1548,8 @@ impl<UsageScope> Reaper<UsageScope> {
         PositionInSeconds::new(tpos)
     }
 
-    /// Converts the given quarter-note position to measure index
-    /// and returns measure bounds in quarter notes.
+    /// Converts the given quarter-note position to a measure index and returns the measure bounds
+    /// in quarter notes.
     ///
     /// # Panics
     ///
@@ -1558,26 +1558,26 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         project: ProjectContext,
         qn: PositionInQuarterNotes,
-    ) -> TimeMapQNToMeasuresResult
+    ) -> TimeMapQnToMeasuresResult
     where
         UsageScope: AnyThread,
     {
         self.require_valid_project(project);
-        unsafe { self.time_map_qn_to_measure_unchecked(project, qn) }
+        unsafe { self.time_map_qn_to_measures_unchecked(project, qn) }
     }
 
-    /// Like [`time_map_qn_to_measure()`] but doesn't check if project is valid.
+    /// Like [`time_map_qn_to_measures()`] but doesn't check if project is valid.
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid project.
     ///
-    /// [`time_map_qn_to_measure()`]: #method.time_map_qn_to_measure
+    /// [`time_map_qn_to_measures()`]: #method.time_map_qn_to_measures
     pub unsafe fn time_map_qn_to_measures_unchecked(
         &self,
         project: ProjectContext,
         qn: PositionInQuarterNotes,
-    ) -> TimeMapQNToMeasuresResult
+    ) -> TimeMapQnToMeasuresResult
     where
         UsageScope: AnyThread,
     {
@@ -1589,10 +1589,10 @@ impl<UsageScope> Reaper<UsageScope> {
             start_qn.as_mut_ptr(),
             end_qn.as_mut_ptr(),
         );
-        TimeMapQNToMeasuresResult {
+        TimeMapQnToMeasuresResult {
             measure_index: measure,
-            start_qn: PositionInQuarterNotes::new(start_qn.assume_init()),
-            end_qn: PositionInQuarterNotes::new(end_qn.assume_init()),
+            start: PositionInQuarterNotes::new(start_qn.assume_init()),
+            end: PositionInQuarterNotes::new(end_qn.assume_init()),
         }
     }
 
@@ -7295,9 +7295,9 @@ pub struct TimeMapQnToMeasuresResult {
     /// Measure index in project.
     pub measure_index: i32,
     /// Start position of the measure in quarter notes.
-    pub start_qn: PositionInQuarterNotes,
+    pub start: PositionInQuarterNotes,
     /// End position of the measure in quarter notes.
-    pub end_qn: PositionInQuarterNotes,
+    pub end: PositionInQuarterNotes,
 }
 
 /// Time signature.
