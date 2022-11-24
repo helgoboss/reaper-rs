@@ -23,11 +23,12 @@ use helgoboss_midi::{RawShortMessage, ShortMessageFactory};
 use reaper_medium::ProjectContext::CurrentProject;
 use reaper_medium::{
     reaper_str, AutoSeekBehavior, AutomationMode, Bpm, CommandId, Db, DurationInSeconds, EditMode,
-    EnumPitchShiftModesResult, FxPresetRef, GangBehavior, GetParamExResult, InputMonitoringMode,
-    MasterTrackBehavior, MidiInputDeviceId, MidiOutputDeviceId, NormalizedPlayRate, PitchShiftMode,
-    PlaybackSpeedFactor, PositionInSeconds, ReaperNormalizedFxParamValue, ReaperPanValue,
-    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordingInput, SoloMode,
-    StuffMidiMessageTarget, TrackFxGetPresetIndexResult, TrackLocation, UndoBehavior, ValueChange,
+    EnumPitchShiftModesResult, EnumProjectExtStateResult, FxPresetRef, GangBehavior,
+    GetParamExResult, InputMonitoringMode, MasterTrackBehavior, MidiInputDeviceId,
+    MidiOutputDeviceId, NormalizedPlayRate, PitchShiftMode, PlaybackSpeedFactor, PositionInSeconds,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperVersion, ReaperVolumeValue,
+    ReaperWidthValue, RecordingInput, SoloMode, StuffMidiMessageTarget,
+    TrackFxGetPresetIndexResult, TrackLocation, UndoBehavior, ValueChange,
 };
 
 use reaper_low::{raw, Swell};
@@ -122,6 +123,8 @@ pub fn create_test_steps() -> impl Iterator<Item = TestStep> {
         main_section_functions(),
         register_and_unregister_action(),
         register_and_unregister_toggle_action(),
+        project_info_string(),
+        ext_state(),
     ]
     .into_iter();
     let steps_b = vec![
@@ -526,6 +529,63 @@ fn register_and_unregister_action() -> TestStep {
             Ok(())
         },
     )
+}
+
+fn ext_state() -> TestStep {
+    step(AllVersions, "Ext State", |rpr, _| {
+        let medium = rpr.medium_reaper();
+        let (section, key, value) = ("MySection", "NewKey", "SomeValue");
+        let result = medium.get_ext_state(section, key);
+        assert_eq!(&result.to_string(), "");
+        medium.set_ext_state(section, String::from(key), value, false);
+        let result = medium.get_ext_state(section, key);
+        assert_eq!(&result.to_string(), value);
+
+        // Project
+
+        let pr = rpr.current_project();
+        let (key2, value2) = ("Another Key", "Strange valu€");
+        let (key_buf_size, val_buf_size) = (50, 50);
+        assert_eq!(
+            &medium
+                .get_project_ext_state(pr.context(), section, key, val_buf_size)?
+                .to_string(),
+            ""
+        );
+        let result =
+            medium.enum_project_ext_state(pr.context(), section, 0, key_buf_size, val_buf_size);
+        assert_eq!(result.is_empty, true);
+        assert_eq!(&result.key.into_string(), "");
+        assert_eq!(&result.value.into_string(), "");
+
+        // set
+
+        medium.set_project_ext_state(pr.context(), section, key, value);
+        medium.set_project_ext_state(pr.context(), section, key2, value2);
+        let result =
+            medium.enum_project_ext_state(pr.context(), section, 0, key_buf_size, val_buf_size);
+        assert_eq!(
+            result,
+            EnumProjectExtStateResult::new(false, &key2.to_uppercase(), value2)
+        );
+        let result =
+            medium.enum_project_ext_state(pr.context(), section, 1, key_buf_size, val_buf_size);
+        assert_eq!(
+            result,
+            EnumProjectExtStateResult::new(false, &key.to_uppercase(), value)
+        );
+        let result =
+            medium.enum_project_ext_state(pr.context(), section, 2, key_buf_size, val_buf_size);
+        assert_eq!(result, EnumProjectExtStateResult::new(true, "", ""));
+
+        assert_eq!(
+            medium
+                .get_project_ext_state(pr.context(), section, key2, val_buf_size)?
+                .to_str(),
+            value2
+        );
+        Ok(())
+    })
 }
 
 fn main_section_functions() -> TestStep {
