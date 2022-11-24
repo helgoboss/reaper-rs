@@ -1548,6 +1548,54 @@ impl<UsageScope> Reaper<UsageScope> {
         PositionInSeconds::new(tpos)
     }
 
+    /// Converts the given quarter-note position to measure index
+    /// and returns measure bounds in quarter notes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn time_map_qn_to_measures(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> TimeMapQNToMeasuresResult
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.time_map_qn_to_measure_unchecked(project, qn) }
+    }
+
+    /// Like [`time_map_qn_to_measure()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`time_map_qn_to_measure()`]: #method.time_map_qn_to_measure
+    pub unsafe fn time_map_qn_to_measures_unchecked(
+        &self,
+        project: ProjectContext,
+        qn: PositionInQuarterNotes,
+    ) -> TimeMapQNToMeasuresResult
+    where
+        UsageScope: AnyThread,
+    {
+        let mut start_qn = MaybeUninit::zeroed();
+        let mut end_qn = MaybeUninit::zeroed();
+        let measure = self.low.TimeMap_QNToMeasures(
+            project.to_raw(),
+            qn.0,
+            start_qn.as_mut_ptr(),
+            end_qn.as_mut_ptr(),
+        );
+        TimeMapQNToMeasuresResult {
+            measure_index: measure,
+            start_qn: PositionInQuarterNotes::new(start_qn.assume_init()),
+            end_qn: PositionInQuarterNotes::new(end_qn.assume_init()),
+        }
+    }
+
     /// Converts the given quarter-note position to time.
     ///
     /// # Panics
@@ -7240,6 +7288,16 @@ pub struct TimeMapGetMeasureInfoResult {
     pub time_signature: TimeSignature,
     /// Tempo at that measure.
     pub tempo: Bpm,
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct TimeMapQnToMeasuresResult {
+    /// Measure index in project.
+    pub measure_index: i32,
+    /// Start position of the measure in quarter notes.
+    pub start_qn: PositionInQuarterNotes,
+    /// End position of the measure in quarter notes.
+    pub end_qn: PositionInQuarterNotes,
 }
 
 /// Time signature.
