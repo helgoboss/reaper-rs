@@ -15,18 +15,19 @@ use crate::{
     MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInPpq,
+    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -1400,7 +1401,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> TimeMap2TimeToBeatsResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_time_to_beats_unchecked(project, tpos) }
@@ -1419,7 +1420,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> TimeMap2TimeToBeatsResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let mut measures = MaybeUninit::zeroed();
         let mut measure_length = MaybeUninit::zeroed();
@@ -1455,7 +1456,7 @@ impl<UsageScope> Reaper<UsageScope> {
         measure_index: i32,
     ) -> TimeMapGetMeasureInfoResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_get_measure_info_unchecked(project, measure_index) }
@@ -1474,7 +1475,7 @@ impl<UsageScope> Reaper<UsageScope> {
         measure_index: i32,
     ) -> TimeMapGetMeasureInfoResult
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let mut start_qn = MaybeUninit::zeroed();
         let mut end_qn = MaybeUninit::zeroed();
@@ -1514,7 +1515,7 @@ impl<UsageScope> Reaper<UsageScope> {
         bpos: PositionInBeats,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_beats_to_time_unchecked(project, measure_mode, bpos) }
@@ -1534,7 +1535,7 @@ impl<UsageScope> Reaper<UsageScope> {
         bpos: PositionInBeats,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         use MeasureMode::*;
         let tpos = self.low.TimeMap2_beatsToTime(
@@ -1607,7 +1608,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_qn_to_time_unchecked(project, qn) }
@@ -1626,7 +1627,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
         PositionInSeconds::new(tpos)
@@ -1643,7 +1644,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_time_to_qn_unchecked(project, tpos) }
@@ -1662,7 +1663,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
         PositionInQuarterNotes::new(qn)
@@ -1681,7 +1682,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_qn_to_time_unchecked(project, qn) }
@@ -1700,7 +1701,7 @@ impl<UsageScope> Reaper<UsageScope> {
         qn: PositionInQuarterNotes,
     ) -> PositionInSeconds
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
         PositionInSeconds::new(tpos)
@@ -1719,7 +1720,7 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.time_map_2_time_to_qn_abs_unchecked(project, tpos) }
@@ -1738,10 +1739,120 @@ impl<UsageScope> Reaper<UsageScope> {
         tpos: PositionInSeconds,
     ) -> PositionInQuarterNotes
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
         PositionInQuarterNotes::new(qn)
+    }
+
+    /// Returns the MIDI tick (PPQ) position corresponding to the start of the measure.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_start_of_measure(
+        &self,
+        take: MediaItemTake,
+        ppq: PositionInPpq,
+    ) -> PositionInPpq
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ppq = self.low.MIDI_GetPPQPos_StartOfMeasure(take.as_ptr(), ppq.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Returns the MIDI tick (ppq) position corresponding to the start of the measure.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_end_of_measure(
+        &self,
+        take: MediaItemTake,
+        ppq: PositionInPpq,
+    ) -> PositionInPpq
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ppq = self.low.MIDI_GetPPQPos_EndOfMeasure(take.as_ptr(), ppq.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Converts the given ppq in take to a project quarter-note position.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_proj_qn_from_ppq_pos(
+        &self,
+        take: MediaItemTake,
+        ppqpos: PositionInPpq,
+    ) -> PositionInQuarterNotes
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let qn = self.low.MIDI_GetProjQNFromPPQPos(take.as_ptr(), ppqpos.0);
+        PositionInQuarterNotes::new(qn)
+    }
+
+    /// Converts the given project quarter-note position to take PPQ.
+    ///
+    /// Quarter notes are counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_from_proj_qn(
+        &self,
+        take: MediaItemTake,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInPpq
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ppq = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.0);
+        PositionInPpq::new(ppq)
+    }
+
+    /// Converts the given ppq in take to a seconds from the project start.
+    ///
+    /// Time is counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_proj_time_from_ppq_pos(
+        &self,
+        take: MediaItemTake,
+        ppqpos: PositionInPpq,
+    ) -> PositionInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let seconds = self.low.MIDI_GetProjTimeFromPPQPos(take.as_ptr(), ppqpos.0);
+        PositionInSeconds::new(seconds)
+    }
+
+    /// Converts the given project time in seconds to the take PPQ
+    ///
+    /// Time is counted from the start of the project, regardless of any partial measures.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_from_proj_time(
+        &self,
+        take: MediaItemTake,
+        time: PositionInSeconds,
+    ) -> PositionInPpq
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ppq = self.low.MIDI_GetPPQPosFromProjTime(take.as_ptr(), time.0);
+        PositionInPpq::new(ppq)
     }
 
     /// Gets the arrange view start/end time for the given screen coordinates.
