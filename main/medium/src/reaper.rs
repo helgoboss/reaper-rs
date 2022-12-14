@@ -6,13 +6,13 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioAccessor,
+    AudioDeviceAttributeKey, AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm,
+    ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
+    HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
     PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
@@ -2403,6 +2403,158 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.ClearConsole();
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    /// AudioAccessor has to be destroyed.
+    pub unsafe fn create_track_audio_accessor(&self, track: MediaTrack) -> AudioAccessor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        AudioAccessor::new_unchecked(self.low().CreateTrackAudioAccessor(track.as_ptr()))
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    /// AudioAccessor has to be destroyed.
+    pub unsafe fn create_take_audio_accessor(&self, take: MediaItemTake) -> AudioAccessor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        AudioAccessor::new_unchecked(self.low().CreateTakeAudioAccessor(take.as_ptr()))
+    }
+
+    /// Should be called after using of AudioAccessor.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn destroy_audio_accessor(&self, mut accessor: AudioAccessor)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low().DestroyAudioAccessor(accessor.as_mut())
+    }
+
+    /// Returns true if the underlying samples (track or media item take)
+    /// have changed
+    ///
+    /// # Note
+    ///
+    /// Does not update the audio accessor, so the user can selectively
+    /// call AudioAccessorValidateState only when needed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn audio_accessor_state_changed(&self, accessor: AudioAccessor) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low().AudioAccessorStateChanged(accessor.as_ptr())
+    }
+
+    /// Force the accessor to reload its state from the underlying
+    /// track or media item take.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn audio_accessor_update(&self, mut accessor: AudioAccessor)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low().AudioAccessorUpdate(accessor.as_mut())
+    }
+
+    /// Validates the current state of the audio accessor.
+    ///
+    /// Returns true if the state changed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn audio_accessor_validate_state(&self, mut accessor: AudioAccessor) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low().AudioAccessorValidateState(accessor.as_mut())
+    }
+
+    /// Get the end time of the audio that can be returned from this accessor.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn get_audio_accessor_end_time(&self, accessor: AudioAccessor) -> PositionInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        PositionInSeconds::new(self.low().GetAudioAccessorEndTime(accessor.as_ptr()))
+    }
+
+    /// Get the start time of the audio that can be returned from this accessor.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn get_audio_accessor_start_time(&self, accessor: AudioAccessor) -> PositionInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        PositionInSeconds::new(self.low().GetAudioAccessorStartTime(accessor.as_ptr()))
+    }
+
+    /// Get a block of samples from the audio accessor.
+    ///
+    /// Samples are extracted immediately pre-FX,
+    /// and returned interleaved (first sample of first channel,
+    /// first sample of second channel...).
+    ///
+    /// Returns false if no audio, true if audio
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn get_audio_accessor_samples(
+        &self,
+        accessor: AudioAccessor,
+        samplerate: u32,
+        channels_amount: u32,
+        start_time: PositionInSeconds,
+        samples_per_channel: u32,
+        mut sample_buffer: Vec<f64>,
+    ) -> ReaperFunctionResult<bool>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let result = self.low().GetAudioAccessorSamples(
+            accessor.as_ptr(),
+            samplerate as i32,
+            channels_amount as i32,
+            start_time.get(),
+            samples_per_channel as i32,
+            sample_buffer.as_mut_ptr(),
+        );
+        match result {
+            0 => Ok(false),
+            1 => Ok(true),
+            _ => Err(ReaperFunctionError::new(
+                "Can not get samples from accessor.",
+            )),
+        }
     }
 
     /// Returns the number of tracks in the given project.

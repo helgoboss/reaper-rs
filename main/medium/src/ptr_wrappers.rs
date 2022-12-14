@@ -91,6 +91,8 @@ pub type MediaItem = NonNull<raw::MediaItem>;
 pub type MediaItemTake = NonNull<raw::MediaItem_Take>;
 /// Pointer to an envelope on a track.
 pub type TrackEnvelope = NonNull<raw::TrackEnvelope>;
+/// Pointer to an audio accessor on track or take.
+pub type AudioAccessor = NonNull<raw::AudioAccessor>;
 /// Pointer to a window (window handle).
 pub type Hwnd = NonNull<raw::HWND__>;
 /// Pointer to a module/instance (module/instance handle).
