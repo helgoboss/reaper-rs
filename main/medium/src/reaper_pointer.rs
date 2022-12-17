@@ -1,5 +1,5 @@
 use super::{MediaItem, MediaItemTake, MediaTrack, ReaProject, TrackEnvelope};
-use crate::{concat_reaper_strs, PcmSource, ReaperStr, ReaperStringArg};
+use crate::{concat_reaper_strs, AudioAccessor, PcmSource, ReaperStr, ReaperStringArg};
 
 use std::borrow::Cow;
 use std::os::raw::c_void;
@@ -13,6 +13,7 @@ pub enum ReaperPointer<'a> {
     MediaItemTake(MediaItemTake),
     TrackEnvelope(TrackEnvelope),
     PcmSource(PcmSource),
+    AudioAccessor(AudioAccessor),
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -49,6 +50,7 @@ impl<'a> ReaperPointer<'a> {
             MediaItemTake(_) => reaper_str!("MediaItem_Take*").into(),
             TrackEnvelope(_) => reaper_str!("TrackEnvelope*").into(),
             PcmSource(_) => reaper_str!("PCM_source*").into(),
+            AudioAccessor(_) => reaper_str!("AudioAccessor*").into(),
             Custom {
                 pointer: _,
                 type_name,
@@ -65,6 +67,7 @@ impl<'a> ReaperPointer<'a> {
             MediaItemTake(p) => p.as_ptr() as *mut _,
             TrackEnvelope(p) => p.as_ptr() as *mut _,
             PcmSource(p) => p.as_ptr() as *mut _,
+            AudioAccessor(p) => p.as_ptr() as *mut _,
             Custom { pointer, .. } => *pointer,
         }
     }
@@ -87,3 +90,4 @@ impl_from_ptr_to_variant!(MediaItem, MediaItem);
 impl_from_ptr_to_variant!(MediaItemTake, MediaItemTake);
 impl_from_ptr_to_variant!(TrackEnvelope, TrackEnvelope);
 impl_from_ptr_to_variant!(PcmSource, PcmSource);
+impl_from_ptr_to_variant!(AudioAccessor, AudioAccessor);
