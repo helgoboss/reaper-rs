@@ -60,6 +60,6 @@ impl<R: Copy + Display + Debug> std::error::Error for TryFromGreaterError<R> {}
 
 impl<V> AsRef<str> for TryFromGreaterError<V> {
     fn as_ref(&self) -> &str {
-        &self.message
+        self.message
     }
 }

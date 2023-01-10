@@ -362,15 +362,7 @@ impl BorrowedPcmSource {
     pub unsafe fn get_file_name_unchecked(&self) -> Option<&ReaperStr> {
         let ptr = self.0.GetFileName();
         let file_name = create_passing_c_str(ptr);
-        if let Some(reaper_str) = file_name {
-            if reaper_str.to_str().is_empty() {
-                None
-            } else {
-                Some(reaper_str)
-            }
-        } else {
-            None
-        }
+        file_name.filter(|s| !s.to_str().is_empty())
     }
 
     /// Returns `true` if supported. Only call when offline.
