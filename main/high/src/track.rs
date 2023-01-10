@@ -250,7 +250,7 @@ impl Track {
                     reaper.set_track_ui_pan(
                         self.raw(),
                         Absolute(reaper_value),
-                        Progress::Done,
+                        Progress::NotDone,
                         build_track_ui_flags(gang_behavior, grouping_behavior),
                     )
                 }
@@ -309,7 +309,7 @@ impl Track {
                     reaper.set_track_ui_width(
                         self.raw(),
                         Absolute(reaper_value),
-                        Progress::Done,
+                        Progress::NotDone,
                         build_track_ui_flags(gang_behavior, grouping_behavior),
                     );
                 }
@@ -395,7 +395,7 @@ impl Track {
                     reaper.set_track_ui_volume(
                         self.raw(),
                         Absolute(reaper_value),
-                        Progress::Done,
+                        Progress::NotDone,
                         build_track_ui_flags(gang_behavior, grouping_behavior),
                     )
                 }
