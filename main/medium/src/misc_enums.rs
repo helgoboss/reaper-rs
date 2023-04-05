@@ -573,7 +573,7 @@ impl ActionValueChange {
         use ActionValueChange::*;
         if let Ok(val) = U7::try_from(val) {
             match (valhw, relmode) {
-                (-1, 0) | (-1, 1) | (-1, 2) | (-1, 3) => match relmode {
+                (valhw, 0) | (valhw, 1) | (valhw, 2) | (valhw, 3) if valhw < 0 => match relmode {
                     0 => AbsoluteLowRes(val),
                     1 => Relative1(val),
                     2 => Relative2(val),
