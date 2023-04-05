@@ -167,32 +167,12 @@ impl NativeColor {
 ///
 /// This uniquely identifies a MIDI input device according to the REAPER MIDI device preferences.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Serialize, Deserialize),
-    serde(try_from = "u8")
-)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MidiInputDeviceId(pub(crate) u8);
 
 impl MidiInputDeviceId {
-    /// Maximum number of MIDI input devices.
-    pub const MAX_DEVICE_COUNT: u8 = 63;
-
-    fn is_valid(value: u8) -> bool {
-        value < Self::MAX_DEVICE_COUNT
-    }
-
     /// Creates the MIDI input device ID.
-    ///
-    /// # Panics
-    ///
-    /// This function panics if the given value is not a valid ID (must be <= 62).
     pub fn new(value: u8) -> MidiInputDeviceId {
-        assert!(
-            Self::is_valid(value),
-            "MIDI input device IDs must be <= 62, got {}",
-            value
-        );
         MidiInputDeviceId(value)
     }
 
@@ -204,20 +184,6 @@ impl MidiInputDeviceId {
     /// Converts this value to an integer as expected by the low-level API.
     pub fn to_raw(self) -> i32 {
         self.0 as i32
-    }
-}
-
-impl TryFrom<u8> for MidiInputDeviceId {
-    type Error = TryFromGreaterError<u8>;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        if !Self::is_valid(value) {
-            return Err(TryFromGreaterError::new(
-                "MIDI input device IDs must be <= 62",
-                value,
-            ));
-        }
-        Ok(MidiInputDeviceId(value))
     }
 }
 

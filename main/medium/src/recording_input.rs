@@ -93,4 +93,4 @@ impl RecordingInput {
     }
 }
 
-const ALL_MIDI_DEVICES_FACTOR: u32 = MidiInputDeviceId::MAX_DEVICE_COUNT as u32;
+const ALL_MIDI_DEVICES_FACTOR: u32 = 63;
