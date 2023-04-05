@@ -29,7 +29,7 @@ impl Guid {
     }
 
     pub fn from_string_without_braces(text: &str) -> Result<Guid, &'static str> {
-        Self::from_string_with_braces(format!("{{{}}}", text).as_str())
+        Self::from_string_with_braces(format!("{{{text}}}").as_str())
     }
 
     pub fn to_string_with_braces(self) -> String {

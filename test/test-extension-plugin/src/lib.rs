@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Err(reason) => {
                     // We use a particular exit code to distinguish test failure from other possible
                     // exit paths.
-                    eprintln!("From REAPER: reaper-rs integration test failed: {}", reason);
+                    eprintln!("From REAPER: reaper-rs integration test failed: {reason}");
                     process::exit(172)
                 }
             }

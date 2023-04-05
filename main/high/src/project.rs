@@ -147,7 +147,7 @@ impl Project {
     pub fn selected_track_count(self, want_master: MasterTrackBehavior) -> u32 {
         Reaper::get()
             .medium_reaper()
-            .count_selected_tracks_2(Proj(self.rea_project), want_master) as u32
+            .count_selected_tracks_2(Proj(self.rea_project), want_master)
     }
 
     pub fn first_selected_track(self, want_master: MasterTrackBehavior) -> Option<Track> {
@@ -198,7 +198,7 @@ impl Project {
         if self.complain_if_not_available().is_err() {
             return 0;
         }
-        Reaper::get().medium_reaper().count_tracks(self.context()) as u32
+        Reaper::get().medium_reaper().count_tracks(self.context())
     }
 
     pub fn item_count(self) -> u32 {

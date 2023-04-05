@@ -366,7 +366,7 @@ impl Bpm {
     /// This function panics if the given value is not within the BPM range supported by REAPER
     /// `(1.0..=960.0)`.
     pub fn new(value: f64) -> Bpm {
-        assert!(Self::is_valid(value), "{} is not a valid Bpm value", value);
+        assert!(Self::is_valid(value), "{value} is not a valid Bpm value");
         Bpm(value)
     }
 
@@ -437,8 +437,7 @@ impl PlaybackSpeedFactor {
     pub fn new(value: f64) -> PlaybackSpeedFactor {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid PlaybackSpeedFactor",
-            value
+            "{value} is not a valid PlaybackSpeedFactor",
         );
         PlaybackSpeedFactor(value)
     }
@@ -502,8 +501,7 @@ impl NormalizedPlayRate {
     pub fn new(value: f64) -> NormalizedPlayRate {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid NormalizedPlayRate",
-            value
+            "{value} is not a valid NormalizedPlayRate",
         );
         NormalizedPlayRate(value)
     }
@@ -551,7 +549,7 @@ impl Hz {
     ///
     /// This function panics if the given value zero or negative.
     pub fn new(value: f64) -> Hz {
-        assert!(Self::is_valid(value), "{} is not a valid Hz value", value);
+        assert!(Self::is_valid(value), "{value} is not a valid Hz value");
         Hz(value)
     }
 
@@ -647,8 +645,7 @@ impl PositionInSeconds {
     pub fn new(value: f64) -> PositionInSeconds {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid PositionInSeconds value",
-            value
+            "{value} is not a valid PositionInSeconds value",
         );
         PositionInSeconds(value)
     }
@@ -827,8 +824,7 @@ impl DurationInSeconds {
     pub fn new(value: f64) -> DurationInSeconds {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid DurationInSeconds value",
-            value
+            "{value} is not a valid DurationInSeconds value",
         );
         DurationInSeconds(value)
     }
@@ -931,8 +927,7 @@ impl DurationInBeats {
     pub fn new(value: f64) -> DurationInBeats {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid DurationInBeats value",
-            value
+            "{value} is not a valid DurationInBeats value",
         );
         DurationInBeats(value)
     }
@@ -993,8 +988,7 @@ impl PositionInBeats {
     pub fn new(value: f64) -> PositionInBeats {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid PositionInBeats value",
-            value
+            "{value} is not a valid PositionInBeats value",
         );
         PositionInBeats(value)
     }
@@ -1052,8 +1046,7 @@ impl PositionInQuarterNotes {
     pub fn new(value: f64) -> PositionInQuarterNotes {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid PositionInQn value",
-            value
+            "{value} is not a valid PositionInQn value",
         );
         PositionInQuarterNotes(value)
     }
@@ -1132,7 +1125,7 @@ impl Db {
     /// This function panics if the given value is not within the decibel range supported by REAPER
     /// `(-1000.0..)`.
     pub fn new(value: f64) -> Db {
-        assert!(Self::is_valid(value), "{} is not a valid Db value", value);
+        assert!(Self::is_valid(value), "{value} is not a valid Db value");
         Db(value)
     }
 
@@ -1206,8 +1199,7 @@ impl VolumeSliderValue {
     pub fn new(value: f64) -> VolumeSliderValue {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid VolumeSliderValue",
-            value
+            "{value} is not a valid VolumeSliderValue",
         );
         VolumeSliderValue(value)
     }
@@ -1283,8 +1275,7 @@ impl ReaperVolumeValue {
     pub fn new(value: f64) -> ReaperVolumeValue {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid ReaperVolumeValue",
-            value
+            "{value} is not a valid ReaperVolumeValue",
         );
         ReaperVolumeValue(value)
     }
@@ -1357,8 +1348,7 @@ impl ReaperPanValue {
     pub fn new(value: f64) -> ReaperPanValue {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid ReaperPanValue",
-            value
+            "{value} is not a valid ReaperPanValue",
         );
         ReaperPanValue(value)
     }
@@ -1424,8 +1414,7 @@ impl ReaperWidthValue {
     pub fn new(value: f64) -> ReaperWidthValue {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid ReaperWidthValue",
-            value
+            "{value} is not a valid ReaperWidthValue",
         );
         ReaperWidthValue(value)
     }
@@ -1491,8 +1480,7 @@ impl ReaperPanLikeValue {
     pub fn new(value: f64) -> ReaperPanLikeValue {
         assert!(
             Self::is_valid(value),
-            "{} is not a valid ReaperPanLikeValue",
-            value
+            "{value} is not a valid ReaperPanLikeValue",
         );
         ReaperPanLikeValue(value)
     }

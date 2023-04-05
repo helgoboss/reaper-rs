@@ -128,7 +128,7 @@ fn execute_next_step(
             let result = std::panic::catch_unwind(AssertUnwindSafe(|| {
                 (step.operation)(reaper.deref(), context)
             }))
-            .unwrap_or_else(|_| Err(format!("Test [{}] panicked", step_name).into()));
+            .unwrap_or_else(|_| Err(format!("Test [{step_name}] panicked").into()));
             finished.complete();
             result
         };
@@ -171,11 +171,11 @@ fn reaper_version_matches(step: &TestStep) -> bool {
 }
 
 fn log_skip(msg: &str) {
-    log(format!("→ **SKIPPED** ({})", msg));
+    log(format!("→ **SKIPPED** ({msg})"));
 }
 
 fn log_failure(msg: &impl Display) {
-    log(format!("→ **FAILED**\n\n{}", msg));
+    log(format!("→ **FAILED**\n\n{msg}"));
 }
 
 fn log_step(step_index: usize, name: &str) {

@@ -133,7 +133,7 @@ Message: {panic_message}
 pub fn log_panic(logger: &slog::Logger, panic_info: &PanicInfo, backtrace: &Backtrace) {
     error!(logger, "Plugin panicked";
         "message" => extract_panic_message(panic_info),
-        "backtrace" => format!("{:#?}", backtrace)
+        "backtrace" => format!("{backtrace:#?}")
     );
 }
 
@@ -213,7 +213,7 @@ fn determine_module_size(hinstance: reaper_medium::Hinstance) -> Option<usize> {
 }
 
 fn format_as_hex(number: usize) -> String {
-    format!("0x{:x}", number)
+    format!("0x{number:x}")
 }
 
 fn hyphen() -> String {

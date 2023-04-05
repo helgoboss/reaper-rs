@@ -9,7 +9,7 @@ use std::fmt::{Debug, Display};
 /// The error message is not very specific most of the time because REAPER functions usually don't
 /// give information about the cause of the error.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
-#[display(fmt = "REAPER function failed: {}", message)]
+#[display(fmt = "REAPER function failed: {message}")]
 pub struct ReaperFunctionError {
     message: &'static str,
 }

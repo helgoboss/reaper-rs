@@ -85,6 +85,6 @@ impl fmt::Display for Volume {
             .medium_reaper()
             .mk_vol_str(self.reaper_value())
             .into_string();
-        write!(f, "{}", vol_string)
+        write!(f, "{vol_string}")
     }
 }

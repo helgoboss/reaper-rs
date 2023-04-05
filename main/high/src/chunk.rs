@@ -368,7 +368,7 @@ impl ChunkRegion {
         if !self.is_valid() {
             return None;
         }
-        let tag_opener_with_new_line = format!("\n<{}", tag_name);
+        let tag_opener_with_new_line = format!("\n<{tag_name}");
         self.find_followed_by_one_of(&tag_opener_with_new_line, " \n", relative_search_start_pos)
             .and_then(|pos| self.parse_tag_starting_from(pos + 1))
     }

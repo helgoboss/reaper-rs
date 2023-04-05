@@ -844,8 +844,8 @@ impl ChangeDetectionMiddleware {
         } else {
             track.normal_fx_chain()
         };
-        if let Some(fx) = fx_chain.fx_by_index(args.fx_index as u32) {
-            let parameter = fx.parameter_by_index(args.param_index as u32);
+        if let Some(fx) = fx_chain.fx_by_index(args.fx_index) {
+            let parameter = fx.parameter_by_index(args.param_index);
             handle_change(ChangeEvent::FxParameterValueChanged(
                 FxParameterValueChangedEvent {
                     touched: {

@@ -2073,7 +2073,7 @@ fn fn_mut_action() -> TestStep {
             "reaperRsCounter",
             "reaper-rs counter",
             move || {
-                Reaper::get().show_console_msg(format!("Hello from Rust number {}\0", i));
+                Reaper::get().show_console_msg(format!("Hello from Rust number {i}\0"));
                 i += 1;
             },
             ActionKind::NotToggleable,
@@ -2245,7 +2245,7 @@ fn general() -> TestStep {
 fn resample_modes() -> TestStep {
     step(AllVersions, "Resample modes", |reaper, _| {
         for (i, m) in reaper.resample_modes().enumerate() {
-            reaper.show_console_msg(format!("- ({}) {}\n", i, m))
+            reaper.show_console_msg(format!("- ({i}) {m}\n"))
         }
         Ok(())
     })
@@ -2259,7 +2259,7 @@ fn pitch_shift_modes() -> TestStep {
                 Unsupported => "<Unsupported>",
                 Supported { name } => name.to_str(),
             };
-            reaper.show_console_msg(format!("- ({}) {}\n", i, text));
+            reaper.show_console_msg(format!("- ({i}) {text}\n"));
             if m != Unsupported {
                 let pitch_shift_sub_modes: Vec<_> = reaper
                     .pitch_shift_sub_modes(PitchShiftMode::new(i as _))
@@ -2270,11 +2270,11 @@ fn pitch_shift_modes() -> TestStep {
                     .take(max_display_count)
                     .enumerate()
                 {
-                    reaper.show_console_msg(format!("    - ({}) {}\n", j, sm))
+                    reaper.show_console_msg(format!("    - ({j}) {sm}\n"))
                 }
                 let count = pitch_shift_sub_modes.len();
                 if count > max_display_count {
-                    reaper.show_console_msg(format!("    - ... ({} in total)\n", count))
+                    reaper.show_console_msg(format!("    - ... ({count} in total)\n"))
                 }
             }
         }
@@ -2319,7 +2319,7 @@ fn volume_types() -> TestStep {
         // Then
         for input_value in input_values {
             let output_value = Volume::from_reaper_value(input_value);
-            reaper.show_console_msg(format!("{:?} => {:?}\n", input_value, output_value));
+            reaper.show_console_msg(format!("{input_value:?} => {output_value:?}\n"));
         }
         Ok(())
     })

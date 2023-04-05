@@ -23,7 +23,7 @@ impl AcceleratorKey {
     pub fn to_code(self) -> u16 {
         use AcceleratorKey::*;
         match self {
-            VirtKey(key) => key.get() as u16,
+            VirtKey(key) => key.get(),
             Character(ch) => ch,
         }
     }

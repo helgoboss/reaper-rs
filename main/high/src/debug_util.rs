@@ -63,8 +63,7 @@ fn resolve_multiple_symbols(
     if let Some(our_module_size) = our_module_info.size {
         if our_module_size != their_module_size {
             warn(format!(
-                "Module sizes deviating (ours: {:x}, theirs: {:x})",
-                our_module_size, their_module_size
+                "Module sizes deviating (ours: {our_module_size:x}, theirs: {their_module_size:x})",
             ));
         }
     } else {
@@ -169,7 +168,7 @@ fn format_symbol_terse(sym: &Symbol) -> String {
                 "{}{}",
                 p.to_string_lossy(),
                 sym.lineno()
-                    .map(|n| format!(" (line {})", n))
+                    .map(|n| format!(" (line {n})"))
                     .unwrap_or_else(|| "".to_string())
             )
         }),
@@ -181,9 +180,9 @@ fn format_symbol_terse(sym: &Symbol) -> String {
 }
 
 fn warn(msg: String) {
-    log(format!("WARNING: {}", msg))
+    log(format!("WARNING: {msg}"))
 }
 
 fn log(msg: String) {
-    Reaper::get().show_console_msg(format!("{}\n", msg));
+    Reaper::get().show_console_msg(format!("{msg}\n"));
 }

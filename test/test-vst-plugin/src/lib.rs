@@ -72,7 +72,7 @@ struct MyHookPostCommand;
 
 impl HookPostCommand for MyHookPostCommand {
     fn call(command_id: CommandId, _flag: i32) {
-        println!("Command {:?} executed", command_id)
+        println!("Command {command_id:?} executed")
     }
 }
 
@@ -199,7 +199,7 @@ impl TestVstPlugin {
             if counter > 10 {
                 return;
             }
-            Reaper::get().show_console_msg(format!("Main thread counter: {}\n", counter));
+            Reaper::get().show_console_msg(format!("Main thread counter: {counter}\n"));
             counter += 1;
         });
         // Some future stuff
@@ -210,9 +210,9 @@ impl TestVstPlugin {
 async fn future_main() {
     Reaper::get().show_console_msg("Hello from future!\n");
     let result = calculate_something().await;
-    Reaper::get().show_console_msg(format!("Calculated: {}\n", result));
+    Reaper::get().show_console_msg(format!("Calculated: {result}\n"));
     let result = calculate_something_else().await;
-    Reaper::get().show_console_msg(format!("Calculated something else: {}\n", result));
+    Reaper::get().show_console_msg(format!("Calculated something else: {result}\n"));
 }
 
 async fn calculate_something() -> i32 {

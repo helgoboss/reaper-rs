@@ -42,6 +42,6 @@ impl fmt::Display for Pan {
             .medium_reaper()
             .mk_pan_str(self.reaper_value())
             .into_string();
-        write!(f, "{}", pan_string)
+        write!(f, "{pan_string}")
     }
 }
