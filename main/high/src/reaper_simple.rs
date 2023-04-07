@@ -397,7 +397,7 @@ impl Reaper {
 
     /// Parses the "reaper-vstplugins*.ini" files to find the VST2 file name.
     ///
-    /// Usually not necessary for REAPER >= 6.37 because one can use [`FxInfo::id`] for
+    /// Usually not necessary for REAPER >= 6.37 because one can use [`crate::FxInfo::id`] for
     /// querying and `<` + magic number for adding a FX.
     ///
     /// Attention: Just returns the first one found. Doesn't care of preferring the one in the

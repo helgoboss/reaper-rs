@@ -11,6 +11,7 @@ use slog::debug;
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
 use std::time::Duration;
+#[allow(deprecated)]
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
 
@@ -24,6 +25,7 @@ struct TestVstPlugin {
     _reaper_guard: Option<Arc<ReaperGuard>>,
 }
 
+#[allow(deprecated)]
 impl Plugin for TestVstPlugin {
     fn new(host: HostCallback) -> Self {
         Self {
