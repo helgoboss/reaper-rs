@@ -1,5 +1,6 @@
 use crate::{Pan, Reaper, Track, Volume};
 
+use crate::error::ReaperResult;
 use reaper_medium::{
     AutomationMode, EditMode, MediaTrack, ReaperFunctionError, ReaperString, TrackSendAttributeKey,
     TrackSendCategory, TrackSendDirection, TrackSendRef, VolumeAndPan,
@@ -78,25 +79,26 @@ impl TrackRoute {
         }
     }
 
-    pub fn volume(&self) -> Result<Volume, ReaperFunctionError> {
+    pub fn volume(&self) -> ReaperResult<Volume> {
         Ok(Volume::from_reaper_value(self.vol_pan()?.volume))
     }
 
-    fn vol_pan(&self) -> Result<VolumeAndPan, ReaperFunctionError> {
+    fn vol_pan(&self) -> ReaperResult<VolumeAndPan> {
         // It's important that we don't use GetTrackSendInfo_Value with D_VOL because it returns the
         // wrong value if an envelope is written.
-        match self.direction {
+        let vol_pan = match self.direction {
             Send => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_send_ui_vol_pan(self.track().raw(), self.index)
+                    .get_track_send_ui_vol_pan(self.track().raw(), self.index)?
             },
             Receive => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_receive_ui_vol_pan(self.track().raw(), self.index)
+                    .get_track_receive_ui_vol_pan(self.track().raw(), self.index)?
             },
-        }
+        };
+        Ok(vol_pan)
     }
 
     pub fn set_volume(
@@ -153,73 +155,75 @@ impl TrackRoute {
         }
     }
 
-    pub fn pan(&self) -> Result<Pan, ReaperFunctionError> {
+    pub fn pan(&self) -> ReaperResult<Pan> {
         Ok(Pan::from_reaper_value(self.vol_pan()?.pan))
     }
 
-    pub fn set_pan(&self, pan: Pan, edit_mode: EditMode) -> Result<(), ReaperFunctionError> {
+    pub fn set_pan(&self, pan: Pan, edit_mode: EditMode) -> ReaperResult<()> {
         unsafe {
             Reaper::get().medium_reaper().set_track_send_ui_pan(
                 self.track().raw(),
                 self.send_ref(),
                 pan.reaper_value(),
                 edit_mode,
-            )
+            )?;
         }
+        Ok(())
     }
 
-    pub fn is_muted(&self) -> bool {
+    pub fn is_muted(&self) -> ReaperResult<bool> {
         let res = match self.direction {
             Send => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_send_ui_mute(self.track().raw(), self.index())
+                    .get_track_send_ui_mute(self.track().raw(), self.index())?
             },
             Receive => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_receive_ui_mute(self.track().raw(), self.index())
+                    .get_track_receive_ui_mute(self.track().raw(), self.index())?
             },
         };
-        res.expect("couldn't get send mute")
+        Ok(res)
     }
 
-    pub fn mute(&self) {
-        self.set_muted(true);
+    pub fn mute(&self) -> ReaperResult<()> {
+        self.set_muted(true)
     }
 
-    pub fn unmute(&self) {
-        self.set_muted(false);
+    pub fn unmute(&self) -> ReaperResult<()> {
+        self.set_muted(false)
     }
 
-    fn set_muted(&self, muted: bool) {
-        if self.is_muted() != muted {
+    fn set_muted(&self, muted: bool) -> ReaperResult<()> {
+        if self.is_muted()? != muted {
             unsafe {
-                let _ = Reaper::get()
+                Reaper::get()
                     .medium_reaper
-                    .toggle_track_send_ui_mute(self.track().raw(), self.send_ref());
+                    .toggle_track_send_ui_mute(self.track().raw(), self.send_ref())?;
             }
         }
+        Ok(())
     }
 
     pub fn is_mono(&self) -> bool {
         self.prop_is_enabled(TrackSendAttributeKey::Mono)
     }
 
-    pub fn set_mono(&self, mono: bool) {
-        self.set_prop_enabled(TrackSendAttributeKey::Mono, mono);
+    pub fn set_mono(&self, mono: bool) -> ReaperResult<()> {
+        self.set_prop_enabled(TrackSendAttributeKey::Mono, mono)
     }
 
     pub fn phase_is_inverted(&self) -> bool {
         self.prop_is_enabled(TrackSendAttributeKey::Phase)
     }
 
-    pub fn set_phase_inverted(&self, inverted: bool) {
-        self.set_prop_enabled(TrackSendAttributeKey::Phase, inverted);
+    pub fn set_phase_inverted(&self, inverted: bool) -> ReaperResult<()> {
+        self.set_prop_enabled(TrackSendAttributeKey::Phase, inverted)
     }
 
-    pub fn set_automation_mode(&self, mode: AutomationMode) {
-        self.set_prop_numeric_value(TrackSendAttributeKey::AutoMode, mode.to_raw() as _);
+    pub fn set_automation_mode(&self, mode: AutomationMode) -> ReaperResult<()> {
+        self.set_prop_numeric_value(TrackSendAttributeKey::AutoMode, mode.to_raw() as _)
     }
 
     pub fn automation_mode(&self) -> AutomationMode {
@@ -227,25 +231,26 @@ impl TrackRoute {
         AutomationMode::from_raw(raw_mode)
     }
 
-    fn set_prop_enabled(&self, key: TrackSendAttributeKey, enabled: bool) {
-        self.set_prop_numeric_value(key, if enabled { 1.0 } else { 0.0 });
+    fn set_prop_enabled(&self, key: TrackSendAttributeKey, enabled: bool) -> ReaperResult<()> {
+        self.set_prop_numeric_value(key, if enabled { 1.0 } else { 0.0 })
     }
 
     fn prop_is_enabled(&self, key: TrackSendAttributeKey) -> bool {
         self.prop_numeric_value(key) > 0.0
     }
 
-    fn set_prop_numeric_value(&self, key: TrackSendAttributeKey, value: f64) {
+    fn set_prop_numeric_value(&self, key: TrackSendAttributeKey, value: f64) -> ReaperResult<()> {
         let (category, index) = self.category_with_index();
         unsafe {
-            let _ = Reaper::get().medium_reaper().set_track_send_info_value(
+            Reaper::get().medium_reaper().set_track_send_info_value(
                 self.track().raw(),
                 category,
                 index,
                 key,
                 value,
-            );
+            )?;
         }
+        Ok(())
     }
 
     fn prop_numeric_value(&self, key: TrackSendAttributeKey) -> f64 {
