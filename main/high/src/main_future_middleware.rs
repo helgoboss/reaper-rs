@@ -1,4 +1,5 @@
 use crate::{local_run_loop_executor, run_loop_executor, Reaper};
+use std::error::Error;
 
 pub struct FutureSupport {
     main_thread_future_spawner: crate::run_loop_executor::Spawner,
@@ -19,7 +20,7 @@ impl FutureSupport {
     /// Spawns a future for execution in main thread.
     pub fn spawn_in_main_thread(
         &self,
-        future: impl std::future::Future<Output = ()> + 'static + Send,
+        future: impl std::future::Future<Output = Result<(), Box<dyn Error>>> + 'static + Send,
     ) {
         let spawner = &self.main_thread_future_spawner;
         spawner.spawn(future);
@@ -31,7 +32,7 @@ impl FutureSupport {
     /// not required. Perfect for capturing `Rc`s.
     pub fn spawn_in_main_thread_from_main_thread(
         &self,
-        future: impl std::future::Future<Output = ()> + 'static,
+        future: impl std::future::Future<Output = Result<(), Box<dyn Error>>> + 'static,
     ) {
         Reaper::get().require_main_thread();
         let spawner = &self.local_main_thread_future_spawner;

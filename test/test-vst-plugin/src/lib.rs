@@ -8,6 +8,7 @@ use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, O
 use reaper_rx::{ControlSurfaceRx, ControlSurfaceRxMiddleware};
 use rxrust::prelude::*;
 use slog::debug;
+use std::error::Error;
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
 use std::time::Duration;
@@ -209,12 +210,13 @@ impl TestVstPlugin {
     }
 }
 
-async fn future_main() {
+async fn future_main() -> Result<(), Box<dyn Error>> {
     Reaper::get().show_console_msg("Hello from future!\n");
     let result = calculate_something().await;
     Reaper::get().show_console_msg(format!("Calculated: {result}\n"));
     let result = calculate_something_else().await;
     Reaper::get().show_console_msg(format!("Calculated something else: {result}\n"));
+    Ok(())
 }
 
 async fn calculate_something() -> i32 {

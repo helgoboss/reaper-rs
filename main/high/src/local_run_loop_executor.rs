@@ -1,4 +1,5 @@
 //! Provides an executor for executing futures on a custom run loop. Single-threaded.
+use std::error::Error;
 // TODO-low If spawning futures turns out to be very useful, we should remove code duplication
 //  with run_loop_executor and try to implement this stuff without Arc and Mutex (the waker stuff
 //  gets hairy though)!
@@ -39,7 +40,7 @@ struct Task {
     /// enough to know that `future` is only mutated from one thread,
     /// so we need use the `Mutex` to prove thread-safety.
     // TODO-low A production executor would not need this, and could use `UnsafeCell` instead.
-    future: Mutex<Option<LocalBoxFuture<'static, ()>>>,
+    future: Mutex<Option<LocalBoxFuture<'static, Result<(), Box<dyn Error>>>>>,
 
     /// Handle to place the task itself back onto the task queue.
     task_sender: Sender<Arc<Task>>,
@@ -57,7 +58,7 @@ pub fn new_spawner_and_executor(capacity: usize, bulk_size: usize) -> (Spawner, 
 }
 
 impl Spawner {
-    pub fn spawn(&self, future: impl Future<Output = ()> + 'static) {
+    pub fn spawn(&self, future: impl Future<Output = Result<(), Box<dyn Error>>> + 'static) {
         let future = future.boxed_local();
         let task = Arc::new(Task {
             future: Mutex::new(Some(future)),

@@ -1,6 +1,7 @@
 //! Provides an executor for executing futures on a custom run loop.
 use crate::mutex_util::lock_ignoring_poisoning;
 use crossbeam_channel::{Receiver, Sender};
+use std::error::Error;
 use {
     futures::{
         future::{BoxFuture, FutureExt},
@@ -35,7 +36,7 @@ struct Task {
     /// enough to know that `future` is only mutated from one thread,
     /// so we need use the `Mutex` to prove thread-safety.
     // TODO-low A production executor would not need this, and could use `UnsafeCell` instead.
-    future: Mutex<Option<BoxFuture<'static, ()>>>,
+    future: Mutex<Option<BoxFuture<'static, Result<(), Box<dyn Error>>>>>,
 
     /// Handle to place the task itself back onto the task queue.
     task_sender: Sender<Arc<Task>>,
@@ -53,7 +54,7 @@ pub fn new_spawner_and_executor(capacity: usize, bulk_size: usize) -> (Spawner, 
 }
 
 impl Spawner {
-    pub fn spawn(&self, future: impl Future<Output = ()> + 'static + Send) {
+    pub fn spawn(&self, future: impl Future<Output = Result<(), Box<dyn Error>>> + 'static + Send) {
         let future = future.boxed();
         let task = Arc::new(Task {
             future: Mutex::new(Some(future)),
