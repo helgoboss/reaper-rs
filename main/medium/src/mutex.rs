@@ -40,6 +40,9 @@ pub struct ReaperMutex<T: AsRef<ReaperMutexPrimitive>> {
     pub(crate) data: UnsafeCell<T>,
 }
 
+unsafe impl<T: AsRef<ReaperMutexPrimitive> + Send> Send for ReaperMutex<T> {}
+unsafe impl<T: AsRef<ReaperMutexPrimitive> + Send> Sync for ReaperMutex<T> {}
+
 impl<T: AsRef<ReaperMutexPrimitive>> fmt::Debug for ReaperMutex<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // In future we could use try-lock in the same fashion that Rust's std Mutex does it.
