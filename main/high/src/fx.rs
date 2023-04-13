@@ -465,7 +465,6 @@ impl Fx {
     }
 
     pub fn set_vst_chunk(&self, bytes: &[u8]) -> Result<(), &'static str> {
-        self.load_if_necessary_or_complain();
         let encoded = base64::encode(bytes);
         self.set_vst_chunk_encoded(encoded)
     }
