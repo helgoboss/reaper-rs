@@ -99,16 +99,31 @@ impl FxChain {
         }
     }
 
+    pub fn show(&self) {
+        self.set_visible(true);
+    }
+
     pub fn hide(&self) {
+        self.set_visible(false);
+    }
+
+    fn set_visible(&self, visible: bool) {
         match self.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let track = self.track_or_master_track();
-                let instruction = FxShowInstruction::HideChain(if self.is_input_fx() {
-                    TrackFxChainType::InputFxChain
+
+                let instruction = if visible {
+                    let location = get_track_fx_location(0, self.is_input_fx());
+                    FxShowInstruction::ShowChain(location)
                 } else {
-                    TrackFxChainType::NormalFxChain
-                });
+                    let chain_type = if self.is_input_fx() {
+                        TrackFxChainType::InputFxChain
+                    } else {
+                        TrackFxChainType::NormalFxChain
+                    };
+                    FxShowInstruction::HideChain(chain_type)
+                };
                 unsafe {
                     Reaper::get()
                         .medium_reaper()

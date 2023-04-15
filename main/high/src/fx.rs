@@ -40,6 +40,8 @@ impl PartialEq for Fx {
 
 impl Hash for Fx {
     fn hash<H: Hasher>(&self, state: &mut H) {
+        // TODO-medium This is tricky. It has a different logic than PartialEq implementation.
+        //  It will not find an FX that's the same but differers in terms of GUID vs indexed.
         self.chain.hash(state);
         if let Some(guid) = self.guid {
             guid.hash(state);
@@ -96,6 +98,14 @@ impl Fx {
                 }
             }
         }
+    }
+
+    pub fn guid_based(&self) -> Option<Fx> {
+        if self.guid.is_some() {
+            return Some(self.clone());
+        }
+        let index = self.index.get()?;
+        self.chain.fx_by_index(index)
     }
 
     pub fn chunk(&self) -> Result<ChunkRegion, &'static str> {
@@ -475,6 +485,11 @@ impl Fx {
             CString::new(encoded).map_err(|_| "base64-encoded VST chunk contains nul byte")?;
         self.set_named_config_param("vst_chunk", c_string.as_bytes_with_nul())?;
         Ok(())
+    }
+
+    pub fn vst_chunk(&self) -> Result<Vec<u8>, &'static str> {
+        let encoded_vst_chunk = self.vst_chunk_encoded()?;
+        base64::decode(encoded_vst_chunk.to_str().as_bytes()).map_err(|_| "couldn't decode bytes")
     }
 
     pub fn vst_chunk_encoded(&self) -> Result<ReaperString, &'static str> {
