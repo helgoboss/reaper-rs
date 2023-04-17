@@ -4,6 +4,7 @@ use std::error::Error;
 //  with run_loop_executor and try to implement this stuff without Arc and Mutex (the waker stuff
 //  gets hairy though)!
 use crate::mutex_util::lock_ignoring_poisoning;
+use crate::run_loop_executor::FutureResult;
 use crossbeam_channel::{Receiver, Sender};
 use futures::future::LocalBoxFuture;
 use {
@@ -40,7 +41,7 @@ struct Task {
     /// enough to know that `future` is only mutated from one thread,
     /// so we need use the `Mutex` to prove thread-safety.
     // TODO-low A production executor would not need this, and could use `UnsafeCell` instead.
-    future: Mutex<Option<LocalBoxFuture<'static, Result<(), Box<dyn Error>>>>>,
+    future: Mutex<Option<LocalBoxFuture<'static, FutureResult>>>,
 
     /// Handle to place the task itself back onto the task queue.
     task_sender: Sender<Arc<Task>>,

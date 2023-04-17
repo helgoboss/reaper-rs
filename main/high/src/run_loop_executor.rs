@@ -27,6 +27,8 @@ pub struct Spawner {
     task_sender: Sender<Arc<Task>>,
 }
 
+pub(crate) type FutureResult = Result<(), Box<dyn Error>>;
+
 /// A future that can reschedule itself to be polled by an `Executor`.
 struct Task {
     /// In-progress future that should be pushed to completion.
@@ -36,7 +38,7 @@ struct Task {
     /// enough to know that `future` is only mutated from one thread,
     /// so we need use the `Mutex` to prove thread-safety.
     // TODO-low A production executor would not need this, and could use `UnsafeCell` instead.
-    future: Mutex<Option<BoxFuture<'static, Result<(), Box<dyn Error>>>>>,
+    future: Mutex<Option<BoxFuture<'static, FutureResult>>>,
 
     /// Handle to place the task itself back onto the task queue.
     task_sender: Sender<Arc<Task>>,
