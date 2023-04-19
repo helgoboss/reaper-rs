@@ -1664,3 +1664,28 @@ impl InsertMediaMode {
         bits as i32
     }
 }
+
+/// Chooses dynamics parameter for normalization.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum CalculateNormalizationParam {
+    LufsI,
+    RmsI,
+    Peak,
+    TruePeak,
+    LufsMMax,
+    LuffSMax,
+}
+
+impl CalculateNormalizationParam {
+    pub fn to_raw(self) -> i32 {
+        use CalculateNormalizationParam::*;
+        match self {
+            LufsI => 0,
+            RmsI => 1,
+            Peak => 2,
+            TruePeak => 3,
+            LufsMMax => 4,
+            LuffSMax => 5,
+        }
+    }
+}

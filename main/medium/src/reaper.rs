@@ -7,12 +7,12 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, CalculateNormalizationParam,
+    ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
+    HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
     OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
     PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
@@ -280,6 +280,122 @@ impl<UsageScope> Reaper<UsageScope> {
                 file_path: Some(PathBuf::from(owned_string)),
             })
         }
+    }
+
+    /// Add Marker or Region to the given Project
+    ///
+    /// Returns marker\region index on success, None on failure.
+    ///
+    /// If you want to specify index — desired_index should be >=0,
+    /// but it would not be used, if index is already in use.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn add_project_marker<'a>(
+        &self,
+        project: ProjectContext,
+        region: bool,
+        pos: PositionInSeconds,
+        region_end_position: PositionInSeconds,
+        name: impl Into<ReaperStringArg<'a>>,
+        desired_index: i32,
+    ) -> Option<i32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let result = self.low().AddProjectMarker(
+            project.to_raw(),
+            region,
+            pos.get(),
+            region_end_position.get(),
+            name.into().as_ptr(),
+            desired_index,
+        );
+        match result {
+            -1 => None,
+            _ => Some(result),
+        }
+    }
+
+    /// Add Marker or Region to the given Project
+    ///
+    /// Returns marker\region index on success, None on failure.
+    ///
+    /// If you want to specify index — desired_index should be >=0,
+    /// but it would not be used, if index is already in use.
+    ///
+    /// # Note
+    ///
+    /// To pass RGB color — use color_to_native()
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn add_project_marker_2<'a>(
+        &self,
+        project: ProjectContext,
+        region: bool,
+        pos: PositionInSeconds,
+        region_end_position: PositionInSeconds,
+        name: impl Into<ReaperStringArg<'a>>,
+        desired_index: i32,
+        color: NativeColor,
+    ) -> Option<i32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let result = self.low().AddProjectMarker2(
+            project.to_raw(),
+            region,
+            pos.get(),
+            region_end_position.get(),
+            name.into().as_ptr(),
+            desired_index,
+            color.to_raw(),
+        );
+        match result {
+            -1 => None,
+            _ => Some(result),
+        }
+    }
+
+    /// Add rescript from file.
+    ///
+    /// Returns command id on success, None on failure.
+    ///
+    /// # Note
+    ///
+    /// commit should be true always, but adding scripts in bulk.
+    /// In the last case — the last function call should be with
+    /// commit=true.
+    pub fn add_remove_reascript<'a>(
+        &self,
+        add: bool,
+        section_id: i32,
+        script_file: impl Into<ReaperStringArg<'a>>,
+        commit: bool,
+    ) -> Option<u32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            let result =
+                self.low()
+                    .AddRemoveReaScript(add, section_id, script_file.into().as_ptr(), commit);
+            match result {
+                x if (x <= 0) => None,
+                _ => Some(result as u32),
+            }
+        }
+    }
+
+    /// force_set=0, doupd=true, center_mode=-1 for default
+    pub fn adjust_zoom(&self, amt: f64, force_set: i32, doupd: bool, center_mode: i32)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().adjustZoom(amt, force_set, doupd, center_mode)
     }
 
     /// Returns the track at the given index.
@@ -907,12 +1023,112 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.IsInRealTimeAudio() != 0
     }
 
+    /// Open all audio and MIDI devices, if not open.
+    pub fn audio_init(&self)
+    where
+        UsageScope: AnyThread,
+    {
+        self.low().Audio_Init();
+    }
+
     /// Returns whether audio is running at all.
     pub fn audio_is_running(&self) -> bool
     where
         UsageScope: AnyThread,
     {
         self.low.Audio_IsRunning() != 0
+    }
+
+    /// Returns whether audio is in pre-buffer.
+    pub fn audio_is_pre_buffer(&self) -> bool
+    where
+        UsageScope: AnyThread,
+    {
+        self.low.Audio_IsPreBuffer() != 0
+    }
+
+    /// Close all audio and MIDI devices, if open.
+    pub fn audio_quit(&self)
+    where
+        UsageScope: AnyThread,
+    {
+        self.low().Audio_Quit();
+    }
+
+    /// Bypass all tracks if true, unbypass if false.
+    pub fn bypass_fx_all_tracks(&self, bypass: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let byp = if bypass == true { -1 } else { 1 };
+        self.low().BypassFxAllTracks(byp);
+    }
+
+    /// Calculates loudness statistics of media via dry run render.
+    ///
+    /// Statistics will be displayed to the user.
+    ///
+    /// call GetSetProjectInfo_String("RENDER_STATS") to retrieve via API.
+    ///
+    /// Returns Ok(()) if loudness was calculated successfully,
+    /// Err("User aborted render") if user canceled the dry run render,
+    /// Err("Unexpected result") if something went wrong.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid media source.
+    pub unsafe fn calc_media_src_loudness(
+        &self,
+        media_source: &PcmSource,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        match self.low().CalcMediaSrcLoudness(media_source.as_ptr()) {
+            1 => Ok(()),
+            -1 => Err(ReaperFunctionError::new("User aborted render.")),
+            _ => Err(ReaperFunctionError::new("Unexpected result.")),
+        }
+    }
+
+    /// Calculate normalize adjustment for source media.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid media source.
+    pub unsafe fn calculate_normalization(
+        &self,
+        media_source: &PcmSource,
+        normalize_to: CalculateNormalizationParam,
+        normalize_target: Db,
+        normalize_start: PositionInSeconds,
+        normalize_end: PositionInSeconds,
+    ) -> f64
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CalculateNormalization(
+            media_source.as_ptr(),
+            normalize_to.to_raw(),
+            normalize_target.get(),
+            normalize_start.get(),
+            normalize_end.get(),
+        )
+    }
+
+    pub fn clear_all_rec_armed(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().ClearAllRecArmed()
+    }
+
+    /// Reset the global peak caches.
+    pub fn clear_peak_cache(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().ClearPeakCache()
     }
 
     /// Starts playing.
@@ -1009,6 +1225,43 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.AnyTrackSolo(project.to_raw())
+    }
+
+    /// True if function name exists in the REAPER API
+    pub fn api_exists<'a>(&self, function_name: impl Into<ReaperStringArg<'a>>) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe { self.low().APIExists(function_name.into().as_ptr()) }
+    }
+
+    /// Displays a message window if the API was successfully called.
+    pub fn api_test(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().APITest()
+    }
+
+    /// Arms or disarms a command.
+    ///
+    /// If command is None — disarms.
+    /// If section_name is empty string — arms in MainSection.
+    pub fn arm_command<'a>(
+        &self,
+        command: Option<CommandId>,
+        section_name: impl Into<ReaperStringArg<'a>>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        let cmd: i32;
+        match command {
+            None => cmd = 0,
+            Some(id) => cmd = id.get() as i32,
+        }
+        unsafe {
+            self.low().ArmCommand(cmd, section_name.into().as_ptr());
+        }
     }
 
     /// Directly simulates a play button hit.
@@ -1929,6 +2182,139 @@ impl<UsageScope> Reaper<UsageScope> {
         PositionInSeconds::new(res)
     }
 
+    /// Get amount of automation items in envelope.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass invalid envelope.
+    pub unsafe fn count_automation_items(&self, envelope: &TrackEnvelope) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountAutomationItems(envelope.as_ptr()) as u32
+    }
+
+    /// Get the number of points in the envelope.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass invalid envelope.
+    pub unsafe fn count_envelope_points(&self, envelope: &TrackEnvelope) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountEnvelopePoints(envelope.as_ptr()) as u32
+    }
+
+    /// Get the number of points in the envelope.
+    ///
+    /// automation_item_index=-1 for the underlying envelope,
+    /// 0 for the first automation item on the envelope, etc.
+    ///
+    /// For automation items, pass automation_item_index|0x10000000
+    /// to base ptidx on the number of points in one full loop iteration,
+    /// even if the automation item is trimmed so that not
+    /// all points are visible.
+    ///
+    /// Otherwise, ptidx will be based on the number of
+    /// visible points in the automation item,
+    /// including all loop iterations.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass invalid envelope.
+    pub unsafe fn count_envelope_points_ex(
+        &self,
+        envelope: &TrackEnvelope,
+        automation_item_index: i32,
+    ) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .CountEnvelopePointsEx(envelope.as_ptr(), automation_item_index) as u32
+    }
+
+    /// Delete an envelope point.
+    ///
+    /// # Note
+    ///
+    /// `automation_item_idx = -1` for the underlying envelope,
+    /// `0` for the first automation item on the envelope, etc.
+    ///
+    /// For automation items, pass automation_item_idx|0x10000000
+    /// to base point_index on the number of points in one full loop iteration,
+    /// even if the automation item is trimmed so that not all points
+    /// are visible.
+    ///
+    /// Otherwise, point_index will be based on the number of visible points
+    /// in the automation item, including all loop iterations.
+    ///
+    /// # Note from original API
+    ///
+    /// If setting multiple points at once, set noSort=true,
+    /// and call Envelope_SortPoints when done.
+    ///
+    /// But we don't have noSort argument.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid envelope.
+    pub unsafe fn delete_envelope_point_ex(
+        &self,
+        mut envelope: TrackEnvelope,
+        automation_item_idx: i32,
+        point_index: u32,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteEnvelopePointEx(envelope.as_mut(), automation_item_idx, point_index as i32)
+    }
+
+    /// Delete envelope points between time bounds.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid envelope.
+    pub unsafe fn delete_envelope_point_range(
+        &self,
+        mut envelope: TrackEnvelope,
+        time_start: PositionInSeconds,
+        time_end: PositionInSeconds,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteEnvelopePointRange(envelope.as_mut(), time_start.get(), time_end.get())
+    }
+
+    /// Delete envelope points between time bounds, defining
+    /// automation item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid envelope.
+    pub unsafe fn delete_envelope_point_range_ex(
+        &self,
+        mut envelope: TrackEnvelope,
+        automation_item_idx: i32,
+        time_start: PositionInSeconds,
+        time_end: PositionInSeconds,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().DeleteEnvelopePointRangeEx(
+            envelope.as_mut(),
+            automation_item_idx,
+            time_start.get(),
+            time_end.get(),
+        )
+    }
+
     /// Returns the number of markers and regions in the given project.
     ///
     /// # Panics
@@ -2019,6 +2405,132 @@ impl<UsageScope> Reaper<UsageScope> {
             marker_index: make_some_if_not_negative(marker_idx.assume_init()),
             region_index: make_some_if_not_negative(region_idx.assume_init()),
         }
+    }
+
+    /// # Note
+    ///
+    /// marker_index is the index, displayed in marker edit window.
+    pub fn delete_project_marker(
+        &self,
+        project: ProjectContext,
+        marker_index: u32,
+        is_region: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.delete_project_marker_unchecked(project, marker_index, is_region) }
+    }
+
+    /// Like [`delete_project_marker()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn delete_project_marker_unchecked(
+        &self,
+        project: ProjectContext,
+        marker_index: u32,
+        is_region: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteProjectMarker(project.to_raw(), marker_index as i32, is_region)
+    }
+
+    /// Like [`delete_project_marker()`] but with different indexing.
+    ///
+    /// # Note
+    ///
+    /// marker_index is 0 for the first marker/region, 1 for the next, etc
+    pub fn delete_project_marker_by_index(&self, project: ProjectContext, marker_index: u32) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.delete_project_marker_by_index_unchecked(project, marker_index) }
+    }
+
+    /// Like [`delete_project_marker_by_index()`] but doesn't check
+    /// if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn delete_project_marker_by_index_unchecked(
+        &self,
+        project: ProjectContext,
+        marker_index: u32,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteProjectMarkerByIndex(project.to_raw(), marker_index as i32)
+    }
+
+    /// Delete a take marker.
+    ///
+    /// # Note
+    ///
+    /// index will change for all following take markers.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn delete_take_marker(&self, take: MediaItemTake, index: u32) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().DeleteTakeMarker(take.as_ptr(), index as i32)
+    }
+
+    /// Deletes one or more stretch markers.
+    ///
+    /// Returns number of stretch markers deleted.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn delete_take_stretch_markers(
+        &self,
+        mut take: MediaItemTake,
+        index: u32,
+        amount: u32,
+    ) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteTakeStretchMarkers(take.as_mut(), index as i32, &(amount as i32)) as u32
+    }
+
+    pub fn delete_tempo_time_signature_marker(&self, project: ProjectContext, index: u32) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe { self.delete_tempo_time_signature_marker_unchecked(project, index) }
+    }
+
+    /// Like [`delete_tempo_time_signature_marker()`] but doesn't check
+    /// if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn delete_tempo_time_signature_marker_unchecked(
+        &self,
+        project: ProjectContext,
+        index: u32,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low()
+            .DeleteTempoTimeSigMarker(project.to_raw(), index as i32)
     }
 
     /// Performs an action belonging to the main section.
@@ -2433,6 +2945,26 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.CountTracks(project.to_raw()) as u32
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn count_take_envelopes(&self, take: MediaItemTake) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountTakeEnvelopes(take.as_ptr()) as u32
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn count_takes(&self, item: MediaItem) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountTakes(item.as_ptr()) as u32
+    }
+
     /// Returns an integer that changes when the project state changes.
     ///
     /// # Panics
@@ -2487,6 +3019,21 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.CountMediaItems(project.to_raw()) as u32
+    }
+
+    pub fn count_selected_media_items(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.count_selected_media_items_unchecked(project) }
+    }
+
+    pub unsafe fn count_selected_media_items_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountSelectedMediaItems(project.to_raw()) as u32
     }
 
     /// Returns the length of the given project.
@@ -4425,6 +4972,24 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.CountTCPFXParms(project.to_raw(), track.as_ptr()) as u32
     }
 
+    pub fn count_tempo_time_sig_markers(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.count_tempo_time_sig_markers_unchecked(project) }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn count_tempo_time_sig_markers_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().CountTempoTimeSigMarkers(project.to_raw()) as u32
+    }
+
     /// Returns information about a specific FX parameter knob displayed on the track control panel.
     ///
     /// # Safety
@@ -4945,6 +5510,75 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.AddTakeToMediaItem(item.as_ptr());
         NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't add take to item"))
+    }
+
+    /// Set or insert tempo\time signature marker.
+    ///
+    /// Returns true on success.
+    ///
+    /// # Note
+    ///
+    /// - index = -1 will insert new marker.
+    /// - Position can be set either with time_position or with
+    /// measure and beat position. Other position should be None.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn set_tempo_time_signature_marker(
+        &self,
+        project: ProjectContext,
+        index: i32,
+        time_position: Option<PositionInSeconds>,
+        measure_position: Option<u32>,
+        beat_position: Option<PositionInQuarterNotes>,
+        bpm: Bpm,
+        time_signature: Option<TimeSignature>,
+        linear_tempo: bool,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let timesig_num: i32;
+        let timesig_denom: i32;
+        match time_signature {
+            None => {
+                timesig_num = 0;
+                timesig_denom = 0;
+            }
+            Some(ts) => {
+                timesig_num = ts.numerator.get() as i32;
+                timesig_denom = ts.denominator.get() as i32;
+            }
+        }
+
+        let tpos: f64;
+        match time_position {
+            None => tpos = -1.0,
+            Some(time) => tpos = time.get(),
+        }
+        let mpos: i32;
+        match measure_position {
+            None => mpos = -1,
+            Some(time) => mpos = time as i32,
+        }
+        let bpos: f64;
+        match beat_position {
+            None => bpos = -1.0,
+            Some(time) => bpos = time.get(),
+        }
+
+        self.low().SetTempoTimeSigMarker(
+            project.to_raw(),
+            index,
+            tpos,
+            mpos,
+            bpos,
+            bpm.get(),
+            timesig_num,
+            timesig_denom,
+            linear_tempo,
+        )
     }
 
     /// Sets the position of the given item.
@@ -5637,6 +6271,19 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.GetItemProjectContext(item.as_ptr());
         NonNull::new(ptr)
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if passed item is invalid.
+    pub unsafe fn get_media_item_track(&self, item: MediaItem) -> ReaperFunctionResult<MediaTrack>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let ptr = self.low.GetMediaItemTrack(item.as_ptr());
+        MediaTrack::new(ptr).ok_or(ReaperFunctionError::new(
+            "Can not find item track. Probably, item is invalid.",
+        ))
     }
 
     /// Returns the active take in this item.
