@@ -6,27 +6,28 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
-    OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, ApplyNudgeFlag, AudioAccessor,
+    AudioDeviceAttributeKey, AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm,
+    ChunkCacheHint, CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior,
+    FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior, GlobalAutomationModeOverride,
+    HelpMode, Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, NudgeUnits,
+    OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
+    PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
+    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectInfoStringCategory,
+    ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -994,6 +995,54 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_valid_project(project);
         unsafe { self.any_track_solo_unchecked(project) }
+    }
+
+    /// True if function name exists in the REAPER API
+    pub fn api_exists(&self, function_name: ReaperStringArg) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe { self.low().APIExists(function_name.as_ptr()) }
+    }
+
+    /// Displays a message window if the API was successfully called.
+    pub fn api_test(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().APITest()
+    }
+
+    /// Applies nudge.
+    ///
+    /// value depends on nudge_units.
+    ///
+    /// if reverse=true: in nudge mode
+    /// (e.g. !ApplyNudgeFlag::SetToValue) nudges left
+    ///
+    /// copies ignored if not in nudge duplicate mode.
+    pub unsafe fn apply_nudge(
+        &self,
+        project: ProjectContext,
+        nudge_flag: BitFlags<ApplyNudgeFlag>,
+        nudge_what: i32,
+        nudge_units: NudgeUnits,
+        value: f64,
+        reverse: bool,
+        copies: i32,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().ApplyNudge(
+            project.to_raw(),
+            nudge_flag.bits() as i32,
+            nudge_what,
+            nudge_units.to_raw(),
+            value,
+            reverse,
+            copies,
+        )
     }
 
     /// Like [`any_track_solo()`] but doesn't check if project is valid.
@@ -2403,6 +2452,149 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.ClearConsole();
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    /// AudioAccessor has to be destroyed.
+    pub unsafe fn create_track_audio_accessor(&self, track: MediaTrack) -> AudioAccessor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        AudioAccessor::new_unchecked(self.low().CreateTrackAudioAccessor(track.as_ptr()))
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    /// AudioAccessor has to be destroyed.
+    pub unsafe fn create_take_audio_accessor(&self, take: MediaItemTake) -> AudioAccessor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        AudioAccessor::new_unchecked(self.low().CreateTakeAudioAccessor(take.as_ptr()))
+    }
+
+    /// Should be called after using of AudioAccessor.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn destroy_audio_accessor(&self, mut accessor: AudioAccessor)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().DestroyAudioAccessor(accessor.as_mut())
+    }
+
+    /// Returns true if the underlying samples (track or media item take)
+    /// have changed
+    ///
+    /// # Note
+    ///
+    /// Does not update the audio accessor, so the user can selectively
+    /// call AudioAccessorValidateState only when needed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn audio_accessor_state_changed(&self, accessor: AudioAccessor) -> bool
+    where
+        UsageScope: AnyThread,
+    {
+        self.low().AudioAccessorStateChanged(accessor.as_ptr())
+    }
+
+    /// Force the accessor to reload its state from the underlying
+    /// track or media item take.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn audio_accessor_update(&self, mut accessor: AudioAccessor)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().AudioAccessorUpdate(accessor.as_mut())
+    }
+
+    /// Validates the current state of the audio accessor.
+    ///
+    /// Returns true if the state changed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn audio_accessor_validate_state(&self, mut accessor: AudioAccessor) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.low().AudioAccessorValidateState(accessor.as_mut())
+    }
+
+    /// Get the end time of the audio that can be returned from this accessor.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn get_audio_accessor_end_time(&self, accessor: AudioAccessor) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        PositionInSeconds::new(self.low().GetAudioAccessorEndTime(accessor.as_ptr()))
+    }
+
+    /// Get the start time of the audio that can be returned from this accessor.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn get_audio_accessor_start_time(&self, accessor: AudioAccessor) -> PositionInSeconds
+    where
+        UsageScope: AnyThread,
+    {
+        PositionInSeconds::new(self.low().GetAudioAccessorStartTime(accessor.as_ptr()))
+    }
+
+    /// Get a block of samples from the audio accessor.
+    ///
+    /// Samples are extracted immediately pre-FX,
+    /// and returned interleaved (first sample of first channel,
+    /// first sample of second channel...).
+    ///
+    /// Returns false if no audio, true if audio
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid audio accessor.
+    pub unsafe fn get_audio_accessor_samples(
+        &self,
+        accessor: AudioAccessor,
+        samplerate: u32,
+        channels_amount: u32,
+        start_time: PositionInSeconds,
+        samples_per_channel: u32,
+        mut sample_buffer: Vec<f64>,
+    ) -> ReaperFunctionResult<bool>
+    where
+        UsageScope: AnyThread,
+    {
+        let result = self.low().GetAudioAccessorSamples(
+            accessor.as_ptr(),
+            samplerate as i32,
+            channels_amount as i32,
+            start_time.get(),
+            samples_per_channel as i32,
+            sample_buffer.as_mut_ptr(),
+        );
+        match result {
+            0 => Ok(false),
+            1 => Ok(true),
+            _ => Err(ReaperFunctionError::new(
+                "Can not get samples from accessor.",
+            )),
+        }
     }
 
     /// Returns the number of tracks in the given project.
@@ -5651,6 +5843,75 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.GetActiveTake(item.as_ptr());
         NonNull::new(ptr)
+    }
+
+    /// Set project information.
+    ///
+    /// For more information of possible values see `ProjectInfoStringCategory`
+    /// documentation.
+    ///
+    /// # Known bugs
+    ///
+    /// This function constantly returns false, but sometimes it works.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn get_set_project_info_string_set<'a, I: Into<ReaperStringArg<'a>>>(
+        &self,
+        project: ProjectContext,
+        category: ProjectInfoStringCategory,
+        value: I,
+    ) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let val: ReaperStringArg = value.into();
+        let val: CString = CString::from(val.as_reaper_str().as_c_str());
+        let category_string = category.to_raw();
+        self.low().GetSetProjectInfo_String(
+            project.to_raw(),
+            category_string.as_ptr(),
+            val.into_raw(),
+            true,
+        )
+    }
+
+    /// Get project information.
+    ///
+    /// For more information of possible values see `ProjectInfoStringCategory`
+    /// documentation.
+    ///
+    /// # Known bugs
+    ///
+    /// There are problems with several categories. At least, with
+    /// TrackGroupName(x), which makes definitely right string for category,
+    /// but doesn't work with reaper-rs.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn get_set_project_info_string_get(
+        &self,
+        project: ProjectContext,
+        category: ProjectInfoStringCategory,
+    ) -> ReaperFunctionResult<String>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let max_size = 1024 * 10;
+        let (result, status) = with_string_buffer(max_size, |buf, _| -> bool {
+            self.low().GetSetProjectInfo_String(
+                project.to_raw(),
+                category.to_raw().as_ptr(),
+                buf,
+                false,
+            )
+        });
+        match status {
+            true => Ok(result.into_string()),
+            false => Err(ReaperFunctionError::new("Can not get project info.")),
+        }
     }
 
     /// Returns the take that is currently being edited in the given MIDI editor.
