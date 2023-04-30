@@ -4,6 +4,7 @@ use std::ffi::CString;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
+use crate::error::ReaperResult;
 use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
@@ -679,18 +680,40 @@ impl Fx {
         }
     }
 
-    pub fn activate_preset(&self, preset: FxPresetRef) {
+    pub fn activate_preset(&self, preset: FxPresetRef) -> ReaperResult<()> {
         self.load_if_necessary_or_complain();
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.track_and_location();
                 unsafe {
-                    let _ = Reaper::get().medium_reaper().track_fx_set_preset_by_index(
+                    Reaper::get().medium_reaper().track_fx_set_preset_by_index(
                         track.raw(),
                         location,
                         preset,
-                    );
+                    )?;
+                    Ok(())
+                }
+            }
+        }
+    }
+
+    pub fn activate_preset_by_name<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperResult<()> {
+        self.load_if_necessary_or_complain();
+        match self.chain.context() {
+            FxChainContext::Take(_) => todo!(),
+            _ => {
+                let (track, location) = self.track_and_location();
+                unsafe {
+                    Reaper::get().medium_reaper().track_fx_set_preset(
+                        track.raw(),
+                        location,
+                        name,
+                    )?;
+                    Ok(())
                 }
             }
         }

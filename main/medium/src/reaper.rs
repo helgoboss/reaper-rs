@@ -6348,9 +6348,8 @@ impl<UsageScope> Reaper<UsageScope> {
     /// subdirectories.
     pub fn get_resource_path<R>(&self, use_resource_path: impl FnOnce(&Path) -> R) -> R
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let ptr = self.low.GetResourcePath();
         let reaper_str =
             unsafe { create_passing_c_str(ptr).expect("should always return resource path") };
@@ -6733,7 +6732,7 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
-    /// Selects a preset of the given track FX.
+    /// Activates a preset of the given track FX by its index.
     ///
     /// # Errors
     ///
@@ -6759,7 +6758,41 @@ impl<UsageScope> Reaper<UsageScope> {
         );
         if !successful {
             return Err(ReaperFunctionError::new(
-                "couldn't select FX preset (maybe FX doesn't exist)",
+                "couldn't activate FX preset by index (maybe FX or preset doesn't exist)",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Activates a preset with the name shown in the REAPER dropdown.
+    ///
+    /// Full paths to `.vstpreset` files are also supported for VST3 plug-ins.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error e.g. if the FX doesn't exist.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn track_fx_set_preset<'a>(
+        &self,
+        track: MediaTrack,
+        fx_location: TrackFxLocation,
+        presetname: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.TrackFX_SetPreset(
+            track.as_ptr(),
+            fx_location.to_raw(),
+            presetname.into().as_ptr(),
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't select FX preset by its name (maybe FX or preset doesn't exist)",
             ));
         }
         Ok(())

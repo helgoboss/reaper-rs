@@ -276,7 +276,7 @@ DOCKED 0
     }
 
     // Returned FX has GUIDs set
-    pub fn fxs(&self) -> impl Iterator<Item = Fx> + ExactSizeIterator + '_ {
+    pub fn fxs(&self) -> impl Iterator<Item = Fx> + ExactSizeIterator + DoubleEndedIterator + '_ {
         (0..self.fx_count()).map(move |i| {
             Fx::from_guid_and_index(
                 self.clone(),

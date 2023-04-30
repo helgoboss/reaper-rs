@@ -3220,7 +3220,7 @@ fn change_fx_preset(get_fx_chain: GetFxChain) -> TestStep {
                     mock.invoke(t);
                 });
         });
-        fx.activate_preset(FxPresetRef::Preset(2));
+        fx.activate_preset(FxPresetRef::Preset(2))?;
         // Then
         // Should notify since REAPER v6.12+dev0617 ... but maybe not if set programmatically?
         assert_eq!(mock.invocation_count(), 0);
