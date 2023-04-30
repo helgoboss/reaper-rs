@@ -193,6 +193,7 @@ impl Fx {
                     "VST" | "VSTi" | "VST3" | "VST3i" => "VST",
                     "JS" => "JS",
                     "AU" | "AUi" => "AU",
+                    "CLAP" | "CLAPi" => "CLAP",
                     _ => "",
                 }
                 .to_owned(),
@@ -807,7 +808,7 @@ pub fn get_track_fx_location(index: u32, is_input_fx: bool) -> TrackFxLocation {
 pub struct FxInfo {
     /// Name of the FX as per default displayed after adding it to a chain.
     ///
-    /// For types other than VST supported since REAPER 6.37.
+    /// For all types other than VST supported since REAPER 6.37.
     ///
     /// Example: "VSTi: ReaSynth (Cockos)"
     pub effect_name: String,
@@ -815,21 +816,22 @@ pub struct FxInfo {
     ///
     /// For types other than VST and JS supported since REAPER 6.37.
     ///
-    /// Examples: "VST", "JS", "AU"
+    /// Examples: "VST", "JS", "AU", "CLAP"
     pub type_expression: String,
     /// Detailed type of the FX.
     ///
     /// For types other than VST and JS supported since REAPER 6.37.
     ///
-    /// Examples: "VST", "VSTi", "VST3", "VST3i", "AU", "AUi", "JS"
+    /// Examples: "VST", "VSTi", "VST3", "VST3i", "AU", "AUi", "JS", "CLAP", "CLAPi"
     pub sub_type_expression: String,
     /// File/bundle name including extension
     ///
     /// For types other than VST and JS supported since REAPER 6.37.
     ///
-    /// Examples: "reasynth.dll", "phaser", "Zebra2.vst"
+    /// Examples: "reasynth.dll" (VST), "phaser" (JS), "Zebra2.vst" (VST),
+    ///     "org.surge-synth-team.surge-xt" (CLAP)
     pub file_name: PathBuf,
-    /// Unique ID for VST plug-ins.
+    /// Unique ID for VST plug-ins (empty for other plug-in types!).
     ///
     /// Supported since REAPER 6.37.
     ///
