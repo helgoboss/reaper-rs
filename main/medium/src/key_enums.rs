@@ -652,6 +652,42 @@ impl<'a> TrackSendAttributeKey<'a> {
     }
 }
 
+/// Project info attribute key which you can pass to [`get_set_project_info_string_set()`],
+/// for example.
+///
+/// [`get_set_project_info_string_set()`]: struct.Reaper.html#method.get_set_project_info_string_set
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub enum ProjectInfoAttributeKey<'a> {
+    /// Render directory.
+    RenderFile,
+    /// Render file name (may contain wildcards).
+    RenderPattern,
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
+    Custom(Cow<'a, ReaperStr>),
+}
+
+impl<'a> ProjectInfoAttributeKey<'a> {
+    /// Convenience function for creating a [`Custom`] key.
+    ///
+    /// [`Custom`]: #variant.Custom
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> ProjectInfoAttributeKey<'a> {
+        ProjectInfoAttributeKey::Custom(key.into().into_inner())
+    }
+
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
+        use ProjectInfoAttributeKey::*;
+        match self {
+            RenderFile => reaper_str!("RENDER_FILE").into(),
+            RenderPattern => reaper_str!("RENDER_PATTERN").into(),
+            Custom(key) => key,
+        }
+    }
+}
+
 /// Envelope chunk name which you can pass e.g. to [`TrackAttributeKey::Env()`].
 ///
 /// [`TrackAttributeKey::Env()`]: enum.TrackAttributeKey.html#variant.Env

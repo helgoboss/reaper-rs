@@ -1278,6 +1278,25 @@ impl NotificationBehavior {
     }
 }
 
+/// Determines how to open a project.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[non_exhaustive]
+pub struct OpenProjectBehavior {
+    /// If `true`, opens the project as template (default = `false`).
+    pub open_as_template: bool,
+    /// If `true`, prompts the user to save (default = `true`).
+    pub prompt: bool,
+}
+
+impl Default for OpenProjectBehavior {
+    fn default() -> Self {
+        Self {
+            open_as_template: false,
+            prompt: true,
+        }
+    }
+}
+
 /// Denotes the target of a send.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum SendTarget {

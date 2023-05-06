@@ -13,20 +13,21 @@ use crate::{
     InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
     MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
     MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OwnedPcmSource,
-    OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OpenProjectBehavior,
+    OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
+    PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
+    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectInfoAttributeKey,
+    ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
+    SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -444,6 +445,32 @@ impl<UsageScope> Reaper<UsageScope> {
         self.low.TrackList_AdjustWindows(false);
     }
 
+    /// Opens the given file.
+    ///
+    /// If it's a project, opens the project. If it's a track template, adds the template to the
+    /// current project.
+    ///
+    /// This is also useful for debugging. Send "\n" for newline and "" to clear the console.
+    pub fn main_open_project<'a>(&self, file: &Path, behavior: OpenProjectBehavior)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let file_str = file.to_str().expect("file name is not valid UTF-8");
+        let mut expression = String::new();
+        if behavior.open_as_template {
+            expression += "template:";
+        }
+        if !behavior.prompt {
+            expression += "noprompt:";
+        }
+        expression += file_str;
+        let expression_reaper_string = ReaperString::from_string(expression);
+        unsafe {
+            self.low.Main_openProject(expression_reaper_string.as_ptr());
+        }
+    }
+
     /// Shows a message to the user in the ReaScript console.
     ///
     /// This is also useful for debugging. Send "\n" for newline and "" to clear the console.
@@ -668,6 +695,53 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.get_set_media_track_info(track, TrackAttributeKey::Name, message.into().as_ptr() as _);
+    }
+
+    /// Sets a project info string attribute.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn get_set_project_info_string_set<'a>(
+        &self,
+        project: ProjectContext,
+        attribute_key: ProjectInfoAttributeKey,
+        value: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_set_project_info_string_set_unchecked(project, attribute_key, value) }
+    }
+
+    /// Like [`get_set_project_info_string_set()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_set_project_info_string_set()`]: #method.get_set_project_info_string_set
+    pub unsafe fn get_set_project_info_string_set_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        attribute_key: ProjectInfoAttributeKey,
+        value: impl Into<ReaperStringArg<'a>>,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.GetSetProjectInfo_String(
+            project.to_raw(),
+            attribute_key.into_raw().as_ptr(),
+            value.into().as_ptr() as _,
+            true,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't set project info string"));
+        }
+        Ok(())
     }
 
     /// Convenience function which returns the given track's input monitoring mode (`I_RECMON`).
