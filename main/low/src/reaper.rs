@@ -3287,6 +3287,10 @@ impl Reaper {
                 GetMidiOutput: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetMidiOutput)).as_ptr()),
                 ),
+                fxDoReaperPresetAction: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(fxDoReaperPresetAction)).as_ptr()),
+                ),
                 InitializeCoolSB: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(InitializeCoolSB)).as_ptr()),
@@ -5838,6 +5842,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetMidiOutput.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.fxDoReaperPresetAction.is_some() {
             loaded_count += 1;
         }
         if pointers.InitializeCoolSB.is_some() {
@@ -19348,6 +19355,23 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn fxDoReaperPresetAction(
+        &self,
+        fx: *mut ::std::os::raw::c_void,
+        name: *const ::std::os::raw::c_char,
+        flag: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.fxDoReaperPresetAction {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(fxDoReaperPresetAction)
+            ),
+            Some(f) => f(fx, name, flag),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn InitializeCoolSB(&self, hwnd: root::HWND) -> root::BOOL {
         match self.pointers.InitializeCoolSB {
             None => panic!(
@@ -24118,6 +24142,13 @@ pub struct ReaperFunctionPointers {
     >,
     pub GetMidiInput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Input>,
     pub GetMidiOutput: Option<extern "C" fn(idx: ::std::os::raw::c_int) -> *mut root::midi_Output>,
+    pub fxDoReaperPresetAction: Option<
+        unsafe extern "C" fn(
+            fx: *mut ::std::os::raw::c_void,
+            name: *const ::std::os::raw::c_char,
+            flag: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub InitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::BOOL>,
     pub UninitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::HRESULT>,
     pub CoolSB_SetMinThumbSize: Option<
@@ -24173,5 +24204,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 847u32;
+    pub(crate) const TOTAL_COUNT: u32 = 848u32;
 }

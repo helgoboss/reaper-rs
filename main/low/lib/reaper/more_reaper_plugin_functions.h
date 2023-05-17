@@ -14,3 +14,5 @@ midi_Output *(*GetMidiOutput)(int idx);
     Do NOT call midi_Output::BeginBlock()/EndBlock() in this mode, just Send()/SendMsg().
 
 */
+
+int (*fxDoReaperPresetAction)(void* fx, const char* name, int flag);
