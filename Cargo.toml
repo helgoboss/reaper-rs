@@ -5,6 +5,7 @@ members = [
     "main/high",
     "main/rx",
     "main/macros",
+    "main/rppxml-parser",
     "test/test",
     "test/test-extension-plugin",
     "test/test-vst-plugin"

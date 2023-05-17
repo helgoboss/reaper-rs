@@ -1,0 +1,10 @@
+[package]
+name = "rppxml-parser"
+version = "0.1.0"
+authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
+edition = "2021"
+license = "MIT"
+rust-version = "1.68.2"
+
+[dependencies]
+splitty = "1.0.1"
