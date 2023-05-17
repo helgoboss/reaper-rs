@@ -72,7 +72,7 @@ The remaining crates are add-ons for the high-level API.
 This API contains the raw bindings, nothing more. It's unsafe to a large extent and not intended to be used
 directly. However, it serves as foundation for all the other APIs and is easy to keep up-to-date because it's
 mostly auto-generated from `reaper_plugin_functions.h`. It also can serve as last resort if a function has not
-yet been implemented in the medium-level API (although I rather want encourage to contribute to the medium-level API
+yet been implemented in the medium-level API (although I rather want to encourage to contribute to the medium-level API
 in such a case).
 
 Status:
@@ -339,10 +339,11 @@ These files are not generated with each build though. In order to decrease build
 IDE/debugging support, they are included in the Git repository like any other Rust source.
 
 You can generate these files on demand (see build section), e.g. after you have adjusted
-`reaper_plugin_functions.h`. Right now this is enabled for Linux and macOS only. If we would generate the files on
-Windows, `bindings.rs` would look quite differently (whereas `reaper.rs` should end up the
+`reaper_plugin_functions.h`. Right now this is enabled for Linux only. If we generated the files on
+Windows, `bindings.rs` would look very different (whereas `reaper.rs` should end up the
 same). The reason is that `reaper_plugin.h` includes `windows.h` on Windows, whereas on Linux and macOS, it uses
-`swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement.
+`swell.h` ([Simple Windows Emulation Layer](https://www.cockos.com/wdl/)) as a replacement. But even on macOS,
+the result looks different than on Linux.
 
 Most parts of `bindings.rs` are used to generate `reaper.rs` and otherwise ignored, but a few
 structs, types and constants are published as part of the `raw` module. In order to have
@@ -389,8 +390,11 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
    ```batch
    cargo build
    ```
+   
+Regenerate the low-level API:
 
-Regenerating the low-level API from Windows is disabled for now.
+- See section "Docker".
+- As an alternative to Docker, use the WSL (preferably Ubuntu) and follow the instruction in the "Linux" section.
 
 #### Linux
 
@@ -435,6 +439,8 @@ cargo build --features generate
 cargo fmt
 ```
 
+In order to get the most deterministic results, use Docker (see section "Docker").
+
 #### macOS
 
 The following instructions include Rust setup. However, it's very well possible that some native toolchain setup
@@ -455,6 +461,26 @@ cd reaper-rs
 
 # Build reaper-rs
 cargo build
+```
+
+Regenerate the low-level API:
+
+- See section "Docker".
+
+### Docker
+
+Regenerating the low-level API should always be done on Linux. And for getting really deterministic results, it's best
+to always use the same distro and same environment, which is easy to achieve with Docker:
+
+```sh
+# Build image (official Rust image + LLVM and Clang)
+docker build --tag rust-for-reaper-rs .
+
+# Build reaper-low with feature "generate"
+docker run --rm --user "$(id -u)":"$(id -g)" -v "$PWD":/usr/src/myapp -w /usr/src/myapp rust-for-reaper-rs cargo build --package reaper-low --features generate
+
+# Format code
+cargo fmt
 ```
 
 ### Test

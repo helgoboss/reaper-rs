@@ -1,5 +1,8 @@
 // This file aggregates all header files that serve as input for generating `bindings.rs` with bindgen.
 
+// This is necessary on some architectures when regenerating the low-level API. I enabled it
+// in the context of making that work in Rust for Docker (running on Debian).
+#define WDL_ALLOW_UNSIGNED_DEFAULT_CHAR
 // Make all types relevant for REAPER plug-ins visible to bindgen.
 #include "../lib/reaper/reaper_plugin.h"
 

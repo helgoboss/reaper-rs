@@ -1,13 +1,13 @@
 /// Executed whenever Cargo builds reaper-rs
 fn main() {
-    #[cfg(target_family = "unix")]
+    #[cfg(target_os = "linux")]
     #[cfg(feature = "generate-stage-one")]
     codegen::stage_one::generate_bindings();
 
     #[cfg(feature = "generate-stage-two")]
     codegen::stage_two::generate_reaper_and_swell();
 
-    #[cfg(target_family = "unix")]
+    #[cfg(target_os = "linux")]
     compile_swell_dialog_generator_support();
 
     compile_glue_code();
@@ -15,7 +15,7 @@ fn main() {
 
 /// This makes SWELL dialogs via "swell-dlggen.h" possible (on C++ side only, via cc crate).
 /// See the C++ source file for a detailled explanation.
-#[cfg(target_family = "unix")]
+#[cfg(target_os = "linux")]
 fn compile_swell_dialog_generator_support() {
     let modstub_file = if cfg!(target_os = "macos") {
         "src/swell-modstub-custom.mm"
@@ -64,7 +64,7 @@ fn compile_glue_code() {
 
 #[cfg(any(feature = "generate-stage-one", feature = "generate-stage-two"))]
 mod codegen {
-    #[cfg(target_family = "unix")]
+    #[cfg(target_os = "linux")]
     #[cfg(feature = "generate-stage-one")]
     pub mod stage_one {
         use bindgen::callbacks::{IntKind, ParseCallbacks};
