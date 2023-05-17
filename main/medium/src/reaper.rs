@@ -451,7 +451,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// current project.
     ///
     /// This is also useful for debugging. Send "\n" for newline and "" to clear the console.
-    pub fn main_open_project<'a>(&self, file: &Path, behavior: OpenProjectBehavior)
+    pub fn main_open_project(&self, file: &Path, behavior: OpenProjectBehavior)
     where
         UsageScope: MainThreadOnly,
     {
