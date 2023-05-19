@@ -34,6 +34,7 @@ impl<S> StreamingParser<S> {
     }
 }
 
+#[allow(clippy::should_implement_trait)]
 impl<S: BufRead> StreamingParser<S> {
     /// Repeatedly call `next` to read the events.
     pub fn next(&mut self) -> Option<Item> {

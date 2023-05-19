@@ -7,7 +7,7 @@ fn main() {
     #[cfg(feature = "generate-stage-two")]
     codegen::stage_two::generate_reaper_and_swell();
 
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     compile_swell_dialog_generator_support();
 
     compile_glue_code();
@@ -15,7 +15,7 @@ fn main() {
 
 /// This makes SWELL dialogs via "swell-dlggen.h" possible (on C++ side only, via cc crate).
 /// See the C++ source file for a detailled explanation.
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 fn compile_swell_dialog_generator_support() {
     let modstub_file = if cfg!(target_os = "macos") {
         "src/swell-modstub-custom.mm"
