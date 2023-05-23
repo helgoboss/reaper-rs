@@ -3916,13 +3916,13 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// REAPER can crash if you pass an invalid track or value.
     pub unsafe fn track_fx_set_named_config_parm<'a>(
         &self,
         track: MediaTrack,
         fx_location: TrackFxLocation,
         param_name: impl Into<ReaperStringArg<'a>>,
-        buffer: &[u8],
+        value: *const c_char,
     ) -> ReaperFunctionResult<()>
     where
         UsageScope: MainThreadOnly,
@@ -3932,7 +3932,7 @@ impl<UsageScope> Reaper<UsageScope> {
             track.as_ptr(),
             fx_location.to_raw(),
             param_name.into().as_ptr(),
-            buffer.as_ptr() as _,
+            value,
         );
         if !successful {
             return Err(ReaperFunctionError::new(

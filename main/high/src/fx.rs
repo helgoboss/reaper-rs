@@ -1,5 +1,5 @@
 use std::cell::Cell;
-use std::ffi::CString;
+use std::ffi::{c_char, CString};
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -294,10 +294,13 @@ impl Fx {
         }
     }
 
-    pub fn set_named_config_param<'a>(
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid value.
+    pub unsafe fn set_named_config_param<'a>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,
-        buffer: &[u8],
+        value: *const c_char,
     ) -> Result<(), ReaperFunctionError> {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
@@ -306,7 +309,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_set_named_config_parm(track.raw(), location, name, buffer)
+                        .track_fx_set_named_config_parm(track.raw(), location, name, value)
                 }
             }
         }
@@ -485,7 +488,12 @@ impl Fx {
         self.load_if_necessary_or_complain();
         let c_string =
             CString::new(encoded).map_err(|_| "base64-encoded VST chunk contains nul byte")?;
-        self.set_named_config_param("vst_chunk", c_string.as_bytes_with_nul())?;
+        unsafe {
+            self.set_named_config_param(
+                "vst_chunk",
+                c_string.as_bytes_with_nul().as_ptr() as *const _,
+            )?;
+        }
         Ok(())
     }
 
@@ -592,7 +600,7 @@ impl Fx {
     ) -> Result<(), &'static str> {
         let mut old_chunk = old_chunk_region.parent_chunk();
         old_chunk.replace_region(&old_chunk_region, new_content);
-        std::mem::drop(old_chunk_region);
+        drop(old_chunk_region);
         self.track()
             .ok_or("only track FX supported")?
             .set_chunk(old_chunk)?;
