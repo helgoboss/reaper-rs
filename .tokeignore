@@ -1,0 +1,7 @@
+target
+main/low/lib
+main/low/src/bindings.rs
+main/low/src/reaper.rs
+main/low/src/swell.rs
+*.json
+*.lua
