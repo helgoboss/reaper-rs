@@ -561,6 +561,20 @@ impl Track {
         }
     }
 
+    pub fn set_armed(
+        &self,
+        armed: bool,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
+        let arm_mode = if armed {
+            RecordArmMode::Armed
+        } else {
+            RecordArmMode::Unarmed
+        };
+        self.set_arm_state_internal(arm_mode, gang_behavior, grouping_behavior);
+    }
+
     fn set_arm_state_internal(
         &self,
         mode: RecordArmMode,
@@ -719,14 +733,28 @@ impl Track {
     }
 
     pub fn mute(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
-        self.set_mute(TrackMuteState::Mute, gang_behavior, grouping_behavior);
+        self.set_mute_internal(TrackMuteState::Mute, gang_behavior, grouping_behavior);
     }
 
     pub fn unmute(&self, gang_behavior: GangBehavior, grouping_behavior: GroupingBehavior) {
-        self.set_mute(TrackMuteState::Unmute, gang_behavior, grouping_behavior);
+        self.set_mute_internal(TrackMuteState::Unmute, gang_behavior, grouping_behavior);
     }
 
-    fn set_mute(
+    pub fn set_mute(
+        &self,
+        mute: bool,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) {
+        let state = if mute {
+            TrackMuteState::Mute
+        } else {
+            TrackMuteState::Unmute
+        };
+        self.set_mute_internal(state, gang_behavior, grouping_behavior);
+    }
+
+    fn set_mute_internal(
         &self,
         state: TrackMuteState,
         gang_behavior: GangBehavior,
