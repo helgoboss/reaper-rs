@@ -1,5 +1,6 @@
 use crate::fx::Fx;
 
+use crate::error::ReaperResult;
 use crate::{FxChain, FxChainContext, Reaper};
 use reaper_medium::{
     GetParamExResult, GetParameterStepSizesResult, ReaperFunctionError,
@@ -80,17 +81,20 @@ impl FxParameter {
         self.fx.is_available() && self.index < self.fx.parameter_count()
     }
 
-    pub fn name(&self) -> ReaperString {
+    pub fn name(&self) -> ReaperResult<ReaperString> {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let (track, location) = self.fx().track_and_location();
-                unsafe {
-                    Reaper::get()
-                        .medium_reaper()
-                        .track_fx_get_param_name(track.raw(), location, self.index, 256)
-                        .expect("Couldn't get FX parameter name")
-                }
+                let name = unsafe {
+                    Reaper::get().medium_reaper().track_fx_get_param_name(
+                        track.raw(),
+                        location,
+                        self.index,
+                        256,
+                    )?
+                };
+                Ok(name)
             }
         }
     }

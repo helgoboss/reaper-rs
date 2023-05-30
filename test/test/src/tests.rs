@@ -3237,7 +3237,10 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         let p = fx.parameter_by_index(5);
         // Then
         assert!(p.is_available());
-        assert_eq!(p.name().into_inner().as_c_str(), c_str!("Pitch Wheel"));
+        assert_eq!(
+            p.name().unwrap().into_inner().as_c_str(),
+            c_str!("Pitch Wheel")
+        );
         assert_eq!(p.index(), 5);
         assert_eq!(p.character(), FxParameterCharacter::Continuous);
         assert_eq!(p.clone(), p);
