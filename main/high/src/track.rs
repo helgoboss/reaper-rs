@@ -10,6 +10,7 @@ use crate::{
     Width,
 };
 
+use either::Either;
 use enumflags2::BitFlags;
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
@@ -18,14 +19,15 @@ use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo}
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, Progress, ReaProject, ReaperFunctionError, ReaperString,
-    ReaperStringArg, RecordArmMode, RecordingInput, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
-    TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
-    TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory, TrackSendDirection,
-    TrackSoloOperation,
+    InputMonitoringMode, MediaTrack, Progress, ReaProject, ReaperFunctionError, ReaperPanValue,
+    ReaperString, ReaperStringArg, ReaperVolumeValue, ReaperWidthValue, RecordArmMode,
+    RecordingInput, RgbColor, SetTrackUiFlags, SoloMode, TrackArea, TrackAttributeKey,
+    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
+    TrackRecArmOperation, TrackSendCategory, TrackSendDirection, TrackSoloOperation,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
+use std::iter;
 
 pub const MAX_TRACK_CHUNK_SIZE: u32 = 20_000_000;
 
@@ -84,23 +86,31 @@ impl Track {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_set_media_track_info_set_name(self.raw(), name);
+                .get_set_media_track_info_set_name(self.raw_internal(), name);
         }
     }
 
     pub fn item_count(&self) -> u32 {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return 0;
+        }
+        self.item_count_internal()
+    }
+
+    fn item_count_internal(&self) -> u32 {
         unsafe {
             Reaper::get()
                 .medium_reaper
-                .count_track_media_items(self.raw())
+                .count_track_media_items(self.raw_internal())
         }
     }
 
     pub fn items(&self) -> impl Iterator<Item = Item> + ExactSizeIterator + 'static {
-        self.load_and_check_if_necessary_or_complain();
-        let raw = self.raw();
-        (0..self.item_count()).map(move |i| {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return Either::Left(iter::empty());
+        }
+        let raw = self.raw_internal();
+        let iter = (0..self.item_count_internal()).map(move |i| {
             let media_item = unsafe {
                 Reaper::get()
                     .medium_reaper()
@@ -108,7 +118,8 @@ impl Track {
                     .unwrap()
             };
             Item::new(media_item)
-        })
+        });
+        Either::Right(iter)
     }
 
     pub fn add_item(&self) -> Result<Item, ReaperFunctionError> {
@@ -124,18 +135,22 @@ impl Track {
     // TODO-low It's really annoying to always have to unwrap an option even if we know this is not
     //  a master track. Maybe we should have different types: Track, MasterTrack, NormalTrack
     pub fn name(&self) -> Option<ReaperString> {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_set_media_track_info_get_name(self.raw(), |n| n.to_owned())
+                .get_set_media_track_info_get_name(self.raw_internal(), |n| n.to_owned())
         }
     }
 
     pub fn custom_color(&self) -> Option<RgbColor> {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
         let reaper = Reaper::get().medium_reaper();
-        let res = unsafe { reaper.get_track_color(self.raw())? };
+        let res = unsafe { reaper.get_track_color(self.raw_internal())? };
         if res.is_used {
             let rgb_color = reaper.color_from_native(res.color);
             Some(rgb_color)
@@ -145,11 +160,13 @@ impl Track {
     }
 
     pub fn input_monitoring_mode(&self) -> InputMonitoringMode {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return InputMonitoringMode::Normal;
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_set_media_track_info_get_rec_mon(self.raw())
+                .get_set_media_track_info_get_rec_mon(self.raw_internal())
         }
     }
 
@@ -177,11 +194,13 @@ impl Track {
     }
 
     pub fn recording_input(&self) -> Option<RecordingInput> {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_set_media_track_info_get_rec_input(self.raw())
+                .get_set_media_track_info_get_rec_input(self.raw_internal())
         }
     }
 
@@ -219,17 +238,23 @@ impl Track {
 
     pub fn raw(&self) -> MediaTrack {
         self.load_if_necessary_or_complain();
+        self.raw_internal()
+    }
+
+    fn raw_internal(&self) -> MediaTrack {
         self.media_track.get().unwrap()
     }
 
     pub fn pan(&self) -> Pan {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return Pan::from_reaper_value(ReaperPanValue::CENTER);
+        }
         // It's important that we don't query D_PAN because that returns the wrong value in case an
         // envelope is written
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_ui_vol_pan(self.raw())
+                .get_track_ui_vol_pan(self.raw_internal())
                 .expect("couldn't get vol/pan")
         };
         Pan::from_reaper_value(result.pan)
@@ -282,13 +307,15 @@ impl Track {
     }
 
     pub fn width(&self) -> Width {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return Width::from_reaper_value(ReaperWidthValue::CENTER);
+        }
         // It's important that we don't query D_WIDTH because that returns the wrong value in case
         // an envelope is written
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_ui_pan(self.raw())
+                .get_track_ui_pan(self.raw_internal())
                 .expect("couldn't get pan/width")
         };
         Width::from_reaper_value(result.pan_2.as_width_value())
@@ -345,30 +372,39 @@ impl Track {
     }
 
     pub fn folder_depth_change(&self) -> i32 {
-        let result = unsafe {
+        if self.load_if_necessary_or_err().is_err() {
+            return 0;
+        }
+        unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_media_track_info_value(self.raw(), TrackAttributeKey::FolderDepth)
-        };
-        result as _
+                .get_media_track_info_value(self.raw_internal(), TrackAttributeKey::FolderDepth)
+                as i32
+        }
     }
 
     pub fn channel_count(&self) -> u32 {
+        if self.load_if_necessary_or_err().is_err() {
+            return 0;
+        }
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_media_track_info_value(self.raw(), TrackAttributeKey::Nchan)
+                .get_media_track_info_value(self.raw_internal(), TrackAttributeKey::Nchan)
         };
         result as _
     }
 
     pub fn volume(&self) -> Volume {
+        if self.load_if_necessary_or_err().is_err() {
+            return Volume::from_reaper_value(ReaperVolumeValue::MIN);
+        }
         // It's important that we don't query D_VOL because that returns the wrong value in case an
         // envelope is written
         let result = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_ui_vol_pan(self.raw())
+                .get_track_ui_vol_pan(self.raw_internal())
                 .expect("Couldn't get vol/pan")
         };
         Volume::from_reaper_value(result.volume)
@@ -445,26 +481,39 @@ impl Track {
 
     pub fn location(&self) -> TrackLocation {
         self.load_and_check_if_necessary_or_complain();
+        self.location_internal()
+    }
+
+    fn location_internal(&self) -> TrackLocation {
         // TODO-low The following returns None if we query the number of a track in another project
         //  Try to find a working solution!
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_set_media_track_info_get_track_number(self.raw())
+                .get_set_media_track_info_get_track_number(self.raw_internal())
                 .unwrap()
         }
     }
 
     pub fn index(&self) -> Option<u32> {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
         use TrackLocation::*;
-        match self.location() {
+        match self.location_internal() {
             MasterTrack => None,
             NormalTrack(idx) => Some(idx),
         }
     }
 
     pub fn has_auto_arm_enabled(&self) -> bool {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
+        self.has_auto_arm_enabled_internal()
+    }
+
+    fn has_auto_arm_enabled_internal(&self) -> bool {
         if let Ok(line) = self.auto_arm_chunk_line() {
             line.is_some()
         } else {
@@ -474,24 +523,29 @@ impl Track {
 
     #[allow(clippy::float_cmp)]
     pub fn is_armed(&self, support_auto_arm: bool) -> bool {
-        if support_auto_arm && self.has_auto_arm_enabled() {
-            self.is_selected()
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
+        if support_auto_arm && self.has_auto_arm_enabled_internal() {
+            self.is_selected_internal()
         } else {
-            self.load_and_check_if_necessary_or_complain();
             let recarm = unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_media_track_info_value(self.raw(), RecArm)
+                    .get_media_track_info_value(self.raw_internal(), RecArm)
             };
             recarm == 1.0
         }
     }
 
     pub fn parent_send_enabled(&self) -> bool {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_media_track_info_value(self.raw(), TrackAttributeKey::MainSend)
+                .get_media_track_info_value(self.raw_internal(), TrackAttributeKey::MainSend)
                 > 0.0
         }
     }
@@ -677,11 +731,13 @@ impl Track {
     }
 
     fn prop_numeric_value(&self, key: TrackAttributeKey) -> f64 {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return 0.0;
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_media_track_info_value(self.raw(), key)
+                .get_media_track_info_value(self.raw_internal(), key)
         }
     }
 
@@ -711,8 +767,11 @@ impl Track {
     }
 
     pub fn is_shown(&self, area: TrackArea) -> bool {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
         let reaper = &Reaper::get().medium_reaper;
-        if self.is_master_track() {
+        if self.is_master_track_internal() {
             let has_flag = reaper.get_master_track_visibility().contains(area);
             match area {
                 TrackArea::Tcp => has_flag,
@@ -720,15 +779,22 @@ impl Track {
             }
         } else {
             unsafe {
-                reaper.get_media_track_info_value(self.raw(), get_show_attribute_key(area)) > 0.0
+                reaper.get_media_track_info_value(self.raw_internal(), get_show_attribute_key(area))
+                    > 0.0
             }
         }
     }
 
     #[allow(clippy::float_cmp)]
     pub fn is_muted(&self) -> bool {
-        self.load_and_check_if_necessary_or_complain();
-        let mute = unsafe { Reaper::get().medium_reaper().get_track_ui_mute(self.raw()) };
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
+        let mute = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_track_ui_mute(self.raw_internal())
+        };
         mute.unwrap_or(false)
     }
 
@@ -794,11 +860,13 @@ impl Track {
     }
 
     pub fn is_solo(&self) -> bool {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
         let solo = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_media_track_info_value(self.raw(), Solo)
+                .get_media_track_info_value(self.raw_internal(), Solo)
         };
         solo > 0.0
     }
@@ -812,11 +880,13 @@ impl Track {
     }
 
     pub fn solo_mode(&self) -> SoloMode {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return SoloMode::Off;
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_set_media_track_info_get_solo(self.raw())
+                .get_set_media_track_info_get_solo(self.raw_internal())
         }
     }
 
@@ -901,10 +971,21 @@ impl Track {
         max_chunk_size: u32,
         undo_is_optional: ChunkCacheHint,
     ) -> Result<Chunk, &'static str> {
+        if self.load_if_necessary_or_err().is_err() {
+            return Err("track not available, so chunk neither");
+        }
+        self.chunk_internal(max_chunk_size, undo_is_optional)
+    }
+
+    fn chunk_internal(
+        &self,
+        max_chunk_size: u32,
+        undo_is_optional: ChunkCacheHint,
+    ) -> Result<Chunk, &'static str> {
         let chunk_content = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_state_chunk(self.raw(), max_chunk_size, undo_is_optional)
+                .get_track_state_chunk(self.raw_internal(), max_chunk_size, undo_is_optional)
                 .map_err(|_| "Couldn't load track chunk")?
         };
         Ok(chunk_content.into())
@@ -925,7 +1006,13 @@ impl Track {
 
     #[allow(clippy::float_cmp)]
     pub fn is_selected(&self) -> bool {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
+        self.is_selected_internal()
+    }
+
+    fn is_selected_internal(&self) -> bool {
         let selected = unsafe {
             Reaper::get()
                 .medium_reaper()
@@ -962,24 +1049,43 @@ impl Track {
     }
 
     pub fn receive_count(&self) -> u32 {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return 0;
+        }
+        self.receive_count_internal()
+    }
+
+    fn receive_count_internal(&self) -> u32 {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_num_sends(self.raw(), TrackSendCategory::Receive)
+                .get_track_num_sends(self.raw_internal(), TrackSendCategory::Receive)
         }
     }
 
     pub fn send_count(&self) -> u32 {
-        self.hw_send_count() + self.typed_send_count(SendPartnerType::Track)
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return 0;
+        }
+        self.send_count_internal()
+    }
+
+    fn send_count_internal(&self) -> u32 {
+        self.hw_send_count_internal() + self.typed_send_count_internal(SendPartnerType::Track)
     }
 
     pub fn typed_send_count(&self, partner_type: SendPartnerType) -> u32 {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return 0;
+        }
+        self.typed_send_count_internal(partner_type)
+    }
+
+    fn typed_send_count_internal(&self, partner_type: SendPartnerType) -> u32 {
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_num_sends(self.raw(), partner_type.to_category())
+                .get_track_num_sends(self.raw_internal(), partner_type.to_category())
         }
     }
 
@@ -991,7 +1097,7 @@ impl Track {
                 .create_track_send(self.raw(), OtherTrack(destination_track.raw()))
         }
         .unwrap();
-        let hw_send_count = self.hw_send_count();
+        let hw_send_count = self.hw_send_count_internal();
         TrackRoute::new(
             self.clone(),
             TrackSendDirection::Send,
@@ -1000,39 +1106,58 @@ impl Track {
     }
 
     pub fn receives(&self) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
-        self.load_and_check_if_necessary_or_complain();
-        (0..self.receive_count())
-            .map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Receive, i))
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return Either::Left(iter::empty());
+        }
+        let iter = (0..self.receive_count_internal())
+            .map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Receive, i));
+        Either::Right(iter)
     }
 
     pub fn sends(&self) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
-        self.load_and_check_if_necessary_or_complain();
-        (0..self.send_count())
-            .map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Send, i))
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return Either::Left(iter::empty());
+        }
+        let iter = (0..self.send_count_internal())
+            .map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Send, i));
+        Either::Right(iter)
     }
 
     pub fn typed_sends(
         &self,
         partner_type: SendPartnerType,
     ) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
-        self.load_and_check_if_necessary_or_complain();
-        let hw_send_count = self.hw_send_count();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return Either::Left(iter::empty());
+        }
+        Either::Right(self.typed_sends_internal(partner_type))
+    }
+
+    fn typed_sends_internal(
+        &self,
+        partner_type: SendPartnerType,
+    ) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
+        let hw_send_count = self.hw_send_count_internal();
         let (from, count) = match partner_type {
-            SendPartnerType::Track => {
-                (hw_send_count, self.typed_send_count(SendPartnerType::Track))
-            }
+            SendPartnerType::Track => (
+                hw_send_count,
+                self.typed_send_count_internal(SendPartnerType::Track),
+            ),
             SendPartnerType::HardwareOutput => (0, hw_send_count),
         };
         let until = from + count;
         (from..until).map(move |i| TrackRoute::new(self.clone(), TrackSendDirection::Send, i))
     }
 
-    fn hw_send_count(&self) -> u32 {
-        self.typed_send_count(SendPartnerType::HardwareOutput)
+    fn hw_send_count_internal(&self) -> u32 {
+        self.typed_send_count_internal(SendPartnerType::HardwareOutput)
     }
 
     pub fn receive_by_index(&self, index: u32) -> Option<TrackRoute> {
-        if index >= self.receive_count() {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
+        if index >= self.receive_count_internal() {
             return None;
         }
         let route = TrackRoute::new(self.clone(), TrackSendDirection::Receive, index);
@@ -1040,7 +1165,10 @@ impl Track {
     }
 
     pub fn send_by_index(&self, index: u32) -> Option<TrackRoute> {
-        if index >= self.send_count() {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
+        if index >= self.send_count_internal() {
             return None;
         }
         let route = TrackRoute::new(self.clone(), TrackSendDirection::Send, index);
@@ -1052,11 +1180,14 @@ impl Track {
         partner_type: SendPartnerType,
         index: u32,
     ) -> Option<TrackRoute> {
-        if index >= self.typed_send_count(partner_type) {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
+        if index >= self.typed_send_count_internal(partner_type) {
             return None;
         }
         let actual_index = match partner_type {
-            SendPartnerType::Track => self.hw_send_count() + index,
+            SendPartnerType::Track => self.hw_send_count_internal() + index,
             SendPartnerType::HardwareOutput => index,
         };
         let route = TrackRoute::new(self.clone(), TrackSendDirection::Send, actual_index);
@@ -1071,7 +1202,10 @@ impl Track {
     }
 
     pub fn find_send_by_destination_track(&self, destination_track: &Track) -> Option<TrackRoute> {
-        self.typed_sends(SendPartnerType::Track)
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return None;
+        }
+        self.typed_sends_internal(SendPartnerType::Track)
             .find(|s| match s.partner() {
                 Some(TrackRoutePartner::Track(t)) => t == *destination_track,
                 _ => false,
@@ -1096,15 +1230,33 @@ impl Track {
         self.complain_if_not_valid();
     }
 
+    fn load_and_check_if_necessary_or_err(&self) -> Result<(), &'static str> {
+        self.load_if_necessary_or_err()?;
+        self.err_if_not_valid()?;
+        Ok(())
+    }
+
     fn load_if_necessary_or_complain(&self) {
+        self.load_if_necessary_or_err().unwrap();
+    }
+
+    fn load_if_necessary_or_err(&self) -> Result<(), &'static str> {
         if self.media_track.get().is_none() && !self.load_by_guid() {
-            panic!("Track not loadable");
+            Err("Track not loadable")
+        } else {
+            Ok(())
         }
     }
 
     fn complain_if_not_valid(&self) {
-        if !self.is_valid() {
-            panic!("Track not available");
+        self.err_if_not_valid().unwrap();
+    }
+
+    fn err_if_not_valid(&self) -> Result<(), &'static str> {
+        if self.is_valid() {
+            Ok(())
+        } else {
+            Err("Track not available")
         }
     }
 
@@ -1215,10 +1367,13 @@ impl Track {
     }
 
     pub fn automation_mode(&self) -> AutomationMode {
+        if self.load_if_necessary_or_err().is_err() {
+            return AutomationMode::Read;
+        }
         unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_automation_mode(self.raw())
+                .get_track_automation_mode(self.raw_internal())
         }
     }
 
@@ -1244,7 +1399,13 @@ impl Track {
     }
 
     pub fn is_master_track(&self) -> bool {
-        self.load_and_check_if_necessary_or_complain();
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return false;
+        }
+        self.is_master_track_internal()
+    }
+
+    fn is_master_track_internal(&self) -> bool {
         let t = unsafe {
             Reaper::get()
                 .medium_reaper()
