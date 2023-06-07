@@ -15,19 +15,19 @@ use crate::{
     MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OpenProjectBehavior,
     OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
-    PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
-    PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext, ProjectInfoAttributeKey,
-    ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode, SectionContext, SectionId,
-    SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
-    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
-    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
-    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    PeakFileMode, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext,
+    ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
+    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
+    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
+    ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode,
+    SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget,
+    TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
+    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
+    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -480,6 +480,42 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         unsafe { self.low.ShowConsoleMsg(message.into().as_ptr()) }
+    }
+
+    /// Returns the hypothetical path of the peak file for the given audio file.
+    ///
+    /// It can either be `<file_name>.reapeaks` or a hashed file name in another path.
+    ///
+    /// `peaks_file_extension` should usually be `.reapeaks` but it can also be another extension if
+    /// you want to store/read other metadata. E.g. the MP3 side uses ".reapindex" for the MP3
+    /// seeking index file.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given file name is not valid UTF-8.
+    pub fn get_peak_file_name_ex_2<'a>(
+        &self,
+        file_name: &Path,
+        buffer_size: u32,
+        mode: PeakFileMode,
+        peaks_file_extension: impl Into<ReaperStringArg<'a>>,
+    ) -> PathBuf
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let file_name_reaper_string = convert_path_to_reaper_string(file_name);
+        let (reaper_string, _) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+            self.low.GetPeakFileNameEx2(
+                file_name_reaper_string.as_ptr(),
+                buffer,
+                max_size,
+                mode.to_raw(),
+                peaks_file_extension.into().as_ptr(),
+            );
+        });
+        let owned_string = reaper_string.into_string();
+        PathBuf::from(owned_string)
     }
 
     /// Gets or sets a track attribute.
@@ -1353,8 +1389,7 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: AnyThread,
     {
-        let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
-        let file_name_reaper_string = ReaperString::from_str(file_name_str);
+        let file_name_reaper_string = convert_path_to_reaper_string(file_name);
         let ptr = unsafe {
             self.low.PCM_Source_CreateFromFileEx(
                 file_name_reaper_string.as_ptr(),
@@ -7596,6 +7631,11 @@ const ZERO_GUID: GUID = GUID {
     Data3: 0,
     Data4: [0; 8],
 };
+
+fn convert_path_to_reaper_string(path: &Path) -> ReaperString {
+    let path_str = path.to_str().expect("file name is not valid UTF-8");
+    ReaperString::from_str(path_str)
+}
 
 mod private {
     use crate::{MainThreadScope, RealTimeAudioThreadScope};

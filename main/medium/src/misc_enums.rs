@@ -386,6 +386,28 @@ impl EditMode {
     }
 }
 
+/// Defines a mode for getting the peak file name.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum PeakFileMode {
+    /// Returns the peak file name for reading purposes.
+    Read,
+    /// Returns the peak file name for writing purposes.
+    ///
+    /// It will ensure that the appropriate path is available.
+    Write,
+}
+
+impl PeakFileMode {
+    /// Converts this value to a boolean as expected by the low-level API.
+    pub fn to_raw(self) -> bool {
+        use PeakFileMode::*;
+        match self {
+            Read => false,
+            Write => true,
+        }
+    }
+}
+
 impl From<TrackSendDirection> for TrackSendCategory {
     fn from(v: TrackSendDirection) -> TrackSendCategory {
         use TrackSendDirection::*;
