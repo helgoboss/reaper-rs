@@ -20,11 +20,11 @@ use crate::{
     ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
     ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
     ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
-    ReaperWidthValue, RecordArmMode, RecordingInput, RequiredViewMode, ResampleMode,
-    SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget,
-    TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
+    ReaperWidthValue, RecordArmMode, RecordingInput, ReorderTracksBehavior, RequiredViewMode,
+    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
+    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
+    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
+    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
     TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
     TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
     ValueChange, VolumeSliderValue, WindowContext,
@@ -2804,6 +2804,29 @@ impl<UsageScope> Reaper<UsageScope> {
             index as i32,
             defaults_behavior == TrackDefaultsBehavior::AddDefaultEnvAndFx,
         );
+    }
+
+    /// Moves all selected tracks to the given index.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if no tracks were selected.
+    pub fn reorder_selected_tracks(
+        &self,
+        index: u32,
+        behavior: ReorderTracksBehavior,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self
+            .low
+            .ReorderSelectedTracks(index as i32, behavior.to_raw());
+        if !successful {
+            return Err(ReaperFunctionError::new("no track selected"));
+        }
+        Ok(())
     }
 
     /// Resets all MIDI devices.

@@ -195,6 +195,30 @@ pub enum TrackDefaultsBehavior {
     AddDefaultEnvAndFx,
 }
 
+/// Determines what should happen when reordering tracks.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum ReorderTracksBehavior {
+    /// Normal behavior.
+    Normal,
+    /// Makes the moved track a child of the track above.
+    MakeChildOfPreviousTrack,
+    /// If the track above is the last track in a folder, makes the moved track a child of that
+    /// folder.
+    ExtendFolder,
+}
+
+impl ReorderTracksBehavior {
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use ReorderTracksBehavior::*;
+        match self {
+            Normal => 0,
+            MakeChildOfPreviousTrack => 1,
+            ExtendFolder => 2,
+        }
+    }
+}
+
 /// Determines the gang behavior.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum GangBehavior {
