@@ -567,6 +567,30 @@ impl BorrowedPcmSource {
         })
     }
 
+    /// Returns a 64-bit hash of the MIDI source data.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if not supported.
+    pub fn ext_get_midi_data_hash(&self) -> ReaperFunctionResult<u64> {
+        let mut hash: MaybeUninit<u64> = MaybeUninit::zeroed();
+        let supported = unsafe {
+            self.0.Extended(
+                raw::PCM_SOURCE_EXT_GETMIDIDATAHASH as _,
+                hash.as_mut_ptr() as _,
+                null_mut(),
+                null_mut(),
+            )
+        };
+        if supported == 0 {
+            return Err(ReaperFunctionError::new(
+                "PCM_SOURCE_EXT_GETPOOLEDMIDIID not supported by source",
+            ));
+        }
+        let hash = unsafe { hash.assume_init() };
+        Ok(hash)
+    }
+
     /// Writes the content of this source to the given file.
     ///
     /// Only currently supported by MIDI but in theory any source could support this.

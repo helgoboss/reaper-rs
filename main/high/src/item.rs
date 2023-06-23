@@ -1,6 +1,7 @@
 use crate::{Project, Reaper, Take};
 use reaper_medium::{
-    DurationInSeconds, MediaItem, PositionInSeconds, ReaperFunctionError, UiRefreshBehavior,
+    DurationInSeconds, MediaItem, PositionInSeconds, ProjectContext, ReaperFunctionError,
+    UiRefreshBehavior,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -24,6 +25,12 @@ impl Item {
                 .get_item_project_context(self.raw)?
         };
         Some(Project::new(raw_project))
+    }
+
+    pub fn is_available(&self) -> bool {
+        Reaper::get()
+            .medium_reaper()
+            .validate_ptr_2(ProjectContext::CurrentProject, self.raw)
     }
 
     pub fn active_take(self) -> Option<Take> {
