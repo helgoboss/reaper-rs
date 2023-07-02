@@ -1,5 +1,5 @@
 use crate::Reaper;
-use reaper_medium::ReaperPanValue;
+use reaper_medium::{ReaperPanValue, ReaperWidthValue};
 use std::fmt;
 use std::str::FromStr;
 
@@ -43,5 +43,33 @@ impl fmt::Display for Pan {
             .mk_pan_str(self.reaper_value())
             .into_string();
         write!(f, "{pan_string}")
+    }
+}
+
+pub trait PanExt {
+    /// Returns the pan value. In case of dual-pan, returns the left pan value.
+    fn main_pan(self) -> ReaperPanValue;
+    fn width(self) -> Option<ReaperWidthValue>;
+}
+
+impl PanExt for reaper_medium::Pan {
+    /// Returns the pan value. In case of dual-pan, returns the left pan value.
+    fn main_pan(self) -> ReaperPanValue {
+        use reaper_medium::Pan::*;
+        match self {
+            BalanceV1(p) => p,
+            BalanceV4(p) => p,
+            StereoPan { pan, .. } => pan,
+            DualPan { left, .. } => left,
+            Unknown(_) => ReaperPanValue::CENTER,
+        }
+    }
+
+    fn width(self) -> Option<ReaperWidthValue> {
+        if let reaper_medium::Pan::StereoPan { width, .. } = self {
+            Some(width)
+        } else {
+            None
+        }
     }
 }
