@@ -55,6 +55,12 @@ pub mod root {
     pub const IDIGNORE: u32 = 5;
     pub const IDYES: u32 = 6;
     pub const IDNO: u32 = 7;
+    pub const GW_HWNDFIRST: u32 = 0;
+    pub const GW_HWNDLAST: u32 = 1;
+    pub const GW_HWNDNEXT: u32 = 2;
+    pub const GW_HWNDPREV: u32 = 3;
+    pub const GW_OWNER: u32 = 4;
+    pub const GW_CHILD: u32 = 5;
     pub const WM_CTLCOLORMSGBOX: u32 = 306;
     pub const WM_CTLCOLOREDIT: u32 = 307;
     pub const WM_CTLCOLORLISTBOX: u32 = 308;
@@ -464,7 +470,8 @@ pub mod root {
         pub __owner: ::std::os::raw::c_int,
         pub __nusers: ::std::os::raw::c_uint,
         pub __kind: ::std::os::raw::c_int,
-        pub __spins: ::std::os::raw::c_int,
+        pub __spins: ::std::os::raw::c_short,
+        pub __elision: ::std::os::raw::c_short,
         pub __list: root::__pthread_list_t,
     }
     impl Default for __pthread_mutex_s {
@@ -476,9 +483,9 @@ pub mod root {
     #[derive(Copy, Clone)]
     pub union pthread_mutex_t {
         pub __data: root::__pthread_mutex_s,
-        pub __size: [::std::os::raw::c_char; 48usize],
+        pub __size: [::std::os::raw::c_char; 40usize],
         pub __align: ::std::os::raw::c_long,
-        _bindgen_union_align: [u64; 6usize],
+        _bindgen_union_align: [u64; 5usize],
     }
     impl Default for pthread_mutex_t {
         fn default() -> Self {
