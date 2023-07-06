@@ -1,5 +1,5 @@
 use crossbeam_channel::{Receiver, Sender};
-use reaper_high::{MainThreadTask, Reaper, TaskSupport, DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY};
+use reaper_high::{MainThreadTask, Reaper, TaskSupport};
 use reaper_medium::ReaperVersion;
 use reaper_rx::{ActionRx, ActionRxProvider, ControlSurfaceRx, MainRx};
 use rxrust::prelude::*;
@@ -55,8 +55,7 @@ pub(crate) struct Test {
 
 impl Default for Test {
     fn default() -> Self {
-        let (sender, receiver) =
-            crossbeam_channel::bounded(DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY);
+        let (sender, receiver) = crossbeam_channel::unbounded();
         Self {
             main_rx: Default::default(),
             task_support: TaskSupport::new(sender.clone()),

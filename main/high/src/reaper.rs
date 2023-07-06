@@ -34,16 +34,6 @@ use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::sync::Mutex;
 
-/// Capacity of the channel which is used to scheduled tasks for execution in the main thread.
-///
-/// Should probably be a bit more than MAX_AUDIO_THREAD_TASKS because the audio callback is
-/// usually executed more often and therefore can produce faster. Plus, the main thread also
-/// uses this very often to schedule tasks for a later execution in the main thread.
-///
-/// Shouldn't be too high because when `Reaper::deactivate()` is called, those tasks are
-/// going to pile up - and they will be discarded on the next activate.
-pub const DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY: usize = 1000;
-
 /// How many tasks to process at a maximum in one main loop iteration.
 pub const DEFAULT_MAIN_THREAD_TASK_BULK_SIZE: usize = 100;
 

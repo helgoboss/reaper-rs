@@ -1,7 +1,7 @@
 use futures_timer::Delay;
 use reaper_high::{
     create_terminal_logger, ActionKind, CrashInfo, FutureMiddleware, FutureSupport, Reaper,
-    ReaperGuard, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE, DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
+    ReaperGuard, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
 };
 use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, PluginContext};
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
@@ -179,12 +179,10 @@ impl TestVstPlugin {
         let mut counter = 0;
         let control_surface_rx = ControlSurfaceRx::new();
         let (spawner, executor) = reaper_high::run_loop_executor::new_spawner_and_executor(
-            DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
             DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
         );
         let (local_spawner, local_executor) =
             reaper_high::local_run_loop_executor::new_spawner_and_executor(
-                DEFAULT_MAIN_THREAD_TASK_CHANNEL_CAPACITY,
                 DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
             );
         let future_support = FutureSupport::new(spawner, local_spawner);
