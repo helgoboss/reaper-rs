@@ -47,8 +47,8 @@ struct Task {
     task_sender: Sender<Arc<Task>>,
 }
 
-pub fn new_spawner_and_executor(capacity: usize, bulk_size: usize) -> (Spawner, RunLoopExecutor) {
-    let (task_sender, ready_queue) = crossbeam_channel::bounded(capacity);
+pub fn new_spawner_and_executor(bulk_size: usize) -> (Spawner, RunLoopExecutor) {
+    let (task_sender, ready_queue) = crossbeam_channel::unbounded();
     (
         Spawner { task_sender },
         RunLoopExecutor {
