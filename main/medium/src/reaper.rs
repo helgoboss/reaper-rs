@@ -4863,9 +4863,8 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Panics if the given project is not valid anymore.
     pub fn master_get_play_rate(&self, project: ProjectContext) -> PlaybackSpeedFactor
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.master_get_play_rate_unchecked(project) }
     }
@@ -4882,9 +4881,8 @@ impl<UsageScope> Reaper<UsageScope> {
         project: ProjectContext,
     ) -> PlaybackSpeedFactor
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
         let raw = self.low.Master_GetPlayRate(project.to_raw());
         PlaybackSpeedFactor(raw)
     }
