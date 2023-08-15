@@ -10,24 +10,24 @@ use crate::{
     AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
     DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
     FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, KbdSectionInfo,
-    MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey,
+    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
+    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OpenProjectBehavior,
     OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
     PeakFileMode, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionInBeats, PositionInQuarterNotes, PositionInSeconds, Progress, ProjectContext,
-    ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject, ReaperFunctionError,
-    ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue,
-    ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue,
-    ReaperWidthValue, RecordArmMode, RecordingInput, ReorderTracksBehavior, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea,
-    TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation,
-    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds,
+    Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult,
+    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
+    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
+    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
+    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
+    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState,
+    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey,
+    TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior,
+    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -567,6 +567,61 @@ impl<UsageScope> Reaper<UsageScope> {
             attribute_key.into_raw().as_ptr(),
             new_value,
         )
+    }
+
+    /// Gets a media item attribute as numerical value.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_media_item_info_value(
+        &self,
+        item: MediaItem,
+        attribute_key: ItemAttributeKey,
+    ) -> f64
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .GetMediaItemInfo_Value(item.as_ptr(), attribute_key.into_raw().as_ptr())
+    }
+
+    /// Returns the MIDI tick (PPQ) position corresponding to a specific project time in
+    /// quarter notes.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn midi_get_ppq_pos_from_proj_qn(
+        &self,
+        take: MediaItemTake,
+        qn: PositionInQuarterNotes,
+    ) -> PositionInPulsesPerQuarterNote
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let pos = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.get());
+        PositionInPulsesPerQuarterNote::new(pos)
+    }
+
+    /// Gets a media item take attribute as numerical value.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_media_item_take_info_value(
+        &self,
+        take: MediaItemTake,
+        attribute_key: TakeAttributeKey,
+    ) -> f64
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .GetMediaItemTakeInfo_Value(take.as_ptr(), attribute_key.into_raw().as_ptr())
     }
 
     /// Sets a take attribute as numerical value.
@@ -4828,6 +4883,34 @@ impl<UsageScope> Reaper<UsageScope> {
             tempo.get(),
             undo_behavior == UndoBehavior::AddUndoPoint,
         );
+    }
+
+    /// Count the number of tempo/time signature markers in the project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn count_tempo_time_sig_markers(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.count_tempo_time_sig_markers_unchecked(project) }
+    }
+
+    /// Like [`set_current_bpm()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`set_current_bpm()`]: #method.set_current_bpm
+    pub unsafe fn count_tempo_time_sig_markers_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CountTempoTimeSigMarkers(project.to_raw()) as u32
     }
 
     /// Converts the given playback speed factor to a normalized play rate.

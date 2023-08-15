@@ -1,7 +1,7 @@
 use crate::{Project, Reaper, Take};
 use reaper_medium::{
-    DurationInSeconds, MediaItem, PositionInSeconds, ProjectContext, ReaperFunctionError,
-    UiRefreshBehavior,
+    DurationInSeconds, ItemAttributeKey, MediaItem, PositionInSeconds, ProjectContext,
+    ReaperFunctionError, UiRefreshBehavior,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -45,6 +45,15 @@ impl Item {
                 .add_take_to_media_item(self.raw())?
         };
         Ok(Take::new(raw_take))
+    }
+
+    pub fn position(&self) -> PositionInSeconds {
+        let pos = unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_info_value(self.raw, ItemAttributeKey::Position)
+        };
+        PositionInSeconds::new(pos)
     }
 
     pub fn set_position(

@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::convert::{TryFrom, TryInto};
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub};
 
 /// A command ID.
 ///
@@ -746,6 +746,12 @@ impl Add<DurationInSeconds> for PositionInSeconds {
     }
 }
 
+impl AddAssign<DurationInSeconds> for PositionInSeconds {
+    fn add_assign(&mut self, rhs: DurationInSeconds) {
+        self.0 += rhs.0;
+    }
+}
+
 impl Sub<DurationInSeconds> for PositionInSeconds {
     type Output = Self;
 
@@ -844,6 +850,13 @@ impl DurationInSeconds {
     /// Returns the wrapped value.
     pub const fn get(self) -> f64 {
         self.0
+    }
+
+    /// Saturating duration subtraction.
+    ///
+    /// Computes `self - rhs`, saturating at zero.
+    pub fn saturating_sub(&self, rhs: DurationInSeconds) -> DurationInSeconds {
+        DurationInSeconds(0.0f64.max(self.0 - rhs.0))
     }
 }
 
@@ -1049,12 +1062,12 @@ impl PositionInQuarterNotes {
     pub fn new(value: f64) -> PositionInQuarterNotes {
         assert!(
             Self::is_valid(value),
-            "{value} is not a valid PositionInQn value",
+            "{value} is not a valid PositionInQuarterNotes value",
         );
         PositionInQuarterNotes(value)
     }
 
-    /// Creates a PositionInQn value without bound checking.
+    /// Creates a PositionInQuarterNotes value without bound checking.
     ///
     /// # Safety
     ///
@@ -1077,6 +1090,65 @@ impl TryFrom<f64> for PositionInQuarterNotes {
             return Err(TryFromGreaterError::new("value must be non-special", value));
         }
         Ok(PositionInQuarterNotes(value))
+    }
+}
+
+/// This represents a position expressed as an amount of pulses per quarter note
+/// (= PPQ or MIDI ticks).
+///
+/// Can be negative, see [`PositionInSeconds`](struct.PositionInSeconds.html).
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+pub struct PositionInPulsesPerQuarterNote(pub(crate) f64);
+
+impl PositionInPulsesPerQuarterNote {
+    /// Position at 0.0 pulses.
+    pub const ZERO: PositionInPulsesPerQuarterNote = PositionInPulsesPerQuarterNote(0.0);
+
+    fn is_valid(value: f64) -> bool {
+        !value.is_infinite() && !value.is_nan()
+    }
+
+    /// Creates a value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is a special number.
+    pub fn new(value: f64) -> PositionInPulsesPerQuarterNote {
+        assert!(
+            Self::is_valid(value),
+            "{value} is not a valid PositionInPulsesPerQuarterNote value",
+        );
+        PositionInPulsesPerQuarterNote(value)
+    }
+
+    /// Creates a PositionInPulsesPerQuarterNote value without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is not a special number.
+    pub unsafe fn new_unchecked(value: f64) -> PositionInPulsesPerQuarterNote {
+        PositionInPulsesPerQuarterNote(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for PositionInPulsesPerQuarterNote {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new("value must be non-special", value));
+        }
+        Ok(PositionInPulsesPerQuarterNote(value))
     }
 }
 

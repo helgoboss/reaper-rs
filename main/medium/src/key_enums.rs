@@ -502,6 +502,38 @@ impl<'a> TakeAttributeKey<'a> {
     }
 }
 
+/// Item attribute key which you can pass to [`get_set_media_item_info()`].
+///
+/// [`get_set_media_item_info()`]: struct.Reaper.html#method.get_set_media_item_info
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub enum ItemAttributeKey<'a> {
+    /// Item position in seconds.
+    Position,
+    /// If a variant is missing in this enum, you can use this custom one as a resort.
+    ///
+    /// Use [`custom()`] to create this variant.
+    ///
+    /// [`custom()`]: #method.custom
+    Custom(Cow<'a, ReaperStr>),
+}
+
+impl<'a> ItemAttributeKey<'a> {
+    /// Convenience function for creating a [`Custom`] key.
+    ///
+    /// [`Custom`]: #variant.Custom
+    pub fn custom(key: impl Into<ReaperStringArg<'a>>) -> ItemAttributeKey<'a> {
+        ItemAttributeKey::Custom(key.into().into_inner())
+    }
+
+    pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
+        use ItemAttributeKey::*;
+        match self {
+            Position => reaper_str!("D_POSITION").into(),
+            Custom(key) => key,
+        }
+    }
+}
+
 /// Track send attribute key which you can pass to [`get_set_track_send_info()`].
 ///
 /// [`get_set_track_send_info()`]: struct.Reaper.html#method.get_set_track_send_info

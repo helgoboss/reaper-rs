@@ -43,6 +43,12 @@ impl Project {
             .get_project_state_change_count(self.context())
     }
 
+    pub fn count_tempo_time_sig_markers(&self) -> u32 {
+        Reaper::get()
+            .medium_reaper()
+            .count_tempo_time_sig_markers(self.context())
+    }
+
     pub fn first_track(self) -> Option<Track> {
         self.track_by_index(0)
     }
