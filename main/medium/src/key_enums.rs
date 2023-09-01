@@ -476,6 +476,10 @@ pub enum TakeAttributeKey<'a> {
     ///
     /// `*mut PCM_source`
     Source,
+    /// Take playback rate.
+    ///
+    /// 0.5 = half speed, 1 = normal, 2 = double speed, etc.
+    PlayRate,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -497,6 +501,7 @@ impl<'a> TakeAttributeKey<'a> {
         match self {
             Source => reaper_str!("P_SOURCE").into(),
             StartOffs => reaper_str!("D_STARTOFFS").into(),
+            PlayRate => reaper_str!("D_PLAYRATE").into(),
             Custom(key) => key,
         }
     }
@@ -509,6 +514,8 @@ impl<'a> TakeAttributeKey<'a> {
 pub enum ItemAttributeKey<'a> {
     /// Item position in seconds.
     Position,
+    /// Muted (item solo overrides). Setting this value will clear [`Self::MuteSolo`].
+    Mute,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -529,6 +536,7 @@ impl<'a> ItemAttributeKey<'a> {
         use ItemAttributeKey::*;
         match self {
             Position => reaper_str!("D_POSITION").into(),
+            Mute => reaper_str!("B_MUTE").into(),
             Custom(key) => key,
         }
     }

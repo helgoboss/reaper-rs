@@ -87,4 +87,14 @@ impl Item {
                 .set_media_item_selected(self.raw, selected);
         }
     }
+
+    pub fn set_mute(&self, mute: bool) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_info_value(
+                self.raw,
+                ItemAttributeKey::Mute,
+                if mute { 1.0 } else { 0.0 },
+            )
+        }
+    }
 }

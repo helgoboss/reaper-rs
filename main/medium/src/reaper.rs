@@ -628,11 +628,11 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// # Errors
     ///
-    /// Returns an error if an invalid (e.g. non-numerical) track attribute key is passed.
+    /// Returns an error if an invalid (e.g. non-numerical) take attribute key is passed.
     ///
     /// # Safety
     ///
-    /// REAPER can crash if you pass an invalid track.
+    /// REAPER can crash if you pass an invalid take.
     pub unsafe fn set_media_item_take_info_value(
         &self,
         take: MediaItemTake,
@@ -651,6 +651,38 @@ impl<UsageScope> Reaper<UsageScope> {
         if !successful {
             return Err(ReaperFunctionError::new(
                 "couldn't set take attribute (maybe attribute key is invalid)",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Sets an item attribute as numerical value.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if an invalid (e.g. non-numerical) item attribute key is passed.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn set_media_item_info_value(
+        &self,
+        item: MediaItem,
+        attribute_key: ItemAttributeKey,
+        new_value: f64,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = self.low.SetMediaItemInfo_Value(
+            item.as_ptr(),
+            attribute_key.into_raw().as_ptr(),
+            new_value,
+        );
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "couldn't set item attribute (maybe attribute key is invalid)",
             ));
         }
         Ok(())
@@ -4946,7 +4978,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Panics if the given project is not valid anymore.
     pub fn master_get_play_rate(&self, project: ProjectContext) -> PlaybackSpeedFactor
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
         self.require_valid_project(project);
         unsafe { self.master_get_play_rate_unchecked(project) }
@@ -4964,9 +4996,48 @@ impl<UsageScope> Reaper<UsageScope> {
         project: ProjectContext,
     ) -> PlaybackSpeedFactor
     where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = self.low.Master_GetPlayRate(project.to_raw());
+        PlaybackSpeedFactor(raw)
+    }
+
+    /// Returns the master play rate of the given project at the given time.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn master_get_play_rate_at_time(
+        &self,
+        time: PositionInSeconds,
+        project: ProjectContext,
+    ) -> PlaybackSpeedFactor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.master_get_play_rate_at_time_unchecked(time, project) }
+    }
+
+    /// Like [`master_get_play_rate_at_time()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`master_get_play_rate_at_time()`]: #method.master_get_play_rate_at_time
+    pub unsafe fn master_get_play_rate_at_time_unchecked(
+        &self,
+        time: PositionInSeconds,
+        project: ProjectContext,
+    ) -> PlaybackSpeedFactor
+    where
         UsageScope: AnyThread,
     {
-        let raw = self.low.Master_GetPlayRate(project.to_raw());
+        let raw = self
+            .low
+            .Master_GetPlayRateAtTime(time.get(), project.to_raw());
         PlaybackSpeedFactor(raw)
     }
 
