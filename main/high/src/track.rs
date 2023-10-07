@@ -21,9 +21,10 @@ use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, Progress, ReaProject, ReaperFunctionError, ReaperPanValue,
     ReaperString, ReaperStringArg, ReaperVolumeValue, ReaperWidthValue, RecordArmMode,
-    RecordingInput, RgbColor, SetTrackUiFlags, SoloMode, TrackArea, TrackAttributeKey,
-    TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendCategory, TrackSendDirection, TrackSoloOperation,
+    RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
+    TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory, TrackSendDirection,
+    TrackSoloOperation,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -215,6 +216,43 @@ impl Track {
                 self.raw(),
                 RecInput,
                 rec_input_index as f64,
+            )
+        };
+        // Only for triggering notification (as manual setting the rec input would also trigger it)
+        // This doesn't work for other surfaces but they are also not interested in record input
+        // changes.
+        let _rec_mon = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_media_track_info_value(self.raw(), RecMon)
+        };
+        // TODO-low 5198273 This is ugly. Solve in other ways.
+        // let control_surface = get_control_surface_instance();
+        // let super_raw: *mut raw::MediaTrack = self.raw().as_ptr();
+        // control_surface.Extended(
+        //     CSURF_EXT_SETINPUTMONITOR as i32,
+        //     super_raw as *mut c_void,
+        //     &mut rec_mon as *mut f64 as *mut c_void,
+        //     null_mut(),
+        // );
+    }
+
+    pub fn recording_mode(&self) -> RecordingMode {
+        self.load_and_check_if_necessary_or_complain();
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_track_info_get_rec_mode(self.raw_internal())
+        }
+    }
+
+    pub fn set_recording_mode(&self, value: RecordingMode) {
+        self.load_and_check_if_necessary_or_complain();
+        let _ = unsafe {
+            Reaper::get().medium_reaper().set_media_track_info_value(
+                self.raw(),
+                TrackAttributeKey::RecMode,
+                value.to_raw() as f64,
             )
         };
         // Only for triggering notification (as manual setting the rec input would also trigger it)

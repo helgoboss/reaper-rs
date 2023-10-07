@@ -103,6 +103,8 @@ impl From<ReaperString> for ReaperStringArg<'static> {
 // string literal.
 impl<'a> From<&'a str> for ReaperStringArg<'a> {
     fn from(s: &'a str) -> Self {
+        // Unfortunately, there's no other way than to copy the string because Rust strings
+        // don't contain a nul terminator but ReaperStrings (= UTF-8 CStrings) do.
         ReaperStringArg(ReaperString::from_str(s).into())
     }
 }

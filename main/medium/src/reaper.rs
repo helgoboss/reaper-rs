@@ -21,13 +21,14 @@ use crate::{
     ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
     ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
     ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
-    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
-    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
-    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState,
-    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior,
-    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    RecordingMode, ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext,
+    SectionId, SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -58,6 +59,7 @@ pub trait AudioThreadOnly: AnyThread + private::Sealed {}
 pub struct MainThreadScope(pub(crate) ());
 
 impl MainThreadOnly for MainThreadScope {}
+
 impl AnyThread for MainThreadScope {}
 
 /// A usage scope which unlocks all functions that are safe to execute from the real-time audio
@@ -66,6 +68,7 @@ impl AnyThread for MainThreadScope {}
 pub struct RealTimeAudioThreadScope(pub(crate) ());
 
 impl AudioThreadOnly for RealTimeAudioThreadScope {}
+
 impl AnyThread for RealTimeAudioThreadScope {}
 
 /// This is the main access point for most REAPER functions.
@@ -820,6 +823,52 @@ impl<UsageScope> Reaper<UsageScope> {
         self.get_set_media_track_info(track, TrackAttributeKey::Name, message.into().as_ptr() as _);
     }
 
+    /// Convenience function which grants temporary access to extension-specific data associated
+    /// with the given track (`P_EXT:xyz`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn get_set_media_track_info_get_ext<'a, R>(
+        &self,
+        track: MediaTrack,
+        data_id: impl Into<ReaperStringArg<'a>>,
+        use_data: impl FnOnce(&ReaperStr) -> R,
+    ) -> Option<R>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(
+            track,
+            TrackAttributeKey::Ext(data_id.into().into_inner()),
+            null_mut(),
+        );
+        create_passing_c_str(ptr as *const c_char).map(use_data)
+    }
+
+    /// Convenience function which sets extension-specific data associated with a track
+    /// (`P_EXT:xyz`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn get_set_media_track_info_set_ext<'a>(
+        &self,
+        track: MediaTrack,
+        data_id: impl Into<ReaperStringArg<'a>>,
+        data: impl Into<ReaperStringArg<'a>>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_track_info(
+            track,
+            TrackAttributeKey::Ext(data_id.into().into_inner()),
+            data.into().as_ptr() as _,
+        );
+    }
+
     /// Sets a project info string attribute.
     ///
     /// # Panics
@@ -1050,6 +1099,21 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
         let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
         RecordingInput::from_raw(rec_input_index)
+    }
+
+    /// Convenience function which returns the given track's recording mode (I_RECMODE).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn get_set_media_track_info_get_rec_mode(&self, track: MediaTrack) -> RecordingMode
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMode, null_mut());
+        let rec_mode_index = deref_as::<i32>(ptr).expect("rec_mode_index pointer is null");
+        RecordingMode::from_raw(rec_mode_index)
     }
 
     /// Convenience function which returns the type and location of the given track
@@ -7818,5 +7882,6 @@ mod private {
     pub trait Sealed {}
 
     impl Sealed for MainThreadScope {}
+
     impl Sealed for RealTimeAudioThreadScope {}
 }

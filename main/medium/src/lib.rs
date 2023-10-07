@@ -398,6 +398,9 @@ pub use string_types::*;
 mod recording_input;
 pub use recording_input::*;
 
+mod recording_mode;
+pub use recording_mode::*;
+
 mod automation_mode;
 pub use automation_mode::*;
 
