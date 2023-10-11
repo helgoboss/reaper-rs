@@ -6690,6 +6690,21 @@ impl<UsageScope> Reaper<UsageScope> {
             .map(use_action_name)
     }
 
+    /// Grants temporary access to the name of the given input channel.
+    pub fn get_input_channel_name<R>(
+        &self,
+        channel_index: u32,
+        use_name: impl FnOnce(Option<&ReaperStr>) -> R,
+    ) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetInputChannelName(channel_index as _);
+        let passing_c_str = unsafe { create_passing_c_str(ptr) };
+        use_name(passing_c_str)
+    }
+
     /// Grants temporary access to the REAPER resource path.
     ///
     /// This is the path to the directory where INI files are stored and other things in

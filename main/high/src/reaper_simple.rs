@@ -43,6 +43,16 @@ impl Reaper {
             .map_err(|_| "invalid sample rate")
     }
 
+    pub fn input_channels(&self) -> impl Iterator<Item = ReaperString> + '_ {
+        (0..)
+            .map(move |i| {
+                self.medium_reaper()
+                    .get_input_channel_name(i, |name| name.map(|n| n.to_reaper_string()))
+            })
+            .take_while(|r| !r.is_none())
+            .map(|r| r.unwrap())
+    }
+
     pub fn main_section(&self) -> Section {
         Section::new(SectionId::new(0))
     }
