@@ -13,7 +13,7 @@ use reaper_medium::{
     GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PanMode,
     PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString,
     ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeMode, TimeModeOverride,
-    TimeRangeType, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
+    TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
 };
 use std::path::{Path, PathBuf};
 
@@ -629,6 +629,15 @@ impl Project {
                 .expect("couldn't get projtimemode")
         };
         TimeMode::from_raw(raw)
+    }
+
+    pub fn set_time_signature(self, value: TimeSignature) {
+        todo!();
+        // let raw: i32 = unsafe {
+        //     self.get_project_config("tempo")
+        //         .expect("couldn't get tempo")
+        // };
+        // raw
     }
 
     pub fn transport_time_mode(self) -> TimeModeOverride {
