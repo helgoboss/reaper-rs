@@ -178,6 +178,9 @@ pub type PcmSink = NonNull<raw::PCM_sink>;
 /// Pointer to a PCM source.
 pub type PcmSource = NonNull<raw::PCM_source>;
 
+/// Pointer to a project state context.
+pub type ProjectStateContext = NonNull<raw::ProjectStateContext>;
+
 /// Pointer to a REAPER pitch shift instance.
 pub type ReaperPitchShift = NonNull<raw::IReaperPitchShift>;
 

@@ -5,9 +5,9 @@ use ref_cast::RefCast;
 
 use crate::util::{create_passing_c_str, with_string_buffer};
 use crate::{
-    BorrowedMidiEventList, Bpm, DurationInBeats, DurationInSeconds, ExtendedArgs, Hwnd, Hz,
-    MediaItemTake, PcmSource, PositionInSeconds, ReaperFunctionError, ReaperFunctionResult,
-    ReaperStr, ReaperString,
+    BorrowedMidiEventList, BorrowedProjectStateContext, Bpm, DurationInBeats, DurationInSeconds,
+    ExtendedArgs, Hwnd, Hz, MediaItemTake, PcmSource, PositionInSeconds, ReaperFunctionError,
+    ReaperFunctionResult, ReaperStr, ReaperString,
 };
 use reaper_low::raw::{PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t, HWND__};
 use std::borrow::Borrow;
@@ -184,21 +184,6 @@ pub struct PcmSourcePeakTransfer(raw::PCM_source_peaktransfer_t);
 impl PcmSourcePeakTransfer {
     /// Returns the pointer to this source peak transfer.
     pub fn as_ptr(&self) -> NonNull<raw::PCM_source_peaktransfer_t> {
-        NonNull::from(&self.0)
-    }
-}
-
-/// Pointer to a project state context.
-//
-// Case 3: Internals exposed: no | vtable: yes
-// ===========================================
-#[derive(Eq, PartialEq, Hash, Debug, RefCast)]
-#[repr(transparent)]
-pub struct BorrowedProjectStateContext(raw::ProjectStateContext);
-
-impl BorrowedProjectStateContext {
-    /// Returns the pointer to this context.
-    pub fn as_ptr(&self) -> NonNull<raw::ProjectStateContext> {
         NonNull::from(&self.0)
     }
 }
@@ -899,7 +884,7 @@ struct PcmSourceAdapter<S: CustomPcmSource> {
     // sources are more flexible in usage, e.g. it can also make sense to share them and
     // synchronize access via mutex (e.g. using the preview register API). Of course, using
     // monomorphization instead of dynamic dispatch also helps with performance - because PCM
-    // sources are primarily used by in real-time threads!
+    // sources are primarily used in real-time threads!
     delegate: S,
 }
 
