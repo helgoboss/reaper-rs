@@ -475,12 +475,12 @@ impl BorrowedPcmSource {
         &self,
         first_line: &ReaperStr,
         context: &BorrowedProjectStateContext,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), &'static str> {
         let res = self
             .0
             .LoadState(first_line.as_ptr(), context.as_ptr().as_ptr());
         if res == -1 {
-            return Err("load state failed".into());
+            return Err("load state failed");
         }
         Ok(())
     }
