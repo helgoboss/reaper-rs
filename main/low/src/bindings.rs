@@ -470,8 +470,7 @@ pub mod root {
         pub __owner: ::std::os::raw::c_int,
         pub __nusers: ::std::os::raw::c_uint,
         pub __kind: ::std::os::raw::c_int,
-        pub __spins: ::std::os::raw::c_short,
-        pub __elision: ::std::os::raw::c_short,
+        pub __spins: ::std::os::raw::c_int,
         pub __list: root::__pthread_list_t,
     }
     impl Default for __pthread_mutex_s {
@@ -483,9 +482,9 @@ pub mod root {
     #[derive(Copy, Clone)]
     pub union pthread_mutex_t {
         pub __data: root::__pthread_mutex_s,
-        pub __size: [::std::os::raw::c_char; 40usize],
+        pub __size: [::std::os::raw::c_char; 48usize],
         pub __align: ::std::os::raw::c_long,
-        _bindgen_union_align: [u64; 5usize],
+        _bindgen_union_align: [u64; 6usize],
     }
     impl Default for pthread_mutex_t {
         fn default() -> Self {
@@ -12161,6 +12160,19 @@ pub mod root {
         }
         extern "C" {
             pub fn delete_project_state_context(context: *mut root::ProjectStateContext);
+        }
+        pub type RustCallback = ::std::option::Option<
+            unsafe extern "C" fn(
+                arg1: *mut root::ProjectStateContext,
+                arg2: *mut ::std::os::raw::c_void,
+            ),
+        >;
+        extern "C" {
+            pub fn invoke_with_cpp_to_rust_project_state_context(
+                callback_target: *mut ::std::os::raw::c_void,
+                user_data: *mut ::std::os::raw::c_void,
+                op: root::reaper_project_state_context::RustCallback,
+            );
         }
         extern "C" {
             pub fn cpp_to_rust_ProjectStateContext_AddLine(

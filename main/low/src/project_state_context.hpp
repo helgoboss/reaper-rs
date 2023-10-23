@@ -10,6 +10,18 @@ namespace reaper_project_state_context {
   // This function is called from Rust and implemented in C++. It destroys the given C++ ProjectStateContext object.
   extern "C" void delete_project_state_context(ProjectStateContext* context);
 
+  extern "C" typedef void (*RustCallback)(ProjectStateContext*, void*);
+
+  // This function is called from Rust and implemented in C++. It creates a C++ ProjectStateContext *on the stack* and
+  // passes it to the given Rust callback, along with the given user data pointer. The point of this
+  // (vs. create_cpp_to_rust_project_state_context) is to let C++ functions use a ProjectStateContext implemented on
+  // the Rust side *without* needing to allocate anything on the heap.
+  extern "C" void invoke_with_cpp_to_rust_project_state_context(
+          void* callback_target,
+          void* user_data,
+          RustCallback op
+  );
+
   // All of the following functions are called from C++ and implemented in Rust.
   // TODO-high This can't work. Wait for variadics support in stable Rust.
   extern "C" void cpp_to_rust_ProjectStateContext_AddLine(void* callback_target, const char *line);
@@ -17,9 +29,9 @@ namespace reaper_project_state_context {
   extern "C" INT64 cpp_to_rust_ProjectStateContext_GetOutputSize(void* callback_target);
   extern "C" int cpp_to_rust_ProjectStateContext_GetTempFlag(void* callback_target);
   extern "C" void cpp_to_rust_ProjectStateContext_SetTempFlag(void* callback_target, int flag);
-  
+
   // All the following functions are called from Rust and implemented in C++. The implementation simply delegates
-  // to the respective method of the `self` object. This glue code is necessary because Rust can't call  C++ pure 
+  // to the respective method of the `self` object. This glue code is necessary because Rust can't call  C++ pure
   // virtual functions directly.
   // TODO-high This can't work. Wait for variadics support in stable Rust.
   extern "C" void rust_to_cpp_ProjectStateContext_AddLine(ProjectStateContext* self, const char *line);

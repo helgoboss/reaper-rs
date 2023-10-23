@@ -142,3 +142,19 @@ extern "C" fn cpp_to_rust_ProjectStateContext_SetTempFlag(
 ) {
     firewall(|| unsafe { &mut *callback_target }.SetTempFlag(flag));
 }
+
+/// This is the "zero-allocation" alternative to [`create_cpp_to_rust_project_state_context`].
+///
+/// It uses continuation-passing style to grant Rust code access to a C++ ProjectStateContext
+/// that's implemented on the Rust side.
+pub unsafe fn invoke_with_cpp_to_rust_project_state_context_intern(
+    callback_target: *mut c_void,
+    user_data: *mut c_void,
+    op: RustCallback,
+) {
+    crate::bindings::root::reaper_project_state_context::invoke_with_cpp_to_rust_project_state_context(
+        callback_target,
+        user_data,
+        op
+    );
+}

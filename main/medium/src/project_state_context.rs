@@ -4,9 +4,10 @@
 use crate::{ProjectStateContext, ReaperStr};
 use reaper_low::{create_cpp_to_rust_project_state_context, raw};
 use ref_cast::RefCast;
-use std::fmt;
+use std::ffi::c_void;
 use std::os::raw::{c_char, c_int, c_longlong};
 use std::ptr::NonNull;
+use std::{fmt, mem};
 
 /// Owned project state context.
 ///
@@ -130,6 +131,7 @@ impl AsMut<BorrowedProjectStateContext> for CustomOwnedProjectStateContext {
     }
 }
 
+/// Adapter for lifting low-level trait to medium-level trait.
 #[derive(Debug)]
 struct ProjectStateContextAdapter<S: CustomProjectStateContext> {
     // See PcmSourceAdapter for further explanation.
@@ -188,7 +190,51 @@ pub fn create_custom_owned_project_state_context<C: CustomProjectStateContext + 
     let raw_cpp_context = unsafe { create_cpp_to_rust_project_state_context(thin_ptr_to_adapter) };
     let cpp_context = unsafe { OwnedProjectStateContext::from_raw(raw_cpp_context) };
     CustomOwnedProjectStateContext {
-        cpp_context: cpp_context,
+        cpp_context,
         _rust_context: rust_context,
     }
+}
+
+/// Turns the given [`CustomProjectStateContext`] implementation into a real
+/// [`ProjectStateContext`] (via C++) and grants the given function pointer temporary access to it.
+///
+/// This is the "zero-allocation" alternative to [`create_custom_owned_project_state_context`].
+// TODO-high-unstable Think of a good name.
+pub fn with_custom_project_state_context<C: CustomProjectStateContext, U>(
+    custom_context: C,
+    user_data: &mut U,
+    use_context: fn(context: &BorrowedProjectStateContext, user_data: &mut U),
+) {
+    let mut adapter = ProjectStateContextAdapter::new(custom_context);
+    let mut fat_ptr_to_rust_context: &mut dyn reaper_low::ProjectStateContext = &mut adapter;
+    let thin_ptr_to_rust_context: &mut (&mut dyn reaper_low::ProjectStateContext) =
+        &mut fat_ptr_to_rust_context;
+    // We need to send 2 things down the call stack: The medium-level callback function
+    // and the medium-level user data (which will be passed to that callback function).
+    let mut low_level_user_data = LowLevelUserData {
+        medium_level_fn_pointer: unsafe { mem::transmute(use_context) },
+        medium_level_user_data: user_data as *mut U as *mut c_void,
+    };
+    unsafe {
+        reaper_low::invoke_with_cpp_to_rust_project_state_context_intern(
+            thin_ptr_to_rust_context as *mut _ as *mut c_void,
+            &mut low_level_user_data as *mut _ as *mut c_void,
+            Some(use_context_adapter_callback),
+        );
+    }
+}
+
+unsafe extern "C" fn use_context_adapter_callback(
+    ctx: *mut raw::ProjectStateContext,
+    low_level_user_data_ptr: *mut c_void,
+) {
+    let project_state_context = BorrowedProjectStateContext::from_raw_mut(&mut *ctx);
+    let low_level_user_data = &mut *(low_level_user_data_ptr as *mut LowLevelUserData);
+    let medium_level_user_data = &mut *low_level_user_data.medium_level_user_data;
+    (low_level_user_data.medium_level_fn_pointer)(project_state_context, medium_level_user_data);
+}
+
+struct LowLevelUserData {
+    medium_level_fn_pointer: fn(&BorrowedProjectStateContext, &mut c_void),
+    medium_level_user_data: *mut c_void,
 }

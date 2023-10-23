@@ -60,4 +60,16 @@ namespace reaper_project_state_context {
   void delete_project_state_context(ProjectStateContext* context) {
     delete context;
   }
+
+  void invoke_with_cpp_to_rust_project_state_context(
+          void* callback_target,
+          void* user_data,
+          RustCallback op
+  ) {
+        // Important: We don't use new! That creates the object on the stack, not on the heap.
+        CppToRustProjectStateContext context(callback_target);
+        // Because the stack object lives only until the end of this function call, we need to
+        // use continuation-passing style to let Rust code (and in turn C++ code ;) make use of it.
+        (op)(&context, user_data);
+  }
 }
