@@ -1146,6 +1146,19 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn get_set_media_track_info_set_guid(&self, track: MediaTrack, guid: &GUID)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_track_info(track, TrackAttributeKey::Guid, guid as *const _ as *mut _);
+    }
+
+    /// Convenience function which sets the given track's GUID (GUID).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
     pub unsafe fn get_set_media_track_info_get_guid(&self, track: MediaTrack) -> GUID
     where
         UsageScope: MainThreadOnly,

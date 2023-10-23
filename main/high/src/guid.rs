@@ -32,6 +32,10 @@ impl Guid {
         Self::from_string_with_braces(format!("{{{text}}}").as_str())
     }
 
+    pub fn to_raw(&self) -> GUID {
+        self.internal
+    }
+
     pub fn to_string_with_braces(self) -> String {
         Reaper::get()
             .medium_reaper()

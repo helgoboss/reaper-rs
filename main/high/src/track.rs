@@ -1330,6 +1330,16 @@ impl Track {
         &self.guid
     }
 
+    pub fn set_guid(&mut self, guid: Guid) {
+        self.load_and_check_if_necessary_or_complain();
+        self.guid = guid;
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_track_info_set_guid(self.raw_internal(), &guid.to_raw());
+        }
+    }
+
     fn load_by_guid(&self) -> bool {
         if self.rea_project.get().is_none() {
             panic!("For loading per GUID, a project must be given");
