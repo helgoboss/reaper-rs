@@ -19,9 +19,9 @@ use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo}
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, Progress, ReaProject, ReaperFunctionError, ReaperPanValue,
-    ReaperString, ReaperStringArg, ReaperVolumeValue, ReaperWidthValue, RecordArmMode,
-    RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
+    InputMonitoringMode, MediaTrack, NativeColorValue, Progress, ReaProject, ReaperFunctionError,
+    ReaperPanValue, ReaperString, ReaperStringArg, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
     TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
     TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory, TrackSendDirection,
     TrackSoloOperation,
@@ -158,6 +158,16 @@ impl Track {
         } else {
             None
         }
+    }
+
+    pub fn set_custom_color(&self, color: Option<RgbColor>) {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = Reaper::get().medium_reaper();
+        let value = color.map(|c| NativeColorValue {
+            color: reaper.color_to_native(c),
+            is_used: false,
+        });
+        unsafe { reaper.set_track_color(self.raw_internal(), value) };
     }
 
     pub fn input_monitoring_mode(&self) -> InputMonitoringMode {

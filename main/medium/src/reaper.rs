@@ -4494,13 +4494,27 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_track_color(&self, track: MediaTrack) -> Option<NativeColorResult>
+    pub unsafe fn get_track_color(&self, track: MediaTrack) -> Option<NativeColorValue>
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
         let value = self.low.GetTrackColor(track.as_ptr());
-        NativeColorResult::from_track_color_value(value)
+        NativeColorValue::from_raw(value)
+    }
+
+    /// Sets the custom color of the given track.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn set_track_color(&self, track: MediaTrack, value: Option<NativeColorValue>)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .SetTrackColor(track.as_ptr(), NativeColorValue::convert_to_raw(value));
     }
 
     /// Extracts an RGB color from the given OS-dependent color.
@@ -4527,6 +4541,19 @@ impl<UsageScope> Reaper<UsageScope> {
             g: unsafe { g.assume_init() as _ },
             b: unsafe { b.assume_init() as _ },
         }
+    }
+
+    /// Makes an OS-dependent color from an RGB color.
+    pub fn color_to_native(&self, color: RgbColor) -> NativeColor
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let native_color = unsafe {
+            self.low
+                .ColorToNative(color.r as _, color.g as _, color.b as _)
+        };
+        NativeColor(native_color as u32)
     }
 
     /// Runs the system color chooser dialog.
@@ -7831,31 +7858,43 @@ pub struct RgbColor {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct NativeColorResult {
+pub struct NativeColorValue {
     /// The OS-dependent color.
     pub color: NativeColor,
     /// Whether the color is actually displayed (vs. just internally stored).
     pub is_used: bool,
 }
 
-impl NativeColorResult {
-    fn from_track_color_value(value: i32) -> Option<Self> {
+impl NativeColorValue {
+    const USED_OFFSET: i32 = 0x1000000;
+
+    fn from_raw(value: i32) -> Option<Self> {
         if value == 0 {
             return None;
         }
-        let used_offset = 0x1000000;
-        let res = if value < used_offset {
+        let res = if value < Self::USED_OFFSET {
             Self {
                 color: NativeColor::new(value as _),
                 is_used: false,
             }
         } else {
             Self {
-                color: NativeColor::new((value - used_offset) as _),
+                color: NativeColor::new((value - Self::USED_OFFSET) as _),
                 is_used: true,
             }
         };
         Some(res)
+    }
+
+    fn convert_to_raw(value: Option<Self>) -> i32 {
+        let Some(value) = value else {
+            return 0;
+        };
+        if value.is_used {
+            value.color.to_raw() + Self::USED_OFFSET
+        } else {
+            value.color.to_raw()
+        }
     }
 }
 
