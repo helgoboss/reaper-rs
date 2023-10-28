@@ -7869,7 +7869,7 @@ impl NativeColorValue {
     const USED_OFFSET: i32 = 0x1000000;
 
     fn from_raw(value: i32) -> Option<Self> {
-        if value == 0 {
+        if value < 0 {
             return None;
         }
         let res = if value < Self::USED_OFFSET {
@@ -7888,7 +7888,7 @@ impl NativeColorValue {
 
     fn convert_to_raw(value: Option<Self>) -> i32 {
         let Some(value) = value else {
-            return 0;
+            return -1;
         };
         if value.is_used {
             value.color.to_raw() + Self::USED_OFFSET
