@@ -45,10 +45,7 @@ impl<T> Debug for RegistrationHandle<T> {
 
 impl<T> Clone for RegistrationHandle<T> {
     fn clone(&self) -> Self {
-        Self {
-            medium_ptr: self.medium_ptr,
-            reaper_ptr: self.reaper_ptr,
-        }
+        *self
     }
 }
 
