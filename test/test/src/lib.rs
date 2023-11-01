@@ -19,7 +19,6 @@ use reaper_rx::{ActionRxHookPostCommand, ActionRxHookPostCommand2, ControlSurfac
 use slog::info;
 use std::error::Error;
 use std::fmt::Display;
-use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
 
 /// Executes the complete integration test.
@@ -125,10 +124,9 @@ fn execute_next_step(
                 finished: finished.clone(),
             };
             let step_name = step.name.clone();
-            let result = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                (step.operation)(reaper.deref(), context)
-            }))
-            .unwrap_or_else(|_| Err(format!("Test [{step_name}] panicked").into()));
+            let result =
+                std::panic::catch_unwind(AssertUnwindSafe(|| (step.operation)(reaper, context)))
+                    .unwrap_or_else(|_| Err(format!("Test [{step_name}] panicked").into()));
             finished.complete();
             result
         };
