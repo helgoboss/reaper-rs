@@ -514,7 +514,7 @@ impl<'a> TakeAttributeKey<'a> {
 pub enum ItemAttributeKey<'a> {
     /// Item position in seconds.
     Position,
-    /// Muted (item solo overrides). Setting this value will clear [`Self::MuteSolo`].
+    /// Muted (item solo overrides). Setting this value will clear `MuteSolo`.
     Mute,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///

@@ -169,7 +169,7 @@ fn format_symbol_terse(sym: &Symbol) -> String {
                 p.to_string_lossy(),
                 sym.lineno()
                     .map(|n| format!(" (line {n})"))
-                    .unwrap_or_else(|| "".to_string())
+                    .unwrap_or_default()
             )
         }),
     ]

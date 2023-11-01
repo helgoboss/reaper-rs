@@ -76,7 +76,7 @@ impl Action {
             }
         }
         let mut opt_runtime_data = self.runtime_data.borrow_mut();
-        let mut runtime_data = opt_runtime_data.as_mut().unwrap();
+        let runtime_data = opt_runtime_data.as_mut().unwrap();
         let index = self
             .find_index(runtime_data)
             .expect("Index couldn't be found");
