@@ -26,6 +26,7 @@ const MAX_PATH_LENGTH: u32 = 5000;
 
 // The pointer will never be dereferenced, so we can safely make it Send and Sync.
 unsafe impl Send for Project {}
+
 unsafe impl Sync for Project {}
 
 impl Project {
@@ -156,6 +157,12 @@ impl Project {
             .count_selected_tracks_2(Proj(self.rea_project), want_master)
     }
 
+    pub fn selected_items_count(self) -> u32 {
+        Reaper::get()
+            .medium_reaper()
+            .count_selected_media_items(Proj(self.rea_project))
+    }
+
     pub fn first_selected_track(self, want_master: MasterTrackBehavior) -> Option<Track> {
         let media_track = Reaper::get().medium_reaper().get_selected_track_2(
             Proj(self.rea_project),
@@ -170,6 +177,22 @@ impl Project {
             .medium_reaper()
             .get_selected_media_item(self.context(), 0)?;
         Some(Item::new(raw_item))
+    }
+
+    pub fn selected_items(
+        self,
+    ) -> impl Iterator<Item = Item> + ExactSizeIterator + DoubleEndedIterator + 'static {
+        if self.complain_if_not_available().is_err() {
+            return Either::Left(iter::empty());
+        }
+        let iter = (0..self.selected_items_count()).map(move |i| {
+            let raw_item = Reaper::get()
+                .medium_reaper()
+                .get_selected_media_item(Proj(self.rea_project), i)
+                .unwrap();
+            Item::new(raw_item)
+        });
+        Either::Right(iter)
     }
 
     pub fn unselect_all_tracks(self) {

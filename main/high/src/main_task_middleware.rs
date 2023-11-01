@@ -111,8 +111,8 @@ impl TaskSupport {
             .map_err(|_| "channel disconnected")
     }
 
-    // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
-    // deactivated).
+    /// Thread-safe. Returns an error if task queue is full (typically if Reaper has been
+    /// deactivated).
     pub fn do_in_main_thread_asap(
         &self,
         op: impl FnOnce() + Send + 'static,

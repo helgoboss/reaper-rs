@@ -432,6 +432,26 @@ impl PeakFileMode {
     }
 }
 
+/// Defines a mode for opening a file in the media explorer.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum OpenMediaExplorerMode {
+    /// Only selects the media file.
+    Select,
+    ///  Selects and toggles playback for the media file.
+    SelectAndPlay,
+}
+
+impl OpenMediaExplorerMode {
+    /// Converts this value to a boolean as expected by the low-level API.
+    pub fn to_raw(self) -> bool {
+        use OpenMediaExplorerMode::*;
+        match self {
+            Select => false,
+            SelectAndPlay => true,
+        }
+    }
+}
+
 impl From<TrackSendDirection> for TrackSendCategory {
     fn from(v: TrackSendDirection) -> TrackSendCategory {
         use TrackSendDirection::*;

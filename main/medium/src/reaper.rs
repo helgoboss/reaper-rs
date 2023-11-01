@@ -13,22 +13,22 @@ use crate::{
     InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey,
     KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior, OpenProjectBehavior,
-    OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
-    PeakFileMode, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds,
-    Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
-    RecordingMode, ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext,
-    SectionId, SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
-    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
-    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
-    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior,
+    OpenMediaExplorerMode, OpenProjectBehavior, OwnedPcmSource, OwnedReaperPitchShift,
+    OwnedReaperResample, PanMode, ParamId, PcmSource, PeakFileMode, PitchShiftMode,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
+    PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds, Progress,
+    ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode,
+    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
+    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
+    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
+    TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState,
+    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey,
+    TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior,
+    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -5895,6 +5895,35 @@ impl<UsageScope> Reaper<UsageScope> {
         ) as u32
     }
 
+    /// Counts the number of selected items in the given project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn count_selected_media_items(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.require_valid_project(project);
+        unsafe { self.count_selected_media_items_unchecked(project) }
+    }
+
+    /// Like [`count_selected_media_items()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`count_selected_media_items()`]: #method.count_selected_media_items
+    pub unsafe fn count_selected_media_items_unchecked(&self, project: ProjectContext) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.CountSelectedMediaItems(project.to_raw()) as u32
+    }
+
     /// Selects or deselects the given track.
     ///
     /// # Safety
@@ -7379,6 +7408,23 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: AnyThread,
     {
         !self.low.GetMidiOutput(device_id.to_raw()).is_null()
+    }
+
+    /// Opens the given file in the Media Explorer.
+    ///
+    /// play=true will play the file immediately (or toggle playback if mediafn was already open), =false will just select it.
+    ///
+    /// When in doubt, it returns 0.0 (center).
+    pub fn open_media_explorer(&self, file_name: &Path, mode: OpenMediaExplorerMode)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let file_name_reaper_string = convert_path_to_reaper_string(file_name);
+        unsafe {
+            self.low
+                .OpenMediaExplorer(file_name_reaper_string.as_ptr(), mode.to_raw());
+        }
     }
 
     /// Parses the given string as pan value.
