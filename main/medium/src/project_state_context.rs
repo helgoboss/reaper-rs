@@ -207,7 +207,7 @@ pub fn with_custom_project_state_context<C: CustomProjectStateContext, U>(
 ) {
     let mut adapter = ProjectStateContextAdapter::new(custom_context);
     let mut fat_ptr_to_rust_context: &mut dyn reaper_low::ProjectStateContext = &mut adapter;
-    let thin_ptr_to_rust_context: &mut (&mut dyn reaper_low::ProjectStateContext) =
+    let thin_ptr_to_rust_context: &mut &mut dyn reaper_low::ProjectStateContext =
         &mut fat_ptr_to_rust_context;
     // We need to send 2 things down the call stack: The medium-level callback function
     // and the medium-level user data (which will be passed to that callback function).

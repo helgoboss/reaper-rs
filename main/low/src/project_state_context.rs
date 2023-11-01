@@ -147,6 +147,10 @@ extern "C" fn cpp_to_rust_ProjectStateContext_SetTempFlag(
 ///
 /// It uses continuation-passing style to grant Rust code access to a C++ ProjectStateContext
 /// that's implemented on the Rust side.
+///
+/// # Safety
+///
+/// REAPER can crash if you pass invalid pointers.
 pub unsafe fn invoke_with_cpp_to_rust_project_state_context_intern(
     callback_target: *mut c_void,
     user_data: *mut c_void,

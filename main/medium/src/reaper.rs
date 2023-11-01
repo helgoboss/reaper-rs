@@ -4549,10 +4549,9 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let native_color = unsafe {
-            self.low
-                .ColorToNative(color.r as _, color.g as _, color.b as _)
-        };
+        let native_color = self
+            .low
+            .ColorToNative(color.r as _, color.g as _, color.b as _);
         NativeColor(native_color as u32)
     }
 

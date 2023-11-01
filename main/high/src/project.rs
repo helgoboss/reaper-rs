@@ -654,7 +654,7 @@ impl Project {
         TimeMode::from_raw(raw)
     }
 
-    pub fn set_time_signature(self, value: TimeSignature) {
+    pub fn set_time_signature(self, _value: TimeSignature) {
         todo!();
         // let raw: i32 = unsafe {
         //     self.get_project_config("tempo")

@@ -52,7 +52,7 @@ impl RecordingMode {
             MonoOutWithLatencyCompensation => 6,
             MidiOverdub => 7,
             MidiReplace => 8,
-            Unknown(i) => i.0 as i32,
+            Unknown(i) => i.0,
         }
     }
 }
