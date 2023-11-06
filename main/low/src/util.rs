@@ -68,7 +68,8 @@ pub unsafe fn bootstrap_extension_plugin(
 ///
 /// Must only be called in main thread.
 pub unsafe fn execute_plugin_destroy_hooks() {
-    for f in PLUGIN_DESTROY_HOOKS.drain(..) {
+    // Run destruction in reverse order (recently constructed things will be destroyed first)
+    for f in PLUGIN_DESTROY_HOOKS.drain(..).rev() {
         f();
     }
 }
