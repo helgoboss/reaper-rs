@@ -26,6 +26,8 @@ pub struct OwnedPreviewRegister {
     register: raw::preview_register_t,
 }
 
+unsafe impl Send for OwnedPreviewRegister {}
+
 impl fmt::Debug for OwnedPreviewRegister {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("OwnedPreviewRegister")
