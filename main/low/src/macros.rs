@@ -37,9 +37,10 @@ macro_rules! reaper_vst_plugin {
                 reason: u32,
                 _: *const u8,
             ) -> u32 {
-                if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
+                println!("ReaLearn host called DllMain with reason {reason}");
+                if reason == reaper_low::raw::DLL_PROCESS_ATTACH {
                     reaper_low::register_hinstance(hinstance);
-                } else if (reason == reaper_low::raw::DLL_PROCESS_DETACH) {
+                } else if reason == reaper_low::raw::DLL_PROCESS_DETACH {
                     unsafe {
                         reaper_low::execute_plugin_destroy_hooks();
                     }
@@ -84,7 +85,7 @@ macro_rules! reaper_vst_plugin {
                     ) -> *mut std::os::raw::c_void,
                 >,
             ) -> std::os::raw::c_int {
-                if (reason == reaper_low::raw::DLL_PROCESS_ATTACH) {
+                if reason == reaper_low::raw::DLL_PROCESS_ATTACH {
                     reaper_low::register_swell_function_provider(get_func);
                 }
                 1
