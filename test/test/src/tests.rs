@@ -2644,6 +2644,8 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
                 js_name == c_str!("JS: phaser")
                     || js_name == c_str!("4-Tap Phaser")
                     || js_name == c_str!("JS: 4-Tap Phaser")
+                    || js_name == c_str!("JS: 4-Tap Phaser [guitar\\phaser]")
+                    || js_name == c_str!("JS: 4-Tap Phaser [guitar/phaser]")
             );
             let fx_chunk = fx.chunk()?;
             assert!(fx_chunk.starts_with("BYPASS 0 0 0"));
@@ -2656,6 +2658,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             assert!(
                 tag_chunk.starts_with(r#"<JS phaser """#)
                     || tag_chunk.starts_with(r#"<JS guitar/phaser """#)
+                    || tag_chunk.starts_with(r#"<JS guitar\phaser """#)
             );
             assert!(tag_chunk.ends_with("\n>"));
             let state_chunk = fx.state_chunk()?;
@@ -2692,6 +2695,8 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
                     fx_info.effect_name == "JS: phaser"
                         || fx_info.effect_name == "4-Tap Phaser"
                         || fx_info.effect_name == "JS: 4-Tap Phaser"
+                        || fx_info.effect_name == "JS: 4-Tap Phaser [guitar\\phaser]"
+                        || fx_info.effect_name == "JS: 4-Tap Phaser [guitar/phaser]"
                 );
             }
             Ok(())
