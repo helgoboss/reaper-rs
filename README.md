@@ -12,10 +12,8 @@
 [Rust](https://www.rust-lang.org/) bindings for the [REAPER](https://www.reaper.fm/) C++ API.
 
 **Important note:** If you want to use _reaper-rs_ for your own project, please use the master branch for the time
-being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often but I don't publish to
-crates.io at the moment, so my crates there are a bit outdated. Rationale: As long as I'm the only consumer of this
-library, this process is easier for me. I tend to keep `reaper-low` and `reaper-medium` mostly stable, so no worries
-about that :)
+being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often, but I don't publish to
+crates.io at the moment, so my crates there are *very* outdated. Rationale: As long as I'm the only consumer of this library, this process is easier for me.
 
 Here's the snippet:
 
