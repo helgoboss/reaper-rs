@@ -294,6 +294,29 @@ impl Swell {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetWindowLong(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+    ) -> root::LONG_PTR {
+        winapi::um::winuser::GetWindowLongW(hwnd as _, idx) as _
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn SetWindowLong(
+        &self,
+        hwnd: root::HWND,
+        idx: ::std::os::raw::c_int,
+        val: root::LONG_PTR,
+    ) -> root::LONG_PTR {
+        winapi::um::winuser::SetWindowLongW(hwnd as _, idx, val as _) as _
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn PostMessage(
         &self,
         hwnd: root::HWND,
