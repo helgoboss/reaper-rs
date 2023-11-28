@@ -79,6 +79,12 @@ impl<T> RegistrationHandle<T> {
 // ==========================================
 
 /// Pointer to a project.
+// TODO-high When we do a bigger refactoring one day, we should make these to newtypes instead!
+//  Reasons:
+//  - Pointers types are non-send. However, there's no reason not to make them Send in our case.
+//    They act as IDs only and the functions working with these IDs are the ones that need to
+//    be protected against access from the wrong thread (they already are) by using a thread check
+//    ... which by there's even a dedicated crate for: https://github.com/mitsuhiko/fragile.
 pub type ReaProject = NonNull<raw::ReaProject>;
 /// Pointer to a track in a project.
 pub type MediaTrack = NonNull<raw::MediaTrack>;
