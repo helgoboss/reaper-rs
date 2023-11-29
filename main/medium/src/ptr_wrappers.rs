@@ -2,15 +2,91 @@
 //! using different strategies, depending on the characteristics of the struct. Sometimes it's just
 //! a type alias, sometimes a wrapper.  
 use crate::{CommandId, SectionId};
+use std::cmp::Ordering;
 
 use reaper_low::raw;
 
 use std::fmt;
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter};
+use std::hash::{Hash, Hasher};
 use std::os::raw::c_void;
 use std::ptr::NonNull;
 
-/// Handle which is returned from some session functions that register something.
+/// A simple opaque handle to something registered within REAPER.
+///
+/// Characteristics:
+///
+/// - Carries enough information to be able to unregister the register thing (passed to the correct
+///   function).
+/// - Carries type information so that this handle cannot just be passed to an "unregister" function
+///   that's intended for unregistering a different type of thing.
+/// - Has ID character: Is small, copyable and can be passed around freely, even if the type
+///   parameter doesn't exhibit these properties.
+/// - Its internals are hidden in order to allow non-breaking changes under the hood.
+pub struct Handle<T>(NonNull<T>);
+
+impl<T> Handle<T> {
+    pub(crate) const fn new(inner: NonNull<T>) -> Self {
+        Self(inner)
+    }
+
+    pub(crate) const fn get(self) -> NonNull<T> {
+        self.0
+    }
+
+    pub(crate) const fn as_ptr(self) -> *mut T {
+        self.0.as_ptr()
+    }
+
+    pub(crate) const fn cast<U>(self) -> Handle<U> {
+        Handle(self.0.cast())
+    }
+}
+
+impl<T> Copy for Handle<T> {}
+
+impl<T> Clone for Handle<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl<T> Eq for Handle<T> {}
+
+impl<T> PartialEq for Handle<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq(&other.0)
+    }
+}
+
+impl<T> Ord for Handle<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.0.cmp(&other.0)
+    }
+}
+
+impl<T> PartialOrd for Handle<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
+
+impl<T> Hash for Handle<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state)
+    }
+}
+
+impl<T> Debug for Handle<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+unsafe impl<T> Send for Handle<T> {}
+unsafe impl<T> Sync for Handle<T> {}
+
+/// A more advanced handle which is returned from some session functions that register something.
 ///
 /// This handle can be used to explicitly unregister the registered object and regain ownership of
 /// the struct which has been passed in originally.
@@ -25,7 +101,7 @@ pub struct RegistrationHandle<T> {
     /// pointer here, which we have access to before casting to a trait object.
     medium_ptr: NonNull<T>,
     /// (Thin) pointer for unregistering the thing that has been passed to REAPER.
-    reaper_ptr: NonNull<c_void>,
+    reaper_ptr: Handle<c_void>,
 }
 
 // We might run into situations when it's necessary to promise Rust that passing handles to other
@@ -52,10 +128,7 @@ impl<T> Clone for RegistrationHandle<T> {
 impl<T> Copy for RegistrationHandle<T> {}
 
 impl<T> RegistrationHandle<T> {
-    pub(crate) fn new(
-        medium_ptr: NonNull<T>,
-        reaper_ptr: NonNull<c_void>,
-    ) -> RegistrationHandle<T> {
+    pub(crate) fn new(medium_ptr: NonNull<T>, reaper_ptr: Handle<c_void>) -> RegistrationHandle<T> {
         RegistrationHandle {
             medium_ptr,
             reaper_ptr,
@@ -70,7 +143,7 @@ impl<T> RegistrationHandle<T> {
         Box::from_raw(self.medium_ptr.as_ptr())
     }
 
-    pub(crate) fn reaper_ptr(&self) -> NonNull<c_void> {
+    pub(crate) fn reaper_handle(&self) -> Handle<c_void> {
         self.reaper_ptr
     }
 }

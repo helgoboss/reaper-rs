@@ -1,5 +1,5 @@
+use crate::Handle;
 use std::collections::HashMap;
-use std::ptr::NonNull;
 use std::sync::Arc;
 
 // Some structs are not self-contained (completely owned). This container takes only
@@ -11,7 +11,7 @@ pub(crate) struct Keeper<T, R> {
     // obtain a stable memory address offset that survives moving. The address needs to be
     // stable because the data part of it (the part returned by AsRef) will be passed to
     // REAPER.
-    map: HashMap<NonNull<R>, Box<T>>,
+    map: HashMap<Handle<R>, Box<T>>,
 }
 
 impl<T: AsRef<R>, R> Default for Keeper<T, R> {
@@ -23,22 +23,22 @@ impl<T: AsRef<R>, R> Default for Keeper<T, R> {
 }
 
 impl<T: AsRef<R>, R> Keeper<T, R> {
-    pub fn keep(&mut self, owned_struct: T) -> NonNull<R> {
+    pub fn keep(&mut self, owned_struct: T) -> Handle<R> {
         let boxed = Box::new(owned_struct);
         let ref_to_data: &R = (*boxed).as_ref();
-        let stable_ptr_to_data: NonNull<R> = ref_to_data.into();
+        let stable_ptr_to_data: Handle<R> = Handle::new(ref_to_data.into());
         self.map.insert(stable_ptr_to_data, boxed);
         stable_ptr_to_data
     }
 
-    pub fn release(&mut self, handle: NonNull<R>) -> Option<T> {
+    pub fn release(&mut self, handle: Handle<R>) -> Option<T> {
         self.map.remove(&handle).map(|boxed| *boxed)
     }
 }
 
 #[derive(Debug)]
 pub(crate) struct SharedKeeper<T, R> {
-    map: HashMap<NonNull<R>, Arc<T>>,
+    map: HashMap<Handle<R>, Arc<T>>,
 }
 
 impl<T: AsRef<R>, R> Default for SharedKeeper<T, R> {
@@ -50,14 +50,14 @@ impl<T: AsRef<R>, R> Default for SharedKeeper<T, R> {
 }
 
 impl<T: AsRef<R>, R> SharedKeeper<T, R> {
-    pub fn keep(&mut self, shared: Arc<T>) -> NonNull<R> {
+    pub fn keep(&mut self, shared: Arc<T>) -> Handle<R> {
         let ref_to_data: &R = (*shared).as_ref();
-        let stable_ptr_to_data: NonNull<R> = ref_to_data.into();
+        let stable_ptr_to_data = Handle::new(ref_to_data.into());
         self.map.insert(stable_ptr_to_data, shared);
         stable_ptr_to_data
     }
 
-    pub fn release(&mut self, handle: NonNull<R>) -> Option<Arc<T>> {
+    pub fn release(&mut self, handle: Handle<R>) -> Option<Arc<T>> {
         self.map.remove(&handle)
     }
 }

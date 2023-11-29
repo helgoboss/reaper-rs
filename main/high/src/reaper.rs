@@ -3,7 +3,6 @@ use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use std::ptr::NonNull;
 use std::rc::Rc;
 use std::sync::{Arc, Weak};
 
@@ -23,10 +22,10 @@ use crossbeam_channel::{Receiver, Sender};
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
-    ActionValueChange, CommandId, HookCommand, HookPostCommand2, OnAudioBuffer, OnAudioBufferArgs,
-    OwnedGaccelRegister, ReaProject, RealTimeAudioThreadScope, ReaperStr, ReaperString,
-    ReaperStringArg, RegistrationHandle, SectionContext, ToggleAction, ToggleActionResult,
-    WindowContext,
+    ActionValueChange, CommandId, Handle, HookCommand, HookPostCommand2, OnAudioBuffer,
+    OnAudioBufferArgs, OwnedGaccelRegister, ReaProject, RealTimeAudioThreadScope, ReaperStr,
+    ReaperString, ReaperStringArg, RegistrationHandle, SectionContext, ToggleAction,
+    ToggleActionResult, WindowContext,
 };
 use slog::{debug, Logger};
 use std::fmt;
@@ -217,7 +216,7 @@ impl Debug for SleepingState {
 #[derive(Debug)]
 struct AwakeState {
     audio_hook_register_handle: RegistrationHandle<HighOnAudioBuffer>,
-    gaccel_registers: HashMap<CommandId, NonNull<raw::gaccel_register_t>>,
+    gaccel_registers: HashMap<CommandId, Handle<raw::gaccel_register_t>>,
 }
 
 pub enum ActionKind {

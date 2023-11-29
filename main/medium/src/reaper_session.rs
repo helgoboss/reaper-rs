@@ -11,7 +11,7 @@ use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
     AcceleratorPosition, BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter,
-    HookCommand, HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope,
+    Handle, HookCommand, HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope,
     MeasureAlignment, OnAudioBuffer, OwnedAcceleratorRegister, OwnedAudioHookRegister,
     OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration, ProjectContext,
     RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex,
@@ -86,18 +86,18 @@ pub struct ReaperSession {
     /// While in here, the control surface is considered to be owned by REAPER, meaning that REAPER
     /// is supposed to have exclusive access to it.
     #[allow(clippy::redundant_allocation)]
-    csurf_insts: HashMap<NonNull<c_void>, Box<Box<dyn IReaperControlSurface>>>,
+    csurf_insts: HashMap<Handle<c_void>, Box<Box<dyn IReaperControlSurface>>>,
     /// Provides a safe place in memory for plug-in registration keys (e.g. "API_myfunction").
     ///
     /// Also used for keeping track of registrations so they can be unregistered automatically on
     /// drop.
     plugin_registrations: HashSet<PluginRegistration>,
     /// Keep track of audio hook registrations so they can be unregistered automatically on drop.
-    audio_hook_registrations: HashSet<NonNull<raw::audio_hook_register_t>>,
+    audio_hook_registrations: HashSet<Handle<raw::audio_hook_register_t>>,
     /// Keep track of playing preview registers so they can be unregistered automatically on drop.
-    playing_preview_registers: HashSet<NonNull<raw::preview_register_t>>,
+    playing_preview_registers: HashSet<Handle<raw::preview_register_t>>,
     /// Keep track of playing track preview registers so they can be unregistered automatically on drop.
-    playing_track_preview_registers: HashSet<(ProjectContext, NonNull<raw::preview_register_t>)>,
+    playing_track_preview_registers: HashSet<(ProjectContext, Handle<raw::preview_register_t>)>,
 }
 
 // The raw pointers contained in the session don't do harm when sent to another thread.
@@ -531,7 +531,7 @@ impl ReaperSession {
     pub fn plugin_register_add_gaccel(
         &mut self,
         register: OwnedGaccelRegister,
-    ) -> ReaperFunctionResult<NonNull<raw::gaccel_register_t>> {
+    ) -> ReaperFunctionResult<Handle<raw::gaccel_register_t>> {
         let handle = self.gaccel_registers.keep(register);
         unsafe { self.plugin_register_add(RegistrationObject::Gaccel(handle))? };
         Ok(handle)
@@ -580,7 +580,7 @@ impl ReaperSession {
     /// [`play_preview_ex()`]: #method.play_preview_ex
     pub unsafe fn play_preview_ex_unchecked(
         &mut self,
-        preview: NonNull<raw::preview_register_t>,
+        preview: Handle<raw::preview_register_t>,
         buffering_behavior: BitFlags<BufferingBehavior>,
         measure_alignment: MeasureAlignment,
     ) -> ReaperFunctionResult<()> {
@@ -614,7 +614,7 @@ impl ReaperSession {
     /// [`play_preview_ex_unchecked()`]: #method.play_preview_ex_unchecked
     pub unsafe fn stop_preview_unchecked(
         &mut self,
-        register: NonNull<raw::preview_register_t>,
+        register: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
         let successful = self.reaper.low().StopPreview(register.as_ptr());
         // If not successful, it usually means the preview is stopped already. Let's remove
@@ -643,7 +643,7 @@ impl ReaperSession {
     pub unsafe fn play_track_preview_2_ex_unchecked(
         &mut self,
         project: ProjectContext,
-        preview: NonNull<raw::preview_register_t>,
+        preview: Handle<raw::preview_register_t>,
         buffering_behavior: BitFlags<BufferingBehavior>,
         measure_alignment: MeasureAlignment,
     ) -> ReaperFunctionResult<()> {
@@ -680,7 +680,7 @@ impl ReaperSession {
     pub unsafe fn stop_track_preview_2_unchecked(
         &mut self,
         project: ProjectContext,
-        register: NonNull<raw::preview_register_t>,
+        register: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
         let successful = self
             .reaper
@@ -712,7 +712,7 @@ impl ReaperSession {
         register: Arc<ReaperMutex<OwnedPreviewRegister>>,
         buffering_behavior: BitFlags<BufferingBehavior>,
         measure_alignment: MeasureAlignment,
-    ) -> ReaperFunctionResult<NonNull<raw::preview_register_t>> {
+    ) -> ReaperFunctionResult<Handle<raw::preview_register_t>> {
         let handle = self.preview_registers.keep(register);
         unsafe { self.play_preview_ex_unchecked(handle, buffering_behavior, measure_alignment)? };
         Ok(handle)
@@ -727,7 +727,7 @@ impl ReaperSession {
     /// [`play_preview_ex()`]: #method.play_preview_ex
     pub fn stop_preview(
         &mut self,
-        handle: NonNull<raw::preview_register_t>,
+        handle: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
         let result = unsafe { self.stop_preview_unchecked(handle) };
         // If stopping was not successful, it usually means that the preview was not playing
@@ -754,7 +754,7 @@ impl ReaperSession {
         register: Arc<ReaperMutex<OwnedPreviewRegister>>,
         buffering_behavior: BitFlags<BufferingBehavior>,
         measure_alignment: MeasureAlignment,
-    ) -> ReaperFunctionResult<NonNull<raw::preview_register_t>> {
+    ) -> ReaperFunctionResult<Handle<raw::preview_register_t>> {
         self.reaper.require_valid_project(project);
         let handle = self.preview_registers.keep(register);
         unsafe {
@@ -778,7 +778,7 @@ impl ReaperSession {
     pub fn stop_track_preview_2(
         &mut self,
         project: ProjectContext,
-        handle: NonNull<raw::preview_register_t>,
+        handle: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
         // It's important we don't just panic when the given project is invalid because that would
         // force the consumer to check the project validity before and not call this method if the
@@ -798,7 +798,7 @@ impl ReaperSession {
     }
 
     /// Unregisters an action.
-    pub fn plugin_register_remove_gaccel(&mut self, handle: NonNull<raw::gaccel_register_t>) {
+    pub fn plugin_register_remove_gaccel(&mut self, handle: Handle<raw::gaccel_register_t>) {
         unsafe { self.plugin_register_remove(RegistrationObject::Gaccel(handle)) };
     }
 
@@ -810,12 +810,12 @@ impl ReaperSession {
         T: TranslateAccel,
     {
         // Unregister the low-level register from REAPER
-        let reaper_ptr = handle.reaper_ptr().cast();
+        let reaper_ptr = handle.reaper_handle().cast();
         unsafe { self.plugin_register_remove(RegistrationObject::BackAccelerator(reaper_ptr)) };
         // Take the owned register out of its storage
         let owned_register = self
             .accelerator_registers
-            .release(handle.reaper_ptr().cast())?;
+            .release(handle.reaper_handle().cast())?;
         // Reconstruct the initial value for handing ownership back to the consumer
         let dyn_callback = owned_register.into_callback();
         // We are not interested in the fat pointer (Box<dyn TranslateAccel>) anymore.
@@ -877,11 +877,12 @@ impl ReaperSession {
         let double_boxed_low_cs: Box<Box<dyn IReaperControlSurface>> = Box::new(Box::new(low_cs));
         let cpp_cs =
             unsafe { create_cpp_to_rust_control_surface(double_boxed_low_cs.as_ref().into()) };
+        let cpp_cs = Handle::new(cpp_cs);
         // Store the low-level Rust control surface in memory. Although we keep it here,
         // conceptually it's owned by REAPER, so we should not access it while being registered.
         let handle = RegistrationHandle::new(control_surface_thin_ptr, cpp_cs.cast());
         self.csurf_insts
-            .insert(handle.reaper_ptr(), double_boxed_low_cs);
+            .insert(handle.reaper_handle(), double_boxed_low_cs);
         // Register the C++ control surface at REAPER
         unsafe { self.plugin_register_add(RegistrationObject::CsurfInst(cpp_cs))? };
         // Return a handle which the consumer can use to unregister
@@ -926,12 +927,12 @@ impl ReaperSession {
         T: ControlSurface,
     {
         // Take the low-level Rust control surface out of its storage
-        let double_boxed_low_cs = self.csurf_insts.remove(&handle.reaper_ptr())?;
+        let double_boxed_low_cs = self.csurf_insts.remove(&handle.reaper_handle())?;
         // Unregister the C++ control surface from REAPER
-        let cpp_cs_ptr = handle.reaper_ptr().cast();
+        let cpp_cs_ptr = handle.reaper_handle().cast();
         self.plugin_register_remove(RegistrationObject::CsurfInst(cpp_cs_ptr));
         // Remove the C++ counterpart surface
-        delete_cpp_control_surface(cpp_cs_ptr);
+        delete_cpp_control_surface(cpp_cs_ptr.get());
         // Reconstruct the initial value for handing ownership back to the consumer
         let low_cs = double_boxed_low_cs
             .into_any()
@@ -970,7 +971,7 @@ impl ReaperSession {
     /// [`audio_reg_hardware_hook_add`]: #method.audio_reg_hardware_hook_add
     pub unsafe fn audio_reg_hardware_hook_add_unchecked(
         &mut self,
-        register: NonNull<audio_hook_register_t>,
+        register: Handle<audio_hook_register_t>,
     ) -> ReaperFunctionResult<()> {
         self.audio_hook_registrations.insert(register);
         let result = self
@@ -998,7 +999,7 @@ impl ReaperSession {
     /// [`audio_reg_hardware_hook_add_unchecked()`]: #method.audio_reg_hardware_hook_add_unchecked
     pub unsafe fn audio_reg_hardware_hook_remove_unchecked(
         &mut self,
-        register: NonNull<audio_hook_register_t>,
+        register: Handle<audio_hook_register_t>,
     ) {
         self.reaper
             .low()
@@ -1098,12 +1099,12 @@ impl ReaperSession {
         T: OnAudioBuffer,
     {
         // Unregister the low-level audio hook register from REAPER
-        let reaper_ptr = handle.reaper_ptr().cast();
+        let reaper_ptr = handle.reaper_handle().cast();
         unsafe { self.audio_reg_hardware_hook_remove_unchecked(reaper_ptr) };
         // Take the owned audio hook register out of its storage
         let owned_audio_hook_register = self
             .audio_hook_registers
-            .release(handle.reaper_ptr().cast())?;
+            .release(handle.reaper_handle().cast())?;
         // Reconstruct the initial value for handing ownership back to the consumer
         let dyn_callback = owned_audio_hook_register.into_callback();
         // We are not interested in the fat pointer (Box<dyn OnAudioBuffer>) anymore.

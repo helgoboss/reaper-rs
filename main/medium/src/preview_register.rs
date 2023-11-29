@@ -5,7 +5,7 @@ use crate::{
 };
 use reaper_low::raw;
 use std::fmt;
-use std::ptr::{null_mut, NonNull};
+use std::ptr::null_mut;
 
 /// An owned preview register.
 ///

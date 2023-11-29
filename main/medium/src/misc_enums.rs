@@ -1,5 +1,5 @@
 use crate::{
-    BookmarkId, CommandId, Hidden, Hwnd, InsertMediaFlag, KbdSectionInfo, MediaTrack,
+    BookmarkId, CommandId, Handle, Hidden, Hwnd, InsertMediaFlag, KbdSectionInfo, MediaTrack,
     MidiFrameOffset, MidiOutputDeviceId, ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg,
     ReaperWidthValue,
 };
@@ -775,11 +775,11 @@ pub enum RegistrationObject<'a> {
     /// section action list, and at the same time a default binding for it (accel.cmd is the
     /// command ID, desc is the description, and accel's other parameters are the key to bind.
     /// ```
-    Gaccel(NonNull<raw::gaccel_register_t>),
+    Gaccel(Handle<raw::gaccel_register_t>),
     /// A record which lets you get a place in the keyboard processing queue.
-    BackAccelerator(NonNull<raw::accelerator_register_t>),
+    BackAccelerator(Handle<raw::accelerator_register_t>),
     /// A record which lets you get the first place in the keyboard processing queue.
-    FrontAccelerator(NonNull<raw::accelerator_register_t>),
+    FrontAccelerator(Handle<raw::accelerator_register_t>),
     /// A hidden control surface (useful for being notified by REAPER about events).
     ///
     /// Extract from `reaper_plugin.h`:
@@ -788,7 +788,7 @@ pub enum RegistrationObject<'a> {
     /// note you can also add a control surface behind the scenes with "csurf_inst"
     /// (IReaperControlSurface*)instance
     /// ```
-    CsurfInst(NonNull<raw::IReaperControlSurface>),
+    CsurfInst(Handle<raw::IReaperControlSurface>),
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.

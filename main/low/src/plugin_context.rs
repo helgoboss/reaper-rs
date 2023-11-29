@@ -28,6 +28,9 @@ pub struct PluginContext {
 // The raw pointers contained in the plug-in context don't do harm when sent to another thread.
 unsafe impl Send for PluginContext {}
 
+// Same with Sync. We need to runtime thread checks anyway to achieve safety.
+unsafe impl Sync for PluginContext {}
+
 /// Additional stuff available in the plug-in context specific to a certain plug-in type.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum TypeSpecificPluginContext {
