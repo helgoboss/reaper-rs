@@ -81,7 +81,7 @@ impl<T> RegistrationHandle<T> {
 macro_rules! ptr_wrapper {
     ($( #[doc = $doc:expr] )* $name:ident ($inner:ty)) => {
         $( #[doc = $doc] )*
-        #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
         pub struct $name(NonNull<$inner>);
 
         impl $name {
@@ -93,6 +93,8 @@ macro_rules! ptr_wrapper {
                 self.0.as_ptr()
             }
         }
+
+        unsafe impl Send for $name {}
     };
 }
 
