@@ -168,6 +168,7 @@ macro_rules! ptr_wrapper {
         }
 
         unsafe impl Send for $name {}
+        unsafe impl Sync for $name {}
     };
 }
 

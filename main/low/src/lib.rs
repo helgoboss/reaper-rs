@@ -109,3 +109,5 @@ pub use pcm_sink::*;
 
 mod project_state_context;
 pub use project_state_context::*;
+
+mod gaccel_register;
