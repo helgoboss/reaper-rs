@@ -6,7 +6,7 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    require_non_null_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
+    require_media_track_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
     AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
     DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
     FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
@@ -34,6 +34,7 @@ use crate::{
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
 
+use crate::ptr_wrappers::require_hwnd_panic;
 use crate::util::{
     create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_prefilled,
 };
@@ -262,7 +263,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let idx = project_ref.to_raw();
         if buffer_size == 0 {
             let ptr = unsafe { self.low.EnumProjects(idx, null_mut(), 0) };
-            let project = NonNull::new(ptr)?;
+            let project = ReaProject::new(ptr)?;
             Some(EnumProjectsResult {
                 project,
                 file_path: None,
@@ -271,7 +272,7 @@ impl<UsageScope> Reaper<UsageScope> {
             let (reaper_string, ptr) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
                 self.low.EnumProjects(idx, buffer, max_size)
             });
-            let project = NonNull::new(ptr)?;
+            let project = ReaProject::new(ptr)?;
             if reaper_string.is_empty() {
                 return Some(EnumProjectsResult {
                     project,
@@ -327,7 +328,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
-        NonNull::new(ptr)
+        MediaTrack::new(ptr)
     }
 
     /// Returns the item at the given index.
@@ -361,7 +362,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetMediaItem(project.to_raw(), item_index as i32);
-        NonNull::new(ptr)
+        MediaItem::new(ptr)
     }
 
     /// Checks if the given pointer is still valid.
@@ -730,7 +731,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::ParTrack, null_mut())
             as *mut raw::MediaTrack;
-        NonNull::new(ptr)
+        MediaTrack::new(ptr)
     }
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
@@ -750,7 +751,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Project, null_mut())
             as *mut raw::ReaProject;
-        NonNull::new(ptr)
+        ReaProject::new(ptr)
     }
 
     /// Convenience function which grants temporary access to the given track's name (`P_NAME`).
@@ -2555,7 +2556,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        require_non_null_panic(self.low.GetMainHwnd())
+        require_hwnd_panic(self.low.GetMainHwnd())
     }
 
     /// Returns the focused MIDI editor window.
@@ -2564,7 +2565,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        NonNull::new(self.low.MIDIEditor_GetActive())
+        Hwnd::new(self.low.MIDIEditor_GetActive())
     }
 
     /// Looks up the command ID for a named command.
@@ -3545,7 +3546,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetCurrentProjectInLoadSave();
-        NonNull::new(ptr)
+        ReaProject::new(ptr)
     }
 
     /// Returns the name of the given track FX parameter.
@@ -4637,7 +4638,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self
             .low
             .GetTrackEnvelopeByChunkName(track.as_ptr(), chunk_name.into_raw().as_ptr());
-        NonNull::new(ptr)
+        TrackEnvelope::new(ptr)
     }
 
     /// Returns the track envelope for the given track and envelope display name.
@@ -4662,7 +4663,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self
             .low
             .GetTrackEnvelopeByName(track.as_ptr(), env_name.into().as_ptr());
-        NonNull::new(ptr)
+        TrackEnvelope::new(ptr)
     }
 
     /// Returns the current peak volume for the given track channel.
@@ -4793,7 +4794,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetTrackMediaItem(track.as_ptr(), item_idx as _);
-        NonNull::new(ptr)
+        MediaItem::new(ptr)
     }
 
     /// Gets the number of FX instances on the given track's normal FX chain.
@@ -4908,7 +4909,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetMasterTrack(project.to_raw());
-        require_non_null_panic(ptr)
+        require_media_track_panic(ptr)
     }
 
     /// Converts the given GUID to a string (including braces).
@@ -5270,7 +5271,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.SetMixerScroll(track.as_ptr());
-        NonNull::new(ptr)
+        MediaTrack::new(ptr)
     }
 
     /// Creates a new media item.
@@ -5287,7 +5288,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.AddMediaItemToTrack(track.as_ptr());
-        NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't add item to track"))
+        MediaItem::new(ptr).ok_or(ReaperFunctionError::new("couldn't add item to track"))
     }
 
     /// Deletes the given media item.
@@ -5331,7 +5332,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.AddTakeToMediaItem(item.as_ptr());
-        NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't add take to item"))
+        MediaItemTake::new(ptr).ok_or(ReaperFunctionError::new("couldn't add take to item"))
     }
 
     /// Sets the position of the given item.
@@ -5982,7 +5983,7 @@ impl<UsageScope> Reaper<UsageScope> {
             selected_track_index as i32,
             master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
         );
-        NonNull::new(ptr)
+        MediaTrack::new(ptr)
     }
 
     /// Returns a selected item from the given project.
@@ -6021,7 +6022,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self
             .low
             .GetSelectedMediaItem(project.to_raw(), selected_item_index as i32);
-        NonNull::new(ptr)
+        MediaItem::new(ptr)
     }
 
     /// Returns the media source of the given media item take.
@@ -6052,7 +6053,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetItemProjectContext(item.as_ptr());
-        NonNull::new(ptr)
+        ReaProject::new(ptr)
     }
 
     /// Returns the active take in this item.
@@ -6066,7 +6067,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.GetActiveTake(item.as_ptr());
-        NonNull::new(ptr)
+        MediaItemTake::new(ptr)
     }
 
     /// Returns the take that is currently being edited in the given MIDI editor.
@@ -6083,7 +6084,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.low.MIDIEditor_GetTake(midi_editor.as_ptr());
-        NonNull::new(ptr).ok_or(ReaperFunctionError::new("couldn't get MIDI editor take"))
+        MediaItemTake::new(ptr).ok_or(ReaperFunctionError::new("couldn't get MIDI editor take"))
     }
 
     /// Selects exactly one track and deselects all others.
@@ -6189,7 +6190,7 @@ impl<UsageScope> Reaper<UsageScope> {
             TrackSendAttributeKey::SrcTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
-        NonNull::new(ptr).ok_or_else(|| {
+        MediaTrack::new(ptr).ok_or_else(|| {
             ReaperFunctionError::new("couldn't get source track (maybe send doesn't exist)")
         })
     }
@@ -6223,7 +6224,7 @@ impl<UsageScope> Reaper<UsageScope> {
             TrackSendAttributeKey::DestTrack,
             null_mut(),
         ) as *mut raw::MediaTrack;
-        NonNull::new(ptr).ok_or_else(|| {
+        MediaTrack::new(ptr).ok_or_else(|| {
             ReaperFunctionError::new("couldn't get destination track (maybe send doesn't exist)")
         })
     }
@@ -6597,7 +6598,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self
             .low
             .TrackFX_GetFloatingWindow(track.as_ptr(), fx_location.to_raw());
-        NonNull::new(ptr)
+        Hwnd::new(ptr)
     }
 
     /// Returns whether the user interface of the given FX is open.

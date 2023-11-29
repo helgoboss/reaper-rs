@@ -1446,7 +1446,7 @@ impl WindowContext {
     /// Converts this raw pointer as returned from the low-level API to a window context.
     pub(crate) fn from_raw(raw: raw::HWND) -> WindowContext {
         use WindowContext::*;
-        match NonNull::new(raw) {
+        match Hwnd::new(raw) {
             None => NoWindow,
             Some(hwnd) => Win(hwnd),
         }

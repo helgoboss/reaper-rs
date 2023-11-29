@@ -547,7 +547,7 @@ impl BorrowedPcmSource {
             user_count: unsafe { user_count.assume_init() },
             first_user: {
                 let ptr = unsafe { first_user.assume_init() };
-                NonNull::new(ptr)
+                MediaItemTake::new(ptr)
             },
         })
     }
@@ -989,7 +989,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
 
     fn PropertiesWindow(&mut self, hwndParent: *mut HWND__) -> i32 {
         let args = PropertiesWindowArgs {
-            parent_window: NonNull::new(hwndParent),
+            parent_window: Hwnd::new(hwndParent),
         };
         self.delegate.properties_window(args)
     }

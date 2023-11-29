@@ -2,7 +2,7 @@
 
 use super::MediaTrack;
 use crate::{
-    require_non_null_panic, AutomationMode, Bpm, Hidden, InputMonitoringMode, Pan, PanMode,
+    require_media_track_panic, AutomationMode, Bpm, Hidden, InputMonitoringMode, Pan, PanMode,
     PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
     ReaperVolumeValue, TrackFxChainType, TrackFxLocation,
 };
@@ -690,7 +690,7 @@ impl ControlSurfaceAdapter {
             return None;
         }
         Some(QualifiedFxLocation {
-            track: require_non_null_panic(media_track_ptr as *mut raw::MediaTrack),
+            track: require_media_track_panic(media_track_ptr as *mut raw::MediaTrack),
             fx_location: if media_item_ptr.is_null() {
                 VersionDependentFxLocation::TrackFx(
                     self.get_as_version_dependent_track_fx_ref(fx_index_ptr),
@@ -755,42 +755,42 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
 
     fn SetSurfaceVolume(&self, trackid: *mut raw::MediaTrack, volume: f64) {
         self.delegate.set_surface_volume(SetSurfaceVolumeArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             volume: ReaperVolumeValue(volume),
         })
     }
 
     fn SetSurfacePan(&self, trackid: *mut raw::MediaTrack, pan: f64) {
         self.delegate.set_surface_pan(SetSurfacePanArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             pan: ReaperPanValue(pan),
         })
     }
 
     fn SetSurfaceMute(&self, trackid: *mut raw::MediaTrack, mute: bool) {
         self.delegate.set_surface_mute(SetSurfaceMuteArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             is_mute: mute,
         })
     }
 
     fn SetSurfaceSelected(&self, trackid: *mut raw::MediaTrack, selected: bool) {
         self.delegate.set_surface_selected(SetSurfaceSelectedArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             is_selected: selected,
         })
     }
 
     fn SetSurfaceSolo(&self, trackid: *mut raw::MediaTrack, solo: bool) {
         self.delegate.set_surface_solo(SetSurfaceSoloArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             is_solo: solo,
         })
     }
 
     fn SetSurfaceRecArm(&self, trackid: *mut raw::MediaTrack, recarm: bool) {
         self.delegate.set_surface_rec_arm(SetSurfaceRecArmArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             is_armed: recarm,
         })
     }
@@ -810,7 +810,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
 
     fn SetTrackTitle(&self, trackid: *mut raw::MediaTrack, title: *const c_char) {
         self.delegate.set_track_title(SetTrackTitleArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             name: {
                 let borrowed_name = unsafe { ReaperStr::from_ptr(title) };
                 Cow::Borrowed(borrowed_name)
@@ -820,7 +820,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
 
     fn GetTouchState(&self, trackid: *mut raw::MediaTrack, isPan: i32) -> bool {
         self.delegate.get_touch_state(GetTouchStateArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
             parameter_type: TouchedParameterType::from_raw(isPan),
         })
     }
@@ -837,7 +837,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
 
     fn OnTrackSelection(&self, trackid: *mut raw::MediaTrack) {
         self.delegate.on_track_selection(OnTrackSelectionArgs {
-            track: require_non_null_panic(trackid),
+            track: require_media_track_panic(trackid),
         })
     }
 
@@ -863,7 +863,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                 raw::CSURF_EXT_SETINPUTMONITOR => {
                     let recmon: i32 = deref_as(parm2).expect("recmon pointer is null");
                     self.delegate.ext_set_input_monitor(ExtSetInputMonitorArgs {
-                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                        track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                         mode: InputMonitoringMode::from_raw(recmon),
                     })
                 }
@@ -875,7 +875,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                     let fx_index = (fxidx_and_paramidx >> 16) & 0xffff;
                     let param_index = fxidx_and_paramidx & 0xffff;
                     let args = ExtSetFxParamArgs {
-                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                        track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                         fx_index: fx_index as u32,
                         param_index: param_index as u32,
                         param_value: newtype_value,
@@ -900,7 +900,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                         })
                 }
                 raw::CSURF_EXT_SETFXOPEN => self.delegate.ext_set_fx_open(ExtSetFxOpenArgs {
-                    track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                    track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                     fx_location: self.get_as_version_dependent_track_fx_ref(parm2),
                     is_open: interpret_as_bool(parm3),
                 }),
@@ -910,7 +910,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                         0
                     } else {
                         self.delegate.ext_set_fx_enabled(ExtSetFxEnabledArgs {
-                            track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                            track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                             fx_location: self.get_as_version_dependent_track_fx_ref(parm2),
                             is_enabled: interpret_as_bool(parm3),
                         })
@@ -918,20 +918,20 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                 }
                 raw::CSURF_EXT_SETSENDVOLUME => {
                     self.delegate.ext_set_send_volume(ExtSetSendVolumeArgs {
-                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                        track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                         send_index: deref_as::<i32>(parm2).expect("send index pointer is null")
                             as u32,
                         volume: deref_as(parm3).expect("volume pointer is null"),
                     })
                 }
                 raw::CSURF_EXT_SETSENDPAN => self.delegate.ext_set_send_pan(ExtSetSendPanArgs {
-                    track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                    track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                     send_index: deref_as::<i32>(parm2).expect("send index pointer is null") as u32,
                     pan: deref_as(parm3).expect("pan pointer is null"),
                 }),
                 raw::CSURF_EXT_SETRECVVOLUME => {
                     self.delegate.ext_set_recv_volume(ExtSetRecvVolumeArgs {
-                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                        track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                         receive_index: deref_as::<i32>(parm2)
                             .expect("receive index pointer is null")
                             as u32,
@@ -939,7 +939,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                     })
                 }
                 raw::CSURF_EXT_SETRECVPAN => self.delegate.ext_set_recv_pan(ExtSetRecvPanArgs {
-                    track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                    track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                     receive_index: deref_as::<i32>(parm2).expect("receive index pointer is null")
                         as u32,
                     pan: deref_as(parm3).expect("pan pointer is null"),
@@ -968,12 +968,12 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                         Unknown(x) => Pan::Unknown(x),
                     };
                     self.delegate.ext_set_pan_ex(ExtSetPanExArgs {
-                        track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                        track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                         pan,
                     })
                 }
                 raw::CSURF_EXT_SETFXCHANGE => self.delegate.ext_set_fx_change(ExtSetFxChangeArgs {
-                    track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                    track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                     fx_chain_type: {
                         if self.supports_detection_of_input_fx_in_set_fx_change {
                             let flags = parm2 as usize as u32;
@@ -998,7 +998,7 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
                 raw::CSURF_EXT_TRACKFX_PRESET_CHANGED => {
                     self.delegate
                         .ext_track_fx_preset_changed(ExtTrackFxPresetChangedArgs {
-                            track: require_non_null_panic(parm1 as *mut raw::MediaTrack),
+                            track: require_media_track_panic(parm1 as *mut raw::MediaTrack),
                             fx_location: get_as_track_fx_location(parm2),
                         })
                 }

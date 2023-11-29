@@ -160,19 +160,18 @@
 //!
 //! #### Strategy
 //!
-//! - Use `NonNull` pointers directly
-//! - Make them more accessible by introducing an alias
+//! - Use newtypes wrapping `NonNull` pointers
 //!
 //! #### Explanation
 //!
 //! Such structs are relevant for the consumers *as pointers only*. Because they are
-//! completely opaque (internals not exposed, not even a vtable) and we never own them. We don't
-//! create a newtype because the `NonNull` guarantee is all we need and we will never provide any
-//! methods on them (no vtable emulation, no convenience methods). Using a wrapper just for reasons
-//! of symmetry would not be good because it comes with a cost (more code to write, less
-//! substitution possibilities) but in this case without any benefit.
+//! completely opaque (internals not exposed, not even a vtable) and we never own them. We create
+//! newtypes in such cases that wrap `NonNull`. For a long time, we used `NonNull` directly, without
+//! the newtype. However, this turned out to be annoying because `NonNull` doesn't implement
+//! `Send`. This led to issues where larger structs containing such values were not easily usable
+//! in static contexts.
 //!
-//! We use pointers instead of references because there's no way we could name a lifetime. REAPER
+//! We wrap pointers instead of references because there's no way we could name a lifetime. REAPER
 //! itself provides functions for checking if those pointers are still valid.
 //!
 //! #### Examples

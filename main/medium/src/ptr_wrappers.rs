@@ -78,26 +78,58 @@ impl<T> RegistrationHandle<T> {
 // Case 1: Internals exposed: no | vtable: no
 // ==========================================
 
-/// Pointer to a project.
-// TODO-high When we do a bigger refactoring one day, we should make these to newtypes instead!
-//  Reasons:
-//  - Pointers types are non-send. However, there's no reason not to make them Send in our case.
-//    They act as IDs only and the functions working with these IDs are the ones that need to
-//    be protected against access from the wrong thread (they already are) by using a thread check
-//    ... which by there's even a dedicated crate for: https://github.com/mitsuhiko/fragile.
-pub type ReaProject = NonNull<raw::ReaProject>;
-/// Pointer to a track in a project.
-pub type MediaTrack = NonNull<raw::MediaTrack>;
-/// Pointer to an item on a track.
-pub type MediaItem = NonNull<raw::MediaItem>;
-/// Pointer to a take in an item.
-pub type MediaItemTake = NonNull<raw::MediaItem_Take>;
+macro_rules! ptr_wrapper {
+    ($( #[doc = $doc:expr] )* $name:ident ($inner:ty)) => {
+        $( #[doc = $doc] )*
+        #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+        pub struct $name(NonNull<$inner>);
+
+        impl $name {
+            pub fn new(ptr: *mut $inner) -> Option<Self> {
+                NonNull::new(ptr).map(Self)
+            }
+
+            pub const fn as_ptr(self) -> *mut $inner {
+                self.0.as_ptr()
+            }
+        }
+    };
+}
+
+ptr_wrapper! {
+    /// Pointer to a project.
+    ReaProject(raw::ReaProject)
+}
+
+ptr_wrapper! {
+    /// Pointer to a track in a project.
+    MediaTrack(raw::MediaTrack)
+}
+
+ptr_wrapper! {
+    /// Pointer to an item on a track.
+    MediaItem(raw::MediaItem)
+}
+
+ptr_wrapper! {
+    /// Pointer to a take in an item.
+    MediaItemTake(raw::MediaItem_Take)
+}
+
+ptr_wrapper! {
 /// Pointer to an envelope on a track.
-pub type TrackEnvelope = NonNull<raw::TrackEnvelope>;
-/// Pointer to a window (window handle).
-pub type Hwnd = NonNull<raw::HWND__>;
-/// Pointer to a module/instance (module/instance handle).
-pub type Hinstance = NonNull<c_void>;
+    TrackEnvelope(raw::TrackEnvelope)
+}
+
+ptr_wrapper! {
+    /// Pointer to a window (window handle).
+    Hwnd(raw::HWND__)
+}
+
+ptr_wrapper! {
+    /// Pointer to a module/instance (module/instance handle).
+    Hinstance(c_void)
+}
 
 // Case 2: Internals exposed: yes | vtable: no
 // ===========================================
@@ -164,12 +196,12 @@ impl<'a> KbdCmd<'a> {
     }
 }
 
-pub(crate) fn require_non_null_panic<T>(ptr: *mut T) -> NonNull<T> {
-    assert!(
-        !ptr.is_null(),
-        "Raw pointer expected to be not null but was null"
-    );
-    unsafe { NonNull::new_unchecked(ptr) }
+pub(crate) fn require_media_track_panic(ptr: *mut raw::MediaTrack) -> MediaTrack {
+    MediaTrack::new(ptr).expect("Raw MediaTrack expected to be not null but was null")
+}
+
+pub(crate) fn require_hwnd_panic(ptr: *mut raw::HWND__) -> Hwnd {
+    Hwnd::new(ptr).expect("Raw HWND expected to be not null but was null")
 }
 
 // Case 3: Internals exposed: no | vtable: yes

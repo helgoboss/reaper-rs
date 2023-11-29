@@ -46,7 +46,7 @@ impl<'a, UsageScope> PluginContext<'a, UsageScope> {
     where
         UsageScope: AnyThread,
     {
-        NonNull::new(self.low.h_instance())
+        Hinstance::new(self.low.h_instance())
     }
 
     /// Returns whether we are currently in the main thread.
@@ -103,7 +103,7 @@ impl<'a> ExtensionPluginContext<'a> {
 
     /// Returns the main window from `reaper_plugin_info_t`.
     pub fn hwnd_main(self) -> Hwnd {
-        NonNull::new(self.low.hwnd_main()).expect("plug-in info doesn't contain main window handle")
+        Hwnd::new(self.low.hwnd_main()).expect("plug-in info doesn't contain main window handle")
     }
 }
 
@@ -146,7 +146,7 @@ impl<'a> VstPluginContext<'a> {
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_project(self, effect: NonNull<AEffect>) -> ReaProject {
         let ptr = self.request_context(effect, 3) as *mut raw::ReaProject;
-        NonNull::new(ptr).expect("a VST should always run in the context of a project")
+        ReaProject::new(ptr).expect("a VST should always run in the context of a project")
     }
 
     /// Returns the REAPER track on which the given VST plug-in resides.
@@ -158,7 +158,7 @@ impl<'a> VstPluginContext<'a> {
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_track(self, effect: NonNull<AEffect>) -> Option<MediaTrack> {
         let ptr = self.request_context(effect, 1) as *mut raw::MediaTrack;
-        NonNull::new(ptr)
+        MediaTrack::new(ptr)
     }
 
     /// Returns the REAPER take in which the given VST plug-in resides.
@@ -170,7 +170,7 @@ impl<'a> VstPluginContext<'a> {
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_take(self, effect: NonNull<AEffect>) -> Option<MediaItemTake> {
         let ptr = self.request_context(effect, 2) as *mut raw::MediaItem_Take;
-        NonNull::new(ptr)
+        MediaItemTake::new(ptr)
     }
 
     /// Returns the location in the FX chain at which the given VST plug-in currently resides.

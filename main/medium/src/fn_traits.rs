@@ -140,7 +140,7 @@ pub(crate) extern "C" fn delegating_hook_post_command_2<T: HookPostCommand2>(
             CommandId(action_command_id as _),
             value_change,
             window_context,
-            NonNull::new(proj).expect("no project given"),
+            ReaProject::new(proj).expect("no project given"),
         );
     });
 }

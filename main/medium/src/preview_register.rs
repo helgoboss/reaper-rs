@@ -90,7 +90,7 @@ impl OwnedPreviewRegister {
     }
 
     pub fn preview_track(&self) -> Option<MediaTrack> {
-        NonNull::new(self.register.preview_track as *mut raw::MediaTrack)
+        MediaTrack::new(self.register.preview_track as *mut raw::MediaTrack)
     }
 
     pub fn set_preview_track(&mut self, track: Option<MediaTrack>) {
