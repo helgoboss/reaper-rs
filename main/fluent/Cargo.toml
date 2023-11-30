@@ -1,0 +1,14 @@
+[package]
+name = "reaper-fluent"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Own dependencies
+reaper-medium = { path = '../medium' }
+reaper-low = { path = '../low' }
+fragile = "2.0.0"
+thiserror = "1.0.45"
+
+[dev-dependencies]
+trybuild = "1.0"

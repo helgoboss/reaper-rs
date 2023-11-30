@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "main/fluent",
     "main/low",
     "main/medium",
     "main/high",

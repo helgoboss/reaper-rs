@@ -316,19 +316,20 @@ Contributions are very welcome! Especially to the medium-level API.
 
 ### Directory structure
 
-| Directory entry               | Content                                                 |
-| ----------------------------- | ------------------------------------------------------- |
-| `/`                           | Workspace root                                          |
-| `/main`                       | Production code                                         |
-| `/main/high`                  | High-level API (`reaper-high`)                          |
-| `/main/low`                   | Low-level API (`reaper-low`)                            |
-| `/main/macros`                | Macros (`reaper-macros`)                                |
-| `/main/medium`                | Medium-level API (`reaper-medium`)                      |
-| `/main/rx`                    | rxRust integration for high-level API (`reaper-rx`)     |
-| `/test`                       | Integration test code                                   |
-| `/test/test`                  | Integration test logic (`reaper-test`)                  |
-| `/test/test-extension-plugin` | Test extension plug-in (`reaper-test-extension-plugin`) |
-| `/test/test-vst-plugin`       | Test VST plug-in (`reaper-test-vst-plugin`)             |
+| Directory entry               | Content                                                                                       |
+|-------------------------------|-----------------------------------------------------------------------------------------------|
+| `/`                           | Workspace root                                                                                |
+| `/main`                       | Production code                                                                               |
+| `/main/fluent`                | Fluent API (`reaper-fluent`, potential/partial work-in-progress replacement of `reaper-high`) |
+| `/main/high`                  | High-level API (`reaper-high`)                                                                |
+| `/main/low`                   | Low-level API (`reaper-low`)                                                                  |
+| `/main/macros`                | Macros (`reaper-macros`)                                                                      |
+| `/main/medium`                | Medium-level API (`reaper-medium`)                                                            |
+| `/main/rx`                    | rxRust integration for high-level API (`reaper-rx`)                                           |
+| `/test`                       | Integration test code                                                                         |
+| `/test/test`                  | Integration test logic (`reaper-test`)                                                        |
+| `/test/test-extension-plugin` | Test extension plug-in (`reaper-test-extension-plugin`)                                       |
+| `/test/test-vst-plugin`       | Test VST plug-in (`reaper-test-vst-plugin`)                                                   |
 
 ### Low-level API code generation
 
