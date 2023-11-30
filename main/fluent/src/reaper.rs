@@ -1,6 +1,7 @@
-use crate::{Model, ProjectDesc, TrackDesc};
+use crate::access::{ReadAccess, WriteAccess};
+use crate::Model;
 use fragile::Fragile;
-use reaper_medium::{ProjectContext, ProjectRef, ReaperSession, TrackDefaultsBehavior};
+use reaper_medium::ReaperSession;
 use std::cell::{Ref, RefCell, RefMut};
 use std::sync::OnceLock;
 
@@ -11,14 +12,14 @@ static INSTANCE: OnceLock<Reaper> = OnceLock::new();
 #[derive(Debug)]
 pub struct Reaper {
     medium_session: Fragile<ReaperSession>,
-    model: Fragile<RefCell<Model>>,
+    model: Fragile<RefCell<Model<WriteAccess>>>,
 }
 
 impl Reaper {
     pub fn install_globally(medium_session: ReaperSession) -> Result<(), Self> {
         let reaper = Self {
             medium_session: Fragile::new(medium_session),
-            model: Fragile::new(RefCell::new(Model(()))),
+            model: Fragile::new(RefCell::new(Model(WriteAccess))),
         };
         INSTANCE.set(reaper)
     }
@@ -37,11 +38,12 @@ impl Reaper {
         self.medium_session.get().reaper()
     }
 
-    pub fn model(&self) -> Ref<Model> {
-        self.model.get().borrow()
+    pub fn model(&self) -> Ref<Model<ReadAccess>> {
+        // self.model.get().borrow();
+        todo!()
     }
 
-    pub fn model_mut(&self) -> RefMut<Model> {
+    pub fn model_mut(&self) -> RefMut<Model<WriteAccess>> {
         self.model.get().borrow_mut()
     }
 }

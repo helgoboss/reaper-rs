@@ -1,6 +1,8 @@
-use crate::{Fx, FxDesc, Reaper, Track, TrackDesc};
+use crate::access::{Mut, ReadAccess, WriteAccess};
+use crate::{Fx, Reaper, Track, TrackDesc};
 use reaper_medium::{AddFxBehavior, ReaperFunctionError, ReaperStringArg, TrackFxChainType};
 use std::iter::FusedIterator;
+use std::marker::PhantomData;
 
 // TODO-high Monitoring context
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -10,9 +12,10 @@ pub struct FxChainDesc {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct FxChain<'a> {
-    track: &'a Track<'a>,
+pub struct FxChain<'a, A> {
+    track: Track<'a, ReadAccess>,
     kind: TrackFxChainType,
+    _p: PhantomData<A>,
 }
 
 impl FxChainDesc {
@@ -29,13 +32,17 @@ impl FxChainDesc {
     // }
 }
 
-impl<'a> FxChain<'a> {
-    pub(crate) fn new(track: &'a Track<'a>, kind: TrackFxChainType) -> Self {
-        Self { track, kind }
+impl<'a, A> FxChain<'a, A> {
+    pub(crate) fn new(track: Track<'a, ReadAccess>, kind: TrackFxChainType) -> Self {
+        Self {
+            track,
+            kind,
+            _p: PhantomData,
+        }
     }
 
-    pub fn track(&self) -> &Track {
-        &self.track
+    pub fn track(&self) -> Track<ReadAccess> {
+        self.track
     }
 
     pub fn kind(&self) -> TrackFxChainType {
@@ -46,18 +53,21 @@ impl<'a> FxChain<'a> {
         &mut self,
         name: impl Into<ReaperStringArg<'b>>,
         behavior: AddFxBehavior,
-    ) -> Result<FxDesc, ReaperFunctionError> {
+    ) -> Result<Fx<WriteAccess>, ReaperFunctionError>
+    where
+        A: Mut,
+    {
         let r = Reaper::get().medium_reaper();
         let index =
             unsafe { r.track_fx_add_by_name_add(self.track.raw(), name, self.kind, behavior)? };
-        let fx = Fx::new(self, index);
-        Ok(FxDesc::new(self.desc(), fx.guid()))
+        Ok(Fx::new(FxChain::new(self.track, self.kind), index))
     }
 
     pub fn fxs(
         &self,
-    ) -> impl Iterator<Item = Fx> + ExactSizeIterator + DoubleEndedIterator + FusedIterator {
-        (0..self.fx_count()).map(|i| Fx::new(self, i))
+    ) -> impl Iterator<Item = Fx<ReadAccess>> + ExactSizeIterator + DoubleEndedIterator + FusedIterator
+    {
+        (0..self.fx_count()).map(|i| Fx::new(FxChain::new(self.track, self.kind), i))
     }
 
     pub fn fx_count(&self) -> u32 {

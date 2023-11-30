@@ -1,6 +1,8 @@
+use crate::access::ReadAccess;
 use crate::{FxChain, FxChainDesc, Reaper};
 use reaper_low::raw::GUID;
 use reaper_medium::{MediaTrack, ReaperString, ReaperStringArg, TrackFxChainType, TrackFxLocation};
+use std::marker::PhantomData;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct FxDesc {
@@ -9,9 +11,10 @@ pub struct FxDesc {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct Fx<'a> {
-    fx_chain: &'a FxChain<'a>,
+pub struct Fx<'a, A> {
+    fx_chain: FxChain<'a, ReadAccess>,
     index: u32,
+    _p: PhantomData<&'a A>,
 }
 
 impl FxDesc {
@@ -30,9 +33,13 @@ impl FxDesc {
     // }
 }
 
-impl<'a> Fx<'a> {
-    pub(crate) fn new(fx_chain: &'a FxChain<'a>, index: u32) -> Self {
-        Self { fx_chain, index }
+impl<'a, A> Fx<'a, A> {
+    pub(crate) fn new(fx_chain: FxChain<'a, ReadAccess>, index: u32) -> Self {
+        Self {
+            fx_chain,
+            index,
+            _p: PhantomData,
+        }
     }
 
     pub fn guid(&self) -> GUID {
@@ -44,8 +51,8 @@ impl<'a> Fx<'a> {
         }
     }
 
-    pub fn fx_chain(&self) -> &FxChain {
-        &self.fx_chain
+    pub fn fx_chain(&self) -> FxChain<ReadAccess> {
+        self.fx_chain
     }
 
     pub fn get_named_config_param_as_string<'b>(

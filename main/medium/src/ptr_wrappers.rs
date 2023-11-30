@@ -47,7 +47,7 @@ impl<T> Copy for Handle<T> {}
 
 impl<T> Clone for Handle<T> {
     fn clone(&self) -> Self {
-        Self(self.0.clone())
+        *self
     }
 }
 
@@ -67,7 +67,7 @@ impl<T> Ord for Handle<T> {
 
 impl<T> PartialOrd for Handle<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.0.partial_cmp(&other.0)
+        Some(self.0.cmp(&other.0))
     }
 }
 

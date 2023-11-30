@@ -1,9 +1,10 @@
 use reaper_fluent::*;
 
 fn main() {
-    let model = Reaper::get().model();
-    let mut project = model.current_project();
+    let mut model = Reaper::get().model_mut();
+    let project = model.current_project();
     let track = project.tracks().next().unwrap();
-    project.delete_track(track.raw());
+    let raw = track.raw();
+    model.current_project_mut().delete_track(raw);
     track.guid();
 }

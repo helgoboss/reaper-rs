@@ -1,4 +1,5 @@
-use crate::{FxChainDesc, Project, ProjectDesc, Reaper};
+use crate::access::{ReadAccess, WriteAccess};
+use crate::{FxChain, Project, ProjectDesc, Reaper};
 use reaper_low::raw::GUID;
 use reaper_medium::{MediaTrack, TrackFxChainType};
 use std::marker::PhantomData;
@@ -10,9 +11,9 @@ pub struct TrackDesc {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Track<'a> {
-    project: &'a Project<'a>,
+pub struct Track<'a, A> {
     raw: MediaTrack,
+    _p: PhantomData<&'a A>,
 }
 
 impl TrackDesc {
@@ -31,17 +32,39 @@ impl TrackDesc {
     // }
 }
 
-impl<'a> Track<'a> {
-    pub(crate) fn new(project: &'a Project<'a>, raw: MediaTrack) -> Self {
-        Self { project, raw }
+impl<'a, A> Track<'a, A> {
+    pub(crate) fn new(raw: MediaTrack) -> Self {
+        Self {
+            raw,
+            _p: PhantomData,
+        }
     }
 
     pub fn desc(&self) -> TrackDesc {
-        TrackDesc::new(self.project.desc(), self.guid())
+        // TrackDesc::new(self.project(), self.guid())
+        todo!()
     }
 
-    pub fn project(&self) -> &Project {
-        &self.project
+    pub fn normal_fx_chain(&self) -> FxChain<ReadAccess> {
+        self.normal_fx_chain_internal()
+    }
+
+    pub fn normal_fx_chain_mut(&self) -> FxChain<WriteAccess> {
+        self.normal_fx_chain_internal()
+    }
+
+    fn normal_fx_chain_internal<B>(&self) -> FxChain<B> {
+        FxChain::new(Track::new(self.raw), TrackFxChainType::NormalFxChain)
+    }
+
+    pub fn project(&self) -> Project<ReadAccess> {
+        let raw = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_track_info_get_project(self.raw)
+                .expect("REAPER >= 5.95 required for this operation")
+        };
+        Project::new(raw)
     }
 
     pub fn raw(&self) -> MediaTrack {

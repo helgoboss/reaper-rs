@@ -1,6 +1,8 @@
-use crate::{Model, Reaper, Track};
+use crate::access::{Mut, ReadAccess, WriteAccess};
+use crate::{Reaper, Track};
 use reaper_medium::{MediaTrack, ProjectContext, ReaProject, TrackDefaultsBehavior};
 use std::iter::FusedIterator;
+use std::marker::PhantomData;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct ProjectDesc {
@@ -8,9 +10,9 @@ pub struct ProjectDesc {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Project<'a> {
-    model: &'a Model,
+pub struct Project<'a, A> {
     raw: ReaProject,
+    _p: PhantomData<&'a A>,
 }
 
 impl ProjectDesc {
@@ -36,13 +38,12 @@ impl ProjectDesc {
     // }
 }
 
-impl<'a> Project<'a> {
-    pub(crate) fn new(model: &'a Model, raw: ReaProject) -> Self {
-        Self { model, raw }
-    }
-
-    pub fn model(&self) -> &Model {
-        &self.model
+impl<'a, A> Project<'a, A> {
+    pub(crate) fn new(raw: ReaProject) -> Self {
+        Self {
+            raw,
+            _p: PhantomData,
+        }
     }
 
     pub fn desc(&self) -> ProjectDesc {
@@ -53,16 +54,27 @@ impl<'a> Project<'a> {
         self.raw
     }
 
-    pub fn insert_track_at(&mut self, index: u32, behavior: TrackDefaultsBehavior) -> Track {
+    // TODO-high Use &mut
+    pub fn insert_track_at(
+        &mut self,
+        index: u32,
+        behavior: TrackDefaultsBehavior,
+    ) -> Track<WriteAccess>
+    where
+        A: Mut,
+    {
         let r = Reaper::get().medium_reaper();
         r.insert_track_at_index(index, behavior);
         let media_track = r
             .get_track(ProjectContext::CurrentProject, index)
             .expect("impossible");
-        Track::new(self, media_track)
+        Track::new(media_track)
     }
 
-    pub fn delete_track(&mut self, track: MediaTrack) {
+    pub fn delete_track(&mut self, track: MediaTrack)
+    where
+        A: Mut,
+    {
         unsafe {
             Reaper::get().medium_reaper().delete_track(track);
         }
@@ -70,11 +82,12 @@ impl<'a> Project<'a> {
 
     pub fn tracks(
         &self,
-    ) -> impl Iterator<Item = Track> + ExactSizeIterator + FusedIterator + DoubleEndedIterator {
+    ) -> impl Iterator<Item = Track<ReadAccess>> + ExactSizeIterator + FusedIterator + DoubleEndedIterator
+    {
         let r = Reaper::get().medium_reaper();
         (0..self.track_count()).map(|i| {
             let media_track = r.get_track(self.context(), i).expect("must exist");
-            Track::new(self, media_track)
+            Track::new(media_track)
         })
     }
 

@@ -1,9 +1,10 @@
-error[E0502]: cannot borrow `project` as mutable because it is also borrowed as immutable
- --> tests/ui/prevent_read_after_delete.rs:7:5
+error[E0502]: cannot borrow `model` as mutable because it is also borrowed as immutable
+ --> tests/ui/prevent_read_after_delete.rs:8:5
   |
-6 |     let track = project.tracks().next().unwrap();
-  |                 ------- immutable borrow occurs here
-7 |     project.delete_track(track.raw());
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
-8 |     track.guid();
+5 |     let project = model.current_project();
+  |                   ----- immutable borrow occurs here
+...
+8 |     model.current_project_mut().delete_track(raw);
+  |     ^^^^^ mutable borrow occurs here
+9 |     track.guid();
   |     ----- immutable borrow later used here
