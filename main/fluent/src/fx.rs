@@ -1,7 +1,9 @@
 use crate::access::ReadAccess;
 use crate::{FxChain, FxChainDesc, Reaper};
 use reaper_low::raw::GUID;
-use reaper_medium::{MediaTrack, ReaperString, ReaperStringArg, TrackFxChainType, TrackFxLocation};
+use reaper_medium::{
+    FxShowInstruction, MediaTrack, ReaperString, ReaperStringArg, TrackFxChainType, TrackFxLocation,
+};
 use std::marker::PhantomData;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -53,6 +55,16 @@ impl<'a, A> Fx<'a, A> {
 
     pub fn fx_chain(&self) -> FxChain<ReadAccess> {
         self.fx_chain
+    }
+
+    pub fn hide_window(&mut self) {
+        unsafe {
+            Reaper::get().medium_reaper().track_fx_show(
+                self.raw_track(),
+                FxShowInstruction::HideFloatingWindow(self.location()),
+            );
+            self.fx_chain.hide_window();
+        }
     }
 
     pub fn get_named_config_param_as_string<'b>(

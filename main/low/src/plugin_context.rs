@@ -203,6 +203,16 @@ impl ExtensionPluginContext {
     ) -> ::std::os::raw::c_int {
         (self.register)(name, infostruct)
     }
+
+    /// Returns the original REAPER plug-in info struct that was passed to the entry point.
+    pub fn to_raw(&self) -> raw::reaper_plugin_info_t {
+        raw::reaper_plugin_info_t {
+            caller_version: self.caller_version,
+            hwnd_main: self.hwnd_main,
+            Register: Some(self.register),
+            GetFunc: Some(self.get_func),
+        }
+    }
 }
 
 impl VstPluginContext {

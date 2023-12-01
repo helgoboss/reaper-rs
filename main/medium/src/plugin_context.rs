@@ -16,7 +16,7 @@ pub struct PluginContext<'a, UsageScope> {
 }
 
 impl<'a, UsageScope> PluginContext<'a, UsageScope> {
-    pub(crate) fn new(low: &'a reaper_low::PluginContext) -> PluginContext<'a, UsageScope> {
+    pub fn new(low: &'a reaper_low::PluginContext) -> PluginContext<'a, UsageScope> {
         PluginContext {
             low,
             p: PhantomData,

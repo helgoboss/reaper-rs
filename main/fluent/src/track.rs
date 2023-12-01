@@ -1,7 +1,7 @@
 use crate::access::{ReadAccess, WriteAccess};
 use crate::{FxChain, Project, ProjectDesc, Reaper};
 use reaper_low::raw::GUID;
-use reaper_medium::{MediaTrack, TrackFxChainType};
+use reaper_medium::{MediaTrack, ReaperStringArg, TrackFxChainType};
 use std::marker::PhantomData;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -47,6 +47,14 @@ impl<'a, A> Track<'a, A> {
 
     pub fn normal_fx_chain(&self) -> FxChain<ReadAccess> {
         self.normal_fx_chain_internal()
+    }
+
+    pub fn set_name<'b>(&mut self, name: impl Into<ReaperStringArg<'b>>) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_track_info_set_name(self.raw, name);
+        }
     }
 
     pub fn normal_fx_chain_mut(&self) -> FxChain<WriteAccess> {

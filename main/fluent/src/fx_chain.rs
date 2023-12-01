@@ -1,6 +1,8 @@
 use crate::access::{Mut, ReadAccess, WriteAccess};
 use crate::{Fx, Reaper, Track, TrackDesc};
-use reaper_medium::{AddFxBehavior, ReaperFunctionError, ReaperStringArg, TrackFxChainType};
+use reaper_medium::{
+    AddFxBehavior, FxShowInstruction, ReaperFunctionError, ReaperStringArg, TrackFxChainType,
+};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 
@@ -61,6 +63,14 @@ impl<'a, A> FxChain<'a, A> {
         let index =
             unsafe { r.track_fx_add_by_name_add(self.track.raw(), name, self.kind, behavior)? };
         Ok(Fx::new(FxChain::new(self.track, self.kind), index))
+    }
+
+    pub fn hide_window(&mut self) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .track_fx_show(self.track.raw(), FxShowInstruction::HideChain(self.kind));
+        }
     }
 
     pub fn fxs(
