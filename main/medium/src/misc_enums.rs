@@ -776,6 +776,8 @@ pub enum RegistrationObject<'a> {
     /// command ID, desc is the description, and accel's other parameters are the key to bind.
     /// ```
     Gaccel(Handle<raw::gaccel_register_t>),
+    GaccelGlobal(Handle<raw::gaccel_register_t>),
+    GaccelGlobalText(Handle<raw::gaccel_register_t>),
     /// A record which lets you get a place in the keyboard processing queue.
     BackAccelerator(Handle<raw::accelerator_register_t>),
     /// A record which lets you get the first place in the keyboard processing queue.
@@ -884,6 +886,14 @@ impl<'a> RegistrationObject<'a> {
             },
             Gaccel(reg) => PluginRegistration {
                 key: reaper_str!("gaccel").into(),
+                value: reg.as_ptr() as _,
+            },
+            GaccelGlobal(reg) => PluginRegistration {
+                key: reaper_str!("gaccel_global").into(),
+                value: reg.as_ptr() as _,
+            },
+            GaccelGlobalText(reg) => PluginRegistration {
+                key: reaper_str!("gaccel_globaltext").into(),
                 value: reg.as_ptr() as _,
             },
             BackAccelerator(reg) => PluginRegistration {

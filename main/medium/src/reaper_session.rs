@@ -537,6 +537,29 @@ impl ReaperSession {
         Ok(handle)
     }
 
+    pub fn plugin_register_add_gaccel_global(
+        &mut self,
+        register: OwnedGaccelRegister,
+    ) -> Result<Handle<raw::gaccel_register_t>, OwnedGaccelRegister> {
+        let handle = self.gaccel_registers.keep(register);
+        let result = unsafe { self.plugin_register_add(RegistrationObject::GaccelGlobal(handle)) };
+        result
+            .map(|_| handle)
+            .map_err(|_| self.gaccel_registers.release(handle).unwrap())
+    }
+
+    pub fn plugin_register_add_gaccel_global_text(
+        &mut self,
+        register: OwnedGaccelRegister,
+    ) -> Result<Handle<raw::gaccel_register_t>, OwnedGaccelRegister> {
+        let handle = self.gaccel_registers.keep(register);
+        let result =
+            unsafe { self.plugin_register_add(RegistrationObject::GaccelGlobalText(handle)) };
+        result
+            .map(|_| handle)
+            .map_err(|_| self.gaccel_registers.release(handle).unwrap())
+    }
+
     pub fn plugin_register_add_accelerator_register<T>(
         &mut self,
         callback: Box<T>,
@@ -800,6 +823,17 @@ impl ReaperSession {
     /// Unregisters an action.
     pub fn plugin_register_remove_gaccel(&mut self, handle: Handle<raw::gaccel_register_t>) {
         unsafe { self.plugin_register_remove(RegistrationObject::Gaccel(handle)) };
+    }
+
+    pub fn plugin_register_remove_gaccel_global(&mut self, handle: Handle<raw::gaccel_register_t>) {
+        unsafe { self.plugin_register_remove(RegistrationObject::GaccelGlobal(handle)) };
+    }
+
+    pub fn plugin_register_remove_gaccel_global_text(
+        &mut self,
+        handle: Handle<raw::gaccel_register_t>,
+    ) {
+        unsafe { self.plugin_register_remove(RegistrationObject::GaccelGlobalText(handle)) };
     }
 
     pub fn plugin_register_remove_accelerator<T>(
