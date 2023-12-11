@@ -98,6 +98,21 @@ impl Track {
         self.item_count_internal()
     }
 
+    pub fn delete_all_items(&self) -> Result<(), ReaperFunctionError> {
+        self.load_and_check_if_necessary_or_complain();
+        let reaper = Reaper::get().medium_reaper();
+        let raw = self.raw_internal();
+        for i in (0..self.item_count_internal()).rev() {
+            unsafe {
+                let Some(item) = reaper.get_track_media_item(raw, i) else {
+                    continue;
+                };
+                reaper.delete_track_media_item(raw, item)?;
+            }
+        }
+        Ok(())
+    }
+
     fn item_count_internal(&self) -> u32 {
         unsafe {
             Reaper::get()
