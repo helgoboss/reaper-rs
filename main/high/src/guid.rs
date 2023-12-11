@@ -2,7 +2,7 @@ use reaper_low::raw::GUID;
 
 use crate::Reaper;
 
-use reaper_medium::ReaperStringArg;
+use reaper_medium::{ReaperFunctionError, ReaperStringArg};
 use std::fmt;
 use std::fmt::Formatter;
 use std::str;
@@ -20,15 +20,14 @@ impl Guid {
 
     pub fn from_string_with_braces<'a>(
         text: impl Into<ReaperStringArg<'a>>,
-    ) -> Result<Guid, &'static str> {
+    ) -> Result<Guid, ReaperFunctionError> {
         Reaper::get()
             .medium_reaper()
             .string_to_guid(text)
             .map(Guid::new)
-            .map_err(|_| "invalid GUID")
     }
 
-    pub fn from_string_without_braces(text: &str) -> Result<Guid, &'static str> {
+    pub fn from_string_without_braces(text: &str) -> Result<Guid, ReaperFunctionError> {
         Self::from_string_with_braces(format!("{{{text}}}").as_str())
     }
 
@@ -58,7 +57,7 @@ impl fmt::Debug for Guid {
 }
 
 impl FromStr for Guid {
-    type Err = &'static str;
+    type Err = ReaperFunctionError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.starts_with('{') {

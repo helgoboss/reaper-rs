@@ -1,6 +1,7 @@
-use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track};
+use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track, Volume};
 use reaper_medium::{
-    MediaItemTake, PlaybackSpeedFactor, PositionInSeconds, ReaperFunctionError, TakeAttributeKey,
+    Db, MediaItemTake, PlaybackSpeedFactor, PositionInSeconds, ReaperFunctionError,
+    ReaperStringArg, TakeAttributeKey,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -35,6 +36,14 @@ impl Take {
             })
     }
 
+    pub fn set_name<'a>(&self, name: impl Into<ReaperStringArg<'a>>) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_item_take_info_set_name(self.raw(), name);
+        }
+    }
+
     pub fn source(&self) -> Option<ReaperSource> {
         let raw_source = unsafe {
             Reaper::get()
@@ -62,6 +71,26 @@ impl Take {
         PlaybackSpeedFactor::new(val)
     }
 
+    pub fn set_play_rate(&self, factor: f64) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_take_info_value(
+                self.raw,
+                TakeAttributeKey::PlayRate,
+                factor,
+            )
+        }
+    }
+
+    pub fn set_preserve_pitch(&self, value: bool) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_take_info_value(
+                self.raw,
+                TakeAttributeKey::PPitch,
+                if value { 1.0 } else { 0.0 },
+            )
+        }
+    }
+
     pub fn start_offset(&self) -> PositionInSeconds {
         let pos = unsafe {
             Reaper::get()
@@ -77,6 +106,17 @@ impl Take {
                 self.raw,
                 TakeAttributeKey::StartOffs,
                 length.get(),
+            )
+        }
+    }
+
+    pub fn set_volume(&self, volume: Volume) -> Result<(), ReaperFunctionError> {
+        // TODO-medium Support polarity (negative values)
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_take_info_value(
+                self.raw,
+                TakeAttributeKey::Vol,
+                volume.reaper_value().get(),
             )
         }
     }

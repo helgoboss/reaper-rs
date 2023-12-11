@@ -97,4 +97,14 @@ impl Item {
             )
         }
     }
+
+    pub fn set_loop_source(&self, value: bool) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_info_value(
+                self.raw,
+                ItemAttributeKey::LoopSrc,
+                if value { 1.0 } else { 0.0 },
+            )
+        }
+    }
 }

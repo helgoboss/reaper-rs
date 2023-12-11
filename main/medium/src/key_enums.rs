@@ -467,8 +467,6 @@ impl<'a> TrackAttributeKey<'a> {
 /// [`get_set_media_item_take_info()`]: struct.Reaper.html#method.get_set_media_item_take_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum TakeAttributeKey<'a> {
-    /// Start offset in source media in seconds.
-    StartOffs,
     /// Current source.
     ///
     /// Note that if setting this, you should first retrieve the old source, set the new, *then*
@@ -476,10 +474,28 @@ pub enum TakeAttributeKey<'a> {
     ///
     /// `*mut PCM_source`
     Source,
+    /// Take name.
+    Name,
+    /// Start offset in source media in seconds.
+    StartOffs,
+    /// Take volume.
+    ///
+    /// Negative if take polarity is flipped.
+    ///
+    /// `*mut f64`
+    ///
+    /// - 0 → -inf
+    /// - 0.5 → -6dB
+    /// - 1 → +0dB
+    /// - 2 → +6dB
+    /// - ...
+    Vol,
     /// Take playback rate.
     ///
     /// 0.5 = half speed, 1 = normal, 2 = double speed, etc.
     PlayRate,
+    /// Preserve pitch when changing playback rate.
+    PPitch,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -500,8 +516,11 @@ impl<'a> TakeAttributeKey<'a> {
         use TakeAttributeKey::*;
         match self {
             Source => reaper_str!("P_SOURCE").into(),
+            Name => reaper_str!("P_NAME").into(),
             StartOffs => reaper_str!("D_STARTOFFS").into(),
+            Vol => reaper_str!("D_VOL").into(),
             PlayRate => reaper_str!("D_PLAYRATE").into(),
+            PPitch => reaper_str!("B_PPITCH").into(),
             Custom(key) => key,
         }
     }
@@ -516,6 +535,8 @@ pub enum ItemAttributeKey<'a> {
     Position,
     /// Muted (item solo overrides). Setting this value will clear `MuteSolo`.
     Mute,
+    /// Loop source.
+    LoopSrc,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -537,6 +558,7 @@ impl<'a> ItemAttributeKey<'a> {
         match self {
             Position => reaper_str!("D_POSITION").into(),
             Mute => reaper_str!("B_MUTE").into(),
+            LoopSrc => reaper_str!("B_LOOPSRC").into(),
             Custom(key) => key,
         }
     }

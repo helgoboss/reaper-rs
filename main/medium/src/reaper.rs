@@ -708,9 +708,17 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
+        // According to the docs we must obtain the old source before setting a new one.
+        // The docs also say that it's now our responsibility to free the old source, which is why
+        // we return it as `OwnedPcmSource`. If the caller does nothing with the old source,
+        // it will be freed automatically (RAII), nice!
         let previous_source_ptr =
             self.get_set_media_item_take_info(take, TakeAttributeKey::Source, null_mut())
                 as *mut raw::PCM_source;
+        // We pass ownership of the new source to REAPER, that's what the leak does! If the take
+        // gets deleted, REAPER will free the source accordingly. The only way of getting back
+        // ownership of the old source is to replace it with yet another one. Rust ownership
+        // paradigms at its best!
         let new_source_ptr = source.leak().as_ptr();
         self.get_set_media_item_take_info(take, TakeAttributeKey::Source, new_source_ptr as _);
         NonNull::new(previous_source_ptr).map(|raw| OwnedPcmSource::from_raw(raw))
@@ -816,12 +824,28 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_track_info_set_name<'a>(
         &self,
         track: MediaTrack,
-        message: impl Into<ReaperStringArg<'a>>,
+        name: impl Into<ReaperStringArg<'a>>,
     ) where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        self.get_set_media_track_info(track, TrackAttributeKey::Name, message.into().as_ptr() as _);
+        self.get_set_media_track_info(track, TrackAttributeKey::Name, name.into().as_ptr() as _);
+    }
+
+    /// Convenience function which sets the take's name (`P_NAME`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn get_set_media_item_take_info_set_name<'a>(
+        &self,
+        take: MediaItemTake,
+        name: impl Into<ReaperStringArg<'a>>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_take_info(take, TakeAttributeKey::Name, name.into().as_ptr() as _);
     }
 
     /// Convenience function which grants temporary access to extension-specific data associated
