@@ -7,6 +7,7 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::convert::{TryFrom, TryInto};
 use std::fmt::{Display, Formatter};
+use std::num::NonZeroI32;
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Rem, Sub};
 
 /// A command ID.
@@ -238,6 +239,35 @@ impl ResampleMode {
     }
 }
 
+/// A combination of pitch-shift mode and sub mode.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct FullPitchShiftMode {
+    pub mode: PitchShiftMode,
+    pub sub_mode: PitchShiftSubMode,
+}
+
+impl FullPitchShiftMode {
+    /// Converts an integer as returned by the low-level API to a full pitch-shift mode.
+    pub fn from_raw(v: i32) -> Option<Self> {
+        if v < 0 {
+            return None;
+        }
+        let v = v as u32;
+        let full_mode = Self {
+            mode: PitchShiftMode::new((v >> 2) & 0xFF),
+            sub_mode: PitchShiftSubMode::new(v & 0xFF),
+        };
+        Some(full_mode)
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        let mode = self.mode.get();
+        let sub_mode = self.sub_mode.get();
+        ((mode << 2) | sub_mode) as i32
+    }
+}
+
 /// A pitch shift mode, backed by a positive integer.
 ///
 /// This uniquely identifies a pitch shift mode.
@@ -283,6 +313,52 @@ impl PitchShiftSubMode {
     /// Converts this value to an integer as expected by the low-level API.
     pub fn to_raw(self) -> i32 {
         self.0 as i32
+    }
+}
+
+/// An item group ID.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "i32")
+)]
+pub struct ItemGroupId(pub(crate) NonZeroI32);
+
+impl ItemGroupId {
+    fn is_valid(value: i32) -> bool {
+        value != 0
+    }
+
+    /// Creates an item group ID.
+    pub fn new(value: i32) -> Option<ItemGroupId> {
+        value.try_into().ok()
+    }
+
+    /// Creates a command ID without bound checking.
+    ///
+    /// # Safety
+    ///
+    /// You must ensure that the given value is not 0.
+    pub const unsafe fn new_unchecked(value: i32) -> ItemGroupId {
+        ItemGroupId(NonZeroI32::new_unchecked(value))
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> i32 {
+        self.0.get()
+    }
+}
+
+impl TryFrom<i32> for ItemGroupId {
+    type Error = TryFromGreaterError<i32>;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        let inner = NonZeroI32::new(value).ok_or(TryFromGreaterError::new(
+            "0 is not a valid item group ID",
+            value,
+        ))?;
+        Ok(ItemGroupId(inner))
     }
 }
 
@@ -1522,6 +1598,64 @@ impl From<ReaperWidthValue> for f64 {
     }
 }
 
+/// This represents a fade curvature.
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(try_from = "f64")
+)]
+#[repr(transparent)]
+pub struct FadeCurvature(pub(crate) f64);
+
+impl FadeCurvature {
+    /// The minimum possible value (-1.0).
+    pub const MIN: FadeCurvature = FadeCurvature(-1.0);
+
+    /// The center value (0.0).
+    pub const LINEAR: FadeCurvature = FadeCurvature(0.0);
+
+    /// The maximum possible value (1.0).
+    pub const MAX: FadeCurvature = FadeCurvature(1.0);
+
+    fn is_valid(value: f64) -> bool {
+        FadeCurvature::MIN.get() <= value && value <= FadeCurvature::MAX.get()
+    }
+
+    /// Creates a fade curvature value.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given value is not within the range supported by REAPER
+    /// `(-1.0..=1.0)`.
+    pub fn new(value: f64) -> FadeCurvature {
+        assert!(
+            Self::is_valid(value),
+            "{value} is not a valid FadeCurvature",
+        );
+        FadeCurvature(value)
+    }
+
+    /// Returns the wrapped value.
+    pub const fn get(self) -> f64 {
+        self.0
+    }
+}
+
+impl TryFrom<f64> for FadeCurvature {
+    type Error = TryFromGreaterError<f64>;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if !Self::is_valid(value) {
+            return Err(TryFromGreaterError::new(
+                "value must be between -1.0 and 1.0",
+                value,
+            ));
+        }
+        Ok(FadeCurvature(value))
+    }
+}
+
 /// This represents a value that could either be a pan or a width value.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(
@@ -1642,6 +1776,8 @@ impl MidiFrameOffset {
     }
 }
 
+// TODO-medium This is debatable. Yes, we don't want information loss. But hiding the value?
+//  Too idealistic.
 /// Represents a value which can neither be accessed nor created by the consumer.
 ///
 /// It's mainly used inside `Unknown` variants in order to enable forward compatibility without

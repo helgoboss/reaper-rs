@@ -51,7 +51,7 @@ pub struct TryFromGreaterError<V> {
 }
 
 impl<V: Copy> TryFromGreaterError<V> {
-    pub(crate) fn new(message: &'static str, value: V) -> TryFromGreaterError<V> {
+    pub(crate) const fn new(message: &'static str, value: V) -> TryFromGreaterError<V> {
         TryFromGreaterError { message, value }
     }
 }

@@ -1,7 +1,9 @@
-use crate::{Project, Reaper, Take};
+use crate::error::ReaperResult;
+use crate::{Project, Reaper, Take, Volume};
 use reaper_medium::{
-    DurationInSeconds, ItemAttributeKey, MediaItem, PositionInSeconds, ProjectContext,
-    ReaperFunctionError, UiRefreshBehavior,
+    BeatAttachMode, DurationInSeconds, FadeCurvature, FadeShape, ItemAttributeKey, ItemGroupId,
+    MediaItem, NativeColor, NativeColorValue, PositionInSeconds, ProjectContext,
+    ReaperFunctionError, ReaperVolumeValue, RgbColor, UiRefreshBehavior,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -68,6 +70,15 @@ impl Item {
         }
     }
 
+    pub fn length(&self) -> DurationInSeconds {
+        let val = unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_info_value(self.raw, ItemAttributeKey::Length)
+        };
+        DurationInSeconds::new(val)
+    }
+
     pub fn set_length(
         &self,
         length: DurationInSeconds,
@@ -104,6 +115,272 @@ impl Item {
                 self.raw,
                 ItemAttributeKey::LoopSrc,
                 if value { 1.0 } else { 0.0 },
+            )
+        }
+    }
+
+    pub fn beat_attach_mode(&self) -> Option<BeatAttachMode> {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_beat_attach_mode(self.raw)
+        }
+    }
+
+    pub fn set_beat_attach_mode(&self, value: Option<BeatAttachMode>) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_beat_attach_mode(self.raw, value)
+        }
+    }
+
+    pub fn volume(&self) -> ReaperVolumeValue {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_vol(self.raw)
+        }
+    }
+
+    pub fn set_volume(&self, value: ReaperVolumeValue) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_vol(self.raw, value);
+        }
+    }
+
+    pub fn snap_offset(&self) -> PositionInSeconds {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_snap_offset(self.raw)
+        }
+    }
+
+    pub fn set_snap_offset(&self, value: PositionInSeconds) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_snap_offset(self.raw, value);
+        }
+    }
+
+    pub fn fade_in_length(&self) -> DurationInSeconds {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_in_len(self.raw)
+        }
+    }
+
+    pub fn set_fade_in_length(&self, value: DurationInSeconds) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_in_len(self.raw, value);
+        }
+    }
+
+    pub fn fade_out_length(&self) -> DurationInSeconds {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_out_len(self.raw)
+        }
+    }
+
+    pub fn set_fade_out_length(&self, value: DurationInSeconds) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_out_len(self.raw, value);
+        }
+    }
+
+    pub fn fade_in_curvature(&self) -> FadeCurvature {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_in_dir(self.raw)
+        }
+    }
+
+    pub fn set_fade_in_curvature(&self, value: FadeCurvature) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_in_dir(self.raw, value);
+        }
+    }
+
+    pub fn fade_in_shape(&self) -> FadeShape {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_in_shape(self.raw)
+        }
+    }
+
+    pub fn set_fade_in_shape(&self, value: FadeShape) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_in_shape(self.raw, value);
+        }
+    }
+
+    pub fn fade_out_shape(&self) -> FadeShape {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_out_shape(self.raw)
+        }
+    }
+
+    pub fn set_fade_out_shape(&self, value: FadeShape) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_out_shape(self.raw, value);
+        }
+    }
+
+    pub fn fade_out_curvature(&self) -> FadeCurvature {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_out_dir(self.raw)
+        }
+    }
+
+    pub fn set_fade_out_curvature(&self, value: FadeCurvature) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_out_dir(self.raw, value);
+        }
+    }
+
+    pub fn auto_fade_in_length(&self) -> Option<DurationInSeconds> {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_in_len_auto(self.raw)
+        }
+    }
+
+    pub fn auto_set_fade_in_length(&self, value: Option<DurationInSeconds>) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_in_len_auto(self.raw, value);
+        }
+    }
+
+    pub fn auto_fade_out_length(&self) -> Option<DurationInSeconds> {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_fade_out_len_auto(self.raw)
+        }
+    }
+
+    pub fn auto_set_fade_out_length(&self, value: Option<DurationInSeconds>) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_fade_out_len_auto(self.raw, value);
+        }
+    }
+
+    pub fn group_id(&self) -> Option<ItemGroupId> {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_get_group_id(self.raw)
+        }
+    }
+
+    pub fn set_group_id(&self, value: Option<ItemGroupId>) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_info_set_group_id(self.raw, value);
+        }
+    }
+
+    pub fn custom_color(&self) -> Option<RgbColor> {
+        let reaper = Reaper::get().medium_reaper();
+        let res = unsafe { reaper.get_set_media_item_info_get_custom_color(self.raw)? };
+        if res.is_used {
+            let rgb_color = reaper.color_from_native(res.color);
+            Some(rgb_color)
+        } else {
+            None
+        }
+    }
+
+    pub fn set_custom_color(&self, color: Option<RgbColor>) {
+        let reaper = Reaper::get().medium_reaper();
+        let value = color.map(|c| NativeColorValue {
+            color: reaper.color_to_native(c),
+            is_used: false,
+        });
+        unsafe { reaper.get_set_media_item_info_set_custom_color(self.raw, value) };
+    }
+
+    pub fn free_mode_y_pos(&self) -> f64 {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_info_value(self.raw, ItemAttributeKey::FreeModeY)
+        }
+    }
+
+    pub fn set_free_mode_y_pos(&self, pos: f64) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_info_value(
+                self.raw,
+                ItemAttributeKey::FreeModeY,
+                pos,
+            )
+        }
+    }
+
+    pub fn free_mode_height(&self) -> f64 {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_info_value(self.raw, ItemAttributeKey::FreeModeH)
+        }
+    }
+
+    pub fn set_free_mode_height(&self, height: f64) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_info_value(
+                self.raw,
+                ItemAttributeKey::FreeModeH,
+                height,
+            )
+        }
+    }
+
+    pub fn fixed_lane(&self) -> u32 {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_info_value(self.raw, ItemAttributeKey::FixedLane) as u32
+        }
+    }
+
+    pub fn set_fixed_lane(&self, lane: u32) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_info_value(
+                self.raw,
+                ItemAttributeKey::FixedLane,
+                lane as _,
             )
         }
     }

@@ -5,6 +5,7 @@ use crate::{
 };
 
 use crate::util::concat_reaper_strs;
+use crate::BeatAttachMode::BeatsPositionOnly;
 use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
@@ -1238,6 +1239,98 @@ impl PanMode {
             BalanceV4 => 3,
             StereoPan => 5,
             DualPan => 6,
+            Unknown(Hidden(x)) => x,
+        }
+    }
+}
+
+/// Beat attach mode (item time base).
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum BeatAttachMode {
+    /// Time.
+    Time,
+    /// Beats (position, length, rate).
+    Beats,
+    /// Beats (position only).
+    BeatsPositionOnly,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<i8>),
+}
+
+impl BeatAttachMode {
+    /// Converts an integer as returned by the low-level API to a beat attach mode.
+    pub fn from_raw(v: i8) -> Self {
+        use BeatAttachMode::*;
+        match v {
+            0 => Time,
+            1 => Beats,
+            2 => BeatsPositionOnly,
+            x => Unknown(Hidden(x)),
+        }
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i8 {
+        use BeatAttachMode::*;
+        match self {
+            Time => 0,
+            Beats => 1,
+            BeatsPositionOnly => 2,
+            Unknown(Hidden(x)) => x,
+        }
+    }
+}
+
+// TODO-medium Consider migrating to newtypes around Cow<i*> for this kind of enums.
+//  Pros:
+//  - Unknown variant not necessary
+//  - The constants representing the "variants" would reveal the actual counterpart in REAPER.
+//    Example: It would be immediately visible in the code that "Linear" translates to 0.
+//  - Doesn't force us to name the variants ... which is especially difficult in this case.
+//  Cons:
+//  - Naming conventions dictate that we should use FadeShape::LINEAR instead of Linear
+//  - No exhaustive matching (also, IDE can't generate match branches)
+/// Fade shape.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum FadeShape {
+    Linear,
+    CurveOne,
+    CurveTwo,
+    CurveThree,
+    CurveFour,
+    CurveFive,
+    CurveSix,
+    Unknown(Hidden<i32>),
+}
+
+impl FadeShape {
+    /// Converts an integer as returned by the low-level API to a fade shape.
+    pub fn from_raw(v: i32) -> Self {
+        use FadeShape::*;
+        match v {
+            0 => Linear,
+            1 => CurveOne,
+            2 => CurveTwo,
+            3 => CurveThree,
+            4 => CurveFour,
+            5 => CurveFive,
+            6 => CurveSix,
+            x => Unknown(Hidden(x)),
+        }
+    }
+
+    /// Converts this value to an integer as expected by the low-level API.
+    pub fn to_raw(self) -> i32 {
+        use FadeShape::*;
+        match self {
+            Linear => 0,
+            CurveOne => 1,
+            CurveTwo => 2,
+            CurveThree => 3,
+            CurveFour => 4,
+            CurveFive => 5,
+            CurveSix => 6,
             Unknown(Hidden(x)) => x,
         }
     }

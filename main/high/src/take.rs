@@ -1,7 +1,7 @@
 use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track, Volume};
 use reaper_medium::{
-    Db, MediaItemTake, PlaybackSpeedFactor, PositionInSeconds, ReaperFunctionError,
-    ReaperStringArg, TakeAttributeKey,
+    Db, FullPitchShiftMode, MediaItemTake, NativeColorValue, PlaybackSpeedFactor,
+    PositionInSeconds, ReaperFunctionError, ReaperStringArg, RgbColor, TakeAttributeKey,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -119,5 +119,41 @@ impl Take {
                 volume.reaper_value().get(),
             )
         }
+    }
+
+    pub fn pitch_mode(&self) -> Option<FullPitchShiftMode> {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_take_info_get_pitch_mode(self.raw)
+        }
+    }
+
+    pub fn set_pitch_mode(&self, pitch_mode: Option<FullPitchShiftMode>) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_take_info_set_pitch_mode(self.raw, pitch_mode);
+        }
+    }
+
+    pub fn custom_color(&self) -> Option<RgbColor> {
+        let reaper = Reaper::get().medium_reaper();
+        let res = unsafe { reaper.get_set_media_item_take_info_get_custom_color(self.raw)? };
+        if res.is_used {
+            let rgb_color = reaper.color_from_native(res.color);
+            Some(rgb_color)
+        } else {
+            None
+        }
+    }
+
+    pub fn set_custom_color(&self, color: Option<RgbColor>) {
+        let reaper = Reaper::get().medium_reaper();
+        let value = color.map(|c| NativeColorValue {
+            color: reaper.color_to_native(c),
+            is_used: false,
+        });
+        unsafe { reaper.get_set_media_item_take_info_set_custom_color(self.raw, value) };
     }
 }

@@ -7,10 +7,11 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 use crate::ProjectContext::CurrentProject;
 use crate::{
     require_media_track_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey,
+    AutoSeekBehavior, AutomationMode, BeatAttachMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint,
+    CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FadeCurvature, FadeShape,
+    FullPitchShiftMode, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
+    GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
+    InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey, ItemGroupId,
     KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
     MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
     MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior,
@@ -573,6 +574,30 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
+    /// Gets or sets an item attribute.
+    ///
+    /// Returns the current value if `new_value` is `null_mut()`.
+    ///
+    /// It's recommended to use one of the convenience functions instead. They all start with
+    /// `get_set_media_item_info_` and are more type-safe.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item or invalid new value.
+    pub unsafe fn get_set_media_item_info(
+        &self,
+        item: MediaItem,
+        attribute_key: ItemAttributeKey,
+        new_value: *mut c_void,
+    ) -> *mut c_void
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low
+            .GetSetMediaItemInfo(item.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
+    }
+
     /// Gets a media item attribute as numerical value.
     ///
     /// # Safety
@@ -724,6 +749,85 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(previous_source_ptr).map(|raw| OwnedPcmSource::from_raw(raw))
     }
 
+    /// Convenience function which returns the take's custom color (`I_CUSTOMCOLOR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn get_set_media_item_take_info_get_custom_color(
+        &self,
+        take: MediaItemTake,
+    ) -> Option<NativeColorValue>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr =
+            self.get_set_media_item_take_info(take, TakeAttributeKey::CustomColor, null_mut());
+        let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
+        NativeColorValue::from_raw(raw)
+    }
+
+    /// Convenience function which sets the take's custom color (`I_CUSTOMCOLOR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn get_set_media_item_take_info_set_custom_color(
+        &self,
+        take: MediaItemTake,
+        value: Option<NativeColorValue>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = NativeColorValue::convert_to_raw(value);
+        self.get_set_media_item_take_info(
+            take,
+            TakeAttributeKey::CustomColor,
+            &raw as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the take's pitch shift mode (`I_PITCHMODE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn get_set_media_item_take_info_get_pitch_mode(
+        &self,
+        take: MediaItemTake,
+    ) -> Option<FullPitchShiftMode>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_take_info(take, TakeAttributeKey::PitchMode, null_mut());
+        let raw = deref_as::<i32>(ptr).expect("I_PITCHMODE pointer is null");
+        FullPitchShiftMode::from_raw(raw)
+    }
+
+    /// Convenience function which sets the take's pitch shift mode (`I_PITCHMODE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn get_set_media_item_take_info_set_pitch_mode(
+        &self,
+        take: MediaItemTake,
+        value: Option<FullPitchShiftMode>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = value.map(FullPitchShiftMode::to_raw).unwrap_or(-1);
+        self.get_set_media_item_take_info(
+            take,
+            TakeAttributeKey::CustomColor,
+            &raw as *const _ as _,
+        );
+    }
+
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
     ///
     /// # Safety
@@ -830,6 +934,476 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.get_set_media_track_info(track, TrackAttributeKey::Name, name.into().as_ptr() as _);
+    }
+
+    /// Convenience function which returns the item's beat attach mode (`C_BEATATTACHMODE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_beat_attach_mode(
+        &self,
+        item: MediaItem,
+    ) -> Option<BeatAttachMode>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::BeatAttachMode, null_mut());
+        let raw = deref_as::<i8>(ptr).expect("C_BEATATTACHMODE pointer is null");
+        match raw {
+            -1 => None,
+            x => Some(BeatAttachMode::from_raw(x)),
+        }
+    }
+
+    /// Convenience function which sets the item's beat attach mode (`C_BEATATTACHMODE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_beat_attach_mode(
+        &self,
+        item: MediaItem,
+        mode: Option<BeatAttachMode>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = mode.map(BeatAttachMode::to_raw).unwrap_or(-1i8);
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::BeatAttachMode,
+            &raw as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's volume (`D_VOL`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_vol(&self, item: MediaItem) -> ReaperVolumeValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::Vol, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
+        ReaperVolumeValue::new(raw)
+    }
+
+    /// Convenience function which sets the item's volume (`D_VOL`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_vol(&self, item: MediaItem, volume: ReaperVolumeValue)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(item, ItemAttributeKey::Vol, &volume.get() as *const _ as _);
+    }
+
+    /// Convenience function which returns the item's snap offset (`D_SNAPOFFSET`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_snap_offset(
+        &self,
+        item: MediaItem,
+    ) -> PositionInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::SnapOffset, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
+        PositionInSeconds::new(raw)
+    }
+
+    /// Convenience function which sets the item's snap offset (`D_SNAPOFFSET`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_snap_offset(
+        &self,
+        item: MediaItem,
+        value: PositionInSeconds,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::SnapOffset,
+            &value.get() as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's fade-in length (`D_FADEINLEN`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_in_len(
+        &self,
+        item: MediaItem,
+    ) -> DurationInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInLen, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("D_FADEINLEN pointer is null");
+        DurationInSeconds::new(raw)
+    }
+
+    /// Convenience function which sets the item's fade-in length (`D_FADEINLEN`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_in_len(
+        &self,
+        item: MediaItem,
+        value: DurationInSeconds,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::FadeInLen,
+            &value.get() as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's fade-out length (`D_FADEOUTLEN`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_out_len(
+        &self,
+        item: MediaItem,
+    ) -> DurationInSeconds
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLen, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("D_FADEOUTLEN pointer is null");
+        DurationInSeconds::new(raw)
+    }
+
+    /// Convenience function which sets the item's fade-out length (`D_FADEOUTLEN`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_out_len(
+        &self,
+        item: MediaItem,
+        value: DurationInSeconds,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::FadeOutLen,
+            &value.get() as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_out_len_auto(
+        &self,
+        item: MediaItem,
+    ) -> Option<DurationInSeconds>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLenAuto, null_mut());
+        deref_as::<f64>(ptr).map(DurationInSeconds::new)
+    }
+
+    /// Convenience function which sets the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_out_len_auto(
+        &self,
+        item: MediaItem,
+        value: Option<DurationInSeconds>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = if let Some(v) = value {
+            &v.get() as *const _ as _
+        } else {
+            null_mut()
+        };
+        self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLenAuto, ptr);
+    }
+
+    /// Convenience function which returns the item's auto fade-in length (`D_FADEINLEN_AUTO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_in_len_auto(
+        &self,
+        item: MediaItem,
+    ) -> Option<DurationInSeconds>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, null_mut());
+        deref_as::<f64>(ptr).map(DurationInSeconds::new)
+    }
+
+    /// Convenience function which sets the item's auto fade-in length (`D_FADEINLEN_AUTO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_in_len_auto(
+        &self,
+        item: MediaItem,
+        value: Option<DurationInSeconds>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = if let Some(v) = value {
+            &v.get() as *const _ as _
+        } else {
+            null_mut()
+        };
+        self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, ptr);
+    }
+
+    /// Convenience function which returns the item's fade-in shape (`C_FADEINSHAPE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_in_shape(&self, item: MediaItem) -> FadeShape
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInShape, null_mut());
+        let raw = deref_as::<i32>(ptr).expect("C_FADEINSHAPE pointer is null");
+        FadeShape::from_raw(raw)
+    }
+
+    /// Convenience function which sets the item's fade-in shape (`C_FADEINSHAPE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_in_shape(
+        &self,
+        item: MediaItem,
+        value: FadeShape,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::FadeInShape,
+            &value.to_raw() as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's fade-out shape (`C_FADEOUTSHAPE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_out_shape(&self, item: MediaItem) -> FadeShape
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutShape, null_mut());
+        let raw = deref_as::<i32>(ptr).expect("C_FADEOUTSHAPE pointer is null");
+        FadeShape::from_raw(raw)
+    }
+
+    /// Convenience function which sets the item's fade-out shape (`C_FADEOUTSHAPE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_out_shape(
+        &self,
+        item: MediaItem,
+        value: FadeShape,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::FadeOutShape,
+            &value.to_raw() as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's auto fade-in curvature (`D_FADEINDIR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_in_dir(&self, item: MediaItem) -> FadeCurvature
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInDir, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("D_FADEINDIR pointer is null");
+        FadeCurvature::new(raw)
+    }
+
+    /// Convenience function which sets the item's fade-in curvature (`D_FADEINDIR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_in_dir(
+        &self,
+        item: MediaItem,
+        value: FadeCurvature,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::FadeInDir,
+            &value.get() as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's auto fade-out curvature (`D_FADEOUTDIR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_out_dir(&self, item: MediaItem) -> FadeCurvature
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutDir, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("D_FADEOUTDIR pointer is null");
+        FadeCurvature::new(raw)
+    }
+
+    /// Convenience function which sets the item's fade-out curvature (`D_FADEOUTDIR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_out_dir(
+        &self,
+        item: MediaItem,
+        value: FadeCurvature,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::FadeOutDir,
+            &value.get() as *const _ as _,
+        );
+    }
+
+    /// Convenience function which returns the item's group ID (`I_GROUPID`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_group_id(
+        &self,
+        item: MediaItem,
+    ) -> Option<ItemGroupId>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::GroupId, null_mut());
+        let raw = deref_as::<i32>(ptr).expect("I_GROUPID pointer is null");
+        ItemGroupId::new(raw)
+    }
+
+    /// Convenience function which sets the item's group ID (`D_GROUPID`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_group_id(
+        &self,
+        item: MediaItem,
+        value: Option<ItemGroupId>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = if let Some(v) = value { v.get() } else { 0 };
+        self.get_set_media_item_info(item, ItemAttributeKey::GroupId, &raw as *const _ as _);
+    }
+
+    /// Convenience function which returns the item's custom color (`I_CUSTOMCOLOR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_custom_color(
+        &self,
+        item: MediaItem,
+    ) -> Option<NativeColorValue>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::CustomColor, null_mut());
+        let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
+        NativeColorValue::from_raw(raw)
+    }
+
+    /// Convenience function which sets the item's custom color (`I_CUSTOMCOLOR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_custom_color(
+        &self,
+        item: MediaItem,
+        value: Option<NativeColorValue>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = NativeColorValue::convert_to_raw(value);
+        self.get_set_media_item_info(item, ItemAttributeKey::CustomColor, &raw as *const _ as _);
     }
 
     /// Convenience function which sets the take's name (`P_NAME`).

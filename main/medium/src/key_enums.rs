@@ -2,6 +2,16 @@ use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
 
 use std::borrow::Cow;
 
+// TODO-medium Consider migrating to newtypes around Cow<str> for this kind of enums.
+//  Pros:
+//  - Equality between custom and non-custom type as long as they wrap the same string.
+//  - Custom would not feel "like a stranger"
+//  - The constants representing the "variants" would reveal the actual counterpart in REAPER.
+//    Example: It would be immediately visible in the code that "Name" translates to "P_NAME".
+//  Cons:
+//  - Naming conventions dictate that we should use TrackAttributeKey::PAR_TRACK instead of ParTrack
+//  - No exhaustive matching (not very relevant here because we pass this to REAPER only, but in
+//    other cases we get values returned by REAPER and then it could make a difference.
 /// Track attribute key which you can pass to [`get_set_media_track_info()`].
 ///
 /// [`get_set_media_track_info()`]: struct.Reaper.html#method.get_set_media_track_info
@@ -494,8 +504,20 @@ pub enum TakeAttributeKey<'a> {
     ///
     /// 0.5 = half speed, 1 = normal, 2 = double speed, etc.
     PlayRate,
+    /// Take pitch adjustment in semitones.
+    ///
+    /// -12=one octave down, 0=normal, +12=one octave up, etc.
+    Pitch,
     /// Preserve pitch when changing playback rate.
     PPitch,
+    /// Pitch shifter mode.
+    ///
+    /// -1=projext default, otherwise high 2 bytes=shifter, low 2 bytes=parameter
+    PitchMode,
+    /// Custom color, OS dependent color|0x1000000 (i.e. ColorToNative(r,g,b)|0x1000000).
+    ///
+    /// If you do not |0x1000000, then it will not be used, but will store the color.
+    CustomColor,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -521,6 +543,9 @@ impl<'a> TakeAttributeKey<'a> {
             Vol => reaper_str!("D_VOL").into(),
             PlayRate => reaper_str!("D_PLAYRATE").into(),
             PPitch => reaper_str!("B_PPITCH").into(),
+            Pitch => reaper_str!("D_PITCH").into(),
+            PitchMode => reaper_str!("I_PITCHMODE").into(),
+            CustomColor => reaper_str!("I_CUSTOMCOLOR").into(),
             Custom(key) => key,
         }
     }
@@ -531,12 +556,61 @@ impl<'a> TakeAttributeKey<'a> {
 /// [`get_set_media_item_info()`]: struct.Reaper.html#method.get_set_media_item_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ItemAttributeKey<'a> {
-    /// Item position in seconds.
-    Position,
     /// Muted (item solo overrides). Setting this value will clear `MuteSolo`.
     Mute,
     /// Loop source.
     LoopSrc,
+    /// Item timebase.
+    ///
+    /// - -1 = track or project default
+    /// - 1 = beats (position, length, rate)
+    /// - 2 = beats (position only).
+    ///
+    /// For auto-stretch timebase: C_BEATATTACHMODE=1, C_AUTOSTRETCH=1
+    BeatAttachMode,
+    /// Item volume.
+    Vol,
+    /// Item position in seconds.
+    Position,
+    /// Item length in seconds.
+    Length,
+    /// Item snap offset in seconds.
+    SnapOffset,
+    /// Item manual fade-in length in seconds.
+    FadeInLen,
+    /// Item manual fade-out length in seconds.
+    FadeOutLen,
+    /// Fade-in curvature, -1..=1.
+    FadeInDir,
+    /// Fade-out curvature, -1..=1.
+    FadeOutDir,
+    /// Item auto-fade-in length in seconds.
+    ///
+    /// -1 = no auto-fade-in
+    FadeInLenAuto,
+    /// Item auto-fade-out length in seconds.
+    ///
+    /// -1 = no auto-fade-out
+    FadeOutLenAuto,
+    /// Fade-in shape, 0..6, 0 = linear.
+    FadeInShape,
+    /// Fade-out shape, 0..6, 0 = linear.
+    FadeOutShape,
+    /// Group ID, 0 = no group.
+    GroupId,
+    /// Custom color.
+    ///
+    /// OS dependent color|0x1000000 (i.e. ColorToNative(r,g,b)|0x1000000).
+    /// If you do not |0x1000000, then it will not be used, but will store the color
+    CustomColor,
+    /// Free item positioning or fixed lane Y-position. 0=top of track, 1.0=bottom of track.
+    FreeModeY,
+    /// Free item positioning or fixed lane height. 0.5=half the track height, 1.0=full track height.
+    FreeModeH,
+    /// Fixed lane of item.
+    ///
+    /// Fine to call with setNewValue, but returned value is read-only.
+    FixedLane,
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -557,8 +631,25 @@ impl<'a> ItemAttributeKey<'a> {
         use ItemAttributeKey::*;
         match self {
             Position => reaper_str!("D_POSITION").into(),
+            Length => reaper_str!("D_LENGTH").into(),
             Mute => reaper_str!("B_MUTE").into(),
             LoopSrc => reaper_str!("B_LOOPSRC").into(),
+            BeatAttachMode => reaper_str!("C_BEATATTACHMODE").into(),
+            Vol => reaper_str!("D_VOL").into(),
+            SnapOffset => reaper_str!("D_SNAPOFFSET").into(),
+            FadeInLen => reaper_str!("D_FADEINLEN").into(),
+            FadeOutLen => reaper_str!("D_FADEOUTLEN").into(),
+            FadeInDir => reaper_str!("D_FADEINDIR").into(),
+            FadeOutDir => reaper_str!("D_FADEOUTDIR").into(),
+            FadeInLenAuto => reaper_str!("D_FADEINLEN_AUTO").into(),
+            FadeOutLenAuto => reaper_str!("D_FADEOUTLEN_AUTO").into(),
+            FadeInShape => reaper_str!("C_FADEINSHAPE").into(),
+            FadeOutShape => reaper_str!("C_FADEOUTSHAPE").into(),
+            GroupId => reaper_str!("I_GROUPID").into(),
+            CustomColor => reaper_str!("I_CUSTOMCOLOR").into(),
+            FreeModeY => reaper_str!("F_FREEMODE_Y").into(),
+            FreeModeH => reaper_str!("F_FREEMODE_H").into(),
+            FixedLane => reaper_str!("I_FIXEDLANE").into(),
             Custom(key) => key,
         }
     }
