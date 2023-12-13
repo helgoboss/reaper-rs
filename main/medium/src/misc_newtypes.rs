@@ -325,7 +325,15 @@ impl PitchShiftSubMode {
 )]
 pub struct ItemGroupId(pub(crate) NonZeroI32);
 
+impl Default for ItemGroupId {
+    fn default() -> Self {
+        Self::MIN_POSITIVE
+    }
+}
+
 impl ItemGroupId {
+    pub const MIN_POSITIVE: Self = unsafe { Self::new_unchecked(1) };
+
     fn is_valid(value: i32) -> bool {
         value != 0
     }
@@ -333,6 +341,13 @@ impl ItemGroupId {
     /// Creates an item group ID.
     pub fn new(value: i32) -> Option<ItemGroupId> {
         value.try_into().ok()
+    }
+
+    /// Returns the next valid group ID (skips zero).
+    pub fn next(&self) -> ItemGroupId {
+        let next = self.0.get() + 1;
+        let next = if next == 0 { 1 } else { next };
+        unsafe { Self::new_unchecked(next) }
     }
 
     /// Creates a command ID without bound checking.
