@@ -512,7 +512,7 @@ pub enum TakeAttributeKey<'a> {
     PPitch,
     /// Pitch shifter mode.
     ///
-    /// -1=projext default, otherwise high 2 bytes=shifter, low 2 bytes=parameter
+    /// -1=project default, otherwise high 2 bytes=shifter, low 2 bytes=parameter
     PitchMode,
     /// Custom color, OS dependent color|0x1000000 (i.e. ColorToNative(r,g,b)|0x1000000).
     ///
@@ -568,6 +568,10 @@ pub enum ItemAttributeKey<'a> {
     ///
     /// For auto-stretch timebase: C_BEATATTACHMODE=1, C_AUTOSTRETCH=1
     BeatAttachMode,
+    /// Auto-stretch at project tempo changes.
+    ///
+    /// 1=enabled. Requires C_BEATATTACHMODE=1.
+    AutoStretch,
     /// Item volume.
     Vol,
     /// Item position in seconds.
@@ -635,6 +639,7 @@ impl<'a> ItemAttributeKey<'a> {
             Mute => reaper_str!("B_MUTE").into(),
             LoopSrc => reaper_str!("B_LOOPSRC").into(),
             BeatAttachMode => reaper_str!("C_BEATATTACHMODE").into(),
+            AutoStretch => reaper_str!("C_AUTOSTRETCH").into(),
             Vol => reaper_str!("D_VOL").into(),
             SnapOffset => reaper_str!("D_SNAPOFFSET").into(),
             FadeInLen => reaper_str!("D_FADEINLEN").into(),

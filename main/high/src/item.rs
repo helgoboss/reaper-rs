@@ -135,6 +135,25 @@ impl Item {
         }
     }
 
+    pub fn auto_stretch(&self) -> bool {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_info_value(self.raw, ItemAttributeKey::AutoStretch)
+                == 1.0
+        }
+    }
+
+    pub fn set_auto_stretch(&self, value: bool) -> Result<(), ReaperFunctionError> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_item_info_value(
+                self.raw,
+                ItemAttributeKey::AutoStretch,
+                if value { 1.0 } else { 0.0 },
+            )
+        }
+    }
+
     pub fn volume(&self) -> ReaperVolumeValue {
         unsafe {
             Reaper::get()
@@ -151,7 +170,7 @@ impl Item {
         }
     }
 
-    pub fn snap_offset(&self) -> PositionInSeconds {
+    pub fn snap_offset(&self) -> DurationInSeconds {
         unsafe {
             Reaper::get()
                 .medium_reaper
@@ -159,7 +178,7 @@ impl Item {
         }
     }
 
-    pub fn set_snap_offset(&self, value: PositionInSeconds) {
+    pub fn set_snap_offset(&self, value: DurationInSeconds) {
         unsafe {
             Reaper::get()
                 .medium_reaper
@@ -313,21 +332,25 @@ impl Item {
 
     pub fn custom_color(&self) -> Option<RgbColor> {
         let reaper = Reaper::get().medium_reaper();
-        let res = unsafe { reaper.get_set_media_item_info_get_custom_color(self.raw)? };
-        if res.is_used {
-            let rgb_color = reaper.color_from_native(res.color);
-            Some(rgb_color)
-        } else {
-            None
+        let res = unsafe { reaper.get_set_media_item_info_get_custom_color(self.raw) };
+        if !res.is_used {
+            return None;
         }
+        Some(reaper.color_from_native(res.color))
     }
 
     pub fn set_custom_color(&self, color: Option<RgbColor>) {
         let reaper = Reaper::get().medium_reaper();
-        let value = color.map(|c| NativeColorValue {
-            color: reaper.color_to_native(c),
-            is_used: false,
-        });
+        let value = match color {
+            None => NativeColorValue {
+                color: Default::default(),
+                is_used: false,
+            },
+            Some(c) => NativeColorValue {
+                color: reaper.color_to_native(c),
+                is_used: true,
+            },
+        };
         unsafe { reaper.get_set_media_item_info_set_custom_color(self.raw, value) };
     }
 

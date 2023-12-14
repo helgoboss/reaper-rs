@@ -757,7 +757,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_item_take_info_get_custom_color(
         &self,
         take: MediaItemTake,
-    ) -> Option<NativeColorValue>
+    ) -> NativeColorValue
     where
         UsageScope: MainThreadOnly,
     {
@@ -776,16 +776,15 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_item_take_info_set_custom_color(
         &self,
         take: MediaItemTake,
-        value: Option<NativeColorValue>,
+        value: NativeColorValue,
     ) where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let raw = NativeColorValue::convert_to_raw(value);
         self.get_set_media_item_take_info(
             take,
             TakeAttributeKey::CustomColor,
-            &raw as *const _ as _,
+            &value.to_raw() as *const _ as _,
         );
     }
 
@@ -821,11 +820,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let raw = value.map(FullPitchShiftMode::to_raw).unwrap_or(-1);
-        self.get_set_media_item_take_info(
-            take,
-            TakeAttributeKey::CustomColor,
-            &raw as *const _ as _,
-        );
+        self.get_set_media_item_take_info(take, TakeAttributeKey::PitchMode, &raw as *const _ as _);
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
@@ -1014,14 +1009,14 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_item_info_get_snap_offset(
         &self,
         item: MediaItem,
-    ) -> PositionInSeconds
+    ) -> DurationInSeconds
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
         let ptr = self.get_set_media_item_info(item, ItemAttributeKey::SnapOffset, null_mut());
         let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
-        PositionInSeconds::new(raw)
+        DurationInSeconds::new(raw)
     }
 
     /// Convenience function which sets the item's snap offset (`D_SNAPOFFSET`).
@@ -1032,7 +1027,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_item_info_set_snap_offset(
         &self,
         item: MediaItem,
-        value: PositionInSeconds,
+        value: DurationInSeconds,
     ) where
         UsageScope: MainThreadOnly,
     {
@@ -1120,44 +1115,6 @@ impl<UsageScope> Reaper<UsageScope> {
         );
     }
 
-    /// Convenience function which returns the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
-    ///
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid item.
-    pub unsafe fn get_set_media_item_info_get_fade_out_len_auto(
-        &self,
-        item: MediaItem,
-    ) -> Option<DurationInSeconds>
-    where
-        UsageScope: MainThreadOnly,
-    {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLenAuto, null_mut());
-        deref_as::<f64>(ptr).map(DurationInSeconds::new)
-    }
-
-    /// Convenience function which sets the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
-    ///
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid item.
-    pub unsafe fn get_set_media_item_info_set_fade_out_len_auto(
-        &self,
-        item: MediaItem,
-        value: Option<DurationInSeconds>,
-    ) where
-        UsageScope: MainThreadOnly,
-    {
-        self.require_main_thread();
-        let ptr = if let Some(v) = value {
-            &v.get() as *const _ as _
-        } else {
-            null_mut()
-        };
-        self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLenAuto, ptr);
-    }
-
     /// Convenience function which returns the item's auto fade-in length (`D_FADEINLEN_AUTO`).
     ///
     /// # Safety
@@ -1172,7 +1129,8 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, null_mut());
-        deref_as::<f64>(ptr).map(DurationInSeconds::new)
+        let raw = deref_as::<f64>(ptr).expect("D_FADEINLEN_AUTO pointer is null");
+        raw.try_into().ok()
     }
 
     /// Convenience function which sets the item's auto fade-in length (`D_FADEINLEN_AUTO`).
@@ -1188,12 +1146,47 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let ptr = if let Some(v) = value {
-            &v.get() as *const _ as _
-        } else {
-            null_mut()
-        };
-        self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, ptr);
+        let raw = value.map(|v| v.get()).unwrap_or(-1.0);
+        self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, &raw as *const _ as _);
+    }
+
+    /// Convenience function which returns the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_get_fade_out_len_auto(
+        &self,
+        item: MediaItem,
+    ) -> Option<DurationInSeconds>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLenAuto, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("D_FADEOUTLEN_AUTO pointer is null");
+        raw.try_into().ok()
+    }
+
+    /// Convenience function which sets the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_item_info_set_fade_out_len_auto(
+        &self,
+        item: MediaItem,
+        value: Option<DurationInSeconds>,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = value.map(|v| v.get()).unwrap_or(-1.0);
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::FadeOutLenAuto,
+            &raw as *const _ as _,
+        );
     }
 
     /// Convenience function which returns the item's fade-in shape (`C_FADEINSHAPE`).
@@ -1371,6 +1364,44 @@ impl<UsageScope> Reaper<UsageScope> {
         self.get_set_media_item_info(item, ItemAttributeKey::GroupId, &raw as *const _ as _);
     }
 
+    /// Convenience function which returns the track's custom color (`I_CUSTOMCOLOR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_track_info_get_custom_color(
+        &self,
+        track: MediaTrack,
+    ) -> NativeColorValue
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::CustomColor, null_mut());
+        let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
+        NativeColorValue::from_raw(raw)
+    }
+
+    /// Convenience function which sets the track's custom color (`I_CUSTOMCOLOR`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_set_media_track_info_set_custom_color(
+        &self,
+        track: MediaTrack,
+        value: NativeColorValue,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.get_set_media_track_info(
+            track,
+            TrackAttributeKey::CustomColor,
+            &value.to_raw() as *const _ as _,
+        );
+    }
+
     /// Convenience function which returns the item's custom color (`I_CUSTOMCOLOR`).
     ///
     /// # Safety
@@ -1379,7 +1410,7 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_item_info_get_custom_color(
         &self,
         item: MediaItem,
-    ) -> Option<NativeColorValue>
+    ) -> NativeColorValue
     where
         UsageScope: MainThreadOnly,
     {
@@ -1397,13 +1428,16 @@ impl<UsageScope> Reaper<UsageScope> {
     pub unsafe fn get_set_media_item_info_set_custom_color(
         &self,
         item: MediaItem,
-        value: Option<NativeColorValue>,
+        value: NativeColorValue,
     ) where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let raw = NativeColorValue::convert_to_raw(value);
-        self.get_set_media_item_info(item, ItemAttributeKey::CustomColor, &raw as *const _ as _);
+        self.get_set_media_item_info(
+            item,
+            ItemAttributeKey::CustomColor,
+            &value.to_raw() as *const _ as _,
+        );
     }
 
     /// Convenience function which sets the take's name (`P_NAME`).
@@ -5088,34 +5122,6 @@ impl<UsageScope> Reaper<UsageScope> {
         AutomationMode::from_raw(result)
     }
 
-    /// Returns the custom color of the given track.
-    ///
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn get_track_color(&self, track: MediaTrack) -> Option<NativeColorValue>
-    where
-        UsageScope: MainThreadOnly,
-    {
-        self.require_main_thread();
-        let value = self.low.GetTrackColor(track.as_ptr());
-        NativeColorValue::from_raw(value)
-    }
-
-    /// Sets the custom color of the given track.
-    ///
-    /// # Safety
-    ///
-    /// REAPER can crash if you pass an invalid track.
-    pub unsafe fn set_track_color(&self, track: MediaTrack, value: Option<NativeColorValue>)
-    where
-        UsageScope: MainThreadOnly,
-    {
-        self.require_main_thread();
-        self.low
-            .SetTrackColor(track.as_ptr(), NativeColorValue::convert_to_raw(value));
-    }
-
     /// Extracts an RGB color from the given OS-dependent color.
     pub fn color_from_native(&self, color: NativeColor) -> RgbColor
     where
@@ -6466,7 +6472,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.count_selected_tracks_2_unchecked(project, master_track_behavior) }
     }
@@ -6491,6 +6496,36 @@ impl<UsageScope> Reaper<UsageScope> {
             project.to_raw(),
             master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
         ) as u32
+    }
+
+    /// Selects or unselects all media items in the given project.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn select_all_media_items(&self, project: ProjectContext, selected: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe {
+            self.select_all_media_items_unchecked(project, selected);
+        }
+    }
+
+    /// Like [`select_all_media_items()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`select_all_media_items()`]: #method.select_all_media_items
+    pub unsafe fn select_all_media_items_unchecked(&self, project: ProjectContext, selected: bool)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.SelectAllMediaItems(project.to_raw(), selected);
     }
 
     /// Counts the number of selected items in the given project.
@@ -8494,7 +8529,7 @@ pub enum GetFocusedFxResult {
     Unknown(Hidden<i32>),
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
 pub struct RgbColor {
     pub r: u8,
     pub g: u8,
@@ -8512,11 +8547,8 @@ pub struct NativeColorValue {
 impl NativeColorValue {
     const USED_OFFSET: i32 = 0x1000000;
 
-    fn from_raw(value: i32) -> Option<Self> {
-        if value < 0 {
-            return None;
-        }
-        let res = if value < Self::USED_OFFSET {
+    fn from_raw(value: i32) -> Self {
+        if value < Self::USED_OFFSET {
             Self {
                 color: NativeColor::new(value as _),
                 is_used: false,
@@ -8526,18 +8558,14 @@ impl NativeColorValue {
                 color: NativeColor::new((value - Self::USED_OFFSET) as _),
                 is_used: true,
             }
-        };
-        Some(res)
+        }
     }
 
-    fn convert_to_raw(value: Option<Self>) -> i32 {
-        let Some(value) = value else {
-            return -1;
-        };
-        if value.is_used {
-            value.color.to_raw() + Self::USED_OFFSET
+    fn to_raw(&self) -> i32 {
+        if self.is_used {
+            self.color.to_raw() + Self::USED_OFFSET
         } else {
-            value.color.to_raw()
+            self.color.to_raw()
         }
     }
 }

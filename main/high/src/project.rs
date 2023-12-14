@@ -62,6 +62,12 @@ impl Project {
             .file_path
     }
 
+    pub fn select_all_items(self, selected: bool) {
+        Reaper::get()
+            .medium_reaper()
+            .select_all_media_items(self.context(), selected);
+    }
+
     pub fn any_solo(self) -> bool {
         Reaper::get().medium_reaper().any_track_solo(self.context())
     }
