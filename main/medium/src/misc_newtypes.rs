@@ -934,7 +934,7 @@ impl DurationInSeconds {
     /// # Safety
     ///
     /// You must ensure that the given value is positive.
-    pub unsafe fn new_unchecked(value: f64) -> DurationInSeconds {
+    pub const unsafe fn new_unchecked(value: f64) -> DurationInSeconds {
         DurationInSeconds(value)
     }
 
