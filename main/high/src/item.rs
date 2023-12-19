@@ -1,9 +1,8 @@
-use crate::error::ReaperResult;
-use crate::{Project, Reaper, Take, Volume};
+use crate::{Project, Reaper, Take};
 use reaper_medium::{
     BeatAttachMode, DurationInSeconds, FadeCurvature, FadeShape, ItemAttributeKey, ItemGroupId,
-    MediaItem, NativeColor, NativeColorValue, PositionInSeconds, ProjectContext,
-    ReaperFunctionError, ReaperVolumeValue, RgbColor, UiRefreshBehavior,
+    MediaItem, NativeColorValue, PositionInSeconds, ProjectContext, ReaperFunctionError,
+    ReaperVolumeValue, RgbColor, UiRefreshBehavior,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

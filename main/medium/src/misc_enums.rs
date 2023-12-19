@@ -5,7 +5,6 @@ use crate::{
 };
 
 use crate::util::concat_reaper_strs;
-use crate::BeatAttachMode::BeatsPositionOnly;
 use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;

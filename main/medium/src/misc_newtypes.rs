@@ -334,10 +334,6 @@ impl Default for ItemGroupId {
 impl ItemGroupId {
     pub const MIN_POSITIVE: Self = unsafe { Self::new_unchecked(1) };
 
-    fn is_valid(value: i32) -> bool {
-        value != 0
-    }
-
     /// Creates an item group ID.
     pub fn new(value: i32) -> Option<ItemGroupId> {
         value.try_into().ok()

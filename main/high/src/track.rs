@@ -19,12 +19,12 @@ use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo}
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, NativeColor, NativeColorValue, Progress, ReaProject,
-    ReaperFunctionError, ReaperPanValue, ReaperString, ReaperStringArg, ReaperVolumeValue,
-    ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags,
-    SoloMode, TrackArea, TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState,
-    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory,
-    TrackSendDirection, TrackSoloOperation,
+    InputMonitoringMode, MediaTrack, NativeColorValue, Progress, ReaProject, ReaperFunctionError,
+    ReaperPanValue, ReaperString, ReaperStringArg, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
+    TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory, TrackSendDirection,
+    TrackSoloOperation,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};

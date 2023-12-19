@@ -8561,7 +8561,7 @@ impl NativeColorValue {
         }
     }
 
-    fn to_raw(&self) -> i32 {
+    fn to_raw(self) -> i32 {
         if self.is_used {
             self.color.to_raw() + Self::USED_OFFSET
         } else {

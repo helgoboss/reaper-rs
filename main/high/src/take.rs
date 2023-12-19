@@ -1,7 +1,7 @@
 use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track, Volume};
 use reaper_medium::{
-    Db, FullPitchShiftMode, MediaItemTake, NativeColor, NativeColorValue, PlaybackSpeedFactor,
-    PositionInSeconds, ReaperFunctionError, ReaperStringArg, RgbColor, TakeAttributeKey,
+    FullPitchShiftMode, MediaItemTake, NativeColorValue, PlaybackSpeedFactor, PositionInSeconds,
+    ReaperFunctionError, ReaperStringArg, RgbColor, TakeAttributeKey,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

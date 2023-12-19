@@ -1,6 +1,5 @@
 use crate::{AcceleratorBehavior, AcceleratorKeyCode, CommandId, ReaperStr, ReaperStringArg};
 use enumflags2::BitFlags;
-use enumflags2::_internal::RawBitFlags;
 use reaper_low::raw;
 use reaper_low::raw::gaccel_register_t;
 use std::borrow::Cow;
