@@ -1,6 +1,7 @@
 use crate::access::{ReadAccess, WriteAccess};
 use crate::{FreeFn, Model};
 use fragile::Fragile;
+use reaper_low::firewall;
 use reaper_medium::ReaperSession;
 use std::cell::{Ref, RefCell, RefMut};
 use std::sync::OnceLock;
@@ -46,7 +47,7 @@ impl Reaper {
 
     pub fn execute_later<F: FreeFn>(&self) {
         extern "C" fn call_and_unregister_timer<F: FreeFn>() {
-            F::call();
+            firewall(F::call);
             Reaper::get()
                 .medium_session_mut()
                 .plugin_register_remove_timer(call_and_unregister_timer::<F>);
