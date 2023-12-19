@@ -61,12 +61,6 @@ pub mod root {
     pub const GW_HWNDPREV: u32 = 3;
     pub const GW_OWNER: u32 = 4;
     pub const GW_CHILD: u32 = 5;
-    pub const GWL_HWNDPARENT: i32 = -25;
-    pub const GWL_USERDATA: i32 = -21;
-    pub const GWL_ID: i32 = -12;
-    pub const GWL_STYLE: i32 = -16;
-    pub const GWL_EXSTYLE: i32 = -20;
-    pub const GWL_WNDPROC: i32 = -4;
     pub const WS_CHILD: u32 = 1073741824;
     pub const WS_DISABLED: u32 = 134217728;
     pub const WS_CLIPSIBLINGS: u32 = 67108864;
@@ -1907,6 +1901,16 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions26CSurf_OnOscControlMessage2E"]
+            pub static mut CSurf_OnOscControlMessage2: ::std::option::Option<
+                unsafe extern "C" fn(
+                    msg: *const ::std::os::raw::c_char,
+                    arg: *const f32,
+                    argstr: *const ::std::os::raw::c_char,
+                ),
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions17CSurf_OnPanChangeE"]
             pub static mut CSurf_OnPanChange: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -2474,6 +2478,16 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions15EnumInstalledFXE"]
+            pub static mut EnumInstalledFX: ::std::option::Option<
+                unsafe extern "C" fn(
+                    index: ::std::os::raw::c_int,
+                    nameOut: *mut *const ::std::os::raw::c_char,
+                    identOut: *mut *const ::std::os::raw::c_char,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions19EnumPitchShiftModesE"]
             pub static mut EnumPitchShiftModes: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -2757,8 +2771,8 @@ pub mod root {
                     section: *mut root::KbdSectionInfo,
                     cmdID: ::std::os::raw::c_int,
                     shortcutidx: ::std::os::raw::c_int,
-                    desc: *mut ::std::os::raw::c_char,
-                    desclen: ::std::os::raw::c_int,
+                    descOut: *mut ::std::os::raw::c_char,
+                    descOut_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
         }
@@ -3080,6 +3094,11 @@ pub mod root {
                     szOut: *mut ::std::os::raw::c_int,
                 ) -> *mut ::std::os::raw::c_void,
             >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions21GetInputActivityLevelE"]
+            pub static mut GetInputActivityLevel:
+                ::std::option::Option<unsafe extern "C" fn(input_id: ::std::os::raw::c_int) -> f64>;
         }
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions19GetInputChannelNameE"]
@@ -4205,6 +4224,19 @@ pub mod root {
                 ::std::option::Option<unsafe extern "C" fn() -> root::HWND>;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions21GetTouchedOrFocusedFXE"]
+            pub static mut GetTouchedOrFocusedFX: ::std::option::Option<
+                unsafe extern "C" fn(
+                    mode: ::std::os::raw::c_int,
+                    trackidxOut: *mut ::std::os::raw::c_int,
+                    itemidxOut: *mut ::std::os::raw::c_int,
+                    takeidxOut: *mut ::std::os::raw::c_int,
+                    fxidxOut: *mut ::std::os::raw::c_int,
+                    parmOut: *mut ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions8GetTrackE"]
             pub static mut GetTrack: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -4898,15 +4930,6 @@ pub mod root {
             >;
         }
         extern "C" {
-            #[link_name = "\u{1}_ZN16reaper_functions18kbd_translateMouseE"]
-            pub static mut kbd_translateMouse: ::std::option::Option<
-                unsafe extern "C" fn(
-                    winmsg: *mut ::std::os::raw::c_void,
-                    midimsg: *mut ::std::os::raw::c_uchar,
-                ) -> bool,
-            >;
-        }
-        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions13LICE__DestroyE"]
             pub static mut LICE__Destroy: ::std::option::Option<
                 unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap),
@@ -5139,6 +5162,17 @@ pub mod root {
                     xHi: ::std::os::raw::c_int,
                     yHi: ::std::os::raw::c_int,
                 ) -> bool,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions18LICE_CombinePixelsE"]
+            pub static mut LICE_CombinePixels: ::std::option::Option<
+                unsafe extern "C" fn(
+                    dest: root::reaper_functions::LICE_pixel,
+                    src: root::reaper_functions::LICE_pixel,
+                    alpha: f32,
+                    mode: ::std::os::raw::c_int,
+                ) -> root::reaper_functions::LICE_pixel,
             >;
         }
         extern "C" {
@@ -6205,6 +6239,17 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions23MIDIEditorFlagsForTrackE"]
+            pub static mut MIDIEditorFlagsForTrack: ::std::option::Option<
+                unsafe extern "C" fn(
+                    track: *mut root::MediaTrack,
+                    pitchwheelrangeInOut: *mut ::std::os::raw::c_int,
+                    flagsInOut: *mut ::std::os::raw::c_int,
+                    is_set: bool,
+                ),
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions8mkpanstrE"]
             pub static mut mkpanstr: ::std::option::Option<
                 unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, pan: f64),
@@ -6880,6 +6925,16 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions25SendMIDIMessageToHardwareE"]
+            pub static mut SendMIDIMessageToHardware: ::std::option::Option<
+                unsafe extern "C" fn(
+                    output: ::std::os::raw::c_int,
+                    msg: *const ::std::os::raw::c_char,
+                    msg_sz: ::std::os::raw::c_int,
+                ),
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions13SetActiveTakeE"]
             pub static mut SetActiveTake:
                 ::std::option::Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>;
@@ -7459,7 +7514,7 @@ pub mod root {
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions14ShowActionListE"]
             pub static mut ShowActionList: ::std::option::Option<
-                unsafe extern "C" fn(caller: *mut root::KbdSectionInfo, callerWnd: root::HWND),
+                unsafe extern "C" fn(section: *mut root::KbdSectionInfo, callerWnd: root::HWND),
             >;
         }
         extern "C" {
@@ -8879,6 +8934,11 @@ pub mod root {
             #[link_name = "\u{1}_ZN16reaper_functions19UpdateItemInProjectE"]
             pub static mut UpdateItemInProject:
                 ::std::option::Option<unsafe extern "C" fn(item: *mut root::MediaItem)>;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions15UpdateItemLanesE"]
+            pub static mut UpdateItemLanes:
+                ::std::option::Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> bool>;
         }
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions14UpdateTimelineE"]

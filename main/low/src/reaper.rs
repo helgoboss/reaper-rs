@@ -304,6 +304,11 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(CSurf_OnOscControlMessage)).as_ptr(),
                     ),
                 ),
+                CSurf_OnOscControlMessage2: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(CSurf_OnOscControlMessage2)).as_ptr(),
+                    ),
+                ),
                 CSurf_OnPanChange: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(CSurf_OnPanChange)).as_ptr()),
@@ -585,6 +590,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(EnumerateSubdirectories)).as_ptr()),
                 ),
+                EnumInstalledFX: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(EnumInstalledFX)).as_ptr()),
+                ),
                 EnumPitchShiftModes: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(EnumPitchShiftModes)).as_ptr()),
@@ -845,6 +854,10 @@ impl Reaper {
                 GetIconThemeStruct: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetIconThemeStruct)).as_ptr()),
+                ),
+                GetInputActivityLevel: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(GetInputActivityLevel)).as_ptr()),
                 ),
                 GetInputChannelName: std::mem::transmute(
                     plugin_context
@@ -1368,6 +1381,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetTooltipWindow)).as_ptr()),
                 ),
+                GetTouchedOrFocusedFX: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(GetTouchedOrFocusedFX)).as_ptr()),
+                ),
                 GetTrack: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GetTrack)).as_ptr()),
                 ),
@@ -1661,10 +1678,6 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(kbd_translateAccelerator)).as_ptr(),
                     ),
                 ),
-                kbd_translateMouse: std::mem::transmute(
-                    plugin_context
-                        .GetFunc(c_str_macro::c_str!(stringify!(kbd_translateMouse)).as_ptr()),
-                ),
                 LICE__Destroy: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(LICE__Destroy)).as_ptr()),
                 ),
@@ -1743,6 +1756,10 @@ impl Reaper {
                 ),
                 LICE_ClipLine: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(LICE_ClipLine)).as_ptr()),
+                ),
+                LICE_CombinePixels: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(LICE_CombinePixels)).as_ptr()),
                 ),
                 LICE_Copy: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(LICE_Copy)).as_ptr()),
@@ -2119,6 +2136,10 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(MIDIEditor_SetSetting_int)).as_ptr(),
                     ),
                 ),
+                MIDIEditorFlagsForTrack: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(MIDIEditorFlagsForTrack)).as_ptr()),
+                ),
                 mkpanstr: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(mkpanstr)).as_ptr()),
                 ),
@@ -2443,6 +2464,11 @@ impl Reaper {
                 SendLocalOscMessage: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(SendLocalOscMessage)).as_ptr()),
+                ),
+                SendMIDIMessageToHardware: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(SendMIDIMessageToHardware)).as_ptr(),
+                    ),
                 ),
                 SetActiveTake: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(SetActiveTake)).as_ptr()),
@@ -3265,6 +3291,10 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(UpdateItemInProject)).as_ptr()),
                 ),
+                UpdateItemLanes: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(UpdateItemLanes)).as_ptr()),
+                ),
                 UpdateTimeline: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(UpdateTimeline)).as_ptr()),
@@ -3540,6 +3570,9 @@ impl Reaper {
         if pointers.CSurf_OnOscControlMessage.is_some() {
             loaded_count += 1;
         }
+        if pointers.CSurf_OnOscControlMessage2.is_some() {
+            loaded_count += 1;
+        }
         if pointers.CSurf_OnPanChange.is_some() {
             loaded_count += 1;
         }
@@ -3750,6 +3783,9 @@ impl Reaper {
         if pointers.EnumerateSubdirectories.is_some() {
             loaded_count += 1;
         }
+        if pointers.EnumInstalledFX.is_some() {
+            loaded_count += 1;
+        }
         if pointers.EnumPitchShiftModes.is_some() {
             loaded_count += 1;
         }
@@ -3955,6 +3991,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetIconThemeStruct.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GetInputActivityLevel.is_some() {
             loaded_count += 1;
         }
         if pointers.GetInputChannelName.is_some() {
@@ -4347,6 +4386,9 @@ impl Reaper {
         if pointers.GetTooltipWindow.is_some() {
             loaded_count += 1;
         }
+        if pointers.GetTouchedOrFocusedFX.is_some() {
+            loaded_count += 1;
+        }
         if pointers.GetTrack.is_some() {
             loaded_count += 1;
         }
@@ -4581,9 +4623,6 @@ impl Reaper {
         if pointers.kbd_translateAccelerator.is_some() {
             loaded_count += 1;
         }
-        if pointers.kbd_translateMouse.is_some() {
-            loaded_count += 1;
-        }
         if pointers.LICE__Destroy.is_some() {
             loaded_count += 1;
         }
@@ -4648,6 +4687,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.LICE_ClipLine.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.LICE_CombinePixels.is_some() {
             loaded_count += 1;
         }
         if pointers.LICE_Copy.is_some() {
@@ -4944,6 +4986,9 @@ impl Reaper {
         if pointers.MIDIEditor_SetSetting_int.is_some() {
             loaded_count += 1;
         }
+        if pointers.MIDIEditorFlagsForTrack.is_some() {
+            loaded_count += 1;
+        }
         if pointers.mkpanstr.is_some() {
             loaded_count += 1;
         }
@@ -5194,6 +5239,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.SendLocalOscMessage.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.SendMIDIMessageToHardware.is_some() {
             loaded_count += 1;
         }
         if pointers.SetActiveTake.is_some() {
@@ -5821,6 +5869,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.UpdateItemInProject.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.UpdateItemLanes.is_some() {
             loaded_count += 1;
         }
         if pointers.UpdateTimeline.is_some() {
@@ -6879,6 +6930,23 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn CSurf_OnOscControlMessage2(
+        &self,
+        msg: *const ::std::os::raw::c_char,
+        arg: *const f32,
+        argstr: *const ::std::os::raw::c_char,
+    ) {
+        match self.pointers.CSurf_OnOscControlMessage2 {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(CSurf_OnOscControlMessage2)
+            ),
+            Some(f) => f(msg, arg, argstr),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn CSurf_OnPanChange(
         &self,
         trackid: *mut root::MediaTrack,
@@ -7896,6 +7964,23 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn EnumInstalledFX(
+        &self,
+        index: ::std::os::raw::c_int,
+        nameOut: *mut *const ::std::os::raw::c_char,
+        identOut: *mut *const ::std::os::raw::c_char,
+    ) -> bool {
+        match self.pointers.EnumInstalledFX {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(EnumInstalledFX)
+            ),
+            Some(f) => f(index, nameOut, identOut),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn EnumPitchShiftModes(
         &self,
         mode: ::std::os::raw::c_int,
@@ -8408,15 +8493,15 @@ impl Reaper {
         section: *mut root::KbdSectionInfo,
         cmdID: ::std::os::raw::c_int,
         shortcutidx: ::std::os::raw::c_int,
-        desc: *mut ::std::os::raw::c_char,
-        desclen: ::std::os::raw::c_int,
+        descOut: *mut ::std::os::raw::c_char,
+        descOut_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetActionShortcutDesc {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetActionShortcutDesc)
             ),
-            Some(f) => f(section, cmdID, shortcutidx, desc, desclen),
+            Some(f) => f(section, cmdID, shortcutidx, descOut, descOut_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -9021,6 +9106,15 @@ impl Reaper {
                 stringify!(GetIconThemeStruct)
             ),
             Some(f) => f(szOut),
+        }
+    }
+    pub fn GetInputActivityLevel(&self, input_id: ::std::os::raw::c_int) -> f64 {
+        match self.pointers.GetInputActivityLevel {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetInputActivityLevel)
+            ),
+            Some(f) => f(input_id),
         }
     }
     pub fn GetInputChannelName(
@@ -11036,6 +11130,26 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetTouchedOrFocusedFX(
+        &self,
+        mode: ::std::os::raw::c_int,
+        trackidxOut: *mut ::std::os::raw::c_int,
+        itemidxOut: *mut ::std::os::raw::c_int,
+        takeidxOut: *mut ::std::os::raw::c_int,
+        fxidxOut: *mut ::std::os::raw::c_int,
+        parmOut: *mut ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.GetTouchedOrFocusedFX {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetTouchedOrFocusedFX)
+            ),
+            Some(f) => f(mode, trackidxOut, itemidxOut, takeidxOut, fxidxOut, parmOut),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetTrack(
         &self,
         proj: *mut root::ReaProject,
@@ -12277,22 +12391,6 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn kbd_translateMouse(
-        &self,
-        winmsg: *mut ::std::os::raw::c_void,
-        midimsg: *mut ::std::os::raw::c_uchar,
-    ) -> bool {
-        match self.pointers.kbd_translateMouse {
-            None => panic!(
-                "Attempt to use a function that has not been loaded: {}",
-                stringify!(kbd_translateMouse)
-            ),
-            Some(f) => f(winmsg, midimsg),
-        }
-    }
-    #[doc = r" # Safety"]
-    #[doc = r""]
-    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn LICE__Destroy(&self, bm: *mut root::reaper_functions::LICE_IBitmap) {
         match self.pointers.LICE__Destroy {
             None => panic!(
@@ -12673,6 +12771,21 @@ impl Reaper {
                 stringify!(LICE_ClipLine)
             ),
             Some(f) => f(pX1Out, pY1Out, pX2Out, pY2Out, xLo, yLo, xHi, yHi),
+        }
+    }
+    pub fn LICE_CombinePixels(
+        &self,
+        dest: root::reaper_functions::LICE_pixel,
+        src: root::reaper_functions::LICE_pixel,
+        alpha: f32,
+        mode: ::std::os::raw::c_int,
+    ) -> root::reaper_functions::LICE_pixel {
+        match self.pointers.LICE_CombinePixels {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(LICE_CombinePixels)
+            ),
+            Some(f) => f(dest, src, alpha, mode),
         }
     }
     #[doc = r" # Safety"]
@@ -14538,6 +14651,24 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn MIDIEditorFlagsForTrack(
+        &self,
+        track: *mut root::MediaTrack,
+        pitchwheelrangeInOut: *mut ::std::os::raw::c_int,
+        flagsInOut: *mut ::std::os::raw::c_int,
+        is_set: bool,
+    ) {
+        match self.pointers.MIDIEditorFlagsForTrack {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(MIDIEditorFlagsForTrack)
+            ),
+            Some(f) => f(track, pitchwheelrangeInOut, flagsInOut, is_set),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn mkpanstr(&self, strNeed64: *mut ::std::os::raw::c_char, pan: f64) {
         match self.pointers.mkpanstr {
             None => panic!(
@@ -15747,6 +15878,23 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SendMIDIMessageToHardware(
+        &self,
+        output: ::std::os::raw::c_int,
+        msg: *const ::std::os::raw::c_char,
+        msg_sz: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.SendMIDIMessageToHardware {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(SendMIDIMessageToHardware)
+            ),
+            Some(f) => f(output, msg, msg_sz),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetActiveTake(&self, take: *mut root::MediaItem_Take) {
         match self.pointers.SetActiveTake {
             None => panic!(
@@ -16750,13 +16898,13 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn ShowActionList(&self, caller: *mut root::KbdSectionInfo, callerWnd: root::HWND) {
+    pub unsafe fn ShowActionList(&self, section: *mut root::KbdSectionInfo, callerWnd: root::HWND) {
         match self.pointers.ShowActionList {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowActionList)
             ),
-            Some(f) => f(caller, callerWnd),
+            Some(f) => f(section, callerWnd),
         }
     }
     #[doc = r" # Safety"]
@@ -19248,6 +19396,18 @@ impl Reaper {
             Some(f) => f(item),
         }
     }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn UpdateItemLanes(&self, proj: *mut root::ReaProject) -> bool {
+        match self.pointers.UpdateItemLanes {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(UpdateItemLanes)
+            ),
+            Some(f) => f(proj),
+        }
+    }
     pub fn UpdateTimeline(&self) {
         match self.pointers.UpdateTimeline {
             None => panic!(
@@ -19817,6 +19977,13 @@ pub struct ReaperFunctionPointers {
     >,
     pub CSurf_OnOscControlMessage:
         Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char, arg: *const f32)>,
+    pub CSurf_OnOscControlMessage2: Option<
+        unsafe extern "C" fn(
+            msg: *const ::std::os::raw::c_char,
+            arg: *const f32,
+            argstr: *const ::std::os::raw::c_char,
+        ),
+    >,
     pub CSurf_OnPanChange: Option<
         unsafe extern "C" fn(trackid: *mut root::MediaTrack, pan: f64, relative: bool) -> f64,
     >,
@@ -20128,6 +20295,13 @@ pub struct ReaperFunctionPointers {
             subdirindex: ::std::os::raw::c_int,
         ) -> *const ::std::os::raw::c_char,
     >,
+    pub EnumInstalledFX: Option<
+        unsafe extern "C" fn(
+            index: ::std::os::raw::c_int,
+            nameOut: *mut *const ::std::os::raw::c_char,
+            identOut: *mut *const ::std::os::raw::c_char,
+        ) -> bool,
+    >,
     pub EnumPitchShiftModes: Option<
         unsafe extern "C" fn(
             mode: ::std::os::raw::c_int,
@@ -20318,8 +20492,8 @@ pub struct ReaperFunctionPointers {
             section: *mut root::KbdSectionInfo,
             cmdID: ::std::os::raw::c_int,
             shortcutidx: ::std::os::raw::c_int,
-            desc: *mut ::std::os::raw::c_char,
-            desclen: ::std::os::raw::c_int,
+            descOut: *mut ::std::os::raw::c_char,
+            descOut_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetActiveTake:
@@ -20493,6 +20667,7 @@ pub struct ReaperFunctionPointers {
     pub GetIconThemeStruct: Option<
         unsafe extern "C" fn(szOut: *mut ::std::os::raw::c_int) -> *mut ::std::os::raw::c_void,
     >,
+    pub GetInputActivityLevel: Option<extern "C" fn(input_id: ::std::os::raw::c_int) -> f64>,
     pub GetInputChannelName:
         Option<extern "C" fn(channelIndex: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char>,
     pub GetInputOutputLatency: Option<
@@ -21159,6 +21334,16 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub GetTooltipWindow: Option<extern "C" fn() -> root::HWND>,
+    pub GetTouchedOrFocusedFX: Option<
+        unsafe extern "C" fn(
+            mode: ::std::os::raw::c_int,
+            trackidxOut: *mut ::std::os::raw::c_int,
+            itemidxOut: *mut ::std::os::raw::c_int,
+            takeidxOut: *mut ::std::os::raw::c_int,
+            fxidxOut: *mut ::std::os::raw::c_int,
+            parmOut: *mut ::std::os::raw::c_int,
+        ) -> bool,
+    >,
     pub GetTrack: Option<
         unsafe extern "C" fn(
             proj: *mut root::ReaProject,
@@ -21581,12 +21766,6 @@ pub struct ReaperFunctionPointers {
             section: *mut root::KbdSectionInfo,
         ) -> ::std::os::raw::c_int,
     >,
-    pub kbd_translateMouse: Option<
-        unsafe extern "C" fn(
-            winmsg: *mut ::std::os::raw::c_void,
-            midimsg: *mut ::std::os::raw::c_uchar,
-        ) -> bool,
-    >,
     pub LICE__Destroy: Option<unsafe extern "C" fn(bm: *mut root::reaper_functions::LICE_IBitmap)>,
     pub LICE__DestroyFont:
         Option<unsafe extern "C" fn(font: *mut root::reaper_functions::LICE_IFont)>,
@@ -21750,6 +21929,14 @@ pub struct ReaperFunctionPointers {
             xHi: ::std::os::raw::c_int,
             yHi: ::std::os::raw::c_int,
         ) -> bool,
+    >,
+    pub LICE_CombinePixels: Option<
+        extern "C" fn(
+            dest: root::reaper_functions::LICE_pixel,
+            src: root::reaper_functions::LICE_pixel,
+            alpha: f32,
+            mode: ::std::os::raw::c_int,
+        ) -> root::reaper_functions::LICE_pixel,
     >,
     pub LICE_Copy: Option<
         unsafe extern "C" fn(
@@ -22481,6 +22668,14 @@ pub struct ReaperFunctionPointers {
             setting: ::std::os::raw::c_int,
         ) -> bool,
     >,
+    pub MIDIEditorFlagsForTrack: Option<
+        unsafe extern "C" fn(
+            track: *mut root::MediaTrack,
+            pitchwheelrangeInOut: *mut ::std::os::raw::c_int,
+            flagsInOut: *mut ::std::os::raw::c_int,
+            is_set: bool,
+        ),
+    >,
     pub mkpanstr: Option<unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, pan: f64)>,
     pub mkvolpanstr:
         Option<unsafe extern "C" fn(strNeed64: *mut ::std::os::raw::c_char, vol: f64, pan: f64)>,
@@ -22838,6 +23033,13 @@ pub struct ReaperFunctionPointers {
             local_osc_handler: *mut ::std::os::raw::c_void,
             msg: *const ::std::os::raw::c_char,
             msglen: ::std::os::raw::c_int,
+        ),
+    >,
+    pub SendMIDIMessageToHardware: Option<
+        unsafe extern "C" fn(
+            output: ::std::os::raw::c_int,
+            msg: *const ::std::os::raw::c_char,
+            msg_sz: ::std::os::raw::c_int,
         ),
     >,
     pub SetActiveTake: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take)>,
@@ -23214,7 +23416,7 @@ pub struct ReaperFunctionPointers {
         ) -> f64,
     >,
     pub ShowActionList:
-        Option<unsafe extern "C" fn(caller: *mut root::KbdSectionInfo, callerWnd: root::HWND)>,
+        Option<unsafe extern "C" fn(section: *mut root::KbdSectionInfo, callerWnd: root::HWND)>,
     pub ShowConsoleMsg: Option<unsafe extern "C" fn(msg: *const ::std::os::raw::c_char)>,
     pub ShowMessageBox: Option<
         unsafe extern "C" fn(
@@ -24104,6 +24306,7 @@ pub struct ReaperFunctionPointers {
         Option<extern "C" fn(readamt: ::std::os::raw::c_int, writeamt: ::std::os::raw::c_int)>,
     pub UpdateArrange: Option<extern "C" fn()>,
     pub UpdateItemInProject: Option<unsafe extern "C" fn(item: *mut root::MediaItem)>,
+    pub UpdateItemLanes: Option<unsafe extern "C" fn(proj: *mut root::ReaProject) -> bool>,
     pub UpdateTimeline: Option<extern "C" fn()>,
     pub ValidatePtr: Option<
         unsafe extern "C" fn(
@@ -24204,5 +24407,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 848u32;
+    pub(crate) const TOTAL_COUNT: u32 = 855u32;
 }
