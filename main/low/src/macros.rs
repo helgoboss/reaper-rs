@@ -56,7 +56,7 @@ macro_rules! dll_main {
             }
             1
         }
-    }
+    };
 }
 
 /// Macro which generates and exports the `SWELL_dllMain` function on Linux.
@@ -105,5 +105,5 @@ macro_rules! swell_dll_main {
             }
             1
         }
-    }
+    };
 }
