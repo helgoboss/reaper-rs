@@ -1,7 +1,10 @@
 use crate::{
-    ActionValueChange, CommandId, KbdSectionInfo, ReaProject, SectionContext, WindowContext,
+    ActionValueChange, CommandId, Hmenu, KbdSectionInfo, MenuHookFlag, ReaProject, ReaperStr,
+    SectionContext, WindowContext,
 };
+use libc::c_char;
 use reaper_low::{firewall, raw};
+use std::ffi::c_void;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
@@ -61,6 +64,26 @@ pub(crate) extern "C" fn delegating_hook_command_2<T: HookCommand2>(
         )
     })
     .unwrap_or(false)
+}
+
+/// Consumers need to implement this trait in order to define what should happen when a custom menu is initialized or
+/// populated.
+pub trait HookCustomMenu {
+    /// The actual callback function invoked by REAPER whenever a custom menu is initialized or populated.
+    fn call(menuidstr: &ReaperStr, menu: Hmenu, flag: MenuHookFlag);
+}
+
+pub(crate) extern "C" fn delegating_hook_custom_menu<T: HookCustomMenu>(
+    menuidstr: *const c_char,
+    menu: raw::HMENU,
+    flag: c_int,
+) {
+    firewall(|| {
+        let menuidstr = unsafe { ReaperStr::from_ptr(menuidstr) };
+        let menu = Hmenu::new(menu).expect("menu ptr should not be null");
+        let flag = MenuHookFlag::from_raw(flag);
+        T::call(menuidstr, menu, flag);
+    });
 }
 
 /// Consumers need to implement this trait in order to let REAPER know if a toggleable action is

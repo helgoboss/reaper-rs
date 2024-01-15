@@ -11,15 +11,16 @@ use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
     AcceleratorPosition, BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter,
-    Handle, HookCommand, HookCommand2, HookPostCommand, HookPostCommand2, MainThreadScope,
-    MeasureAlignment, OnAudioBuffer, OwnedAcceleratorRegister, OwnedAudioHookRegister,
-    OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration, ProjectContext,
-    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex,
-    ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
-    TranslateAccel,
+    Handle, HookCommand, HookCommand2, HookCustomMenu, HookPostCommand, HookPostCommand2,
+    MainThreadScope, MeasureAlignment, OnAudioBuffer, OwnedAcceleratorRegister,
+    OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration,
+    ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult,
+    ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
+    ToggleAction, TranslateAccel,
 };
 use reaper_low::raw::audio_hook_register_t;
 
+use crate::fn_traits::delegating_hook_custom_menu;
 use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
@@ -309,6 +310,34 @@ impl ReaperSession {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookCommand2(
                 delegating_hook_command_2::<T>,
+            ));
+        }
+    }
+
+    /// Registers a custom menu hook.
+    ///
+    /// See [`plugin_register_add_hook_command`](#method.plugin_register_add_hook_command) for
+    /// understanding how to use this function (it has a very similar design).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_hook_custom_menu<T: HookCustomMenu>(
+        &mut self,
+    ) -> ReaperFunctionResult<()> {
+        unsafe {
+            self.plugin_register_add(RegistrationObject::HookCustomMenu(
+                delegating_hook_custom_menu::<T>,
+            ))?;
+        }
+        Ok(())
+    }
+
+    /// Unregisters a custom menu hook.
+    pub fn plugin_register_remove_hook_custom_menu<T: HookCustomMenu>(&mut self) {
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::HookCustomMenu(
+                delegating_hook_custom_menu::<T>,
             ));
         }
     }

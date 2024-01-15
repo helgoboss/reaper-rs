@@ -1,6 +1,7 @@
 //! Exposes important raw types, functions and constants from the C++ REAPER API.
 #![allow(non_camel_case_types)]
 
+use std::ffi::c_char;
 use std::os::raw::{c_int, c_void};
 
 /// Structs, types and constants defined by REAPER.
@@ -167,6 +168,10 @@ pub type HookCommand2 = extern "C" fn(
     relmode: c_int,
     hwnd: HWND,
 ) -> bool;
+
+/// Function pointer type for a menu hook function that is called when a customizable REAPER menu is initialized or
+/// shown.
+pub type HookCustomMenu = extern "C" fn(menuidstr: *const c_char, menu: HMENU, flag: c_int);
 
 /// Function pointer type for toggle actions.
 pub type ToggleAction = extern "C" fn(command_id: c_int) -> c_int;

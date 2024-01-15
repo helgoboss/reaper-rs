@@ -5,6 +5,7 @@ use crate::{
 };
 
 use crate::util::concat_reaper_strs;
+use derive_more::Display;
 use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
 use reaper_low::raw;
@@ -724,6 +725,8 @@ pub enum RegistrationObject<'a> {
     /// relmode absolute(0) or 1/2/3 for relative adjust modes
     /// ```
     HookCommand2(raw::HookCommand2),
+    /// Menu hook function that is called when a customizable REAPER menu is initialized or shown.
+    HookCustomMenu(raw::HookCustomMenu),
     /// A hook post command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
@@ -870,6 +873,10 @@ impl<'a> RegistrationObject<'a> {
             },
             HookPostCommand2(func) => PluginRegistration {
                 key: reaper_str!("hookpostcommand2").into(),
+                value: func as _,
+            },
+            HookCustomMenu(func) => PluginRegistration {
+                key: reaper_str!("hookcustommenu").into(),
                 value: func as _,
             },
             Timer(func) => PluginRegistration {
@@ -1548,6 +1555,29 @@ impl WindowContext {
         match Hwnd::new(raw) {
             None => NoWindow,
             Some(hwnd) => Win(hwnd),
+        }
+    }
+}
+
+/// Whether a custom menu is initialized or populated.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum MenuHookFlag {
+    /// The menu is being populated.
+    Init,
+    /// The menu is being populated and shown.
+    Show,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<i32>),
+}
+
+impl MenuHookFlag {
+    /// Converts the given raw value as returned from the low-level API to a menu hook flag.
+    pub(crate) fn from_raw(flag: i32) -> Self {
+        match flag {
+            0 => Self::Init,
+            1 => Self::Show,
+            x => Self::Unknown(Hidden(x)),
         }
     }
 }

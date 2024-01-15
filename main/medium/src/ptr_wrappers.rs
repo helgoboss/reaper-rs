@@ -203,6 +203,11 @@ ptr_wrapper! {
 }
 
 ptr_wrapper! {
+    /// Pointer to a menu (menu handle).
+    Hmenu(raw::HMENU__)
+}
+
+ptr_wrapper! {
     /// Pointer to a module/instance (module/instance handle).
     Hinstance(c_void)
 }

@@ -21,15 +21,16 @@ use crate::{
     PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds, Progress,
     ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject,
     ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode,
-    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
-    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
-    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState,
-    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior,
-    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    ReaperPanValue, ReaperPointer, ReaperSession, ReaperStr, ReaperString, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
+    RecordingMode, ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext,
+    SectionId, SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -572,6 +573,16 @@ impl<UsageScope> Reaper<UsageScope> {
             attribute_key.into_raw().as_ptr(),
             new_value,
         )
+    }
+
+    /// Adds an "Extensions" main menu (if not already added), which the extension can populate/modify with
+    /// [`ReaperSession::plugin_register_add_hook_custom_menu`].
+    pub fn add_extensions_main_menu(&self)
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.AddExtensionsMainMenu();
     }
 
     /// Gets or sets an item attribute.
