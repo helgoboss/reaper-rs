@@ -4,7 +4,6 @@ use crate::{
 };
 use libc::c_char;
 use reaper_low::{firewall, raw};
-use std::ffi::c_void;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 
