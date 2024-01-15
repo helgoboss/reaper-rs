@@ -32,8 +32,11 @@ pub fn execute_integration_test(on_finish: impl Fn(Result<(), Box<dyn Error>>) +
     let step_count = steps.len();
     let rx_setup = RxSetup::setup();
     execute_next_step(steps, step_count, move |result| {
-        rx_setup.teardown();
+        // We keep the surface around after teardown because this whole thing is driven by the surface.
+        // See plugin_register_remove_csurf_inst. Would otherwise result in undefined behavior, maybe crash.
+        let surface = rx_setup.teardown();
         on_finish(result);
+        surface
     });
 }
 
@@ -92,27 +95,29 @@ impl RxSetup {
         }
     }
 
-    fn teardown(&self) {
+    fn teardown(&self) -> Option<Box<MiddlewareControlSurface<TestControlSurfaceMiddleware>>> {
         let mut session = Reaper::get().medium_session();
-        unsafe {
-            let _ = session.plugin_register_remove_csurf_inst(self.control_surface_reg_handle);
-        }
+        let csurf_inst =
+            unsafe { session.plugin_register_remove_csurf_inst(self.control_surface_reg_handle) };
         session.plugin_register_remove_hook_post_command_2::<ActionRxHookPostCommand2<Test>>();
         session.plugin_register_remove_hook_post_command::<ActionRxHookPostCommand<Test>>();
+        csurf_inst
     }
 }
 
 fn execute_next_step(
     mut steps: VecDeque<TestStep>,
     step_count: usize,
-    on_finish: impl Fn(Result<(), Box<dyn Error>>) + 'static,
-) {
+    on_finish: impl Fn(
+            Result<(), Box<dyn Error>>,
+        ) -> Option<Box<MiddlewareControlSurface<TestControlSurfaceMiddleware>>>
+        + 'static,
+) -> Option<Box<MiddlewareControlSurface<TestControlSurfaceMiddleware>>> {
     let step = match steps.pop_front() {
         Some(step) => step,
         None => {
             log("\n**Integration test was successful**\n\n");
-            on_finish(Ok(()));
-            return;
+            return on_finish(Ok(()));
         }
     };
     log_step(step_count - steps.len() - 1, &step.name);
@@ -134,13 +139,14 @@ fn execute_next_step(
             Ok(()) => {
                 Test::task_support()
                     .do_later_in_main_thread_from_main_thread_asap(move || {
-                        execute_next_step(steps, step_count, on_finish)
+                        execute_next_step(steps, step_count, on_finish);
                     })
                     .expect("couldn't schedule next test step");
+                None
             }
             Err(e) => {
                 log_failure(&e);
-                on_finish(Err(e));
+                on_finish(Err(e))
             }
         }
     } else {
@@ -153,9 +159,10 @@ fn execute_next_step(
         log_skip(reason);
         Test::task_support()
             .do_later_in_main_thread_from_main_thread_asap(move || {
-                execute_next_step(steps, step_count, on_finish)
+                execute_next_step(steps, step_count, on_finish);
             })
             .expect("couldn't schedule next test step");
+        None
     }
 }
 
