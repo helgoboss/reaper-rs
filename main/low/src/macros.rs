@@ -8,11 +8,11 @@
 /// # Example
 ///
 /// ```
-/// use reaper_low::{reaper_vst_plugin, static_vst_plugin_context, StaticVstPluginContext};
+/// use reaper_low::{reaper_vst_plugin, static_plugin_context, StaticPluginContext};
 ///
 /// reaper_vst_plugin!();
 ///
-/// let static_context: StaticVstPluginContext = static_vst_plugin_context();
+/// let static_context: StaticPluginContext = static_plugin_context();
 /// ```
 ///
 /// [`PluginContext::from_vst_plugin()`]:

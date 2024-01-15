@@ -1,6 +1,6 @@
 use super::raw::{reaper_plugin_info_t, HINSTANCE};
 use super::PluginContext;
-use crate::StaticExtensionPluginContext;
+use crate::StaticPluginContext;
 use std::error::Error;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
@@ -30,7 +30,7 @@ pub fn firewall<F: FnOnce() -> R, R>(f: F) -> Option<R> {
 pub unsafe fn bootstrap_extension_plugin(
     h_instance: HINSTANCE,
     rec: *mut reaper_plugin_info_t,
-    static_context: StaticExtensionPluginContext,
+    static_context: StaticPluginContext,
     init: fn(PluginContext) -> Result<(), Box<dyn Error>>,
 ) -> i32 {
     // TODO-low Log early errors

@@ -1,22 +1,10 @@
-use crate::{
-    raw, register_plugin_destroy_hook, GetSwellFunc, StaticExtensionPluginContext,
-    StaticVstPluginContext,
-};
+use crate::{raw, register_plugin_destroy_hook, GetSwellFunc, StaticPluginContext};
 
-/// Exposes the (hopefully) obtained static extension plug-in context.
+/// Exposes the (hopefully) obtained static plug-in context.
 ///
 /// This is typically called by one of the plugin macros.
-pub fn static_extension_plugin_context() -> StaticExtensionPluginContext {
-    StaticExtensionPluginContext {
-        get_swell_func: unsafe { swell::GET_SWELL_FUNC },
-    }
-}
-
-/// Exposes the (hopefully) obtained static VST plug-in context.
-///
-/// This is typically called by one of the plugin macros.
-pub fn static_vst_plugin_context() -> StaticVstPluginContext {
-    StaticVstPluginContext {
+pub fn static_plugin_context() -> StaticPluginContext {
+    StaticPluginContext {
         h_instance: unsafe { hinstance::HINSTANCE },
         get_swell_func: unsafe { swell::GET_SWELL_FUNC },
     }
@@ -94,7 +82,7 @@ mod hinstance {
     use crate::raw;
     use std::sync::Once;
 
-    /// On Windows this will contain the module handle after REAPER start.
+    /// On Windows, this will contain the module handle after the plug-in has been loaded.
     pub static mut HINSTANCE: raw::HINSTANCE = std::ptr::null_mut();
     pub static INIT_HINSTANCE: Once = Once::new();
 }
