@@ -459,6 +459,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
                 reaper.register_action(
                     "reaperRsTest2",
                     "reaper-rs test toggle action",
+                    None,
                     move || {
                         mock.invoke(43);
                     },
@@ -499,6 +500,7 @@ fn register_and_unregister_action() -> TestStep {
                 reaper.register_action(
                     "reaperRsTest",
                     "reaper-rs test action",
+                    None,
                     move || {
                         mock.invoke(42);
                     },
@@ -2072,6 +2074,7 @@ fn fn_mut_action() -> TestStep {
         let _action1 = _session.register_action(
             "reaperRsCounter",
             "reaper-rs counter",
+            None,
             move || {
                 Reaper::get().show_console_msg(format!("Hello from Rust number {i}\0"));
                 i += 1;

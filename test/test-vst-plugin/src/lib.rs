@@ -145,6 +145,7 @@ impl TestVstPlugin {
                 reaper.register_action(
                     "reaperRsVstIntegrationTests",
                     "reaper-rs VST integration tests",
+                    None,
                     || reaper_test::execute_integration_test(|_| ()),
                     ActionKind::NotToggleable,
                 );

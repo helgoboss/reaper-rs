@@ -1,8 +1,8 @@
 use crate::{ActionCharacter, Project, Reaper, ReaperError, ReaperResult, Section};
 use c_str_macro::c_str;
 use reaper_medium::{
-    ActionValueChange, CommandId, ProjectContext, ReaperStr, ReaperString, SectionContext,
-    WindowContext,
+    AcceleratorBehavior, AcceleratorKeyCode, ActionValueChange, CommandId, ProjectContext,
+    ReaperStr, ReaperString, SectionContext, WindowContext,
 };
 
 use helgoboss_midi::{U14, U7};
@@ -12,9 +12,16 @@ use reaper_medium::WindowContext::Win;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 
+use enumflags2::BitFlags;
 use std::ffi::CString;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct KeyBinding {
+    pub behavior: BitFlags<AcceleratorBehavior>,
+    pub key_code: AcceleratorKeyCode,
+}
+
+#[derive(Copy, Clone, Debug)]
 struct RuntimeData {
     section: Section,
     // Sometimes shortly named cmd in REAPER API. Unique within section. Might be filled lazily.

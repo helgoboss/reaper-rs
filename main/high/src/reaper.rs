@@ -1,4 +1,4 @@
-use crate::CrashInfo;
+use crate::{CrashInfo, KeyBinding};
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -349,6 +349,7 @@ impl Reaper {
         &self,
         command_name: impl Into<ReaperStringArg<'static>>,
         description: impl Into<ReaperStringArg<'static>>,
+        default_key_binding: Option<KeyBinding>,
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
@@ -371,12 +372,16 @@ impl Reaper {
             SessionStatus::Sleeping(_) => return registered_action,
             SessionStatus::Awake(s) => s,
         };
-        let address = medium
-            .plugin_register_add_gaccel(OwnedGaccelRegister::without_key_binding(
+        let reg = match default_key_binding {
+            None => OwnedGaccelRegister::without_key_binding(command_id, description.into_owned()),
+            Some(kb) => OwnedGaccelRegister::with_key_binding(
                 command_id,
                 description.into_owned(),
-            ))
-            .unwrap();
+                kb.behavior,
+                kb.key_code,
+            ),
+        };
+        let address = medium.plugin_register_add_gaccel(reg).unwrap();
         awake_state.gaccel_registers.insert(command_id, address);
         registered_action
     }

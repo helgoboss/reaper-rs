@@ -37,6 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     reaper.register_action(
         "reaperRsIntegrationTests",
         "reaper-rs integration tests",
+        None,
         || reaper_test::execute_integration_test(|_| ()),
         ActionKind::NotToggleable,
     );
