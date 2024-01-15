@@ -40,6 +40,18 @@ pub enum TypeSpecificPluginContext {
     Vst(VstPluginContext),
 }
 
+impl TypeSpecificPluginContext {
+    /// Returns `true` if this is an extension plug-in context.
+    pub fn is_extension(&self) -> bool {
+        matches!(self, Self::Extension(_))
+    }
+
+    /// Returns `true` if this is a VST plug-in context.
+    pub fn is_vst(&self) -> bool {
+        matches!(self, Self::Vst(_))
+    }
+}
+
 /// Additional data available in the context of extension plug-ins.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct ExtensionPluginContext {

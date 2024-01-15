@@ -123,6 +123,7 @@ impl TestVstPlugin {
 
     fn use_high_level_reaper(&mut self) {
         let guard = Reaper::guarded(
+            true,
             || {
                 let context =
                     PluginContext::from_vst_plugin(&self.host, static_plugin_context()).unwrap();

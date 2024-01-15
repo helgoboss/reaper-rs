@@ -229,6 +229,7 @@ pub fn toggleable(is_on: impl Fn() -> bool + 'static) -> ActionKind {
 }
 
 pub struct ReaperGuard {
+    manage_reaper_state: bool,
     go_to_sleep: Option<Box<dyn FnOnce() + Sync + Send>>,
 }
 
@@ -236,10 +237,12 @@ impl Drop for ReaperGuard {
     fn drop(&mut self) {
         debug!(
             Reaper::get().logger(),
-            "REAPER guard dropped. Making _reaper-rs_ sleep..."
+            "REAPER guard dropped. Going to sleep..."
         );
         (self.go_to_sleep.take().unwrap())();
-        let _ = Reaper::get().go_to_sleep();
+        if self.manage_reaper_state {
+            let _ = Reaper::get().go_to_sleep();
+        }
     }
 }
 
@@ -248,9 +251,14 @@ static GUARD_INITIALIZER: std::sync::Once = std::sync::Once::new();
 impl Reaper {
     /// The given initializer is executed only the first time this is called.
     ///
-    /// `wake_up()` is called whenever first first instance pops up. `go_to_sleep()` is called
+    /// `wake_up()` is called whenever the first instance pops up. `go_to_sleep()` is called
     /// whenever the last instance goes away.
+    ///
+    /// If `manage_reaper_state` is `true`, waking up will also wake up reaper-rs (e.g. register actions) and going
+    /// to sleep will put reaper-rs to sleep (e.g. unregister actions). If this is `false`, you must take care of that
+    /// manually. This flag is provided so you can keep reaper-rs awake even if no VST plug-in instance is around.
     pub fn guarded<S: FnOnce() + Sync + Send + 'static>(
+        manage_reaper_state: bool,
         initializer: impl FnOnce(),
         wake_up: impl FnOnce() -> S,
     ) -> Arc<ReaperGuard> {
@@ -270,6 +278,7 @@ impl Reaper {
         let _ = Reaper::get().wake_up();
         let go_to_sleep = wake_up();
         let arc = Arc::new(ReaperGuard {
+            manage_reaper_state,
             go_to_sleep: Some(Box::new(go_to_sleep)),
         });
         *guard = Arc::downgrade(&arc);
@@ -315,14 +324,24 @@ impl Reaper {
         &self.logger
     }
 
+    /// This wakes reaper-rs up.
+    ///
+    /// In particular, it does the following:
+    ///
+    /// - Discards any queued audio hook tasks
+    /// - Adds custom audio hook
+    /// - Registers command hooks (to actually execute invoked custom actions or menu entries)
+    /// - Registers post command hooks (to inform listeners of executed actions)
+    /// - Registers toggle actions (to report action on/off states)
+    /// - Registers all defined actions (before waking up, they are not actually registered)
     pub fn wake_up(&self) -> Result<(), &'static str> {
-        debug!(self.logger(), "Waking up...");
         self.require_main_thread();
         let mut session_status = self.session_status.borrow_mut();
         let sleeping_state = match session_status.deref_mut() {
             SessionStatus::Awake(_) => return Err("Session is already awake"),
             SessionStatus::Sleeping(state) => state.take(),
         };
+        debug!(self.logger(), "Waking up...");
         let sleeping_state = match sleeping_state {
             None => return Err("Previous wake-up left session in invalid state"),
             Some(s) => s,
@@ -366,13 +385,13 @@ impl Reaper {
     }
 
     pub fn go_to_sleep(&self) -> Result<(), &'static str> {
-        debug!(self.logger(), "Going to sleep...");
         self.require_main_thread();
         let mut session_status = self.session_status.borrow_mut();
         let awake_state = match session_status.deref() {
             SessionStatus::Sleeping(_) => return Err("Session is already sleeping"),
             SessionStatus::Awake(s) => s,
         };
+        debug!(self.logger(), "Going to sleep...");
         let mut medium = self.medium_session();
         // Remove audio hook
         let audio_hook = medium
