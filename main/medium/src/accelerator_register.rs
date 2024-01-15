@@ -127,7 +127,7 @@ pub struct AcceleratorKeyCode(u16);
 
 impl AcceleratorKeyCode {
     /// Creates a key code.
-    pub fn new(value: u16) -> Self {
+    pub const fn new(value: u16) -> Self {
         Self(value)
     }
 

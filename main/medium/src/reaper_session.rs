@@ -566,6 +566,7 @@ impl ReaperSession {
         Ok(handle)
     }
 
+    /// Like [`Self::plugin_register_add_gaccel`] but registers shortcut globally, except if text field focused.
     pub fn plugin_register_add_gaccel_global(
         &mut self,
         register: OwnedGaccelRegister,
@@ -577,6 +578,7 @@ impl ReaperSession {
             .map_err(|_| self.gaccel_registers.release(handle).unwrap())
     }
 
+    /// Like [`Self::plugin_register_add_gaccel`] but registers shortcut globally, even if text field focused.
     pub fn plugin_register_add_gaccel_global_text(
         &mut self,
         register: OwnedGaccelRegister,

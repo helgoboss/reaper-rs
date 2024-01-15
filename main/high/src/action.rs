@@ -19,6 +19,14 @@ use std::ffi::CString;
 pub struct KeyBinding {
     pub behavior: BitFlags<AcceleratorBehavior>,
     pub key_code: AcceleratorKeyCode,
+    pub kind: KeyBindingKind,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum KeyBindingKind {
+    Local,
+    Global,
+    GlobalText,
 }
 
 #[derive(Copy, Clone, Debug)]

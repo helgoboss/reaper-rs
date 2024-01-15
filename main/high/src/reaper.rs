@@ -1,4 +1,4 @@
-use crate::{CrashInfo, KeyBinding};
+use crate::{CrashInfo, KeyBinding, KeyBindingKind};
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -22,8 +22,8 @@ use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
     ActionValueChange, CommandId, Handle, HookCommand, HookPostCommand2, OwnedGaccelRegister,
-    ReaProject, RealTimeAudioThreadScope, ReaperStr, ReaperString, ReaperStringArg, SectionContext,
-    ToggleAction, ToggleActionResult, WindowContext,
+    ReaProject, RealTimeAudioThreadScope, ReaperSession, ReaperStr, ReaperString, ReaperStringArg,
+    SectionContext, ToggleAction, ToggleActionResult, WindowContext,
 };
 use slog::{debug, Logger};
 use std::fmt;
@@ -155,7 +155,22 @@ impl Debug for SleepingState {
 
 #[derive(Debug)]
 struct AwakeState {
-    gaccel_registers: HashMap<CommandId, Handle<raw::gaccel_register_t>>,
+    action_regs: HashMap<CommandId, ActionReg>,
+}
+
+#[derive(Debug)]
+struct ActionReg {
+    handle: Handle<raw::gaccel_register_t>,
+    key_binding_kind: KeyBindingKind,
+}
+
+impl ActionReg {
+    pub fn new(handle: Handle<raw::gaccel_register_t>, key_binding_kind: KeyBindingKind) -> Self {
+        Self {
+            handle,
+            key_binding_kind,
+        }
+    }
 }
 
 pub enum ActionKind {
@@ -289,18 +304,18 @@ impl Reaper {
         // This only works since Reaper 6.19+dev1226, so we must allow it to fail.
         let _ = medium.plugin_register_add_hook_post_command_2::<HighLevelHookPostCommand2>();
         *session_status = SessionStatus::Awake(AwakeState {
-            gaccel_registers: self
+            action_regs: self
                 .command_by_id
                 .borrow()
                 .iter()
                 .map(|(id, command)| {
-                    let handle = medium
-                        .plugin_register_add_gaccel(OwnedGaccelRegister::without_key_binding(
-                            *id,
-                            command.description.clone(),
-                        ))
-                        .unwrap();
-                    (*id, handle)
+                    let reg = register_action(
+                        &mut medium,
+                        *id,
+                        command.description.clone(),
+                        command.key_binding,
+                    );
+                    (*id, reg)
                 })
                 .collect(),
         });
@@ -318,8 +333,18 @@ impl Reaper {
         debug!(self.logger(), "Going to sleep...");
         let mut medium = self.medium_session();
         // Unregister actions
-        for gaccel_handle in awake_state.gaccel_registers.values() {
-            medium.plugin_register_remove_gaccel(*gaccel_handle);
+        for reg in awake_state.action_regs.values() {
+            match reg.key_binding_kind {
+                KeyBindingKind::Local => {
+                    medium.plugin_register_remove_gaccel(reg.handle);
+                }
+                KeyBindingKind::Global => {
+                    medium.plugin_register_remove_gaccel_global(reg.handle);
+                }
+                KeyBindingKind::GlobalText => {
+                    medium.plugin_register_remove_gaccel_global_text(reg.handle);
+                }
+            }
         }
         // Remove functions
         medium.plugin_register_remove_hook_post_command_2::<HighLevelHookPostCommand2>();
@@ -361,6 +386,7 @@ impl Reaper {
             Rc::new(RefCell::new(operation)),
             kind,
             description.to_reaper_string(),
+            default_key_binding,
         );
         if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
             p.insert(command);
@@ -372,17 +398,13 @@ impl Reaper {
             SessionStatus::Sleeping(_) => return registered_action,
             SessionStatus::Awake(s) => s,
         };
-        let reg = match default_key_binding {
-            None => OwnedGaccelRegister::without_key_binding(command_id, description.into_owned()),
-            Some(kb) => OwnedGaccelRegister::with_key_binding(
-                command_id,
-                description.into_owned(),
-                kb.behavior,
-                kb.key_code,
-            ),
-        };
-        let address = medium.plugin_register_add_gaccel(reg).unwrap();
-        awake_state.gaccel_registers.insert(command_id, address);
+        let action_reg = register_action(
+            &mut medium,
+            command_id,
+            description.into_owned(),
+            default_key_binding,
+        );
+        awake_state.action_regs.insert(command_id, action_reg);
         registered_action
     }
 
@@ -398,9 +420,21 @@ impl Reaper {
             SessionStatus::Sleeping(_) => return,
             SessionStatus::Awake(s) => s,
         };
-        if let Some(gaccel_handle) = awake_state.gaccel_registers.get(&command_id) {
-            self.medium_session()
-                .plugin_register_remove_gaccel(*gaccel_handle);
+        if let Some(reg) = awake_state.action_regs.get(&command_id) {
+            match reg.key_binding_kind {
+                KeyBindingKind::Local => {
+                    self.medium_session()
+                        .plugin_register_remove_gaccel(reg.handle);
+                }
+                KeyBindingKind::Global => {
+                    self.medium_session()
+                        .plugin_register_remove_gaccel_global(reg.handle);
+                }
+                KeyBindingKind::GlobalText => {
+                    self.medium_session()
+                        .plugin_register_remove_gaccel_global_text(reg.handle);
+                }
+            }
         }
     }
 
@@ -488,6 +522,7 @@ struct Command {
     operation: Rc<RefCell<dyn FnMut()>>,
     kind: ActionKind,
     description: ReaperString,
+    key_binding: Option<KeyBinding>,
 }
 
 impl Debug for Command {
@@ -501,11 +536,13 @@ impl Command {
         operation: Rc<RefCell<dyn FnMut()>>,
         kind: ActionKind,
         description: ReaperString,
+        key_binding: Option<KeyBinding>,
     ) -> Command {
         Command {
             operation,
             kind,
             description,
+            key_binding,
         }
     }
 }
@@ -594,4 +631,54 @@ fn require_main_thread(context: &PluginContext) {
         context.is_in_main_thread(),
         "this function must be called in the main thread"
     );
+}
+
+fn register_action(
+    session: &mut ReaperSession,
+    command_id: CommandId,
+    description: impl Into<ReaperStringArg<'static>>,
+    default_key_binding: Option<KeyBinding>,
+) -> ActionReg {
+    let (reg, key_binding_kind) = match default_key_binding {
+        None => (
+            OwnedGaccelRegister::without_key_binding(command_id, description),
+            KeyBindingKind::Local,
+        ),
+        Some(kb) => (
+            OwnedGaccelRegister::with_key_binding(
+                command_id,
+                description,
+                kb.behavior,
+                kb.key_code,
+            ),
+            kb.kind,
+        ),
+    };
+    let register_local = |session: &mut ReaperSession, reg| {
+        ActionReg::new(
+            session.plugin_register_add_gaccel(reg).unwrap(),
+            KeyBindingKind::Local,
+        )
+    };
+    match key_binding_kind {
+        KeyBindingKind::Local => register_local(session, reg),
+        KeyBindingKind::Global => {
+            match session.plugin_register_add_gaccel_global(reg) {
+                Ok(handle) => ActionReg::new(handle, key_binding_kind),
+                Err(reg) => {
+                    // REAPER < 7.07
+                    register_local(session, reg)
+                }
+            }
+        }
+        KeyBindingKind::GlobalText => {
+            match session.plugin_register_add_gaccel_global_text(reg) {
+                Ok(handle) => ActionReg::new(handle, key_binding_kind),
+                Err(reg) => {
+                    // REAPER < 7.07
+                    register_local(session, reg)
+                }
+            }
+        }
+    }
 }

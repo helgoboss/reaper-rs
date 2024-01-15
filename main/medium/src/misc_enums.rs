@@ -778,7 +778,9 @@ pub enum RegistrationObject<'a> {
     /// command ID, desc is the description, and accel's other parameters are the key to bind.
     /// ```
     Gaccel(Handle<raw::gaccel_register_t>),
+    /// Like [`Self::Gaccel`] but registers shortcut globally, except if text field focused.
     GaccelGlobal(Handle<raw::gaccel_register_t>),
+    /// Like [`Self::Gaccel`] but registers shortcut globally, even if text field focused.
     GaccelGlobalText(Handle<raw::gaccel_register_t>),
     /// A record which lets you get a place in the keyboard processing queue.
     BackAccelerator(Handle<raw::accelerator_register_t>),
