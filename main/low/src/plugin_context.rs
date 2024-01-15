@@ -88,7 +88,7 @@ impl PluginContext {
     ///
     /// [`reaper_plugin_info_t`]: raw/struct.reaper_plugin_info_t.html
     pub unsafe fn from_extension_plugin(
-        _h_instance: raw::HINSTANCE,
+        h_instance: raw::HINSTANCE,
         rec: raw::reaper_plugin_info_t,
         static_context: StaticPluginContext,
     ) -> Result<PluginContext, ContextFromExtensionPluginError> {
@@ -107,7 +107,18 @@ impl PluginContext {
                 register,
                 get_func,
             }),
-            h_instance: static_context.h_instance,
+            // Prefer h_instance from the static context because this one will for sure be the one from
+            // the correct DLL's entry point. In Helgobox, we have an extension plug-in and a VST plug-in.
+            // The extension DLL loads the VST plug-in DLL *itself* (in order to eagerly load some things) and
+            // calls the VST plug-ins extension plug-in entry point ... it's then as if the VST plug-in DLL itself
+            // would be loaded right at startup. But in this case it would obviously pass the h_instance of the
+            // extension DLL to the extension entry point of the VST DLL, and we don't want that because our
+            // Swell struct would be using the wrong HINSTANCE to create dialogs etc.
+            h_instance: if static_context.h_instance.is_null() {
+                h_instance
+            } else {
+                static_context.h_instance
+            },
             get_swell_func_ptr: static_context.get_swell_func,
             main_thread_id: std::thread::current().id(),
         })
