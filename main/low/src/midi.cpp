@@ -38,4 +38,8 @@ namespace reaper_midi {
   void midi_Output_SendMsg(midi_Output* self, MIDI_event_t* msg, int frame_offset) {
     self->SendMsg(msg, frame_offset);
   }
+
+  void delete_midi_output(midi_Output* output) {
+    delete output;
+  }
 }

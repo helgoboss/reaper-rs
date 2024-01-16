@@ -8045,6 +8045,27 @@ impl<UsageScope> Reaper<UsageScope> {
         use_device(arg.as_ref())
     }
 
+    // /// Grants temporary access to a MIDI output device that is not open yet.
+    // pub fn create_midi_output<R>(
+    //     &self,
+    //     device_id: MidiOutputDeviceId,
+    //     stream_mode: bool,
+    //     use_device: impl FnOnce(Option<&MidiOutput>) -> R,
+    // ) -> R {
+    //     let ptr = unsafe {
+    //         self.low
+    //             .CreateMIDIOutput(device_id.to_raw(), stream_mode, null_mut())
+    //     };
+    //     let arg = NonNull::new(ptr).map(MidiOutput);
+    //     let result = use_device(arg.as_ref());
+    //     if let Some(output) = arg {
+    //         unsafe {
+    //             reaper_low::delete_midi_output(output.0);
+    //         }
+    //     }
+    //     result
+    // }
+
     /// Returns if the given device is open (enabled in REAPER's MIDI preferences).
     pub fn get_midi_output_is_open(&self, device_id: MidiOutputDeviceId) -> bool
     where

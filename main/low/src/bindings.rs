@@ -11635,6 +11635,9 @@ pub mod root {
                 frame_offset: ::std::os::raw::c_int,
             );
         }
+        extern "C" {
+            pub fn delete_midi_output(output: *mut root::midi_Output);
+        }
     }
     pub type WDL_INT64 = ::std::os::raw::c_longlong;
     #[repr(C)]

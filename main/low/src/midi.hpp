@@ -6,6 +6,9 @@
 // to the respective method of the `self` object. This glue code is necessary because Rust can't call  C++ pure virtual
 // functions directly.
 namespace reaper_midi {
+  // Utility functions
+  extern "C" void delete_midi_output(midi_Output* output);
+
   // MIDI_eventlist methods
   extern "C" MIDI_event_t* MIDI_eventlist_EnumItems(MIDI_eventlist* self, int* bpos);
   extern "C" void MIDI_eventlist_AddItem(MIDI_eventlist* self, MIDI_event_t* evt);
