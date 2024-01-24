@@ -3291,6 +3291,20 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr)
     }
 
+    /// Grants temporary access to the "reaper.ini" full filename.
+    pub fn get_ini_file<R>(&self, use_ini_file: impl FnOnce(&Path) -> R) -> R
+    where
+        UsageScope: AnyThread,
+    {
+        // TODO-high I think we should either insist on the path being UTF-8 and return an Utf8Path (separate crate)
+        //  or not interpret the path as UTF-8 and return Path. At the moment, it's something inbetween.
+        let ptr = self.low.get_ini_file();
+        let reaper_str =
+            unsafe { create_passing_c_str(ptr).expect("should always return ini path") };
+        let path = Path::new(reaper_str.to_str());
+        use_ini_file(path)
+    }
+
     /// Returns the REAPER preference with the given name.
     pub fn get_config_var<'a>(
         &self,
