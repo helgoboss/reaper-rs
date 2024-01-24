@@ -459,7 +459,7 @@ impl Reaper {
         Ok(result)
     }
 
-    fn get_preference_ref<'a, T>(
+    pub fn get_preference_ref<'a, T>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,
     ) -> Result<&mut T, &'static str> {

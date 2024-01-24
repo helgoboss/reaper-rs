@@ -59,8 +59,8 @@ use std::os::raw::c_char;
 pub struct ReaperStringArg<'a>(Cow<'a, ReaperStr>);
 
 impl<'a> ReaperStringArg<'a> {
-    /// Returns a raw pointer to the string. Used by code in this crate only.
-    pub(crate) fn as_ptr(&self) -> *const c_char {
+    /// Returns a raw pointer to the string.
+    pub fn as_ptr(&self) -> *const c_char {
         self.0.as_c_str().as_ptr()
     }
 
@@ -173,8 +173,8 @@ impl ReaperString {
         )
     }
 
-    /// Returns a raw pointer to the string. Used by code in this crate only.
-    pub(crate) fn as_ptr(&self) -> *const c_char {
+    /// Returns a raw pointer to the string.
+    pub fn as_ptr(&self) -> *const c_char {
         self.0.as_ptr()
     }
 
@@ -266,8 +266,8 @@ impl ReaperStr {
         ReaperStr::new(CStr::from_ptr(ptr))
     }
 
-    /// Returns a raw pointer to the string. Used by code in this crate only.
-    pub(crate) fn as_ptr(&self) -> *const c_char {
+    /// Returns a raw pointer to the string.
+    pub fn as_ptr(&self) -> *const c_char {
         self.0.as_ptr()
     }
 
