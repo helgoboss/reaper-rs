@@ -364,6 +364,33 @@ impl Swell {
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn WritePrivateProfileString(
+        &self,
+        appname: *const ::std::os::raw::c_char,
+        keyname: *const ::std::os::raw::c_char,
+        val: *const ::std::os::raw::c_char,
+        fn_: *const ::std::os::raw::c_char,
+    ) -> root::BOOL {
+        let appname_utf16 = utf8_to_16(appname);
+        let keyname_utf16 = utf8_to_16(keyname);
+        let val_utf16 = utf8_to_16(val);
+        let fn_utf16 = utf8_to_16(fn_);
+        let result = winapi::um::winuser::WritePrivateProfileStringW(
+            appname_utf16.as_ptr() as _,
+            keyname_utf16.as_ptr() as _,
+            val_utf16.as_ptr() as _,
+            fn_utf16.as_ptr() as _,
+        );
+        std::mem::drop(appname_utf16);
+        std::mem::drop(keyname_utf16);
+        std::mem::drop(val_utf16);
+        std::mem::drop(fn_utf16);
+        result as _
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn SetMenuItemInfo(
         &self,
         hMenu: root::HMENU,
