@@ -82,7 +82,6 @@ mod reaper;
 pub use reaper::*;
 
 mod reaper_impl;
-pub use reaper_impl::*;
 
 mod swell;
 pub use swell::*;
