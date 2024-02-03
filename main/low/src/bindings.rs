@@ -11590,6 +11590,9 @@ pub mod root {
         #[allow(unused_imports)]
         use self::super::super::root;
         extern "C" {
+            pub fn delete_midi_output(output: *mut root::midi_Output);
+        }
+        extern "C" {
             pub fn MIDI_eventlist_EnumItems(
                 self_: *mut root::MIDI_eventlist,
                 bpos: *mut ::std::os::raw::c_int,
@@ -11634,9 +11637,6 @@ pub mod root {
                 msg: *mut root::MIDI_event_t,
                 frame_offset: ::std::os::raw::c_int,
             );
-        }
-        extern "C" {
-            pub fn delete_midi_output(output: *mut root::midi_Output);
         }
     }
     pub type WDL_INT64 = ::std::os::raw::c_longlong;

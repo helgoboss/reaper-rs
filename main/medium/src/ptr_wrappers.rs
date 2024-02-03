@@ -203,6 +203,11 @@ ptr_wrapper! {
 }
 
 ptr_wrapper! {
+    /// Pointer to a brush.
+    Hbrush(raw::HGDIOBJ__)
+}
+
+ptr_wrapper! {
     /// Pointer to a menu (menu handle).
     Hmenu(raw::HMENU__)
 }
