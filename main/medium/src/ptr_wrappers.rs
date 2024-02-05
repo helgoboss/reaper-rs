@@ -208,6 +208,11 @@ ptr_wrapper! {
 }
 
 ptr_wrapper! {
+    /// Pointer to a device context.
+    Hdc(raw::HDC__)
+}
+
+ptr_wrapper! {
     /// Pointer to a menu (menu handle).
     Hmenu(raw::HMENU__)
 }

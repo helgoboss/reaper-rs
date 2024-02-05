@@ -212,7 +212,7 @@ impl Swell {
         }
     }
 
-    pub fn RGB(r: u8, g: u8, b: u8) -> root::DWORD {
+    pub const fn RGB(r: u8, g: u8, b: u8) -> root::DWORD {
         #[cfg(target_family = "unix")]
         {
             // SWELL says: "the byte ordering of RGB() etc is different than on win32"

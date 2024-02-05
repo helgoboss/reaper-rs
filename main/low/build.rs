@@ -151,7 +151,7 @@ mod codegen {
                 .whitelist_var("WM_.*")
                 .whitelist_var("WS_.*")
                 .whitelist_var("GW_.*")
-                .whitelist_var("GWL^_.*")
+                .whitelist_var("GWL_.*")
                 .whitelist_var("SIF_.*")
                 .whitelist_var("SB_.*")
                 .whitelist_var("EN_.*")

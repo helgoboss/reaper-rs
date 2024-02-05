@@ -61,6 +61,12 @@ pub mod root {
     pub const GW_HWNDPREV: u32 = 3;
     pub const GW_OWNER: u32 = 4;
     pub const GW_CHILD: u32 = 5;
+    pub const GWL_HWNDPARENT: i32 = -25;
+    pub const GWL_USERDATA: i32 = -21;
+    pub const GWL_ID: i32 = -12;
+    pub const GWL_STYLE: i32 = -16;
+    pub const GWL_EXSTYLE: i32 = -20;
+    pub const GWL_WNDPROC: i32 = -4;
     pub const WS_CHILD: u32 = 1073741824;
     pub const WS_DISABLED: u32 = 134217728;
     pub const WS_CLIPSIBLINGS: u32 = 67108864;
