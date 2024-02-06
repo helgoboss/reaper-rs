@@ -7776,6 +7776,13 @@ impl Swell {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DeleteObject(&self, arg1: root::HGDIOBJ) {
+        unsafe { windows::DeleteObject(arg1) }
+    }
+    #[cfg(target_family = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn SetTextColor(&self, ctx: root::HDC, col: ::std::os::raw::c_int) {
         unsafe { windows::SetTextColor(ctx, col) }
     }
@@ -9553,6 +9560,9 @@ mod windows {
     }
     extern "system" {
         pub fn CreateSolidBrush(col: ::std::os::raw::c_int) -> root::HBRUSH;
+    }
+    extern "system" {
+        pub fn DeleteObject(arg1: root::HGDIOBJ);
     }
     extern "system" {
         pub fn SetTextColor(ctx: root::HDC, col: ::std::os::raw::c_int);

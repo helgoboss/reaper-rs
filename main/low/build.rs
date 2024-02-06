@@ -316,6 +316,7 @@ mod codegen {
             "BitBlt",
             "StretchBlt",
             "CreateSolidBrush",
+            "DeleteObject",
             "SetTextColor",
             "SetBkMode",
             "SetBkColor",
