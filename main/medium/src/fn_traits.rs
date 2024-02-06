@@ -2,8 +2,8 @@ use crate::{
     ActionValueChange, CommandId, Hmenu, KbdSectionInfo, MenuHookFlag, ReaProject, ReaperStr,
     SectionContext, WindowContext,
 };
-use libc::c_char;
 use reaper_low::{firewall, raw};
+use std::ffi::c_char;
 use std::os::raw::c_int;
 use std::ptr::NonNull;
 

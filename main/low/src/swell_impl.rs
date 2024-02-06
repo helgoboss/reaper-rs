@@ -375,7 +375,7 @@ impl Swell {
         let keyname_utf16 = utf8_to_16(keyname);
         let val_utf16 = utf8_to_16(val);
         let fn_utf16 = utf8_to_16(fn_);
-        let result = winapi::um::winuser::WritePrivateProfileStringW(
+        let result = winapi::um::winbase::WritePrivateProfileStringW(
             appname_utf16.as_ptr() as _,
             keyname_utf16.as_ptr() as _,
             val_utf16.as_ptr() as _,
