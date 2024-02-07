@@ -139,6 +139,8 @@ mod codegen {
                 .whitelist_var("REAPER_PLUGIN_VERSION")
                 .whitelist_var("REAPER_PITCHSHIFT_API_VER")
                 .whitelist_var("UNDO_STATE_.*")
+                .whitelist_var("NULL_BRUSH")
+                .whitelist_var("NULL_PEN")
                 .whitelist_var("VK_.*")
                 .whitelist_var("BM_.*")
                 .whitelist_var("BST_.*")
@@ -317,6 +319,7 @@ mod codegen {
             "StretchBlt",
             "CreateSolidBrush",
             "DeleteObject",
+            "GetStockObject",
             "SetTextColor",
             "SetBkMode",
             "SetBkColor",

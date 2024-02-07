@@ -361,6 +361,8 @@ pub mod root {
     pub const DT_END_ELLIPSIS: u32 = 32768;
     pub const TRANSPARENT: u32 = 0;
     pub const OPAQUE: u32 = 1;
+    pub const NULL_PEN: u32 = 1;
+    pub const NULL_BRUSH: u32 = 2;
     pub const GMEM_ZEROINIT: u32 = 1;
     pub const GMEM_FIXED: u32 = 0;
     pub const GMEM_MOVEABLE: u32 = 0;

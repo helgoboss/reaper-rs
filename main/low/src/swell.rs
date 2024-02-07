@@ -7773,6 +7773,10 @@ impl Swell {
         unsafe { windows::CreateSolidBrush(col) }
     }
     #[cfg(target_family = "windows")]
+    pub fn GetStockObject(&self, wh: ::std::os::raw::c_int) -> root::HGDIOBJ {
+        unsafe { windows::GetStockObject(wh) }
+    }
+    #[cfg(target_family = "windows")]
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -9560,6 +9564,9 @@ mod windows {
     }
     extern "system" {
         pub fn CreateSolidBrush(col: ::std::os::raw::c_int) -> root::HBRUSH;
+    }
+    extern "system" {
+        pub fn GetStockObject(wh: ::std::os::raw::c_int) -> root::HGDIOBJ;
     }
     extern "system" {
         pub fn DeleteObject(arg1: root::HGDIOBJ);
