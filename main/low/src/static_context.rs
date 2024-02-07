@@ -32,10 +32,10 @@ pub fn register_swell_function_provider(get_func: Option<GetSwellFunc>) {
 
 /// Registers the module handle globally.
 ///
-/// As a result it can later be picked up by using [`static_vst_plugin_context()`].
+/// As a result it can later be picked up by using [`static_plugin_context()`].
 /// This is typically called on Windows only by some entry point in one of the plugin macros.
 ///
-/// [`static_vst_plugin_context()`]: fn.static_vst_plugin_context.html
+/// [`static_plugin_context()`]: fn.static_plugin_context.html
 pub fn register_hinstance(hinstance: raw::HINSTANCE) {
     // Save handle in static variable.
     hinstance::INIT_HINSTANCE.call_once(|| unsafe {
