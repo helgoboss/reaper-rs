@@ -575,7 +575,7 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Adds an "Extensions" main menu (if not already added), which the extension can populate/modify with
-    /// [`ReaperSession::plugin_register_add_hook_custom_menu`].
+    /// [`crate::ReaperSession::plugin_register_add_hook_custom_menu`].
     pub fn add_extensions_main_menu(&self)
     where
         UsageScope: MainThreadOnly,
