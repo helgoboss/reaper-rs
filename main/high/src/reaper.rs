@@ -370,9 +370,22 @@ impl Reaper {
         }
     }
 
+    /// This looks for a command that has been registered via [`Self::register_action`].
+    ///
+    /// This is a pure reaper-rs feature, it doesn't communicate with REAPER.
+    pub fn with_our_command<R>(
+        &self,
+        command_id: CommandId,
+        use_command: impl FnOnce(Option<&Command>) -> R,
+    ) -> R {
+        let command_by_id = self.command_by_id.borrow();
+        let command = command_by_id.get(&command_id);
+        use_command(command)
+    }
+
     pub fn register_action(
         &self,
-        command_name: impl Into<ReaperStringArg<'static>>,
+        command_name: impl Into<ReaperStringArg<'static>> + Clone,
         description: impl Into<ReaperStringArg<'static>>,
         default_key_binding: Option<KeyBinding>,
         operation: impl FnMut() + 'static,
@@ -380,9 +393,12 @@ impl Reaper {
     ) -> RegisteredAction {
         self.require_main_thread();
         let mut medium = self.medium_session();
-        let command_id = medium.plugin_register_add_command_id(command_name).unwrap();
+        let command_id = medium
+            .plugin_register_add_command_id(command_name.clone())
+            .unwrap();
         let description = description.into().into_inner();
         let command = Command::new(
+            command_name.into().into_inner().to_reaper_string(),
             Rc::new(RefCell::new(operation)),
             kind,
             description.to_reaper_string(),
@@ -488,7 +504,8 @@ impl Reaper {
 // TODO-medium Think about the consequences.
 unsafe impl Sync for Reaper {}
 
-struct Command {
+pub struct Command {
+    name: ReaperString,
     /// Reasoning for that type (from inner to outer):
     /// - `FnMut`: We don't use just `fn` because we want to support closures. We don't use just
     ///   `Fn` because we want to support closures that keep mutable references to their captures.
@@ -533,17 +550,23 @@ impl Debug for Command {
 
 impl Command {
     fn new(
+        name: ReaperString,
         operation: Rc<RefCell<dyn FnMut()>>,
         kind: ActionKind,
         description: ReaperString,
         key_binding: Option<KeyBinding>,
     ) -> Command {
         Command {
+            name,
             operation,
             kind,
             description,
             key_binding,
         }
+    }
+
+    pub fn command_name(&self) -> &str {
+        self.name.to_str()
     }
 }
 
