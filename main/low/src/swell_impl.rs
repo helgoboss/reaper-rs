@@ -6,7 +6,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
-use std::ptr::null;
 use crate::{
     bindings::root, register_plugin_destroy_hook, PluginContext, Swell, SwellFunctionPointers,
 };
@@ -348,8 +347,8 @@ impl Swell {
         if font.is_null() {
             return std::ptr::null_mut();
         }
-        let font = *font;
-        let mut wide_font = winapi::um::wingdi::LOGFONTW{
+        let font = &*font;
+        let mut wide_font = winapi::um::wingdi::LOGFONTW {
             lfHeight: font.lfHeight,
             lfWidth: font.lfWidth,
             lfEscapement: font.lfEscapement,
@@ -365,10 +364,10 @@ impl Swell {
             lfPitchAndFamily: font.lfPitchAndFamily as _,
             lfFaceName: [0; 32],
         };
-
-        winapi::um::wingdi::CreateFontIndirectW(
-            &mut wide_font as *mut _
-         ) as _
+        for (i, ch) in font.lfFaceName.iter().take(15).enumerate() {
+            (*ch as u8 as char).encode_utf16(&mut wide_font.lfFaceName[i * 2..]);
+        }
+        winapi::um::wingdi::CreateFontIndirectW(&mut wide_font as *mut _) as _
     }
 
     /// # Safety
