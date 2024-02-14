@@ -208,6 +208,11 @@ ptr_wrapper! {
 }
 
 ptr_wrapper! {
+    /// Pointer to a font.
+    Hfont(raw::HGDIOBJ__)
+}
+
+ptr_wrapper! {
     /// Pointer to a device context.
     Hdc(raw::HDC__)
 }
