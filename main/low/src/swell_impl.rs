@@ -5,6 +5,8 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
+
+use std::ptr::null;
 use crate::{
     bindings::root, register_plugin_destroy_hook, PluginContext, Swell, SwellFunctionPointers,
 };
@@ -337,6 +339,36 @@ impl Swell {
         } else {
             winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam) as _
         }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn CreateFontIndirect(&self, font: *mut root::LOGFONT) -> root::HFONT {
+        if font.is_null() {
+            return std::ptr::null_mut();
+        }
+        let font = *font;
+        let mut wide_font = winapi::um::wingdi::LOGFONTW{
+            lfHeight: font.lfHeight,
+            lfWidth: font.lfWidth,
+            lfEscapement: font.lfEscapement,
+            lfOrientation: font.lfOrientation,
+            lfWeight: font.lfWeight,
+            lfItalic: font.lfItalic as _,
+            lfUnderline: font.lfUnderline as _,
+            lfStrikeOut: font.lfStrikeOut as _,
+            lfCharSet: font.lfCharSet as _,
+            lfOutPrecision: font.lfOutPrecision as _,
+            lfClipPrecision: font.lfClipPrecision as _,
+            lfQuality: font.lfQuality as _,
+            lfPitchAndFamily: font.lfPitchAndFamily as _,
+            lfFaceName: [0; 32],
+        };
+
+        winapi::um::wingdi::CreateFontIndirectW(
+            &mut wide_font as *mut _
+         ) as _
     }
 
     /// # Safety
