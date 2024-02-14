@@ -16,11 +16,11 @@ use crate::{
     OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration,
     ProjectContext, RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult,
     ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject,
-    ToggleAction, TranslateAccel,
+    ToggleAction, ToolbarIconMap, TranslateAccel,
 };
 use reaper_low::raw::audio_hook_register_t;
 
-use crate::fn_traits::delegating_hook_custom_menu;
+use crate::fn_traits::{delegating_hook_custom_menu, delegating_toolbar_icon_map};
 use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
@@ -338,6 +338,34 @@ impl ReaperSession {
         unsafe {
             self.plugin_register_remove(RegistrationObject::HookCustomMenu(
                 delegating_hook_custom_menu::<T>,
+            ));
+        }
+    }
+
+    /// Registers a toolbar icon map.
+    ///
+    /// See [`plugin_register_add_hook_command`](#method.plugin_register_add_hook_command) for
+    /// understanding how to use this function (it has a very similar design).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_toolbar_icon_map<T: ToolbarIconMap>(
+        &mut self,
+    ) -> ReaperFunctionResult<()> {
+        unsafe {
+            self.plugin_register_add(RegistrationObject::ToolbarIconMap(
+                delegating_toolbar_icon_map::<T>,
+            ))?;
+        }
+        Ok(())
+    }
+
+    /// Unregisters a toolbar icon map.
+    pub fn plugin_register_remove_toolbar_icon_map<T: ToolbarIconMap>(&mut self) {
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::ToolbarIconMap(
+                delegating_toolbar_icon_map::<T>,
             ));
         }
     }

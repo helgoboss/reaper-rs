@@ -5,7 +5,7 @@ use crate::{
 use reaper_low::{firewall, raw};
 use std::ffi::c_char;
 use std::os::raw::c_int;
-use std::ptr::NonNull;
+use std::ptr::{null, NonNull};
 
 /// Consumers need to implement this trait in order to define what should happen when a certain
 /// action is invoked.
@@ -83,6 +83,36 @@ pub(crate) extern "C" fn delegating_hook_custom_menu<T: HookCustomMenu>(
         let flag = MenuHookFlag::from_raw(flag);
         T::call(menuidstr, menu, flag);
     });
+}
+
+/// Consumers need to implement this trait in order to define what should happen when a custom menu is initialized or
+/// populated.
+pub trait ToolbarIconMap {
+    /// The actual callback function invoked by REAPER whenever a custom menu is initialized or populated.
+    fn call(
+        toolbar_name: &ReaperStr,
+        command_id: CommandId,
+        toggle_state: Option<bool>,
+    ) -> Option<&'static ReaperStr>;
+}
+
+pub(crate) extern "C" fn delegating_toolbar_icon_map<T: ToolbarIconMap>(
+    toolbar_name: *const c_char,
+    command_id: c_int,
+    state: c_int,
+) -> *const c_char {
+    firewall(|| {
+        let toolbar_name = unsafe { ReaperStr::from_ptr(toolbar_name) };
+        let command_id = CommandId(command_id as _);
+        let toggle_state = match state.signum() {
+            -1 => None,
+            0 => Some(false),
+            _ => Some(true),
+        };
+        let icon = T::call(toolbar_name, command_id, toggle_state);
+        icon.map(|i| i.as_ptr()).unwrap_or(null())
+    })
+    .unwrap_or(null())
 }
 
 /// Consumers need to implement this trait in order to let REAPER know if a toggleable action is

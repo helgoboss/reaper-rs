@@ -758,6 +758,7 @@ pub enum RegistrationObject<'a> {
     ///   1=action belongs to this extension and is currently set to "on"
     /// ```
     ToggleAction(raw::ToggleAction),
+    ToolbarIconMap(raw::ToolbarIconMap),
     // ActionHelp(*mut c_void),
     /// A command ID for the given command name.
     ///
@@ -886,6 +887,10 @@ impl<'a> RegistrationObject<'a> {
             },
             ToggleAction(func) => PluginRegistration {
                 key: reaper_str!("toggleaction").into(),
+                value: func as _,
+            },
+            ToolbarIconMap(func) => PluginRegistration {
+                key: reaper_str!("toolbar_icon_map").into(),
                 value: func as _,
             },
             CommandId(command_name) => PluginRegistration {

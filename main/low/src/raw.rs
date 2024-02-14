@@ -190,6 +190,10 @@ pub type ToggleAction = extern "C" fn(command_id: c_int) -> c_int;
 /// Function pointer type for getting notified about invocation of hook command.
 pub type HookPostCommand = extern "C" fn(command_id: c_int, flag: c_int);
 
+/// Function pointer type for toolbar icon maps.
+pub type ToolbarIconMap =
+    extern "C" fn(toolbar_name: *const c_char, command_id: c_int, state: c_int) -> *const c_char;
+
 /// Function pointer type for timers.
 pub type TimerFunction = extern "C" fn();
 
