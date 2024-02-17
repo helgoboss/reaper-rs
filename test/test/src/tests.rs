@@ -1782,7 +1782,7 @@ fn set_track_volume_extreme_values() -> TestStep {
                 ReaperVolumeValue::new(1.0 / 0.0)
             );
             #[cfg(target_family = "windows")]
-            assert_eq!(track_1_volume.as_str(), "+1.#dB");
+            assert_eq!(track_1_volume.to_string().as_str(), "+1.#dB");
             #[cfg(target_family = "unix")]
             assert_eq!(track_1_volume.to_string().as_str(), "+indB");
 
@@ -1792,10 +1792,7 @@ fn set_track_volume_extreme_values() -> TestStep {
             assert!(track_2_volume.normalized_slider_value().is_nan());
             assert!(track_2_volume.reaper_value().get().is_nan());
             #[cfg(target_family = "windows")]
-            assert!(SliderVolume::from_reaper_value(track_2_volume)
-                .to_string()
-                .as_str()
-                .contains("1.#RdB"));
+            assert!(track_2_volume.to_string().as_str().contains("1.#RdB"));
             #[cfg(target_family = "unix")]
             assert!(track_2_volume.to_string().contains("nandB"));
             Ok(())
