@@ -75,8 +75,7 @@ impl<'a, A> FxChain<'a, A> {
 
     pub fn fxs(
         &self,
-    ) -> impl Iterator<Item = Fx<ReadAccess>> + ExactSizeIterator + DoubleEndedIterator + FusedIterator
-    {
+    ) -> impl ExactSizeIterator<Item = Fx<ReadAccess>> + DoubleEndedIterator + FusedIterator {
         (0..self.fx_count()).map(|i| Fx::new(FxChain::new(self.track, self.kind), i))
     }
 

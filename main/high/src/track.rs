@@ -120,7 +120,7 @@ impl Track {
         }
     }
 
-    pub fn items(&self) -> impl Iterator<Item = Item> + ExactSizeIterator + 'static {
+    pub fn items(&self) -> impl ExactSizeIterator<Item = Item> + 'static {
         if self.load_and_check_if_necessary_or_err().is_err() {
             return Either::Left(iter::empty());
         }
@@ -1164,7 +1164,7 @@ impl Track {
         )
     }
 
-    pub fn receives(&self) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
+    pub fn receives(&self) -> impl ExactSizeIterator<Item = TrackRoute> + '_ {
         if self.load_and_check_if_necessary_or_err().is_err() {
             return Either::Left(iter::empty());
         }
@@ -1173,7 +1173,7 @@ impl Track {
         Either::Right(iter)
     }
 
-    pub fn sends(&self) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
+    pub fn sends(&self) -> impl ExactSizeIterator<Item = TrackRoute> + '_ {
         if self.load_and_check_if_necessary_or_err().is_err() {
             return Either::Left(iter::empty());
         }
@@ -1185,7 +1185,7 @@ impl Track {
     pub fn typed_sends(
         &self,
         partner_type: SendPartnerType,
-    ) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
+    ) -> impl ExactSizeIterator<Item = TrackRoute> + '_ {
         if self.load_and_check_if_necessary_or_err().is_err() {
             return Either::Left(iter::empty());
         }
@@ -1195,7 +1195,7 @@ impl Track {
     fn typed_sends_internal(
         &self,
         partner_type: SendPartnerType,
-    ) -> impl Iterator<Item = TrackRoute> + ExactSizeIterator + '_ {
+    ) -> impl ExactSizeIterator<Item = TrackRoute> + '_ {
         let hw_send_count = self.hw_send_count_internal();
         let (from, count) = match partner_type {
             SendPartnerType::Track => (

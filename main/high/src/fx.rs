@@ -315,7 +315,7 @@ impl Fx {
         }
     }
 
-    pub fn parameters(&self) -> impl Iterator<Item = FxParameter> + ExactSizeIterator + '_ {
+    pub fn parameters(&self) -> impl ExactSizeIterator<Item = FxParameter> + '_ {
         self.load_if_necessary_or_complain();
         (0..self.parameter_count()).map(move |i| self.parameter_by_index(i))
     }

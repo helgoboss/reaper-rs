@@ -112,9 +112,7 @@ impl Project {
         Ok(Track::from_guid(self, *guid))
     }
 
-    pub fn tracks(
-        self,
-    ) -> impl Iterator<Item = Track> + ExactSizeIterator + DoubleEndedIterator + 'static {
+    pub fn tracks(self) -> impl ExactSizeIterator<Item = Track> + DoubleEndedIterator + 'static {
         if self.complain_if_not_available().is_err() {
             return Either::Left(iter::empty());
         }
@@ -128,9 +126,7 @@ impl Project {
         Either::Right(iter)
     }
 
-    pub fn items(
-        self,
-    ) -> impl Iterator<Item = Item> + ExactSizeIterator + DoubleEndedIterator + 'static {
+    pub fn items(self) -> impl ExactSizeIterator<Item = Item> + DoubleEndedIterator + 'static {
         if self.complain_if_not_available().is_err() {
             return Either::Left(iter::empty());
         }
@@ -187,7 +183,7 @@ impl Project {
 
     pub fn selected_items(
         self,
-    ) -> impl Iterator<Item = Item> + ExactSizeIterator + DoubleEndedIterator + 'static {
+    ) -> impl ExactSizeIterator<Item = Item> + DoubleEndedIterator + 'static {
         if self.complain_if_not_available().is_err() {
             return Either::Left(iter::empty());
         }
@@ -211,7 +207,7 @@ impl Project {
     pub fn selected_tracks(
         self,
         want_master: MasterTrackBehavior,
-    ) -> impl Iterator<Item = Track> + ExactSizeIterator + DoubleEndedIterator + 'static {
+    ) -> impl ExactSizeIterator<Item = Track> + DoubleEndedIterator + 'static {
         if self.complain_if_not_available().is_err() {
             return Either::Left(iter::empty());
         }
@@ -530,7 +526,7 @@ impl Project {
         Some(IndexBasedBookmark::new(self, index))
     }
 
-    pub fn bookmarks(self) -> impl Iterator<Item = IndexBasedBookmark> + ExactSizeIterator {
+    pub fn bookmarks(self) -> impl ExactSizeIterator<Item = IndexBasedBookmark> {
         (0..self.bookmark_count().total_count).map(move |i| IndexBasedBookmark::new(self, i))
     }
 

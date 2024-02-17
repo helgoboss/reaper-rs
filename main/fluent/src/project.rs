@@ -82,7 +82,7 @@ impl<'a, A> Project<'a, A> {
 
     pub fn tracks(
         &self,
-    ) -> impl Iterator<Item = Track<ReadAccess>> + ExactSizeIterator + FusedIterator + DoubleEndedIterator
+    ) -> impl ExactSizeIterator<Item = Track<ReadAccess>> + FusedIterator + DoubleEndedIterator
     {
         let r = Reaper::get().medium_reaper();
         (0..self.track_count()).map(|i| {
