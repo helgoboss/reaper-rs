@@ -1,12 +1,16 @@
 use crate::Reaper;
 use reaper_medium::{Db, ReaperVolumeValue, VolumeSliderValue};
-use std::convert::TryFrom;
 use std::fmt;
 
+/// A type that wraps a normalized REAPER slider value (= slider value / 1000) and is therefore best suited for
+/// representing a fader position within the typical REAPER volume range from -inf to 12 dB.
 /// TODO-medium This struct needs an overhaul, not ready for prime time at all.
 #[derive(Debug)]
 pub struct Volume {
-    soft_normalized_value: f64,
+    /// A value where 0.0 represents -inf dB and 1.0 represents 12 dB (the "soft maximum").
+    ///
+    /// It can also be larger than 1.0 but not negative.
+    normalized_slider_value: f64,
 }
 
 impl Default for Volume {
@@ -15,16 +19,17 @@ impl Default for Volume {
     }
 }
 
-const LN10_OVER_TWENTY: f64 = 0.115_129_254_649_702_28;
-
 impl Volume {
+    /// Represents -inf dB.
     pub const MIN: Volume = Volume {
-        soft_normalized_value: 0.0,
+        normalized_slider_value: 0.0,
     };
 
-    // Attention! Because of the fact that REAPER allows exceeding the soft maximum of 12 dB,
-    // the VolumeSliderValue can go beyond 1000, which means that this "normalized value" can go
-    // beyond 1.0!
+    /// Expects a value where 0.0 represents -inf dB and 1.0 represents 12 dB (the "soft maximum").
+    ///
+    /// Attention! Because of the fact that REAPER allows exceeding the soft maximum of 12 dB,
+    /// the VolumeSliderValue can go beyond 1000, which means that this "normalized value" can go
+    /// beyond 1.0!
     pub fn try_from_soft_normalized_value(
         soft_normalized_value: f64,
     ) -> Result<Volume, &'static str> {
@@ -34,48 +39,43 @@ impl Volume {
             );
         }
         let volume = Volume {
-            soft_normalized_value,
+            normalized_slider_value: soft_normalized_value,
         };
         Ok(volume)
     }
 
+    /// Calculates the volume from the given REAPER volume value.
     pub fn from_reaper_value(reaper_value: ReaperVolumeValue) -> Volume {
-        let raw_db = reaper_value.get().ln() / LN10_OVER_TWENTY;
-        let db = if raw_db == f64::NEG_INFINITY {
-            // REAPER doesn't represent negative infinity as f64::NEG_INFINITY, so we must replace
-            // this with REAPER's negative infinity.
-            Db::MINUS_INF
-        } else {
-            // We don't want this to panic and the consumer can expect to get some kind of value
-            // if the given input value was a valid ReaperVolumeValue.
-            if let Ok(db) = Db::try_from(raw_db) {
-                db
-            } else {
-                return Volume::MIN;
-            }
-        };
+        let db = reaper_value.to_db(Db::MINUS_INF);
         Volume::from_db(db)
     }
 
+    /// Calculates the volume from the given dB value.
     pub fn from_db(db: Db) -> Volume {
-        Volume::try_from_soft_normalized_value(
-            Reaper::get().medium_reaper().db2slider(db).get() / 1000.0,
-        )
-        .unwrap_or(Volume::MIN)
+        let slider_value = Reaper::get().medium_reaper().db2slider(db);
+        let soft_normalized_value = slider_value.get() / VolumeSliderValue::TWELVE_DB.get();
+        let volume_result = Volume::try_from_soft_normalized_value(soft_normalized_value);
+        volume_result.unwrap_or(Volume::MIN)
     }
 
-    pub fn soft_normalized_value(&self) -> f64 {
-        self.soft_normalized_value
+    /// Returns a number where 0.0 represents -inf dB and 1.0 represents 12 dB (the "soft maximum").
+    ///
+    /// [`reaper_medium::VolumeSliderValue`] divided by 1000.
+    pub fn normalized_slider_value(&self) -> f64 {
+        self.normalized_slider_value
     }
 
+    /// Returns the corresponding REAPER volume value.
     pub fn reaper_value(&self) -> ReaperVolumeValue {
-        ReaperVolumeValue::new((self.db().get() * LN10_OVER_TWENTY).exp())
+        self.db().to_reaper_volume_value()
     }
 
+    /// Returns the corresponding dB value.
     pub fn db(&self) -> Db {
-        Reaper::get()
-            .medium_reaper()
-            .slider2db(VolumeSliderValue::new(self.soft_normalized_value * 1000.0))
+        let slider_value = VolumeSliderValue::new(
+            self.normalized_slider_value * VolumeSliderValue::TWELVE_DB.get(),
+        );
+        Reaper::get().medium_reaper().slider2db(slider_value)
     }
 }
 

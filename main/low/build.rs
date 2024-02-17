@@ -173,6 +173,8 @@ mod codegen {
                 .whitelist_var("DLL_PROCESS_DETACH")
                 .whitelist_var("TRANSPARENT")
                 .whitelist_var("OPAQUE")
+                .whitelist_var("TWENTY_OVER_LN10")
+                .whitelist_var("LN10_OVER_TWENTY")
                 .whitelist_type("HINSTANCE")
                 .whitelist_type("reaper_plugin_info_t")
                 .whitelist_type("gaccel_register_t")

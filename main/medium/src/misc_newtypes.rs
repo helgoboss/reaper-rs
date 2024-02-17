@@ -1,6 +1,7 @@
 //! This module defines various newtypes in order to achieve more type safety.
 use crate::{ReaperStr, ReaperStringArg, TryFromGreaterError};
 use derive_more::*;
+use reaper_low::raw::{LN10_OVER_TWENTY, TWENTY_OVER_LN10};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -1267,8 +1268,11 @@ impl Db {
     /// The negative infinity volume (-1000.0 = -inf dB).
     pub const MINUS_INF: Db = Db(-1000.0);
 
-    /// The "soft minimum" volume (-150.0 dB).
+    /// The old (?) "soft minimum" volume (-150.0 dB).
     pub const MINUS_150_DB: Db = Db(-150.0);
+
+    /// The new (?) "soft minimum" volume (-144.0 dB).
+    pub const MINUS_144_DB: Db = Db(-144.0);
 
     /// The "unaltered" volume (0.0 dB).
     pub const ZERO_DB: Db = Db(0.0);
@@ -1295,6 +1299,13 @@ impl Db {
     pub const fn get(self) -> f64 {
         self.0
     }
+
+    /// Efficient conversion to a gain value, exactly as done in WDL's `db2val.h`.
+    ///
+    /// Doesn't call the REAPER API.
+    pub fn to_reaper_volume_value(&self) -> ReaperVolumeValue {
+        ReaperVolumeValue((self.0 * LN10_OVER_TWENTY).exp())
+    }
 }
 
 impl TryFrom<f64> for Db {
@@ -1312,6 +1323,20 @@ impl TryFrom<f64> for Db {
 }
 
 /// This represents a volume measured as fader position.
+///
+/// The scale should correspond to the one used in PGF8000 faders.
+///
+/// # Examples
+///
+/// - A value of 0.0 or very close corresponds to -inf dB
+/// - A value of 3.1647785560398 corresponds to -144 dB (the first dB value not showed as -inf anymore in REAPER GUI)
+/// - A value of 716 corresponds to 0.0 dB (unaltered volume)
+/// - A value of 1000 corresponds to 12 dB
+/// - Higher values are possible but harder to enter via GUI
+///
+/// # Usage
+///
+/// This is usually used for faders when mapping from dB to fader position and vice versa.
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(
     feature = "serde",
@@ -1332,15 +1357,18 @@ impl VolumeSliderValue {
     ///
     /// See [`ReaperVolumeValue::NAN`].
     ///
-    /// [`ReaperVolumeValue::NAN`]: struct.ReaperVolumeValue.html#associatedconstant.NAN
+    /// [`VolumeSliderValue::NAN`]: struct.VolumeSliderValue.html#associatedconstant.NAN
     /// [`f64::NAN`]: std/primitive.f64.html#associatedconstant.NAN
-    pub const NAN: ReaperVolumeValue = ReaperVolumeValue(f64::NAN);
+    pub const NAN: VolumeSliderValue = VolumeSliderValue(f64::NAN);
 
     /// The negative infinity volume (0.0 = -inf dB).
     pub const MINUS_INF_DB: VolumeSliderValue = VolumeSliderValue(0.0);
 
-    /// The "soft minimum" volume (2.5138729793972 = -150.0 dB).
-    pub const MINUS_150_DB: VolumeSliderValue = VolumeSliderValue(2.513_872_979_397_2);
+    /// The old (?) "soft minimum" volume (2.5138729793972 = -150.0 dB).
+    pub const MINUS_150_DB: VolumeSliderValue = VolumeSliderValue(2.5138729793972);
+
+    /// The new (?) "soft minimum" volume (3.1647785560398 = -144.0 dB).
+    pub const MINUS_144_DB: VolumeSliderValue = VolumeSliderValue(3.1647785560398);
 
     /// The "unaltered" volume (716.0 = 0.0 dB).
     pub const ZERO_DB: VolumeSliderValue = VolumeSliderValue(716.0);
@@ -1384,6 +1412,46 @@ impl TryFrom<f64> for VolumeSliderValue {
 }
 
 /// This represents a volume measured in REAPER's native volume unit.
+///
+/// What I call "REAPER's native volume unit" is in REAPER/WDL code often called `val` or `gain`. It's essentially
+/// a dB value represented as linear factor, and thus it's suitable in scenarios such as altering the amplitude of
+/// a sample, simply by multiplying with this value.
+///
+/// # Formulas
+///
+/// Some formulas for conversion from val to dB and vice versa. Using the constants
+/// is maybe slightly more efficient.
+///
+/// ```ignore
+/// TWENTY_OVER_LN10 = 20 / log(10)
+/// LN10_OVER_TWENTY = log(10) / 20
+///
+/// db = log10(val) * 20
+///    = log(val) / LN10_OVER_TWENTY
+///    = log(val) * TWENTY_OVER_LN10
+///
+/// val = pow(10, db / 20.0)
+///     = exp(db * LN10_OVER_TWENTY)
+/// ```
+///
+/// # Examples
+///
+/// - A value of 0.0 or very close corresponds to -inf dB
+/// - A value of 0.000000063095734448019 corresponds to -144 dB (the first dB value not showed as -inf anymore
+///   in the REAPER GUI)
+/// - A value of 0.5 corresponds to -6.02 dB (roughly halved volume)
+/// - A value of 1.0 corresponds to 0.0 dB (unaltered volume)
+/// - A value of 2.0 corresponds to 6.02 dB (roughly doubled volume)
+/// - A value of 3.981071705535 corresponds to 12 dB (REAPER's "soft maximum" volume)
+/// - Higher values are possible but harder to enter via GUI
+///
+/// # Usages
+///
+/// - Track volume
+/// - Send volume
+/// - Item volume
+/// - Take volume
+/// - Track peaks
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Display)]
 #[cfg_attr(
     feature = "serde",
@@ -1398,7 +1466,7 @@ impl ReaperVolumeValue {
     /// If the scale would be linear, this would be less than -150 dB. But it's not. In practice,
     /// REAPER considers this as equal to the [`MINUS_150_DB`] value.
     ///
-    /// There's no maximum value because REAPER allows to exceed the soft maximum of 12 dB!
+    /// There's no maximum value because REAPER allows to exceed the "soft maximum" of 12 dB!
     ///
     /// [`MINUS_150_DB`]: #associatedconstant.MINUS_150_DB
     pub const MIN: ReaperVolumeValue = ReaperVolumeValue(0.0);
@@ -1416,13 +1484,20 @@ impl ReaperVolumeValue {
     /// When setting a value, use [`MIN`] (0.0) instead because this is just an approximation.
     ///
     /// [`MIN`]: #associatedconstant.MIN
-    pub const MINUS_150_DB: ReaperVolumeValue = ReaperVolumeValue(3.162_277_660_168_4e-_008);
+    pub const MINUS_150_DB: ReaperVolumeValue = ReaperVolumeValue(0.000000031622776601684);
+
+    /// The new (?) "soft minimum" volume (0.000000063095734448019 = -144.0 dB).
+    ///
+    /// When setting a value, use [`MIN`] (0.0) instead because this is just an approximation.
+    ///
+    /// [`MIN`]: #associatedconstant.MIN
+    pub const MINUS_144_DB: ReaperVolumeValue = ReaperVolumeValue(0.000000063095734448019);
 
     /// The "unaltered" volume (1.0 = 0.0 dB).
     pub const ZERO_DB: ReaperVolumeValue = ReaperVolumeValue(1.0);
 
     /// The "soft maximum" volume (3.981071705535 = 12.0 dB).
-    pub const TWELVE_DB: ReaperVolumeValue = ReaperVolumeValue(3.981_071_705_535);
+    pub const TWELVE_DB: ReaperVolumeValue = ReaperVolumeValue(3.981071705535);
 
     fn is_valid(value: f64) -> bool {
         ReaperVolumeValue::MIN.get() <= value || value.is_nan()
@@ -1440,6 +1515,17 @@ impl ReaperVolumeValue {
             "{value} is not a valid ReaperVolumeValue",
         );
         ReaperVolumeValue(value)
+    }
+
+    /// Efficient conversion to a dB value, exactly as done in WDL's `db2val.h`.
+    ///
+    /// Doesn't call the REAPER API.
+    pub fn to_db(&self, min_db: Db) -> Db {
+        let min_val = min_db.to_reaper_volume_value();
+        if *self <= min_val {
+            return min_db;
+        }
+        Db(self.0.ln() * TWENTY_OVER_LN10)
     }
 
     /// Returns the wrapped value.

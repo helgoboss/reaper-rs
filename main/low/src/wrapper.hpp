@@ -5,6 +5,7 @@
 #define WDL_ALLOW_UNSIGNED_DEFAULT_CHAR
 // Make all types relevant for REAPER plug-ins visible to bindgen.
 #include "../lib/reaper/reaper_plugin.h"
+#include "../lib/WDL/WDL/db2val.h"
 
 // Make all REAPER functions (function pointers to be exact) visible under dedicated namespace, so we can easily include
 // them with bindgen. None of the function pointers will actually be used in the real plug-in. They just serve as

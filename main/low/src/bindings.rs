@@ -470,6 +470,8 @@ pub mod root {
     pub const UNDO_STATE_ITEMS: u32 = 4;
     pub const UNDO_STATE_MISCCFG: u32 = 8;
     pub const UNDO_STATE_FREEZE: u32 = 16;
+    pub const TWENTY_OVER_LN10: f64 = 8.685889638065037;
+    pub const LN10_OVER_TWENTY: f64 = 0.11512925464970228;
     pub type ReaSample = f64;
     pub type __intptr_t = ::std::os::raw::c_long;
     #[repr(C)]
