@@ -883,7 +883,7 @@ fn set_track_send_volume() -> TestStep {
         .unwrap();
         // Then
         assert!(abs_diff_eq!(
-            send.volume().unwrap().to_db(Db::MINUS_INF).get(),
+            send.volume().unwrap().to_db_ex(Db::MINUS_INF).get(),
             -30.009_531_739_774_296,
             epsilon = EPSILON
         ));
@@ -921,11 +921,11 @@ fn query_track_send() -> TestStep {
             Some(TrackRoutePartner::Track(track_3))
         );
         assert_eq!(
-            send_to_track_2.volume().unwrap().to_db(Db::MINUS_INF),
+            send_to_track_2.volume().unwrap().to_db_ex(Db::MINUS_INF),
             Db::ZERO_DB
         );
         assert_eq!(
-            send_to_track_3.volume().unwrap().to_db(Db::MINUS_INF),
+            send_to_track_3.volume().unwrap().to_db_ex(Db::MINUS_INF),
             Db::ZERO_DB
         );
         assert!(!send_to_track_2.is_muted()?);
@@ -1724,7 +1724,7 @@ fn set_track_volume() -> TestStep {
             0.031_588_093_366_685_01,
             epsilon = EPSILON
         ));
-        let db = volume.to_db(Db::MINUS_INF).get();
+        let db = volume.to_db_ex(Db::MINUS_INF).get();
         assert!(abs_diff_eq!(db, -30.009_531_739_774_296, epsilon = EPSILON));
         assert!(abs_diff_eq!(
             SliderVolume::from_reaper_value(volume).normalized_slider_value(),
@@ -1811,7 +1811,7 @@ fn query_track_volume() -> TestStep {
         let volume = track.volume();
         // Then
         assert_eq!(volume, ReaperVolumeValue::ZERO_DB);
-        assert_eq!(volume.to_db(Db::MINUS_INF), Db::ZERO_DB);
+        assert_eq!(volume.to_db_ex(Db::MINUS_INF), Db::ZERO_DB);
         assert_eq!(
             SliderVolume::from_reaper_value(volume).to_string().as_str(),
             "0.00dB"

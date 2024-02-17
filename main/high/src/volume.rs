@@ -46,7 +46,7 @@ impl SliderVolume {
 
     /// Calculates the volume from the given REAPER volume value.
     pub fn from_reaper_value(reaper_value: ReaperVolumeValue) -> SliderVolume {
-        let db = reaper_value.to_db(Db::MINUS_INF);
+        let db = reaper_value.to_db_ex(Db::MINUS_INF);
         SliderVolume::from_db(db)
     }
 

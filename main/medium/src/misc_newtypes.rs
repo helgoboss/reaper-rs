@@ -1517,10 +1517,17 @@ impl ReaperVolumeValue {
         ReaperVolumeValue(value)
     }
 
-    /// Efficient conversion to a dB value, exactly as done in WDL's `db2val.h`.
+    /// Efficient conversion to a dB value with -150 dB minimum, pretty much as done in WDL's `db2val.h`.
     ///
     /// Doesn't call the REAPER API.
-    pub fn to_db(&self, min_db: Db) -> Db {
+    pub fn to_db(&self) -> Db {
+        self.to_db_ex(Db::MINUS_150_DB)
+    }
+
+    /// Efficient conversion to a dB value with configurable minimum, exactly as done in WDL's `db2val.h`.
+    ///
+    /// Doesn't call the REAPER API.
+    pub fn to_db_ex(&self, min_db: Db) -> Db {
         let min_val = min_db.to_reaper_volume_value();
         if *self <= min_val {
             return min_db;
