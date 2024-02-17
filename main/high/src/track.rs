@@ -6,8 +6,7 @@ use crate::guid::Guid;
 use crate::track_route::TrackRoute;
 
 use crate::{
-    Chunk, ChunkRegion, Item, Pan, Project, Reaper, SendPartnerType, TrackRoutePartner, Volume,
-    Width,
+    Chunk, ChunkRegion, Item, Pan, Project, Reaper, SendPartnerType, TrackRoutePartner, Width,
 };
 
 use either::Either;
@@ -462,9 +461,9 @@ impl Track {
         result as _
     }
 
-    pub fn volume(&self) -> Volume {
+    pub fn volume(&self) -> ReaperVolumeValue {
         if self.load_if_necessary_or_err().is_err() {
-            return Volume::from_reaper_value(ReaperVolumeValue::MIN);
+            return ReaperVolumeValue::MIN;
         }
         // It's important that we don't query D_VOL because that returns the wrong value in case an
         // envelope is written
@@ -474,18 +473,17 @@ impl Track {
                 .get_track_ui_vol_pan(self.raw_internal())
                 .expect("Couldn't get vol/pan")
         };
-        Volume::from_reaper_value(result.volume)
+        result.volume
     }
 
     pub fn set_volume(
         &self,
-        volume: Volume,
+        volume: ReaperVolumeValue,
         gang_behavior: GangBehavior,
         grouping_behavior: GroupingBehavior,
     ) {
         self.load_and_check_if_necessary_or_complain();
-        let reaper_value = volume.reaper_value();
-        let reaper_value = if self.project() == Reaper::get().current_project() {
+        let volume = if self.project() == Reaper::get().current_project() {
             let reaper = Reaper::get().medium_reaper();
             // Why we use this function and not the others:
             //
@@ -497,7 +495,7 @@ impl Track {
                 unsafe {
                     reaper.set_track_ui_volume(
                         self.raw(),
-                        Absolute(reaper_value),
+                        Absolute(volume),
                         Progress::NotDone,
                         build_track_ui_flags(gang_behavior, grouping_behavior),
                     )
@@ -510,11 +508,7 @@ impl Track {
                 //   better with REAPER 5.28.
                 // - In automation mode "Touch" this leads to jumps.
                 unsafe {
-                    reaper.csurf_on_volume_change_ex(
-                        self.raw(),
-                        Absolute(reaper_value),
-                        gang_behavior,
-                    )
+                    reaper.csurf_on_volume_change_ex(self.raw(), Absolute(volume), gang_behavior)
                 }
             }
         } else {
@@ -523,19 +517,17 @@ impl Track {
                 let _ = Reaper::get().medium_reaper().set_media_track_info_value(
                     self.raw(),
                     TrackAttributeKey::Vol,
-                    reaper_value.get(),
+                    volume.get(),
                 );
             }
-            reaper_value
+            volume
         };
         // Setting the volume programmatically doesn't inform control surfaces - including our own
         // surfaces which are important for feedback. So use the following to notify manually.
         unsafe {
-            Reaper::get().medium_reaper().csurf_set_surface_volume(
-                self.raw(),
-                reaper_value,
-                NotifyAll,
-            );
+            Reaper::get()
+                .medium_reaper()
+                .csurf_set_surface_volume(self.raw(), volume, NotifyAll);
         }
     }
 

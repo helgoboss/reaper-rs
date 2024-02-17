@@ -1,9 +1,9 @@
-use crate::{Pan, Reaper, Track, Volume};
+use crate::{Pan, Reaper, Track};
 
 use crate::error::ReaperResult;
 use reaper_medium::{
-    AutomationMode, EditMode, MediaTrack, ReaperFunctionError, ReaperString, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TrackSendRef, VolumeAndPan,
+    AutomationMode, EditMode, MediaTrack, ReaperFunctionError, ReaperString, ReaperVolumeValue,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, VolumeAndPan,
 };
 use std::fmt;
 use TrackSendDirection::*;
@@ -79,8 +79,8 @@ impl TrackRoute {
         }
     }
 
-    pub fn volume(&self) -> ReaperResult<Volume> {
-        Ok(Volume::from_reaper_value(self.vol_pan()?.volume))
+    pub fn volume(&self) -> ReaperResult<ReaperVolumeValue> {
+        Ok(self.vol_pan()?.volume)
     }
 
     fn vol_pan(&self) -> ReaperResult<VolumeAndPan> {
@@ -103,14 +103,14 @@ impl TrackRoute {
 
     pub fn set_volume(
         &self,
-        volume: Volume,
+        volume: ReaperVolumeValue,
         edit_mode: EditMode,
     ) -> Result<(), ReaperFunctionError> {
         unsafe {
             Reaper::get().medium_reaper().set_track_send_ui_vol(
                 self.track().raw(),
                 self.send_ref(),
-                volume.reaper_value(),
+                volume,
                 edit_mode,
             )
         }

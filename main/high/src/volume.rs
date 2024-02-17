@@ -6,22 +6,22 @@ use std::fmt;
 /// representing a fader position within the typical REAPER volume range from -inf to 12 dB.
 /// TODO-medium This struct needs an overhaul, not ready for prime time at all.
 #[derive(Debug)]
-pub struct Volume {
+pub struct SliderVolume {
     /// A value where 0.0 represents -inf dB and 1.0 represents 12 dB (the "soft maximum").
     ///
     /// It can also be larger than 1.0 but not negative.
     normalized_slider_value: f64,
 }
 
-impl Default for Volume {
+impl Default for SliderVolume {
     fn default() -> Self {
         Self::MIN
     }
 }
 
-impl Volume {
+impl SliderVolume {
     /// Represents -inf dB.
-    pub const MIN: Volume = Volume {
+    pub const MIN: SliderVolume = SliderVolume {
         normalized_slider_value: 0.0,
     };
 
@@ -30,32 +30,32 @@ impl Volume {
     /// Attention! Because of the fact that REAPER allows exceeding the soft maximum of 12 dB,
     /// the VolumeSliderValue can go beyond 1000, which means that this "normalized value" can go
     /// beyond 1.0!
-    pub fn try_from_soft_normalized_value(
+    pub fn try_from_normalized_slider_value(
         soft_normalized_value: f64,
-    ) -> Result<Volume, &'static str> {
+    ) -> Result<SliderVolume, &'static str> {
         if soft_normalized_value < 0.0 && !soft_normalized_value.is_nan() {
             return Err(
                 "soft-normalized value must be positive or NaN in order to represent a volume",
             );
         }
-        let volume = Volume {
+        let volume = SliderVolume {
             normalized_slider_value: soft_normalized_value,
         };
         Ok(volume)
     }
 
     /// Calculates the volume from the given REAPER volume value.
-    pub fn from_reaper_value(reaper_value: ReaperVolumeValue) -> Volume {
+    pub fn from_reaper_value(reaper_value: ReaperVolumeValue) -> SliderVolume {
         let db = reaper_value.to_db(Db::MINUS_INF);
-        Volume::from_db(db)
+        SliderVolume::from_db(db)
     }
 
     /// Calculates the volume from the given dB value.
-    pub fn from_db(db: Db) -> Volume {
+    pub fn from_db(db: Db) -> SliderVolume {
         let slider_value = Reaper::get().medium_reaper().db2slider(db);
         let soft_normalized_value = slider_value.get() / VolumeSliderValue::TWELVE_DB.get();
-        let volume_result = Volume::try_from_soft_normalized_value(soft_normalized_value);
-        volume_result.unwrap_or(Volume::MIN)
+        let volume_result = SliderVolume::try_from_normalized_slider_value(soft_normalized_value);
+        volume_result.unwrap_or(SliderVolume::MIN)
     }
 
     /// Returns a number where 0.0 represents -inf dB and 1.0 represents 12 dB (the "soft maximum").
@@ -79,7 +79,7 @@ impl Volume {
     }
 }
 
-impl fmt::Display for Volume {
+impl fmt::Display for SliderVolume {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let vol_string = Reaper::get()
             .medium_reaper()

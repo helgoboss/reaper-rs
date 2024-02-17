@@ -1,7 +1,7 @@
-use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track, Volume};
+use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track};
 use reaper_medium::{
     FullPitchShiftMode, MediaItemTake, NativeColorValue, PlaybackSpeedFactor, PositionInSeconds,
-    ReaperFunctionError, ReaperStringArg, RgbColor, TakeAttributeKey,
+    ReaperFunctionError, ReaperStringArg, ReaperVolumeValue, RgbColor, TakeAttributeKey,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -110,13 +110,13 @@ impl Take {
         }
     }
 
-    pub fn set_volume(&self, volume: Volume) -> Result<(), ReaperFunctionError> {
+    pub fn set_volume(&self, volume: ReaperVolumeValue) -> Result<(), ReaperFunctionError> {
         // TODO-medium Support polarity (negative values)
         unsafe {
             Reaper::get().medium_reaper.set_media_item_take_info_value(
                 self.raw,
                 TakeAttributeKey::Vol,
-                volume.reaper_value().get(),
+                volume.get(),
             )
         }
     }

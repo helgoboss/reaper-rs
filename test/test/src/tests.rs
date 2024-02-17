@@ -8,8 +8,8 @@ use c_str_macro::c_str;
 
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxInfo,
-    FxParameterCharacter, GroupingBehavior, Guid, Pan, PlayRate, Reaper, SendPartnerType, Tempo,
-    Track, TrackRoutePartner, Volume, Width,
+    FxParameterCharacter, GroupingBehavior, Guid, Pan, PlayRate, Reaper, SendPartnerType,
+    SliderVolume, Tempo, Track, TrackRoutePartner, Width,
 };
 use rxrust::prelude::*;
 
@@ -875,13 +875,15 @@ fn set_track_send_volume() -> TestStep {
                 });
         });
         send.set_volume(
-            Volume::try_from_soft_normalized_value(0.25).unwrap(),
+            SliderVolume::try_from_normalized_slider_value(0.25)
+                .unwrap()
+                .reaper_value(),
             EditMode::NormalTweak,
         )
         .unwrap();
         // Then
         assert!(abs_diff_eq!(
-            send.volume().unwrap().db().get(),
+            send.volume().unwrap().to_db(Db::MINUS_INF).get(),
             -30.009_531_739_774_296,
             epsilon = EPSILON
         ));
@@ -918,8 +920,14 @@ fn query_track_send() -> TestStep {
             send_to_track_3.partner(),
             Some(TrackRoutePartner::Track(track_3))
         );
-        assert_eq!(send_to_track_2.volume().unwrap().db(), Db::ZERO_DB);
-        assert_eq!(send_to_track_3.volume().unwrap().db(), Db::ZERO_DB);
+        assert_eq!(
+            send_to_track_2.volume().unwrap().to_db(Db::MINUS_INF),
+            Db::ZERO_DB
+        );
+        assert_eq!(
+            send_to_track_3.volume().unwrap().to_db(Db::MINUS_INF),
+            Db::ZERO_DB
+        );
         assert!(!send_to_track_2.is_muted()?);
         assert!(!send_to_track_3.is_muted()?);
         Ok(())
@@ -1703,25 +1711,30 @@ fn set_track_volume() -> TestStep {
                 });
         });
         track.set_volume(
-            Volume::try_from_soft_normalized_value(0.25).unwrap(),
+            SliderVolume::try_from_normalized_slider_value(0.25)
+                .unwrap()
+                .reaper_value(),
             GangBehavior::DenyGang,
             GroupingBehavior::PreventGrouping,
         );
         // Then
         let volume = track.volume();
         assert!(abs_diff_eq!(
-            volume.reaper_value().get(),
+            volume.get(),
             0.031_588_093_366_685_01,
             epsilon = EPSILON
         ));
-        let db = volume.db().get();
+        let db = volume.to_db(Db::MINUS_INF).get();
         assert!(abs_diff_eq!(db, -30.009_531_739_774_296, epsilon = EPSILON));
         assert!(abs_diff_eq!(
-            volume.normalized_slider_value(),
+            SliderVolume::from_reaper_value(volume).normalized_slider_value(),
             0.250_000_000_000_034_97,
             epsilon = EPSILON
         ));
-        assert_eq!(volume.to_string().as_str(), "-30.0dB");
+        assert_eq!(
+            SliderVolume::from_reaper_value(volume).to_string().as_str(),
+            "-30.0dB"
+        );
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), track);
         Ok(())
@@ -1761,7 +1774,7 @@ fn set_track_volume_extreme_values() -> TestStep {
             };
             // Then
             assert_eq!(track_1_result.volume, ReaperVolumeValue::new(1.0 / 0.0));
-            let track_1_volume = Volume::from_reaper_value(track_1_result.volume);
+            let track_1_volume = SliderVolume::from_reaper_value(track_1_result.volume);
             assert_eq!(track_1_volume.db(), Db::new(1.0 / 0.0));
             assert_eq!(track_1_volume.normalized_slider_value(), 1.0 / 0.0);
             assert_eq!(
@@ -1769,17 +1782,20 @@ fn set_track_volume_extreme_values() -> TestStep {
                 ReaperVolumeValue::new(1.0 / 0.0)
             );
             #[cfg(target_family = "windows")]
-            assert_eq!(track_1_volume.to_string().as_str(), "+1.#dB");
+            assert_eq!(track_1_volume.as_str(), "+1.#dB");
             #[cfg(target_family = "unix")]
             assert_eq!(track_1_volume.to_string().as_str(), "+indB");
 
             assert!(track_2_result.volume.get().is_nan());
-            let track_2_volume = Volume::from_reaper_value(track_2_result.volume);
+            let track_2_volume = SliderVolume::from_reaper_value(track_2_result.volume);
             assert!(track_2_volume.db().get().is_nan());
             assert!(track_2_volume.normalized_slider_value().is_nan());
             assert!(track_2_volume.reaper_value().get().is_nan());
             #[cfg(target_family = "windows")]
-            assert!(track_2_volume.to_string().as_str().contains("1.#RdB"));
+            assert!(SliderVolume::from_reaper_value(track_2_volume)
+                .to_string()
+                .as_str()
+                .contains("1.#RdB"));
             #[cfg(target_family = "unix")]
             assert!(track_2_volume.to_string().contains("nandB"));
             Ok(())
@@ -1794,10 +1810,16 @@ fn query_track_volume() -> TestStep {
         // When
         let volume = track.volume();
         // Then
-        assert_eq!(volume.reaper_value(), ReaperVolumeValue::ZERO_DB);
-        assert_eq!(volume.db(), Db::ZERO_DB);
-        assert_eq!(volume.to_string().as_str(), "0.00dB");
-        assert!(abs_diff_eq!(volume.normalized_slider_value(), 0.716));
+        assert_eq!(volume, ReaperVolumeValue::ZERO_DB);
+        assert_eq!(volume.to_db(Db::MINUS_INF), Db::ZERO_DB);
+        assert_eq!(
+            SliderVolume::from_reaper_value(volume).to_string().as_str(),
+            "0.00dB"
+        );
+        assert!(abs_diff_eq!(
+            SliderVolume::from_reaper_value(volume).normalized_slider_value(),
+            0.716
+        ));
         Ok(())
     })
 }
@@ -2321,7 +2343,7 @@ fn volume_types() -> TestStep {
         // When
         // Then
         for input_value in input_values {
-            let output_value = Volume::from_reaper_value(input_value);
+            let output_value = SliderVolume::from_reaper_value(input_value);
             reaper.show_console_msg(format!("{input_value:?} => {output_value:?}\n"));
         }
         Ok(())
