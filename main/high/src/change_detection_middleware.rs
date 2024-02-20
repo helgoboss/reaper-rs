@@ -956,7 +956,7 @@ impl ChangeDetectionMiddleware {
                 let func = Reaper::get().medium_reaper();
                 let mut td = unsafe {
                     TrackData {
-                        volume: ReaperVolumeValue::new(
+                        volume: ReaperVolumeValue::new_panic(
                             func.get_media_track_info_value(mt, TrackAttributeKey::Vol),
                         ),
                         pan: {

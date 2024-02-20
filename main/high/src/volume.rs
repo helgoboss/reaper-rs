@@ -67,7 +67,7 @@ impl SliderVolume {
 
     /// Returns the corresponding REAPER volume value.
     pub fn reaper_value(&self) -> ReaperVolumeValue {
-        self.db().to_reaper_volume_value()
+        self.db().to_linear_volume_value()
     }
 
     /// Returns the corresponding dB value.

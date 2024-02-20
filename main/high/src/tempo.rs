@@ -1,8 +1,6 @@
 use crate::normalized_value::is_normalized_value;
 use reaper_medium::Bpm;
 
-const BPM_SPAN: f64 = Bpm::MAX.get() - Bpm::MIN.get();
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Tempo(Bpm);
 
@@ -13,16 +11,22 @@ impl Tempo {
 
     pub fn from_normalized_value(normalized_value: f64) -> Tempo {
         assert!(is_normalized_value(normalized_value));
-        Tempo(Bpm::new(Bpm::MIN.get() + normalized_value * BPM_SPAN))
+        Tempo(Bpm::new_panic(
+            Bpm::MIN.get() + normalized_value * bpm_span(),
+        ))
     }
 
     pub fn normalized_value(self) -> f64 {
-        (self.0.get() - Bpm::MIN.get()) / BPM_SPAN
+        (self.0.get() - Bpm::MIN.get()) / bpm_span()
     }
 
     pub fn bpm(self) -> Bpm {
         self.0
     }
+}
+
+fn bpm_span() -> f64 {
+    Bpm::MAX.get() - Bpm::MIN.get()
 }
 
 #[cfg(test)]

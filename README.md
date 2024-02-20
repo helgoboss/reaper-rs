@@ -320,6 +320,7 @@ Contributions are very welcome! Especially to the medium-level API.
 |-------------------------------|-----------------------------------------------------------------------------------------------|
 | `/`                           | Workspace root                                                                                |
 | `/main`                       | Production code                                                                               |
+| `/main/common-types`          | Types that are used in reaper-medium but generally useful (factored out for interoperability) |
 | `/main/fluent`                | Fluent API (`reaper-fluent`, potential/partial work-in-progress replacement of `reaper-high`) |
 | `/main/high`                  | High-level API (`reaper-high`)                                                                |
 | `/main/low`                   | Low-level API (`reaper-low`)                                                                  |

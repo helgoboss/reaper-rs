@@ -140,7 +140,7 @@ impl PcmSourceTransfer {
 
     /// Returns the desired output sample rate.
     pub fn sample_rate(&self) -> Hz {
-        Hz(self.0.samplerate)
+        Hz::new_panic(self.0.samplerate)
     }
 
     /// Sets the desired output sample rate.
@@ -165,7 +165,7 @@ impl PcmSourceTransfer {
     }
 
     pub fn force_bpm(&self) -> Bpm {
-        Bpm::new(self.0.force_bpm)
+        Bpm::new_panic(self.0.force_bpm)
     }
 
     pub fn set_force_bpm(&mut self, force_bpm: Bpm) {
@@ -385,11 +385,7 @@ impl BorrowedPcmSource {
 
     /// Returns preferred sample rate. If `None` then it is assumed to be silent (or MIDI).
     pub fn get_sample_rate(&self) -> Option<Hz> {
-        let r = self.0.GetSampleRate();
-        if r < 1.0 {
-            return None;
-        }
-        Some(Hz::new(r))
+        Hz::new(self.0.GetSampleRate()).ok()
     }
 
     /// Returns the length of this source.
@@ -398,20 +394,13 @@ impl BorrowedPcmSource {
     ///
     /// Returns an error if this source doesn't return a valid duration.
     pub fn get_length(&self) -> ReaperFunctionResult<DurationInSeconds> {
-        let length = self.0.GetLength();
-        if length < 0.0 {
-            return Err(ReaperFunctionError::new("source doesn't return length"));
-        }
-        Ok(DurationInSeconds::new(length))
+        DurationInSeconds::new(self.0.GetLength())
+            .map_err(|_| ReaperFunctionError::new("source doesn't return length"))
     }
 
     /// Returns length in beats if supported.
     pub fn get_length_beats(&self) -> Option<DurationInBeats> {
-        let length = self.0.GetLengthBeats();
-        if length < 0.0 {
-            return None;
-        }
-        Some(DurationInBeats::new(length))
+        DurationInBeats::new(self.0.GetLengthBeats()).ok()
     }
 
     /// Returns bits/sample, if available. Only used for metadata purposes, since everything
@@ -422,11 +411,7 @@ impl BorrowedPcmSource {
 
     /// Returns `None` if not supported.
     pub fn get_preferred_position(&self) -> Option<PositionInSeconds> {
-        let pos = self.0.GetPreferredPosition();
-        if pos < 0.0 {
-            return None;
-        }
-        Some(PositionInSeconds::new(pos))
+        PositionInSeconds::new(self.0.GetPreferredPosition()).ok()
     }
 
     /// Unstable!!!

@@ -13,6 +13,7 @@ categories = ["api-bindings", "multimedia", "multimedia::audio"]
 [dependencies]
 c_str_macro = "1.0.2"
 derive_more = "0.99.5"
+reaper-common-types = { version = "0.1.0", path = "../common-types" }
 reaper-low = { version = "0.1.0", path = "../low" }
 reaper-macros = { path = "../macros" }
 helgoboss-midi = "0.4.0"

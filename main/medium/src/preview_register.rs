@@ -66,7 +66,7 @@ impl OwnedPreviewRegister {
     }
 
     pub fn volume(&self) -> ReaperVolumeValue {
-        ReaperVolumeValue::new(self.register.volume)
+        ReaperVolumeValue::new_panic(self.register.volume)
     }
 
     pub fn set_volume(&mut self, volume: ReaperVolumeValue) {
@@ -74,7 +74,7 @@ impl OwnedPreviewRegister {
     }
 
     pub fn cur_pos(&self) -> PositionInSeconds {
-        PositionInSeconds::new(self.register.curpos)
+        PositionInSeconds::new_panic(self.register.curpos)
     }
 
     pub fn set_cur_pos(&mut self, pos: PositionInSeconds) {

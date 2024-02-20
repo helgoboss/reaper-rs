@@ -340,7 +340,7 @@ impl Project {
             // ReaLearn #283
             Reaper::get()
                 .medium_reaper()
-                .time_map_2_get_divided_bpm_at_time(self.context(), PositionInSeconds::new(0.0))
+                .time_map_2_get_divided_bpm_at_time(self.context(), PositionInSeconds::ZERO)
         };
         Tempo::from_bpm(bpm)
     }
@@ -678,7 +678,7 @@ impl Project {
             self.get_project_config("projtimeoffs")
                 .expect("couldn't get projtimeoffs")
         };
-        PositionInSeconds::new(raw)
+        PositionInSeconds::new_panic(raw)
     }
 
     pub fn measure_offset(self) -> i32 {

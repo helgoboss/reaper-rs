@@ -756,14 +756,14 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
     fn SetSurfaceVolume(&self, trackid: *mut raw::MediaTrack, volume: f64) {
         self.delegate.set_surface_volume(SetSurfaceVolumeArgs {
             track: require_media_track_panic(trackid),
-            volume: ReaperVolumeValue(volume),
+            volume: ReaperVolumeValue::new_panic(volume),
         })
     }
 
     fn SetSurfacePan(&self, trackid: *mut raw::MediaTrack, pan: f64) {
         self.delegate.set_surface_pan(SetSurfacePanArgs {
             track: require_media_track_panic(trackid),
-            pan: ReaperPanValue(pan),
+            pan: ReaperPanValue::new_panic(pan),
         })
     }
 

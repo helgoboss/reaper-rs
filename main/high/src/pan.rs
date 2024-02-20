@@ -22,7 +22,7 @@ impl Pan {
     }
 
     pub fn reaper_value(&self) -> ReaperPanValue {
-        ReaperPanValue::new(self.normalized_value * 2.0 - 1.0)
+        ReaperPanValue::new_panic(self.normalized_value * 2.0 - 1.0)
     }
 }
 

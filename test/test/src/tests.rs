@@ -189,11 +189,11 @@ fn set_project_tempo() -> TestStep {
                 });
         });
         project.set_tempo(
-            Tempo::from_bpm(Bpm::new(130.0)),
+            Tempo::from_bpm(Bpm::new_panic(130.0)),
             UndoBehavior::OmitUndoPoint,
         )?;
         // Then
-        assert_eq!(project.tempo().bpm(), Bpm::new(130.0));
+        assert_eq!(project.tempo().bpm(), Bpm::new_panic(130.0));
         // TODO-low There should be only one event invocation
         assert_eq!(mock.invocation_count(), 2);
         Ok(())
@@ -237,7 +237,7 @@ fn get_project_tempo() -> TestStep {
         // When
         let tempo = project.tempo();
         // Then
-        assert_eq!(tempo.bpm(), Bpm::new(120.0));
+        assert_eq!(tempo.bpm(), Bpm::new_panic(120.0));
         assert!(abs_diff_eq!(tempo.normalized_value(), 119.0 / 959.0));
         Ok(())
     })
@@ -787,10 +787,13 @@ fn set_time_ranges() -> TestStep {
         // Given
         let project = Reaper::get().current_project();
         // When
-        project.set_time_selection(PositionInSeconds::new(5.0), PositionInSeconds::new(7.0));
+        project.set_time_selection(
+            PositionInSeconds::new_panic(5.0),
+            PositionInSeconds::new_panic(7.0),
+        );
         project.set_loop_points(
-            PositionInSeconds::new(5.0),
-            PositionInSeconds::new(7.0),
+            PositionInSeconds::new_panic(5.0),
+            PositionInSeconds::new_panic(7.0),
             AutoSeekBehavior::DenyAutoSeek,
         );
         // Then
@@ -827,7 +830,7 @@ fn set_track_send_pan() -> TestStep {
         // Then
         assert_eq!(
             send.pan().unwrap().reaper_value(),
-            ReaperPanValue::new(-0.5)
+            ReaperPanValue::new_panic(-0.5)
         );
         assert_eq!(send.pan().unwrap().normalized_value(), 0.25);
         assert_eq!(mock.invocation_count(), 2);
@@ -1583,7 +1586,7 @@ fn set_track_pan() -> TestStep {
         );
         // Then
         let pan = track.pan();
-        assert_eq!(pan.reaper_value(), ReaperPanValue::new(-0.5));
+        assert_eq!(pan.reaper_value(), ReaperPanValue::new_panic(-0.5));
         assert_eq!(pan.normalized_value(), 0.25);
         assert_eq!(pan.to_string().as_str(), "50%L");
         assert_eq!(mock.invocation_count(), 1);
@@ -1605,11 +1608,19 @@ fn set_track_pan_weirdness() -> TestStep {
             let reaper = reaper.medium_reaper();
             let track = get_track(0)?.raw();
             // Given
-            reaper.csurf_on_pan_change_ex(track, Absolute(ReaperPanValue::new(0.0)), DenyGang);
+            reaper.csurf_on_pan_change_ex(
+                track,
+                Absolute(ReaperPanValue::new_panic(0.0)),
+                DenyGang,
+            );
             let pan_before = reaper.get_track_ui_vol_pan(track)?.pan;
             assert_eq!(pan_before.get(), 0.0);
             // When
-            reaper.csurf_on_pan_change_ex(track, Absolute(ReaperPanValue::new(0.01)), DenyGang);
+            reaper.csurf_on_pan_change_ex(
+                track,
+                Absolute(ReaperPanValue::new_panic(0.01)),
+                DenyGang,
+            );
             // Then
             let pan_after = reaper.get_track_ui_vol_pan(track)?.pan;
             assert_eq!(pan_after.get(), 0.0);
@@ -1753,7 +1764,7 @@ fn set_track_volume_extreme_values() -> TestStep {
             let track_1_result = unsafe {
                 Reaper::get().medium_reaper().csurf_on_volume_change_ex(
                     track_1.raw(),
-                    ValueChange::Absolute(ReaperVolumeValue::new(1.0 / 0.0)),
+                    ValueChange::Absolute(ReaperVolumeValue::new_panic(1.0 / 0.0)),
                     GangBehavior::DenyGang,
                 );
                 Reaper::get()
@@ -1764,7 +1775,7 @@ fn set_track_volume_extreme_values() -> TestStep {
             let track_2_result = unsafe {
                 Reaper::get().medium_reaper().csurf_on_volume_change_ex(
                     track_2.raw(),
-                    ValueChange::Absolute(ReaperVolumeValue::new(f64::NAN)),
+                    ValueChange::Absolute(ReaperVolumeValue::new_panic(f64::NAN)),
                     GangBehavior::DenyGang,
                 );
                 Reaper::get()
@@ -1773,13 +1784,16 @@ fn set_track_volume_extreme_values() -> TestStep {
                     .unwrap()
             };
             // Then
-            assert_eq!(track_1_result.volume, ReaperVolumeValue::new(1.0 / 0.0));
+            assert_eq!(
+                track_1_result.volume,
+                ReaperVolumeValue::new_panic(1.0 / 0.0)
+            );
             let track_1_volume = SliderVolume::from_reaper_value(track_1_result.volume);
-            assert_eq!(track_1_volume.db(), Db::new(1.0 / 0.0));
+            assert_eq!(track_1_volume.db(), Db::new_panic(1.0 / 0.0));
             assert_eq!(track_1_volume.normalized_slider_value(), 1.0 / 0.0);
             assert_eq!(
                 track_1_volume.reaper_value(),
-                ReaperVolumeValue::new(1.0 / 0.0)
+                ReaperVolumeValue::new_panic(1.0 / 0.0)
             );
             #[cfg(target_family = "windows")]
             assert_eq!(track_1_volume.to_string().as_str(), "+1.#dB");
@@ -2329,7 +2343,7 @@ fn volume_types() -> TestStep {
              * std::f64::NEG_INFINITY, */
         ]
         .into_iter()
-        .map(ReaperVolumeValue::new)
+        .map(ReaperVolumeValue::new_panic)
         .chain(vec![
             ReaperVolumeValue::MIN,
             ReaperVolumeValue::MINUS_150_DB,
@@ -2379,7 +2393,7 @@ fn create_empty_project_in_new_tab() -> TestStep {
         assert_eq!(new_project.track_count(), 0);
         assert!(new_project.index()? > 0);
         assert!(new_project.file().is_none());
-        assert_eq!(new_project.length(), DurationInSeconds::new(0.0));
+        assert_eq!(new_project.length(), DurationInSeconds::ZERO);
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), new_project);
         Ok(())

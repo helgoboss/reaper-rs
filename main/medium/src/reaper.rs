@@ -642,7 +642,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let pos = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.get());
-        PositionInPulsesPerQuarterNote::new(pos)
+        PositionInPulsesPerQuarterNote::new_panic(pos)
     }
 
     /// Gets a media item take attribute as numerical value.
@@ -995,7 +995,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_item_info(item, ItemAttributeKey::Vol, null_mut());
         let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
-        ReaperVolumeValue::new(raw)
+        ReaperVolumeValue::new_panic(raw)
     }
 
     /// Convenience function which sets the item's volume (`D_VOL`).
@@ -1026,7 +1026,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_item_info(item, ItemAttributeKey::SnapOffset, null_mut());
         let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
-        DurationInSeconds::new(raw)
+        DurationInSeconds::new_panic(raw)
     }
 
     /// Convenience function which sets the item's snap offset (`D_SNAPOFFSET`).
@@ -1064,7 +1064,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInLen, null_mut());
         let raw = deref_as::<f64>(ptr).expect("D_FADEINLEN pointer is null");
-        DurationInSeconds::new(raw)
+        DurationInSeconds::new_panic(raw)
     }
 
     /// Convenience function which sets the item's fade-in length (`D_FADEINLEN`).
@@ -1102,7 +1102,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLen, null_mut());
         let raw = deref_as::<f64>(ptr).expect("D_FADEOUTLEN pointer is null");
-        DurationInSeconds::new(raw)
+        DurationInSeconds::new_panic(raw)
     }
 
     /// Convenience function which sets the item's fade-out length (`D_FADEOUTLEN`).
@@ -1672,7 +1672,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Pan, null_mut());
         let pan = deref_as::<f64>(ptr).expect("I_PAN pointer is null");
-        ReaperPanValue::new(pan)
+        ReaperPanValue::new_panic(pan)
     }
 
     /// Convenience function which returns the given track's dual-pan position 1 (D_DUALPANL).
@@ -1690,7 +1690,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanL, null_mut());
         let pan = deref_as::<f64>(ptr).expect("D_DUALPANL pointer is null");
-        ReaperPanValue::new(pan)
+        ReaperPanValue::new_panic(pan)
     }
 
     /// Convenience function which returns the given track's dual-pan position 2 (D_DUALPANR).
@@ -1708,7 +1708,7 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanR, null_mut());
         let pan = deref_as::<f64>(ptr).expect("D_DUALPANR pointer is null");
-        ReaperPanValue::new(pan)
+        ReaperPanValue::new_panic(pan)
     }
 
     /// Convenience function which returns the given track's width (D_WIDTH).
@@ -2166,9 +2166,9 @@ impl<UsageScope> Reaper<UsageScope> {
             return use_result(None);
         }
         let result = EnumProjectMarkers3Result {
-            position: PositionInSeconds::new(pos.assume_init()),
+            position: PositionInSeconds::new_panic(pos.assume_init()),
             region_end_position: if is_region.assume_init() {
-                Some(PositionInSeconds::new(region_end.assume_init()))
+                Some(PositionInSeconds::new_panic(region_end.assume_init()))
             } else {
                 None
             },
@@ -2350,9 +2350,9 @@ impl<UsageScope> Reaper<UsageScope> {
             common_denom.as_mut_ptr(),
         );
         TimeMap2TimeToBeatsResult {
-            full_beats: PositionInBeats::new(full_beats.assume_init()),
+            full_beats: PositionInBeats::new_panic(full_beats.assume_init()),
             measure_index: measures.assume_init(),
-            beats_since_measure: PositionInBeats::new(beats_within_measure),
+            beats_since_measure: PositionInBeats::new_panic(beats_within_measure),
             time_signature: TimeSignature {
                 numerator: NonZeroU32::new(measure_length.assume_init() as _).unwrap(),
                 denominator: NonZeroU32::new(common_denom.assume_init() as _).unwrap(),
@@ -2407,14 +2407,14 @@ impl<UsageScope> Reaper<UsageScope> {
             bpm.as_mut_ptr(),
         );
         TimeMapGetMeasureInfoResult {
-            start_time: PositionInSeconds::new(start_time),
-            start_qn: PositionInQuarterNotes::new(start_qn.assume_init()),
-            end_qn: PositionInQuarterNotes::new(end_qn.assume_init()),
+            start_time: PositionInSeconds::new_panic(start_time),
+            start_qn: PositionInQuarterNotes::new_panic(start_qn.assume_init()),
+            end_qn: PositionInQuarterNotes::new_panic(end_qn.assume_init()),
             time_signature: TimeSignature {
                 numerator: NonZeroU32::new(num.assume_init() as _).unwrap(),
                 denominator: NonZeroU32::new(denom.assume_init() as _).unwrap(),
             },
-            tempo: Bpm::new(bpm.assume_init()),
+            tempo: Bpm::new_panic(bpm.assume_init()),
         }
     }
 
@@ -2455,13 +2455,13 @@ impl<UsageScope> Reaper<UsageScope> {
         use MeasureMode::*;
         let tpos = self.low.TimeMap2_beatsToTime(
             project.to_raw(),
-            bpos.0,
+            bpos.get(),
             match measure_mode {
                 IgnoreMeasure => null(),
                 FromMeasureAtIndex(i) => &i as *const _,
             },
         );
-        PositionInSeconds::new(tpos)
+        PositionInSeconds::new_panic(tpos)
     }
 
     /// Converts the given quarter-note position to a measure index and returns the measure bounds
@@ -2501,14 +2501,14 @@ impl<UsageScope> Reaper<UsageScope> {
         let mut end_qn = MaybeUninit::zeroed();
         let measure = self.low.TimeMap_QNToMeasures(
             project.to_raw(),
-            qn.0,
+            qn.get(),
             start_qn.as_mut_ptr(),
             end_qn.as_mut_ptr(),
         );
         TimeMapQnToMeasuresResult {
             measure_index: measure,
-            start: PositionInQuarterNotes::new(start_qn.assume_init()),
-            end: PositionInQuarterNotes::new(end_qn.assume_init()),
+            start: PositionInQuarterNotes::new_panic(start_qn.assume_init()),
+            end: PositionInQuarterNotes::new_panic(end_qn.assume_init()),
         }
     }
 
@@ -2544,8 +2544,8 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: AnyThread,
     {
-        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
-        PositionInSeconds::new(tpos)
+        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.get());
+        PositionInSeconds::new_panic(tpos)
     }
 
     /// Converts the given time to a quarter-note position.
@@ -2580,8 +2580,8 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: AnyThread,
     {
-        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
-        PositionInQuarterNotes::new(qn)
+        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.get());
+        PositionInQuarterNotes::new_panic(qn)
     }
 
     /// Converts the given quarter-note position to time.
@@ -2618,8 +2618,8 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: AnyThread,
     {
-        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.0);
-        PositionInSeconds::new(tpos)
+        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.get());
+        PositionInSeconds::new_panic(tpos)
     }
 
     /// Converts the given time to a quarter-note position.
@@ -2656,8 +2656,8 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: AnyThread,
     {
-        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.0);
-        PositionInQuarterNotes::new(qn)
+        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.get());
+        PositionInQuarterNotes::new_panic(qn)
     }
 
     /// Gets the arrange view start/end time for the given screen coordinates.
@@ -2709,8 +2709,8 @@ impl<UsageScope> Reaper<UsageScope> {
             end_time.as_mut_ptr(),
         );
         GetSetArrangeView2Result {
-            start_time: PositionInSeconds::new(start_time.assume_init()),
-            end_time: PositionInSeconds::new(end_time.assume_init()),
+            start_time: PositionInSeconds::new_panic(start_time.assume_init()),
+            end_time: PositionInSeconds::new_panic(end_time.assume_init()),
         }
     }
 
@@ -2749,7 +2749,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let bpm = self
             .low
             .TimeMap2_GetDividedBpmAtTime(project.to_raw(), tpos.get());
-        Bpm(bpm)
+        Bpm::new_panic(bpm)
     }
 
     /// Returns the current position of the edit cursor.
@@ -2780,7 +2780,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: AnyThread,
     {
         let res = self.low.GetCursorPositionEx(project.to_raw());
-        PositionInSeconds::new(res)
+        PositionInSeconds::new_panic(res)
     }
 
     /// Returns the latency-compensated actual-what-you-hear position.
@@ -2811,7 +2811,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: AnyThread,
     {
         let res = self.low.GetPlayPositionEx(project.to_raw());
-        PositionInSeconds::new(res)
+        PositionInSeconds::new_panic(res)
     }
 
     /// Returns the position of the next audio block being processed.
@@ -2842,7 +2842,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: AnyThread,
     {
         let res = self.low.GetPlayPosition2Ex(project.to_raw());
-        PositionInSeconds::new(res)
+        PositionInSeconds::new_panic(res)
     }
 
     /// Returns the number of markers and regions in the given project.
@@ -3447,7 +3447,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let res = self.low.GetProjectLength(project.to_raw());
-        DurationInSeconds::new(res)
+        DurationInSeconds::new_panic(res)
     }
 
     /// Sets the position of the edit cursor and optionally moves the view and/or seeks.
@@ -3546,8 +3546,8 @@ impl<UsageScope> Reaper<UsageScope> {
             return None;
         }
         let res = GetLoopTimeRange2Result {
-            start: PositionInSeconds::new(start),
-            end: PositionInSeconds::new(end),
+            start: PositionInSeconds::new_panic(start),
+            end: PositionInSeconds::new_panic(end),
         };
         Some(res)
     }
@@ -5305,7 +5305,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let result = self.low.Track_GetPeakInfo(track.as_ptr(), channel as _);
-        ReaperVolumeValue::new(result)
+        ReaperVolumeValue::new_panic(result)
     }
 
     /// Gets a track attribute as numerical value.
@@ -5608,7 +5608,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        Bpm(self.low.Master_GetTempo())
+        Bpm::new_panic(self.low.Master_GetTempo())
     }
 
     /// Sets the current tempo of the given project.
@@ -6142,7 +6142,7 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: AnyThread,
     {
-        Db(self.low.SLIDER2DB(value.get()))
+        Db::new_panic(self.low.SLIDER2DB(value.get()))
     }
 
     /// Returns the given track's volume and incomplete pan. Also returns the correct value during
@@ -6175,8 +6175,8 @@ impl<UsageScope> Reaper<UsageScope> {
             ));
         }
         Ok(VolumeAndPan {
-            volume: ReaperVolumeValue::new(volume.assume_init()),
-            pan: ReaperPanValue::new(pan.assume_init()),
+            volume: ReaperVolumeValue::new_panic(volume.assume_init()),
+            pan: ReaperPanValue::new_panic(pan.assume_init()),
         })
     }
 
@@ -6291,7 +6291,7 @@ impl<UsageScope> Reaper<UsageScope> {
             value_change.is_relative(),
             gang_behavior == GangBehavior::AllowGang,
         );
-        ReaperVolumeValue::new(raw)
+        ReaperVolumeValue::new_panic(raw)
     }
 
     /// Sets the given track's volume, also supports relative changes and gang.
@@ -6323,7 +6323,7 @@ impl<UsageScope> Reaper<UsageScope> {
             progress.to_raw(),
             flags.bits() as _,
         );
-        ReaperVolumeValue::new(raw)
+        ReaperVolumeValue::new_panic(raw)
     }
 
     /// Informs control surfaces that the given track's pan has been changed.
@@ -6369,7 +6369,7 @@ impl<UsageScope> Reaper<UsageScope> {
             value_change.is_relative(),
             gang_behavior == GangBehavior::AllowGang,
         );
-        ReaperPanValue::new(raw)
+        ReaperPanValue::new_panic(raw)
     }
 
     /// Sets the given track's pan. Also supports relative changes and gang.
@@ -6400,7 +6400,7 @@ impl<UsageScope> Reaper<UsageScope> {
             progress.to_raw(),
             flags.bits() as _,
         );
-        ReaperPanValue::new(raw)
+        ReaperPanValue::new_panic(raw)
     }
 
     /// Sets the given track's polarity (phase).
@@ -7357,7 +7357,7 @@ impl<UsageScope> Reaper<UsageScope> {
             value_change.value(),
             value_change.is_relative(),
         );
-        ReaperVolumeValue::new(raw)
+        ReaperVolumeValue::new_panic(raw)
     }
 
     /// Sets the pan of the given track send or hardware output send.
@@ -7386,7 +7386,7 @@ impl<UsageScope> Reaper<UsageScope> {
             value_change.value(),
             value_change.is_relative(),
         );
-        ReaperPanValue::new(raw)
+        ReaperPanValue::new_panic(raw)
     }
 
     /// Grants temporary access to the name of the action registered under the given command ID
@@ -7572,8 +7572,8 @@ impl<UsageScope> Reaper<UsageScope> {
             ));
         }
         Ok(VolumeAndPan {
-            volume: ReaperVolumeValue::new(volume.assume_init()),
-            pan: ReaperPanValue::new(pan.assume_init()),
+            volume: ReaperVolumeValue::new_panic(volume.assume_init()),
+            pan: ReaperPanValue::new_panic(pan.assume_init()),
         })
     }
 
@@ -7611,8 +7611,8 @@ impl<UsageScope> Reaper<UsageScope> {
             ));
         }
         Ok(VolumeAndPan {
-            volume: ReaperVolumeValue::new(volume.assume_init()),
-            pan: ReaperPanValue::new(pan.assume_init()),
+            volume: ReaperVolumeValue::new_panic(volume.assume_init()),
+            pan: ReaperPanValue::new_panic(pan.assume_init()),
         })
     }
 
@@ -8114,7 +8114,7 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         let raw_pan = unsafe { self.low.parsepanstr(pan_string.into().as_ptr()) };
-        ReaperPanValue::new(raw_pan)
+        ReaperPanValue::new_panic(raw_pan)
     }
 
     /// Formats the given pan value.
@@ -8574,12 +8574,7 @@ pub enum GetFocusedFxResult {
     Unknown(Hidden<i32>),
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
-pub struct RgbColor {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
-}
+pub use reaper_common_types::RgbColor;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct NativeColorValue {

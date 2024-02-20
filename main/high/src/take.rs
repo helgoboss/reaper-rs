@@ -97,7 +97,7 @@ impl Take {
                 .medium_reaper
                 .get_media_item_take_info_value(self.raw, TakeAttributeKey::StartOffs)
         };
-        PositionInSeconds::new(pos)
+        PositionInSeconds::new_panic(pos)
     }
 
     pub fn set_start_offset(&self, length: PositionInSeconds) -> Result<(), ReaperFunctionError> {

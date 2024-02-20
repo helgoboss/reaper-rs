@@ -54,7 +54,7 @@ impl Item {
                 .medium_reaper
                 .get_media_item_info_value(self.raw, ItemAttributeKey::Position)
         };
-        PositionInSeconds::new(pos)
+        PositionInSeconds::new_panic(pos)
     }
 
     pub fn set_position(
@@ -75,7 +75,7 @@ impl Item {
                 .medium_reaper
                 .get_media_item_info_value(self.raw, ItemAttributeKey::Length)
         };
-        DurationInSeconds::new(val)
+        DurationInSeconds::new_panic(val)
     }
 
     pub fn set_length(
