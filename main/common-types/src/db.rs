@@ -20,7 +20,7 @@ use nutype::nutype;
         Serialize,
         Deserialize
     ),
-    default = 1.0
+    default = 0.0
 )]
 pub struct Db(f64);
 
